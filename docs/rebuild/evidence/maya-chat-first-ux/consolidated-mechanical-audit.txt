@@ -1,0 +1,31 @@
+PASS  unresolvable §N.M refs in normative text: []
+PASS  errata citations in normative text: []
+PASS  precedence language in normative text: []
+PASS  floor-reduction rows in §0.17: 2
+PASS  CLIENT.2 present: 1
+PASS  ARTIFACT.3 present: 1
+PASS  CLIENT.3 distinct: 1
+PASS  ARTIFACT.5 distinct: 1
+PASS  declarations of verificationFloor: 1
+PASS  declarations of FLOOR_EXEMPT: 1
+PASS  declarations of SENSITIVE_DEST: 1
+PASS  declarations of requiredConfirmationKind: 1
+PASS  declarations of five floor tables: 1
+PASS  declarations of FLOOR_EXEMPT census: 1
+PASS  declarations of FR table: 1
+PASS  declarations of CONTROL_REGISTRY table: 1
+PASS  declarations of mint-class table: 1
+PASS  declarations of Phrase: 1
+PASS  declarations of Narrative: 1
+PASS  declarations of NarrativeTemplate: 1
+PASS  declarations of NARRATIVE_TEMPLATES: 1
+PASS  declarations of refSet: 1
+PASS  declarations of MintedIntent: 1
+PASS  declarations of DraftClass: 1
+PASS  MAYA_AI_TOOL_CATALOG_BY_NAME bracket-indexed: 0
+PASS  "amended"/"replaced by" inside a // comment: 0
+PASS  cited prerequisites with no §A1 row: []
+PASS  clause ids used more than once: []
+PASS  "not restated here" followed by a restatement: []
+
+29/29 mechanical checks pass

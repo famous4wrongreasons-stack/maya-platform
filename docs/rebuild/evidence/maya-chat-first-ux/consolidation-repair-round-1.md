@@ -108,3 +108,23 @@ resolves; no errata citation survives in normative text; no precedence chain any
 
 **This is not a certification.** It is the repair. The dependency-closure verification of these
 repairs is the next pass, and the exit bar is unchanged.
+
+---
+
+## Round 1b — four more found by the mechanical audit, after the repair
+
+Writing the F6a check as an executable script rather than trusting the repair found four more
+instances of the same pattern, three of them the *identical* failure: a sentence saying a rule is
+not restated here, with the rule restated immediately below it.
+
+| # | Was | Now |
+|---|---|---|
+| R52 | §2.5 K22 cited §0.11 F68 for the `reading_order` derivation — but F68 had itself become a pointer to §4.8 A-0 | K22 cites §4.8 A-0 directly. A citation chain is not a declaration site. |
+| R53 | §3.4 R3.4.7's prose said the five-intent census is "not restated here" — and the census table stood six lines below it | the table is gone; §0.8 carries the only census |
+| R54 | §2.4 K13 printed the `max_commit_intents` build veto a **third** time (after §0.13 F75 and §3.11 R3.11.2) | K13 states the per-kind value, which is a `KIND_REGISTRY` column and §2's to own, and cites F75 for the veto |
+| R55 | §3.10.2 reprinted §0.13 F74's two-row `confirmation_of_ref` table | cites F74 |
+
+`consolidated-mechanical-audit.mjs` is the script, and it is the evidence: **29/29 checks pass**,
+including the two F6a passes, the `§N.M` link resolution, the prerequisite-row closure and the
+clause-identifier uniqueness. It is committed so the next reader runs it rather than trusting
+this record.

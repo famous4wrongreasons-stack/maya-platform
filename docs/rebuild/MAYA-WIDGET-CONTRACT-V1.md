@@ -2530,13 +2530,10 @@ type TextSentence =
 
 **K13 — one actuating subject per envelope.** `max_commit_intents` is `2` for `APPROVAL`, `1` for `BOOKING_CONFIRMATION`, `SETTINGS_DRAFT` and `PAYMENT_HANDOFF`, and `0` for the other eighteen. `APPROVAL` is the only kind for which `2` is admissible, and its pair is constrained:
 
-```
-kind === 'APPROVAL'        ⟹ max_commit_intents === 2
-kind !== 'APPROVAL'        ⟹ max_commit_intents ∈ {0, 1}                  // build veto
-max_commit_intents === 2   ⟹ exactly one approve/reject pair, both non-null, both carrying
-                             the SAME confirmation_of_ref.ref (the approval_ref) and the
-                             SAME Action Engine capability; consuming either marks the other consumed
-```
+The build veto over `max_commit_intents`, and the pairing conditions that make `2` safe, are
+declared in **§0.13 F75** and are not restated here. What §2 owns is the per-kind value itself,
+which is a `KIND_REGISTRY` column: `2` for `APPROVAL`, `1` for the three other commit-bearing
+kinds, `0` for the remaining eighteen.
 
 Approve and reject are two mutually exclusive decisions on **one** approval object, not two commits on two subjects, so the invariant the count protects — one actuating subject per envelope — is preserved rather than widened. *Evaluated at:* BUILD (the veto), MINT/INTENT (the count and the pair constraints, counted per `widget_id`).
 
@@ -2589,14 +2586,14 @@ type RoleHintRule = { derive_from: string; map: Record<string, RoleHint> };
 
 **K22 — `reading_order` covers every interactive element, and each kind declares which paths those are.** What §2 owns is the **left-hand side of the derivation**: `KIND_REGISTRY[kind].interactive_paths`, the per-kind list of body paths that contribute interactive elements. Everything else is declared elsewhere and is not restated here:
 
-> `InteractiveRef`, `refKey` and `refSet` are declared in **§4.8**; the `produced` /
-> `reading_order` derivation, its ordered concatenation, its `emitted` filter and its
-> escape-last rule are declared in **§0.11 F68**. A derivation stated in three sections is a
-> derivation maintained in three sections, and this one was.
+> `InteractiveRef`, `refKey`, `refSet` **and** the `produced` / `reading_order` derivation —
+> its ordered concatenation, its `emitted` filter and its escape-last rule — are all declared in
+> **§4.8 A-0**, and §0.11 F68 points there rather than restating them. A derivation stated in
+> three sections is a derivation maintained in three sections, and this one was.
 
 Two consequences bear on §2 and are stated here because they are about `interactive_paths` and nothing else. First, `refSet` takes the **fitted tier**, because `CHART`'s declared path list is conditional on the degradation outcome, which lives on `render`, not on `body`; the render receipt is attached at `EP-FIT`, before `EP-MINT` seals and before `body_hash` is computed, so the tier is in hand when the derivation runs. Second, on the four kinds whose `interactive_paths` already denote the escape — `BOOKING_CONFIRMATION` and `PAYMENT_HANDOFF` (`dismiss_intent`), `FORM` and `SETTINGS_DRAFT` (`discard_intent`) — the escape is **produced, not appended**, and its produced position governs.
 
-*Mechanism:* `validateEnvelope` recomputes the list by §0.11 F68's derivation and refuses on any difference. *Evaluated at:* `EP-MINT`.
+*Mechanism:* `validateEnvelope` recomputes the list by §4.8 A-0's derivation and refuses on any difference. *Evaluated at:* `EP-MINT`.
 
 [NON-NORMATIVE] Fixing the list as *exactly* what `interactive_paths` produces was unsatisfiable in two directions at once. No kind lists the escape among its paths, yet the escape must be keyboard-reachable on every input-locked envelope; and `role: 'more'` is minted on any kind whenever the fitter dropped something, while only four kinds declare a `more_intent` path. The closed appended form answers both without a role list that would drift.
 
@@ -3724,14 +3721,6 @@ stored `IntentRecord` — which is why the record carries `priority` and `widget
 difference between the stored and the recomputed floor, raised or lowered, refuses the
 submission.
 
-| Intent | Clause that admits it | Why it exercises no authority |
-|---|---|---|
-| the escape verb (§3.12.6) | `effect: 'NONE'` with `capability: null`, or `effect: 'CONTROL'` with `control.widget.dismiss` | It never cancels an appointment and appears in no routing map that reaches a canonical owner. On a `confirmation_subject: 'cancel'` body, cancelling **is** the `COMMIT` — a different intent, which the veto excludes by effect |
-| `discard_intent` (FORM, SETTINGS_DRAFT) | it **is** an escape intent — `role: 'escape'`, `priority: 0` | Destroys a widget-layer draft; reaches no canonical owner |
-| `no_action_option.select_intent` (STRATEGY_OPTIONS) | `effect: 'REFINE'`, `capability: { space: 'C9', key: 'c9.no_action' }`, whose `resourceClass` is `LOCAL` | The unique row of `C9_CAPABILITIES` that touches **no source** — a structural property, not a name on a list |
-| `reconnect_intent` (SOURCE_STATUS) | `effect: 'HANDOFF'`, `target.class === 's'`, `priority: 0` | A `HANDOFF` does not exercise its destination; it routes to a surface that demands its own verification at its own ingress |
-| `editor_handoff_intent` (SETTINGS_DRAFT) | as above | as above |
-
 *Mechanism:* the two vetoes, the uniqueness assertion, and `verificationFloor`'s exempt branch.
 *Evaluated at:* `EP-BUILD` (the vetoes), `EP-FIT` (a `FLOOR_EXEMPT` intent is never withheld at
 the ladder's verification step), `EP-MINT`. *Status:* `NORMATIVE-PENDING` on **P-11**, **P-19**.
@@ -4268,10 +4257,11 @@ A `COMMIT` whose `confirmation_of_ref.kind !== 'draft'` is mintable **only** whe
 effect class and the identity compared fixed together, because the two cases live in different
 key spaces:
 
-| `confirmation_of_ref.kind` | producing record's effect | identity that must hold |
-|---|---|---|
-| `'record'` (reschedule, cancel) | `REFINE` or `DRAFT` | the record's **C9** capability equals the `propose` side of the `COMMIT`'s `AE_PROPOSE_PAIRING` row |
-| `'approval'` (an APPROVAL decision) | `REQUEST_APPROVAL` | the record's **AE** capability equals the `ae` side of that same row — i.e. it equals the `COMMIT`'s own AE key |
+The two-row table fixing the producing effect class **together with** the identity compared —
+`'record'` against the C9 propose side, `'approval'` against the AE side — is declared in
+**§0.13 F74** and is not restated here. They are fixed together because the two cases live in
+different key spaces, and a single identity rule would refuse every `APPROVAL` decision
+unconditionally.
 
 The confirmation body must have been *returned by the canonical owner in response to a gateway
 submission*, so booking-intent normalisation, Client-principal verification and confirmation
