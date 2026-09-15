@@ -102,3 +102,34 @@ so that none exists. BOOK.1 now names `AE_WIDGET_COMMIT_ALLOWLIST`'s three booki
 wrong rule.** The severity is falling and the class is narrowing, which is what convergence looks
 like — but the bar is 0/0/0 and it is not met yet. A third pass is warranted, and it should be
 read as the last one only if it comes back clean.
+
+---
+
+## Correction to this record — six repairs it claimed and did not make
+
+**Section A above listed six citation repairs that were not in the file when this record was
+committed.** The repair script that carried V1–V6 aborted on an assertion failure at V7 — the
+correct behaviour, since V7's target text had changed — but it aborted **before** the write, so
+the five edits it had already reported `ok` were discarded with it. The follow-up script re-ran
+V7 onward and not V1–V6. The record was written from the script's console output rather than
+from the file, and so recorded work that did not land.
+
+This was caught by writing the check as a script rather than by re-reading:
+`citation-target-check.mjs` resolves every `§N.M <token>` citation in normative text against the
+text of the cited section, and reported the survivors. The six are now applied, and the checker
+found **two more** that no lens had named:
+
+| # | was | is |
+|---|---|---|
+| V5 | §A1.1 P-06 cited `§3.6.6 R3.6.6` | **§3.6** — there is no §3.6.6 subsection; R3.6.6 is a clause of §3.6 |
+| V5 | §A1.1 P-06 cited `§2.6.15 FORM.7` | **§2.6.17** — §2.6.15 is `SOURCE_STATUS`; `FORM` is §2.6.17 |
+| V14b/c | FORM.2 still carried `as BOOK.2's derivation fixes` and the parenthetical *"(or `BOOKING_CONFIRMATION` for a booking-class capability, or `PAYMENT_HANDOFF` for a payment-class one)"* | the kind is read from the allowlist row and **never inferred from the capability's class** — the parenthetical was the deleted chain surviving as prose |
+
+`citation-target-check.mjs` now reports **0 problems**, and it is committed so this class is
+checked by running it rather than by claiming it.
+
+**The lesson is the one this whole cycle keeps teaching.** Every claim in a repair record should
+be produced by reading the artefact, not by reading the tool output that was supposed to change
+it — and the way to make that cheap is to write the check as a program. Three of the four
+duplicates in round 1b, all fifteen wrong-section citations in round 2, and these eight, were
+found by scripts and not by reading.
