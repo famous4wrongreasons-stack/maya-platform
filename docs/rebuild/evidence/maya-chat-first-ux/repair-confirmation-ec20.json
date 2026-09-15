@@ -1,0 +1,159 @@
+{
+ "pass": "narrow confirmation of the EC-20 repairs",
+ "verifiers": 2,
+ "complete": true,
+ "linesRead": [
+  1620,
+  2510
+ ],
+ "allSound": false,
+ "thirdFloorReduction": false,
+ "invariantsFailing": [
+  {
+   "name": "K22 set-equality over the new concatenation, all 22 kinds including degraded",
+   "holds": false,
+   "note": "The APPENDED operand holds on all 22: I walked every declared interactive_paths line and every path lands in the seven-member union — options[].option_id (CHOICE, SERVICE_SELECTOR, STAFF_SELECTOR incl. any_staff_option, STRATEGY_OPTIONS alternatives[].option_id), fields[].field_key (FORM), groups[].slots[].slot_ref (TIME_SLOT_SELECTOR, the seventh member), entries[].entry_ref (SCHEDULE), table.rows[].row_key (CLIENT_LIST, REPORT, and CHART only when the fitted tier degraded it — E2's argument), and *_intent/*_intent_ref refs everywhere else including PROGRESS's amended steps[].state.next_intent_ref. The closed second operand subsumes escape, remedy and 'more' on every kind, degraded or not, so set-equality is satisfiable where EC-19's role list made it unsatisfiable on eighteen. It FAILS on the PRODUCED operand under degradation: nothing prunes a body intent ref whose intent the fitter withheld (steps 1-3, 5; step 6 touches only rows/chars/options), so on TEXT_ONLY (ceiling HANDOFF, max_intents 1) METRIC emits a drill_intent ref and FORM a discard_intent ref that no emitted intent and no rendered control answers. reading_order is then not the set of interactive elements, which is the rule K22 states."
+  },
+  {
+   "name": "nameSourceOf and resolveInteractive totality over InteractiveRef's seven members",
+   "holds": false,
+   "note": "BRANCH-total: seven cases, one per member, no reachable default, and each lands on a minted string — intent.label (string), field.label.rendered and section.heading.rendered (LocaleText read as Phrase, §0.18), option label-or-title, slot start.label (Measure extends Cell), entry title.label, row header cell via rowHeaderKey narrowed non-null by §0C.22-quater. DOMAIN-total: no. (a) The degradation hole above makes resolveInteractive partial on produced intent refs. (b) The signature is not discriminated: resolveInteractive(env, ref) returns the whole eight-alternative InteractiveElement union regardless of ref.k, so every branch of nameSourceOf reads a member the declared return type does not commonly carry (el.label on a WidgetIntent vs a FormField vs an OptionItem; el.start; el.row) — the code as printed does not type-check, and the same looseness is what lets E4's pointer base go unchecked. (c) InteractiveElement names plain OptionItem, but SERVICE_SELECTOR's and STAFF_SELECTOR's options are OptionItem & {duration, price, …} / & {nearest_availability, …} — the very fields E4's option:* rows point at are absent from the declared element type."
+  },
+  {
+   "name": "Gate 5's S0.16 recompute against IntentRecord as now declared (FLOOR_EXEMPT and SENSITIVE_DEST in full)",
+   "holds": false,
+   "note": "SEMANTICALLY yes: every member the two predicates read is now on the record — priority (EC-19), effect, capability retyped to CapabilityRef by §0B.7, handoff_capability_ref retyped by E6, target: IntentTarget | null already declared in §3.7, widget_kind (E6) for KIND_FLOOR — so FLOOR_EXEMPT's four conjuncts and SENSITIVE_DEST's AE/C9/CONTROL/TOOL switch are all recomputable at EP-INGRESS. TYPE-wise no: §0C.17 declares verificationFloor(i: MintedIntent, kind) and FLOOR_EXEMPT(i: MintedIntent), and MintedIntent is Omit<WidgetIntent,…> & {…}, carrying intent_ref, label, utterance_preview, speech_aliases, ordinal, enabled, expires_at, authority_hint — none of which IntentRecord declares. An IntentRecord is not assignable to MintedIntent, so Gate 5's recompute cannot call its own derivation. This is exactly the defect E6 fixed one call deeper, by re-declaring subjectCapability over a structural IntentSubject; the same treatment was not applied to verificationFloor/FLOOR_EXEMPT."
+  },
+  {
+   "name": "Gate 5's S0.16 recompute against IntentRecord as now declared",
+   "holds": false,
+   "note": "Recomputable in DATA, not in TYPE. Every input is now on the record: FLOOR_EXEMPT reads priority (new), effect, capability (CapabilityRef|null via §0B.7), target and handoff_capability_ref (retyped by E6); SENSITIVE_DEST reads only r.space plus the live AE_CAP_BY_KEY / WIDGET_CAPABILITY_POLICY tables; verificationFloor's other three terms read effect, widget_kind (new) and target. So FLOOR_EXEMPT and SENSITIVE_DEST ARE fully recomputable at EP-INGRESS and no exempt intent need diverge. Two things still block it. (1) The call does not typecheck: both functions are declared over MintedIntent, which IntentRecord does not satisfy (see E6). (2) §0.13's header comment still reads 'INPUTS: exactly i.effect, i.capability, i.handoff_capability_ref, i.target, and kind. No other value is read' — now false, since FLOOR_EXEMPT reads i.priority, and that enumeration is the closed-input statement a conformance test would be written against."
+  },
+  {
+   "name": "Gate 6 dispatch and call site for all four spaces, HANDOFF, and a null subject",
+   "holds": false,
+   "note": "Dispatch is TOTAL and the call site is no longer inert: §0C.28-quinquies fixes the key as subjectCapability(record).space and EC-19 binds `const ref = subjectCapability(record)` once at the top, so the branch and the argument two lines below agree. AE → §0B.18 bullet 1; C9 → EC-11's two branches (47 catalogue names via assertCanExecute, the 9 extras via the policy row plus c9Capability — verified in process that the 47/9 split and each extra's mode are exactly as §0C.8 tabulates); CONTROL → §0.23; TOOL → bullet 2, declared but unreachable since §0B.7 admits no TOOL ref on any intent (SENSITIVE_DEST fails closed on it consistently); null subject → §0C.28-septies passes the intent on, and §3.5 guarantees null only for NONE (no token, no submission) and w/i/s/detail NAVIGATE (no capability edge at Gate 13). What fails is HANDOFF: the dispatch lands it on a branch that tests authority to EXECUTE its destination, which R3.5.3 forbids reading and §0C.18 argues a handoff does not exercise — and on the AE side that branch is the COMMIT allowlist test FR-6a requires the consent key to fail. See E9."
+  }
+ ],
+ "residualCount": 16,
+ "residualClasses": {
+  "totality-break": 1,
+  "contradiction + dangling field": 1,
+  "type-mismatch": 3,
+  "contradiction (stale after E1)": 1,
+  "under-coverage": 1,
+  "ambiguity + false ground": 1,
+  "stale cross-reference": 1,
+  "unenforced assertion + type-mismatch": 1,
+  "type mismatch / inert call site": 1,
+  "contradiction / over-broad gate": 1,
+  "stale closed enumeration": 1,
+  "claim larger than its proof": 1,
+  "type mismatch left by a sibling repair (E4/E5 angle, noted in passing)": 1,
+  "stale quotation": 1
+ },
+ "residual": [
+  {
+   "cls": "totality-break",
+   "clause": "§0C.28-sexies's `produced` operand, read with §0C.22-octies's corrected ground and §4.5.4 steps 1-3/5",
+   "consequence": "The fitter withholds intents but never nulls the body ref that names them, so a produced {k:'intent'} ref can denote an intent absent from env.intents: METRIC's drill_intent on TEXT_ONLY (tier ceiling HANDOFF only, max_intents 1), FORM's discard_intent (an exempt intent is still withheld at steps 2 and 3 per §0C.17), CHOICE's more_intent on ANNOUNCEMENT. resolveInteractive is then partial, nameSourceOf's declared totality is false, accessible_names must key an element that does not exist, and A-3's DOM-order equality names a control no renderer draws — K22 set-equality fails for every degraded envelope of every kind whose body declares a droppable intent path.",
+   "fix": "Add one sentence to §0C.28-sexies: `produced` excludes any {k:'intent'} ref whose intent_ref is not present in `emitted` — i.e. refSet's intent-valued paths are filtered against the fitted intent list, which the tier argument already puts in scope — and state in §0C.22-octies that resolveInteractive is total over the filtered set. (The alternative, having step 6 null the withheld body refs, collides with §0.47 and with the non-nullable escape handles of §0.28.)"
+  },
+  {
+   "cls": "contradiction + dangling field",
+   "clause": "§0C.22-quinquies's `accessible_name_suffix` value comment vs §0C.22's A-2 mechanism; the three `intent:primary` rows",
+   "consequence": "A-2 says the composition is 'applied to the emitted body'; the type says the pointers are 'relative to the element resolveInteractive returns'. Under the element reading — which E3 has just made definite for intent refs — ARTIFACT's filename/format/size_bytes, APPROVAL's audience_size/risk_tier/reversibility and CLIENT_LIST's audience_size resolve against a WidgetIntent (§3.1), which declares none of them; they live on ArtifactBody, ApprovalBody and body bulk_intents[]. Under the body reading, the two `option:*` rows cannot express 'that option's duration and price'. Four of the six populated rows are unresolvable on one reading, two on the other, and the EP-BUILD check has no single base to run against.",
+   "fix": "Give the suffix an explicit base: type the cell as {base: 'element' | 'body'; pointers: readonly string[]} (or add a per-row `owner_path` naming the body node for the intent rows), set base:'body' for ARTIFACT/APPROVAL/CLIENT_LIST and base:'element' for SERVICE_SELECTOR/STAFF_SELECTOR, and delete the conflicting half of A-2's mechanism sentence."
+  },
+  {
+   "cls": "type-mismatch",
+   "clause": "§0C.22's A-2 composition and §0C.22-quinquies's default",
+   "consequence": "A-2 still composes `nameSourceOf(ref, env).label + ', ' + suffix` where suffix is now readonly string[], and no clause declares the function that turns a pointer list into text (resolve pointer → Cell.label / Phrase.rendered / formatted Measure, joined by ', '). The CI check 'equality with the row's composition' therefore has no composition to compare against. Two sentences also still give the default as the empty string `''`, which is not a member of the new value type.",
+   "fix": "Declare `renderSuffix(pointers, base): string` beside refKey — each pointer resolves to a Cell, Measure or Phrase and contributes its minted label, joined with ', ', empty list yielding '' — restate A-2 as label + (suffix.length ? ', ' + renderSuffix(...) : ''), and change both `''` defaults to `[]`."
+  },
+  {
+   "cls": "contradiction (stale after E1)",
+   "clause": "EC-17's ruling paragraph and its errata row in §0C.13",
+   "consequence": "Both still say per-kind membership is what interactive_paths produces 'plus the emitted escape and remedy intents, as EC-18 item 2 amends it' — the exact role list E1 replaced because it left role:'more' unsatisfiable on eighteen kinds. The contract again gives two answers for reading_order's membership, which is the defect EC-17 exists to prevent; and E14 edited this very paragraph without updating it.",
+   "fix": "Replace the clause in both places with 'plus every emitted intent not already denoted by a produced ref, in emitted order (EC-18 item 2 as amended by EC-20)'."
+  },
+  {
+   "cls": "under-coverage",
+   "clause": "§0C.22-nonies, against §4.8.2's CLIENT_LIST row keyed `intent:primary`",
+   "consequence": "E5 assigns roles for APPROVAL and ARTIFACT but nothing fixes the role of CLIENT_LIST's bulk intents, and §3.1 lets a composer pick any of eight. A bulk intent minted 'secondary' or 'destructive' takes the empty default and loses audience_size from its accessible name, breaking A-17 ('Bulk intents ... carry audience_size in the accessible name') exactly as ARTIFACT's missing role would have put the file facts on the regenerate control. CLIENT_LIST's row refs are {k:'row'} and are unaffected either way, so there is no scoping reason to key on a role here.",
+   "fix": "Either add CLIENT.2 at EP-MINT — every bulk_intents[] entry is role:'primary' — or re-key the CLIENT_LIST row to `intent:*`, which its own paths make unambiguous."
+  },
+  {
+   "cls": "type-mismatch",
+   "clause": "§0C.22-ter's `resolveInteractive` signature and `InteractiveElement`",
+   "consequence": "The return type is the full union for every ref kind, so nameSourceOf's seven branches read members the declared type does not carry (el.label, el.start, el.row, el.heading), and the union's option member is plain OptionItem while SERVICE_SELECTOR and STAFF_SELECTOR carry OptionItem & {duration, price} / & {nearest_availability} — the exact fields E4's option:* pointers name. The declaration reads as total but does not type-check, and it silently admits E4's wrong pointer base.",
+   "fix": "Index the return: type ElementFor<K extends InteractiveRef['k']> = …; declare resolveInteractive<K>(env, ref: Extract<InteractiveRef,{k:K}>): ElementFor<K>, and name the two option intersections (or the kind's leaf schema) in the option alternative."
+  },
+  {
+   "cls": "type-mismatch",
+   "clause": "§0C.17's `verificationFloor(i: MintedIntent, kind)` / `FLOOR_EXEMPT(i: MintedIntent)` against §0.16's Gate 5 recompute",
+   "consequence": "Gate 5 recomputes the floor from the live tables and the IntentRecord, but MintedIntent is WidgetIntent-shaped (intent_ref, label, utterance_preview, speech_aliases, ordinal, enabled, authority_hint) and IntentRecord declares none of those, so the record is not assignable to the derivation's parameter. Every member the two predicates actually read is present on the record, so this is purely the nominal-subject defect E6 repaired for subjectCapability, one call deeper — and it leaves EC-19's whole reason for adding `priority` unexercised.",
+   "fix": "Re-declare both over a structural subject, as §0C.28-septies does: type FloorSubject = IntentSubject & {priority: number; effect: EffectClass}; FLOOR_EXEMPT(i: FloorSubject), verificationFloor(i: FloorSubject, kind: WidgetKind) — both MintedIntent and IntentRecord satisfy it with no widening."
+  },
+  {
+   "cls": "ambiguity + false ground",
+   "clause": "§0C.28-sexies's append order and its 'the escape verb is in no kind's interactive_paths' premise",
+   "consequence": "'In emitted order' and 'the escape last among the appended intents' are two orderings for one list and disagree whenever escape precedes remedy or 'more' in emitted order, while K22 requires render order and A-3 requires DOM order to equal reading_order — the ambiguity the ++ operator was introduced to remove. The premise is also false for BOOKING_CONFIRMATION, PAYMENT_HANDOFF, FORM and SETTINGS_DRAFT, whose declared paths are dismiss_intent/discard_intent — §0.25's escape — so on those four kinds escape is produced, never appended, and not last.",
+   "fix": "State it once: 'appended in emitted order, except the escape, which is moved to the end of the appended segment; on the four kinds whose interactive_paths already denote the escape its produced position governs and nothing is appended for it.'"
+  },
+  {
+   "cls": "stale cross-reference",
+   "clause": "§1.1.1's producer table row for `render` ('degradation ladder, at EP-DELIVER'), on which E2 now depends",
+   "consequence": "E2's tier argument is only available at the EP-MINT recompute because S0.7 puts EP-FIT before EP-MINT; §1.1.1 still attributes `render` to EP-DELIVER, i.e. after mint, and §4.5.4 returns the receipt as a value separate from envelope′ with no clause saying when it is attached to the root member. A reader following §1 builds a refSet call whose third argument does not exist yet.",
+   "fix": "Amend §1.1.1's `render` row to 'degradation ladder, at EP-FIT (attached to the envelope before EP-MINT seals)', and add one sentence to §4.5.4 step 8 saying the receipt is written to envelope.render before body_hash is computed."
+  },
+  {
+   "cls": "unenforced assertion + type-mismatch",
+   "clause": "EC-18(3)'s `NarrativeTemplate` / `MomentTemplate` declarations",
+   "consequence": "'MUST resolve in NARRATIVE_TEMPLATES' appears only as a code comment — the EP-REGISTRY-LOAD paragraph asserts moment_template_id and required_cells but never narrative_template_id, so a MomentTemplate naming a non-existent narrative template starts the process. And both catalogues are Record<id, …> holding a single `version`, while §1.6.5's Provenance references a template by (narrative_template_id, narrative_template_version) and §4.2 replays frozen receipts: an older version named by a stored receipt cannot resolve in a single-version map, though §0.18 calls it 'the versioned catalogue'.",
+   "fix": "Extend the EP-REGISTRY-LOAD assertion to narrative_template_id, and key both catalogues by `${id}@${version}` (or make the value a Record<version, …>), so a receipt's (id, version) pair resolves."
+  },
+  {
+   "cls": "type mismatch / inert call site",
+   "clause": "§0C.17 (FLOOR_EXEMPT, verificationFloor) against §3.7 IntentRecord and §0.16 Gate 5",
+   "consequence": "E6 re-declared subjectCapability over a structural IntentSubject but left its two callers typed over MintedIntent, which retains ten WidgetIntent members IntentRecord does not declare (intent_ref, intent_token, role, label, utterance_preview, speech_aliases, ordinal, input_schema, authority_hint, enabled). Gate 5's mandated recompute therefore still cannot be written as declared, and EC-20's own justification for E6 ('without which Gate 5 still could not recompute') is not discharged. A gateway built to these signatures either passes a cast or re-implements the predicate, and §0.16 refuses on ANY divergence, so a second implementation is a refusal engine.",
+   "fix": "Apply §0C.28-septies's own remedy one level up: declare FLOOR_EXEMPT and verificationFloor over a structural subject — IntentSubject widened with `effect: EffectClass` and `priority: number` — and state that MintedIntent and IntentRecord both satisfy it. Nothing else in either shape needs to change."
+  },
+  {
+   "cls": "contradiction / over-broad gate",
+   "clause": "§0C.28-quinquies and §0B.18's superseded bullets against §3.5 R3.5.3, §0B.20's FR-6a restatement and §0C.18",
+   "consequence": "Dispatching Gate 6 on subjectCapability makes it read handoff_capability_ref, which R3.5.3 declares is read only by R3.5.1, R3.4 and the help generator, and subjects a route to an execute-admission test. For the nine C9 extras, c9Capability refuses BUSINESS_INTELLIGENCE on any non-READ mode, so a BI run may not even offer the a22.configuration or b35.confirm handoff. For an AE destination — which §0C.17-quater's SENSITIVE_DEST case 'AE' and §0B.20's consent act both presuppose exists — §0B.18 bullet 1(a) demands a row in AE_WIDGET_COMMIT_ALLOWLIST, which FR-6a forbids for the consent key, so FR-6a's only mandated affordance is refused by the same section that mandates it. Fail-closed throughout, but it is the safety inversion §0C.18 names: the route to step up is harder to reach than the act.",
+   "fix": "Scope the Gate 6 branches by effect as well as by space: state that for effect==='HANDOFF' the subject resolves only the DESTINATION classification fences (registration, SENSITIVE_DEST, targetFloor('s') and the surface's own ingress), never assertCanExecute, c9Capability's domain/mode admission, or the AE COMMIT allowlist. Then either extend R3.5.3's reader list to that branch or say Gate 6 reads the ref's space alone."
+  },
+  {
+   "cls": "stale closed enumeration",
+   "clause": "§0.13's code-block header comment",
+   "consequence": "It still reads 'INPUTS: exactly i.effect, i.capability, i.handoff_capability_ref, i.target, and kind. No other value is read', which EC-4 falsified when FLOOR_EXEMPT began reading i.priority — the very member E6 had to add to IntentRecord for Gate 5. A closed input list that omits a live input is the same defect class EC-17 ruled on for K22's enumeration: a second, wrong answer beside the mechanism.",
+   "fix": "Amend the comment to name priority as the fifth input, and record it in §0C.13's EC-4 row alongside the §0.13 citation already there."
+  },
+  {
+   "cls": "claim larger than its proof",
+   "clause": "§0C.18, 'What bounds it is a build veto, not the census'",
+   "consequence": "E12's veto constrains only the CONTROL branch of a four-branch predicate. The NONE branch (capability null) and the HANDOFF branch (any class-'s', non-SENSITIVE_DEST destination) admit unboundedly many members, and REFINE is bounded by an enumeration property (LOCAL count = 1, verified in process), not by a veto. The sentence promises a bound the mechanism does not deliver — the same over-read §0C.32's floor-reduction table exists to prevent.",
+   "fix": "Restate as: the veto bounds the CONTROL branch; the REFINE branch is bounded by the LOCAL-uniqueness assertion; NONE and HANDOFF are unbounded in cardinality and bounded in authority by the non-actuation argument. Three grounds, said separately."
+  },
+  {
+   "cls": "type mismatch left by a sibling repair (E4/E5 angle, noted in passing)",
+   "clause": "§0C.22-quinquies prose and §0C.22-nonies, against the same paragraph's declared type",
+   "consequence": "E4 retyped accessible_name_suffix's VALUE to `readonly string[]` and the code comment says 'The empty array is the declared default', but three prose sites still say the default is `''` — 'Every ${kind}:${role} pair a row does not name takes the declared default \\'\\'', 'intent:escape, intent:remedy and intent:more take the empty default', and 'The other sixteen carry the declared default \\'\\' (the empty suffix)'. A string default under an array type is the defect E4 existed to remove.",
+   "fix": "Replace the three `''` spellings with `[]`, and restate A-2's reduction as 'an empty pointer list, for which the composition reduces to nameSourceOf(ref, env).label verbatim'."
+  },
+  {
+   "cls": "stale quotation",
+   "clause": "§0C.28-quater's opening ground",
+   "consequence": "It quotes §1.1.4 as declaring run_id nullable 'because two paths mint envelopes', while E9/EC-18 amends §1.1.4 to three and §0C.28-quater itself then relies on minter 3. The quoted text is superseded by the same section that quotes it. Harmless to the ruling, which names all three paths explicitly, but it is the drifting-prose-count pattern EC-16 rules against.",
+   "fix": "Quote the amended wording, or cite §1.1.4 'as amended by EC-18' the way EC-17 now cites EC-18."
+  }
+ ],
+ "verdicts": [
+  "On this angle all seven repairs close the residual they were aimed at, and three of them (E1's closed concatenation, E2's tier argument, E14's unreachable-member correction) are clean: they are the right shape and introduce nothing. But four introduce new defects and the two headline totality invariants do not survive. E4 is the worst: retyping the suffix to a pointer list fixed the verbatim-concatenation bug and simultaneously left the contract with two incompatible pointer bases — A-2 says 'the emitted body', the type says 'the element resolveInteractive returns' — and under the element reading, which E3 has just made definite, the three intent:primary rows (ARTIFACT, APPROVAL, CLIENT_LIST",
+  "Five of the seven repairs on this angle are sound and close their residuals cleanly: E7 (the run-bearing refusal re-keyed on subjectCapability genuinely closes the HANDOFF escape and keeps §0C.28-ter's IFF consistent on all three mint paths), E8 (the policy-row test is correctly demoted to a build-time totality restatement without lowering any live fence), E11 (disabled_because now type-matches Cell.reason_code, is sealed in body_hash, and adds no authority vocabulary), E12's veto proper (verified in process: control.widget.dismiss is the unique ANONYMOUS-floored CONTROL key), and E13 (the false FLOOR_EXEMPT ground is gone from the EC-18 errata row and the true ground now matches the body te"
+ ],
+ "status": "OPEN — NOT REPAIRED. The repair loop was stopped here by instruction rather than continued. These 16 residuals are the honest open state of the contract and are the reason WIDGET CONTRACT CERTIFIABLE is NO.",
+ "note": "No third floor reduction. No security-contract violation in this or the three preceding passes. On the authority angle 5 of 7 EC-20 repairs are sound and clean, including E7 — the run-bearing HANDOFF escape from the c9_domain refusal is genuinely closed. The largest open item is E6: IntentRecord now carries every VALUE Gate 5 needs, but FLOOR_EXEMPT and verificationFloor are still declared over MintedIntent, which retains ten members IntentRecord does not, so the recompute is constructible in data and not in type."
+}

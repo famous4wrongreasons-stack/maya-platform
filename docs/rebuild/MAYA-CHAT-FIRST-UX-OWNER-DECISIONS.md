@@ -23,6 +23,29 @@ OWNER UX DECISIONS APPROVED: 0/12
 | `CHAT-FIRST != CHAT-ONLY` | Fallback-редактор обязателен. Это **D3** — подтверждение, а не выбор. |
 | `NATIVE/PWA SHARE ONE BUSINESS INTERACTION CONTRACT` | Отдельной native-архитектуры виджетов не создаётся (D-none: это факт, см. §9 архитектуры). |
 
+## Ссылки на пакеты: P01–P30 — это прежний план
+
+Таблицы влияния ниже ссылаются на пакеты как `P01`…`P30`. Это **прежний
+30-пакетный план**. Он заменён набором из **16 пакетов `K1`…`K16` в 6 волнах**
+(§14 архитектуры, полная таблица —
+[`evidence/maya-chat-first-ux/section-packages-and-gate-v2.md`](evidence/maya-chat-first-ux/section-packages-and-gate-v2.md)).
+Рассуждения в таблицах влияния остаются верными — менялась нарезка, а не работа.
+Соответствие:
+
+| Прежние | Теперь | Прежние | Теперь |
+|---|---|---|---|
+| P01, P02, P06, P16 | **K1** | P17, P18 (client) | **K8** |
+| P03, P04, P05 | **K2** | P17, P18 (owner/staff), P25 | **K10** |
+| P07, P08 | **K3** | P14 | **K11** |
+| P12, P20 | **K4** | P22, P23, P26 | **K12** |
+| P09, P10, P19 | **K5** | P24, P28 | **K13** |
+| P11, P15 | **K6** | P13 | **K14** |
+| P30 (booking) | **K7** | P27 | **K15** |
+| P29 | растворён в K2 / K5 / G23 | P21 | **K16** |
+
+Условия шлюза `G16`/`G17` прежней нумерации читаются как `G22`/`G24` в шлюзе из
+24 условий.
+
 ## Двенадцать решений
 
 Восемь из исходного списка; D9–D11 добавлены инвентаризацией; **D12 добавлено
@@ -66,7 +89,7 @@ OWNER UX DECISIONS APPROVED: 0/12
 
 **QUESTION.** How many primary-navigation destinations does the target shell have, and which?
 
-**WHY.** This is explicitly flagged as un-derivable from the evidence: executing every ASSIGNED retirement takes primary nav from 112 to 49, and the decision that takes 49 to a handful is a product adjudication, not a finding. The design section derives four shell destinations from the NEVER_CHAT_ACTUATED list, but an owner may legitimately weigh discoverability and operator speed differently.
+**WHY.** This is explicitly flagged as un-derivable from the evidence: executing every assigned retirement takes primary nav from 112 to **92** — not to 49, which was an arithmetic error corrected in §3.3 of the architecture document — and the decision that takes 92 to a handful is a product adjudication, not a finding. Of the 112, **11 belong to `smm_bot`**, a separate production system, so Maya's own census is **101**. The design section derives four shell destinations from the NEVER_CHAT_ACTUATED list, but an owner may legitimately weigh discoverability and operator speed differently.
 
 **OPTION A.** Five: one root (Maya) plus Account, Connections, Privacy & Data, Notifications. The tab bar is deleted as a control type, not re-skinned. These four are the handoff target set — the destinations where the eight NEVER_CHAT_ACTUATED acts terminate.
 
@@ -88,7 +111,7 @@ OWNER UX DECISIONS APPROVED: 0/12
 | Impact | |
 |---|---|
 | **NATIVE** | No shell or plugin work and no store release: the shell chrome is web, and neither the Capacitor shell nor the TWA contributes navigation. The native-facing consequence is the route-key namespace. The four destinations (`shell.account`, `shell.connections`, `shell.privacy`, `shell.notifications`) become targets for the three registered custom schemes (`mayaos`, `ru.mayaos.app`, `pro.malesthetic.app`) and for push NAVIGATE actions, and per N8/N9 the `appUrlOpen` handler extracts only `{route_key, opaque_handle}` and resolves the destination server-side — it must not read a staff id, record id, tenant slug or price from the URL. [NON-NORMATIVE] Name these four once: a route key that has shipped inside a store-released shell or a push payload cannot be withdrawn unilaterally, and per the migration map query parameters and deep links are sealed last for exactly this reason. |
-| **PWA** | The tab bar is deleted as a control type rather than re-skinned, taking primary navigation from 112 surfaces to 49 via the 63 assigned retirements and then to 5. The honest cost is operator speed: a staff member repeating one operation forty times a day loses the one-tap path and must type, speak or re-enter through a widget. The count is held by the nav ratchet added to `scripts/verify-prepublication-contracts.mjs` and measured at G11 (primary-nav count ≤ 49 and zero survivors lacking a written justification). Adding a sixth destination is a contract-level change reviewed like a schema change — that is the mechanism that keeps 5 from drifting to 9. |
+| **PWA** | The tab bar is deleted as a control type rather than re-skinned, taking primary navigation from 112 surfaces (101 that Maya owns) to **92** via the 63 assigned retirements and then to 5 — reaching 5 requires re-dispositioning 34 further rows in K1's dossier, which is a named forcing function rather than a number that arrives on its own. The honest cost is operator speed: a staff member repeating one operation forty times a day loses the one-tap path and must type, speak or re-enter through a widget. The count is held by the nav ratchet added to `scripts/verify-prepublication-contracts.mjs` and measured at G11 (in-scope primary-nav count ≤ the owner-adjudicated number, recommended 5, and zero survivors lacking a written justification). Adding a sixth destination is a contract-level change reviewed like a schema change — that is the mechanism that keeps 5 from drifting to 9. |
 | **SECURITY / AUTHORITY** | The destination set is derived from the eight NEVER_CHAT_ACTUATED acts, which is what makes it defensible: the count cannot move without first moving that list. Privacy & Data is the terminal surface for five of the eight capability gaps (`GAP-CONSENT-MKT-CHANGE`, `GAP-CONSENT-PD-WITHDRAW`, `GAP-CONSENT-REGISTER-EXPORT`, `GAP-HISTORY-ERASE`, with `GAP-IDENTITY-TG-UNBIND` in Connections) and carries `SESSION_VERIFIED` with `STEP_UP_VERIFIED` on withdrawal and register export. Under 152-FZ the discoverability of a withdrawal path is part of the obligation, which is the specific argument against option B burying it two taps into a mixed drawer. P20 enforces that each NEVER_CHAT_ACTUATED key has HANDOFF as its only legal intent AND independently declares its required verification rung, so a stale destination list still fails closed at the ladder. |
 | **MIGRATION** | Executed by P21 (the 63 retirements) with route keys registered by P19. Each retired entry point walks the ledger state machine — PARITY_PROVEN → ENTRY_POINT_DARK (14 days, route still resolves and logs every hit) → ROUTE_SEALED (30 days; 45 days for any capability touching period close, so two month-end closes fall inside the window) → DELETED — with a one-step rollback at every transition that requires no deploy of the successor. Ordering constraint: no row darkens while another row's `parity_proven_by` names it, and P20 must land before P22 so the consent surfaces are fenced as HANDOFF-only before their canonical owners exist. |
 | **DEPENDENCIES** | Blocked by: D1 (a persona field would permit the per-persona work rail of option C); D3 (destinations may exist at all only because chat-only is excluded); D4 (without the capability index, 201 capabilities have no entry point and nav pressure returns immediately — D2-A paired with D4-A is the weakest combination in the set). Blocks: D6 (the greeting's off-switch is specified to live in Notifications, which must therefore exist); D9's permanent home (the interim lane may land in the old shell, but P22's surface is Privacy & Data). Package dependencies: P19, P20, P21, P22; gate G11. |

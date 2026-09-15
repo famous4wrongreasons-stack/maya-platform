@@ -1,0 +1,150 @@
+{
+ "packages": 16,
+ "waves": 6,
+ "gateConditions": 24,
+ "graph": "DAG",
+ "cycles": 0,
+ "waveOrderViolations": 0,
+ "rows": [
+  {
+   "id": "K1",
+   "name": "Surface and Capability Ledger",
+   "dependsOn": [],
+   "wave": 1
+  },
+  {
+   "id": "K2",
+   "name": "Widget Contract and Portability Kernel",
+   "dependsOn": [
+    "K1"
+   ],
+   "wave": 1
+  },
+  {
+   "id": "K3",
+   "name": "Widget Runtime (intent gateway + read-only emission)",
+   "dependsOn": [
+    "K2"
+   ],
+   "wave": 2
+  },
+  {
+   "id": "K4",
+   "name": "Authority Runtime and Secure-Surface Fence",
+   "dependsOn": [
+    "K2",
+    "K3"
+   ],
+   "wave": 2
+  },
+  {
+   "id": "K5",
+   "name": "Chat Shell, Renderer and Route Registry",
+   "dependsOn": [
+    "K2",
+    "K3"
+   ],
+   "wave": 2
+  },
+  {
+   "id": "K6",
+   "name": "Channel Profiles, Degradation and Voice",
+   "dependsOn": [
+    "K3",
+    "K5"
+   ],
+   "wave": 2
+  },
+  {
+   "id": "K7",
+   "name": "Booking Commit Path",
+   "dependsOn": [
+    "K4",
+    "K5"
+   ],
+   "wave": 3
+  },
+  {
+   "id": "K8",
+   "name": "Client Capability Widgets",
+   "dependsOn": [
+    "K5",
+    "K7"
+   ],
+   "wave": 3
+  },
+  {
+   "id": "K9",
+   "name": "Commerce and Loyalty Redemption",
+   "dependsOn": [
+    "K7"
+   ],
+   "wave": 3
+  },
+  {
+   "id": "K10",
+   "name": "Analytics and Reporting Widgets",
+   "dependsOn": [
+    "K5",
+    "K4"
+   ],
+   "wave": 4
+  },
+  {
+   "id": "K11",
+   "name": "C9 Orchestration Widgets",
+   "dependsOn": [
+    "K3",
+    "K4"
+   ],
+   "wave": 4
+  },
+  {
+   "id": "K12",
+   "name": "Data-Subject Authority (consent, unbind, erasure)",
+   "dependsOn": [
+    "K4",
+    "K6",
+    "K3"
+   ],
+   "wave": 5
+  },
+  {
+   "id": "K13",
+   "name": "Proactive and Notification Integrity",
+   "dependsOn": [
+    "K6",
+    "K4"
+   ],
+   "wave": 5
+  },
+  {
+   "id": "K14",
+   "name": "Telegram Cutover",
+   "dependsOn": [
+    "K12",
+    "K6",
+    "K13"
+   ],
+   "wave": 6
+  },
+  {
+   "id": "K15",
+   "name": "Legacy Authority Retirement and Bundle Disposition",
+   "dependsOn": [
+    "K4",
+    "K5",
+    "K1"
+   ],
+   "wave": 6
+  },
+  {
+   "id": "K16",
+   "name": "Retirement Under Parity",
+   "dependsOn": [],
+   "wave": 6
+  }
+ ],
+ "consolidationTest": "A package earns its own id only if it delivers a capability that can be exercised and proved on its own. A package cut along an artefact boundary, a taxonomy class, or a staging step is a fragment and must be merged into the capability it serves.",
+ "reCheckedVerdict": "16 is the minimal dependency-driven plan. Applying the consolidation test a second time yields exactly one near-miss (K1+K2, both wave 1), and separating them is justified: K1 exits on a HUMAN dossier approval with a pinned hash, K2 exits on a CI job. Merging would gate an automated check behind a human signature and make the wave-1 exit ambiguous. The three the plan already declares unmergeable remain so: K7 (its safety property is a static-analysis proof over the minting code, destroyed if another minting path lands in the same change), K11 (must prove 0 contract diffs against shipped C9), K14 (~45 individually recorded command decisions, not batchable)."
+}
