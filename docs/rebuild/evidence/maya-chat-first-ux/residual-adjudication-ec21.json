@@ -1,0 +1,144 @@
+{
+ "source": "the 16 residuals from the EC-20 narrow confirmation",
+ "adjudicated": 16,
+ "confirmed": 16,
+ "refuted": 0,
+ "unadjudicated": 0,
+ "adjudicationVenue": "main context — no adjudicator subagents",
+ "classes": {
+  "structural": 13,
+  "security": 0,
+  "unproven": 3
+ },
+ "note": "All sixteen are internal-consistency defects in Section 0-C, each verifiable by reading two clauses of the artefact. Four whose refutation was plausible were checked directly against the text before being accepted: R9 (1.1.1 render row says EP-DELIVER, after EP-MINT), R12 (R3.5.3 declares handoff_capability_ref read only by R3.5.1, R3.4 and the help generator), R13 (0.13 header enumerates four inputs and omits priority), R15 (one string default remained under an array type). Repaired as EC-21.",
+ "findings": [
+  {
+   "finding": "R1",
+   "cls": "totality-break",
+   "verdict": "CONFIRMED",
+   "exactDefect": "§0C.28-sexies's `produced` operand, read with §0C.22-octies's corrected ground and §4.5.4 steps 1-3/5 — The fitter withholds intents but never nulls the body ref that names them, so a produced {k:'intent'} ref can denote an intent absent from env.intents: METRIC's drill_intent on TEXT_ONLY (tier ceiling HANDOFF only, max_intents 1), FORM's discard_intent (an exempt intent is still withheld at steps 2 and 3 per §0C.17), CHOICE's more_intent on ANNOUNCEMENT. resolveInteractive is then partial, nameSou",
+   "exactRepair": "Add one sentence to §0C.28-sexies: `produced` excludes any {k:'intent'} ref whose intent_ref is not present in `emitted` — i.e. refSet's intent-valued paths are filtered against the fitted intent list, which the tier argument already puts in scope — and state in §0C.22-octies that resolveInteractive is total over the filtered set. (The alternative, having step 6 null the withheld body refs, collides with §0.47 and with the non-nullable escape handles of §0.28.)",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  },
+  {
+   "finding": "R2",
+   "cls": "contradiction + dangling field",
+   "verdict": "CONFIRMED",
+   "exactDefect": "§0C.22-quinquies's `accessible_name_suffix` value comment vs §0C.22's A-2 mechanism; the three `intent:primary` rows — A-2 says the composition is 'applied to the emitted body'; the type says the pointers are 'relative to the element resolveInteractive returns'. Under the element reading — which E3 has just made definite for intent refs — ARTIFACT's filename/format/size_bytes, APPROVAL's audience_size/risk_tier/reversibility and CLIENT_LIST's audience_size resolve against a WidgetIntent (§3.1), which declares none",
+   "exactRepair": "Give the suffix an explicit base: type the cell as {base: 'element' | 'body'; pointers: readonly string[]} (or add a per-row `owner_path` naming the body node for the intent rows), set base:'body' for ARTIFACT/APPROVAL/CLIENT_LIST and base:'element' for SERVICE_SELECTOR/STAFF_SELECTOR, and delete the conflicting half of A-2's mechanism sentence.",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  },
+  {
+   "finding": "R3",
+   "cls": "type-mismatch",
+   "verdict": "CONFIRMED",
+   "exactDefect": "§0C.22's A-2 composition and §0C.22-quinquies's default — A-2 still composes `nameSourceOf(ref, env).label + ', ' + suffix` where suffix is now readonly string[], and no clause declares the function that turns a pointer list into text (resolve pointer → Cell.label / Phrase.rendered / formatted Measure, joined by ', '). The CI check 'equality with the row's composition' therefore has no composition to compare against. Two sentences also still give the def",
+   "exactRepair": "Declare `renderSuffix(pointers, base): string` beside refKey — each pointer resolves to a Cell, Measure or Phrase and contributes its minted label, joined with ', ', empty list yielding '' — restate A-2 as label + (suffix.length ? ', ' + renderSuffix(...) : ''), and change both `''` defaults to `[]`.",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  },
+  {
+   "finding": "R4",
+   "cls": "contradiction (stale after E1)",
+   "verdict": "CONFIRMED",
+   "exactDefect": "EC-17's ruling paragraph and its errata row in §0C.13 — Both still say per-kind membership is what interactive_paths produces 'plus the emitted escape and remedy intents, as EC-18 item 2 amends it' — the exact role list E1 replaced because it left role:'more' unsatisfiable on eighteen kinds. The contract again gives two answers for reading_order's membership, which is the defect EC-17 exists to prevent; and E14 edited this very paragraph without updati",
+   "exactRepair": "Replace the clause in both places with 'plus every emitted intent not already denoted by a produced ref, in emitted order (EC-18 item 2 as amended by EC-20)'.",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  },
+  {
+   "finding": "R5",
+   "cls": "under-coverage",
+   "verdict": "CONFIRMED",
+   "exactDefect": "§0C.22-nonies, against §4.8.2's CLIENT_LIST row keyed `intent:primary` — E5 assigns roles for APPROVAL and ARTIFACT but nothing fixes the role of CLIENT_LIST's bulk intents, and §3.1 lets a composer pick any of eight. A bulk intent minted 'secondary' or 'destructive' takes the empty default and loses audience_size from its accessible name, breaking A-17 ('Bulk intents ... carry audience_size in the accessible name') exactly as ARTIFACT's missing role would have put the",
+   "exactRepair": "Either add CLIENT.2 at EP-MINT — every bulk_intents[] entry is role:'primary' — or re-key the CLIENT_LIST row to `intent:*`, which its own paths make unambiguous.",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  },
+  {
+   "finding": "R6",
+   "cls": "type-mismatch",
+   "verdict": "CONFIRMED",
+   "exactDefect": "§0C.22-ter's `resolveInteractive` signature and `InteractiveElement` — The return type is the full union for every ref kind, so nameSourceOf's seven branches read members the declared type does not carry (el.label, el.start, el.row, el.heading), and the union's option member is plain OptionItem while SERVICE_SELECTOR and STAFF_SELECTOR carry OptionItem & {duration, price} / & {nearest_availability} — the exact fields E4's option:* pointers name. The declaration reads",
+   "exactRepair": "Index the return: type ElementFor<K extends InteractiveRef['k']> = …; declare resolveInteractive<K>(env, ref: Extract<InteractiveRef,{k:K}>): ElementFor<K>, and name the two option intersections (or the kind's leaf schema) in the option alternative.",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  },
+  {
+   "finding": "R7",
+   "cls": "type-mismatch",
+   "verdict": "CONFIRMED",
+   "exactDefect": "§0C.17's `verificationFloor(i: MintedIntent, kind)` / `FLOOR_EXEMPT(i: MintedIntent)` against §0.16's Gate 5 recompute — Gate 5 recomputes the floor from the live tables and the IntentRecord, but MintedIntent is WidgetIntent-shaped (intent_ref, label, utterance_preview, speech_aliases, ordinal, enabled, authority_hint) and IntentRecord declares none of those, so the record is not assignable to the derivation's parameter. Every member the two predicates actually read is present on the record, so this is purely the no",
+   "exactRepair": "Re-declare both over a structural subject, as §0C.28-septies does: type FloorSubject = IntentSubject & {priority: number; effect: EffectClass}; FLOOR_EXEMPT(i: FloorSubject), verificationFloor(i: FloorSubject, kind: WidgetKind) — both MintedIntent and IntentRecord satisfy it with no widening.",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  },
+  {
+   "finding": "R8",
+   "cls": "ambiguity + false ground",
+   "verdict": "CONFIRMED",
+   "exactDefect": "§0C.28-sexies's append order and its 'the escape verb is in no kind's interactive_paths' premise — 'In emitted order' and 'the escape last among the appended intents' are two orderings for one list and disagree whenever escape precedes remedy or 'more' in emitted order, while K22 requires render order and A-3 requires DOM order to equal reading_order — the ambiguity the ++ operator was introduced to remove. The premise is also false for BOOKING_CONFIRMATION, PAYMENT_HANDOFF, FORM and SETTINGS_D",
+   "exactRepair": "State it once: 'appended in emitted order, except the escape, which is moved to the end of the appended segment; on the four kinds whose interactive_paths already denote the escape its produced position governs and nothing is appended for it.'",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  },
+  {
+   "finding": "R9",
+   "cls": "stale cross-reference",
+   "verdict": "CONFIRMED",
+   "exactDefect": "§1.1.1's producer table row for `render` ('degradation ladder, at EP-DELIVER'), on which E2 now depends — E2's tier argument is only available at the EP-MINT recompute because S0.7 puts EP-FIT before EP-MINT; §1.1.1 still attributes `render` to EP-DELIVER, i.e. after mint, and §4.5.4 returns the receipt as a value separate from envelope′ with no clause saying when it is attached to the root member. A reader following §1 builds a refSet call whose third argument does not exist yet.",
+   "exactRepair": "Amend §1.1.1's `render` row to 'degradation ladder, at EP-FIT (attached to the envelope before EP-MINT seals)', and add one sentence to §4.5.4 step 8 saying the receipt is written to envelope.render before body_hash is computed.",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  },
+  {
+   "finding": "R10",
+   "cls": "unenforced assertion + type-mismatch",
+   "verdict": "CONFIRMED",
+   "exactDefect": "EC-18(3)'s `NarrativeTemplate` / `MomentTemplate` declarations — 'MUST resolve in NARRATIVE_TEMPLATES' appears only as a code comment — the EP-REGISTRY-LOAD paragraph asserts moment_template_id and required_cells but never narrative_template_id, so a MomentTemplate naming a non-existent narrative template starts the process. And both catalogues are Record<id, …> holding a single `version`, while §1.6.5's Provenance references a template by (narrative_template_i",
+   "exactRepair": "Extend the EP-REGISTRY-LOAD assertion to narrative_template_id, and key both catalogues by `${id}@${version}` (or make the value a Record<version, …>), so a receipt's (id, version) pair resolves.",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  },
+  {
+   "finding": "R11",
+   "cls": "type mismatch / inert call site",
+   "verdict": "CONFIRMED",
+   "exactDefect": "§0C.17 (FLOOR_EXEMPT, verificationFloor) against §3.7 IntentRecord and §0.16 Gate 5 — E6 re-declared subjectCapability over a structural IntentSubject but left its two callers typed over MintedIntent, which retains ten WidgetIntent members IntentRecord does not declare (intent_ref, intent_token, role, label, utterance_preview, speech_aliases, ordinal, input_schema, authority_hint, enabled). Gate 5's mandated recompute therefore still cannot be written as declared, and EC-20's own j",
+   "exactRepair": "Apply §0C.28-septies's own remedy one level up: declare FLOOR_EXEMPT and verificationFloor over a structural subject — IntentSubject widened with `effect: EffectClass` and `priority: number` — and state that MintedIntent and IntentRecord both satisfy it. Nothing else in either shape needs to change.",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  },
+  {
+   "finding": "R12",
+   "cls": "contradiction / over-broad gate",
+   "verdict": "CONFIRMED",
+   "exactDefect": "§0C.28-quinquies and §0B.18's superseded bullets against §3.5 R3.5.3, §0B.20's FR-6a restatement and §0C.18 — Dispatching Gate 6 on subjectCapability makes it read handoff_capability_ref, which R3.5.3 declares is read only by R3.5.1, R3.4 and the help generator, and subjects a route to an execute-admission test. For the nine C9 extras, c9Capability refuses BUSINESS_INTELLIGENCE on any non-READ mode, so a BI run may not even offer the a22.configuration or b35.confirm handoff. For an AE destination — which ",
+   "exactRepair": "Scope the Gate 6 branches by effect as well as by space: state that for effect==='HANDOFF' the subject resolves only the DESTINATION classification fences (registration, SENSITIVE_DEST, targetFloor('s') and the surface's own ingress), never assertCanExecute, c9Capability's domain/mode admission, or the AE COMMIT allowlist. Then either extend R3.5.3's reader list to that branch or say Gate 6 reads the ref's space alone.",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  },
+  {
+   "finding": "R13",
+   "cls": "stale closed enumeration",
+   "verdict": "CONFIRMED",
+   "exactDefect": "§0.13's code-block header comment — It still reads 'INPUTS: exactly i.effect, i.capability, i.handoff_capability_ref, i.target, and kind. No other value is read', which EC-4 falsified when FLOOR_EXEMPT began reading i.priority — the very member E6 had to add to IntentRecord for Gate 5. A closed input list that omits a live input is the same defect class EC-17 ruled on for K22's enumeration: a second, wrong answer beside the mechanis",
+   "exactRepair": "Amend the comment to name priority as the fifth input, and record it in §0C.13's EC-4 row alongside the §0.13 citation already there.",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  },
+  {
+   "finding": "R14",
+   "cls": "claim larger than its proof",
+   "verdict": "CONFIRMED",
+   "exactDefect": "§0C.18, 'What bounds it is a build veto, not the census' — E12's veto constrains only the CONTROL branch of a four-branch predicate. The NONE branch (capability null) and the HANDOFF branch (any class-'s', non-SENSITIVE_DEST destination) admit unboundedly many members, and REFINE is bounded by an enumeration property (LOCAL count = 1, verified in process), not by a veto. The sentence promises a bound the mechanism does not deliver — the same over-read §0C",
+   "exactRepair": "Restate as: the veto bounds the CONTROL branch; the REFINE branch is bounded by the LOCAL-uniqueness assertion; NONE and HANDOFF are unbounded in cardinality and bounded in authority by the non-actuation argument. Three grounds, said separately.",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  },
+  {
+   "finding": "R15",
+   "cls": "type mismatch left by a sibling repair (E4/E5 angle, noted in passing)",
+   "verdict": "CONFIRMED",
+   "exactDefect": "§0C.22-quinquies prose and §0C.22-nonies, against the same paragraph's declared type — E4 retyped accessible_name_suffix's VALUE to `readonly string[]` and the code comment says 'The empty array is the declared default', but three prose sites still say the default is `''` — 'Every ${kind}:${role} pair a row does not name takes the declared default \\'\\'', 'intent:escape, intent:remedy and intent:more take the empty default', and 'The other sixteen carry the declared default \\'\\' (the",
+   "exactRepair": "Replace the three `''` spellings with `[]`, and restate A-2's reduction as 'an empty pointer list, for which the composition reduces to nameSourceOf(ref, env).label verbatim'.",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  },
+  {
+   "finding": "R16",
+   "cls": "stale quotation",
+   "verdict": "CONFIRMED",
+   "exactDefect": "§0C.28-quater's opening ground — It quotes §1.1.4 as declaring run_id nullable 'because two paths mint envelopes', while E9/EC-18 amends §1.1.4 to three and §0C.28-quater itself then relies on minter 3. The quoted text is superseded by the same section that quotes it. Harmless to the ruling, which names all three paths explicitly, but it is the drifting-prose-count pattern EC-16 rules against.",
+   "exactRepair": "Quote the amended wording, or cite §1.1.4 'as amended by EC-18' the way EC-17 now cites EC-18.",
+   "adjudicatedBy": "main context, against the artefact clauses and (for R9/R12/R13/R15) direct verification"
+  }
+ ]
+}

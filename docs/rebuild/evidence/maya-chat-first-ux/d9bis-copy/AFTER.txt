@@ -1,0 +1,114 @@
+=== AFTER — copy no longer promises a non-existent executable path ===
+
+--- bot.py: marketing consent promise ---
+445:            "_Согласие можно отозвать в любой момент: 8-962-447-67-47, "
+460:            "_Согласие можно отозвать в любой момент: напишите /unsubscribe, позвоните 8-962-447-67-47 или напишите на malehaircut@gmail.com — отзыв оформит администрат
+
+--- bot.py: help list ---
+3402:    "`/unsubscribe` — запросить отписку от акций и промокодов\n"
+3403:    "`/subscribe` — запросить возврат рассылок\n"
+
+--- bot.py: cmd_unsubscribe / cmd_subscribe ---
+async def cmd_unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # D9-bis: отписку выполняет администратор. Отдельной поверхности настройки
+    # согласий в приложении пока нет, поэтому здесь называется работающий канал,
+    # а не несуществующий экран.
+    await update.effective_message.reply_text(
+        "Принял. Чтобы отозвать согласие на маркетинговые сообщения, позвоните "
+        "8-962-447-67-47 или напишите на malehaircut@gmail.com — администратор оформит "
+        "отзыв и подтвердит. Напоминания о ваших записях приходят в любом случае, "
+        "согласие на них не нужно."
+    )
+
+
+async def cmd_subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # D9-bis: см. cmd_unsubscribe — согласие оформляет администратор.
+    await update.effective_message.reply_text(
+        "Принял. Чтобы вернуть маркетинговые сообщения, позвоните 8-962-447-67-47 "
+        "или напишите на malehaircut@gmail.com — администратор оформит согласие и подтвердит."
+    )
+
+
+async def cmd_clear(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+=== WHAT DID NOT CHANGE (consent/security contracts intact) ===
+webhook_server.py:6117 :  "Ваши права: уточнить, удалить данные, отозвать согласие — 8-962-447-67-47, malehaircut@gmail.com."
+privacy_policy.py      : 19:*Ваши права:* вы можете запросить уточнение или удаление данных, 
+anonymizer/redact_pii  : 1 call sites in bot.py — untouched
+consent gate (ПД-гейт) : 31 references — untouched
+
+=== DIFF ===
+diff --git "a/ai \320\260\320\264\320\274\320\270\320\275\320\270\321\201\321\202\321\200\320\260\321\202\320\276\321\200/bot.py" "b/ai \320\260\320\264\320\274\320\270\320\275\320\270\321\201\321\202\321\200\320\260\321\202\320\276\321\200/bot.py"
+index 60a736b2..441b18d4 100644
+--- "a/ai \320\260\320\264\320\274\320\270\320\275\320\270\321\201\321\202\321\200\320\260\321\202\320\276\321\200/bot.py"	
++++ "b/ai \320\260\320\264\320\274\320\270\320\275\320\270\321\201\321\202\321\200\320\260\321\202\320\276\321\200/bot.py"	
+@@ -48,6 +48,7 @@ import reactivation
+ import referral
+ import reviews
+ import sources
++import site_publication_bot
+ import subscriptions
+ import yukassa_api
+ import webhook_server
+@@ -456,7 +457,7 @@ async def _gate_show_consent_screen(update: Update, status: str):
+             "• «Не были давно? Соскучились» — раз в 1-2 месяца\n"
+             "• «У вашего мастера освободилось окно» — точечно\n"
+             "• Сезонные акции и скидки\n\n"
+-            "_Согласие можно отозвать в любой момент командой /unsubscribe._\n"
++            "_Согласие можно отозвать в любой момент: напишите /unsubscribe, позвоните 8-962-447-67-47 или напишите на malehaircut@gmail.com — отзыв оформит администратор._\n"
+             "_На напоминания о ваших записях согласие не нужно — они придут в любом случае._"
+         )
+ 
+@@ -783,14 +784,22 @@ async def cmd_privacy(update: Update, context: ContextTypes.DEFAULT_TYPE):
+ 
+ 
+ async def cmd_unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
++    # D9-bis: отписку выполняет администратор. Отдельной поверхности настройки
++    # согласий в приложении пока нет, поэтому здесь называется работающий канал,
++    # а не несуществующий экран.
+     await update.effective_message.reply_text(
+-        "Согласия настраиваются в приложении после подтверждённой привязки клиента. Откройте настройки согласий: " + APP_URL
++        "Принял. Чтобы отозвать согласие на маркетинговые сообщения, позвоните "
++        "8-962-447-67-47 или напишите на malehaircut@gmail.com — администратор оформит "
++        "отзыв и подтвердит. Напоминания о ваших записях приходят в любом случае, "
++        "согласие на них не нужно."
+     )
+ 
+ 
+ async def cmd_subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
++    # D9-bis: см. cmd_unsubscribe — согласие оформляет администратор.
+     await update.effective_message.reply_text(
+-        "Согласия настраиваются в приложении после подтверждённой привязки клиента. Откройте настройки согласий: " + APP_URL
++        "Принял. Чтобы вернуть маркетинговые сообщения, позвоните 8-962-447-67-47 "
++        "или напишите на malehaircut@gmail.com — администратор оформит согласие и подтвердит."
+     )
+ 
+ 
+@@ -1493,6 +1502,7 @@ async def cmd_freed_test(update: Update, context: ContextTypes.DEFAULT_TYPE):
+ # ─── Админ-меню (inline-панель со всеми командами кнопками) ──────────────
+ 
+ ADMIN_MAIN_KB = InlineKeyboardMarkup([
++    [InlineKeyboardButton("Новый пост на сайте", callback_data="sitepost:new")],
+     [InlineKeyboardButton("📊 Аналитика", callback_data="admin_cat_analytics")],
+     [InlineKeyboardButton("⚡ Запустить рассылку вручную", callback_data="admin_cat_jobs")],
+     [InlineKeyboardButton("📣 Маркетинг и анонсы", callback_data="admin_cat_marketing")],
+@@ -3389,8 +3399,8 @@ CLIENT_COMMANDS_TEXT = (
+     "Команды:\n"
+     "`/clear` — начать диалог заново\n"
+     "`/whats_new` — что нового в боте\n"
+-    "`/unsubscribe` — отписаться от акций и промокодов\n"
+-    "`/subscribe` — вернуть рассылки\n"
++    "`/unsubscribe` — запросить отписку от акций и промокодов\n"
++    "`/subscribe` — запросить возврат рассылок\n"
+     "`/privacy` — политика конфиденциальности\n\n"
+     "А ещё можно просто написать или сказать голосом, что нужно — я пойму 💬"
+ )
+@@ -7236,6 +7246,8 @@ def main():
+         logger.info("Подключение к Telegram через прокси")
+     app = builder.build()
+ 
++    site_publication_bot.register_handlers(app)
++
+     # ── Глобальный гейт согласий ─────────────────────────────────────────
+     # Срабатывает РАНЬШЕ всех остальных хендлеров (group=-1). Если у клиента
+     # не подписано согласие на ПД или не сделан выбор по маркетингу — гейт

@@ -1,0 +1,30 @@
+=== BEFORE — exact copy promising a non-existent executable path ===
+
+--- ai администратор/bot.py:460 (marketing consent promise) ---
+            "_Согласие можно отозвать в любой момент командой /unsubscribe._\n"
+
+--- ai администратор/bot.py:3394 (help list) ---
+    "`/unsubscribe` — отписаться от акций и промокодов\n"
+
+--- ai администратор/bot.py:786-795 (cmd_unsubscribe / cmd_subscribe) ---
+async def cmd_unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.effective_message.reply_text(
+        "Согласия настраиваются в приложении после подтверждённой привязки клиента. Откройте настройки согласий: " + APP_URL
+    )
+
+
+async def cmd_subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.effective_message.reply_text(
+        "Согласия настраиваются в приложении после подтверждённой привязки клиента. Откройте настройки согласий: " + APP_URL
+    )
+
+=== WHY THESE ARE FALSE PROMISES ===
+cmd_unsubscribe performs NO revocation: it replies with a pointer to APP_URL.
+The app has no consent-settings surface — grep 'настройки согласий' in app.html: 0 hits.
+So /unsubscribe promises an act that terminates nowhere. This is GAP-CONSENT-MKT-CHANGE.
+
+=== COPY THAT IS HONEST AND MUST NOT BE WEAKENED ===
+--- webhook_server.py:6117 (152-FZ rights, names a working human channel) ---
+    "Ваши права: уточнить, удалить данные, отозвать согласие — 8-962-447-67-47, malehaircut@gmail.com."
+--- privacy_policy.py (same, 'напишите или позвоните') ---
+19:*Ваши права:* вы можете запросить уточнение или удаление данных, отозвать любое согласие — напишите или поз�
