@@ -324,9 +324,13 @@ type ControlKey = 'control.run.cancel' | 'control.widget.dismiss' | 'control.del
 
 `WidgetIntent.capability`, `WidgetIntent.handoff_capability_ref`, `IntentTarget` of class `c`,
 `IntentRecord.capability`, **`IntentRecord.handoff_capability_ref`**, every row key of
-`WIDGET_CAPABILITY_POLICY`, and every argument of `subjectCapability`, `subjectFloor`,
-`requiredConfirmationKind`, `SENSITIVE_DEST`, `RUN_OPENING` and `verificationFloor` are typed
-`CapabilityRef`, never `string`. *Mechanism:* the discriminated union above plus
+`WIDGET_CAPABILITY_POLICY`, and every **capability-valued** argument of `subjectCapability`,
+`subjectFloor`, `requiredConfirmationKind`, `SENSITIVE_DEST`, `RUN_OPENING` and
+`verificationFloor` are typed `CapabilityRef`, never `string`. The qualifier is load-bearing:
+`subjectCapability` and `verificationFloor` take a **structural subject** (`IntentSubject`,
+`FloorSubject`) rather than a ref, and the rule binds the capability members *inside* that
+subject — `capability`, `handoff_capability_ref` and a class-`c` `target.ref` — not the subject
+itself. *Mechanism:* the discriminated union above plus
 `validateEnvelope`'s per-effect membership check against `C9_CAPABILITIES`,
 `ActionCapabilityRegistry` and `CONTROL_REGISTRY` respectively; a source test asserting that
 **no member or argument named above** is typed `string`. The test is stated over that list and
@@ -1483,7 +1487,7 @@ running fence.
 | **FR-4** | **CHANNEL IDENTITY ≠ BUSINESS AUTHORITY** | all four | `verificationFloor()` recomputed from the live tables and the record and compared against the server-derived `verification_level`, capped by `profile.max_verification_level`; every actuating class floors at ≥ `BOUND_CLIENT` and every `COMMIT` at ≥ `SESSION_VERIFIED` | `EP-INGRESS` Gate 5 | `[ABSENT]` — holds fail-closed |
 | **FR-5** | **WIDGET EVENT → TYPED INTENT → CURRENT AUTHORITY CHECK → CANONICAL OWNER**, no shortcut | — | One ordered gate pipeline is the single ingress for all five carriers (Step 0), with no branch that skips a gate | `EP-INGRESS` | `[ABSENT]` — holds fail-closed |
 | **FR-6a** | No widget kind confers **consent** | **AE-CAP** | `CONSENT(cap)` ⟹ excluded from `AE_WIDGET_COMMIT_ALLOWLIST`, asserted at start-up; the only widget affordance is a `HANDOFF` of class `s` to `shell.privacy` at `≥ SESSION_VERIFIED`. Backed at the engine by `actorPolicy: 'VERIFIED_CLIENT_CHANNEL'` + `assertConsentChannelBinding` against a live, unrevoked `ClientChannelLink`, and by `allowedSourceTypes: ['legacy_bridge']` for the invalidation capability | `EP-REGISTRY-LOAD` (exclusion), `EP-MINT` (refusal), `EP-CANONICAL` (engine fence) | exclusion `[ABSENT]`; engine fence `[EXISTS]` — holds |
-| **FR-6b** | No widget kind confers **booking authority** | **AE-CAP** | `BOOKING(cap) := targetKind === 'appointment'`; an allowlist row must be `BOOKING_CONFIRMATION` and the `ae` side of exactly one pairing row; plus F74's `confirmation_of_ref` + `produced_by_intent_token_hash` guard | `EP-REGISTRY-LOAD`, `EP-MINT`, `EP-INGRESS` Gate 7 | `[ABSENT]` — holds fail-closed |
+| **FR-6b** | No widget kind confers **booking authority** | **AE-CAP** | `BOOKING(cap)` (§0.7 F32); an allowlist row must be `BOOKING_CONFIRMATION` and the `ae` side of exactly one pairing row; plus F74's `confirmation_of_ref` + `produced_by_intent_token_hash` guard | `EP-REGISTRY-LOAD`, `EP-MINT`, `EP-INGRESS` Gate 7 | `[ABSENT]` — holds fail-closed |
 | **FR-6c** | No widget kind confers **marketing permission** | **AE-CAP** | `communication.bulk-campaign.admit.v2` is the **only** `MARKETING_FANOUT` capability on the allowlist, asserted by cardinality at start-up; its own `approvalRequirement: 'REQUIRED'` + `approverPolicyKey: 'tenant-owner'` + `allowedActorRoles: [TENANT_OWNER, BUSINESS_OWNER]` + `actorPolicy: 'REQUIRED'` are the fence. The other three are `GAP-BULK-SEND-DIRECT` | `EP-CANONICAL` (the fence); `EP-REGISTRY-LOAD` (the cardinality assertion) | AE fence `[EXISTS]` and running; cardinality assertion `[ABSENT]` — holds |
 | **FR-6d** | No widget kind confers **finance permission** | **AE-CAP** | `MONEY(cap)` (facet ∪ targetKind — **92 of 226**, against 12 for the `'financial'` token) is a build-time **veto**; the fence is that **no money-mutating capability is on the allowlist at all**, all 92 being gap-keyed, and `PAYMENT_HANDOFF` is gap-blocked with a null `commit_intent` and no button | `EP-REGISTRY-LOAD`, `EP-MINT`, `EP-INGRESS` Gate 7 | `[ABSENT]` — **holds today by absence: no money-mutating capability has a button** |
 | **FR-6e** | No widget kind confers **tenant authority** | tenant id, plus AE-CAP for the tenant object | `TenantContextService.assertTenantId` over the record's tenant and the live principal's; reinforced by `evaluateTenantAccessState` at the resolver and by `assertNoCallerAuthority`. Separately, `TENANT_AUTHORITY(cap) ⟹ fail` is a start-up veto, so no tenant-object capability is ever allowlisted (`GAP-TENANT-ADMIN`), and `IDENTITY(cap)` likewise (`GAP-IDENTITY-SESSION`) | `EP-INGRESS` Gate 4; `EP-REGISTRY-LOAD`; `EP-CANONICAL` | cross-tenant half `[EXISTS]`; the veto `[ABSENT]` — holds |
@@ -1558,7 +1562,7 @@ Gate 6's key-space dispatch, **P-27** the `controlledFixtureMode === false` buil
 **P-28** the widget `ActionSourceType` discipline, **P-29** `MECHANISM_GAP_LEDGER` itself,
 **P-30** the gateway's record fields and the spoken-readback path, **P-31**
 `A11yBlock.accessible_names`, **P-32** the moment, notification-consent and template
-catalogues. Every one is `[ABSENT]` today, and the widget layer does not exist in any form.
+catalogues. **None is `[EXISTS]` today**, and the widget layer does not exist in any form; each row's status is §A1's, and P-19 is `[UNENFORCEABLE-TODAY]` rather than `[ABSENT]` because a renderer import-graph allowlist is buildable in principle and has no substrate to run in.
 
 **F94 — the correct reading of this contract today.** The rules are implementable and their
 mechanisms are named; **the mechanisms are not running.** Every rule marked
@@ -1790,14 +1794,14 @@ interface WidgetEnvelope {
 
   correlation: Correlation;             // §1.1.4
   source: WidgetSource;                 // §1.1.5
-  origin: Origin;                       // declared in §0.3
-  authority: AuthorityEnvelope;         // declared in §0.3; carries `verification_level` (§1.7)
+  origin: Origin;                       // declared in §0.5 F17
+  authority: AuthorityEnvelope;         // declared in §0.5 F17; carries `verification_level` (§1.7)
   body: WidgetBody;                     // declared in §2 — read model, no writable field
   intents: WidgetIntent[];              // declared in §3; 0..12 (E7)
   provenance: Provenance;               // §1.6
   limitations: Limitation[];            // §1.6.7, 0..20, REQUIRED (may be empty)
   lifecycle: Lifecycle;                 // declared in §4
-  presentation: Presentation;           // declared in §0.3; carries `text_equivalent`
+  presentation: Presentation;           // declared in §0.5 F17; carries `text_equivalent`
   render: RenderReceipt;                // declared in §4
   integrity: Integrity;                 // §1.9
 }
@@ -1925,7 +1929,7 @@ No fourth class exists. A rendered leaf that is neither a `Cell`/`Measure` nor a
 
 A **leaf** is the whole `Cell` / `Measure` / `Phrase` / `Narrative` value, or a structural scalar. The minted string members *inside* a leaf — `Cell.label`, `Measure.basis`, `Measure.formatted`, `Phrase.rendered`, `Narrative.rendered` — are not separate leaves; they are governed by §1.9 H3. V1 governs `body` only; minted strings outside `body` are governed by §1.9 H3 and by §3.1.
 
-*Mechanism:* `buildCellIndex(kind, body_version, body)` — a pure server function that walks the body against the kind's registered **leaf schema**, in which every leaf is declared `datum`, `phrase` or `structural`. The walk yields a `CellIndex`; the validator refuses emission when (a) any leaf reached by the walk is absent from the schema, (b) any leaf declared `datum` is not a well-formed `Cell`/`Measure`, (c) any leaf declared `phrase` carries a `phrase_key` or a `narrative_template_id@version` absent from its catalogue, or (d) any leaf declared `structural` appears in the text equivalent produced by §7's `renderTextEquivalent`. *Evaluation points:* `EP-MINT`; and `EP-BUILD`, where a schema-totality test asserts that every leaf of every registered body schema carries a class.
+*Mechanism:* `buildCellIndex(kind, body_version, body)` — a pure server function that walks the body against the kind's registered **leaf schema**, in which every leaf is declared `datum`, `phrase` or `structural`. The walk yields a `CellIndex`; the validator refuses emission when (a) any leaf reached by the walk is absent from the schema, (b) any leaf declared `datum` is not a well-formed `Cell`/`Measure`, (c) any leaf declared `phrase` carries a `phrase_key` or a `narrative_template_id@version` absent from its catalogue, or (d) any leaf declared `structural` appears in the text equivalent produced by §1.9 H2's `renderTextEquivalent`. *Evaluation points:* `EP-MINT`; and `EP-BUILD`, where a schema-totality test asserts that every leaf of every registered body schema carries a class.
 
 ```ts
 interface CellIndex {                    // artefact of buildCellIndex; recorded in the emission fixture
@@ -2193,7 +2197,19 @@ declare const LIMITATION_REASON_TABLE: Readonly<Record<string, LimitationReason>
 
 Its default severity is `limitation`. *Mechanism:* table lookup at `EP-MINT`; `EP-BUILD` totality test (below).
 
-**P10 — every canonical denial code has a rendering, and none of them is an error.** `C9_DENIAL_PROJECTION` maps each `c9Deny(...)` code to `{ cell_state, reason_code, limitation_severity }`. Most such denials are **policy fences, not faults** — `paid_capability_not_activated`, `capability_not_registered`, `review_stale`, `run_expired_or_terminal`, `use_secure_surface`, `no_delegated_domain_required` — and each MUST project to a Cell state and a `Limitation`, never to an error surface. *Mechanisms:* (a) an `EP-BUILD` ratchet that enumerates the `c9Deny('…')` literals under `maya-saas-backend/src/orchestration/` — **118 distinct codes**, verified — and fails the build if any code has no row; (b) at runtime, an unmapped code projects to `state: 'UNAVAILABLE'`, `reason_code: 'PROVIDER_SILENT'` and a `limitation`-severity `Limitation`, so a new upstream code degrades to an honest unknown rather than to a red box. *Evaluation points:* `EP-COMPOSE` (projection happens before anything reaches a renderer), `EP-BUILD` (totality).
+**P10 — every canonical denial code has a rendering, and none of them is an error.** The
+projection is declared here and nowhere else:
+
+```ts
+interface DenialProjection {
+  cell_state: CellState;                          // never a failure state
+  reason_code: string;                            // a LIMITATION_REASON_TABLE key
+  limitation_severity: LimitationReason['severity'];   // 'limitation' | 'caveat' — never 'error'
+}
+declare const C9_DENIAL_PROJECTION: Readonly<Record<string, DenialProjection>>;
+```
+
+`C9_DENIAL_PROJECTION` maps each `c9Deny(...)` code to `{ cell_state, reason_code, limitation_severity }`. Most such denials are **policy fences, not faults** — `paid_capability_not_activated`, `capability_not_registered`, `review_stale`, `run_expired_or_terminal`, `use_secure_surface`, `no_delegated_domain_required` — and each MUST project to a Cell state and a `Limitation`, never to an error surface. *Mechanisms:* (a) an `EP-BUILD` ratchet that enumerates the `c9Deny('…')` literals under `maya-saas-backend/src/orchestration/` — **118 distinct codes**, verified — and fails the build if any code has no row; (b) at runtime, an unmapped code projects to `state: 'UNAVAILABLE'`, `reason_code: 'PROVIDER_SILENT'` and a `limitation`-severity `Limitation`, so a new upstream code degrades to an honest unknown rather than to a red box. *Evaluation points:* `EP-COMPOSE` (projection happens before anything reaches a renderer), `EP-BUILD` (totality).
 
 **P1 — no second backend contract per widget.** Every `body` field MUST be a subset of the response projection of `provenance.source_capability`. A widget kind may not introduce a field its source capability cannot produce. *Mechanism:* a projector contract test per kind, run against recorded capability responses. *Evaluation point:* `EP-BUILD`.
 
@@ -2505,7 +2521,7 @@ type TextSentence =
   | 'unknowns' | 'masking' | 'gap' | 'expiry' | 'readback' | 'options' | 'handoff';
 ```
 
-**K9 — sentence order is a contract, not a style.** `renderTextEquivalent(kind, body, intents, locale)` emits exactly `sentence_order` and nothing else; a sentence whose source is absent is omitted, never reordered. *Mechanism:* the renderer is a table-driven pure server function keyed on `text_shape.sentence_order`; a CI test asserts, for every recorded emission fixture, that the emitted sentence sequence equals the kind's declared order. *Evaluated at:* MINT/VALIDATE (the minted text is covered by `body_hash`) and in CI. Consequence: "consent-aware audience maths are shown *before* the irreversible tap" becomes the checkable clause `indexOf('audience') < indexOf('options')` in the `APPROVAL` row, rather than a review comment.
+**K9 — sentence order is a contract, not a style.** `renderTextEquivalent` is declared in §1.9 H2, at arity five — `(kind, body, cell_index, intents, locale)` — and is not restated here; the cell index is load-bearing, because §1.2 V1 clause (d) needs it to detect a structural leaf reaching the text. What §2 owns is that it emits exactly `sentence_order` and nothing else; a sentence whose source is absent is omitted, never reordered. *Mechanism:* the renderer is a table-driven pure server function keyed on `text_shape.sentence_order`; a CI test asserts, for every recorded emission fixture, that the emitted sentence sequence equals the kind's declared order. *Evaluated at:* MINT/VALIDATE (the minted text is covered by `body_hash`) and in CI. Consequence: "consent-aware audience maths are shown *before* the irreversible tap" becomes the checkable clause `indexOf('audience') < indexOf('options')` in the `APPROVAL` row, rather than a review comment.
 
 **K10 — `parity` states what the text equivalent actually reproduces.** `'full'` means the portability test asserts every fact a rich renderer shows. `'recipe_only'` and `'file_facts_only'` are narrower assertions declared per kind (§2.6.21, §2.6.22); for those kinds the portability test asserts the narrower parity and nothing more. *Evaluated at:* CI, against the declared value. A kind may not claim `'full'` and then rely on a picture.
 
@@ -2603,7 +2619,7 @@ Approve and reject are two mutually exclusive decisions on **one** approval obje
 
 **K19 — `retention_sec` is derived from the pii class the composed body actually carries.** A kind whose `pii_ceiling` is `'inherited'` resolves at MINT/COMPOSE to the pii class present in the composed body; where nothing resolves, it resolves to `client_identified` — the shortest window, which is the fail-closed direction. `retention_sec` is then read from the contract's single retention classification, under its minimum rule: where more than one window applies, the shortest wins. A tenant may lower a window, never raise it. *Mechanism:* the historisation job reads `KIND_REGISTRY[kind].retention_sec` as resolved for that emission. *Evaluated at:* MINT/COMPOSE (the resolution) and historisation (the drop). Dropping a body never touches an `IntentRecord`, an Action Engine receipt, an appointment, a consent record or a loyalty balance.
 
-**K20 — `emittable` is derived, never authored.** At REGISTRY LOAD, `emittable(kind) = ownerClassKeys(kind) ∩ capabilityRegistry ≠ ∅`. `composeEnvelope` refuses a kind whose `emittable` is false and instead emits a `LIMITATION` carrying the `capability_gap_ref` mapped from that owner class, with no intent (fail closed, say so in text). No renderer may synthesise a control for a capability the registry does not contain, and a gap-blocked control is rendered as prose, never as a disabled-styled button. *Evaluated at:* REGISTRY LOAD, and at MINT/COMPOSE on every emission.
+**K20 — `emittable` is derived, never authored.** At `EP-REGISTRY-LOAD`, `emittable(kind) = ∃ k ∈ ownerClassKeys(kind) : k ∈ REGISTERED_KEYS`, where `REGISTERED_KEYS` is the space-qualified union of the three registries §0.6 F23 declares the lookups for — `{space:'C9'} × C9_CAPABILITIES`, `{space:'AE'} × ActionCapabilityRegistry.list()`, `{space:'CONTROL'} × CONTROL_REGISTRY` — and **never** a bare name: an intersection against an unqualified key set would match a C9 key against an AE spelling, which §0.6 F24 shows is a real collision and not a hypothetical one. `composeEnvelope` refuses a kind whose `emittable` is false and instead emits a `LIMITATION` carrying the `capability_gap_ref` mapped from that owner class, with no intent (fail closed, say so in text). No renderer may synthesise a control for a capability the registry does not contain, and a gap-blocked control is rendered as prose, never as a disabled-styled button. *Evaluated at:* REGISTRY LOAD, and at MINT/COMPOSE on every emission.
 
 **K25 — every per-kind lifecycle constant is compiled, total and unauthored.** `expires_at_ceiling_s` and the matching `on_expiry` behaviour are populated per kind from the contract's single lifecycle ceiling table and from nothing else; they are never members of a composer input. Where more than one clock bounds an emission, the soonest governs. Because `KIND_REGISTRY` is a mapped type over `WidgetKind`, a kind missing from that table fails compilation rather than defaulting. *Evaluated at:* REGISTRY LOAD, MINT/VALIDATE.
 
@@ -2945,7 +2961,7 @@ interface StrategyOptionsBody {
   alternatives: Array<{ option_id: string; title: Cell<string>;
                         reasoning: Narrative;
                         expected_effect: Measure | null;
-                        risk_tier: 'read' | 'low_write' | 'medium_write' | 'high_write' | 'restricted';
+                        risk_tier: Cell<'read' | 'low_write' | 'medium_write' | 'high_write' | 'restricted'>;  // a rendered datum, so a Cell (§1.2 V1)
                         reversible: Cell<boolean>;
                         audience_size: Measure | null;
                         select_intent: IntentRef }>;      // ≤3
@@ -2958,7 +2974,7 @@ interface StrategyOptionsBody {
 **Ceiling** REQUEST_APPROVAL. **Owner** `ORCHESTRATION_RUN` → C9 run revisions and `c9.no_action`. The alternative's decision fields are taken from `AgentResult@1.proposed_action_intents[]` — `risk`, `approval`, `reversibility`, `audience_size`, `rationale`. **Fullscreen** OPTIONAL (`audit`). **`role_hint`** `radiogroup`. **Interactive paths** `alternatives[].option_id`, `no_action_option.select_intent`. **Text** headline = `question`; itemized = ≤3 alternatives with reasoning, expected effect, risk and reversibility, then NO_ACTION — always spoken; order `lead → options → risk_reversibility → audience → policy → unknowns → as_of`; parity `full`.
 
 - **STRATEGY.1** `no_action_option` is required and selectable, and is never dropped by degradation: its `select_intent` carries `priority: 0`, is a `REFINE` on the single C9 row whose resource class is `LOCAL` (`c9.no_action`), and survives every step of the ladder. *Evaluated at:* MINT/VALIDATE and at ladder step 2.
-- **STRATEGY.2** `risk_tier`, `reversible` and `audience_size` are taken from the agent result's proposed intents; the widget layer computes none of them. **`reversible` is a `Cell<boolean>` and the only value the upstream shape can carry is the single-member literal `SOURCE_DEFINED`**, which is not a boolean and not a measurement — so `reversible` is `NOT_MEASURED` with `reason_code: 'NOT_COLLECTED'` whenever the source is that literal, which is every emission today. **No rule anywhere may read `reversible.value` without first requiring `reversible.state === 'KNOWN'`.** *Evaluated at:* MINT/COMPOSE, by field copy and by the `Cell` state rule; and at BUILD, by the source test that forbids an unguarded `.value` read.
+- **STRATEGY.2** `risk_tier`, `reversible` and `audience_size` are taken from the agent result's proposed intents; the widget layer computes none of them. Each is carried as a `Cell`/`Measure` because it is rendered and §1.2 V1 admits no bare user-visible scalar — **the wrapper is presentation, never a recomputation**: the composer copies the upstream value into `Cell.value` and mints only the label. **`reversible` is a `Cell<boolean>` and the only value the upstream shape can carry is the single-member literal `SOURCE_DEFINED`**, which is not a boolean and not a measurement — so `reversible` is `NOT_MEASURED` with `reason_code: 'NOT_COLLECTED'` whenever the source is that literal, which is every emission today. **No rule anywhere may read `reversible.value` without first requiring `reversible.state === 'KNOWN'`.** *Evaluated at:* MINT/COMPOSE, by field copy and by the `Cell` state rule; and at BUILD, by the source test that forbids an unguarded `.value` read.
 - **STRATEGY.3** `review_disclaimer` is rendered verbatim in every channel: a review is not an approval, and the C9 review path can never satisfy a pending approval. *Evaluated at:* MINT/VALIDATE (the phrase key is fixed) and at the EFFECT ROUTING gate.
 - **STRATEGY.4** This kind may not be emitted on a proactive trigger. *Evaluated at:* MINT/VALIDATE.
 - **STRATEGY.5** `expected_effect` is `Measure | null` and **MUST be null** unless a `FactUsed` element of `provenance.facts_used` supplies it. No capability in the `ORCHESTRATION_RUN` owner class produces one today, so today it is null. *Evaluated at:* MINT/VALIDATE.
@@ -2974,7 +2990,7 @@ interface ApprovalBody {
   subject: Cell<string>;
   effect_preview: Array<{ label: Phrase; value: Cell<string> | Measure }>;
   audience_size: Measure | null;           // REQUIRED non-null for any communication-class approval
-  risk_tier: 'read' | 'low_write' | 'medium_write' | 'high_write' | 'restricted';
+  risk_tier: Cell<'read' | 'low_write' | 'medium_write' | 'high_write' | 'restricted'>;  // a rendered datum, so a Cell (§1.2 V1)
   reversible: Cell<boolean>;
   state: Cell<'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED' | 'EXPIRED'>;
   requested_by_label: Cell<string>;
@@ -3393,7 +3409,7 @@ interface WidgetIntent {
   confirmation: ConfirmationRequirement | null;  // non-null iff effect ∈
                                               // {REQUEST_APPROVAL, COMMIT}
   authority_hint: AuthorityHint;              // RENDERING HINT ONLY. Never read by any
-                                              // server decision (§3.14, FR-3).
+                                              // server decision (§0.16 F89, FR-3).
 
   // --- state ---
   enabled: Cell<boolean>;             // a disabled intent still carries a real floor
@@ -3643,7 +3659,7 @@ gateway wiring [TO BUILD].
 version, so this rule is defence in depth over a class nothing may currently emit.
 
 **R3.3.3 — a consent-bearing or identity-binding handoff may use `s` only.** If
-`SENSITIVE_DEST(subjectCapability(i))` (§3.4) then `i.effect === 'HANDOFF'` and
+`SENSITIVE_DEST(subjectCapability(i))` (§0.8 F48) then `i.effect === 'HANDOFF'` and
 `i.target.class === 's'`. *Mechanism:* emission validator. *Evaluated at:* `EP-MINT`.
 *Status:* [TO BUILD]. [NON-NORMATIVE] `s` is the only class with a stated
 `SESSION_VERIFIED` floor and the only class that is a destination rather than a
@@ -3728,11 +3744,13 @@ notification-delivery preference key. Independently, **no AE capability satisfyi
 decision is a `HANDOFF` of class `s` to `shell.privacy` with
 `verification_floor ≥ SESSION_VERIFIED`.
 
-```
-CONSENT(cap)  :=  cap.targetKind  ∈ {'client_consent', 'client_consent_security'}
-              ∨   cap.actionClass ∈ {'record_client_consent',
-                                     'invalidate_client_consent_authority'}
-```
+`CONSENT(cap)` and `IDENTITY(cap)` are declared in §0.7 F32 — in their full form, `targetKind`
+disjoined with `actionClass` — and are **not restated here**. The copy that stood in this section
+carried only the `actionClass` half, which is the way a predicate comes to mean two things.
+Verified by enumeration over the executed registry: both halves resolve to the same three
+capabilities today, so the disjunct adds nothing now and is retained in F32 because a capability
+registered later under one of those action classes with a different `targetKind` would otherwise
+escape the fence.
 
 *Mechanism:* the frozen policy table with a CI test asserting every notification-preference key
 is present at `SESSION_VERIFIED` or higher, plus the start-up allowlist-exclusion assertion.
@@ -3860,7 +3878,7 @@ refused at Gate 5 on any channel that cannot establish a first-party session.
 
 **R3.5.3 — `handoff_capability_ref` is referenced, never invoked.** Gate 13 routes
 `HANDOFF` to a signed target and has no edge to a capability invoker. The field has exactly
-four readers and no fifth: R3.5.1, the floor derivation of §3.4, Gate 6's destination-fence
+four readers and no fifth: R3.5.1, the floor derivation of §0.8 F43, Gate 6's destination-fence
 branch for `effect === 'HANDOFF'` (§3.9 Gate 6), and the help generator. *Mechanism:* effect
 router, closed switch; a reference test asserts the reader set. *Evaluated at:* `EP-INGRESS`
 Gate 13, `EP-BUILD`. *Status:* [TO BUILD].
@@ -3879,6 +3897,11 @@ table and `subjectCapability` against the registry. *Evaluated at:* `EP-MINT`. *
 ```ts
 interface ConfirmationRequirement {          // non-null iff effect ∈ {REQUEST_APPROVAL, COMMIT}
   risk_tier: 'read' | 'low_write' | 'medium_write' | 'high_write' | 'restricted';
+                                             // NOT a Cell: this is an intent-side member, never a
+                                             // body leaf, so §1.2 V1 does not reach it, and
+                                             // §4.4.3 classifies it AUDIT_RETAINED — a Cell's
+                                             // minted label would be conversation content on an
+                                             // authority-side field.
   reversible: Cell<boolean>;                 // SOURCE-DEFINED. Non-KNOWN is normal.
   audience_size: Measure | null;             // REQUIRED for any communication capability
   requires_explicit_confirm_step: true;      // literal, single value (R3.6.3)
@@ -4186,7 +4209,7 @@ if (ref === null)                             // NONE, and w/i/s/detail NAVIGATE
 
 if (record.effect === 'HANDOFF')
   → the subject resolves the DESTINATION fences ONLY: registration in its space,
-    SENSITIVE_DEST (§3.4), targetFloor('s') at Gate 5, and the landing surface's own
+    SENSITIVE_DEST (§0.8 F48), targetFloor('s') at Gate 5, and the landing surface's own
     ingress. It NEVER resolves assertCanExecute, c9Capability's domain/mode admission,
     or the AE commit allowlist.
 
@@ -4275,9 +4298,8 @@ plus the anti-error lint. *Evaluated at:* projection, and `EP-BUILD`. *Status:* 
 **R3.10.1 — the booking family is derived from the canonical registry, never authored and
 never a capability name.**
 
-```
-BOOKING(cap) := cap.targetKind === 'appointment'
-```
+`BOOKING(cap)` is declared in §0.7 F32 and is not restated here. What §3.10 owns is the
+disposition of the thirteen capabilities it selects:
 
 `targetKind` is a mandatory field of `RegisteredActionCapabilityV1`
 (`action-engine.contract.ts:175`). Verified membership, exhaustive — **thirteen capabilities**,
@@ -4713,7 +4735,7 @@ interface Lifecycle {
 *Evaluated at:* gateway, when `next_envelope` is minted.
 
 **L8 — expiry is never an error.** Interacting with an expired envelope returns `outcome: 'EXPIRED'` with either a freshly composed equivalent envelope or a `LIMITATION` body with a remedy. No renderer may bind expiry to an error theme token, an error icon, `role="alert"`, or an automatic retry.
-*Mechanism:* the M1 anti-error lint over `Cell.label` and the renderer theme-token ban; `EXPIRED` is a member of the receipt `outcome` union, not of any error type.
+*Mechanism:* §1.3 C4's anti-error label lint over `Cell.label` and the renderer theme-token ban; `EXPIRED` is a member of the receipt `outcome` union, not of any error type.
 *Evaluated at:* gateway token-integrity gate; renderer conformance suite (five branches per Cell).
 
 **L9 — a stale affordance must be withdrawn where the channel allows it, and refused where it does not.** On transition to `SUPERSEDED`, `EXPIRED`, `CANCELLED` or `HISTORISED`, the delivering adapter issues a best-effort withdrawal: Telegram `editMessageReplyMarkup` with empty markup; web push `getNotifications()` + `close()` by `dedupe_key`; no-op for SMS and email. **Correctness never depends on the withdrawal succeeding** — a tap on a withdrawn-but-still-visible control is refused by token integrity.
@@ -5254,7 +5276,7 @@ interface BundleBridgeRequirements {
 *Evaluated at:* `EP-FIT`; CI property test.
 
 **NT5 — absence is a `Cell`, never a failure.** `Cell<T>{ state: 'UNAVAILABLE', reason_code: 'OUT_OF_SCOPE', label: 'На этом устройстве недоступно — откроется в браузере', next_intent_ref: <web handoff> }`. Never a red banner, never an error icon, never an auto-retry. `'unknown'` from mode 3 resolves to exactly this shape.
-*Mechanism:* the M1 anti-error lint and the renderer's five-branch Cell requirement.
+*Mechanism:* §1.3 C4's anti-error label lint and the renderer's five-branch Cell requirement.
 *Evaluated at:* `EP-RENDER`; renderer conformance suite (gate G7).
 
 **NT6 — the Android TWA declares `shell.kind: 'android_twa'` and zero capabilities.** There is no Capacitor bridge in a TWA, so it cannot report; its profile is build-stamped (`negotiation_mode: 'assumed_absent'`, every key `'absent'`), not negotiated.
@@ -5320,7 +5342,7 @@ An unmatched transcript takes the natural-language path, identical to typed text
 *Evaluated at:* renderer conformance suite.
 
 **V11 — voice-disabled is the default, not a degradation.** Every voice affordance has a typed equivalent that is present, visible and equally prominent whether or not a microphone exists. Voice becomes unavailable when permission is denied, `getUserMedia` or `MediaRecorder` is missing, no supported MIME type negotiates, `audio.capture_pcm16` is absent and the web path also fails, or the user turned it off. In every case the surface renders `Cell{ state: 'UNAVAILABLE', reason_code: 'OUT_OF_SCOPE', label: 'Голос недоступен на этом устройстве — напишите сообщение' }`. Neutral, never red.
-*Mechanism:* the typed path is the primary path in the DOM order (A-3 reading order); the unavailability Cell is the single failure shape, covered by the M1 lint.
+*Mechanism:* the typed path is the primary path in the DOM order (A-3 reading order); the unavailability Cell is the single failure shape, covered by §1.3 C4's anti-error label lint.
 *Evaluated at:* `EP-RENDER`; renderer conformance suite.
 
 **V12 — no duplex voice semantics are specified, because none is evidenced.** What exists is bounded push-to-talk transcription (one file ≤ 1 MB or base64 PCM16/16 kHz, request/response). Authority, budget and barge-in semantics for a streaming duplex session are **not** designed here; when such a path is built it enters through V1's funnel or it does not enter.
@@ -5474,7 +5496,8 @@ type ElementFor<K extends InteractiveRef['k']> =
   : K extends 'field'   ? FormField
   : K extends 'option'  ? OptionItem
                           | (OptionItem & { duration: Measure; price: Measure | null })
-                          | (OptionItem & { nearest_availability: Cell<string> })
+                          | (OptionItem & { nearest_availability: Measure })   // §2.6.3 declares it Measure; a
+       //   Cell<string> is not assignable to it, since Measure.value is number | string | null
                           | StrategyOptionsBody['alternatives'][number]
                           // ^ REQUIRED: STRATEGY_OPTIONS' declared path
                           // `alternatives[].option_id` makes {k:'option'} denote this shape,
@@ -5807,7 +5830,7 @@ Columns: **Component** — the named artefact. **Depends on it** — the contrac
 | **P-01** | **`IntentGateway`** — Step 0 plus Gates 1–13, one ordered pipeline, and the programme's only two new routes `POST /api/widgets/resolve`, `POST /api/widgets/intent` | FR-1, FR-2, FR-3, FR-4, FR-5, FR-7, FR-9, FR-13; §3.9 R3.9.1; every `EP-INGRESS` rule in the contract | `[ABSENT]` — `api/widgets` 0 hits; `IntentGateway` 0 hits | **K3** (wave 2) |
 | **P-02** | **`IntentRecord`** — the stored record and its type, including `principal_proof_hash`, `capability`, `effect`, `verification_floor`, `widget_kind`, `frozen_nouns` | Gate 1 single-use consumption, Gate 3 principal binding, Gate 7's COMMIT check, §3.7, §4.2's frozen receipt, §0.4 F15's noun-resolver input set, idempotency of a tap, "who pressed what" audit | `[ABSENT]` — 0 hits | **K3** (wave 2) |
 | **P-03** | **Timeline store** — conversation turns, envelopes, bodies, minted text, `spoken_transcript`, rendered utterances | §4.2's week-later receipt; §4.4.2 retention and per-kind body drop; §4.4.1 RT3(b)'s history-blind replay; §4.7 V5's "stored exactly once"; `EP-FETCH` timeline read | `[ABSENT]` — 0 hits | **K3** (wave 2) |
-| **P-04** | **Receipt store** — append-only, written only by the Action Engine and the approval owner, no FK into the timeline store | §4.3 DR3 (`TerminalLine.outcome === 'CONFIRMED' ⟺ action_receipt_ref !== null`); §4.4.1 RT1; §4.4.3's tombstone log; FR-12 | `[ABSENT]` — 0 hits. `C9WorkReceipt` is a different artefact | **K3** creates it; **K7/K9/K11/K12** write it; **K12** proves the split by erasure replay |
+| **P-04** | **Receipt store** — append-only, written only by the Action Engine and the approval owner, no FK into the timeline store | §4.2 FR2 (`TerminalLine.outcome === 'CONFIRMED' ⟺ action_receipt_ref !== null`), invoked by §4.3 DR2; §4.4.1 RT1; §4.4.3's tombstone log; FR-12 | `[ABSENT]` — 0 hits. `C9WorkReceipt` is a different artefact | **K3** creates it; **K7/K9/K11/K12** write it; **K12** proves the split by erasure replay |
 | **P-05** | **Emission / receipt store** — `maya.render.receipt/1` (`RenderReceipt`), `DeliveryRecord`, `Lifecycle.delivery` per emission | §4.1's lifecycle; §4.3's delivery bookkeeping; §4.5.4 step 8's degraded-envelope receipt; §4.2's historisation job keyed by `intent_token_hash`; `control.widget.dismiss`'s write target | `[ABSENT]` — `RenderReceipt` 0, `ChannelProfile` 0 | **K3** (store) + **K6** (per-carrier receipt, wave 2) |
 | **P-06** | **Free-input ledger** — every open-domain emission with its `justification`, tenant and capability, written in the mint transaction | §2 K14; §3.6 R3.6.6 — the two counters are one counter, keyed on field kind; INV-23; §2.6.17 FORM.7 | `[ABSENT]` — `free_input_justification` 0 hits | **K3** (wave 2) |
 | **P-07** | **Capability-gap ledger** — the 8 gap keys as first-class entries with `owner: NONE`, plus the gaps §0.7 F37 and §4.3 DR4 add | §1.6.7 P2; §1.3 C5; §2 K20; §2.6.14 LIMIT.1; §2.6.18 CONSENT.5; §2.6.20 PAY.4; §2.6.22 ARTIFACT.4; **§A2's entire mechanism** | `[ABSENT]` — `capability_gap_ref` 0 hits | **K1** (wave 1 — the only wave executable under this cycle's fence) |
@@ -5915,7 +5938,7 @@ Every one is `[ABSENT]`: the widget layer does not exist in any form (§A0.5).
 |---|---|---|
 | **§2 K20** — `emittable(kind) = ownerClassKeys(kind) ∩ capabilityRegistry ≠ ∅` | `composeEnvelope` **refuses** a kind whose `emittable` is false and emits a `LIMITATION` carrying the `capability_gap_ref` mapped from that owner class, with no intent. `emittable` is **derived, never authored** | `EP-REGISTRY-LOAD`, then `EP-COMPOSE` on every emission |
 | **§1.6.7 P2** — the /unsubscribe clause | If a remedy has no canonical owner, the envelope MUST carry a `Limitation` with a non-null `capability_gap_ref` and MUST NOT carry an intent that promises the remedy | `EP-MINT` |
-| **§1.3 C5** — `M2` | A `Cell` in state `NOT_MEASURED`/`UNAVAILABLE` either names a real intent present in this envelope or forces `next_intent_ref: null` **and** a non-null `capability_gap_ref`. This forces the gap onto the record from the *Cell* side, so it cannot be omitted by an emitter that simply declines to mint an intent | `EP-MINT` |
+| **§1.3 C5** — the remedy-or-gap rule | A `Cell` in state `NOT_MEASURED`/`UNAVAILABLE` either names a real intent present in this envelope or forces `next_intent_ref: null` **and** a non-null `capability_gap_ref`. This forces the gap onto the record from the *Cell* side, so it cannot be omitted by an emitter that simply declines to mint an intent | `EP-MINT` |
 | **§2.6.14 LIMIT.1** — no button for a capability with no owner | When `capability_gap_ref` is non-null, `remedy_intents` must be empty and the text must carry the gap sentence | `EP-MINT` |
 
 **A2.4 — the evaluation point.** NORMATIVE-PENDING is evaluated at **`EP-REGISTRY-LOAD`, and again at `EP-COMPOSE` on every emission.** At `EP-REGISTRY-LOAD` the capability-gap ledger (P-07) is read and every `[ABSENT]` mechanism named in §A1 is bound to its gap key; a §A1 row with no gap key fails the start-up assertion and the process does not start. At `EP-COMPOSE` K20's derivation runs per emission. `EP-MINT` is the backstop: P2, C5 and LIMIT.1 refuse an envelope that reached the minter with an actuating intent and a non-null gap ref. **Three points, all fail-closed, none of them the renderer.**
