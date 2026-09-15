@@ -1,0 +1,305 @@
+{
+ "contract": "maya.k1.capability-gap-ledger/1",
+ "rows": [
+  {
+   "gapKey": "GAP-APPOINTMENT-DETAIL-COMMIT",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-ATTENDANCE",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-ATTENDANCE-CONFIRM",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-BULK-SEND-DIRECT",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-CASH-DECLARATION",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-COMMERCE-CREDENTIALS",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-COMMERCE-GIFT",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-CONSENT-MKT-GRANT",
+   "act": "grant marketing consent",
+   "ownerState": "registered_elsewhere",
+   "evidence": "the same call, kind marketing",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": true
+  },
+  {
+   "gapKey": "GAP-CONSENT-MKT-REVOKE",
+   "act": "revoke marketing consent",
+   "ownerState": "registered_elsewhere",
+   "evidence": "the same call, kind marketing, granted false",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": true
+  },
+  {
+   "gapKey": "GAP-CONSENT-PD-GRANT",
+   "act": "record a 152-FZ base consent",
+   "ownerState": "registered_elsewhere",
+   "evidence": "package5.wave3.record-client-consent.execute.v1, kind privacy, granted true",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": true
+  },
+  {
+   "gapKey": "GAP-CONSENT-PD-WITHDRAW",
+   "act": "withdraw a 152-FZ base consent",
+   "ownerState": "registered_elsewhere",
+   "evidence": "the same call, granted false - granted:false IS the revocation",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": true
+  },
+  {
+   "gapKey": "GAP-CONSENT-READ",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-CONSENT-REGISTER-EXPORT",
+   "act": "export the consent register",
+   "ownerState": "none",
+   "evidence": "zero occurrences of any consent-register export under src",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": true
+  },
+  {
+   "gapKey": "GAP-EXPENSE-COMMIT",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-EXPENSE-DELETE",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-HISTORY-ERASE",
+   "act": "erase conversation history as a data-subject right",
+   "ownerState": "none",
+   "evidence": "the only erasure in the tree is a maintenance-run payload erasure, not a data-subject right",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": true
+  },
+  {
+   "gapKey": "GAP-IDENTITY-CLIENT-UNBIND",
+   "act": "unbind a client channel",
+   "ownerState": "unreachable",
+   "evidence": "ClientChannelLinkService.revoke() has zero callers; its only transactional caller declares allowedSourceTypes legacy_bridge only",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": true
+  },
+  {
+   "gapKey": "GAP-IDENTITY-READ",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-IDENTITY-SESSION",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-IDENTITY-STAFF-UNBIND",
+   "act": "unbind a staff Telegram identity",
+   "ownerState": "none",
+   "evidence": "binding exists at auth/social-auth.service.ts completeTelegramLink; no unbind of any kind exists",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": true
+  },
+  {
+   "gapKey": "GAP-LOYALTY-REDEEM",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-MEDIA-GENERATION",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-REFERRAL-REWARD",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-SEPARATION-OF-DUTIES",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-SUBSCRIPTION",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-TENANT-ADMIN",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-TENANT-BILLING",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-TENANT-CONFIG-COMMIT",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-TIPS",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  },
+  {
+   "gapKey": "GAP-VALUE-CONFIG",
+   "act": "named by the contract; the act is stated at its declaring clause",
+   "ownerState": "none",
+   "evidence": "declared in the certified contract (see F36/F37 and the kind bodies)",
+   "openedAt": "K1",
+   "closedAt": null,
+   "closingCommit": null,
+   "isOneOfTheEight": false
+  }
+ ]
+}

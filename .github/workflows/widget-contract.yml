@@ -1,0 +1,58 @@
+name: Widget Contract
+
+# Wave 1 (K1 + K2) changes no runtime and no deployed byte. Its CI job therefore arrives
+# NON-BLOCKING: `continue-on-error` on every step that could fail, so a contract finding is
+# reported and does not stop a release that the contract does not yet govern. It becomes
+# blocking in wave 2, when the gateway it describes starts running.
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: widget-contract-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  widget-contract:
+    name: Widget Contract (non-blocking)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: maya-saas-backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: maya-saas-backend/package-lock.json
+      - run: npm ci
+      - name: The certified contract compiles
+        run: npx tsc --noEmit --project tsconfig.widget-contract.json
+        continue-on-error: true
+      - name: Widget Contract checkers
+        run: node scripts/widget-contract-check.mjs
+        continue-on-error: true
+      - name: Wave 1 fence - the contract module is excluded from the build
+        run: |
+          grep -q '"src/widget-contract"' tsconfig.build.json
+          echo "src/widget-contract is excluded from tsconfig.build.json: deployed bytes unchanged"
+        continue-on-error: true
+
+  k1-dossier:
+    name: K1 surface dossier (non-blocking)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: The dossier covers every surface, and the ledgers are complete
+        run: node docs/rebuild/evidence/maya-chat-first-ux/k1/k1-dossier-check.mjs
+        continue-on-error: true

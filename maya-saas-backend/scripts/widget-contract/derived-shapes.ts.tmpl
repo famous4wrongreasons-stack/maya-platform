@@ -1,0 +1,66 @@
+// K2 - five shapes the certified contract NAMES and declares nowhere.
+//
+// Found by compiling it, which is what K2 is for. None is a contradiction and none adds a
+// semantic: each is fixed by the contract's own text, and is written down here so that a rule
+// citing one is a rule against a typed thing rather than against a free name. Each carries the
+// clause that fixes it and the package that must build it. Recorded as a K2 finding in the
+// wave-1 checkpoint; it is NOT a contract regression, because nothing here decides anything the
+// contract left open.
+import type { ChoiceBody, ServiceSelectorBody, StaffSelectorBody, TimeSlotSelectorBody,
+  BookingConfirmationBody, ScheduleBody, ClientListBody, MetricBody, ChartBody, ReportBody,
+  StrategyOptionsBody, ApprovalBody, ProgressBody, LimitationBody, SourceStatusBody,
+  SettingsDraftBody, FormBody, ConsentStateBody, IdentityBindingBody, PaymentHandoffBody,
+  MediaPreviewBody, ArtifactBody } from './kinds';
+
+/**
+ * `WidgetBody` - the union of the twenty-two kind bodies.
+ * Fixed by: section 2.1's closed enum plus section 2.6's twenty-two bodies. `refSet` and
+ * `resolveInteractive` both take it, and an envelope's `body` is one of exactly these.
+ * Built by: K2, here. Total over the enum by construction - a kind added to the union without a
+ * body here fails compilation, which is section 2.2 K1's own discipline.
+ */
+export type WidgetBody =
+  | ChoiceBody | ServiceSelectorBody | StaffSelectorBody | TimeSlotSelectorBody
+  | BookingConfirmationBody | ScheduleBody | ClientListBody | MetricBody | ChartBody
+  | ReportBody | StrategyOptionsBody | ApprovalBody | ProgressBody | LimitationBody
+  | SourceStatusBody | SettingsDraftBody | FormBody | ConsentStateBody
+  | IdentityBindingBody | PaymentHandoffBody | MediaPreviewBody | ArtifactBody;
+
+/**
+ * `CorrelationRefs` - the opaque handles a composer input may carry beside a correlation.
+ * Fixed by: section 1.1.4's `Correlation`, whose members are ids and a trace id, and section
+ * 1.1.2's rule that a composer input carries no capability, endpoint or role.
+ * Built by: K3 - the gateway mints them.
+ */
+export type CorrelationRefs = Readonly<Record<string, string>>;
+
+/**
+ * `IntentProposal` - what a projector may PROPOSE before the minter types it.
+ * Fixed by: section 1.1.2's `WidgetComposerInput` (mint class E, "structurally incapable of
+ * conferring authority") and section 3.1's rule that the whole `WidgetIntent` is composed
+ * server-side. A proposal therefore carries a role and a label and nothing that decides
+ * authority: no capability, no effect, no floor, no token.
+ * Built by: K3.
+ */
+export interface IntentProposal {
+  readonly role: string;
+  readonly label: string;
+  readonly slot_bindings?: Readonly<Record<string, string>>;
+}
+
+/**
+ * `BridgeKey` - the closed set of native bridge capabilities a bundle may declare.
+ * Fixed by: section 4.6's rule that native adds delivery, re-authentication and file save, and
+ * adds NO intent, effect class, widget kind or route. A bridge that could originate an effect
+ * would be a second authority path, which FR-1 forbids.
+ * Built by: K6 (the manifest) and K5 (the bundle).
+ */
+export type BridgeKey = 'push_delivery' | 'biometric_reauth' | 'file_save';
+
+/**
+ * `BridgeSession` - the native side's opaque session handle for one bridge call.
+ * Fixed by: section 4.6 and the forbidden-key list - it may carry no capability, endpoint,
+ * provider, tenant or role, so an opaque server-minted string is the whole of it.
+ * Built by: K6.
+ */
+export type BridgeSession = string;

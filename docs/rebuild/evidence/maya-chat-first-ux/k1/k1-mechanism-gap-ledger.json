@@ -1,0 +1,261 @@
+{
+ "contract": "maya.k1.mechanism-gap-ledger/1",
+ "rows": [
+  {
+   "gapKey": "MG-P-01",
+   "pRef": "P-01",
+   "component": "IntentGateway",
+   "status": "[ABSENT]",
+   "packageKey": "K3",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-02",
+   "pRef": "P-02",
+   "component": "IntentRecord",
+   "status": "[ABSENT]",
+   "packageKey": "K3",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-03",
+   "pRef": "P-03",
+   "component": "Timeline store",
+   "status": "[ABSENT]",
+   "packageKey": "K3",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-04",
+   "pRef": "P-04",
+   "component": "Receipt store",
+   "status": "[ABSENT]",
+   "packageKey": "K3+K12",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-05",
+   "pRef": "P-05",
+   "component": "Emission / receipt store",
+   "status": "[ABSENT]",
+   "packageKey": "K3+K6",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-06",
+   "pRef": "P-06",
+   "component": "Free-input ledger",
+   "status": "[ABSENT]",
+   "packageKey": "K3",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-07",
+   "pRef": "P-07",
+   "component": "Capability-gap ledger",
+   "status": "[ABSENT]",
+   "packageKey": "K1",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-08",
+   "pRef": "P-08",
+   "component": "Server-owned draft store",
+   "status": "[ABSENT]",
+   "packageKey": "K3+K7",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-09",
+   "pRef": "P-09",
+   "component": "Consent-register read projection",
+   "status": "[PARTIAL]",
+   "packageKey": "K12",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-10",
+   "pRef": "P-10",
+   "component": "WIDGET_CAPABILITY_POLICY",
+   "status": "[ABSENT]",
+   "packageKey": "K2+K1",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-11",
+   "pRef": "P-11",
+   "component": "VerificationLevel ladder and verificationFloor()",
+   "status": "[ABSENT]",
+   "packageKey": "K2+K4",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-12",
+   "pRef": "P-12",
+   "component": "STEP_UP_VERIFIED reachability",
+   "status": "[ABSENT]",
+   "packageKey": "NONE - outside the sixteen",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-13",
+   "pRef": "P-13",
+   "component": "CHART read facade",
+   "status": "[ABSENT]",
+   "packageKey": "K10",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-14",
+   "pRef": "P-14",
+   "component": "shell.pay",
+   "status": "[ABSENT]",
+   "packageKey": "K5+K9",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-15",
+   "pRef": "P-15",
+   "component": "shell.file",
+   "status": "[ABSENT]",
+   "packageKey": "K5+K10",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-16",
+   "pRef": "P-16",
+   "component": "control.widget.dismiss",
+   "status": "[ABSENT]",
+   "packageKey": "K3+K6",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-17",
+   "pRef": "P-17",
+   "component": "control.delivery.resolve",
+   "status": "[ABSENT]",
+   "packageKey": "K13",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-18",
+   "pRef": "P-18",
+   "component": "produced_by_intent_token_hash: string \\| null",
+   "status": "[ABSENT]",
+   "packageKey": "K3+K7",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-19",
+   "pRef": "P-19",
+   "component": "Renderer sandboxing / import-graph allowlist",
+   "status": "[UNENFORCEABLE-TODAY]",
+   "packageKey": "K5+K15",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-20",
+   "pRef": "P-20",
+   "component": "Gate 10 promotion criterion",
+   "status": "[ABSENT]",
+   "packageKey": "K3+K14",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-21",
+   "pRef": "P-21",
+   "component": "GAP-ATTENDANCE-CONFIRM",
+   "status": "[ABSENT]",
+   "packageKey": "K13",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-22",
+   "pRef": "P-22",
+   "component": "NEVER_CHAT_ACTUATED — the eight reserved names",
+   "status": "[ABSENT]",
+   "packageKey": "K12",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-23",
+   "pRef": "P-23",
+   "component": "AE_WIDGET_COMMIT_ALLOWLIST + AE_CAPABILITY_GAP_LEDGER, with the start-up assertion set",
+   "status": "[ABSENT]",
+   "packageKey": "K2+K4",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-24",
+   "pRef": "P-24",
+   "component": "CapabilityRef and the per-effect key-space rule",
+   "status": "[ABSENT]",
+   "packageKey": "K2",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-25",
+   "pRef": "P-25",
+   "component": "AE_PROPOSE_PAIRING",
+   "status": "[ABSENT]",
+   "packageKey": "K2+K7",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-26",
+   "pRef": "P-26",
+   "component": "Gate 6's key-space dispatch",
+   "status": "[ABSENT]",
+   "packageKey": "K4",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-27",
+   "pRef": "P-27",
+   "component": "The controlledFixtureMode === false build assertion",
+   "status": "[ABSENT]",
+   "packageKey": "K3",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-28",
+   "pRef": "P-28",
+   "component": "The widget ActionSourceType discipline",
+   "status": "[ABSENT]",
+   "packageKey": "K4",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-29",
+   "pRef": "P-29",
+   "component": "MECHANISM_GAP_LEDGER",
+   "status": "[ABSENT]",
+   "packageKey": "K1",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-30",
+   "pRef": "P-30",
+   "component": "The gateway's record fields and the spoken-readback path",
+   "status": "[ABSENT]",
+   "packageKey": "K3+K6",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-31",
+   "pRef": "P-31",
+   "component": "A11yBlock.accessible_names",
+   "status": "[ABSENT]",
+   "packageKey": "K5",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-32",
+   "pRef": "P-32",
+   "component": "The moment, notification-consent and template catalogues",
+   "status": "[ABSENT]",
+   "packageKey": "K13",
+   "blockingRules": []
+  }
+ ]
+}
