@@ -1,19 +1,31 @@
 # MAYA CHAT-FIRST — K1…K16 IMPLEMENTATION MAPPING
 
-> **Status: PLAN. Implementation has not begun and is not authorized by this document.**
+> **Status: CANONICAL. Implementation has not begun and is not authorized by this document.**
 > This is the frozen mapping between the approved architecture, the certified
 > `MAYA WIDGET CONTRACT v1`, and sixteen packages across six waves. It names what each
 > package builds, which contract prerequisite it discharges, which surfaces it owns, which
 > widget kinds it may emit, what it is allowed to write, and the single condition on which
-> it is accepted. It authorizes no code.
+> it is accepted. **It authorizes no code**, and adoption is not authorization: the owner
+> opens wave 1, not this document.
 >
 > **Inputs, all frozen:** owner decisions D1–D12 (approved); `MAYA WIDGET CONTRACT v1`
-> (consolidated, certified); the 795-surface inventory at 795/795 triaged; the sixteen
-> packages and six waves of §14; the twenty-four-condition completion gate of §14.4.
+> (consolidated, certified — five certification passes, twelve independent lenses, and the
+> narrow confirmation of `R3.11.5`'s executability); the 795-surface inventory at 795/795
+> triaged; the sixteen packages and six waves of §14; the twenty-four-condition completion
+> gate of §14.4.
 >
 > **Nothing in this document adds a business decision, a security semantic, a widget kind,
 > an authority path or a floor reduction.** Where it names a field the contract does not
-> declare, it says so in the row and names the package that must declare it.
+> declare, it says so in the row and names the package that must declare it. §5 is the one
+> place it goes further than the contract — because the contract names `IntentReceipt` and
+> declares no shape for it — and it says so where it does.
+>
+> **Every figure in this document is derived by script, never transcribed.** Two checkers
+> are committed beside it and are the way to read it:
+> `evidence/maya-chat-first-ux/mapping-vs-contract-check.mjs` re-derives every claim this
+> document makes about the contract (14 checks), and
+> `evidence/maya-chat-first-ux/widget-schema-count.mjs` re-derives §5.0's frozen numbers from
+> the schema embedded in §5.4 (10 checks). Run them rather than trusting the tables.
 
 ---
 
@@ -245,7 +257,7 @@ two places and the ledger inherits the corrections, not the originals:
 | **Kinds** | declares all 22; emits none |
 | **Writes** | nothing at runtime. The policy and control tables are compiled-in registries with a start-up assertion. |
 | **Authority** | none — K2 is types plus tests. |
-| **Canonical owners** | reads the three registries at build to prove `WIDGET_CAPABILITY_POLICY` is total over `C9_CAPABILITIES` ∪ the reachable Action Engine keys. Changes none of them. |
+| **Canonical owners** | reads the three registries at build to prove `WIDGET_CAPABILITY_POLICY` is total over `C9_CAPABILITIES`'s 56 keys **and over those only** (§0.7 F28) — AE-CAP totality is `AE_WIDGET_COMMIT_ALLOWLIST` ∪ `AE_CAPABILITY_GAP_LEDGER`'s job under F31, not this table's. Changes none of them. |
 | **Exit** | **one CI job green**: `Object.keys(KIND_REGISTRY).length === 22`; every per-kind table total; the forbidden-key walk rejects all listed keys at every depth of envelope, submission, channel profile, native bridge manifest and `IntentRecord`; **R1 portability failures = 0**; `MUTATE`/`EXECUTE`/`ERROR`/`overlay` accepted = 0. |
 | **Gate rows** | G5, G8 (the schema-diff half) |
 
@@ -524,260 +536,558 @@ K16 executes, not a number either package may assume.
 
 ---
 
-## 5. D12 — the widget-layer stores, declared
+## 5. D12 — the widget-layer stores, frozen
 
-**D12-B is the authority for everything in this section.** `CANONICAL BUSINESS SCHEMA OWNERS:
-UNCHANGED`, and additive widget-layer persistence is authorized for intent idempotency, receipt
-persistence, timeline/audit and frozen widget snapshots. **No business table may acquire a
-dependency or a foreign key on widget-layer storage.**
+**D12-B is the authority for this section.** `CANONICAL BUSINESS SCHEMA OWNERS: UNCHANGED`, and
+additive widget-layer persistence is authorized for intent idempotency, receipt persistence,
+timeline/audit and frozen widget snapshots. **No business table may acquire a dependency or a
+foreign key on widget-layer storage.**
 
 That constraint has a direction, and the direction is the whole of it:
 
 ```
-widget-layer table ──FK──► Tenant            ALLOWED  (widget → business)
+widget-layer table ──FK──► Tenant            ALLOWED   (widget → business)
 business table     ──FK──► widget-layer      FORBIDDEN (business → widget)
 ```
 
-A widget row may name a tenant, because a widget row that cannot be tenant-scoped cannot be
-fenced. A business row may not name a widget, because then deleting conversation history would
-leave a business record incomplete — which is exactly what §4.4.1 RT3 forbids and what the
-history-blind replay test exists to catch.
+A widget row may name a tenant, because a widget row that cannot be tenant-fenced cannot be
+fenced at all. A business row may not name a widget, because then deleting conversation history
+would leave a business record incomplete — which §4.4.1 RT3 forbids and the history-blind replay
+test exists to catch.
+
+### 5.0 The frozen numbers
+
+Every figure below is **derived from the schema text by script**
+(`evidence/maya-chat-first-ux/widget-schema-count.mjs`), never transcribed. Re-run it rather than
+trusting this table.
+
+| | |
+|---|---:|
+| **NEW WIDGET MODELS** | **13** |
+| **WIDGET-LAYER PHYSICAL FIELDS** | **181** (13 surrogate keys, 168 substantive) |
+| **ENUMS** (closed value sets, each a `CHECK`) | **17** |
+| **FK** | **16** — 10 → `Tenant`, 6 widget → widget |
+| **CHECK** | **34** — 27 enum-valued, 7 range/ordering |
+| **UNIQUE** | **21** |
+| **INDEXES** | **23** |
+| **MIGRATIONS EXPECTED** | **2** |
+| **BUSINESS SCHEMA OWNERS CHANGED** | **0** |
+| erasure classes, every column exactly one | `AUDIT_RETAINED` 140 · `CONVERSATION_CONTENT` 18 · `CANONICAL_ELSEWHERE` 1 · registry (no data subject) 22 = **181** |
+
+Per wave: **wave 1** — 3 models, 22 columns, 3 unique, 3 index, 5 check, 0 FK.
+**wave 2** — 10 models, 159 columns, 18 unique, 20 index, 29 check, 16 FK.
 
 ### 5.1 The three stores, and which packages write them
 
 | store | holds | ceiling | erasable on a conversation-erasure request | created by |
 |---|---|---|---:|---|
-| **Timeline** | conversation turns, sealed envelopes, bodies, minted text, `spoken_transcript`, rendered utterances | `T_TIMELINE` = 180 d | **yes, fully** | K3 |
-| **Intent-audit** | `IntentRecord`, submission metadata, `RenderReceipt`, `SuppressedEmission`, the free-input ledger | `T_AUDIT` = 1095 d | audit fields **no**; content fields **yes** | K3 |
-| **Receipt** | Action Engine receipts, approval decisions, consent records, the tombstone log | append-only; floor `T_AUDIT` | **no** | K3 creates · K7/K9/K11/K12 write *through the Action Engine* |
+| **Timeline** | `WidgetTimelineTurn`, `WidgetEmission` | `T_TIMELINE` = 180 d | **yes, fully** | K3 |
+| **Intent-audit** | `WidgetIntentRecord`, `WidgetIntentSubmissionAudit`, `WidgetIntentReceipt`, `WidgetRenderReceipt`, `WidgetSuppressedEmission`, `WidgetFreeInputLedger`, `WidgetDraft` | `T_AUDIT` = 1095 d | audit fields **no**; content fields **yes** | K3 |
+| **Receipt** | Action Engine receipts (already exist, not re-declared) + `WidgetErasureTombstone` | append-only; floor `T_AUDIT` | **no** | K3 creates the tombstone log · K7/K9/K11/K12 write receipts **through the Action Engine** |
+| *(registries)* | `WidgetCapabilityGap`, `WidgetMechanismGap`, `WidgetCapabilityPolicy` | n/a — no data subject | n/a | K1, K2 |
 
-**RT1 is a schema property, not a convention.** The receipt store has no column referencing a
+**RT1 is a schema property, not a convention.** No column of the receipt store references a
 `widget_id`, a turn id or a conversation id, and write grants are limited to the Action Engine
 and the approval owner. The CI schema test asserts both.
 
-### 5.2 Conventions, taken from the tables already in this schema
+### 5.2 The five D12 stores, and the one the contract never shaped
 
-Every model below follows `C9WorkReceipt` (`prisma/schema.prisma:4012`), which is the newest
-canonical table and the one whose shape the deploy path already exercises:
+Of the thirteen models, **five are the stores D12 named**, and one of those five had no shape
+anywhere in the contract:
 
-- `id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid`
-- `tenantId String` + `tenant Tenant @relation(..., onDelete: Restrict, onUpdate: Restrict)`
-- every hash `@db.Char(64)`; every timestamp `@db.Timestamptz(3)`; every JSON `Json @db.JsonB`
-- `@@unique([id, tenantId])` so children can compose tenant-scoped foreign keys
-- named FK/index maps (`Model_N_fkey`, `Model_N_idx`), matching the existing style
+| D12 store | model | columns | note |
+|---|---|---:|---|
+| intent idempotency | `WidgetIntentRecord` | 38 | §3.7's `IntentRecord`, persisted |
+| render/emission receipt | `WidgetRenderReceipt` | 17 | `maya.render.receipt/1`, §4.5.5 |
+| **receipt persistence** | **`WidgetIntentReceipt`** | **11** | **the contract names `IntentReceipt` twice — §4.2 FR2 derives `TerminalOutcome` from it, §4.4.3 classifies its `utterance_echo` — and declares it nowhere. This is that shape.** |
+| suppressed emission | `WidgetSuppressedEmission` | 8 | §4.9 PR5b's evidence that silence was chosen |
+| free-input ledger | `WidgetFreeInputLedger` | 12 | P-06, written in the mint transaction |
 
-**Every column carries exactly one `ErasureClass`**, per §4.4.3 RT5, and the build test
-enumerates columns from the schema — a column added without a class breaks the build. The class
-is recorded in the model as a comment **and** in a generated classification map; the map is the
-rule, the comment is for the reader (§1.0).
+**`WidgetIntentReceipt` lives in the intent-audit store, not the receipt store**, and the
+distinction is not bookkeeping. `utteranceEcho` is a sentence composed on a person's behalf, so
+it is `CONVERSATION_CONTENT` and must be erasable — and the receipt store is declared
+non-erasable. The **business** receipt it points at through `actionReceiptRef` stays in the
+receipt store and is not erased. That split is what lets `TerminalOutcome` survive an erasure as
+*"this principal submitted intent X against capability Y at time T, and a canonical action
+completed"* without holding what was said.
 
-### 5.3 `WidgetIntentRecord` — the intent-audit store's centre
+### 5.3 Conventions, taken from the tables already in this schema
 
-The contract's `IntentRecord` (§3.7), persisted. `A` = `AUDIT_RETAINED`, `C` = `CONVERSATION_CONTENT`.
+Every model follows `C9WorkReceipt` (`prisma/schema.prisma:4012`) — the newest canonical table
+and the one the deploy path already exercises: `@db.Uuid` ids from `gen_random_uuid()`,
+`@db.Char(64)` hashes, `@db.Timestamptz(3)` timestamps, `Json @db.JsonB`, composite
+`@@unique([id, tenantId])` so children can compose tenant-scoped foreign keys, and named
+`Model_N_fkey` / `Model_N_idx` maps.
 
-| column | type | class | why it is here |
-|---|---|---|---|
-| `id` | `String @db.Uuid` | A | surrogate key |
-| `tenantId` | `String` | A | Gate 4's tenant assertion |
-| `intentTokenHash` | `String @db.Char(64)` | A | Gate 1's single-use consumption; the token itself is **never** stored |
-| `widgetId` | `String @db.Uuid` | A | the emission this intent belongs to |
-| `principalProofHash` | `String @db.Char(64)` | A | Gate 3's principal binding; §4.2 FR4's read-path re-check |
-| `widgetKind` | `String` | A | `KIND_FLOOR[kind]`, and Gate 7's kind rule |
-| `effect` | `String` | A | `EFFECT_FLOOR[effect]`; Gate 6's scoping |
-| `priority` | `Int` | A | `FLOOR_EXEMPT` reads it; without it Gate 5 cannot reproduce the exempt branch and every exempt intent diverges and is refused |
-| `capabilitySpace` / `capabilityKey` | `String?` | A | the `CapabilityRef`, stored as its two components so no column is ever a bare capability string (§0.6 F21) |
-| `handoffSpace` / `handoffKey` | `String?` | A | the destination ref; `SENSITIVE_DEST` reads it |
-| `targetJson` | `Json? @db.JsonB` | A | `IntentTarget`; `targetFloor` reads `.class` |
-| `verificationFloor` | `String` | A | the stored value Gate 5 recomputes and compares |
-| `confirmationJson` | `Json? @db.JsonB` | A | risk tier, reversibility, audience size, `requires_readback`, `readback_ref`, the `consent_scope` registry key — **no free text** |
-| `inputSchemaHash` | `String? @db.Char(64)` | A | Gate 8's schema identity |
-| `requestedScopeHash` | `String @db.Char(64)` | A | scope identity |
-| `bodyHash` | `String @db.Char(64)` | A | Gate 8-R's readback comparison; the `SUPERSEDED` comparison |
-| `selectionDomain` | `String` | A | the closed domain's **option ids** — the human labels are a separate column and are `C` |
-| `c9Domain` | `String?` | A | non-null iff `subjectCapability(record).space === 'C9'` **and** `run_id !== null`; null by construction on both run-less mint paths |
-| `runId` / `revisionId` | `String? @db.Uuid` | A | `run_ref` |
-| `approvalOfIntentRef` | `String?` | A | §3.11 |
-| `confirmationOfKind` / `confirmationOfRef` | `String?` | A | non-null iff `effect === 'COMMIT'` |
-| `producedByIntentTokenHash` | `String? @db.Char(64)` | A | §0.13 F74's guard against the obvious bypass |
-| `issuedAt` / `expiresAt` | `DateTime @db.Timestamptz(3)` | A | Gate 2 |
-| `singleUse` | `Boolean` | A | Gate 1 |
-| `consumedAt` | `DateTime? @db.Timestamptz(3)` | A | Gate 1's consumption; **the idempotency of a tap** |
-| `actionReceiptRef` | `String?` | A | the only pointer to a business fact |
-| `frozenNounsJson` | `Json? @db.JsonB` | **A** | opaque handles naming canonical rows — `AUDIT_RETAINED`, because the noun resolver reads it on the path to Gate 11 and Gate 14, and erasing it would leave a PENDING approval undecidable |
-| `utteranceTemplate` | `String?` | C | |
-| `renderedUtterance` | `String?` | C | |
-| `selectedLabels` | `String[]` | C | |
-| `selectionDomainLabels` | `Json? @db.JsonB` | C | the human strings |
-| `spokenTranscript` | `String?` | C | voice turns only; authority `NONE` |
+**Every column carries exactly one `ErasureClass`** (§4.4.3 RT5), annotated in the model and
+generated into a classification map. The map is the rule; the annotation is for the reader
+(§1.0). The build test enumerates columns from the schema, so a column added without a class
+breaks the build rather than defaulting.
 
+### 5.4 The models
+
+```prisma
+// ─────────────────────────────────────────────────────────────────────────────
+// MAYA WIDGET LAYER — D12 additive stores.
+// CANONICAL BUSINESS SCHEMA OWNERS: UNCHANGED. Every statement below is CREATE
+// TABLE. No business table gains a column, and no business table references any
+// table here. The only direction that crosses the boundary is widget → Tenant,
+// which is required so a widget row can be tenant-fenced at all.
+// Conventions follow C9WorkReceipt (prisma/schema.prisma:4012), the newest
+// canonical table and the one the deploy path already exercises.
+// Every column carries exactly one ErasureClass: A = AUDIT_RETAINED,
+// C = CONVERSATION_CONTENT, X = CANONICAL_ELSEWHERE, — = registry/no subject.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── 1. TIMELINE STORE — T_TIMELINE = 180 d, fully erasable ───────────────────
+
+model WidgetTimelineTurn {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId            String                                    // A
+  conversationId      String    @db.Uuid                        // A
+  turnIndex           Int                                       // A
+  role                String                                    // A  CHECK: TurnRole (3)
+  principalProofHash  String    @db.Char(64)                    // A
+  channel             String                                    // A  CHECK: ChannelId (5)
+  createdAt           DateTime  @db.Timestamptz(3)              // A
+  retentionUntil      DateTime  @db.Timestamptz(3)              // A
+  textContent         String?                                   // C
+  spokenTranscript    String?                                   // C
+  erasedAt            DateTime? @db.Timestamptz(3)              // A
+
+  tenant Tenant @relation("WidgetTimelineTurn_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetTimelineTurn_1_fkey")
+
+  @@unique([id, tenantId], map: "WidgetTimelineTurn_1_key")
+  @@unique([tenantId, conversationId, turnIndex], map: "WidgetTimelineTurn_2_key")
+  @@index([tenantId, conversationId, createdAt], map: "WidgetTimelineTurn_1_idx")
+  @@index([tenantId, retentionUntil], map: "WidgetTimelineTurn_2_idx")
+}
+
+model WidgetEmission {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId              String                                  // A
+  widgetId              String    @db.Uuid                      // A
+  turnId                String    @db.Uuid                      // A
+  kind                  String                                  // A  CHECK: WidgetKind (22)
+  bodyVersion           Int                                     // A
+  envelopeSeal          String    @db.Char(64)                  // A
+  bodyHash              String    @db.Char(64)                  // A
+  lifecycleState        String                                  // A  CHECK: LifecycleState (8)
+  freshnessClass        String                                  // A  CHECK: FreshnessClass (4)
+  issuedAt              DateTime  @db.Timestamptz(3)            // A
+  expiresAt             DateTime  @db.Timestamptz(3)            // A
+  retentionSec          Int                                     // A
+  retentionUntil        DateTime  @db.Timestamptz(3)            // A
+  dedupeKey             String                                  // A
+  deliveryChannel       String                                  // A  CHECK: ChannelId (5)
+  supersedesWidgetId    String?   @db.Uuid                      // A
+  supersededByWidgetId  String?   @db.Uuid                      // A
+  deliveryStateJson     Json      @db.JsonB                     // A  DeliveryRecord — presentation only
+  terminalLinesJson     Json?     @db.JsonB                     // A  outcome + receipt ref only
+  bodyJson              Json?     @db.JsonB                     // C  dropped at retentionSec
+  textEquivalentJson    Json?     @db.JsonB                     // C
+  a11yJson              Json?     @db.JsonB                     // C  accessible_names
+  speechJson            Json?     @db.JsonB                     // C
+  bodyDroppedAt         DateTime? @db.Timestamptz(3)            // A
+  erasedAt              DateTime? @db.Timestamptz(3)            // A
+
+  tenant Tenant             @relation("WidgetEmission_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetEmission_1_fkey")
+  turn   WidgetTimelineTurn @relation("WidgetEmission_2_fkey", fields: [turnId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "WidgetEmission_2_fkey")
+
+  @@unique([id, tenantId], map: "WidgetEmission_1_key")
+  @@unique([widgetId, tenantId], map: "WidgetEmission_2_key")     // FK target: order matches the references
+  @@index([tenantId, turnId], map: "WidgetEmission_1_idx")
+  @@index([tenantId, dedupeKey, lifecycleState], map: "WidgetEmission_2_idx")
+  @@index([tenantId, retentionUntil, bodyDroppedAt], map: "WidgetEmission_3_idx")
+}
+
+// ── 2. INTENT-AUDIT STORE — T_AUDIT = 1095 d; audit fields survive erasure ───
+
+model WidgetIntentRecord {
+  id                        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId                  String                              // A
+  intentTokenHash           String    @db.Char(64)              // A  the token itself is NEVER stored
+  widgetId                  String    @db.Uuid                  // A
+  principalProofHash        String    @db.Char(64)              // A  Gate 3
+  widgetKind                String                              // A  CHECK: WidgetKind (22) — KIND_FLOOR, Gate 7
+  effect                    String                              // A  CHECK: EffectClass (8) — EFFECT_FLOOR
+  priority                  Int                                 // A  FLOOR_EXEMPT reads it
+  capabilitySpace           String?                             // A  CHECK: CapabilitySpace (4)
+  capabilityKey             String?                             // A
+  handoffSpace              String?                             // A  CHECK: CapabilitySpace (4)
+  handoffKey                String?                             // A
+  targetJson                Json?     @db.JsonB                 // A  IntentTarget; targetFloor reads .class
+  verificationFloor         String                              // A  CHECK: VerificationLevel (5) — Gate 5 compares
+  confirmationJson          Json?     @db.JsonB                 // A  risk tier, reversible, audience, readback
+  inputSchemaHash           String?   @db.Char(64)              // A
+  requestedScopeHash        String    @db.Char(64)              // A
+  bodyHash                  String    @db.Char(64)              // A  Gate 8-R; SUPERSEDED comparison
+  selectionDomain           String                              // A  option ids only — labels are separate
+  c9Domain                  String?                             // A  CHECK: C9Domain (4)
+  runId                     String?   @db.Uuid                  // A
+  revisionId                String?   @db.Uuid                  // A
+  approvalOfIntentRef       String?                             // A
+  confirmationOfKind        String?                             // A  CHECK: ConfirmationOfKind (3)
+  confirmationOfRef         String?                             // A
+  producedByIntentTokenHash String?   @db.Char(64)              // A  F74's bypass guard
+  issuedAt                  DateTime  @db.Timestamptz(3)        // A
+  expiresAt                 DateTime  @db.Timestamptz(3)        // A
+  singleUse                 Boolean                             // A
+  consumedAt                DateTime? @db.Timestamptz(3)        // A  Gate 1 — idempotency of a tap
+  actionReceiptRef          String?                             // A  the ONLY pointer to a business fact
+  frozenNounsJson           Json?     @db.JsonB                 // A  AUDIT_RETAINED per F14 / §4.4.3
+  utteranceTemplate         String?                             // C
+  renderedUtterance         String?                             // C
+  selectedLabels            String[]                            // C
+  selectionDomainLabelsJson Json?     @db.JsonB                 // C
+  spokenTranscript          String?                             // C
+  erasedAt                  DateTime? @db.Timestamptz(3)        // A
+
+  tenant   Tenant         @relation("WidgetIntentRecord_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetIntentRecord_1_fkey")
+  emission WidgetEmission @relation("WidgetIntentRecord_2_fkey", fields: [widgetId, tenantId], references: [widgetId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "WidgetIntentRecord_2_fkey")
+
+  @@unique([id, tenantId], map: "WidgetIntentRecord_1_key")
+  @@unique([intentTokenHash, tenantId], map: "WidgetIntentRecord_2_key")  // FK target: order matches the references
+  @@index([tenantId, widgetId], map: "WidgetIntentRecord_1_idx")
+  @@index([tenantId, expiresAt, consumedAt], map: "WidgetIntentRecord_2_idx")
+  @@index([tenantId, principalProofHash, issuedAt], map: "WidgetIntentRecord_3_idx")
+  @@index([tenantId, capabilityKey, effect], map: "WidgetIntentRecord_4_idx")
+}
+
+model WidgetIntentSubmissionAudit {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId           String                                     // A
+  widgetId           String    @db.Uuid                         // A
+  intentTokenHash    String    @db.Char(64)                     // A
+  clientNonce        String                                     // A
+  profileId          String                                     // A  ADVISORY — never an authority input
+  clientEmittedAt    DateTime? @db.Timestamptz(3)               // A  advisory; never business time
+  receivedAt         DateTime  @db.Timestamptz(3)               // A
+  readbackRef        String?                                    // A
+  readbackBodyHash   String?   @db.Char(64)                     // A
+  inputsClosedJson   Json?     @db.JsonB                        // A  enum/ref values — closed-domain ids
+  inputsFreeTextJson Json?     @db.JsonB                        // C  string values
+  inputsPiiJson      Json?     @db.JsonB                        // X  phone / sensitivity:'pii'
+  readbackAffirmation String?                                   // C  a word the data subject said
+  spokenTranscript   String?                                    // C
+  erasedAt           DateTime? @db.Timestamptz(3)               // A
+
+  tenant Tenant             @relation("WidgetIntentSubmissionAudit_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetIntentSubmissionAudit_1_fkey")
+  record WidgetIntentRecord @relation("WidgetIntentSubmissionAudit_2_fkey", fields: [intentTokenHash, tenantId], references: [intentTokenHash, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "WidgetIntentSubmissionAudit_2_fkey")
+
+  @@unique([id, tenantId], map: "WidgetIntentSubmissionAudit_1_key")
+  @@index([tenantId, intentTokenHash], map: "WidgetIntentSubmissionAudit_1_idx")
+  @@index([tenantId, receivedAt], map: "WidgetIntentSubmissionAudit_2_idx")
+}
+
+model WidgetIntentReceipt {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId         String                                       // A
+  widgetId         String    @db.Uuid                           // A
+  intentTokenHash  String    @db.Char(64)                       // A
+  submittedAt      DateTime  @db.Timestamptz(3)                 // A
+  outcome          String                                       // A  CHECK: IntentReceiptOutcome (4)
+  refusalCode      String?                                      // A  closed vocabulary; never free text
+  actionReceiptRef String?                                      // A  FR2: CONFIRMED ⟺ non-null
+  answeringChannel String                                       // A  CHECK: ChannelId (5)
+  utteranceEcho    String?                                      // C  composed on a person's behalf
+  erasedAt         DateTime? @db.Timestamptz(3)                 // A
+
+  tenant Tenant             @relation("WidgetIntentReceipt_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetIntentReceipt_1_fkey")
+  record WidgetIntentRecord @relation("WidgetIntentReceipt_2_fkey", fields: [intentTokenHash, tenantId], references: [intentTokenHash, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "WidgetIntentReceipt_2_fkey")
+
+  @@unique([id, tenantId], map: "WidgetIntentReceipt_1_key")
+  @@unique([tenantId, intentTokenHash], map: "WidgetIntentReceipt_2_key")
+  @@index([tenantId, widgetId], map: "WidgetIntentReceipt_1_idx")
+  @@index([tenantId, outcome, submittedAt], map: "WidgetIntentReceipt_2_idx")
+}
+
+model WidgetRenderReceipt {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId                 String                               // A
+  widgetId                 String    @db.Uuid                   // A
+  profileId                String                               // A
+  profileVersion           Int                                  // A
+  renderTier               String                               // A  CHECK: RenderTier (3) — the one body_hash term
+  intentsMinted            Int                                  // A  before fitting
+  intentsEmitted           Int                                  // A  after fitting
+  intentsWithheldJson      Json      @db.JsonB                  // A  {role, reason, reachable_via}
+  bodyReductionsJson       Json      @db.JsonB                  // A  {path, reduction, restored_by}
+  textEquivalentIsCanonical Boolean                             // A
+  escalationJson           Json?     @db.JsonB                  // A
+  degradedAt               DateTime  @db.Timestamptz(3)         // A
+  deliveryChannel          String                               // A  CHECK: ChannelId (5)
+  composedEnvelopeJson     Json      @db.JsonB                  // C  the undegraded envelope (C6)
+  emittedEnvelopeJson      Json      @db.JsonB                  // C  what was actually sent (C6)
+  erasedAt                 DateTime? @db.Timestamptz(3)         // A
+
+  tenant   Tenant         @relation("WidgetRenderReceipt_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetRenderReceipt_1_fkey")
+  emission WidgetEmission @relation("WidgetRenderReceipt_2_fkey", fields: [widgetId, tenantId], references: [widgetId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "WidgetRenderReceipt_2_fkey")
+
+  @@unique([id, tenantId], map: "WidgetRenderReceipt_1_key")
+  @@unique([tenantId, widgetId, deliveryChannel], map: "WidgetRenderReceipt_2_key")
+  @@index([tenantId, degradedAt], map: "WidgetRenderReceipt_1_idx")
+  @@index([tenantId, renderTier], map: "WidgetRenderReceipt_2_idx")
+}
+
+model WidgetSuppressedEmission {
+  id                       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId                 String                               // A
+  moment                   String                               // A  a MOMENT_REGISTRY key
+  momentTemplateKey        String                               // A  `${id}@${version}`
+  dedupeKey                String                               // A
+  suppressedAt             DateTime @db.Timestamptz(3)          // A
+  unresolvedCells          String[]                             // A  JSON Pointers — never the values
+  subjectPrincipalProofHash String? @db.Char(64)                // A
+
+  tenant Tenant @relation("WidgetSuppressedEmission_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetSuppressedEmission_1_fkey")
+
+  @@unique([id, tenantId], map: "WidgetSuppressedEmission_1_key")
+  @@unique([tenantId, dedupeKey, moment], map: "WidgetSuppressedEmission_2_key")
+  @@index([tenantId, moment, suppressedAt], map: "WidgetSuppressedEmission_1_idx")
+}
+
+model WidgetFreeInputLedger {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId         String                                       // A
+  widgetId         String   @db.Uuid                            // A
+  intentTokenHash  String   @db.Char(64)                        // A
+  capabilitySpace  String                                       // A  CHECK: CapabilitySpace (4)
+  capabilityKey    String                                       // A
+  widgetKind       String                                       // A  CHECK: WidgetKind
+  fieldKinds       String[]                                     // A  the non-closed kinds that triggered it
+  justification    String                                       // A  server-authored, closed set
+  boundsSourceRefs String[]                                     // A  INV-23
+  normalizerRefs   String[]                                     // A  INV-23
+  mintedAt         DateTime @db.Timestamptz(3)                  // A
+
+  tenant Tenant             @relation("WidgetFreeInputLedger_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetFreeInputLedger_1_fkey")
+  record WidgetIntentRecord @relation("WidgetFreeInputLedger_2_fkey", fields: [intentTokenHash, tenantId], references: [intentTokenHash, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "WidgetFreeInputLedger_2_fkey")
+
+  @@unique([id, tenantId], map: "WidgetFreeInputLedger_1_key")
+  @@unique([tenantId, intentTokenHash], map: "WidgetFreeInputLedger_2_key")
+  @@index([tenantId, capabilityKey, mintedAt], map: "WidgetFreeInputLedger_1_idx")
+}
+
+model WidgetDraft {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId             String                                   // A
+  draftRef             String                                   // A  server-minted; names this draft
+  draftClass           String                                   // A  CHECK: DraftClass (5)
+  ownerCapabilitySpace String                                   // A  CHECK: CapabilitySpace (4)
+  ownerCapabilityKey   String                                   // A
+  principalProofHash   String    @db.Char(64)                   // A
+  diffJson             Json      @db.JsonB                      // C  server-computed diff
+  createdAt            DateTime  @db.Timestamptz(3)             // A
+  expiresAt            DateTime  @db.Timestamptz(3)             // A
+  consumedAt           DateTime? @db.Timestamptz(3)             // A
+  erasedAt             DateTime? @db.Timestamptz(3)             // A
+
+  tenant Tenant @relation("WidgetDraft_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetDraft_1_fkey")
+
+  @@unique([id, tenantId], map: "WidgetDraft_1_key")
+  @@unique([tenantId, draftRef], map: "WidgetDraft_2_key")
+  @@index([tenantId, expiresAt, consumedAt], map: "WidgetDraft_1_idx")
+}
+
+// ── 3. RECEIPT STORE — append-only, floor T_AUDIT, never erased ──────────────
+// The Action Engine receipts themselves already exist and are NOT re-declared.
+// What the widget layer adds to this store is the tombstone log, and only that.
+
+model WidgetErasureTombstone {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId          String                                      // A
+  erasedAt          DateTime @db.Timestamptz(3)                 // A
+  erasureRequestRef String                                      // A
+  store             String                                      // A  CHECK: TombstoneStore (2)
+  rowKey            String                                      // A
+  fieldsErased      String[]                                    // A
+
+  tenant Tenant @relation("WidgetErasureTombstone_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetErasureTombstone_1_fkey")
+
+  @@unique([id, tenantId], map: "WidgetErasureTombstone_1_key")
+  @@index([tenantId, erasureRequestRef], map: "WidgetErasureTombstone_1_idx")
+  @@index([tenantId, erasedAt], map: "WidgetErasureTombstone_2_idx")
+}
+
+// ── 4. LEDGERS AND REGISTRIES — wave 1; no tenant subject, no erasure class ──
+
+model WidgetCapabilityGap {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // —  surrogate key
+  gapKey        String                                          // —  'GAP-…'
+  act           String                                          // —
+  ownerState    String                                          // —  CHECK: GapOwnerState (3)
+  evidence      String                                          // —
+  openedAt      DateTime  @db.Timestamptz(3)                    // —
+  closedAt      DateTime? @db.Timestamptz(3)                    // —
+  closingCommit String?                                         // —
+
+  @@unique([gapKey], map: "WidgetCapabilityGap_1_key")
+  @@index([ownerState, openedAt], map: "WidgetCapabilityGap_1_idx")
+}
+
+model WidgetMechanismGap {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // —  surrogate key
+  gapKey        String                                          // —  'MG-P01' … 'MG-P32'
+  pRef          String                                          // —  'P-01' … 'P-32'
+  component     String                                          // —
+  status        String                                          // —  CHECK: MechanismGapStatus (4)
+  packageKey    String                                          // —  'K1' … 'K16'
+  blockingRules String[]                                        // —
+
+  @@unique([gapKey], map: "WidgetMechanismGap_1_key")
+  @@index([status, packageKey], map: "WidgetMechanismGap_1_idx")
+}
+
+model WidgetCapabilityPolicy {
+  id                    String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // —  surrogate key
+  capabilitySpace       String                                  // —  CHECK: CapabilitySpace (4)
+  capabilityKey         String                                  // —
+  minVerification       String                                  // —  CHECK: VerificationLevel (5)
+  consentClass          String                                  // —  CHECK: ConsentClass (5)
+  dispatchIsSynchronous Boolean                                 // —  R3.11.5 — read through the PROPOSE key
+  contractVersion       Int                                     // —  a change here is a version bump
+
+  @@unique([capabilitySpace, capabilityKey], map: "WidgetCapabilityPolicy_1_key")
+  @@index([consentClass, minVerification], map: "WidgetCapabilityPolicy_1_idx")
+}
 ```
-@@unique([id, tenantId])
-@@unique([tenantId, intentTokenHash])     // Gate 1: one row per token, ever
-@@index([tenantId, widgetId])             // the emission's intents
-@@index([tenantId, expiresAt, consumedAt])// the expiry sweep
-@@index([tenantId, principalProofHash, issuedAt])   // "who pressed what"
+
+### 5.5 The seventeen closed value sets
+
+Each is a `CHECK` on a `String` column, not a Prisma `enum` — matching `C9WorkReceipt`, whose
+`state`, `domain` and `kind` are `String`. A closed set stated in the database and in TypeScript
+is one set with two enforcement points, not two sets.
+
+| set | members | where it comes from |
+|---|---:|---|
+| `WidgetKind` | 22 | contract §2.1, closed |
+| `EffectClass` | 8 | §3.2 |
+| `LifecycleState` | 8 | §4.1 |
+| `VerificationLevel` | 5 | §0.8 F39 — the ladder |
+| `ChannelId` | 5 | §4.5 |
+| `ConsentClass` | 5 | §0.14 F81 |
+| `DraftClass` | 5 | §0.14 F79 — **not** `'expense'`, **not** `'loyalty_adjustment'` |
+| `CapabilitySpace` | 4 | §0.6 F21 |
+| `C9Domain` | 4 | the orchestrator's own published union, imported, never redeclared |
+| `FreshnessClass` | 4 | §4.1 |
+| `IntentReceiptOutcome` | 4 | `ACCEPTED` / `REFUSED` / `NEEDS_CONFIRMATION` / `NEEDS_VERIFICATION` |
+| `MechanismGapStatus` | 4 | §0.1 F5's status vocabulary |
+| `RenderTier` | 3 | §4.5 — the one receipt member inside `body_hash` |
+| `ConfirmationOfKind` | 3 | §0.13 F74 |
+| `TurnRole` | 3 | timeline only |
+| `GapOwnerState` | 3 | `none` / `unreachable` / `registered_elsewhere` — §A1.6.1's three-way finding |
+| `TombstoneStore` | 2 | `timeline` / `intent_audit` — the two erasable stores |
+
+**There is no `error` severity and no `ERROR`, `FAILURE` or `RETRY` member anywhere above.** §2.1
+closes the kind enum without them and §1.3 C4 forbids the vocabulary in a `Cell.label`; a
+database that admitted them would be the one place the ban did not reach.
+
+### 5.6 The migration envelope
+
+```sql
+-- ═════════════════════════════════════════════════════════════════════════════
+-- WAVE 1 — prisma/migrations/<stamp>_widget_layer_ledgers/migration.sql   (K1+K2)
+-- ═════════════════════════════════════════════════════════════════════════════
+CREATE TABLE "WidgetCapabilityGap"    ( ... );
+CREATE TABLE "WidgetMechanismGap"     ( ... );
+CREATE TABLE "WidgetCapabilityPolicy" ( ... );
+
+CREATE UNIQUE INDEX "WidgetCapabilityGap_1_key"    ON "WidgetCapabilityGap"("gapKey");
+CREATE UNIQUE INDEX "WidgetMechanismGap_1_key"     ON "WidgetMechanismGap"("gapKey");
+CREATE UNIQUE INDEX "WidgetCapabilityPolicy_1_key" ON "WidgetCapabilityPolicy"("capabilitySpace","capabilityKey");
+CREATE INDEX "WidgetCapabilityGap_1_idx"    ON "WidgetCapabilityGap"("ownerState","openedAt");
+CREATE INDEX "WidgetMechanismGap_1_idx"     ON "WidgetMechanismGap"("status","packageKey");
+CREATE INDEX "WidgetCapabilityPolicy_1_idx" ON "WidgetCapabilityPolicy"("consentClass","minVerification");
+
+ALTER TABLE "WidgetMechanismGap"     ADD CONSTRAINT "WidgetMechanismGap_status_check"      CHECK ("status" IN ('[ABSENT]','[EXISTS]','[PARTIAL]','[UNENFORCEABLE-TODAY]'));
+ALTER TABLE "WidgetCapabilityGap"    ADD CONSTRAINT "WidgetCapabilityGap_owner_check"      CHECK ("ownerState" IN ('none','unreachable','registered_elsewhere'));
+ALTER TABLE "WidgetCapabilityPolicy" ADD CONSTRAINT "WidgetCapabilityPolicy_space_check"   CHECK ("capabilitySpace" IN ('C9','TOOL','AE','CONTROL'));
+ALTER TABLE "WidgetCapabilityPolicy" ADD CONSTRAINT "WidgetCapabilityPolicy_minver_check"  CHECK ("minVerification" IN ('ANONYMOUS','CHANNEL_IDENTITY','BOUND_CLIENT','SESSION_VERIFIED','STEP_UP_VERIFIED'));
+ALTER TABLE "WidgetCapabilityPolicy" ADD CONSTRAINT "WidgetCapabilityPolicy_consent_check" CHECK ("consentClass" IN ('none','communication','personal_data','identity_binding','finance'));
+
+-- ═════════════════════════════════════════════════════════════════════════════
+-- WAVE 2 — prisma/migrations/<stamp>_widget_layer_runtime/migration.sql      (K3)
+-- ═════════════════════════════════════════════════════════════════════════════
+CREATE TABLE "WidgetTimelineTurn"          ( ... );
+CREATE TABLE "WidgetEmission"              ( ... );
+CREATE TABLE "WidgetIntentRecord"          ( ... );
+CREATE TABLE "WidgetIntentSubmissionAudit" ( ... );
+CREATE TABLE "WidgetIntentReceipt"         ( ... );
+CREATE TABLE "WidgetRenderReceipt"         ( ... );
+CREATE TABLE "WidgetSuppressedEmission"    ( ... );
+CREATE TABLE "WidgetFreeInputLedger"       ( ... );
+CREATE TABLE "WidgetDraft"                 ( ... );
+CREATE TABLE "WidgetErasureTombstone"      ( ... );
+
+-- 18 unique indexes, 20 secondary indexes, 29 CHECK constraints, 16 FK constraints
+-- (10 → "Tenant", 6 widget → widget), each as its own ALTER TABLE on a WIDGET table.
+
+-- ═════════════════════════════════════════════════════════════════════════════
+-- WHAT IS ABSENT FROM BOTH FILES, and is the point of them
+-- ═════════════════════════════════════════════════════════════════════════════
+--   0 × ALTER TABLE on any business table
+--   0 × ADD COLUMN on any business table
+--   0 × FOREIGN KEY whose referencing table is a business table
+--   0 × DROP / RENAME of anything
+--   0 × CHECK added to or removed from a business table
+--
+-- Chapter 9's own migration is the contrast that makes this checkable: it carries
+-- `ALTER TABLE "TenantBusinessConfigurationRevision" DROP CONSTRAINT
+-- "R11_config_contract_check"` and re-adds it. That is a business-table change,
+-- it was correct for Chapter 9, and there is no statement of that shape here.
 ```
 
-**Two properties of this table are load-bearing and neither is a comment.** The token is stored
-only as a hash, so a database read cannot mint a submission; and `consumedAt` is written in the
-same transaction that dispatches the effect, so a replayed tap finds a consumed row rather than
-a second effect.
+**`BUSINESS SCHEMA OWNERS CHANGED: 0`, stated precisely enough to be checked.** The `Tenant`
+*model* in `schema.prisma` gains **10 virtual back-relation fields** (`widgetIntentRecords
+WidgetIntentRecord[]`, and so on). Prisma requires both sides of a relation to be declared, and a
+one-to-many back-relation **generates no SQL**: the foreign key lives on the child. Chapter 9 is
+the precedent and the proof — `Tenant` carries `c9Runs`, `c9StrategyRevisions`, `c9PlanSteps`,
+`c9StepBindings` and `c9WorkReceipts`, and its migration contains **zero** `ALTER TABLE "Tenant"`
+statements. The widget layer does exactly the same thing.
 
-### 5.4 `WidgetRenderReceipt` — what the user on SMS actually saw
+The gate that enforces it is mechanical, not reviewed by eye: **G8** asserts *modified business
+tables = 0, migrations other than these two = 0, FKs into business tables = 0*, computed from the
+migration diff.
 
-`maya.render.receipt/1` (§4.5.5), persisted. Every column `AUDIT_RETAINED` **except** the two
-that carry minted prose.
+**Two deploy-path facts, restated because they have broken releases in this repository.**
+`prisma.config.ts` must be present in the release — the schema carries no `url` and
+`migrate deploy` fails with *"datasource.url is required"* without it. And a release is built
+whole on the server: `node_modules` is never copied between releases in any form, because a
+copied tree brings a stale generated Prisma client that does not know these columns, and the
+first write then fails at runtime while health stays green.
 
-| column | type | class | note |
-|---|---|---|---|
-| `id`, `tenantId`, `widgetId` | | A | |
-| `profileId` / `profileVersion` | `String` / `Int` | A | **advisory** at ingress (R3.8.3); an audit fact here |
-| `renderTier` | `String` | A | the one receipt member inside `body_hash` |
-| `intentsMinted` / `intentsEmitted` | `Int` | A | before and after fitting |
-| `intentsWithheldJson` | `Json @db.JsonB` | A | `{role, reason, reachable_via}` per entry — C4 requires every `reachable_via` to be present in the emitted envelope, or the fitter throws instead of emitting |
-| `bodyReductionsJson` | `Json @db.JsonB` | A | `{path, reduction, restored_by}`, same requirement |
-| `textEquivalentIsCanonical` | `Boolean` | A | true whenever `renderTier === 'TEXT_ONLY'` |
-| `escalationJson` | `Json? @db.JsonB` | A | `{to_route_key, reason}` |
-| `degradedAt` | `DateTime @db.Timestamptz(3)` | A | |
-| `composedEnvelopeJson` | `Json @db.JsonB` | **C** | the undegraded envelope — C6 requires both to be retained under one `widget_id` |
-| `emittedEnvelopeJson` | `Json @db.JsonB` | **C** | what was actually sent |
+### 5.7 Retention, frozen
 
-The two envelope columns are `CONVERSATION_CONTENT` because they contain bodies and minted text.
-After erasure the receipt keeps its counts and its withholding reasons and loses the prose —
-which is what makes *"was anything withheld from this person, and could they still reach it?"*
-answerable three years later without holding what they were shown.
-
-### 5.5 `WidgetSuppressedEmission` — the record that silence was chosen
-
-§4.9 PR5b: when a `MomentTemplate`'s `required_cells` do not all resolve to `KNOWN`, the emission
-is suppressed — no envelope, no empty card, no placeholder, no failure message — and one row is
-written. **The row is the evidence that silence was chosen rather than lost.**
-
-| column | type | class |
+| store | ceiling | source |
 |---|---|---|
-| `id`, `tenantId` | | A |
-| `moment` | `String` | A |
-| `momentTemplateKey` | `String` | A |
-| `dedupeKey` | `String` | A |
-| `suppressedAt` | `DateTime @db.Timestamptz(3)` | A |
-| `unresolvedCells` | `String[]` | A |
-| `subjectPrincipalProofHash` | `String? @db.Char(64)` | A |
+| Timeline | `T_TIMELINE` = **180 d** from turn creation | §4.4.1 |
+| Intent-audit | `T_AUDIT` = **1095 d** from `issued_at` | §4.4.1 |
+| Receipt | append-only; set by the canonical owner, floor `T_AUDIT` | §4.4.1 |
 
-```
-@@index([tenantId, moment, suppressedAt])
-@@index([tenantId, dedupeKey])
-```
+Per-kind body ceilings — **7 rows, total over all 22 kinds** (§4.4.2, the contract's sole per-kind
+retention authority):
 
-Every column is `AUDIT_RETAINED`: a moment name, a template key, a dedupe key, a timestamp and a
-list of JSON Pointers carry no conversation content. There is **no** column for the values that
-failed to resolve — recording *what was missing* would put the unresolved business data into the
-widget layer, which is the thing suppression exists to avoid.
+| kinds | ceiling |
+|---|---|
+| `CLIENT_LIST` | 24 h |
+| `FORM` with any `sensitivity: 'pii'` field | 24 h |
+| `CONSENT_STATE`, `IDENTITY_BINDING`, `PAYMENT_HANDOFF`, `MEDIA_PREVIEW`, `ARTIFACT` | 24 h |
+| `SCHEDULE`, `SOURCE_STATUS`, `PROGRESS`, `TIME_SLOT_SELECTOR` | 7 d |
+| `CHOICE`, `SERVICE_SELECTOR`, `STAFF_SELECTOR`, `LIMITATION`, `FORM` (no pii field) | 30 d |
+| `BOOKING_CONFIRMATION`, `SETTINGS_DRAFT`, `APPROVAL` | 90 d |
+| `METRIC`, `CHART`, `REPORT`, `STRATEGY_OPTIONS` | 365 d, capped by `T_TIMELINE` |
 
-### 5.6 `WidgetFreeInputLedger` — the rationing of open-domain input
+`retention_sec` is **written by the emission validator, never authored** — the shortest of the
+per-kind ceiling, tenant policy, and 24 h whenever the resolved pii class is `client_identified`
+or any body field is `sensitivity: 'pii'` (RT4). Tenant policy **may only shorten** (RT2): a
+value exceeding a ceiling is refused, never clamped silently.
 
-P-06, §2 K14 / §3.6.6 R3.6.6, **written in the same transaction as the mint**. The two counters
-the first edition described are one counter, keyed on field kind.
-
-| column | type | class |
-|---|---|---|
-| `id`, `tenantId`, `widgetId` | | A |
-| `intentTokenHash` | `String @db.Char(64)` | A |
-| `capabilitySpace` / `capabilityKey` | `String` | A |
-| `widgetKind` | `String` | A |
-| `fieldKinds` | `String[]` | A | the non-closed kinds that triggered the ledger write |
-| `justification` | `String` | A | `free_input_justification` — a server-authored justification from a closed set, not user text |
-| `boundsSourceRefs` / `normalizerRefs` | `String[]` | A | INV-23 |
-| `mintedAt` | `DateTime @db.Timestamptz(3)` | A |
-
-```
-@@unique([tenantId, intentTokenHash])
-@@index([tenantId, capabilityKey, mintedAt])   // the ration, per capability, over time
-```
-
-**The ledger counts the larger population.** `free_input_justification` is required on any
-`InputSchema` containing a field of kind `integer`, `decimal`, `date`, `time`, `datetime`, `text`
-or `phone` without a closed `enum_values`, **regardless of which kind carries it**; `input_allowed`
-independently restricts which kinds may carry such a schema at all. Both fences apply.
-
-### 5.7 `WidgetIntentReceipt` — the adjudication of one submission
-
-The contract names `IntentReceipt` in §4.2 FR2 (`TerminalOutcome` is derived from it) and in
-§4.4.3 (`IntentReceipt.utterance_echo`), and **declares no shape for it.** K3 declares it, and
-this is the shape, derived from the two clauses that read it and from nothing else:
-
-| column | type | class |
-|---|---|---|
-| `id`, `tenantId`, `widgetId` | | A |
-| `intentTokenHash` | `String @db.Char(64)` | A |
-| `submittedAt` | `DateTime @db.Timestamptz(3)` | A |
-| `outcome` | `String` | A | `ACCEPTED` / `REFUSED` / `NEEDS_CONFIRMATION` / `NEEDS_VERIFICATION` |
-| `refusalCode` | `String?` | A | from the closed refusal vocabulary; never free text |
-| `actionReceiptRef` | `String?` | A | **the only pointer to a business fact**; FR2's `outcome === 'CONFIRMED' ⟺ actionReceiptRef !== null` is asserted over this column |
-| `answeringChannel` | `String` | A | |
-| `utteranceEcho` | `String?` | **C** | what was written into the transcript on this person's behalf |
-
-```
-@@unique([tenantId, intentTokenHash])   // one adjudication per token
-@@index([tenantId, widgetId])
-```
-
-**It lives in the intent-audit store, not the receipt store**, and the distinction is not
-bookkeeping: `utteranceEcho` is a sentence composed on a person's behalf, so it is
-`CONVERSATION_CONTENT` and must be erasable — and the receipt store is declared non-erasable.
-The **business** receipt it points at stays in the receipt store and is not erased. That split is
-what lets `TerminalOutcome` survive an erasure as *"this principal submitted intent X against
-capability Y at time T, and a canonical action completed"* without holding what was said.
-
-### 5.8 The registry and ledger tables
-
-Small, and wave 1's entire schema footprint.
-
-| model | package | holds |
-|---|---|---|
-| `WidgetCapabilityGap` | K1 | the gap ledger: `gapKey`, `act`, `ownerState`, `evidence`, `openedAt`, `closedAt`, `closingCommit` — the eight `owner: NONE` keys plus every gap a later package opens |
-| `WidgetMechanismGap` | K1 | `MECHANISM_GAP_LEDGER`, `MG-P01` … `MG-P32`, one row per prerequisite, from which every build-status count is **printed, never transcribed** |
-| `WidgetCapabilityPolicy` | K2 | `WIDGET_CAPABILITY_POLICY`: `capKey`, `minVerification`, `consentClass` — total over C9-CAP's 56 rows **and over those only** |
-| `WidgetDraft` | K3 (store) / K7 (booking owner) | the server-owned draft: `draftRef`, `draftClass`, `ownerCapabilityKey`, `diffJson`, `expiresAt`. `diffJson` is `CONVERSATION_CONTENT`. |
-| `WidgetErasureTombstone` | K3 / proved by K12 | `{erasedAt, erasureRequestRef, store, rowKey, fieldsErased[]}` — append-only, in the receipt store |
-
-`CONTROL_REGISTRY` is **not** a table: it is a compiled-in registry closed at three keys, with a
-start-up assertion. A control registry that can be edited at runtime is a control registry that
-can grow a fourth key without review.
-
-### 5.9 The migration envelope
-
-**One migration in wave 1, one in wave 2, and nothing that touches a business table.**
-
-```
-prisma/migrations/<stamp>_widget_layer_ledgers/        (wave 1, K1+K2)
-    CREATE TABLE "WidgetCapabilityGap"
-    CREATE TABLE "WidgetMechanismGap"
-    CREATE TABLE "WidgetCapabilityPolicy"
-
-prisma/migrations/<stamp>_widget_layer_runtime/        (wave 2, K3)
-    CREATE TABLE "WidgetTimelineTurn"
-    CREATE TABLE "WidgetEmission"
-    CREATE TABLE "WidgetIntentRecord"
-    CREATE TABLE "WidgetIntentSubmissionAudit"
-    CREATE TABLE "WidgetIntentReceipt"
-    CREATE TABLE "WidgetRenderReceipt"
-    CREATE TABLE "WidgetSuppressedEmission"
-    CREATE TABLE "WidgetFreeInputLedger"
-    CREATE TABLE "WidgetDraft"
-    CREATE TABLE "WidgetErasureTombstone"
-```
-
-**Every statement is `CREATE TABLE`.** Not one `ALTER TABLE` against an existing model, not one
-new column on a business table, not one foreign key from a business table into these. The gate
-that enforces it is mechanical: the completion gate's G8 row asserts *modified business tables =
-0, migrations other than these two = 0, FKs into business tables = 0*, computed from the
-migration diff rather than reviewed by eye.
-
-**Two things the deploy path already demands, restated because they have broken releases here
-before.** `prisma.config.ts` must be present in the release — the schema carries no `url` and
-`migrate deploy` fails without it. And a migration is never applied by copying a neighbour's
-`node_modules`: the release is built whole on the server, or the generated client will not know
-these columns and the first write will fail at runtime while health stays green.
+**Erasure writes, it does not delete.** RT6 sets every `CONVERSATION_CONTENT` and
+`CANONICAL_ELSEWHERE` column to `NULL` across the timeline and intent-audit stores for the
+requesting principal, stamps `erasedAt`, and appends to `WidgetErasureTombstone`. The row keeps
+its shape and its 140 `AUDIT_RETAINED` columns, so the audit line survives as *"this principal
+submitted intent X against capability Y at time T"* without holding what they said.
 
 ---
 
