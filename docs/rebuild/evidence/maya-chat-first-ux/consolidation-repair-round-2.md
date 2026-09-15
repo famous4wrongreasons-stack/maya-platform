@@ -133,3 +133,20 @@ be produced by reading the artefact, not by reading the tool output that was sup
 it — and the way to make that cheap is to write the check as a program. Three of the four
 duplicates in round 1b, all fifteen wrong-section citations in round 2, and these eight, were
 found by scripts and not by reading.
+
+## Round 2b — three found by checks written while round 3 ran
+
+Two more checkers were written and run against the repaired body while the third verification
+pass was in flight. Both are committed.
+
+| # | check | finding |
+|---|---|---|
+| W1 | `declared-identifier-check.mjs` — every `SCREAMING_SNAKE` identifier a normative clause names must appear in some declaration | **`OwnerClass` and `ownerClassKeys` were declared by nothing.** `KindRule.owner_class` is typed `OwnerClass`, and K20's `emittable(kind) = ownerClassKeys(kind) ∩ capabilityRegistry ≠ ∅` — **the derivation that decides whether a kind may be emitted at all** — reads `ownerClassKeys`. Both are now declared in §2.4, the owner class as a closed twenty-five-member union over the values §2.4's own registry column uses and §0.14 F79's six draft owners, and `ownerClassKeys` as a total function whose `'NONE'` and `'INHERITED'` branches are the empty set and the intent's own capability rather than partial cases. |
+| W2 | the same run | **the shortfall branch table stated twice** — §0.8 F53 in prose and §3.4 R3.4.5 as a table. §3.4 keeps it, because §0.2's map gives the gate pipeline to §3; F53 keeps the half that is a property of the floor (withheld at `EP-FIT` step 1, reachable via an emitted `HANDOFF`) and cites R3.4.5 for the branch. |
+| — | `per-kind-totality-check.mjs` — every per-kind table total over the 22 kinds | **both tables total, 22/22.** No finding. |
+
+The other 27 identifiers the first checker flagged were triaged and are all legitimate:
+repository values (`APPROVER_ROLES`, `TENANT_ACTION_ROLES`, `PACKAGE5_WAVE3_REGISTRATIONS`,
+`VK_TOKEN`), terms cited only as **deleted** (`FAILURE`, `RETRY`, `NON_INTERACTIVE`), and
+identifiers declared in a markdown table rather than a fenced block (`CONTROL_REGISTRY`,
+`T_AUDIT`, `T_TIMELINE`, `HANDOFF_REQUIRED`, `NEEDS_SECOND_CHANNEL`).

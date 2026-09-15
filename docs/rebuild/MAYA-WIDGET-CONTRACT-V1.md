@@ -976,12 +976,13 @@ pure-function re-evaluation plus one comparison. *Evaluation point:* `EP-INGRESS
 
 **F53 — shortfall: withheld at fitting, refused at ingress.** At `EP-FIT` step 1 an intent whose
 floor exceeds the session's server-derived level is **withheld** with `reason:
-'verification_floor'` and MUST be reachable via an emitted `HANDOFF`. If such a token is
-nevertheless submitted, Gate 5 applies the per-effect branch: `NAVIGATE`/`REFINE`/`HANDOFF` →
-`HANDOFF_REQUIRED` plus a step-up path landing on the same target;
-`CONTROL`/`DRAFT`/`REQUEST_APPROVAL`/`COMMIT` → `NEEDS_SECOND_CHANNEL`, refused, with the deep
-link. No branch renders as a failure. *Mechanism:* the fitter's step 1 and the Gate 5 branch
-table. *Evaluation points:* `EP-FIT`, `EP-INGRESS` Gate 5.
+'verification_floor'` and MUST be reachable via an emitted `HANDOFF` — that half is §0's, because
+it is a property of the floor. If such a token is nevertheless submitted, Gate 5 applies a
+per-effect branch, and **that branch table is declared once, in §3.4 R3.4.5**, because §0.2's map
+gives the gate pipeline to §3. It is not restated here. What holds across every branch, and is
+the reason the branch exists at all: **no branch renders as a failure.** *Mechanism:* the
+fitter's step 1, and §3.4 R3.4.5's branch table. *Evaluation points:* `EP-FIT`,
+`EP-INGRESS` Gate 5.
 
 **F54 — the authority check at Gate 6 dispatches on `subjectCapability(record)`, and is scoped
 by effect.** Dispatching on `record.capability` would skip the C9 branch for **every
@@ -2513,6 +2514,40 @@ type TextSentence =
 ---
 
 ### 2.4 The registry, at a glance
+
+**The owner-class vocabulary is closed, and declared here.** `KindRule.owner_class` is typed
+`OwnerClass`, and K20's `emittable` derivation reads `ownerClassKeys`; neither was declared by
+any shape, which is an F2 violation on the derivation that decides whether a kind may be emitted
+at all.
+
+```ts
+type OwnerClass =
+  // read owners
+  | 'CATALOG_READ' | 'AVAILABILITY_READ' | 'SCHEDULE_READ' | 'CLIENT_READ'
+  | 'MEASUREMENT_READ' | 'RESULT_READ' | 'ANALYTICS_READ' | 'INTEGRATION_STATUS'
+  // act owners
+  | 'BOOKING_OWNER' | 'BULK_AUDIENCE_OWNER' | 'ORCHESTRATION_RUN' | 'ACTION_EXECUTION'
+  | 'CONSENT_REGISTER' | 'IDENTITY_BINDING_OWNER' | 'COMMERCE_OWNER'
+  | 'MEDIA_GENERATION_OWNER' | 'ARTIFACT_OWNER'
+  // the six SETTINGS_DRAFT draft owners, declared with their keys in §0.14 F79
+  | 'SETTINGS_OWNER' | 'NOTIFICATION_PREF_OWNER' | 'SCHEDULE_RULE_OWNER'
+  | 'TENANT_CONFIG_OWNER' | 'TASK_OWNER' | 'AUDIENCE_OWNER'
+  // the two non-owners
+  | 'INHERITED'          // the owner is named by the intent's own capability (FORM)
+  | 'NONE';              // the kind cites no owner at all (LIMITATION)
+
+declare function ownerClassKeys(kind: WidgetKind): ReadonlySet<CapabilityRef>;
+       // the registry keys KIND_REGISTRY[kind].owner_class resolves to, at EP-REGISTRY-LOAD.
+       // Total over WidgetKind: 'NONE' resolves to the empty set and 'INHERITED' to the keys
+       // the intent's own capability names, so neither is a partial branch.
+```
+
+At `EP-REGISTRY-LOAD`, or the process does not start: every `OwnerClass` member other than
+`'NONE'` and `'INHERITED'` resolves to at least one key that is a member of its declared space,
+and every `KindRule.owner_class` is a member of the union above. A kind whose owner class
+resolves to the empty set is `emittable: false` and emits a `LIMITATION` carrying the mapped
+`capability_gap_ref` — which is exactly how the five blocked kinds of §2.7 are blocked, by
+derivation rather than by a list.
 
 `Owner class` resolves to a set of C9 capability-registry keys at REGISTRY LOAD. `Ceiling` is the derived phrase of K3, computed over the ordered members alone. `FS` is the fullscreen rule. `Cap` is the density cap that forces escalation. `CONTROL` is a permitted effect on every row and appears in none of the ceilings.
 
