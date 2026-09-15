@@ -1,0 +1,46 @@
+{
+ "file": "MAYA-WIDGET-CONTRACT-V1.consolidated.md",
+ "lines": 6218,
+ "checks": [
+  {
+   "check": "precedence language in normative text",
+   "count": 1,
+   "note": "as amended by EC-1"
+  },
+  {
+   "check": "amendment inside a comment",
+   "count": 0,
+   "note": ""
+  },
+  {
+   "check": "duplicate clause identifiers",
+   "count": 0,
+   "note": ""
+  },
+  {
+   "check": "called but never declared (in fences)",
+   "count": 46,
+   "note": "ActionCapabilityRegistry | list | maxLevel | targetFloor | tryGet | union | anyway | refuseMint | allowedKinds | source | capability | basis"
+  },
+  {
+   "check": "ReadonlyMap bracket-indexed",
+   "count": 0,
+   "note": ""
+  },
+  {
+   "check": "CLIENT.2 pii fence present",
+   "count": 0,
+   "note": "present"
+  },
+  {
+   "check": "ARTIFACT.3 contains_pii fence present",
+   "count": 0,
+   "note": "present"
+  },
+  {
+   "check": "floor-reduction mentions (expect a single disclosing table)",
+   "count": 5,
+   "note": "manual read required"
+  }
+ ]
+}
