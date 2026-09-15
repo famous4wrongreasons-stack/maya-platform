@@ -1,0 +1,969 @@
+{
+ "counts": {
+  "KEEP AS CHAT SURFACE": "4",
+  "CONVERT TO WIDGET": "1",
+  "KEEP AS FULLSCREEN SECONDARY": "1",
+  "SETTINGS / SECURITY ONLY": "30",
+  "RETIRE AFTER PARITY": "3",
+  "LEGACY / UNREACHABLE": "14",
+  "OUT OF SCOPE WITH EXACT REASON": "82",
+  "TOTAL": "135"
+ },
+ "assignments": [
+  {
+   "name": "Booking entry — main YClients online booking (hero, #book, mobile #book-mob-section, footer, promo)",
+   "channel": "pwa",
+   "file": "сайт и приложение/index.html",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group A — public marketing site] All five occurrences of `personal/menu?o=` (index.html L833, L2621, L2649, L2656, L4328) leave the domain for n532637.yclients.com; index.html carries zero chat surfaces, so there is no principal for a typed intent to bind to and no canonical confirmation step that could own the booking effect. Already adjudicated round 1 as KEEP AS CAPABILITY under a near-duplicate name; this does not overturn that. Fate belongs to conflict C3."
+  },
+  {
+   "name": "MayaRuntime.openTipsURL (custom plugin — YClients tips payment escape from WKWebView)",
+   "channel": "native-shell",
+   "file": "сайт и приложение/app.html",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group B — native bridge capability] Not a surface: declared capability id `runtime.tips.open` in maya.native.bridge/1 §4 — transport behind a tips action, no navigation entry to retire. The hard constraint forbids designing a separate native widget architecture. Round-2 KEEP AS CAPABILITY preserved, including its parity risk: the gesture chain openTipsURL → AppLauncher.openUrl → __meExt → Telegram.WebApp.openLink → location.href must survive intact or iOS blocks the open."
+  },
+  {
+   "name": "MayaRuntime.checkTipsAvailability (custom plugin — network reachability probe before payment)",
+   "channel": "native-shell",
+   "file": "сайт и приложение/app.html",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group B] Bridge capability id `runtime.tips.availability`, a pre-flight probe behind the same tips action. Parity risk carried forward: the web branch returns {available:true, skipped:true} (app.html:22180), so a uniform 'Оплатить' state sends web and Telegram users into a blank page with no in-conversation error."
+  },
+  {
+   "name": "MayaRuntime.loadRemoteImage (custom plugin — fetch social avatar bytes outside WKWebView CORS)",
+   "channel": "native-shell",
+   "file": "сайт и приложение/app.html",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group B] Bridge capability id `runtime.image.remote_load`, an asset-acquisition call inside the identity layer (mePromoteSocialAvatarToNative, app.html:5247). Native-only guard at L5253 means any canvas composition of avatars works on native and silently taints on web."
+  },
+  {
+   "name": "MayaRuntime.getPreviewAccess (custom plugin — native grants MAYA OS trial/preview entitlement + API base)",
+   "channel": "native-shell",
+   "file": "сайт и приложение/app.html",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "Authority-layer enforcement point, not a screen. The plugin sets previewAllowed, window.__ME_MAYA_OS_PREVIEW=true and overrides window.__ME_MAYA_OS_API_BASE (app.html:6887-6894) — a device-side grant. Round-2 disposition is already SECURITY/AUTHORITY ONLY; the platform section pins it as N7 `runtime.preview_access → presentation only`. Enforced by the server re-deciding entitlement on every call plus the five unconsolidated client-preview PII fences (gate G5). It may never be read to decide what MAYA offers: a shell build is not a principal."
+  },
+  {
+   "name": "MayaNfcWriter.writeUrl (custom plugin — write client smart-link to a blank NFC tag)",
+   "channel": "native-shell",
+   "file": "сайт и приложение/app.html",
+   "classification": "CONVERT TO WIDGET",
+   "reason": "The one genuine conversion in this batch; matches the round-2 disposition MOVE INTO CHAT WIDGET. A one-shot staff action in the client-connect flow: single-action card, OS sheet handles the tap. NORMATIVE constraint the card must carry: three tiers with different promises — MayaNfcWriter.writeUrl (app.html:34434) writes, Web NFC NDEFReader (:34436) writes via another dialog, clipboard fallback (:34442) does NOT write — and the bundle already varies the label (:34683). Tier, write result and fallback text must be distinct states; the write intent is staff-authority only, derived server-side, never from the button."
+  },
+  {
+   "name": "MayaVoiceRecorder (custom plugin — native voice capture for MAYA chat)",
+   "channel": "native-shell",
+   "file": "сайт и приложение/app.html",
+   "classification": "KEEP AS CHAT SURFACE",
+   "reason": "Already chat-native and stays so: this is the composer's own input modality, not a destination (round-2 widgetType says exactly that). Under VoiceSurface@1 the speech tier renders the same envelope. Carry-forward: native must send WAV as JSON base64 to /ai/transcribe, not multipart (CapacitorHttp patches fetch/XHR; iOS multipart arrives empty, app.html:20552), and the native 20 s cap (R.nativeCap, :20720) differs from web — unifying copy without unifying the limit makes one channel truncate silently."
+  },
+  {
+   "name": "TeamVoicePlayer (custom plugin — native audio playback)",
+   "channel": "native-shell",
+   "file": "сайт и приложение/app.html",
+   "classification": "KEEP AS CHAT SURFACE",
+   "reason": "Already chat-native: an inline voice-message bubble in the conversation (round-2 widgetType). Carry-forward: WKWebView drops streaming playback, which is why voice is downloaded whole into a local blob first (app.html:37821-37823) — streaming into <audio src> plays on web and stalls on iOS. app-tenant.html does carry it (L20606, L21144), so the tenant bundle can hear MAYA but cannot record."
+  },
+  {
+   "name": "app-tenant.html — partial Capacitor surface (no custom Maya plugins)",
+   "channel": "native-shell",
+   "file": "сайт и приложение/app-tenant.html",
+   "classification": "RETIRE AFTER PARITY",
+   "reason": "A third bundle for one role contradicts 'ROLES DEFINE AUTHORITY, NOT APPLICATION MODES' at the packaging level; round-2 disposition MERGE, which in this vocabulary is a retirement gated on proven parity. Verified census: StatusBar (L21602), Keyboard (L21606), App (L22894), TeamVoicePlayer. Missing: MayaRuntime, MayaNfcWriter, MayaVoiceRecorder, AppIcon, Haptics, SplashScreen, PushNotifications, AppLauncher — with no SplashScreen.hide the native splash never clears. It injects X-Telegram-InitData at four sites, so it is identity-bearing, not a stub. Bound by G1–G9 plus a named successor; depends on unresolved decision D10."
+  },
+  {
+   "name": "SMM bot runtime (aiogram polling, second production Telegram bot)",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C — separate product] smm_bot has its own bot token, its own deploy root (/opt/smm_bot), its own SQLite store, and its own authority model `is_admin(uid) := uid in config.ADMIN_IDS` (bot.py:49-50) — no tenant, no Membership, no Client/User, no C9 registry key. This row is the runtime itself (Dispatcher + long polling + three spawned loops). PRIMARY-NAV CHECK: primary nav of smm_bot, not of MAYA — see conflict C7."
+  },
+  {
+   "name": "/start — command catalogue",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] The command catalogue is this separate bot's own menu, reachable only by an ADMIN_IDS member. PRIMARY-NAV CHECK: primary nav of smm_bot, not of MAYA — see conflict C7."
+  },
+  {
+   "name": "platforms_status() — connected-platform indicator",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Renders the five configured outbound targets to the operator of a different product (bot.py:76-88). One of those targets is ВКонтакте — see conflict C2."
+  },
+  {
+   "name": "/model — AI model switcher (Claude Sonnet 4.5 / GPT-4o) + setmodel: inline keyboard",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Switches the caption LLM at runtime and persists to an on-disk JSON settings file; no MAYA model routing, no governed setting, no audit record. PRIMARY-NAV CHECK: primary nav of smm_bot, not of MAYA — see conflict C7."
+  },
+  {
+   "name": "/features — smart-feature toggles + togglefeat: inline keyboard",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Feature toggles persisted to the same JSON file — not governed settings, no tenant, no audit record. PRIMARY-NAV CHECK: primary nav of smm_bot, not of MAYA — see conflict C7."
+  },
+  {
+   "name": "/best_time — Publer best-posting-time analytics",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Third-party analytics read (Publer GET /analytics/{account}/best_times), gated on PUBLER_IG_ACCOUNT. Not C7/C8 canonical data, so it could not back a chart under 'LLM never generates numbers for a chart; charts render canonical C7/C8 data'. PRIMARY-NAV CHECK: primary nav of smm_bot — see conflict C7."
+  },
+  {
+   "name": "/top_hashtags — Publer hashtag-reach analytics",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Third-party analytics read (Publer); the hashtags are injected into generated captions. Not canonical C7/C8 data. PRIMARY-NAV CHECK: primary nav of smm_bot — see conflict C7."
+  },
+  {
+   "name": "/competitor — Publer competitor analysis",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Third-party competitor analytics read (Publer), configured in the Publer dashboard, not in this project. PRIMARY-NAV CHECK: primary nav of smm_bot — see conflict C7."
+  },
+  {
+   "name": "/queue — scheduled-post queue listing",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Reads pending rows from smm_bot's own SQLite queue (bot.py:335-353). PRIMARY-NAV CHECK: primary nav of smm_bot — see conflict C7."
+  },
+  {
+   "name": "/cancel <id> — delete a pending scheduled post",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Hard-deletes a queued row (schedule_db.py:134-142 DELETE FROM scheduled_posts) in a separate product's store. Admin-guarded at :357."
+  },
+  {
+   "name": "/bulk — mass media upload session (FSM bulk_collecting)",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] In-memory per-user media buffer; no persistence and no principal beyond a Telegram user id. PRIMARY-NAV CHECK: primary nav of smm_bot — see conflict C7."
+  },
+  {
+   "name": "/done — close bulk upload, present distribution menu (FSM bulk_distribution)",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Separate product. UNGUARDED handler — no is_admin call in bot.py:402-441; see conflict C1."
+  },
+  {
+   "name": "Bulk distribution dispatcher — 4 scheduling modes (умно / вручную / за период / регулярно)",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Separate product. UNGUARDED handler that writes N rows into scheduled_posts (bot.py:455-556) — see conflict C1."
+  },
+  {
+   "name": "_distribute_over_period — even spread over N days at fixed time slots",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Scheduling algorithm reached only from the unguarded dispatcher (bot.py:559-602) — see conflict C1."
+  },
+  {
+   "name": "_smart_distribute — platform-limit-aware distribution using Publer best times",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Scheduling algorithm reached only from the unguarded dispatcher (bot.py:605-689), with hardcoded per-day limits at :615-616 — see conflict C1."
+  },
+  {
+   "name": "Manual per-item scheduling flow (/skip, /stop, FSM bulk_manual_datetime)",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Separate product. UNGUARDED handlers at bot.py:725, :732, :741 — see conflict C1."
+  },
+  {
+   "name": "Media intake + album assembly (photo/video → pending post)",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Content intake for a separate product; admin guard present at :795. PRIMARY-NAV CHECK: primary nav of smm_bot — see conflict C7."
+  },
+  {
+   "name": "Post approval preview + inline keyboard (approve / schedule / reject / generate / edit / copy)",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] The keyboard is built for an admin (bot.py:53-73), but six of the eight callback handlers it feeds carry no is_admin check — see conflict C1. PRIMARY-NAV CHECK: primary nav of smm_bot — see conflict C7."
+  },
+  {
+   "name": "Callback: approve: — publish now to all platforms",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Separate product, and the sharpest instance of conflict C1: verified in the canonical checkout that bot.py:961-980 performs NO principal check before calling publish_to_all and fanning out to five platforms. Its only barrier is that Telegram delivers a callback query solely from a message carrying the keyboard — a channel-delivery property, i.e. exactly 'CHANNEL IDENTITY != BUSINESS AUTHORITY'."
+  },
+  {
+   "name": "Callback: schedule: — schedule one post (with Publer best-time hint)",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Separate product. UNGUARDED handler (bot.py:897, :931) that persists a full post payload as payload_json — see conflict C1."
+  },
+  {
+   "name": "Callback: generate: — AI caption generation for a pending post",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Separate product. UNGUARDED handler (bot.py:843-875) that spends a vision LLM call — see conflict C1."
+  },
+  {
+   "name": "Callbacks: reject: / edit: / copy: — discard, manual re-caption, clipboard echo",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Separate product. UNGUARDED handlers at bot.py:881, :982, :992, :1004 — see conflict C1."
+  },
+  {
+   "name": "scheduler_loop — 30s background publisher for due scheduled posts",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Separate product, and an autonomous publisher: bot.py:1016-1073 publishes due posts with no operator confirmation at publish time and generates a caption on the fly when one is missing."
+  },
+  {
+   "name": "queue_health_loop — 6h empty/short-queue alerting",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Separate product; proactive admin DM about content-queue depth, deduped once per day via a JSON meta store."
+  },
+  {
+   "name": "holiday_loop — daily 09:00 holiday-content prompts",
+   "channel": "smm-bot",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] Separate product; proactive admin DM built from a 12-date Russian holiday calendar."
+  },
+  {
+   "name": "schedule_db — SQLite publication queue (/opt/smm_bot/scheduled.db)",
+   "channel": "smm-bot",
+   "file": "smm_bot/schedule_db.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group C] A datastore, not a surface: raw sqlite3 at /opt/smm_bot/scheduled.db with an in-place ALTER migration for payload_json. Separate product's storage."
+  },
+  {
+   "name": "publish_to_all — outbound fan-out dispatcher (5 targets)",
+   "channel": "social-publishing",
+   "file": "smm_bot/publishers.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group D — outbound publish transport] Belongs to smm_bot; moves bytes to third-party feeds and renders no envelope to any MAYA user. Platform/channels §0 lists `social-publishing` (7) among the emitters and transports excluded from ChannelProfile. Invoked from the unguarded approve: callback (:973) and from scheduler_loop (:1056)."
+  },
+  {
+   "name": "Telegram channel publishing (config.TG_CHANNEL_ID)",
+   "channel": "social-publishing",
+   "file": "smm_bot/publishers.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group D] Outbound target of smm_bot (gate publishers.py:26-27). Marketing broadcast to a public channel, not a MAYA conversation."
+  },
+  {
+   "name": "Telegram group publishing (config.TG_GROUP_ID)",
+   "channel": "social-publishing",
+   "file": "smm_bot/publishers.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group D] Outbound target of smm_bot (gate publishers.py:29-30), sharing the tg caption variant with the channel."
+  },
+  {
+   "name": "VKontakte wall publishing (wall.post to -VK_GROUP_ID) — ⚠️ CONFLICT with CLAUDE.md rule 7",
+   "channel": "social-publishing",
+   "file": "smm_bot/publishers.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group D] Outbound target of smm_bot. CONFLICT RAISED, NOT RESOLVED (C2): CLAUDE.md rule 7 states VK/MAX links must not exist in the project, yet this is live code — verified in the canonical checkout at publishers.py:32-33 (`if config.VK_TOKEN and config.VK_GROUP_ID`) with api.vk.com/method/wall.post calls at :125 and :218. Whether the rule or the code is wrong is the owner's call."
+  },
+  {
+   "name": "Instagram publishing via Publer API",
+   "channel": "social-publishing",
+   "file": "smm_bot/publishers.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group D] Outbound target of smm_bot via a third-party relay (gate publishers.py:35-36, 120 s timeout at :269)."
+  },
+  {
+   "name": "TikTok publishing via Publer API (video only)",
+   "channel": "social-publishing",
+   "file": "smm_bot/publishers.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group D] Outbound target of smm_bot via a third-party relay (gate publishers.py:38-43). liveStatus UNKNOWN is carried forward verbatim as UNKNOWN and is NOT resolved into 'retired' — 'UNKNOWN is never rendered as failure' applies to triage records as much as to widgets."
+  },
+  {
+   "name": "Per-platform caption generator (tg / ig / vk / tiktok)",
+   "channel": "social-publishing",
+   "file": "smm_bot/ai_caption.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group D] Content generation feeding smm_bot's outbound targets, behind the platform_specific_captions feature flag. liveStatus FENCED carried forward as FENCED."
+  },
+  {
+   "name": "Anonymous visitor identity cookie (me_visitor) + consent gateway",
+   "channel": "public-community",
+   "file": "maya-saas-backend/deploy/platform/beget-edge/rc/r09-site-community-proxy.php",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "Identity enforcement point. It mints and verifies a pseudonymous browser subject (me_visitor, three dot-parts, acceptance window at L25) and signs the source — and grants NO User, Client or staff authority. That is 'CHANNEL IDENTITY != BUSINESS AUTHORITY' made mechanical, and it must be proven by a negative test (no pseudonymous cookie yields any capability), the shape of gate G3. No user-visible successor; never becomes a widget."
+  },
+  {
+   "name": "Guest-chat edge route mapping (site_guest_chat -> guest-chat)",
+   "channel": "guest-chat",
+   "file": "maya-saas-backend/deploy/platform/beget-edge/rc/r09-site-community-proxy.php",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group E — edge transport] A route-name mapping inside the relay's 7-action allowlist (L4-9, POST-only else 405, payload allowlist L34-38). Platform/channels §0 excludes `edge-relay` from ChannelProfile because a transport that could declare presentation capability is the shape of a fourth authority path. An allowlist inside a relay is hardening; the authority decision is made at the canonical owner."
+  },
+  {
+   "name": "ANONYMOUS GUEST CHAT WITH MAYA (module)",
+   "channel": "guest-chat",
+   "file": "ai администратор/site_guest_chat.py",
+   "classification": "KEEP AS CHAT SURFACE",
+   "reason": "This is a chat surface already and stays one: an anonymous stranger talking to MAYA on the marketing site. Nothing to convert. What the contract adds is discipline: the conversation renders under the TEXT_ONLY conformance reference (R1), and because the principal is an unauthenticated stranger the envelope must carry ZERO COMMIT intents — 'no widget type may by itself confer consent, booking authority, marketing permission, finance permission, tenant authority or approval', and the VerificationLevel floor (Gate 4) refuses them on channel identity regardless. Evidence caveat carried forward: ABSENT from this checkout; existence rests on the production inventory — see conflict C4."
+  },
+  {
+   "name": "POST /api/site/community/{action} — anonymous source initiator",
+   "channel": "public-community",
+   "file": "ai администратор/site_community.py",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "Ingress enforcement point, not a presentation surface: gateway HMAC verification with a ±90 s window (L49-59) and the standing rule at L168 that legacy auth/session metadata is ignored because every source is anonymous. It decides what may enter and presents nothing. No user-visible successor."
+  },
+  {
+   "name": "Community engagement legacy owner (likes/views/comments/AI moderation/brand replies) — FENCED",
+   "channel": "public-community",
+   "file": "ai администратор/site_engagement.py",
+   "classification": "LEGACY / UNREACHABLE",
+   "reason": "Fenced shut at the body level: every SQLite writer retired (_connect L49-51, record_view L124-125, toggle_like L128-129, add_comment L132-140, add_brand_reply L143-144, event_status L155-156). Survives only as normalisation/pre-filter; the AI-moderation and brand-reply authority it once held is gone. NOT a free deletion — the retired bodies are AST-frozen by package5_public_community_runtime_guard.py scan() L12-35 against the r09 contract (package5_wave_rc_guard_contracts.py L123-182)."
+  },
+  {
+   "name": "Canonical community source bridge (Python -> NestJS)",
+   "channel": "public-community",
+   "file": "ai администратор/canonical_public_community.py",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "Transport-level authority boundary: HMAC source signing with an operation allowlist, carrying only visitorSubjectHash. Its own roleMode records that it structurally cannot carry a tenant, User or Client — one of the few places where 'enforced by non-existence' is literally true, because there is no field on the wire to carry the authority. No successor surface."
+  },
+  {
+   "name": "R09 permanent owner-boundary ratchet",
+   "channel": "public-community",
+   "file": "ai администратор/package5_public_community_runtime_guard.py",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "A guard, and the load-bearing kind: it AST-compares every retired body against the frozen r09 contract (scan() L12-35), running in CI and at runtime. Its parity proof is negative — mutate a retired body and the scan must fail. No user-visible successor; it must never be relaxed to let a UX change through."
+  },
+  {
+   "name": "POST /public-community/source — canonical anonymous source controller",
+   "channel": "public-community",
+   "file": "maya-saas-backend/src/public-community/public-community.controller.ts",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "A public controller whose job is to refuse what it is not given: @Public, anonymous, X-Community-Time / X-Community-Signature verified via gateway.verify (L38), and tenant resolved ONLY from the configured gateway mapping, never from the request. That last clause is the tenant-authority fence. Enforcement point with no presentation of its own."
+  },
+  {
+   "name": "Gateway verification service (source scope, no moderator authority)",
+   "channel": "public-community",
+   "file": "maya-saas-backend/src/public-community/public-community-gateway.service.ts",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "Verification service: parses PUBLIC_COMMUNITY_GATEWAYS into a mapping (L30-72) and resolves configured source scope only, granting no User, Client or moderator capability. Enforcement point, no successor surface."
+  },
+  {
+   "name": "PublicCommunityService.acceptComment — consent persistence + idempotent anonymous comment",
+   "channel": "public-community",
+   "file": "maya-saas-backend/src/public-community/public-community.service.ts",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "This is where consent is actually recorded, so it is authority, not presentation: exact-key command shape ['author','text','publicationConsent','consentPolicyVersion'] (L121-126) and consent enforcement at L127-134 rejecting the write unless publicationConsent is explicitly given. 'No widget type may by itself confer consent' holds here because the canonical owner — not the button — writes an append-only anonymous GUEST consent fact with no Client/User FK by design. Cutover owner: LEGAL."
+  },
+  {
+   "name": "PublicCommunityService.observe — anonymous likes and daily views",
+   "channel": "public-community",
+   "file": "maya-saas-backend/src/public-community/public-community.service.ts",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "Canonical owner method, not a surface: it records likes and daily views as per-browser-scope facts (identityHash over tenantId/sourceGatewayId/visitorSubjectHash/kind/callerKey, L204-300), explicitly not per-person. The human-facing control that reaches it is the public site community UI, inventoried separately in this same batch — counting this row as a surface would double-count that control."
+  },
+  {
+   "name": "GET/POST /public-community/moderation — human moderation + brand reply",
+   "channel": "public-community",
+   "file": "maya-saas-backend/src/public-community/public-community.controller.ts",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "Authority gate: @TenantScoped plus @Roles(TENANT_OWNER, BUSINESS_OWNER, TENANT_ADMIN, ADMINISTRATOR) with current active exact-tenant membership required (L53-60). Moderation and brand reply are approval acts and 'no widget type may by itself confer approval', so the gate lives here and the PWA queue is only its renderer. Parity proof is negative: one refusal test per role below the floor (gate G3)."
+  },
+  {
+   "name": "Community text/author safety contract (PII, profanity, staff-impersonation)",
+   "channel": "public-community",
+   "file": "maya-saas-backend/src/public-community/public-community.contract.ts",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "Content-safety and impersonation enforcement: COMMUNITY_CONTRACT 'maya.public-community/1', NFC+CRLF normalisation (L66-70), author collapse to 'Гость' (L71-76), PII and profanity rejection (L62, L63-101). Staff-impersonation prevention is an authority property, not a formatting preference — a stranger must not be able to sign as staff. Pure validation, no successor surface."
+  },
+  {
+   "name": "R09 schema foundation (PublicCommunityComment / PublicCommunityInteraction)",
+   "channel": "public-community",
+   "file": "maya-saas-backend/prisma/migrations/20260908010400_r09_approved_foundation/migration.sql",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "A Postgres migration (visitorSubjectHash, consentPolicyVersion, consentAcceptedAt, retentionUntil). Schema, not a surface — and the cycle's hard constraint is NO schema change, so this row cannot generate UX work by construction. Cutover owner: CAPABILITY."
+  },
+  {
+   "name": "365-day payload retention purge (AC6 purge_public_community_payloads)",
+   "channel": "public-community",
+   "file": "maya-saas-backend/src/package5-wave6/package5-wave-rc-payloads.ts",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "Scheduled retention executor (purge_public_community_payloads → PublicCommunityComment, policyKey 'public-community-retention'). No rendered surface. It is a 152-FZ obligation whose only legitimate cutover owner is LEGAL, and LEGAL is the only owner that can clear a row carrying a 152-FZ obligation."
+  },
+  {
+   "name": "Public site community UI (deployed Next.js chunk)",
+   "channel": "public-community",
+   "file": "maya-saas-backend/deploy/platform/beget-edge/rc/r09-public-community.js",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group A] User-facing, but not a surface of this product: browser JS injected into a production Next.js chunk on muzhskayaestetika.рф — a different web property with no source in this repository. It is not part of the PWA/native bundle the chat-first shell replaces, and its principal is an anonymous visitor holding no authority, so nothing on it can be chat-actuated. Out of scope for the chat-first UX, NOT unimportant: one of the three anonymous public-site surfaces in conflict C3."
+  },
+  {
+   "name": "PWA moderation queue «Обсуждения на сайте»",
+   "channel": "public-community",
+   "file": "сайт и приложение/app.html",
+   "classification": "KEEP AS FULLSCREEN SECONDARY",
+   "reason": "PRIMARY-NAV CHECK: the only primary-nav row in this batch belonging to MAYA's own PWA, and it is NOT excluded. A moderation queue is a list-plus-decision stack — it does not fit a chat bubble, the explicit criterion for fullscreen detail — and each decision is an approval act that no widget may confer. Target shape: a summary card in the conversation (queue depth, oldest item age) with a HANDOFF into the fullscreen route; the approve/reject control lives only there, authorised by the @Roles gate on the moderation controller. DEFECT TO FIX: today it is reachable only by hand-typing ?community_moderation (opener app.html:33068) — a query-param door, not a route. It needs a real route_key to satisfy G1/G2; entry mechanism depends on unresolved decision D4."
+  },
+  {
+   "name": "Beget api-proxy action dispatcher (7 community actions)",
+   "channel": "edge-relay",
+   "file": "maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group E] PHP edge relay: the action dispatcher arm for the 7 community actions (L113). It moves bytes and resolves no authority itself. Excluded from ChannelProfile by platform/channels §0."
+  },
+  {
+   "name": "Site publications API (/api/site/posts, /api/site/posts/{slug}, /api/site/post-media/{name})",
+   "channel": "public-community",
+   "file": "ai администратор/site_publications.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group A] Backend read API for the public marketing site, not a surface of the chat-first app; the pages it feeds fall under conflict C3. Recorded honestly: the public GET path is live while the draft/publish WRITERS have no active caller found (CYCLE-06 remainder inventory:48), so the write half is orphaned but the read half is not — the row is not retired. Evidence caveat: ABSENT from this checkout, resting on a production sha256 (conflict C4)."
+  },
+  {
+   "name": "site_publication_bot.py",
+   "channel": "public-community",
+   "file": "ai администратор/site_publication_bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "Not a verified surface: `grep -rn \"site_publication_bot\"` over the entire repository returns ZERO matches and no such file exists. The row is a filename inferred from a name, with no code behind it, so it cannot be triaged as a UX surface — there is no evidence it is one. Per 'UNKNOWN is never rendered as failure' it is recorded as UNRESOLVED IN THIS CHECKOUT, explicitly not as retired or dead; resolving it means reading the production host, which this cycle's fence forbids. Listed in conflict C4."
+  },
+  {
+   "name": "Anonymous guest-chat front-end UI",
+   "channel": "guest-chat",
+   "file": "сайт и приложение/index.html",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "A proven absence, not a surface: index.html (870237 bytes) contains site_event_status 0, site_event_comment 0, site_guest_chat 0, MayaPublicCommunity 0, me_visitor 0. What the row records is a CAPABILITY GAP — a live production guest-chat backend with no front-end in the shipped bundle — which belongs in the missing-capability list, not the surface census. It is NOT safe to conclude the front-end exists nowhere: the sibling community UI for the same proxy is a deployed Next.js chunk on muzhskayaestetika.рф with no source here, so the guest-chat front-end may be deployed the same way. The repository can neither confirm nor refute it (conflicts C3, C4)."
+  },
+  {
+   "name": "webhook_server.py — community/guest route registration",
+   "channel": "public-community",
+   "file": "ai администратор/webhook_server.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "aiohttp application bootstrap on :8080 — server wiring, not a UX surface. Its real content is a wiring finding: `grep -c \"api/site\"` returns 0 in this checkout, so the community and guest routes are not registered here while the production inventory says the modules run. That is a question for the CAPABILITY owner about which artefact is deployed (conflict C4), not a chat-first design decision."
+  },
+  {
+   "name": "R09 frozen retirement contract (site_community / site_engagement bodies)",
+   "channel": "public-community",
+   "file": "ai администратор/package5_wave_rc_guard_contracts.py",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "Frozen contract data consumed by the runtime guards: the exact required bodies for the retired site_community and site_engagement functions (L123-182, contract 'r09'). It is what makes the retirement enforceable rather than merely intended. No successor surface, and it must not be edited to accommodate a UX change."
+  },
+  {
+   "name": "Public site cabinet — Telegram deep-link nonce handshake (applogin_start/applogin_poll)",
+   "channel": "public-web-auth",
+   "file": "сайт и приложение/index.html",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "[Group F — security surface] Platform/channels §0 names `public-web-auth` (6) as the one security channel, 'precisely where SECURE_SURFACE_ONLY fields and the NEVER_CHAT_ACTUATED handoffs terminate'. PRIMARY-NAV CHECK: primary nav, and NOT excluded — it survives as a shell destination, not a tab. Sign-in is an identity act; identity.client.channel.unbind is in NEVER_CHAT_ACTUATED (§6.8) demanding SESSION_VERIFIED/STEP_UP_VERIFIED, so its bind counterpart terminates at shell.account / shell.connections by HANDOFF only. Chat may explain the state; chat may never mint the session."
+  },
+  {
+   "name": "Public site cabinet — Yandex ID OAuth (yandex_start / yandex_auth)",
+   "channel": "public-web-auth",
+   "file": "сайт и приложение/index.html",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "[Group F] PRIMARY-NAV CHECK: primary nav, NOT excluded — survives as a shell destination (shell.account). OAuth redirect with CSRF state binding in localStorage (yandex_state) and address-bar scrubbing after exchange. A widget cannot author an OAuth redirect and a button cannot mint a session: BUTTON != AUTHORITY."
+  },
+  {
+   "name": "Public site cabinet — session-token resume (cabinet_session)",
+   "channel": "public-web-auth",
+   "file": "сайт и приложение/index.html",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "[Group F] PRIMARY-NAV CHECK: primary nav, NOT excluded — survives as shell.account (which principal is signed in; sessions and devices; sign-out). The row is the session mechanism (getTok index.html:5445, cabinet_session :5592), and the session is what every other authority derives from. Recorded honestly: the cabinet CONTENT it drives — visit history, loyalty balance, subscription, upcoming visit — duplicates PWA surfaces already dispositioned elsewhere, and that duplication belongs to conflict C3, not to this row's class."
+  },
+  {
+   "name": "Public site cabinet — Telegram Login Widget credential consumer (tg_auth_data)",
+   "channel": "public-web-auth",
+   "file": "сайт и приложение/index.html",
+   "classification": "LEGACY / UNREACHABLE",
+   "reason": "Orphaned credential consumer: getTgAuth (index.html:5446) reads localStorage 'tg_auth_data' and submits it as auth_data, but the Telegram Login Widget that wrote that key is retired, so the branch at :5593 can no longer be entered by a fresh user. Dead read path, no successor needed. It is still a credential-handling path, so removal belongs to AUTHORITY and must carry a negative test proving no stale key can still mint a cabinet session."
+  },
+  {
+   "name": "api-proxy.php — production front proxy («Прокси фронта»)",
+   "channel": "edge-relay",
+   "file": "maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group E] The production front proxy: 95 ?action= routes fanned out to the Python bot, local Telegram HMAC verification, per-action IP rate limiting, CORS allowlist. Its roleMode records that role separation is delegated entirely upstream — it resolves nothing itself. Evidence caveat: the real file is NOT in the repository (`find . -name 'api-proxy*.php'` returns only the sanitized fixture), so every statement about it describes a fixture (conflict C4)."
+  },
+  {
+   "name": "api-proxy.codex-loyalty-20260721.php — stale duplicate front proxy served from public webroot",
+   "channel": "edge-relay",
+   "file": "docs/rebuild/evidence/package5-exhaustive-edge.json",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group E] CONFLICT RAISED (C5). Classifying it out of scope for the chat-first UX does NOT mean leaving it in place: it is a stale July-2026 duplicate of the entire 92-action identity+panel+god surface served from a second public URL (app/api-proxy.codex-loyalty-20260721.php, 146896 bytes, 92 phpActions in package5-exhaustive-edge.json), bypassing any hardening applied to api-proxy.php after 2026-07-21. That is a security/ops removal owned by AUTHORITY, needing no parity proof because it duplicates a live surface by construction."
+  },
+  {
+   "name": "maya-native-api.php — native/SaaS path-passthrough relay",
+   "channel": "edge-relay",
+   "file": "сайт и приложение/maya-native-api.php",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group E] Path-passthrough relay to the NestJS backend with a deliberately fixed upstream (L5), preserving REST verbs, ETag/304, Location and Retry-After, and enforcing a single unambiguous Idempotency-Key. Credential-transparent by design: forwards Authorization / X-Session-Token / X-Telegram-InitData untouched and resolves no role."
+  },
+  {
+   "name": "maya-platform-api.php — mayaos.ru edge relay",
+   "channel": "edge-relay",
+   "file": "maya-saas-backend/deploy/platform/beget-edge/maya-platform-api.php",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group E] mayaos.ru relay with the same fixed-upstream discipline (L3-4: 'this relay must never become a user-controlled open proxy'). Matches the topology recorded in CLAUDE.md — mayaos.ru fronts on Beget, /api/* relays to the NestJS backend on the bot VPS."
+  },
+  {
+   "name": "tg-config.php — bot_token store inside the public webroot",
+   "channel": "edge-relay",
+   "file": "docs/rebuild/evidence/package5-exhaustive-edge.json",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "Credential material, therefore an enforcement dependency rather than a transport: it supplies bot_token, bot_username, auth_max_age and bot_api_base to the proxy (api-proxy.sanitized.php L104-107), and the Telegram HMAC verification underpinning every Telegram-originated identity is keyed by SHA256(bot_token). No user-visible successor; never becomes a widget. Standing risk not introduced here: CLAUDE.md gotcha 1 records that project secrets are in the open and keys are NOT yet rotated (SECURITY_REMEDIATION.md) — a secret store inside the public webroot belongs to that remediation track."
+  },
+  {
+   "name": "SMS OTP delivery — send_sms / verify_sms (hard-fenced)",
+   "channel": "sms",
+   "file": "maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "A fail-closed refusal arm, which is an enforcement point: `case 'send_sms': case 'verify_sms':` returns success=false (L181-185) because SMS authorisation was deliberately removed. Deleting the arm would silently re-open an SMS login path, so it stays and its parity proof is the negative test that it still refuses. Its comment is also the second instance of conflict C2 — it tells the reader that login is «только ВКонтакте / Telegram»."
+  },
+  {
+   "name": "SMS OTP delivery — auth_phone_start (live, YClients-backed)",
+   "channel": "sms",
+   "file": "maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "Phone verification is identity binding, and identity binding is never chat-actuated: identity.client.channel.unbind is in NEVER_CHAT_ACTUATED (§6.8) and its bind counterpart terminates at shell.connections under a SESSION_VERIFIED floor. Chat may state that a phone is unverified and HANDOFF; it may never carry the code-entry control, because a widget that could bind a phone would be a widget conferring identity. Mechanism: the proxy forwards to the bot, which triggers the YClients SMS (L307-328)."
+  },
+  {
+   "name": "SMS OTP consumption — cabinet_link_phone (via client-consent proxy)",
+   "channel": "sms",
+   "file": "maya-saas-backend/deploy/vps/package5-client-consent-proxy.php",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "Consent-bearing and therefore LEGAL-owned: one route carries SMS-code phone binding AND 152-FZ consent submit/status AND one-time client-link token consumption AND notification preferences. Four of the eight NEVER_CHAT_ACTUATED acts (consent.pd.grant/withdraw, consent.marketing.grant/revoke) terminate on exactly this kind of surface, at shell.privacy, with STEP_UP_VERIFIED for withdrawal. 'No widget type may by itself confer consent' holds because the canonical owner writes an append-only consent fact, never the control that was tapped. BUNDLE cannot sign off consent screens."
+  },
+  {
+   "name": "tg_login_verify / cabinet_me_login — server-side Telegram Login Widget HMAC verification",
+   "channel": "public-web-auth",
+   "file": "maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "[Group F] Server-side HMAC-SHA256 verification of the Telegram Login Widget payload keyed by SHA256(bot_token), with replays refused beyond auth_max_age (L471-511). This is the mechanism behind 'CHANNEL IDENTITY != BUSINESS AUTHORITY': a verified Telegram identity resolves a cabinet and nothing more. Enforcement point, no user-visible successor."
+  },
+  {
+   "name": "vk_auth / vk_sdk_auth — VK ID login routes (policy-prohibited, still routable)",
+   "channel": "public-web-auth",
+   "file": "maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "[Group F] CONFLICT RAISED, NOT RESOLVED (C2): vk_auth and vk_sdk_auth are live and routable (L187-211), while CLAUDE.md rule 7 says VK links must not exist in the project. Classified as a security surface because that is what it is; whether it should exist at all is an owner decision, and if it is removed the removal is an AUTHORITY change with a negative test, not a UX edit."
+  },
+  {
+   "name": "Email OTP / magic-link delivery",
+   "channel": "email",
+   "file": "сайт и приложение/index.html",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "A proven negative, not a surface. Triangulated absence: index.html has no email_login / email_code / magic_link / action=email match, no mailto:, no email input. There is no email channel, no code and no route to triage — the row records a capability that does not exist. It belongs in the capability-gap list, where a Limitation with a capability_gap_ref is the correct rendering and rule P2 forbids carrying an intent that promises it. Triaging an absence as a UX surface would invent work; the absence itself is kept."
+  },
+  {
+   "name": "GET /api/realtime — full-duplex voice WebSocket endpoint",
+   "channel": "realtime-voice",
+   "file": "ai администратор/webhook_server.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "WebSocket transport, not a surface: `web_app.router.add_get(\"/api/realtime\", realtime_handler)` at webhook_server.py:10000. The human-facing thing is the voice conversation, normatively covered by VoiceSurface@1 and the ChannelProfile flags speech_in/speech_out; the socket is its carrier. liveStatus FENCED carried forward as FENCED, not converted into retired."
+  },
+  {
+   "name": "Realtime auth handshake — canonical channel proof only (B21)",
+   "channel": "realtime-voice",
+   "file": "ai администратор/webhook_server.py",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "Authority gate: the handshake accepts ONLY a canonical channel proof (maya_jwt, telegram_init_data, telegram_widget) and the verdict is server-side (webhook_server.py:8186-8205). The client asks for a mode; the server decides it. That is 'ONE MAYA — DIFFERENT AUTHORITY' at the socket boundary, and the reason a spoken 'I am the owner' can never be authority. Enforcement point, no successor surface. FENCED carried forward."
+  },
+  {
+   "name": "realtime-authority verdict (NestJS canonical runtime)",
+   "channel": "realtime-voice",
+   "file": "maya-saas-backend/src/crm/client-channel-runtime.service.ts",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "Backend authorization and the only LIVE component of the voice stack: realtimeAuthority(channelProof, value) at client-channel-runtime.service.ts:326+, per-socket re-verification, PII-free verdict, privacy-consent gate and the A16 staff CRM access gate. Per-socket re-verification is what stops a long-lived connection from outliving the authority that opened it — the CURRENT AUTHORITY CHECK step of WIDGET EVENT → TYPED INTENT → CURRENT AUTHORITY CHECK → CANONICAL OWNER."
+  },
+  {
+   "name": "realtime_bridge.run_session — voice session runtime (OpenAI realtime ↔ tool-loop brain)",
+   "channel": "realtime-voice",
+   "file": "ai администратор/realtime_bridge.py",
+   "classification": "KEEP AS CHAT SURFACE",
+   "reason": "Voice is the same conversation on a different tier, not a second product: server-VAD turn detection, streamed transcript, the same tool-loop brain turn, PCM16 TTS streamed back (realtime_bridge.py:346-692). Under R1 the TEXT_ONLY rendering is the conformance reference, so a spoken turn is a projection of the identical envelope — which is also why intent resolution on voice must be a deterministic match on speech_aliases or ordinal BEFORE any LLM (§6.9), never an LLM deciding what the user chose. FENCED carried forward: this is a build against VoiceSurface@1, not a live surface to preserve."
+  },
+  {
+   "name": "🔴 Realtime PII boundary — DIVERGES from the bot's voice handler",
+   "channel": "realtime-voice",
+   "file": "ai администратор/realtime_bridge.py",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "CONFLICT RAISED, NOT RESOLVED (C6). Classified as an enforcement point because that is what it is meant to be and is not: redact_pii is applied on the LLM path only, while the raw transcript goes to the client and to logs and raw audio goes to OpenAI unconditionally — whereas the bot's own handle_voice (bot.py:2379-2397) refuses audio outright during contact collection. That divergence hits CLAUDE.md gotcha 4 (client personal data must never reach the LLM; the 152-FZ contour) and gate G5, which requires all five client-preview fences to fire independently. It must be resolved before voice is unfenced; it is a security-track finding, not a design choice."
+  },
+  {
+   "name": "PWA hands-free voice orb — realtime client (rtStart/rtStop/rtPlay)",
+   "channel": "realtime-voice",
+   "file": "сайт и приложение/app.html",
+   "classification": "LEGACY / UNREACHABLE",
+   "reason": "Dead in the field: the PWA realtime client (RT_URL 'wss://rt.malesthetic.pro/api/realtime', app.html:20015; rtStart/rtStop/rtPlay) is RETIRED while its server endpoint is FENCED, so no reachable path leads from this code to a voice session. Reviving hands-free voice is a build against VoiceSurface@1 with a named A11yFloor, not a migration of this code. 'RETIRED client + FENCED server' is the honest reading; it is not a claim that voice is abandoned as a product."
+  },
+  {
+   "name": "PWA legacy hands-free voice fallback (vmListen → chat proxy STT)",
+   "channel": "realtime-voice",
+   "file": "сайт и приложение/app.html",
+   "classification": "LEGACY / UNREACHABLE",
+   "reason": "A dead fallback behind a dead primary: vmListen (app.html:20325-20381), MediaRecorder capture with silence detection posting WAV to the chat proxy for STT, RETIRED. Its only role was to catch failures of the realtime orb, which is itself retired. No successor needed; a future voice tier inherits the constraint it proves — that the capture path differs per platform and cannot be unified by assumption."
+  },
+  {
+   "name": "Service Worker push renderer + notification click routing",
+   "channel": "web-push",
+   "file": "сайт и приложение/service-worker.js",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "A renderer, not a surface with an information architecture of its own: it implements the push.v1 ChannelProfile — show a notification, route the tap (service-worker.js:26-46). Two contract facts make it un-triageable as UX: degradation is server-side (a renderer never decides what to show, never drops an intent, never hides a Limitation), and the human-facing artefacts it paints are the 12 canonical proactive moments, already inventoried and bound by gate G7. Its migration work is declarative — declare max_intents (≤2 actions on Android, 0 on some desktops) and token_carrier = notification action id."
+  },
+  {
+   "name": "Root self-destructing Service Worker (pwa-assets/for-root)",
+   "channel": "web-push",
+   "file": "сайт и приложение/pwa-assets/for-root/service-worker.js",
+   "classification": "LEGACY / UNREACHABLE",
+   "reason": "A service worker that exists to remove itself: install → skipWaiting, activate → unregister self and reload root clients. RETIRED, no successor. Care required: CLAUDE.md gotcha 3 warns these two workers are easy to confuse — the ACTIVE one is «сайт и приложение/service-worker.js» (push-only, no fetch handler); this is the for-root self-destruct. Deleting the wrong file breaks push."
+  },
+  {
+   "name": "PWA web-push subscribe / permission prompt (__meSubscribePush)",
+   "channel": "web-push",
+   "file": "сайт и приложение/app.html",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "A permission prompt is a consent act, and consent is never chat-actuated: Notification.requestPermission plus pushManager.subscribe with the VAPID key (app.html:40640-40713) terminates at shell.notifications under a SESSION_VERIFIED floor. A widget may state that notifications are off and HANDOFF; it may not carry the grant control, because 'no widget type may by itself confer marketing permission'. Mechanism that keeps it honest: success is displayed only on a server receipt, never optimistically."
+  },
+  {
+   "name": "PWA web-push unsubscribe (__meUnsubscribePush)",
+   "channel": "web-push",
+   "file": "сайт и приложение/app.html",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "The unsubscribe counterpart, and stricter: it refuses without the stored episode id («Сначала подтвердите подключение этого устройства», app.html:40714-40726) and the server confirms deactivation before the browser unsubscribes. 'Exact verified endpoint owner' is enforced by the server, not the button — a device cannot revoke another device. Terminates at shell.notifications / shell.connections."
+  },
+  {
+   "name": "Notifications settings card — «Уведомления на этом устройстве» (AWebPushControls)",
+   "channel": "web-push",
+   "file": "сайт и приложение/app.html",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "This IS a shell destination, not a card to convert: AWebPushControls (app.html:16376-16389) is today's version of shell.notifications. The information-architecture section argues it explicitly — a notification preference is where a user goes when they are annoyed at the product, and making an annoyed user converse with the thing annoying them is hostile. It already encodes the right discipline in its own comment ('only a confirmed server outcome is displayed as success'), plus an aria-live status region and the 5-device limit message. Keep, move into shell.notifications, and add per-moment preference across the 12 canonical moments plus quiet hours."
+  },
+  {
+   "name": "POST /api/push/subscribe (Python edge)",
+   "channel": "web-push",
+   "file": "ai администратор/webhook_server.py",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "Registration enforcement point: verified-Client-only, canonical channel proof required, strict body allowlist, and its docstring states the boundary exactly — «verified Client registration only; no send or legacy store» (webhook_server.py:8440-8457). Registering a push endpoint is an identity binding; the proof, not the request, decides. No user-visible successor."
+  },
+  {
+   "name": "POST /api/push/unsubscribe (Python edge)",
+   "channel": "web-push",
+   "file": "ai администратор/webhook_server.py",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "Owner-scoped termination: «Exact verified owner may terminate only its own endpoint episode» (webhook_server.py:8460-8473), body allowlisted to the endpoint id. The fence is that no principal can end another principal's episode — a negative test in the shape of gate G3. No successor surface."
+  },
+  {
+   "name": "Beget edge proxy actions push_subscribe / push_unsubscribe",
+   "channel": "web-push",
+   "file": "maya-saas-backend/test/fixtures/beget/api-proxy.sanitized.php",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group E] PHP edge relay arm for push_subscribe / push_unsubscribe with a per-action key allowlist (api-proxy.sanitized.php:2213-2229). The authority decision is made upstream at the Python edge and the NestJS controller, both classified SETTINGS / SECURITY ONLY in this batch; an allowlist in a relay is hardening, not the decision."
+  },
+  {
+   "name": "NestJS ClientWebPushController — /client-web-push/{subscribe,unsubscribe}",
+   "channel": "web-push",
+   "file": "maya-saas-backend/src/crm/client-web-push.controller.ts",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "First-party registration authority: @Controller('client-web-push') @TenantScoped (L24-25) with subscribe (L28-34) and unsubscribe (L35-41) both requiring a verified Client via maya_jwt, or the legacy bridge acting on behalf of one. Tenant scoping is the hard boundary in the data model, so this is where 'no widget type may by itself confer tenant authority' is made true. Enforcement point, no successor surface."
+  },
+  {
+   "name": "CommunicationWebPushService — the only web-push sender",
+   "channel": "web-push",
+   "file": "maya-saas-backend/src/communication-delivery/communication-web-push.service.ts",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "The only web-push sender — an emitter, not a surface. It executes ACTION 'communication.appointment-reminders.execute.v1' idempotently through the Action Engine for three of the 12 canonical moments (appointment_reminder, wanted_slot_available, native_feedback_invitation). Those three are already inventoried as notification surfaces and bound by gate G7; counting the sender would double-count them."
+  },
+  {
+   "name": "CommunicationWebPushTransport — VAPID I/O adapter",
+   "channel": "web-push",
+   "file": "maya-saas-backend/src/communication-delivery/communication-web-push.transport.ts",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "I/O adapter: aes128gcm encryption, VAPID signing, destination allowlist, 5 s timeout with no retry, and ready() refuses to run unless all three VAPID env vars are present (L14-83). Pure transport with a fail-closed readiness check; no envelope, no successor."
+  },
+  {
+   "name": "🔴 Legacy Python push senders — fail-closed stubs",
+   "channel": "web-push",
+   "file": "ai администратор/webhook_server.py",
+   "classification": "LEGACY / UNREACHABLE",
+   "reason": "Fail-closed stubs: _push_subscriptions_for_master returns an empty list with the docstring «B24: legacy raw-identity push has no canonical delivery authority» (webhook_server.py:388-390). The legacy Python senders are unreachable as delivery. They remain as fences, not features, and — like the retired scheduler bodies — they are ratchet-frozen, so removal is an AUTHORITY change with a negative test, not a cleanup."
+  },
+  {
+   "name": "app-tenant.html — stale legacy push subscription bundle",
+   "channel": "web-push",
+   "file": "сайт и приложение/app-tenant.html",
+   "classification": "RETIRE AFTER PARITY",
+   "reason": "A stale duplicate of a live control, so it retires with its host rather than on its own: app-tenant.html:22704-22735 carries the SAME VAPID key as app.html and registers fire-and-forget with no server-receipt confirmation — exactly the optimistic-success pattern a notification control is forbidden to use. Its host bundle is dispositioned MERGE, so this retires when the tenant bundle merges AND the merged bundle proves the tenant client's push path end to end (G2 receipt plus G7 delivery test). liveStatus UNKNOWN carried forward: 'after parity' states the order of operations, not that it works today."
+  },
+  {
+   "name": "maya-os-site/index.html — B24 push block (MAYA OS bundle)",
+   "channel": "web-push",
+   "file": "maya-os-site/index.html",
+   "classification": "RETIRE AFTER PARITY",
+   "reason": "The same notification control implemented a third time, in the MAYA OS bundle (index.html:37473-37530+), this one LIVE and correctly server-receipt-confirmed. Three bundles of one app is the condition the programme exists to end, so the duplicate retires into shell.notifications once the unified bundle proves parity for MAYA OS tenants — never before, because retiring it early removes a working notification control from a live tenant. Depends on unresolved decision D10."
+  },
+  {
+   "name": "native-enhancements.js — window.requestPushPermission (orphaned)",
+   "channel": "web-push",
+   "file": "сайт и приложение/native-enhancements.js",
+   "classification": "LEGACY / UNREACHABLE",
+   "reason": "Orphaned dead code: window.requestPushPermission (native-enhancements.js:205-234) requests permission and subscribes, and nothing calls it. RETIRED. Removal still belongs to BUNDLE with a grep proving zero call sites, because a second permission-requesting path nobody knows about is precisely how a consent prompt reappears unowned."
+  },
+  {
+   "name": "Capacitor native push registration (/inbox/devices)",
+   "channel": "web-push",
+   "file": "сайт и приложение/app.html",
+   "classification": "SETTINGS / SECURITY ONLY",
+   "reason": "The native half of the same shell destination: Capacitor push registration (app.html:41076-41106), guarded by C.isNativePlatform() and the presence of Plugins.PushNotifications, requesting APNs permission, registering the device token with /inbox/devices and deep-linking on tap. It is device identity plus an OS permission grant — both terminate at shell.connections / shell.notifications and neither may be chat-actuated. Consistent with 'native is a PWA profile plus a bridge': one destination, two carriers, not two designs."
+  },
+  {
+   "name": "APScheduler root — AsyncIOScheduler (Europe/Moscow)",
+   "channel": "scheduler",
+   "file": "ai администратор/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G — emitter] Server-side timer host (AsyncIOScheduler, Europe/Moscow, replace_existing) that renders no envelope and owns no navigation or moment of its own. Platform/channels §0 excludes `scheduler` (32) from ChannelProfile because a transport that could declare presentation capability is the shape of a fourth authority path. Cutover owner: CHANNEL."
+  },
+  {
+   "name": "cron pii_rotation — 03:00 MSK",
+   "channel": "scheduler",
+   "file": "ai администратор/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] Retention job (PII anonymisation + expired gift-cert cleanup at 03:00 MSK, bot.py:4309-4316 → :4467-4478). No rendered output. It is a 152-FZ obligation whose cutover owner is LEGAL, not BUNDLE."
+  },
+  {
+   "name": "cron reactivation — 10:00 MSK (dormant-client winback)",
+   "channel": "scheduler",
+   "file": "ai администратор/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] Emitter with no surface. liveStatus FENCED carried forward: verified body at bot.py:4480-4482 is a «scheduled compatibility entry; no campaign was admitted». Any outbound it would produce is already counted among the 12 canonical moments and bound by G7."
+  },
+  {
+   "name": "cron birthday — 10:30 MSK (birthday_alert)",
+   "channel": "scheduler",
+   "file": "ai администратор/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] Emitter feeding the birthday moment (bot.py:4332-4341 → :4485-4491 → birthday.run_birthday_job). The marketing-consent gate and per-client opt-out live in birthday.py, not in the timer, and must stay there — 'no widget type may by itself confer marketing permission'. The moment itself is already inventoried and bound by G7."
+  },
+  {
+   "name": "cron cycle_reminder — 11:00 MSK (owner return-queue alert)",
+   "channel": "scheduler",
+   "file": "ai администратор/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] Emitter with no surface: verified at bot.py:4493-4512 it builds the owner return-queue and «ничего клиентам сам не отправляет», delivering only a PII-free owner alert. The PII-free payload is a fence, not a UI choice. Owner moment already inventoried and bound by G7."
+  },
+  {
+   "name": "cron referral_resolver — 11:30 MSK",
+   "channel": "scheduler",
+   "file": "ai администратор/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] Emitter with no surface (bot.py:4357-4366 → :4514-4520 → referral.run_referral_resolver_job). FENCED carried forward. Any promo-code issuance it drives terminates at a canonical owner, never at a button."
+  },
+  {
+   "name": "cron subscriptions — 12:00 MSK (renewal nudge)",
+   "channel": "scheduler",
+   "file": "ai администратор/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] Emitter with no surface. FENCED carried forward: verified body at bot.py:4522-4525 is a «scheduled compatibility entry; no campaign was admitted»."
+  },
+  {
+   "name": "cron loyalty — 12:30 MSK (earn + expiry)",
+   "channel": "scheduler",
+   "file": "ai администратор/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] Emitter with no surface (bot.py:4380-4389 → :4782-4788 → loyalty.run_loyalty_job, earn plus expiry). FENCED carried forward; any client-visible outcome is one of the 12 canonical moments, bound by G7."
+  },
+  {
+   "name": "cron reviews — every 5 min (review request dispatch)",
+   "channel": "scheduler",
+   "file": "ai администратор/bot.py",
+   "classification": "LEGACY / UNREACHABLE",
+   "reason": "[Group H — dead registration] The cron entry is live but the body emits nothing: verified bot.py:4790 `_reviews_job` returns {'status':'canonical_admitted_request_scheduler','messages':0}. No envelope, no delivery, no successor needed. NOT a free deletion — this exact empty body is frozen by the AST ratchet package5_wave_rc_guard_contracts.py contract 'r08', so removal is an AUTHORITY ratchet change, not a UX cleanup."
+  },
+  {
+   "name": "cron lead_alerts — every 5 min (hanging_lead)",
+   "channel": "scheduler",
+   "file": "ai администратор/bot.py",
+   "classification": "LEGACY / UNREACHABLE",
+   "reason": "[Group H] The tick is live but the capability beneath it is retired: verified lead_alerts.py:145 `scan_and_alert` returns {'checked':0,'alerted':0,'status':'retired_unverified_lead_occurrence'}, so bot.py:4794-4799 alerts nobody. No successor needed. Removal belongs to AUTHORITY with a negative test, because the retirement is enforced by contract, not by absence."
+  },
+  {
+   "name": "cron dual_role_guard — every 3 h at :17",
+   "channel": "scheduler",
+   "file": "ai администратор/bot.py",
+   "classification": "LEGACY / UNREACHABLE",
+   "reason": "[Group H] Dead registration plus a one-shot warm run at boot: verified bot.py:4778 `_dual_role_guard_job` returns {'status':'retired_identity_alert_not_authority','messages':0}. The status string itself states the principle — an identity alert was never authority. Frozen by package5_wave_rc_guard_contracts.py contract 'r06'; removal is a ratchet change owned by AUTHORITY."
+  },
+  {
+   "name": "cron daily_report — 21:00 MSK (owner evening report)",
+   "channel": "scheduler",
+   "file": "ai администратор/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] Trigger-only emitter: verified bot.py:4766-4772 supplies no content, no recipients and no date — «the canonical owner owns facts, plan and delivery» — and logs a warning if the trigger is unresolved so the owner resumes the same report. It cannot author anything, which is exactly why it is not a surface. The evening owner report is already inventoried among the 12 moments and bound by G7."
+  },
+  {
+   "name": "cron god_watch — 09:00 MSK",
+   "channel": "scheduler",
+   "file": "ai администратор/bot.py",
+   "classification": "LEGACY / UNREACHABLE",
+   "reason": "[Group H] Dead registration: verified bot.py:4774 `_god_watch_job` returns {'status':'retired_no_canonical_operational_occurrence','messages':0}, despite the registration comment still claiming «MAYA сама проверяет систему и оплаты». Comment and behaviour disagree; the behaviour is authoritative. Frozen by package5_wave_rc_guard_contracts.py contract 'r06'."
+  },
+  {
+   "name": "cron director_briefing — 10:00 MSK (morning_brief)",
+   "channel": "scheduler",
+   "file": "ai администратор/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] Trigger-only emitter: verified bot.py:4760-4764 delegates to the same canonical owner morning occurrence with «no legacy forecast/delivery owner». The owner morning brief is already inventoried among the 12 moments and bound by G7 — counting the trigger separately would double-count it."
+  },
+  {
+   "name": "loop master_day_brief_loop — every 600 s (morning_staff)",
+   "channel": "scheduler",
+   "file": "ai администратор/webhook_server.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] Background loop, trigger-only (webhook_server.py:8804-8831, started :10159, 75 s start delay). The Python side always reports sent=0, which is the visible signature of delivery having moved to the canonical owner. The staff morning brief is already inventoried among the 12 moments and bound by G7."
+  },
+  {
+   "name": "loop master_shift_reminder_loop — every 300 s (shift_reminder)",
+   "channel": "scheduler",
+   "file": "ai администратор/webhook_server.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] Background loop, trigger-only operational tick for the 60- and 30-minute shift reminders (webhook_server.py:8794-8802, started :10161). The shift_reminder moment is already inventoried and bound by G7."
+  },
+  {
+   "name": "loop waitlist_admin_alert_loop — every 120 s (owner_alert / wanted slot)",
+   "channel": "scheduler",
+   "file": "ai администратор/webhook_server.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] Background loop, trigger-only operational tick for wanted-slot admin notices (webhook_server.py:8888-8897, started :10162, calls freed_slot.alert_admins_new_waitlist). The wanted_slot moment is already inventoried and bound by G7."
+  },
+  {
+   "name": "loop client_retention_refresh_loop — retired",
+   "channel": "scheduler",
+   "file": "ai администратор/webhook_server.py",
+   "classification": "LEGACY / UNREACHABLE",
+   "reason": "[Group H] Dead registration: the task is still spawned at webhook_server.py:10160 but the coroutine at :8833-8835 is «C8: legacy scorer retired; no qualified canonical tenant evidence here» followed by a bare `return`. No envelope, no successor. Removal belongs to AUTHORITY with a negative test."
+  },
+  {
+   "name": "loop maya_operating_rhythm_loop — retired",
+   "channel": "scheduler",
+   "file": "ai администратор/webhook_server.py",
+   "classification": "LEGACY / UNREACHABLE",
+   "reason": "[Group H] Dead registration: still spawned at webhook_server.py:10163, but the coroutine at :8899-8901 is «R04: scheduling does not supply a canonical command or actor» followed by `return None`. The comment states the rule precisely — a schedule is not an actor. Frozen by package5_operational_work_runtime_guard.py:61, which asserts the body contains no Call node; removal is a ratchet change."
+  },
+  {
+   "name": "loop reputation_monitor_loop — retired and unscheduled",
+   "channel": "scheduler",
+   "file": "ai администратор/webhook_server.py",
+   "classification": "LEGACY / UNREACHABLE",
+   "reason": "[Group H] Doubly dead: the body at webhook_server.py:8883-8885 is «B34: retired job, including direct calls and alternative launchers» → `return None`, and it is not among the spawned tasks at all. Frozen by package5_review_source_guard.py:32 ('reputation_monitor_loop': 'return None') and covered by test_package5_b34_review_retirement.py; removal is a ratchet change owned by AUTHORITY."
+  },
+  {
+   "name": "OwnerReportsSchedulerService — 5 min (daily_report + morning_brief)",
+   "channel": "scheduler",
+   "file": "maya-saas-backend/src/owner-reports/owner-reports.scheduler.ts",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] NestJS emitter (90 s first run then 5 min, both .unref()ed) producing the multi-tenant morning brief and evening daily report with durable plan resume across restarts. Both moments are already inventoried among the 12 and bound by G7; the scheduler renders nothing."
+  },
+  {
+   "name": "AppointmentNotificationsScheduler — 5 min (appointment_reminder)",
+   "channel": "scheduler",
+   "file": "maya-saas-backend/src/appointment-notifications/appointment-notifications.scheduler.ts",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] NestJS emitter feeding appointment_reminder with configurable lead times, an entitlement gate, a per-tenant switch and primary/secondary dedupe — precisely the machinery gate G7 asserts against (same dedupe_key, notify_pref_key, once_per and quiet hours across push ↔ chat ↔ Telegram). The moment is inventoried; the timer is not a surface."
+  },
+  {
+   "name": "OperationalAlertsScheduler — 60 s (shift_reminder, owner_alert, C8)",
+   "channel": "scheduler",
+   "file": "maya-saas-backend/src/operational-alerts/operational-alerts.scheduler.ts",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] NestJS emitter for shift_reminder, wanted-slot owner_alert and C8 derived valuation observations. onModuleInit returns early unless Date.parse(OPERATIONAL_ALERTS_CANONICAL_CUTOVER_AT) is finite (:30-38) — a deliberate fail-closed gate. All the moments it feeds are already inventoried and bound by G7."
+  },
+  {
+   "name": "NativeFeedbackScheduler — 60 s (native_feedback_invitation)",
+   "channel": "scheduler",
+   "file": "maya-saas-backend/src/native-feedback/native-feedback.scheduler.ts",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] NestJS emitter feeding native_feedback_invitation: resume-only dispatch, per-slot idempotency, retention-window bounded, delivered by web push. G7 bites hardest here because the same signal is both an overlay and a delivery endpoint — but that is a property of the moment, already inventoried, not of the timer."
+  },
+  {
+   "name": "ExpenseReminderScheduler — 60 s (weekly_expense_reminder)",
+   "channel": "scheduler",
+   "file": "maya-saas-backend/src/expense-intake/expense-reminder.scheduler.ts",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] NestJS emitter feeding weekly_expense_reminder: per-tenant-timezone weekly window, resume-before-admit ordering, explicit system-principal assertion, Telegram delivery, gated on EXPENSE_REMINDERS_CANONICAL_ENABLED (:26-29). The moment is inventoried and G7-bound; the system-principal assertion is the fence that keeps a schedule from acting as a person."
+  },
+  {
+   "name": "TeamCommunicationsScheduler — 60 s (team message fan-out)",
+   "channel": "scheduler",
+   "file": "maya-saas-backend/src/team-communications/team-communications.scheduler.ts",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] NestJS emitter fanning out team messages: resume-only delivery, encrypted plan, per-slot idempotency, inbox channel. No rendered envelope of its own; the inbox item it produces is the surface, already inventoried."
+  },
+  {
+   "name": "BillingSchedulerService — 60 min (subscription auto-renewal)",
+   "channel": "scheduler",
+   "file": "maya-saas-backend/src/billing/billing-scheduler.service.ts",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] NestJS emitter: due-billing sweep with a YooKassa charge per debtor and a re-entrancy guard. It moves money, which is exactly why no widget may reach it — 'no widget type may by itself confer finance permission', and only a canonical owner may cause the effect. No rendered envelope; the payment receipt and any failure notice are separate, already-inventoried surfaces."
+  },
+  {
+   "name": "AppointmentReconciliationScheduler — near/medium CRM contours",
+   "channel": "scheduler",
+   "file": "maya-saas-backend/src/crm/appointment-reconciliation.scheduler.ts",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] NestJS emitter behind an isEnabled() gate, running CRM appointment reconciliation on two time contours (:63-81). It produces no outbound moment of its own and renders nothing; it keeps canonical rows correct, which is a CAPABILITY concern."
+  },
+  {
+   "name": "IngestionRetentionScheduler — daily quarantine + 60 s payload deadlines",
+   "channel": "scheduler",
+   "file": "maya-saas-backend/src/events/ingestion-retention.scheduler.ts",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Group G] NestJS emitter behind an isEnabled() gate (:50-53): event quarantine retention plus WaveRC payload deadline enforcement. A retention obligation with no rendered surface; cutover owner is LEGAL for the retention半 and CAPABILITY for the deadline enforcement."
+  },
+  {
+   "name": "SMM bot scheduler_loop — every 30 s (social autopost + admin receipt)",
+   "channel": "scheduler",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Groups C + G] Belongs to smm_bot, the separate production product, and is an emitter besides: smm_bot/bot.py:1016-1073 publishes due posts autonomously to five social targets with no operator confirmation at publish time, generating a caption on the fly when the stored one is empty. Counted once here and once in the smm-bot channel rows; it is the same loop seen from two inventory angles — see conflict C8."
+  },
+  {
+   "name": "SMM bot queue_health_loop — every 6 h (content-queue alerts)",
+   "channel": "scheduler",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Groups C + G] Belongs to smm_bot; proactive admin DM about content-queue depth, feature-flagged and deduped once per day. Same loop as the smm-bot channel row of the same name — see conflict C8."
+  },
+  {
+   "name": "SMM bot holiday_loop — daily 09:00 (holiday content prompts)",
+   "channel": "scheduler",
+   "file": "smm_bot/bot.py",
+   "classification": "OUT OF SCOPE WITH EXACT REASON",
+   "reason": "[Groups C + G] Belongs to smm_bot; proactive admin DM with holiday content prompts from a 12-date Russian calendar, feature-flagged and day-deduped. Same loop as the smm-bot channel row of the same name — see conflict C8."
+  }
+ ],
+ "conflictsRaised": [
+  "C1 — smm_bot authority hole (verified, not inferred). Six of the eight callback handlers in smm_bot/bot.py carry no is_admin check: generate: (:843), copy: (:881), schedule: (:897), approve: (:961), reject: (:982), edit: (:992). Only togglefeat: (:221) and setmodel: (:231) are guarded. The sharpest case is approve: — I read bot.py:961-980 and it performs NO principal check before calling publish_to_all, which fans out to Telegram channel, Telegram group, VKontakte, Instagram and TikTok. The only barrier is that Telegram delivers a callback query solely from a message carrying the keyboard, i.e. a channel-delivery property, not an authority check — the exact failure mode named by 'CHANNEL IDENTITY != BUSINESS AUTHORITY' and 'BUTTON != AUTHORITY'. The FSM text handlers /done (:402), bulk_distribute (:455) and the manual scheduling flow (:725, :732, :741) are likewise unguarded. Not resolved here: this is a live production security finding in a bot that is out of scope for the UX cycle, and it needs an owner decision about who fixes it and when.",
+  "C2 — VKontakte exists in live code and live copy, against CLAUDE.md rule 7 («VK/MAX-ссылок в проекте быть не должно»). Three independent instances, all verified: (1) smm_bot/publishers.py:32-33 gates a VK publish target on VK_TOKEN + VK_GROUP_ID and calls api.vk.com/method/wall.post at :125 and :218; (2) api-proxy.sanitized.php L187-211 exposes live, routable vk_auth and vk_sdk_auth login routes under the comment «НОВОЕ: Вход через VK ID»; (3) the fenced SMS arm at L181-185 still tells the reader that login is «только ВКонтакте / Telegram», so the policy conflict is in user-adjacent copy as well as in code. Reported, not resolved: whether the rule or the code is wrong is the owner's call. NOTE on blast radius — if VK is removed, (2) and (3) are AUTHORITY changes requiring negative tests, not UX edits, and (1) removes one of smm_bot's five publish targets.",
+  "C3 — the public marketing site's scope is undeclared, and three untriaged surfaces depend on the answer. The architecture document scopes the programme to the chat-first shell but never states whether the public site is inside it. Three user-facing anonymous surfaces sit there: the YClients booking deep-link in index.html (5 occurrences, all off-domain), the community UI deployed as a Next.js chunk on muzhskayaestetika.рф (no source in this repository), and the anonymous guest chat with MAYA (live backend, no front-end found in index.html). A fourth complication: index.html also carries an authenticated client cabinet (cabinet_session) rendering visit history, loyalty balance, subscription and upcoming visit — i.e. the public site duplicates PWA surfaces already dispositioned elsewhere. I classified all of these OUT OF SCOPE for the chat-first UX because the page they live on has no chat and no session to bind an intent to, but that is a reading of scope, not a decision. Owner decision needed; it plausibly belongs beside D10 (bundle strategy).",
+  "C4 — source-of-truth gap: seven of the 135 rows rest on production evidence that is absent from this checkout, so every statement about them describes an artefact nobody in this cycle can read. site_guest_chat.py (evidenced by a production inventory), site_publications.py (evidenced by a production sha256, 321 lines), the real api-proxy.php (only a sanitized test fixture exists; `find . -name 'api-proxy*.php'` returns nothing else), webhook_server.py community/guest wiring (`grep -c \"api/site\"` returns 0 here while production is said to run the modules), the guest-chat front-end (proven absent from index.html but plausibly deployed like the Next.js community chunk), tg-config.php and api-proxy.codex-loyalty-20260721.php (both known only through package5-exhaustive-edge.json). Worst case: site_publication_bot.py, where `grep -rn site_publication_bot` over the whole repository returns ZERO matches — it is a filename with no code behind it. Per 'UNKNOWN is never rendered as failure' I recorded these as unresolved-in-this-checkout, never as retired. Resolving them requires reading the production host, which this cycle's fence forbids, so it needs an explicit owner instruction.",
+  "C5 — a stale duplicate of the entire front proxy is live at a second public URL. package5-exhaustive-edge.json records app/api-proxy.codex-loyalty-20260721.php on muzhskayaestetika.рф, 146896 bytes, 92 phpActions — a July-2026 snapshot of the whole identity + panel + god surface, bypassing any hardening applied to api-proxy.php after 2026-07-21. I classified it OUT OF SCOPE because it is not a UX decision, and that explicitly does NOT mean leave it there: it is an AUTHORITY/ops removal that needs no parity proof, since it duplicates a live surface by construction. Raising it rather than acting, per the read-only fence.",
+  "C6 — the realtime voice PII boundary diverges from the bot's own baseline, against CLAUDE.md gotcha 4. realtime_bridge.py applies redact_pii on the LLM path only: the raw transcript goes to the client and to logs, and raw audio goes to OpenAI unconditionally. The bot's handle_voice (bot.py:2379-2397) is stricter — it refuses audio outright while a contact-collection flow is in the consent/name/phone/confirm stages. That is a divergence in the 152-FZ contour and a direct hit on gate G5, which requires all five client-preview fences to fire independently. Voice is FENCED today, which is the only reason this is not currently exposed. It must be resolved before voice is unfenced; it is a security-track finding, not a design choice available to the widget contract.",
+  "C7 — excluding smm_bot changes a published primary-navigation number. All 11 of smm_bot's primary-nav entries are in this untriaged set, and I classified them out of scope because they are primary navigation of a different product. Consequence, verified by re-joining the inventory: MAYA's own primary-nav census is 101 entry points, not 112. None of the 20 primary-nav rows already dispositioned RETIRE FROM PRIMARY NAVIGATION lies in smm-bot (they are pwa 15, telegram-bot 4, web-public 1), so no part of the retirement plan depends on the exclusion — but §3.3 and §7.2 of the architecture document should be restated against 101 so nobody later reads the smm_bot commands as MAYA navigation that failed to be retired. (Separately: my name-join yields 20 such rows where §3.2 reports 19; the gap is attributable to the three duplicate surface names and is not load-bearing.)",
+  "C8 — the scheduler channel double-counts smm_bot by construction, and the 9 renamed rows double-count the native bridge. Three rows appear in both the scheduler channel and the smm-bot channel (scheduler_loop, queue_health_loop, holiday_loop) — the same three loops seen from two inventory angles; I classified both copies identically so no capability is silently dropped, but the census should collapse them. Separately, the nine dispositions that §3.2 already reports as unmatched are not orphans: they are near-duplicate NAMES of untriaged rows 0-8 (the booking deep-link and the eight native-shell plugins), each already carrying a round-1/round-2 disposition. I honoured those prior adjudications rather than re-deciding them — KEEP AS CAPABILITY → out of scope or chat-native, SECURITY/AUTHORITY ONLY → settings/security, MOVE INTO CHAT WIDGET → convert to widget, MERGE → retire after parity — but the two name variants must be reconciled to one row each before anyone can claim 795/795 without an asterisk."
+ ]
+}
