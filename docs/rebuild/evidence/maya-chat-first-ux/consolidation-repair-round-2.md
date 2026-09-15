@@ -150,3 +150,21 @@ repository values (`APPROVER_ROLES`, `TENANT_ACTION_ROLES`, `PACKAGE5_WAVE3_REGI
 `VK_TOKEN`), terms cited only as **deleted** (`FAILURE`, `RETRY`, `NON_INTERACTIVE`), and
 identifiers declared in a markdown table rather than a fenced block (`CONTROL_REGISTRY`,
 `T_AUDIT`, `T_TIMELINE`, `HANDOFF_REQUIRED`, `NEEDS_SECOND_CHANNEL`).
+
+## Round 2c — the callers of a retyped function
+
+Retyping `requiredConfirmationKind` from `(aeKey: string)` to `(ref: CapabilityRef)` — itself a
+repair, made so F21's own requirement about that function could be true — left **six call sites
+and descriptions** still passing `aeKey`. All six are updated: §0.14 F80, §2.6.5 BOOK.2 (twice),
+§3.10, §2.6.16 SETTINGS.1 and §2.6.17 FORM.2.
+
+**A repair to a signature is a repair to every caller of it.** That is the same closure lesson
+round 2 was filed for, applied to a change round 2 itself introduced — which is the argument for
+running the checks after every repair rather than after every round.
+
+`mechanism-discipline-check.mjs` was also written and run: 331 normative rules, 6 with a
+mechanism and no separately-labelled evaluation point. All six were inspected and none is a
+violation — F80 names its three evaluation points inside the mechanism clause; F81 is a
+definition rather than a guarantee; R3.6.2's mechanism is *absence*, with `[EXISTS]` status,
+so there is nothing to evaluate. The check is committed and reports the same; it is kept because
+the next reader should not have to re-derive that triage.
