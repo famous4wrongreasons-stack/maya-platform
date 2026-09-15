@@ -1,0 +1,196 @@
+import fs from 'node:fs';
+import {META} from './human-dossier-meta.mjs';
+const R='/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent';
+const rows=JSON.parse(fs.readFileSync(R+'/docs/rebuild/evidence/maya-chat-first-ux/k1/k1-surface-dossier.json','utf8'));
+const G=JSON.parse(fs.readFileSync(new URL('./human-dossier-groups.json',import.meta.url),'utf8'));
+const S=r=>/^REQUIRES SIGNATURE/.test(r.successorSource||''), O=r=>/^REQUIRES SIGNATURE/.test(r.canonicalOwnerSource||'');
+const byId=new Map(rows.map(r=>[r.id,r]));
+const sig=rows.filter(r=>S(r)||O(r));
+
+// ---- totality and disjointness, asserted, never transcribed ----
+const all=[].concat(...Object.values(G));
+if(new Set(all).size!==all.length) throw new Error('group overlap');
+if(all.length!==sig.length) throw new Error(`partition ${all.length} != ${sig.length}`);
+for(const id of all) if(!sig.find(r=>r.id===id)) throw new Error('not a signature row: '+id);
+for(const k of Object.keys(G)) if(!META[k]) throw new Error('no meta for '+k);
+for(const k of Object.keys(META)) if(!G[k]) throw new Error('no rows for '+k);
+
+const T={rows:sig.length, s:sig.filter(S).length, o:sig.filter(O).length, both:sig.filter(r=>S(r)&&O(r)).length};
+const cells=T.s+T.o;
+
+const stat=k=>{const rs=G[k].map(i=>byId.get(i));
+ return {rs, n:rs.length, s:rs.filter(S).length, o:rs.filter(O).length, b:rs.filter(r=>S(r)&&O(r)).length,
+  ch:[...new Set(rs.map(r=>r.channel))], pk:[...new Set(rs.map(r=>r.package))].filter(p=>p&&p!=='-'),
+  cl:[...new Set(rs.map(r=>r.class))]};
+};
+const surfaces=rs=>rs.map(r=>`\`${r.id}\`${S(r)&&O(r)?' **S+O**':''} ${r.name}`).join(' · ');
+
+let out=[];
+const w=s=>out.push(s);
+w('# K1 — OWNER DOSSIER FOR THE HUMAN-JUDGEMENT CELLS');
+w('');
+w('*Generated from `k1-surface-dossier.json` by `build-human-dossier.mjs`. Every count below is derived');
+w('from the file at build time and asserted, not transcribed. The build fails if the grouping is not a');
+w('total, disjoint partition of the signature rows.*');
+w('');
+w('---');
+w('');
+w('## 0. What is actually being signed');
+w('');
+w('```');
+w(`SURFACES SWEPT                       ${rows.length}`);
+w(`ROWS CARRYING A SIGNATURE CELL       ${T.rows}`);
+w(`  SUCCESSOR CELLS                    ${T.s}`);
+w(`  CANONICAL-OWNER CELLS              ${T.o}`);
+w(`  ROWS CARRYING BOTH (OVERLAP)       ${T.both}`);
+w(`TOTAL CELLS (${T.s} + ${T.o})              ${cells}`);
+w(`GROUPS PRESENTED                     ${Object.keys(G).length}`);
+w(`ROWS YOU CONFIRM ONE BY ONE          0`);
+w('```');
+w('');
+w('**One correction to the number I reported to you.** I called these "126 human-judgement cells". **126');
+w(`is the number of *rows*; they carry ${cells} *cells*, because ${T.both} rows need both a successor and an owner.`);
+w(`The split you asked for — ${T.s} successor decisions, ${T.o} owner decisions — is exact; the overlap is those ${T.both} rows,`);
+w('which appear once each in the groups below and are marked `S+O`.');
+w('');
+w('The two kinds of decision are not equally consequential, and the dossier keeps them apart:');
+w('');
+w(`- **Successor decisions (${T.s})** change what a user can reach and how. Groups **G01–G18**.`);
+w(`- **Owner decisions (${T.o})** name who owns something that already runs. They change no behaviour.`);
+w('  Groups **O01–O08**. Approving these is bookkeeping with teeth: an unattributed surface is one that');
+w('  gets rediscovered later as a new feature, or re-pointed by someone who did not know it had an owner.');
+w('');
+w('---');
+w('');
+w('## 1. Successor decisions');
+w('');
+let idx=0;
+for(const k of Object.keys(G).filter(x=>x.startsWith('G'))){
+ const m=META[k], st=stat(k); idx++;
+ w(`### ${k} — ${m.title}`);
+ w('');
+ w('```');
+ w(`ROW COUNT              ${st.n}   (successor cells ${st.s}, owner cells ${st.o}${st.b?`, both ${st.b}`:''})`);
+ w(`CHANNELS               ${st.ch.join(', ')}`);
+ w(`DISPOSITION CLASS      ${st.cl.join(' / ')}`);
+ w(`PACKAGE                ${st.pk.join(' / ')||'—'}`);
+ w('```');
+ w('');
+ w(`**CURRENT SURFACES.** ${surfaces(st.rs)}`);
+ w('');
+ w(`**PROPOSED SUCCESSOR.** ${m.successor}`);
+ w('');
+ w(`**PROPOSED CANONICAL OWNER.** ${m.owner}`);
+ w('');
+ w(`**WHY.** ${m.why}`);
+ w('');
+ w(`**WHAT DISAPPEARS.** ${m.gone}`);
+ w('');
+ w(`**WHAT REMAINS.** ${m.stays}`);
+ w('');
+ w(`**RISK.** ${m.risk}`);
+ w('');
+ w(`**RECOMMENDED APPROVAL.** ${m.rec}`);
+ w('');
+ w('---');
+ w('');
+}
+w('## 2. Canonical-owner decisions');
+w('');
+w('*These name an owner for something that already exists and already runs. None of them proposes a');
+w('successor, because none of them proposes a change. The field is present and reads "not a successor');
+w('decision" so the shape of the dossier stays uniform.*');
+w('');
+for(const k of Object.keys(G).filter(x=>x.startsWith('O'))){
+ const m=META[k], st=stat(k);
+ w(`### ${k} — ${m.title}`);
+ w('');
+ w('```');
+ w(`ROW COUNT              ${st.n}   (owner cells ${st.o}${st.s?`, successor cells ${st.s}`:''}${st.b?`, both ${st.b}`:''})`);
+ w(`CHANNELS               ${st.ch.join(', ')}`);
+ w(`DISPOSITION CLASS      ${st.cl.join(' / ')}`);
+ w(`PACKAGE                ${st.pk.join(' / ')||'— (out of scope rows)'}`);
+ w('```');
+ w('');
+ w(`**CURRENT SURFACES.** ${surfaces(st.rs)}`);
+ w('');
+ w(`**PROPOSED SUCCESSOR.** ${m.successor||'— not a successor decision; nothing is replaced.'}`);
+ w('');
+ w(`**PROPOSED CANONICAL OWNER.** ${m.owner}`);
+ w('');
+ w(`**WHY.** ${m.why}`);
+ w('');
+ w(`**WHAT DISAPPEARS.** ${m.gone}`);
+ w('');
+ w(`**WHAT REMAINS.** ${m.stays}`);
+ w('');
+ w(`**RISK.** ${m.risk}`);
+ w('');
+ w(`**RECOMMENDED APPROVAL.** ${m.rec}`);
+ w('');
+ w('---');
+ w('');
+}
+
+// risk index
+w('## 3. Where to look first');
+w('');
+w('If you read only part of this, read these. They are the groups where a merge could make something');
+w('worse rather than fewer.');
+w('');
+w('| GROUP | ROWS | WHY IT IS THE ONE TO CHECK |');
+w('|---|---|---|');
+w(`| **G01** consent | ${stat('G01').n} | the only group with a statutory record behind it |`);
+w(`| **G13** deep links | ${stat('G13').n} | a URL parameter pins tenant identity into localStorage before any gate runs |`);
+w(`| **G06** owner panel | ${stat('G06').n} | densest client-side authority tests; re-parenting ahead of a server gate *loosens* a check |`);
+w(`| **G12** chat widgets | ${stat('G12').n} | contains the card that approves money |`);
+w(`| **G11** Telegram admin | ${stat('G11').n} | runs real business effects from a callback keyboard |`);
+w(`| **O03** scheduler | ${stat('O03').n} | four of the eleven send messages to real clients daily |`);
+w('');
+w('---');
+w('');
+w('## 4. Approval block');
+w('');
+w('*One block. Strike any group you do not approve and it stays unsigned; the rest proceed. Any group left');
+w('unsigned blocks only its own rows — the dossier is a partition, so no group depends on another being signed.*');
+w('');
+w('```');
+w('K1 HUMAN DOSSIER');
+w('');
+w(`SUCCESSOR DECISIONS   G01–G18   ${T.s} cells / ${Object.keys(G).filter(x=>x.startsWith('G')).length} groups   APPROVED: ___`);
+w(`OWNER DECISIONS       O01–O08   ${T.o} cells / ${Object.keys(G).filter(x=>x.startsWith('O')).length} groups   APPROVED: ___`);
+w('');
+w('CONDITIONAL GROUPS — approving these approves the condition with them:');
+w('  G04  strip removed only after the parity harness proves each tab reachable from chat');
+w('  G06  no panel capability re-parented ahead of its server-side authority gate');
+w('  G09  the successor must not guess a tenant; ambiguous workspace must ask');
+w('  G11  each admin_run_* carries its contract-assigned confirmation before the keyboard goes');
+w('  G13  the booking-backend family stops writing tenant identity from a URL parameter');
+w('  G01  the merge keeps two independent booleans and fails closed');
+w('  G16  "Я перевёл" stays an acknowledgement, never a confirmed transfer');
+w('');
+w('EXCLUSIONS (strike-through any group number):');
+w('  ______________________________________________');
+w('');
+w('K1 HUMAN DOSSIER SIGNED:  YES / NO');
+w('```');
+w('');
+w('---');
+w('');
+w('## 5. What signing does and does not authorize');
+w('');
+w('**Does.** Closes K1. Lets Wave 2 begin. Fixes the successor and owner columns of these '+T.rows+' rows so the');
+w('parity harness can be turned from RED to a real check.');
+w('');
+w('**Does not.** No production change. No deployed byte changes. No migration runs. The frozen limitations');
+w('stay exactly as frozen — in particular **no surface in any group here may say a client confirmed');
+w('attendance while `GAP-ATTENDANCE-CONFIRM` is open**, which is why G16 carries its wording constraint.');
+fs.writeFileSync(R+'/docs/rebuild/K1-HUMAN-JUDGEMENT-OWNER-DOSSIER.md',out.join('\n')+'\n');
+
+// machine-readable twin
+const json={generated_from:'k1-surface-dossier.json', totals:{surfaces:rows.length,...T,cells},
+ groups:Object.keys(G).map(k=>{const st=stat(k);return {group:k,title:META[k].title,rows:st.n,successor_cells:st.s,owner_cells:st.o,both:st.b,
+  channels:st.ch,packages:st.pk,classes:st.cl,ids:G[k],proposed_successor:META[k].successor||null,proposed_owner:META[k].owner,
+  risk:META[k].risk,recommended:META[k].rec};})};
+fs.writeFileSync(R+'/docs/rebuild/evidence/maya-chat-first-ux/k1/k1-human-dossier.json',JSON.stringify(json,null,1));
+console.log(`OK  rows ${T.rows}  successor ${T.s}  owner ${T.o}  both ${T.both}  cells ${cells}  groups ${Object.keys(G).length}`);

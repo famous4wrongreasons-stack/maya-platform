@@ -1466,15 +1466,87 @@ emission validator. *Evaluation point:* `EP-MINT`.
 
 **F88 — the forbidden-key list, stated once: one union, three enforcement points.**
 
-`arguments`, `payload`, `state` *(outside a declared body enum field)*, `role`, `permissions`,
-`token`, `tenant_id` *(outside the envelope root)*, `client_id`, `staff_id`, `record_id`,
-`is_staff`, `is_owner`, `__meRole`, `__meIsStaff`, `__meIsFounder`, `url`, `href`, `endpoint`,
-`checkout_url`, `return_url`, `provider_ref`, `bridge_method`, `required_verification`,
-`interaction_model`, `four_eyes`, `fourEyes`, `booking_effect`, `presentation_hint`.
+`arguments`, `payload`, `state` *(outside a declared body enum field)*, `role` *(outside the
+declared `WidgetIntent.role` presentation enum — F88.1)*, `permissions`, `token`, `tenant_id`
+*(outside the envelope root)*, `client_id`, `staff_id`, `record_id`, `is_staff`, `is_owner`,
+`__meRole`, `__meIsStaff`, `__meIsFounder`, `url`, `href`, `endpoint`, `checkout_url`,
+`return_url`, `provider_ref`, `bridge_method`, `required_verification`, `interaction_model`,
+`four_eyes`, `fourEyes`, `booking_effect`, `presentation_hint`.
 
 *Mechanism:* one structural validator — a total walk over the serialized value — applied to
 `WidgetEnvelope`, `WidgetIntentSubmission`, `ChannelProfile`, `NativeBridgeManifest` and
 `IntentRecord`. *Evaluation points:* `EP-MINT`, `EP-INGRESS`, `EP-REGISTRY-LOAD`.
+
+**F88.1 — `role` is forbidden as an authority, persona or identity field, and is permitted at
+exactly one declared location.** `OWNER RULING, wave 1.` The unqualified form of this key made
+F88's own walk refuse every envelope this contract can mint, because §3.1 declares
+`WidgetIntent.role` and the walk reaches it through `WidgetEnvelope.intents`. The fence is
+narrowed to what it was always for, in the same shape as its two already-qualified siblings —
+and it is narrowed by **location and type**, never by name alone:
+
+```
+SERIALIZED AUTHORITY / PERSONA / IDENTITY ROLE        →  FORBIDDEN
+WidgetIntent.role, at that exact member, typed as
+  §3.1 declares it                                    →  ALLOWED
+any other serialized member or key named `role`,
+  at any other depth, of any other type               →  FORBIDDEN
+```
+
+**One correction to the ruling's own wording, made in the open rather than silently.** The
+ruling quotes the type as `'primary' | 'secondary' | 'destructive' | 'escape'`. **§3.1 declares
+eight members, not four:**
+
+```ts
+role: 'primary' | 'secondary' | 'destructive' | 'escape'
+    | 'more' | 'handoff' | 'remedy' | 'control';
+```
+
+The permission is bound to *the exact declared type*, which the ruling states twice, so it covers
+all eight — and the four the ruling did not quote are interaction roles on exactly the same
+footing as the four it did: `'more'` is minted by the fitter when a density cap forces escalation
+(§2.5 K17), `'control'` is the run-cancel control (§2.6.13 PROGRESS.3, §3.2 R3.2.4), and
+`'handoff'` and `'remedy'` name the routing and recovery affordances. **None of the eight denotes
+a persona**, which is the test the ruling sets. Recorded here so the owner sees that the
+permission covers eight rather than discovering it in an implementation.
+
+**There is no generic exception.** "A key named `role` is allowed" is not the rule and must never
+be implemented as one: the permission is bound to the declared member of the declared shape with
+the declared four-member type, and a `role` that is nested, renamed-into, re-typed, or carried on
+any other shape fails exactly as before. A `WidgetIntent.role` whose value is outside the four
+also fails, because the type is half of the permission.
+
+**Why this weakens no fence.** `WidgetIntent.role` is interaction semantics: it does not denote
+Owner, Staff or Client; it takes no part in authentication, authorization or tenant selection; it
+raises no verification floor; it selects no capability; it creates no approval; and it confers no
+business authority. `CLIENT.3`, `APPROVAL.4` and `ARTIFACT.5` are rules *about* it, which is what
+a presentation enum looks like. Its neighbours on F88's list — `__meRole`, `is_staff`, `is_owner`
+— are the authority keys the fence exists for, and they are untouched.
+
+*Mechanism:* the same single validator, with the permission expressed as a **(shape, member,
+type)** triple rather than a key name, so that no other `role` can inherit it. Its K3 test vector
+is fixed here and is part of P-01's definition of done:
+
+| wire content | verdict |
+|---|---|
+| an owner / staff / client role on the wire | **FAIL** |
+| `__meRole` | **FAIL** |
+| `is_owner` | **FAIL** |
+| `is_staff` | **FAIL** |
+| an undeclared nested `role`, at any depth | **FAIL** |
+| `WidgetIntent.role = 'primary'` | **PASS** |
+| `WidgetIntent.role = 'secondary'` | **PASS** |
+| `WidgetIntent.role = 'destructive'` | **PASS** |
+| `WidgetIntent.role = 'escape'` | **PASS** |
+| `WidgetIntent.role = 'more'` / `'handoff'` / `'remedy'` / `'control'` | **PASS** — the four §3.1 declares that the ruling did not quote |
+| `WidgetIntent.role` holding any ninth value | **FAIL** — the type is half of the permission |
+
+**And one behavioural proof, separately:** changing `WidgetIntent.role` among those four values
+**must not change the authority decision** for identical authority inputs. The test replays one
+emission fixture four times, varying only `role`, and asserts that `verificationFloor`, Gate 6's
+dispatch and Gate 7's verdict are byte-identical across all four. A presentation field that could
+move an authority decision would not be a presentation field.
+*Evaluated at:* `EP-MINT`, `EP-INGRESS`, and `EP-BUILD` for the invariance replay.
+*Status:* `NORMATIVE-PENDING` on **P-01** — K3 builds the validator and these nine vectors.
 
 ### 0.16 The conferral fences
 

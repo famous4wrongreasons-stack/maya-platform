@@ -2,7 +2,7 @@
 // Source:     docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md
 // Regenerate: node scripts/widget-contract/emit.mjs
 // Module:     kinds
-
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { CapabilityRef } from './capability-ref';
 import { DraftClass } from './confirmation-guard';
 import { Cell, Measure, Narrative, Phrase } from './envelope';

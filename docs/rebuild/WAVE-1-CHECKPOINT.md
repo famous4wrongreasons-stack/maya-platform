@@ -2,7 +2,7 @@
 
 ```
 PACKAGES COMPLETE: 2/16
-WAVES COMPLETE:    0/6      (wave 1's code is complete; its exit needs one signature and one ruling)
+WAVES COMPLETE:    0/6      (wave 1's code is complete; its exit needs one signature and two rulings)
 SURFACE PARITY:    0/795    (the harness is emitted RED by design; K1 turns nothing green)
 PRIMARY NAV:       101 → target 5   (unchanged: K1 proposes, K16 executes)
 ROLE PRESENTATION MODES REMAINING: 4   (unchanged: K5 removes them)
@@ -48,6 +48,13 @@ dossier nobody needs to read:
 does this fold into* is a product judgement) and 57 canonical owners. That is K1's exit, and it is
 the one exit in this plan a machine cannot certify.
 
+**One correction to a number in the earlier report.** I called these "126 human-judgement cells".
+126 is the count of **rows**; they carry **137 cells**, because **11 rows need both** a successor
+and an owner. The 80/57 split is exact; 80 + 57 = 137, and the 11 overlapping rows are why the row
+count is lower. `K1-HUMAN-JUDGEMENT-OWNER-DOSSIER.md` groups all 126 into **26 groups** — 18
+successor groups and 8 owner groups — and carries one approval block. The grouping is asserted to
+be a total, disjoint partition at build time; the build fails otherwise.
+
 **The authorized 34 re-dispositions reproduce from the data**, and their scope is now on the row
 rather than implicit:
 
@@ -87,7 +94,7 @@ Two kinds of contract text are preserved as comments rather than emitted, becaus
 specification and not TypeScript: `// [SPEC, not code]` for §4.8's set-notation derivations, and
 `// [MEMBER FRAGMENT]` for members quoted from a shape declared elsewhere.
 
-`widget-contract-check.mjs`: **21/22**, with four checks **PENDING** and named — each a
+`widget-contract-check.mjs`: **26/28**, with four checks **PENDING** and named — each a
 prerequisite, not an omission (`KIND_REGISTRY` totality and `WIDGET_CAPABILITY_POLICY` totality
 wait on P-10; R1 portability on P-19/K5; the forbidden-key walk on P-01/K3).
 
@@ -113,52 +120,167 @@ adds no runtime and breaks none.
 
 ---
 
-## STOP — a concrete contract contradiction, per the authorized stop policy
+## F88 — the owner ruling, applied; and two more instances of the same class
 
-This is stop condition **4**: *the certified Widget Contract reveals a concrete
-regression/contradiction*. It was found by compiling the contract, and it is reported rather than
-resolved, because resolving it is an owner decision.
+### The ruling, as applied
 
-**§0.15 F88's forbidden-key list and §3.1's `WidgetIntent` cannot both be satisfied as written.**
+The wave-1 ruling is written into the contract as **F88.1**, immediately after F88, and F88's list
+line now reads `` `role` *(outside the declared `WidgetIntent.role` presentation enum — F88.1)* ``,
+which is the same in-place qualification F88 already uses twice.
 
-F88 lists twenty-eight keys and **qualifies two of them in place**:
+```
+SERIALIZED AUTHORITY / PERSONA / IDENTITY ROLE  →  FORBIDDEN
+WidgetIntent.role, at that exact member,
+  typed as §3.1 declares it                     →  ALLOWED
+any other serialized member or key named `role`,
+  at any other depth, of any other type         →  FORBIDDEN
+```
 
-> `arguments`, `payload`, `state` *(outside a declared body enum field)*, `role`, `permissions`,
-> `token`, `tenant_id` *(outside the envelope root)*, …
+The permission is implemented as a **`(shape, member, type, depth)` tuple**, never as a key name.
+A checker asserts that no generic "role allowed everywhere" exception exists by reading its own
+source for the shape binding.
 
-Its mechanism is **"one structural validator — a total walk over the serialized value — applied to
-`WidgetEnvelope`, `WidgetIntentSubmission`, `ChannelProfile`, `NativeBridgeManifest` and
-`IntentRecord`"**.
+### One correction to the ruling's wording, surfaced rather than absorbed
 
-§3.1 declares:
+The ruling quotes the type as `'primary' | 'secondary' | 'destructive' | 'escape'`. **§3.1 declares
+eight members:**
 
-> `role: 'primary' | 'secondary' | 'destructive' | 'escape'`
+```ts
+role: 'primary' | 'secondary' | 'destructive' | 'escape'
+    | 'more' | 'handoff' | 'remedy' | 'control';
+```
 
-on `WidgetIntent`, which is reached by that walk through `WidgetEnvelope.intents`. **So F88's own
-validator would refuse every envelope this contract can mint.** That is an assertion set that can
-never pass — the category the certification hunted, surfacing only once the contract was compiled
-and its shapes enumerated.
+The ruling binds the permission to *the exact declared type*, which it states twice, so it covers
+all eight. The four it did not quote are interaction roles on the same footing as the four it did:
+`'more'` is minted by the fitter when a density cap forces escalation (§2.5 K17), `'control'` is
+the run-cancel control (§2.6.13 PROGRESS.3, §3.2 R3.2.4), `'handoff'` and `'remedy'` name the
+routing and recovery affordances. **None denotes a persona**, which is the test the ruling sets.
+Binding to eight is the ruling applied, not the ruling widened — but it is written here rather than
+left to be discovered in an implementation.
 
-**Why it is not a security weakening, and why I am not fixing it unilaterally.** `role` sits on
-F88's list among `__meRole`, `is_staff` and `is_owner` — authority keys. `WidgetIntent.role` is a
-**presentation** role from a closed four-member set that confers nothing, and CLIENT.3, APPROVAL.4
-and ARTIFACT.5 are rules *about* it. The likely intent is that F88 means an *authority* role. But
-"likely" is not a ruling, and the two sibling keys on that same list carry their qualifier
-explicitly — so adding one to `role` is a change to a conferral fence, and that is the owner's.
+### The proof vectors execute, and the invariance is proven by absence
 
-**Three ways it can be closed, and what each costs:**
+All nine vectors the ruling requires, plus three more, are pushed through **the same two predicates
+the walk uses** — so a later widening of the predicate flips a vector and fails the check:
 
-1. **Qualify `role` as its siblings are qualified** — `role` *(outside `WidgetIntent`'s closed
-   presentation set)*. Smallest change; matches F88's own pattern twice over; weakens nothing,
-   because the presentation set confers nothing.
-2. **Rename the member** — `WidgetIntent.presentation_role`. Leaves F88 untouched and absolute,
-   at the cost of renaming a member six kind-body clauses already cite by name.
-3. **Scope F88's walk** — exclude `intents[]` from it. **Not recommended**: it would stop the walk
-   checking the one array most likely to carry a smuggled key.
+```
+FAIL  owner / staff / client role on the wire      FAIL  __meRole · is_owner · is_staff
+FAIL  undeclared nested role (depth 2)             FAIL  role on a shape that is not WidgetIntent
+FAIL  WidgetIntent.role with a ninth value         PASS  WidgetIntent.role, declared type, depth 0
+PASS  tenant_id at the envelope root               FAIL  tenant_id nested in the envelope
+```
+
+**Behavioural invariance.** The ruling requires that changing `WidgetIntent.role` among its declared
+values cannot change an authority decision for identical authority inputs. Proven the strongest way
+available: **0 property reads of `.role` across all 13 modules.** No function reads it, so no
+function can branch on it. This is a proof of absence checked by AST, not a claim about intent.
+
+---
+
+## Two more instances of the same class — narrow STOPs, not a re-opened contract
+
+Both were found by the same walk, after it was corrected. Neither is covered by the ruling, and
+**neither is being resolved by analogy** — extending a ruling about `role` to a different key, or
+to a different location, is exactly the generic exception the ruling forbids.
+
+### SECOND FINDING — `IntentRecord.tenant_id`
+
+§3.7 declares `tenant_id` on `IntentRecord`, which is one of the five shapes F88's validator walks.
+F88 qualifies `tenant_id` **only** "outside the envelope root" — a qualifier phrased for the
+envelope, while the walk also covers `IntentRecord`. As written, the validator refuses every
+`IntentRecord` the contract mints.
+
+An `IntentRecord` is **server-side storage and is never sent to a client**, so the wire risk the
+fence exists for is absent here. One line closes it — *"outside the envelope root and
+`IntentRecord`"* — but that line moves a conferral fence, so it is an **owner ruling**.
+
+### THIRD FINDING — `RenderReceipt.intents_withheld[].role`, and the checker defect that hid it
+
+§4.5.5 declares `role: WidgetIntent['role']` at depth 2 inside `RenderReceipt`, to name which
+intents the fitter withheld. The type is an alias of the exact declared type; the **location** is
+not the declared location, and F88.1 is a tuple.
+
+**This one surfaced only because I fixed a defect in my own checker**, and that matters more than
+the finding. F88 says its keys are forbidden *"at any other depth"*. My checker collected **only
+depth-1 members**, so it could not check the thing F88 states. It now walks to full depth through
+inline object literals and array element types, stopping at named type references (which the reach
+walk visits on their own), and carries a dotted path and a depth on every member. The `tenant_id`
+and `role` exemptions are now additionally bound to **depth 0**, so a nested `tenant_id` inside the
+envelope is refused — a vector that previously would have passed.
+
+A checker that reads correctly but does not enforce is the failure mode this whole cycle has been
+hunting. This is the third time it has appeared, and the second time in code I wrote.
+
+### Recommended rulings
+
+| | recommendation |
+|---|---|
+| **`IntentRecord.tenant_id`** | qualify F88 in place: *`tenant_id` (outside the envelope root and outside `IntentRecord`)*. Same pattern F88 already uses twice; weakens nothing on the wire, because an `IntentRecord` never reaches a wire. |
+| **`RenderReceipt.intents_withheld[].role`** | extend F88.1's location clause to the two declared locations: `WidgetIntent.role` **and** `RenderReceipt.intents_withheld[].role`, both typed as §3.1 declares. Enumerated locations, not a key-name exception. |
 
 **Nothing downstream is blocked today** — F88's validator is a K3 deliverable (`EP-MINT`) and does
-not exist yet. But **K3 is the package that builds it**, so this must be ruled on before wave 2
-opens, not during it.
+not exist yet. But **K3 builds it**, so both must be ruled on before wave 2 reaches K3. The two
+failing checks stay failing and visible until then; they are not marked pending, because pending
+would mean "a later package supplies this", and what is missing here is a decision.
 
-Wave 1's code is complete and its gates are green. Its **exit** needs two things from the owner:
-the **126 signatures** on the dossier, and this **ruling**.
+---
+
+## The five undeclared shapes — resolved inside the frozen contract, no new semantics
+
+Per the instruction, each was defined in its assigned package from the contract's own text, and
+each is recorded with the clause that fixes it. **None required new authority or business
+semantics, so none is a STOP.**
+
+| shape | fixed by | what it is |
+|---|---|---|
+| `WidgetBody` | §2's 22 body declarations | the union of the 22 bodies, nothing more |
+| `CorrelationRefs` | §1.1.2 — "run/turn/message/parent ids only" | exactly those four, all optional |
+| `IntentProposal` | §1.1.2 — "capability (or handoff_capability_ref), argument handles, role. No token. No floor." | exactly those members; **no `label`** |
+| `BridgeSession` | §4.6 NT3 | `{ resolved: Readonly<Record<BridgeKey, 'available' \| 'absent' \| 'unknown'>> }` |
+| `BridgeKey` | §4.6 — `required: []` | **deliberately left open as `string`.** The contract never closes it, and `required: []` means it gates nothing. Closing it here would be inventing a fence the contract does not state. |
+
+A first pass at these under-read three of them — it invented a `label` on `IntentProposal`, made
+`BridgeSession` an opaque string against NT3's explicit `.resolved`, and closed `BridgeKey` into a
+union taken from my own envelope rather than from the contract. The corrected versions take the
+members the contract states. The difference between deriving a shape and inventing one is exactly
+the difference those three corrections make.
+
+---
+
+## Release gates, re-run
+
+```
+typecheck (build config)      PASS     lint (full repo glob)      PASS   0 errors, 9 pre-existing warnings
+typecheck:scripts             PASS     prettier                   PASS
+typecheck (widget contract)   PASS     K1 dossier checks          PASS   15/15
+widget-contract checkers      26/28    two findings, both above
+every evidence checker        PASS     run-all-checks.sh
+```
+
+`run-all-checks.sh` is new, and it exists because I mis-invoked three of these checkers in this
+session: they take a document path, and handed the wrong file they print a plausible
+`printed (absent)` rather than an error. The invocation is now recorded instead of remembered.
+
+---
+
+## Wave status
+
+```
+K1 SURFACES:                795/795
+K1 HUMAN-JUDGEMENT ROWS:    126   (137 cells: 80 successor + 57 owner, 11 rows carrying both)
+K1 OWNER DOSSIER:           READY   26 groups
+K1 SIGNED:                  NO
+K2 COMPILE:                 PASS
+K2 CHECKERS:                26/28
+F88 RULING APPLIED:         YES
+F88 SELF-CONTRADICTION:     RESOLVED for `role` at WidgetIntent
+                            OPEN for IntentRecord.tenant_id           (second instance)
+                            OPEN for RenderReceipt…[].role            (third instance)
+WIDGET CONTRACT REGRESSIONS: 0
+PACKAGES COMPLETE:          2/16
+WAVE 1 COMPLETE:            NO
+WAVE 2 STARTED:             NO
+```
+
+Wave 2 does not start until the K1 human dossier is signed. The two open findings do not block the
+signature — they block **K3**, which is in wave 2's second half.

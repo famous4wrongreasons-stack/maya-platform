@@ -2,7 +2,7 @@
 // Source:     docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md
 // Regenerate: node scripts/widget-contract/emit.mjs
 // Module:     capability-ref
-
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import {
   ActionCapabilityRegistry,
   C9_CAPABILITIES,

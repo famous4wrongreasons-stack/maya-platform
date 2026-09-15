@@ -2,7 +2,7 @@
 // Source:     docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md
 // Regenerate: node scripts/widget-contract/emit.mjs
 // Module:     envelope
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { stableActionJson } from './ambient';
 import { CorrelationRefs, IntentProposal, WidgetBody } from './derived-shapes';
 import { AuthorityEnvelope, Origin, Presentation } from './envelope-roots';

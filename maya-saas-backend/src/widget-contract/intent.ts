@@ -2,7 +2,7 @@
 // Source:     docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md
 // Regenerate: node scripts/widget-contract/emit.mjs
 // Module:     intent
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { C9Domain } from './ambient';
 import { KIND_FLOOR } from './tables';
 import { CapabilityRef } from './capability-ref';

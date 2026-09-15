@@ -2,7 +2,7 @@
 // Source:     docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md
 // Regenerate: node scripts/widget-contract/emit.mjs
 // Module:     envelope-roots
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { Phrase, VerificationLevel } from './envelope';
 import { FullscreenReason } from './kinds';
 import { A11yBlock, ChannelProfile, ProactiveProvenance } from './lifecycle';
