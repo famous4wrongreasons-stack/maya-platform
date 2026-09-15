@@ -1,0 +1,114 @@
+{
+ "pass": "narrow EC-23 dependency verification",
+ "result": "FAIL",
+ "verifiers": 2,
+ "linesRead": [
+  520,
+  960
+ ],
+ "artifactFenceSafe": false,
+ "newFloorReduction": false,
+ "gate5Recomputable": true,
+ "gate6Executable": true,
+ "a2FullyBound": false,
+ "identifierCollisionScan": [
+  "NONE at the point of declaration: 0-C declares exactly three §2 identifiers — APPROVAL.4 (§2.6.12, which declares .1-.3), ARTIFACT.5 (§2.6.22, which declares .1-.4), CLIENT.3 (§2.6.7, which declares .1-.2) — and all three numbers are free.",
+  "SOURCE.3 (§2.6.15) appears in 0-C at §0C.17-bis but as an explicit AMENDMENT to the existing clause ('SOURCE.3 is amended to give reconnect_intent priority: 0'), not a second clause under the same number — correct form, no supersession risk.",
+  "The other 0-C occurrences — BOOK.1, BOOK.2, STRATEGY.1, SETTINGS.4, FORM.2/.4/.6, LIMIT.1, ARTIFACT.1, CLIENT.1, CLIENT.2, APPROVAL.1 — are citations or voidings of existing §2 clauses, never declarations under a number §2 already uses.",
+  "RESIDUAL soft collision (not a declaration): §0C.13's EC-20 row, artefact line 3224, 'APPROVAL.4 and ARTIFACT.3 assign the roles the per-control scoping needs' — a 0-C sentence still naming ARTIFACT.3 with role-assigning content after EC-23 renumbered the clause to .5.",
+  "No new K-rule collision: 0-C cites K1, K2, K3, K5, K7, K11, K12, K13, K20, K22 and declares none; §2 declares K1-K23."
+ ],
+ "causedByEc23": 9,
+ "independentLoadBearing": 1,
+ "headline": "FAIL. No new floor reduction; Gate 5 recomputable and Gate 6 executable; the 0-C-wide identifier scan found NO remaining declaration collision — 0-C declares exactly three section-2 identifiers (APPROVAL.4, ARTIFACT.5, CLIENT.3) and all three numbers are free. But EC-23 edit 7 was a REGRESSION: nameSourceOf lost its binding in six of seven branches and did not compile. Repaired as EC-24.",
+ "findings": {
+  "causedByEc23": [
+   {
+    "clause": "§0C.13 errata ledger, EC-20 row (artefact line 3224): \"APPROVAL.4 and ARTIFACT.3 assign the roles the per-control scoping needs.\"",
+    "consequence": "Edit 1 renumbered the clause at its declaration site but not at this citation. Because §0C.2 makes 0-C govern over §2, a 0-C sentence asserting that ARTIFACT.3 assigns intent roles is precisely the supersession read edit 1 exists to prevent — it now points at §2.6.22's contains_pii / pii_ceiling clause. So the answer to (c) is: NOT completely safe. One citation remains. It is the weaker kind of exposure (a ledger restatement, not a rule declaration) but it is inside the governing section and it is the exact sentence pattern that created the hazard.",
+    "fix": "In the EC-20 row, replace 'ARTIFACT.3' with 'ARTIFACT.5 (numbered .3 by EC-20, renumbered by EC-23)'. One-token edit; nothing else in the row changes."
+   },
+   {
+    "clause": "§0C.13 errata ledger, EC-23 row (artefact line 3221): \"EC-21 had introduced a colliding number one clause above the CLIENT.2 collision EC-22 fixed\"",
+    "consequence": "Misattribution. §0C.22-nonies — the section that declares both APPROVAL.4 and the former ARTIFACT.3 — is cited by EC-20's row (\"§0C.22-octies, §0C.22-nonies, §0C.28-septies\") and by no other erratum, and EC-20's own outcome text says it declared them. EC-21's row cites §0C.17-quinquies, §0C.22-undecies, §0C.28-quinquies and never mentions ARTIFACT. The ledger's whole value is that each defect's provenance is checkable; a wrong provenance in the row that fixes the defect is the ledger contradicting itself.",
+    "fix": "'EC-20 had introduced a colliding number' in EC-23's row. The spatial claim ('one clause above the CLIENT.2 collision') is correct and stays."
+   },
+   {
+    "clause": "§0C.32, first sentence of the surviving blanket claim: \"No repair admits a capability, widens an allowlist, or relaxes a veto. That holds over **every** erratum, EC-1 … EC-22.\"",
+    "consequence": "Edit 8 rewrote this very paragraph and did not extend its range. EC-23 is a numbered erratum in §0C.13, so the contract's only remaining global safety claim now silently excludes the most recent repair round — and §0C.32's closing promise ('A reader auditing this contract should be able to find every floor reduction it makes by reading this table') is made over a range that stops one row short. The claim WOULD hold over EC-23 if stated (verified: EC-23's only candidate widening is §1.9 H1's term list gaining render.render_tier, which increases hash coverage rather than widening an allowlist; the CLIENT.3 conjuncts restrict; the EC-2 row rewrite changes justification text, not floors), so this is a scope defect, not a soundness defect.",
+    "fix": "'EC-1 … EC-23' in the blanket sentence and 'EC-17 … EC-23' in the illustrative-buckets sentence. Two tokens."
+   },
+   {
+    "clause": "§0C.28-sexies item 3, MomentTemplate block (artefact lines 3071-3074): the amendment '§4.9.3's ProactiveProvenance gains moment_template_version: number' exists only as a code comment.",
+    "consequence": "§4.9.3's declared shape (line 6559) still carries moment_template_id with no version, and 0-C's own ProactiveProvenance re-declaration (line 2925) does not add one. Load-bearing: MOMENT_TEMPLATES is keyed `${id}@${version}` (line 3085) precisely so §4.2's replay of a FROZEN receipt resolves the older version — a frozen proactive receipt whose provenance carries only an id cannot form that key, which is the failure the versioned catalogue was declared to prevent. EC-23's edit 3 rules in this same round that a comment-only amendment never amended anything; edit 8 then left the structurally identical case in a comment. (Alternative reading: the comment predates EC-23 and this is EC-22's residual — but EC-23's brief claims this as one of its eight edits and its edit 3 establishes the rule that condemns it, so it is EC-23's to close.)",
+    "fix": "Lift it out of the comment into a RULING beside §0C.28-nonies's H1 ruling, and fix the nullability while doing so — §4.9.3 declares `moment_template_id: string | null` REQUIRED iff narrative_source === 'moment_template', so the member must be `moment_template_version: number | null` under the same condition, not the bare `number` the comment states."
+   },
+   {
+    "clause": "§0C.22's A-2 (artefact lines 2058-2059): \"…verbatim wherever the pointer list is empty. Where for an intent control that label **is** intent.label (§0C.22-ter).\"",
+    "consequence": "Ungrammatical fragment — a dangling 'Where' with no clause after it, left by EC-23's rewrite of A-2's binding line (edit 5) or by edit 4's strike. A-2 is a normative composition rule and this sentence is the one that tells a reader WHEN nameSourceOf's label is intent.label. Flagged as a cross-angle observation: edit 5 is Angle B's and I did not verify suffixFor's declaration (lines 2168-2172) beyond confirming both `el` and `suffix` are bound by declared functions, which they are — so a2FullyBound is reported true on the binding itself, independent of this prose residue.",
+    "fix": "Restore the missing antecedent: \"Where `ref.k === 'intent'` that label **is** `intent.label` (§0C.22-ter).\""
+   },
+   {
+    "clause": "§0C.22-ter, `nameSourceOf` (artefact lines 2183–2201) — edit 7",
+    "consequence": "CONFIRMED, the most serious finding in this angle. `el` is bound only inside `case 'intent'` (line 2189). The other six branches — `el.label.rendered` (2191), `el.heading.rendered` (2192), `'label' in el ? el.label : el.title` (2193), `el.start.label` (2196), `el.title.label` (2197), `el.row.cells[rowHeaderKey(el.table)]` (2198) — reference an identifier that is not in scope. nameSourceOf is the declared-total function that A-2's composition, A-2's EP-BUILD CI check (`accessible_names[refKey(ref)].startsWith(nameSourceOf(ref, env).label)`), §0C.22-ter's one-line invariant (line 2204), §0C.22-quater's row-branch totality argument, §0C.22-sexies's slot/alternatives argument, §0C.22-octies's totality ground, EC-6's ledger row (line 3210) and §0C.28-sexies item R1 ('unfiltered, resolveInteractive is partial, nameSourceOf's totality is false') all stand on. All of them are now grounded in a function body with six unbound identifiers. This is a regression: the pre-EC-23 text (section0c.v5.bak) bound `el` once before the switch.",
+    "fix": "Brace the six remaining cases and bind in each, exactly as the intent branch does: `case 'field': { const el = resolveInteractive(env, ref); return { label: el.label.rendered, from: 'field' }; }` — and likewise for section, option, slot, entry, row. (Necessary but not sufficient; pair it with independentPreExisting #A or the narrowing the comment promises still will not occur.)"
+   },
+   {
+    "clause": "§0C.22 A-2 (amended), artefact line 2057 — edit 5",
+    "consequence": "CONFIRMED. `suffix = suffixFor(env.kind, ref, ref.k === 'intent' ? el : null)`. `el` is bound on the preceding line as `resolveInteractive(env, ref)` with `ref` at the full union; the ternary's test narrows `ref`, not `el`, so the third argument's type is `ElementFor<InteractiveRef['k']> | null` — the flat seven-shape union — where suffixFor declares `WidgetIntent | null`. This is precisely the failure mode edit 7 was written to remove from nameSourceOf, reproduced by edit 5 in A-2 itself, one screen above it. A-2's mechanism is an EP-BUILD CI check, so the composition has to be writable; as written the check cannot be compiled.",
+    "fix": "Bind inside the branch instead of testing after: `suffix = ref.k === 'intent' ? suffixFor(env.kind, ref, resolveInteractive(env, ref)) : suffixFor(env.kind, ref, null)`, leaving `el = resolveInteractive(env, ref)` in place for the `renderSuffix(suffix, el, env.body)` argument only, where the union is harmless."
+   },
+   {
+    "clause": "§0C.22-ter code block, artefact lines 2168–2179 — edit 5",
+    "consequence": "CONFIRMED (minor, but it is a binding defect of the same family). The four-line `suffixFor` declaration was inserted BETWEEN `renderSuffix`'s declaration (2168–2169) and the comment block that documents renderSuffix — 'Each pointer resolves — against `el` when base is element, against `body` when it is body — to a Cell, Measure or Phrase, and contributes its MINTED label: Cell.label, Measure.formatted, Phrase.rendered. Joined with \", \". An empty pointer list yields \"\". Mint class M.' Those lines now read as suffixFor's contract, which is false: suffixFor returns a SuffixSpec and yields no string, and 'an empty pointer list yields \"\"' contradicts suffixFor's own stated default of a spec with an empty pointer list. renderSuffix is left with no stated semantics at all — yet A-2's CI check ('equality with the row's composition applied to the emitted body') and §0C.22-quinquies's whole reason for a descriptor rather than a literal string depend on exactly those sentences.",
+    "fix": "Move the `declare function suffixFor(...)` line plus its own four comment lines to immediately AFTER the pointer-resolution comment block (i.e. below line 2179), so the pointer semantics stay attached to renderSuffix."
+   },
+   {
+    "clause": "§0C.31 errata ledger, EC-20's row (artefact line 3224) — collateral of edit 1, flagged here because Angle A's (c) scan is keyed on the 'NAME.N (section 2.x)' pattern and this citation carries no section cite",
+    "consequence": "CONFIRMED (stale citation). EC-20's row still reads 'APPROVAL.4 and ARTIFACT.3 assign the roles the per-control scoping needs.' Edit 1 renumbered that clause to ARTIFACT.5 precisely because §2.6.22's ARTIFACT.3 is the `contains_pii` / `pii_ceiling` clause. The ledger row therefore now points a reader at the PII clause as the thing that assigns intent roles — the exact misreading edit 1 exists to prevent, surviving one row below EC-23's own row. §0C.22-nonies's body (2367, 2384) and its follow-up sentence (2400) were both updated; only the ledger was not.",
+    "fix": "In EC-20's ledger row, change 'APPROVAL.4 and ARTIFACT.3 assign the roles' to 'APPROVAL.4 and ARTIFACT.5 assign the roles'."
+   }
+  ],
+  "independentPreExisting": [
+   {
+    "clause": "§0C.28-quinquies's HANDOFF destination-fence list (artefact lines 2861-2864): \"registration in its space, SENSITIVE_DEST (§0C.17-quater), targetFloor('s'), and the landing surface's own ingress.\"",
+    "evidence": "The list states targetFloor('s') unconditionally for every HANDOFF, but §0C.17's verificationFloor returns a flat 'ANONYMOUS' for a FLOOR_EXEMPT HANDOFF (line 1819-1821), waiving targetFloor for exactly the two class-'s' handoffs EC-4's row names. Predates EC-23 (EC-21's repair). Edit 6's new split is the accurate statement and now sits beside the older loose one.",
+    "loadBearing": false
+   },
+   {
+    "clause": "§0C.13's EC-4 row: \"EFFECT_FLOOR, KIND_FLOOR and targetFloor waived for all five … The residual is targetFloor('s') on a handoff.\"",
+    "evidence": "The row calls targetFloor both waived and residual in the same cell. Readable as 'the residual RISK is that targetFloor is waived', which is almost certainly the intent, but the sentence as written is self-contradictory. Predates EC-23 entirely; EC-23 did not touch the EC-4 row.",
+    "loadBearing": false
+   },
+   {
+    "clause": "§0C.22-nonies: \"§3.1 lets a composer choose any of the eight roles\"",
+    "evidence": "Correct as written — §3.1's union is eight members (line 4787-4788) — but §0.16's EC-4 note at line 1266 says EC-4 'keyed its exemption on four role values §3.1's closed union does not declare', implying an earlier four-member reading. The eight-member union governs and the section is right; noted only to record that the count was checked rather than assumed.",
+    "loadBearing": false
+   },
+   {
+    "clause": "§0C.22-ter, `resolveInteractive`'s declared signature (artefact lines 2162–2163), introduced by EC-21 and untouched by EC-23",
+    "evidence": "`declare function resolveInteractive<K extends InteractiveRef['k']>(env: WidgetEnvelope, ref: Extract<InteractiveRef, { k: K }>): ElementFor<K>`. `Extract<T,U>` expands to `T extends U ? T : never`, a conditional type, and TypeScript does not infer type arguments from conditional-type positions — inference is skipped and K falls back to its constraint `InteractiveRef['k']`. The argument then checks against `Extract<InteractiveRef, {k: InteractiveRef['k']}>` = InteractiveRef (so it compiles), and the return type is `ElementFor<InteractiveRef['k']>`, which — K being naked in ElementFor's conditional — distributes to the union of all seven element shapes. Narrowing `ref` in a switch branch therefore changes nothing about the returned type. Consequence: edit 7's stated purpose ('resolves el inside each branch so ElementFor actually narrows') is unreachable as long as this signature stands, even after the six free `el`s are bound; `el.heading`, `el.start`, `el.title` and `el.row` remain reads the declared type does not carry. The same non-inference applies to `renderSuffix<K>(d, el: ElementFor<K>, body)` (2168–2169), where it is harmless only because A-2 passes the union anyway.",
+    "loadBearing": true
+   },
+   {
+    "clause": "§1.9 H1 *Mechanism* sentence (artefact line 3803)",
+    "evidence": "'Evaluation points: EP-MINT (compute), EP-RENDER (the renderer recomputes body_hash and verifies the seal over it before drawing), EP-CI.' §0.16 E-14 (line 456) already voided the renderer-verifies-the-seal half — the seal is a keyed HMAC held by three minters and is verified at EP-INGRESS and EP-FETCH only. Edit 3 amends H1's term list and leaves this sentence as it found it. Pre-existing: identical in section0c.v5.bak's surroundings and in §1 before EC-23. Not load-bearing — E-14 governs by §0.1 precedence and states the corrected EP-RENDER duty (recompute body_hash, check expires_at) in full.",
+    "loadBearing": false
+   },
+   {
+    "clause": "§0C.31 errata ledger, EC-17's row (artefact line 3227) vs EC-17's body (artefact line 3134)",
+    "evidence": "The body now attributes the appended segment to '(EC-18 item 2 as amended by EC-20 and EC-21)'; the ledger row says 'as amended by EC-18 item 2 and EC-20', omitting EC-21 — although EC-21's own row (3223) lists 'EC-17's citation' among what it amended. Citation drift that predates EC-23 (the ledger row is unchanged in the diff). Not load-bearing: the ruling is the body, the ledger is a restatement, and both describe the same closed form.",
+    "loadBearing": false
+   },
+   {
+    "clause": "§0C.22 A-2 (amended), artefact lines 2058–2059",
+    "evidence": "'…so the name is `nameSourceOf(ref, env).label` verbatim wherever the pointer list is empty. Where for an intent control that label is `intent.label` (§0C.22-ter).' The second sentence opens with a dangling 'Where' and is a fragment. The diff shows these two lines are CONTEXT, unchanged by edit 5 — the defect predates EC-23. Not load-bearing: the intended meaning ('for an intent control that label is intent.label') is recoverable and is independently fixed by §0C.22-ter's intent branch.",
+    "loadBearing": false
+   }
+  ]
+ },
+ "verdicts": [
+  "NOT a plain PASS on Angle A — EC-23 is substantively sound but incomplete in four places, all of them in text EC-23 itself wrote. Per question: (a) edits 2 and 6 close cleanly and completely; edit 1 closes its collision at the declaration site; edit 8 closes only its bucket-list half. (b) Every immediate reader I could find still holds — the suffix table keys on role tokens not clause numbers, so ARTIFACT.5/APPROVAL.4/CLIENT.3 broke no reader; §0C.22-undecies's crossing pointer is now genuinely single-valued; §0C.28-quater's and §0C.28-quinquies's Gate 5/Gate 6 statements agree with the rewritten EC-2 row, including the SENSITIVE_DEST 'exactly one place' claim, which I checked specifically a",
+  "ANGLE B — NOT PASS. Edits 3 and 4 are clean; edit 5 achieves its purpose but leaves two new defects; edit 7 is a regression.\n\n(a) Closure. Edit 3 closes: the amendment moved out of refSet's comment into a block-quoted ruling in §0C.28-nonies that restates §1.9 H1's list in full, term-for-term identical to H1's code block plus `render.render_tier`, so the closed list is recomputable from the ruling alone. Edit 4 closes: the bare duplicate of \"what KIND_REGISTRY[kind].interactive_paths produces\" is gone and the bolded qualified copy survives; the sentence parses. Edit 5 closes its stated purpose — `suffixFor` is a genuine total declaration and A-2 no longer binds `suffix` by prose — but see (f"
+ ]
+}

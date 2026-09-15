@@ -882,10 +882,15 @@ reversibility) conflicts with A-2 identically.
 **S0C.22 — the ruling.** A-2 is replaced:
 
 > **A-2 (amended).** A control's accessible name is composed as
-> `nameSourceOf(ref, env).label` + (`suffix.pointers.length ? ', ' + renderSuffix(suffix, resolveInteractive(env, ref), env.body) : ''`),
-> where `suffix` is the entry §4.8.2's row gives for this ref's lookup key — every argument
-> bound, none free — so the name is
+> `nameSourceOf(ref, env).label` + (`suffix.pointers.length ? ', ' + renderSuffix(suffix, el, env.body) : ''`),
+> where `el = resolveInteractive(env, ref)` and
+> `suffix = ref.k === 'intent' ? suffixFor(env.kind, ref, resolveInteractive(env, ref))`
+> `                              : suffixFor(env.kind, ref, null)` — bound inside the branch, so
+> the third argument is `WidgetIntent` where the ref is an intent and `null` otherwise, rather
+> than a union tested after the fact. Every argument is bound by a declared total function, none
+> by prose and none free — so the name is
 > `nameSourceOf(ref, env).label` **verbatim** wherever the pointer list is empty. Where
+> `ref.k === 'intent'`,
 > for an intent control that label **is** `intent.label` (§0C.22-ter). In every case the
 > accessible name contains the denoted element's own label as a prefix, by construction. **`intent.utterance`
 > does not exist and every reference to it is void**; `intent.utterance_preview` is
@@ -988,8 +993,11 @@ type ElementFor<K extends InteractiveRef['k']> =
   : K extends 'slot'    ? TimeSlotSelectorBody['groups'][number]['slots'][number]
   : K extends 'row'     ? { table: TableSpec; row: TableSpec['rows'][number] }
   : never;
-declare function resolveInteractive<K extends InteractiveRef['k']>(
-  env: WidgetEnvelope, ref: Extract<InteractiveRef, { k: K }>): ElementFor<K>;
+// K is inferred from `ref.k`, a LITERAL property, not from a conditional type: a conditional
+// type in parameter position is not an inference site, so `Extract<InteractiveRef, {k: K}>`
+// would have left K at its constraint and defeated the indexing this declaration exists for.
+declare function resolveInteractive<R extends InteractiveRef>(
+  env: WidgetEnvelope, ref: R): ElementFor<R['k']>;
 declare function rowHeaderKey(t: TableSpec): string;   // the one column of THAT table whose
                                                        // is_row_header is true (§2: "exactly
                                                        // one column MUST be true") — total
@@ -1001,27 +1009,73 @@ declare function renderSuffix<K extends InteractiveRef['k']>(
        // Cell.label, Measure.formatted, Phrase.rendered. Joined with ', '. An empty pointer
        // list yields ''. Mint class M, like accessible_names itself.
 
+declare function suffixFor(kind: WidgetKind, ref: InteractiveRef,
+                           intent: WidgetIntent | null): SuffixSpec;
+       // §4.8.2's entry for `${ref.k}:${intent.role}`, else for `${ref.k}:*`, else the
+       // declared default { base: 'element', pointers: [] }. TOTAL — it never returns
+       // undefined, so A-2 needs no null branch and the Partial<Record<…>> indexed access
+       // never reaches A-2's text. `intent` is null for every non-intent ref kind.
+
 type NameSource = { label: string; from: InteractiveRef['k'] };
 
 function nameSourceOf(ref: InteractiveRef, env: WidgetEnvelope): NameSource {
-  const el = resolveInteractive(env, ref);        // total by K22's set-equality rule
+  // `el` is resolved INSIDE each branch, not once before the switch: resolving it first would
+  // infer K at the full union, so `el` would stay the flat seven-shape union in every branch
+  // and `el.title` / `el.heading` / `el.start` would be reads the declared type does not carry
+  // — the very failure the indexed ElementFor was adopted to prevent.
   switch (ref.k) {
-    case 'intent':  return { label: el.label,              from: 'intent'  };  // string (§3.1)
-    case 'field':   return { label: el.label.rendered,     from: 'field'   };  // Phrase (§0.18)
-    case 'section': return { label: el.heading.rendered,   from: 'section' };  // Phrase (§0.18)
-    case 'option':  return { label: ('label' in el ? el.label : el.title).label,
-                             from: 'option' };   // OptionItem.label OR, on STRATEGY_OPTIONS,
-                                                 // alternatives[].title — both Cell<string>
-    case 'slot':    return { label: el.start.label,        from: 'slot'    };  // Measure (§2.6.4)
-    case 'entry':   return { label: el.title.label,        from: 'entry'   };  // Cell<string> (§2)
-    case 'row':     return { label: el.row.cells[rowHeaderKey(el.table)].label,
-                             from: 'row' };                                    // Cell<string> | Measure
+    case 'intent':  { const el = resolveInteractive(env, ref);
+                      return { label: el.label,                   from: 'intent'  }; }  // string
+    case 'field':   { const el = resolveInteractive(env, ref);
+                      return { label: el.label.rendered,          from: 'field'   }; }  // Phrase
+    case 'section': { const el = resolveInteractive(env, ref);
+                      return { label: el.heading.rendered,        from: 'section' }; }  // Phrase
+    case 'option':  { const el = resolveInteractive(env, ref);
+                      return { label: ('label' in el ? el.label : el.title).label,
+                               from: 'option' }; }  // OptionItem.label OR, on STRATEGY_OPTIONS,
+                                                    // alternatives[].title — both Cell<string>
+    case 'slot':    { const el = resolveInteractive(env, ref);
+                      return { label: el.start.label,             from: 'slot'    }; }  // Measure
+    case 'entry':   { const el = resolveInteractive(env, ref);
+                      return { label: el.title.label,             from: 'entry'   }; }  // Cell
+    case 'row':     { const el = resolveInteractive(env, ref);
+                      return { label: el.row.cells[rowHeaderKey(el.table)].label,
+                               from: 'row' }; }                          // Cell<string> | Measure
   }   // total by type over the closed seven-member union — no default branch is reachable.
 }
 
 // A-2, in one line: the accessible name begins with the label of whatever the ref denotes.
 ∀ ref ∈ reading_order : accessible_names[refKey(ref)].startsWith(nameSourceOf(ref, env).label)
 ```
+
+**S0C.28-decies — §4.9.3's `ProactiveProvenance` is amended, and this too is a ruling.**
+`MOMENT_TEMPLATES` is keyed `` `${id}@${version}` `` (EC-22), and §4.9.3 declares
+`moment_template_id: string | null`, "REQUIRED iff `narrative_source === 'moment_template'`",
+with **no version member** — so the carrier cannot resolve the key it names, and §4.2 replays
+frozen receipts whose template version may be older than current.
+
+> **`ProactiveProvenance` gains `moment_template_version: number | null`**, non-null under
+> exactly the condition that makes `moment_template_id` non-null, and the pair resolves
+> `MOMENT_TEMPLATES` under the composed key. Added to **P-32**'s component list.
+
+The first draft of this repair put the amendment in a code comment inside `MomentTemplate`'s
+declaration — the identical failure §0C.28-nonies rules a defect for §1.9 H1, committed in the
+same round that ruled on it.
+
+**S0C.28-nonies — §1.9 H1 is amended, and this is a ruling rather than a comment.** `refSet`
+reads `render.render_tier`, so the fitted tier now determines `reading_order`; if the tier were
+outside `body_hash`, a sealed envelope could be re-read at a different tier and its
+`reading_order` would no longer match its seal.
+
+> **`body_hash`'s term list gains `render.render_tier`** — that field alone, **never the whole
+> `RenderReceipt`**, because R3.3.6 appends `target_classes` at delivery, *after* the seal, and
+> a term that changes after sealing would break every hash. §1.9 H1's list is otherwise
+> unchanged: `contract`, `kind`, `body_version`, `body`, `cell_index_digest`, `provenance`,
+> `limitations`, `intents.map(stripIntentToken)`, `presentation`, **`render.render_tier`**.
+
+The first draft of this repair put the amendment in a code comment inside `refSet`'s
+declaration, which is the same "left in a code comment only" failure §0C.28-sexies item 3 rules
+a defect — and it meant H1's closed list was never actually amended.
 
 **S0C.22-octies — `resolveInteractive`'s totality ground, corrected for the appended refs.**
 §0C.22-ter grounds that function's totality on "`validateEnvelope` already recomputes the ref
@@ -1182,9 +1236,20 @@ gap applies to `ARTIFACT`'s two controls. Two clauses close it, both at `EP-MINT
 > **APPROVAL.4 (§2.6.12).** `approve_intent` is `role: 'primary'`, `reject_intent` is
 > `role: 'destructive'`, `detail_intent` is `role: 'secondary'`, and an `APPROVAL` body mints
 > **exactly one** `role: 'primary'` intent.
-> **ARTIFACT.3 (§2.6.22).** `fetch_intent` is `role: 'primary'` and `regenerate_intent` is
-> `role: 'secondary'`.
-> **CLIENT.3 (§2.6.7).** Every `bulk_intents[]` entry is `role: 'primary'`. **Numbered 3, not
+> **ARTIFACT.5 (§2.6.22).** `fetch_intent` is `role: 'primary'` and `regenerate_intent` is
+> `role: 'secondary'`. **Numbered 5, not 3** — §2.6.22 already declares `ARTIFACT.1` … `.4`, and
+> its **`ARTIFACT.3` is a PII clause**: "`contains_pii` is stated before the file is fetched …
+> when it is true the text says so in the `policy` sentence, and `pii_ceiling` applies." This is
+> the same collision `CLIENT.3` was renumbered to avoid, one clause above it, and EC-22 closed
+> the CLIENT case and missed this one. §2.6.22's `ARTIFACT.1`, `.2`, `.3` and `.4` are
+> **unaffected by this section**, and §2.6.12's `APPROVAL.1` … `.3` likewise — `APPROVAL.4` is a
+> free number there, which is why it needed no renumbering.
+> **CLIENT.3 (§2.6.7).** Every `bulk_intents[]` entry is `role: 'primary'`, **no two entries
+> carry the same intent handle, and no other emitted intent on a `CLIENT_LIST` body carries
+> `role: 'primary'`.** The last two conjuncts are what make §0C.22-undecies's crossing pointer
+> single-valued and its `EP-MINT` refusal well-founded: without them a composer could mint a
+> second `primary` intent that is not a bulk intent, and the selection "the entry whose handle
+> equals `ref.id`" would either miss or be ambiguous. **Numbered 3, not
 > 2:** §2.6.7 already declares a `CLIENT.2` — "this kind is never emitted with
 > `presentation_mode: 'client'`", the `pii_ceiling: 'client_identified'` display fence. Because
 > §0-C governs over §2 (§0C.2), a second rule under the same identifier could be read as
@@ -1195,7 +1260,7 @@ gap applies to `ARTIFACT`'s two controls. Two clauses close it, both at `EP-MINT
 > put the file facts on the regenerate control. `CLIENT_LIST`'s row refs are `{k:'row'}` and are
 > unaffected either way.
 
-Without ARTIFACT.3 the `intent:*` key this table first used would have put the file facts on the
+Without ARTIFACT.5 the `intent:*` key this table first used would have put the file facts on the
 regenerate control — "Создать заново, report.pdf, PDF, 2 МБ" — which §0B.36 scopes to the single
 activation control. A suffix on the wrong control is a wrong accessible name, not a loose one.
 
@@ -1795,10 +1860,6 @@ declare function refSet(paths: readonly string[], body: WidgetBody,
        // Declared here under §0C.11-bis's rule, beside resolveInteractive: the ref set a
        // kind's interactive_paths produce against this body. K22's own recompute already
        // performs it; naming it gives the concatenation below a typed left operand.
-       // `tier` is covered: §1.9 H1's term list gains `render.render_tier`, so a tier that
-       // disagrees with the sealed reading_order breaks body_hash. The whole receipt cannot
-       // be a term — R3.3.6 appends `target_classes` at delivery, after the seal — so the one
-       // field the derivation reads is named, and nothing else.
        // `tier` is REQUIRED because CHART's declared path list is conditional — "and, when
        // degraded to `table`, `table_equivalent.rows[].row_key`" — and the degradation
        // outcome lives on `render: RenderReceipt`, not on `body`. §0.7 fixes EP-FIT before
@@ -1865,7 +1926,10 @@ interface MomentTemplate {
   moment_template_id: string;
   version: number;
   narrative_template_id: string;        // with the version below, composes the key
-  narrative_template_version: number;   // REQUIRED — §1.6.5's Provenance already references a
+  narrative_template_version: number;   // REQUIRED — and §4.9.3's ProactiveProvenance gains
+                                        // `moment_template_version: number` for the same
+                                        // reason — see the ruling below.
+                                        // §1.6.5's Provenance already references a
                                         // narrative template by (id, version), and §4.2 replays
                                         // FROZEN receipts, so an id alone cannot resolve
   required_cells: string[];             // JSON Pointers into the body this moment composes
@@ -1923,7 +1987,7 @@ when degraded, `table_equivalent.rows[].row_key`; REPORT's are `fullscreen_inten
 element at all.
 
 **The ruling.** **K22's prose enumeration is VOID as an enumeration.** `InteractiveRef`'s members — **seven** after §0C.22-sexies adds `{k:'slot'}` — are the typed
-authority, and per-kind membership is what `KIND_REGISTRY[kind].interactive_paths` produces
+authority, and per-kind membership is
 **what `KIND_REGISTRY[kind].interactive_paths` produces, filtered so that no `{k:'intent'}` ref
 names an intent absent from `emitted` (EC-21), plus every emitted intent not already denoted by
 a produced ref, in `emitted` order (EC-18 item 2 as amended by EC-20 and EC-21)** — which is
@@ -2011,8 +2075,11 @@ the components Annex A and §0B.41 already registered as `[ABSENT]`.
 | **EC-14** | §4.9.3 PR3c | "`notify_pref_key` must resolve in the notification-consent registry" | **Retained and made constructible.** Neither the member nor the registry existed. `ProactiveProvenance.notify_pref_key` (mint class D) and the closed twelve-row `MOMENT_REGISTRY` are declared, with a start-up assertion that every row's key resolves. §0C.28-bis |
 | **EC-15** | §3.7 `IntentRecord` | `body_hash` and `selection_domain` read by Gate 8-R and by the `SUPERSEDED` comparison | **Declared.** Both added, mint class D, `AUDIT_RETAINED`, in **P-30**'s component list. §0C.26-ter, §0C.28-bis |
 | **EC-16** | §0C.14 heading, §0C.32; §A5 | "the fourteen fundamental rules"; "§A1 enumerates 22 prerequisites: 18/2/2" | **Corrected.** Sixteen rules over twenty-one rows, each stated as holding outright or holding fail-closed. §A5's tally is **VOID as a restatement**: 32 prerequisite rows, per-status counts derived from `MECHANISM_GAP_LEDGER` at build, never transcribed. §0C.28-bis |
+| **EC-24** | §0C.22-ter's `nameSourceOf` and `resolveInteractive`; §0C.13's EC-20 and EC-23 rows; §0C.32's range; §0C.22's A-2; §4.9.3 | nine defects the narrow EC-23 verification attributed to the EC-23 edits | **Amended.** **A REGRESSION is reverted:** EC-23 removed `const el = …` from before `nameSourceOf`'s switch and re-added it in **one** branch, leaving six branches reading a free `el` — the function did not compile at all, which is worse than the wrongly-typed binding EC-23 replaced. All seven branches now bind it. `resolveInteractive` is re-declared inferring `K` from `ref.k`, a literal property, because a conditional type in parameter position is **not an inference site** and would have left `K` at its constraint, defeating the indexing. §0C.13's EC-20 row no longer says `ARTIFACT.3` assigns roles — inside the governing section that sentence pointed at §2.6.22's PII clause, the very supersession the renumbering exists to prevent. EC-23's own row misattributed the collision to EC-21; it was **EC-20**. §0C.32's blanket claim now ranges over EC-1 … EC-23. A-2's lost antecedent restored and its `suffix` bound inside the branch. **§4.9.3's `ProactiveProvenance` gains `moment_template_version` as a RULING** (§0C.28-decies) — EC-23 left it in a code comment, the identical failure it had just ruled on for §1.9 H1. §0C.22-ter, §0C.28-decies |
+| **EC-23** | §0C.22-nonies's `ARTIFACT.3`; `CLIENT.3`'s conjuncts; §1.9 H1; EC-17's duplicated phrase; A-2's `suffix` binding; §0C.32's EC-2 row and its bucket list; `nameSourceOf`'s `el`; §4.9.3 | what the bounded EC-22 verification found | **Amended.** **`ARTIFACT.3` renumbered `ARTIFACT.5`** — §2.6.22's existing `ARTIFACT.3` is a PII clause (`contains_pii` / `pii_ceiling`), and **EC-20** had introduced the colliding number, one clause above the `CLIENT.2` collision EC-22 fixed — §0C.22-nonies is EC-20's section, and EC-21 never mentions ARTIFACT; `APPROVAL.4` was and is free. `CLIENT.3` gains handle-uniqueness and a no-other-`primary` conjunct, without which §0C.22-undecies's crossing pointer is not single-valued. **§1.9 H1's term list gains `render.render_tier` as a RULING** — EC-22 left that amendment inside a code comment, so the closed list was never actually amended. EC-17's duplicated phrase struck. `suffixFor` declared, so A-2 binds its arguments by a total function rather than by prose. §0C.32's EC-2 row no longer infers effect class from `resourceClass`, and splits its fence by exemption instead of conjoining three terms that never all hold at once; its bucket list is marked illustrative. `nameSourceOf` resolves `el` inside each branch so `ElementFor` actually narrows. §0C.28-nonies |
+| **EC-22** | §0C.22-ter `ElementFor`; `renderSuffix`; A-2; the `CLIENT_LIST` suffix row; the APPROVAL row's default; EC-17's restatement; EC-14's `Moment`/`MomentTemplate`; §0C.32's EC-2 row; §1.9 H1; EC-21's citations | fourteen defects the final bounded verification attributed to the EC-21 repairs | **Amended.** `CLIENT.2` renumbered **`CLIENT.3`**, protecting §2.6.7's `pii_ceiling: 'client_identified'` fence from being read as superseded. `ElementFor<'option'>` gains `StrategyOptionsBody['alternatives'][number]`. `renderSuffix` lifted from a comment into a typed declaration. `CLIENT_LIST`'s pointer becomes `bulk_intents[⟨entry whose handle is ref.id⟩].audience_size`, with a general rule for a `base:'body'` pointer crossing an array. `Moment` and `MomentTemplate` gain their version members and both start-up assertions are restated over the composed `id@version` key. §0C.32's EC-2 row scoped to non-`HANDOFF`. §0C.22-undecies, §0C.28-nonies |
 | **EC-21** | §0C.17's two floor predicates; §0.13's input list; §0C.28-sexies's `produced`, ordering and `render` timing; §0C.22-quinquies's suffix value; §0C.22-ter's `resolveInteractive`; §0C.18's bound; EC-14's catalogues; Gate 6's HANDOFF branch; EC-17's citation | sixteen residuals the EC-20 confirmation raised, all adjudicated CONFIRMED | **Amended.** `FLOOR_EXEMPT`/`verificationFloor` re-declared over a structural `FloorSubject`, without which Gate 5 still could not recompute them from an `IntentRecord` — the defect EC-19 added `priority` for and EC-20 left one call deeper. §0.13's closed input list names `priority` as its fifth input. `produced` is filtered against `emitted`, because the fitter withholds intents without nulling the body refs that name them. One ordering, with the four kinds whose paths already denote the escape called out. §1.1.1's `render` row moves to `EP-FIT`, since a tier read at `EP-MINT` must exist by then. The suffix gains an explicit `base` and a declared `renderSuffix`; its default is an empty list, not `''`. `resolveInteractive` is indexed by ref kind. §0C.18's bound is stated as three grounds, only one of which is the veto. Both template catalogues are keyed `id@version`, so a frozen receipt's older version resolves. **Gate 6 is scoped by effect: a `HANDOFF`'s subject resolves destination fences only, never an execute-admission test.** §0C.17-quinquies, §0C.22-undecies, §0C.28-quinquies |
-| **EC-20** | §0C.28-sexies's derivation; §0C.22-quinquies's value type; §3.7; §0C.28-quater; §0B.18; §1.1.4; §0C.18; §0C.11-ter; EC-14's `MomentTemplate` | twenty-one residuals the bounded verification of EC-19 raised | **Amended.** The `reading_order` second operand becomes the **closed** form — every emitted intent not already denoted — because a role list left `role: 'more'` unsatisfiable on eighteen kinds; the operator becomes ordered concatenation, since `∪` left `remedy` unpositioned against K22's render-order rule. `refSet` takes the fitted tier, because CHART's path list is conditional on degradation, which lives on `render`, not `body`. `accessible_name_suffix`'s VALUE becomes `readonly string[]` of pointers — a string would have concatenated `audience_size` literally. APPROVAL.4 and ARTIFACT.3 assign the roles the per-control scoping needs. `IntentRecord` gains `widget_kind` and its `handoff_capability_ref` is retyped, without which Gate 5 still could not recompute; `subjectCapability` is re-declared over a structural subject both shapes satisfy. §0C.28-quater's refusal is re-keyed on `subjectCapability` — a run-bearing `HANDOFF` escaped it. `NARRATIVE_TEMPLATES` declared. §0C.18's "exactly five" gains a build veto. §0C.22-octies, §0C.22-nonies, §0C.28-septies |
+| **EC-20** | §0C.28-sexies's derivation; §0C.22-quinquies's value type; §3.7; §0C.28-quater; §0B.18; §1.1.4; §0C.18; §0C.11-ter; EC-14's `MomentTemplate` | twenty-one residuals the bounded verification of EC-19 raised | **Amended.** The `reading_order` second operand becomes the **closed** form — every emitted intent not already denoted — because a role list left `role: 'more'` unsatisfiable on eighteen kinds; the operator becomes ordered concatenation, since `∪` left `remedy` unpositioned against K22's render-order rule. `refSet` takes the fitted tier, because CHART's path list is conditional on degradation, which lives on `render`, not `body`. `accessible_name_suffix`'s VALUE becomes `readonly string[]` of pointers — a string would have concatenated `audience_size` literally. APPROVAL.4 and ARTIFACT.5 (numbered `.3` by EC-20, renumbered by EC-23) assign the roles the per-control scoping needs. `IntentRecord` gains `widget_kind` and its `handoff_capability_ref` is retyped, without which Gate 5 still could not recompute; `subjectCapability` is re-declared over a structural subject both shapes satisfy. §0C.28-quater's refusal is re-keyed on `subjectCapability` — a run-bearing `HANDOFF` escaped it. `NARRATIVE_TEMPLATES` declared. §0C.18's "exactly five" gains a build veto. §0C.22-octies, §0C.22-nonies, §0C.28-septies |
 | **EC-19** | §3.1 `AuthorityHint`; §3.7 `IntentRecord`; §0C.28-bis EC-14's `Moment`; §0C.22-quinquies's suffix key; §0C.28-bis Gate 6 call site; §0C.28-quater; §0C.32's EC-2 row; EC-17 vs EC-18 | eight defects the final pass confirmed | **Declared / amended.** `AuthorityHint` declared with a closed non-authority member set (§0C.11-ter). `IntentRecord` gains `priority`, without which Gate 5 cannot recompute `FLOOR_EXEMPT` and every exempt intent would diverge under §0.16. `Moment` gains `kind` and `moment_template_id`, which EC-18(3)'s assertion reads. The suffix keys on `${ref kind}:${role}` so APPROVAL's suffix reaches the approve control alone. Gate 6's call site binds `ref = subjectCapability(record)` — the dispatch was repaired in round 10 and the call two lines below was not, leaving it inert for `HANDOFF`. §0C.28-quater names minter 3. §0C.32's EC-2 row is scoped per path. EC-17 reads "as amended by EC-18". §0C.11-ter, §0C.28-sexies |
 | **EC-18** | §2.6.13 PROGRESS; §2 K22's derivation; §4.9.4 PR5b | `steps[].unknown.next_intent_ref` as a live path; `reading_order` = exactly `interactive_paths`; "each moment template declares `required_cells`" | **Amended / declared.** §0.19 deleted `steps[].unknown`, so PROGRESS's path becomes `steps[].state.next_intent_ref`. K22's derivation appends **every emitted intent not already denoted by a produced ref** — the closed form, because a role list left `role: 'more'` unsatisfiable on eighteen kinds — in `emitted` order with the escape last. No authority widens: the operand ranges over intents that already passed the floor and the ladder, and `reading_order` is an accessibility ordering that gates nothing. (The first draft justified this by "both are `priority: 0` and `FLOOR_EXEMPT`", which is false for `remedy` and contradicted §0C.18.) `MomentTemplate` + `MOMENT_TEMPLATES` are declared. §0C.28-sexies |
 | **EC-17** | §2 K22, its enumeration | "the union of `option_id`, `field_key`, `row_key`, `entry_ref`, `series_id` and bare `intent_token`" | **VOID as an enumeration.** It names `series_id` — which §1.4 classes **structural**, "never rendered", and which no kind's `interactive_paths` produces — and omits `section_id`. `InteractiveRef`'s **seven** members are the typed authority — the seventh, `{k:'slot'}`, added by §0C.22-sexies because `TIME_SLOT_SELECTOR`'s declared path `groups[].slots[].slot_ref` could be denoted by none of the six; K22's rule and mechanism stand **as amended by EC-18 item 2 and EC-20** (every emitted intent not already denoted by a produced ref joins the list, in `emitted` order). §0C.28-bis, §0C.22-sexies |
@@ -2033,16 +2100,19 @@ fence, and §0B.28 already draws that line for the FR-6 family.
 first three conjuncts are true and provable. The fourth is not: **two repairs lower a floor,
 and both do so deliberately.** Replacing it:
 
-> **No repair admits a capability, widens an allowlist, or relaxes a veto.** Every repair
-> either removes rows from an allowlist (EC-1), adds a veto (EC-7, EC-13), voids an
-> unbuildable claim (EC-8, EC-10, EC-12), declares a carrier that was missing (EC-6, EC-9,
-> EC-14, EC-15), or corrects an identity or a count (EC-3, EC-5, EC-11, EC-16).
+> **No repair admits a capability, widens an allowlist, or relaxes a veto.** That holds over
+> **every** erratum, EC-1 … EC-23. The buckets below illustrate the early ones and are **not an
+> enumeration** — EC-17 … EC-23 belong to the same three shapes (correcting an identity, a type
+> or a count; declaring a carrier; adding a fence) and are not listed individually: removes rows
+> from an allowlist (EC-1), adds a veto (EC-7, EC-13), voids an unbuildable claim (EC-8, EC-10,
+> EC-12), declares a carrier that was missing (EC-6, EC-9, EC-14, EC-15), corrects an identity
+> or a count (EC-3, EC-5, EC-11, EC-16).
 >
 > **Two repairs lower a floor, deliberately, and each names its compensating fence:**
 >
 > | Repair | What it lowers | Why, and what still holds |
 > |---|---|---|
-> | **EC-2** | nine C9-CAP keys, from a raise (literal reading) or `STEP_UP_VERIFIED` (charitable reading) to: **three** `SOURCE_HANDOFF` keys (`b35.preview`, `b35.confirm`, `a22.configuration`) → `SESSION_VERIFIED`; **five** `SOURCE_READ` keys (`c7.measurement.read`, `c8.result.read`, `b35.status`, `owner_report.status`, `owner_report.download`) → whatever their own `WIDGET_CAPABILITY_POLICY` row and consent class require, per §0C.11(4); and `c9.no_action` → `ANONYMOUS` | `STEP_UP_VERIFIED` is **unreachable** while P-12 is `[ABSENT]`, so the prior value was not a fence but a permanent withholding that made five widget kinds unemittable. What still fences these nine: their `WIDGET_CAPABILITY_POLICY` row and `CONSENT_CLASS_FLOOR`, carried through `c9Floor` at Gate 5 on **every** path — and, **on the run-bearing path only AND only where the intent is not a `HANDOFF`**, Gate 6's second C9 branch with `c9Capability`'s own admission. EC-21 scopes Gate 6 by effect, so for a `HANDOFF` subject that admission is not applied on **any** path — which is the case for `b35.preview`, `b35.confirm` and `a22.configuration`, whose `resourceClass` is `SOURCE_HANDOFF`. Their whole fence is therefore `c9Floor`'s `C9_MODE_FLOOR`/`C9_RESOURCE_FLOOR` of `SESSION_VERIFIED` at Gate 5, plus `SENSITIVE_DEST` and `targetFloor('s')`. §0C.28-quater withdraws that admission on the two run-less mint paths, where `c9_domain` is null by construction, so for a capability read of `c7.measurement.read`, `c8.result.read`, `b35.status`, `owner_report.status` or `owner_report.download` the residual fence is the policy row and the consent class alone. Stated rather than implied, because an unqualified claim here would be exactly the over-read this table exists to prevent. The bulk-send path additionally keeps `AE_FAMILY_FLOOR['marketing_fanout'] = STEP_UP_VERIFIED` and `communication.bulk-campaign.admit.v2`'s owner-only, approval-bound AE fence, which is `[EXISTS]` and running today |
+> | **EC-2** | nine C9-CAP keys, from a raise (literal reading) or `STEP_UP_VERIFIED` (charitable reading) to: **three** `SOURCE_HANDOFF` keys (`b35.preview`, `b35.confirm`, `a22.configuration`) → `SESSION_VERIFIED`; **five** `SOURCE_READ` keys (`c7.measurement.read`, `c8.result.read`, `b35.status`, `owner_report.status`, `owner_report.download`) → whatever their own `WIDGET_CAPABILITY_POLICY` row and consent class require, per §0C.11(4); and `c9.no_action` → `ANONYMOUS` | `STEP_UP_VERIFIED` is **unreachable** while P-12 is `[ABSENT]`, so the prior value was not a fence but a permanent withholding that made five widget kinds unemittable. What still fences these nine: their `WIDGET_CAPABILITY_POLICY` row and `CONSENT_CLASS_FLOOR`, carried through `c9Floor` at Gate 5 on **every** path — and, **on the run-bearing path only AND only where the intent's EFFECT is not `HANDOFF`**, Gate 6's second C9 branch with `c9Capability`'s own admission. EC-21 scopes Gate 6 by **effect**, so for an intent whose effect is `HANDOFF` that admission is not applied on **any** path. **`resourceClass` does not determine effect class** — `b35.preview`, `b35.confirm` and `a22.configuration` carry `resourceClass: 'SOURCE_HANDOFF'`, but a capability's resource class is a registry property and the same key may equally be the subject of a `REFINE` or a `DRAFT`; inferring the intent's effect from it, as the first draft of this row did, is invalid. The residual fence splits by exemption rather than conjoining terms that never all hold at once: **for a `HANDOFF` that is not `FLOOR_EXEMPT`** it is `c9Floor`'s `C9_MODE_FLOOR`/`C9_RESOURCE_FLOOR` of `SESSION_VERIFIED` at Gate 5 **together with** `targetFloor('s')`; **for a `FLOOR_EXEMPT` class-`s` `HANDOFF`** both are waived by §0C.17 and the fence is `SENSITIVE_DEST` plus the landing surface's own ingress. `SENSITIVE_DEST` is evaluated in exactly one place — `FLOOR_EXEMPT`'s fourth clause — so it and the two floors are alternatives, never a conjunction. §0C.28-quater withdraws that admission on the two run-less mint paths, where `c9_domain` is null by construction, so for a capability read of `c7.measurement.read`, `c8.result.read`, `b35.status`, `owner_report.status` or `owner_report.download` the residual fence is the policy row and the consent class alone. Stated rather than implied, because an unqualified claim here would be exactly the over-read this table exists to prevent. The bulk-send path additionally keeps `AE_FAMILY_FLOOR['marketing_fanout'] = STEP_UP_VERIFIED` and `communication.bulk-campaign.admit.v2`'s owner-only, approval-bound AE fence, which is `[EXISTS]` and running today |
 > | **EC-4** | five intents: `EFFECT_FLOOR`, `KIND_FLOOR` and `targetFloor` waived for all five; `subjectFloor` waived for the **two class-`s` HANDOFFs only**, which floor at `ANONYMOUS`. The escape verb, `discard_intent` and the no-action option keep their own `subjectFloor` (§0C.17-ter) | The set is derived, not listed, and its build veto makes an actuating intent unconstructible: `COMMIT`/`DRAFT` excluded by effect; `REQUEST_APPROVAL` and `REFINE` excluded over AE and C9 respectively by the capability clause, which admits only a `CONTROL` ref or the unique `resourceClass: 'LOCAL'` C9 row. The residual is `targetFloor('s')` on a handoff, and it is tolerable for a stated reason, not by assumption: a `HANDOFF` never invokes its destination capability (R3.5.3), and §0.31's routes re-check the principal proof at `EP-FETCH`. Declining, discarding and asking for the route to a surface that authenticates are not the exercise of authority |
 >
 > A reader auditing this contract should be able to find every floor reduction it makes by
