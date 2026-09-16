@@ -83,6 +83,25 @@ export interface GateContext {
   /** The stored record, once Gate 1 has found one. Null before that, and after a refusal. */
   readonly record: IntentRecordRow | null;
   readonly submission: SubmissionShape;
+  /**
+   * `v` — the LIVE verification level of the principal presenting this token, derived server-side
+   * on THIS request. Gate 5 has no meaning without it: a floor with nothing to compare against is
+   * a number in a column. It is derived by the AuthorityResolver, never sent by a client, and
+   * never read from the record — a level stored at mint is a level that has aged.
+   */
+  readonly verificationLevel: VerificationLevel;
+  /**
+   * §3.4 R3.4.6's channel ceiling: the highest rung THIS carrier can establish, whatever the
+   * session claims. A first-party session replayed over SMS is capped by the carrier.
+   */
+  readonly channelMaxLevel: VerificationLevel;
+  /** Which carrier the submission arrived on. Presentation elsewhere; a ceiling here. */
+  readonly carrier: string;
+  /**
+   * The roles the server resolved for this principal, for Gate 6. Never client-supplied — FR-3's
+   * `assertNoCallerAuthority` forbids caller-supplied authority outright.
+   */
+  readonly resolvedRoles: readonly string[];
 }
 
 /** The stored record, as the widget layer holds it. A subset of §3.7 — K3 reads only this much. */
@@ -99,6 +118,28 @@ export interface IntentRecordRow {
   readonly issuedAt: Date;
   readonly expiresAt: Date;
   readonly supersededByWidgetId: string | null;
+
+  // ── what the RECOMPUTE reads (F42) ──────────────────────────────────────────────────────────
+  // Every one of these already existed as a column and none was selected. Gate 5 cannot recompute
+  // a floor from a row that omits the terms the floor is made of, so the select was widened rather
+  // than the comparison weakened.
+  readonly priority: number;
+  readonly capabilitySpace: string | null;
+  readonly capabilityKey: string | null;
+  readonly handoffSpace: string | null;
+  readonly handoffKey: string | null;
+  readonly targetJson: unknown;
+  /** Gate 8-R compares the affirmation against THIS, and the SUPERSEDED comparison reads it. */
+  readonly bodyHash: string;
+  /** Gate 8's closed domain: the option ids the server declared. Labels are separate by design. */
+  readonly selectionDomain: string;
+  readonly inputSchemaHash: string | null;
+  /** Gate 7 reads both; F74's pairing check compares them. */
+  readonly confirmationOfKind: string | null;
+  readonly confirmationOfRef: string | null;
+  readonly producedByIntentTokenHash: string | null;
+  /** Gate 10 compares the router's resolution against the capability, over THIS utterance. */
+  readonly renderedUtterance: string | null;
 }
 
 /**

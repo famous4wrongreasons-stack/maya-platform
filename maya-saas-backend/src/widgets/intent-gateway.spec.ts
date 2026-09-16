@@ -30,6 +30,19 @@ interface Row {
   issuedAt: Date;
   expiresAt: Date;
   emission: { supersededByWidgetId: string | null } | null;
+  priority: number;
+  capabilitySpace: string | null;
+  capabilityKey: string | null;
+  handoffSpace: string | null;
+  handoffKey: string | null;
+  targetJson: unknown;
+  bodyHash: string;
+  selectionDomain: string;
+  inputSchemaHash: string | null;
+  confirmationOfKind: string | null;
+  confirmationOfRef: string | null;
+  producedByIntentTokenHash: string | null;
+  renderedUtterance: string | null;
 }
 
 class FakePrisma {
@@ -68,6 +81,19 @@ const row = (over: Partial<Row> = {}): Row => ({
   issuedAt: new Date('2026-01-01T00:00:00.000Z'),
   expiresAt: new Date('2099-01-01T00:00:00.000Z'),
   emission: { supersededByWidgetId: null },
+  priority: 1,
+  capabilitySpace: null,
+  capabilityKey: null,
+  handoffSpace: null,
+  handoffKey: null,
+  targetJson: null,
+  bodyHash: sha256Hex('body'),
+  selectionDomain: '',
+  inputSchemaHash: null,
+  confirmationOfKind: null,
+  confirmationOfRef: null,
+  producedByIntentTokenHash: null,
+  renderedUtterance: null,
   ...over,
 });
 
@@ -126,6 +152,9 @@ describe('K3 CI exit — the four refusals', () => {
       tenantId: TENANT,
       principalProofHash: PRINCIPAL,
       submission: submission(GOOD),
+      verificationLevel: 'SESSION_VERIFIED',
+      carrier: 'pwa',
+      resolvedRoles: [],
     });
     expect(r.verdict.outcome).toBe('refuse');
     expect('code' in r.verdict && r.verdict.code).toBe('EXPIRED');
@@ -141,6 +170,9 @@ describe('K3 CI exit — the four refusals', () => {
       tenantId: TENANT,
       principalProofHash: PRINCIPAL,
       submission: submission(GOOD),
+      verificationLevel: 'SESSION_VERIFIED',
+      carrier: 'pwa',
+      resolvedRoles: [],
     });
     expect(r.verdict.outcome).toBe('refuse');
     expect(r.stoppedAt).toBe('1');
@@ -153,6 +185,9 @@ describe('K3 CI exit — the four refusals', () => {
       tenantId: TENANT,
       principalProofHash: FOREIGN,
       submission: submission(GOOD),
+      verificationLevel: 'SESSION_VERIFIED',
+      carrier: 'pwa',
+      resolvedRoles: [],
     });
     expect(r.verdict.outcome).toBe('refuse');
     expect('code' in r.verdict && r.verdict.code).toBe(
@@ -170,6 +205,9 @@ describe('K3 CI exit — the four refusals', () => {
       tenantId: TENANT,
       principalProofHash: PRINCIPAL,
       submission: submission(GOOD),
+      verificationLevel: 'SESSION_VERIFIED',
+      carrier: 'pwa',
+      resolvedRoles: [],
     });
     // The distinction matters to a person: "this is out of date, here is the new one" is a
     // different message from "this expired", and the contract gives them different codes.
@@ -183,6 +221,9 @@ describe('K3 CI exit — the four refusals', () => {
       tenantId: TENANT,
       principalProofHash: PRINCIPAL,
       submission: submission(GOOD),
+      verificationLevel: 'SESSION_VERIFIED',
+      carrier: 'pwa',
+      resolvedRoles: [],
     });
     expect(r.verdict.outcome).toBe('refuse');
     // The tenant is in the WHERE clause, so the row is not loaded at all. Reading it and then
@@ -278,29 +319,34 @@ describe('K3 CI exit — indistinguishable latency', () => {
   });
 });
 
-describe('K3 — the fail-closed default', () => {
-  it('a gate whose mechanism a later package owns refuses rather than passes', async () => {
-    // The happy path: a valid, unexpired, correctly-bound token. It must NOT sail through — gates
-    // 5 onward are not built, and F5's fail-closed default says an absent mechanism refuses.
+describe('the pipeline after wiring — 14 live, 1 hosted by its owner', () => {
+  it('a valid token now reaches the REAL gates instead of a stub', async () => {
+    // This test used to assert the opposite: that a valid, unexpired, correctly-bound token was
+    // refused with `mechanism_absent` at Gate 5, because gates 5 onward were stubs. They are not
+    // stubs any more, so the same token now runs the pipeline and gets a real verdict.
     const { gateway } = gatewayFor([row({ singleUse: false })]);
     const r = await gateway.submit({
       intentToken: GOOD,
       tenantId: TENANT,
       principalProofHash: PRINCIPAL,
       submission: submission(GOOD),
+      verificationLevel: 'SESSION_VERIFIED',
+      carrier: 'pwa',
+      resolvedRoles: [],
     });
-    expect(r.verdict.outcome).toBe('refuse');
-    expect('code' in r.verdict && r.verdict.code).toBe('mechanism_absent');
-    expect(r.stoppedAt).toBe('5');
-    // Gates 1-4 ran and passed; the pipeline stopped at the first unbuilt one.
-    expect(r.ran).toBe(5);
+    expect('code' in r.verdict && r.verdict.code).not.toBe('mechanism_absent');
+    // A NONE-effect record with no capability terminates at Gate 13 by design: NONE has no route.
+    expect(r.verdict.outcome).toBe('terminate');
+    expect(r.ran).toBe(14);
   });
 
-  it('exactly four gates are live in K3, and the rest say which package builds them', () => {
+  it('no slot is a pending() stub any more', () => {
     const { gateway } = gatewayFor([row()]);
-    // Gates 1-4: three implemented here plus Gate 2, which passes because the global JWT guard
-    // has already enforced it. The other ten name the package that builds them.
-    expect(gateway.liveGateCount).toBe(4);
-    expect(gateway.gateCount - gateway.liveGateCount).toBe(11);
+    // GATE MODULE EXISTS != GATE ENFORCED. Ten slots that were stubs now call the modules that
+    // already owned their rules, and Gate 14's slot — which is unreachable, because Gate 13
+    // terminates — says where its enforcement actually is instead of claiming to be unbuilt.
+    expect(gateway.gateCount).toBe(15);
+    expect(gateway.liveGateCount).toBe(15);
+    expect(gateway.gateCount - gateway.liveGateCount).toBe(0);
   });
 });

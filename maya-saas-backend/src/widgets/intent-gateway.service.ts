@@ -19,7 +19,22 @@ import type {
   IntentRecordRow,
   SubmissionShape,
 } from './gate.types';
+import type { VerificationLevel } from '../widget-contract/envelope';
 import { digestEquals, sha256Hex } from './token.util';
+import {
+  gate5,
+  gate6,
+  gate7,
+  gate8,
+  gate8R,
+  gate9,
+  gate10,
+  gate11,
+  gate12,
+  gate13,
+  gateSensitiveDest,
+} from './gates/gate-logic';
+import { channelMaxLevel } from './authority/authority-resolver';
 
 /** A gate whose mechanism a later package builds. It runs, and it refuses. */
 const pending = (
@@ -151,22 +166,82 @@ export class IntentGatewayService {
           : { outcome: 'refuse', code: 'tenant_mismatch' };
       },
     },
-    pending(
-      '5',
-      'Verification floor',
-      'ChannelProfileRegistry + AuthorityResolver',
-      'K4',
-    ),
-    pending('6', 'Authority, computed from scratch', 'AuthorityResolver', 'K4'),
-    pending('7', 'Effect admissibility', 'IntentGateway', 'K4'),
-    pending('8', 'Input validation', 'IntentGateway', 'K4'),
-    pending('8-R', 'Readback', 'IntentGateway', 'K6'),
-    pending('9', 'Lowering', 'chat ingress', 'K5'),
-    pending('10', 'Divergence audit', 'intent router', 'K5'),
-    pending('11', 'Noun resolution', 'IntentGateway', 'K7'),
-    pending('12', 'Data fence', 'Projector', 'K5'),
-    pending('13', 'Effect routing', 'effect router', 'K7'),
-    pending('14', 'Canonical action', 'CanonicalActionIngressService', 'K7'),
+    {
+      n: '5',
+      name: 'Verification floor',
+      host: 'ChannelProfileRegistry + AuthorityResolver',
+      run: (ctx) => gate5(ctx),
+    },
+    {
+      n: '6',
+      name: 'Authority, computed from scratch',
+      host: 'AuthorityResolver',
+      // R3.5.1 runs with Gate 6 rather than as a sixteenth gate: it is a property OF the subject
+      // capability, and splitting it out would put one rule in two places.
+      run: (ctx) => {
+        const sensitive = gateSensitiveDest(ctx);
+        return sensitive.outcome === 'pass' ? gate6(ctx) : sensitive;
+      },
+    },
+    {
+      n: '7',
+      name: 'Effect admissibility',
+      host: 'IntentGateway',
+      run: (ctx) => gate7(ctx),
+    },
+    {
+      n: '8',
+      name: 'Input validation',
+      host: 'IntentGateway',
+      run: (ctx) => gate8(ctx),
+    },
+    {
+      n: '8-R',
+      name: 'Readback',
+      host: 'IntentGateway',
+      run: (ctx) => gate8R(ctx),
+    },
+    { n: '9', name: 'Lowering', host: 'chat ingress', run: () => gate9() },
+    {
+      n: '10',
+      name: 'Divergence audit',
+      host: 'intent router',
+      run: (ctx) => gate10(ctx),
+    },
+    {
+      n: '11',
+      name: 'Noun resolution',
+      host: 'IntentGateway',
+      run: (ctx) => gate11(ctx),
+    },
+    {
+      n: '12',
+      name: 'Data fence',
+      host: 'Projector',
+      run: (ctx) => gate12(ctx),
+    },
+    {
+      n: '13',
+      name: 'Effect routing',
+      host: 'effect router',
+      run: (ctx) => gate13(ctx),
+    },
+    // Gate 14 stays with the Action Engine, which enforces it on its own ingress — on-path and
+    // correct. Moving it here for a tidier count would move a fence away from its owner.
+    //
+    // The slot is kept so the array is §3.9's fifteen and not a subset, but it is NOT a
+    // `pending()` stub: `pending` means "a later package builds this", and this one is built. It
+    // is also unreachable — Gate 13 terminates by routing — so the honest thing for it to say is
+    // where the enforcement actually is.
+    {
+      n: '14',
+      name: 'Canonical action',
+      host: 'CanonicalActionIngressService',
+      run: () => ({
+        outcome: 'terminate',
+        why: 'enforced at action-engine.ingress.ts:71 — assertNoCallerAuthority, before any effect',
+      }),
+    },
   ];
 
   /** The contract's count, asserted here so the array cannot quietly lose a gate. */
@@ -190,6 +265,14 @@ export class IntentGatewayService {
     principalProofHash: string;
     submission: SubmissionShape;
     now?: Date;
+    /**
+     * `v`, derived by the AuthorityResolver on THIS request. Required, not optional: a default
+     * here would be a floor comparison against a value nobody established, and the whole finding
+     * that produced this wiring was a floor with nothing to compare against.
+     */
+    verificationLevel: VerificationLevel;
+    carrier: string;
+    resolvedRoles: readonly string[];
   }): Promise<{ verdict: GateVerdict; stoppedAt: string | null; ran: number }> {
     const token = this.step0(args.submission);
     if (!token)
@@ -213,6 +296,10 @@ export class IntentGatewayService {
       now: args.now ?? new Date(),
       record,
       submission: args.submission,
+      verificationLevel: args.verificationLevel,
+      channelMaxLevel: channelMaxLevel(args.carrier),
+      carrier: args.carrier,
+      resolvedRoles: args.resolvedRoles,
     };
 
     let ran = 0;
@@ -264,6 +351,22 @@ export class IntentGatewayService {
         consumedAt: true,
         issuedAt: true,
         expiresAt: true,
+        // F42's terms. Every one already existed as a column and none was selected, so Gate 5 had
+        // nothing to recompute a floor FROM. Widening the select was the fix; weakening the
+        // comparison would have been the other one.
+        priority: true,
+        capabilitySpace: true,
+        capabilityKey: true,
+        handoffSpace: true,
+        handoffKey: true,
+        targetJson: true,
+        bodyHash: true,
+        selectionDomain: true,
+        inputSchemaHash: true,
+        confirmationOfKind: true,
+        confirmationOfRef: true,
+        producedByIntentTokenHash: true,
+        renderedUtterance: true,
         // Supersession is a property of the ENVELOPE, not of the record: a record points at a
         // widgetId, and WidgetEmission.supersededByWidgetId is where a newer envelope replacing an
         // older one is written. Reading it here rather than duplicating it onto the record keeps
