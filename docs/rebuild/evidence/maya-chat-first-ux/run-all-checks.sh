@@ -33,6 +33,8 @@ printf '%-34s ' k5-exit-gate
 ( "$ROOT/$E/k5-exit-gate.sh" 2>&1 | tail -1 )
 printf '%-34s ' k6-exit-gate
 ( "$ROOT/$E/k6-exit-gate.sh" 2>&1 | tail -1 )
+printf '%-34s ' wave-3-final-gate
+( "$ROOT/$E/wave-3-final-gate.sh" 2>&1 | tail -1 )
 printf '%-34s ' f88-mutation-battery
 ( cd maya-saas-backend && "$ROOT/$E/f88-mutation-battery.sh" 2>&1 | tail -1 )
 exit $fail

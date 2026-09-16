@@ -135,3 +135,63 @@ an answer. A real check belongs to deploy, which is a separate owner-approved st
 jest worker killed by the operating system, not a failing assertion; the suite passes alone. Bounding
 the workers removed the memory pressure. The gate now also distinguishes *a test failed* from *a
 suite could not run*, because they are different problems with different fixes.
+
+---
+
+# Wave 3 — K7 · K8 · K9 — the client acts
+
+## A defect found while proving MONEY, and it was mine
+
+Wave 3 asks for `MONEY KEYS GAP-KEYED: 92/92`. The first computation returned **15**.
+
+`MONEY` is the contract's own derived predicate — `riskFacets ∩ MONEY_FACETS`, or
+`targetKind ∈ MONEY_TARGET_KINDS`. Both sets were **hard-coded in K2's generator by me**: five
+plausible money words (`financial`, `money`, `payment`, `refund`, `loyalty_balance`) and seven
+target kinds. The contract declares **sixteen** facets and **twenty-seven** target kinds.
+
+The invented set matched **12 by the bare `financial` token** — and the contract warns about exactly
+that number: *"92 capabilities against 12 for the bare `financial` token"*. I had reproduced the
+documented wrong answer without noticing it was the documented wrong answer.
+
+The sets are now **extracted from §3.10** and the generator refuses to emit a truncated block. The
+count reproduces at **92 of 226**, and the test asserts **both** numbers — 92 for the contract
+predicate and 12 for the bare token — so the regression is caught by its own signature.
+
+Under-fencing MONEY is the most consequential direction available in this codebase. Seventy-seven
+money capabilities were outside the fence and nothing would have said so.
+
+## The six figures
+
+```
+COMMIT OUTSIDE CONFIRMATION: IMPOSSIBLE     BUTTON → ENDPOINT PATHS: 0
+BOOKING ALLOWLIST: EXACTLY 3 KEYS           DIRECT UI → PROVIDER WRITES: 0
+MONEY KEYS GAP-KEYED: 92/92                 VOICE-SPECIFIC AUTHORITY PATHS: 0
+```
+
+**Three keys, not seven.** `attendance`, `duration`, `services` and `fields` stay gap-ledgered under
+`GAP-APPOINTMENT-DETAIL-COMMIT`: no propose key exists for them in any space, and a COMMIT whose
+propose key cannot be resolved is a COMMIT whose authority cannot be checked.
+
+**The guard reads server state only.** A submission names a token; the draft, the capability, the
+confirmation kind and the record it confirms are all looked up. "COMMIT outside a confirmation" is
+impossible because there is no field to put one in and no branch that reaches an owner without
+passing the guard.
+
+**Voice has no authority path of its own**, and the audit row proves it: the function takes no
+carrier, so «said it», «typed it» and «pressed it» produce byte-identical rows.
+
+## K8 — the fences fire where it matters
+
+All five run on **every** presentation, even after one has refused, so *"5/5 fired"* is observable
+per request rather than inferred from five separate unit tests. `CLIENT_LIST` is refused outright
+under `presentation_mode: 'client'` — not "the principal lacks it", but refused for that mode
+whatever they hold. The downgrade replay is the exit's own method: the same emission under a
+reduced principal must stop being admissible.
+
+## K9 — the finance fence refuses rather than degrades
+
+`PAYMENT_HANDOFF` is **not emittable**; the correct emission is a `LIMITATION` carrying its gap ref
+and **no intent**. A payment affordance that half-works is worse than one that is absent, because a
+person will try it. `shell.pay` carries **one** opaque `session_ref` and nothing else — the body has
+no member able to hold a provider URL, a checkout id or a card token, which is BUTTON → ENDPOINT
+applied where the stakes are money.

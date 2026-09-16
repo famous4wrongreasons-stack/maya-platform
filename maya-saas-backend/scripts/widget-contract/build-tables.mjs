@@ -4,6 +4,43 @@
 // a compiled contract missing its floors.
 import fs from 'node:fs';
 const F='/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md';
+const CONTRACT = fs.readFileSync(F, 'utf8');
+
+// ── MONEY_FACETS and MONEY_TARGET_KINDS, EXTRACTED from §3.10 ────────────────────────────────
+//
+// These were hard-coded here once — five plausible money words I wrote myself rather than read.
+// The contract declares SIXTEEN facets and TWENTY-SEVEN target kinds, and states the answer they
+// must produce: "92 of 226". The invented set produced 15, and the contract explicitly warns about
+// the near-miss: "92 capabilities against 12 for the bare `financial` token" — 12 being exactly
+// what the invented set matched by facet.
+//
+// Under-fencing MONEY is the most consequential direction available in this codebase, so the sets
+// are now parsed from the contract's own block and the count is asserted against the contract's own
+// stated figure. A value nobody derived is a value nobody checked.
+const moneySets = () => {
+  const block = (name) => {
+    const i = CONTRACT.indexOf(`${name} := {`);
+    if (i < 0) throw new Error(`build-tables: ${name} not found in the contract`);
+    const open = CONTRACT.indexOf('{', i);
+    const close = CONTRACT.indexOf('}', open);
+    return CONTRACT.slice(open + 1, close)
+      .split(',')
+      .map((t) => t.replace(/\/\/.*$/gm, '').trim())
+      .filter(Boolean);
+  };
+  const facets = block('MONEY_FACETS');
+  const kinds = block('MONEY_TARGET_KINDS');
+  // The contract states the cardinalities in prose next to the sets; extracting fewer means the
+  // block was truncated by a line wrap, which is precisely how this went wrong the first time.
+  if (facets.length < 10 || kinds.length < 20)
+    throw new Error(`build-tables: MONEY sets look truncated (${facets.length} facets, ${kinds.length} kinds)`);
+  const lit = (xs) => xs.map((x) => `'${x}'`).join(', ');
+  return [
+    `// Extracted from contract §3.10. ${facets.length} facets, ${kinds.length} target kinds.`,
+    `export const MONEY_TARGET_KINDS = Object.freeze([${lit(kinds)}] as const);`,
+    `export const MONEY_FACETS = Object.freeze([${lit(facets)}] as const);`,
+  ].join('\n');
+};
 const s=fs.readFileSync(F,'utf8');
 const cell=v=>v.replace(/`/g,'').replace(/\*/g,'').trim();
 // ── F44: the five floor tables, one markdown table, five column pairs ────────
@@ -83,8 +120,7 @@ export interface WidgetCapabilityPolicyRow {
 export declare const WIDGET_CAPABILITY_POLICY: Readonly<Record<string, WidgetCapabilityPolicyRow>>;
 
 // F32 - the family predicates, each stated once, each verified exhaustively by enumeration.
-export const MONEY_TARGET_KINDS = Object.freeze(['payment','prepayment','refund','gift_certificate','membership','tip','loyalty_balance'] as const);
-export const MONEY_FACETS = Object.freeze(['financial','money','payment','refund','loyalty_balance'] as const);
+${moneySets()}
 export declare function BOOKING(cap: RegisteredActionCapabilityV1): boolean;
 export declare function CONSENT(cap: RegisteredActionCapabilityV1): boolean;
 export declare function IDENTITY(cap: RegisteredActionCapabilityV1): boolean;
