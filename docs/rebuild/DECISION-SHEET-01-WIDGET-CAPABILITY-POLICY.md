@@ -1,103 +1,113 @@
-# DECISION SHEET 01 — `WIDGET_CAPABILITY_POLICY`, 56 rows
+# DECISION SHEET 01 — `WIDGET_CAPABILITY_POLICY` · 56 rows × 2 columns
 
-**Blocks:** Gate 5 (verification floor), and through it Gates 6 and 7.
-**Raised by:** R3's instruction *«Не подменять derivation таблицей, вручную переписанной из
-contract. Source должен оставаться generated/certified contract definitions.»*
-**One decision. Nothing else on this sheet needs your attention.**
+**Blocks:** Gate 5, and through it Gates 6 and 7. **One decision.**
 
 ---
 
-## The situation, exactly
+## First, the two facts that shrink the question
 
-R3 requires Gate 5's floor to be a real derivation. The derivation already exists, generated from
-the certified contract and correct:
+**1. `min_verification` HAS a source.** It is not in `C9Capability`, but the 47 C9 keys that are
+also catalogue names carry `allowedRoles` — authored authorisation data that already exists and is
+already enforced elsewhere. Executed over the live registries, the 56 partition cleanly:
 
-```ts
-// src/widget-contract/verification-floor.ts:121
-return maxLevel(
-  row.min_verification,                      // ← WIDGET_CAPABILITY_POLICY
-  risk,                                      // derived: TOOL catalogue riskTier
-  C9_MODE_FLOOR(cap.mode),                   // derived: C9 registry
-  C9_RESOURCE_FLOOR(cap.resourceClass),      // derived: C9 registry
-  CONSENT_CLASS_FLOOR[row.consent_class],    // ← WIDGET_CAPABILITY_POLICY
-);
+```
+client-only roles   {client, customer}                         4
+client + staff      both present                              10
+staff-only          no client/customer role                   33
+no catalogue entry  the 9 C9-native keys                       9
+                                                        ---------
+                                                              56
 ```
 
-**Three of the five terms derive from the live registries. Two come from a table whose values no
-canonical source in this repository carries.**
+**2. `consent_class` has NO source.** Searched the whole backend: outside the generated contract
+module the string appears in exactly two files, both mine from K13, both about notification
+preferences. `C9Capability` has 22 fields and none is a consent class. The AE contract has none.
 
-§0.7 F28 fixes the table's shape, its totality (56 C9-CAP rows, and those only) and its change
-discipline — *"Any change to a row's `consent_class` or a lowering of a `min_verification` is a
-contract version bump"* — and **never enumerates the rows**. P-10 assigns it to "K2 (the tables)
-over K1's canon". K1's canon does not carry it: `C9Capability`
-(`src/orchestration/c9.registry.ts:52-74`) has 22 fields and **neither `min_verification` nor
-`consent_class` is among them**.
+> **OWNER-AUTHORED SECURITY POLICY REQUIRED — for `consent_class` only.**
 
-So the two load-bearing columns are **authored policy, not derived data**, and F28's own
-version-bump clause says as much: you do not version-bump a derivation.
-
-## Why I did not just pick values
-
-Because `maxLevel` means a wrong row is not symmetric. Too strict and a legitimate read becomes
-unreachable; too loose and a capability is exercised below the rung it needs. And a conservative
-blanket default is not available either: `CONSENT_CLASS_FLOOR['personal_data']` is
-`SESSION_VERIFIED`, so defaulting the column strictly would floor **every C9 read** at
-`SESSION_VERIFIED` — which directly contradicts the derivation's own comment at
-`C9_MODE_FLOOR('READ')`: *"reads carry their floor in `min_verification`"*.
-
-Fifty-six rows × two columns is 112 authored values. Inventing them and calling the result a
-derivation is the thing R3 forbids by name.
+**3. Two of the nine categories you asked about are not in this table at all.** F28 makes it total
+over C9-CAP's 56 rows *"and over those only"*. **Booking COMMIT** and **consent mutation** are
+AE-CAP keys, covered instead by `AE_WIDGET_COMMIT_ALLOWLIST ∪ AE_CAPABILITY_GAP_LEDGER` under F31.
+Nothing you decide here touches them.
 
 ---
 
-## What I need from you
+## OPTION A — derive `min_verification`, author `consent_class` by group  ← **RECOMMENDED**
 
-**One of the three.** Nothing here is urgent-by-default; Gate 5 stays fail-closed until you answer.
+| | |
+|---|---|
+| **SOURCE OF 56 ROWS** | `C9_CAPABILITIES` enumerated at build; totality asserted at `EP-REGISTRY-LOAD` |
+| **HOW `min_verification` IS ASSIGNED** | Deterministic, from data that exists: `resourceClass === 'LOCAL'` → `ANONYMOUS`; `allowedRoles ⊆ {client, customer}` → `BOUND_CLIENT`; any staff/owner role present → `SESSION_VERIFIED`; no catalogue entry → by `mode`: `READ` → `CHANNEL_IDENTITY`, `PROPOSE_ONLY`/`OWNER_HANDOFF` → `SESSION_VERIFIED` |
+| **HOW `consent_class` IS ASSIGNED** | **By you**, as ~8 group rulings, not 56 values. Proposed groups, each a `capabilityKey` prefix that already exists: `clients.*` and `customers.*` (6 keys) · `loyalty.*` (finance?) · `expenses.*` · `analytics.*` · `b35.*` (3) · `appointments.own.*` (4) · `a22.*` · everything else |
+| **ANY VALUE INFERRED/GUESSED** | **`min_verification`: none** — every input is an authored field already used for authorisation. **`consent_class`: none** — you assign it; I assign nothing |
+| **FAIL-CLOSED BEHAVIOUR** | A C9 key with no row fails the build (F28). An unclassified group defaults to nothing — the build refuses rather than picking |
+| **READ BEHAVIOUR** | A client-facing read (`catalog.services.read`) floors at `BOUND_CLIENT`; a staff-only read (`analytics.business.profit`) at `SESSION_VERIFIED`. Both are then raised further by `risk`, `C9_MODE_FLOOR` and `consent_class` through `maxLevel` |
+| **WRITE/HANDOFF/COMMIT** | Every `PROPOSE_ONLY` and `OWNER_HANDOFF` key already floors at `SESSION_VERIFIED` via `C9_MODE_FLOOR`, independently of this table. This column cannot lower that |
+| **CONSENT CONSEQUENCES** | Exactly what you assign. `personal_data`/`communication`/`identity_binding`/`finance` each floor at `SESSION_VERIFIED` through `CONSENT_CLASS_FLOOR`; `none` adds nothing |
+| **VERIFICATION CONSEQUENCES** | 4 keys reachable at `BOUND_CLIENT`; 33 + 13 at `SESSION_VERIFIED`; 1 (`c9.no_action`) at `ANONYMOUS`; the 8 remaining C9-native reads at `CHANNEL_IDENTITY` before other terms raise them |
+| **CONTRACT VERSIONING** | The derivation rule is versioned once. A later `allowedRoles` change moves a floor automatically — which F28 calls a version bump, so the monotonicity test must catch a *lowering* and fail the build |
+| **BUSINESS/USER LOSS** | None beyond today: no capability becomes unreachable that is reachable now |
+| **SECURITY RISK** | The residual is the version-bump coupling: `allowedRoles` is owned by the AI-tools catalogue, so a loosening there would loosen a floor here. Mitigated by the monotonicity test, not by hope |
+| **WHY** | It is the only option where **nothing is guessed and your attention is spent only where no data exists.** ~8 rulings instead of 112 values |
 
-### OPTION A — a derivation rule, stated once (RECOMMENDED)
+## OPTION B — author all 56 × 2
 
-Give a rule and I derive all 56 rows from the live registry, exactly as the MONEY sets and the
-twelve canonical moments were derived. The natural candidate, using fields that already exist:
+| | |
+|---|---|
+| **SOURCE OF 56 ROWS** | Same enumeration; both columns from you |
+| **`min_verification`** | You assign all 56 |
+| **`consent_class`** | You assign all 56 |
+| **INFERRED/GUESSED** | None |
+| **FAIL-CLOSED** | Same build failure on a missing row |
+| **READ / WRITE / HANDOFF** | Exactly what you write |
+| **CONSENT / VERIFICATION** | Exactly what you write |
+| **VERSIONING** | Every row is independently version-bumpable — the most faithful reading of F28 |
+| **BUSINESS/USER LOSS** | None, if authored correctly |
+| **SECURITY RISK** | Transcription error across 112 hand-entered values; no coupling risk |
+| **WHY NOT** | It spends 112 decisions to reproduce, for `min_verification`, what `allowedRoles` already says |
 
-```
-min_verification  :=  LOCAL          -> ANONYMOUS
-                      SOURCE_READ    -> CHANNEL_IDENTITY
-                      SOURCE_HANDOFF -> BOUND_CLIENT
+## OPTION C — uniform fail-closed
 
-consent_class     :=  'personal_data'  if the capability's ownerKey or toolOrInterface
-                                        names a client-scoped owner
-                      'communication'  if it names a delivery owner
-                      'none'           otherwise
-```
-
-*Cost:* one ruling. *Risk:* the `consent_class` half is a heuristic over names, which is the kind
-of inference the enum ruling calls inadmissible — so if you choose A, I would rather you narrow the
-`consent_class` half to a literal list of which keys are `personal_data` / `communication`, and
-leave `min_verification` to the rule above.
-
-### OPTION B — author the 56 rows
-
-I generate a worksheet: one line per C9 key, with its `mode`, `resourceClass`, `riskTier`,
-`ownerKey` and `domains` already filled in, and the two columns blank. You fill them; I bind the
-result and prove totality and monotonicity at `EP-REGISTRY-LOAD`.
-
-*Cost:* 56 lines of your attention. *Risk:* none — this is what F28's version-bump clause assumes.
-
-### OPTION C — fail closed, and accept what that costs
-
-Every row gets `min_verification: 'SESSION_VERIFIED'`, `consent_class: 'none'`. The floor is then
-never below `SESSION_VERIFIED` for any C9 capability. Gate 5 becomes executable immediately.
-
-*Cost:* every C9 read requires a verified first-party session — no capability is reachable from
-Telegram channel identity or from an anonymous web session. That is a **product** change, not a
-security one, and it would show up as capability loss at G3.
+| | |
+|---|---|
+| **SOURCE OF 56 ROWS** | Enumeration; both columns constant |
+| **`min_verification`** | `SESSION_VERIFIED` for all 56 |
+| **`consent_class`** | `none` for all 56 |
+| **INFERRED/GUESSED** | None — but `consent_class: none` is a *decision to remove the consent term*, not an absence of one |
+| **FAIL-CLOSED** | Maximal on verification; **minimal on consent** |
+| **READ BEHAVIOUR** | Every C9 read requires a verified first-party session. Nothing is reachable from Telegram channel identity or an anonymous web session |
+| **WRITE/HANDOFF** | Unchanged — already `SESSION_VERIFIED` |
+| **CONSENT CONSEQUENCES** | **The consent term contributes nothing to any floor.** §0.14 F80's `consent_class` fence becomes vacuous |
+| **VERIFICATION CONSEQUENCES** | Strictest possible; capability loss at G3 |
+| **VERSIONING** | One constant; any later differentiation is a bump |
+| **BUSINESS/USER LOSS** | **Real.** A client browsing services in Telegram can no longer reach `catalog.services.read` |
+| **SECURITY RISK** | Looks safest and is not: it is strict on the axis that is already strict and **silent on the axis with no data** |
+| **WHY NOT** | It answers the question I could answer and erases the one I could not |
 
 ---
 
-## What happens either way
+## Representative rows — Option A, with real values
 
-- Gate 5 stays a refusing stub until this is answered. The pipeline stays fail-closed at Gate 5.
-- The three derived terms are already implemented and need nothing from you.
-- No production effect, no deletion, no dark window.
+| category | key | mode / resourceClass | roles | **`min_verification`** | **`consent_class`** |
+|---|---|---|---|---|---|
+| public / read-only | `catalog.services.read` | READ / SOURCE_READ | client+staff | `BOUND_CLIENT` → *derived* | **you** |
+| authenticated client read | `appointments.own.list` | READ / SOURCE_READ | client+staff | `BOUND_CLIENT` | **you** |
+| finance read | `analytics.business.profit` | READ / SOURCE_READ | staff-only | `SESSION_VERIFIED` | **you** (`finance`?) |
+| client PII | `clients.dossier.read` | READ / SOURCE_READ | staff-only | `SESSION_VERIFIED` | **you** (`personal_data`?) |
+| booking preparation | `appointments.own.create` | PROPOSE_ONLY / SOURCE_HANDOFF | client-only | `SESSION_VERIFIED` (via mode) | **you** |
+| **booking COMMIT** | — | — | — | **not in this table** — AE key | — |
+| communication / marketing | `b35.preview`, `b35.confirm` | PROPOSE_ONLY, OWNER_HANDOFF | no catalogue | `SESSION_VERIFIED` | **you** (`communication`?) |
+| **consent mutation** | — | — | — | **not in this table** — AE key | — |
+| configuration / A22 handoff | `a22.configuration` | OWNER_HANDOFF / SOURCE_HANDOFF | no catalogue | `SESSION_VERIFIED` | **you** |
 
-**I will not pick.** A floor is exactly the thing that must not be guessed.
+The `?` values are the shape of a plausible answer, **not a proposal I have implemented**. Every
+one is blank until you fill it.
+
+---
+
+```
+NO GUESSED SECURITY FLOOR      NO GUESSED CONSENT CLASS
+OBSERVED SAMPLE != POLICY DOMAIN               LLM != POLICY AUTHOR
+```
+
+Gate 5 stays a refusing stub until this is answered.

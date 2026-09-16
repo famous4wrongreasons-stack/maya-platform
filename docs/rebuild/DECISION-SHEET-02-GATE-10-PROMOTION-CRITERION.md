@@ -1,4 +1,22 @@
-# DECISION SHEET 02 — Gate 10's promotion criterion
+# DECISION SHEET 02 — Gate 10's promotion criterion  ·  **ANSWERED**
+
+> **OWNER DECISION, 2026-09-16: `GATE 10: REFUSAL ON EFFECT-CLASS DIVERGENCE`.**
+>
+> Divergence **within** the same effect class → audit/shadow evidence; not on its own grounds for
+> refusal. Divergence that **changes** the effect class → deterministic refusal before admission
+> or effect. The rule may never permit: READ → WRITE · PREPARE → COMMIT · one action class → a
+> materially different one · a change of canonical owner · an escalation of business effect · a
+> bypass of approval, consent or authority.
+>
+> The effect-class taxonomy is the existing canonical one (§3.2's eight classes). **No new
+> classification is to be created for Gate 10.** Mutation tests mandatory.
+>
+> Required, each proved: SAME EFFECT CLASS → AUDIT · CROSS EFFECT CLASS → REFUSE ·
+> EFFECT ESCALATION → REFUSE · OWNER CHANGE → REFUSE · APPROVAL/CONSENT BYPASS → REFUSE.
+
+---
+
+## The sheet as it was put, retained for the record
 
 **Blocks:** Gate 10 refusing. Does **not** block Gate 10's audit half, which I can build now.
 **Raised by:** R2 — *«Если contract действительно оставляет сам criterion owner-undefined, STOP с
