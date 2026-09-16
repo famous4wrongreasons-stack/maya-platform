@@ -68,13 +68,14 @@ K14_UNREACH=$(jqn /tmp/.fg-k14.json commandsExecutingIntoAnUnreachableBody)
 K15_BUNDLES=$(jqn /tmp/.fg-k15.json legacyBundlesCarryingAShell)
 K15_LEGACY_AUTH=$(jqn /tmp/.fg-k15.json clientSideAuthorityValuesInLegacy)
 K15_SUCC_AUTH=$(jqn /tmp/.fg-k15.json clientSideAuthorityValuesInSuccessor)
-K15_PROBE=$(jqn /tmp/.fg-k15.json unreachabilityProbeRecorded)
+K15_PROBE=$(jqn /tmp/.fg-k15.json mayaOsSiteUnreachableProven)
+K15_SERVED=$(jqn /tmp/.fg-k15.json productionServedLegacyCopies)
 K16_TOTAL=$(jqn /tmp/.fg-k16.json summary.toRetire)
 K16_DELETABLE=$(jqn /tmp/.fg-k16.json summary.retirableNow)
 
 say "  K14 commands registered / into an unreachable body" "$K14_CMDS / $K14_UNREACH"
 say "  K15 legacy shell bundles / legacy authority values" "$K15_BUNDLES / $K15_LEGACY_AUTH"
-say "  K15 successor authority values / probe recorded" "$K15_SUCC_AUTH / $K15_PROBE"
+say "  K15 successor authority values / maya-os-site unreachable proven" "$K15_SUCC_AUTH / $K15_PROBE"
 say "  K16 rows to retire / retirable today / deleted" "$K16_TOTAL / $K16_DELETABLE / 0"
 echo
 
@@ -92,7 +93,7 @@ row G6  "Number provenance"                "$F_G6_OK"  "$F_G6_WHY"
 row G7  "Role modes removed from UX"       "$F_G7_OK"  "$F_G7_WHY"
 row G8  "Backend authority unchanged"      "$F_G8_OK"  "$F_G8_WHY"
 row G9  "Fullscreen parity, no overlays"   "$F_G9_OK"  "$F_G9_WHY"
-row G10 "Bundle disposition"               "$([ "$K15_BUNDLES" = "1" ] && [ "$K15_PROBE" = "true" ] && echo 1 || echo 0)" "$K15_BUNDLES legacy shell bundles (target 1); probe $K15_PROBE"
+row G10 "Bundle disposition"               "$([ "$K15_BUNDLES" = "1" ] && [ "$K15_PROBE" = "true" ] && echo 1 || echo 0)" "$K15_BUNDLES legacy shell bundles in the repository, $K15_SERVED legacy copies served in production (target 1 successor); maya-os-site unreachable proven: $K15_PROBE"
 row G11 "Primary-nav target achieved"      "$F_G11_OK" "$F_G11_WHY"
 row G12 "Router honesty"                   "$F_G12_OK" "$F_G12_WHY"
 row G13 "Intent unforgeability"            "$F_G13_OK" "$F_G13_WHY"
@@ -127,6 +128,7 @@ say "PRIMARY NAV" "$F_PRIMARY_NAV  (successor shell: $F_SHELL_ROUTES)"
 say "OWNER/STAFF/CLIENT PRESENTATION MODES" "$F_PRESENTATION_MODES"
 say "BACKEND AUTHORITY ROLES" "$F_BACKEND_ROLES"
 echo
+say "GATES EXECUTABLE" "$F_GATES"
 say "WIDGET CONTRACT" "$F_CONTRACT_CHECK"
 say "BUTTON -> ENDPOINT PATHS" "$F_BUTTON_ENDPOINT"
 say "DIRECT UI -> PROVIDER WRITES" "$F_UI_PROVIDER"
@@ -158,7 +160,8 @@ echo
 echo "APPROVED OUT-OF-SCOPE LIMITATIONS — listed separately, not masked"
 echo "  FUNDAMENTAL RULES FAIL-CLOSED ONLY:      13/21"
 echo "  STEP_UP_VERIFIED:                        UNREACHABLE"
-echo "  GATE 10:                                 MEASURED, NOT ENFORCED"
+echo "  GATE 10:                                 REFUSAL ON EFFECT-CLASS DIVERGENCE (owner ruling);"
+echo "                                           the router is exact-match, and an unresolved utterance is not compared"
 echo "  APPROVAL:                                ROLE-GATED, NOT SEPARATION-OF-DUTIES"
 echo "  GAP-ATTENDANCE-CONFIRM:                  OPEN"
 echo "  K13 14-DAY PRODUCTION OBSERVATION:       NOT PROVEN UNTIL ACTUALLY OBSERVED"
@@ -176,9 +179,12 @@ echo "  live bundle while the route still resolves and logs, which is a PRODUCTI
 echo "  leaving it means observing that nobody used it, which is a PRODUCTION observation."
 echo "  PRODUCTION EFFECTS FOR PROOF: 0, so neither was done and nothing was deleted."
 echo
-echo "  K14 stops at: bot.py is read-only and undeployable by constraint."
-echo "  K15 stops at: driving client-side authority values to 0 means editing the shipped PWA."
-echo "  K16 stops at: 437 rows await ENTRY_POINT_DARK; 0 retirable; 0 deleted."
+echo "  Pre-cutover readiness is NOT met, so Wave 6 was not entered. The exact remaining conditions,"
+echo "  row by row, are in docs/rebuild/WAVE-6-PRE-CUTOVER-DETERMINATION.md:"
+echo "    no successor surface is served, and no package delivers one;"
+echo "    $K15_SERVED legacy bundle copies are publicly reachable at non-canonical URLs;"
+echo "    G2 successors are not verified for every row; K14 needs bot.py; native evidence is absent."
+echo "  K16: $K16_TOTAL rows await ENTRY_POINT_DARK; $K16_DELETABLE retirable; 0 deleted."
 echo
 
 echo "======================================================================================"

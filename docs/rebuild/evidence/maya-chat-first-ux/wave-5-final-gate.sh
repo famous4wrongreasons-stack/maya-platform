@@ -87,7 +87,9 @@ M=$(sed -n '/^export const MOMENT_REGISTRY/,/^});$/p' src/widgets/proactive/mome
   || { say "MOMENT_REGISTRY ROWS:" "$M"; fail=1; }
 
 # Additive: wave 5 touches no pre-existing widget module except the two the CONTROL space required.
-TOUCHED=$(cd .. && git diff --name-only 80cdde7a -- maya-saas-backend/src/widgets \
+# Pinned to wave 5's own commit. Diffing against the working tree counted every later, separately
+# approved change — the gate wiring — as wave 5 touching modules it never touched.
+TOUCHED=$(cd .. && git diff --name-only 80cdde7a 0feb3932 -- maya-saas-backend/src/widgets \
   | grep -vE "widgets/(consent|proactive)/" | sed 's#.*/widgets/##' | tr '\n' ' ')
 EXPECTED="authority/floor.ts authority/registry-binding.ts control/control-registry.service.ts "
 [ "$TOUCHED" = "$EXPECTED" ] && say "PRE-EXISTING MODULES TOUCHED:" "3  (the CONTROL space only)" \

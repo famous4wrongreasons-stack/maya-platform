@@ -1,0 +1,27 @@
+{
+  "contract": "maya.native-pwa-cutover-evidence/1",
+  "performedAt": "2026-09-16T16:55Z",
+  "productionEffects": 0,
+  "verdict": "NOT PROVEN",
+  "notFail": "Nothing observed contradicts a future native/PWA cutover. What is missing is the evidence, and this record does not manufacture it.",
+  "facts": {
+    "nativeSourceInRepository": "ABSENT. No *.swift, *.kt, *.java, *.pbxproj, AndroidManifest, capacitor.config or twa-manifest is tracked; dossier row S-455 records the same absence.",
+    "nativeBinaryOutsideRepository": "The Google Play package folder on the owner's machine holds a signed .aab/.apk and a Readme; neither states a start URL in text. It was read only, never modified.",
+    "androidAppLinks": "https://malesthetic.pro/.well-known/assetlinks.json answers 200 and delegates handle_all_urls to pro.malesthetic.twa.",
+    "webBundlesReferenceNativeBridges": "The committed app.html references Capacitor.Plugins 31 times, including the custom MayaRuntime and MayaNfcWriter plugins, whose native implementation is not in the repository.",
+    "whatAWrapperWouldShowToday": "Both /app/ entries serve the maintenance page (three-bundle-probe.json), so a wrapper whose start URL is either of them shows maintenance.",
+    "ownerIntentOnRecord": "docs/rebuild/evidence/chapter7-wave3-fixture-recovery/maintenance-provenance.json records the owner's 2026-09-08 instruction: close the PWA temporarily behind a maintenance page, and use the native Maya app once it is finished. Recorded here as provenance, not as a new instruction."
+  },
+  "proofsOfMappingSection6_5": {
+    "1 same envelope renders identically, intent sets byte-identical": "NOT PROVEN — there is no native renderer in the repository to compare against",
+    "2 same submission reaches the same gate sequence": "NOT PROVEN for native; the web half is covered by the gateway suites",
+    "3 bridge failure degrades to the PWA path, never wider": "NOT PROVEN — the bridge implementation is out of repository",
+    "4 a11y floor holds in both": "web renderer PASS (conformance.test.mjs); native NOT PROVEN"
+  },
+  "surfacesBlockedByAnOutOfRepositoryNativeChange": {
+    "rule": "A retiring row whose channel is native-shell, or whose function lives in a native plugin or custom URL scheme, is NOT retired until the native change exists and is proven. It is returned as an exact blocker, not deleted.",
+    "ids": ["S-455", "S-460", "S-461", "S-465", "S-473", "S-474", "S-475", "S-476", "S-477", "S-478", "S-479", "S-480", "S-481", "S-489", "S-490", "S-602", "S-603", "S-637"],
+    "count": 18
+  },
+  "doesTheWebCutoverRequireIt": "Mapping §6 (D11-B) defines one Web Interaction Contract for native and PWA, with parity 'proved rather than asserted'. The 18 native-shell rows depend on native evidence. The remaining web rows do not depend on it by contract. They are blocked for their own reasons, recorded elsewhere."
+}

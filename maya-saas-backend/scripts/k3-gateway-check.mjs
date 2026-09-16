@@ -64,11 +64,31 @@ chk(
 // ── 4. a gate cannot pass silently ───────────────────────────────────────────────────────────
 // Every gate whose mechanism a later package owns must REFUSE, not pass. "Not built yet" and
 // "allowed" being the same branch is the failure mode F5's fail-closed default exists to prevent.
+//
+// Once every gate is wired there is no pending() helper left, and "the helper refuses" can no longer
+// be the test. The property itself can: no slot's run is a constant pass. A pending() helper, where
+// one still exists, must still refuse.
 const pendingHelper = /const pending = \([\s\S]*?\n\}\);/.exec(runner);
+const appModuleSrc = fs.readFileSync(path.join(BE, 'src/app.module.ts'), 'utf8');
+const jwtGuardGlobal =
+  /provide:\s*APP_GUARD,\s*useClass:\s*JwtAuthGuard/.test(appModuleSrc) &&
+  !/@Public\(/.test(read('widgets.controller.ts'));
+const constantPass = gatesArray
+  ? gatesArray.elements
+      .map((e) => e.getText(gw))
+      .filter((t) => /run:\s*\(\s*\)\s*=>\s*(\(\s*)?\{\s*outcome:\s*'pass'/.test(t) || /run:\s*\(\s*\)\s*=>\s*pass\b/.test(t))
+      // A slot hosted by HTTP middleware passes because the middleware has already run — admissible
+      // only when that is PROVEN: the guard is global and the widgets controller does not opt out.
+      .filter((t) => !(/host:\s*'HTTP middleware'/.test(t) && jwtGuardGlobal))
+      .map((t) => /n:\s*'([^']+)'/.exec(t)?.[1] ?? '?')
+  : ['no gate array'];
+const pendingRefuses = pendingHelper === null ||
+  (/outcome: 'refuse'/.test(pendingHelper[0]) && /mechanism_absent/.test(pendingHelper[0]));
 chk(
-  'a gate pending on a later package refuses rather than passes',
-  pendingHelper !== null && /outcome: 'refuse'/.test(pendingHelper[0]) && /mechanism_absent/.test(pendingHelper[0]),
-  pendingHelper ? "pending() returns refuse/mechanism_absent" : 'no pending() helper',
+  'no gate can pass silently: no slot is a constant pass, and a pending() helper refuses',
+  constantPass.length === 0 && pendingRefuses,
+  `${constantPass.length ? `constant-pass slots: ${constantPass.join(' ')}` : '0 constant-pass slots'}; ` +
+    (pendingHelper ? `pending() ${pendingRefuses ? 'returns refuse/mechanism_absent' : 'DOES NOT REFUSE'}` : 'no pending() helper (every gate wired)'),
 );
 
 // ── 5. BUTTON -> ENDPOINT is unrepresentable ─────────────────────────────────────────────────

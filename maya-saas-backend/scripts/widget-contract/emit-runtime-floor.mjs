@@ -68,7 +68,10 @@ import {
   RISK_FLOOR,
 } from '../../widget-contract/tables';
 import type { CapabilityRef } from '../../widget-contract/capability-ref';
-import type { Correlation, VerificationLevel } from '../../widget-contract/envelope';
+import type {
+  Correlation,
+  VerificationLevel,
+} from '../../widget-contract/envelope';
 import type {
   EffectClass,
   IntentRecord,

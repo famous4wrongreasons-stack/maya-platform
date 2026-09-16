@@ -268,3 +268,14 @@ GATE PIPELINE:                        4 of 15 gates live; the other 11 refuse wi
                                       mechanism_absent, and their rules are enforced in
                                       their own modules rather than in the pipeline
 ```
+
+---
+
+## Correction recorded 2026-09-16 — production was not where this checkpoint assumed
+
+This checkpoint calls `app.html` "the shipped PWA" and reads the K15 census as the production
+exposure. A root-and-route probe later found otherwise. Both app entries have served a maintenance
+page since 2026-09-08. Meanwhile 44 legacy bundle copies, carrying 2,568 client-side authority
+values, stay reachable at other URLs, and no successor bundle is served. The census above counts
+repository files only. The pre-cutover determination replaces the "STOPS AT" readings here with
+measured ones: see [WAVE-6-PRE-CUTOVER-DETERMINATION.md](WAVE-6-PRE-CUTOVER-DETERMINATION.md).

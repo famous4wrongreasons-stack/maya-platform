@@ -1,0 +1,4376 @@
+{
+ "contract": "maya.k16.successor-map/1",
+ "rule": "verdicts are recomputed by successor-verify.mjs on every read; this file is a snapshot, not a checkbox",
+ "rows": [
+  {
+   "id": "S-002",
+   "surface": "Login / entry",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/jwt.strategy.ts#validate",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-003",
+   "surface": "Login · splash slide-to-unlock",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Signed G09 successor is an `auth` capability; no sign-in identifier is registered (account holds identity, sessions, sign-out, not sign-in). The splash is a render state of login and cannot retire before it.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-004",
+   "surface": "Login · email code sheet",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/email-auth.service.ts#verify",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-005",
+   "surface": "Login · social sign-in (Yandex / Telegram)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'getValidAuthFlowState' and reaches social-auth.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-007",
+   "surface": "Login · trial sheet (10-day trial)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Signed G07 successor is an `onboarding` capability with the trial sheet as a step; no onboarding or trial-activation capability is registered in C9 or the booking allowlist.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-008",
+   "surface": "Login · AI business-setup wizard",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Wizard stages (AI dialogue, blueprint confirm, logo upload, CRM connect) need the signed `onboarding` capability; none is registered, and no key creates services, staff, branding or a CRM link.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-009",
+   "surface": "Mode chooser (ChooseVersion)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: server-forced disambiguation (access.chooser_required)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-010",
+   "surface": "Access-compat error screen",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/guards/roles.guard.ts#RolesGuard",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-011",
+   "surface": "Client Home («Запись»)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/6 served functions have no successor: shop purchase, personal referral link, public ratings",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-012",
+   "surface": "Client Home · contacts sheet",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/3 served functions have no successor: open salon website",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-013",
+   "surface": "Services price list",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "C9",
+   "resolved": true,
+   "successor": "C9:catalog.services.read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-014",
+   "surface": "Team / masters list",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "C9",
+   "resolved": true,
+   "successor": "C9:catalog.staff.read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-016",
+   "surface": "Tips («Чаевые»)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No tips capability: choosing a master and amount and handing off to tip payment has no C9 key; shell.pay/fs.payment are route keys with no capability behind a tip.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-017",
+   "surface": "Client Cabinet",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/3 served functions have no successor: tips, own subscription status, shop, personal referral link, feedback",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-019",
+   "surface": "Invite / referral",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing a personal referral-link capability: referrals.status.read returns programme status and rewards and does not create a referral, so it cannot give the client a link to share.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-023",
+   "surface": "Booking flow · in-flow client auth gate («Вход клиента / Без SMS»)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'assertTenantAllowsClientRegistration' and reaches auth.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-024",
+   "surface": "Work cabinet on the `book` screen (staff/owner tab strip)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "3/12 served functions have no successor: tenant clients list; internal-calendar service create/edit/delete; schedule setup: weekly rules, time-off, providers, staff access",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-025",
+   "surface": "«Мои записи» sheet",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": true,
+   "successor": "C9:appointments.own.list + AE_BOOKING:crm.appointment.cancel.v1 + AE_BOOKING:crm.appointment.reschedule.v1",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-026",
+   "surface": "Staff Home («Главная»)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "2/7 served functions have no successor: master's own day appointments; client base, team chat, platform centre",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-027",
+   "surface": "Staff Home · day view modal («Клиенты на день»)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No capability returns a master's own day roster with client tags or AI advice: operations.journal.read is schedule-manager-only and PII-free; staff.schedule.own.read returns shifts, not appointments.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-028",
+   "surface": "Owner morning brief popup",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "2/3 served functions have no successor: cycle alert with named return-call list; confirm-to-run cycle-reminder job",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-029",
+   "surface": "Staff Clients (legacy master client base)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No registered clients-list capability with master-scoped revenue: clients.dossier.read is a single-client lookup, clients.high-value.read is business-only ranks. G03 binding keeps this surface until a protected successor exists.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-030",
+   "surface": "Owner panel (legacy ALivePanel)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "6/14 served functions have no successor: daily report cash/card split; waitlist tab; manual client-messaging jobs tab; team tab (staff access); loyalty code redemption tab; founder-only MAYA tab",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-034",
+   "surface": "SaaS panel · commerce (YooKassa) sheet",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'assertActor' and reaches p4-10-commerce-credential-canonical-cutover.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-035",
+   "surface": "SaaS panel · team access manager («Роли и вход»)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "no refusal within 60 lines of 'updateTeamAccess' at maya-saas-backend/src/crm/crm-integration.controller.ts:468",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-037",
+   "surface": "Schedule · new-booking modal",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "2/3 served functions have no successor: client lookup by phone; duration override",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-040",
+   "surface": "Team chat («Внутренний чат смены»)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No registered team-messaging capability (messages, voice notes, attachments, withdraw). fs.team-thread is only a route key; G02 binding keeps the legacy surface until a protected server-side successor exists.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-045",
+   "surface": "Client tab bar (CLIENT_TABS)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/6 served functions have no successor: home/cabinet: shop, referral link, ratings, tips, subscription, feedback",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-046",
+   "surface": "Staff tab bar (STAFF_TABS / saasStaffTabItems)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/6 served functions have no successor: Клиенты tab (client base); Главная team-chat and platform-centre tiles",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-047",
+   "surface": "Global bottom nav container",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/8 served functions have no successor: clients tab, cabinet shop/tips/subscription, team chat",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-048",
+   "surface": "Profile menu sheet",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/5 served functions have no successor: cabinet entry: tips, subscription, shop, referral link",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-049",
+   "surface": "Logout confirmation modal",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/auth-session.service.ts#assertAccessSession",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-050",
+   "surface": "«Сменить режим» floating button",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:maya",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-053",
+   "surface": "Owner trial countdown badge",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No entitlement or trial-status capability: nothing registered returns trial_days_remaining or the tenant access_state.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-054",
+   "surface": "152-FZ consent dialog (AMayaConsent)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-channel-runtime.service.ts#submitConsent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-055",
+   "surface": "Intro carousel (AMayaIntro)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-056",
+   "surface": "Coach marks (AOnboarding)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-057",
+   "surface": "Promo banner (APromoBanner)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No promo/offer capability: nothing registered delivers, claims or dismisses a promotional offer.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-061",
+   "surface": "Deep-link overlay · Expense intake / reminders",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": true,
+   "successor": "C9:expenses.create + C9:settings.update",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-063",
+   "surface": "Report downloads widget",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "2/3 served functions have no successor: list saved report snapshots; PDF handbook (static admin help)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-064",
+   "surface": "Deep-link overlay · Team communications",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Second mount of team chat opened by ?team=main; no registered team-messaging capability and no declared deep-link resolver. G02 binding keeps it until a protected successor exists.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-068",
+   "surface": "Deep-link · calendar setup (?calendar_setup=1)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No declared deep-link vocabulary identifier exists, and the link's only effect opens internal-calendar schedule setup, which itself has no write capability.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-069",
+   "surface": "Push notification controls",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No push-permission or device-subscription capability; nothing registered enables, disables or reports a device's web-push state (the notifications route key serves nothing by itself).",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-073",
+   "surface": "Login / MAYA OS entry (ALogin)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/jwt.strategy.ts#validate",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-075",
+   "surface": "Conversational AI onboarding «Настроить с Майей» (4 stages) — inside ALogin",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Four stages (AI dialogue with templates, blueprint confirm, logo upload, CRM provider pick) require the signed `onboarding` capability, which is not registered.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-076",
+   "surface": "Trial activation sheet (slide-to-unlock)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No trial-activation capability: POST /onboarding/trial-activations has no C9 or AE key, and onboarding has no registered successor.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-077",
+   "surface": "Business finder modal",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Pre-login tenant search is part of sign-in; no auth or tenant-directory capability is registered.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-078",
+   "surface": "«Скоро» / not-available modal",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-079",
+   "surface": "Role/workspace chooser «Я клиент / Я сотрудник» (ChooseVersion)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: trial notice (client registration disabled during trial)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-080",
+   "surface": "Client home (AClientHome)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "2/9 served functions have no successor: shop and invite tiles, subscriptions; promo, ratings and stat widgets; socials row",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-081",
+   "surface": "Services catalogue (AServices)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "C9",
+   "resolved": true,
+   "successor": "C9:catalog.services.read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-082",
+   "surface": "Team / masters (ATeam)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: phone-link form (SMS code, cabinet_link_phone)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-084",
+   "surface": "Tips / gratuity to a master (ATips)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No tips capability: picking a master, amount and note with external payment hand-off has no C9 key.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-085",
+   "surface": "Client cabinet (AClientCabinet)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "2/4 served functions have no successor: own subscriptions; guest / needphone prompts (sign-in, phone binding)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-086",
+   "surface": "Shop — subscriptions & gift certificates (AShop)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/3 served functions have no successor: purchase subscription or certificate",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-087",
+   "surface": "Referral / invite friends (AInvite)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No personal referral-link capability; referrals.status.read returns programme status and rewards only.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-088",
+   "surface": "Client notification settings (ASettings)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:notifications",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-089",
+   "surface": "CRM integration centre (ACrmCenter)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "no refusal within 60 lines of 'CrmIntegrationController' at maya-saas-backend/src/crm/crm-integration.controller.ts:81",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-091",
+   "surface": "Staff/owner cabinet hosted on the `book` screen (myView)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "3/12 served functions have no successor: tenant clients list; internal-calendar service create/edit/delete; schedule setup: weekly rules, time-off, providers, staff access",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-092",
+   "surface": "Staff home (AStaffHome)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/6 served functions have no successor: owner control-centre entry (panel)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-093",
+   "surface": "Staff day sheet (AStaffDayView)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No capability returns the logged-in master's own day appointments: operations.journal.read is schedule-manager-only; staff.schedule.own.read returns shifts, not bookings.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-094",
+   "surface": "Staff clients list (AStaffClients)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No clients capability scoped to a master's own clients with revenue totals (including the notmaster state); dossier lookup is per client. G03 binding keeps it until a protected successor exists.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-096",
+   "surface": "Business panel — legacy salon panel (ALivePanel)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "6/14 served functions have no successor: daily report cash/card split; waitlist tab; manual client-messaging jobs tab; team tab (staff access); loyalty code redemption tab; founder-only MAYA tab",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-097",
+   "surface": "Owner CRM team-access manager (ASaasTeamAccessManager)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "no refusal within 60 lines of 'updateTeamAccess' at maya-saas-backend/src/crm/crm-integration.controller.ts:468",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-099",
+   "surface": "Platform GOD mode / MAYA control centre (AGodMode)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "no refusal within 60 lines of 'listTenants' at maya-saas-backend/src/admin/admin.controller.ts:62",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-100",
+   "surface": "Internal team chat (ATeamChat)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No registered team-messaging capability for presence, voice, attachments and media viewer; fs.team-thread and fs.media are route keys only. G02 binding keeps this copy until a protected successor exists.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-105",
+   "surface": "Consent gate 152-ФЗ (AConsentGate)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-channel-runtime.service.ts#submitConsent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-106",
+   "surface": "First-run intro carousel (AMayaIntro)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-107",
+   "surface": "Coach-mark tour (AOnboarding)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-108",
+   "surface": "Promo banner + gift promo (APromoBanner / APromoGift)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No promo capability: revealing a promo code and the in-app promo claim (idle/loading/done/err) have no registered key.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-109",
+   "surface": "Owner morning brief popup (AOwnerMorningBrief)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "2/3 served functions have no successor: cycle alert with return-call list; dismiss into founder GOD mode",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-111",
+   "surface": "Profile mini-menu (bottom-nav 4th tab)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/7 served functions have no successor: cabinet link: client subscriptions",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-112",
+   "surface": "Logout confirmation sheet",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/auth-session.service.ts#assertAccessSession",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-113",
+   "surface": "Bottom tab bar (AuroraTab, global)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/8 served functions have no successor: Клиенты tabs; home shop/promo; cabinet subscriptions",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-114",
+   "surface": "Floating MAYA FAB + «Сменить вход» pill",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:maya",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-117",
+   "surface": "Native Telegram login bridge (deep-link + polling)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "enforced only in legacy ai администратор/database.py#applogin_authorize; no canonical fence",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-118",
+   "surface": "OAuth return routing (Telegram / Yandex)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/social-auth.service.ts#completeIdentityLink",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-122",
+   "surface": "Post-login role routing (meAuthRoute)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Signed G09 folds post-login routing into an `auth` capability that resumes the conversation; no auth identifier exists for identity application, /me refresh and CRM boot routing, so it cannot retire.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-123",
+   "surface": "Legacy role hydration (applyRole / __meHydrate)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/legacy-staff-principal.controller.ts#read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-125",
+   "surface": "UNROUTED components (present but not reachable)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-127",
+   "surface": "Login / вход (ALogin)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "no refusal within 60 lines of 'cmd_start' at ai администратор/bot.py:484",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-128",
+   "surface": "Choose version (Я клиент / Я сотрудник)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:maya",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-129",
+   "surface": "Client Home",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/5 served functions have no successor: shop entry (purchases)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-130",
+   "surface": "Services (Услуги)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "C9",
+   "resolved": true,
+   "successor": "C9:catalog.services.read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-131",
+   "surface": "Team (Команда)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "C9",
+   "resolved": true,
+   "successor": "C9:catalog.staff.read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-134",
+   "surface": "Tips screen (ATips)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No tips capability for choosing a master and amount and opening the external YClients tips payment page.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-136",
+   "surface": "Invite / referral",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No capability returns a client's personal referral link or invited/arrived counters; referrals.status.read is programme configuration only.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-139",
+   "surface": "Staff home (AStaffHome)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/4 served functions have no successor: founder-only GOD mode entry",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-140",
+   "surface": "God mode / Центр управления (AGodMode)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'assertTenantUpdateFieldsAllowed' and reaches admin.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-142",
+   "surface": "Team chat (ATeamChat)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No registered team-messaging capability (messages, hold-to-record voice, 20 MB attachments, delete); fs.team-thread is a route key only. G02 binding keeps this tab until a protected successor exists.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-145",
+   "surface": "152-ФЗ consent gate (AConsentGate)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-channel-runtime.service.ts#submitConsent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-146",
+   "surface": "Promo banner (slide-to-unlock promo code)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No promo capability for the first-visit code reveal and permanent dismissal; its booking link alone does not carry the promo.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-147",
+   "surface": "VK ID OAuth login flow",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-149",
+   "surface": "Admin login (slug + e-mail + password)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/auth.service.ts#login",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-150",
+   "surface": "Обзор (Overview)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No tenant platform-state or plan-feature capability; support.integration-status.read covers CRM integration health only.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-152",
+   "surface": "Тексты (content)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No tenant content capability drafts or saves greeting, headline rows, stat tiles, about text or map ratings; catalog.staff.read only reads the public profile.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-154",
+   "surface": "Подписка (billing, operator view)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "no refusal within 60 lines of 'chargeTenant' at maya-saas-backend/src/billing/billing.controller.ts:109",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-155",
+   "surface": "＋ Новый салон (4-step onboarding wizard)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Operator tenant-creation wizard (basics, brand, texts, booking system, owner account); G07 excludes the operator path from conversational onboarding, and no onboarding or operator capability is registered.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-157",
+   "surface": "Self-serve session handoff consumer (#handoff=nonce)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/jwt.strategy.ts#validate",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-158",
+   "surface": "Logout / session pipeline",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/auth-session.service.ts#refresh",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-159",
+   "surface": "Trial signup form (Создайте салон)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — G08 turns the form into a Maya conversation entry, but its function, creating a 14-day trial tenant (slug, schedule source, preset, timezone), needs the onboarding capability, which is not registered.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-160",
+   "surface": "Trial success / credentials (Салон создан)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/onboarding/canonical-trial-onboarding.service.ts#ownerSession",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-161",
+   "surface": "Handoff to admin (Открыть админку салона)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — The nonce/tenant binding and one-time handoff exist only client-side; the server never receives the nonce, so no backend code refuses a bundle used outside the handoff.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-169",
+   "surface": "Final CTA + footer",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — The trial CTA leads to tenant trial creation (no onboarding capability); the live-demo CTA selects a demo tenant through URL parameters, which needs a declared entry vocabulary that does not exist.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-170",
+   "surface": "Tip flow: master select → amount → transfer details",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Signed G16 successor is a `tips` capability; none is registered, so master selection, preset amounts, SBP detail copy, bank hand-off and «Я перевёл» have no successor.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-171",
+   "surface": "Thanks + rating/feedback panel",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Submitting a rating and review is a write; reviews.list.read and reviews.analyze are business-only READs, and no feedback-submission capability is registered.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-174",
+   "surface": "Offline fallback page",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-176",
+   "surface": "Client cabinet (Личный кабинет) — modal shell",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-177",
+   "surface": "Cabinet — login state (Telegram + Yandex sign-in)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — SPLIT AUTHORITY — canonical fence covers only part of this surface; the remaining contour is enforced only in legacy code: Two different legacy fences: bot.py cmd_start (Telegram nonce) and web_auth.py exchange_yandex_code (Yandex code exchange); neither covers both methods.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-178",
+   "surface": "Cabinet — Telegram waiting/poll state",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'applogin_poll' and reaches database — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-179",
+   "surface": "Cabinet — authenticated account screen (points, visits, subscription, next visit, history)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/4 served functions have no successor: subscription/abonement status",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-180",
+   "surface": "Cabinet — needphone / guest / error states",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "2/3 served functions have no successor: phone-binding prompt for the loyalty card; re-login",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-181",
+   "surface": "Cabinet — Yandex OAuth return handler (same-page callback)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — SPLIT AUTHORITY — canonical fence covers only part of this surface; the remaining contour is enforced only in legacy code: Surface's CSRF state check is client-only on legacy /api/auth/yandex (exchange_yandex_code); canonical SocialAuthService.getValidAuthFlowState checks state server-side but is not on this path.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-184",
+   "surface": "Booking entry — per-master YClients booking from team cards",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "AE_BOOKING",
+   "resolved": true,
+   "successor": "AE_BOOKING:crm.appointment.create.v1",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-185",
+   "surface": "Gift certificate purchase entry (#gift)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: gift certificate purchase hand-off",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-190",
+   "surface": "Promo overlay (−20% Mon/Tue, new clients)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No promo/offer capability delivers the new-client discount or records its permanent dismissal; the booking CTA alone does not carry the promo.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-191",
+   "surface": "Exit-intent modal (5% cashback)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No capability delivers the 5% cashback offer or records its dismissal; loyalty.own.read returns an individual balance, not programme messaging, and the bot CTA has no identifier.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-192",
+   "surface": "Cookie consent banner",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No backend, PHP or Python code references cookieConsent or cookie consent; the choice exists only in localStorage in index.html.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-194",
+   "surface": "Telegram bot entry (hero / mobile nav / footer / exit-intent)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/4 served functions have no successor: gift certificate purchase via the bot",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-195",
+   "surface": "Splash / cinematic intro gate",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-197",
+   "surface": "Tips (чаевые) page — master selection and payment hand-off",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No tips capability: master selection, amount presets, QR print mode and the external tip payment hand-off have no registered key.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-199",
+   "surface": "MAYA OS self-serve tenant onboarding (create salon)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/onboarding/onboarding.service.ts#createTrialSignup",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-204",
+   "surface": "AShopCard — shop widget (widget: \"shop\")",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "2/4 served functions have no successor: client's active subscription and remaining visits; open shop to purchase",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-205",
+   "surface": "AProfileCard — profile widget (widget: \"profile\")",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": true,
+   "successor": "ROUTE:account + C9:appointments.own.list + C9:loyalty.own.read + ROUTE:fs.booking + C9:support.contact-admin.request",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-206",
+   "surface": "AHistoryCard — visit history widget (widget: \"history\")",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "C9",
+   "resolved": true,
+   "successor": "C9:appointments.own.list",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-212",
+   "surface": "AMasterUpsellCard — upsell advice card (widget: \"master_upsell\")",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "C9",
+   "resolved": true,
+   "successor": "C9:analytics.employee.query",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-216",
+   "surface": "saasAiApprovalCard — owner action-approval card (m.aiApproval)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/ai-tools/ai-tool-policy.service.ts#canDecide",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-217",
+   "surface": "Inbox → chat card (server notifications rendered as bot messages)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No inbox capability: nothing registered lists persistent inbox items or their deep links for the conversation (tasks.list covers assigned tasks only).",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-221",
+   "surface": "chatWidgetIntent — regex widget fallback (client surface only)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/7 served functions have no successor: shop purchase, referral link, tips, notify web-push controls",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-224",
+   "surface": "Quick replies — static defaults",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "3/13 served functions have no successor: Записи сегодня chip (staff own appointments); Что умеет MAYA OS? (tenant capability overview); Настроить финансы (finance dashboard widgets and targets)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-227",
+   "surface": "Quick replies — welcome-screen command chips",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "3/13 served functions have no successor: Записи сегодня chip (staff own appointments); Что умеет MAYA OS? (tenant capability overview); Настроить финансы (finance dashboard widgets and targets)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-232",
+   "surface": "Backend client commands returning a widget hint",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-channel-runtime.service.ts#clientAppointmentAuthority",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-234",
+   "surface": "Backend widget emission gate (NestJS ai-core)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "no refusal within 60 lines of 'complete' at maya-saas-backend/src/ai-tools/ai-core.service.ts:1599",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-238",
+   "surface": "Proactive widget messages (frontend-synthesized, SaaS)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/3 served functions have no successor: server-governed proactive trigger (moment, dedupe, suppression)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-239",
+   "surface": "Action / link buttons attached to chat messages",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/8 served functions have no successor: shop purchase, invite (referral link), run_job",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-240",
+   "surface": "Second rendering site of the whole widget system (MAYA OS site bundle)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "2/11 served functions have no successor: tips, referral, shop purchase, web-push controls; onboarding quick-reply handling",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-241",
+   "surface": "Owner morning brief — overlay card deck (not a chat widget)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "2/3 served functions have no successor: embedded confirm step (run cycle-reminder job); expandable call list",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-242",
+   "surface": "Owner expense confirmation cards (not a chat widget)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "C9",
+   "resolved": true,
+   "successor": "C9:expenses.create",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-243",
+   "surface": "AMayaConsent — canonical Client consent «Ваш выбор» (blocking modal)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:fs.consent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-244",
+   "surface": "AConsentGate — legacy 152-ФЗ blocking consent screen (PHP proxy)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:fs.consent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-245",
+   "surface": "AConsentGate — legacy 152-ФЗ blocking consent screen (PHP proxy)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:fs.consent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-246",
+   "surface": "Implicit booking-consent notice on the confirmation step",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:fs.consent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-252",
+   "surface": "POST /internal/security/client-consent-invalidations — consent invalidation (platform owner)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "no refusal within 60 lines of 'remediate' at maya-saas-backend/src/package5-wave3/consent-security-invalidation.controller.ts:16",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-256",
+   "surface": "Effective-consent resolver (authority for every consent read)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-effective-consent.ts#effectiveClientConsent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-257",
+   "surface": "Marketing-consent enforcement at send time",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/communication-delivery/communication-bulk-policy.service.ts#current",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-258",
+   "surface": "Native-feedback marketing eligibility gate",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'marketingAllowed' and reaches native-feedback-policy.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-261",
+   "surface": "ANotifyCard — notification settings as an in-chat widget",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: embedded per-device web-push control",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-262",
+   "surface": "AWebPushControls — per-device web-push enable/disable",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No push-subscription capability reports or changes a device's web-push state with a server receipt; the notifications route key alone serves nothing.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-264",
+   "surface": "Auto web-push subscription with NO user control",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Signed G17 successor is a `notifications` capability that asks and records the push answer; none is registered, so the silent auto-subscriber has no successor.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-267",
+   "surface": "In-app MAYA inbox (persistent notification feed) + device registration",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No inbox capability: listing persistent items, marking read and native APNs/web device registration have no C9, AE or route identifier behind them.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-268",
+   "surface": "Owner broadcast tab «Рассылка» (marketing bulk send)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": true,
+   "successor": "C9:b35.preview + C9:b35.confirm + C9:b35.status",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-269",
+   "surface": "Owner automations / jobs tab «Задачи» (client-facing message runs)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No capability triggers reactivation, birthday, cycle-reminder or review-request jobs or reports consent skips; b35 is a marketing bulk campaign, not these jobs.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-272",
+   "surface": "Team communications (staff in-app messaging + voice notes)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — The team-communications controller has no registered capability (feed, chunked attachments, voice); per G02 binding, without a canonical protected successor it is not retired.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-281",
+   "surface": "In-app onboarding voice input (onbSendAudio)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Voice is an input mode of the signed `onboarding` capability, which is not registered; the onboarding transcript path has no capability of its own.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-282",
+   "surface": "Team-communications voice note recording",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Voice notes are an input mode of the G02 team-messaging capability, which is not registered; fs.team-thread and fs.media are route keys only.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-285",
+   "surface": "In-app owner AI onboarding wizard (onb* — chat|confirm|logo|crm)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — In-app wizard stages (conversational capture, confirm with imported CRM data, logo, CRM) need the signed `onboarding` capability; none is registered.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-287",
+   "surface": "AOnboarding — first-run spotlight coach-marks",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-288",
+   "surface": "AMayaIntro — 6-page first-run intro carousel",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-290",
+   "surface": "AI onboarding confirmation receipt",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/onboarding/ai-confirmation-receipt.service.ts#claim",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-306",
+   "surface": "S16 Inbox",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No inbox capability lists unread items or marks one read; nothing registered backs the card.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-309",
+   "surface": "S19 Communication Delivery",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'assertExecutionAllowsDelivery' and reaches communication-delivery.kernel — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-310",
+   "surface": "S20 Panel / GOD / admin",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'ensureTenantCanBeManaged' and reaches admin.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-314",
+   "surface": "S24 Finance / expense",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": true,
+   "successor": "C9:expenses.create + C9:expenses.read + C9:expenses.period.complete + C9:analytics.business.profit",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-315",
+   "surface": "S25 Loyalty / value / certificates",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": true,
+   "successor": "C9:loyalty.own.read + C9:commerce.certificates.read + C9:commerce.memberships.read + C9:referrals.status.read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-316",
+   "surface": "S26 Reviews",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/3 served functions have no successor: recent review text excerpts",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-317",
+   "surface": "S27 Onboarding",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No onboarding capability is registered; a22.configuration confirms C9 orchestration context (profile, strategy, report preferences), not tenant setup.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-318",
+   "surface": "S28 Auth / identity",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/jwt.strategy.ts#validate",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-320",
+   "surface": "S30 All direct database writer candidates",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — The category is policed only by 17 CI architecture ratchets and scattered per-table triggers; there is no single server-side runtime fence for bypass writers.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-321",
+   "surface": "S31 All direct provider / delivery candidates",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Only 12 CI architecture ratchets police direct provider calls; assertExecutionAllowsDelivery guards the canonical path, not bypassing code.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-322",
+   "surface": "S32 Legacy identity / projection fallbacks",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/legacy-staff-principal.controller.ts#read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-325",
+   "surface": "C9Controller — /api/orchestration (finite coordination surface)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'current' and reaches c9.authority — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-326",
+   "surface": "AppointmentsController — /api/appointments (client booking)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": true,
+   "successor": "AE_BOOKING:crm.appointment.create.v1 + C9:appointments.own.create + C9:appointments.own.list + AE_BOOKING:crm.appointment.cancel.v1 + AE_BOOKING:crm.appointment.reschedule.v1",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-327",
+   "surface": "AvailabilityController — /api (root-mounted slot reads)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "C9",
+   "resolved": true,
+   "successor": "C9:booking.availability.read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-330",
+   "surface": "MeasurementController — /api/analytics/measurements",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'viewer' and reaches measurement.read.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-331",
+   "surface": "CustomersController — /api/customers",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "3/4 served functions have no successor: customer consent profile read/update; tenant customer records list; internal notes update",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-332",
+   "surface": "CrmController — /api/crm (public capability catalog)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No CRM provider catalogue capability; support.integration-status.read reports this tenant's integration health, not implemented and planned providers.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-334",
+   "surface": "OwnerReportSnapshotsController — /api/owner-reports",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "3/4 served functions have no successor: list report snapshots; structured snapshot payload; static admin help",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-337",
+   "surface": "DashboardPreferencesController — /api/me/dashboard",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/3 served functions have no successor: update finance dashboard widgets and targets",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-338",
+   "surface": "StaffController — /api/staff",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "C9",
+   "resolved": true,
+   "successor": "C9:catalog.staff.read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-339",
+   "surface": "ServicesController — /api/services",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "C9",
+   "resolved": true,
+   "successor": "C9:catalog.services.read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-342",
+   "surface": "ExpensesController — /api/expenses",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/3 served functions have no successor: delete expense with audit record",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-343",
+   "surface": "InboxController — /api/inbox",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No inbox capability for listing items or marking one read; device registration and the internal ingest bridges also have no identifier.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-344",
+   "surface": "OperationalWorkController — /api/operational-work (tasks)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": true,
+   "successor": "C9:tasks.list + C9:tasks.create + C9:tasks.complete",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-348",
+   "surface": "/start — native app login handshake + client handoff",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "no refusal within 60 lines of 'cmd_start' at ai администратор/bot.py:484",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-349",
+   "surface": "/clear — conversation reset (retired)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Conversation-history erasure has no registered capability; privacy-and-data is only its intended route key, and the dossier requires the deletion capability before closing.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-352",
+   "surface": "/whats_new — release-notes card",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No release-notes capability: nothing registered delivers WHATS_NEW_TEXT or records its dismissal.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-353",
+   "surface": "/unsubscribe — marketing opt-out (retired to app)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:privacy-and-data",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-354",
+   "surface": "/subscribe — marketing opt-in restore (retired to app)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:privacy-and-data",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-355",
+   "surface": "/admin — admin console root",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "3/5 served functions have no successor: analytics stats (AI cost, AI advice, loyalty, subscriptions, referrals, cashiers); manual job runs; what's-new preview, masters' AI provider, consent CSV export, welcome-points backfill",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-356",
+   "surface": "/bind — staff Telegram binding (retired)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — The hand-off target, owner-configured staff access (CrmStaffAccess), has no registered capability or route; connections holds channel bindings, not staff-access grants.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-357",
+   "surface": "/unbind — staff unbind (retired)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Staff Telegram unbind has no owner in any channel (the dossier flags parity as already violated); connections is only the intended route key, with no capability behind it.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-359",
+   "surface": "/today — master day cards with AI upsell + payment buttons",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No master-own appointment feed, per-visit AI upsell advice or cash/card close-out capability: money mutations are excluded from the commit allowlist and the journal read is manager-only.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-363",
+   "surface": "/mute — master notification pause (governed)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:notifications",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-369",
+   "surface": "/ai_cost — LLM spend report",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No LLM-spend capability; nothing registered reads the AI billing cost report.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-370",
+   "surface": "/stats_ai — AI-advice analytics with period argument",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No capability reads AI-advice statistics by provider; the analytics keys cover business and employee performance only.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-373",
+   "surface": "/subscriptions_stats — subscription portfolio summary",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No subscription-portfolio capability; commerce.memberships.read lists configured offers, not client subscriptions by status or plan.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-375",
+   "surface": "/loyalty_stats — loyalty programme summary",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No loyalty-programme summary capability; loyalty.own.read is one client's balance and loyalty.internal.adjust is a write.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-378",
+   "surface": "/reviews_now — trigger review request (retired to app)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No capability requests reviews from clients; reviews.list.read and reviews.analyze only read, and the native-feedback trigger has no registered key.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-379",
+   "surface": "/leads_stats — hanging-lead alert summary",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No capability reports hanging leads or lead alerts.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-381",
+   "surface": "/sources_stats — acquisition-source attribution",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No acquisition-source attribution capability; reports.recovered attributes MAYA recovery outreach, not first-touch client sources.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-384",
+   "surface": "/dashboard — owner metrics digest with period argument",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "C9",
+   "resolved": true,
+   "successor": "C9:analytics.business.query",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-386",
+   "surface": "/admin_pdf — printable command reference (retired to app download)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Neither the admin-help PDF nor the in-chat command catalogue it defers to has a registered identifier; owner_report.download serves report runs, not static help.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-387",
+   "surface": "/cashiers — list staff allowed to redeem codes",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No capability lists staff allowed to redeem codes; the cashier flag is retired into staff access, which has no registered key.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-391",
+   "surface": "/referral_stats — referral programme summary",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — No referral statistics capability; referrals.status.read returns programme configuration and rewards, not counts by status or codes and promos issued.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-392",
+   "surface": "/freed_test <staff_id> <ISO datetime> — simulate a freed slot",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-393",
+   "surface": "152-FZ blocking consent gate (TypeHandler group=-1)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "enforced only in legacy ai администратор/bot.py#consent_gate; no canonical fence",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-394",
+   "surface": "PD consent screen (need_pdn)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:fs.consent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-395",
+   "surface": "Marketing opt-in prompt (need_marketing)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:fs.consent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-396",
+   "surface": "pdn_accept / mkt_accept / mkt_decline — consent buttons now inert",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'recordChannelConsent' and reaches package5-wave3-canonical-cutover.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-399",
+   "surface": "Action Engine → Telegram privacy delivery endpoint",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "enforced only in legacy ai администратор/webhook_server.py#internal_privacy_telegram_handler; no canonical fence",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-403",
+   "surface": "Mini App initData signature verification",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'authenticate' and reaches client-channel-authenticator.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-404",
+   "surface": "?start=app_<nonce> — native app login deep link",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "no refusal within 60 lines of 'cmd_start' at ai администратор/bot.py:484",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-405",
+   "surface": "?start=linkphone — phone-linking deep link from the app",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-408",
+   "surface": "Client main reply keyboard (persistent nav)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "2/8 served functions have no successor: Пригласить друга, Наш канал, subscription payment; capability discovery",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-409",
+   "surface": "Master reply keyboard (persistent nav)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "3/5 served functions have no successor: today's own appointments (cmd_today); month appointments (cmd_month); master help",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-410",
+   "surface": "Role-based keyboard resolver",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: master keyboard targets /today and /month",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-411",
+   "surface": "ABOUT_KEYBOARD — static shop card",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/3 served functions have no successor: external links: channel, site, iOS/Android apps, 2GIS, Yandex Maps",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-412",
+   "surface": "Admin console root (admin_main)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "5/7 served functions have no successor: analytics reports (AI cost, AI advice, loyalty/subscription/referral stats, cashiers); manual job launches (reactivation, birthday, cycle, reviews, syncs); what's-new preview; team settings (masters' AI provider, cashiers); welcome-points backfill",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-413",
+   "surface": "Admin category: Аналитика (admin_cat_analytics)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "6/6 served functions have no successor: AI cost report (admin_run_ai_cost); AI advice-to-masters stats (admin_run_stats_ai); loyalty programme stats (admin_run_loyalty_stats); subscription stats (admin_run_sub_stats); referral programme stats (admin_run_ref_stats); cashiers list (admin_run_cashiers)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-414",
+   "surface": "Admin category: Запустить рассылку вручную (admin_cat_jobs)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "7/7 served functions have no successor: reactivation run (admin_run_react); birthday promo codes (admin_run_birthday); cycle reminders (admin_run_cycle); review requests (admin_run_reviews); subscription sync (admin_run_sub_now); loyalty points accrual (admin_run_loy_now); referral resolver (admin_run_ref_now)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-415",
+   "surface": "Admin category: Маркетинг и анонсы (admin_cat_marketing)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/3 served functions have no successor: what's-new preview (admin_run_whatsnew)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-416",
+   "surface": "Admin category: Команда (admin_cat_team)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "2/2 served functions have no successor: masters' AI provider (admin_run_ai_prov → staff_ai_provider); cashiers list (admin_run_cashiers)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-417",
+   "surface": "Admin category: Аудит и прочее (admin_cat_audit)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: welcome-points backfill (admin_run_backfill)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-419",
+   "surface": "Broadcast composer — category picker",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: template library categories",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-421",
+   "surface": "Broadcast composer — template preview + use/edit",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: template library preview",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-423",
+   "surface": "Broadcast composer — audience preview + send confirm",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": true,
+   "successor": "C9:b35.preview + C9:b35.confirm + C9:b35.status",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-424",
+   "surface": "Broadcast execution — now refuses",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/marketing/canonical-bulk.service.ts#authority",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-426",
+   "surface": "Free-text bind-code request detector (retired)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: staff-access handoff target",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-428",
+   "surface": "CLIENT_COMMANDS_TEXT — client capability menu in prose",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a generated, role-aware capability index; no ref lists capabilities for discovery. The commands it glosses (/clear, /whats_new, /unsubscribe, /subscribe, /privacy) are dispositioned separately.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-429",
+   "surface": "MASTER_COMMANDS_TEXT — master capability menu in prose",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a generated master capability index; no ref renders a capability glossary, and the /mute and cash/card vocabulary it teaches has no registered capability.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-431",
+   "surface": "Contact-share handler (retired)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-channel-runtime.service.ts#resolve",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-434",
+   "surface": "Master self-introduction recogniser (retired)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/legacy-staff-principal.controller.ts#read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-435",
+   "surface": "empauth_* — owner confirms a staff member",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: an owner-approves-staff-member capability (reset bind code, bind chat, notify employee); no C9 key or route grants staff access.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-436",
+   "surface": "bindnew_* — reissue a master bind code",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a staff bind-code reissue capability with confirm-before-invalidate; no route or C9 key issues staff access codes.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-437",
+   "surface": "master_unbind_* — master disconnect confirmation",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:connections",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-438",
+   "surface": "pay_cash_* / pay_card_* — master closes a visit",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a capability closing a visit as cash or card with provider read-back; no C9 key records payment and money-mutating AE capabilities are gap-keyed off the widget allowlist.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-439",
+   "surface": "vmood_* — visit mood pills (🔴 silence / 🔵 talk)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a visit-mood capability storing the choice per record and showing it to the barber; no registered key exists (G15 only names it as a future capability).",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-440",
+   "surface": "rev_1..rev_5 — star rating request",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a review-submit capability with follow-up comment capture; reviews.list.read and reviews.analyze are READ and cannot record a rating.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-441",
+   "surface": "react_* — dormant-client win-back buttons",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "2/4 served functions have no successor: proactive win-back card delivery; decline / engaged outcome logging",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-442",
+   "surface": "freed_book_* / freed_decline — freed-slot offer",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: freed-slot offer push and decline",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-446",
+   "surface": "gift_method_* — certificate purchase method choice",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a certificate purchase/issue capability. commerce.certificates.read only reads configured denominations (READ) and cannot sell; this surface starts a purchase.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-447",
+   "surface": "Retired client-callback interceptor",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'authenticate' and reaches client-channel-authenticator.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-449",
+   "surface": "Callback pattern allowlist (single CallbackQueryHandler)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "no refusal within 60 lines of 'CallbackQueryHandler' at ai администратор/bot.py:5041",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-451",
+   "surface": "ABSENCE — no Telegram command menu registered",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a registered capability index or suggestion capability; O06 binds that it be reachable before the Telegram keyboards retire.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-455",
+   "surface": "NATIVE SOURCE ABSENT — no *.swift/*.kt/*.java/*.pbxproj/AndroidManifest.xml/capacitor.config.*/Info.plist in repo",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — find for *.swift/*.kt/*.java/*.pbxproj/AndroidManifest.xml/capacitor.config.*/Info.plist returns 0; no server-side code decides build/signing authority.",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-460",
+   "surface": "MayaRuntime.getPreviewAccess (custom plugin — native grants MAYA OS trial/preview entitlement + API base)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a native-plugin on native-shell; its successor would be a fence or a capability",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-461",
+   "surface": "MayaNfcWriter.writeUrl (custom plugin — write client smart-link to a blank NFC tag)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — A widget kind alone is not a successor: no registered capability issues the client smart link or performs an NFC write, so the K8 kind has nothing to render.",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-465",
+   "surface": "Capacitor App plugin — appUrlOpen listener + getLaunchUrl (OAuth deep-link return)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — SPLIT AUTHORITY — canonical fence covers only part of this surface; the remaining contour is enforced only in legacy code: The listener routes two contours: oauth-callback URLs reach NestJS getValidAuthFlowState, while vk-auth/yandex-auth and /app links reach legacy Python auth_vk_handler/auth_yandex_handler, which never verify state server-side.",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-473",
+   "surface": "mayaos://oauth-callback custom URL scheme",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'getValidAuthFlowState' and reaches social-auth.service — located is not proven",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-474",
+   "surface": "ru.mayaos.app:// custom URL scheme (oauth-callback | vk-auth | yandex-auth)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — SPLIT AUTHORITY — canonical fence covers only part of this surface; the remaining contour is enforced only in legacy code: No server mints or validates ru.mayaos.app://. Its oauth-callback payload is checked by NestJS getValidAuthFlowState; vk-auth/yandex-auth payloads go to Python auth_vk_handler/auth_yandex_handler, gated only by login flags and provider code exchange.",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-475",
+   "surface": "pro.malesthetic.app:// custom URL scheme (oauth-callback | vk-auth | yandex-auth)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — SPLIT AUTHORITY — canonical fence covers only part of this surface; the remaining contour is enforced only in legacy code: No server mints or validates pro.malesthetic.app://. Its oauth-callback payload is checked by NestJS getValidAuthFlowState; vk-auth/yandex-auth go to Python auth_vk_handler/auth_yandex_handler without state checks. Bundle-id sharing has no server fence.",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-476",
+   "surface": "Universal Links — apple-app-site-association (iOS /app/* claim)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Universal-link routing is an OS grant; the iOS native source is not in the repo, and no server code validates what /app/* opens carry (legacy VK/Yandex code+state is never state-checked server-side).",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-477",
+   "surface": "Android App Links — assetlinks.json (TWA package claim)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — App Link delegation is an OS-level grant; the TWA source is not in the repo, and no server-side code validates which app handles malesthetic.pro links or what those opens carry.",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-478",
+   "surface": "capacitor://malesthetic.pro origin (native webview origin, CORS-allowlisted)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — The capacitor:// origin drives browser-enforced CORS only. No server code refuses a request by Origin, and the relay does not forward Origin upstream; authority rests on forwarded bearer credentials.",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-479",
+   "surface": "maya-native-api.php — native-app API relay (fixed upstream, origin allowlist)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "enforced only in legacy сайт и приложение/maya-native-api.php#maya_forwarded_idempotency_key; no canonical fence",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-480",
+   "surface": "native-enhancements.js — PWA 'native feel' shim (ORPHANED: zero inbound references)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "8/8 served functions have no successor: standalone/platform dataset flags; navigator.vibrate haptics; pull-to-refresh; swipe screen navigation; external link retargeting; VAPID push subscribe; offline banner; A2HS install prompt",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-481",
+   "surface": "native-styles.css — companion stylesheet (ORPHANED)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-483",
+   "surface": "Telegram initData -> X-Telegram-InitData header injection (6 sites in app.html)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — SPLIT AUTHORITY — canonical fence covers only part of this surface; the remaining contour is enforced only in legacy code: Preferences, cabinet projection and feedback re-verify initData in NestJS authenticate via the legacy bridge, but /api/chat, /api/chat/stream and panel auth verify it only in Python _verify_telegram_init_data (webhook_server.py).",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-484",
+   "surface": "Telegram initData -> realtime WebSocket auth (m.init_data)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-channel-runtime.service.ts#realtimeAuthority",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-485",
+   "surface": "Telegram identity read — initDataUnsafe.user (avatar + foreign-login eviction)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Foreign-login eviction exists only in app.html (__meDropForeignLogin). Missing: a server check rejecting a stored credential whose subject differs from the live signed Telegram user. Avatar seeding is presentation only.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-488",
+   "surface": "TELEGRAM SDK ABSENT — telegram-web-app.js is never loaded by the bundle",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — SPLIT AUTHORITY — canonical fence covers only part of this surface; the remaining contour is enforced only in legacy code: With telegram-web-app.js never loaded, client initData paths are inert; any initData that arrives is HMAC-verified by two different owners: NestJS authenticate (bridge commands) and Python _verify_telegram_init_data (chat, panel).",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-489",
+   "surface": "MAYA OS bundle (maya-os-site/index.html) — same Capacitor + scheme contract, second native build",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "5/5 served functions have no successor: MayaRuntime preview access; MayaNfcWriter NFC write; MayaVoiceRecorder native capture; TeamVoicePlayer native playback; three-scheme OAuth deep-link contract",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-490",
+   "surface": "app-tenant.html — partial Capacitor surface (no custom Maya plugins)",
+   "retirementCondition": "RETIRE IN K16",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-491",
+   "surface": "ASaasOwnerPanel — tab shell (9 tabs, role-filtered)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "4/10 served functions have no successor: Сотрудники tab: roles and login access; Клиенты tab: MAYA account list; Клиентам tab: invite link, QR, NFC; deep-link tab injection (__meSaasPanelTab)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-492",
+   "surface": "SaaS owner tab 1/9 — MAYA (maya)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": true,
+   "successor": "C9:operations.journal.read + ROUTE:fs.booking + C9:support.integration-status.read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-495",
+   "surface": "SaaS owner tab 3/9 — Расписание (schedule) — redirect, not a real tab",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:fs.calendar",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-497",
+   "surface": "ASaasTeamAccessManager — role & login grant widget (inside Сотрудники)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "no refusal within 60 lines of 'updateTeamAccess' at maya-saas-backend/src/crm/crm-integration.controller.ts:468",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-498",
+   "surface": "SaaS owner tab 5/9 — Услуги (services)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "C9",
+   "resolved": true,
+   "successor": "C9:catalog.services.read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-500",
+   "surface": "SaaS owner tab 7/9 — Клиентам (connect) — client acquisition surface",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a capability returning the tenant install smart link, installable gate and QR (GET /mobile/pwa/{slug}/install) plus an NFC write; client_invite_kit is not a registered key.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-501",
+   "surface": "Connect sub-capability A — Умная ссылка (smart link share)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Its merge target client_invite_kit has no registered capability; nothing supplies the smart_url, business name or share action.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-503",
+   "surface": "Connect sub-capability C — QR для стойки и зеркала",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Its merge target client_invite_kit has no registered capability; nothing supplies install.qr_url or its tenant-origin resolution.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-506",
+   "surface": "Integrations sub-capability — ЮKassa credentials (commerce)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'assertActor' and reaches p4-10-commerce-credential-canonical-cutover.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-508",
+   "surface": "ALivePanel — legacy tab shell (10 tabs, permission-filtered)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "5/10 served functions have no successor: MAYA founder GOD-OS tab; Лист ожидания tab; Задачи (manual job launcher) tab; Команда (bind codes, cashier) tab; Гашение (code redemption) tab",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-509",
+   "surface": "Live tab 1/10 — MAYA (os) → embedded GOD-OS",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — SPLIT AUTHORITY — canonical fence covers only part of this surface; the remaining contour is enforced only in legacy code: The live GOD tab's god_billing data is fenced only by this Python middleware (platform flag from NestJS LegacyStaffPrincipalController), while trials/tenants data is fenced canonically by @Roles(UserRole.PLATFORM_OWNER) on AdminAnalyticsController/AdminController.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-510",
+   "surface": "Live tab 2/10 — Аналитика (analytics)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": true,
+   "successor": "C9:analytics.business.query + C9:analytics.team-kpi.read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-511",
+   "surface": "Live tab 3/10 — Расписание (schedule / masterSchedule)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "3/5 served functions have no successor: tips count and total; today's own appointment list; upcoming grouped appointments",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-513",
+   "surface": "Live tab 5/10 — Лист ожидания (waitlist)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a waitlist capability exposing freed slots, waiting-client chips and counts, plus a proactive trigger; no C9 key reads panel_waitlist.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-514",
+   "surface": "Live tab 6/10 — Отзывы (reviews)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/3 served functions have no successor: comment text and master per review",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-515",
+   "surface": "Live tab 7/10 — Задачи (jobs)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "enforced only in legacy ai администратор/webhook_server.py#panel_job_run_handler; no canonical fence",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-516",
+   "surface": "Live tab 8/10 — Рассылка (broadcast)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/marketing/canonical-bulk.service.ts#authority",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-517",
+   "surface": "Live tab 9/10 — Команда (team)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "2/3 served functions have no successor: bind status badge and code issuance; cashier permission toggle",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-518",
+   "surface": "Live tab 10/10 — Гашение (redeem)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a code-redemption capability (lookup then confirm) for certificates and loyalty points. commerce.certificates.read only reads denominations; loyalty.internal.adjust adjusts an internal balance, not a code.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-522",
+   "surface": "Work cabinet shell (BookingShell mini-cabinet)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "3/10 served functions have no successor: Клиенты (customers) list; Услуги (internal-calendar services config); Расписание (internal-calendar schedule config)",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-523",
+   "surface": "Tab: Записи (appts) — non-business fallback branch",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/5 served functions have no successor: loyalty transactions",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-525",
+   "surface": "Tab: Моя статистика (mystat)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "C9",
+   "resolved": true,
+   "successor": "C9:analytics.employee.query",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-526",
+   "surface": "Tab: Расписание (calendar) — operational journal",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "C9",
+   "resolved": true,
+   "successor": "C9:operations.journal.read",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-527",
+   "surface": "Tab: Сотрудники (team)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/3 served functions have no successor: per-staff rating",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-528",
+   "surface": "Tab: Клиенты (customers)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: browsable list of 50 customers",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-529",
+   "surface": "Tab: Услуги (services)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing server counterpart: the tab edits internal-calendar services (POST/PATCH/DELETE /internal-calendar/services); catalog.services.read only reads. G04 binds it to stay until a protected write successor exists.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-531",
+   "surface": "Tab: Сессии (profile) — devices & logout",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "no refusal within 60 lines of 'resolveFacts' at maya-saas-backend/src/package5-wave2/package5-wave2.service.ts:422",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-536",
+   "surface": "Internal calendar: provider login access (admin-only)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'ensureTenantCanBeManaged' and reaches admin.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-538",
+   "surface": "Internal calendar: time-off / breaks",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: an internal-calendar time-off create/delete capability. staff.schedule.update writes the YClients staff-day schedule, not /internal-calendar/providers/{id}/time-off.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-539",
+   "surface": "Internal calendar: readiness indicator",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a capability exposing internal-calendar readiness (myCal.ready). support.integration-status.read summarises CRM integration health, not whether internal-calendar services and schedule are configured.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-540",
+   "surface": "Internal calendar: empty/cold-start entry card",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: an internal-calendar setup capability for services and schedule; the card is only an invitation and nothing registered stands behind it.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-542",
+   "surface": "Journal: date paging control",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-543",
+   "surface": "Journal: staff (provider) filter",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-544",
+   "surface": "Journal: CRM-unavailable dead-end state",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-545",
+   "surface": "Journal: generic error + retry state",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-547",
+   "surface": "Deep link ?calendar_setup=1 (producers)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: the declared deep-link vocabulary (no registered ref) and an internal-calendar setup capability to resolve to. G13 forbids the producers' localStorage backend and tenant writes.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-551",
+   "surface": "Client-mode tab clamp",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/guards/roles.guard.ts#RolesGuard",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-553",
+   "surface": "OAuth callback — success state «Готово» + 400ms redirect",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: auth bundle write and sanitised redirect",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-554",
+   "surface": "OAuth callback — generic failure state fail()",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: retry sign-in",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-555",
+   "surface": "OAuth callback — coded provider-error table (9 codes)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: the shared error-code-to-copy module is code, not a route or capability; no admissible ref unifies the three auth error tables.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-556",
+   "surface": "OAuth callback — provider-declined state (?error / ?error_description)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: pending OAuth state cleanup",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-557",
+   "surface": "OAuth callback — missing code/state state",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "no refusal within 60 lines of 'CompleteOauthLoginDto' at maya-saas-backend/src/auth/dto/complete-oauth-login.dto.ts:4",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-558",
+   "surface": "OAuth callback — unknown provider-prefix state",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'getValidAuthFlowState' and reaches social-auth.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-559",
+   "surface": "OAuth callback — missing/foreign pending context state",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/tenancy/tenant-context.service.ts#runAsPublicTenant",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-560",
+   "surface": "OAuth callback — 15-minute pending TTL sweep on load",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'getValidAuthFlowState' and reaches social-auth.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-561",
+   "surface": "OAuth callback — per-state pending TTL + clock-skew validation",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: the shared pending-freshness predicate (15-minute TTL, 60-second skew) is a code-level security check, not a route or capability; no admissible ref carries it.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-562",
+   "surface": "OAuth callback — same-origin return-URL sanitisation safeRet()",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: any server check of the post-login return path. The backend only allowlists the provider redirect_uri (normalizeRedirectUri); open-redirect protection for ret exists solely in oauth-callback.html safeRet().",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-563",
+   "surface": "OAuth callback — 429 auth_rate_limited state with live countdown",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: an auth capability behind the card; LIMITATION is only a widget kind, so nothing registered renders auth_rate_limited with its countdown and retry.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-564",
+   "surface": "OAuth callback — tenant-scoped auth-bundle write + read-back verification",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/auth-session.service.ts#refresh",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-566",
+   "surface": "OAuth callback — pending dropped on every /complete failure",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/social-auth.service.ts#claimAuthFlowStateOrThrow",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-567",
+   "surface": "Кабинет tab «Сессии»",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:account",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-568",
+   "surface": "Сессии tab — lazy load on tab click",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:account",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-573",
+   "surface": "«Устройства» list — rendered session rows",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:account",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-574",
+   "surface": "«Показать активные сессии» — deferred-load placeholder",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-575",
+   "surface": "«Выйти на всех устройствах» button",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:account",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-576",
+   "surface": "Session-list error banner",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:account",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-577",
+   "surface": "«Нет данных» empty state for sessions",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-579",
+   "surface": "Cross-tab session revocation listener",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/auth-session.service.ts#assertAccessSession",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-580",
+   "surface": "Deep link ?booking_api_base= — repoints the entire booking/auth API base",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: any enforcement pinning the API base. No server can stop a client from sending tokens to an attacker-chosen host; only removing the param or pinning the base in the shell closes it.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-581",
+   "surface": "Deep link ?booking_backend=saas-local|legacy — switches backend contour",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a server-owned contour decision. Each backend authenticates its own credentials, but no server component decides or validates which contour (saas-local vs legacy) a client uses.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-582",
+   "surface": "Deep link ?booking_tenant=<slug> — selects the tenant namespace",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/tenancy/tenant-resolver.service.ts#bindAuthenticatedUser",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-583",
+   "surface": "Deep link ?god=1 — auto-opens platform GOD «Центр управления»",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — SPLIT AUTHORITY — canonical fence covers only part of this surface; the remaining contour is enforced only in legacy code: The flag behind ?god=1 is server-derived (is_founder/is_platform_owner). GOD data is refused to non-platform users by Python middleware for /api/god/*, and canonically by @Roles(UserRole.PLATFORM_OWNER) on AdminAnalyticsController/AdminController.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-584",
+   "surface": "Deep link ?cabinet=<tab> — boot straight into a cabinet tab",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a named-intent router or deep-link vocabulary as a registered ref; the tab allow-list it holds must become that vocabulary, which does not exist yet.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-588",
+   "surface": "Deep link ?trial=1 / ?start=trial — opens the trial entry flow",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a trial-start or onboarding capability; no route or C9 key starts a trial, so the card has nothing to render.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-589",
+   "surface": "Deep link ?workspace=client|business — forces the workspace side",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: role-derived authority is server runtime, not an admissible ref; nothing registered replaces forcing the client/business side, and the dual-role parity case is unproven.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-590",
+   "surface": "Deep link ?tips=<master-slug> — opens the tips screen",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a tips capability; no registered key takes a tip or preselects a master for tipping.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-591",
+   "surface": "Deep link ?promo=1 / ?promo=reset — force-show / reset the promo overlay",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "enforced only in legacy ai администратор/webhook_server.py#promo_gift_handler; no canonical fence",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-592",
+   "surface": "Deep link ?coach=1 / ?coach=reset — force-show / reset coach marks",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: no server-side decision exists for this surface at all; it is a disabled presentation feature, so no server fence can succeed it.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-593",
+   "surface": "Deep link ?social_linked=<provider> / ?social_link_error=<text>",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:connections",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-596",
+   "surface": "Deep link ?cash_declaration=1 — self-mounting cash-declaration overlay (3/6)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a cash-declaration capability for a branch business day with expectedRevision; no C9 key writes /cash-declarations, and money-affecting AE capabilities are gap-keyed.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-597",
+   "surface": "Deep link ?expenses=reminder|intake (+ #expense_source) — self-mounting expense overlay (4/6)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": true,
+   "successor": "C9:expenses.create + C9:settings.update",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-600",
+   "surface": "Deep link ?download=admin-help — auto-downloads the owner admin-help PDF",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a capability serving the static admin-help PDF. owner_report.download returns a generated owner report run by id, not GET /owner-reports/admin-help.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-601",
+   "surface": "OAuth return deep link ?code&?state&?error&?error_description → tenant URL restore",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'getValidAuthFlowState' and reaches social-auth.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-602",
+   "surface": "Custom-scheme relay mayaos://oauth-callback (native hand-back)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/social-auth.service.ts#buildNativeCallbackUrl",
+   "why": null,
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-603",
+   "surface": "Custom-scheme relays VK_NATIVE_SCHEME / YANDEX_NATIVE_SCHEME",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: server-side flow-state binding for the legacy VK/Yandex native relays. Server enforcement is limited to VK_LOGIN_ENABLED/YANDEX_LOGIN_ENABLED flags and provider code exchange in Python.",
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-604",
+   "surface": "Legacy VK return deep link ?code&?device_id&?state",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'auth_vk_handler' and reaches webhook_server — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-605",
+   "surface": "Legacy Yandex return deep link ?code&?state",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'auth_yandex_handler' and reaches webhook_server — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-607",
+   "surface": "cleanReturnUrl() — app-minted deep link carrying backend+tenant+workspace+cabinet",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/auth/social-auth.service.ts#completeIdentityLink",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-608",
+   "surface": "Owner-workspace recovery — one-shot strip of tenant deep-link params",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: no server counterpart exists for clearing client overrides, so it cannot be cited as a mitigation. The api_base override it clears stays unfenced server-side (see S-580).",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-609",
+   "surface": "app-tenant deep link ?god=1 — auto-opens GOD «Центр управления»",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: the founder GOD «Центр управления» has no route or capability; the merge target is a client-side gate, not an admissible ref.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-610",
+   "surface": "app-tenant deep link ?consent=1 — force-shows the 152-FZ consent sheet",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:fs.consent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-611",
+   "surface": "app-tenant deep link ?tips=<master>",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a tips capability; the tip card it duplicates has no registered key.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-612",
+   "surface": "app-tenant deep link ?promo=1 / ?promo=reset",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: the declared deep-link vocabulary is not a registered ref, and promo overlays have no capability to resolve to.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-613",
+   "surface": "app-tenant deep links ?booking_backend / ?booking_api_base / ?booking_tenant",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: the deep-link vocabulary has no ref, and G13 binds that URL parameters never set backend, API base or tenant, so there is no admissible target.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-614",
+   "surface": "app-tenant legacy VK return ?code",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: the signed auth capability is unregistered. G09 binds that the Yandex path be production-ready before this VK return is removed.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-615",
+   "surface": "maya-os-site deep link ?god=1 — auto-opens GOD «Центр управления»",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: the founder GOD «Центр управления» has no route or capability; the merge target is a client-side gate, not an admissible ref.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-616",
+   "surface": "maya-os-site deep links ?booking_backend / ?booking_api_base / ?booking_tenant",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: the declared deep-link vocabulary has no ref; G13 forbids URL-set backend or tenant authority, so the three booking parameters have no admissible target.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-617",
+   "surface": "maya-os-site deep links ?onboarded / ?calendar_setup / ?crm_connect / ?cabinet",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: the declared deep-link vocabulary has no ref; these onboarding, calendar-setup, CRM-connect and cabinet links resolve to nothing registered.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-618",
+   "surface": "maya-os-site deep links ?consent, ?promo, ?tips-equivalents, ?social_linked / ?social_link_error, ?start, ?device_id",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: the declared deep-link vocabulary has no ref; the consent, promo, tips, social-link, start and device_id parameters have no registered resolver.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-619",
+   "surface": "Beget edge relay — client/consent route table (package5-client-consent-proxy.php)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'maya_client_consent_request' and reaches package5-client-consent-proxy — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-620",
+   "surface": "Edge relay route: /api/consent/status",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-channel-runtime.service.ts#status",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-621",
+   "surface": "Edge relay route: /api/consent/submit (152-FZ + ст.18 ФЗ «О рекламе» write)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-channel-runtime.service.ts#submitConsent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-622",
+   "surface": "Edge relay route: /api/cabinet/notify-prefs (client notification preferences)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-preferences.service.ts#identity",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-623",
+   "surface": "Edge relay route: /api/set-visit-mood",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'snapshot' and reaches client-preferences.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-624",
+   "surface": "Edge relay route: /api/client-link/consume",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: G15's client-link consumption capability name is not registered in C9; the canonical client-channel consume path is a backend endpoint, not an admissible ref.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-625",
+   "surface": "Edge relay route: /api/cabinet/link-phone",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-link-challenge.service.ts#consume",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-626",
+   "surface": "Edge relay route: /api/client/feedback (native feedback)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/native-feedback/native-feedback.service.ts#respond",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-627",
+   "surface": "api-proxy.php dispatch — consent_status / consent_submit / client_link_consume",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'maya_client_consent_request' and reaches package5-client-consent-proxy — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-628",
+   "surface": "api-proxy.php dispatch — cabinet_link_phone / native_feedback / notify_prefs",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'maya_client_consent_request' and reaches package5-client-consent-proxy — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-629",
+   "surface": "api-proxy.php dispatch — set_visit_mood",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: G15's visit-mood capability name is not registered; no C9 key writes set_visit_mood.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-630",
+   "surface": "maya-native-api.php — wildcard native-shell relay to NestJS",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/guards/jwt-auth.guard.ts#JwtAuthGuard",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-631",
+   "surface": "webhook_server consent_status_handler",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-channel-runtime.service.ts#status",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-632",
+   "surface": "webhook_server consent_submit_handler",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-channel-runtime.service.ts#submitConsent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-633",
+   "surface": "webhook_server notify_prefs_handler (client)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-preferences.service.ts#identity",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-634",
+   "surface": "webhook_server set_visit_mood_handler",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'snapshot' and reaches client-preferences.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-635",
+   "surface": "NestJS POST /api/client-channel/consent — canonical PWA consent ingress",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-channel-runtime.service.ts#submitConsent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-636",
+   "surface": "NestJS POST /api/internal/legacy/client-commands/consent — bot/relay consent ingress",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-channel.controller.ts#LegacyClientChannelController",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-637",
+   "surface": "NestJS PATCH /api/customers/me/profile — legacy NATIVE-SHELL consent ingress",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": true,
+   "successor": "FENCE:maya-saas-backend/src/crm/client-channel-runtime.service.ts#submitLegacyNativeConsent",
+   "why": null,
+   "nativeBlocker": true
+  },
+  {
+   "id": "S-638",
+   "surface": "Governed settings namespace: business_rules",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a capability for the business_rules namespace. a22.configuration's C9 draft accepts only the c9_orchestration namespace, so it cannot propose rules despite the shared governed-settings owner.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-639",
+   "surface": "Governed settings namespace: client_capabilities",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a capability for client_capabilities.client_self_visit_history. a22.configuration's C9 draft is fixed to the c9_orchestration namespace.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-640",
+   "surface": "Governed settings namespace: staff_ai_provider",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a capability for staff_ai_provider. a22.configuration's C9 draft is fixed to c9_orchestration; settings.update toggles personal analytics capabilities, not the provider.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-641",
+   "surface": "Governed settings namespace: staff_notifications (ONLY staff notification-preferences surface)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:notifications",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-644",
+   "surface": "AConsentGate — RETIRED stub in salon app.html",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:fs.consent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-645",
+   "surface": "AConsentGate — LIVE legacy consent gate in app-tenant.html (white-label mirror)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:fs.consent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-646",
+   "surface": "AConsentGate — LIVE legacy consent gate in maya-os-site/index.html (MayaOS PWA bundle)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:fs.consent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-647",
+   "surface": "ASettings — client notification preferences (6 categories)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:notifications",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-649",
+   "surface": "Telegram 152-FZ consent gate (global TypeHandler, group=-1)",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "enforced only in legacy ai администратор/bot.py#consent_gate; no canonical fence",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-650",
+   "surface": "Telegram gate bypass list",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "LEGACY_ONLY_FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names '_is_staff_chat_id' and reaches bot — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-654",
+   "surface": "Telegram consent accept callbacks — RETIRED (no write)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:fs.consent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-656",
+   "surface": "Telegram /unsubscribe and /subscribe — redirect only",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:privacy-and-data",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-657",
+   "surface": "ai администратор/privacy.html — standalone policy document",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:fs.consent",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-662",
+   "surface": "offline.html — PWA offline fallback",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-663",
+   "surface": "maya-site.html — MayaOS marketing storefront",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: marketing-site CTAs have no route or capability; they point to superseded /maya-start.html, so the acquisition chain still needs a successor decision.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-664",
+   "surface": "maya-start.html — MayaOS trial signup",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: in-app onboarding and trial signup have no registered capability or route; the URL survives only as a back-compat redirect.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-665",
+   "surface": "maya-admin.html — MayaOS salon admin / password login",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "3/3 served functions have no successor: password login; strict-TTL handoff and stale-key sweep; onboarding wizard",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-666",
+   "surface": "oauth-callback.html — social/OAuth return page",
+   "retirementCondition": "RETIRED AS UI - K15; the fence remains server-side",
+   "proposedType": "FENCE",
+   "resolved": false,
+   "successor": null,
+   "why": "fence located, but no test both names 'getValidAuthFlowState' and reaches social-auth.service — located is not proven",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-667",
+   "surface": "app-tenant.html — white-label tenant mirror (deployed as tenant-test.html)",
+   "retirementCondition": "RETIRE AFTER PARITY - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/3 served functions have no successor: white-label theming",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-668",
+   "surface": "vkid-sdk.js — orphaned VK ID SDK (policy violation)",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-669",
+   "surface": "native-enhancements.js / native-styles.css — orphaned native-feel shims",
+   "retirementCondition": "RETIRE IN K16, row by row",
+   "proposedType": "ABSENT",
+   "resolved": false,
+   "successor": null,
+   "why": "ABSENT — Missing: a registered carrier for the platform-detection contract; the rationale asks to record it because the native shell may need it again.",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-703",
+   "surface": "Anonymous visitor identity cookie (me_visitor) + consent gateway",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a edge-relay PHP; anonymous pseudonymous-identity minter + HMAC source-signing gateway on public-community; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-706",
+   "surface": "POST /api/site/community/{action} — anonymous source initiator",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a aiohttp route module (Python bot backend, port 8080) on public-community; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-707",
+   "surface": "Community engagement legacy owner (likes/views/comments/AI moderation/brand replies) — FENCED",
+   "retirementCondition": "RETIRE IN K16 after the probe is recorded",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-708",
+   "surface": "Canonical community source bridge (Python -> NestJS)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a Python HMAC source-signing client to the canonical NestJS owner on public-community; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-709",
+   "surface": "R09 permanent owner-boundary ratchet",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-710",
+   "surface": "POST /public-community/source — canonical anonymous source controller",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a NestJS public controller on VPS 111.88.148.206:3107 on public-community; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-711",
+   "surface": "Gateway verification service (source scope, no moderator authority)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a NestJS injectable — HMAC transport verification + tenant resolution on public-community; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-712",
+   "surface": "PublicCommunityService.acceptComment — consent persistence + idempotent anonymous comment",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a NestJS canonical owner method (Postgres, Prisma, serializable retry) on public-community; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-714",
+   "surface": "GET/POST /public-community/moderation — human moderation + brand reply",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a NestJS authenticated moderation controller + Action Engine executor on public-community; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-715",
+   "surface": "Community text/author safety contract (PII, profanity, staff-impersonation)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a NestJS pure contract/validation module on public-community; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-725",
+   "surface": "R09 frozen retirement contract (site_community / site_engagement bodies)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-726",
+   "surface": "Public site cabinet — Telegram deep-link nonce handshake (applogin_start/applogin_poll)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:connections",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-727",
+   "surface": "Public site cabinet — Yandex ID OAuth (yandex_start / yandex_auth)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:connections",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-728",
+   "surface": "Public site cabinet — session-token resume (cabinet_session)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/4 served functions have no successor: subscription status",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-729",
+   "surface": "Public site cabinet — Telegram Login Widget credential consumer (tg_auth_data)",
+   "retirementCondition": "RETIRE IN K16 after the probe is recorded",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-733",
+   "surface": "SMS OTP delivery — send_sms / verify_sms (hard-fenced)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a fenced-otp-endpoint on sms; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-734",
+   "surface": "SMS OTP delivery — auth_phone_start (live, YClients-backed)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a otp-send-endpoint on sms; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-735",
+   "surface": "SMS OTP consumption — cabinet_link_phone (via client-consent proxy)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "4/4 served functions have no successor: SMS-code phone binding; 152-FZ consent submit and status; one-time client-link token consumption; notification preferences",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-736",
+   "surface": "tg_login_verify / cabinet_me_login — server-side Telegram Login Widget HMAC verification",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a signature-verification-endpoint on public-web-auth; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-737",
+   "surface": "vk_auth / vk_sdk_auth — VK ID login routes (policy-prohibited, still routable)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a policy-conflicting-auth-route on public-web-auth; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-739",
+   "surface": "tg-config.php — bot_token store inside the public webroot",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a secret-store on edge-relay; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-742",
+   "surface": "Realtime auth handshake — canonical channel proof only (B21)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a auth-gate on realtime-voice; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-743",
+   "surface": "realtime-authority verdict (NestJS canonical runtime)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a backend-authorization on realtime-voice; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-745",
+   "surface": "🔴 Realtime PII boundary — DIVERGES from the bot's voice handler",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a pii-boundary-gap on realtime-voice; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-746",
+   "surface": "PWA hands-free voice orb — realtime client (rtStart/rtStop/rtPlay)",
+   "retirementCondition": "RETIRE IN K16 after the probe is recorded",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-747",
+   "surface": "PWA legacy hands-free voice fallback (vmListen → chat proxy STT)",
+   "retirementCondition": "RETIRE IN K16 after the probe is recorded",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-749",
+   "surface": "Root self-destructing Service Worker (pwa-assets/for-root)",
+   "retirementCondition": "RETIRE IN K16 after the probe is recorded",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-750",
+   "surface": "PWA web-push subscribe / permission prompt (__meSubscribePush)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:notifications",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-751",
+   "surface": "PWA web-push unsubscribe (__meUnsubscribePush)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:notifications",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-752",
+   "surface": "Notifications settings card — «Уведомления на этом устройстве» (AWebPushControls)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": true,
+   "successor": "ROUTE:notifications",
+   "why": null,
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-753",
+   "surface": "POST /api/push/subscribe (Python edge)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a http-endpoint on web-push; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-754",
+   "surface": "POST /api/push/unsubscribe (Python edge)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a http-endpoint on web-push; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-756",
+   "surface": "NestJS ClientWebPushController — /client-web-push/{subscribe,unsubscribe}",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a backend-endpoint on web-push; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-759",
+   "surface": "🔴 Legacy Python push senders — fail-closed stubs",
+   "retirementCondition": "RETIRE IN K16 after the probe is recorded",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-760",
+   "surface": "app-tenant.html — stale legacy push subscription bundle",
+   "retirementCondition": "RETIRE IN K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: ask push permission in conversation and record it",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-761",
+   "surface": "maya-os-site/index.html — B24 push block (MAYA OS bundle)",
+   "retirementCondition": "RETIRE IN K16",
+   "proposedType": "MULTI",
+   "resolved": false,
+   "successor": null,
+   "why": "1/2 served functions have no successor: ask push permission in conversation and record it",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-762",
+   "surface": "native-enhancements.js — window.requestPushPermission (orphaned)",
+   "retirementCondition": "RETIRE IN K16 after the probe is recorded",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-763",
+   "surface": "Capacitor native push registration (/inbox/devices)",
+   "retirementCondition": "RETIRE FROM PRIMARY NAV - K16",
+   "proposedType": "ROUTE",
+   "resolved": false,
+   "successor": null,
+   "why": "a route cannot succeed a native-push on web-push; its successor would be a fence or a capability",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-772",
+   "surface": "cron reviews — every 5 min (review request dispatch)",
+   "retirementCondition": "RETIRE IN K16 after the probe is recorded",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-773",
+   "surface": "cron lead_alerts — every 5 min (hanging_lead)",
+   "retirementCondition": "RETIRE IN K16 after the probe is recorded",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-774",
+   "surface": "cron dual_role_guard — every 3 h at :17",
+   "retirementCondition": "RETIRE IN K16 after the probe is recorded",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-776",
+   "surface": "cron god_watch — 09:00 MSK",
+   "retirementCondition": "RETIRE IN K16 after the probe is recorded",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-781",
+   "surface": "loop client_retention_refresh_loop — retired",
+   "retirementCondition": "RETIRE IN K16 after the probe is recorded",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-782",
+   "surface": "loop maya_operating_rhythm_loop — retired",
+   "retirementCondition": "RETIRE IN K16 after the probe is recorded",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  },
+  {
+   "id": "S-783",
+   "surface": "loop reputation_monitor_loop — retired and unscheduled",
+   "retirementCondition": "RETIRE IN K16 after the probe is recorded",
+   "proposedType": "NONE_SIGNED",
+   "resolved": false,
+   "successor": null,
+   "why": "signed: no successor owed; the row rests on its own proof (unreachability probe, orphan proof, or the owning widget's parity), and none is recorded",
+   "nativeBlocker": false
+  }
+ ]
+}

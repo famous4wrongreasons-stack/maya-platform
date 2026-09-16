@@ -310,13 +310,13 @@ export const gate8R = (ctx: GateContext): GateVerdict => {
   return pass;
 };
 
-// ── Gate 9 — lowering ────────────────────────────────────────────────────────────────────────────
+// ── Gate 9 — lowering: NOT HERE ──────────────────────────────────────────────────────────────────
 //
-// The tap becomes a turn. From here the path is byte-identical to a typed message — which is the
-// point, and which is why this gate passes rather than terminating: the append is the emitter's,
-// and a gate that performed it would be a second write path.
-
-export const gate9 = (): GateVerdict => pass;
+// A `gate9` that returned `pass` lived here and was counted as wiring. It performed nothing: §3.9's
+// Gate 9 is not a refusal but the first durable write — the tap's rendered utterance appended as a
+// USER turn with authority NONE — and no code performs that append. A function that can only pass
+// is not a gate. The slot is a refusing NORMATIVE-PENDING stub in the pipeline until the append is
+// built; see intent-gateway.service.ts.
 
 // ── Gate 10 — divergence audit, REFUSAL ON EFFECT-CLASS DIVERGENCE ───────────────────────────────
 //

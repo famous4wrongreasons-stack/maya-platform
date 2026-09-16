@@ -23,6 +23,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { loadImplementation, verifySuccessor } from '../../docs/rebuild/evidence/maya-chat-first-ux/successor-verify.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const backend = path.resolve(here, '..');
@@ -47,11 +48,15 @@ const SHELL_ROUTES = listOf('SHELL_ROUTES');
 const FULLSCREEN_ROUTES = listOf('FULLSCREEN_ROUTES');
 const ALL_ROUTES = new Set([...BASE_ROUTES, ...SHELL_ROUTES, ...FULLSCREEN_ROUTES]);
 
-/** The successor map, when one is recorded. Prose is not a successor; a resolvable key is. */
-const SUCCESSOR_FILE = E + 'successor-map.json';
-const successorMap = exists(SUCCESSOR_FILE)
-  ? new Map(readJson(SUCCESSOR_FILE).map((o) => [o.surface, o.successor]))
-  : new Map();
+/**
+ * Successors, re-verified here by the one module that holds the rule (successor-verify.mjs). Prose
+ * is not a successor; a proposal that resolves against the built code is.
+ */
+const PROPOSAL_FILE = E + 'successor-proposals.json';
+const proposals = exists(PROPOSAL_FILE)
+  ? Object.fromEntries(readJson(PROPOSAL_FILE).map((p) => [p.id, p]))
+  : {};
+const successorImpl = loadImplementation(repo);
 
 // The four key spaces, EXECUTED.
 //
@@ -137,29 +142,46 @@ const fullscreenIntentsResolve = (() => {
 
 const navTargetMet = BASE_ROUTES.length <= 5 && false; // the LEGACY nav is what G11 measures, and it is 112
 
-const probeRecorded = exists(E + 'maya-os-site-unreachable-probe.json');
+// A probe that was RECORDED is not the same as unreachability PROVEN: three-bundle-probe.json is
+// recorded, and it found the lineage not proven unreachable. Only `true` turns this green.
+const probeRecorded = exists(E + 'three-bundle-probe.json') &&
+  readJson(E + 'three-bundle-probe.json').mayaOsSiteUnreachable === true;
 
 const EVALUATORS = {
   'none - not this programme surface': () => ({
     verdict: 'NOT_APPLICABLE',
     why: 'out of scope with a stated reason; no successor is owed and no parity is claimed',
   }),
-  'the fence fires independently of any UI, proved by test': () =>
-    fencesProvedIndependently
-      ? { verdict: 'GREEN', why: `${piiFenceNames.length} PII fences are independent exports and the K4 suite fires each with the others removed` }
-      : { verdict: 'RED', why: 'the fences are not proved to fire independently of the UI' },
-  'the destination is reachable by a class-s HANDOFF at its floor': () =>
-    consentHandoffProved
-      ? { verdict: 'GREEN', why: 'every sensitive destination resolves to a live shell route, and K12 refuses a handoff below SESSION_VERIFIED' }
-      : { verdict: 'RED', why: 'no class-s handoff rule with resolving destinations' },
+  // Both of the next two used to turn EVERY row green from one programme-level fact — that the PII
+  // fences fire independently, that the class-s handoff rule exists. A true statement about the
+  // system is not evidence about a row, so each now also needs the row's OWN verified successor.
+  'the fence fires independently of any UI, proved by test': (row) => {
+    if (!fencesProvedIndependently)
+      return { verdict: 'RED', why: 'the fences are not proved to fire independently of the UI' };
+    const v = verifySuccessor(successorImpl, proposals[row.id]);
+    return v.resolved && proposals[row.id].successorType === 'FENCE'
+      ? { verdict: 'GREEN', why: `this row's canonical fence ${v.successor} is located, refuses, and is bound by a test` }
+      : { verdict: 'RED', why: v.resolved ? `successor ${v.successor} is not a fence` : v.why };
+  },
+  'the destination is reachable by a class-s HANDOFF at its floor': (row) => {
+    if (!consentHandoffProved)
+      return { verdict: 'RED', why: 'no class-s handoff rule with resolving destinations' };
+    const v = verifySuccessor(successorImpl, proposals[row.id]);
+    const classS = ['account', 'connections', 'privacy-and-data', 'notifications', 'fs.consent'];
+    return v.resolved && proposals[row.id].successorType === 'ROUTE' && classS.includes(proposals[row.id].ref)
+      ? { verdict: 'GREEN', why: `this row resolves to the class-s destination ${proposals[row.id].ref}; K12 refuses a handoff below SESSION_VERIFIED` }
+      : { verdict: 'RED', why: v.resolved ? `successor ${v.successor} is not a class-s destination` : v.why };
+  },
   'chat carries it; no separate surface is required': () =>
     conversationIsTheSurface
       ? { verdict: 'GREEN', why: 'the conversation is always open in the shell state; it is not a route you leave' }
       : { verdict: 'RED', why: 'the shell does not guarantee the conversation is present' },
-  'the route resolves under the same authority': (row) =>
-    successorMap.has(row.name) && ALL_ROUTES.has(successorMap.get(row.name))
-      ? { verdict: 'GREEN', why: `resolves to '${successorMap.get(row.name)}'` }
-      : { verdict: 'RED', why: 'no recorded successor route for this row' },
+  'the route resolves under the same authority': (row) => {
+    const v = verifySuccessor(successorImpl, proposals[row.id]);
+    return v.resolved && proposals[row.id].successorType === 'ROUTE'
+      ? { verdict: 'GREEN', why: `resolves to ${v.successor}` }
+      : { verdict: 'RED', why: v.resolved ? `successor ${v.successor} is not a route` : v.why };
+  },
   'the fullscreen_intent resolves and the route renders the same detail': () =>
     fullscreenIntentsResolve
       ? { verdict: 'RED', why: 'fullscreen intents all resolve, but "renders the same detail" needs a per-surface fixture and none exists' }
@@ -198,19 +220,16 @@ const results = rows.map((row) => {
     ? evaluator(row)
     : { verdict: 'RED', why: `no evaluator for requirement "${row.parityRequirement}"` };
 
-  // G2's quantity, per row: does a successor resolve to a live route or a canon capability key?
-  const recorded = successorMap.get(row.name);
+  // G2's quantity, per row: does the recorded successor survive successor-verify.mjs?
   // Only a row being RETIRED owes a successor. A surface that keeps itself — "it becomes a
   // capability", "reached by HANDOFF", "it is the conversation", "out of scope" — has no successor
   // to resolve, and counting it as unresolved would inflate G2 with rows that are not going away.
   // The first version excluded only two of the five NOT RETIRED conditions and reported 709 where
   // the defensible figure is the retirement population.
   const needsSuccessor = row.retirementCondition.startsWith('RETIRE');
-  const caps = capRegistry();
-  const resolves =
-    recorded !== undefined &&
-    (ALL_ROUTES.has(recorded) ||
-      caps.C9.has(recorded) || caps.TOOL.has(recorded) || caps.AE.has(recorded) || caps.CONTROL.has(recorded));
+  const sv = needsSuccessor ? verifySuccessor(successorImpl, proposals[row.id]) : null;
+  const recorded = sv?.successor;
+  const resolves = sv?.resolved === true;
 
   return {
     id: row.id,
@@ -283,7 +302,7 @@ const summary = {
   G3_canonKeysLost: keysLost,
   G3_keysReachableInZeroChannels: unreachableAtRung.length,
   G3_canonKeysConsidered: allCanonKeys.length,
-  successorMapEntries: successorMap.size,
+  successorMapEntries: Object.keys(proposals).length,
 };
 
 if (process.argv.includes('--json')) {
@@ -299,7 +318,7 @@ if (process.argv.includes('--json')) {
     if (v.rows) console.log(`  ${String(v.green).padStart(4)} / ${String(v.rows).padEnd(4)}  ${k}`);
   console.log();
   console.log('G2  rows whose successor does not resolve to a live route or canon key:');
-  console.log(`      ${summary.G2_rowsWhoseSuccessorDoesNotResolve}   target 0   (successor map holds ${summary.successorMapEntries} entries)`);
+  console.log(`      ${summary.G2_rowsWhoseSuccessorDoesNotResolve}   target 0   (successor proposals recorded: ${summary.successorMapEntries})`);
   console.log('G3  canon keys that LOST reachability:');
   console.log(`      ${summary.G3_canonKeysLost}   target 0   — 0 deletions across all six waves, so no route was removed`);
   console.log('G3  canon keys reachable in 0 channels at the correct rung:');

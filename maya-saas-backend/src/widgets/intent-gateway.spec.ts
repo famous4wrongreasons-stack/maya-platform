@@ -319,11 +319,12 @@ describe('K3 CI exit — indistinguishable latency', () => {
   });
 });
 
-describe('the pipeline after wiring — 14 live, 1 hosted by its owner', () => {
-  it('a valid token now reaches the REAL gates instead of a stub', async () => {
-    // This test used to assert the opposite: that a valid, unexpired, correctly-bound token was
-    // refused with `mechanism_absent` at Gate 5, because gates 5 onward were stubs. They are not
-    // stubs any more, so the same token now runs the pipeline and gets a real verdict.
+describe('the pipeline after wiring — 14 live slots, Gate 9 honestly pending', () => {
+  it('a valid token runs the REAL gates 1..8-R, then refuses at the unbuilt Gate 9', async () => {
+    // Before the wiring this token was refused with `mechanism_absent` at Gate 5, because gates 5
+    // onward were stubs. Gates 5..8-R are real now, so it passes them — and then stops at Gate 9,
+    // whose append is not built. A wiring commit briefly made Gate 9 a function that returned `pass`
+    // and wrote nothing; this test holds the corrected, fail-closed reading.
     const { gateway } = gatewayFor([row({ singleUse: false })]);
     const r = await gateway.submit({
       intentToken: GOOD,
@@ -334,19 +335,22 @@ describe('the pipeline after wiring — 14 live, 1 hosted by its owner', () => {
       carrier: 'pwa',
       resolvedRoles: [],
     });
-    expect('code' in r.verdict && r.verdict.code).not.toBe('mechanism_absent');
-    // A NONE-effect record with no capability terminates at Gate 13 by design: NONE has no route.
-    expect(r.verdict.outcome).toBe('terminate');
-    expect(r.ran).toBe(14);
+    expect(r.verdict.outcome).toBe('refuse');
+    expect('code' in r.verdict && r.verdict.code).toBe('mechanism_absent');
+    expect('detail' in r.verdict && r.verdict.detail).toMatch(
+      /gate 9 \(Lowering\)/,
+    );
+    // 1, 2, 3, 4, 5, 6, 7, 8, 8-R ran and passed; 9 ran and refused.
+    expect(r.ran).toBe(10);
   });
 
-  it('no slot is a pending() stub any more', () => {
+  it('exactly one slot is a pending() stub: Gate 9', () => {
     const { gateway } = gatewayFor([row()]);
-    // GATE MODULE EXISTS != GATE ENFORCED. Ten slots that were stubs now call the modules that
-    // already owned their rules, and Gate 14's slot — which is unreachable, because Gate 13
-    // terminates — says where its enforcement actually is instead of claiming to be unbuilt.
+    // GATE MODULE EXISTS != GATE ENFORCED. Nine slots that were stubs now call the modules that
+    // already owned their rules; Gate 14's slot says where its enforcement is. Gate 9 stays a
+    // refusing stub, because the write it names is not built.
     expect(gateway.gateCount).toBe(15);
-    expect(gateway.liveGateCount).toBe(15);
-    expect(gateway.gateCount - gateway.liveGateCount).toBe(0);
+    expect(gateway.liveGateCount).toBe(14);
+    expect(gateway.gateCount - gateway.liveGateCount).toBe(1);
   });
 });

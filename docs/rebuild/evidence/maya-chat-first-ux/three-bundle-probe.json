@@ -1,0 +1,156 @@
+{
+  "contract": "maya.three-bundle-probe/1",
+  "performedAt": "2026-09-16T16:53Z",
+  "productionEffects": 0,
+  "method": [
+    "DNS: malesthetic.pro, www.malesthetic.pro, mayaos.ru, www.mayaos.ru all resolve to 45.130.41.193 (Beget, nginx-reuseport/1.21.1).",
+    "ROOT evidence: read-only SSH listing of the Beget account (ls, find, stat, sha256sum, grep -o counts). No file written, moved or deleted.",
+    "ROUTE evidence: an HTTP HEAD request against every legacy bundle copy found on disk, plus GET of the canonical entry pages. No request to any PHP endpoint was made."
+  ],
+  "redaction": "The canonical repository is PUBLIC. The exact file names and URLs of the reachable legacy copies are withheld from this file, because a list of them is a map for anyone who wants the old authority UI. They are held outside the repository and were reported to the owner directly. Digest prefixes are kept so a copy can be matched without being named.",
+  "docrootToHost": {
+    "muzhskayaestetika.rf/public_html": "https://malesthetic.pro (the IDN host 301-redirects here)",
+    "mayaos.ru/public_html": "https://mayaos.ru",
+    "mocine3388.beget.tech/public_html": "http://mocine3388.beget.tech (Beget technical domain, no TLS)"
+  },
+  "canonicalEntries": [
+    {
+      "url": "https://malesthetic.pro/",
+      "status": 200,
+      "bytes": 141609,
+      "lastModified": "2026-09-01",
+      "what": "static salon marketing site; not an app shell"
+    },
+    {
+      "url": "https://malesthetic.pro/app.html",
+      "status": 404,
+      "bytes": 22803,
+      "what": "static 404 page; ROOT: no app.html exists in the docroot, so the 404 is corroborated, not assumed"
+    },
+    {
+      "url": "https://malesthetic.pro/app/",
+      "status": 200,
+      "bytes": 2247,
+      "lastModified": "2026-09-08",
+      "what": "maintenance page «Ведутся технические работы»"
+    },
+    {
+      "url": "https://mayaos.ru/",
+      "status": 200,
+      "bytes": 89134,
+      "lastModified": "2026-08-08",
+      "what": "static MAYA OS marketing site; not the 2.5 MB maya-os-site bundle"
+    },
+    {
+      "url": "https://mayaos.ru/app/",
+      "status": "302 -> 200",
+      "bytes": 2247,
+      "lastModified": "2026-09-08",
+      "what": "maintenance page «Ведутся технические работы»"
+    }
+  ],
+  "legacyBundleCopiesOnDisk": {
+    "selection": "every *.html* / *.htm file over 300 KB within depth 3 of a served docroot",
+    "total": 92,
+    "byHost": [
+      {
+        "host": "mayaos.ru",
+        "copies": 35,
+        "served200": 35,
+        "denied403": 0,
+        "whyServed": "withheld (public repository); the mechanism is recorded in the owner-only list",
+        "authorityTokensInServed": 2209,
+        "roleModeTokensInServed": 534,
+        "relayOrProviderRefsInServed": 1042,
+        "widgetPathRefsInServed": 0
+      },
+      {
+        "host": "malesthetic.pro",
+        "copies": 55,
+        "served200": 7,
+        "denied403": 48,
+        "whyDenied": "withheld (public repository); the mechanism is recorded in the owner-only list",
+        "authorityTokensInServed": 359,
+        "roleModeTokensInServed": 69,
+        "relayOrProviderRefsInServed": 192,
+        "widgetPathRefsInServed": 0
+      },
+      {
+        "host": "mocine3388.beget.tech",
+        "copies": 2,
+        "served200": 2,
+        "denied403": 0,
+        "whyServed": "withheld (public repository); the mechanism is recorded in the owner-only list",
+        "authorityTokensInServed": 0,
+        "roleModeTokensInServed": 0,
+        "relayOrProviderRefsInServed": 3,
+        "widgetPathRefsInServed": 0
+      }
+    ],
+    "servedTotal": 44,
+    "authorityTokensInServedTotal": 2568,
+    "roleModeTokensInServedTotal": 603,
+    "relayOrProviderRefsInServedTotal": 1237,
+    "widgetPathRefsInServedTotal": 0,
+    "tokenSets": {
+      "authority": [
+        "me_is_staff",
+        "__meRole",
+        "__meIsStaff",
+        "__meIsMaster",
+        "__meIsFounder",
+        "__panelInfo"
+      ],
+      "roleMode": [
+        "ChooseVersion",
+        "__meCurMode"
+      ],
+      "relayOrProvider": [
+        "api-proxy.php",
+        "maya-platform-api.php",
+        "api.yclients.com"
+      ],
+      "widgetPath": [
+        "/widgets/intent",
+        "/widgets/resolve"
+      ]
+    }
+  },
+  "sourceBackupsWithSecrets": {
+    "finding": "Proxy-source backups exist in a served directory. Every one probed returned 403, so they are NOT exposed on the evidence gathered. Names and paths are withheld.",
+    "exposed": false
+  },
+  "legacyExecutableRelays": {
+    "finding": "Besides the live legacy relay, older relay copies with an executable extension are present in served directories on two hosts. None was requested: PRODUCTION EFFECTS FOR PROOF: 0. Names and paths are withheld.",
+    "presentByRootEvidence": true,
+    "exercised": false
+  },
+  "checks": {
+    "unsafeLegacyRouteNotReachableThroughAnotherBundle": {
+      "verdict": "FAIL",
+      "evidence": "The canonical app entries are dark (maintenance), but 44 full legacy app bundles answer 200 as text/html at other URLs on the same hosts. Two of the mayaos.ru copies are BYTE-IDENTICAL to repository commits of app.html (2e7de86d, 33396c16) — the shipped PWA itself, reachable after its entry went dark."
+    },
+    "roleModeUiCannotResurrectThroughAnOldBuild": {
+      "verdict": "FAIL",
+      "evidence": "603 role-mode tokens (ChooseVersion / __meCurMode) and 2,568 client-side authority tokens are served in those 44 copies."
+    },
+    "noDirectProviderOrBusinessWritePathInARetiredBundle": {
+      "verdict": "FAIL",
+      "evidence": "The served copies carry 1,237 relay/provider references, and the relays they call are present in the same docroots. Whether a given write would be accepted today was not exercised; presence alone fails a check whose condition is absence."
+    },
+    "primaryMayaBundleUsesTheCertifiedWidgetPath": {
+      "verdict": "FAIL",
+      "evidence": "No primary Maya bundle is served: both /app/ entries serve a 2,247-byte maintenance page. The successor source maya-chat-shell has no HTML entry, no DOM mount and no network client, so it cannot be served as it stands. 0 of 44 served copies reference /widgets/."
+    }
+  },
+  "mayaOsSiteUnreachable": null,
+  "verdict": "FAIL",
+  "note": "404, 403 and maintenance responses were not taken as proof on their own. Each reading above is paired with the docroot listing that explains it.",
+  "lineage": {
+    "method": "sha256 of every served copy compared with the last 40 committed versions of each repository bundle",
+    "appHtml": "2 served copies byte-identical to committed app.html (2e7de86d, 33396c16)",
+    "mayaOsSiteIndexHtml": "0 served copies byte-identical to any of its last 40 committed versions. 30 served mayaos.ru copies from 2026-08-08/09 share its size and authority-token profile (2.44–2.51 MB, 60 tokens), which is resemblance, not identity.",
+    "appTenantHtml": "0 byte-identical copies in HEAD; one served copy has a tenant-bundle token profile"
+  },
+  "mayaOsSiteUnreachableReading": "NOT PROVEN either way. Its HEAD bytes are served nowhere that was found, but lookalike copies are reachable and a recorded unreachability probe is a production observation that has not been made. K15 requires unreachability to be PROVEN, so K15 still stands open on this point."
+}

@@ -1,0 +1,37 @@
+{
+  "contract": "maya.rollback-readiness/1",
+  "performedAt": "2026-09-16T16:48Z",
+  "productionEffects": 0,
+  "scope": "Readiness to roll back BEFORE the first cutover effect. A rollback EXERCISED under the dark-window lifecycle (§7.1 condition 2) is a different fact; it is not claimed here and remains open.",
+  "lines": {
+    "PRE-CUTOVER COMMIT PINNED": {
+      "verdict": "PASS",
+      "backend": "Production runs release 20260914-c9-wave4-7c9da983 (VPS /opt/maya-saas/current, read-only readlink). Commit 7c9da983 is an ancestor of origin/codex/maya-identity-consent-20260913 and is also contained in origin/codex/maya-brain-systemic-release-20260815, so it is pinned on the remote rather than in a local ref.",
+      "frontend": "Both served /app/ entries are byte-identical (sha256 prefix cb27000739b179dd) to 'сайт и приложение/maintenance.html' as committed in 1ac62a51 (2026-09-08, 'ops(pwa): show maintenance mode and keep Telegram active')."
+    },
+    "PRE-CUTOVER ARTIFACT RECOVERABLE": {
+      "verdict": "PASS",
+      "backend": "Three complete release directories are on the VPS: 20260914-c9-wave2-b7ae4ddc, -wave3-78ad0247 and -wave4-7c9da983 (current). A previous-release entry is present, and deploy.sh switches back to previous-release automatically when a new release fails its readiness check. Readiness was 200 with database ready at 2026-09-16T16:48:33Z.",
+      "frontend": "The served entry is recoverable from git (1ac62a51). The pre-maintenance app bundles are also still on the Beget disk under dated names, with digests recorded in three-bundle-probe.json; two of them are byte-identical to committed app.html (2e7de86d, 33396c16).",
+      "caveat": "Those Beget-side copies are simultaneously rollback artefacts and publicly reachable legacy bundles (three-bundle-probe.json). Closing the exposure must MOVE them out of the served docroot with digests kept, not delete them. Either way that is a production change, and none was made."
+    },
+    "DATABASE ROLLBACK/ROLL-FORWARD PLAN DEFINED": {
+      "verdict": "PASS",
+      "rollForward": "maya-saas-backend/deploy/vps/deploy.sh <release> — npm ci, bcrypt load, prisma migrate deploy (applies exactly 20260916120000_widget_layer_ledgers and 20260916120100_widget_layer_runtime), prisma generate plus client load check, smoke on :3199 /api/health/ready, symlink switch, automatic return to previous-release on failure. Production PENDING MIGRATIONS and DRIFT are measured AT that deploy, on the server, and never inferred from a local run.",
+      "rollbackStep1": "Application rollback = previous-release symlink. The 13 Widget* tables stay in place, unread: release 7c9da983 has no model for them, and every table is additive, so the old binary is unaffected.",
+      "rollbackStep2": "Schema reversal, only if required: DROP the 13 Widget* tables in dependency order (WidgetIntentSubmissionAudit, WidgetIntentReceipt, WidgetRenderReceipt, WidgetDraft, WidgetFreeInputLedger, WidgetSuppressedEmission, WidgetErasureTombstone, WidgetIntentRecord, WidgetEmission, WidgetTimelineTurn, WidgetCapabilityPolicy, WidgetCapabilityGap, WidgetMechanismGap), then 'prisma migrate resolve --rolled-back' for the two migration names. No statement touches a non-Widget table.",
+      "dataLoss": "Only widget-layer rows (timeline, intent, receipt and ledger records) are lost in step 2. They are not a system of record for any business fact."
+    },
+    "WIDGET MIGRATIONS ADDITIVE": {
+      "verdict": "PASS",
+      "evidence": "Measured on the two migration.sql files: 13 CREATE TABLE, all Widget*; 50 ALTER TABLE, every target a Widget* table; 0 DROP, 0 TRUNCATE, 0 DELETE, 0 UPDATE, 0 INSERT; the only FOREIGN KEY into a business table is 10 x Widget* -> Tenant(id) ON DELETE RESTRICT ON UPDATE RESTRICT.",
+      "businessTableToWidgetTableFk": 0
+    },
+    "BUSINESS DATA DELETION REQUIRED FOR ROLLBACK": {
+      "verdict": "NO",
+      "evidence": "Neither rollback step writes to a business table. RESTRICT on Widget* -> Tenant means widget rows can never cascade into, or be cascaded from, tenant data."
+    }
+  },
+  "verdict": "PASS",
+  "openUnderTheLifecycle": "§7.1 condition (2), a rollback EXERCISED at least once, has not happened, because no cutover step has been taken to roll back."
+}

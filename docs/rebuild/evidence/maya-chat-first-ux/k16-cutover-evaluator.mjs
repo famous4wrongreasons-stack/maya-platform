@@ -21,6 +21,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadImplementation, verifySuccessor } from './successor-verify.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '../../../..');
@@ -42,7 +43,9 @@ const rows = harness.rows;
 const OBSERVATION_FILE = E + 'dark-window-observations.json';
 const ROLLBACK_FILE = E + 'rollback-register.json';
 const DEEP_LINK_FILE = E + 'deep-link-map.json';
-const PROBE_FILE = E + 'maya-os-site-unreachable-probe.json';
+const PROBE_FILE = E + 'three-bundle-probe.json';
+const ROLLBACK_READINESS_FILE = E + 'rollback-readiness.json';
+const NATIVE_FILE = E + 'native-pwa-cutover-evidence.json';
 
 const structured = (file, required) => {
   if (!exists(file)) return [];
@@ -81,7 +84,7 @@ const walkSpecs = (dir) => {
 walkSpecs('maya-saas-backend/src/widgets');
 walkSpecs('maya-chat-shell/src');
 
-const a11ySuiteExists = ['maya-chat-shell/src/a11y', 'maya-chat-shell/test/a11y'].some(exists);
+const a11ySuiteExists = ['maya-chat-shell/conformance.test.mjs', 'maya-chat-shell/src/a11y', 'maya-chat-shell/test/a11y'].some(exists);
 
 // The successor shell's authority cleanliness, computed once — it is the same answer for every row.
 const shellFiles = [];
@@ -117,12 +120,17 @@ const successorAuthorityClean =
 // evidence, and folding them in would turn one true statement about the shell into 795 unearned
 // greens.
 
-const SUCCESSOR_FILE = E + 'successor-map.json';
+// Successors are re-verified here on every run, by the one module that holds the rule. The proposals
+// are judgement; successor-verify.mjs is what turns a proposal into evidence or refuses it.
+const PROPOSAL_FILE = E + 'successor-proposals.json';
 const PARITY_FILE = E + 'parity-fixtures.json';
 const A11Y_FILE = E + 'a11y-conformance.json';
 const AUTHORITY_FILE = E + 'authority-proofs.json';
 
-const successors = structured(SUCCESSOR_FILE, ['surface', 'successor']);
+const proposals = exists(PROPOSAL_FILE)
+  ? Object.fromEntries(readJson(PROPOSAL_FILE).map((p) => [p.id, p]))
+  : {};
+const impl = loadImplementation(repo);
 const parityFixtures = structured(PARITY_FILE, ['surface', 'fixture', 'passing']);
 const a11yProofs = structured(A11Y_FILE, ['surface', 'criticalFindings', 'keyboardTraversal']);
 const authorityProofs = structured(AUTHORITY_FILE, ['surface', 'serverDerived']);
@@ -130,10 +138,10 @@ const authorityProofs = structured(AUTHORITY_FILE, ['surface', 'serverDerived'])
 const evaluate = (row) => {
   const v = {};
 
-  const succ = successors.find((o) => o.surface === row.name);
-  v.successorExists = succ && ALL_ROUTES.includes(succ.successor)
-    ? { green: true, why: `successor '${succ.successor}' recorded` }
-    : { green: false, why: succ ? `recorded successor '${succ.successor}' is not a route the shell has` : 'no successor recorded for this row' };
+  const sv = verifySuccessor(impl, proposals[row.id]);
+  v.successorExists = sv.resolved
+    ? { green: true, why: `successor ${sv.successor}` }
+    : { green: false, why: sv.why };
 
   const fx = parityFixtures.find((o) => o.surface === row.name);
   v.parity = fx && fx.passing === true
@@ -201,7 +209,11 @@ const summary = {
   observationRecords: observations.length,
   rollbackRecords: rollbacks.length,
   deepLinkRecords: deepLinks.length,
-  unreachabilityProbeRecorded: exists(PROBE_FILE),
+  successorsResolved: evaluated.filter((r) => r.evaluated.successorExists.green).length,
+  threeBundleProbe: exists(PROBE_FILE) ? readJson(PROBE_FILE).verdict : 'NOT RECORDED',
+  mayaOsSiteUnreachable: exists(PROBE_FILE) ? readJson(PROBE_FILE).mayaOsSiteUnreachable : null,
+  rollbackReadiness: exists(ROLLBACK_READINESS_FILE) ? readJson(ROLLBACK_READINESS_FILE).verdict : 'NOT RECORDED',
+  nativePwa: exists(NATIVE_FILE) ? readJson(NATIVE_FILE).verdict : 'NOT RECORDED',
   // True of the SHELL, not of any row. Reported so it is visible without being counted as evidence.
   programmeLevel: {
     successorShellHoldsNoClientAuthorityValue: successorAuthorityClean,
@@ -236,9 +248,13 @@ if (process.argv.includes('--json')) {
   console.log();
   console.log(
     `  structured records: ${summary.observationRecords} observations, ` +
-      `${summary.rollbackRecords} rollbacks, ${summary.deepLinkRecords} deep links, ` +
-      `probe ${summary.unreachabilityProbeRecorded ? 'recorded' : 'NOT RECORDED'}`,
+      `${summary.rollbackRecords} rollbacks, ${summary.deepLinkRecords} deep links`,
   );
+  console.log(
+    `  three-bundle probe: ${summary.threeBundleProbe}   maya-os-site unreachable: ${summary.mayaOsSiteUnreachable === null ? 'NOT PROVEN' : summary.mayaOsSiteUnreachable}   ` +
+      `rollback readiness: ${summary.rollbackReadiness}   native/PWA: ${summary.nativePwa}`,
+  );
+  console.log(`  successors resolved and verified: ${summary.successorsResolved} / ${summary.toRetire}`);
   console.log();
   console.log(`  ROWS RETIRABLE TODAY:               ${summary.retirableNow}`);
   console.log(`  DELETIONS PERFORMED:                ${summary.deletionsPerformed}`);

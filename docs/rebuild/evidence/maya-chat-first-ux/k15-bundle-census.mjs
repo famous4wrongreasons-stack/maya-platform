@@ -105,7 +105,10 @@ const manifest = fs.existsSync(path.join(repo, manifestPath))
 //
 // A probe of unreachability is a RECORDED REQUEST that did not reach the surface. It cannot be
 // synthesised: a file saying "it is unreachable" is a claim, and the exit asks for a probe.
-const PROBE_FILE = 'docs/rebuild/evidence/maya-chat-first-ux/maya-os-site-unreachable-probe.json';
+//
+// three-bundle-probe.json is that record for PRODUCTION: root listing plus a HEAD request per copy.
+// Recorded is not proven — only `mayaOsSiteUnreachable === true` counts as proof.
+const PROBE_FILE = 'docs/rebuild/evidence/maya-chat-first-ux/three-bundle-probe.json';
 const probe = fs.existsSync(path.join(repo, PROBE_FILE))
   ? JSON.parse(fs.readFileSync(path.join(repo, PROBE_FILE), 'utf8'))
   : null;
@@ -122,6 +125,9 @@ const out = {
   clientSideAuthorityValuesInSuccessor: shellAuthorityHits.length,
   successorReadsClientStorage: shellStorageHits,
   unreachabilityProbeRecorded: Boolean(probe),
+  mayaOsSiteUnreachableProven: probe?.mayaOsSiteUnreachable === true,
+  productionServedLegacyCopies: probe?.legacyBundleCopiesOnDisk?.servedTotal ?? null,
+  productionServedAuthorityValues: probe?.legacyBundleCopiesOnDisk?.authorityTokensInServedTotal ?? null,
   census,
 };
 
@@ -144,14 +150,18 @@ if (process.argv.includes('--json')) {
   console.log(`  client-side authority values, SUCCESSOR:  ${out.clientSideAuthorityValuesInSuccessor}   target 0  <- already met`);
   console.log(`  successor reads client storage:           ${out.successorReadsClientStorage.length ? out.successorReadsClientStorage.join(', ') : 'never'}`);
   console.log();
-  console.log(`  maya-os-site unreachability probe:        ${out.unreachabilityProbeRecorded ? 'recorded' : 'NOT RECORDED'}`);
-  if (!out.unreachabilityProbeRecorded)
-    console.log('    a probe is a recorded request that did not reach the surface; it cannot be');
-    console.log('    synthesised, and recording one is a production request. NOT PERFORMED.');
+  console.log(`  production probe recorded:                ${out.unreachabilityProbeRecorded ? 'yes (three-bundle-probe.json)' : 'NO'}`);
+  console.log(`  maya-os-site unreachable, PROVEN:         ${out.mayaOsSiteUnreachableProven ? 'yes' : 'NO'}`);
+  if (out.unreachabilityProbeRecorded) {
+    console.log(`  legacy copies SERVED in production:       ${out.productionServedLegacyCopies}   target 0`);
+    console.log(`  authority values in those copies:         ${out.productionServedAuthorityValues}   target 0`);
+  }
   console.log();
   console.log('  EXACT CUTOVER CONDITION for K15:');
-  console.log(`    driving the legacy count from ${out.clientSideAuthorityValuesInLegacy} to 0 means editing app.html, which is`);
-  console.log('    the shipped PWA. PRODUCTION EFFECTS FOR PROOF: 0. NOT PERFORMED.');
+  console.log(`    the repository still holds ${out.clientSideAuthorityValuesInLegacy} legacy authority values, and production SERVES`);
+  console.log(`    ${out.productionServedLegacyCopies ?? '?'} legacy copies holding ${out.productionServedAuthorityValues ?? '?'} more. The canonical entries already show`);
+  console.log('    a maintenance page; the copies are reachable at other URLs. Closing them is a production');
+  console.log('    change, and there is no served successor bundle to put in their place. NOT PERFORMED.');
 }
 
 // No process.exit here: it truncates a pending stdout write, and --json emits megabytes.

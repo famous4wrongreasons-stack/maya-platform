@@ -27,7 +27,6 @@ import {
   gate7,
   gate8,
   gate8R,
-  gate9,
   gate10,
   gate11,
   gate12,
@@ -36,7 +35,14 @@ import {
 } from './gates/gate-logic';
 import { channelMaxLevel } from './authority/authority-resolver';
 
-/** A gate whose mechanism a later package builds. It runs, and it refuses. */
+/**
+ * A gate whose mechanism is not built. It runs, and it REFUSES — "not built yet" and "allowed" must
+ * never be the same branch (F5's fail-closed default).
+ *
+ * One slot uses it: Gate 9, Lowering. The wiring commit replaced it with a function that returned
+ * `pass` and performed nothing, which is worse than a stub: the append of `rendered_utterance` as a
+ * USER turn never happened, so Gate 10 received no utterance to compare on the tap path.
+ */
 const pending = (
   n: string,
   name: string,
@@ -201,7 +207,16 @@ export class IntentGatewayService {
       host: 'IntentGateway',
       run: (ctx) => gate8R(ctx),
     },
-    { n: '9', name: 'Lowering', host: 'chat ingress', run: () => gate9() },
+    // NOT BUILT. §3.9: rendered_utterance = render(utterance_template, server-resolved canonical
+    // labels) is appended as a USER turn with authority NONE — the first durable write. Nothing
+    // performs that append, and §3.9 defines no refusal for a lowering that cannot render (an erased
+    // or absent template), so building it needs a ruling rather than an invented refusal code.
+    pending(
+      '9',
+      'Lowering',
+      'chat ingress',
+      'the USER-turn append of rendered_utterance, and a ruling on the refusal when it cannot render',
+    ),
     {
       n: '10',
       name: 'Divergence audit',
