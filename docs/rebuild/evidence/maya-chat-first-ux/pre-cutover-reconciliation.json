@@ -1,0 +1,50 @@
+{
+  "contract": "maya.pre-cutover-reconciliation/1",
+  "ruling": "R1 — read-only production access, Phase 1. No mutation performed.",
+  "performedAt": "2026-09-16T14:14Z",
+  "access": "GRANTED AND USED — Beget jump host, read-only queries only",
+  "production": {
+    "currentRelease": "20260914-c9-wave4-7c9da983",
+    "previousReleaseSymlink": "present",
+    "serviceMayaSaas": "active since 2026-09-14 13:40:45 MSK",
+    "healthReady": "HTTP 200, {\"status\":\"ready\",\"checks\":{\"database\":\"ready\"}}",
+    "publicTables": 117,
+    "appliedMigrations": 99,
+    "migrationDirectoriesInRelease": 96,
+    "directoriesPresentButNotApplied": 0,
+    "appliedWithNoDirectoryInRelease": 3,
+    "appliedWithNoDirectoryNames": [
+      "20260814205000_marketing_tenant_compound_keys",
+      "20260814210000_outbound_messaging_delivery",
+      "20260814223000_marketing_campaign_scheduling"
+    ],
+    "unfinishedOrRolledBack": [
+      {
+        "migration": "20260814210000_outbound_messaging_delivery",
+        "finishedAt": null,
+        "rolledBackAt": "2026-08-14T21:00:59+03:00",
+        "reading": "a failed migration from August, correctly recorded as rolled back. Pre-existing, acknowledged by prisma/historical-migration-baseline.json, and not introduced by this cycle."
+      }
+    ],
+    "widgetLayerMigrationsApplied": 0,
+    "widgetTablesInProduction": 0
+  },
+  "branchReconciliation": {
+    "certifiedHead": "fd109d70",
+    "productionReleaseCommit": "7c9da983",
+    "productionCommitIsAncestorOfHead": true,
+    "commitsAhead": 37,
+    "commitsBehind": 0,
+    "treesTouchedRelativeToProduction": ["docs", "maya-saas-backend", "maya-chat-shell", ".github"],
+    "productionTreesTouched": 0
+  },
+  "verdict": "PASS",
+  "why": [
+    "PENDING MIGRATIONS: 0 for the deployed release — 0 directories present but unapplied.",
+    "DRIFT: NONE for the deployed release, on the same measure.",
+    "HEALTH/READINESS: PASS — 200, database ready.",
+    "The branch is a clean fast-forward: production's commit is an ancestor of HEAD, 0 behind, and the diff touches no production tree.",
+    "The widget layer is absent from production by design — dark, never deployed, 0 Widget tables, 0 widget migrations applied. Deploying this branch would make PENDING MIGRATIONS 2, which is the expected and intended next step, not drift."
+  ],
+  "notMaterialDivergence": "The three applied-without-a-directory rows and the one rolled-back row are from 2026-08-14 and are acknowledged in prisma/historical-migration-baseline.json. They predate this cycle, are unchanged by it, and do not affect the widget layer."
+}
