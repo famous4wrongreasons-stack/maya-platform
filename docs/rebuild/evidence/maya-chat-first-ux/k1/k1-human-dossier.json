@@ -37,10 +37,10 @@
     "S-646",
     "S-654"
    ],
-   "proposed_successor": "ONE `CONSENT` widget kind (§2.6 CONSENT.1–CONSENT.3), reached from chat, backed by the single canonical write `/api/consent/submit`. The two legally separate confirmations (PDN required, marketing optional) stay two separate fields on that one widget.",
+   "proposed_successor": "ONE `CONSENT` widget kind (§2.6 CONSENT.1–CONSENT.3), reached from chat, with the two legally separate confirmations (PDN required, marketing optional) as two separate fields on that one widget. **Which backend it writes to is a decision this group surfaces rather than settles:** the live client path uses `/client-channel/status` on NestJS/Postgres, while `/api/consent/submit` is the aiohttp/SQLite route (`webhook_server.py:10015`). Those are different systems with different stores and are not interchangeable — the successor names one, and this dossier does not pre-empt which.",
    "proposed_owner": "consent / 152-ФЗ  ·  marketing opt-in (the optional field only)",
    "risk": "HIGH — the only group in the 126 with a statutory record behind it. A merge that loses the PDN/marketing separation, or that lets a refusal read as an acceptance, is a 152-ФЗ defect, not a UX regression.",
-   "recommended": "APPROVE, with the merge required to preserve two separate booleans and fail closed. Do not let the successor accept a single \"I agree\"."
+   "recommended": "APPROVE — approving is the safer of the two directions here, because the exposure is the status quo, not the merge: two of the three live bundles record no consent at all today. Three conditions. (1) Two independent booleans preserved, and no path submits `accept_pdn: true` without a user action — every copy today hardcodes it as a transport constant. (2) **The successor fails CLOSED when the consent service is unreachable.** This is not inherited from anywhere: the canonical component sets `checkedSession` before its status fetch and its promise `.catch` calls `setShow(false)` without resetting it, so the 800 ms re-check short-circuits and **one 5xx or network blip suppresses the gate for the life of that token.** The legacy gate fails open only on an explicit 401 and retries. The merge must not carry the wider behaviour forward. (3) The successor decides its write path explicitly rather than inheriting whichever copy is merged last."
   },
   {
    "group": "G02",
@@ -69,7 +69,7 @@
    "proposed_successor": "ONE `team messaging` capability rendered as a chat thread, with voice notes and attachments as input modes of that same capability rather than surfaces of their own.",
    "proposed_owner": "team messaging  ·  voice input  ·  attachments",
    "risk": "MEDIUM — voice and attachment upload are the most stateful code in the PWA; folding them into a thread must not drop the per-chunk receipt check.",
-   "recommended": "APPROVE."
+   "recommended": "APPROVE, with three conditions carried into K5/K8: the lane selector is enforced by `@Roles` server-side, never by hiding the lane; internal and AI threads are visually unmistakable, because client personal data must never reach the LLM; and the recorder's stream teardown and its iOS-first MIME order survive the merge unchanged."
   },
   {
    "group": "G03",
@@ -94,7 +94,7 @@
    "proposed_successor": "ONE `clients` capability with the master-scoped revenue projection as a parameter, not as a second surface.",
    "proposed_owner": "clients  ·  client revenue",
    "risk": "LOW.",
-   "recommended": "APPROVE."
+   "recommended": "APPROVE the de-duplication, conditional on the real edge: `panel#clients` is manager-scoped and tenant-API backed, so self-scoping for a plain master must be **proven under the parity harness** before either copy retires. Treat this as a re-implementation of the projection, not a re-parenting of it."
   },
   {
    "group": "G04",
@@ -121,7 +121,7 @@
    "proposed_successor": "NO successor as a cabinet. Each tab becomes its own capability reached by asking for it: `calendar`, `services catalog`, `schedule`.",
    "proposed_owner": "calendar  ·  services catalog  ·  schedule",
    "risk": "MEDIUM — the back-stack (L38689-38775), NAV_NO_BAR and NO_PUSH_ROOTS are keyed by these exact screen names; removing the strip without re-keying them strands the targets.",
-   "recommended": "APPROVE, conditional on the K1 parity harness proving each tab target reachable from chat before the strip is removed."
+   "recommended": "APPROVE, conditional on the parity harness proving each tab target reachable from chat before the strip is removed, and on the `calendar` tab's gate being reproduced server-side rather than inherited from the strip."
   },
   {
    "group": "G05",
@@ -149,7 +149,7 @@
    "proposed_successor": "NONE. These are states of the widget that owns them: paging and the staff filter are `REFINE` intents on the `calendar` widget; the two dead-ends and the empty state are that widget rendering empty or refusing.",
    "proposed_owner": "calendar  ·  sessions/devices (the empty state only)",
    "risk": "LOW — the only risk is bookkeeping: if these rows are deleted rather than re-parented, the parity harness loses five checks.",
-   "recommended": "APPROVE as re-parenting, not deletion."
+   "recommended": "APPROVE as re-parenting, not deletion. One condition: the sessions surface must distinguish loading, loaded-empty and failed — a failed fetch currently renders as «Нет данных» on the very screen used to revoke sessions."
   },
   {
    "group": "G06",
@@ -174,7 +174,7 @@
    "proposed_successor": "NO successor as a panel. The ten capabilities it hosts stand on their own: analytics, daily report, waitlist, reviews, scheduled jobs, broadcast/marketing, team, loyalty redeem, schedule, and the founder-only MAYA tab.",
    "proposed_owner": "finance/analytics · reports · reviews · scheduled jobs · broadcast/marketing · staff roles · loyalty redeem · schedule",
    "risk": "MEDIUM-HIGH — this is where client-side role tests are densest. If a capability is re-parented before its server-side gate exists, the panel's removal *loosens* a check.",
-   "recommended": "APPROVE, conditional: no panel-hosted capability may be re-parented ahead of its server-side authority gate."
+   "recommended": "APPROVE, conditional: no panel-hosted capability may be re-parented ahead of its server-side authority gate. The panel's client-side predicates sit over endpoints with their own checks, but the coverage is not uniform across the ten, so each is proven individually rather than as a class."
   },
   {
    "group": "G07",
@@ -203,7 +203,7 @@
    "proposed_successor": "ONE conversational `onboarding` capability with declared stages (dialogue → confirm → logo → CRM), with the trial sheet as a step in it and voice as an input mode.",
    "proposed_owner": "onboarding  ·  business creation  ·  billing / trial activation  ·  CRM connect  ·  branding/logo upload  ·  voice input",
    "risk": "MEDIUM — tenant creation is the highest-consequence write in the product; the merged flow must keep the 409-slug-taken and 429-cooldown behaviour exactly.",
-   "recommended": "APPROVE."
+   "recommended": "APPROVE, with the platform-operator path **excluded from the merge**: `POST /activate` and tenant_admin creation must not become reachable from a tenant-facing conversation. Two further conditions: neither the CRM user-token nor the draft token may enter persisted chat history; and the login copy's manual fallback form is kept, because a chat-first flow still needs a non-conversational path."
   },
   {
    "group": "G08",
@@ -229,7 +229,7 @@
    "proposed_successor": "CHAT ENTRY. The trial form, the final CTA and the Telegram entry all resolve to \"start a conversation with Maya\", carrying their origin as a parameter.",
    "proposed_owner": "business creation (trial)  ·  chat (CTA and bot entry)",
    "risk": "LOW-MEDIUM — marketing conversion is measurable and the owner may want the form retained for A/B reasons. That is a business call, not a contract one.",
-   "recommended": "APPROVE, or defer this group alone if conversion testing is wanted first. It blocks nothing else."
+   "recommended": "APPROVE, or defer this group alone if conversion testing is wanted first — it blocks nothing else. One condition if approved: the Telegram `?start=` payload namespace already carries sign-in, phone-binding and gift-certificate payloads, so a marketing-origin payload must not collide with them."
   },
   {
    "group": "G09",
@@ -255,7 +255,7 @@
    "proposed_successor": "ONE `auth` capability. Post-login routing stops choosing a screen and instead resumes the conversation; the splash and the legacy VK return collapse into it.",
    "proposed_owner": "auth  ·  routing",
    "risk": "MEDIUM — a routing change that lands a user in the wrong workspace is a tenant-confusion risk, which the authorization explicitly forbids (\"Никогда не угадывать tenant для effectful action\").",
-   "recommended": "APPROVE, conditional: the successor must resume without guessing a tenant; if the workspace is ambiguous it must ask."
+   "recommended": "APPROVE, conditional on three things, one of which can break login outright rather than degrade it: the Yandex path exists on `app-tenant.html` **before** the VK branch is deleted; the successor resumes without guessing a tenant and asks when the workspace is ambiguous; and the merged resolver is proven against both copies' cases, not whichever is simpler."
   },
   {
    "group": "G10",
@@ -281,7 +281,7 @@
    "proposed_successor": "THE FIVE CLASS-S DESTINATIONS. Identity rows, theme, settings and logout resolve to Account / Privacy & Data / Notifications; the cabinet modal shell disappears.",
    "proposed_owner": "profile  ·  logout  ·  cabinet",
    "risk": "LOW-MEDIUM — the role-aware \"Личный кабинет\" target (staff → mystat, manager → default tab, legacy → cabinet) is a client-side role test that must not be recreated in the successor.",
-   "recommended": "APPROVE."
+   "recommended": "APPROVE. One condition: the role-aware «Личный кабинет» target is a client-side role test and must not be recreated in the successor — the destination is resolved server-side or asked for."
   },
   {
    "group": "G11",
@@ -310,7 +310,7 @@
    "proposed_successor": "NO successor as menus. Each callback becomes a capability the owner can ask for in words; the category level disappears entirely.",
    "proposed_owner": "reports · finance/analytics · broadcast/marketing · staff roles · loyalty points · referral · subscriptions · consent export",
    "risk": "MEDIUM — several of these run real business effects (broadcast, loyalty accrual, referral resolution). They must arrive behind the confirmation kind the contract assigns them, not behind a keyboard.",
-   "recommended": "APPROVE, conditional on each `admin_run_*` carrying its contract-assigned confirmation before the keyboard is removed."
+   "recommended": "APPROVE, conditional on each `admin_run_*` carrying its contract-assigned confirmation before the keyboard is removed. Two items here are **live defects today, not migration risk**: `admin_run_backfill` is an unconfirmed bulk write, and the marketing opt-in screen still promises revocation «командой /unsubscribe» while that command cannot be reached from behind the gate. The second is a legal exposure and deserves its own schedule, not K5's."
   },
   {
    "group": "G12",
@@ -342,7 +342,7 @@
    "proposed_successor": "THE CONTRACT KIND that corresponds to each: shop → OFFER, profile → PROFILE, history → LIST, upsell advice → ADVICE, quick replies → the intent row of the widget that precedes them, action buttons → declared intents, expense cards → CONFIRM.",
    "proposed_owner": "shop · profile · visit history · reports · chat · booking · expense confirmation",
    "risk": "MEDIUM — the expense confirmation card is the one that approves money. Its four states (pending/approved/executing/completed) and its expiry must map onto the contract's confirmation lifecycle exactly, with no state that means \"approved\" by default.",
-   "recommended": "APPROVE. Flag the expense card for explicit review during K6."
+   "recommended": "APPROVE, with the tenant-isolation condition made as explicit as the money one: a merged component must carry the foreign-tenant gates the shop and history cards have today, because a merged widget key does not inherit the dispatcher's gate. The expense card gets an explicit review in K6 — four states, a real expiry, no state meaning approved by default, and it must survive a reload."
   },
   {
    "group": "G13",
@@ -373,7 +373,7 @@
    "proposed_successor": "ONE declared deep-link vocabulary resolving to capabilities, replacing the per-bundle ad-hoc parsers.",
    "proposed_owner": "CRM connect · calendar setup · onboarding · consent · promo · tips · social link · booking backend selection",
    "risk": "HIGH for the booking-backend family specifically — it is the clearest \"guessing a tenant\" path in the inventory. LOW for the rest.",
-   "recommended": "APPROVE, with the booking-backend family required to stop writing tenant identity from a URL parameter."
+   "recommended": "APPROVE, conditional: the `booking_*` family stops writing backend and tenant identity into localStorage from a URL parameter. The rows do not show tenant *guessing*, so the claim is narrowed to what they do show — an unauthenticated parameter selecting which backend the app talks to."
   },
   {
    "group": "G14",
@@ -400,7 +400,7 @@
    "proposed_successor": "ONE bundle. `app-tenant.html` and the MAYA OS site bundle stop being second rendering sites; `privacy.html` becomes the served policy text the consent widget already reads.",
    "proposed_owner": "(the same owners as the surfaces they duplicate)",
    "risk": "MEDIUM — de-duplication is the largest mechanical change in K1's scope and touches deployed files. Nothing in Wave 1 does it; this row only records the decision.",
-   "recommended": "APPROVE the decision; sequence the work into K5/K8 where the envelope already places it."
+   "recommended": "APPROVE the decision; the signature executes nothing. Two conditions for when K5/K8 runs it: the merge target is the **generator**, since edits to the generated bundle are overwritten on the next run; and `/app/tenant-test.html` keeps working or redirects, or a tenant loses their app. Worth splitting the policy document out — publishing one canonical policy URL is independently doable and far cheaper than a bundle merge."
   },
   {
    "group": "G15",
@@ -428,7 +428,7 @@
    "proposed_successor": "Each keeps its route and gains its capability name: customer consent profile, tenant-scoped customer records, internal notes, the CRM provider catalogue, client-link consumption, visit mood.",
    "proposed_owner": "consent / 152-ФЗ · clients · CRM connect · client-link · visit mood",
    "risk": "LOW — naming only. The one to watch is `set_visit_mood`, which has both a relay and a backend handler and so appears twice.",
-   "recommended": "APPROVE."
+   "recommended": "APPROVE the naming, but **not** as naming-only: three of the four rows schedule a retirement. One hard condition: `customers/me/profile` is the data subject's own 152-ФЗ record and must not be folded behind the manager-gated registry, nor inherit a different feature gate. The orphaned `client-link/consume` route is removed on both sides or on neither."
   },
   {
    "group": "G16",
@@ -452,7 +452,7 @@
    "proposed_successor": "ONE `tips` capability: choose master → amount → transfer details, as a widget sequence.",
    "proposed_owner": "tips",
    "risk": "LOW-MEDIUM — the \"Я перевёл\" button is the same shape as GAP-ATTENDANCE-CONFIRM: a user assertion about something the system did not witness. It must not be surfaced as a confirmed transfer.",
-   "recommended": "APPROVE, with the wording constraint recorded."
+   "recommended": "APPROVE, with the wording constraint recorded: «Я перевёл» stays an acknowledgement and is never rendered as a confirmed transfer — the same shape as `GAP-ATTENDANCE-CONFIRM`, which is open."
   },
   {
    "group": "G17",
@@ -481,7 +481,7 @@
    "proposed_successor": "ONE `notifications` capability that asks first, in the conversation, and records the answer.",
    "proposed_owner": "notifications  ·  Notification.requestPermission  ·  pushManager.subscribe",
    "risk": "LOW to implement; the risk is *not* doing it.",
-   "recommended": "APPROVE."
+   "recommended": "APPROVE the `app-tenant.html` half, where not acting is the risk. **Do not sequence the two halves as one step**: retiring the MAYA OS block early removes a working control from a live tenant and depends on unresolved decision D10. Nothing here may be approved on the premise that the tenant push path works today — that row's live status is unknown."
   },
   {
    "group": "G18",
@@ -512,7 +512,7 @@
    "proposed_successor": "404 and offline stay as static fallbacks (they are not capabilities and have no chat successor). The orphaned VK SDK and the orphaned native stylesheet are deleted. The partial Capacitor surface in the mirror bundle retires with that bundle.",
    "proposed_owner": "(none — these rows have no capability, which is the finding)",
    "risk": "LOW.",
-   "recommended": "APPROVE."
+   "recommended": "APPROVE. One correction worth noting: deleting `vkid-sdk.js` removes an unreferenced file and does not by itself discharge the standing no-VK rule — the VK `?code` return path in G09 is the live half."
   },
   {
    "group": "O01",
@@ -561,7 +561,7 @@
    "proposed_successor": "(not a successor decision — these rows are owner-attribution only)",
    "proposed_owner": "PUBLIC COMMUNITY — one canonical owner: `PublicCommunityService` on the NestJS backend, with the Python side demoted to a signing source and the legacy SQLite store demoted to normalization.",
    "risk": "LOW as an attribution; HIGH if someone later reads \"canonical owner: NestJS\" as licence to re-point the Python writers. The ratchet prevents that mechanically.",
-   "recommended": "APPROVE as attribution. No implementation follows in Wave 1."
+   "recommended": "APPROVE as attribution. No implementation follows in Wave 1, and the ratchet is what keeps the Python side from re-acquiring authority."
   },
   {
    "group": "O02",
@@ -588,7 +588,7 @@
    "proposed_successor": null,
    "proposed_owner": "GUEST CHAT — `site_guest_chat` (in-memory anonymous session manager), reached through the edge-relay route mapping. The marketing-site front-end for it does not exist.",
    "risk": "LOW.",
-   "recommended": "APPROVE as attribution."
+   "recommended": "APPROVE as attribution, with the missing front-end recorded as an absence rather than a gap — so it is not rediscovered later as a new feature."
   },
   {
    "group": "O03",
@@ -623,7 +623,7 @@
    "proposed_successor": null,
    "proposed_owner": "SCHEDULER — `bot.py` cron table (reactivation, referral resolver, subscriptions, loyalty) and `webhook_server.py` background loops; four of the crons and all three loops are already retired or unreachable.",
    "risk": "MEDIUM as a *record* — four of these send messages to real clients on a schedule, and any later chat-first work that re-points them is production-affecting. Recording which four is the point of this group.",
-   "recommended": "APPROVE as attribution, with the live/retired split recorded explicitly."
+   "recommended": "APPROVE as attribution, with the live/retired split recorded explicitly. The live crons send messages to real clients on a schedule; any later work that re-points them is production-affecting and does not travel under a K1 signature."
   },
   {
    "group": "O04",
@@ -648,7 +648,7 @@
    "proposed_successor": null,
    "proposed_owner": "WEB PUSH (legacy) — the Python senders are fail-closed stubs; `window.requestPushPermission` in `native-enhancements.js` is orphaned.",
    "risk": "LOW.",
-   "recommended": "APPROVE as attribution."
+   "recommended": "APPROVE as attribution. Deletion belongs to K16, and the fail-closed behaviour stays untouched until then."
   },
   {
    "group": "O05",
@@ -675,7 +675,7 @@
    "proposed_successor": null,
    "proposed_owner": "OTP DELIVERY — SMS via the hard-fenced `send_sms` / `verify_sms` endpoints; email OTP / magic-link has no implementation.",
    "risk": "LOW as attribution; naming it does not make it reachable.",
-   "recommended": "APPROVE as attribution."
+   "recommended": "APPROVE as attribution. Naming the SMS fence does not make `STEP_UP_VERIFIED` reachable, and the email channel stays an absence."
   },
   {
    "group": "O06",
@@ -704,7 +704,7 @@
    "proposed_successor": null,
    "proposed_owner": "TELEGRAM — no command menu, no /help, no ConversationHandler, no client conversational AI in that channel.",
    "risk": "LOW.",
-   "recommended": "APPROVE as attribution."
+   "recommended": "APPROVE as attribution — but the attribution carries an ordering constraint, and that is the point of the group: the in-conversation capability index ships **before** the reply keyboards retire, not after. Approving O06 is safe; approving the neighbouring retirements ahead of these is not."
   },
   {
    "group": "O07",
@@ -733,7 +733,7 @@
    "proposed_successor": null,
    "proposed_owner": "NATIVE SHELL — no native source in the repository (no Swift/Kotlin/Java/pbxproj/AndroidManifest); the companion stylesheet is orphaned. TELEGRAM MINI-APP — `telegram-web-app.js` is never loaded, so the mini-app identity contract is unresolved.",
    "risk": "MEDIUM — the mini-app row is the one absence in the 57 that names a prerequisite for later work.",
-   "recommended": "APPROVE as attribution, with the mini-app prerequisite carried forward into K15."
+   "recommended": "APPROVE as attribution, with the mini-app prerequisite carried into K15 and one correction: the hazard in two of these rows is **live now**, not merely a prerequisite for later work. No native source in this repository means a chat-first change can pass every check here and still brick the shipped app."
   },
   {
    "group": "O08",
@@ -759,7 +759,7 @@
    "proposed_successor": null,
    "proposed_owner": "`cabinet_link_phone` · `native_feedback` · `notify` (relay dispatch) and `set_visit_mood_handler` (backend) — server-side fences, no UI successor.",
    "risk": "LOW.",
-   "recommended": "APPROVE as attribution."
+   "recommended": "APPROVE as attribution. Both fences stay exactly as they are."
   }
  ]
 }

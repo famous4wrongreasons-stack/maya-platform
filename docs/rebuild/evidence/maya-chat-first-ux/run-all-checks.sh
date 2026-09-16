@@ -3,7 +3,7 @@
 # print a misleading "absent" when handed the wrong file, so the invocation is recorded here rather
 # than remembered.
 set -u
-cd "$(dirname "$0")/../../../.." || exit 1
+cd "$(dirname "$0")/../../../.." || exit 1; ROOT=$(pwd)
 D=docs/rebuild; E=$D/evidence/maya-chat-first-ux; fail=0
 run(){ printf '%-34s ' "$1"; shift; out=$(node "$@" 2>&1 | tail -1); echo "$out"
        case "$out" in *FAIL*|*Error*|*error*) fail=1;; esac; }
@@ -20,4 +20,6 @@ run k1-dossier-check               $E/k1/k1-dossier-check.mjs
 run k1-human-dossier               $E/k1/build-human-dossier.mjs
 printf '%-34s ' widget-contract-check
 ( cd maya-saas-backend && node scripts/widget-contract-check.mjs 2>&1 | tail -1 )
+printf '%-34s ' f88-mutation-battery
+( cd maya-saas-backend && "$ROOT/$E/f88-mutation-battery.sh" 2>&1 | tail -1 )
 exit $fail

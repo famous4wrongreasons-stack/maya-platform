@@ -1466,16 +1466,17 @@ emission validator. *Evaluation point:* `EP-MINT`.
 
 **F88 — the forbidden-key list, stated once: one union, three enforcement points.**
 
-`arguments`, `payload`, `state` *(outside a declared body enum field)*, `role` *(outside the
-declared `WidgetIntent.role` presentation enum — F88.1)*, `permissions`, `token`, `tenant_id`
-*(outside the envelope root)*, `client_id`, `staff_id`, `record_id`, `is_staff`, `is_owner`,
+`arguments`, `payload`, `state` *(F88.2)*, `role` *(F88.2)*, `permissions`, `token`, `tenant_id`
+*(F88.2)*, `client_id`, `staff_id`, `record_id`, `is_staff`, `is_owner`,
 `__meRole`, `__meIsStaff`, `__meIsFounder`, `url`, `href`, `endpoint`, `checkout_url`,
 `return_url`, `provider_ref`, `bridge_method`, `required_verification`, `interaction_model`,
 `four_eyes`, `fourEyes`, `booking_effect`, `presentation_hint`.
 
 *Mechanism:* one structural validator — a total walk over the serialized value — applied to
 `WidgetEnvelope`, `WidgetIntentSubmission`, `ChannelProfile`, `NativeBridgeManifest` and
-`IntentRecord`. *Evaluation points:* `EP-MINT`, `EP-INGRESS`, `EP-REGISTRY-LOAD`.
+`IntentRecord`. **Its only exemptions are the six exact structural locations enumerated in F88.2;
+the validator holds no key-name allowlist and cannot be given one.** *Evaluation points:*
+`EP-MINT`, `EP-INGRESS`, `EP-REGISTRY-LOAD`.
 
 **F88.1 — `role` is forbidden as an authority, persona or identity field, and is permitted at
 exactly one declared location.** `OWNER RULING, wave 1.` The unqualified form of this key made
@@ -1522,9 +1523,9 @@ business authority. `CLIENT.3`, `APPROVAL.4` and `ARTIFACT.5` are rules *about* 
 a presentation enum looks like. Its neighbours on F88's list — `__meRole`, `is_staff`, `is_owner`
 — are the authority keys the fence exists for, and they are untouched.
 
-*Mechanism:* the same single validator, with the permission expressed as a **(shape, member,
-type)** triple rather than a key name, so that no other `role` can inherit it. Its K3 test vector
-is fixed here and is part of P-01's definition of done:
+*Mechanism:* the same single validator, with the permission expressed as a **(shape, path, depth,
+type)** structural location rather than a key name, so that no other `role` can inherit it — row 5
+of F88.2's table. Its K3 test vector is fixed here and is part of P-01's definition of done:
 
 | wire content | verdict |
 |---|---|
@@ -1540,13 +1541,83 @@ is fixed here and is part of P-01's definition of done:
 | `WidgetIntent.role = 'more'` / `'handoff'` / `'remedy'` / `'control'` | **PASS** — the four §3.1 declares that the ruling did not quote |
 | `WidgetIntent.role` holding any ninth value | **FAIL** — the type is half of the permission |
 
-**And one behavioural proof, separately:** changing `WidgetIntent.role` among those four values
-**must not change the authority decision** for identical authority inputs. The test replays one
-emission fixture four times, varying only `role`, and asserts that `verificationFloor`, Gate 6's
-dispatch and Gate 7's verdict are byte-identical across all four. A presentation field that could
+**And one behavioural proof, separately:** changing `WidgetIntent.role` among **its eight declared
+values** **must not change the authority decision** for identical authority inputs. Two proofs are
+required and neither substitutes for the other. The **replay** varies only `role` across one
+emission fixture and asserts that `verificationFloor`, Gate 6's dispatch and Gate 7's verdict are
+byte-identical. The **absence proof** asserts that no authority function performs a property read
+named `role` at all — which is the stronger of the two, because it refuses the *capability* to
+branch rather than sampling the branches a fixture happens to take. A presentation field that could
 move an authority decision would not be a presentation field.
 *Evaluated at:* `EP-MINT`, `EP-INGRESS`, and `EP-BUILD` for the invariance replay.
-*Status:* `NORMATIVE-PENDING` on **P-01** — K3 builds the validator and these nine vectors.
+*Status:* `NORMATIVE-PENDING` on **P-01** — K3 builds the validator, these vectors and F88.2's table together.
+
+**F88.2 — F88's exemptions are exactly six structural locations, and F88 holds no key-name
+allowlist.** `OWNER RULING, wave 1.` Three of F88's twenty-eight keys are minted by this contract
+itself, at locations this contract declares. Before this clause they were qualified in prose
+(*"outside a declared body enum field"*, *"outside the envelope root"*), and prose qualifiers are
+key-name exceptions wearing a location's clothes: they say where a key is **not** allowed and leave
+every other position to be argued. **They are replaced by an enumeration of where each key IS
+allowed.** The table is closed. A key occurrence that is not a row of it fails, with no further
+test and no appeal to intent.
+
+| # | shape | path | depth | required type | why this location and no other |
+|---|---|---|---|---|---|
+| 1 | `Cell` | `state` | 0 | `CellState` | the declared body cell state enum (§1.2) |
+| 2 | `Lifecycle` | `state` | 0 | `LifecycleState` | the declared lifecycle enum (§4.1) |
+| 3 | `WidgetEnvelope` | `tenant_id` | 0 | `string` | the canonical root binding (§1.1.1: *uuid v4, root only*) |
+| 4 | `IntentRecord` | `tenant_id` | 0 | `string` | **internal persistence / audit binding** (§3.7) |
+| 5 | `WidgetIntent` | `role` | 0 | the eight-member enum §3.1 declares | the presentation role (F88.1) |
+| 6 | `RenderReceipt` | `intents_withheld[].role` | 1 | exactly `WidgetIntent['role']` | **frozen presentation metadata of an intent that already existed** (§4.5.5) |
+
+**Rows 4 and 6 are the wave-1 rulings on the two remaining instances.** Each is narrow by
+construction, and neither is a generic exception:
+
+**Row 4 — `IntentRecord.tenant_id`.** An `IntentRecord` is server-side persistence and audit. It is
+never serialized to a channel, so it is not a wire field, and the key here is not an authority hint
+and not a presentation mode: it is the binding that makes a stored record attributable. **It confers
+nothing.** `IntentRecord.tenant_id` **may not by itself grant authority**: the current tenant is
+re-resolved and re-validated canonically server-side on every decision, and a record's stored
+binding is evidence about the past, never an input that selects the present tenant. The negative
+test below asserts exactly that, and it is the test that matters — the exemption lets the field
+exist, and a separate fence keeps it from being consulted.
+
+**Row 6 — `RenderReceipt.intents_withheld[].role`.** §4.5.5 mints this itself, to name which intents
+the fitter withheld and why. It is a **copy of an already-minted `WidgetIntent.role`**, stored after
+the fact, and its declared type is the alias `WidgetIntent['role']` — which the table requires
+**literally**, not as an expanded equivalent, so that a re-typing is a change the validator sees.
+It is not authority, not a persona, not a capability, not an approval, and not a verification input.
+A `role` anywhere else on `RenderReceipt` — including `RenderReceipt.role` — is outside the table
+and fails.
+
+**The prohibition that makes the table a fence rather than a list.** The validator must be
+implemented so that an exemption is a **(shape, path, depth, type)** tuple. **An implementation that
+can express "the key `k` is allowed" is non-conforming**, whatever its current contents: the defect
+this clause exists to prevent is not a wrong allowlist entry, it is an allowlist that a later,
+reasonable-looking edit can widen by one word. A conformance test asserts that no exemption in the
+implementation is expressible by key name alone.
+
+*Mechanism:* the same single validator of F88. *Evaluation points:* `EP-MINT`, `EP-INGRESS`,
+`EP-REGISTRY-LOAD`, and `EP-BUILD` for the table-shape conformance test.
+
+**Required negative tests.** Part of P-01's definition of done, and all five must refuse:
+
+| vector | verdict |
+|---|---|
+| a nested arbitrary `role`, at any depth, on any shape | **FAIL** |
+| a nested `role` carrying an owner / staff / client value | **FAIL** |
+| a nested arbitrary `tenant_id`, at any depth below a root | **FAIL** |
+| a `role` on `RenderReceipt` **outside** `intents_withheld[]` | **FAIL** |
+| `IntentRecord.tenant_id` read as an input to an authority decision | **FAIL** |
+
+**Required invariance.** Changing a presentation `role` — at either of its two admitted locations —
+**must not change the authority result** for identical authority inputs. The proof is by absence:
+no authority function may perform a property read named `role`, so none can branch on one. A read
+introduced later fails the test, which is stronger than replaying fixtures, because it refuses the
+capability to branch rather than sampling the branches taken.
+
+*Status:* `NORMATIVE-PENDING` on **P-01** — K3 builds the validator, this table and these five
+vectors together.
 
 ### 0.16 The conferral fences
 

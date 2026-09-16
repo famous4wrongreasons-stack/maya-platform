@@ -250,9 +250,12 @@ while (queue.length) {
     for (const ref of m.type.match(/\b[A-Z][A-Za-z0-9_]*\b/g) || [])
       if (shapes[ref] && !reach.has(ref)) queue.push(ref);
 }
-// F88.1, the wave-1 owner ruling: the permission is a (shape, member, type) TRIPLE and never a
-// key name. "A key named `role` is allowed" is not the rule and must not be implemented as one.
-// §3.1 declares EIGHT, not the four the ruling quoted. F88.1 binds to the declared type.
+// ── F88.2 ── the structural exemption table ─────────────────────────────────────────────────
+// The owner's ruling: F88's exemptions are EXACT STRUCTURAL LOCATIONS, never key names. So the
+// table below is the implementation of that sentence, not a convenience over it. Each row is a
+// (shape, path, depth, type-predicate) tuple. There is deliberately no field an edit could use to
+// write "the key `k` is allowed": `key` is derived FROM `path`, so a row cannot name a key without
+// also naming where it sits. A conformance check below asserts that property against this source.
 const ROLE_ENUM = [
   'primary',
   'secondary',
@@ -263,92 +266,128 @@ const ROLE_ENUM = [
   'remedy',
   'control',
 ];
-const isDeclaredPresentationRole = (shape, m) => {
-  if (shape !== 'WidgetIntent' || m.key !== 'role' || m.depth !== 0)
-    return false; // exact location, depth 0
-  const vals = [...m.type.matchAll(/'([a-z_]+)'/g)].map((x) => x[1]); // exact type
+const isRoleEnum = (t) => {
+  const vals = [...t.matchAll(/'([a-z_]+)'/g)].map((x) => x[1]);
   return (
     vals.length === ROLE_ENUM.length && ROLE_ENUM.every((v) => vals.includes(v))
   );
 };
+const F88_EXEMPTIONS = [
+  {
+    shape: 'Cell',
+    path: 'state',
+    depth: 0,
+    type: (t) => t === 'CellState',
+    note: '§1.2 declared body cell state enum',
+  },
+  {
+    shape: 'Lifecycle',
+    path: 'state',
+    depth: 0,
+    type: (t) => t === 'LifecycleState',
+    note: '§4.1 declared lifecycle enum',
+  },
+  {
+    shape: 'WidgetEnvelope',
+    path: 'tenant_id',
+    depth: 0,
+    type: (t) => t === 'string',
+    note: '§1.1.1 canonical root binding, root only',
+  },
+  {
+    shape: 'IntentRecord',
+    path: 'tenant_id',
+    depth: 0,
+    type: (t) => t === 'string',
+    note: '§3.7 internal persistence/audit binding - OWNER RULING, wave 1',
+  },
+  {
+    shape: 'WidgetIntent',
+    path: 'role',
+    depth: 0,
+    type: isRoleEnum,
+    note: '§3.1 presentation role, the eight declared members - F88.1',
+  },
+  {
+    shape: 'RenderReceipt',
+    path: 'intents_withheld[].role',
+    depth: 1,
+    type: (t) => t === "WidgetIntent['role']",
+    note: '§4.5.5 frozen presentation metadata, the alias LITERALLY - OWNER RULING, wave 1',
+  },
+];
 const EXEMPT = (shape, m) =>
-  (m.key === 'tenant_id' && shape === 'WidgetEnvelope' && m.depth === 0) || // F88: the envelope ROOT, depth 0
-  (m.key === 'state' && /Cell<|CellState|LifecycleState/.test(m.type)) || // F88: outside a declared body enum field
-  isDeclaredPresentationRole(shape, m); // F88.1
+  F88_EXEMPTIONS.some(
+    (e) =>
+      e.shape === shape &&
+      e.path === m.path &&
+      e.depth === m.depth &&
+      e.type(m.type),
+  );
+
 const hits = [];
 for (const shape of reach)
   for (const m of shapes[shape] || [])
     if (FORBIDDEN.includes(m.key) && !EXEMPT(shape, m))
-      hits.push(`${shape}.${m.path}: ${m.type}`);
-// The second instance of F88's unqualified-key class, found by the same walk. It is NOT covered
-// by the wave-1 ruling, which was about `role`, and it is reported rather than resolved by
-// analogy: extending an owner's ruling to a key the owner did not rule on is how a fence moves
-// without anyone deciding to move it.
-const SECOND_FINDING = hits.filter((h) =>
-  h.startsWith('IntentRecord.tenant_id'),
-);
+      hits.push(`${shape}.${m.path} (depth ${m.depth}): ${m.type}`);
 chk(
-  `no forbidden key in F88's walked closure (${reach.size} shapes), F88 and F88.1 applied`,
+  `no forbidden key in F88's walked closure (${reach.size} shapes), F88.2's six locations applied`,
   hits.length === 0,
   hits.length
-    ? hits.join(' | ') +
-        (SECOND_FINDING.length
-          ? `\n        SECOND FINDING, same class as the role ruling, NOT covered by it. §3.7 declares` +
-            `\n        IntentRecord.tenant_id and Gate 4 reads it, while F88 qualifies \`tenant_id\` only` +
-            `\n        "outside the envelope root" - a qualifier that contemplates the envelope while the` +
-            `\n        walk also covers IntentRecord. An IntentRecord is SERVER-SIDE STORAGE and is never` +
-            `\n        sent to a client, so the wire risk the fence exists for is absent here. One line` +
-            `\n        would close it - "outside the envelope root and IntentRecord" - but that is a` +
-            `\n        conferral fence and therefore an OWNER RULING, reported and not taken by analogy.`
-          : '')
-    : `0 of ${FORBIDDEN.length} keys present`,
+    ? hits.join(' | ')
+    : `0 unexempted occurrences of ${FORBIDDEN.length} forbidden keys`,
 );
 
-// F88.1 is a NARROW permission, so check that it is narrow rather than that it merely passed.
-const rolesInWalk = [...reach].flatMap((sh) =>
-  (shapes[sh] || []).filter((m) => m.key === 'role').map((m) => ({ sh, ...m })),
-);
-const admitted = rolesInWalk.filter((r) => isDeclaredPresentationRole(r.sh, r));
-// THIRD FINDING, same class, found only once the walk was taken to full depth as F88 requires:
-// section 4.5.5 declares `role: WidgetIntent['role']` at RenderReceipt.intents_withheld[].role,
-// depth 2. The type is an alias of the exact declared type, but F88.1 binds to the exact declared
-// LOCATION as well, and this is not that location. Reported, not exempted - writing an exemption
-// for it would make the ruling a rule about the key name, which is what it forbids.
-const THIRD_FINDING = rolesInWalk.filter(
-  (r) => !isDeclaredPresentationRole(r.sh, r),
+// Every exemption must correspond to something that actually exists, or the table is carrying a
+// licence for a shape nobody declares - the quiet way an allowlist outlives its reason.
+const unused = F88_EXEMPTIONS.filter(
+  (e) =>
+    !(shapes[e.shape] || []).some(
+      (m) => m.path === e.path && m.depth === e.depth && e.type(m.type),
+    ),
 );
 chk(
-  'F88.1 admits exactly one role member inside the walk, by location AND type',
-  rolesInWalk.length === 1 && admitted.length === 1,
-  rolesInWalk
-    .map((r) => `${r.sh}.${r.path} (depth ${r.depth}): ${r.type.slice(0, 52)}`)
-    .join(' | ') +
-    (THIRD_FINDING.length
-      ? `
-        THIRD FINDING, same class, surfaced by taking the walk to full depth: the contract
-        MINTS this one itself in section 4.5.5, to name which intents the fitter withheld.
-        It is presentation, not a persona - but it is not the declared location either, and
-        F88.1 is a triple. Closing it is a one-line contract edit and an OWNER RULING.`
-      : ''),
+  `F88.2's table is exactly ${F88_EXEMPTIONS.length} locations and every one is live`,
+  F88_EXEMPTIONS.length === 6 && unused.length === 0,
+  unused.length
+    ? 'DEAD: ' + unused.map((e) => `${e.shape}.${e.path}`).join(', ')
+    : F88_EXEMPTIONS.map((e) => `${e.shape}.${e.path}`).join(' · '),
 );
+
+// CONFORMANCE: F88.2 forbids an implementation that CAN express a key-name exemption, whatever it
+// currently contains. Checked against this file's own source: no exemption row may carry a bare
+// `key:` field, and EXEMPT must compare shape, path and depth - not m.key.
+// A check that reads this file must not be satisfiable BY ITS OWN TEXT. The previous version of
+// the "no generic exception" check searched the whole source for a literal it also contained, so
+// it passed by finding itself and measured nothing for one reported run. Source-reading checks now
+// read only the two named regions, never the whole file, and a guard below proves the regions do
+// not contain the assertions.
+const SELF = fs.readFileSync(new URL(import.meta.url).pathname, 'utf8');
+const region = (from, to) => SELF.slice(SELF.indexOf(from), SELF.indexOf(to));
+const tableSrc = region('const F88_EXEMPTIONS', 'const EXEMPT =');
+const exemptSrc = region('const EXEMPT =', 'const hits = []');
+const keyNameShaped = /\bkey\s*:/.test(tableSrc) || /m\.key/.test(exemptSrc);
 chk(
-  'the eight admitted values are exactly the presentation enum section 3.1 declares',
-  admitted.length === 1 &&
-    ROLE_ENUM.every((v) => admitted[0].type.includes(`'${v}'`)),
-  ROLE_ENUM.join(' | '),
+  'F88.2 conformance: no exemption is expressible by key name alone',
+  !keyNameShaped &&
+    /e\.shape === shape/.test(exemptSrc) &&
+    /e\.path === m\.path/.test(exemptSrc) &&
+    /e\.depth === m\.depth/.test(exemptSrc),
+  'every row is (shape, path, depth, type); EXEMPT compares all four; no `key:` field exists to widen',
 );
-// F88.1 PROOF VECTORS. The owner asked that the ruling be shown to REFUSE, not to read correctly.
-// Each vector is a (shape, member, type, depth) tuple pushed through the same two predicates the
-// walk uses - EXEMPT and FORBIDDEN - and its verdict is compared with the required one. A vector
-// table that agrees with the implementation because it calls the implementation is the point: if
-// the predicate is ever widened, a vector flips and this check fails.
-const verdict = (shape, key, type, depth = 0) =>
-  FORBIDDEN.includes(key) && !EXEMPT(shape, { key, type, depth, path: key })
+
+// ── the required vectors ────────────────────────────────────────────────────────────────────
+// Pushed through the SAME predicates the walk uses, so widening a predicate flips a vector.
+const verdict = (shape, path, type, depth = 0) => {
+  const key = path.split('.').pop().replace(/\[\]$/, '');
+  return FORBIDDEN.includes(key) && !EXEMPT(shape, { path, depth, type })
     ? 'FAIL'
     : 'PASS';
+};
 const R8 =
   "| 'primary' | 'secondary' | 'destructive' | 'escape' | 'more' | 'handoff' | 'remedy' | 'control'";
 const VECTORS = [
+  // F88.1's nine, as the owner fixed them
   ['owner role on the wire', 'WidgetEnvelope', 'role', "'owner'", 0, 'FAIL'],
   [
     'staff role on the wire',
@@ -362,9 +401,9 @@ const VECTORS = [
   ['__meRole', 'WidgetEnvelope', '__meRole', 'string', 0, 'FAIL'],
   ['is_owner', 'WidgetEnvelope', 'is_owner', 'boolean', 0, 'FAIL'],
   ['is_staff', 'WidgetIntentSubmission', 'is_staff', 'boolean', 0, 'FAIL'],
-  ['undeclared nested role', 'WidgetEnvelope', 'role', R8, 2, 'FAIL'],
+  ['undeclared nested role', 'WidgetEnvelope', 'body.meta.role', R8, 2, 'FAIL'],
   [
-    'role on a shape that is not WidgetIntent, right type',
+    'role on a shape that is not WidgetIntent',
     'IntentRecord',
     'role',
     R8,
@@ -387,6 +426,72 @@ const VECTORS = [
     0,
     'FAIL',
   ],
+  // F88.2's five required negative tests
+  [
+    'NEG 1  nested arbitrary role',
+    'ChannelProfile',
+    'caps.role',
+    'string',
+    1,
+    'FAIL',
+  ],
+  [
+    'NEG 2  nested owner/staff/client role',
+    'IntentRecord',
+    'audit.role',
+    "'owner' | 'staff' | 'client'",
+    1,
+    'FAIL',
+  ],
+  [
+    'NEG 3  nested arbitrary tenant_id',
+    'WidgetEnvelope',
+    'body.tenant_id',
+    'string',
+    1,
+    'FAIL',
+  ],
+  [
+    'NEG 4  receipt role OUTSIDE intents_withheld',
+    'RenderReceipt',
+    'role',
+    "WidgetIntent['role']",
+    0,
+    'FAIL',
+  ],
+  [
+    'NEG 4b receipt role, right path wrong depth',
+    'RenderReceipt',
+    'intents_withheld[].role',
+    "WidgetIntent['role']",
+    2,
+    'FAIL',
+  ],
+  [
+    'NEG 4c receipt role, right path wrong type',
+    'RenderReceipt',
+    'intents_withheld[].role',
+    R8,
+    1,
+    'FAIL',
+  ],
+  // the two admitted locations, and the roots
+  [
+    'IntentRecord.tenant_id, the ruled location',
+    'IntentRecord',
+    'tenant_id',
+    'string',
+    0,
+    'PASS',
+  ],
+  [
+    'RenderReceipt withheld role, the ruled one',
+    'RenderReceipt',
+    'intents_withheld[].role',
+    "WidgetIntent['role']",
+    1,
+    'PASS',
+  ],
   [
     'tenant_id at the envelope root',
     'WidgetEnvelope',
@@ -398,56 +503,199 @@ const VECTORS = [
   [
     'tenant_id nested in the envelope',
     'WidgetEnvelope',
-    'tenant_id',
+    'meta.tenant_id',
     'string',
     1,
     'FAIL',
   ],
+  // One wrong-type vector per exemption row. Without these the TYPE arm of a row is dead weight:
+  // mutation-testing this file found that widening row 4's type predicate to `() => true` changed
+  // no verdict, because nothing ever presented a wrong-typed tenant_id at the ruled location. A
+  // fence arm that no test can distinguish is not a fence arm.
+  ['TYPE 1  Cell.state, not CellState', 'Cell', 'state', 'string', 0, 'FAIL'],
+  [
+    'TYPE 2  Lifecycle.state, not LifecycleState',
+    'Lifecycle',
+    'state',
+    'string',
+    0,
+    'FAIL',
+  ],
+  [
+    'TYPE 3  envelope tenant_id, not string',
+    'WidgetEnvelope',
+    'tenant_id',
+    'TenantRef',
+    0,
+    'FAIL',
+  ],
+  [
+    'TYPE 4  IntentRecord tenant_id, not string',
+    'IntentRecord',
+    'tenant_id',
+    'TenantRef',
+    0,
+    'FAIL',
+  ],
+  [
+    'TYPE 5  WidgetIntent.role, seven members',
+    'WidgetIntent',
+    'role',
+    "| 'primary' | 'secondary'",
+    0,
+    'FAIL',
+  ],
+  [
+    'TYPE 6  receipt role, expanded not aliased',
+    'RenderReceipt',
+    'intents_withheld[].role',
+    R8,
+    1,
+    'FAIL',
+  ],
+  [
+    'tenant_id on a third shape',
+    'ChannelProfile',
+    'tenant_id',
+    'string',
+    0,
+    'FAIL',
+  ],
 ];
-const vres = VECTORS.map(([n, sh, k, t, d, want]) => ({
+const vres = VECTORS.map(([n, sh, p, t, d, want]) => ({
   n,
-  got: verdict(sh, k, t, d),
+  got: verdict(sh, p, t, d),
   want,
 }));
 const vbad = vres.filter((v) => v.got !== v.want);
 chk(
-  `F88.1 proof vectors execute the refusal (${VECTORS.length} vectors)`,
+  `F88.2 vectors execute the refusal (${VECTORS.length} vectors, 5 of them the required negatives)`,
   vbad.length === 0,
   vbad.length
     ? vbad.map((v) => `${v.n}: got ${v.got}, want ${v.want}`).join(' | ')
-    : vres.map((v) => `${v.want} ${v.n}`).join('\n        '),
-  'EXECUTED',
-);
-// Behavioural invariance: the ruling requires that changing WidgetIntent.role among its declared
-// values cannot change an authority decision. Proven by absence of a read: no function anywhere in
-// the module performs a property access named `role`, so no function can branch on one.
-let roleReads = 0;
-for (const f of files) {
-  const sf = ts.createSourceFile(
-    f,
-    fs.readFileSync(path.join(SRC, f), 'utf8'),
-    ts.ScriptTarget.ES2022,
-    true,
-  );
-  const walk = (n) => {
-    if (ts.isPropertyAccessExpression(n) && n.name.text === 'role') roleReads++;
-    n.forEachChild(walk);
-  };
-  walk(sf);
-}
-chk(
-  'changing WidgetIntent.role cannot change an authority decision',
-  roleReads === 0,
-  `0 property reads of .role in ${files.length} modules - no function reads it, so none can branch on it`,
+    : vres.map((v) => `${v.want}  ${v.n}`).join('\n        '),
   'EXECUTED',
 );
 
+// The reach walk must FOLLOW named type references, or the fence passes by not looking: with the
+// five roots alone, WidgetIntent, RenderReceipt, Cell and Lifecycle all leave the walk and the hit
+// list empties out. Mutation testing found this arm untested. Every shape the exemption table
+// names must be reachable FROM a root, which is the property that makes the table meaningful.
+const unreachableExemptions = F88_EXEMPTIONS.filter((e) => !reach.has(e.shape));
 chk(
-  'no generic `role allowed everywhere` exception exists in the checker',
-  /shape!=='WidgetIntent'/.test(
-    fs.readFileSync(new URL(import.meta.url).pathname, 'utf8'),
-  ),
-  'the permission is bound to the shape, the member and the four-member type',
+  'the walk follows type references: every exempted shape is reachable from a root',
+  unreachableExemptions.length === 0 && reach.size > WALK_ROOTS.length,
+  unreachableExemptions.length
+    ? 'OUTSIDE THE WALK: ' +
+        unreachableExemptions.map((e) => e.shape).join(', ')
+    : `${reach.size} shapes reached from ${WALK_ROOTS.length} roots; all ${F88_EXEMPTIONS.length} exempted shapes are inside`,
+);
+
+// ── the walker itself, proven against a synthetic shape ─────────────────────────────────────
+// Mutation-testing this file found that capping the walk at depth 1 changed no verdict, because
+// no shape the contract currently declares carries a forbidden key deeper than depth 1. So the
+// UNBOUNDEDNESS of the walk - the property F88 states as "at any other depth" - was resting on
+// nothing. It is now proven directly: the real deepMembers() and the real EXEMPT() are run over a
+// synthetic declaration that buries forbidden keys at depths 2, 3 and 4, in BOTH array spellings
+// (`Array<T>` and `T[]`) - mutation testing found the `T[]` arm dead, because the contract as it
+// stands happens to use only one of the two.
+// This tests the walker rather than today's shapes, so it survives the shapes changing.
+const PROBE = `
+interface DepthProbe {
+  a: { role: string };
+  b: { c: { tenant_id: string } };
+  d: Array<{ e: { f: { is_owner: boolean } } }>;
+  i: { j: { permissions: string } }[];
+  g: { h: { role: 'primary' | 'secondary' | 'destructive' | 'escape' | 'more' | 'handoff' | 'remedy' | 'control' } };
+}`;
+const probeSf = ts.createSourceFile(
+  'probe.ts',
+  PROBE,
+  ts.ScriptTarget.ES2022,
+  true,
+);
+let probeDecl = null;
+probeSf.forEachChild((n) => {
+  if (ts.isInterfaceDeclaration(n)) probeDecl = n;
+});
+const probeMembers = deepMembers(probeDecl, probeSf);
+const probeHits = probeMembers.filter(
+  (m) => FORBIDDEN.includes(m.key) && !EXEMPT('DepthProbe', m),
+);
+const deepest = Math.max(0, ...probeMembers.map((m) => m.depth));
+chk(
+  'the walk is unbounded in depth: forbidden keys at depths 2-4 are found and refused',
+  probeHits.length === 5 && deepest >= 3,
+  probeHits.length === 5 && deepest >= 3
+    ? probeHits.map((m) => `${m.path} (depth ${m.depth})`).join(' · ') +
+        ` - deepest member reached: depth ${deepest}`
+    : `found ${probeHits.length} of 5 planted keys, deepest depth ${deepest} - the walk is capped`,
+  'EXECUTED',
+);
+
+// ── NEG 5 and the invariance, both proven by ABSENCE OF A READ ──────────────────────────────
+// "IntentRecord.tenant_id copied into an authority decision -> FAIL" and "changing a presentation
+// role cannot change an authority result" are the same kind of claim, and the same proof answers
+// both: a field that nothing reads cannot be branched on. An AST read-count is stronger than
+// replaying fixtures, because it refuses the CAPABILITY to branch rather than sampling branches.
+const readsOf = (name) => {
+  let n = 0;
+  for (const f of files) {
+    const sf = ts.createSourceFile(
+      f,
+      fs.readFileSync(path.join(SRC, f), 'utf8'),
+      ts.ScriptTarget.ES2022,
+      true,
+    );
+    const walk = (node) => {
+      if (ts.isPropertyAccessExpression(node) && node.name.text === name) n++;
+      if (
+        ts.isElementAccessExpression(node) &&
+        ts.isStringLiteral(node.argumentExpression || {}) &&
+        node.argumentExpression.text === name
+      )
+        n++;
+      node.forEachChild(walk);
+    };
+    walk(sf);
+  }
+  return n;
+};
+const roleReads = readsOf('role');
+const tenantReads = readsOf('tenant_id');
+chk(
+  'NEG 5  IntentRecord.tenant_id is never read into an authority decision',
+  tenantReads === 0,
+  `0 property reads of .tenant_id in ${files.length} modules - the stored binding is evidence about` +
+    ` the past, and no declared function consults it; the current tenant is re-resolved server-side`,
+  'EXECUTED',
+);
+chk(
+  'INVARIANCE  changing a presentation role cannot change an authority result',
+  roleReads === 0,
+  `0 property reads of .role in ${files.length} modules - no function reads it at either admitted` +
+    ` location, so none can branch on it for identical authority inputs`,
+  'EXECUTED',
+);
+// The guard that makes the two source-reading checks above honest: the regions they search must
+// contain no assertion, so an assertion can never be its own evidence.
+const regionsAreInert =
+  !/\bchk\(/.test(tableSrc) &&
+  !/\bchk\(/.test(exemptSrc) &&
+  tableSrc.length > 400;
+const shapeRows = (tableSrc.match(/shape:/g) || []).length;
+const pathRows = (tableSrc.match(/path:/g) || []).length;
+const depthRows = (tableSrc.match(/depth:/g) || []).length;
+chk(
+  'no generic exception exists: every exemption row names a shape, a path and a depth',
+  regionsAreInert &&
+    shapeRows === F88_EXEMPTIONS.length &&
+    pathRows === F88_EXEMPTIONS.length &&
+    depthRows === F88_EXEMPTIONS.length,
+  regionsAreInert
+    ? `${shapeRows} shape / ${pathRows} path / ${depthRows} depth fields over ${F88_EXEMPTIONS.length} rows;` +
+        ` the searched regions hold no assertion, so none can satisfy itself`
+    : 'the searched region contains an assertion - a source check could satisfy itself',
 );
 chk(
   'IntentProposal is outside the walk, so its role is not admitted by exception but by scope',

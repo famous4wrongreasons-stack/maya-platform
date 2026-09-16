@@ -1,0 +1,14 @@
+{
+ "G10": {
+  "title": "Profile menus and the duplicate client cabinet",
+  "why": "S-048 and S-111 are one compiled profile sheet shipped in two bundles — `app.html` and `maya-os-site/index.html`, the same four rows and role branch — not two menus; S-111 is a tab with no screen, duplicating the «Кабинет» tab beside it. S-176 differs in kind: an independent client cabinet inside the marketing page calling the same production endpoints, so retiring it removes a duplicate client app, and two remain.",
+  "disappear": "The profile sheet in both bundles, the 4th tab that exists only to open it, and the marketing overlay as a separate client codebase, with its `?cab_demo=` QA harness. Body re-parenting goes only after the unclosed `#promo-overlay` is fixed — removed earlier, the merged surface renders invisible.",
+  "remain": "Everything these rows front: cabinet entry, settings, logout, and the client's own points, visits and history behind the same authenticated endpoints, with one of three implementations removed. Theme too — but the successor should better it, not copy it: today's toggle deliberately does not persist and reverts itself every five minutes.",
+  "user_impact": "Two populations, one component: the client's 4th tab and the staff avatar open the same sheet. One loss is verified and material — the settings screen has exactly one route, and losing it leaves a client holding a consent record with no live control over what is sent. The logout loss applies only to non-business clients; theme is a gain, since today's toggle does not stick.",
+  "security_impact": "Neutral for authority — nothing closed, nothing opened. The role branch picks a destination, not a gate, but the inference that those screens enforce their own access is unevidenced: resolve the destination server-side and confirm its data endpoints authorize independently before dropping the branch. Consolidation is miscounted — the endpoints are called from three bundles, and only the marketing overlay retires.",
+  "risk": "MEDIUM — one loss is unambiguous, the rest narrower. `__meGo('settings')` occurs exactly once and is the only route to the settings screen — reminder timing, notification switches. Lose that row unreplaced and a client keeps a consent record with no live control over what is sent, the one loss touching 152-ФЗ. All three are RETIRE AFTER PARITY: a parity hazard, not a live one.",
+  "fidelity_checked": false,
+  "lost": "",
+  "dropped": "The site's RU/EN bilingual re-render (12 `setLanguage` hooks in index.html, none in the PWA) — a site-language contract must exist before the site entry retires — and the no-`fetch` fallback to `/app/`, today the only graceful degradation."
+ }
+}

@@ -48,6 +48,56 @@ dossier nobody needs to read:
 does this fold into* is a product judgement) and 57 canonical owners. That is K1's exit, and it is
 the one exit in this plan a machine cannot certify.
 
+**The dossier's prose was adversarially corrected before presentation, and it moved one way.**
+Every group was drafted against its own surface rows, then read by a pass whose only instruction was
+to refute it, then re-checked by a third. **All 26 groups came back with corrections**, and they ran
+overwhelmingly in one direction: **the first drafts, mine included, understated risk and overstated
+benefit.** After correction, **13 of 26 groups sit at HIGH or MEDIUM-HIGH**, where my first pass had
+put most of them at LOW.
+
+Four were plain factual errors, and I re-verified each against the files myself rather than relaying
+them:
+
+| my claim | what the files say |
+|---|---|
+| G11 removes "the `is_admin` **client-side** gate" | `is_admin` is defined in `canonical_staff_access.py:122` and `database.py:1500` — **Python, server-side.** Removing it is neutral, not a client-check-being-replaced risk. 37 call sites in `bot.py`, not the 22 I printed. |
+| G14: "`app-tenant.html` is a 2.5 MB near-duplicate" | `app-tenant.html` is **1,096,396 bytes**; the 2,506,493-byte file is `maya-os-site/index.html`. The description belonged to a different row — and for `app-tenant.html` the work is *building* a missing system, not deleting a duplicate. Different cost, different risk. |
+| G03: "the newer one adds the `notmaster` state the older one lacks" | `notmaster` appears **4 times in both** copies. The state to preserve has to be added to the *merge target*, which has none. |
+| G17: auto-subscribes "with no user control, **in three bundles**" | **One** bundle. `app.html` and `maya-os-site/index.html` each carry 5 `unsubscribe` references; `app-tenant.html` carries 0. |
+
+**Two findings landed outside K1 entirely, and one thing I thought I had found was my own mistake.**
+The two are live conditions in existing code, not things this wave changes, so they are recorded and
+filed separately rather than folded into a group. Neither is a stop condition: neither is a contract
+contradiction nor a new decision.
+
+1. **CRM journal read path.** `getJournal` forwards a caller-supplied `providerId`
+   (`crm.service.ts:3212`) with no counterpart to the write path's `assertJournalStaffWritable`,
+   while `CRM_JOURNAL_ROLES` admits PROVIDER/EMPLOYEE/STAFF. Whether a staff member can read a
+   colleague's journal is a per-actor question the rows cannot settle. Filed for its own session.
+
+2. **A consent promise the gate refuses.** `bot.py:445` tells a client «Согласие можно отозвать в
+   любой момент командой /unsubscribe», and `_GATE_ALLOWED_COMMANDS` at `bot.py:353` is
+   `{"/start", "/privacy", "/cancel"}`. A gated client is told about a route the gate blocks. This
+   is a 152-ФЗ / ст.18 surface, so the wording and the mechanism are both load-bearing. Filed —
+   `bot.py` is production and is not touched here.
+
+3. **A stale docstring in `bot.py` that reads as a live sender.** I thought I had found O03's
+   live/retired split wrong by one row: `_lead_alerts_job` calls `lead_alerts.scan_and_alert(app)`
+   every five minutes and its docstring says «раз в 5 мин шлёт "зависшие заявки" админу». Reading
+   one level further down, `scan_and_alert` returns
+   `{'checked': 0, 'alerted': 0, 'status': 'retired_unverified_lead_occurrence'}` immediately — it
+   is retired at the module level, exactly as the row says. **The row was right and I was wrong.**
+   What survives is smaller and still worth recording: `reviews`, `lead_alerts`, `dual_role_guard`
+   and `god_watch` are all **registered and firing on schedule with retired stub handlers**, which
+   is not the same as "unreachable"; and `_lead_alerts_job`'s docstring still describes the
+   behaviour it no longer has, which is a trap for the next person who reads `bot.py`.
+
+   It is also the one thing the adversarial passes could not have caught. They verified every claim
+   **against the dossier rows**; where a row is wrong, only reading the code finds it. Here the row
+   was right and my reading of one wrapper was wrong — but the asymmetry holds in both directions,
+   and it is the reason the parity harness has to run against behaviour rather than against this
+   dossier.
+
 **One correction to a number in the earlier report.** I called these "126 human-judgement cells".
 126 is the count of **rows**; they carry **137 cells**, because **11 rows need both** a successor
 and an owner. The 80/57 split is exact; 80 + 57 = 137, and the 11 overlapping rows are why the row
@@ -177,51 +227,74 @@ function can branch on it. This is a proof of absence checked by AST, not a clai
 
 ---
 
-## Two more instances of the same class — narrow STOPs, not a re-opened contract
+## The two remaining instances — ruled, and the fence rebuilt around the ruling
 
-Both were found by the same walk, after it was corrected. Neither is covered by the ruling, and
-**neither is being resolved by analogy** — extending a ruling about `role` to a different key, or
-to a different location, is exactly the generic exception the ruling forbids.
+Both were approved narrowly, and the ruling carried one instruction that changed more than the two
+rows it was about: **"не делать allowlist по одному имени поля — все исключения F88 должны быть
+exact structural locations."** F88 had two prose qualifiers (*"outside a declared body enum field"*,
+*"outside the envelope root"*). A prose qualifier says where a key is **not** allowed and leaves
+every other position to be argued — it is a key-name exception wearing a location's clothes. They
+are replaced by **F88.2**, an enumeration of where each key **is** allowed.
 
-### SECOND FINDING — `IntentRecord.tenant_id`
+| # | shape | path | depth | required type | source |
+|---|---|---|---|---|---|
+| 1 | `Cell` | `state` | 0 | `CellState` | §1.2 |
+| 2 | `Lifecycle` | `state` | 0 | `LifecycleState` | §4.1 |
+| 3 | `WidgetEnvelope` | `tenant_id` | 0 | `string` | §1.1.1 canonical root binding |
+| 4 | `IntentRecord` | `tenant_id` | 0 | `string` | §3.7 — **owner ruling, wave 1** |
+| 5 | `WidgetIntent` | `role` | 0 | the eight members §3.1 declares | F88.1 |
+| 6 | `RenderReceipt` | `intents_withheld[].role` | 1 | exactly `WidgetIntent['role']` | §4.5.5 — **owner ruling, wave 1** |
 
-§3.7 declares `tenant_id` on `IntentRecord`, which is one of the five shapes F88's validator walks.
-F88 qualifies `tenant_id` **only** "outside the envelope root" — a qualifier phrased for the
-envelope, while the walk also covers `IntentRecord`. As written, the validator refuses every
-`IntentRecord` the contract mints.
+The table is closed. An occurrence that is not a row fails, with no further test. The
+implementation carries **no field an edit could use to write "the key `k` is allowed"** — `key` is
+derived *from* `path`, so a row cannot name a key without also naming where it sits — and a
+conformance check asserts that property against the source.
 
-An `IntentRecord` is **server-side storage and is never sent to a client**, so the wire risk the
-fence exists for is absent here. One line closes it — *"outside the envelope root and
-`IntentRecord`"* — but that line moves a conferral fence, so it is an **owner ruling**.
+All five required negative tests and the required invariance run as executable vectors:
 
-### THIRD FINDING — `RenderReceipt.intents_withheld[].role`, and the checker defect that hid it
+```
+FAIL  nested arbitrary role                  FAIL  receipt role outside intents_withheld
+FAIL  nested owner/staff/client role         FAIL  receipt role, right path wrong depth / wrong type
+FAIL  nested arbitrary tenant_id             PASS  IntentRecord.tenant_id, the ruled location
+FAIL  IntentRecord.tenant_id read into an authority decision — 0 reads, proven by AST
+FAIL  changing a presentation role changes an authority result — 0 reads, proven by AST
+```
 
-§4.5.5 declares `role: WidgetIntent['role']` at depth 2 inside `RenderReceipt`, to name which
-intents the fitter withheld. The type is an alias of the exact declared type; the **location** is
-not the declared location, and F88.1 is a tuple.
+**NEG 5 and the invariance are the same claim** — a field nothing reads cannot be branched on — and
+both are proven by **absence of a read** rather than by replaying fixtures. An absence proof refuses
+the *capability* to branch; a fixture replay only samples the branches taken today.
 
-**This one surfaced only because I fixed a defect in my own checker**, and that matters more than
-the finding. F88 says its keys are forbidden *"at any other depth"*. My checker collected **only
-depth-1 members**, so it could not check the thing F88 states. It now walks to full depth through
-inline object literals and array element types, stopping at named type references (which the reach
-walk visits on their own), and carries a dotted path and a depth on every member. The `tenant_id`
-and `role` exemptions are now additionally bound to **depth 0**, so a nested `tenant_id` inside the
-envelope is refused — a vector that previously would have passed.
+---
 
-A checker that reads correctly but does not enforce is the failure mode this whole cycle has been
-hunting. This is the third time it has appeared, and the second time in code I wrote.
+## The mutation battery — and the three dead fence arms it found
 
-### Recommended rulings
+A checker that cannot fail is not a checker. `f88-mutation-battery.sh` widens or narrows one arm of
+the fence at a time and requires the pass count to drop. **Twenty mutations, all now caught.** Three
+of them were **not** caught on the first run, and each was a real hole:
 
-| | recommendation |
+| mutation that survived | what it meant |
 |---|---|
-| **`IntentRecord.tenant_id`** | qualify F88 in place: *`tenant_id` (outside the envelope root and outside `IntentRecord`)*. Same pattern F88 already uses twice; weakens nothing on the wire, because an `IntentRecord` never reaches a wire. |
-| **`RenderReceipt.intents_withheld[].role`** | extend F88.1's location clause to the two declared locations: `WidgetIntent.role` **and** `RenderReceipt.intents_withheld[].role`, both typed as §3.1 declares. Enumerated locations, not a key-name exception. |
+| row 4's type predicate widened to `() => true` | the **type arm** of the `IntentRecord` exemption was dead weight — nothing ever presented a wrong-typed `tenant_id` at the ruled location. Closed by one wrong-type vector per row, six in all. |
+| the walk capped at depth 1 | **the depth-unboundedness F88 states was resting on nothing** — no shape the contract declares today carries a forbidden key below depth 1. Closed by running the real walker and the real `EXEMPT` over a synthetic declaration that buries keys at depths 2, 3 and 4, in both array spellings. |
+| `reach` stops following type references | with the five roots alone, `WidgetIntent`, `RenderReceipt`, `Cell` and `Lifecycle` all leave the walk and **the hit list empties out — the fence would pass by not looking.** Closed by asserting every exempted shape is reachable from a root. |
 
-**Nothing downstream is blocked today** — F88's validator is a K3 deliverable (`EP-MINT`) and does
-not exist yet. But **K3 builds it**, so both must be ruled on before wave 2 reaches K3. The two
-failing checks stay failing and visible until then; they are not marked pending, because pending
-would mean "a later package supplies this", and what is missing here is a decision.
+The `T[]` array arm was also dead, because the contract as it stands happens to use only
+`Array<T>`. It is now exercised by the synthetic probe.
+
+---
+
+## A vacuous check I shipped in the last report
+
+`no generic \`role allowed everywhere\` exception exists in the checker` tested the source for the
+literal `shape!=='WidgetIntent'`. Prettier reflowed the code to `shape !== 'WidgetIntent'` — with
+spaces — so the only remaining occurrence of the searched string was **inside the check's own regex
+literal**. The check found itself and passed. **It measured nothing, and it was PASS in the 26/28 I
+reported.**
+
+It is replaced by one that cannot satisfy itself: source-reading checks now read only two named
+regions, and a guard asserts those regions contain no assertion. This is the same failure mode as
+the depth-1 walk and the self-referential proof step from round 4 — a check that reads correctly and
+enforces nothing — appearing for the fourth time in this cycle, and the third time in my own code.
 
 ---
 
@@ -252,14 +325,19 @@ the difference those three corrections make.
 ```
 typecheck (build config)      PASS     lint (full repo glob)      PASS   0 errors, 9 pre-existing warnings
 typecheck:scripts             PASS     prettier                   PASS
-typecheck (widget contract)   PASS     K1 dossier checks          PASS   15/15
-widget-contract checkers      26/28    two findings, both above
+typecheck (widget contract)   PASS     prisma validate            PASS
+widget-contract checkers      31/31    4 pending on named prerequisites
+f88 mutation battery          20/20    every arm of the fence is load-bearing
 every evidence checker        PASS     run-all-checks.sh
+dist leak                     none     nothing from wave 1 reaches the build output
 ```
 
-`run-all-checks.sh` is new, and it exists because I mis-invoked three of these checkers in this
-session: they take a document path, and handed the wrong file they print a plausible
-`printed (absent)` rather than an error. The invocation is now recorded instead of remembered.
+The four pending checks are pending on **prerequisites, not on decisions**: `KIND_REGISTRY` and
+`WIDGET_CAPABILITY_POLICY` totality wait on **P-10**; R1 portability waits on **P-19** (built by
+K5); the forbidden-key walk over a *live envelope* waits on **P-01** (built by K3). That last one
+is now partly discharged at the type level — the synthetic-depth proof runs the real walker and the
+real exemption table — but a walk over runtime values still needs a runtime envelope, and saying
+otherwise would be the same overclaim this cycle keeps catching.
 
 ---
 
@@ -268,19 +346,21 @@ session: they take a document path, and handed the wrong file they print a plaus
 ```
 K1 SURFACES:                795/795
 K1 HUMAN-JUDGEMENT ROWS:    126   (137 cells: 80 successor + 57 owner, 11 rows carrying both)
-K1 OWNER DOSSIER:           READY   26 groups
+K1 OWNER DOSSIER:           PRESENTED   26 groups, 13 fields each, one approval block
 K1 SIGNED:                  NO
 K2 COMPILE:                 PASS
-K2 CHECKERS:                26/28
-F88 RULING APPLIED:         YES
-F88 SELF-CONTRADICTION:     RESOLVED for `role` at WidgetIntent
-                            OPEN for IntentRecord.tenant_id           (second instance)
-                            OPEN for RenderReceipt…[].role            (third instance)
+K2 CHECKERS:                31/31    (was 28; the mutation battery added 3)
+F88 STRUCTURAL EXEMPTIONS:  6        exact (shape, path, depth, type) locations
+F88 GENERIC EXEMPTIONS:     0        asserted against the source, not claimed
+F88 MUTATIONS CAUGHT:       20/20
 WIDGET CONTRACT REGRESSIONS: 0
 PACKAGES COMPLETE:          2/16
 WAVE 1 COMPLETE:            NO
 WAVE 2 STARTED:             NO
 ```
 
-Wave 2 does not start until the K1 human dossier is signed. The two open findings do not block the
-signature — they block **K3**, which is in wave 2's second half.
+The check count rose from 28 to 31 because the mutation battery found three arms of the fence that
+no test could distinguish. A rising check count after a ruling is the ruling being implemented, not
+scope creep: each new check exists because a mutation survived without it.
+
+Wave 2 does not start until the K1 human dossier is signed.
