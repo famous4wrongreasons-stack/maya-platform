@@ -20,19 +20,17 @@ import type {
   SubmissionShape,
 } from './gate.types';
 import type { VerificationLevel } from '../widget-contract/envelope';
+import type { ChannelId } from '../widget-contract/lifecycle';
 import { digestEquals, sha256Hex } from './token.util';
-import {
-  gate5,
-  gate6,
-  gate7,
-  gate8,
-  gate8R,
-  gate10,
-  gate11,
-  gate12,
-  gate13,
-  gateSensitiveDest,
-} from './gates/gate-logic';
+import { gate5 } from './gates/gate5';
+import { gate6, gateSensitiveDest } from './gates/gate6';
+import { gate7 } from './gates/gate7';
+import { gate8 } from './gates/gate8';
+import { gate8R } from './gates/gate8r';
+import { gate10 } from './gates/gate10';
+import { gate11 } from './gates/gate11';
+import { gate12 } from './gates/gate12';
+import { gate13 } from './gates/gate13';
 import { channelMaxLevel } from './authority/authority-resolver';
 
 /**
@@ -286,7 +284,7 @@ export class IntentGatewayService {
      * that produced this wiring was a floor with nothing to compare against.
      */
     verificationLevel: VerificationLevel;
-    carrier: string;
+    carrier: ChannelId;
     resolvedRoles: readonly string[];
   }): Promise<{ verdict: GateVerdict; stoppedAt: string | null; ran: number }> {
     const token = this.step0(args.submission);

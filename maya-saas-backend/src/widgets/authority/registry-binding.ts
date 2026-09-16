@@ -15,6 +15,7 @@ import {
 } from '../../orchestration/c9.registry';
 import { MAYA_AI_TOOL_CATALOG } from '../../ai-tools/ai-tool.catalog';
 import { ActionCapabilityRegistry } from '../../action-engine/action-engine.registry';
+import { CONTROL_REGISTRY } from '../../widget-contract/tables';
 
 /** The four key spaces §0.6 F21 declares. A ref belongs to exactly one. */
 export type Space = 'C9' | 'TOOL' | 'AE' | 'CONTROL';
@@ -64,19 +65,19 @@ const aeKeys = (): ReadonlySet<string> => {
 };
 
 /**
- * The CONTROL space is closed in the contract and small; it is not a registry lookup.
+ * The CONTROL space: §0.7 F27 closes it at three keys, in the generated `CONTROL_REGISTRY` table.
  *
- * §0.7 F27 closes it at THREE keys. K4 bound the two that had owners; K13 adds the third,
- * `control.delivery.resolve`, whose owner is the widget layer's own cross-channel delivery
- * resolver. The space and the SUBMISSION-dispatchable set are deliberately different sizes —
- * see `control-registry.service.ts`, where that difference is asserted rather than left to be
- * noticed.
+ * This set is DERIVED from that table rather than written out beside it, so F27 has one runtime
+ * statement. A literal copy here was a second statement of the same closed set, free to drift from
+ * the table every other reader (Gates 6, 7 and 13) is required to use.
+ *
+ * The space and the SUBMISSION-dispatchable set are deliberately different sizes — see
+ * `control-registry.service.ts`, whose `CONTROL_KEYS` is Gate 13's dispatch set only, and where
+ * that difference is asserted rather than left to be noticed.
  */
-export const CONTROL_KEYS: ReadonlySet<string> = new Set([
-  'control.widget.dismiss',
-  'control.run.cancel',
-  'control.delivery.resolve',
-]);
+export const CONTROL_KEYS: ReadonlySet<string> = new Set(
+  Object.keys(CONTROL_REGISTRY),
+);
 
 export interface SpaceCensus {
   readonly C9: number;

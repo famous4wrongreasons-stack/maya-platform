@@ -11,6 +11,7 @@
 //   - a gate cannot be skipped, because the runner walks the array and the array is the pipeline
 
 import type { VerificationLevel } from '../widget-contract/envelope';
+import type { ChannelId } from '../widget-contract/lifecycle';
 
 /** Where a gate runs. §3.9's "Runs in" column, kept so the table and the code can be compared. */
 export type GateHost =
@@ -95,8 +96,12 @@ export interface GateContext {
    * session claims. A first-party session replayed over SMS is capped by the carrier.
    */
   readonly channelMaxLevel: VerificationLevel;
-  /** Which carrier the submission arrived on. Presentation elsewhere; a ceiling here. */
-  readonly carrier: string;
+  /**
+   * Which carrier the submission arrived on — the answering channel, in the contract's one channel
+   * vocabulary (`ChannelId`), which is also the key of the channel ceiling. Presentation elsewhere;
+   * a ceiling here.
+   */
+  readonly carrier: ChannelId;
   /**
    * The roles the server resolved for this principal, for Gate 6. Never client-supplied — FR-3's
    * `assertNoCallerAuthority` forbids caller-supplied authority outright.

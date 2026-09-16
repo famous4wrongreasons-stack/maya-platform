@@ -27,11 +27,13 @@ const repo = path.resolve(here, '../../../..');
 const read = (p) => fs.readFileSync(path.join(repo, p), 'utf8');
 
 const GATEWAY = 'maya-saas-backend/src/widgets/intent-gateway.service.ts';
-const LOGIC = 'maya-saas-backend/src/widgets/gates/gate-logic.ts';
 const INGRESS = 'maya-saas-backend/src/action-engine/action-engine.ingress.ts';
+// Gates 5–13 were one file (`gate-logic.ts`) and are now one file per gate. A row for a gate
+// function reads that gate's own file; the checks applied to it are the same as before the split.
+const gateFile = (name) => `maya-saas-backend/src/widgets/gates/${name}.ts`;
+const logicRow = (name) => ({ file: gateFile(name), src: read(gateFile(name)), logic: true });
 
 const gateway = read(GATEWAY);
-const logic = read(LOGIC);
 const ingress = fs.existsSync(path.join(repo, INGRESS)) ? read(INGRESS) : '';
 const appModule = read('maya-saas-backend/src/app.module.ts');
 const widgetsController = read('maya-saas-backend/src/widgets/widgets.controller.ts');
@@ -49,17 +51,17 @@ const GATES = [
   { n: '2', name: 'Transport auth', symbol: 'JwtAuthGuard', host: 'HTTP middleware (global guard)', file: 'maya-saas-backend/src/app.module.ts', src: appModule },
   { n: '3', name: 'Principal binding', symbol: 'digestEquals', host: 'pipeline', file: GATEWAY, src: gateway },
   { n: '4', name: 'Tenant scope', symbol: "n: '4'", host: 'pipeline', file: GATEWAY, src: gateway },
-  { n: '5', name: 'Verification floor', symbol: 'gate5', host: 'pipeline', file: LOGIC, src: logic },
-  { n: '6', name: 'Authority', symbol: 'gate6', host: 'pipeline', file: LOGIC, src: logic },
-  { n: '6r', name: 'R3.5.1 sensitive destination', symbol: 'gateSensitiveDest', host: 'pipeline (with 6)', file: LOGIC, src: logic },
-  { n: '7', name: 'Effect admissibility', symbol: 'gate7', host: 'pipeline', file: LOGIC, src: logic },
-  { n: '8', name: 'Input validation', symbol: 'gate8', host: 'pipeline', file: LOGIC, src: logic },
-  { n: '8-R', name: 'Readback', symbol: 'gate8R', host: 'pipeline', file: LOGIC, src: logic },
+  { n: '5', name: 'Verification floor', symbol: 'gate5', host: 'pipeline', ...logicRow('gate5') },
+  { n: '6', name: 'Authority', symbol: 'gate6', host: 'pipeline', ...logicRow('gate6') },
+  { n: '6r', name: 'R3.5.1 sensitive destination', symbol: 'gateSensitiveDest', host: 'pipeline (with 6)', ...logicRow('gate6') },
+  { n: '7', name: 'Effect admissibility', symbol: 'gate7', host: 'pipeline', ...logicRow('gate7') },
+  { n: '8', name: 'Input validation', symbol: 'gate8', host: 'pipeline', ...logicRow('gate8') },
+  { n: '8-R', name: 'Readback', symbol: 'gate8R', host: 'pipeline', ...logicRow('gate8r') },
   { n: '9', name: 'Lowering', symbol: "'Lowering'", host: 'pipeline', file: GATEWAY, src: gateway },
-  { n: '10', name: 'Divergence audit', symbol: 'gate10', host: 'pipeline', file: LOGIC, src: logic },
-  { n: '11', name: 'Noun resolution', symbol: 'gate11', host: 'pipeline', file: LOGIC, src: logic },
-  { n: '12', name: 'Data fence', symbol: 'gate12', host: 'pipeline', file: LOGIC, src: logic },
-  { n: '13', name: 'Effect routing', symbol: 'gate13', host: 'pipeline', file: LOGIC, src: logic },
+  { n: '10', name: 'Divergence audit', symbol: 'gate10', host: 'pipeline', ...logicRow('gate10') },
+  { n: '11', name: 'Noun resolution', symbol: 'gate11', host: 'pipeline', ...logicRow('gate11') },
+  { n: '12', name: 'Data fence', symbol: 'gate12', host: 'pipeline', ...logicRow('gate12') },
+  { n: '13', name: 'Effect routing', symbol: 'gate13', host: 'pipeline', ...logicRow('gate13') },
   { n: '14', name: 'Canonical action', symbol: 'assertNoCallerAuthority', host: 'Action Engine ingress', file: INGRESS, src: ingress },
 ];
 
@@ -84,7 +86,7 @@ const rows = GATES.map((g) => {
   const inlineConstantPass =
     g.host.startsWith('pipeline') && /run:\s*\(\s*\)\s*=>\s*(\(\s*)?(\{\s*outcome:\s*'pass'|pass\b)/.test(slot);
   const constantPass = inlineConstantPass ||
-    (g.file === LOGIC && new RegExp(`export const ${g.symbol} = \\([^)]*\\)(: GateVerdict)? =>\\s*pass;`).test(logic));
+    (g.logic === true && new RegExp(`export const ${g.symbol} = \\([^)]*\\)(: GateVerdict)? =>\\s*pass;`).test(g.src));
   // A `pending()` stub RUNS and REFUSES — honest, but not enforcement. It only disqualifies a
   // gate whose host IS the pipeline: a gate enforced in its owning module is not made a stub by
   // anything the pipeline does or does not contain.

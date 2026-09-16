@@ -11,6 +11,7 @@
 // authority outright, so every input below is server-derived or absent.
 
 import type { VerificationLevel } from '../../widget-contract/envelope';
+import type { ChannelId } from '../../widget-contract/lifecycle';
 import { VERIFICATION_RANK } from './ladder';
 
 /**
@@ -49,29 +50,34 @@ export const resolveVerificationLevel = (
  * Whatever a session claims, a carrier caps it: a first-party session replayed over SMS is still
  * arriving over SMS. The ceiling is a property of the carrier and is not negotiable by the caller.
  *
- * Total over the six carriers with a fail-closed default: an unknown carrier caps at ANONYMOUS,
- * which refuses everything above the bottom rung rather than admitting it.
+ * Keyed by `ChannelId`, the contract's one channel vocabulary (the same one the answering channel
+ * of a receipt is checked against), so a key that is not a channel does not compile. The native
+ * shell's key is `native-shell`; a bare `native` is not a `ChannelId`.
+ *
+ * Seven rows with a fail-closed default: a channel with no row caps at ANONYMOUS, which refuses
+ * everything above the bottom rung rather than admitting it.
  */
-export const CHANNEL_MAX_LEVEL: Readonly<Record<string, VerificationLevel>> =
-  Object.freeze({
-    pwa: 'SESSION_VERIFIED',
-    native: 'SESSION_VERIFIED',
-    // A Telegram chat id identifies a channel, not a person with business authority — the
-    // fundamental rule this programme exists to enforce.
-    'telegram-bot': 'BOUND_CLIENT',
-    'web-push': 'CHANNEL_IDENTITY',
-    sms: 'CHANNEL_IDENTITY',
-    email: 'CHANNEL_IDENTITY',
-    'realtime-voice': 'BOUND_CLIENT',
-  });
+export const CHANNEL_MAX_LEVEL: Readonly<
+  Partial<Record<ChannelId, VerificationLevel>>
+> = Object.freeze({
+  pwa: 'SESSION_VERIFIED',
+  'native-shell': 'SESSION_VERIFIED',
+  // A Telegram chat id identifies a channel, not a person with business authority — the
+  // fundamental rule this programme exists to enforce.
+  'telegram-bot': 'BOUND_CLIENT',
+  'web-push': 'CHANNEL_IDENTITY',
+  sms: 'CHANNEL_IDENTITY',
+  email: 'CHANNEL_IDENTITY',
+  'realtime-voice': 'BOUND_CLIENT',
+} satisfies Partial<Record<ChannelId, VerificationLevel>>);
 
-export const channelMaxLevel = (carrier: string): VerificationLevel =>
+export const channelMaxLevel = (carrier: ChannelId): VerificationLevel =>
   CHANNEL_MAX_LEVEL[carrier] ?? 'ANONYMOUS';
 
 /** The effective level: the session's rung, capped by what the carrier can establish. */
 export const effectiveLevel = (
   sessionLevel: VerificationLevel,
-  carrier: string,
+  carrier: ChannelId,
 ): VerificationLevel => {
   const ceiling = channelMaxLevel(carrier);
   return VERIFICATION_RANK[sessionLevel] <= VERIFICATION_RANK[ceiling]

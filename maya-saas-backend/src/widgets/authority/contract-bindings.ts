@@ -180,6 +180,11 @@ export const MONEY = (cap: RegisteredActionCapabilityV1): boolean => {
 export { WIDGET_CAPABILITY_POLICY } from './capability-policy';
 
 export interface AeCommitRowLike {
+  /**
+   * F72's lookup column: the widget kind whose confirmation must precede a COMMIT on this key. The
+   * generated union, not `string`, so a kind outside the four COMMIT-bearing kinds does not compile.
+   */
+  readonly confirmation_kind: AeCommitRow['confirmation_kind'];
   /** The generated union, not `string` — AE_FAMILY_FLOOR is keyed by it and must stay total. */
   readonly family: AeCommitRow['family'];
   readonly min_verification: VerificationLevel;
@@ -190,11 +195,12 @@ export interface AeCommitRowLike {
 /**
  * `AE_WIDGET_COMMIT_ALLOWLIST` in the keyed shape the derivation reads.
  *
- * DERIVED from K7's three rows, which remain the only allowlist. The three columns the generated
- * shape adds are not authored here either: `family` is `booking` because all three rows are
- * booking capabilities; `requires_ae_approval` is read from the live registry, which the contract
- * requires it to EQUAL; and `min_verification` is `SESSION_VERIFIED` because the generated type's
- * own comment fixes it — "≥ SESSION_VERIFIED for every row".
+ * DERIVED from K7's three rows, which remain the only allowlist. The columns the generated shape
+ * adds are not authored here either: `confirmation_kind` is K7's own `confirmationKind` column,
+ * copied; `family` is `booking` because all three rows are booking capabilities;
+ * `requires_ae_approval` is read from the live registry, which the contract requires it to EQUAL;
+ * and `min_verification` is `SESSION_VERIFIED` because the generated type's own comment fixes it —
+ * "≥ SESSION_VERIFIED for every row".
  */
 export const AE_WIDGET_COMMIT_ALLOWLIST: Readonly<
   Record<string, AeCommitRowLike>
@@ -203,6 +209,7 @@ export const AE_WIDGET_COMMIT_ALLOWLIST: Readonly<
     K7_ALLOWLIST.map((row) => [
       row.ae,
       Object.freeze({
+        confirmation_kind: row.confirmationKind,
         family: 'booking' as const,
         min_verification: 'SESSION_VERIFIED',
         requires_ae_approval:
