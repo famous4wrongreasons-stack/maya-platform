@@ -963,21 +963,56 @@ is one set with two enforcement points, not two sets.
 |---|---:|---|
 | `WidgetKind` | 22 | contract §2.1, closed |
 | `EffectClass` | 8 | §3.2 |
-| `LifecycleState` | 8 | §4.1 |
+| `LifecycleState` | 10 | §4.1 |
 | `VerificationLevel` | 5 | §0.8 F39 — the ladder |
-| `ChannelId` | 5 | §4.5 |
+| `ChannelId` | 11 | §4.5 |
 | `ConsentClass` | 5 | §0.14 F81 |
 | `DraftClass` | 5 | §0.14 F79 — **not** `'expense'`, **not** `'loyalty_adjustment'` |
 | `CapabilitySpace` | 4 | §0.6 F21 |
 | `C9Domain` | 4 | the orchestrator's own published union, imported, never redeclared |
-| `FreshnessClass` | 4 | §4.1 |
+| `FreshnessClass` | 4 | §4.1, `Lifecycle.freshness_class` |
 | `IntentReceiptOutcome` | 4 | `ACCEPTED` / `REFUSED` / `NEEDS_CONFIRMATION` / `NEEDS_VERIFICATION` |
-| `MechanismGapStatus` | 4 | §0.1 F5's status vocabulary |
-| `RenderTier` | 3 | §4.5 — the one receipt member inside `body_hash` |
+| `MechanismGapStatus` | 5 | §0.1 F5's status vocabulary, in full |
+| `RenderTier` | 7 | §4.5 — the one receipt member inside `body_hash` |
 | `ConfirmationOfKind` | 3 | §0.13 F74 |
-| `TurnRole` | 3 | timeline only |
+| `TurnRole` | **3, unverified** | **NO CANONICAL DEFINITION.** The contract declares no `TurnRole` union and no timeline-turn shape; the count here has no source. Its CHECK constraint is not generated, and `WidgetTimelineTurn.role` is unconstrained until the members are ruled. |
 | `GapOwnerState` | 3 | `none` / `unreachable` / `registered_elsewhere` — §A1.6.1's three-way finding |
 | `TombstoneStore` | 2 | `timeline` / `intent_audit` — the two erasable stores |
+
+**Four rows above were corrected after the certified contract was compiled and compared with them.**
+`LifecycleState`, `ChannelId` and `RenderTier` each cited a contract section and printed a different
+cardinality than that section declares (8 vs 10, 5 vs 11, 3 vs 7); `MechanismGapStatus` cited F5's
+status vocabulary and printed 4 where F5 names 5. **`OWNER RULING, wave 2`: the certified contract
+is the source of truth for all four, and these rows were transcription defects, not decisions** — no
+certified semantics changed. `enum-member-check.mjs` now compares the **exact member set**, not the
+count, so a summary table can no longer drift from the contract it cites.
+
+<!-- BEGIN GENERATED ENUM MEMBERS — build-widget-checks.mjs owns this block; do not hand-edit -->
+
+**The exact members, derived.** Each set below is resolved from a canonical definition and
+the provenance is printed with it. `enum-member-check.mjs` compares this block, the counts in the
+table above, and the emitted `CHECK` constraints against one another.
+
+```
+WidgetKind             22  CHOICE SERVICE_SELECTOR STAFF_SELECTOR TIME_SLOT_SELECTOR BOOKING_CONFIRMATION SCHEDULE CLIENT_LIST METRIC CHART REPORT STRATEGY_OPTIONS APPROVAL PROGRESS LIMITATION SOURCE_STATUS SETTINGS_DRAFT FORM CONSENT_STATE IDENTITY_BINDING PAYMENT_HANDOFF MEDIA_PREVIEW ARTIFACT
+EffectClass             8  NONE NAVIGATE REFINE CONTROL DRAFT REQUEST_APPROVAL COMMIT HANDOFF
+LifecycleState         10  MINTED DELIVERED LIVE CONSUMED SUPERSEDED EXPIRED CANCELLED HISTORISED BODY_DROPPED REDACTED
+VerificationLevel       5  ANONYMOUS CHANNEL_IDENTITY BOUND_CLIENT SESSION_VERIFIED STEP_UP_VERIFIED
+ChannelId              11  pwa native-shell telegram-miniapp telegram-bot web-push realtime-voice guest-chat web-public public-community sms email
+ConsentClass            5  none communication personal_data identity_binding finance
+DraftClass              5  settings notification_pref task schedule_rule audience
+CapabilitySpace         4  C9 TOOL AE CONTROL
+C9Domain                4  ADMIN CLIENT_LIFECYCLE OCCUPANCY BUSINESS_INTELLIGENCE
+RenderTier              7  RICH_INTERACTIVE RICH_CONSTRAINED ANNOUNCEMENT SPOKEN TEXT_ONLY PUBLIC_READ ANONYMOUS_CHAT
+FreshnessClass          4  live scenario proactive_once static
+ConfirmationOfKind      3  draft record approval
+MechanismGapStatus      5  [EXISTS] [ABSENT] [PARTIAL] [UNENFORCEABLE-TODAY] NORMATIVE-PENDING
+IntentReceiptOutcome    4  ACCEPTED REFUSED NEEDS_CONFIRMATION NEEDS_VERIFICATION
+TombstoneStore          2  timeline intent_audit
+GapOwnerState           3  none unreachable registered_elsewhere
+TurnRole                ?  NO CANONICAL DEFINITION — constraint not generated
+```
+<!-- END GENERATED ENUM MEMBERS -->
 
 **There is no `error` severity and no `ERROR`, `FAILURE` or `RETRY` member anywhere above.** §2.1
 closes the kind enum without them and §1.3 C4 forbids the vocabulary in a `Cell.label`; a

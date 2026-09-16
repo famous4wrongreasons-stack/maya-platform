@@ -19,6 +19,8 @@ run widget-schema-count            $E/widget-schema-count.mjs       $D/MAYA-CHAT
 run k1-dossier-check               $E/k1/k1-dossier-check.mjs
 run k1-human-dossier               $E/k1/build-human-dossier.mjs
 run k1-signature-check             $E/k1/k1-signature-check.mjs
+run widget-check-generator         $E/build-widget-checks.mjs
+run enum-member-check              $E/enum-member-check.mjs
 printf '%-34s ' widget-contract-check
 ( cd maya-saas-backend && node scripts/widget-contract-check.mjs 2>&1 | tail -1 )
 printf '%-34s ' f88-mutation-battery

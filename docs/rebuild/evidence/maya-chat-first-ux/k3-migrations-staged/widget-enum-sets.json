@@ -1,0 +1,185 @@
+{
+ "WidgetKind": {
+  "members": [
+   "CHOICE",
+   "SERVICE_SELECTOR",
+   "STAFF_SELECTOR",
+   "TIME_SLOT_SELECTOR",
+   "BOOKING_CONFIRMATION",
+   "SCHEDULE",
+   "CLIENT_LIST",
+   "METRIC",
+   "CHART",
+   "REPORT",
+   "STRATEGY_OPTIONS",
+   "APPROVAL",
+   "PROGRESS",
+   "LIMITATION",
+   "SOURCE_STATUS",
+   "SETTINGS_DRAFT",
+   "FORM",
+   "CONSENT_STATE",
+   "IDENTITY_BINDING",
+   "PAYMENT_HANDOFF",
+   "MEDIA_PREVIEW",
+   "ARTIFACT"
+  ],
+  "why": "contract union `WidgetKind` (kinds.ts)"
+ },
+ "EffectClass": {
+  "members": [
+   "NONE",
+   "NAVIGATE",
+   "REFINE",
+   "CONTROL",
+   "DRAFT",
+   "REQUEST_APPROVAL",
+   "COMMIT",
+   "HANDOFF"
+  ],
+  "why": "contract union `EffectClass` (intent.ts)"
+ },
+ "LifecycleState": {
+  "members": [
+   "MINTED",
+   "DELIVERED",
+   "LIVE",
+   "CONSUMED",
+   "SUPERSEDED",
+   "EXPIRED",
+   "CANCELLED",
+   "HISTORISED",
+   "BODY_DROPPED",
+   "REDACTED"
+  ],
+  "why": "contract union `LifecycleState` (lifecycle.ts)"
+ },
+ "VerificationLevel": {
+  "members": [
+   "ANONYMOUS",
+   "CHANNEL_IDENTITY",
+   "BOUND_CLIENT",
+   "SESSION_VERIFIED",
+   "STEP_UP_VERIFIED"
+  ],
+  "why": "contract union `VerificationLevel` (envelope.ts)"
+ },
+ "ChannelId": {
+  "members": [
+   "pwa",
+   "native-shell",
+   "telegram-miniapp",
+   "telegram-bot",
+   "web-push",
+   "realtime-voice",
+   "guest-chat",
+   "web-public",
+   "public-community",
+   "sms",
+   "email"
+  ],
+  "why": "contract union `ChannelId` (lifecycle.ts)"
+ },
+ "ConsentClass": {
+  "members": [
+   "none",
+   "communication",
+   "personal_data",
+   "identity_binding",
+   "finance"
+  ],
+  "why": "contract union `ConsentClass` (tables.ts)"
+ },
+ "DraftClass": {
+  "members": [
+   "settings",
+   "notification_pref",
+   "task",
+   "schedule_rule",
+   "audience"
+  ],
+  "why": "contract union `DraftClass` (confirmation-guard.ts)"
+ },
+ "CapabilitySpace": {
+  "members": [
+   "C9",
+   "TOOL",
+   "AE",
+   "CONTROL"
+  ],
+  "why": "contract union `CapabilitySpace` (capability-ref.ts)"
+ },
+ "C9Domain": {
+  "members": [
+   "ADMIN",
+   "CLIENT_LIFECYCLE",
+   "OCCUPANCY",
+   "BUSINESS_INTELLIGENCE"
+  ],
+  "why": "contract union `C9Domain` (ambient.ts)"
+ },
+ "RenderTier": {
+  "members": [
+   "RICH_INTERACTIVE",
+   "RICH_CONSTRAINED",
+   "ANNOUNCEMENT",
+   "SPOKEN",
+   "TEXT_ONLY",
+   "PUBLIC_READ",
+   "ANONYMOUS_CHAT"
+  ],
+  "why": "contract union `RenderTier` (lifecycle.ts)"
+ },
+ "FreshnessClass": {
+  "members": [
+   "live",
+   "scenario",
+   "proactive_once",
+   "static"
+  ],
+  "why": "contract `Lifecycle.freshness_class` (lifecycle.ts:48)"
+ },
+ "ConfirmationOfKind": {
+  "members": [
+   "draft",
+   "record",
+   "approval"
+  ],
+  "why": "contract `IntentRecord.kind` (intent.ts:261)"
+ },
+ "MechanismGapStatus": {
+  "members": [
+   "[EXISTS]",
+   "[ABSENT]",
+   "[PARTIAL]",
+   "[UNENFORCEABLE-TODAY]",
+   "NORMATIVE-PENDING"
+  ],
+  "why": "contract §0.1 F5 status vocabulary, extracted from its own sentence"
+ },
+ "IntentReceiptOutcome": {
+  "members": [
+   "ACCEPTED",
+   "REFUSED",
+   "NEEDS_CONFIRMATION",
+   "NEEDS_VERIFICATION"
+  ],
+  "why": "mapping §5.5 states the four members in full (not a count)"
+ },
+ "TombstoneStore": {
+  "members": [
+   "timeline",
+   "intent_audit"
+  ],
+  "why": "mapping §5.5 states both members in full — the two erasable stores"
+ },
+ "GapOwnerState": {
+  "members": [
+   "none",
+   "unreachable",
+   "registered_elsewhere"
+  ],
+  "why": "mapping §5.5 states all three in full, and the K1 capability-gap registry uses only those"
+ },
+ "TurnRole": null
+}

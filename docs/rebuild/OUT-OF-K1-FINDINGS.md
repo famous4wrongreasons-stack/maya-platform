@@ -136,6 +136,144 @@ unchanged, and this file adds none.
 
 ---
 
+## F-ENUM-CARDINALITY — RESOLVED by owner ruling, wave 2
+
+The three disagreements are closed: **the certified contract wins**, and §5.5's rows were
+transcription defects, not decisions. `LifecycleState` 8 → **10**, `ChannelId` 5 → **11**,
+`RenderTier` 3 → **7**.
+
+**A fourth turned up during reconciliation, of exactly the same class.** §5.5 gave
+`MechanismGapStatus` as **4** and cited «§0.1 F5's status vocabulary». F5 names **five**:
+`[EXISTS]`, `[ABSENT]`, `[PARTIAL]`, `[UNENFORCEABLE-TODAY]`, `NORMATIVE-PENDING`. It is corrected
+the same way and for the same reason — the row cites the contract rather than claiming authority of
+its own. The K1 mechanism-gap registry happens to use only three of the five, but an observed sample
+is not a domain, and a `CHECK` narrower than the vocabulary is the failure the ruling exists to
+prevent.
+
+**Three of the four count-only enums are now derived, none guessed:**
+
+| enum | members | evidence |
+|---|---|---|
+| `ConfirmationOfKind` | `draft` `record` `approval` | **normative union** — §0.13 F74 declares it in TypeScript, and the compiled contract carries it at `intent.ts:261` |
+| `FreshnessClass` | `live` `scenario` `proactive_once` `static` | **normative union** — a member of `Lifecycle` (§4.1), compiled at `lifecycle.ts:48`; E-28 confirms the ownership |
+| `MechanismGapStatus` | F5's five, above | **normative vocabulary** — extracted from F5's own sentence, not retyped |
+
+`GapOwnerState`, `IntentReceiptOutcome` and `TombstoneStore` were never count-only: §5.5 states their
+members in full, and the K1 capability-gap registry independently uses only `GapOwnerState`'s three.
+
+---
+
+## F-TURNROLE — the one enum with no canonical definition anywhere
+
+**STOP, scoped to this enum only.** Every other constraint is generated; this one cannot be, and
+padding it to three would be exactly the inference the ruling forbids.
+
+```
+ENUM                     TurnRole
+EXPECTED COUNT           3   (asserted by mapping §5.5, with no source)
+AVAILABLE MEMBERS        none that any canonical definition states
+MISSING SEMANTIC DEFINITION   what a timeline turn's role may be
+```
+
+**Where it is not.** The certified contract contains **no `TurnRole`**, no `TimelineTurn` shape and
+no turn-role union — `grep` returns 0 across the whole document. The compiled contract module
+declares nothing turn-role-shaped. §5.5's source column reads «timeline only», which points at
+nothing. The nearest thing in the repository is `AiCoreMessageRole = 'assistant' | 'user'`
+(`src/ai-tools/ai-core.types.ts:5`) — **two** members, in an LLM transport type that is not a
+contract definition and does not match the asserted count.
+
+**What the contract does say about turns**, and why it is not enough: Gate 9 requires the lowered
+utterance to be appended «as a **USER turn with authority NONE**», E10 repeats it, and
+`spoken_transcript` is documented «voice turns only; authority NONE». So a `user` role certainly
+exists and a distinction between typed and spoken turns is implied. **That is inference from usage,
+not a declared domain** — it yields neither a third member nor an assurance that three is the right
+number.
+
+**Consequence, and it is narrow.** `WidgetTimelineTurn.role` has no `CHECK`, so **33 of 34** are
+generated and the resume gate's `CHECKS: 34/34` does not hold. The migration stays out of the deploy
+path. Nothing else in K3 is blocked by this: the tables, columns, keys, indexes and the other 33
+constraints are all generated and verified.
+
+**What a ruling needs to settle:** the exact members of a timeline turn's role. The natural
+candidates are a two-member `user` / `assistant` domain matching the existing transport type, or a
+three-member domain adding a system/tool turn — but which one is a semantic decision about what the
+timeline records, and the contract has never made it.
+
+---
+
+## What this file is for
+
+Neither finding is a K1 decision, and neither may be closed by a K1 signature. They are recorded
+here because the alternative is that they survive only in a conversation. `PACKAGES: 16` is
+unchanged, and this file adds none.
+
+---
+
+## F-ENUM-CARDINALITY — RESOLVED by owner ruling, wave 2
+
+The three disagreements are closed: **the certified contract wins**, and §5.5's rows were
+transcription defects, not decisions. `LifecycleState` 8 → **10**, `ChannelId` 5 → **11**,
+`RenderTier` 3 → **7**.
+
+**A fourth turned up during reconciliation, of exactly the same class.** §5.5 gave
+`MechanismGapStatus` as **4** and cited «§0.1 F5's status vocabulary». F5 names **five**:
+`[EXISTS]`, `[ABSENT]`, `[PARTIAL]`, `[UNENFORCEABLE-TODAY]`, `NORMATIVE-PENDING`. It is corrected
+the same way and for the same reason — the row cites the contract rather than claiming authority of
+its own. The K1 mechanism-gap registry happens to use only three of the five, but an observed sample
+is not a domain, and a `CHECK` narrower than the vocabulary is the failure the ruling exists to
+prevent.
+
+**Three of the four count-only enums are now derived, none guessed:**
+
+| enum | members | evidence |
+|---|---|---|
+| `ConfirmationOfKind` | `draft` `record` `approval` | **normative union** — §0.13 F74 declares it in TypeScript, and the compiled contract carries it at `intent.ts:261` |
+| `FreshnessClass` | `live` `scenario` `proactive_once` `static` | **normative union** — a member of `Lifecycle` (§4.1), compiled at `lifecycle.ts:48`; E-28 confirms the ownership |
+| `MechanismGapStatus` | F5's five, above | **normative vocabulary** — extracted from F5's own sentence, not retyped |
+
+`GapOwnerState`, `IntentReceiptOutcome` and `TombstoneStore` were never count-only: §5.5 states their
+members in full, and the K1 capability-gap registry independently uses only `GapOwnerState`'s three.
+
+---
+
+## F-TURNROLE — the one enum with no canonical definition anywhere
+
+**STOP, scoped to this enum only.** Every other constraint is generated; this one cannot be, and
+padding it to three would be exactly the inference the ruling forbids.
+
+```
+ENUM                     TurnRole
+EXPECTED COUNT           3   (asserted by mapping §5.5, with no source)
+AVAILABLE MEMBERS        none that any canonical definition states
+MISSING SEMANTIC DEFINITION   what a timeline turn's role may be
+```
+
+**Where it is not.** The certified contract contains **no `TurnRole`**, no `TimelineTurn` shape and
+no turn-role union — `grep` returns 0 across the whole document. The compiled contract module
+declares nothing turn-role-shaped. §5.5's source column reads «timeline only», which points at
+nothing. The nearest thing in the repository is `AiCoreMessageRole = 'assistant' | 'user'`
+(`src/ai-tools/ai-core.types.ts:5`) — **two** members, in an LLM transport type that is not a
+contract definition and does not match the asserted count.
+
+**What the contract does say about turns**, and why it is not enough: Gate 9 requires the lowered
+utterance to be appended «as a **USER turn with authority NONE**», E10 repeats it, and
+`spoken_transcript` is documented «voice turns only; authority NONE». So a `user` role certainly
+exists and a distinction between typed and spoken turns is implied. **That is inference from usage,
+not a declared domain** — it yields neither a third member nor an assurance that three is the right
+number.
+
+**Consequence, and it is narrow.** `WidgetTimelineTurn.role` has no `CHECK`, so **33 of 34** are
+generated and the resume gate's `CHECKS: 34/34` does not hold. The migration stays out of the deploy
+path. Nothing else in K3 is blocked by this: the tables, columns, keys, indexes and the other 33
+constraints are all generated and verified.
+
+**What a ruling needs to settle:** the exact members of a timeline turn's role. The natural
+candidates are a two-member `user` / `assistant` domain matching the existing transport type, or a
+three-member domain adding a system/tool turn — but which one is a semantic decision about what the
+timeline records, and the contract has never made it.
+
+---
+
 ## F-ENUM-CARDINALITY — the adopted mapping and the certified contract disagree on three closed enums
 
 **Status: PROVEN, reproducible, and it blocks K3's migration.** Found while writing the CHECK
