@@ -14,8 +14,17 @@ migration, zero business-table changes, zero modified controllers.*
 The pipeline is **one ordered array**, which is §0.3's stated mechanism and not a style choice: an
 array can be enumerated, counted and asserted, and nested conditionals can only be read. All fifteen
 gates of §3.9 are present in the contract's order. Gates 1, 3 and 4 are live; Gate 2 passes because
-the global JWT guard has already run; **the remaining ten run and refuse** with `mechanism_absent`,
-each naming the package that builds it.
+the global JWT guard has already run; **the remaining eleven run and refuse** with
+`mechanism_absent`, each naming the package that builds it.
+
+*Corrected in wave 6:* this line read «the remaining ten» until an adversarial pass counted the
+array. There are **eleven** — 5, 6, 7, 8, 8-R, 9, 10, 11, 12, 13, 14 — against four live. The
+substance is unchanged and fail-closed: a submission that reaches gate 5 is refused. What the
+miscount obscured is worth stating plainly, because it is the shape of the whole cycle: the rules
+those eleven gates name are implemented and tested **in their own modules** — K4's floors, K6's
+fitter, K7's booking guard — and are **not wired into the pipeline**. «The gate pipeline enforces
+X» is true of gates 1-4; for the rest the enforcement point is the module and the pipeline is a
+refusal.
 
 **`BUTTON → ENDPOINT` is unrepresentable, and not by checking.** `SubmitIntentDto` has three members
 — `intent_token`, `inputs`, `readback_ack`. A check could be bypassed; an absent field cannot be

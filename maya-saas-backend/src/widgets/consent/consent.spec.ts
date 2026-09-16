@@ -499,19 +499,93 @@ describe('K12 — erasure, and the proof that history was never business state',
   });
 
   it('after an erasure replay every canonical read is byte-identical', () => {
-    const before = {
-      bookings: [
-        { id: 'b1', startsAt: '2026-09-20T09:00:00.000Z', staffId: 's1' },
-      ],
-      consent: [{ clientId: 'c1', kind: 'marketing', granted: false }],
-      loyalty: [{ clientId: 'c1', balance: 1200 }],
+    // This test was a tautology for one wave: `after` was `JSON.parse(JSON.stringify(before))`, so
+    // it compared an object with a clone of itself and could not have failed. An adversarial pass
+    // caught it. The replay below actually erases: a world holds both the widget-layer stores and
+    // the canonical rows, the erasure is APPLIED to it, and the canonical reads are then recomputed
+    // from the world rather than copied.
+    const world = {
+      timeline: [
+        {
+          rowKey: 'turn-1',
+          textContent: 'запишите меня на завтра',
+          spokenTranscript: null,
+        },
+        { rowKey: 'turn-2', textContent: 'спасибо', spokenTranscript: null },
+      ] as Array<Record<string, unknown>>,
+      intent_audit: [
+        { rowKey: 'sub-1', argumentsJson: '{"staffId":"s1"}' },
+      ] as Array<Record<string, unknown>>,
+      canonical: {
+        bookings: [
+          { id: 'b1', startsAt: '2026-09-20T09:00:00.000Z', staffId: 's1' },
+        ],
+        consent: [{ clientId: 'c1', kind: 'marketing', granted: false }],
+        loyalty: [{ clientId: 'c1', balance: 1200 }],
+      },
     };
-    // The erasure touches the widget layer's two stores. Nothing it touches is reachable from a
-    // canonical read, so the canonical reads are the same object — and the digest says so.
-    const after = JSON.parse(JSON.stringify(before)) as typeof before;
-    const verdict = replayIsByteIdentical(before, after);
+
+    // A canonical read is a function of the canonical rows ONLY. That is the property under test,
+    // and it is what makes the erasure invisible to it.
+    const canonicalReads = (w: typeof world) => ({ ...w.canonical });
+    const before = canonicalReads(world);
+
+    const apply = (stones: ReturnType<typeof planErasure>) => {
+      for (const s of stones) {
+        const store = world[s.store];
+        const target = store.find((r) => r.rowKey === s.rowKey);
+        if (!target)
+          throw new Error(`erasure names a row that is not in ${s.store}`);
+        for (const p of s.fieldsErased) target[p.slice(1)] = null;
+      }
+    };
+
+    apply(
+      planErasure(
+        req,
+        [
+          {
+            store: 'timeline',
+            rowKey: 'turn-1',
+            erasureClass: 'CONVERSATION_CONTENT',
+            fields: ['/textContent'],
+          },
+          {
+            store: 'timeline',
+            rowKey: 'turn-2',
+            erasureClass: 'CONVERSATION_CONTENT',
+            fields: ['/textContent'],
+          },
+          {
+            store: 'intent_audit',
+            rowKey: 'sub-1',
+            erasureClass: 'CANONICAL_ELSEWHERE',
+            fields: ['/argumentsJson'],
+          },
+        ],
+        now,
+      ),
+    );
+
+    // The erasure really happened: nothing a person wrote survives in the erasable stores.
+    expect(world.timeline.every((r) => r.textContent === null)).toBe(true);
+    expect(world.intent_audit[0].argumentsJson).toBeNull();
+
+    // And every canonical read is byte-identical, recomputed rather than cloned.
+    const verdict = replayIsByteIdentical(before, canonicalReads(world));
     expect(verdict.identical).toBe(true);
     expect(verdict.changed).toEqual([]);
+  });
+
+  it('...and the replay would CATCH an erasure that reached a canonical row', () => {
+    // The negative control the tautological version could never have. If the widget layer's erasure
+    // could touch a canonical row — which is what a business object holding a message id would make
+    // possible — the digests diverge and the replay says which read moved.
+    const before = { loyalty: [{ clientId: 'c1', balance: 1200 }] };
+    const after = { loyalty: [{ clientId: 'c1', balance: null }] };
+    const verdict = replayIsByteIdentical(before, after);
+    expect(verdict.identical).toBe(false);
+    expect(verdict.changed).toEqual(['loyalty']);
   });
 
   it('and the comparison is not vacuous', () => {

@@ -50,6 +50,14 @@ say "DRIFT:" "NONE locally; a server check belongs to deploy"
 # SIGSEGV mid-run — an operating-system kill, not a failing assertion, and the suite it took down
 # passes on its own. Bounding the workers removes the memory pressure rather than retrying until
 # the flake is absent, which would have been a way of not finding out what was wrong.
+# The final acceptance gate runs this same full regression once, for all five waves. Running it
+# again here, nested inside that job, is a second concurrent jest over the same 469 suites — which
+# is how this gate came back FAIL inside the final gate while passing standalone. The regression is
+# not skipped, it is run ONCE, by whoever is outermost.
+if [ "${REGRESSION_RUN_BY_CALLER:-0}" = "1" ]; then
+  say "MANDATORY REGRESSION:" "run once by the caller"
+  J=""
+else
 J=$( cd "$BE" && npx jest --silent --maxWorkers=4 2>&1 | tail -8 )
 SUITES=$(echo "$J" | grep -oE 'Suites: *[0-9]+ passed[^,]*' | head -1)
 TESTS=$(echo "$J" | grep -oE 'Tests: *[0-9]+ passed[^,]*' | head -1)
@@ -58,6 +66,7 @@ if echo "$J" | grep -qE "Tests: *[0-9]+ failed"; then
 elif echo "$J" | grep -qE "Suites: *[0-9]+ failed"; then
   say "MANDATORY REGRESSION:" "FAIL  (a suite failed to RUN — ${SUITES#Test Suites: })"; fail=1
 else say "MANDATORY REGRESSION:" "PASS  ${TESTS#Tests: }"; fi
+fi
 
 # ── production untouched ─────────────────────────────────────────────────────────────────────
 PROD=$(git status --porcelain | grep -cE "(ai |сайт |maya-os-site|smm_bot)" || true)

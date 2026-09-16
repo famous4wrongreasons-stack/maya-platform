@@ -389,3 +389,49 @@ are the ones a reviewer would look at first:
 
 Moving either changes the count, which the start-up assertion then rejects — so a change here is a
 contract amendment, not a config edit. **Recorded, not decided.** Nothing in wave 6 depends on it.
+
+---
+
+## F-WAVE6-CUTOVER — three packages at their cutover condition, nothing deleted
+
+**Filed:** wave 6. **Classification:** the plan's own condition, reached and reported.
+**No owner decision is required to proceed; one is required to go further.**
+
+Wave 6 is the only wave permitted to delete. It deleted nothing. §7.1's third condition — *the
+legacy surface has been observed unused for the agreed window* — is a statement about what real
+users did not do, over wall-clock time, against a surface that was live and logging. No artefact a
+repository can hold is that observation, and `PRODUCTION EFFECTS FOR PROOF` is 0.
+
+Six adversarial verifiers were instructed to refute that conclusion. They narrowed a great deal
+around it and the kernel stood.
+
+**The window is fully specified and simply has not been entered.** D10's ledger state machine:
+`MAPPED → PARITY_PROVEN → ENTRY_POINT_DARK (14 days) → ROUTE_SEALED (30 days; 45 for period-close)
+→ DELETED`, one-step rollback at each transition. Entering `ENTRY_POINT_DARK` is a production
+config change; leaving it is a production observation.
+
+### What each package needs, exactly
+
+| package | the one thing it is waiting on |
+|---|---|
+| **K14** | `bot.py` executable — the ~45 command bodies live there, and it is read-only and undeployable by constraint |
+| **K15** | an edit to `app.html`, the shipped 2.7 MB source-less PWA, to drive 192 client-side authority values to 0; and a recorded unreachability probe for `maya-os-site/index.html` |
+| **K16** | 437 rows entering and leaving `ENTRY_POINT_DARK`; 0 retirable today; 0 deleted |
+
+### What would unblock it, and what would not
+
+**Would:** authorising a production cutover window — entering `ENTRY_POINT_DARK` for a first batch
+of rows, with the ledger recording each transition and its rollback. The evidence files the
+evaluator reads are named and empty:
+`dark-window-observations.json`, `rollback-register.json`, `deep-link-map.json`,
+`successor-map.json`, `parity-fixtures.json`, `a11y-conformance.json`, `authority-proofs.json`,
+`maya-os-site-unreachable-probe.json`. The day any is written with real records, the evaluator
+changes its answer without being edited — verified by feeding it synthetic records and watching a
+row turn retirable, then removing them and watching it revert.
+
+**Would not:** relabelling the simulated K13 delivery window as a production observation; treating
+a document that *describes* the dark window as a record of one; or granting condition (1) — an
+adversarial pass proved that granting parity to all 80 original K16 candidates leaves deletable at
+**0**, a delta of exactly zero. The binding conjuncts are (2) and (3).
+
+**Recorded, not decided.** Wave 6 stops here, as instructed, without substituting evidence.
