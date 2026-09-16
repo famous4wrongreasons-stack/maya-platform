@@ -133,3 +133,75 @@ here so that it is repaired on its own schedule rather than inherited silently b
 Neither finding is a K1 decision, and neither may be closed by a K1 signature. They are recorded
 here because the alternative is that they survive only in a conversation. `PACKAGES: 16` is
 unchanged, and this file adds none.
+
+---
+
+## F-ENUM-CARDINALITY — the adopted mapping and the certified contract disagree on three closed enums
+
+**Status: PROVEN, reproducible, and it blocks K3's migration.** Found while writing the CHECK
+constraints for `MIGRATION 2`. `enum-cardinality-check.mjs` reproduces it.
+
+§5.5 of the mapping lists seventeen enum sets that the D12 `CHECK` constraints are written over,
+each with a member count and a source. Ten of them name a type the certified contract declares.
+**Seven agree. Three do not** — and each of the three cites the contract section it contradicts:
+
+| set | mapping says | the contract declares | mapping cites |
+|---|---:|---:|---|
+| `LifecycleState` | 8 | **10** — adds `BODY_DROPPED`, `REDACTED` | §4.1 |
+| `ChannelId` | 5 | **11** — `pwa native-shell telegram-miniapp telegram-bot web-push realtime-voice guest-chat web-public public-community sms email` | §4.5 |
+| `RenderTier` | 3 | **7** — `RICH_INTERACTIVE RICH_CONSTRAINED ANNOUNCEMENT SPOKEN TEXT_ONLY PUBLIC_READ ANONYMOUS_CHAT` | §4.5 |
+
+### Why it cannot be resolved by choosing quietly
+
+A `CHECK` narrower than the contract does not fail at review — it fails at `INSERT`, in production,
+on the first envelope that uses a member the database was not told about. A `CHECK` written to the
+contract instead makes the mapping's own §5.5 table wrong. Either way a document the owner signed
+stops describing the system, and **the difference decides what the database will accept.**
+
+Nothing caught it. `mapping-vs-contract-check.mjs` passes 14/14 and never compares a member count;
+`widget-schema-count.mjs` counts `CHECK` annotations without resolving what any of them admits. So
+three enums could differ by up to six members with every gate green. That gap is now closed by
+`enum-cardinality-check.mjs`, which fails while the disagreement stands.
+
+### And seven of the seventeen have no members anywhere
+
+`TurnRole` (3), `FreshnessClass` (4), `ConfirmationOfKind` (3), `IntentReceiptOutcome` (4),
+`TombstoneStore` (2), `GapOwnerState` (3), `MechanismGapStatus` (4) are not contract types. Three
+spell their members out in the §5.5 table and can be written as constraints today. **Four give only
+a count** — `TurnRole`, `FreshnessClass`, `ConfirmationOfKind`, `MechanismGapStatus` — and a count
+cannot become a `CHECK`. `FreshnessClass` and `ConfirmationOfKind` point at contract sections (§4.1,
+§0.13 F74) that use the concept without declaring a named union, so their members are recoverable by
+reading; `TurnRole` cites only "timeline only".
+
+### What is recommended, and why it is still the owner's
+
+**The contract should win on all three.** It is the certified artifact, the mapping cites it as the
+source rather than claiming its own authority, and a database narrower than the contract is the
+failure mode that cannot be caught before production. On that reading §5.5's three rows are
+transcription errors in a summary table, not decisions — which is the least disruptive explanation
+and the one most consistent with how the table is written.
+
+But it is **not** mine to apply: it changes what the production database accepts, and the owner's
+stop rule names a proven schema contradiction explicitly. So K3's migration stops here, with the
+generated SQL retained and **removed from `prisma/migrations/` so no deploy can pick it up
+incomplete**.
+
+### What is ready and waiting
+
+Both migrations are generated, validated and staged under
+`evidence/maya-chat-first-ux/k3-migrations-staged/`:
+
+```
+MIGRATION 1  widget_layer_ledgers   3 CREATE TABLE   0 FK   0 DROP
+MIGRATION 2  widget_layer_runtime  10 CREATE TABLE  16 FK   0 DROP   16 ALTER, all on Widget* tables
+```
+
+They match the envelope exactly (3 + 10 models, 16 FK, 10 → `Tenant`, 6 widget → widget), no
+business table is touched, and both schema stages pass `prisma validate`. **Six back-relations had
+to be added** that the D12 block omits — it declares only the owning side of each widget → widget
+relation, so as printed it does not load in Prisma at all. That is a defect of the printed block,
+not of the design, and it is fixed in the staged schema.
+
+The 34 `CHECK` constraints are the only thing outstanding: 27 are writable now (23 from the
+contract's own unions, 4 from members the §5.5 table spells out), and **7 are blocked** — 3 by the
+cardinality disagreement and 4 by having no members declared anywhere.
