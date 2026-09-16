@@ -1,0 +1,8 @@
+# The emitted bundle is derivable from the sources, so it is not committed.
+dist/maya-chat-shell.ts
+.build-check/
+
+# The MANIFEST is committed, deliberately. It carries the digest, and a reproducibility claim
+# nobody else can check is not a claim — `node build.mjs --check` compares a fresh build against
+# this file, so it has to travel with the sources.
+!dist/manifest.json

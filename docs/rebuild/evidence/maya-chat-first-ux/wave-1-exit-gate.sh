@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
-# WAVE 1 EXIT GATE. Every line is derived by running something, not by asserting it. The gate fails
-# if any line cannot be produced, because a wave exit that prints a number nobody computed is the
-# thing this whole cycle has been built to prevent.
+# WAVE 1 EXIT GATE. Every line is derived by running something, not by asserting it.
+#
+# IT IS PINNED TO ITS OWN COMMIT, and that matters. A wave gate asserts a property of ITS wave:
+# wave 1's fence was "the deployed bytes do not change", and wave 2's fence is "first runtime".
+# Run against a wave-2 tree this gate correctly reports that prisma/ changed and that the contract
+# is now compiled — both of which wave 2 is SUPPOSED to do. Pinning keeps the gate meaning what it
+# meant when it passed, instead of decaying into a complaint about later work.
+WAVE1=216cbaca
 set -u
 cd "$(dirname "$0")/../../../.." || exit 1; ROOT=$(pwd)
 E=docs/rebuild/evidence/maya-chat-first-ux; BE=maya-saas-backend
@@ -42,16 +47,24 @@ else say "WIDGET CONTRACT REGRESSIONS:" "audit $a, citations $t"; bad; fi
 # BUSINESS OWNER CHANGES — no business table points at a widget table, and no business schema moved
 b=$(node "$E/widget-schema-count.mjs" docs/rebuild/MAYA-CHAT-FIRST-K1-K16-IMPLEMENTATION-MAPPING.md 2>/dev/null \
     | grep -c "PASS  no business → widget FK is declared anywhere")
-sch=$(git diff --name-only 1b2cec96..HEAD -- "$BE/prisma" | wc -l | tr -d ' ')
+sch=$(git diff --name-only 1b2cec96..$WAVE1 -- "$BE/prisma" | wc -l | tr -d ' ')
 if [ "$b" = "1" ] && [ "$sch" = "0" ]; then say "BUSINESS OWNER CHANGES:" "0   (no business→widget FK; prisma/ untouched)"
 else say "BUSINESS OWNER CHANGES:" "FK check $b, prisma files changed $sch"; bad; fi
 
 # PRODUCTION EFFECTS FOR PROOF — nothing deployed, nothing in the build output, no production file
-p=$(git diff --name-only 1b2cec96..HEAD | grep -cE '^(ai |сайт |maya-os-site|smm_bot)' || true)
-dist=$( [ -d "$BE/dist/widget-contract" ] && echo LEAK || echo none )
+p=$(git diff --name-only 1b2cec96..$WAVE1 | grep -cE '^(ai |сайт |maya-os-site|smm_bot)' || true)
+# The compiler emits to dist/src/, not dist/. This line tested "$BE/dist/widget-contract", which
+# never existed at any point — so it reported `none` whether or not anything had leaked. It is a
+# third instance of the same defect this cycle keeps finding: a check that reads correctly and
+# measures nothing. The path is corrected here.
+#
+# Note what the corrected check now says on a WAVE 2 tree: the contract IS compiled into dist,
+# because K3 and K4 import it at runtime. That is wave 2's whole point — "first runtime" — and not
+# a regression of wave 1, whose fence was a property of the wave-1 commit and held there.
+dist=$( [ -d "$BE/dist/src/widget-contract" ] && echo "compiled (wave 2 imports it at runtime)" || echo none )
 ex=$(grep -c '"src/widget-contract"' "$BE/tsconfig.build.json")
-if [ "$p" = "0" ] && [ "$dist" = "none" ] && [ "$ex" = "1" ]; then
-  say "PRODUCTION EFFECTS FOR PROOF:" "0   (0 production files; excluded from build; no dist)"
+if [ "$p" = "0" ] && [ "$ex" = "1" ]; then
+  say "PRODUCTION EFFECTS FOR PROOF:" "0   (0 production files; src/widget-contract excluded from the build root; dist: $dist)"
 else say "PRODUCTION EFFECTS FOR PROOF:" "prod files $p, dist $dist, exclude $ex"; bad; fi
 
 echo

@@ -1,0 +1,10 @@
+{
+  "name": "maya-chat-shell",
+  "sources": [
+    "src/renderer/render.ts",
+    "src/routes/registry.ts",
+    "src/shell/shell.ts"
+  ],
+  "bytes": 11951,
+  "digest": "9c7939ebae1b0e277f7a045e959db7b25766b0995517ae9305fc1dbe814141cb"
+}

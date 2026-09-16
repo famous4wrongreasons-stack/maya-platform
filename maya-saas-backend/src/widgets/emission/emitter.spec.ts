@@ -14,11 +14,9 @@ class FakePrisma {
       this.emissions.push(args.data);
       return args.data;
     },
-    findFirst: async ({
-      where,
-    }: {
-      where: { tenantId: string; widgetId: string };
-    }) =>
+    // Not `async`: this double awaits nothing, and a promise it never needs is a promise a
+    // reader has to reason about. The caller awaits the value either way.
+    findFirst: ({ where }: { where: { tenantId: string; widgetId: string } }) =>
       this.emissions.find(
         (e) => e.tenantId === where.tenantId && e.widgetId === where.widgetId,
       ) ?? null,
@@ -31,7 +29,7 @@ class FakePrisma {
   };
   // The real $transaction takes an array of promises; the double just resolves them, which is
   // enough to prove both writes are issued together rather than one at a time.
-  $transaction = async (ops: unknown[]) => ops;
+  $transaction = (ops: unknown[]) => Promise.resolve(ops);
 }
 
 const make = () => {

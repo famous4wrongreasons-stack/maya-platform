@@ -36,7 +36,9 @@ class FakePrisma {
   public reads = 0;
   constructor(private readonly rows: Row[]) {}
   widgetIntentRecord = {
-    findFirst: async ({
+    // Not `async`: this double awaits nothing, and a promise it never needs is a promise a
+    // reader has to reason about. The caller awaits the value either way.
+    findFirst: ({
       where,
     }: {
       where: { intentTokenHash: string; tenantId: string };

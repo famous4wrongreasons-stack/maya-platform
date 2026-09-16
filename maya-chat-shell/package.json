@@ -1,0 +1,12 @@
+{
+  "name": "maya-chat-shell",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "K5 \u2014 the Maya chat shell. One source, emitted once. The build that did not exist.",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node build.mjs --check",
+    "typecheck": "../maya-saas-backend/node_modules/.bin/tsc --noEmit -p tsconfig.json"
+  }
+}
