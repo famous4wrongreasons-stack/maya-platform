@@ -128,10 +128,20 @@ chk(
 // ── 8. dark behind an entitlement no plan grants ─────────────────────────────────────────────
 const catalog = fs.readFileSync(path.join(BE, 'src/common/feature-catalog.ts'), 'utf8');
 const planBlock = catalog.slice(catalog.indexOf('MAYA_PLAN_FEATURES'));
+// A plan is not the only grant. Trial full access expands platform features too, and until
+// 2026-09-16 it expanded `planned` ones — which would have handed the runtime to every live
+// full-access trial tenant. So the check also reads the trial rule and the key's readiness.
+const registrySrc = fs.readFileSync(path.join(BE, 'src/entitlements/feature-registry.service.ts'), 'utf8');
+const entitlementsSrc = fs.readFileSync(path.join(BE, 'src/entitlements/entitlements.service.ts'), 'utf8');
+const runtimePlanned = /'widgets\.runtime':\s*defineReadiness\('planned'/.test(catalog);
+const trialExcludesPlanned =
+  /trialGrantable\([^)]*\)[^{]*\{[\s\S]*?implementationStatus !== 'planned'/.test(registrySrc) &&
+  /this\.registry\.trialGrantable\(featureKey\)/.test(entitlementsSrc) &&
+  !/this\.registry\.platformAvailable\(featureKey\)/.test(entitlementsSrc);
 chk(
-  'the runtime is dark: gated by widgets.runtime, which no plan grants',
-  /@RequiresFeature\('widgets\.runtime'\)/.test(ctrl) && !/widgets\.runtime/.test(planBlock),
-  'controller requires widgets.runtime; the key appears in no plan',
+  'the runtime is dark: gated by widgets.runtime, which no plan and no trial grants',
+  /@RequiresFeature\('widgets\.runtime'\)/.test(ctrl) && !/widgets\.runtime/.test(planBlock) && runtimePlanned && trialExcludesPlanned,
+  `controller requires widgets.runtime; in no plan; readiness planned: ${runtimePlanned}; trial expansion excludes planned: ${trialExcludesPlanned}`,
 );
 
 // ── 9. the gateway reaches no capability owner ───────────────────────────────────────────────

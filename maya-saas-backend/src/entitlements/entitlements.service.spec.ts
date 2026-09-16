@@ -99,6 +99,44 @@ describe('EntitlementsService', () => {
     expect(result.features.video_analytics).toBeUndefined();
   });
 
+  it('never grants a planned feature — the widget runtime — through trial full access', async () => {
+    // `widgets.runtime` is `planned` and offered in platform_backend. Before this rule every live
+    // full-access trial tenant would have received it the moment the widget tables existed.
+    const service = buildService({
+      id: 'tenant-a',
+      status: 'trial',
+      trialFullAccess: true,
+      trialEndsAt: new Date(Date.now() + 24 * 60 * 60 * 1_000),
+      planId: 'plan-start',
+      plan: { featuresJson: {}, entitlements: [] },
+      entitlements: [],
+    });
+
+    const result = await service.getEffectiveEntitlements('tenant-a');
+
+    expect(result.features['ai.owner']).toBe(true);
+    expect(result.features['widgets.runtime']).toBeUndefined();
+    expect(result.featureKeys).not.toContain('widgets.runtime');
+  });
+
+  it('still grants the widget runtime to a tenant it is deliberately switched on for', async () => {
+    const service = buildService({
+      id: 'tenant-a',
+      status: 'active',
+      trialFullAccess: false,
+      trialEndsAt: null,
+      planId: 'plan-start',
+      plan: { featuresJson: {}, entitlements: [] },
+      entitlements: [
+        { featureKey: 'widgets.runtime', enabled: true, expiresAt: null },
+      ],
+    });
+
+    const result = await service.getEffectiveEntitlements('tenant-a');
+
+    expect(result.features['widgets.runtime']).toBe(true);
+  });
+
   it('does not extend full access after the verified trial expires', async () => {
     const service = buildService({
       id: 'tenant-a',

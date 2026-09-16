@@ -137,7 +137,7 @@ export class EntitlementsService {
     ) {
       validityCandidates.push(tenant.trialEndsAt);
       for (const featureKey of MAYA_FEATURE_KEYS) {
-        if (this.registry.platformAvailable(featureKey)) {
+        if (this.registry.trialGrantable(featureKey)) {
           effective.set(featureKey, true);
         }
       }

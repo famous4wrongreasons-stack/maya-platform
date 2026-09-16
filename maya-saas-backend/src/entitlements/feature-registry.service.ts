@@ -51,6 +51,23 @@ export class FeatureRegistryService {
     );
   }
 
+  /**
+   * What a verified full-access trial may switch on: a feature the platform backend offers AND has
+   * implemented. A `planned` feature is not implemented, so a trial never grants it.
+   *
+   * This closes a real gap. `widgets.runtime` is `planned` and offered in `platform_backend`, and it
+   * is described as "granted to no plan … reachable only where it is switched on deliberately".
+   * Trial expansion used `platformAvailable` alone, so every live full-access trial tenant would
+   * have received the widget runtime the moment its tables existed. An explicit per-tenant
+   * entitlement is the deliberate switch, and it still grants.
+   */
+  trialGrantable(featureKey: MayaFeatureKey): boolean {
+    return (
+      this.platformAvailable(featureKey) &&
+      MAYA_FEATURE_READINESS[featureKey].implementationStatus !== 'planned'
+    );
+  }
+
   dependencies(featureKey: MayaFeatureKey): readonly MayaFeatureKey[] {
     return MAYA_FEATURE_REGISTRY[featureKey].dependencies ?? [];
   }
