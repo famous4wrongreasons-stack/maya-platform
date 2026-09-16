@@ -13,8 +13,26 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { PrismaService } from '../../prisma/prisma.service';
 
+/**
+ * The keys a SUBMISSION may name — which is not the same as the CONTROL key space.
+ *
+ * §0.7 F27 closes the space at three: `control.widget.dismiss`, `control.run.cancel` and
+ * `control.delivery.resolve`. Only the first is dispatched here. `control.run.cancel` has its own
+ * owner endpoint in the orchestrator and is write-once under a cancel key hash; and
+ * `control.delivery.resolve` is exercised by the SCHEDULER on the delivery path, never by an
+ * intent token — a person does not ask which channel their reminder goes out on.
+ *
+ * The difference between the two sets is asserted in `proactive.spec.ts` rather than left as a
+ * comment, so a key added to one and forgotten in the other fails a test instead of drifting.
+ */
 export const CONTROL_KEYS = ['control.widget.dismiss'] as const;
 export type ControlKey = (typeof CONTROL_KEYS)[number];
+
+/** Registered in the space, dispatched elsewhere. Named so the gap is explicit, not accidental. */
+export const CONTROL_KEYS_DISPATCHED_ELSEWHERE = [
+  'control.run.cancel',
+  'control.delivery.resolve',
+] as const;
 
 export interface ControlOutcome {
   readonly handled: boolean;

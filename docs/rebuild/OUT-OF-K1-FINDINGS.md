@@ -343,3 +343,49 @@ not of the design, and it is fixed in the staged schema.
 The 34 `CHECK` constraints are the only thing outstanding: 27 are writable now (23 from the
 contract's own unions, 4 from members the §5.5 table spells out), and **7 are blocked** — 3 by the
 cardinality disagreement and 4 by having no members declared anywhere.
+
+---
+
+## F-MOMENT-ENUMERATION — the contract fixes a cardinality it never enumerates
+
+**Filed:** wave 5, during K13. **Classification:** documentation gap in the certified corpus.
+**Does not grow the plan.** **No owner decision is blocked by it.**
+
+§4.9.3 states, normatively, that `MOMENT_REGISTRY` carries **exactly twelve** rows, and that "a
+moment absent from `MOMENT_REGISTRY` cannot be emitted". **It never names the twelve.** Nor does any
+other document in the certified corpus: §triage-135 names three of them in passing
+(`appointment_reminder`, `wanted_slot_available`, `native_feedback_invitation`), the UX architecture
+records that a verification pass "confirmed 12 proactive moments" against the repository, and the
+passage that named them did not survive into the corpus.
+
+This is the exact shape the wave-2 enum ruling addresses: a count without members. Twelve plausible
+names typed into the registry would have been indistinguishable from twelve derived ones, and the
+ruling forbids filling to a count.
+
+**What K13 did instead.** Derived the set from three sources, each admissible under the ruling's own
+terms, and checked the cardinality afterwards rather than aiming at it:
+
+1. `Package2InboxType` — a normative union whose exact domain is fixed by the total
+   `Record<Package2InboxType, string>` that keys `PACKAGE2_CAPABILITY_BY_TYPE` (21 members)
+2. the certified surface inventory's 52 notification surfaces — a moment is scheduler-emitted
+3. `ProactiveProvenance.artefact_kind` — a six-member closed union; a type with no canonical
+   artefact row cannot carry a provenance
+
+The intersection is **twelve**, and it contains all three moments the triage document names. The
+derivation is `evidence/maya-chat-first-ux/derive-canonical-moments.mjs`, re-run by the wave-5 gate
+and by the suite, so neither source can move without the registry failing.
+
+**What remains for the owner, and it is not urgent.** §4.9.4 PR4 is explicit that the registry's
+*content* — which moments exist, what each may say, and to whom — "rests on review discipline at
+the point a moment is added to the registry, and this contract does not fake a mechanism for it."
+The derived twelve are therefore a **defensible reconstruction, not an owner decision**. Two rows
+are the ones a reviewer would look at first:
+
+- **`team_message` is excluded** on a type-level ground, not an editorial one: a message a human
+  wrote has no canonical artefact row among the six kinds, so it cannot carry a `ProactiveProvenance`.
+  The `TeamCommunicationsScheduler` does fan it out on a schedule, so a reviewer could disagree.
+- **`birthday_alert` is mapped to `artefact_kind: 'opportunity'`**, which fits (a winback occasion)
+  but is the loosest of the twelve assignments.
+
+Moving either changes the count, which the start-up assertion then rejects — so a change here is a
+contract amendment, not a config edit. **Recorded, not decided.** Nothing in wave 6 depends on it.

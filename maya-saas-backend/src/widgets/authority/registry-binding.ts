@@ -63,10 +63,19 @@ const aeKeys = (): ReadonlySet<string> => {
   );
 };
 
-/** The CONTROL space is closed in the contract and small; it is not a registry lookup. */
+/**
+ * The CONTROL space is closed in the contract and small; it is not a registry lookup.
+ *
+ * §0.7 F27 closes it at THREE keys. K4 bound the two that had owners; K13 adds the third,
+ * `control.delivery.resolve`, whose owner is the widget layer's own cross-channel delivery
+ * resolver. The space and the SUBMISSION-dispatchable set are deliberately different sizes —
+ * see `control-registry.service.ts`, where that difference is asserted rather than left to be
+ * noticed.
+ */
 export const CONTROL_KEYS: ReadonlySet<string> = new Set([
   'control.widget.dismiss',
   'control.run.cancel',
+  'control.delivery.resolve',
 ]);
 
 export interface SpaceCensus {

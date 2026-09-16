@@ -15,6 +15,21 @@ import {
 /** The top rung: what an unresolvable subject gets, so that it cannot be acted on by anyone. */
 const FAIL_CLOSED: VerificationLevel = 'STEP_UP_VERIFIED';
 
+/**
+ * §0.7 F27's per-key control floor, total over the three keys the space is closed at.
+ *
+ * Exported so the coincidence it relies on is asserted rather than assumed: this table's key set
+ * must EQUAL `CONTROL_KEYS`. While they coincide the `?? FAIL_CLOSED` below is unreachable, which
+ * is the correct state — a key in the space with no floor row is a defect to be caught at the
+ * boundary, not softened by a default.
+ */
+export const CONTROL_FLOOR: Readonly<Record<string, VerificationLevel>> =
+  Object.freeze({
+    'control.widget.dismiss': 'ANONYMOUS',
+    'control.run.cancel': 'BOUND_CLIENT',
+    'control.delivery.resolve': 'BOUND_CLIENT',
+  });
+
 const c9ByKey = (): ReadonlyMap<string, (typeof C9_CAPABILITIES)[number]> =>
   new Map(C9_CAPABILITIES.map((c) => [c.capabilityKey, c]));
 
@@ -46,10 +61,16 @@ export const subjectFloorFor = (
       return 'CHANNEL_IDENTITY';
     }
     case 'CONTROL':
+      // A TABLE over the three keys, not a test for one name. §0.7 F27 states a CONTROL_FLOOR per
+      // key, and the ternary this replaces would have silently given ANONYMOUS to any key added
+      // later — which is how a floor becomes a hole. `?? FAIL_CLOSED` keeps it total: a CONTROL
+      // key that resolves in the space but has no floor row gets the top rung, not the bottom.
+      //
       // control.run.cancel is BOUND_CLIENT per §3.4 and keeps that floor through FLOOR_EXEMPT;
       // dismiss is presentation and needs only that the caller is the principal the widget was
-      // minted for, which Gate 3 has already established by the time a control is routed.
-      return ref.key === 'control.run.cancel' ? 'BOUND_CLIENT' : 'ANONYMOUS';
+      // minted for, which Gate 3 has already established by the time a control is routed;
+      // delivery.resolve decides who receives what, so it is BOUND_CLIENT.
+      return CONTROL_FLOOR[ref.key] ?? FAIL_CLOSED;
     case 'AE':
       // Conservative until K11: an Action Engine capability is a business effect, and a business
       // effect is not reachable below a bound client.
