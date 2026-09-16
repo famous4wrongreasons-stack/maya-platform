@@ -43,6 +43,9 @@ export const MAYA_FEATURE_KEYS = [
   'telegram.consultant',
   'branding.custom',
   'domain.custom',
+  // MAYA widget runtime (K3, wave 2). Deliberately absent from every plan: the runtime is dark,
+  // and this key is how it stays dark. Granting it to a tenant is a separate, later decision.
+  'widgets.runtime',
 ] as const;
 
 export type MayaFeatureKey = (typeof MAYA_FEATURE_KEYS)[number];
@@ -97,6 +100,13 @@ export const MAYA_FEATURE_REGISTRY: Record<
   MayaFeatureDefinition
 > = {
   booking: defineFeature('Legacy booking', 'bookings', 'Compatibility flag.'),
+  'widgets.runtime': defineFeature(
+    'Maya widget runtime',
+    'widgets',
+    'The chat-first widget gateway: sealed envelopes, typed intents, one ordered gate pipeline. ' +
+      'Read-only in wave 2 and granted to no plan, so the runtime is reachable only where it is ' +
+      'switched on deliberately.',
+  ),
   branding: defineFeature('Legacy branding', 'branding', 'Compatibility flag.'),
   client_app: defineFeature(
     'Legacy client app',
@@ -313,6 +323,12 @@ export const MAYA_FEATURE_READINESS: Record<
   MayaFeatureReadiness
 > = {
   booking: defineReadiness('platform_ready', CURRENT_AND_PLATFORM),
+  // 'planned', not 'partial': in wave 2 the runtime composes, seals and refuses, and emits to
+  // nobody. Saying anything warmer here would be the exact mistake this map exists to prevent.
+  'widgets.runtime': defineReadiness('planned', PLATFORM_BACKEND, [
+    'Wave 2 is read-only and dark: the gateway refuses forged, expired, replayed and foreign-principal tokens, and delivers no widget to any user.',
+    'No plan grants this key, so no tenant has it.',
+  ]),
   branding: defineReadiness('platform_ready', CURRENT_AND_PLATFORM),
   client_app: defineReadiness('partial', CURRENT_AND_PLATFORM, [
     'The universal role-aware app and final trial experience are still being unified in the platform frontend.',

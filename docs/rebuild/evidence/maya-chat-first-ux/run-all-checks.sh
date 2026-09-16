@@ -23,6 +23,8 @@ run widget-check-generator         $E/build-widget-checks.mjs
 run enum-member-check              $E/enum-member-check.mjs
 printf '%-34s ' widget-contract-check
 ( cd maya-saas-backend && node scripts/widget-contract-check.mjs 2>&1 | tail -1 )
+printf '%-34s ' k3-gateway-check
+( cd maya-saas-backend && node scripts/k3-gateway-check.mjs 2>&1 | tail -1 )
 printf '%-34s ' f88-mutation-battery
 ( cd maya-saas-backend && "$ROOT/$E/f88-mutation-battery.sh" 2>&1 | tail -1 )
 exit $fail

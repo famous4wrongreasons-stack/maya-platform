@@ -27,6 +27,7 @@ import { BusinessContentModule } from './business-content/business-content.modul
 import { CommerceModule } from './commerce/commerce.module';
 import { CrmModule } from './crm/crm.module';
 import { CustomersModule } from './customers/customers.module';
+import { WidgetsModule } from './widgets/widgets.module';
 import { CustomerSubscriptionsModule } from './customer-subscriptions/customer-subscriptions.module';
 import { CustomerPortalModule } from './customer-portal/customer-portal.module';
 import { DashboardPreferencesModule } from './dashboard-preferences/dashboard-preferences.module';
@@ -90,6 +91,9 @@ import { SystemMetricsService } from './system-metrics.service';
     BranchesModule,
     CrmModule,
     CustomersModule,
+    // K3, wave 2. Registered so the two routes exist; gated by `widgets.runtime`, which no plan
+    // grants, so the runtime is dark. Registering it is what makes the gate pipeline testable.
+    WidgetsModule,
     CustomerSubscriptionsModule,
     CustomerPortalModule,
     DashboardPreferencesModule,
