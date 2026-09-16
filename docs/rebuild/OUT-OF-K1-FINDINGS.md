@@ -126,6 +126,18 @@ command through the gate so it can hand off; or correct the wording to name a ro
 **Blocks nothing in Wave 2.** It is a live compliance defect in production code, and it is tracked
 here so that it is repaired on its own schedule rather than inherited silently by a cutover.
 
+**Update 2026-09-17 — D9-bis step B copy carried; the finding stays OPEN.** The owner-approved copy
+(D9-bis option C, step B) is now committed on the canonical line, byte-identical to the approved
+edit and not deployed. The bot now names a channel that works (phone and e-mail, handled by the
+administrator) instead of an app screen that does not exist. **What it does not fix is this
+finding's own defect.** The opt-in line still begins «напишите /unsubscribe», and `/unsubscribe` is
+still not in `_GATE_ALLOWED_COMMANDS`, so a client whose choice is pending is still refused the
+command the text names. Two further observations for the owner, recorded rather than edited:
+«Принял.» and «запросить отписку» read as if a request were registered, but `cmd_unsubscribe` has
+no side effect and notifies nobody; and «администратор оформит» has no canonical administrator
+write path, since marketing revocation exists only as client self-service. Repairing either needs
+the owner's call on letting `/unsubscribe` through the gate, or on the wording.
+
 ---
 
 ## What this file is for
