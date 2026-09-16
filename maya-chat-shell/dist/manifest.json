@@ -5,6 +5,6 @@
     "src/routes/registry.ts",
     "src/shell/shell.ts"
   ],
-  "bytes": 11951,
-  "digest": "9c7939ebae1b0e277f7a045e959db7b25766b0995517ae9305fc1dbe814141cb"
+  "bytes": 14393,
+  "digest": "92e8c9d38538efdc275b1b17cc292f2c57c1e6dbfc2317c9ea99928fb500fd56"
 }
