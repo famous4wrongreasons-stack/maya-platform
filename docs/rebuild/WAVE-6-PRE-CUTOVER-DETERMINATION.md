@@ -364,3 +364,24 @@ K13 14-DAY WINDOW:                   SIMULATED ONLY — not a production observa
 F-CRM-JOURNAL-READ:                  OPEN (K4/K10); operations.journal.read → consent none does not
                                      weaken tenant/actor/read authority
 ```
+
+---
+
+## Correction recorded 2026-09-17 — K14's figures described the wrong tree
+
+The K14 section above, and the K14 ledger it quotes, read the owner's Desktop working copy of the
+bot, not the canonical line production runs. That copy predates the R02 staff-principal cutover. On
+the canonical tree the dossier's premise **holds exactly as stated**: the staff principal is a
+ContextVar set only inside the aiohttp middleware, and the bot runs start_polling.
+
+```
+                                        published (Desktop copy)   canonical line
+commands into an unreachable body       0                          28
+mute_master / scan_and_alert            LIVE                       FENCED
+body-level fences holding               4 of 6                     7 of 7
+```
+
+The ledger now reads the repository-relative canonical tree through an AST probe
+(`evidence/maya-chat-first-ux/k14-telegram-probe.py`). K14's exit condition, "commands executing into
+an unreachable body = 0", is **not met**: those 28 commands must be re-dispositioned onto the served
+shell. They are not restored.
