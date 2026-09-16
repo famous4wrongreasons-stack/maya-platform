@@ -181,5 +181,11 @@
   ],
   "why": "mapping §5.5 states all three in full, and the K1 capability-gap registry uses only those"
  },
- "TurnRole": null
+ "TurnRole": {
+  "members": [
+   "user",
+   "assistant"
+  ],
+  "why": "OWNER RULING, wave 2 — the two participants a conversation has"
+ }
 }

@@ -101,7 +101,15 @@ const SETS = {
     const agree = reg && reg.members.every((m) => stated.includes(m));
     return { members: stated, why: 'mapping §5.5 states all three in full' + (agree ? ', and the K1 capability-gap registry uses only those' : '') };
   })(),
-  TurnRole: null, // no canonical definition exists — see the report below
+  // OWNER RULING, wave 2. The only set here that is not derived from the contract, because the
+  // contract never declared one — which is why it needed a ruling rather than a lookup. The
+  // timeline records the conversation a person can see: two participants, the human and Maya.
+  // Tool calls, AgentResult, orchestrator coordination, ActionExecution, receipts, system
+  // instructions, hidden reasoning and delivery events stay in their own canonical records and
+  // do not become messages. Voice is not a role — a spoken turn is a `user` turn whose modality
+  // lives in `spokenTranscript`. A widget is not a role — Maya's answer is one `assistant` turn
+  // plus zero or more widgets, and interacting with one mints a new typed user intent.
+  TurnRole: { members: ['user', 'assistant'], why: 'OWNER RULING, wave 2 — the two participants a conversation has' },
 };
 
 // ── the seven range/ordering constraints ─────────────────────────────────────────────────────

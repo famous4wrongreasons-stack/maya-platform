@@ -975,11 +975,45 @@ is one set with two enforcement points, not two sets.
 | `MechanismGapStatus` | 5 | §0.1 F5's status vocabulary, in full |
 | `RenderTier` | 7 | §4.5 — the one receipt member inside `body_hash` |
 | `ConfirmationOfKind` | 3 | §0.13 F74 |
-| `TurnRole` | **3, unverified** | **NO CANONICAL DEFINITION.** The contract declares no `TurnRole` union and no timeline-turn shape; the count here has no source. Its CHECK constraint is not generated, and `WidgetTimelineTurn.role` is unconstrained until the members are ruled. |
+| `TurnRole` | 2 | **`OWNER RULING, wave 2`** — the contract declared no such domain, so this one was decided rather than found |
 | `GapOwnerState` | 3 | `none` / `unreachable` / `registered_elsewhere` — §A1.6.1's three-way finding |
 | `TombstoneStore` | 2 | `timeline` / `intent_audit` — the two erasable stores |
 
-**Four rows above were corrected after the certified contract was compiled and compared with them.**
+**`TurnRole` is the one row here that was RULED rather than corrected.** Its count went 3 → 2, and
+that is **not** a transcription fix: no canonical domain existed, so there was nothing to transcribe
+from. `OWNER RULING, wave 2`:
+
+```
+TurnRole = 'user' | 'assistant'
+```
+
+`user` is a person's message or input, including voice once it has been transcribed and admitted.
+`assistant` is Maya's visible answer, including the widgets presented with it. **Nothing else is a
+conversation turn.** `system`, `tool`, `agent`, `orchestrator` and `event` are excluded by the
+ruling: tool calls, `AgentResult`, orchestrator coordination, `ActionExecution`, receipts, system
+instructions, hidden reasoning and delivery/provider events stay in their own canonical records and
+may not be dressed as messages. Inside Maya there may be an orchestrator, four agents and twenty
+tools; the timeline is what a person can see, and a person sees two participants.
+
+**Voice is not a role.** A spoken turn is `user`; the modality lives beside it (`spokenTranscript`),
+never in the role. **A widget is not a role.** Maya's answer is one `assistant` turn plus zero or
+more widgets, and interacting with a widget mints a new typed user intent rather than a new role.
+
+**And it confers nothing** — permanent, and load-bearing for every later package:
+
+```
+TurnRole != authority        TurnRole != authentication      TurnRole != tenant identity
+TurnRole != approval         TurnRole != consent
+```
+
+`role = 'user'` does not establish *which* user. The authenticated principal, the tenant and the
+authority are resolved canonically server-side on every decision, and a timeline row is evidence
+about what was said, never an input that decides what may be done.
+
+The existing `AiCoreMessageRole = 'assistant' | 'user'` agrees, but it is a transport type and is
+**confirmation, not the reason** — the reason is that a conversation has two participants.
+
+**Four other rows were corrected after the certified contract was compiled and compared with them.**
 `LifecycleState`, `ChannelId` and `RenderTier` each cited a contract section and printed a different
 cardinality than that section declares (8 vs 10, 5 vs 11, 3 vs 7); `MechanismGapStatus` cited F5's
 status vocabulary and printed 4 where F5 names 5. **`OWNER RULING, wave 2`: the certified contract
@@ -1010,7 +1044,7 @@ MechanismGapStatus      5  [EXISTS] [ABSENT] [PARTIAL] [UNENFORCEABLE-TODAY] NOR
 IntentReceiptOutcome    4  ACCEPTED REFUSED NEEDS_CONFIRMATION NEEDS_VERIFICATION
 TombstoneStore          2  timeline intent_audit
 GapOwnerState           3  none unreachable registered_elsewhere
-TurnRole                ?  NO CANONICAL DEFINITION — constraint not generated
+TurnRole                2  user assistant
 ```
 <!-- END GENERATED ENUM MEMBERS -->
 

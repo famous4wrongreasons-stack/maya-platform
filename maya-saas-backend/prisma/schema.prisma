@@ -168,6 +168,19 @@ enum CommunicationCampaignState {
 }
 
 model Tenant {
+  // MAYA widget layer (D12). Back-relations only: Tenant gains no column, and no business
+  // table references a widget table. The only direction that crosses the boundary is
+  // widget -> Tenant, which is what makes a widget row tenant-fenceable at all.
+  widgetTimelineTurns WidgetTimelineTurn[] @relation("WidgetTimelineTurn_1_fkey")
+  widgetEmissions WidgetEmission[] @relation("WidgetEmission_1_fkey")
+  widgetIntentRecords WidgetIntentRecord[] @relation("WidgetIntentRecord_1_fkey")
+  widgetIntentSubmissionAudits WidgetIntentSubmissionAudit[] @relation("WidgetIntentSubmissionAudit_1_fkey")
+  widgetIntentReceipts WidgetIntentReceipt[] @relation("WidgetIntentReceipt_1_fkey")
+  widgetRenderReceipts WidgetRenderReceipt[] @relation("WidgetRenderReceipt_1_fkey")
+  widgetSuppressedEmissions WidgetSuppressedEmission[] @relation("WidgetSuppressedEmission_1_fkey")
+  widgetFreeInputLedgers WidgetFreeInputLedger[] @relation("WidgetFreeInputLedger_1_fkey")
+  widgetDrafts WidgetDraft[] @relation("WidgetDraft_1_fkey")
+  widgetErasureTombstones WidgetErasureTombstone[] @relation("WidgetErasureTombstone_1_fkey")
   // Chapter 9: derived coordination only; source ownership is unchanged.
   c9Runs C9Run[] @relation("C9Run_1_fkey")
   c9StrategyRevisions C9StrategyRevision[] @relation("C9StrategyRevision_1_fkey")
@@ -4046,3 +4059,341 @@ model C9WorkReceipt {
   @@index([tenantId, state, leaseUntil, id], map: "C9WorkReceipt_1_idx")
   @@index([tenantId, runId, domain, kind], map: "C9WorkReceipt_2_idx")
 }
+
+model WidgetCapabilityGap {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // —  surrogate key
+  gapKey        String                                          // —  'GAP-…'
+  act           String                                          // —
+  ownerState    String                                          // —  CHECK: GapOwnerState (3)
+  evidence      String                                          // —
+  openedAt      DateTime  @db.Timestamptz(3)                    // —
+  closedAt      DateTime? @db.Timestamptz(3)                    // —
+  closingCommit String?                                         // —
+
+  @@unique([gapKey], map: "WidgetCapabilityGap_1_key")
+  @@index([ownerState, openedAt], map: "WidgetCapabilityGap_1_idx")
+}
+
+model WidgetMechanismGap {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // —  surrogate key
+  gapKey        String                                          // —  'MG-P01' … 'MG-P32'
+  pRef          String                                          // —  'P-01' … 'P-32'
+  component     String                                          // —
+  status        String                                          // —  CHECK: MechanismGapStatus (4)
+  packageKey    String                                          // —  'K1' … 'K16'
+  blockingRules String[]                                        // —
+
+  @@unique([gapKey], map: "WidgetMechanismGap_1_key")
+  @@index([status, packageKey], map: "WidgetMechanismGap_1_idx")
+}
+
+model WidgetCapabilityPolicy {
+  id                    String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // —  surrogate key
+  capabilitySpace       String                                  // —  CHECK: CapabilitySpace (4)
+  capabilityKey         String                                  // —
+  minVerification       String                                  // —  CHECK: VerificationLevel (5)
+  consentClass          String                                  // —  CHECK: ConsentClass (5)
+  dispatchIsSynchronous Boolean                                 // —  R3.11.5 — read through the PROPOSE key
+  contractVersion       Int                                     // —  a change here is a version bump
+
+  @@unique([capabilitySpace, capabilityKey], map: "WidgetCapabilityPolicy_1_key")
+  @@index([consentClass, minVerification], map: "WidgetCapabilityPolicy_1_idx")
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAYA WIDGET LAYER — D12 additive stores.
+// CANONICAL BUSINESS SCHEMA OWNERS: UNCHANGED. Every statement below is CREATE
+// TABLE. No business table gains a column, and no business table references any
+// table here. The only direction that crosses the boundary is widget → Tenant,
+// which is required so a widget row can be tenant-fenced at all.
+// Conventions follow C9WorkReceipt (prisma/schema.prisma:4012), the newest
+// canonical table and the one the deploy path already exercises.
+// Every column carries exactly one ErasureClass: A = AUDIT_RETAINED,
+// C = CONVERSATION_CONTENT, X = CANONICAL_ELSEWHERE, — = registry/no subject.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── 1. TIMELINE STORE — T_TIMELINE = 180 d, fully erasable ───────────────────
+
+model WidgetTimelineTurn {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId            String                                    // A
+  conversationId      String    @db.Uuid                        // A
+  turnIndex           Int                                       // A
+  role                String                                    // A  CHECK: TurnRole (3)
+  principalProofHash  String    @db.Char(64)                    // A
+  channel             String                                    // A  CHECK: ChannelId (5)
+  createdAt           DateTime  @db.Timestamptz(3)              // A
+  retentionUntil      DateTime  @db.Timestamptz(3)              // A
+  textContent         String?                                   // C
+  spokenTranscript    String?                                   // C
+  erasedAt            DateTime? @db.Timestamptz(3)              // A
+
+  tenant Tenant @relation("WidgetTimelineTurn_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetTimelineTurn_1_fkey")
+  emissions WidgetEmission[] @relation("WidgetEmission_2_fkey")
+
+
+  @@unique([id, tenantId], map: "WidgetTimelineTurn_1_key")
+  @@unique([tenantId, conversationId, turnIndex], map: "WidgetTimelineTurn_2_key")
+  @@index([tenantId, conversationId, createdAt], map: "WidgetTimelineTurn_1_idx")
+  @@index([tenantId, retentionUntil], map: "WidgetTimelineTurn_2_idx")
+}
+
+model WidgetEmission {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId              String                                  // A
+  widgetId              String    @db.Uuid                      // A
+  turnId                String    @db.Uuid                      // A
+  kind                  String                                  // A  CHECK: WidgetKind (22)
+  bodyVersion           Int                                     // A
+  envelopeSeal          String    @db.Char(64)                  // A
+  bodyHash              String    @db.Char(64)                  // A
+  lifecycleState        String                                  // A  CHECK: LifecycleState (8)
+  freshnessClass        String                                  // A  CHECK: FreshnessClass (4)
+  issuedAt              DateTime  @db.Timestamptz(3)            // A
+  expiresAt             DateTime  @db.Timestamptz(3)            // A
+  retentionSec          Int                                     // A
+  retentionUntil        DateTime  @db.Timestamptz(3)            // A
+  dedupeKey             String                                  // A
+  deliveryChannel       String                                  // A  CHECK: ChannelId (5)
+  supersedesWidgetId    String?   @db.Uuid                      // A
+  supersededByWidgetId  String?   @db.Uuid                      // A
+  deliveryStateJson     Json      @db.JsonB                     // A  DeliveryRecord — presentation only
+  terminalLinesJson     Json?     @db.JsonB                     // A  outcome + receipt ref only
+  bodyJson              Json?     @db.JsonB                     // C  dropped at retentionSec
+  textEquivalentJson    Json?     @db.JsonB                     // C
+  a11yJson              Json?     @db.JsonB                     // C  accessible_names
+  speechJson            Json?     @db.JsonB                     // C
+  bodyDroppedAt         DateTime? @db.Timestamptz(3)            // A
+  erasedAt              DateTime? @db.Timestamptz(3)            // A
+
+  tenant Tenant             @relation("WidgetEmission_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetEmission_1_fkey")
+  turn   WidgetTimelineTurn @relation("WidgetEmission_2_fkey", fields: [turnId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "WidgetEmission_2_fkey")
+  intentRecords WidgetIntentRecord[] @relation("WidgetIntentRecord_2_fkey")
+  renderReceipts WidgetRenderReceipt[] @relation("WidgetRenderReceipt_2_fkey")
+
+
+
+  @@unique([id, tenantId], map: "WidgetEmission_1_key")
+  @@unique([widgetId, tenantId], map: "WidgetEmission_2_key")     // FK target: order matches the references
+  @@index([tenantId, turnId], map: "WidgetEmission_1_idx")
+  @@index([tenantId, dedupeKey, lifecycleState], map: "WidgetEmission_2_idx")
+  @@index([tenantId, retentionUntil, bodyDroppedAt], map: "WidgetEmission_3_idx")
+}
+
+// ── 2. INTENT-AUDIT STORE — T_AUDIT = 1095 d; audit fields survive erasure ───
+
+model WidgetIntentRecord {
+  id                        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId                  String                              // A
+  intentTokenHash           String    @db.Char(64)              // A  the token itself is NEVER stored
+  widgetId                  String    @db.Uuid                  // A
+  principalProofHash        String    @db.Char(64)              // A  Gate 3
+  widgetKind                String                              // A  CHECK: WidgetKind (22) — KIND_FLOOR, Gate 7
+  effect                    String                              // A  CHECK: EffectClass (8) — EFFECT_FLOOR
+  priority                  Int                                 // A  FLOOR_EXEMPT reads it
+  capabilitySpace           String?                             // A  CHECK: CapabilitySpace (4)
+  capabilityKey             String?                             // A
+  handoffSpace              String?                             // A  CHECK: CapabilitySpace (4)
+  handoffKey                String?                             // A
+  targetJson                Json?     @db.JsonB                 // A  IntentTarget; targetFloor reads .class
+  verificationFloor         String                              // A  CHECK: VerificationLevel (5) — Gate 5 compares
+  confirmationJson          Json?     @db.JsonB                 // A  risk tier, reversible, audience, readback
+  inputSchemaHash           String?   @db.Char(64)              // A
+  requestedScopeHash        String    @db.Char(64)              // A
+  bodyHash                  String    @db.Char(64)              // A  Gate 8-R; SUPERSEDED comparison
+  selectionDomain           String                              // A  option ids only — labels are separate
+  c9Domain                  String?                             // A  CHECK: C9Domain (4)
+  runId                     String?   @db.Uuid                  // A
+  revisionId                String?   @db.Uuid                  // A
+  approvalOfIntentRef       String?                             // A
+  confirmationOfKind        String?                             // A  CHECK: ConfirmationOfKind (3)
+  confirmationOfRef         String?                             // A
+  producedByIntentTokenHash String?   @db.Char(64)              // A  F74's bypass guard
+  issuedAt                  DateTime  @db.Timestamptz(3)        // A
+  expiresAt                 DateTime  @db.Timestamptz(3)        // A
+  singleUse                 Boolean                             // A
+  consumedAt                DateTime? @db.Timestamptz(3)        // A  Gate 1 — idempotency of a tap
+  actionReceiptRef          String?                             // A  the ONLY pointer to a business fact
+  frozenNounsJson           Json?     @db.JsonB                 // A  AUDIT_RETAINED per F14 / §4.4.3
+  utteranceTemplate         String?                             // C
+  renderedUtterance         String?                             // C
+  selectedLabels            String[]                            // C
+  selectionDomainLabelsJson Json?     @db.JsonB                 // C
+  spokenTranscript          String?                             // C
+  erasedAt                  DateTime? @db.Timestamptz(3)        // A
+
+  tenant   Tenant         @relation("WidgetIntentRecord_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetIntentRecord_1_fkey")
+  emission WidgetEmission @relation("WidgetIntentRecord_2_fkey", fields: [widgetId, tenantId], references: [widgetId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "WidgetIntentRecord_2_fkey")
+  submissionAudits WidgetIntentSubmissionAudit[] @relation("WidgetIntentSubmissionAudit_2_fkey")
+  receipts WidgetIntentReceipt[] @relation("WidgetIntentReceipt_2_fkey")
+  freeInputEntries WidgetFreeInputLedger[] @relation("WidgetFreeInputLedger_2_fkey")
+
+
+
+
+  @@unique([id, tenantId], map: "WidgetIntentRecord_1_key")
+  @@unique([intentTokenHash, tenantId], map: "WidgetIntentRecord_2_key")  // FK target: order matches the references
+  @@index([tenantId, widgetId], map: "WidgetIntentRecord_1_idx")
+  @@index([tenantId, expiresAt, consumedAt], map: "WidgetIntentRecord_2_idx")
+  @@index([tenantId, principalProofHash, issuedAt], map: "WidgetIntentRecord_3_idx")
+  @@index([tenantId, capabilityKey, effect], map: "WidgetIntentRecord_4_idx")
+}
+
+model WidgetIntentSubmissionAudit {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId           String                                     // A
+  widgetId           String    @db.Uuid                         // A
+  intentTokenHash    String    @db.Char(64)                     // A
+  clientNonce        String                                     // A
+  profileId          String                                     // A  ADVISORY — never an authority input
+  clientEmittedAt    DateTime? @db.Timestamptz(3)               // A  advisory; never business time
+  receivedAt         DateTime  @db.Timestamptz(3)               // A
+  readbackRef        String?                                    // A
+  readbackBodyHash   String?   @db.Char(64)                     // A
+  inputsClosedJson   Json?     @db.JsonB                        // A  enum/ref values — closed-domain ids
+  inputsFreeTextJson Json?     @db.JsonB                        // C  string values
+  inputsPiiJson      Json?     @db.JsonB                        // X  phone / sensitivity:'pii'
+  readbackAffirmation String?                                   // C  a word the data subject said
+  spokenTranscript   String?                                    // C
+  erasedAt           DateTime? @db.Timestamptz(3)               // A
+
+  tenant Tenant             @relation("WidgetIntentSubmissionAudit_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetIntentSubmissionAudit_1_fkey")
+  record WidgetIntentRecord @relation("WidgetIntentSubmissionAudit_2_fkey", fields: [intentTokenHash, tenantId], references: [intentTokenHash, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "WidgetIntentSubmissionAudit_2_fkey")
+
+  @@unique([id, tenantId], map: "WidgetIntentSubmissionAudit_1_key")
+  @@index([tenantId, intentTokenHash], map: "WidgetIntentSubmissionAudit_1_idx")
+  @@index([tenantId, receivedAt], map: "WidgetIntentSubmissionAudit_2_idx")
+}
+
+model WidgetIntentReceipt {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId         String                                       // A
+  widgetId         String    @db.Uuid                           // A
+  intentTokenHash  String    @db.Char(64)                       // A
+  submittedAt      DateTime  @db.Timestamptz(3)                 // A
+  outcome          String                                       // A  CHECK: IntentReceiptOutcome (4)
+  refusalCode      String?                                      // A  closed vocabulary; never free text
+  actionReceiptRef String?                                      // A  FR2: CONFIRMED ⟺ non-null
+  answeringChannel String                                       // A  CHECK: ChannelId (5)
+  utteranceEcho    String?                                      // C  composed on a person's behalf
+  erasedAt         DateTime? @db.Timestamptz(3)                 // A
+
+  tenant Tenant             @relation("WidgetIntentReceipt_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetIntentReceipt_1_fkey")
+  record WidgetIntentRecord @relation("WidgetIntentReceipt_2_fkey", fields: [intentTokenHash, tenantId], references: [intentTokenHash, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "WidgetIntentReceipt_2_fkey")
+
+  @@unique([id, tenantId], map: "WidgetIntentReceipt_1_key")
+  @@unique([tenantId, intentTokenHash], map: "WidgetIntentReceipt_2_key")
+  @@index([tenantId, widgetId], map: "WidgetIntentReceipt_1_idx")
+  @@index([tenantId, outcome, submittedAt], map: "WidgetIntentReceipt_2_idx")
+}
+
+model WidgetRenderReceipt {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId                 String                               // A
+  widgetId                 String    @db.Uuid                   // A
+  profileId                String                               // A
+  profileVersion           Int                                  // A
+  renderTier               String                               // A  CHECK: RenderTier (3) — the one body_hash term
+  intentsMinted            Int                                  // A  before fitting
+  intentsEmitted           Int                                  // A  after fitting
+  intentsWithheldJson      Json      @db.JsonB                  // A  {role, reason, reachable_via}
+  bodyReductionsJson       Json      @db.JsonB                  // A  {path, reduction, restored_by}
+  textEquivalentIsCanonical Boolean                             // A
+  escalationJson           Json?     @db.JsonB                  // A
+  degradedAt               DateTime  @db.Timestamptz(3)         // A
+  deliveryChannel          String                               // A  CHECK: ChannelId (5)
+  composedEnvelopeJson     Json      @db.JsonB                  // C  the undegraded envelope (C6)
+  emittedEnvelopeJson      Json      @db.JsonB                  // C  what was actually sent (C6)
+  erasedAt                 DateTime? @db.Timestamptz(3)         // A
+
+  tenant   Tenant         @relation("WidgetRenderReceipt_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetRenderReceipt_1_fkey")
+  emission WidgetEmission @relation("WidgetRenderReceipt_2_fkey", fields: [widgetId, tenantId], references: [widgetId, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "WidgetRenderReceipt_2_fkey")
+
+  @@unique([id, tenantId], map: "WidgetRenderReceipt_1_key")
+  @@unique([tenantId, widgetId, deliveryChannel], map: "WidgetRenderReceipt_2_key")
+  @@index([tenantId, degradedAt], map: "WidgetRenderReceipt_1_idx")
+  @@index([tenantId, renderTier], map: "WidgetRenderReceipt_2_idx")
+}
+
+model WidgetSuppressedEmission {
+  id                       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId                 String                               // A
+  moment                   String                               // A  a MOMENT_REGISTRY key
+  momentTemplateKey        String                               // A  `${id}@${version}`
+  dedupeKey                String                               // A
+  suppressedAt             DateTime @db.Timestamptz(3)          // A
+  unresolvedCells          String[]                             // A  JSON Pointers — never the values
+  subjectPrincipalProofHash String? @db.Char(64)                // A
+
+  tenant Tenant @relation("WidgetSuppressedEmission_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetSuppressedEmission_1_fkey")
+
+  @@unique([id, tenantId], map: "WidgetSuppressedEmission_1_key")
+  @@unique([tenantId, dedupeKey, moment], map: "WidgetSuppressedEmission_2_key")
+  @@index([tenantId, moment, suppressedAt], map: "WidgetSuppressedEmission_1_idx")
+}
+
+model WidgetFreeInputLedger {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId         String                                       // A
+  widgetId         String   @db.Uuid                            // A
+  intentTokenHash  String   @db.Char(64)                        // A
+  capabilitySpace  String                                       // A  CHECK: CapabilitySpace (4)
+  capabilityKey    String                                       // A
+  widgetKind       String                                       // A  CHECK: WidgetKind
+  fieldKinds       String[]                                     // A  the non-closed kinds that triggered it
+  justification    String                                       // A  server-authored, closed set
+  boundsSourceRefs String[]                                     // A  INV-23
+  normalizerRefs   String[]                                     // A  INV-23
+  mintedAt         DateTime @db.Timestamptz(3)                  // A
+
+  tenant Tenant             @relation("WidgetFreeInputLedger_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetFreeInputLedger_1_fkey")
+  record WidgetIntentRecord @relation("WidgetFreeInputLedger_2_fkey", fields: [intentTokenHash, tenantId], references: [intentTokenHash, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "WidgetFreeInputLedger_2_fkey")
+
+  @@unique([id, tenantId], map: "WidgetFreeInputLedger_1_key")
+  @@unique([tenantId, intentTokenHash], map: "WidgetFreeInputLedger_2_key")
+  @@index([tenantId, capabilityKey, mintedAt], map: "WidgetFreeInputLedger_1_idx")
+}
+
+model WidgetDraft {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId             String                                   // A
+  draftRef             String                                   // A  server-minted; names this draft
+  draftClass           String                                   // A  CHECK: DraftClass (5)
+  ownerCapabilitySpace String                                   // A  CHECK: CapabilitySpace (4)
+  ownerCapabilityKey   String                                   // A
+  principalProofHash   String    @db.Char(64)                   // A
+  diffJson             Json      @db.JsonB                      // C  server-computed diff
+  createdAt            DateTime  @db.Timestamptz(3)             // A
+  expiresAt            DateTime  @db.Timestamptz(3)             // A
+  consumedAt           DateTime? @db.Timestamptz(3)             // A
+  erasedAt             DateTime? @db.Timestamptz(3)             // A
+
+  tenant Tenant @relation("WidgetDraft_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetDraft_1_fkey")
+
+  @@unique([id, tenantId], map: "WidgetDraft_1_key")
+  @@unique([tenantId, draftRef], map: "WidgetDraft_2_key")
+  @@index([tenantId, expiresAt, consumedAt], map: "WidgetDraft_1_idx")
+}
+
+// ── 3. RECEIPT STORE — append-only, floor T_AUDIT, never erased ──────────────
+// The Action Engine receipts themselves already exist and are NOT re-declared.
+// What the widget layer adds to this store is the tombstone log, and only that.
+
+model WidgetErasureTombstone {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A  surrogate key
+  tenantId          String                                      // A
+  erasedAt          DateTime @db.Timestamptz(3)                 // A
+  erasureRequestRef String                                      // A
+  store             String                                      // A  CHECK: TombstoneStore (2)
+  rowKey            String                                      // A
+  fieldsErased      String[]                                    // A
+
+  tenant Tenant @relation("WidgetErasureTombstone_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetErasureTombstone_1_fkey")
+
+  @@unique([id, tenantId], map: "WidgetErasureTombstone_1_key")
+  @@index([tenantId, erasureRequestRef], map: "WidgetErasureTombstone_1_idx")
+  @@index([tenantId, erasedAt], map: "WidgetErasureTombstone_2_idx")
+}
+
+// ── 4. LEDGERS AND REGISTRIES — wave 1; no tenant subject, no erasure class ──
