@@ -244,5 +244,37 @@
       "fixableInPackage": true,
       "fix": "NOT MISSING — no fix required for the gate itself. Gate 14 is the one gate of the eleven whose mechanism genuinely executes: CanonicalActionIngressService is live production code injected by ~25 modules, and its two named guards run on every canonical admission in the product today. The contract places Gate 14's host OUTSIDE the widget layer by design ('Runs in: CanonicalActionIngressService -> ActionEngineKernel -> provider owner'), so its absence from the widget pipeline is correct architecture, not a hole: Gate 14 is the widget layer's destination, not its gate. The widget-side edge (Gate 13's COMMIT branch -> Gate 14) is ABSENT but fail-closed and belongs to K7.\n\nTWO RESIDUAL RATCHET GAPS worth closing inside approved scope (K3..K16, no new business decision, no new gate, no production effect):\n\n(1) The repo-wide ratchet at canonical-action-ingress.architecture.spec.ts:69-90 catches a direct durable ledger write (`actionExecution.create({`) and a direct `.createCanonicalExecution(`, but it does NOT catch a widget service importing a provider client (a YClients HTTP client, say) and calling it directly. 'The Action Engine, never the widget, chat or renderer, calls the provider owner' is held today only by the fact that no widget file does so.\n\n(2) The one check that does fence the widget layer — k3-gateway-check.mjs:117-127 — is not in CI (platform-ci.yml runs `npm test`, `npm run lint`, `npm run build`; k3-gateway-check.mjs appears only in the evidence shell gates), and it inspects widgets.module.ts's Nest import list only, not file-level imports anywhere else under src/widgets/. A future K7 author wiring the COMMIT edge could import an owner from inside a widget service and nothing blocking would object.\n\nCONCRETE FIX, both inside K3's own package: add a jest architecture spec beside the widget layer (e.g. maya-saas-backend/src/widgets/widget-layer-import-fence.architecture.spec.ts), modelled on canonical-action-ingress.architecture.spec.ts, that walks every non-spec .ts under src/widgets/ and asserts its cross-layer ('../../') imports lie in a closed allowlist — today exactly: prisma/prisma.service, prisma/prisma.module, widget-contract/*, orchestration/c9.registry, ai-tools/ai-tool.catalog, action-engine/action-engine.registry (read-only enumeration, as used at authority/registry-binding.ts:17 and consent/data-subject-acts.ts:17) — and that the ONLY action-engine symbol the widget tree may ever import, once K7 lands, is CanonicalActionIngressService, never ActionEngineKernel, ActionEngineRuntimeService, PrismaClient business models, or any provider client. Because it is a jest spec it lands in the BLOCKING `npm test` job at platform-ci.yml:69. Optionally also wire `node scripts/k3-gateway-check.mjs` into an npm script invoked by that job so check #9 becomes blocking too. This is a ratchet over source text: zero production effect, zero deletions, no owner decision needed."
     }
-  ]
+  ],
+  "verifiedByHand": {
+    "note": "Four claims checked directly against the code rather than taken from the agents, because each is a statement about this programme's own work and each is falsifiable in one command.",
+    "facts": [
+      {
+        "claim": "the emitter stores a CONSTANT floor, not a derived one",
+        "evidence": "maya-saas-backend/src/widgets/emission/emitter.service.ts:190 — verificationFloor: 'ANONYMOUS', unconditional",
+        "consequence": "every intent record ever written claims the bottom rung, so even a future stored-vs-recomputed comparison would be comparing against a literal. This is an R3.4.1 violation on its own, independent of Gate 5 being a stub."
+      },
+      {
+        "claim": "the generated contract module is excluded from the production build",
+        "evidence": "maya-saas-backend/tsconfig.build.json exclude contains 'src/widget-contract'",
+        "consequence": "verificationFloor() — the function the contract names as THE floor derivation — is not compiled into the running server."
+      },
+      {
+        "claim": "and it could not run even if it were",
+        "evidence": "require('./dist/src/widget-contract/verification-floor.js') throws TypeError: Cannot read properties of undefined (reading 'map')",
+        "consequence": "its transitive dependencies are `export declare` ambients with no runtime value. The derivation exists as text, never as behaviour."
+      },
+      {
+        "claim": "there is no verification level to compare a floor against",
+        "evidence": "maya-saas-backend/src/widgets/gate.types.ts — GateContext carries intentTokenHash, tenantId, principalProofHash, now, record, submission, and no verification level",
+        "consequence": "Gate 5 has neither operand: no v, and no runnable f."
+      }
+    ]
+  },
+  "tally": {
+    "gatesDeclared": 15,
+    "liveInThePipeline": 4,
+    "enforcedInAnOwningModule": 1,
+    "withNoExecutableEnforcementPoint": 10,
+    "note": "Gate 14 is enforced in the Action Engine's own ingress, which is the correct home for it — 'enforced in owning module and intentionally not central' is a real category and this is its one member."
+  }
 }
