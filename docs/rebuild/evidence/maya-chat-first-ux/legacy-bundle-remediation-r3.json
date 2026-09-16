@@ -1,0 +1,586 @@
+{
+ "contract": "maya.legacy-bundle-remediation/1",
+ "ruling": "R3 — move every confirmed publicly reachable legacy bundle copy out of the served document roots into a non-public archive. Not a deletion. Not K16.",
+ "inventoriedAt": "2026-09-16T18:31Z",
+ "movedAt": "2026-09-16T18:32:21Z",
+ "redaction": "The repository is PUBLIC. Source paths, URLs and the archive path are withheld. They sit in the owner-only rollback manifest, whose sha256 is recorded below, stored privately on the host and handed to the owner.",
+ "method": [
+  "fresh read-only inventory of every *.html* file carrying a legacy authority or role-mode token, or larger than 300 KB, in the three served docroots (92 candidates)",
+  "HTTP HEAD per candidate: 44 answered 200 with content-length equal to the file size; 48 answered 403 and were left untouched",
+  "rollback manifest (index, source URL, host docroot, relative path, bytes, mtime, mode, owner, sha256, archive path) written to a mode-700 archive directory OUTSIDE every docroot before any move",
+  "per file: re-hash immediately before the move (skip if changed), mv -n on the same filesystem (a rename), re-hash the archived copy",
+  "after: HEAD every source URL; GET and hash seven canonical entries before and after"
+ ],
+ "rollbackManifestSha256": "f93c052092bd9ca68a04b4ec56fbe9ee2068ce92345c7f4e606454369e44342e",
+ "archiveId": "r3-20260916",
+ "archiveLocation": "a home-directory archive on the same host and filesystem, outside every served docroot, mode 700",
+ "results": {
+  "moved": 44,
+  "skipped": 0,
+  "failed": 0,
+  "sha256EqualAfterMove": 44,
+  "mtimePreserved": 44,
+  "sourceUrlsNowServing200": 0,
+  "sourceUrlsNow404": 44,
+  "byHost": {
+   "mayaos.ru": 35,
+   "malesthetic.pro": 7,
+   "beget-technical-domain": 2
+  },
+  "candidatesInventoried": 92,
+  "confirmedPublicAndInManifest": 44
+ },
+ "modeNote": "34 files that were mode 644 read 600 in the archive, and the other 10 kept their mode. The move did not do this: the host re-applied the archive directory's ACL policy at move time, removing the web identity's ACL entry and the group/other bits, with ctime equal to the move second. Content, owner and mtime are unchanged. Rollback restores the recorded mode explicitly.",
+ "rollback": {
+  "procedure": "for each manifest row: mv -n <archive path> <source path>; chmod <recorded mode>; verify sha256 equals the manifest; verify the source URL answers 200 again",
+  "exercised": false,
+  "whyNotExercised": "exercising it would re-expose the bundles the ruling exists to close; the procedure is a rename plus chmod against a manifest verified on both ends"
+ },
+ "canonicalEntriesUnchanged": [
+  {
+   "url": "https://malesthetic.pro/",
+   "statusBefore": 200,
+   "statusAfter": 200,
+   "sha256": "88f21093332e8f445a5342e7b9ac0c6fb56b3ba36a4eba3ff1161412cc0be862",
+   "identical": true
+  },
+  {
+   "url": "https://malesthetic.pro/app/",
+   "statusBefore": 200,
+   "statusAfter": 200,
+   "sha256": "cb27000739b179ddea6546fb4dd169fc9f1f397abca998acdcacf4dc1162c249",
+   "identical": true
+  },
+  {
+   "url": "https://mayaos.ru/",
+   "statusBefore": 200,
+   "statusAfter": 200,
+   "sha256": "4e3c01cfaabba0853e73b887ed424bedc7515653acca825df931abd526e374ec",
+   "identical": true
+  },
+  {
+   "url": "https://mayaos.ru/app/",
+   "statusBefore": 200,
+   "statusAfter": 200,
+   "sha256": "cb27000739b179ddea6546fb4dd169fc9f1f397abca998acdcacf4dc1162c249",
+   "identical": true
+  },
+  {
+   "url": "https://mayaos.ru/oauth-callback.html",
+   "statusBefore": 200,
+   "statusAfter": 200,
+   "sha256": "0c843bbd32b83a963b22442e08a9d9edad52537caa35059d004f9848163931dc",
+   "identical": true
+  },
+  {
+   "url": "https://malesthetic.pro/.well-known/assetlinks.json",
+   "statusBefore": 200,
+   "statusAfter": 200,
+   "sha256": "57e22c1d7dcc6cdce19d565693d0439b69b0ac7fa03217c733b8d5b63c11c61f",
+   "identical": true
+  },
+  {
+   "url": "https://malesthetic.pro/app.html",
+   "statusBefore": 404,
+   "statusAfter": 404,
+   "sha256": "7520a20f674296e2c0857bb022b2b3081ccab8d79eb33921f5f57473e71327e1",
+   "identical": true
+  }
+ ],
+ "publicLegacyBundlesExposed": {
+  "before": 44,
+  "after": 0
+ },
+ "notTouched": [
+  "48 copies that already answered 403 (private backups, left as they were)",
+  "every mode-600 proxy/config backup",
+  "the live legacy relay and the older executable relay copies (outside R3's scope; recorded as a separate finding)",
+  "both canonical /app/ maintenance entries, the marketing sites, oauth-callback.html, assetlinks.json"
+ ],
+ "files": [
+  {
+   "id": "mayaos.ru#01",
+   "bytes": 2373028,
+   "sha256": "98f2fd6b0ae84226626c8edb69eb3c9d650bd68bb4206d285986673d7afb1c57",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#02",
+   "bytes": 2454714,
+   "sha256": "026c96693b328d7546e176478e00eeac319a0e5060f966a17928d1cccacfeae7",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#03",
+   "bytes": 2455709,
+   "sha256": "f0c404ecff344aed400ef6cffba9c82855d3d16416b8481f2491e980dac95bcd",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#04",
+   "bytes": 2453278,
+   "sha256": "91b62365b9bbf157aaf16b22608dbfba7a1eca2cd849df584a18bb74c86d6de1",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#05",
+   "bytes": 2447751,
+   "sha256": "2ec59ea2fbab56d20d6465c286c3f5999e23b16ecdfec8bd9a9937cdfe64616e",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#06",
+   "bytes": 2500628,
+   "sha256": "e5121faa2df68de5bbc4d9760c8852ddfa726d254e6cd0a0aefc4e92c644df7e",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#07",
+   "bytes": 2737840,
+   "sha256": "81603f309deba2783369cfaa401da464106255e6d167002b7ddc473794a97fe2",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#08",
+   "bytes": 2507220,
+   "sha256": "38e069b50b70ac15f5b37511c44169cc049fc612e09e71adc20c21da6a5d5378",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#09",
+   "bytes": 2502189,
+   "sha256": "9c9c989ef41155ed96f0261263a26a0ea6e59a122134600974949f02898bdac6",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#10",
+   "bytes": 2737840,
+   "sha256": "81603f309deba2783369cfaa401da464106255e6d167002b7ddc473794a97fe2",
+   "modeBefore": "600",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#11",
+   "bytes": 2484668,
+   "sha256": "b5e96b03bb5b34ae4256e3811ce972ee4794a9277c3f13676c84a00573d3b1c1",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#12",
+   "bytes": 2507174,
+   "sha256": "0fcdd4484187d4915b25b9498d61223b2e1578ba991498bd47ac229955030be4",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#13",
+   "bytes": 2470835,
+   "sha256": "14cd743925d40719e51499e86116082b8976286f1bf1da88f2d258d6b357882e",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#14",
+   "bytes": 2506246,
+   "sha256": "028433477dab024e6c4d7788921bbedb0963cd2bab2b9b383ea4167c307a5ca8",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#15",
+   "bytes": 2469518,
+   "sha256": "9cce55241a0ab54203a213286372b7e2c09701195e5dc583da558558ce5d6a1c",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#16",
+   "bytes": 2738358,
+   "sha256": "b3278512ca71beee709b93c1de2892fa841ef0cb19ae965791d71dfcb2a65e6e",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#17",
+   "bytes": 2456284,
+   "sha256": "fbf27730e7cec6b77e0fc93da1b90dff077f45b44d6ace9df9cedcb0abd7c6ae",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#18",
+   "bytes": 2502809,
+   "sha256": "5e6b5deb6f0a7379f30ca28a90b13fb70d73dda1758e14d03b83ac4467978d64",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#19",
+   "bytes": 2506208,
+   "sha256": "423aa04ef2c7d91a6498d72c6fb7f935cefeea476643e37b8348009f0cc520f1",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#20",
+   "bytes": 2454117,
+   "sha256": "14073f1960d2c0c010598805109df1bcfdab558c54a2a6c198e5e49bdecdb4e3",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#21",
+   "bytes": 2503917,
+   "sha256": "e4d37a1292a6955fbb758cbaeb4dbb1347df14f7a015fc482c1002b9ee8f2e9a",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#22",
+   "bytes": 2459228,
+   "sha256": "51dabd71fb94ea2f099b07efb316ecb05f82062e4e547d1333add09a0a99aa54",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#23",
+   "bytes": 2469901,
+   "sha256": "bce9dea36f5c421987cdf6cea9dc6e41eb5ecd0a8076fa41aa88fbce8f517beb",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#24",
+   "bytes": 2456358,
+   "sha256": "615c57821bc18ceb36f6102a59f86cd77a020f0fe5bfa8ffb3da06ce5d12f1ee",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#25",
+   "bytes": 2736594,
+   "sha256": "99fdaf34b57dbff4afbc8d45763ade8b19620a9c793366c19e55005dd601e2f6",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#26",
+   "bytes": 2468838,
+   "sha256": "895ecb6e535d6bfd2ab31171f22085b3a77a9742b44024c2b57355f63ba78c16",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#27",
+   "bytes": 2467297,
+   "sha256": "c286755e3a187791bf3e403adc12c75e9548d611e6eef3dc2b270df100c06b1b",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#28",
+   "bytes": 2458628,
+   "sha256": "90cc53e8b25b9ea5da5294a11429229c6bd78fc7ee5b64cebe451c5c052f4bff",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#29",
+   "bytes": 2458238,
+   "sha256": "d5d669b419137e463e6bfa5134b3e0ddedb233caa31a5776fb99ca9912252ce8",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#30",
+   "bytes": 2462201,
+   "sha256": "f94ad4aeab8cad90f9f5408ecd4da7ba7b70a51077ff6de6ecb767dd9e9c5810",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#31",
+   "bytes": 2502214,
+   "sha256": "1cecc5f023ab1663743a0afb02d90bb99009dd3286f3c1005dc072efeb5a4356",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#32",
+   "bytes": 2501957,
+   "sha256": "791dccf3346b28c58ae25408007fed47de734a4cc518bb37256b3185102be884",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#33",
+   "bytes": 2502084,
+   "sha256": "9df8aa6ad8196cf7c38891e79d66b2bfa9bf3492c60727b9432e0ba6b0834c8c",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#34",
+   "bytes": 2506672,
+   "sha256": "c886fefb60b68d19b1c61e0796d177889917fd91cb4dddf76ff55def49807f43",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "mayaos.ru#35",
+   "bytes": 2466225,
+   "sha256": "e346276f79d2bd56edb76d4093c98687eecc27184c35d993f5dcfd20b6191117",
+   "modeBefore": "644",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "malesthetic.pro#01",
+   "bytes": 1407285,
+   "sha256": "60e1bbf0b40737f2fdcb1b12f0f2a1c125a58b2744ad6117d012c4cf689fa941",
+   "modeBefore": "600",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "malesthetic.pro#02",
+   "bytes": 2123462,
+   "sha256": "23e03edb05a6ff07eaa7d81338092796fe9868a4b061cb47d6a834dcf94bce5c",
+   "modeBefore": "600",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "malesthetic.pro#03",
+   "bytes": 1126060,
+   "sha256": "4d9fc3528ca88f6ecd43e93594814e8eaa60de4ceec82b17166595927276b4e5",
+   "modeBefore": "600",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "malesthetic.pro#04",
+   "bytes": 2084294,
+   "sha256": "0a80318ff32df64a8f7768396928c3a7262f0c2b3e14ae4e28b66dcedbf80326",
+   "modeBefore": "600",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "malesthetic.pro#05",
+   "bytes": 2121618,
+   "sha256": "b2d84aeaf5501e0b417c42fc4bb0473fd216cdfb0e9568caec9b911df353d7ab",
+   "modeBefore": "600",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "malesthetic.pro#06",
+   "bytes": 2444044,
+   "sha256": "784b68630d659a5aceb9832d84f6ebd5c6519a1ecd0a15adcbe5e5dd029607b6",
+   "modeBefore": "600",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "malesthetic.pro#07",
+   "bytes": 2419223,
+   "sha256": "384ae3a2dfb783dad21f5d5159cf8685c7e2145a809657778b02a352ef1ea6d3",
+   "modeBefore": "600",
+   "modeAfterInArchive": "600",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "beget-technical-domain#01",
+   "bytes": 1878808,
+   "sha256": "246a3ab25f8e9c37fedabd9b86fc6bd10b5eddca33dffae46905ecbe1241af1a",
+   "modeBefore": "700",
+   "modeAfterInArchive": "700",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  },
+  {
+   "id": "beget-technical-domain#02",
+   "bytes": 1006973,
+   "sha256": "a66be10932a4dda6aeb3bf66d6a7c5c8b37c1c17872bacfb30782be811582af8",
+   "modeBefore": "700",
+   "modeAfterInArchive": "700",
+   "mtimePreserved": true,
+   "sha256EqualAfterMove": true,
+   "httpBefore": 200,
+   "httpAfter": 404
+  }
+ ]
+}
