@@ -1,5 +1,15 @@
 # K1 — OWNER DOSSIER FOR THE HUMAN-JUDGEMENT CELLS
 
+> ## SIGNED
+>
+> All **26 groups approved**, 11 of them **with conditions** — `G01`, `G02`, `G03`, `G04`, `G06`, `G07`, `G09`, `G11`, `G12`, `G13`, `G16`.
+> The conditions are **part of the approval, not advisory notes**: 25 binding terms in all.
+> A condition is discharged when the package that owns the group proves it, not when the package ships.
+> Checkpoint accepted: `81bcc5ec`. Arithmetic accepted as derived.
+>
+> Nothing below is a proposal any more. It is the record of what was decided, and the conditions
+> in each group's RECOMMENDED line now bind the package that executes it.
+
 *Generated from `k1-surface-dossier.json` by `build-human-dossier.mjs`. Every count below is derived
 from the file at build time and asserted, not transcribed. The build fails if the grouping is not a
 total, disjoint partition of the signature rows.*
@@ -1115,33 +1125,108 @@ nobody builds — but they are not where the attention goes.
 
 ---
 
-## 4. K1 RECOMMENDED APPROVAL BLOCK
-
-*One block. Strike any group you do not approve and it stays unsigned; the rest proceed. Any group left
-unsigned blocks only its own rows — the dossier is a partition, so no group depends on another being signed.*
+## 4. THE SIGNATURE
 
 ```
-K1 HUMAN DOSSIER
+K1 OWNER DOSSIER — SIGNED
 
 HUMAN-JUDGEMENT ROWS  126      CELLS  137      SUCCESSOR  80      OWNER  57      OVERLAP  11
+GROUPS  26/26      PARTITION  TOTAL + DISJOINT      SURFACES  795/795
 
-SUCCESSOR DECISIONS   G01–G18   80 cells / 18 groups   APPROVED: ___
-OWNER DECISIONS       O01–O08   57 cells / 8 groups   APPROVED: ___
+G01:  APPROVE — WITH STATED FAIL-CLOSED CONSENT CONDITIONS
+G02:  APPROVE WITH CONDITIONS
+G03:  APPROVE WITH CONDITIONS
+G04:  APPROVE WITH CONDITIONS
+G05:  APPROVE
+G06:  APPROVE WITH CONDITIONS
+G07:  APPROVE WITH CONDITIONS
+G08:  APPROVE
+G09:  APPROVE WITH CONDITIONS
+G10:  APPROVE
+G11:  APPROVE WITH CONDITIONS
+G12:  APPROVE WITH CONDITIONS
+G13:  APPROVE WITH CONDITIONS
+G14:  APPROVE
+G15:  APPROVE
+G16:  APPROVE WITH CONDITIONS
+G17:  APPROVE
+G18:  APPROVE
+O01:  APPROVE
+O02:  APPROVE
+O03:  APPROVE
+O04:  APPROVE
+O05:  APPROVE
+O06:  APPROVE
+O07:  APPROVE
+O08:  APPROVE
 
-CONDITIONAL GROUPS — approving these approves the condition with them:
-  G04  strip removed only after the parity harness proves each tab reachable from chat
-  G06  no panel capability re-parented ahead of its server-side authority gate
-  G09  the successor must not guess a tenant; ambiguous workspace must ask
-  G11  each admin_run_* carries its contract-assigned confirmation before the keyboard goes
-  G13  the booking-backend family stops writing tenant identity from a URL parameter
-  G01  the merge keeps two independent booleans and fails closed
-  G16  "Я перевёл" stays an acknowledgement, never a confirmed transfer
-
-EXCLUSIONS (strike-through any group number):
-  ______________________________________________
-
-K1 HUMAN DOSSIER SIGNED:  YES / NO
+K1 SIGNED: YES
 ```
+
+### The conditions, in full
+
+*Reproduced here so that no condition depends on being looked up. Where a group is marked
+APPROVE WITH CONDITIONS and has no block below, its conditions are that group's RECOMMENDED line.*
+
+**G01**
+
+- Two independent consent facts preserved: privacy/PD, and marketing.
+- Never create accept_pdn=true without an exact user action.
+- A status-fetch error FAILS CLOSED. One failed status request may not suppress the consent gate for the lifetime of a token or session.
+- The backend canonical owner for the unified widget is determined from the already-certified consent contracts. Do not create a third consent owner.
+
+**G13**
+
+- Unauthenticated URL parameters may not establish authoritative tenant, backend, Client or booking authority, via localStorage or any other client-side state.
+- A deep link is a CANDIDATE CONTEXT -> server validation -> current authority.
+
+**G12**
+
+- The merge may not lose existing tenant / foreign-tenant fences.
+- A widget key does not by itself inherit authority.
+- Expense-card state and expiry must survive reload through the approved widget receipt/state contract, without becoming a financial system of record.
+
+**G07**
+
+- The platform-operator-only activation path is excluded from ordinary conversational onboarding.
+- CRM token / raw secret: never persisted in chat or widget history.
+- A manual secure fallback is preserved.
+
+**G11**
+
+- Do not carry an unconfirmed bulk mutation across as-is.
+- admin_run_backfill must pass the canonical confirmation/authority path.
+- The /unsubscribe finding is kept as a separate remediation item.
+- Telegram stays DELIVERY / HANDOFF and does not become a second widget runtime.
+
+**G02 / G03 / G04 / G06**
+
+- Client-side visibility never substitutes for server-side authority.
+- For each surface merged, prove the corresponding server-side entitlement / actor scope.
+- If the server-side counterpart is absent, do not retire the legacy surface until a canonical protected successor exists.
+
+**G09**
+
+- The Yandex login path must be production-ready before the VK path is removed.
+- No authentication dead-end.
+
+**G17**
+
+- The two halves of the push migration carry different risks.
+- Do not combine them into one irreversible cutover step.
+
+**O06**
+
+- The capability index must be reachable before the Telegram keyboards are retired.
+
+**G16**
+
+- «Я перевёл» stays an acknowledgement and is never rendered as a confirmed transfer - the same shape as GAP-ATTENDANCE-CONFIRM, which is open.
+
+### Carried forward, not closed
+
+- `F-CRM-JOURNAL-READ` — CRM journal listing is tenant-scoped, not actor-scoped: getJournal takes no actor and providerId is an optional filter. Mechanically settled; INTENT UNDECIDED - two comments in the same module disagree. Not a proven regression; an owner decision the staff-journal package must surface.
+- `F-UNSUBSCRIBE` — /unsubscribe product/handler mismatch: the consent text names a command the gate blocks.
 
 ---
 

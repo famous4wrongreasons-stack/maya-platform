@@ -1,15 +1,46 @@
-# Wave 1 — K1 + K2 — checkpoint
+# Wave 1 — K1 + K2 — CLOSED
 
 ```
-PACKAGES COMPLETE: 2/16
-WAVES COMPLETE:    0/6      (wave 1's code is complete; its exit needs one signature and two rulings)
-SURFACE PARITY:    0/795    (the harness is emitted RED by design; K1 turns nothing green)
-PRIMARY NAV:       101 → target 5   (unchanged: K1 proposes, K16 executes)
-ROLE PRESENTATION MODES REMAINING: 4   (unchanged: K5 removes them)
-WIDGET CONTRACT REGRESSIONS: 0
-BUSINESS OWNER CHANGES: 0
-PRODUCTION EFFECTS FOR PROOF: 0
+K1 SIGNED:          YES     26/26 groups, 11 with conditions, 25 binding terms
+K1 COMPLETE:        YES
+K2 COMPLETE:        YES
+WAVE 1 COMPLETE:    YES
+PACKAGES COMPLETE:  2/16
+WAVES COMPLETE:     1/6
 ```
+
+Every line of the exit is produced by running something. `wave-1-exit-gate.sh` re-derives all eight
+figures and refuses to print the closing block if any one of them fails to derive — a wave exit that
+prints a number nobody computed is precisely the failure this cycle was built to prevent.
+
+```
+K1 SIGNED:                    YES   (6/6 signature checks)
+K1 DOSSIER:                   15/15 checks pass
+K2 COMPILE:                   PASS
+K2 CHECKERS:                  31/31 checks pass
+F88 MUTATIONS CAUGHT:         20/20
+WIDGET CONTRACT REGRESSIONS:  0     (audit 29/29, dangling citations 0)
+BUSINESS OWNER CHANGES:       0     (no business→widget FK; prisma/ untouched)
+PRODUCTION EFFECTS FOR PROOF: 0     (0 production files; excluded from build; no dist)
+```
+
+**The conditions are part of the approval.** Eleven groups were approved `WITH CONDITIONS`, and
+`k1-signature-check.mjs` asserts that every one of them has a recorded binding term — a conditional
+approval whose condition nobody wrote down is a signature on nothing. A condition is discharged when
+the package that owns the group **proves** it, not when that package ships.
+
+```
+G01 G02 G03 G04 G06 G07 G09 G11 G12 G13 G16     approved with conditions
+G05 G08 G10 G14 G15 G17 G18                     approved
+O01 O02 O03 O04 O05 O06 O07 O08                 approved as attribution
+```
+
+G17 and O06 carry owner conditions of their own despite being approved without the marker: the two
+halves of the push migration may not become one irreversible cutover, and the capability index must
+be reachable before the Telegram keyboards retire.
+
+**The check count stays at 31.** It rose from 28 because the mutation battery found three arms of
+the F88 fence that no test could distinguish. They are not removed to match the older number.
 
 ## Wave 1's fence held
 
@@ -66,39 +97,33 @@ them:
 | G17: auto-subscribes "with no user control, **in three bundles**" | **One** bundle. `app.html` and `maya-os-site/index.html` each carry 5 `unsubscribe` references; `app-tenant.html` carries 0. |
 
 **Two findings landed outside K1 entirely, and one thing I thought I had found was my own mistake.**
-The two are live conditions in existing code, not things this wave changes, so they are recorded and
-filed separately rather than folded into a group. Neither is a stop condition: neither is a contract
-contradiction nor a new decision.
+Both are recorded with full evidence and a classification in
+[`OUT-OF-K1-FINDINGS.md`](OUT-OF-K1-FINDINGS.md). Neither grows the plan: `PACKAGES: 16` is
+unchanged, and both are existing-package remediation.
 
-1. **CRM journal read path.** `getJournal` forwards a caller-supplied `providerId`
-   (`crm.service.ts:3212`) with no counterpart to the write path's `assertJournalStaffWritable`,
-   while `CRM_JOURNAL_ROLES` admits PROVIDER/EMPLOYEE/STAFF. Whether a staff member can read a
-   colleague's journal is a per-actor question the rows cannot settle. Filed for its own session.
+**`F-CRM-JOURNAL-READ` is not what I reported, and the adversarial pass is what corrected it.**
+Mechanically it is settled: `getJournal` (`crm.service.ts:3160`) contains **zero occurrences of
+`actor`**, and `providerId` is `@IsOptional()`, documented as *"optionally **limit**"* — a display
+filter over a tenant-wide list, so **omitting it returns the whole tenant's journal** and nobody
+needs a colleague's id at all. What is exposed is client names, `notes`, services, times and prices;
+**no phone numbers** (fenced separately, detail path only) and **nothing cross-tenant**.
 
-2. **A consent promise the gate refuses.** `bot.py:445` tells a client «Согласие можно отозвать в
-   любой момент командой /unsubscribe», and `_GATE_ALLOWED_COMMANDS` at `bot.py:353` is
-   `{"/start", "/privacy", "/cancel"}`. A gated client is told about a route the gate blocks. This
-   is a 152-ФЗ / ст.18 surface, so the wording and the mechanism are both load-bearing. Filed —
-   `bot.py` is production and is not touched here.
+But the intent is genuinely undecided, and the codebase argues with itself: `crm.service.ts:3269`
+says «Остальные — **только собственные визиты**», while `crm-integration.controller.ts:46` says the
+journal is «**работа всей смены**… где это умеет каждый». The first comment's own parenthetical
+points at `assertJournalRecordAccess` — a **record** fence — so it reads equally well as "may only
+act on their own visits", which is exactly what is implemented.
 
-3. **A stale docstring in `bot.py` that reads as a live sender.** I thought I had found O03's
-   live/retired split wrong by one row: `_lead_alerts_job` calls `lead_alerts.scan_and_alert(app)`
-   every five minutes and its docstring says «раз в 5 мин шлёт "зависшие заявки" админу». Reading
-   one level further down, `scan_and_alert` returns
-   `{'checked': 0, 'alerted': 0, 'status': 'retired_unverified_lead_occurrence'}` immediately — it
-   is retired at the module level, exactly as the row says. **The row was right and I was wrong.**
-   What survives is smaller and still worth recording: `reviews`, `lead_alerts`, `dual_role_guard`
-   and `god_watch` are all **registered and firing on schedule with retired stub handlers**, which
-   is not the same as "unreachable"; and `_lead_alerts_job`'s docstring still describes the
-   behaviour it no longer has, which is a trap for the next person who reads `bot.py`.
+**So it is not a proven security regression, and the hard STOP does not fire.** I called it a proven
+gap; that was an overstatement. What it is: a salon-wide schedule readable by the whole shift, which
+is either normal for a barbershop or a leak of client names across masters — **a business decision
+nobody has recorded**, carried as an obligation on the package that surfaces the staff journal.
 
-   It is also the one thing the adversarial passes could not have caught. They verified every claim
-   **against the dossier rows**; where a row is wrong, only reading the code finds it. Here the row
-   was right and my reading of one wrapper was wrong — but the asymmetry holds in both directions,
-   and it is the reason the parity harness has to run against behaviour rather than against this
-   dossier.
+**`F-UNSUBSCRIBE`** is a live compliance defect, and the signed **G11 condition constrains its
+repair**: Telegram stays delivery / handoff, so a fix that gave the bot its own consent-revocation
+runtime would violate the condition just signed.
 
-**One correction to a number in the earlier report.** I called these "126 human-judgement cells".
+**One correction to a number in the earlier report.****One correction to a number in the earlier report.** I called these "126 human-judgement cells".
 126 is the count of **rows**; they carry **137 cells**, because **11 rows need both** a successor
 and an owner. The 80/57 split is exact; 80 + 57 = 137, and the 11 overlapping rows are why the row
 count is lower. `K1-HUMAN-JUDGEMENT-OWNER-DOSSIER.md` groups all 126 into **26 groups** — 18

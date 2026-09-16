@@ -34,5 +34,17 @@ for(const o of out){ if(!o.ok) bad++; console.log(`${o.ok?'PASS':'FAIL'}  ${o.n}
 const sig=new Set([...rows.filter(r=>r.successorSource==='REQUIRES SIGNATURE'),
                    ...rows.filter(r=>r.canonicalOwnerSource==='REQUIRES SIGNATURE')].map(r=>r.id));
 console.log(`\n${out.length-bad}/${out.length} checks pass`);
-console.log(`AWAITING OWNER SIGNATURE: ${sig.size} rows - the one exit a machine cannot certify.`);
+// The one exit a machine cannot certify - so the machine reports whether a human has taken it,
+// and stops claiming the exit is still open once they have.
+let signed=null;
+try{ signed=JSON.parse(fs.readFileSync(new URL('./k1-signature.json',import.meta.url),'utf8')); }catch{}
+if(signed&&signed.signed){
+  const cond=Object.values(signed.verdicts).filter(v=>/CONDITION/i.test(v)).length;
+  const terms=Object.values(signed.binding_conditions).flat().length;
+  console.log(`OWNER SIGNATURE: PRESENT - ${sig.size} rows across ${Object.keys(signed.verdicts).length} groups, `+
+    `${cond} approved WITH CONDITIONS carrying ${terms} binding terms. The conditions are part of the `+
+    `approval, not advisory notes; k1-signature-check.mjs asserts none of them is unrecorded.`);
+}else{
+  console.log(`AWAITING OWNER SIGNATURE: ${sig.size} rows - the one exit a machine cannot certify.`);
+}
 process.exit(bad?1:0);

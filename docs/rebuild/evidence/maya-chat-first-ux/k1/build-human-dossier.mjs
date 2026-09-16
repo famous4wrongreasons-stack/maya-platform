@@ -18,6 +18,8 @@ let IMPACTS={};
 try{ IMPACTS=JSON.parse(fs.readFileSync(new URL('./human-dossier-impacts.json',import.meta.url),'utf8')); }catch{}
 // The brief carries the compressed form; human-dossier-full-text.json keeps every word of the
 // grounded version, so nothing is lost by making the document readable.
+let SIGNED=null;
+try{ SIGNED=JSON.parse(fs.readFileSync(new URL('./k1-signature.json',import.meta.url),'utf8')); }catch{}
 let BRIEF={};
 try{ BRIEF=JSON.parse(fs.readFileSync(new URL('./human-dossier-brief.json',import.meta.url),'utf8')); }catch{}
 const useBrief=Object.keys(BRIEF).length>0;
@@ -70,6 +72,20 @@ const verdictWord=(rec)=>{const r=(rec||'').trim();
 let out=[];
 const w=s=>out.push(s);
 w('# K1 — OWNER DOSSIER FOR THE HUMAN-JUDGEMENT CELLS');
+if(SIGNED&&SIGNED.signed){
+ const cond=Object.keys(SIGNED.verdicts).filter(k=>/CONDITION/i.test(SIGNED.verdicts[k]));
+ const terms=Object.values(SIGNED.binding_conditions).flat().length;
+ w('');
+ w('> ## SIGNED');
+ w('>');
+ w(`> All **${Object.keys(SIGNED.verdicts).length} groups approved**, ${cond.length} of them **with conditions** — \`${cond.join('\`, \`')}\`.`);
+ w(`> The conditions are **part of the approval, not advisory notes**: ${terms} binding terms in all.`);
+ w('> A condition is discharged when the package that owns the group proves it, not when the package ships.');
+ w(`> Checkpoint accepted: \`${SIGNED.checkpoint_accepted}\`. Arithmetic accepted as derived.`);
+ w('>');
+ w('> Nothing below is a proposal any more. It is the record of what was decided, and the conditions');
+ w('> in each group\'s RECOMMENDED line now bind the package that executes it.');
+}
 w('');
 w('*Generated from `k1-surface-dossier.json` by `build-human-dossier.mjs`. Every count below is derived');
 w('from the file at build time and asserted, not transcribed. The build fails if the grouping is not a');
@@ -269,6 +285,38 @@ w('nobody builds — but they are not where the attention goes.');
 w('');
 w('---');
 w('');
+if(SIGNED&&SIGNED.signed){
+ w('## 4. THE SIGNATURE');
+ w('');
+ w('```');
+ w('K1 OWNER DOSSIER — SIGNED');
+ w('');
+ w(`HUMAN-JUDGEMENT ROWS  ${T.rows}      CELLS  ${cells}      SUCCESSOR  ${T.s}      OWNER  ${T.o}      OVERLAP  ${T.both}`);
+ w(`GROUPS  ${Object.keys(G).length}/${Object.keys(G).length}      PARTITION  TOTAL + DISJOINT      SURFACES  ${rows.length}/${rows.length}`);
+ w('');
+ for(const k of Object.keys(G)) w(`${k}:  ${SIGNED.verdicts[k]}`);
+ w('');
+ w('K1 SIGNED: YES');
+ w('```');
+ w('');
+ w('### The conditions, in full');
+ w('');
+ w('*Reproduced here so that no condition depends on being looked up. Where a group is marked');
+ w('APPROVE WITH CONDITIONS and has no block below, its conditions are that group\'s RECOMMENDED line.*');
+ w('');
+ for(const [k,list] of Object.entries(SIGNED.binding_conditions)){
+  w(`**${k.replace(/_/g,' / ')}**`);
+  w('');
+  for(const c of list) w(`- ${c}`);
+  w('');
+ }
+ w('### Carried forward, not closed');
+ w('');
+ for(const f of SIGNED.out_of_k1_findings) w(`- \`${f.id}\` — ${f.summary}`);
+ w('');
+ w('---');
+ w('');
+}else{
 w('## 4. K1 RECOMMENDED APPROVAL BLOCK');
 w('');
 w('*One block. Strike any group you do not approve and it stays unsigned; the rest proceed. Any group left');
@@ -299,6 +347,7 @@ w('```');
 w('');
 w('---');
 w('');
+}
 w('## 5. What signing does and does not authorize');
 w('');
 w('**Does.** Closes K1. Lets Wave 2 begin. Fixes the successor and owner columns of these '+T.rows+' rows so the');

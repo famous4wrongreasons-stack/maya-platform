@@ -18,6 +18,7 @@ run mapping-vs-contract-check      $E/mapping-vs-contract-check.mjs $D/MAYA-CHAT
 run widget-schema-count            $E/widget-schema-count.mjs       $D/MAYA-CHAT-FIRST-K1-K16-IMPLEMENTATION-MAPPING.md
 run k1-dossier-check               $E/k1/k1-dossier-check.mjs
 run k1-human-dossier               $E/k1/build-human-dossier.mjs
+run k1-signature-check             $E/k1/k1-signature-check.mjs
 printf '%-34s ' widget-contract-check
 ( cd maya-saas-backend && node scripts/widget-contract-check.mjs 2>&1 | tail -1 )
 printf '%-34s ' f88-mutation-battery
