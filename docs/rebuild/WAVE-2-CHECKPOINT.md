@@ -195,3 +195,48 @@ and **no intent**. A payment affordance that half-works is worse than one that i
 person will try it. `shell.pay` carries **one** opaque `session_ref` and nothing else — the body has
 no member able to hold a provider URL, a checkout id or a card token, which is BUTTON → ENDPOINT
 applied where the stakes are money.
+
+---
+
+# Wave 4 — K10 · K11 — owner and staff intelligence
+
+**Fence: additive, read-only. The only writes are C9 approvals, through the orchestrator's own
+contract.** Nothing in either package touches Prisma, and the gate checks that by looking for the
+persistence client rather than for method names — an earlier version matched `createHash().update()`
+and called a hash a database write.
+
+## K10 — a number is not a number
+
+The strictest exit in the programme, and the strictness is the point: *cells that are not C7/C8
+projections = 0; numerals originating from an LLM = 0; every `Measure` traces to a `FactUsed`.*
+
+A model that can produce a number a person then acts on is the most dangerous thing this product
+could contain. So a numeric cell is **a number plus the fact it came from**, and a cell without a
+`factRef` cannot be constructed — `measure()` refuses rather than defaulting. "Numerals originating
+from an LLM = 0" is true **by construction**: there is no member that would hold one.
+
+**The digest is computed on the read path, outside the projector.** A projector that hashed its own
+output would certify itself, and the digest would move whenever the projector did. Computed over the
+rows as read, it is something a third party can recheck — and the test recomputes it for every
+fixture rather than trusting the emitted value. `rows_digest` and `series_digest` are deliberately
+different questions: a series is a **sequence**, so reordering its points changes it.
+
+**An ARTIFACT is minted for one principal**, re-compared at fetch against the **live** proof hash.
+An owner report is the most concentrated personal data this product makes, and a link that works for
+whoever holds it is how that data leaves.
+
+## K11 — a widget may not recompute a risk
+
+`risk_tier`, `reversible` and `audience_size` are **copied, never recomputed** — because, in the
+mapping's own words, *"a widget that recomputes a risk tier is a widget that can lower one."* The
+test reads the source and refuses any operator on those three fields, so the property is checked
+rather than promised.
+
+**`NO_ACTION` must be equally selectable**, and "equally" is enforced structurally: the option must
+have the same shape as every other, with no marker a renderer could use to treat it differently. A
+chooser where doing nothing is harder to pick than doing something manufactures consent. It is also
+the unique `resourceClass: 'LOCAL'` row, verified by enumeration against the live registry.
+
+**Envelopes that initiate a strategy = 0.** A widget presents; it does not start. There is no
+function that begins a run and no orchestrator imported — asserted by reading the module's own
+source for an import statement.
