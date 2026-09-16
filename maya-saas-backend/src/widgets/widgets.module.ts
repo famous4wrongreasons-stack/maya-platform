@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 
 import { PrismaModule } from '../prisma/prisma.module';
+import { ControlRegistryService } from './control/control-registry.service';
+import { WidgetEmitterService } from './emission/emitter.service';
 import { IntentGatewayService } from './intent-gateway.service';
+import { WidgetStoresService } from './stores/widget-stores.service';
 import { WidgetsController } from './widgets.controller';
 
 /**
@@ -15,7 +18,17 @@ import { WidgetsController } from './widgets.controller';
 @Module({
   imports: [PrismaModule],
   controllers: [WidgetsController],
-  providers: [IntentGatewayService],
-  exports: [IntentGatewayService],
+  providers: [
+    IntentGatewayService,
+    WidgetStoresService,
+    WidgetEmitterService,
+    ControlRegistryService,
+  ],
+  exports: [
+    IntentGatewayService,
+    WidgetStoresService,
+    WidgetEmitterService,
+    ControlRegistryService,
+  ],
 })
 export class WidgetsModule {}

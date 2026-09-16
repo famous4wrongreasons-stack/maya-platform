@@ -19,7 +19,7 @@ import type {
   IntentRecordRow,
   SubmissionShape,
 } from './gate.types';
-import { sha256Hex } from './token.util';
+import { digestEquals, sha256Hex } from './token.util';
 
 /** A gate whose mechanism a later package builds. It runs, and it refuses. */
 const pending = (
@@ -124,7 +124,10 @@ export class IntentGatewayService {
         // A token minted for A and replayed by B fails here. A forwarded Telegram message and a
         // shared push are inert for the same reason, and an unlink invalidates every outstanding
         // envelope retroactively because the proof hash changes.
-        return r.principalProofHash === ctx.principalProofHash
+        // Constant-time. A `===` here would return faster the earlier the two hashes diverge, and
+        // §3 requires a foreign-principal token refused at latency indistinguishable from a forged
+        // or expired one — which a short-circuiting compare measurably is not.
+        return digestEquals(r.principalProofHash, ctx.principalProofHash)
           ? { outcome: 'pass' }
           : { outcome: 'refuse', code: 'widget_principal_mismatch' };
       },
@@ -191,11 +194,11 @@ export class IntentGatewayService {
     const token = this.step0(args.submission);
     if (!token)
       return {
-        verdict: {
+        verdict: this.normalise({
           outcome: 'refuse',
           code: 'unauthenticated',
           detail: 'no intent token in submission',
-        },
+        }),
         stoppedAt: '0',
         ran: 0,
       };
@@ -218,10 +221,25 @@ export class IntentGatewayService {
       const verdict = await gate.run(ctx);
       if (verdict.outcome !== 'pass') {
         this.log.debug(`gate ${gate.n} (${gate.name}) -> ${verdict.outcome}`);
-        return { verdict, stoppedAt: gate.n, ran };
+        return { verdict: this.normalise(verdict), stoppedAt: gate.n, ran };
       }
     }
     return { verdict: { outcome: 'pass' }, stoppedAt: null, ran };
+  }
+
+  /**
+   * Every refusal leaves this service with the SAME KEYS, whichever gate produced it.
+   *
+   * Found by K3's own exit test: gates that supplied a `detail` and gates that did not returned
+   * objects of different shape, so the response structure itself said which gate had refused. The
+   * codes are meant to differ — §3.9 assigns one per gate, and the caller is already authenticated
+   * — but the shape is not, and normalising it here is structural rather than a rule each of the
+   * fifteen gates has to remember.
+   */
+  private normalise(v: GateVerdict): GateVerdict {
+    if (v.outcome === 'refuse' || v.outcome === 'superseded')
+      return { outcome: v.outcome, code: v.code, detail: v.detail ?? '' };
+    return v;
   }
 
   /**
