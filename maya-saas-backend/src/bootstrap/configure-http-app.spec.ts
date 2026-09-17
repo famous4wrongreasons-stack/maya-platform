@@ -7,13 +7,26 @@
 // route-specific parser run before the default one. Parity of the compiled bootstrap itself was
 // proved in U0 S3 by probing `dist/src/main.js` before and after the extraction (S3 log).
 //
+// That probe ran once, and what it proved depends on WHERE `main.ts` calls `configureHttpApp`: called
+// after `enableCors`, the parsers' 413s gain CORS headers, and none of the HTTP cases here notices,
+// because they configure a probe application, not `main.ts`. The guard the plan names for the
+// extraction (`test:http`, the production binary) cannot boot with the CI literals today. So the call
+// site is held at the source too (the last describe block): `main.ts` creates the application without
+// Nest's own body parser, calls `configureHttpApp(app)` exactly once, unconditionally, before it
+// touches the application in any way other than `app.get`, and registers nothing `configureHttpApp`
+// owns a second time.
+//
 // Class U: a real Nest HTTP application over a probe controller, with no guard and no database.
+
+import fs from 'node:fs';
+import path from 'node:path';
 
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import { IsString } from 'class-validator';
 import request from 'supertest';
+import ts from 'typescript';
 
 import { configureHttpApp } from './configure-http-app';
 
@@ -162,5 +175,227 @@ describe('configureHttpApp — the parsers, the api prefix and the validation pi
         'application/x-www-form-urlencoded',
       ).expect(413);
     });
+  });
+});
+
+// ── the call site in main.ts ─────────────────────────────────────────────────────────────────────────
+
+const MAIN = path.join(__dirname, '..', 'main.ts');
+
+/** What `configureHttpApp` owns, so `main.ts` may not register it again. */
+const OWNED_APP_METHODS = new Set(['use', 'setGlobalPrefix', 'useGlobalPipes']);
+const OWNED_MODULES = new Set(['express', 'body-parser']);
+
+/**
+ * Why `main.ts` (as `source`) does not call `configureHttpApp` the way the S3 parity proof requires,
+ * or `[]`. Read from the syntax tree:
+ *   - `NestFactory.create` is called once, with `bodyParser: false`, and bound to `const app`;
+ *   - `configureHttpApp` is called exactly once, as a statement directly in the body of the function
+ *     that creates `app` (not under a condition), with the one argument `app`;
+ *   - before that call, `app` appears only in its own declaration and as the object of `app.get(…)`;
+ *   - nowhere does `main.ts` call `app.use`, `app.setGlobalPrefix` or `app.useGlobalPipes`, or import
+ *     `express` or `body-parser`.
+ */
+const bootstrapCallSiteProblems = (source: string): string[] => {
+  const sf = ts.createSourceFile(
+    'main.ts',
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+  );
+  const problems: string[] = [];
+  const creates: ts.CallExpression[] = [];
+  const configures: ts.CallExpression[] = [];
+  const appRefs: ts.Identifier[] = [];
+  let appDeclaration: ts.VariableDeclaration | null = null;
+
+  const visit = (n: ts.Node): void => {
+    if (ts.isCallExpression(n)) {
+      const callee = n.expression;
+      if (
+        ts.isPropertyAccessExpression(callee) &&
+        ts.isIdentifier(callee.expression) &&
+        callee.expression.text === 'NestFactory' &&
+        callee.name.text === 'create'
+      )
+        creates.push(n);
+      if (ts.isIdentifier(callee) && callee.text === 'configureHttpApp')
+        configures.push(n);
+      if (
+        ts.isPropertyAccessExpression(callee) &&
+        ts.isIdentifier(callee.expression) &&
+        callee.expression.text === 'app' &&
+        OWNED_APP_METHODS.has(callee.name.text)
+      )
+        problems.push(`main.ts calls app.${callee.name.text} itself`);
+    }
+    if (
+      ts.isImportDeclaration(n) &&
+      ts.isStringLiteral(n.moduleSpecifier) &&
+      OWNED_MODULES.has(n.moduleSpecifier.text)
+    )
+      problems.push(`main.ts imports '${n.moduleSpecifier.text}'`);
+    if (
+      ts.isVariableDeclaration(n) &&
+      ts.isIdentifier(n.name) &&
+      n.name.text === 'app'
+    )
+      appDeclaration = n;
+    if (ts.isIdentifier(n) && n.text === 'app') appRefs.push(n);
+    n.forEachChild(visit);
+  };
+  visit(sf);
+
+  if (creates.length !== 1)
+    problems.push(`NestFactory.create is called ${creates.length} times`);
+  else {
+    const options = creates[0].arguments[1];
+    const bodyParser =
+      options && ts.isObjectLiteralExpression(options)
+        ? options.properties.find(
+            (p) =>
+              ts.isPropertyAssignment(p) &&
+              ts.isIdentifier(p.name) &&
+              p.name.text === 'bodyParser',
+          )
+        : undefined;
+    if (
+      !bodyParser ||
+      !ts.isPropertyAssignment(bodyParser) ||
+      bodyParser.initializer.kind !== ts.SyntaxKind.FalseKeyword
+    )
+      problems.push('NestFactory.create is not given bodyParser: false');
+  }
+
+  const declaration = appDeclaration as ts.VariableDeclaration | null;
+  if (!declaration) {
+    problems.push('main.ts declares no app');
+    return problems;
+  }
+  if (
+    !ts.isVariableDeclarationList(declaration.parent) ||
+    !(declaration.parent.flags & ts.NodeFlags.Const)
+  )
+    problems.push('app is not a const');
+  const created =
+    declaration.initializer && ts.isAwaitExpression(declaration.initializer)
+      ? declaration.initializer.expression
+      : declaration.initializer;
+  if (creates.length === 1 && created !== creates[0])
+    problems.push('app is not bound to the result of NestFactory.create');
+
+  if (configures.length !== 1) {
+    problems.push(`configureHttpApp is called ${configures.length} times`);
+    return problems;
+  }
+  const call = configures[0];
+  const [arg, ...rest] = call.arguments;
+  if (!arg || rest.length > 0 || !ts.isIdentifier(arg) || arg.text !== 'app')
+    problems.push('configureHttpApp is not called with the one argument app');
+  const statement = call.parent;
+  const body = ts.findAncestor(declaration, (a) => ts.isBlock(a));
+  if (
+    !ts.isExpressionStatement(statement) ||
+    statement.expression !== call ||
+    statement.parent !== body
+  )
+    problems.push(
+      'configureHttpApp(app) is not an unconditional statement of the function that creates app',
+    );
+
+  for (const ref of appRefs) {
+    if (ref.getStart(sf) >= call.getStart(sf)) continue;
+    if (ref === declaration.name) continue;
+    const access = ref.parent;
+    const isAppGet =
+      ts.isPropertyAccessExpression(access) &&
+      access.expression === ref &&
+      access.name.text === 'get' &&
+      ts.isCallExpression(access.parent) &&
+      access.parent.expression === access;
+    if (!isAppGet)
+      problems.push(
+        `app is used before configureHttpApp(app): ${ref.parent.getText(sf).slice(0, 60)}`,
+      );
+  }
+  return problems;
+};
+
+describe('main.ts calls configureHttpApp first, once, unconditionally', () => {
+  const source = fs.readFileSync(MAIN, 'utf8');
+
+  it('CONTROL: main.ts as it is breaks none of the call-site rules', () => {
+    expect(bootstrapCallSiteProblems(source)).toEqual([]);
+  });
+
+  const replaceOnce = (from: string, to: string): string => {
+    expect(source.split(from)).toHaveLength(2);
+    return source.replace(from, () => to);
+  };
+  const CALL = '  configureHttpApp(app);\n';
+  const CORS_END = '  });\n\n  if (\n    isSwaggerEnabled';
+
+  const mutants: [string, () => string, RegExp][] = [
+    [
+      'the call moved after enableCors',
+      () =>
+        replaceOnce(CALL, '').replace(
+          CORS_END,
+          `  });\n${CALL}\n  if (\n    isSwaggerEnabled`,
+        ),
+      /app is used before configureHttpApp\(app\): app\.disable/,
+    ],
+    [
+      'a middleware registered before the call',
+      () => replaceOnce(CALL, `  app.enableCors();\n${CALL}`),
+      /app is used before configureHttpApp\(app\): app\.enableCors/,
+    ],
+    [
+      'the call under a condition',
+      () => replaceOnce(CALL, `  if (process.env.X) {\n  ${CALL}  }\n`),
+      /not an unconditional statement/,
+    ],
+    ['the call removed', () => replaceOnce(CALL, ''), /called 0 times/],
+    [
+      'the call made twice',
+      () => replaceOnce(CALL, `${CALL}${CALL}`),
+      /called 2 times/,
+    ],
+    [
+      "Nest's own body parser left on",
+      () => replaceOnce('    bodyParser: false,\n', '    bodyParser: true,\n'),
+      /bodyParser: false/,
+    ],
+    [
+      'the prefix registered again in main.ts',
+      () => replaceOnce(CALL, `${CALL}  app.setGlobalPrefix('api');\n`),
+      /calls app\.setGlobalPrefix itself/,
+    ],
+    [
+      'a parser imported and registered in main.ts',
+      () =>
+        replaceOnce(
+          "import { NestFactory } from '@nestjs/core';\n",
+          "import { NestFactory } from '@nestjs/core';\nimport { json } from 'express';\n",
+        ).replace(CALL, `${CALL}  app.use(json());\n`),
+      /imports 'express'[\s\S]*calls app\.use itself|calls app\.use itself[\s\S]*imports 'express'/,
+    ],
+    [
+      'app is not the application NestFactory.create returned',
+      () =>
+        replaceOnce(
+          '  const app = await NestFactory.create<NestExpressApplication>(',
+          '  const made = await NestFactory.create<NestExpressApplication>(',
+        ).replace(
+          '  const configService = app.get(ConfigService);\n',
+          '  const app = made;\n  const configService = app.get(ConfigService);\n',
+        ),
+      /app is not bound to the result of NestFactory\.create/,
+    ],
+  ];
+
+  it.each(mutants)('RED: %s', (_name, mutate, reason) => {
+    const problems = bootstrapCallSiteProblems(mutate());
+    expect(problems.join('\n')).toMatch(reason);
   });
 });
