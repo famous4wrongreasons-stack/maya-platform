@@ -1,9 +1,20 @@
-// K3 — the five widget-layer stores.
+// K3 — the five widget-layer stores, behind one facade.
 //
-// They are one service rather than five, for one reason: every write here must be tenant-fenced,
-// and a fence repeated in five files is a fence that will eventually be repeated wrong. `scoped()`
-// is the only way a tenant id enters a query in this file, and the K3 checker asserts that no
-// method builds a `where` without it.
+// Callers see one service. Since U0 (integrator decision D-6) it is a FACADE over sub-stores, so a
+// unit that builds one store owns one file instead of editing a shared service:
+//   - `timeline.store.ts`        TimelineStore         (store 1)
+//   - `intent-audit.store.ts`    IntentAuditStore      (stores 2 and 3: the receipt is in the
+//                                                       intent-audit store, MAP:606-611)
+//   - `divergence.store.ts`      DivergenceStore       (skeleton: no table until AMB-32)
+//   - `lowering-source.read.ts`  LoweringSourceReader  (skeleton: its read lands with U8a)
+// Each existing method was moved unchanged and is delegated below with the same signature. The draft
+// store (4) and the free-input ledger (5) are not split: no unit of the plan owns them, so they stay
+// here as they were.
+//
+// The stores were one service for one reason: every write must be tenant-fenced, and a fence repeated
+// in five files is a fence that will eventually be repeated wrong. That reason survives the split in
+// `tenant-scope.ts`: `scoped()` is declared once there, and it is the only way a tenant id enters a
+// store query's `where`, in this file and in every sub-store.
 //
 // What these stores are NOT: they are not a second home for business data. §5's boundary is that no
 // business table references a widget table and no widget row is a canonical record of anything. A
@@ -13,168 +24,63 @@
 import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../../prisma/prisma.service';
+import { DivergenceStore } from './divergence.store';
+import { IntentAuditStore } from './intent-audit.store';
+import { LoweringSourceReader } from './lowering-source.read';
+import { scoped } from './tenant-scope';
+import { TimelineStore, type TimelineTurnInput } from './timeline.store';
 
-/** Retention windows from §5. Stated once so a store cannot invent its own. */
-export const RETENTION = {
-  /** T_TIMELINE — the conversation a person can see. */
-  timelineDays: 180,
-  /** Emission bodies are dropped well before the row is, which is why the two are separate. */
-  emissionBodyDefaultSec: 7 * 24 * 60 * 60,
-} as const;
-
-export interface TimelineTurnInput {
-  tenantId: string;
-  conversationId: string;
-  turnIndex: number;
-  /** TurnRole — 'user' or 'assistant'. OWNER RULING, wave 2; the database CHECK admits no other. */
-  role: 'user' | 'assistant';
-  principalProofHash: string;
-  channel: string;
-  textContent?: string | null;
-  spokenTranscript?: string | null;
-}
+export { RETENTION, type TimelineTurnInput } from './timeline.store';
 
 @Injectable()
 export class WidgetStoresService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly timeline: TimelineStore;
+  private readonly intentAudit: IntentAuditStore;
+  // Held so the facade's composition is the plan's (§1.3) before either has a method; no method
+  // delegates to them yet.
+  private readonly divergence: DivergenceStore;
+  private readonly loweringSource: LoweringSourceReader;
 
-  /**
-   * The only place a tenant id enters a query in this file. Every store method routes through it,
-   * so "is this tenant-fenced?" has one answer instead of one per method.
-   */
-  private scoped<T extends object>(
-    tenantId: string,
-    where: T,
-  ): T & { tenantId: string } {
-    if (!tenantId) throw new Error('widget store: refusing an unscoped query');
-    return { ...where, tenantId };
-  }
-
-  private plusDays(from: Date, days: number): Date {
-    return new Date(from.getTime() + days * 24 * 60 * 60 * 1000);
+  constructor(private readonly prisma: PrismaService) {
+    this.timeline = new TimelineStore(prisma);
+    this.intentAudit = new IntentAuditStore(prisma);
+    this.divergence = new DivergenceStore(prisma);
+    this.loweringSource = new LoweringSourceReader(prisma);
   }
 
   // ── 1. TIMELINE STORE ───────────────────────────────────────────────────────────────────────
-  // Gate 9 calls this: the lowered utterance is appended as a USER turn with authority NONE, and
-  // "from here the path is byte-identical to a typed message". That is the point of the store —
-  // a widget tap and a typed sentence become the same kind of row.
+  // `TimelineStore` (timeline.store.ts). Gate 9 appends the lowered utterance as a USER turn with
+  // authority NONE; reading the timeline reaches no capability owner.
 
   async appendTurn(
     input: TimelineTurnInput,
     now = new Date(),
   ): Promise<{ id: string }> {
-    const row = await this.prisma.widgetTimelineTurn.create({
-      data: {
-        tenantId: input.tenantId,
-        conversationId: input.conversationId,
-        turnIndex: input.turnIndex,
-        role: input.role,
-        principalProofHash: input.principalProofHash,
-        channel: input.channel,
-        createdAt: now,
-        retentionUntil: this.plusDays(now, RETENTION.timelineDays),
-        textContent: input.textContent ?? null,
-        spokenTranscript: input.spokenTranscript ?? null,
-      },
-      select: { id: true },
-    });
-    return row;
+    return this.timeline.appendTurn(input, now);
   }
 
-  /**
-   * Reading the timeline reaches no capability owner — §3's exit requires zero capability calls on
-   * this path, and the way to keep that true is for the read to be a plain select with nothing to
-   * join to.
-   */
   async readTimeline(tenantId: string, conversationId: string, limit = 50) {
-    return this.prisma.widgetTimelineTurn.findMany({
-      where: this.scoped(tenantId, { conversationId, erasedAt: null }),
-      orderBy: { turnIndex: 'asc' },
-      take: Math.min(limit, 200),
-      select: {
-        id: true,
-        turnIndex: true,
-        role: true,
-        channel: true,
-        createdAt: true,
-        textContent: true,
-        spokenTranscript: true,
-      },
-    });
+    return this.timeline.readTimeline(tenantId, conversationId, limit);
   }
 
   // ── 2. INTENT-AUDIT STORE ───────────────────────────────────────────────────────────────────
-  // What arrived, separately from what was decided. The two are different questions and §5 gives
-  // them different tables: the audit records the submission as received, the receipt records the
-  // adjudication. Keeping them apart is what lets a refusal be explained without re-deriving it.
+  // `IntentAuditStore` (intent-audit.store.ts). What arrived, separately from what was decided.
 
   async recordSubmission(
-    input: {
-      tenantId: string;
-      widgetId: string;
-      intentTokenHash: string;
-      clientNonce: string;
-      profileId: string;
-      clientEmittedAt?: Date | null;
-      readbackRef?: string | null;
-      readbackBodyHash?: string | null;
-      readbackAffirmation?: string | null;
-      inputsClosed?: unknown;
-      spokenTranscript?: string | null;
-    },
+    input: Parameters<IntentAuditStore['recordSubmission']>[0],
     now = new Date(),
   ): Promise<{ id: string }> {
-    return this.prisma.widgetIntentSubmissionAudit.create({
-      data: {
-        tenantId: input.tenantId,
-        widgetId: input.widgetId,
-        intentTokenHash: input.intentTokenHash,
-        clientNonce: input.clientNonce,
-        profileId: input.profileId,
-        clientEmittedAt: input.clientEmittedAt ?? null,
-        receivedAt: now,
-        readbackRef: input.readbackRef ?? null,
-        readbackBodyHash: input.readbackBodyHash ?? null,
-        readbackAffirmation: input.readbackAffirmation ?? null,
-        // Closed-domain values only. Free text and PII have their own columns and their own fences
-        // in K4; writing them here would put unvalidated input into the audit trail.
-        inputsClosedJson: (input.inputsClosed ?? null) as never,
-        spokenTranscript: input.spokenTranscript ?? null,
-      },
-      select: { id: true },
-    });
+    return this.intentAudit.recordSubmission(input, now);
   }
 
   // ── 3. RECEIPT STORE (shell) ────────────────────────────────────────────────────────────────
-  // K3 builds the shell: one adjudication per token, with a closed refusal vocabulary. The action
-  // receipt it can point at belongs to K7, which is why `actionReceiptRef` stays null here.
+  // `IntentAuditStore.writeReceipt`: one adjudication per token, `actionReceiptRef` null until K7.
 
   async writeReceipt(
-    input: {
-      tenantId: string;
-      widgetId: string;
-      intentTokenHash: string;
-      outcome: string;
-      refusalCode?: string | null;
-      answeringChannel: string;
-      utteranceEcho?: string | null;
-    },
+    input: Parameters<IntentAuditStore['writeReceipt']>[0],
     now = new Date(),
   ): Promise<{ id: string }> {
-    return this.prisma.widgetIntentReceipt.create({
-      data: {
-        tenantId: input.tenantId,
-        widgetId: input.widgetId,
-        intentTokenHash: input.intentTokenHash,
-        submittedAt: now,
-        outcome: input.outcome,
-        refusalCode: input.refusalCode ?? null,
-        actionReceiptRef: null,
-        answeringChannel: input.answeringChannel,
-        utteranceEcho: input.utteranceEcho ?? null,
-      },
-      select: { id: true },
-    });
+    return this.intentAudit.writeReceipt(input, now);
   }
 
   // ── 4. SERVER-OWNED DRAFT STORE ─────────────────────────────────────────────────────────────
@@ -223,7 +129,7 @@ export class WidgetStoresService {
     now = new Date(),
   ) {
     return this.prisma.widgetDraft.findFirst({
-      where: this.scoped(tenantId, {
+      where: scoped(tenantId, {
         draftRef,
         principalProofHash,
         consumedAt: null,
@@ -284,7 +190,7 @@ export class WidgetStoresService {
 
   async countFreeInputFields(tenantId: string): Promise<number> {
     return this.prisma.widgetFreeInputLedger.count({
-      where: this.scoped(tenantId, {}),
+      where: scoped(tenantId, {}),
     });
   }
 }

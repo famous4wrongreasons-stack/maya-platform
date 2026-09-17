@@ -110,11 +110,24 @@ chk(
 );
 
 // ── 6. the tenant is never taken from the body ───────────────────────────────────────────────
+// U0 item 8 moved the controller's submit-argument derivation, unchanged, into `intentSubmitArgs`.
+// The check follows it rather than loosening: the controller submits exactly that derivation and
+// nothing else, the derivation sets the tenant once and from the actor, and neither file sets a
+// tenant from the DTO.
 const ctrl = read('widgets.controller.ts');
+const submitArgs = read('intent-submit-args.ts');
+const ctrlSubmits = [...ctrl.matchAll(/\.submit\(/g)].length;
+const tenantAssignments = [...submitArgs.matchAll(/tenantId:/g)].length;
 chk(
   'the tenant comes from the authenticated principal, never from the body',
-  /tenantId: actor\.tenantId/.test(ctrl) && !/tenantId: dto\./.test(ctrl),
-  'controller reads actor.tenantId; the DTO has no tenant field to read',
+  /this\.gateway\.submit\(intentSubmitArgs\(dto, actor\)\)/.test(ctrl) &&
+    ctrlSubmits === 1 &&
+    tenantAssignments === 1 &&
+    /tenantId: actor\.tenantId/.test(submitArgs) &&
+    !/tenantId: dto\./.test(ctrl) &&
+    !/tenantId: dto\./.test(submitArgs),
+  `controller submits intentSubmitArgs(dto, actor) (${ctrlSubmits} submit call); intentSubmitArgs sets the tenant ` +
+    `${tenantAssignments} time(s), from actor.tenantId; the DTO has no tenant field to read`,
 );
 
 // ── 7. exactly two routes ────────────────────────────────────────────────────────────────────
@@ -150,10 +163,39 @@ chk(
 const mod = read('widgets.module.ts');
 const imports = [...mod.matchAll(/^import .* from '([^']+)';$/gm)].map((m) => m[1]).filter((p) => p.startsWith('.'));
 const foreign = imports.filter((p) => !p.startsWith('./') && p !== '../prisma/prisma.module');
+// U0 (D-6) added `WidgetOwnerPortsModule`, the one widget module that will ever import an owner
+// module. The widget module's relative import of it passes the rule above, so without this clause
+// the new module would be a path around the check. Until the plan's enumerated rule replaces this
+// clause (U0 item 9), the owner-ports module imports nothing but `@nestjs/common`, and its
+// `imports`, `providers` and `exports` are empty. Read with the compiler, so a multi-line import or
+// a re-export is seen too.
+const PORTS = 'owner-ports/widget-owner-ports.module.ts';
+const portsSf = sf(PORTS);
+const portsSpecifiers = portsSf.statements
+  .filter((s) => (ts.isImportDeclaration(s) || ts.isExportDeclaration(s)) && s.moduleSpecifier)
+  .map((s) => s.moduleSpecifier.text);
+const portsArrays = {};
+const portsWalk = (n) => {
+  if (ts.isDecorator(n) && ts.isCallExpression(n.expression) && n.expression.expression.getText(portsSf) === 'Module') {
+    const arg = n.expression.arguments[0];
+    if (arg && ts.isObjectLiteralExpression(arg))
+      for (const p of arg.properties)
+        if (ts.isPropertyAssignment(p))
+          portsArrays[p.name.getText(portsSf)] = ts.isArrayLiteralExpression(p.initializer)
+            ? p.initializer.elements.length
+            : 'not an array literal';
+  }
+  n.forEachChild(portsWalk);
+};
+portsWalk(portsSf);
+const portsForeign = portsSpecifiers.filter((p) => p !== '@nestjs/common');
+const portsEmpty = ['imports', 'providers', 'exports'].every((k) => portsArrays[k] === 0);
 chk(
   'the widget module imports Prisma and no capability module',
-  foreign.length === 0,
-  foreign.length ? `IMPORTS: ${foreign.join(', ')}` : imports.join(', '),
+  foreign.length === 0 && portsForeign.length === 0 && portsEmpty,
+  (foreign.length ? `IMPORTS: ${foreign.join(', ')}` : imports.join(', ')) +
+    `; ${PORTS}: ${portsForeign.length ? `IMPORTS: ${portsForeign.join(', ')}` : 'imports only @nestjs/common'}, ` +
+    `@Module arrays ${JSON.stringify(portsArrays)}`,
 );
 
 for (const c of out) console.log(`${c.ok ? 'PASS' : 'FAIL'}  ${c.n}\n        ${c.ev}`);

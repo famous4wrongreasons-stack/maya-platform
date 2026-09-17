@@ -18,8 +18,7 @@ import { RequiresFeature } from '../entitlements/requires-feature.decorator';
 import { IntentGatewayService } from './intent-gateway.service';
 import { SubmitIntentDto } from './dto/submit-intent.dto';
 import { ResolveWidgetDto } from './dto/resolve-widget.dto';
-import { resolveVerificationLevel } from './authority/authority-resolver';
-import { principalProofHash } from './principal.util';
+import { intentSubmitArgs } from './intent-submit-args';
 
 @ApiTags('widgets')
 @ApiBearerAuth()
@@ -67,31 +66,9 @@ export class WidgetsController {
     @Body() dto: SubmitIntentDto,
     @CurrentUser() actor: AuthenticatedUser,
   ) {
-    // `v` is derived HERE, from what the server established about this caller — never sent, never
-    // read back from the record. FR-3 forbids caller-supplied authority outright, so every input
-    // to the resolver is an answer from a mechanism that already ran.
-    const verificationLevel = resolveVerificationLevel({
-      membershipResolved: Boolean(actor.tenantId) && Boolean(actor.userId),
-      channelLinkActive: false,
-      channelSubject: Boolean(actor.userId),
-      roles: [],
-    });
-
-    const result = await this.gateway.submit({
-      intentToken: dto.intent_token,
-      // The tenant comes from the authenticated principal, never from the body. A body-supplied
-      // tenant is the shape of every tenant-confusion bug, and the DTO has no field for one.
-      tenantId: actor.tenantId ?? '',
-      // The JWT-validated user, as `@CurrentUser()` delivers it (D-9). Nothing here reads its role or
-      // builds a principal from it (K5): which read supplies the live principal's role is AMB-03's.
-      actor,
-      principalProofHash: principalProofHash(actor),
-      submission: dto,
-      verificationLevel,
-      // The carrier of an HTTP submission. A carrier is a ceiling, not a claim: `channelMaxLevel`
-      // caps whatever the session says.
-      carrier: 'pwa',
-    });
+    // Every argument, including the tenant (from the actor, never the body) and `v`, is derived in
+    // `intentSubmitArgs`, the one derivation the live-path harness also uses.
+    const result = await this.gateway.submit(intentSubmitArgs(dto, actor));
 
     return {
       contract: 'maya.widget.intent/1',

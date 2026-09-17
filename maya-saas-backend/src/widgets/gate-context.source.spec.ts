@@ -137,34 +137,51 @@ describe('D-9 — the actor is carried, the resolved-roles member is gone, and G
   });
 
   it('the controller hands the gateway the actor, and no role, roles or principal member', () => {
-    const src = readWidget('widgets.controller.ts');
-    const sf = parseSource('widgets.controller.ts', src);
-    const submitArgs: string[][] = [];
-    const visit = (n: ts.Node): void => {
+    // Since U0 item 8 the controller submits `intentSubmitArgs(dto, actor)` and nothing else, so the
+    // argument object is read where it is built. Both files are held to "no role read".
+    const ctrlSrc = readWidget('widgets.controller.ts');
+    const ctrlSf = parseSource('widgets.controller.ts', ctrlSrc);
+    const submitCalls: string[] = [];
+    const visitCtrl = (n: ts.Node): void => {
       if (
         ts.isCallExpression(n) &&
-        n.expression.getText(sf) === 'this.gateway.submit'
-      ) {
-        const arg = n.arguments[0];
-        if (arg && ts.isObjectLiteralExpression(arg))
-          submitArgs.push(
-            arg.properties.map((p) => (p.name ? p.name.getText(sf) : '...')),
-          );
-      }
-      ts.forEachChild(n, visit);
+        ts.isPropertyAccessExpression(n.expression) &&
+        n.expression.name.text === 'submit'
+      )
+        submitCalls.push(n.getText(ctrlSf));
+      ts.forEachChild(n, visitCtrl);
     };
-    visit(sf);
-    expect(submitArgs).toHaveLength(1);
-    expect(submitArgs[0]).toContain('actor');
+    visitCtrl(ctrlSf);
+    expect(submitCalls).toEqual([
+      'this.gateway.submit(intentSubmitArgs(dto, actor))',
+    ]);
+
+    const argsSrc = readWidget('intent-submit-args.ts');
+    const argsSf = parseSource('intent-submit-args.ts', argsSrc);
+    const returned: string[][] = [];
+    const visitArgs = (n: ts.Node): void => {
+      if (
+        ts.isReturnStatement(n) &&
+        n.expression &&
+        ts.isObjectLiteralExpression(n.expression)
+      )
+        returned.push(
+          n.expression.properties.map((p) =>
+            p.name ? p.name.getText(argsSf) : '...',
+          ),
+        );
+      ts.forEachChild(n, visitArgs);
+    };
+    visitArgs(argsSf);
+    expect(returned).toHaveLength(1);
+    expect(returned[0]).toContain('actor');
     for (const forbidden of [RESOLVED_ROLES, 'role', 'roles', 'principal'])
-      expect(submitArgs[0]).not.toContain(forbidden);
-    expect(
-      actorRoleReads({
-        slot: null,
-        file: 'widgets.controller.ts',
-        source: src,
-      }),
-    ).toEqual([]);
+      expect(returned[0]).not.toContain(forbidden);
+    for (const [file, source] of [
+      ['widgets.controller.ts', ctrlSrc],
+      ['intent-submit-args.ts', argsSrc],
+    ] as const)
+      expect(actorRoleReads({ slot: null, file, source })).toEqual([]);
   });
 
   it("Gate 6 — its slot and every file the slot calls — does not read the actor's role", () => {
