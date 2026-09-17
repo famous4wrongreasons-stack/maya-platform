@@ -14,7 +14,6 @@ import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import type { SubmitIntentDto } from './dto/submit-intent.dto';
 import type { IntentGatewayService } from './intent-gateway.service';
 import { intentSubmitArgs } from './intent-submit-args';
-import { principalProofHash } from './principal.util';
 import { WidgetsController } from './widgets.controller';
 
 type SubmitArgs = Parameters<IntentGatewayService['submit']>[0];
@@ -62,8 +61,13 @@ const recordingGateway = () => {
   };
 };
 
-describe('WidgetsController.intent — the arguments it hands the gateway are unchanged', () => {
-  it('a member of a tenant: the tenant from the actor, SESSION_VERIFIED, carrier pwa, the dto and actor as given', async () => {
+describe('WidgetsController.intent — the arguments it hands the gateway', () => {
+  // P-PRINCIPAL (D-1, D-2) took `principalProofHash` and `verificationLevel` OUT of this derivation.
+  // They were computed from the JWT's four fields; they are now properties of the live principal the
+  // gateway resolves inside `T`, from `C9Authority.current` and the tenancy owner's role read. The
+  // members that remain are the ones the ROUTE establishes: the token, the tenant (from the actor,
+  // never the body), the actor itself, the submission and the carrier.
+  it('a member of a tenant: the tenant from the actor, carrier pwa, the dto and actor as given', async () => {
     const { controller, calls } = recordingGateway();
     const a = actor();
     const d = dto();
@@ -74,41 +78,38 @@ describe('WidgetsController.intent — the arguments it hands the gateway are un
       'intentToken',
       'tenantId',
       'actor',
-      'principalProofHash',
       'submission',
-      'verificationLevel',
       'carrier',
     ]);
     expect(args.intentToken).toBe('tok-0123456789abcdef');
     expect(args.tenantId).toBe('t-1');
     expect(args.actor).toBe(a);
-    expect(args.principalProofHash).toBe(principalProofHash(a));
     expect(args.submission).toBe(d);
-    expect(args.verificationLevel).toBe('SESSION_VERIFIED');
     expect(args.carrier).toBe('pwa');
     expect(args.now).toBeUndefined();
   });
 
-  it('no tenant on the actor: the tenant is the empty string, never the body; the level is CHANNEL_IDENTITY', async () => {
+  it('no tenant on the actor: the tenant is the empty string, never the body', async () => {
     const { controller, calls } = recordingGateway();
     const a = actor({ tenantId: null, membershipId: null });
     await controller.intent(dto(), a);
     expect(calls[0].tenantId).toBe('');
-    expect(calls[0].verificationLevel).toBe('CHANNEL_IDENTITY');
-    expect(calls[0].principalProofHash).toBe(principalProofHash(a));
+    expect(calls[0].actor).toBe(a);
   });
 
-  it('no tenant and no user: ANONYMOUS', async () => {
+  it('no level and no proof hash are derived here any more: the live principal carries both (D-2)', async () => {
     const { controller, calls } = recordingGateway();
     await controller.intent(dto(), actor({ tenantId: null, userId: '' }));
-    expect(calls[0].verificationLevel).toBe('ANONYMOUS');
+    const derived = calls[0] as unknown as Record<string, unknown>;
+    expect('verificationLevel' in derived).toBe(false);
+    expect('principalProofHash' in derived).toBe(false);
   });
 
-  it('a tenant without a user id is not a resolved membership: CHANNEL_IDENTITY is not reached either', async () => {
+  it('a tenant without a user id still yields the actor tenant and nothing else', async () => {
     const { controller, calls } = recordingGateway();
     await controller.intent(dto(), actor({ userId: '' }));
     expect(calls[0].tenantId).toBe('t-1');
-    expect(calls[0].verificationLevel).toBe('ANONYMOUS');
+    expect(calls[0].carrier).toBe('pwa');
   });
 
   it('the response carries the verdict, the stop and the counts, and nothing else', async () => {
@@ -161,9 +162,9 @@ describe("intentSubmitArgs — the controller's derivation, callable by a harnes
     } as unknown as SubmitIntentDto;
     const derived = intentSubmitArgs(smuggled, a);
     expect(derived.tenantId).toBe(clean.tenantId);
-    expect(derived.verificationLevel).toBe(clean.verificationLevel);
     expect(derived.carrier).toBe('pwa');
-    expect(derived.principalProofHash).toBe(clean.principalProofHash);
     expect(derived.actor).toBe(a);
+    // The two members a body could once have hoped to influence are no longer derived here at all.
+    expect(Object.keys(derived)).toEqual(Object.keys(clean));
   });
 });

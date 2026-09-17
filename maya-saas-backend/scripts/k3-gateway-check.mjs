@@ -89,12 +89,29 @@ chk(
 // ── 3. no gate can be skipped ────────────────────────────────────────────────────────────────
 // The runner must walk the array. A `continue`, or an index that is not the loop's, would be a
 // branch around a gate — which is the one thing the ordering is supposed to make impossible.
+//
+// GATES-PLAN-V11 D-1 (P-PRINCIPAL) split the walk at ONE point: the request transaction `T` commits
+// after slot 10, so slots 11-13 run outside it. That is a commit point, not a branch, and the check is
+// tightened rather than relaxed to say so: `submit()` cuts `this.gates` into exactly two slices whose
+// bounds are the same expression (`lastInTx + 1`), so they are contiguous and cover the array; there is
+// ONE loop, a for-of over the slice it was handed, with no `continue`, no index, and no condition on a
+// gate's identity; and it still stops at the first non-pass verdict. A third slice, an overlap or a gap
+// would fail the range test, and a loop over anything but the handed slice would fail the loop test.
 const runner = read('intent-gateway.service.ts');
-const loop = /for \(const gate of this\.gates\) \{([\s\S]*?)\n {4}\}/.exec(runner);
+const loop = /for \(const gate of slots\) \{([\s\S]*?)\n {4}\}/.exec(runner);
+const ranges =
+  /const inTransactionSlots = this\.gates\.slice\(0, lastInTx \+ 1\);\n\s*const afterCommitSlots = this\.gates\.slice\(lastInTx \+ 1\);/.test(runner) &&
+  (runner.match(/this\.gates\.slice\(/g) ?? []).length === 2 &&
+  (runner.match(/for \(const gate of /g) ?? []).length === 1 &&
+  !/for \(let |this\.gates\[/.test(runner);
 chk(
   'the runner walks every gate and stops only on a verdict',
-  loop !== null && !/\bcontinue\b/.test(loop[1]) && /verdict\.outcome !== 'pass'/.test(loop[1]),
-  loop ? 'one for-of over this.gates; no continue; stops at the first non-pass' : 'no runner loop found',
+  loop !== null && ranges && !/\bcontinue\b/.test(loop[1]) && /verdict\.outcome !== 'pass'/.test(loop[1]),
+  loop && ranges
+    ? 'one for-of over the handed slice; two contiguous slices of this.gates covering it; no continue, no index; stops at the first non-pass'
+    : loop
+      ? 'RANGES: the two slices are not this.gates cut once at lastInTx + 1'
+      : 'no runner loop found',
 );
 
 // ── 4. a gate cannot pass silently ───────────────────────────────────────────────────────────
@@ -126,6 +143,14 @@ chk(
 //      already run: the JWT guard is global and the widgets controller does not opt out. (Unchanged,
 //      except that it is bound to slot 2 and the guard's name is matched whole: `JwtAuthGuardX` in
 //      the APP_GUARD provider no longer reads as the JWT guard.)
+//      GATES-PLAN-V11 D-16 (P-PRINCIPAL) makes this exception UNUSED: slot 2 now refuses
+//      `unauthenticated` in-array when no transport session reached the gateway at all, so it is not a
+//      constant pass and does not ask for the exception. A principal the transport chain admitted and
+//      `C9Authority.current` denied is refused at slot 3 (`widget_principal_mismatch`), never at slot 2
+//      — row 2 is the transport chain (C11:4721), row 3 is the live proof hash (C11:4722). The
+//      exception is kept, not removed, because the property it states is still the one being checked:
+//      a slot that IS a constant pass must prove why. If slot 2 becomes one again it must prove it
+//      again, which is what kills the `slot 2 constant pass` mutant.
 //   2. slot 12, hosted by 'Projector' — a POINTER (D-7, G12 §5.2): the data fence runs inside the
 //      projector, which Gate 13's edges call. Admitted only when (a) its `run` IS the pointer, so the
 //      slot reads nothing, and (b) the architecture proofs ARCH-12-9 (the projector is referenced only
@@ -656,9 +681,13 @@ const WIDGETS_MODULE = 'widgets.module.ts';
  * added by the unit that binds a port through it, in the same commit as the test that pins the binding
  * (plan §3.5 item 7). U0: none.
  */
-const OWNER_MODULES = [];
-/** DI tokens of `di-tokens.ts` the owner-ports module may provide and export. U0: none. */
-const BOUND_PORT_TOKENS = [];
+const OWNER_MODULES = [
+  // P-PRINCIPAL (D-1, D-2): K1's resolver (C11:2536-2539) and B-02's in-transaction Membership read.
+  'orchestration/c9.module.ts#C9Module',
+  'tenancy/tenancy.module.ts#TenancyModule',
+];
+/** DI tokens of `di-tokens.ts` the owner-ports module may provide and export. */
+const BOUND_PORT_TOKENS = ['PRINCIPAL_RESOLVER'];
 const NEVER_IMPORTED = ['action-engine/action-engine.module.ts#ActionEngineModule'];
 /** The widget layer's own store client, and where it may be imported (`null`: any widget file). */
 const STORE_CLIENT = {

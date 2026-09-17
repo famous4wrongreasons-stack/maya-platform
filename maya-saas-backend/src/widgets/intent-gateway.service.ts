@@ -9,7 +9,7 @@
 // that skips a gate, because there is no branch at all — the runner walks the array in order and
 // stops at the first non-pass verdict.
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { PrismaService } from '../prisma/prisma.service';
@@ -20,8 +20,9 @@ import type {
   IntentRecordRow,
   SubmissionShape,
 } from './gate.types';
-import type { VerificationLevel } from '../widget-contract/envelope';
 import type { ChannelId } from '../widget-contract/lifecycle';
+import { PRINCIPAL_RESOLVER } from './di-tokens';
+import type { PrincipalResolver, RequestTx } from './authority/principal-view';
 import { digestEquals, sha256Hex } from './token.util';
 import { mergeFacts, NO_FACTS } from './gates/facts';
 import { gate1 } from './gates/gate1';
@@ -50,11 +51,75 @@ import { channelMaxLevel } from './authority/authority-resolver';
 // counts it as not built. A stub that refuses is honest; a function that passed would be counted as a
 // gate. What stood in each of those slots before U0, and why it was worse, is kept in its seam file.
 
+/**
+ * The pass verdict, as one value rather than a literal per slot.
+ *
+ * Slot 2 answers with it (D-16), and a slot that answers with a SHARED value cannot be mistaken for the
+ * constant pass it used to be: `run: () => ({ outcome: 'pass' })` said, in its own text, that nothing
+ * was evaluated. G2-IN reads exactly that.
+ */
+const PASS: GateVerdict = Object.freeze({ outcome: 'pass' });
+
+/** The last slot that runs inside `T` (D-1). Slots 11–13 run after the commit. */
+const LAST_TRANSACTIONAL_SLOT = '10';
+
+/**
+ * `T`'s options (D-1): interactive, `ReadCommitted`, with an EXPLICIT timeout.
+ *
+ * The isolation level is spelled as the literal the store client's own union admits, so the widget layer
+ * gains no second import of the database client's package (D-6, FR-1).
+ */
+const REQUEST_TX_OPTIONS = {
+  isolationLevel: 'ReadCommitted',
+  maxWait: 5_000,
+  timeout: 15_000,
+} as const;
+
+/** What one contiguous range of the pipeline answered, and the context it left behind. */
+interface SlotRun {
+  readonly ctx: GateContext;
+  readonly verdict: GateVerdict;
+  readonly stoppedAt: string | null;
+  readonly ran: number;
+}
+
+/**
+ * D-16 — "did a transport session reach the gateway at all?".
+ *
+ * Row 2 (C11:4721) is the TRANSPORT chain: the six global `APP_GUARD`s the typed route runs. When that
+ * chain admits a caller, slot 2 has nothing left to decide, and a principal the chain admitted but
+ * `C9Authority.current` denied is slot 3's refusal, never slot 2's. Slot 2 refuses in-array only in the
+ * world where the guard was neutralised and no session arrived — defence in depth (G2-IN, E-INDEP on `N2`).
+ */
+const transportSessionPresent = (
+  actor: Readonly<AuthenticatedUser> | null | undefined,
+): boolean =>
+  typeof actor?.userId === 'string' &&
+  actor.userId.length > 0 &&
+  typeof actor?.sessionId === 'string' &&
+  actor.sessionId.length > 0;
+
 @Injectable()
 export class IntentGatewayService {
   private readonly log = new Logger(IntentGatewayService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(PRINCIPAL_RESOLVER)
+    private readonly principals: PrincipalResolver,
+  ) {}
+
+  /**
+   * D-1 — `T`'s commit and rollback counts, the only thing this service says about the transaction.
+   *
+   * It is an OBSERVABLE, not a gate input: no slot reads it, and nothing branches on it. PR-9a reads the
+   * delta across one submission, because "the transaction commits at the first non-pass verdict ≤ slot 10
+   * and rolls back on a throw" is otherwise a claim with nothing to measure.
+   */
+  readonly transactions: { committed: number; rolledBack: number } = {
+    committed: 0,
+    rolledBack: 0,
+  };
 
   /**
    * §3.9 Step 0 — carrier decode. Every channel converges on one token: the rendered model's token
@@ -90,14 +155,33 @@ export class IntentGatewayService {
       n: '2',
       name: 'Transport auth',
       host: 'HTTP middleware',
-      // Already enforced: JwtAuthGuard is global, and no credential comes from the widget.
-      run: () => ({ outcome: 'pass' }),
+      // D-16: the transport session chain the typed route uses — the same six global `APP_GUARD`s, with
+      // no `@Public`, on `/api/ai/chat` and `/api/widgets/intent` alike. It is not a second principal
+      // resolution: `C9Authority.current(T)` is, and its denial is refused at slot 3.
+      run: (ctx) =>
+        transportSessionPresent(ctx.actor)
+          ? PASS
+          : {
+              outcome: 'refuse',
+              code: 'unauthenticated',
+              detail: 'no transport session reached the gateway',
+            },
     },
     {
       n: '3',
       name: 'Principal binding',
       host: 'IntentGateway',
       run: (ctx) => {
+        // D-16: the chain admitted a session and `C9Authority.current` denied it a live principal — a
+        // staff-class role without exactly one active Staff row, or a tenant, membership or user that
+        // went inactive after the guard ran. With no live principal there is no live proof hash, so row 3
+        // ("equals the live principal's proof hash", C11:4722) has nothing equal to compare.
+        if (ctx.principal === null)
+          return {
+            outcome: 'refuse',
+            code: 'widget_principal_mismatch',
+            detail: 'no live principal',
+          };
         const r = ctx.record;
         if (!r)
           return {
@@ -242,15 +326,8 @@ export class IntentGatewayService {
     tenantId: string;
     /** The JWT-validated user from `@CurrentUser()` (D-9). No role or principal is built from it. */
     actor: Readonly<AuthenticatedUser>;
-    principalProofHash: string;
     submission: SubmissionShape;
     now?: Date;
-    /**
-     * `v`, derived by the AuthorityResolver on THIS request. Required, not optional: a default
-     * here would be a floor comparison against a value nobody established, and the whole finding
-     * that produced this wiring was a floor with nothing to compare against.
-     */
-    verificationLevel: VerificationLevel;
     carrier: ChannelId;
   }): Promise<{ verdict: GateVerdict; stoppedAt: string | null; ran: number }> {
     const token = this.step0(args.submission);
@@ -266,39 +343,108 @@ export class IntentGatewayService {
       };
 
     const intentTokenHash = sha256Hex(token);
-    const record = await this.findRecord(intentTokenHash, args.tenantId);
+    // The array is walked in two CONTIGUOUS ranges that cover it exactly, and the only thing between
+    // them is `T`'s commit. There is still no branch that skips a gate: every slot of both ranges runs.
+    const lastInTx = this.gates.findIndex(
+      (gate) => gate.n === LAST_TRANSACTIONAL_SLOT,
+    );
+    const inTransactionSlots = this.gates.slice(0, lastInTx + 1);
+    const afterCommitSlots = this.gates.slice(lastInTx + 1);
 
-    let ctx: GateContext = {
-      intentTokenHash,
-      tenantId: args.tenantId,
-      actor: args.actor,
-      // D-2 (I-CTX): the live principal is a base member. P-PRINCIPAL resolves it inside the request
-      // transaction; until then it is null on every request, and no slot reads it.
-      principal: null,
-      principalProofHash: args.principalProofHash,
-      now: args.now ?? new Date(),
-      record,
-      submission: args.submission,
-      verificationLevel: args.verificationLevel,
-      channelMaxLevel: channelMaxLevel(args.carrier),
-      carrier: args.carrier,
-      facts: NO_FACTS,
+    // D-1 — ONE request transaction `T`. It opens before the principal read and the record read, the
+    // principal adapter and the tenancy owner's Membership read run in it, slots 9 and 10 write only
+    // through it, and it commits when a slot ≤ 10 returns a non-pass verdict or when slot 10 returns.
+    // Returning from the callback commits; throwing rolls back. Slots 11–13 run after the commit, so no
+    // row lock and no advisory lock is held while an owner runs (PR-9b).
+    let inTransaction: SlotRun;
+    try {
+      inTransaction = await this.prisma.$transaction(async (tx) => {
+        // K1 (C11:2536-2539): both live rungs are resolved inside `T`, through the owner's resolver.
+        // A denial is `null` and is refused at slot 3 (D-16); a fault is re-thrown and rolls `T` back.
+        const principal = await this.principals.resolve(tx);
+        const record = await this.findRecord(
+          tx,
+          intentTokenHash,
+          args.tenantId,
+        );
+
+        const ctx: GateContext = {
+          intentTokenHash,
+          tenantId: args.tenantId,
+          actor: args.actor,
+          // D-2: the live principal is a base member, resolved once, before the array runs — Gate 1's
+          // R3.9.4 issuance and Gate 3 both read it, and a fact produced at slot 2 or later could not
+          // be read at slot 1 (J-1).
+          principal,
+          // K3/K4 (C11:2544-2546): what Gate 3 compares is the owner's own digest for the LIVE
+          // principal. With no live principal there is no hash, and slot 3 refuses before the compare.
+          principalProofHash: principal?.proofHash ?? '',
+          now: args.now ?? new Date(),
+          record,
+          submission: args.submission,
+          // `v` is the live principal's level (K1), never sent by a client and never read from the
+          // record. No principal is `ANONYMOUS`, which is rank 0 and passes no floor above it.
+          verificationLevel: principal?.verificationLevel ?? 'ANONYMOUS',
+          channelMaxLevel: channelMaxLevel(args.carrier),
+          carrier: args.carrier,
+          facts: NO_FACTS,
+        };
+
+        return this.runSlots(ctx, inTransactionSlots, 0);
+      }, REQUEST_TX_OPTIONS);
+    } catch (error) {
+      this.transactions.rolledBack += 1;
+      throw error;
+    }
+    this.transactions.committed += 1;
+
+    if (inTransaction.stoppedAt !== null)
+      return {
+        verdict: this.normalise(inTransaction.verdict),
+        stoppedAt: inTransaction.stoppedAt,
+        ran: inTransaction.ran,
+      };
+
+    const afterCommit = await this.runSlots(
+      inTransaction.ctx,
+      afterCommitSlots,
+      inTransaction.ran,
+    );
+    return {
+      verdict: this.normalise(afterCommit.verdict),
+      stoppedAt: afterCommit.stoppedAt,
+      ran: afterCommit.ran,
     };
+  }
 
-    let ran = 0;
-    for (const gate of this.gates) {
+  /**
+   * The runner, over a CONTIGUOUS RANGE of the one ordered array.
+   *
+   * The range is the only thing D-1 added, and it is not a branch: `submit()` cuts `this.gates` into
+   * two slices that cover it exactly, in order, and calls this back to back with nothing between them
+   * but `T`'s commit. Inside, the walk is what it always was — every slot runs, in order, and the first
+   * non-pass verdict stops it. There is no index, no `continue` and no condition on a gate's identity.
+   */
+  private async runSlots(
+    start: GateContext,
+    slots: readonly Gate[],
+    already: number,
+  ): Promise<SlotRun> {
+    let ctx = start;
+    let ran = already;
+    for (const gate of slots) {
       ran += 1;
       const verdict = await gate.run(ctx);
       if (verdict.outcome !== 'pass') {
         this.log.debug(`gate ${gate.n} (${gate.name}) -> ${verdict.outcome}`);
-        return { verdict: this.normalise(verdict), stoppedAt: gate.n, ran };
+        return { ctx, verdict, stoppedAt: gate.n, ran };
       }
       // J-1: a later gate sees what an earlier one established only through a NEW context, and only
       // what `mergeFacts` admits — each fact from its one producer slot, once. It throws otherwise.
       if (verdict.facts)
         ctx = { ...ctx, facts: mergeFacts(ctx.facts, verdict.facts, gate.n) };
     }
-    return { verdict: { outcome: 'pass' }, stoppedAt: null, ran };
+    return { ctx, verdict: PASS, stoppedAt: null, ran };
   }
 
   /**
@@ -326,10 +472,11 @@ export class IntentGatewayService {
    * brings a template or a label into memory.
    */
   private async findRecord(
+    tx: RequestTx,
     intentTokenHash: string,
     tenantId: string,
   ): Promise<IntentRecordRow | null> {
-    const row = await this.prisma.widgetIntentRecord.findFirst({
+    const row = await tx.widgetIntentRecord.findFirst({
       where: { intentTokenHash, tenantId },
       select: {
         intentTokenHash: true,

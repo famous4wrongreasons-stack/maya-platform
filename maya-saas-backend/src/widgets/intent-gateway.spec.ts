@@ -25,6 +25,7 @@ import type {
   GateContext,
   GateVerdict,
   IntentRecordRow,
+  PrincipalView,
   SubmissionShape,
 } from './gate.types';
 import * as gate1Module from './gates/gate1';
@@ -124,6 +125,13 @@ class FakePrisma {
     private readonly records: RecordRow[],
     private readonly emissions: EmissionRow[],
   ) {}
+  /**
+   * D-1's `T`. The double has one connection, so the callback runs against the double itself: what it
+   * models is the SCOPE (the record read and slots 1..10 are inside it, slots 11-13 are not), not
+   * Postgres' transaction semantics, which only the live harness can prove.
+   */
+  $transaction = async <T>(work: (tx: FakePrisma) => Promise<T>): Promise<T> =>
+    work(this);
   widgetIntentRecord = {
     // Not `async`: this double awaits nothing. The caller awaits the value either way.
     findFirst: (args: {
@@ -242,8 +250,6 @@ const args = (
   over: Partial<{
     token: string;
     tenantId: string;
-    principalProofHash: string;
-    verificationLevel: VerificationLevel;
     carrier: ChannelId;
     submission: SubmissionShape;
   }> = {},
@@ -253,21 +259,54 @@ const args = (
     intentToken: token,
     tenantId: over.tenantId ?? TENANT,
     actor: ACTOR,
-    principalProofHash: over.principalProofHash ?? PRINCIPAL,
     submission: over.submission ?? submission(token),
-    verificationLevel: over.verificationLevel ?? 'SESSION_VERIFIED',
     carrier: over.carrier ?? 'pwa',
   };
 };
 
+/**
+ * P-PRINCIPAL (D-2): `principalProofHash` and `v` are no longer submit ARGUMENTS. They are properties of
+ * the live principal the gateway resolves inside `T`, so a test that wants "a token minted for A and
+ * replayed by B" says so by changing the RESOLVER's answer — which is where it comes from on the live
+ * path too. The holder is mutable so a test can vary it between submissions on one gateway.
+ */
+interface LivePrincipal {
+  proofHash: string | null;
+  verificationLevel: VerificationLevel;
+}
+
 const gatewayFor = (
   records: RecordRow[],
   emissions: EmissionRow[] = [emission()],
+  over: Partial<LivePrincipal> = {},
 ) => {
   const prisma = new FakePrisma(records, emissions);
+  const live: LivePrincipal = {
+    // `in`, not `??`: a DENIAL is spelled `proofHash: null`, and `??` would read it as "unset".
+    proofHash:
+      'proofHash' in over ? (over.proofHash as string | null) : PRINCIPAL,
+    verificationLevel: over.verificationLevel ?? 'SESSION_VERIFIED',
+  };
+  // A denial is `null` (slot 3 refuses it, D-16); otherwise the view the adapter returns. The double
+  // never reads the store, so `prisma.reads` still counts record reads alone.
+  const resolver = {
+    resolve: () =>
+      Promise.resolve(
+        live.proofHash === null
+          ? null
+          : ({
+              authority: null,
+              role: null,
+              presentationMode: 'staff',
+              verificationLevel: live.verificationLevel,
+              proofHash: live.proofHash,
+            } as unknown as PrincipalView),
+      ),
+  };
   return {
     prisma,
-    gateway: new IntentGatewayService(prisma as never),
+    live,
+    gateway: new IntentGatewayService(prisma as never, resolver),
   };
 };
 
@@ -349,8 +388,10 @@ describe('K3 CI exit — the four refusals', () => {
   });
 
   it('FOREIGN PRINCIPAL: a token minted for A and replayed by B is refused', async () => {
-    const { gateway } = gatewayFor([record()]);
-    const r = await gateway.submit(args({ principalProofHash: FOREIGN }));
+    const { gateway } = gatewayFor([record()], [emission()], {
+      proofHash: FOREIGN,
+    });
+    const r = await gateway.submit(args());
     expect(r.verdict.outcome).toBe('refuse');
     expect(code(r.verdict)).toBe('widget_principal_mismatch');
     expect(r.stoppedAt).toBe('3');
@@ -410,12 +451,12 @@ describe('K3 CI exit — indistinguishable latency', () => {
     { name: 'foreign', rows: [record()], token: GOOD, principal: FOREIGN },
   ];
 
-  it('every refusal performs exactly one store read', async () => {
+  it("every refusal performs exactly one RECORD read (the principal read is the resolver's, PR-12)", async () => {
     for (const c of cases()) {
-      const { gateway, prisma } = gatewayFor(c.rows);
-      await gateway.submit(
-        args({ token: c.token, principalProofHash: c.principal }),
-      );
+      const { gateway, prisma } = gatewayFor(c.rows, [emission()], {
+        proofHash: c.principal,
+      });
+      await gateway.submit(args({ token: c.token }));
       expect({ name: c.name, reads: prisma.reads }).toEqual({
         name: c.name,
         reads: 1,
@@ -450,11 +491,11 @@ describe('K3 CI exit — indistinguishable latency', () => {
       PRINCIPAL.slice(0, 63) + (PRINCIPAL.endsWith('a') ? 'b' : 'a');
     const farMiss =
       (PRINCIPAL.startsWith('a') ? 'b' : 'a') + PRINCIPAL.slice(1);
-    const { gateway } = gatewayFor([record()]);
+    const { gateway, live } = gatewayFor([record()]);
     const round = async (principal: string, n: number) => {
+      live.proofHash = principal;
       const t0 = process.hrtime.bigint();
-      for (let i = 0; i < n; i += 1)
-        await gateway.submit(args({ principalProofHash: principal }));
+      for (let i = 0; i < n; i += 1) await gateway.submit(args());
       return Number(process.hrtime.bigint() - t0) / n;
     };
     await round(nearMiss, 50);
@@ -480,10 +521,10 @@ describe('K3 CI exit — indistinguishable latency', () => {
   it('no refusal reveals which gate it failed through its verdict shape', async () => {
     const shapes = new Set<string>();
     for (const c of cases()) {
-      const { gateway } = gatewayFor(c.rows);
-      const r = await gateway.submit(
-        args({ token: c.token, principalProofHash: c.principal }),
-      );
+      const { gateway } = gatewayFor(c.rows, [emission()], {
+        proofHash: c.principal,
+      });
+      const r = await gateway.submit(args({ token: c.token }));
       shapes.add(Object.keys(r.verdict).sort().join(','));
     }
     // Every refusal is the same SHAPE — outcome, code, detail. The code differs, which is
@@ -590,17 +631,63 @@ describe('the pipeline after U0 — slots 8, 9 and 10 are refusing stubs', () =>
     expect(declared).toEqual(['gates/gate10.ts:gate10']);
   });
 
-  it('I-CTX / D-2: the runner builds the context with principal null until P-PRINCIPAL resolves the live principal', async () => {
+  it('D-2: the runner builds the context from the RESOLVED principal — slot 1 already sees it, and `v` and the proof hash come from it', async () => {
+    // Gate 1 is the earliest reader, which is why the principal is a base member and not a fact: a
+    // fact produced at slot 2 or later could not be read here (J-1). Before P-PRINCIPAL the runner set
+    // `null` on every request; now it sets what the resolver answered, inside `T`.
     const real = gate1Module.gate1;
-    const seen: unknown[] = [];
+    const seen: GateContext[] = [];
     jest.spyOn(gate1Module, 'gate1').mockImplementation((ctx) => {
-      seen.push(ctx.principal);
+      seen.push(ctx);
       return real(ctx);
     });
-    const { gateway } = gatewayFor([record({ singleUse: false })]);
+    const { gateway, live } = gatewayFor(
+      [record({ singleUse: false })],
+      [emission()],
+      {
+        verificationLevel: 'BOUND_CLIENT',
+      },
+    );
     const r = await gateway.submit(args());
     expect(r.stoppedAt).toBe('8');
-    expect(seen).toEqual([null]);
+    expect(seen).toHaveLength(1);
+    expect(seen[0].principal).not.toBeNull();
+    expect(seen[0].principalProofHash).toBe(live.proofHash);
+    expect(seen[0].verificationLevel).toBe('BOUND_CLIENT');
+  });
+
+  it('D-2: a denial resolves to `null`, and slot 3 — not slot 2 — refuses it (D-16)', async () => {
+    const { gateway } = gatewayFor([record()], [emission()], {
+      proofHash: null,
+    });
+    const r = await gateway.submit(args());
+    expect(r.stoppedAt).toBe('3');
+    expect(code(r.verdict)).toBe('widget_principal_mismatch');
+  });
+
+  it('D-16: with no transport session at all, slot 2 refuses `unauthenticated` in-array', async () => {
+    const { gateway } = gatewayFor([record()]);
+    const r = await gateway.submit({
+      ...args(),
+      actor: { ...ACTOR, sessionId: '' },
+    });
+    expect(r.stoppedAt).toBe('2');
+    expect(code(r.verdict)).toBe('unauthenticated');
+  });
+
+  it('D-1: `T` commits once per submission and rolls back on a throw', async () => {
+    const { gateway } = gatewayFor([record()]);
+    const before = { ...gateway.transactions };
+    await gateway.submit(args());
+    expect(gateway.transactions.committed - before.committed).toBe(1);
+    expect(gateway.transactions.rolledBack - before.rolledBack).toBe(0);
+
+    jest.spyOn(gate1Module, 'gate1').mockImplementation(() => {
+      throw new Error('a fault inside T');
+    });
+    await expect(gateway.submit(args())).rejects.toThrow('a fault inside T');
+    expect(gateway.transactions.committed - before.committed).toBe(1);
+    expect(gateway.transactions.rolledBack - before.rolledBack).toBe(1);
   });
 });
 

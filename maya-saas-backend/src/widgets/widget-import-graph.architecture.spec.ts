@@ -46,7 +46,11 @@ const SRC = path.join(BE, 'src');
  * added by the unit that binds a port through it, in the same commit as the test that pins the binding
  * (plan §3.5 item 7), here AND in k3 check 9. U0: none.
  */
-const OWNER_MODULES: readonly string[] = [];
+const OWNER_MODULES: readonly string[] = [
+  // P-PRINCIPAL (D-1, D-2): K1's resolver (C11:2536-2539) and B-02's in-transaction Membership read.
+  'orchestration/c9.module.ts#C9Module',
+  'tenancy/tenancy.module.ts#TenancyModule',
+];
 const NEVER_IMPORTED: readonly string[] = [
   'action-engine/action-engine.module.ts#ActionEngineModule',
 ];
@@ -123,8 +127,29 @@ const PACKAGES: Readonly<Record<string, Allowed>> = {
   'node:crypto': { why: 'hashes, digests and random tokens' },
 };
 
-/** Non-widget modules only the boundary files may import: owner services and adapters. U0: none. */
-const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {};
+/** Non-widget modules only the boundary files may import: owner services and adapters. */
+const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
+  'orchestration/c9.authority.ts': {
+    why: "K1's principal resolver; the one call of `C9Authority.current` in the widget layer (P-PRINCIPAL)",
+    only: ['owner-ports/principal.adapter.ts'],
+  },
+  'orchestration/c9.identity.ts': {
+    why: "K3's `c9PrincipalHash`, imported and re-exported at the boundary so the layer has one import site for it",
+    only: ['owner-ports/principal.adapter.ts'],
+  },
+  'tenancy/memberships.service.ts': {
+    why: "B-02's in-transaction `FOR SHARE` role read (C11:7189-7191)",
+    only: ['owner-ports/principal.adapter.ts'],
+  },
+  'orchestration/c9.module.ts': {
+    why: "the C9 owner's module, so the boundary can resolve PRINCIPAL_RESOLVER",
+    only: ['owner-ports/widget-owner-ports.module.ts'],
+  },
+  'tenancy/tenancy.module.ts': {
+    why: "the tenancy owner's module, so the boundary can resolve the Membership read",
+    only: ['owner-ports/widget-owner-ports.module.ts'],
+  },
+};
 
 // ── the program ──────────────────────────────────────────────────────────────────────────────────
 
@@ -788,7 +813,9 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       'prisma/prisma.module.ts#PrismaModule',
       BOUNDARY,
     ]);
-    expect(a.modules.get(BOUNDARY)).toEqual([]);
+    // P-PRINCIPAL binds the first port through the boundary: the two owner modules it needs, and no
+    // more. The list is the same one `OWNER_MODULES` enumerates, read from the module itself.
+    expect(a.modules.get(BOUNDARY)).toEqual([...OWNER_MODULES]);
     // Derived from the array, not listed: a slot's calls, including a helper that is not in gates/.
     expect(a.gateFiles).toEqual(
       expect.arrayContaining([
@@ -848,7 +875,13 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
         [...used].some((u) => u.startsWith(dir)),
       ),
     ).toBe(true);
-    expect(Object.keys(OWNER_PORT_MODULES)).toEqual([]);
+    expect(Object.keys(OWNER_PORT_MODULES)).toEqual([
+      'orchestration/c9.authority.ts',
+      'orchestration/c9.identity.ts',
+      'tenancy/memberships.service.ts',
+      'orchestration/c9.module.ts',
+      'tenancy/tenancy.module.ts',
+    ]);
   }, 60_000);
 
   it('DI-FREE: each enumerated non-widget module reaches no Nest DI class through its value imports', () => {
@@ -967,7 +1000,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
           `${k}=${v === null ? 'null' : v === WIDGETS_MODULE ? 'WIDGETS_MODULE' : `'${v}'`}`,
       ),
     );
-    expect(values.get('BOUND_PORT_TOKENS')).toEqual([]);
+    expect(values.get('BOUND_PORT_TOKENS')).toEqual(['PRINCIPAL_RESOLVER']);
   });
 
   describe('each rule goes red on a planted violation (in memory; the repository is not edited)', () => {
@@ -1183,8 +1216,8 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
         () =>
           replace(
             'intent-gateway.service.ts',
-            'const row = await this.prisma.widgetIntentRecord.findFirst({',
-            'const { user } = this.prisma;\n    void user;\n    const row = await this.prisma.widgetIntentRecord.findFirst({',
+            'const row = await tx.widgetIntentRecord.findFirst({',
+            'const { user } = this.prisma;\n    void user;\n    const row = await tx.widgetIntentRecord.findFirst({',
           ),
       ],
       [
@@ -1193,8 +1226,8 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
         () =>
           replace(
             'intent-gateway.service.ts',
-            'const row = await this.prisma.widgetIntentRecord.findFirst({',
-            "await this.prisma.$queryRawUnsafe('SELECT 1');\n    const row = await this.prisma.widgetIntentRecord.findFirst({",
+            'const row = await tx.widgetIntentRecord.findFirst({',
+            "await this.prisma.$queryRawUnsafe('SELECT 1');\n    const row = await tx.widgetIntentRecord.findFirst({",
           ),
       ],
       [
@@ -1203,8 +1236,8 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
         () =>
           replace(
             'intent-gateway.service.ts',
-            'const row = await this.prisma.widgetIntentRecord.findFirst({',
-            'await this.prisma.$queryRaw`SELECT * FROM "Appointment"`;\n    const row = await this.prisma.widgetIntentRecord.findFirst({',
+            'const row = await tx.widgetIntentRecord.findFirst({',
+            'await this.prisma.$queryRaw`SELECT * FROM "Appointment"`;\n    const row = await tx.widgetIntentRecord.findFirst({',
           ),
       ],
       [

@@ -1,0 +1,142 @@
+[
+  {
+    "id": "P-M1",
+    "description": "B-02 drift: `business_owner` stops presenting as an owner and falls through to staff (C11:7189-7191)",
+    "file": "src/widgets/authority/principal-view.ts",
+    "find": "  new Set(['tenant_owner', 'business_owner']),\n",
+    "replace": "  new Set(['tenant_owner']),\n",
+    "killers": ["PR-6U-2", "PR-6"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "P-M2",
+    "description": "the fourth presentation mode returns: `'system'`, which F18 does not have (C11:292-296; P-K4K8)",
+    "file": "src/widgets/authority/principal-view.ts",
+    "find": "  return 'staff';\n",
+    "replace": "  return 'system' as unknown as Presentation['presentation_mode'];\n",
+    "killers": ["PR-6U-2", "PR-6"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "P-M3",
+    "description": "K1 inverted: a first-party session derives BOUND_CLIENT and a client link derives SESSION_VERIFIED (C11:2536-2539)",
+    "file": "src/widgets/authority/principal-view.ts",
+    "find": "    membershipResolved: kind === 'USER',\n    channelLinkActive: kind === 'CLIENT_CHANNEL',\n",
+    "replace": "    membershipResolved: kind === 'CLIENT_CHANNEL',\n    channelLinkActive: kind === 'USER',\n",
+    "killers": ["PR-7U-1", "PR-7"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "P-M4",
+    "description": "the hash the deleted `principal.util.ts` computed: a local sha256 over JWT-ish fields instead of K3's `c9PrincipalHash` (C11:2544-2546)",
+    "edits": [
+      {
+        "file": "src/widgets/owner-ports/principal.adapter.ts",
+        "find": "import { MembershipsService } from '../../tenancy/memberships.service';\n",
+        "replace": "import { MembershipsService } from '../../tenancy/memberships.service';\nimport { sha256Hex } from '../token.util';\n"
+      },
+      {
+        "file": "src/widgets/owner-ports/principal.adapter.ts",
+        "find": "      proofHash: c9PrincipalHash(authority),\n",
+        "replace": "      proofHash: sha256Hex(\n        [\n          authority.userId ?? '',\n          authority.tenantId,\n          authority.membershipId ?? '',\n        ].join('\\u0000'),\n      ),\n"
+      }
+    ],
+    "killers": ["PR-7"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "P-M5",
+    "description": "no live role is read at all: every principal carries `role: null`, so B-02's mapping has nothing to map and a USER principal stops resolving",
+    "file": "src/widgets/owner-ports/principal.adapter.ts",
+    "find": "    if (authority.membershipId === null || authority.userId === null)\n      return null;\n",
+    "replace": "    if ((true as boolean) || authority.membershipId === null) return null;\n",
+    "killers": ["PR-3", "PR-6"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "P-M6",
+    "description": "M25 — the role is read OUTSIDE `T`, on another connection and without the share lock, so it is the committed role rather than the live one (D-1, B-02)",
+    "edits": [
+      {
+        "file": "src/tenancy/memberships.service.ts",
+        "find": "    const rows = await tx.$queryRaw<ActiveMembershipInTransaction[]>`\n",
+        "replace": "    const rows = await this.prisma.$queryRaw<ActiveMembershipInTransaction[]>`\n"
+      },
+      {
+        "file": "src/tenancy/memberships.service.ts",
+        "find": "      FOR SHARE OF m\n",
+        "replace": ""
+      }
+    ],
+    "killers": ["PR-8"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "P-M7",
+    "description": "a denial is treated as a fault: `C9Authority.current`'s refusal is re-thrown instead of becoming `principal: null`, so the pipeline answers a fault where slot 3 should refuse (R3.9.3 C11:4902-4903)",
+    "file": "src/widgets/owner-ports/principal.adapter.ts",
+    "find": "const isDenial = (error: unknown): boolean =>\n  error instanceof ForbiddenException || error instanceof UnauthorizedException;\n",
+    "replace": "const isDenial = (error: unknown): boolean => error !== error;\n",
+    "killers": ["PR-2"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "P-M8",
+    "description": "the base member is mutable: a slot could rewrite the principal a later slot reads (D-2, J-1)",
+    "file": "src/widgets/authority/principal-view.ts",
+    "find": "  Object.freeze({\n    authority: input.authority,\n",
+    "replace": "  ({\n    authority: input.authority,\n",
+    "killers": ["PR-VIEW-1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "P-M9",
+    "description": "slot 2 goes back to the constant pass it was: `run: () => ({ outcome: 'pass' })`, so nothing is evaluated there at all (D-16)",
+    "file": "src/widgets/intent-gateway.service.ts",
+    "find": "      run: (ctx) =>\n        transportSessionPresent(ctx.actor)\n          ? PASS\n          : {\n              outcome: 'refuse',\n              code: 'unauthenticated',\n              detail: 'no transport session reached the gateway',\n            },\n",
+    "replace": "      run: () => ({ outcome: 'pass' as const }),\n",
+    "killers": [
+      {
+        "test": "G2-IN",
+        "neutralisers": "N2"
+      }
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "P-M10",
+    "description": "slot 2 refuses a principal the transport chain admitted and `C9Authority.current` denied — row 2's refusal standing in for row 3's (D-16, C11:4721-4722)",
+    "file": "src/widgets/intent-gateway.service.ts",
+    "find": "      run: (ctx) =>\n        transportSessionPresent(ctx.actor)\n          ? PASS\n",
+    "replace": "      run: (ctx) =>\n        transportSessionPresent(ctx.actor) && ctx.principal !== null\n          ? PASS\n",
+    "killers": ["PR-4", "PR-5", "G2-EQ"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "P-M11",
+    "description": "`T` is held past slot 10: the whole array runs inside the request transaction, so a row lock is still held while the owners at slots 11-13 run (D-1)",
+    "file": "src/widgets/intent-gateway.service.ts",
+    "find": "    const inTransactionSlots = this.gates.slice(0, lastInTx + 1);\n    const afterCommitSlots = this.gates.slice(lastInTx + 1);\n",
+    "replace": "    const inTransactionSlots = this.gates.slice(0, this.gates.length);\n    const afterCommitSlots = this.gates.slice(this.gates.length);\n",
+    "killers": ["PR-9b"],
+    "expect": "pending"
+  },
+  {
+    "id": "P-M12",
+    "description": "X-M6: the harness binds a principal the resolver never resolved — a hand-built view overrides PRINCIPAL_RESOLVER, so no owner read and no FOR SHARE lock happens on the path under test (D-17, PR-12)",
+    "edits": [
+      {
+        "file": "test/widgets-live/support/bootstrap.ts",
+        "find": "import { SubmitIntentDto } from '../../../src/widgets/dto/submit-intent.dto';\n",
+        "replace": "import { SubmitIntentDto } from '../../../src/widgets/dto/submit-intent.dto';\nimport { PRINCIPAL_RESOLVER } from '../../../src/widgets/di-tokens';\n"
+      },
+      {
+        "file": "test/widgets-live/support/bootstrap.ts",
+        "find": "  })\n    .overrideProvider(PrismaService)\n",
+        "replace": "  })\n    .overrideProvider(PRINCIPAL_RESOLVER)\n    .useValue({\n      resolve: () =>\n        Promise.resolve({\n          authority: null,\n          role: null,\n          presentationMode: 'staff',\n          verificationLevel: 'SESSION_VERIFIED',\n          proofHash: 'harness-bound-principal',\n        }),\n    })\n    .overrideProvider(PrismaService)\n"
+      }
+    ],
+    "killers": ["PR-12", "PR-8", "PR-2"],
+    "expect": "live-killed"
+  }
+]

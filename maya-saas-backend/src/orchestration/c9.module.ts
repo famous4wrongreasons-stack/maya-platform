@@ -46,6 +46,11 @@ import { C9PolicyService } from './c9.policy.service';
     C9PolicyService,
   ],
   exports: [
+    // P-PRINCIPAL (GATES-PLAN-V11): the widget layer's owner-ports boundary injects `C9Authority` to
+    // resolve K1's live principal inside the one request transaction (C11:2536-2539). Exporting the
+    // provider adds no key, no field and no hash, and changes no C9 behaviour (F3/FR-16) — it only
+    // makes the resolver reachable from a module that already imports `C9Module`.
+    C9Authority,
     C9Store,
     C9WorkService,
     C9ContextService,

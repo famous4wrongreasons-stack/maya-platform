@@ -30,7 +30,7 @@ import { Logger } from '@nestjs/common';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { UserRole } from '../common/domain.enums';
-import type { Gate, GateVerdict } from './gate.types';
+import type { Gate, GateVerdict, PrincipalView } from './gate.types';
 import { IntentGatewayService } from './intent-gateway.service';
 
 /** §3.9's order, as G8-R T17 and G10 B-1 state it. */
@@ -107,6 +107,9 @@ const ACTOR: Readonly<AuthenticatedUser> = Object.freeze({
 
 /** A store that answers the one record read; nothing reads the record, because every slot is replaced. */
 const store = () => ({
+  /** D-1's `T`, in a double with one connection: the callback runs against the same object. */
+  $transaction: <T>(work: (tx: unknown) => Promise<T>): Promise<T> =>
+    work(store()),
   widgetIntentRecord: {
     findFirst: () =>
       Promise.resolve({
@@ -128,11 +131,24 @@ const submit = (gateway: IntentGatewayService) =>
     intentToken: 'token',
     tenantId: 'tenant-a',
     actor: ACTOR,
-    principalProofHash: 'proof',
     submission: { intent_token: 'token' },
-    verificationLevel: 'SESSION_VERIFIED',
     carrier: 'pwa',
   });
+
+/**
+ * D-2: the live principal is resolved by the gateway, not passed in. Every slot here is a recorder, so
+ * the view's only job is to exist — a `null` would be refused at slot 3 before the recorders ran.
+ */
+const principals = {
+  resolve: () =>
+    Promise.resolve({
+      authority: null,
+      role: null,
+      presentationMode: 'staff',
+      verificationLevel: 'SESSION_VERIFIED',
+      proofHash: 'proof',
+    } as unknown as PrincipalView),
+};
 
 const NON_PASS: readonly GateVerdict[] = [
   { outcome: 'refuse', code: 'mechanism_absent', detail: 'recorder' },
@@ -202,7 +218,7 @@ const orderBreaks = async (
   return breaks;
 };
 
-const real = () => new IntentGatewayService(store() as never);
+const real = () => new IntentGatewayService(store() as never, principals);
 
 // The runner logs each stop at debug level; the recorders stop it on purpose, 240 times.
 beforeEach(() => {

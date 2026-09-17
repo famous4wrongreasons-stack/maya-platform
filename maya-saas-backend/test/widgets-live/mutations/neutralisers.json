@@ -1,0 +1,12 @@
+{
+  "N2": {
+    "description": "P-PRINCIPAL/D-16: the transport chain admits a caller with no user, so no session reaches the gateway and slot 2's in-array refusal is the only thing left (G2-IN, E-INDEP). Shared: a set is named by a killer, never applied on its own.",
+    "edits": [
+      {
+        "file": "src/guards/jwt-auth.guard.ts",
+        "find": "    if (error || !user) {\n      throw new UnauthorizedException();\n    }\n",
+        "replace": "    if (error) {\n      throw new UnauthorizedException();\n    }\n"
+      }
+    ]
+  }
+}

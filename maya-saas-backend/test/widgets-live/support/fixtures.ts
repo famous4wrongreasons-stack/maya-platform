@@ -53,7 +53,11 @@ import {
   type SealedEmission,
 } from '../../../src/widgets/emission/emitter.service';
 import { recomputeFloor } from '../../../src/widgets/gates/gate5';
-import { principalProofHash } from '../../../src/widgets/principal.util';
+import { C9Authority } from '../../../src/orchestration/c9.authority';
+import type { ClientChannelRuntimeService } from '../../../src/crm/client-channel-runtime.service';
+import { MembershipsService } from '../../../src/tenancy/memberships.service';
+import { TenantResolverService } from '../../../src/tenancy/tenant-resolver.service';
+import { PrincipalAdapter } from '../../../src/widgets/owner-ports/principal.adapter';
 import { WidgetStoresService } from '../../../src/widgets/stores/widget-stores.service';
 import type { FixtureContext } from './bootstrap';
 import { EvidenceWriter } from './evidence';
@@ -64,6 +68,20 @@ const SLUG_PREFIX = 'widgets-live-';
 
 const sha256 = (value: string) =>
   createHash('sha256').update(value).digest('hex');
+
+/**
+ * The JWT widget route carries no channel proof, so `C9Authority.current`'s CLIENT_CHANNEL branch is
+ * unreachable when a fixture resolves a principal. A rejection rather than a stub answer, so a fixture
+ * that somehow reached it would fail loudly instead of minting for a principal nobody resolved.
+ */
+const UNREACHABLE_CHANNELS: Pick<ClientChannelRuntimeService, 'resolve'> = {
+  resolve: () =>
+    Promise.reject(
+      new Error(
+        'widgets-live fixtures resolve the USER branch only: no channel proof exists on this route',
+      ),
+    ),
+};
 
 export interface TenantFixture {
   readonly id: string;
@@ -308,6 +326,42 @@ export class Fixtures {
     });
   }
 
+  /**
+   * The LIVE principal's proof hash for this actor — the digest Gate 3 will compare (K3/K4, C11:2544-2546).
+   *
+   * P-PRINCIPAL replaced the layer's old `principalProofHash(actor)` (a sha256 over four JWT fields) with
+   * the owner's own `c9PrincipalHash`, computed over the principal `C9Authority.current(T)` resolves. A
+   * fixture must therefore mint for the RESOLVED principal, not for the token's claims, or every Gate 3
+   * positive in every live spec would refuse. It runs the production resolver, in the request CLS the
+   * `TenantAccessGuard` binds and inside one interactive transaction — the same two reads the gateway makes.
+   *
+   * A principal the owner DENIES (a staff-class role with no Staff row; an inactive tenant, membership or
+   * user) has no live hash. The record is then minted with an unmatchable digest, which is honest: the
+   * submission is refused at slot 3, which is what the live path does for it (D-16).
+   */
+  async principalProofHash(
+    actor: Readonly<AuthenticatedUser>,
+  ): Promise<string> {
+    const resolver = this.ctx.moduleRef.get(TenantResolverService, {
+      strict: false,
+    });
+    const adapter = new PrincipalAdapter(
+      new C9Authority(
+        this.ctx.tenantContext,
+        UNREACHABLE_CHANNELS as unknown as ClientChannelRuntimeService,
+      ),
+      new MembershipsService(this.ctx.prisma),
+    );
+    const view = await this.ctx.tenantContext.run(
+      `widgets-live-principal:${randomUUID()}`,
+      () => {
+        resolver.bindAuthenticatedUser(actor);
+        return this.ctx.prisma.$transaction((tx) => adapter.resolve(tx));
+      },
+    );
+    return view?.proofHash ?? sha256(`no-live-principal:${randomUUID()}`);
+  }
+
   /** The turn → emission → record chain through the real writers. */
   async widget(input: {
     tenant: TenantFixture;
@@ -319,7 +373,7 @@ export class Fixtures {
   }): Promise<WidgetFixture> {
     const writers = this.requireWriters('widget');
     const conversationId = randomUUID();
-    const proof = principalProofHash(input.actor);
+    const proof = await this.principalProofHash(input.actor);
     const now = input.now ?? new Date();
     const turn = await writers.stores.appendTurn(
       {
