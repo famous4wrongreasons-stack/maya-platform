@@ -279,6 +279,7 @@ const gatewayFor = (
   records: RecordRow[],
   emissions: EmissionRow[] = [emission()],
   over: Partial<LivePrincipal> = {},
+  boundTenantId: string = TENANT,
 ) => {
   const prisma = new FakePrisma(records, emissions);
   const live: LivePrincipal = {
@@ -303,10 +304,21 @@ const gatewayFor = (
             } as unknown as PrincipalView),
       ),
   };
+  // U4 (IR4-1): slot 4 asks the tenancy owner through `TENANT_SCOPE`. The double asserts the tenant
+  // the REQUEST is bound to — which is what `TenantContextService` answers on the live path — so a
+  // record of another tenant refuses here exactly as it does in production.
+  const tenantScope = {
+    assert: (expectedTenantId: string): void => {
+      if (expectedTenantId !== boundTenantId)
+        throw new Error(
+          `tenant scope: ${expectedTenantId} is not the bound tenant`,
+        );
+    },
+  };
   return {
     prisma,
     live,
-    gateway: new IntentGatewayService(prisma as never, resolver),
+    gateway: new IntentGatewayService(prisma as never, resolver, tenantScope),
   };
 };
 
