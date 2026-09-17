@@ -1,0 +1,56 @@
+[
+  {
+    "id": "PAIR-M1",
+    "description": "a row of F38 is dropped (b35.confirm ⇄ communication.bulk-campaign.admit.v2)",
+    "file": "src/widgets/authority/propose-pairing.ts",
+    "find": "  row('b35.confirm', 'communication.bulk-campaign.admit.v2'),\n",
+    "replace": "",
+    "killers": ["PAIR-1", "PAIR-2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PAIR-M2",
+    "description": "a second row claims an AE key that F38 pairs once (FR-6b, C11:1786)",
+    "file": "src/widgets/authority/propose-pairing.ts",
+    "find": "  row('appointments.own.create', 'crm.appointment.create.v1'),\n",
+    "replace": "  row('appointments.own.create', 'crm.appointment.create.v1'),\n  row('appointments.own.list', 'crm.appointment.create.v1'),\n",
+    "killers": ["PAIR-1", "PAIR-2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PAIR-M3",
+    "description": "a row names an AE key that no registry holds (expenses.create.execute.v2)",
+    "file": "src/widgets/authority/propose-pairing.ts",
+    "find": "  row('expenses.create', 'expenses.create.execute.v1'),\n",
+    "replace": "  row('expenses.create', 'expenses.create.execute.v2'),\n",
+    "killers": ["PAIR-1", "PAIR-3"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PAIR-M4",
+    "description": "the lookups stop checking the space, so a C9 key answers an AE question",
+    "file": "src/widgets/authority/propose-pairing.ts",
+    "find": "  return ref.space === space ? ref.key : null;\n",
+    "replace": "  return ref.key;\n",
+    "killers": ["PAIR-2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PAIR-M5",
+    "description": "the fence stops detecting a duplicated ae side (FR-6b)",
+    "file": "src/widgets/authority/propose-pairing.ts",
+    "find": "  for (const [key, group] of index(rows, (r) => r.ae.key))\n    if (group.length > 1)\n      problems.push(`${key} is the ae side of ${group.length} rows (FR-6b)`);\n",
+    "replace": "  for (const [key, group] of index(rows, (r) => r.ae.key))\n    if (group.length > 1 && key === '')\n      problems.push(`${key} is the ae side of ${group.length} rows (FR-6b)`);\n",
+    "killers": ["PAIR-2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PAIR-M6",
+    "description": "the fence stops checking that the ae key is registered in ActionCapabilityRegistry",
+    "file": "src/widgets/authority/propose-pairing.ts",
+    "find": "    if (r.ae.space !== 'AE')\n      problems.push(`row ${at}: ae side is in space ${r.ae.space}`);\n    else if (!AE_CAP_BY_KEY.has(r.ae.key))\n      problems.push(`row ${at}: ${r.ae.key} is not a registered AE key`);\n",
+    "replace": "    if (r.ae.space !== 'AE')\n      problems.push(`row ${at}: ae side is in space ${r.ae.space}`);\n",
+    "killers": ["PAIR-3"],
+    "expect": "build-killed"
+  }
+]
