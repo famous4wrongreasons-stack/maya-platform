@@ -1,0 +1,72 @@
+name: Widgets Live
+
+# The widget gates' live-path suite (integration plan §4.2): the real WidgetsModule over a real
+# PostgreSQL, a JwtStrategy-validated principal, and the NW (no-write) recorder; the HTTP level boots
+# AppModule with every global guard. It runs apart from Platform CI so `platform-backend` stays inside
+# its 20-minute budget.
+#
+# Not a required check. Making it one is a repository-settings decision for the owner.
+#
+# The database is this job's own service. The harness's guard admits `maya_ci` only because CI=true
+# (set by GitHub Actions) and WIDGET_GATEWAY_PG=required; no seed runs, so `widgets.runtime` reaches a
+# tenant only through a TenantEntitlement a test creates for its own tenant.
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: widgets-live-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  widgets-live:
+    name: Widgets live path
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: maya_ci
+          POSTGRES_PASSWORD: maya_ci
+          POSTGRES_USER: maya_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U maya_ci -d maya_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: maya-saas-backend
+    env:
+      AUTH_RATE_LIMIT_SECRET: test-auth-rate-limit-secret-for-ci-only
+      AUTH_REFRESH_TOKEN_SECRET: test-refresh-token-secret-for-ci-only
+      AUTH_SESSION_METADATA_SECRET: test-session-metadata-secret-for-ci-only
+      CRM_ENCRYPTION_KEY: test-crm-encryption-key-for-ci-only
+      DATABASE_URL: postgresql://maya_ci:maya_ci@127.0.0.1:5432/maya_ci?schema=public
+      JWT_SECRET: test-jwt-signing-secret-for-ci-only
+      NODE_ENV: test
+      PHONE_AUTH_SECRET: test-phone-auth-secret-for-ci-only
+      SEED_DEMO_TENANT_ADMIN_EMAIL: admin@demo-business.local
+      SEED_DEMO_TENANT_ADMIN_PASSWORD: test-demo-tenant-password-for-ci
+      SEED_PLATFORM_OWNER_EMAIL: owner@maya.local
+      SEED_PLATFORM_OWNER_PASSWORD: test-platform-owner-password-for-ci
+      WIDGET_GATEWAY_PG: required
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: maya-saas-backend/package-lock.json
+      - run: npm ci
+      - run: npm run prisma:generate
+      - run: npx prisma migrate deploy
+      - run: npm run typecheck:widgets-live
+      - run: npm run test:widgets:live
+      - run: npm run build

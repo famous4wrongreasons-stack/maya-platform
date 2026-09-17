@@ -1,0 +1,78 @@
+name: Widgets Mutation
+
+# The widget gates' mutation battery (integration plan §4.5): every mutant a gate unit declares in
+# `maya-saas-backend/test/widgets-live/mutations/gate<N>.json` is applied to a temporary copy of the
+# backend, never to the checkout, and must turn its declared killer red. The report is uploaded as an
+# artifact; a flipping commit records its artifact id (§4.6). While no battery is declared the report says
+# EMPTY, which is not evidence.
+#
+# Not a required check. Making it one is a repository-settings decision for the owner.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - maya-saas-backend/src/widgets/**
+      - maya-saas-backend/src/widget-contract/**
+      - maya-saas-backend/prisma/**
+      - maya-saas-backend/test/widgets-live/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: widgets-mutation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  widgets-mutation:
+    name: Widgets mutation battery
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: maya_ci
+          POSTGRES_PASSWORD: maya_ci
+          POSTGRES_USER: maya_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U maya_ci -d maya_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: maya-saas-backend
+    env:
+      AUTH_RATE_LIMIT_SECRET: test-auth-rate-limit-secret-for-ci-only
+      AUTH_REFRESH_TOKEN_SECRET: test-refresh-token-secret-for-ci-only
+      AUTH_SESSION_METADATA_SECRET: test-session-metadata-secret-for-ci-only
+      CRM_ENCRYPTION_KEY: test-crm-encryption-key-for-ci-only
+      DATABASE_URL: postgresql://maya_ci:maya_ci@127.0.0.1:5432/maya_ci?schema=public
+      JWT_SECRET: test-jwt-signing-secret-for-ci-only
+      NODE_ENV: test
+      PHONE_AUTH_SECRET: test-phone-auth-secret-for-ci-only
+      SEED_DEMO_TENANT_ADMIN_EMAIL: admin@demo-business.local
+      SEED_DEMO_TENANT_ADMIN_PASSWORD: test-demo-tenant-password-for-ci
+      SEED_PLATFORM_OWNER_EMAIL: owner@maya.local
+      SEED_PLATFORM_OWNER_PASSWORD: test-platform-owner-password-for-ci
+      WIDGET_GATEWAY_PG: required
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: maya-saas-backend/package-lock.json
+      - run: npm ci
+      - run: npm run prisma:generate
+      - run: npx prisma migrate deploy
+      - run: node scripts/widgets-mutation-battery.mjs --out widgets-mutation-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: widgets-mutation-${{ github.sha }}
+          path: maya-saas-backend/widgets-mutation-report.json
+          if-no-files-found: error

@@ -66,6 +66,9 @@ jobs:
       - run: npm run typecheck
       - run: npm run typecheck:scripts
       - run: npm run lint
+      # K3 structural checks (widget gate pipeline): one ordered array, no silent pass, the owner-ports
+      # boundary, the dark entitlement. Blocking: a red check fails the job.
+      - run: node scripts/k3-gateway-check.mjs
       - run: npm test -- --runInBand
       - run: npm run test:e2e -- --runInBand
       - run: npm run build
