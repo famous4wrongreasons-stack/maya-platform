@@ -14,6 +14,7 @@ import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import type { SubmitIntentDto } from './dto/submit-intent.dto';
 import type { IntentGatewayService } from './intent-gateway.service';
 import { intentSubmitArgs } from './intent-submit-args';
+import { reasonText } from './rendering/reason-text';
 import { WidgetsController } from './widgets.controller';
 
 type SubmitArgs = Parameters<IntentGatewayService['submit']>[0];
@@ -112,14 +113,17 @@ describe('WidgetsController.intent — the arguments it hands the gateway', () =
     expect(calls[0].carrier).toBe('pwa');
   });
 
-  it('the response carries the verdict, the stop and the counts, and nothing else', async () => {
+  it('the response carries the verdict, the stop, the counts and R3.9.3’s reason_text, and nothing else', async () => {
     const { controller } = recordingGateway();
     const response = await controller.intent(dto(), actor());
+    // P-RENDER (IR-REN-1) adds exactly one member, which SH-22 admits on R3.9.3. The literal is
+    // written out in full, so a second member added here fails this test rather than passing unseen.
     expect(JSON.stringify(response)).toBe(
       JSON.stringify({
         contract: 'maya.widget.intent/1',
         outcome: 'refuse',
         code: 'mechanism_absent',
+        reason_text: reasonText('mechanism_absent'),
         stopped_at_gate: '8',
         gates_run: 8,
         gates_total: 15,

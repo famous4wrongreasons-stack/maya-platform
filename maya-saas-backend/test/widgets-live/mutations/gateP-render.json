@@ -1,0 +1,74 @@
+[
+  {
+    "id": "REN-M1",
+    "description": "drop a row: one c9Deny code loses its projection, so P10(a)'s ratchet must fail",
+    "file": "src/widget-contract/reason-table.ts",
+    "find": "      'use_secure_surface',\n      'work_capability_mode',\n",
+    "replace": "      'work_capability_mode',\n",
+    "killers": ["REN-2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "REN-M2",
+    "description": "drop a row: a §3.9 refusal code loses its LIMITATION_REASON_TABLE entry, so it would render with no reason_text",
+    "file": "src/widget-contract/reason-table.ts",
+    "find": "  handle_stale: reasonRow('handle_stale', 'widget.refusal.handle_stale'),\n",
+    "replace": "",
+    "killers": ["REN-1", "REN-4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "REN-M3",
+    "description": "severity error: P9's default becomes the severity the contract says does not exist (§1.6.7, §2.1)",
+    "file": "src/widget-contract/reason-table.ts",
+    "find": "  severity: LimitationReason['severity'] = 'limitation',\n",
+    "replace": "  severity: LimitationReason['severity'] = 'error' as unknown as LimitationReason['severity'],\n",
+    "killers": ["REN-1", "REN-4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "REN-M4",
+    "description": "severity error, on the denial side: a projection family carries limitation_severity 'error', which P10 forbids in the type's own comment",
+    "file": "src/widget-contract/reason-table.ts",
+    "find": "    reason_code: 'IN_PROGRESS',\n    limitation_severity: 'caveat',\n",
+    "replace": "    reason_code: 'IN_PROGRESS',\n    limitation_severity: 'error' as unknown as LimitationReason['severity'],\n",
+    "killers": ["REN-2", "REN-4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "REN-M5",
+    "description": "raw exception text: reason_text stops being a minted Phrase and interpolates the code into a fault sentence, which C4's lint must catch",
+    "file": "src/widgets/rendering/reason-text.ts",
+    "find": "    rendered: REFUSAL_PHRASES[phrase_key] ?? REFUSAL_PHRASES[FALLBACK_TEXT_KEY],\n",
+    "replace": "    rendered: `c9Deny(${code}) failed: ${String(REFUSAL_PHRASES[phrase_key] ?? '')}`,\n",
+    "killers": ["REN-4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "REN-M6",
+    "description": "a seed granting widgets.runtime: the one thing §2.6 constraint 8 and k3 check 8 exist to forbid",
+    "file": "prisma/seed.ts",
+    "find": "const prisma = new PrismaClient({\n  adapter: new PrismaPg({ connectionString }),\n});\n",
+    "replace": "const prisma = new PrismaClient({\n  adapter: new PrismaPg({ connectionString }),\n});\n\nexport async function seedWidgetsRuntime(tenantId: string): Promise<void> {\n  await prisma.tenantEntitlement.create({\n    data: { tenantId, featureKey: 'widgets.runtime', enabled: true },\n  });\n}\n",
+    "killers": ["REN-6"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "REN-M7",
+    "description": "P10(b) neutralised: an unmapped code throws instead of degrading to an honest unknown, which turns a policy fence into a 500",
+    "file": "src/widgets/rendering/denial-projection.ts",
+    "find": "  return (\n    (Object.prototype.hasOwnProperty.call(C9_DENIAL_PROJECTION, code)\n      ? C9_DENIAL_PROJECTION[code]\n      : undefined) ?? UNMAPPED_DENIAL_PROJECTION\n  );\n",
+    "replace": "  if (!Object.prototype.hasOwnProperty.call(C9_DENIAL_PROJECTION, code))\n    throw new Error(`no denial projection for ${code}`);\n  return C9_DENIAL_PROJECTION[code];\n",
+    "killers": ["REN-2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "REN-M8",
+    "description": "the ratchet goes blind: one c9Deny call site stops passing a literal, so the enumeration can no longer see its code",
+    "file": "src/orchestration/c9.contract.ts",
+    "find": "    c9Deny('object_required');\n",
+    "replace": "    c9Deny(String('object_required'));\n",
+    "killers": ["REN-2"],
+    "expect": "build-killed"
+  }
+]

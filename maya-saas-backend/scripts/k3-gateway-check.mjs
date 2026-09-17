@@ -946,6 +946,53 @@ chk(
         `owner services under owner-ports/**: ${portServices.length ? portServices.join(', ') : 'none'}`,
 );
 
+// ── 10. `widgets.runtime` is granted by exactly one path (P-RENDER REN-6; §2.6 constraint 8) ──────
+// Check 8 covers the PRODUCT's own grants (no plan, no trial). This covers the REPOSITORY's: a seed
+// or a migration that granted the key would hand the dark runtime to a real tenant without any plan
+// changing, and nothing in check 8 would notice. The one allowlisted path is `Fixtures.grantFeature`,
+// which asserts the proof database before it writes, reached only from `test/widgets-live/**` and from
+// the BIN runner's guarded `ctx.fixtures` (I-HAR). This block must not flag its OWN file, so every
+// mention of the builder here is a regex literal or a message string and none of them spells the call
+// with its opening parenthesis — writing that spelling in a comment is enough to make this check fail.
+const GRANT_SOURCE = 'test/widgets-live/support/fixtures.ts';
+const GRANT_CALLER_PREFIXES = ['test/widgets-live/', 'scripts/widgets-http-proof/'];
+const GRANT_CALLER_FILE = 'scripts/widgets-intent-http-proof.ts';
+const BIN_CASES_PREFIX = 'scripts/widgets-http-proof/';
+const BIN_CASE_GUARD = /\.fixtures\s*\.\s*grantFeature\s*\(/;
+const FIXTURES_MODULE_IMPORT = /from\s*'[^']*widgets-live\/support\/fixtures'/;
+const ENTITLEMENT_WRITE =
+  /tenantEntitlement\s*\.\s*(create|createMany|upsert|update|updateMany)|INSERT\s+INTO\s+"?TenantEntitlement"?/i;
+const grantWalk = (dir) =>
+  fs.existsSync(dir)
+    ? fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+        const p = path.join(dir, e.name);
+        if (e.isDirectory()) return e.name === 'node_modules' ? [] : grantWalk(p);
+        return [p];
+      })
+    : [];
+const grantBreaks = [];
+for (const scope of ['prisma', 'scripts', 'src', 'test'])
+  for (const f of grantWalk(path.join(BE, scope))) {
+    let text;
+    try { text = fs.readFileSync(f, 'utf8'); } catch { continue; }
+    if (!text.includes('widgets.runtime')) continue;
+    const key = path.relative(BE, f).split(path.sep).join('/');
+    if ((scope === 'prisma' || scope === 'scripts') && ENTITLEMENT_WRITE.test(text) && key !== GRANT_SOURCE)
+      grantBreaks.push(`${key} writes a TenantEntitlement row for widgets.runtime`);
+    if (!/grantFeature\s*\(/.test(text)) continue;
+    if (!GRANT_CALLER_PREFIXES.some((p) => key.startsWith(p)) && key !== GRANT_CALLER_FILE)
+      grantBreaks.push(`${key} reaches Fixtures.grantFeature for widgets.runtime outside the allowlist`);
+    else if (key.startsWith(BIN_CASES_PREFIX) && (!BIN_CASE_GUARD.test(text) || FIXTURES_MODULE_IMPORT.test(text)))
+      grantBreaks.push(`${key} reaches the grant other than through the BIN runner's guarded ctx.fixtures`);
+  }
+chk(
+  'widgets.runtime is granted by one path: Fixtures.grantFeature on the guarded proof DB, and by no migration, seed or script',
+  grantBreaks.length === 0 && fs.existsSync(path.join(BE, GRANT_SOURCE)),
+  grantBreaks.length
+    ? `GRANT: ${[...new Set(grantBreaks)].join('; ')}`
+    : `no migration, seed or script grants it; the one path is ${GRANT_SOURCE}, reached from ${GRANT_CALLER_PREFIXES.map((p) => `${p}**`).join(', ')} and ${GRANT_CALLER_FILE}`,
+);
+
 for (const c of out) console.log(`${c.ok ? 'PASS' : 'FAIL'}  ${c.n}\n        ${c.ev}`);
 const bad = out.filter((c) => !c.ok).length;
 console.log(bad ? `\n${out.length - bad}/${out.length} — K3 structural checks` : `\n${out.length}/${out.length} K3 structural checks pass`);

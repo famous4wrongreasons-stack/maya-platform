@@ -100,6 +100,12 @@ describe('P-F88 — the §3.8 submission and F88’s walk, at the shape stage [H
         contract: 'maya.widget.intent/1',
         outcome: 'refuse',
         code: 'EXPIRED',
+        // P-RENDER (IR-REN-1): R3.9.3's `reason_text`, minted from the code's own row. Written out
+        // rather than matched loosely, so a member added to this response later fails here too.
+        reason_text: {
+          phrase_key: 'widget.refusal.expired',
+          rendered: expect.any(String) as unknown,
+        },
         stopped_at_gate: '1',
         gates_run: 1,
         gates_total: expect.any(Number) as unknown,

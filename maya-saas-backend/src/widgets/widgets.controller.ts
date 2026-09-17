@@ -20,6 +20,7 @@ import { SubmitIntentDto } from './dto/submit-intent.dto';
 import { F88SubmissionPipe } from './validation/f88-walk';
 import { ResolveWidgetDto } from './dto/resolve-widget.dto';
 import { intentSubmitArgs } from './intent-submit-args';
+import { reasonText } from './rendering/reason-text';
 
 @ApiTags('widgets')
 @ApiBearerAuth()
@@ -74,11 +75,20 @@ export class WidgetsController {
     // Every argument, including the tenant (from the actor, never the body) and `v`, is derived in
     // `intentSubmitArgs`, the one derivation the live-path harness also uses.
     const result = await this.gateway.submit(intentSubmitArgs(dto, actor));
+    const code = 'code' in result.verdict ? result.verdict.code : null;
 
     return {
       contract: 'maya.widget.intent/1',
       outcome: result.verdict.outcome,
-      code: 'code' in result.verdict ? result.verdict.code : null,
+      code,
+      // R3.9.3 (P-RENDER, IR-REN-1): every refusal renders as `reason_text`, server-minted from the
+      // one table. The SIGNATURE is the fence — `reasonText` takes a code and returns a `Phrase`, so
+      // free text is unrepresentable here and an exception's message cannot become the reason.
+      // SH-22 admits this member on R3.9.3; no other member may be added to this response.
+      // P-G15a: when EXPIRED/SUPERSEDED become response OUTCOMES with no code (L8, D-10), this
+      // expression widens by one line to mint from `result.verdict.outcome`. The table already
+      // carries those keys.
+      reason_text: code === null ? null : reasonText(code),
       stopped_at_gate: result.stoppedAt,
       gates_run: result.ran,
       gates_total: this.gateway.gateCount,
