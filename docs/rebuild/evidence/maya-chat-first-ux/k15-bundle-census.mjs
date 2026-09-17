@@ -126,8 +126,13 @@ const out = {
   successorReadsClientStorage: shellStorageHits,
   unreachabilityProbeRecorded: Boolean(probe),
   mayaOsSiteUnreachableProven: probe?.mayaOsSiteUnreachable === true,
-  productionServedLegacyCopies: probe?.legacyBundleCopiesOnDisk?.servedTotal ?? null,
-  productionServedAuthorityValues: probe?.legacyBundleCopiesOnDisk?.authorityTokensInServedTotal ?? null,
+  // The latest measurement wins: after R3 the post-remediation sweep supersedes the first probe.
+  productionServedLegacyCopies: probe?.postRemediation
+    ? probe.postRemediation.served200
+    : (probe?.legacyBundleCopiesOnDisk?.servedTotal ?? null),
+  productionServedAuthorityValues: probe?.postRemediation
+    ? (probe.postRemediation.served200 === 0 ? 0 : null)
+    : (probe?.legacyBundleCopiesOnDisk?.authorityTokensInServedTotal ?? null),
   census,
 };
 
@@ -158,10 +163,9 @@ if (process.argv.includes('--json')) {
   }
   console.log();
   console.log('  EXACT CUTOVER CONDITION for K15:');
-  console.log(`    the repository still holds ${out.clientSideAuthorityValuesInLegacy} legacy authority values, and production SERVES`);
-  console.log(`    ${out.productionServedLegacyCopies ?? '?'} legacy copies holding ${out.productionServedAuthorityValues ?? '?'} more. The canonical entries already show`);
-  console.log('    a maintenance page; the copies are reachable at other URLs. Closing them is a production');
-  console.log('    change, and there is no served successor bundle to put in their place. NOT PERFORMED.');
+  console.log(`    production serves ${out.productionServedLegacyCopies ?? '?'} legacy copies (${out.productionServedAuthorityValues ?? '?'} authority values); the repository`);
+  console.log(`    still holds ${out.clientSideAuthorityValuesInLegacy} in unserved legacy files. K15's remaining condition is the successor: no Maya`);
+  console.log('    shell bundle is served, so "bundles carrying the shell = 1" is not met.');
 }
 
 // No process.exit here: it truncates a pending stdout write, and --json emits megabytes.

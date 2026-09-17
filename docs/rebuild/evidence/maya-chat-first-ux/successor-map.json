@@ -2429,7 +2429,7 @@
    "proposedType": "LEGACY_ONLY_FENCE",
    "resolved": false,
    "successor": null,
-   "why": "no refusal within 60 lines of 'CallbackQueryHandler' at ai администратор/bot.py:5041",
+   "why": "no refusal within 60 lines of 'CallbackQueryHandler' at ai администратор/bot.py:25",
    "nativeBlocker": false
   },
   {

@@ -143,7 +143,7 @@
       "evidence": "No primary Maya bundle is served: both /app/ entries serve a 2,247-byte maintenance page. The successor source maya-chat-shell has no HTML entry, no DOM mount and no network client, so it cannot be served as it stands. 0 of 44 served copies reference /widgets/."
     }
   },
-  "mayaOsSiteUnreachable": null,
+  "mayaOsSiteUnreachable": true,
   "verdict": "FAIL",
   "note": "404, 403 and maintenance responses were not taken as proof on their own. Each reading above is paired with the docroot listing that explains it.",
   "lineage": {
@@ -152,5 +152,34 @@
     "mayaOsSiteIndexHtml": "0 served copies byte-identical to any of its last 40 committed versions. 30 served mayaos.ru copies from 2026-08-08/09 share its size and authority-token profile (2.44–2.51 MB, 60 tokens), which is resemblance, not identity.",
     "appTenantHtml": "0 byte-identical copies in HEAD; one served copy has a tenant-bundle token profile"
   },
-  "mayaOsSiteUnreachableReading": "NOT PROVEN either way. Its HEAD bytes are served nowhere that was found, but lookalike copies are reachable and a recorded unreachability probe is a production observation that has not been made. K15 requires unreachability to be PROVEN, so K15 still stands open on this point."
+  "mayaOsSiteUnreachableReading": "PROVEN on 2026-09-17 by root and route evidence together: no copy of the maya-os-site lineage (byte-identical or look-alike) remains in any served docroot, the 30 look-alike copies that were reachable are archived and their URLs answer 404, and the canonical mayaos.ru entries serve the marketing site and the maintenance page.",
+  "postRemediation": {
+    "performedAt": "2026-09-17",
+    "after": "R3 legacy-bundle remediation (legacy-bundle-remediation-r3.json): 44 publicly served copies moved to a non-public archive, not deleted",
+    "method": "the same read-only root inventory widened to depth 6 in every served docroot (exactly three exist), selecting every html file with a legacy authority or role-mode token or larger than 300 KB; HTTP HEAD per candidate",
+    "servedDocroots": 3,
+    "candidates": 48,
+    "served200": 0,
+    "denied403": 48,
+    "note": "the 48 are the private backups that were already refused before R3; none was touched",
+    "checks": {
+      "unsafeLegacyRouteNotReachableThroughAnotherBundle": {
+        "verdict": "PASS",
+        "evidence": "0 legacy app bundle copies answer 200 in any served docroot; the 44 former URLs answer 404"
+      },
+      "roleModeUiCannotResurrectThroughAnOldBuild": {
+        "verdict": "PASS",
+        "evidence": "0 served copies carry authority or role-mode tokens"
+      },
+      "noDirectProviderOrBusinessWritePathInARetiredBundle": {
+        "verdict": "FAIL",
+        "evidence": "no retired bundle is served, but older legacy relay copies with an executable .php extension remain present in served directories on two hosts (outside R3's bundle scope; not requested, not moved). The live legacy relay is still required by the canonical maintenance-era surfaces."
+      },
+      "primaryMayaBundleUsesTheCertifiedWidgetPath": {
+        "verdict": "FAIL",
+        "evidence": "no Maya shell bundle is served yet; the served-shell implementation plan (v2.1) is ready, not built"
+      }
+    },
+    "verdict": "FAIL"
+  }
 }
