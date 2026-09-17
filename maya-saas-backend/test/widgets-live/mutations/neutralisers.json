@@ -8,5 +8,20 @@
         "replace": "    if (error) {\n      throw new UnauthorizedException();\n    }\n"
       }
     ]
+  },
+  "N4": {
+    "description": "U4: the two mechanisms that shadow slot 4 — `findRecord`'s tenant filter, and slot 3's principal compare. Re-quoted against the gateway AS MERGED (P-PRINCIPAL rewrote slot 3, D-16); slot 3's new null-principal branch needs no neutraliser, because the request under test carries a principal that resolves — it is the RECORD that belongs to another tenant.",
+    "edits": [
+      {
+        "file": "src/widgets/intent-gateway.service.ts",
+        "find": "      where: { intentTokenHash, tenantId },\n",
+        "replace": "      where: {\n        intentTokenHash,\n        tenantId: tenantId === '' ? tenantId : undefined,\n      },\n"
+      },
+      {
+        "file": "src/widgets/intent-gateway.service.ts",
+        "find": "        return digestEquals(r.principalProofHash, ctx.principalProofHash)\n          ? { outcome: 'pass' }\n          : { outcome: 'refuse', code: 'widget_principal_mismatch' };\n",
+        "replace": "        return digestEquals(r.principalProofHash, ctx.principalProofHash) ||\n          ctx.intentTokenHash.length > 0\n          ? { outcome: 'pass' }\n          : { outcome: 'refuse', code: 'widget_principal_mismatch' };\n"
+      }
+    ]
   }
 }

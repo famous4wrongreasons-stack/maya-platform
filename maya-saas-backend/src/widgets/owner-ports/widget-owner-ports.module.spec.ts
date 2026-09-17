@@ -21,6 +21,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { TenancyModule } from '../../tenancy/tenancy.module';
 import * as DI_TOKENS from '../di-tokens';
 import { PrincipalAdapter } from './principal.adapter';
+import { TenantScopeAdapter } from './tenant-scope.provider';
 import { IntentGatewayService } from '../intent-gateway.service';
 import { WidgetStoresService } from '../stores/widget-stores.service';
 import { WidgetsController } from '../widgets.controller';
@@ -65,9 +66,11 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
     ]);
     expect(meta(MODULE_METADATA.PROVIDERS, WidgetOwnerPortsModule)).toEqual([
       { provide: DI_TOKENS.PRINCIPAL_RESOLVER, useClass: PrincipalAdapter },
+      { provide: DI_TOKENS.TENANT_SCOPE, useClass: TenantScopeAdapter },
     ]);
     expect(meta(MODULE_METADATA.EXPORTS, WidgetOwnerPortsModule)).toEqual([
       DI_TOKENS.PRINCIPAL_RESOLVER,
+      DI_TOKENS.TENANT_SCOPE,
     ]);
   });
 
@@ -99,7 +102,13 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
   it('the real WidgetsModule resolves its providers and the bound port, and resolves no other token', async () => {
     // Every token bound so far. A token leaves this list only by being bound, in the commit that binds
     // it: that is what keeps "unbound" from drifting into "nobody checked".
-    const BOUND: readonly string[] = [DI_TOKENS.PRINCIPAL_RESOLVER];
+    const BOUND: readonly string[] = [
+      DI_TOKENS.PRINCIPAL_RESOLVER,
+      DI_TOKENS.TENANT_SCOPE,
+      // P-SEAL binds this one in `widgets.module.ts`, not at the boundary (B-22): the seal key is the
+      // minter's, and it moves to the emission module in P-MINT-CORE's merge.
+      DI_TOKENS.SEAL_VERIFIER,
+    ];
     const moduleRef = await Test.createTestingModule({
       // The owner modules the boundary now imports resolve configuration the way the application does:
       // `ConfigModule` is global in `AppModule`, and an isolated test module has to say so itself.
@@ -122,6 +131,9 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       expect(
         moduleRef.get<unknown>(DI_TOKENS.PRINCIPAL_RESOLVER, { strict: false }),
       ).toBeInstanceOf(PrincipalAdapter);
+      expect(
+        moduleRef.get<unknown>(DI_TOKENS.TENANT_SCOPE, { strict: false }),
+      ).toBeInstanceOf(TenantScopeAdapter);
       for (const token of Object.values(DI_TOKENS).filter(
         (t) => !BOUND.includes(t),
       ))

@@ -150,8 +150,12 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
     only: ['owner-ports/widget-owner-ports.module.ts'],
   },
   'tenancy/tenancy.module.ts': {
-    why: "the tenancy owner's module, so the boundary can resolve the Membership read",
+    why: "the tenancy owner's module, so the boundary can resolve the Membership read and TENANT_SCOPE",
     only: ['owner-ports/widget-owner-ports.module.ts'],
+  },
+  'tenancy/tenant-context.service.ts': {
+    why: "Gate 4's tenancy owner: row 4 names TenantContextService.assertTenantId (C11:4723); reached only through the TENANT_SCOPE adapter",
+    only: ['owner-ports/tenant-scope.provider.ts'],
   },
 };
 
@@ -885,6 +889,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       'tenancy/memberships.service.ts',
       'orchestration/c9.module.ts',
       'tenancy/tenancy.module.ts',
+      'tenancy/tenant-context.service.ts',
     ]);
   }, 60_000);
 
@@ -1004,7 +1009,10 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
           `${k}=${v === null ? 'null' : v === WIDGETS_MODULE ? 'WIDGETS_MODULE' : `'${v}'`}`,
       ),
     );
-    expect(values.get('BOUND_PORT_TOKENS')).toEqual(['PRINCIPAL_RESOLVER']);
+    expect(values.get('BOUND_PORT_TOKENS')).toEqual([
+      'PRINCIPAL_RESOLVER',
+      'TENANT_SCOPE',
+    ]);
   });
 
   describe('each rule goes red on a planted violation (in memory; the repository is not edited)', () => {

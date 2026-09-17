@@ -21,8 +21,9 @@ import type {
   SubmissionShape,
 } from './gate.types';
 import type { ChannelId } from '../widget-contract/lifecycle';
-import { PRINCIPAL_RESOLVER } from './di-tokens';
+import { PRINCIPAL_RESOLVER, TENANT_SCOPE } from './di-tokens';
 import type { PrincipalResolver, RequestTx } from './authority/principal-view';
+import type { TenantScopePort } from './owner-ports/tenant-scope.provider';
 import { digestEquals, sha256Hex } from './token.util';
 import { mergeFacts, NO_FACTS } from './gates/facts';
 import { gate1 } from './gates/gate1';
@@ -107,6 +108,8 @@ export class IntentGatewayService {
     private readonly prisma: PrismaService,
     @Inject(PRINCIPAL_RESOLVER)
     private readonly principals: PrincipalResolver,
+    @Inject(TENANT_SCOPE)
+    private readonly tenantScope: TenantScopePort,
   ) {}
 
   /**
@@ -204,8 +207,9 @@ export class IntentGatewayService {
       n: '4',
       name: 'Tenant scope',
       host: 'TenantResolver',
-      // Seam: `gates/gate4.ts` (U4).
-      run: (ctx) => gate4(ctx),
+      // Seam: `gates/gate4.ts` (U4). Row 4 (C11:4723) NAMES `TenantContextService.assertTenantId`,
+      // and the port is how the slot reaches it without naming the service (D-6).
+      run: (ctx) => gate4(ctx, this.tenantScope),
     },
     {
       n: '5',

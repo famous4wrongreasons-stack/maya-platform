@@ -687,7 +687,7 @@ const OWNER_MODULES = [
   'tenancy/tenancy.module.ts#TenancyModule',
 ];
 /** DI tokens of `di-tokens.ts` the owner-ports module may provide and export. */
-const BOUND_PORT_TOKENS = ['PRINCIPAL_RESOLVER'];
+const BOUND_PORT_TOKENS = ['PRINCIPAL_RESOLVER', 'TENANT_SCOPE'];
 const NEVER_IMPORTED = ['action-engine/action-engine.module.ts#ActionEngineModule'];
 /** The widget layer's own store client, and where it may be imported (`null`: any widget file). */
 const STORE_CLIENT = {

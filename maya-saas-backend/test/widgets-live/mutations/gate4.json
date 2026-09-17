@@ -1,0 +1,48 @@
+[
+  {
+    "id": "M4-1",
+    "description": "the inline string compare is restored in slot 4: the gate decides the tenant again instead of asking the owner (D-9, C11:4723). Build-killed: no behaviour differs on any input a conformant build can produce, which is why the fence is at the source.",
+    "file": "src/widgets/gates/gate4.ts",
+    "find": "  const r = ctx.record;\n  if (!r) return refuse('tenant_mismatch', 'no record');\n  try {\n    // The RECORD's tenant, never the request's: asserting the request's own tenant against itself\n    // is a call that cannot fail, which is the shape of a gate that looks enforced and is not.\n    tenantScope.assert(r.tenantId);\n  } catch {\n    return refuse('tenant_mismatch', '');\n  }\n  return pass;\n",
+    "replace": "  const r = ctx.record;\n  if (!r) return refuse('tenant_mismatch', 'no record');\n  return r.tenantId === ctx.tenantId ? pass : refuse('tenant_mismatch', '');\n",
+    "killers": ["T4-SRC-a", "T4-SRC-b"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M4-2",
+    "description": "slot 4 asserts the REQUEST's own tenant instead of the record's — a call that cannot fail, and a gate that looks enforced and is not. Live-killed on N4: with the tenant filter and slot 3 neutralised, tenant A's submission of tenant B's record reaches slot 4, passes it, and stops past 4.",
+    "file": "src/widgets/gates/gate4.ts",
+    "find": "    tenantScope.assert(r.tenantId);\n",
+    "replace": "    tenantScope.assert(ctx.tenantId);\n",
+    "killers": [
+      {
+        "test": "T4-INDEP",
+        "neutralisers": "N4"
+      }
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M4-3",
+    "description": "the owner's raise is swallowed and slot 4 passes: `tenant_mismatch` becomes unreachable. Live-killed on N4, at both entry levels; the [HTTP] kill is the E-INDEP evidence for G4-b (§3.2 Gate 4).",
+    "file": "src/widgets/gates/gate4.ts",
+    "find": "  } catch {\n    return refuse('tenant_mismatch', '');\n  }\n",
+    "replace": "  } catch {\n    return pass;\n  }\n",
+    "killers": [
+      {
+        "test": "T4-INDEP",
+        "neutralisers": "N4"
+      }
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M4-4",
+    "description": "IR4-7: the gateway drops the port argument, so slot 4 stops running on the bound TENANT_SCOPE. With IR4-3 applied there is no interim default left, so this is a compile break — which is the point: the wiring cannot be lost silently.",
+    "file": "src/widgets/intent-gateway.service.ts",
+    "find": "      run: (ctx) => gate4(ctx, this.tenantScope),\n",
+    "replace": "      run: (ctx) => gate4(ctx as never),\n",
+    "killers": ["T4-WIRED"],
+    "expect": "build-killed"
+  }
+]
