@@ -1,0 +1,71 @@
+{
+  "contract": "maya.php-relay-copy-remediation/1",
+  "performedAt": "2026-09-17",
+  "authority": "owner ruling on checkpoint ffbd684a: read-only inventory of old PHP relay copies, then a safe move of confirmed obsolete backup/recovery copies out of served roots by the R3 procedure; never move a canonical/live handler whose replacement is not proven; an artifact that cannot be proven obsolete stays and stops only on itself",
+  "productionEffects": 0,
+  "redaction": "public evidence: counts, roles and verdicts only; exact hosts, paths, URLs and source bytes are withheld",
+  "method": [
+    "the R01 relay release gate's own read-only root inventory (public-relay-inventory.cjs) against relay-release-manifest.json, run over SSH without executing PHP",
+    "the gate's whole-source guard (client-initiator-boundary.cjs) over every active PHP source, in memory",
+    "HTTP HEAD, no body and no action, against every denial URL the gate derives for each denied copy, across every registered host alias",
+    "the R3 owner-only manifest compared against the relay manifest pins"
+  ],
+  "inventory": {
+    "servedDocroots": 3,
+    "phpArtifactsDiscovered": 26,
+    "unregisteredPhpArtifacts": 0,
+    "symlinks": 0,
+    "scanErrors": 0,
+    "byRole": {
+      "full_php": {
+        "count": 2,
+        "pinnedHash": 2,
+        "wholeSourceGuard": "PASS 2/2",
+        "http": "200 on 2"
+      },
+      "relay_php": {
+        "count": 8,
+        "pinnedHash": 8,
+        "wholeSourceGuard": "PASS 8/8",
+        "http": "200 on 7, 403 on 1 (application-authenticated)"
+      },
+      "blocked_archive": {
+        "count": 16,
+        "pinnedHash": 16,
+        "providerWriteCandidates": 13,
+        "denialProbes": 128,
+        "denied403": 128,
+        "served": 0
+      }
+    },
+    "hostingConfiguration": {
+      "pinned": 9,
+      "drift": 0
+    }
+  },
+  "classification": {
+    "obsoleteBackupOrRecoveryCopies": 16,
+    "obsoleteCopiesPubliclyServed": 0,
+    "activeCanonicalHandlers": 9,
+    "datedActiveAliasesUnprovenObsolete": 1,
+    "datedAliasComparedToLiveRelay": {
+      "actionNamesSubset": "93 of 95",
+      "extraOutboundHosts": 0,
+      "extraWriteMethodRequestOptions": 7,
+      "reading": "may serve older implementations of the same business writes",
+      "referencesFromServedRoots": "0 in 3 roots (html/js/php/json, read-only search)"
+    }
+  },
+  "moves": 0,
+  "whyNoMove": [
+    "Every obsolete copy is already refused by the host (128 of 128 probes 403) and pinned by path and hash in the R01 relay release gate; moving one makes the gate fail closed on every later backend deploy, and the gate's governance forbids editing its manifest to regain a green release. Exposure is already 0, so a move buys no exposure reduction.",
+    "One dated alias of the full relay is registered by the R01 gate as an active full relay, passes the whole-source guard and answers 200. Its known consumer, a dated PWA alias, was archived by R3, but no evidence proves it has no other caller. By the ruling it stays in place and stops only on itself (DECISION-SHEET-05, item S5-2)."
+  ],
+  "publicObsoletePhpRelaysExposed": 0,
+  "finding": {
+    "id": "R3-RELAY-GATE-DRIFT",
+    "summary": "R3 moved 5 files that the R01 relay release gate pins in place (3 preserved_html, 2 preserved_backup). Their archived bytes equal the pins 5/5, but the gate requires them at their original location, so its verify step now fails closed. deploy.sh runs that step before upload, so every backend deploy stops before any change until reconciled. The R3 pre-move checks did not consult this gate; that omission is the defect.",
+    "gateVerifyNow": "FAIL (Live artifact changed) — 5 entries missing, every other entry PASS",
+    "decision": "DECISION-SHEET-05, item S5-1"
+  }
+}

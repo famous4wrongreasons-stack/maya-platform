@@ -173,7 +173,8 @@
       },
       "noDirectProviderOrBusinessWritePathInARetiredBundle": {
         "verdict": "FAIL",
-        "evidence": "no retired bundle is served, but older legacy relay copies with an executable .php extension remain present in served directories on two hosts (outside R3's bundle scope; not requested, not moved). The live legacy relay is still required by the canonical maintenance-era surfaces."
+        "evidence": "php-relay-copies-r4.json (2026-09-17): all 16 obsolete PHP relay copies are denied by the host (128 of 128 alias probes 403); 13 of them carry provider write candidates. The 10 served relays are gate-registered and pass the whole-source guard 10/10. One of them is a dated alias of the full relay whose consumer bundle R3 archived: its action names are a subset of the live relay (93 of 95, no extra outbound host), but its bodies differ and carry 7 more write-method request options than the live relay, so it may expose older implementations of the same business writes. It is served (200), and its obsolescence is unproven.",
+        "narrowedTo": "exactly one served artifact: the dated full-relay alias (DECISION-SHEET-05 S5-2); the earlier wording, which counted denied copies on disk, is superseded"
       },
       "primaryMayaBundleUsesTheCertifiedWidgetPath": {
         "verdict": "FAIL",
