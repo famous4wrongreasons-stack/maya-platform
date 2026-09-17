@@ -72,6 +72,10 @@ interface Allowed {
 
 /** Non-widget modules any widget file may import. Closed: a module not listed here is refused. */
 const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
+  'action-engine/action-engine.identity.ts': {
+    why: "H4/H6: the platform's one keyed-HMAC discipline (`ActionIdentityService.hmac`); a plain class, constructed as a value, no DI (D-6 registries)",
+    only: ['emission/seal.service.ts'],
+  },
   'prisma/prisma.service.ts': {
     why: "the widget layer's store client; its delegates are fenced by FR-1 below",
   },

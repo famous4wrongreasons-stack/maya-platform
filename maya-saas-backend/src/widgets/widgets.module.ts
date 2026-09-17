@@ -5,7 +5,10 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { assertOwnerClassesResolve } from './authority/contract-bindings';
 import { assertLedgersBindAtRegistryLoad } from './authority/ledger-startup.assert';
 import { ControlRegistryService } from './control/control-registry.service';
+import { SEAL_VERIFIER } from './di-tokens';
 import { WidgetEmitterService } from './emission/emitter.service';
+import { SealService } from './emission/seal.service';
+import { SealVerifierService } from './emission/seal-verifier.service';
 import { IntentGatewayService } from './intent-gateway.service';
 import { WidgetOwnerPortsModule } from './owner-ports/widget-owner-ports.module';
 import { WidgetStoresService } from './stores/widget-stores.service';
@@ -32,12 +35,22 @@ import { WidgetsController } from './widgets.controller';
     WidgetStoresService,
     WidgetEmitterService,
     ControlRegistryService,
+    // P-SEAL (IR-SEAL-1), B-22: the seal key is HELD BY THE MINTER's side, never by the gateway. There
+    // is no `emission.module.ts` in Wave 1 and `emission/**` outside `seal*.ts` is P-MINT-CORE's, so the
+    // two providers stand here and move to the emission module in P-MINT-CORE's merge. B-22 holds
+    // either way: the gateway never imports the classes — it will take `SEAL_VERIFIER` as a type-only
+    // token — and SEAL-5 pins that no key is reachable from its closure.
+    SealService,
+    SealVerifierService,
+    { provide: SEAL_VERIFIER, useExisting: SealVerifierService },
   ],
   exports: [
     IntentGatewayService,
     WidgetStoresService,
     WidgetEmitterService,
     ControlRegistryService,
+    SealService,
+    SEAL_VERIFIER,
   ],
 })
 export class WidgetsModule implements OnModuleInit {

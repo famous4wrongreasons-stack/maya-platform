@@ -1,0 +1,85 @@
+[
+  {
+    "id": "SEAL-M1",
+    "description": "the seal becomes an unkeyed sha-256 over the same terms: anyone who can read the row can recompute it (H4 C11:2615-2623). It is also a second hashing scheme under src/widgets, so the H6 ratchet must see it too.",
+    "edits": [
+      {
+        "file": "src/widgets/emission/seal.service.ts",
+        "find": "import { ActionIdentityService } from '../../action-engine/action-engine.identity';\n",
+        "replace": "import { createHash } from 'node:crypto';\n\nimport { ActionIdentityService } from '../../action-engine/action-engine.identity';\n"
+      },
+      {
+        "file": "src/widgets/emission/seal.service.ts",
+        "find": "    return this.key().hmac(\n      SEAL_NAMESPACE,\n      sealTermTuple({ ...terms, sealKeyVersion: version }),\n    );\n",
+        "replace": "    void this.key();\n    return createHash('sha256')\n      .update(\n        SEAL_NAMESPACE +\n          JSON.stringify(sealTermTuple({ ...terms, sealKeyVersion: version })),\n        'utf8',\n      )\n      .digest('hex');\n"
+      }
+    ],
+    "killers": ["SEAL-1", "SEAL-4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SEAL-M2",
+    "description": "one H4 term leaves the pre-image: `principal_proof_hash`, so a token minted for one principal seals the same as one minted for another.",
+    "edits": [
+      {
+        "file": "src/widgets/emission/seal.service.ts",
+        "find": "  terms.principalProofHash,\n",
+        "replace": ""
+      }
+    ],
+    "killers": ["SEAL-1", "SEAL-2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SEAL-M3",
+    "description": "the stored seal is compared with `===`: same verdicts, measurable latency (§3, indistinguishable latency).",
+    "edits": [
+      {
+        "file": "src/widgets/emission/seal-verifier.service.ts",
+        "find": "    return digestEquals(emission.envelopeSeal, expected)\n      ? VERIFIED\n      : REFUSED('seal_mismatch');\n",
+        "replace": "    return emission.envelopeSeal === expected\n      ? VERIFIED\n      : REFUSED('seal_mismatch');\n"
+      }
+    ],
+    "killers": ["SEAL-6"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SEAL-M4",
+    "description": "a missing term verifies: the verifier answers `ok` when a column the seal covers is null or empty, so an erased or half-written row passes Gate 1.",
+    "edits": [
+      {
+        "file": "src/widgets/emission/seal-verifier.service.ts",
+        "find": "      return REFUSED('term_absent');\n",
+        "replace": "      return VERIFIED;\n"
+      }
+    ],
+    "killers": ["SEAL-2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SEAL-M5",
+    "description": "the key-version guard admits every version, so a seal minted under a rotated key would be verified under the current one (AREA-C: the interim verifies under the single current version and refuses otherwise).",
+    "edits": [
+      {
+        "file": "src/widgets/emission/seal-verifier.service.ts",
+        "find": "    if (version !== CURRENT_SEAL_KEY_VERSION) {\n      return REFUSED('unknown_key_version');\n    }\n",
+        "replace": "    if (version === '\\u0000never') {\n      return REFUSED('unknown_key_version');\n    }\n"
+      }
+    ],
+    "killers": ["SEAL-3"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SEAL-M6",
+    "description": "the H6 ratchet's scanner is neutralised, so it would report no hashing site anywhere and pass over a widget layer that had grown a second scheme. A ratchet that cannot see is the failure mode a ratchet is most likely to have.",
+    "edits": [
+      {
+        "file": "src/widgets/emission/seal-h6.architecture.spec.ts",
+        "find": "const HASH_PRIMITIVES = new Set(['createHash', 'createHmac']);\n",
+        "replace": "const HASH_PRIMITIVES = new Set<string>([]);\n"
+      }
+    ],
+    "killers": ["SEAL-4"],
+    "expect": "build-killed"
+  }
+]
