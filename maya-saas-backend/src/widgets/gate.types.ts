@@ -301,8 +301,17 @@ export interface IntentRecordRow {
  * shape is asserted by a test rather than merely written carefully.
  */
 export interface SubmissionShape {
+  /** §3.8's literal. P-F88's shape stage refuses a body without it before the handler runs. */
+  readonly contract?: string;
+  /** Gate 1 compares it against the record (P-G15a). SH-17: validated as a UUID (C11:7403). */
+  readonly widget_id?: string;
   readonly intent_token: string;
   readonly inputs?: Readonly<Record<string, unknown>> | null;
+  /** The client's retry key. D-11/AMB-28: dedupe on it is optional and is not a clause. */
+  readonly client_nonce?: string;
+  /** ADVISORY (R3.8.3). No gate antecedent may read it — P-F88's F88-7 is the ratchet. */
+  readonly profile_id?: string;
+  readonly client_emitted_at?: string;
   /**
    * R8R-2: `unknown`. Nothing about the value's shape is established before Gate 8-R reads it, so the
    * type does not claim one; Gate 8-R narrows it.

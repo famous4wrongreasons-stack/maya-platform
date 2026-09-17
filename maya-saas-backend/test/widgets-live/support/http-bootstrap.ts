@@ -36,6 +36,7 @@ import { resetLoopbackLoginPreflight } from './login-rate-limit';
 import { MintProvenanceSink, type MintProvenanceLine } from './mint-provenance';
 import { recordingStoreClient, WriteRecorder } from './no-write-recorder';
 import { assertProofDatabase } from './proof-db-guard';
+import { submissionDefaults } from './bootstrap';
 
 export const GATEWAY_SCOPE = 'gateway';
 export const LOGIN_RATE_LIMIT_SCOPE = 'harness:login-rate-limit';
@@ -134,7 +135,9 @@ export async function bootHttp(
       const res = await request(server)
         .post('/api/widgets/intent')
         .set('authorization', `Bearer ${accessToken}`)
-        .send(body);
+        // P-F88, IR-F88-3: §3.8's required members, filled for a caller that did not name them. A raw
+        // shape-stage body never comes through here — those suites call supertest themselves.
+        .send({ ...submissionDefaults(), ...body });
       return { status: res.status, body: res.body as unknown };
     },
     mintProvenance: () => sink.captured(),

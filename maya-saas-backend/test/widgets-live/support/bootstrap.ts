@@ -36,7 +36,10 @@ import { PrismaService } from '../../../src/prisma/prisma.service';
 import { TenancyModule } from '../../../src/tenancy/tenancy.module';
 import { TenantContextService } from '../../../src/tenancy/tenant-context.service';
 import { TenantResolverService } from '../../../src/tenancy/tenant-resolver.service';
-import { SubmitIntentDto } from '../../../src/widgets/dto/submit-intent.dto';
+import {
+  SubmitIntentDto,
+  WIDGET_INTENT_SUBMISSION_CONTRACT,
+} from '../../../src/widgets/dto/submit-intent.dto';
 import { WidgetEmitterService } from '../../../src/widgets/emission/emitter.service';
 import { IntentGatewayService } from '../../../src/widgets/intent-gateway.service';
 import { intentSubmitArgs } from '../../../src/widgets/intent-submit-args';
@@ -61,11 +64,34 @@ const harnessConfig = () =>
 type GatewayResult = Awaited<ReturnType<IntentGatewayService['submit']>>;
 type ControllerResponse = Awaited<ReturnType<WidgetsController['intent']>>;
 
+/**
+ * §3.8's required members, filled for a caller that did not name them (P-F88, IR-F88-3).
+ *
+ * A GW- or HTTP-level test is about a GATE, not about the shape stage, and every such body predates the
+ * §3.8 DTO. The shape stage has its own raw-body suites (`f88-shape.live-spec.ts` and
+ * `scripts/widgets-http-proof/gateP-f88.cases.ts`), which post through supertest directly and never
+ * reach this helper — so filling here cannot hide F88-3. A member the caller DID name is never
+ * overwritten.
+ *
+ * From P-G15a on, a body must name the RECORD's `widget_id` rather than a fresh one, because Gate 1
+ * compares it. Until then the default is inert.
+ */
+export const submissionDefaults = (): Record<string, unknown> => ({
+  contract: WIDGET_INTENT_SUBMISSION_CONTRACT,
+  widget_id: randomUUID(),
+  inputs: null,
+  client_nonce: `wl-${randomUUID().slice(0, 8)}`,
+  profile_id: 'pwa.default',
+});
+
 /** The route's body, as the global ValidationPipe would admit it (whitelist, forbidNonWhitelisted). */
 export async function toSubmitIntentDto(
   body: Record<string, unknown>,
 ): Promise<SubmitIntentDto> {
-  const dto = plainToInstance(SubmitIntentDto, body);
+  const dto = plainToInstance(SubmitIntentDto, {
+    ...submissionDefaults(),
+    ...body,
+  });
   const errors = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,

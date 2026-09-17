@@ -52,5 +52,34 @@ mut "the walk skips Array<T>"         "n.typeName.getText(sf) === 'Array' &&" "f
 mut "reach stops following references" "if (shapes[ref] && !reach.has(ref)) queue.push(ref);" "if (false) queue.push(ref);"
 mut "FORBIDDEN loses tenant_id"       "'tenant_id'," ""
 mut "FORBIDDEN loses role"            "  'role'," ""
+
+# ── GATES-PLAN-V11 P-F88 (IR-F88-5): the RUNTIME list cannot drift from the contract ──────────
+# The card says "append runtime mutants" here. This script's mechanism is "mutate
+# `widget-contract-check.mjs`, count its passes", and it cannot measure the runtime walk: the
+# per-arm runtime mutants are `test/widgets-live/mutations/gateP-f88.json` F88-M1..M14, which the
+# plan's own runner executes. What this script CAN measure, in exactly its own style, is the
+# GENERATOR - that `src/widget-contract/f88.generated.ts` is what §0.15 says and cannot silently
+# stop being it. It measures an exit code rather than a pass count, so it has its own runner.
+#
+# Only arms that are CAUGHT today are listed. Dropping `emit-f88.mjs`'s own count guards
+# (`unique.length !== 28`, `rows.length !== 6`) and widening its unmappable-type branch are
+# deliberately NOT listed: with the contract unedited the parse is still correct, so `--check` still
+# passes and the arm would read as a dead fence when it is only unreachable from here. Each is
+# covered by the slice mutations below, which make the parse wrong and prove the comparison bites.
+echo
+echo "the generator (P-F88): emit-f88.mjs --check must go red for each arm"
+gmut(){ cp scripts/widget-contract/emit-f88.mjs "$TMP/g.mjs"
+  python3 - "$TMP/g.mjs" "$2" "$3" <<'GPY' || { printf '  %-52s NOT APPLIED\n' "$1"; bad=1; return 1; }
+import sys; p,o,n=sys.argv[1],sys.argv[2],sys.argv[3]
+s=open(p,encoding='utf-8').read()
+sys.exit(2) if o not in s else open(p,'w',encoding='utf-8').write(s.replace(o,n,1))
+GPY
+  cp "$TMP/g.mjs" scripts/widget-contract/.emit-f88.mut.mjs
+  node scripts/widget-contract/.emit-f88.mut.mjs --check >/dev/null 2>&1; r=$?
+  rm -f scripts/widget-contract/.emit-f88.mut.mjs
+  if [ $r -ne 0 ]; then printf '  %-52s CAUGHT\n' "$1"; else printf '  %-52s SURVIVED  <-- dead fence arm\n' "$1"; bad=1; fi }
+gmut "the F88.2 table slice ends at row 5"    "    '**Rows 4 and 6 are the wave-1 rulings'," "    '| 5 |',"
+gmut "the union's paragraph slice ends early" "    '*Mechanism:* one structural validator'," "    '\`role\` *(F88.2)*',"
+
 echo; [ $bad -eq 0 ] && echo "ALL MUTATIONS CAUGHT - every arm of the fence is load-bearing" || echo "A MUTATION SURVIVED"
 exit $bad

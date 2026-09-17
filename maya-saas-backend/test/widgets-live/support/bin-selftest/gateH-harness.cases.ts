@@ -29,7 +29,16 @@ const intent = (ctx: HttpProofContext, token: string) =>
       authorization: `Bearer ${token}`,
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ intent_token: 'har7-unknown-intent-token-0000' }),
+    // P-F88, IR-F88-3: HAR-7 asserts a 200 slot-1 refusal, so the body must pass the §3.8 shape stage.
+    // Spelled out here rather than filled by a helper: a BIN case posts its own bytes (D-17).
+    body: JSON.stringify({
+      contract: 'maya.widget.intent.submission/1',
+      widget_id: '00000000-0000-4000-8000-000000000007',
+      intent_token: 'har7-unknown-intent-token-0000',
+      inputs: null,
+      client_nonce: 'har7-nonce-0001',
+      profile_id: 'pwa.default',
+    }),
   });
 
 export const cases: WidgetsHttpProofCase[] = [

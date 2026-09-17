@@ -33,6 +33,9 @@ run contract-version-record-check  $E/contract-version-record-check.mjs
 run gate-audit-check               $E/gate-audit-check.mjs
 run gate-audit-check-self-test     $E/gate-audit-check.mjs --self-test
 gate widget-contract-check          inbe node scripts/widget-contract-check.mjs
+# GATES-PLAN-V11 P-F88 (IR-F88-4): the generated F88 union and the six F88.2 exemption rows are what the
+# contract says, or the generator exits 1. Without it `f88.generated.ts` could drift from §0.15 silently.
+gate emit-f88-check                 inbe node scripts/widget-contract/emit-f88.mjs --check
 gate k3-gateway-check               inbe node scripts/k3-gateway-check.mjs
 gate k3-exit-gate                   "$ROOT/$E/k3-exit-gate.sh"
 gate k4-exit-gate                   "$ROOT/$E/k4-exit-gate.sh"

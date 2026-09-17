@@ -1,0 +1,128 @@
+[
+  {
+    "id": "F88-M1",
+    "description": "the exemption matcher admits everything (every arm of F88.2 widened at once): on a submission no row applies today, so this is the strongest possible widening of the table",
+    "file": "src/widgets/validation/f88-walk.ts",
+    "find": "  F88_EXEMPTIONS.some(\n    (e) =>\n      e.shape === shape &&\n      e.path === path &&\n      e.depth === depth &&\n      e.accepts(value),\n  );\n",
+    "replace": "  true;\n",
+    "killers": ["F88-1", "F88-2"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "F88-M2",
+    "description": "the matcher stops comparing the shape: rows 3 and 4 then admit `tenant_id` at the root of a SUBMISSION, which is the tenant-confusion shape the root binding exists to prevent",
+    "file": "src/widgets/validation/f88-walk.ts",
+    "find": "      e.shape === shape &&\n",
+    "replace": "",
+    "killers": ["F88-2"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "F88-M3",
+    "description": "the walk stops at depth 2 — a cap is a hole, and R3.8.2 says «at any depth»",
+    "file": "src/widgets/validation/f88-walk.ts",
+    "find": "        else visit(child, currentShape, here, depth + 1);\n",
+    "replace": "        else if (depth < 2) visit(child, currentShape, here, depth + 1);\n",
+    "killers": ["F88-1"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "F88-M4",
+    "description": "the walk stops following arrays, so a forbidden key inside a list is invisible",
+    "file": "src/widgets/validation/f88-walk.ts",
+    "find": "      for (const element of node)\n        visit(element, currentShape, elementPath, depth);\n",
+    "replace": "      void elementPath;\n",
+    "killers": ["F88-2"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "F88-M5",
+    "description": "the union diverges from the contract: one key is dropped from the generated list (the two-places failure R3.8.2 records, in its live form)",
+    "file": "src/widget-contract/f88.generated.ts",
+    "find": "  'checkout_url',\n",
+    "replace": "",
+    "killers": ["F88-1"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "F88-M6",
+    "description": "`spoken_transcript` is accepted at the shape stage (AMB-26c reversed): a data subject's affirmation would then reach the gateway",
+    "file": "src/widgets/dto/submit-intent.dto.ts",
+    "find": "  if (body.spoken_transcript !== undefined)\n    issues.push({\n      field: 'spoken_transcript',\n      message:\n        '§3.8: `spoken_transcript` is voice-only and is refused at the shape stage on this carrier; a data subject’s affirmation is never logged (AMB-26c, R-7)',\n    });\n",
+    "replace": "",
+    "killers": ["F88-5"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "F88-M7",
+    "description": "a null `readback_ack` is admitted (AMB-02c reversed): it would reach Gate 8-R and be answered with a §3.9 code instead of a 400",
+    "file": "src/widgets/dto/submit-intent.dto.ts",
+    "find": "  if (body.readback_ack === null)\n    issues.push({\n      field: 'readback_ack',\n      message:\n        '§3.8: `readback_ack` is REQUIRED iff Gate 8-R applies and refused otherwise; a null ack is neither, and is a 400 at the shape stage rather than `readback_mismatch` (AMB-02c)',\n    });\n",
+    "replace": "",
+    "killers": ["F88-4"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "F88-M8",
+    "description": "the shape constraint stops refusing: the walk still runs and its answer is discarded, which is the way a fence dies without anything looking broken",
+    "file": "src/widgets/dto/submit-intent.dto.ts",
+    "find": "    if (issues.length > 0) throw new SubmissionShapeRejection(issues);\n",
+    "replace": "    void issues;\n",
+    "killers": ["F88-1", "F88-2", "F88-4", "F88-5"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "F88-M9",
+    "description": "the matcher stops comparing depth. Behaviourally this is EQUIVALENT today, and saying so is the point: the walk spells a path so that depth is the number of dotted steps in it, so no value can match a row's path at the wrong depth. The term is kept, and this mutant is declared, because F88.2 requires the exemption to BE a four-term tuple; F88-U6 reads the matcher's own source and is what kills it.",
+    "file": "src/widgets/validation/f88-walk.ts",
+    "find": "      e.depth === depth &&\n",
+    "replace": "",
+    "killers": ["F88-U6"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "F88-M10",
+    "description": "the matcher stops comparing the path: `RenderReceipt` row 6 would then admit a `role` at depth 1 anywhere on the receipt, not only inside `intents_withheld[]` — the fourth of F88.2's five required negative vectors",
+    "file": "src/widgets/validation/f88-walk.ts",
+    "find": "      e.path === path &&\n",
+    "replace": "",
+    "killers": ["F88-U3", "F88-U6"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "F88-M11",
+    "description": "the matcher stops checking the type, which F88.1 calls half of the permission: a ninth `role` value would be admitted at the declared location",
+    "file": "src/widgets/validation/f88-walk.ts",
+    "find": "      e.accepts(value),\n",
+    "replace": "      true,\n",
+    "killers": ["F88-U2", "F88-U4", "F88-U6"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "F88-M12",
+    "description": "row 5's type predicate is widened in the generated table: an owner value on `WidgetIntent.role` would pass",
+    "file": "src/widget-contract/f88.generated.ts",
+    "find": "    declaredType: 'the eight-member enum §3.1 declares',\n    accepts: inSet(WIDGET_INTENT_ROLE),\n",
+    "replace": "    declaredType: 'the eight-member enum §3.1 declares',\n    accepts: () => true,\n",
+    "killers": ["F88-U2", "F88-8b"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "F88-M13",
+    "description": "a seventh exemption row is added for a shape nobody declares — the widening-by-one-edit F88.2 forbids",
+    "file": "src/widget-contract/f88.generated.ts",
+    "find": "export const F88_EXEMPTIONS: readonly F88Exemption[] = Object.freeze([\n",
+    "replace": "export const F88_EXEMPTIONS: readonly F88Exemption[] = Object.freeze([\n  Object.freeze({\n    row: 7,\n    shape: 'WidgetIntentSubmission',\n    path: 'role',\n    depth: 0,\n    declaredType: 'string',\n    accepts: isString,\n    note: 'not a row of F88.2',\n  }),\n",
+    "killers": ["F88-U6", "F88-8b", "F88-8c"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "F88-M14",
+    "description": "the generator's F88.2 table slice ends early, so it parses four rows instead of six: the count guard is what turns that into a failed build rather than a shorter fence",
+    "file": "scripts/widget-contract/emit-f88.mjs",
+    "find": "    '**Rows 4 and 6 are the wave-1 rulings',\n",
+    "replace": "    '| 5 |',\n",
+    "killers": ["F88-8b"],
+    "expect": "build-killed"
+  }
+]

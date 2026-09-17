@@ -17,6 +17,7 @@ import { TenantScoped } from '../decorators/tenant-scoped.decorator';
 import { RequiresFeature } from '../entitlements/requires-feature.decorator';
 import { IntentGatewayService } from './intent-gateway.service';
 import { SubmitIntentDto } from './dto/submit-intent.dto';
+import { F88SubmissionPipe } from './validation/f88-walk';
 import { ResolveWidgetDto } from './dto/resolve-widget.dto';
 import { intentSubmitArgs } from './intent-submit-args';
 
@@ -63,7 +64,11 @@ export class WidgetsController {
     summary: 'Submit a typed widget intent through the gate pipeline',
   })
   async intent(
-    @Body() dto: SubmitIntentDto,
+    // P-F88, IR-F88-1. Defence in depth, not the mechanism: the SAME `assertNoForbiddenKeys` already
+    // runs inside the global `ValidationPipe` through the DTO's whole-body constraint, and both throw
+    // the same `SubmissionShapeRejection`, so the route's answer is byte-identical with or without this
+    // pipe. It exists for a body that reaches the handler by any path other than the global pipe.
+    @Body(new F88SubmissionPipe()) dto: SubmitIntentDto,
     @CurrentUser() actor: AuthenticatedUser,
   ) {
     // Every argument, including the tenant (from the actor, never the body) and `v`, is derived in
