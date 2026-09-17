@@ -1,0 +1,18 @@
+{
+  "source": [
+    "maya-saas-backend/src/auth/email-auth.service.ts:434 @ 62fde3a3",
+    "maya-saas-backend/src/auth/email-auth.service.ts:646 @ 62fde3a3"
+  ],
+  "status": 429,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "message": "Too many invalid email code attempts. Request a new code.",
+    "error": {
+      "code": "email_too_many_attempts",
+      "message": "Too many invalid email code attempts. Request a new code.",
+      "field": "code"
+    }
+  }
+}

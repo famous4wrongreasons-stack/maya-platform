@@ -1,0 +1,28 @@
+{
+  "source": [
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts:1698 @ 62fde3a3"
+  ],
+  "note": "Reflow case (§2.7 step 14): a reply carrying a 200-character unbroken token.",
+  "status": 201,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "request_id": "{{request_id}}",
+    "reply": "Код бронирования: ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ — сохраните его.",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [],
+    "grounding": {
+      "status": "not_required",
+      "domain": null,
+      "required_tools": [],
+      "evidence_tools": []
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "source": [
+    "maya-saas-backend/src/auth/email-auth.service.ts:326 @ 62fde3a3",
+    "maya-saas-backend/src/auth/email-auth-delivery.service.ts:171 @ 62fde3a3"
+  ],
+  "status": 503,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "message": "SMTP email delivery credentials are incomplete.",
+    "error": {
+      "code": "email_delivery_unavailable",
+      "message": "SMTP email delivery credentials are incomplete."
+    }
+  }
+}

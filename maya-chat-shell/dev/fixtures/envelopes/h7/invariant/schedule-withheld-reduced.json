@@ -1,0 +1,517 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M070M8KCEX72D4FY2F",
+  "kind": "SCHEDULE",
+  "body_version": 1,
+  "tenant_id": "16b5b51e-e367-4eab-a5d6-76c9bb99a1a2",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "800d2687ad6de6bc0e41e0b5c1ead5ff"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "staff.schedule.read",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": [
+        "/entries/1/title"
+      ]
+    }
+  },
+  "body": {
+    "range": {
+      "from": "2026-09-18T07:00:00.000Z",
+      "to": "2026-09-18T10:00:00.000Z"
+    },
+    "timezone": "Europe/Moscow",
+    "lanes": [
+      {
+        "lane_id": "l-ilya",
+        "label": {
+          "state": "KNOWN",
+          "value": "Илья",
+          "label": "Илья",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "staff_ref": "staff.ilya"
+      },
+      {
+        "lane_id": "l-anna",
+        "label": {
+          "state": "KNOWN",
+          "value": "Анна",
+          "label": "Анна",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "staff_ref": "staff.anna"
+      }
+    ],
+    "buckets": [
+      {
+        "bucket_id": "b10",
+        "start": "2026-09-18T07:00:00.000Z",
+        "end": "2026-09-18T08:00:00.000Z"
+      },
+      {
+        "bucket_id": "b11",
+        "start": "2026-09-18T08:00:00.000Z",
+        "end": "2026-09-18T09:00:00.000Z"
+      },
+      {
+        "bucket_id": "b12",
+        "start": "2026-09-18T09:00:00.000Z",
+        "end": "2026-09-18T10:00:00.000Z"
+      }
+    ],
+    "entries": [
+      {
+        "entry_ref": "e-1",
+        "lane_id": "l-ilya",
+        "bucket_span": [
+          "b10",
+          "b10"
+        ],
+        "title": {
+          "state": "KNOWN",
+          "value": "Мужская стрижка",
+          "label": "Мужская стрижка",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "subtitle": null,
+        "state": {
+          "state": "KNOWN",
+          "value": "BOOKED",
+          "label": "занято",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "pii_masked": false,
+        "detail_intent": "i2",
+        "move_intent": "i3",
+        "move_targets": [
+          "b11",
+          "b12"
+        ]
+      },
+      {
+        "entry_ref": "e-2",
+        "lane_id": "l-ilya",
+        "bucket_span": [
+          "b12",
+          "b12"
+        ],
+        "title": {
+          "state": "UNAVAILABLE",
+          "value": null,
+          "label": "Запись клиента (данные скрыты)",
+          "reason_code": "PERMISSION",
+          "fact_ref": null,
+          "as_of": null,
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "subtitle": null,
+        "state": {
+          "state": "KNOWN",
+          "value": "BOOKED",
+          "label": "занято",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "pii_masked": true,
+        "detail_intent": "i2",
+        "move_intent": null,
+        "move_targets": null
+      },
+      {
+        "entry_ref": "e-3",
+        "lane_id": "l-anna",
+        "bucket_span": [
+          "b11",
+          "b11"
+        ],
+        "title": {
+          "state": "KNOWN",
+          "value": "Перерыв",
+          "label": "Перерыв",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "subtitle": null,
+        "state": {
+          "state": "KNOWN",
+          "value": "BLOCKED",
+          "label": "перерыв",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "pii_masked": false,
+        "detail_intent": null,
+        "move_intent": null,
+        "move_targets": null
+      }
+    ],
+    "gaps": [
+      {
+        "lane_id": "l-anna",
+        "bucket_span": [
+          "b10",
+          "b10"
+        ],
+        "recoverable": {
+          "state": "KNOWN",
+          "value": 1500,
+          "label": "Можно заполнить окно",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "gap.revenue",
+          "unit": "RUB",
+          "basis_key": null,
+          "basis": "средний чек салона",
+          "currency": "RUB",
+          "formatted": "1 500 ₽",
+          "comparison": null
+        }
+      }
+    ],
+    "detail_intent": "i1"
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "RNPWYJ1wFBT-7hqULBtVqhAS0bHlmmKF",
+      "role": "secondary",
+      "label": "Открыть расписание",
+      "utterance_preview": "Открыть расписание",
+      "speech_aliases": [
+        "открыть расписание"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "NAVIGATE",
+      "capability": null,
+      "handoff_capability_ref": null,
+      "target": {
+        "class": "detail",
+        "ref": "fs.calendar"
+      },
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "QPoCC7h0srwsMHwNd3TqbiczsmpjTWji",
+      "role": "secondary",
+      "label": "Подробнее о записи",
+      "utterance_preview": "Подробнее о записи",
+      "speech_aliases": [
+        "подробнее о записи"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "staff.schedule.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": {
+        "fields": [
+          {
+            "name": "selection",
+            "required": true,
+            "kind": "enum",
+            "domain_ref": "schedule.entries",
+            "selection_min": 1,
+            "selection_max": 1
+          }
+        ],
+        "max_total_bytes": 256,
+        "free_input_justification": null
+      },
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i3",
+      "intent_token": "4573RUqK7FA9cZI2Vn8wc6g1FuQXrEa1",
+      "role": "secondary",
+      "label": "Перенести запись",
+      "utterance_preview": "Перенести запись",
+      "speech_aliases": [
+        "перенести запись"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "appointments.own.reschedule"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": {
+        "fields": [
+          {
+            "name": "selection",
+            "required": true,
+            "kind": "enum",
+            "domain_ref": "schedule.move_targets",
+            "selection_min": 1,
+            "selection_max": 1
+          }
+        ],
+        "max_total_bytes": 256,
+        "free_input_justification": null
+      },
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "staff.schedule.read",
+    "capability_version": "v1",
+    "projector_id": "projector.schedule",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "f98ef6182ebc81ef427926517895322cd30970b76298cf58cd8df0fb870ab5ba",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "acba74eb09d1a0b16bd35442451f3e505baadeb13d42988582a767282587ca3a",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "aae4ab31895680cc47a258c6afa74e9f00422132c01ff9617e0a9f34519311e7",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "e761e69966c5028f10f449c4",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Расписание на 18 сентября, 10:00–13:00, 2 мастера",
+      "body": "Илья: 10:00 мужская стрижка, 12:00 запись клиента. Анна: 11:00 перерыв; окно в 10:00 можно заполнить.",
+      "itemized": [
+        "Илья: 10:00 — мужская стрижка; 12:00 — занято",
+        "Анна: 11:00 — перерыв"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": "Данные одной записи скрыты."
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "grid",
+      "label": "Расписание на 18 сентября, 10:00–13:00, 2 мастера",
+      "description": "Илья: 10:00 мужская стрижка, 12:00 запись клиента. Анна: 11:00 перерыв; окно в 10:00 можно заполнить.",
+      "reading_order": [
+        {
+          "k": "entry",
+          "id": "e-1"
+        },
+        {
+          "k": "entry",
+          "id": "e-2"
+        },
+        {
+          "k": "entry",
+          "id": "e-3"
+        },
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        },
+        {
+          "k": "intent",
+          "id": "i3"
+        }
+      ],
+      "live_region": "polite",
+      "accessible_names": {
+        "entry:e-1": "Мужская стрижка",
+        "entry:e-2": "Запись клиента (данные скрыты)",
+        "entry:e-3": "Перерыв",
+        "intent:i1": "Открыть расписание",
+        "intent:i2": "Подробнее о записи",
+        "intent:i3": "Перенести запись"
+      }
+    },
+    "fullscreen_detail": {
+      "route_key": "fs.calendar",
+      "reason": "exceeds_chat_density"
+    }
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 4,
+    "intents_emitted": 3,
+    "intents_withheld": [
+      {
+        "role": "more",
+        "reason": "capacity",
+        "reachable_via": "RNPWYJ1wFBT-7hqULBtVqhAS0bHlmmKF"
+      },
+      {
+        "role": "secondary",
+        "reason": "carrier_limit",
+        "reachable_via": "fs.calendar"
+      }
+    ],
+    "body_reductions": [
+      {
+        "path": "entries",
+        "reduction": "paginated",
+        "restored_by": "QPoCC7h0srwsMHwNd3TqbiczsmpjTWji"
+      }
+    ],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "3d2eba7b18bc06f208f6b4260577cc705acffabe6bf35bf57fc427d95296deee",
+    "cell_index_digest": "b6b7efe797fcff931df575616b37a722e810ca12d2cd04864e5827800103be99",
+    "envelope_seal": "9245d78792ac13a192e4add1e30425f3e7aedf42260d0d25c25bad34075b3118",
+    "seal_key_version": 1,
+    "principal_proof_hash": "86ec08079dc7e8b3c0b5e414e355290ec5d777fc8375d0797834d49eb33d82c1",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

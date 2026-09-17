@@ -1,0 +1,586 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M0MF4GCGYQEWV3WTX3",
+  "kind": "REPORT",
+  "body_version": 1,
+  "tenant_id": "fc072357-8e51-4b89-add8-09d94428b257",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "6cea31f80e8a96ececbf2d75c21542d6"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "analytics.business.query",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "title": {
+      "phrase_key": "report.title",
+      "rendered": "Отчёт за август"
+    },
+    "period_label": {
+      "phrase_key": "period.month",
+      "rendered": "Август 2026"
+    },
+    "top_summary": [
+      {
+        "state": "KNOWN",
+        "value": 412000,
+        "label": "Выручка",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null,
+        "key": "revenue.month",
+        "unit": "RUB",
+        "basis_key": null,
+        "basis": "касса салона",
+        "currency": "RUB",
+        "formatted": "412 000 ₽",
+        "comparison": null
+      },
+      {
+        "state": "KNOWN",
+        "value": 96500,
+        "label": "Расходы",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null,
+        "key": "expenses.month",
+        "unit": "RUB",
+        "basis_key": null,
+        "basis": "учёт расходов",
+        "currency": "RUB",
+        "formatted": "96 500 ₽",
+        "comparison": null
+      }
+    ],
+    "sections": [
+      {
+        "section_id": "sec-staff",
+        "heading": {
+          "phrase_key": "report.section.staff",
+          "rendered": "Выручка по мастерам"
+        },
+        "depth": 1,
+        "narrative": {
+          "narrative_template_id": "report.revenue_by_staff",
+          "narrative_template_version": 1,
+          "slots": {},
+          "rendered": "Больше всего выручки принёс Илья."
+        },
+        "table": {
+          "caption": {
+            "phrase_key": "report.table.staff",
+            "rendered": "Выручка по мастерам"
+          },
+          "columns": [
+            {
+              "key": "staff",
+              "label": {
+                "phrase_key": "col.staff",
+                "rendered": "Мастер"
+              },
+              "type": "text",
+              "sensitivity": "internal",
+              "is_row_header": true
+            },
+            {
+              "key": "shift",
+              "label": {
+                "phrase_key": "col.shift",
+                "rendered": "Смена"
+              },
+              "type": "text",
+              "sensitivity": "public",
+              "is_row_header": false
+            },
+            {
+              "key": "revenue",
+              "label": {
+                "phrase_key": "col.revenue",
+                "rendered": "Выручка"
+              },
+              "type": "measure",
+              "sensitivity": "internal",
+              "is_row_header": false,
+              "align": "end"
+            }
+          ],
+          "rows": [
+            {
+              "row_key": "rs-ilya",
+              "cells": {
+                "staff": {
+                  "state": "KNOWN",
+                  "value": "Илья",
+                  "label": "Илья",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": "2026-09-17T08:55:00.000Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "shift": {
+                  "state": "KNOWN",
+                  "value": "day",
+                  "label": "дневная",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": "2026-09-17T08:55:00.000Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "revenue": {
+                  "state": "KNOWN",
+                  "value": 210000,
+                  "label": "Выручка",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": "2026-09-17T08:55:00.000Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null,
+                  "key": "revenue.staff",
+                  "unit": "RUB",
+                  "basis_key": null,
+                  "basis": "касса салона",
+                  "currency": "RUB",
+                  "formatted": "210 000 ₽",
+                  "comparison": null
+                }
+              }
+            },
+            {
+              "row_key": "rs-anna",
+              "cells": {
+                "staff": {
+                  "state": "KNOWN",
+                  "value": "Анна",
+                  "label": "Анна",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": "2026-09-17T08:55:00.000Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "shift": {
+                  "state": "KNOWN",
+                  "value": "day",
+                  "label": "дневная",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": "2026-09-17T08:55:00.000Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "revenue": {
+                  "state": "KNOWN",
+                  "value": 142000,
+                  "label": "Выручка",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": "2026-09-17T08:55:00.000Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null,
+                  "key": "revenue.staff",
+                  "unit": "RUB",
+                  "basis_key": null,
+                  "basis": "касса салона",
+                  "currency": "RUB",
+                  "formatted": "142 000 ₽",
+                  "comparison": null
+                }
+              }
+            },
+            {
+              "row_key": "rs-oleg",
+              "cells": {
+                "staff": {
+                  "state": "KNOWN",
+                  "value": "Олег",
+                  "label": "Олег",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": "2026-09-17T08:55:00.000Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "shift": {
+                  "state": "KNOWN",
+                  "value": "evening",
+                  "label": "вечерняя",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": "2026-09-17T08:55:00.000Z",
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "revenue": {
+                  "state": "PARTIAL",
+                  "value": null,
+                  "label": "выручка ещё считается",
+                  "reason_code": "PERIOD_NOT_CLOSED",
+                  "fact_ref": null,
+                  "as_of": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null,
+                  "key": "revenue.staff",
+                  "unit": "RUB",
+                  "basis_key": null,
+                  "basis": "касса салона",
+                  "currency": "RUB",
+                  "formatted": "—",
+                  "comparison": null
+                }
+              }
+            }
+          ],
+          "row_intents": {
+            "rs-ilya": "i3",
+            "rs-anna": "i3",
+            "rs-oleg": "i3"
+          },
+          "group_by": {
+            "key": "shift",
+            "group_labels": {
+              "day": {
+                "phrase_key": "shift.day",
+                "rendered": "Дневная смена"
+              },
+              "evening": {
+                "phrase_key": "shift.evening",
+                "rendered": "Вечерняя смена"
+              }
+            }
+          }
+        },
+        "metrics": []
+      },
+      {
+        "section_id": "sec-expenses",
+        "heading": {
+          "phrase_key": "report.section.expenses",
+          "rendered": "Расходы"
+        },
+        "depth": 2,
+        "narrative": {
+          "narrative_template_id": "report.expenses",
+          "narrative_template_version": 1,
+          "slots": {},
+          "rendered": "Основной расход — материалы."
+        },
+        "table": null,
+        "metrics": [
+          {
+            "state": "KNOWN",
+            "value": 41000,
+            "label": "Материалы",
+            "reason_code": null,
+            "fact_ref": null,
+            "as_of": "2026-09-17T08:55:00.000Z",
+            "evidence_refs": [],
+            "next_intent_ref": null,
+            "key": "expenses.materials",
+            "unit": "RUB",
+            "basis_key": null,
+            "basis": "учёт расходов",
+            "currency": "RUB",
+            "formatted": "41 000 ₽",
+            "comparison": null
+          }
+        ]
+      }
+    ],
+    "fullscreen_intent": "i1",
+    "export_intent": "i2"
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "6frVvA3QOjMczm_zirFAjn5xMOW7ESHH",
+      "role": "secondary",
+      "label": "Открыть отчёт целиком",
+      "utterance_preview": "Открыть отчёт целиком",
+      "speech_aliases": [
+        "открыть отчёт целиком"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "NAVIGATE",
+      "capability": null,
+      "handoff_capability_ref": null,
+      "target": {
+        "class": "detail",
+        "ref": "fs.report"
+      },
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "4HgWiD2qZhXbsjH3pt4D7munab2BvOCb",
+      "role": "secondary",
+      "label": "Выгрузить отчёт",
+      "utterance_preview": "Выгрузить отчёт",
+      "speech_aliases": [
+        "выгрузить отчёт"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "owner_report.download"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i3",
+      "intent_token": "DVsQMJofPBkGymBKA4Co-srKZ961EYND",
+      "role": "secondary",
+      "label": "Записи мастера",
+      "utterance_preview": "Записи мастера",
+      "speech_aliases": [
+        "записи мастера"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "staff.schedule.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": {
+        "fields": [
+          {
+            "name": "selection",
+            "required": true,
+            "kind": "enum",
+            "domain_ref": "report.staff_rows",
+            "selection_min": 1,
+            "selection_max": 1
+          }
+        ],
+        "max_total_bytes": 256,
+        "free_input_justification": null
+      },
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "analytics.business.query",
+    "capability_version": "v1",
+    "projector_id": "projector.report",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "5a8d23b1696689099039904956e375b696214627bfa8217ad955d2737eac57ab",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "8c7d93499d09d663946bd5a5effa5e79543c96e352ec7415194d7ee1eb26709b",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "719d32928e34a7a280a2be1184bbf2b9ddf815eac10f9237db5e822f13d96ad0",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "7df19e9cbcbdb6876f99345c",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "SHEET",
+    "text_equivalent": {
+      "headline": "Отчёт за август 2026: выручка 412 000 ₽, расходы 96 500 ₽",
+      "body": "Выручка за август 412 000 ₽, расходы 96 500 ₽. Больше всего выручки принёс Илья. Основной расход — материалы.",
+      "itemized": [
+        "Илья: 210 000 ₽",
+        "Анна: 142 000 ₽",
+        "Олег: выручка ещё считается",
+        "Материалы: 41 000 ₽"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": "Выручка Олега ещё считается."
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "document",
+      "label": "Отчёт за август 2026: выручка 412 000 ₽, расходы 96 500 ₽",
+      "description": "Выручка за август 412 000 ₽, расходы 96 500 ₽. Больше всего выручки принёс Илья. Основной расход — материалы.",
+      "reading_order": [
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        },
+        {
+          "k": "row",
+          "id": "rs-ilya"
+        },
+        {
+          "k": "row",
+          "id": "rs-anna"
+        },
+        {
+          "k": "row",
+          "id": "rs-oleg"
+        },
+        {
+          "k": "intent",
+          "id": "i3"
+        }
+      ],
+      "live_region": "off",
+      "accessible_names": {
+        "intent:i1": "Открыть отчёт целиком",
+        "intent:i2": "Выгрузить отчёт",
+        "row:rs-ilya": "Илья",
+        "row:rs-anna": "Анна",
+        "row:rs-oleg": "Олег",
+        "intent:i3": "Записи мастера"
+      }
+    },
+    "fullscreen_detail": {
+      "route_key": "fs.report",
+      "reason": "audit"
+    }
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 3,
+    "intents_emitted": 3,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "1f7b1fcf248a1f6c4100defd12e355ce11771be830632940e607179286671ec3",
+    "cell_index_digest": "76c580af288ec3e78ec6e7a9700cd106e46aed23e874e6f3059f89e09c0b4af7",
+    "envelope_seal": "b1a3230d38130a7d020f59a224eabb9b0f8c1041f2bc0c5ab0af2f79be4283d7",
+    "seal_key_version": 1,
+    "principal_proof_hash": "944af080f2d9324cf1d28bbc12f1a63cbe639d30ecff9436a1b1f189541d9cb3",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

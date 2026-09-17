@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'self'; require-trusted-types-for 'script'">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>MAYA shell fixture host (dev)</title>
+<script type="module" src="/__dev/fixture-host.mjs"></script>
+</head>
+<body>
+<!-- Dev only: served under /__dev/ by `dev/serve.mjs --mock`, never emitted into dist/web. It drives the
+     EMITTED modules (the ones in /m/<digest>/) against the contract-typed envelopes of dev/fixtures/envelopes. -->
+<main id="maya" aria-label="Fixture host"></main>
+<output id="fixture-host-status">loading</output>
+</body>
+</html>

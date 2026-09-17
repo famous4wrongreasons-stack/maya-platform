@@ -1,0 +1,16 @@
+{
+  "source": [
+    "maya-saas-backend/src/tenants/tenants.service.ts:286 @ 62fde3a3"
+  ],
+  "observed": "observed on the local binary (pre-HEAD, dist 2026-09-17T10:00+03:00) — s7-probe/real-bodies.txt",
+  "status": 404,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "note": "Not a §1.4 row: /auth/login with a business address that names no tenant answers 404, not 401.",
+  "body": {
+    "message": "Tenant not found",
+    "error": "Not Found",
+    "statusCode": 404
+  }
+}

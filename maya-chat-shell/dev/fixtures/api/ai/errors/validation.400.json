@@ -1,0 +1,24 @@
+{
+  "source": [
+    "maya-saas-backend/src/ai-tools/dto/ai-core-chat.dto.ts:27 @ 62fde3a3",
+    "maya-saas-backend/src/bootstrap/configure-http-app.ts:43 @ 62fde3a3"
+  ],
+  "status": 400,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "message": "property audience should not exist",
+    "error": {
+      "code": "validation",
+      "message": "property audience should not exist",
+      "field": "audience",
+      "details": [
+        {
+          "field": "audience",
+          "message": "property audience should not exist"
+        }
+      ]
+    }
+  }
+}

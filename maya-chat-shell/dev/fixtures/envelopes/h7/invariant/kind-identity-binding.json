@@ -1,0 +1,345 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M0799W03W1BDA8W5FX",
+  "kind": "IDENTITY_BINDING",
+  "body_version": 1,
+  "tenant_id": "880bc102-a8a6-42aa-9928-7ea14d4f6606",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "78d9a313e7a2626a3cfd86c46cadf88c"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "identity.channels.read",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "subject_label": {
+      "state": "KNOWN",
+      "value": "Ваш аккаунт",
+      "label": "Ваш аккаунт",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "bindings": [
+      {
+        "binding_id": "b-tg",
+        "channel": "telegram",
+        "label": {
+          "state": "KNOWN",
+          "value": "Telegram",
+          "label": "Telegram",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "state": {
+          "state": "KNOWN",
+          "value": "LINKED",
+          "label": "связан",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "since": {
+          "state": "KNOWN",
+          "value": "2026-03-03T10:00:00.000Z",
+          "label": "3 марта 2026",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "unlocks_text": [
+          {
+            "phrase_key": "binding.tg.unlocks",
+            "rendered": "Напоминания о записи приходят в Telegram."
+          }
+        ],
+        "loss_on_unbind_text": [
+          {
+            "phrase_key": "binding.tg.loss",
+            "rendered": "Напоминания перестанут приходить."
+          }
+        ],
+        "manage_handoff_intent": "i1"
+      },
+      {
+        "binding_id": "b-email",
+        "channel": "email",
+        "label": {
+          "state": "KNOWN",
+          "value": "Email",
+          "label": "Email",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "state": {
+          "state": "KNOWN",
+          "value": "UNLINKED",
+          "label": "не связан",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "since": {
+          "state": "NOT_MEASURED",
+          "value": null,
+          "label": "не подключался",
+          "reason_code": "NOT_COLLECTED",
+          "fact_ref": null,
+          "as_of": null,
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "unlocks_text": [
+          {
+            "phrase_key": "binding.email.unlocks",
+            "rendered": "Чеки будут приходить на почту."
+          }
+        ],
+        "loss_on_unbind_text": [],
+        "manage_handoff_intent": "i2"
+      }
+    ],
+    "capability_gap_ref": null
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "pUqvtQ0xLy53FXzBeUP_uWpbTOvr1ekc",
+      "role": "handoff",
+      "label": "Управлять Telegram",
+      "utterance_preview": "Управлять Telegram",
+      "speech_aliases": [
+        "управлять telegram"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "HANDOFF",
+      "capability": null,
+      "handoff_capability_ref": {
+        "space": "AE",
+        "key": "identity.client.channel.unbind"
+      },
+      "target": {
+        "class": "s",
+        "ref": {
+          "route": "shell.connections",
+          "param": null
+        }
+      },
+      "input_schema": null,
+      "verification_floor": "SESSION_VERIFIED",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "tbFOgW6IlKrxGzARBtsvPj-P9QrNC9vf",
+      "role": "handoff",
+      "label": "Подключить email",
+      "utterance_preview": "Подключить email",
+      "speech_aliases": [
+        "подключить email"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "HANDOFF",
+      "capability": null,
+      "handoff_capability_ref": {
+        "space": "AE",
+        "key": "identity.client.channel.bind"
+      },
+      "target": {
+        "class": "s",
+        "ref": {
+          "route": "shell.connections",
+          "param": null
+        }
+      },
+      "input_schema": null,
+      "verification_floor": "SESSION_VERIFIED",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "identity.channels.read",
+    "capability_version": "v1",
+    "projector_id": "projector.identity_binding",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "e2185252e294378fd80aeb1f131a5cbfa16fc72a7fae9e542955a76dc8dd466d",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "578ea331f7d58dd622572d832804165bb637b67a1815d18f134372771bf4eec4",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "72ace84e47976825c628bc6c0bd271a46ec8bab0b4d962b9fe367356d3c7d0e1",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "bf325a2f8c7a47a9dea9fdd1",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Связанные каналы: Telegram",
+      "body": "Telegram связан с 3 марта 2026: напоминания о записи приходят туда. Email не связан; если подключить, чеки будут приходить на почту.",
+      "itemized": [
+        "Telegram — связан с 3 марта 2026",
+        "Email — не связан"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": null
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "region",
+      "label": "Связанные каналы: Telegram",
+      "description": "Telegram связан с 3 марта 2026: напоминания о записи приходят туда. Email не связан; если подключить, чеки будут приходить на почту.",
+      "reading_order": [
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        }
+      ],
+      "live_region": "polite",
+      "accessible_names": {
+        "intent:i1": "Управлять Telegram",
+        "intent:i2": "Подключить email"
+      }
+    },
+    "fullscreen_detail": {
+      "route_key": "fs.consent",
+      "reason": "exact_configuration"
+    }
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 2,
+    "intents_emitted": 2,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "917e4450ec36a10402b24f4b2683f0c4c8c1e44d3273ed4ad67d90940a0dd259",
+    "cell_index_digest": "fda8c98d3945bfdb26b142c00885894e899e4206329e8fcaa243ca6c67880ef0",
+    "envelope_seal": "701a5e6e543a35d38a76d920a96c5ac171132f1db902dc1fe165512c6a4a47e4",
+    "seal_key_version": 1,
+    "principal_proof_hash": "841ff084dbe6aa85db99a2eea14b822e0f60b241e9ada9b8b63a8005f6eaffc4",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

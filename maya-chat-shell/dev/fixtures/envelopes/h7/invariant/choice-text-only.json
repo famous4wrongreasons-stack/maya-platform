@@ -1,0 +1,398 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M07MYM2CFJNR7DM6C4",
+  "kind": "CHOICE",
+  "body_version": 1,
+  "tenant_id": "f02cc980-37d1-4b56-8d17-b2b776d77a37",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "e5cf134ca624ee8c891032bd29189fbe"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "catalog.services.read",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "prompt": {
+      "phrase_key": "choice.prompt.visit_goal",
+      "rendered": "Что вы хотите сделать?"
+    },
+    "select": "single",
+    "min_select": 1,
+    "max_select": 1,
+    "options": [
+      {
+        "option_id": "o-cut",
+        "label": {
+          "state": "KNOWN",
+          "value": "Стрижка",
+          "label": "Стрижка",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "sublabel": null,
+        "badges": [],
+        "measures": [],
+        "media": null,
+        "intent_ref": "i1",
+        "enabled": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "Доступно",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        }
+      },
+      {
+        "option_id": "o-beard",
+        "label": {
+          "state": "KNOWN",
+          "value": "Оформление бороды",
+          "label": "Оформление бороды",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "sublabel": null,
+        "badges": [],
+        "measures": [],
+        "media": null,
+        "intent_ref": "i1",
+        "enabled": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "Доступно",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        }
+      },
+      {
+        "option_id": "o-both",
+        "label": {
+          "state": "KNOWN",
+          "value": "Стрижка и борода",
+          "label": "Стрижка и борода",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "sublabel": null,
+        "badges": [],
+        "measures": [],
+        "media": null,
+        "intent_ref": "i1",
+        "enabled": {
+          "state": "UNAVAILABLE",
+          "value": null,
+          "label": "Сейчас недоступно: мастер не принимает",
+          "reason_code": "PERMISSION",
+          "fact_ref": null,
+          "as_of": null,
+          "evidence_refs": [],
+          "next_intent_ref": null
+        }
+      }
+    ],
+    "shown_count": 3,
+    "total_count": 3,
+    "more_intent": "i2"
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "n_t3sWK6-DcvBr-niMgy9Kpy3399pEs2",
+      "role": "primary",
+      "label": "Выбрать",
+      "utterance_preview": "Выбрать",
+      "speech_aliases": [
+        "выбрать"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "catalog.services.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": {
+        "fields": [
+          {
+            "name": "selection",
+            "required": true,
+            "kind": "enum",
+            "domain_ref": "choice.visit_goal",
+            "selection_min": 1,
+            "selection_max": 1
+          }
+        ],
+        "max_total_bytes": 256,
+        "free_input_justification": null
+      },
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "primary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "KVqBTx-ZfPlmnRvNzxZwQ8Q2KjjW6z_j",
+      "role": "more",
+      "label": "Показать ещё",
+      "utterance_preview": "Показать ещё",
+      "speech_aliases": [
+        "показать ещё"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "catalog.services.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i9",
+      "intent_token": "tVeBxh8-5cN9t0MoNLaXKJgVBymj6cnt",
+      "role": "escape",
+      "label": "Закрыть",
+      "utterance_preview": "Закрыть",
+      "speech_aliases": [
+        "отмена",
+        "стоп",
+        "закрыть"
+      ],
+      "ordinal": null,
+      "priority": 0,
+      "effect": "CONTROL",
+      "capability": {
+        "space": "CONTROL",
+        "key": "control.widget.dismiss"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": false
+    }
+  ],
+  "provenance": {
+    "source_capability": "catalog.services.read",
+    "capability_version": "v1",
+    "projector_id": "projector.choice",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "6841749cddaa174b76cf60eccde1c3461302d86a142ab7f294a9ab7c67fc6bc8",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "77c0748cb12e88a52c4c2c411905aff5ab77cfb214f0d4f8768a7cd2e3165a50",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "8571ad213d66d214aaf219f13ac84c0ee9fe67959761770d770207895f87cb11",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "soft",
+    "on_expiry": "re_resolve",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "e72af8cc3614ce30d7203ca4",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Что вы хотите сделать?",
+      "body": "Выберите один вариант: стрижка, оформление бороды или стрижка и борода.",
+      "itemized": [
+        "Стрижка",
+        "Оформление бороды",
+        "Стрижка и борода — сейчас недоступно"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": "Вариант «Стрижка и борода» сейчас недоступен."
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "radiogroup",
+      "label": "Что вы хотите сделать?",
+      "description": "Выберите один вариант: стрижка, оформление бороды или стрижка и борода.",
+      "reading_order": [
+        {
+          "k": "option",
+          "id": "o-cut"
+        },
+        {
+          "k": "option",
+          "id": "o-beard"
+        },
+        {
+          "k": "option",
+          "id": "o-both"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        },
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i9"
+        }
+      ],
+      "live_region": "off",
+      "accessible_names": {
+        "option:o-cut": "Стрижка",
+        "option:o-beard": "Оформление бороды",
+        "option:o-both": "Стрижка и борода",
+        "intent:i2": "Показать ещё",
+        "intent:i1": "Выбрать",
+        "intent:i9": "Закрыть"
+      }
+    },
+    "fullscreen_detail": null
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "TEXT_ONLY",
+    "intents_minted": 3,
+    "intents_emitted": 3,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": true,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "2c07a45d10f3bd2d643c59dc69dbdba05db29b54c935ccef01bd339964193b46",
+    "cell_index_digest": "dd24e541df164321186af081501249fb84347d7b34919f73df2a8cb0524f8f35",
+    "envelope_seal": "6807efe8c8f0f74f9658e6195f0be9c22c567c1eb4aca348db8b52944670b806",
+    "seal_key_version": 1,
+    "principal_proof_hash": "e83ddf17241dff5e0008e0f105a007db37c273fe55f9f163ac8bbcddb7e7e197",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

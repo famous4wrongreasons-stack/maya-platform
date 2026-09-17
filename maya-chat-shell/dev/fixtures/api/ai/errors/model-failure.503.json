@@ -1,0 +1,15 @@
+{
+  "source": [
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts:4732 @ 62fde3a3"
+  ],
+  "status": 503,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "message": "MAYA could not safely complete this turn.",
+    "error": {
+      "code": "ai_model_tool_step_limit"
+    }
+  }
+}

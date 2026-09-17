@@ -1,0 +1,17 @@
+{
+  "source": [
+    "maya-saas-backend/src/auth/email-auth.service.ts:462 @ 62fde3a3"
+  ],
+  "status": 400,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "message": "Request a new email verification code and try again.",
+    "error": {
+      "code": "email_code_missing",
+      "message": "Request a new email verification code and try again.",
+      "field": "code"
+    }
+  }
+}

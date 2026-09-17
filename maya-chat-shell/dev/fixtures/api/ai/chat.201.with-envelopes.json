@@ -1,0 +1,30 @@
+{
+  "source": [
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts:1698 @ 62fde3a3",
+    "maya-chat-shell/dev/fixtures/envelopes/** (the contract-typed corpus of dev/make-envelopes.mjs)"
+  ],
+  "note": "P1 has no envelope consumer on /ai/chat (ChatProjection keeps request_id, reply, action_status only): a response carrying envelopes must draw the reply and nothing of the envelopes (D9, B4 not landed).",
+  "status": 201,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "request_id": "{{request_id}}",
+    "reply": "{{reply}}",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [],
+    "grounding": {
+      "status": "not_required",
+      "domain": null,
+      "required_tools": [],
+      "evidence_tools": []
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    },
+    "envelopes": "{{envelopes}}"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "expect": [
+    "baseline"
+  ],
+  "note": "an entry for src/shell/shell.ts can never be admitted"
+}

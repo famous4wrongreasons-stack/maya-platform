@@ -1,0 +1,290 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M00ER0NHS5KMR6VC1D",
+  "kind": "MEDIA_PREVIEW",
+  "body_version": 1,
+  "tenant_id": "3f4e36cd-bc59-4fcf-8173-2ff3c8dd64b7",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "aad38db8e23bb511edf4c2f56c099256"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "cutmatch.generate",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "media_ref": "media-1",
+    "alt": {
+      "phrase_key": "media.alt",
+      "rendered": "Мужская стрижка «кроп» с чёткой линией у висков."
+    },
+    "recipe": {
+      "requested": {
+        "state": "KNOWN",
+        "value": "Стрижка кроп, фото анфас",
+        "label": "Стрижка кроп, фото анфас",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "parameters": [
+        {
+          "label": {
+            "phrase_key": "media.param.style",
+            "rendered": "Стиль"
+          },
+          "value": {
+            "state": "KNOWN",
+            "value": "crop",
+            "label": "кроп",
+            "reason_code": null,
+            "fact_ref": null,
+            "as_of": "2026-09-17T08:55:00.000Z",
+            "evidence_refs": [],
+            "next_intent_ref": null
+          }
+        }
+      ],
+      "produced_at": {
+        "state": "PENDING",
+        "value": null,
+        "label": "изображение готовится",
+        "reason_code": "IN_PROGRESS",
+        "fact_ref": null,
+        "as_of": null,
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "producer_label": {
+        "state": "KNOWN",
+        "value": "Подбор стрижки",
+        "label": "Подбор стрижки",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      }
+    },
+    "subject_is_principal": true,
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "regenerate_intent": "i1",
+    "fullscreen_intent": "i2"
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "oWAdboXKc_a7cWopNaG2DyMhQQHICata",
+      "role": "secondary",
+      "label": "Сгенерировать заново",
+      "utterance_preview": "Сгенерировать заново",
+      "speech_aliases": [
+        "сгенерировать заново"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "cutmatch.generate"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "Q9oRPWNVO4Y_dgbO-LmutoQPjkGc9mNL",
+      "role": "secondary",
+      "label": "Открыть изображение",
+      "utterance_preview": "Открыть изображение",
+      "speech_aliases": [
+        "открыть изображение"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "NAVIGATE",
+      "capability": null,
+      "handoff_capability_ref": null,
+      "target": {
+        "class": "detail",
+        "ref": "fs.media"
+      },
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "cutmatch.generate",
+    "capability_version": "v1",
+    "projector_id": "projector.media_preview",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "d8fa03eca9a32977afde0d48e02bd0c4f6d4803d5e7af37df624d00e09b6b636",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "08d577989599e472c116cfae1d204f9970826342040b70d4b670392256a2bab4",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "590e1bb96bd8d0b92454de3a0c614e42d53b5c473d8d41e3ebaa532425c58d7f",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "27790e68901f3277ece0dfff",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Подбор стрижки: кроп",
+      "body": "Запрошено: стрижка кроп, фото анфас. Стиль: кроп. Изображение готовится.",
+      "itemized": [
+        "Запрос: стрижка кроп, фото анфас",
+        "Стиль: кроп"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": "Изображение ещё готовится."
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "img",
+      "label": "Подбор стрижки: кроп",
+      "description": "Запрошено: стрижка кроп, фото анфас. Стиль: кроп. Изображение готовится.",
+      "reading_order": [
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        }
+      ],
+      "live_region": "off",
+      "accessible_names": {
+        "intent:i1": "Сгенерировать заново",
+        "intent:i2": "Открыть изображение"
+      }
+    },
+    "fullscreen_detail": {
+      "route_key": "fs.media",
+      "reason": "non_textual_medium"
+    }
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 2,
+    "intents_emitted": 2,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "f6b41680dfc46953b1f2fd86ecc5884e436f2447dcfb4a3ff3f8fe056d49f207",
+    "cell_index_digest": "9a5d32c4a389e1123ad6e1b1eea4be4f2f92860e324a51c1abecd019e1c7c338",
+    "envelope_seal": "779d8934261eab3df76d72de76dcf24bf624ec513648dc6c2d981d34e0fbfcd8",
+    "seal_key_version": 1,
+    "principal_proof_hash": "485878206245b47d44b8e4286f6605da4659f3599e5fc8c02a0481558340e229",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

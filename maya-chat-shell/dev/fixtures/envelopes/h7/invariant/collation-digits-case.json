@@ -1,0 +1,482 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M03CX58GNQSSDGFJAN",
+  "kind": "CLIENT_LIST",
+  "body_version": 1,
+  "tenant_id": "05b61e74-572d-4639-9a3a-1af85ab38c19",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "89b671ba79de2e16345754a40b2e35d6"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "clients.segment.read",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "client_identified",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "segment_label": {
+      "phrase_key": "segment.lapsed",
+      "rendered": "Клиенты без визита больше 60 дней"
+    },
+    "segment_ref": "seg-lapsed-60",
+    "table": {
+      "caption": {
+        "phrase_key": "segment.lapsed",
+        "rendered": "Клиенты без визита больше 60 дней"
+      },
+      "columns": [
+        {
+          "key": "Z",
+          "label": {
+            "phrase_key": "col.client",
+            "rendered": "Клиент"
+          },
+          "type": "text",
+          "sensitivity": "pii",
+          "is_row_header": true
+        },
+        {
+          "key": "10",
+          "label": {
+            "phrase_key": "col.last_visit",
+            "rendered": "Последний визит"
+          },
+          "type": "datetime",
+          "sensitivity": "internal",
+          "is_row_header": false
+        },
+        {
+          "key": "a",
+          "label": {
+            "phrase_key": "col.visits",
+            "rendered": "Визитов"
+          },
+          "type": "measure",
+          "sensitivity": "internal",
+          "is_row_header": false,
+          "align": "end"
+        }
+      ],
+      "rows": [
+        {
+          "row_key": "r-1",
+          "cells": {
+            "10": {
+              "state": "KNOWN",
+              "value": "2026-07-12",
+              "label": "12 июля",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "Z": {
+              "state": "KNOWN",
+              "value": "Иван П.",
+              "label": "Иван П.",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "a": {
+              "state": "KNOWN",
+              "value": 7,
+              "label": "Визитов",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "client.visits",
+              "unit": "count",
+              "basis_key": null,
+              "basis": "журнал записей",
+              "currency": null,
+              "formatted": "7",
+              "comparison": null
+            }
+          }
+        },
+        {
+          "row_key": "r-2",
+          "cells": {
+            "10": {
+              "state": "NOT_MEASURED",
+              "value": null,
+              "label": "нет данных о последнем визите",
+              "reason_code": "NOT_COLLECTED",
+              "fact_ref": null,
+              "as_of": null,
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "Z": {
+              "state": "KNOWN",
+              "value": "Сергей К.",
+              "label": "Сергей К.",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "a": {
+              "state": "KNOWN",
+              "value": 2,
+              "label": "Визитов",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "client.visits",
+              "unit": "count",
+              "basis_key": null,
+              "basis": "журнал записей",
+              "currency": null,
+              "formatted": "2",
+              "comparison": null
+            }
+          }
+        },
+        {
+          "row_key": "r-3",
+          "cells": {
+            "10": {
+              "state": "KNOWN",
+              "value": "2026-06-02",
+              "label": "2 июня",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "Z": {
+              "state": "KNOWN",
+              "value": "Олег В.",
+              "label": "Олег В.",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "a": null
+          }
+        }
+      ],
+      "row_intents": {
+        "r-1": "i2",
+        "r-2": "i2"
+      },
+      "group_by": null
+    },
+    "pii_masked": false,
+    "bulk_intents": [
+      {
+        "intent_ref": "i1",
+        "label": {
+          "phrase_key": "bulk.invite",
+          "rendered": "Пригласить на визит"
+        },
+        "audience_size": {
+          "state": "KNOWN",
+          "value": 42,
+          "label": "Получателей",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "audience.size",
+          "unit": "count",
+          "basis_key": null,
+          "basis": "сегмент на 17 сентября",
+          "currency": null,
+          "formatted": "42 клиента",
+          "comparison": null
+        }
+      }
+    ],
+    "page": {
+      "cursor_ref": "cursor-2",
+      "has_more": true
+    }
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "e-En446RzbLMQ-RQJUIQ413gJfi0HojN",
+      "role": "primary",
+      "label": "Пригласить на визит",
+      "utterance_preview": "Пригласить на визит",
+      "speech_aliases": [
+        "пригласить на визит"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REQUEST_APPROVAL",
+      "capability": {
+        "space": "AE",
+        "key": "b35.confirm"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "SESSION_VERIFIED",
+      "confirmation": {
+        "risk_tier": "medium_write",
+        "reversible": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "можно отменить",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "audience_size": {
+          "state": "KNOWN",
+          "value": 42,
+          "label": "Получателей",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "audience.size",
+          "unit": "count",
+          "basis_key": null,
+          "basis": "сегмент на 17 сентября",
+          "currency": null,
+          "formatted": "42 клиента",
+          "comparison": null
+        },
+        "requires_explicit_confirm_step": true,
+        "requires_readback": false,
+        "readback_ref": null,
+        "readback_text": null,
+        "idempotency_key": "0000388268137ffe76cb0b395d2a49d8e53d5b3675dab80e70689c6f44d585ca",
+        "approval_policy": "owner"
+      },
+      "authority_hint": {
+        "emphasis": "primary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "-_JIe_ifwJK4kK9-sh0oxIrleQfeUF_B",
+      "role": "secondary",
+      "label": "Открыть карточку",
+      "utterance_preview": "Открыть карточку",
+      "speech_aliases": [
+        "открыть карточку"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "clients.dossier.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": {
+        "fields": [
+          {
+            "name": "selection",
+            "required": true,
+            "kind": "enum",
+            "domain_ref": "segment.rows",
+            "selection_min": 1,
+            "selection_max": 1
+          }
+        ],
+        "max_total_bytes": 256,
+        "free_input_justification": null
+      },
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "clients.segment.read",
+    "capability_version": "v1",
+    "projector_id": "projector.client_list",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "95df6c2bfeb56143588eae59c0acc1534d52bd78d1c4a445b5ce4de324331ed7",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "23176f353bbf23655a28ae9d63d50d70d366484aacc59cc76c381301af2dc053",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "ca378616a4bef686c8c3c5b208be6d021476ced432b5a77503898e0ed66f7130",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "a23b90189bd76e0233d75b8d",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Клиенты без визита больше 60 дней: 42",
+      "body": "Иван П. — последний визит 12 июля, 7 визитов. Сергей К. — нет данных о последнем визите, 2 визита. Олег В. — 2 июня.",
+      "itemized": [
+        "Иван П., 12 июля, 7",
+        "Сергей К., нет данных, 2",
+        "Олег В., 2 июня"
+      ],
+      "completeness_sentence": "Показаны 3 клиента из 42.",
+      "unknowns_sentence": "Для одного клиента нет данных о последнем визите."
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "table",
+      "label": "Клиенты без визита больше 60 дней: 42",
+      "description": "Иван П. — последний визит 12 июля, 7 визитов. Сергей К. — нет данных о последнем визите, 2 визита. Олег В. — 2 июня.",
+      "reading_order": [
+        {
+          "k": "row",
+          "id": "r-1"
+        },
+        {
+          "k": "row",
+          "id": "r-2"
+        },
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        }
+      ],
+      "live_region": "polite",
+      "accessible_names": {
+        "row:r-1": "Иван П.",
+        "row:r-2": "Сергей К.",
+        "intent:i1": "Пригласить на визит, 42 клиента",
+        "intent:i2": "Открыть карточку"
+      }
+    },
+    "fullscreen_detail": {
+      "route_key": "fs.client-card",
+      "reason": "exceeds_chat_density"
+    }
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 2,
+    "intents_emitted": 2,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "fc842f01cf9f1d7b56ed1c1ca9ce298e999da14f6aeae793da2845efa288159f",
+    "cell_index_digest": "37a04aa8625982fb1e1eca8584bd72c59d17cc4a8880b05f822180d3bf4456ef",
+    "envelope_seal": "0d90fdca6884352ab73fa763d2225423ce81c141c3636808f0691775f9389e1e",
+    "seal_key_version": 1,
+    "principal_proof_hash": "c72c5b6fab17b310a38dd0ae2b4ecd78edd516ec85e95a03090a9aa31c62dfa9",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

@@ -1,0 +1,517 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M07KADMCVFPKPS3WSV",
+  "kind": "FORM",
+  "body_version": 1,
+  "tenant_id": "352b5797-eee5-4431-b30e-867e82f0da44",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "8dd6a9c1e49c8754ab5c71e15f9b99d7"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "cash.declaration.draft",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "form_ref": "form-cash-1",
+    "justification": "LEGAL_EXACTNESS",
+    "schema_ref": "schema.cash_declaration",
+    "fields": [
+      {
+        "field_key": "amount",
+        "label": {
+          "phrase_key": "form.amount",
+          "rendered": "Сумма в кассе"
+        },
+        "control": "number",
+        "required": true,
+        "help": {
+          "phrase_key": "form.amount.help",
+          "rendered": "Пересчитайте наличные перед вводом."
+        },
+        "max_len": null,
+        "pattern": null,
+        "options": null,
+        "current": {
+          "state": "KNOWN",
+          "value": 612500,
+          "label": "612 500 ₽",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "bound": {
+          "bound_ref": "cash.declare#amount",
+          "min": {
+            "state": "KNOWN",
+            "value": 0,
+            "label": "Минимум",
+            "reason_code": null,
+            "fact_ref": null,
+            "as_of": "2026-09-17T08:55:00.000Z",
+            "evidence_refs": [],
+            "next_intent_ref": null,
+            "key": "bound.min",
+            "unit": "RUB",
+            "basis_key": null,
+            "basis": "лимит кассы",
+            "currency": "RUB",
+            "formatted": "0 ₽",
+            "comparison": null
+          },
+          "max": {
+            "state": "KNOWN",
+            "value": 500000,
+            "label": "Максимум",
+            "reason_code": null,
+            "fact_ref": null,
+            "as_of": "2026-09-17T08:55:00.000Z",
+            "evidence_refs": [],
+            "next_intent_ref": null,
+            "key": "bound.max",
+            "unit": "RUB",
+            "basis_key": null,
+            "basis": "лимит кассы",
+            "currency": "RUB",
+            "formatted": "500 000 ₽",
+            "comparison": null
+          },
+          "max_abs_delta": null,
+          "basis": {
+            "phrase_key": "form.amount.basis",
+            "rendered": "Лимит кассы салона — 500 000 ₽."
+          }
+        },
+        "sensitivity": "internal"
+      },
+      {
+        "field_key": "comment",
+        "label": {
+          "phrase_key": "form.comment",
+          "rendered": "Комментарий"
+        },
+        "control": "text",
+        "required": false,
+        "help": null,
+        "max_len": 200,
+        "pattern": null,
+        "options": null,
+        "current": {
+          "state": "NOT_MEASURED",
+          "value": null,
+          "label": "комментарий не заполнен",
+          "reason_code": "NOT_COLLECTED",
+          "fact_ref": null,
+          "as_of": null,
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "bound": null,
+        "sensitivity": "internal"
+      },
+      {
+        "field_key": "shift",
+        "label": {
+          "phrase_key": "form.shift",
+          "rendered": "Смена"
+        },
+        "control": "select",
+        "required": true,
+        "help": null,
+        "max_len": null,
+        "pattern": null,
+        "options": [
+          {
+            "option_id": "sh-day",
+            "label": {
+              "state": "KNOWN",
+              "value": "Дневная",
+              "label": "Дневная",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "sublabel": null,
+            "badges": [],
+            "measures": [],
+            "media": null,
+            "intent_ref": "i1",
+            "enabled": {
+              "state": "KNOWN",
+              "value": true,
+              "label": "Доступно",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            }
+          },
+          {
+            "option_id": "sh-evening",
+            "label": {
+              "state": "KNOWN",
+              "value": "Вечерняя",
+              "label": "Вечерняя",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "sublabel": null,
+            "badges": [],
+            "measures": [],
+            "media": null,
+            "intent_ref": "i1",
+            "enabled": {
+              "state": "KNOWN",
+              "value": true,
+              "label": "Доступно",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            }
+          }
+        ],
+        "current": {
+          "state": "KNOWN",
+          "value": "day",
+          "label": "Дневная",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "bound": null,
+        "sensitivity": "public"
+      }
+    ],
+    "submit_intent": "i1",
+    "discard_intent": "i9",
+    "editor_handoff_intent": "i2",
+    "partial_save": false
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "dMQm9acz-XQ52tUb-u1maQq-O1T1WIHr",
+      "role": "primary",
+      "label": "Сохранить черновик",
+      "utterance_preview": "Сохранить черновик",
+      "speech_aliases": [
+        "сохранить черновик"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "DRAFT",
+      "capability": {
+        "space": "AE",
+        "key": "cash.declaration.draft"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": {
+        "fields": [
+          {
+            "name": "amount",
+            "required": true,
+            "kind": "decimal",
+            "bounds": {
+              "min": 0,
+              "max": 500000,
+              "step": 1,
+              "unit_ref": "RUB",
+              "bounds_source": "cash.declare#amount"
+            }
+          },
+          {
+            "name": "comment",
+            "required": false,
+            "kind": "text",
+            "max_len": 200,
+            "normalizer_ref": "plain_text"
+          }
+        ],
+        "max_total_bytes": 1024,
+        "free_input_justification": "LEGAL_EXACTNESS"
+      },
+      "verification_floor": "BOUND_CLIENT",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "primary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i9",
+      "intent_token": null,
+      "role": "escape",
+      "label": "Отменить",
+      "utterance_preview": "Отменить",
+      "speech_aliases": [
+        "отмена",
+        "стоп",
+        "закрыть"
+      ],
+      "ordinal": null,
+      "priority": 0,
+      "effect": "NONE",
+      "capability": null,
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": false
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "anRkLfFjMXqpyOQiZ2yYHme-XY5MR7dW",
+      "role": "handoff",
+      "label": "Открыть полную форму",
+      "utterance_preview": "Открыть полную форму",
+      "speech_aliases": [
+        "открыть полную форму"
+      ],
+      "ordinal": null,
+      "priority": 0,
+      "effect": "HANDOFF",
+      "capability": null,
+      "handoff_capability_ref": {
+        "space": "AE",
+        "key": "cash.declaration.draft"
+      },
+      "target": {
+        "class": "s",
+        "ref": {
+          "route": "shell.account",
+          "param": null
+        }
+      },
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "cash.declaration.draft",
+    "capability_version": "v1",
+    "projector_id": "projector.form",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "9c5d6002fc968b66c13f2aa8a35f307ffe3dab67ab6b10f69ec2046e304757f3",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "e1ee5dd2a5ffeb84330b487e55b16fea552a7da679ce008c2c229870553bd764",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "d9403429a03462adedee9ac87c7d56ae338469c64f0b9df9c23e4f339e50f3f7",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [
+    {
+      "code": "VALUE_OUT_OF_BOUNDS",
+      "text": {
+        "phrase_key": "limitation.out_of_bounds",
+        "rendered": "Сумма больше лимита кассы — проверьте."
+      },
+      "severity": "limitation",
+      "affects": [
+        "/fields/0/current"
+      ],
+      "capability_gap_ref": null
+    }
+  ],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "91b3f9713c9c783c0a779b8e",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Декларация кассы за смену",
+      "body": "Сумма в кассе 612 500 ₽ — больше лимита 500 000 ₽. Комментарий не заполнен. Смена: дневная.",
+      "itemized": [
+        "Сумма в кассе: 612 500 ₽",
+        "Комментарий: не заполнен",
+        "Смена: дневная"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": "Комментарий не заполнен."
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "form",
+      "label": "Декларация кассы за смену",
+      "description": "Сумма в кассе 612 500 ₽ — больше лимита 500 000 ₽. Комментарий не заполнен. Смена: дневная.",
+      "reading_order": [
+        {
+          "k": "field",
+          "id": "amount"
+        },
+        {
+          "k": "field",
+          "id": "comment"
+        },
+        {
+          "k": "field",
+          "id": "shift"
+        },
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i9"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        }
+      ],
+      "live_region": "polite",
+      "accessible_names": {
+        "field:amount": "Сумма в кассе",
+        "field:comment": "Комментарий",
+        "field:shift": "Смена",
+        "intent:i1": "Сохранить черновик",
+        "intent:i9": "Отменить",
+        "intent:i2": "Открыть полную форму"
+      }
+    },
+    "fullscreen_detail": {
+      "route_key": "fs.report",
+      "reason": "exact_configuration"
+    }
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 3,
+    "intents_emitted": 3,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "eeca3b52de809b6f1f0b818af059e77c4706e2ace48470061f1b98b00b7a7d54",
+    "cell_index_digest": "e3f93c49b5b4dc498e9571cb489f9b4bb249e26029342a9bdaed0b93665b2b71",
+    "envelope_seal": "ea4cab3f7006e6be6901ea2b3962a27b41cda00df7552e2a11bfe316362a2ced",
+    "seal_key_version": 1,
+    "principal_proof_hash": "034b0eb165a5eeb4c572a96c8956116335d408bfa4ebba7cb524e92c4da9add8",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

@@ -1,0 +1,279 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M0XGQFYJBP72AJQNG8",
+  "kind": "SOURCE_STATUS",
+  "body_version": 1,
+  "tenant_id": "13d19f91-c4dd-4cc8-96b8-c68966fbec4b",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "66680d04c17dbf6d109b267c60182b3f"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "support.integration-status.read",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "sources": [
+      {
+        "source_id": "src-crm",
+        "label": {
+          "state": "KNOWN",
+          "value": "Журнал записей",
+          "label": "Журнал записей",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "state": {
+          "state": "KNOWN",
+          "value": "CONNECTED",
+          "label": "подключено",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "as_of": {
+          "state": "KNOWN",
+          "value": "2026-09-17T08:55:00.000Z",
+          "label": "обновлено 5 минут назад",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "impact_text": {
+          "phrase_key": "source.ok",
+          "rendered": "Расписание актуально."
+        },
+        "reconnect_intent": null
+      },
+      {
+        "source_id": "src-tg",
+        "label": {
+          "state": "KNOWN",
+          "value": "Telegram",
+          "label": "Telegram",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "state": {
+          "state": "KNOWN",
+          "value": "UNLINKED",
+          "label": "не подключено",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "as_of": {
+          "state": "NOT_MEASURED",
+          "value": null,
+          "label": "нет данных об обновлении",
+          "reason_code": "SOURCE_UNLINKED",
+          "fact_ref": null,
+          "as_of": null,
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "impact_text": {
+          "phrase_key": "source.tg.impact",
+          "rendered": "Напоминания клиентам не отправляются."
+        },
+        "reconnect_intent": "i1"
+      }
+    ],
+    "overall": {
+      "state": "KNOWN",
+      "value": "PARTIAL",
+      "label": "работает частично",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    }
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "TGKN1UV9ZtyIyMkTnm83UpmV8Vjh4bqL",
+      "role": "handoff",
+      "label": "Подключить Telegram",
+      "utterance_preview": "Подключить Telegram",
+      "speech_aliases": [
+        "подключить telegram"
+      ],
+      "ordinal": null,
+      "priority": 0,
+      "effect": "HANDOFF",
+      "capability": null,
+      "handoff_capability_ref": {
+        "space": "C9",
+        "key": "support.contact-admin.request"
+      },
+      "target": {
+        "class": "s",
+        "ref": {
+          "route": "shell.connections",
+          "param": null
+        }
+      },
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "support.integration-status.read",
+    "capability_version": "v1",
+    "projector_id": "projector.source_status",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "0787d8fa54af06156481f127384a09ef869be37921119cb2e3b3061de80f4151",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "f397fa3e36f934379f6d32903c6839813fe77ff5c8b8d9d5dc4b942d4ac7ff1d",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "e41847d9c30d27eba469e7b3b1ca4a990733f16fd222c9639127eaa31cf97a4e",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "4a29bcb9278e35d2538dfe24",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Источники данных: работает частично",
+      "body": "Журнал записей подключён, обновлён 5 минут назад. Telegram не подключён: напоминания клиентам не отправляются.",
+      "itemized": [
+        "Журнал записей — подключено",
+        "Telegram — не подключено"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": "Для Telegram нет данных об обновлении."
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "status",
+      "label": "Источники данных: работает частично",
+      "description": "Журнал записей подключён, обновлён 5 минут назад. Telegram не подключён: напоминания клиентам не отправляются.",
+      "reading_order": [
+        {
+          "k": "intent",
+          "id": "i1"
+        }
+      ],
+      "live_region": "polite",
+      "accessible_names": {
+        "intent:i1": "Подключить Telegram"
+      }
+    },
+    "fullscreen_detail": null
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 1,
+    "intents_emitted": 1,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "835361d30aa80cce80f10c1298b8998cc6115396bad50596db14cec93bdca39d",
+    "cell_index_digest": "3176998e8c93a9a82448fb789ddaf78c6ad85c41c3599098bfae74c4fcb86b73",
+    "envelope_seal": "f0eb6a200f93192f450d95988766933c65d5a929ad181da16e3e206054993032",
+    "seal_key_version": 1,
+    "principal_proof_hash": "b7711e4b9f1bf4c1fd6da22ab57ce8c95b6ee59c2f3eade24328eb208cb71327",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

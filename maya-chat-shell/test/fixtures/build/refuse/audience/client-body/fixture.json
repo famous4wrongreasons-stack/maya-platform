@@ -1,0 +1,6 @@
+{
+  "expect": [
+    "audience"
+  ],
+  "note": "{\u2026, audience:'owner'} in net/client.ts"
+}

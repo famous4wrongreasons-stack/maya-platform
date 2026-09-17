@@ -1,0 +1,2051 @@
+{
+  "corpus": "maya.shell.h7.fixtures/1",
+  "generated_by": "dev/make-envelopes.mjs",
+  "hashed_with": "maya-saas-backend/src/action-engine/action-engine.identity.ts stableActionJson (transpiled from source) + node:crypto sha256",
+  "reference_lang": "en_US.UTF-8",
+  "matrix_langs": [
+    "ru_RU.UTF-8",
+    "et_EE.UTF-8",
+    "lt_LT.UTF-8"
+  ],
+  "collation_locales": [
+    "ru-RU",
+    "en-US",
+    "et-EE",
+    "lt-LT"
+  ],
+  "now": "2026-09-17T09:05:00.000Z",
+  "canonicaliser_sources": {
+    "maya-saas-backend/src/action-engine/action-engine.identity.ts": "c02e7fb4f9d5a549ab67854250ae146f4108321fd16721cccd15d25000654317",
+    "maya-saas-backend/src/action-engine/action-engine.errors.ts": "6a92d30ac9d3fda2e19181672bbdb7e03a32224f7f5562ed5fa43c5fa07bbb91"
+  },
+  "counts": {
+    "fixtures": 40,
+    "invariant": 36,
+    "divergent": 4,
+    "kinds": 22
+  },
+  "fixtures": [
+    {
+      "id": "kind-choice",
+      "file": "h7/invariant/kind-choice.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "CHOICE",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the CHOICE branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "off"
+      },
+      "reference": {
+        "body_hash": "4ba963cc26935a304b7d946fd02a30b0761df65cdd067e0867784b512cf34c66",
+        "canonical_bytes": 6243
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "tZ3LDzImrpnXRmpLXH_Ofc1YaTX_j2UF",
+          "YUTZ4r1LIn_4Onc5V65veP0K31o0lFX2"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "4fdcb3ac-c01d-4367-a139-6f163a6a06c0",
+        "envelope_seal": "5ce1abdece3fcaee388f78e11e1a577b3a63af42dfde3e142abef4e81f36c123",
+        "principal_proof_hash": "d0a2d6a48ae1aadf0277dce9fe0c897cd85a637cd4196dcd7d90a11195c6c46d"
+      }
+    },
+    {
+      "id": "kind-service-selector",
+      "file": "h7/invariant/kind-service-selector.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "SERVICE_SELECTOR",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the SERVICE_SELECTOR branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "off"
+      },
+      "reference": {
+        "body_hash": "de517a9f15452e8c714ecb9020f1c600224e57713f23d0045f620002354d6138",
+        "canonical_bytes": 8922
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "nXPgv-rpfnAcI7K4aMNb607CmFA77dd2",
+          "7fKpeL4sq4x8nSCfuh3wnhSaxWbUe6PY"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "0c29e808-43e1-497e-b442-c39260fac492",
+        "envelope_seal": "534ab72c8429a638f364f7290dbb411d333101782adc70c51efaa9b5e527371d",
+        "principal_proof_hash": "6c6c6b35dff54fc4b0f06be9054e58a50566d04adec47b483de551ddd8276698"
+      }
+    },
+    {
+      "id": "kind-staff-selector",
+      "file": "h7/divergent/kind-staff-selector.json",
+      "group": "divergent",
+      "category": "kind",
+      "kind": "STAFF_SELECTOR",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the STAFF_SELECTOR branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "off"
+      },
+      "reference": {
+        "body_hash": "f919c2c7e4c91a05fbe6f654308406515daf10aeeb3bd44eec677ed2efe1f3fd",
+        "canonical_bytes": 6479
+      },
+      "collation": [
+        {
+          "pointer": "/presentation/a11y/accessible_names",
+          "locales": [
+            "lt-LT"
+          ],
+          "keys": [
+            "option:st-ilya",
+            "option:st-anna",
+            "option:st-any",
+            "intent:i1"
+          ]
+        }
+      ],
+      "secrets": {
+        "intent_tokens": [
+          "fk4-Lzj9QGdkm9vFIgnX1nnd47TK8JOD"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "cd6b7390-4070-478f-a35a-03dc27add860",
+        "envelope_seal": "59b56bfbd4278816a44a025147a6bf433898f53d4fc74d6b970da2ab01dd3274",
+        "principal_proof_hash": "5c8f41a412e6724a92ab33c14a2a8308d94baf12eb7bccc64ba000ce9fcf822f"
+      }
+    },
+    {
+      "id": "kind-time-slot-selector",
+      "file": "h7/invariant/kind-time-slot-selector.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "TIME_SLOT_SELECTOR",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the TIME_SLOT_SELECTOR branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "849b64c8ed780156daa463f4664121007c4b4fb5bf99bbeb1744396fa88972b8",
+        "canonical_bytes": 10904
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "CnGCju8MUDcB8Df5v8I0GoQEdaD3abgb",
+          "HWgE0nIt_KRVXbZH_lESNjTKyuhyR29j",
+          "gwuBxqOSMMB1fBCQWYUSir736KiuYWVJ",
+          "IoUqvblLZb1EBTz9L26SBXff6hR5ChET"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "39131354-7285-4eec-a298-5317dbf146e8",
+        "envelope_seal": "1e89e2f4a5eb39d3190566aa522e361969a43192da79a935f8069145761a0ce8",
+        "principal_proof_hash": "018da73e59bba877da14e8a83c004a0337fd08e0e094bc1b57e235c459ef1183"
+      }
+    },
+    {
+      "id": "kind-booking-confirmation",
+      "file": "h7/invariant/kind-booking-confirmation.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "BOOKING_CONFIRMATION",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the BOOKING_CONFIRMATION branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "87a2f5bb2daa60c750dfbe141c410fb23456da11920c9fcffd57cff6d0d10357",
+        "canonical_bytes": 8645
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "0XNtFXa92s-EGAI6-FAKJmJFpdzT0rPK",
+          "N0f6TNXLb_en9Ha5hnKrcaC8rVix_wUN",
+          "3WKhRAv4s1BAGWWqXme1HtDUIPtu2g8x"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [
+          "1959cf486bc64611af3249819754400d28119b98667d9b1f26a2b2965fcb0813"
+        ],
+        "tenant_id": "39f537de-8508-4a92-9586-df09e4e36f6a",
+        "envelope_seal": "d54cbe54c1c43d5869518a2ab94b822a073084abfe1c41c71dc6376e4e43765a",
+        "principal_proof_hash": "c17ebe83a2a1073857c9d6ef72d834301d5d315db4eaf47bc7f482125e330844"
+      }
+    },
+    {
+      "id": "kind-schedule",
+      "file": "h7/invariant/kind-schedule.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "SCHEDULE",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the SCHEDULE branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "25689709b5e2a45d0dbcad686e3b8c184bdc2f83e535bc09161688523b23083b",
+        "canonical_bytes": 8002
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "GkGBnFjeU7CHxP5R-TRDlnlwk7vd_cNm",
+          "anrM8Cyy_nevjnmnErbQbGlQECKx4eEH",
+          "ZaW1vlCw-ooen_s_jE3W-uEDeS8fiq0q"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "9ace536f-911c-47be-b0d4-9db87584930c",
+        "envelope_seal": "9d644c19ed156ca4ac9a40308c2407e4b25758f420d2539111d690be316646a7",
+        "principal_proof_hash": "ea403fccfd97c4da806f9c32cc3ef6b930519d18df21e64eeaad64b22c4df2f7"
+      }
+    },
+    {
+      "id": "kind-client-list",
+      "file": "h7/invariant/kind-client-list.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "CLIENT_LIST",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the CLIENT_LIST branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "c960dbdf6830410dd9c7561e8bef66d5cb723ddcdef507ae58c6f9615c447f55",
+        "canonical_bytes": 8148
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "Cf6dim1NhunNVfugoma9GsiozkrcGdAq",
+          "V2PXOZle6sJ37fX_pfdvLDM_C3p_FRJp"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [
+          "e3976636a569828e834bae18dfc8d955821a476f4b80c23e1fdc91a089196ab3"
+        ],
+        "tenant_id": "b8ce598e-e1e1-4fae-8e6a-236f4605e710",
+        "envelope_seal": "4c4e2f30c18422ff81c48df433108760161f407f997577df5a759f1f84f54086",
+        "principal_proof_hash": "c1a31ee7ec18de92f7cb7eba4697a5795f5169e747aeb02bbd5cdaa121adb9cb"
+      }
+    },
+    {
+      "id": "kind-metric",
+      "file": "h7/invariant/kind-metric.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "METRIC",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the METRIC branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "off"
+      },
+      "reference": {
+        "body_hash": "8c5a142f7b2efd80cf44f8fe8c94f5d06f36f48fd0dac0a5e636100849966044",
+        "canonical_bytes": 5227
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "UOOTSxfHyCTYge7EPSly_qR1pvbbT6AF",
+          "qIEY-Ecrgi80aBxqFMomXc353UjUev-y"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "7a19ed9e-e3b2-41b0-9742-2deab459fe5f",
+        "envelope_seal": "4020b56e22d6480323431238e52ed34262d7978dbd7da9eff623d176497b6378",
+        "principal_proof_hash": "5f5930b1efbe42bc88af856a53066d4bc28d4c929089f2a3d3f8606ed6a2796a"
+      }
+    },
+    {
+      "id": "kind-chart",
+      "file": "h7/divergent/kind-chart.json",
+      "group": "divergent",
+      "category": "kind",
+      "kind": "CHART",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the CHART branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "prose",
+        "live_region": "off"
+      },
+      "reference": {
+        "body_hash": "14131179b2c6858b335e097eaff591972f640a161fbb5abf40aae678b98d7dbe",
+        "canonical_bytes": 7528
+      },
+      "collation": [
+        {
+          "pointer": "/body/axes",
+          "locales": [
+            "lt-LT"
+          ],
+          "keys": [
+            "x",
+            "y"
+          ]
+        },
+        {
+          "pointer": "/body/series/0/points/0",
+          "locales": [
+            "lt-LT"
+          ],
+          "keys": [
+            "x",
+            "y"
+          ]
+        },
+        {
+          "pointer": "/body/series/0/points/1",
+          "locales": [
+            "lt-LT"
+          ],
+          "keys": [
+            "x",
+            "y"
+          ]
+        },
+        {
+          "pointer": "/body/series/0/points/2",
+          "locales": [
+            "lt-LT"
+          ],
+          "keys": [
+            "x",
+            "y"
+          ]
+        }
+      ],
+      "secrets": {
+        "intent_tokens": [
+          "j7VQdcWVYKEJ7pM1sWN6WBYxbcPCk5w-"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "adb8aa03-f711-4ed5-9739-a22f0bccdd6e",
+        "envelope_seal": "0a11f07fb850289b65d7f584face1a43e5bdfd8724eb9d7084a9e7299a197e4f",
+        "principal_proof_hash": "18de2560765a508e2dda53184ee554bb442fbddba5191a4a15b30cf7cb34fff0"
+      }
+    },
+    {
+      "id": "kind-report",
+      "file": "h7/invariant/kind-report.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "REPORT",
+      "tier": "RICH_INTERACTIVE",
+      "density": "SHEET",
+      "lifecycle_state": "LIVE",
+      "note": "the REPORT branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "off"
+      },
+      "reference": {
+        "body_hash": "1f7b1fcf248a1f6c4100defd12e355ce11771be830632940e607179286671ec3",
+        "canonical_bytes": 9683
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "6frVvA3QOjMczm_zirFAjn5xMOW7ESHH",
+          "4HgWiD2qZhXbsjH3pt4D7munab2BvOCb",
+          "DVsQMJofPBkGymBKA4Co-srKZ961EYND"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "fc072357-8e51-4b89-add8-09d94428b257",
+        "envelope_seal": "b1a3230d38130a7d020f59a224eabb9b0f8c1041f2bc0c5ab0af2f79be4283d7",
+        "principal_proof_hash": "944af080f2d9324cf1d28bbc12f1a63cbe639d30ecff9436a1b1f189541d9cb3"
+      }
+    },
+    {
+      "id": "kind-strategy-options",
+      "file": "h7/invariant/kind-strategy-options.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "STRATEGY_OPTIONS",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the STRATEGY_OPTIONS branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "off"
+      },
+      "reference": {
+        "body_hash": "704f018a2b98dc5dae7f45a7fd32148fac6ef19083cc650ca1420a7511e09ba1",
+        "canonical_bytes": 8059
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "9WlImci_Nwp-k4iBklmA1J8-OWO4RHUX",
+          "kvbDwSlmnccCXnyHfxs8PGCeeTMSDCLB"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "67272e2c-f1b3-4831-a7c4-0c3f888d425e",
+        "envelope_seal": "a1904fb01e89b3f6153a11431c04406ed9d1092584011bddd4b1490cab3c5574",
+        "principal_proof_hash": "0e085c071dc48ff73e3957154c7fd2dd7b0e7b5f7d6f60c6fd1753973f79ad8d"
+      }
+    },
+    {
+      "id": "kind-approval",
+      "file": "h7/invariant/kind-approval.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "APPROVAL",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the APPROVAL branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "5036e6a7f2d3a2fd29a8bb3f97783a99d6e7c43798caeba1da6ea62353689771",
+        "canonical_bytes": 7784
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "6urTy6G7G_XWdBHjnnkzPXP6DZktTX4G",
+          "_7a_GQUbzopGDpbxXRkUuYaJC3yEgQZ7",
+          "_-MSNem38og3c_1V2zgOkdcaqdcuudyo"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [
+          "7cf5de4ca190ff7af6f87efddbbd7b761061e73cfd17bbc01ca27bc41b00b9b0",
+          "7cf5de4ca190ff7af6f87efddbbd7b761061e73cfd17bbc01ca27bc41b00b9b0"
+        ],
+        "tenant_id": "aaf0280e-718b-47d3-b530-7f4a9f2d15b2",
+        "envelope_seal": "a202c61a57b73c5dd266f814a507eb9a84a345a7b784317db96d4b992e40dca9",
+        "principal_proof_hash": "76168476e19562f391cb12aa51717cbb94dd91ecadc59fff606b456dce38e959"
+      }
+    },
+    {
+      "id": "kind-progress",
+      "file": "h7/invariant/kind-progress.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "PROGRESS",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the PROGRESS branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "5faadc0dbdc45b0f49609433e5fc4824c0eb3fcfb989e016d74a1670b0728ef6",
+        "canonical_bytes": 5550
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "f4OIGoknUrQTBcTWR1EObjq5N1MmjF5P",
+          "jDyg0qi_tFS9kkdH7IWQlPOMdEXCTNem"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "274fdbea-fb89-48d3-aa19-d27755006281",
+        "envelope_seal": "be4664330727f4ce9c34ce78d115c3188c1965c8a52a0ba8bd97752b21396bb5",
+        "principal_proof_hash": "5f7be65a101ed29b93c5af44efaa4ea8c5d5a702c9e5b0c21699e1b8df4b0e29"
+      }
+    },
+    {
+      "id": "kind-limitation-blocking",
+      "file": "h7/invariant/kind-limitation-blocking.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "LIMITATION",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the LIMITATION branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "assertive"
+      },
+      "reference": {
+        "body_hash": "0f1a641aa6b918d11b370eacd9e6e210743d3cab2baffc0910183c0d97c15284",
+        "canonical_bytes": 2852
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "zpVdyywnv4NpZqgFscnnsQXb7IpueGYR"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "25558159-567e-4195-8423-2b1f536e88c8",
+        "envelope_seal": "388f0ba9f18a8904d7ef5d495654df878f8ce48dd5f45216c10d9ddfaf837f69",
+        "principal_proof_hash": "0b2184f1b8a6be26748b838d4805b3e2d2eab4b3a9c287911a6f863be3a56039"
+      }
+    },
+    {
+      "id": "kind-source-status",
+      "file": "h7/invariant/kind-source-status.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "SOURCE_STATUS",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the SOURCE_STATUS branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "835361d30aa80cce80f10c1298b8998cc6115396bad50596db14cec93bdca39d",
+        "canonical_bytes": 4691
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "TGKN1UV9ZtyIyMkTnm83UpmV8Vjh4bqL"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "13d19f91-c4dd-4cc8-96b8-c68966fbec4b",
+        "envelope_seal": "f0eb6a200f93192f450d95988766933c65d5a929ad181da16e3e206054993032",
+        "principal_proof_hash": "b7711e4b9f1bf4c1fd6da22ab57ce8c95b6ee59c2f3eade24328eb208cb71327"
+      }
+    },
+    {
+      "id": "kind-settings-draft",
+      "file": "h7/invariant/kind-settings-draft.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "SETTINGS_DRAFT",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the SETTINGS_DRAFT branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "16d418d6e553149dd98f46d1c74079577fb7b37f995be07ad744cb391fe4b91f",
+        "canonical_bytes": 6937
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "fIc-7ujKYtEYiEnlCrfjhK-ACQtUY7Bz",
+          "hUI7YGoTcygZa8UE7sycZGy67DxFpbgN"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [
+          "64606f05307acca1a8f2cb84746bdb9e31d953250bd17c44ef181328f5b9a077"
+        ],
+        "tenant_id": "2bd9cd03-79a1-4146-8880-b5acd9fe836f",
+        "envelope_seal": "d55bbb292358c6b5866c14c3605a6e63410c918ac5a226dbcf38dc5a832b81c5",
+        "principal_proof_hash": "0b22b7968a9537140aff49a8d4ecd3507235d80c1b59752b912e87ac5d60fa9e"
+      }
+    },
+    {
+      "id": "kind-form",
+      "file": "h7/invariant/kind-form.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "FORM",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the FORM branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "eeca3b52de809b6f1f0b818af059e77c4706e2ace48470061f1b98b00b7a7d54",
+        "canonical_bytes": 8397
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "dMQm9acz-XQ52tUb-u1maQq-O1T1WIHr",
+          "anRkLfFjMXqpyOQiZ2yYHme-XY5MR7dW"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "352b5797-eee5-4431-b30e-867e82f0da44",
+        "envelope_seal": "ea4cab3f7006e6be6901ea2b3962a27b41cda00df7552e2a11bfe316362a2ced",
+        "principal_proof_hash": "034b0eb165a5eeb4c572a96c8956116335d408bfa4ebba7cb524e92c4da9add8"
+      }
+    },
+    {
+      "id": "kind-consent-state",
+      "file": "h7/invariant/kind-consent-state.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "CONSENT_STATE",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the CONSENT_STATE branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "prose",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "71f07f21f6cd788d93744eb575fcb42feb7f2af619c9a78b6160d1539ce6ac23",
+        "canonical_bytes": 5009
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "OLXtCaaQJhQwzMglbbqdPi6CXTzRWz7o"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "6b646d4a-c3cb-47c2-ae85-d8d49216fcd2",
+        "envelope_seal": "0b35045796acfe20766e16adcda6395f0b30aced121401cd37cb12bc28a424a7",
+        "principal_proof_hash": "b6db0e23fc0096eb38c45a43a586c0d1e4973a31a2953d375860731e6eb17a3e"
+      }
+    },
+    {
+      "id": "kind-identity-binding",
+      "file": "h7/invariant/kind-identity-binding.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "IDENTITY_BINDING",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the IDENTITY_BINDING branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "prose",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "917e4450ec36a10402b24f4b2683f0c4c8c1e44d3273ed4ad67d90940a0dd259",
+        "canonical_bytes": 5671
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "pUqvtQ0xLy53FXzBeUP_uWpbTOvr1ekc",
+          "tbFOgW6IlKrxGzARBtsvPj-P9QrNC9vf"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "880bc102-a8a6-42aa-9928-7ea14d4f6606",
+        "envelope_seal": "701a5e6e543a35d38a76d920a96c5ac171132f1db902dc1fe165512c6a4a47e4",
+        "principal_proof_hash": "841ff084dbe6aa85db99a2eea14b822e0f60b241e9ada9b8b63a8005f6eaffc4"
+      }
+    },
+    {
+      "id": "kind-payment-handoff",
+      "file": "h7/invariant/kind-payment-handoff.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "PAYMENT_HANDOFF",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the PAYMENT_HANDOFF branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "prose",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "acc0b147b3a03182fc3a07a7f3573fd903cd5751663c53b175f7f3abb1058f62",
+        "canonical_bytes": 6672
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "W4Ctmmc2J-p3DX_mbHsJYwTUf2j0d8X_",
+          "uv2oH1LYx_cg7MQQCZjEp-TpbRy-p511"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [
+          "bf6f277045ff9dcffd694cde1b91f5651e83dac26b611cd7c18a9009968142f9"
+        ],
+        "tenant_id": "afe2157f-5119-4b46-879e-6674be80815b",
+        "envelope_seal": "7f30d67e6817e9186f64eaf6b64020fbee1958960f8030b22e06493252bab1cd",
+        "principal_proof_hash": "8ab11b75dc97bf2c6a780dc448cd81a3bbb7ca91e6b2ca6052ff6b5d663fa790"
+      }
+    },
+    {
+      "id": "kind-media-preview",
+      "file": "h7/invariant/kind-media-preview.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "MEDIA_PREVIEW",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the MEDIA_PREVIEW branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "prose",
+        "live_region": "off"
+      },
+      "reference": {
+        "body_hash": "f6b41680dfc46953b1f2fd86ecc5884e436f2447dcfb4a3ff3f8fe056d49f207",
+        "canonical_bytes": 4758
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "oWAdboXKc_a7cWopNaG2DyMhQQHICata",
+          "Q9oRPWNVO4Y_dgbO-LmutoQPjkGc9mNL"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "3f4e36cd-bc59-4fcf-8173-2ff3c8dd64b7",
+        "envelope_seal": "779d8934261eab3df76d72de76dcf24bf624ec513648dc6c2d981d34e0fbfcd8",
+        "principal_proof_hash": "485878206245b47d44b8e4286f6605da4659f3599e5fc8c02a0481558340e229"
+      }
+    },
+    {
+      "id": "kind-artifact",
+      "file": "h7/invariant/kind-artifact.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "ARTIFACT",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the ARTIFACT branch",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "off"
+      },
+      "reference": {
+        "body_hash": "7fa20b8be9eb64cebda152b4167731cfc39559e225d3849ef7caa3e2c1d3b749",
+        "canonical_bytes": 4807
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "9Svt2U1jy0A51CrB_anRndPmR0Tr1Ghf",
+          "JJQi7yC2fxzN_N85qW3S6gzud9bplfB9"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "276c964f-d13d-45dc-9686-4b966bafcaa8",
+        "envelope_seal": "8dc974c572cf5b0af21768c427f52832c08b55c464d744eb066fd74b24fed547",
+        "principal_proof_hash": "9b7f6d59eb05f4bccd7d8568ed10ff8ef25f1096ee8eac9af8ac75b66c31589e"
+      }
+    },
+    {
+      "id": "limitation-non-blocking",
+      "file": "h7/invariant/limitation-non-blocking.json",
+      "group": "invariant",
+      "category": "kind",
+      "kind": "LIMITATION",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "LIMITATION with severity limitation: live region polite",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "83add9fd7f7346f8e79365b0f7e68ae95d8b2ebee6d3627cbf6f0eaa9a9d2147",
+        "canonical_bytes": 2130
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "08039c93-1944-49d8-9ead-d7bf8e311a46",
+        "envelope_seal": "8a91ba81c25c2d70f6d551106a97913ed102b3c5f2f4b89b42575ca1fde99a44",
+        "principal_proof_hash": "4425842df8133351235a4141ddff1bf0c1d238a4084cc4fad1944cb7725b4f94"
+      }
+    },
+    {
+      "id": "choice-text-only",
+      "file": "h7/invariant/choice-text-only.json",
+      "group": "invariant",
+      "category": "tier",
+      "kind": "CHOICE",
+      "tier": "TEXT_ONLY",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "CHOICE fitted at TEXT_ONLY: the escape is CONTROL with a token",
+      "expect": {
+        "verdict": "valid",
+        "mode": "prose",
+        "live_region": "off"
+      },
+      "reference": {
+        "body_hash": "2c07a45d10f3bd2d643c59dc69dbdba05db29b54c935ccef01bd339964193b46",
+        "canonical_bytes": 6285
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "n_t3sWK6-DcvBr-niMgy9Kpy3399pEs2",
+          "KVqBTx-ZfPlmnRvNzxZwQ8Q2KjjW6z_j",
+          "tVeBxh8-5cN9t0MoNLaXKJgVBymj6cnt"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "f02cc980-37d1-4b56-8d17-b2b776d77a37",
+        "envelope_seal": "6807efe8c8f0f74f9658e6195f0be9c22c567c1eb4aca348db8b52944670b806",
+        "principal_proof_hash": "e83ddf17241dff5e0008e0f105a007db37c273fe55f9f163ac8bbcddb7e7e197"
+      }
+    },
+    {
+      "id": "booking-expired",
+      "file": "h7/invariant/booking-expired.json",
+      "group": "invariant",
+      "category": "expiry",
+      "kind": "BOOKING_CONFIRMATION",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "expires_at before NOW: expired (lifecycle is not a hash term, so the seal still holds)",
+      "expect": {
+        "verdict": "expired",
+        "mode": "frozen_prose",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "37c9c00a1dfcdb0908b3f698ff17746bfec023175bb2f215acaaff496b174d89",
+        "canonical_bytes": 8645
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "T014EJW3RWLDQyBnb8T65N56PCUpmdoH",
+          "0LQC8_Y3ID2PhHKDHiFOAv--HjPLjbyk",
+          "IIGkdEnq4wO-h6SXkJkJPVqoHIYoHFwm"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [
+          "de089e6a2d047d8c4a73a7cf2e74a14a426b9d67df1f5422ca2ab64442eaabc8"
+        ],
+        "tenant_id": "a525d485-f08d-4b75-a61e-e5e7a9ae31fa",
+        "envelope_seal": "3f2dfdc23eeea83b0df60e11061e91f24443dd6e01e96cc7d401e3434b5c8ab2",
+        "principal_proof_hash": "9dd2fa4cec382a942796215d8d8ff006e5112e6151182e8f960c96f7788cf9d3"
+      }
+    },
+    {
+      "id": "booking-tampered-body",
+      "file": "h7/invariant/booking-tampered-body.json",
+      "group": "invariant",
+      "category": "tamper",
+      "kind": "BOOKING_CONFIRMATION",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "a minted Measure.formatted changed after sealing: body_mismatch",
+      "expect": {
+        "verdict": "body_mismatch",
+        "mode": "frozen_prose",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "07d4e1d5e1974404511f05e7201c1c1bfc78f496baaa3fb39cb86bf0f5aa0f30",
+        "canonical_bytes": 8643
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "_UumIe9U-As4j40G0JXP5yp_IbqwfRW3",
+          "gdJZ9qfbSryiA9Y4V7E1OxUnP8DHdv_0",
+          "J849d7U2ssJ-HAf9TU2kQFwWSguzhZrT"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [
+          "50a8677c769350a8262b92e6e7dbf49e3fa731a26b2aff0421a4f98c1a546917"
+        ],
+        "tenant_id": "3539fcf4-b540-4b60-ba47-3dca36da0c08",
+        "envelope_seal": "1d459b143ea768faff0033156a4bd2364ebbc4090e10d15f3af89943a5dee7af",
+        "principal_proof_hash": "0cb380562ab7b176c06373a4b78b667390335e7be6d274709c6afc1a1f06227b"
+      }
+    },
+    {
+      "id": "booking-token-changed",
+      "file": "h7/invariant/booking-token-changed.json",
+      "group": "invariant",
+      "category": "term-coverage",
+      "kind": "BOOKING_CONFIRMATION",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "an intent_token changed after sealing: valid (stripIntentToken removes it)",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "6fc09473f8b00729a1f7752fd5dad1a6c0d2cbebff8b777c001d64cbeab00f4c",
+        "canonical_bytes": 8645
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "ru3GyCxdld-GQ6adAbi__DEGRNgkJsPg",
+          "36-5_ByV1WsFdtKcnkW-Cu1GenLLlRct",
+          "gmoSImtMzJgfhwQhhBi9sGRLP2SewZbi"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [
+          "3e113dffe2153164052cf309cbd617a006706a93828189acce856700b4bccc90"
+        ],
+        "tenant_id": "b4632638-f9af-49d3-8ee3-8b53d60754ed",
+        "envelope_seal": "a1acd4e94fde679ed34844357120dd6c2a4f45660a7466a1fae9c3304c4e019b",
+        "principal_proof_hash": "ab672907c8212c3f4e7b4b0b9a25759cf491b926b3242ead560f953bacb1754d"
+      }
+    },
+    {
+      "id": "booking-receipt-pointers-changed",
+      "file": "h7/invariant/booking-receipt-pointers-changed.json",
+      "group": "invariant",
+      "category": "term-coverage",
+      "kind": "BOOKING_CONFIRMATION",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "the render receipt changed beyond its tier: valid (the whole receipt is never a term)",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "e5d87df8e830fc0db373bb964dc4d326cc6f552830b1367639c118d5f75e0f09",
+        "canonical_bytes": 8645
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "MWGHXJd_tv7TWUv2sTMtXVkzvdd8F0DG",
+          "tH0RyxyvmrSQYdhhHzcuctsH3u0rky12",
+          "Iy6zMiDHElvxkKINMgicjK6SQDdoun1e"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [
+          "tH0RyxyvmrSQYdhhHzcuctsH3u0rky12"
+        ],
+        "idempotency_keys": [
+          "0eaa788b0be8e2ad9a5dc4045de6e185dc9a67ef6da4938711212f33b29a955c"
+        ],
+        "tenant_id": "c87d235f-2589-47ee-9cc7-a97971d3318f",
+        "envelope_seal": "9f31849638238b221e2ea7f98c67e2cb8ec4ed76c267aed48b72bb646b9dd35e",
+        "principal_proof_hash": "037b80d3ff5de9256a3336763cbb740fcc85a1eeab0aa0e4f2a46fa531c9657b"
+      }
+    },
+    {
+      "id": "booking-render-tier-changed",
+      "file": "h7/invariant/booking-render-tier-changed.json",
+      "group": "invariant",
+      "category": "tamper",
+      "kind": "BOOKING_CONFIRMATION",
+      "tier": "RICH_CONSTRAINED",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "render.render_tier changed after sealing: body_mismatch",
+      "expect": {
+        "verdict": "body_mismatch",
+        "mode": "frozen_prose",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "7766a76623d05c313cbc78333141afc47e1a0c5d6f6940c029b72191155575d0",
+        "canonical_bytes": 8645
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "xkjMiWyBLaRD-A4fFVaWtz4oL94jbtRA",
+          "ERFLnszi2vXUZrjLHJZ7GA4HWPHDnIc6",
+          "YBd712fmbBIg-VDGmXeD6x5ujQFueZwB"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [
+          "1b2bfd36f2191bbef025133d451a7be8009a64392171eb44e34e32439edca180"
+        ],
+        "tenant_id": "e81f54da-5992-4009-9140-b1d2304c937c",
+        "envelope_seal": "e3dc16ccdf00e1b9245926a34ab454d74baad55ba0d32b32fe42b418130599d8",
+        "principal_proof_hash": "957ea2ebd2cf6c98356a7cc8bc4844ddd1d52c1e7346deef5711a53bd0c2f21c"
+      }
+    },
+    {
+      "id": "booking-cell-index-digest-changed",
+      "file": "h7/invariant/booking-cell-index-digest-changed.json",
+      "group": "invariant",
+      "category": "tamper",
+      "kind": "BOOKING_CONFIRMATION",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "integrity.cell_index_digest changed after sealing: body_mismatch",
+      "expect": {
+        "verdict": "body_mismatch",
+        "mode": "frozen_prose",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "43c0f03e595788fbf1533d7e474d676ab99ae4b886b94f0b3bb3c9ce017b59b2",
+        "canonical_bytes": 8645
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "bhAYvIkRhBCrJxxoZvZTqjGqFXD5VYk0",
+          "VkeseHCbUaFZoi-L2y6q5il7Q3uLUTVC",
+          "smSGhndjs4PNvCN2_AuXGtQr1xGzC4R6"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [
+          "cd9a3a32eba30e14e402e20deba3c23204dd5a442790dc1a550ebbf333189346"
+        ],
+        "tenant_id": "134edcad-b47b-4b2c-9205-920d29f9e804",
+        "envelope_seal": "6aeadd0d62b4b0d449e2302ea0292ee6533d821971e212c5458af4f9faaa4dbe",
+        "principal_proof_hash": "f2d5f21f6d7c4b27708a3229c8805b4aefcd8b70b60bbef04ba10c1eb71920fe"
+      }
+    },
+    {
+      "id": "booking-root-values-changed",
+      "file": "h7/invariant/booking-root-values-changed.json",
+      "group": "invariant",
+      "category": "term-coverage",
+      "kind": "BOOKING_CONFIRMATION",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "seal, proof hash, tenant and widget id changed: valid (none is an H1 term)",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "d430a8c44e23e28c689033d1245d0991aace89dbc7db33d054856f5f1d19be97",
+        "canonical_bytes": 8645
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "AL1gwfbn-u8Uh5ideGN6KXLxcUmw_Qkc",
+          "G0AUjVMquMTCPW_2LeIynt8QVV83MLSX",
+          "DPbCuq0qZh9lhOh1KCM5S6QHDWlWhZWr"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [
+          "9815fd3a6abcc61a094d571ca700f95d3dd7a8f234ac268de16f8a864ef7bf3a"
+        ],
+        "tenant_id": "b141adbe-6146-4206-86c3-9cb4d171b986",
+        "envelope_seal": "6ccf9b843941cf54fe7efce3616ae833dcc3dcace399ccb456bb47b435c488a3",
+        "principal_proof_hash": "3f04750523455438f426ac13703d3e85a8def02ef99bf09e7e69bb584871a83b"
+      }
+    },
+    {
+      "id": "metric-class-i-target",
+      "file": "h7/invariant/metric-class-i-target.json",
+      "group": "invariant",
+      "category": "class-i",
+      "kind": "METRIC",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "a NAVIGATE whose target is {class:'i', ref: another intent's token}: valid",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "off"
+      },
+      "reference": {
+        "body_hash": "65b335c525a26ea272241d9d8d3c0b0a1c2f87db66da1f96a4eab7b2179f7d52",
+        "canonical_bytes": 5245
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "n6_y32ATwJMZXvaEyEvzfvxL5jN6tw0u",
+          "E18jalWrIpv7e7dDW40toWmCuEyWKZOL"
+        ],
+        "class_i_refs": [
+          "n6_y32ATwJMZXvaEyEvzfvxL5jN6tw0u"
+        ],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "719efa8f-0747-4cb3-aa09-b2730baffc12",
+        "envelope_seal": "26422d152c8ade5e5a30929e11ceb63d5f1fcd7376ac1d3add0504a174f4c47f",
+        "principal_proof_hash": "e063d484bf4b60517aaa99c89694cf5427a247acccba08aacef355f7109b4541"
+      }
+    },
+    {
+      "id": "metric-class-i-ref-tampered",
+      "file": "h7/invariant/metric-class-i-ref-tampered.json",
+      "group": "invariant",
+      "category": "tamper",
+      "kind": "METRIC",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "a class-'i' target ref changed after sealing: body_mismatch (class-'i' refs are hash terms, R7-E5)",
+      "expect": {
+        "verdict": "body_mismatch",
+        "mode": "frozen_prose",
+        "live_region": "off"
+      },
+      "reference": {
+        "body_hash": "9543f3ee239b31972c0760263555d2f4bc18d5e264d93fbfa73fec41f9f86d6a",
+        "canonical_bytes": 5245
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "n6ax_D2mqXCHDoPLyCcqEfeG7J0rgOpk",
+          "VQfyfY0jCF9TBj-Yi52zW-eGOQinR46j"
+        ],
+        "class_i_refs": [
+          "JJE981Cfcujv0G7PGqNg2vJYSbNBpYXg"
+        ],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "f080c43d-4e86-4fb0-890c-8f49c8c82c6d",
+        "envelope_seal": "e90bf1a0a2a5aa4f0042e20f604938ff08d9ed512ba3d4fb647c79e58344f22c",
+        "principal_proof_hash": "e9368be7bca4a38a614307dba8dea657706729a54d54ff701eb2061fc5aa755a"
+      }
+    },
+    {
+      "id": "schedule-withheld-reduced",
+      "file": "h7/invariant/schedule-withheld-reduced.json",
+      "group": "invariant",
+      "category": "receipt",
+      "kind": "SCHEDULE",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "withheld intents and a body reduction pointing at an emitted token and a route key: valid",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "3d2eba7b18bc06f208f6b4260577cc705acffabe6bf35bf57fc427d95296deee",
+        "canonical_bytes": 8002
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "RNPWYJ1wFBT-7hqULBtVqhAS0bHlmmKF",
+          "QPoCC7h0srwsMHwNd3TqbiczsmpjTWji",
+          "4573RUqK7FA9cZI2Vn8wc6g1FuQXrEa1"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [
+          "RNPWYJ1wFBT-7hqULBtVqhAS0bHlmmKF",
+          "fs.calendar",
+          "QPoCC7h0srwsMHwNd3TqbiczsmpjTWji"
+        ],
+        "idempotency_keys": [],
+        "tenant_id": "16b5b51e-e367-4eab-a5d6-76c9bb99a1a2",
+        "envelope_seal": "9245d78792ac13a192e4add1e30425f3e7aedf42260d0d25c25bad34075b3118",
+        "principal_proof_hash": "86ec08079dc7e8b3c0b5e414e355290ec5d777fc8375d0797834d49eb33d82c1"
+      }
+    },
+    {
+      "id": "slots-superseded-predecessor",
+      "file": "h7/invariant/slots-superseded-predecessor.json",
+      "group": "invariant",
+      "category": "lifecycle",
+      "kind": "TIME_SLOT_SELECTOR",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "SUPERSEDED",
+      "note": "SUPERSEDED, replaced in place by the successor: valid, drawn as static text",
+      "expect": {
+        "verdict": "valid",
+        "mode": "frozen_prose",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "65667c80499aee5b333f5386cd77ffb041a4bc700bbd06160140352329274909",
+        "canonical_bytes": 10904
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "W_TXhRrkmJxaWqroB1iKJ-bH2VkGeFEh",
+          "WZ_lIktd6nMBFJ5y3cQ8ygNDFt4_ndLS",
+          "bJxATEq13OnX-igaINanVx0HJgtSBk5w",
+          "EdL7frR5jw8wPW8y3cZhgRClVKOI6oXs"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "9a36d56e-0751-4bf1-915f-71dd5f5cfcbb",
+        "envelope_seal": "7117fbcaee5f2c965e82745a663e49dc70b714503717a2f6fe469f89b1cd0378",
+        "principal_proof_hash": "9e7f8897f218600bdec86c11891f014de70ca93fe3c7f93fcf9be2280dd46a89"
+      }
+    },
+    {
+      "id": "slots-superseded-successor",
+      "file": "h7/invariant/slots-superseded-successor.json",
+      "group": "invariant",
+      "category": "lifecycle",
+      "kind": "TIME_SLOT_SELECTOR",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "supersedes the predecessor: valid",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "82c79ef44b7fb40dcd71ff340ddbbc1d2c2948ebbb03bfa92fdabfc12b87f856",
+        "canonical_bytes": 10904
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "G6bNz33jGnEtitOITB2bWkj8mdcooF3U",
+          "dOJHeMSAOkaQp1KMc1csd7dEtE1SHUgy",
+          "_TFbRn0L7AMCCPdK3yHWM9nOPfJGDiQB",
+          "NEiwsyJxuz3jRrAF2e0r7TDaORJ6VVdD"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [],
+        "tenant_id": "32b3fcfc-e0af-4260-890c-cf567783fbef",
+        "envelope_seal": "33439ad41f9ea9259ab986ecbd02c279c2182b2b611cbc61d85a25d1ddc4482d",
+        "principal_proof_hash": "371b1f10ef8564a3885d4efcdcb48b1ad4720d6f47b69ae49b96488f9aeacde9"
+      }
+    },
+    {
+      "id": "approval-consumed",
+      "file": "h7/invariant/approval-consumed.json",
+      "group": "invariant",
+      "category": "lifecycle",
+      "kind": "APPROVAL",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "CONSUMED",
+      "note": "CONSUMED: valid verdict; a terminal item draws no control (FR2)",
+      "expect": {
+        "verdict": "valid",
+        "mode": "frozen_prose",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "c592d7ddea4329776309c2eb113d77ac9ecf5ba958432205d9b5d3cb35dae31d",
+        "canonical_bytes": 7784
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "7eMuWp349Y4fEpJmRKw_GQpL1WJardNx",
+          "AN75Xi8-c7fnOJ3P-Z1hbF5Fka_FM5AJ",
+          "IQauns2TMb_3JzeUOZwmFZQ-_be0LgeV"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [
+          "41002f9dd0aa0f370b5e2cf30b63eaf27fcb0afb6a627eb85e4e37a18f2b1af8",
+          "41002f9dd0aa0f370b5e2cf30b63eaf27fcb0afb6a627eb85e4e37a18f2b1af8"
+        ],
+        "tenant_id": "28f1d8d2-04a3-4a41-983e-759ab3ec149c",
+        "envelope_seal": "aad8bef7132359017ac54be57e2aa958166a6ce64c39f2c72578ae078ccc405c",
+        "principal_proof_hash": "9795e089e5c024262671f1109352eda06588dfd688113da9b9fc9fd9fb9a8b23"
+      }
+    },
+    {
+      "id": "collation-lt-y-j",
+      "file": "h7/divergent/collation-lt-y-j.json",
+      "group": "divergent",
+      "category": "collation",
+      "kind": "CLIENT_LIST",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "column keys i/j/y: Lithuanian collates y between i and j",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "28e8e99e707036ef0d0cf2402169f980d89293314d9a65ba593cd484d00f61a2",
+        "canonical_bytes": 8080
+      },
+      "collation": [
+        {
+          "pointer": "/body/table/rows/0/cells",
+          "locales": [
+            "lt-LT"
+          ],
+          "keys": [
+            "j",
+            "y",
+            "i"
+          ]
+        },
+        {
+          "pointer": "/body/table/rows/1/cells",
+          "locales": [
+            "lt-LT"
+          ],
+          "keys": [
+            "j",
+            "y",
+            "i"
+          ]
+        },
+        {
+          "pointer": "/body/table/rows/2/cells",
+          "locales": [
+            "lt-LT"
+          ],
+          "keys": [
+            "j",
+            "y",
+            "i"
+          ]
+        }
+      ],
+      "secrets": {
+        "intent_tokens": [
+          "Nl7aK3CkqA_3r6481gJ1igTLfK97gjHL",
+          "juwNum-j6JlkvMMnnFWjwgzCKM7Zq7mL"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [
+          "7ba6073dd42f20663f8e2769d7114008dd9e8c2742322261b2b2c87c9ff48457"
+        ],
+        "tenant_id": "cfc86aca-5fe4-4b3b-9c0d-9f0168f30246",
+        "envelope_seal": "6f302982ccde226c2390511fa74b07395d25c281d27ce3fb664b831ce2cb8fdf",
+        "principal_proof_hash": "1582ffead410d7a7bf7a67f8b2a06197e996379783bf1692aaf1cd55caf8f073"
+      }
+    },
+    {
+      "id": "collation-et-z-t",
+      "file": "h7/divergent/collation-et-z-t.json",
+      "group": "divergent",
+      "category": "collation",
+      "kind": "CLIENT_LIST",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "column keys s/t/z: Estonian collates z between s and t",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "b5cf385ef8dcea7a100298b05c97c0a5866513ea1a500fe85a58fe3009df339c",
+        "canonical_bytes": 8080
+      },
+      "collation": [
+        {
+          "pointer": "/body/table/rows/0/cells",
+          "locales": [
+            "et-EE"
+          ],
+          "keys": [
+            "z",
+            "t",
+            "s"
+          ]
+        },
+        {
+          "pointer": "/body/table/rows/1/cells",
+          "locales": [
+            "et-EE"
+          ],
+          "keys": [
+            "z",
+            "t",
+            "s"
+          ]
+        },
+        {
+          "pointer": "/body/table/rows/2/cells",
+          "locales": [
+            "et-EE"
+          ],
+          "keys": [
+            "z",
+            "t",
+            "s"
+          ]
+        }
+      ],
+      "secrets": {
+        "intent_tokens": [
+          "3VP2c2HUSFZbKIGvya9ZojiMm3NNom7R",
+          "aMmxxbxVokEpJDb4ESU064PO9qst_jHa"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [
+          "48df98f41f7af6ada7d7d69ce233216fa646983e31029b1a50f4b77ef288032e"
+        ],
+        "tenant_id": "ab90ba4b-96fc-4464-894f-ea067f81774b",
+        "envelope_seal": "50a637d206a10caa6d6a43d48c1837b289cbe79794092fd8e76f43f753e6a1df",
+        "principal_proof_hash": "cf20b3e620a7a0430fa1a66066ed1d14125227328b357dd4329719481b2b005b"
+      }
+    },
+    {
+      "id": "collation-digits-case",
+      "file": "h7/invariant/collation-digits-case.json",
+      "group": "invariant",
+      "category": "collation",
+      "kind": "CLIENT_LIST",
+      "tier": "RICH_INTERACTIVE",
+      "density": "CARD",
+      "lifecycle_state": "LIVE",
+      "note": "column keys Z/a/10: integer-like keys serialise in index order in every engine; 'a' before 'Z' in every matrix locale",
+      "expect": {
+        "verdict": "valid",
+        "mode": "structured",
+        "live_region": "polite"
+      },
+      "reference": {
+        "body_hash": "fc842f01cf9f1d7b56ed1c1ca9ce298e999da14f6aeae793da2845efa288159f",
+        "canonical_bytes": 8084
+      },
+      "collation": [],
+      "secrets": {
+        "intent_tokens": [
+          "e-En446RzbLMQ-RQJUIQ413gJfi0HojN",
+          "-_JIe_ifwJK4kK9-sh0oxIrleQfeUF_B"
+        ],
+        "class_i_refs": [],
+        "receipt_pointers": [],
+        "idempotency_keys": [
+          "0000388268137ffe76cb0b395d2a49d8e53d5b3675dab80e70689c6f44d585ca"
+        ],
+        "tenant_id": "05b61e74-572d-4639-9a3a-1af85ab38c19",
+        "envelope_seal": "0d90fdca6884352ab73fa763d2225423ce81c141c3636808f0691775f9389e1e",
+        "principal_proof_hash": "c72c5b6fab17b310a38dd0ae2b4ecd78edd516ec85e95a03090a9aa31c62dfa9"
+      }
+    }
+  ],
+  "randoms": {
+    "approval-consumed:hex:cell-index": "8afe0ca144594560e0a0ea3f036a90aae316df4572c958c038a7024e1798215d",
+    "approval-consumed:hex:completeness": "77593dcdba8dafdede1c69ab3a3e24ed699547f8df233679de7736a6ddb21ee7",
+    "approval-consumed:hex:dedupe": "535f4fd8def218ee58996214ea02d010607ad61886ae507501017d6c32c379c5",
+    "approval-consumed:hex:facts": "26a241ab4a5ceb96121e6e67e82dd38488b671584538cc2766ff89bfa130572a",
+    "approval-consumed:hex:idempotency": "41002f9dd0aa0f370b5e2cf30b63eaf27fcb0afb6a627eb85e4e37a18f2b1af8",
+    "approval-consumed:hex:principal": "9795e089e5c024262671f1109352eda06588dfd688113da9b9fc9fd9fb9a8b23",
+    "approval-consumed:hex:scope": "cb1e15dfc8c5b9459883a8aaf0738e0201de7c0b9ab1876e9d9c0ae31022c8c0",
+    "approval-consumed:hex:seal": "aad8bef7132359017ac54be57e2aa958166a6ce64c39f2c72578ae078ccc405c",
+    "approval-consumed:hex:trace": "c378e3a8e78c81d95bffe6744ce8e56fa25435504bb7d3abd9c7eebb5b6dd359",
+    "approval-consumed:token:i1": "7eMuWp349Y4fEpJmRKw_GQpL1WJardNx",
+    "approval-consumed:token:i2": "AN75Xi8-c7fnOJ3P-Z1hbF5Fka_FM5AJ",
+    "approval-consumed:token:i3": "IQauns2TMb_3JzeUOZwmFZQ-_be0LgeV",
+    "approval-consumed:ulid:widget": "01M2Q9G7M06VXQ6JZTFR8X0KD5",
+    "approval-consumed:uuid:tenant": "28f1d8d2-04a3-4a41-983e-759ab3ec149c",
+    "booking-cell-index-digest-changed:hex:cell-index": "3138219573c6b40e80bf25179ba72a3b53fc23e5a73285c958823556c2756e95",
+    "booking-cell-index-digest-changed:hex:cell-index-replaced": "1fcbff9e600f1c5fec22a119897466277836a058829a11bd5c2bdfd07fe76414",
+    "booking-cell-index-digest-changed:hex:completeness": "560853c859171a73b35013a4d7dde9d663e91ec26c107019a0847784e5a77b5e",
+    "booking-cell-index-digest-changed:hex:dedupe": "b3fc45506e835f56cbc09de93d3a1809d446ea6960c6111e417c4a1cd128e058",
+    "booking-cell-index-digest-changed:hex:facts": "9e262d8af094215ee97aa8cc1e363262a97fbc1ed0d84fa861475d89a0ca76f2",
+    "booking-cell-index-digest-changed:hex:idempotency": "cd9a3a32eba30e14e402e20deba3c23204dd5a442790dc1a550ebbf333189346",
+    "booking-cell-index-digest-changed:hex:principal": "f2d5f21f6d7c4b27708a3229c8805b4aefcd8b70b60bbef04ba10c1eb71920fe",
+    "booking-cell-index-digest-changed:hex:scope": "608708ce18621c941cae6e0f012b462d28b0b1355f17f9e7c5ae2cadb39d2bb5",
+    "booking-cell-index-digest-changed:hex:seal": "6aeadd0d62b4b0d449e2302ea0292ee6533d821971e212c5458af4f9faaa4dbe",
+    "booking-cell-index-digest-changed:hex:trace": "1325dc638dfdc17ceaf071333fef02338b5b91a03ceb65b5061bccd1cba378ac",
+    "booking-cell-index-digest-changed:token:i1": "bhAYvIkRhBCrJxxoZvZTqjGqFXD5VYk0",
+    "booking-cell-index-digest-changed:token:i2": "VkeseHCbUaFZoi-L2y6q5il7Q3uLUTVC",
+    "booking-cell-index-digest-changed:token:i3": "smSGhndjs4PNvCN2_AuXGtQr1xGzC4R6",
+    "booking-cell-index-digest-changed:ulid:widget": "01M2Q9G7M041CPBNY8GAXG9Y84",
+    "booking-cell-index-digest-changed:uuid:tenant": "134edcad-b47b-4b2c-9205-920d29f9e804",
+    "booking-expired:hex:cell-index": "8095f0311b78e58d2fbe2d2bd8f1b78d02441f980303a0640ad6aff12e258417",
+    "booking-expired:hex:completeness": "39af96e9cddee7e429b694dbe7232bfc896dde2d64a4c01101867f0946c8ceb6",
+    "booking-expired:hex:dedupe": "156f9ac5406c1f350855254b3855cf44fbda7a52150a28a22cc610365a22e795",
+    "booking-expired:hex:facts": "38e9332de62a2503fb81a8c97e2d8b6eccba9d7c51a8ad8c5cc7387f1991f62c",
+    "booking-expired:hex:idempotency": "de089e6a2d047d8c4a73a7cf2e74a14a426b9d67df1f5422ca2ab64442eaabc8",
+    "booking-expired:hex:principal": "9dd2fa4cec382a942796215d8d8ff006e5112e6151182e8f960c96f7788cf9d3",
+    "booking-expired:hex:scope": "9c28a0ff63a310fb5852e176f9fdc5a7d939a91b83f3899164165ecab092bd2a",
+    "booking-expired:hex:seal": "3f2dfdc23eeea83b0df60e11061e91f24443dd6e01e96cc7d401e3434b5c8ab2",
+    "booking-expired:hex:trace": "ad52aeeabbabac780bb22ef67873980b8b0f81949a3b7d78487c83a4fbb9f9e4",
+    "booking-expired:token:i1": "T014EJW3RWLDQyBnb8T65N56PCUpmdoH",
+    "booking-expired:token:i2": "0LQC8_Y3ID2PhHKDHiFOAv--HjPLjbyk",
+    "booking-expired:token:i3": "IIGkdEnq4wO-h6SXkJkJPVqoHIYoHFwm",
+    "booking-expired:ulid:widget": "01M2Q9G7M0N85B65GWZA3QKPJJ",
+    "booking-expired:uuid:tenant": "a525d485-f08d-4b75-a61e-e5e7a9ae31fa",
+    "booking-receipt-pointers-changed:hex:cell-index": "bbe6f040c507301b6dc4b715b03982a1ba77e46e9da7e67970531c18a4315de0",
+    "booking-receipt-pointers-changed:hex:completeness": "4531832a15919a8ce70cbbf3bbd0a742a7db63d274ddafe6713ffa1e59610f18",
+    "booking-receipt-pointers-changed:hex:dedupe": "59d72a7636d86d8fc9dc2eea98710b77df437eefb7c3334e6f0db62ff17a3f00",
+    "booking-receipt-pointers-changed:hex:facts": "d449fb5624a5ee00a06f9d1d2750bbca871922af484d19f29f78be3ab90e1205",
+    "booking-receipt-pointers-changed:hex:idempotency": "0eaa788b0be8e2ad9a5dc4045de6e185dc9a67ef6da4938711212f33b29a955c",
+    "booking-receipt-pointers-changed:hex:principal": "037b80d3ff5de9256a3336763cbb740fcc85a1eeab0aa0e4f2a46fa531c9657b",
+    "booking-receipt-pointers-changed:hex:scope": "d3274ba1bac0f9c20de7b669ce1faa83a563ef411d86f1c24d7d33503f7c808e",
+    "booking-receipt-pointers-changed:hex:seal": "9f31849638238b221e2ea7f98c67e2cb8ec4ed76c267aed48b72bb646b9dd35e",
+    "booking-receipt-pointers-changed:hex:trace": "b0dfde473a6d329c382b084b005cfe77ec4d437964eb86992ebd78b51c968a6c",
+    "booking-receipt-pointers-changed:token:i1": "MWGHXJd_tv7TWUv2sTMtXVkzvdd8F0DG",
+    "booking-receipt-pointers-changed:token:i2": "tH0RyxyvmrSQYdhhHzcuctsH3u0rky12",
+    "booking-receipt-pointers-changed:token:i3": "Iy6zMiDHElvxkKINMgicjK6SQDdoun1e",
+    "booking-receipt-pointers-changed:ulid:widget": "01M2Q9G7M09M9Y7B9VN4VTZCCV",
+    "booking-receipt-pointers-changed:uuid:tenant": "c87d235f-2589-47ee-9cc7-a97971d3318f",
+    "booking-render-tier-changed:hex:cell-index": "a4156d5adfb91bc8c193343df493bbd5aabdda92179d9e9a180a128e56294268",
+    "booking-render-tier-changed:hex:completeness": "bcd297a4e5797b546c7b36d169b7bf7d0b019586da53d3424c0ca46cc5dfae1d",
+    "booking-render-tier-changed:hex:dedupe": "bda9b9756b769e8d9a3b29921ca2ac5fdf4d2c7cd573ad004c1c3bccbcca9b0b",
+    "booking-render-tier-changed:hex:facts": "4b8b6be3da0abc26e3681a4b9386ecbfe1e8f9398c602a3d2c0555a13d1d2dcc",
+    "booking-render-tier-changed:hex:idempotency": "1b2bfd36f2191bbef025133d451a7be8009a64392171eb44e34e32439edca180",
+    "booking-render-tier-changed:hex:principal": "957ea2ebd2cf6c98356a7cc8bc4844ddd1d52c1e7346deef5711a53bd0c2f21c",
+    "booking-render-tier-changed:hex:scope": "b94afa38fc826731502f837c587c2d6484e0d58607d400908faf76396bc7aefb",
+    "booking-render-tier-changed:hex:seal": "e3dc16ccdf00e1b9245926a34ab454d74baad55ba0d32b32fe42b418130599d8",
+    "booking-render-tier-changed:hex:trace": "91f710a87ab32167ea94d0edf6a94189231d0fbc7784a33e2618dcf79c38e90d",
+    "booking-render-tier-changed:token:i1": "xkjMiWyBLaRD-A4fFVaWtz4oL94jbtRA",
+    "booking-render-tier-changed:token:i2": "ERFLnszi2vXUZrjLHJZ7GA4HWPHDnIc6",
+    "booking-render-tier-changed:token:i3": "YBd712fmbBIg-VDGmXeD6x5ujQFueZwB",
+    "booking-render-tier-changed:ulid:widget": "01M2Q9G7M00YWM06DBCD4BSKGP",
+    "booking-render-tier-changed:uuid:tenant": "e81f54da-5992-4009-9140-b1d2304c937c",
+    "booking-root-values-changed:hex:cell-index": "fd9138cc6747eb60d510236b4869ab70c9cd6ce434e572faad579e786759a1e4",
+    "booking-root-values-changed:hex:completeness": "0da4d38c26af3236e8a9b81c29815c9909b2b2e75af563b7d03b6932a7dcbb03",
+    "booking-root-values-changed:hex:dedupe": "e4e75d99765adea2c83f437a9d04bf2503bbc2ece53742e11f87d2f662bc0347",
+    "booking-root-values-changed:hex:facts": "55498f8230d914e4e1ee6dbb8f657d489e0bfa5f72ac41a46870f5078e4edbc3",
+    "booking-root-values-changed:hex:idempotency": "9815fd3a6abcc61a094d571ca700f95d3dd7a8f234ac268de16f8a864ef7bf3a",
+    "booking-root-values-changed:hex:principal": "f41cb6d961f573559300526ff142ea49b3cc3045cb304540dd14d8b6d241576d",
+    "booking-root-values-changed:hex:principal-replaced": "3f04750523455438f426ac13703d3e85a8def02ef99bf09e7e69bb584871a83b",
+    "booking-root-values-changed:hex:scope": "b6af12f9209b1e7034452a13dcfc8436a43079e508731d1102f66d98116ee829",
+    "booking-root-values-changed:hex:seal": "3ca6fee1c1140c8dee9977717e85542ba33479f31a2d2aa153a825a547091e52",
+    "booking-root-values-changed:hex:seal-replaced": "6ccf9b843941cf54fe7efce3616ae833dcc3dcace399ccb456bb47b435c488a3",
+    "booking-root-values-changed:hex:trace": "33e3c0cc54b844481474908dd204a3f4055cc842e7064f51d15a92059c3f1984",
+    "booking-root-values-changed:token:i1": "AL1gwfbn-u8Uh5ideGN6KXLxcUmw_Qkc",
+    "booking-root-values-changed:token:i2": "G0AUjVMquMTCPW_2LeIynt8QVV83MLSX",
+    "booking-root-values-changed:token:i3": "DPbCuq0qZh9lhOh1KCM5S6QHDWlWhZWr",
+    "booking-root-values-changed:ulid:widget": "01M2Q9G7M0VHWDVKQXKKNV7NAA",
+    "booking-root-values-changed:ulid:widget-replaced": "01M2Q9G7M0R8RKXFDSR6BZEXYB",
+    "booking-root-values-changed:uuid:tenant": "bcdbe061-e638-42a9-95db-2936a8d662b1",
+    "booking-root-values-changed:uuid:tenant-replaced": "b141adbe-6146-4206-86c3-9cb4d171b986",
+    "booking-tampered-body:hex:cell-index": "af3d74f2720197f16e14f1dc9d1d6ae7a7f4afda7f26a5a5d928d656c85e7ca4",
+    "booking-tampered-body:hex:completeness": "d71b8c8b3c23f59246625c6789a4d9aaeabab9f58395bf6cbf7a91b336f8d3f0",
+    "booking-tampered-body:hex:dedupe": "6818103d510e9b0661dab785e836308ee240f76cad587270aec5cf3f489650f5",
+    "booking-tampered-body:hex:facts": "03306142a132d0b23063b75d8d0f0522a0c6ff865e7d68a5ce27188ae83acb93",
+    "booking-tampered-body:hex:idempotency": "50a8677c769350a8262b92e6e7dbf49e3fa731a26b2aff0421a4f98c1a546917",
+    "booking-tampered-body:hex:principal": "0cb380562ab7b176c06373a4b78b667390335e7be6d274709c6afc1a1f06227b",
+    "booking-tampered-body:hex:scope": "23c7ac55edaa56e342b144b716b30073ecbc0ad097f5152b892abd091f227eed",
+    "booking-tampered-body:hex:seal": "1d459b143ea768faff0033156a4bd2364ebbc4090e10d15f3af89943a5dee7af",
+    "booking-tampered-body:hex:trace": "f15c531b4b1c738cb27904f8c71096d6722809a39d5a059c4eb3e4a4d014fbfe",
+    "booking-tampered-body:token:i1": "_UumIe9U-As4j40G0JXP5yp_IbqwfRW3",
+    "booking-tampered-body:token:i2": "gdJZ9qfbSryiA9Y4V7E1OxUnP8DHdv_0",
+    "booking-tampered-body:token:i3": "J849d7U2ssJ-HAf9TU2kQFwWSguzhZrT",
+    "booking-tampered-body:ulid:widget": "01M2Q9G7M08N9Y8Y8B2MBF1SVQ",
+    "booking-tampered-body:uuid:tenant": "3539fcf4-b540-4b60-ba47-3dca36da0c08",
+    "booking-token-changed:hex:cell-index": "94779b040623e5423badbdc851624dd98a203c24b4ce9896a9460375885dacc9",
+    "booking-token-changed:hex:completeness": "52dee18201999760280030dd45bcf629a7cd0b7a9e0961d4a620c4f818fe99e4",
+    "booking-token-changed:hex:dedupe": "47f1bf09576efedeb5d95dab09d4d07812da9d9fb0b68264f3afac07a4d468c7",
+    "booking-token-changed:hex:facts": "b60d7ea7a13c3d3c652ad94086758d7bf4a2ddc07d2cfe8b2c010ef01e044adc",
+    "booking-token-changed:hex:idempotency": "3e113dffe2153164052cf309cbd617a006706a93828189acce856700b4bccc90",
+    "booking-token-changed:hex:principal": "ab672907c8212c3f4e7b4b0b9a25759cf491b926b3242ead560f953bacb1754d",
+    "booking-token-changed:hex:scope": "2e379dff6548232ce4406c9978ec9c74be43d15fb7c6d50e281bcd90988071ac",
+    "booking-token-changed:hex:seal": "a1acd4e94fde679ed34844357120dd6c2a4f45660a7466a1fae9c3304c4e019b",
+    "booking-token-changed:hex:trace": "cefa4324dcebcc23943edebc8ddc9375407b4db990cc6320dd90b109e662f859",
+    "booking-token-changed:token:i1": "sUmNk7jct0GbAGsW1qh1kOEVTBAoaZ6u",
+    "booking-token-changed:token:i1-replaced": "ru3GyCxdld-GQ6adAbi__DEGRNgkJsPg",
+    "booking-token-changed:token:i2": "36-5_ByV1WsFdtKcnkW-Cu1GenLLlRct",
+    "booking-token-changed:token:i3": "gmoSImtMzJgfhwQhhBi9sGRLP2SewZbi",
+    "booking-token-changed:ulid:widget": "01M2Q9G7M0HRGEPABP3D1MRRVS",
+    "booking-token-changed:uuid:tenant": "b4632638-f9af-49d3-8ee3-8b53d60754ed",
+    "choice-text-only:hex:cell-index": "dd24e541df164321186af081501249fb84347d7b34919f73df2a8cb0524f8f35",
+    "choice-text-only:hex:completeness": "51178971ac67f122a592da6c6aa570b0d88cf0669d4ba51c6987c818dac3427b",
+    "choice-text-only:hex:dedupe": "e72af8cc3614ce30d7203ca41c04af9cb8ffe32dcd49307e8fd217619652e6b8",
+    "choice-text-only:hex:facts": "6841749cddaa174b76cf60eccde1c3461302d86a142ab7f294a9ab7c67fc6bc8",
+    "choice-text-only:hex:principal": "e83ddf17241dff5e0008e0f105a007db37c273fe55f9f163ac8bbcddb7e7e197",
+    "choice-text-only:hex:scope": "77c0748cb12e88a52c4c2c411905aff5ab77cfb214f0d4f8768a7cd2e3165a50",
+    "choice-text-only:hex:seal": "6807efe8c8f0f74f9658e6195f0be9c22c567c1eb4aca348db8b52944670b806",
+    "choice-text-only:hex:trace": "e5cf134ca624ee8c891032bd29189fbe046ef71faf3719d21d66573cd69e7794",
+    "choice-text-only:token:i1": "n_t3sWK6-DcvBr-niMgy9Kpy3399pEs2",
+    "choice-text-only:token:i2": "KVqBTx-ZfPlmnRvNzxZwQ8Q2KjjW6z_j",
+    "choice-text-only:token:i9": "tVeBxh8-5cN9t0MoNLaXKJgVBymj6cnt",
+    "choice-text-only:ulid:widget": "01M2Q9G7M07MYM2CFJNR7DM6C4",
+    "choice-text-only:uuid:tenant": "f02cc980-37d1-4b56-8d17-b2b776d77a37",
+    "collation-digits-case:hex:cell-index": "37a04aa8625982fb1e1eca8584bd72c59d17cc4a8880b05f822180d3bf4456ef",
+    "collation-digits-case:hex:completeness": "c660886ed6f1e78d98f1e46196f4bed7f2cd95e95b6e15209f8bb8fe8db2eba5",
+    "collation-digits-case:hex:dedupe": "a23b90189bd76e0233d75b8de89045e1c18856559220cc0de13f1451db94d55f",
+    "collation-digits-case:hex:facts": "95df6c2bfeb56143588eae59c0acc1534d52bd78d1c4a445b5ce4de324331ed7",
+    "collation-digits-case:hex:idempotency": "0000388268137ffe76cb0b395d2a49d8e53d5b3675dab80e70689c6f44d585ca",
+    "collation-digits-case:hex:principal": "c72c5b6fab17b310a38dd0ae2b4ecd78edd516ec85e95a03090a9aa31c62dfa9",
+    "collation-digits-case:hex:scope": "23176f353bbf23655a28ae9d63d50d70d366484aacc59cc76c381301af2dc053",
+    "collation-digits-case:hex:seal": "0d90fdca6884352ab73fa763d2225423ce81c141c3636808f0691775f9389e1e",
+    "collation-digits-case:hex:trace": "89b671ba79de2e16345754a40b2e35d609cb08dd7a09a14ea00986fce673b485",
+    "collation-digits-case:token:i1": "e-En446RzbLMQ-RQJUIQ413gJfi0HojN",
+    "collation-digits-case:token:i2": "-_JIe_ifwJK4kK9-sh0oxIrleQfeUF_B",
+    "collation-digits-case:ulid:widget": "01M2Q9G7M03CX58GNQSSDGFJAN",
+    "collation-digits-case:uuid:tenant": "05b61e74-572d-4639-9a3a-1af85ab38c19",
+    "collation-et-z-t:hex:cell-index": "9058881b0041ba5a1e3ce3c7b1dab2395ecdb7965d6f0f8280855475f75a2a0f",
+    "collation-et-z-t:hex:completeness": "041e0c27f5c524e86061ffba36b158339d5bacbdfba6b153b6497ee1df3779c8",
+    "collation-et-z-t:hex:dedupe": "7d73b36a3d340df5a774522f43ebb7462f3a7f0c9abb5fa6ab776a2f9164ddc4",
+    "collation-et-z-t:hex:facts": "0f176f881d1b8b04814d4cfbfc614aa19764b09d833ef00e047b7880479314c9",
+    "collation-et-z-t:hex:idempotency": "48df98f41f7af6ada7d7d69ce233216fa646983e31029b1a50f4b77ef288032e",
+    "collation-et-z-t:hex:principal": "cf20b3e620a7a0430fa1a66066ed1d14125227328b357dd4329719481b2b005b",
+    "collation-et-z-t:hex:scope": "01de2261d05fd2da14fdd9b703e1dd31d0f2b973cc1ce49241c6f22af8f5fdf5",
+    "collation-et-z-t:hex:seal": "50a637d206a10caa6d6a43d48c1837b289cbe79794092fd8e76f43f753e6a1df",
+    "collation-et-z-t:hex:trace": "634ca91a15a11e9085f4123ee03d921f987020d5252ca707b170911469f9fe42",
+    "collation-et-z-t:token:i1": "3VP2c2HUSFZbKIGvya9ZojiMm3NNom7R",
+    "collation-et-z-t:token:i2": "aMmxxbxVokEpJDb4ESU064PO9qst_jHa",
+    "collation-et-z-t:ulid:widget": "01M2Q9G7M01FM0DS09XPE2GHDH",
+    "collation-et-z-t:uuid:tenant": "ab90ba4b-96fc-4464-894f-ea067f81774b",
+    "collation-lt-y-j:hex:cell-index": "3c2ca38cc50bc5c0f0c0a1f03da86cdbbaaec24875739abd2c4bc4cc8bd6467a",
+    "collation-lt-y-j:hex:completeness": "f69726632192ca3bd8b4a7e18f64cf7aa725021ee6519ff5e6baa786989ea964",
+    "collation-lt-y-j:hex:dedupe": "d7dabd202b945c844988e3490a4b953c1c38de779d1beb40f529ba259d51604a",
+    "collation-lt-y-j:hex:facts": "e9aa7205b3d1e527690c32a35cebccd3785f01021eb5e5ce747602ec8ced1063",
+    "collation-lt-y-j:hex:idempotency": "7ba6073dd42f20663f8e2769d7114008dd9e8c2742322261b2b2c87c9ff48457",
+    "collation-lt-y-j:hex:principal": "1582ffead410d7a7bf7a67f8b2a06197e996379783bf1692aaf1cd55caf8f073",
+    "collation-lt-y-j:hex:scope": "7a3cc7f153a1433157929d738f2c427f54382faf168ad658a39edcca50548262",
+    "collation-lt-y-j:hex:seal": "6f302982ccde226c2390511fa74b07395d25c281d27ce3fb664b831ce2cb8fdf",
+    "collation-lt-y-j:hex:trace": "31253dd7a9e25ae12cb79989415656f810979eaf0da3bd66812439ed9389cacc",
+    "collation-lt-y-j:token:i1": "Nl7aK3CkqA_3r6481gJ1igTLfK97gjHL",
+    "collation-lt-y-j:token:i2": "juwNum-j6JlkvMMnnFWjwgzCKM7Zq7mL",
+    "collation-lt-y-j:ulid:widget": "01M2Q9G7M0QV0W7BSZ6HP2KK1N",
+    "collation-lt-y-j:uuid:tenant": "cfc86aca-5fe4-4b3b-9c0d-9f0168f30246",
+    "kind-approval:hex:cell-index": "a1379f626a04c8a15ada973e17f76c017b72dcb4e93863fe1041b8f5d981b3f5",
+    "kind-approval:hex:completeness": "0089f951ecf211fe82a9f091eace4cbabe60f154fc18ba9046200560d5454de2",
+    "kind-approval:hex:dedupe": "e172341f6660ecb576c5dfe7030dad982f41eb74df4c10f3b5f81de92f899e01",
+    "kind-approval:hex:facts": "c11d7c6641f51366e09b4a081c5faa075caf9d2c93395f38366584b6a16a9aff",
+    "kind-approval:hex:idempotency": "7cf5de4ca190ff7af6f87efddbbd7b761061e73cfd17bbc01ca27bc41b00b9b0",
+    "kind-approval:hex:principal": "76168476e19562f391cb12aa51717cbb94dd91ecadc59fff606b456dce38e959",
+    "kind-approval:hex:scope": "98620c099c6d953b4784e7a85d82099d14e5026608cb01d4c2d669f6e808ab90",
+    "kind-approval:hex:seal": "a202c61a57b73c5dd266f814a507eb9a84a345a7b784317db96d4b992e40dca9",
+    "kind-approval:hex:trace": "39400b8b5b1d83d33a1988471a94dd6309d7160db7c28bdd1ad4bce3e65c2dca",
+    "kind-approval:token:i1": "6urTy6G7G_XWdBHjnnkzPXP6DZktTX4G",
+    "kind-approval:token:i2": "_7a_GQUbzopGDpbxXRkUuYaJC3yEgQZ7",
+    "kind-approval:token:i3": "_-MSNem38og3c_1V2zgOkdcaqdcuudyo",
+    "kind-approval:ulid:widget": "01M2Q9G7M0XX12C7H20TZJKQ7K",
+    "kind-approval:uuid:tenant": "aaf0280e-718b-47d3-b530-7f4a9f2d15b2",
+    "kind-artifact:hex:artifact": "f5ecdebcc657e34e327b3d11ef4da272d2c6c95092001dec172a908002725b50",
+    "kind-artifact:hex:cell-index": "dc7c8a9b01a6bb077a46f7ebee1bdd59098291585e4b024fbe2b9ba0f96b232c",
+    "kind-artifact:hex:completeness": "9a96b7c4dfe56380bee0a5c29509687797ba5da48e988d932eb5805044b1519f",
+    "kind-artifact:hex:dedupe": "15bf979813d3fbcff6b6be378d470da2986a287bc27095625a3645b62d21646f",
+    "kind-artifact:hex:facts": "c41cd2406120cf800987b85814d2b6893540ecf8aac74988d731df6aede3070a",
+    "kind-artifact:hex:principal": "9b7f6d59eb05f4bccd7d8568ed10ff8ef25f1096ee8eac9af8ac75b66c31589e",
+    "kind-artifact:hex:scope": "7fa8c0d69061a71ef37679a554de7878ab4bb9a8effba6cd03dcf6bb2d72e7d9",
+    "kind-artifact:hex:seal": "8dc974c572cf5b0af21768c427f52832c08b55c464d744eb066fd74b24fed547",
+    "kind-artifact:hex:trace": "7b4c057a52ff3a7fe919a27e5a5c152a452d234d7db92f514c064dd9ff0f1301",
+    "kind-artifact:token:i1": "9Svt2U1jy0A51CrB_anRndPmR0Tr1Ghf",
+    "kind-artifact:token:i2": "JJQi7yC2fxzN_N85qW3S6gzud9bplfB9",
+    "kind-artifact:ulid:widget": "01M2Q9G7M0PDCZ5AJMA8H2JJKH",
+    "kind-artifact:uuid:tenant": "276c964f-d13d-45dc-9686-4b966bafcaa8",
+    "kind-booking-confirmation:hex:cell-index": "704bef7463b8c8143346e6429d7baf4d8a61d89f5ec527af56bfb9b94a835c1d",
+    "kind-booking-confirmation:hex:completeness": "cc7f1b6c41b417800ca2fef732f8adf7ac4ef6f8f00411d9512223e85734b1c7",
+    "kind-booking-confirmation:hex:dedupe": "b503f1890d6ef7996edd2236042367210d98cf31f41c0d7611ac6f2e36324325",
+    "kind-booking-confirmation:hex:facts": "1500504fc10bfd8cf25d20817b0671ae96bf063578cb7c8a8cc6285706bdd0eb",
+    "kind-booking-confirmation:hex:idempotency": "1959cf486bc64611af3249819754400d28119b98667d9b1f26a2b2965fcb0813",
+    "kind-booking-confirmation:hex:principal": "c17ebe83a2a1073857c9d6ef72d834301d5d315db4eaf47bc7f482125e330844",
+    "kind-booking-confirmation:hex:scope": "975c239c45aecfb0e42c7479b93195da5a62573e1628799e3cc3ee04503d2d6f",
+    "kind-booking-confirmation:hex:seal": "d54cbe54c1c43d5869518a2ab94b822a073084abfe1c41c71dc6376e4e43765a",
+    "kind-booking-confirmation:hex:trace": "44ccf47c7b65bed3d6026eea608c82049073dd9322dd2ae4d9fc8a43d3022a7e",
+    "kind-booking-confirmation:token:i1": "0XNtFXa92s-EGAI6-FAKJmJFpdzT0rPK",
+    "kind-booking-confirmation:token:i2": "N0f6TNXLb_en9Ha5hnKrcaC8rVix_wUN",
+    "kind-booking-confirmation:token:i3": "3WKhRAv4s1BAGWWqXme1HtDUIPtu2g8x",
+    "kind-booking-confirmation:ulid:widget": "01M2Q9G7M0HBEEBEF2P1SD3ZAS",
+    "kind-booking-confirmation:uuid:tenant": "39f537de-8508-4a92-9586-df09e4e36f6a",
+    "kind-chart:hex:cell-index": "b5ef4bcde91af1aec5ddb353de772ff12fbbe3788f96b7bc3eedc7bcfaa0b3f3",
+    "kind-chart:hex:completeness": "05685afcaf0c20abef0a8be12dfd899e3bcb19f42ef1b4ddf9034dd86f50a3d5",
+    "kind-chart:hex:dedupe": "dcaf33944bad5f31f8f3f7f1d157f6612cee6ca7441e09ad536e591c6b96f8f1",
+    "kind-chart:hex:facts": "ff9fb472247f9af15d52713ab00b0bf3e064bb5827fbb8f73b2d60ea4b742f60",
+    "kind-chart:hex:principal": "18de2560765a508e2dda53184ee554bb442fbddba5191a4a15b30cf7cb34fff0",
+    "kind-chart:hex:rows-digest": "39f22f09a276be194f484c0212f84e1d9720fadaef26fd1f7bb6cb7388b4db79",
+    "kind-chart:hex:scope": "6932494c842814be7c82e48f1fafe5aafd22b21ce57e00b28138e6a359008a0c",
+    "kind-chart:hex:seal": "0a11f07fb850289b65d7f584face1a43e5bdfd8724eb9d7084a9e7299a197e4f",
+    "kind-chart:hex:series-digest": "e492b7a11802e47d4639f6a3c3b98f6fff2c4f984f8e19077113c45b3b6a7e25",
+    "kind-chart:hex:trace": "2681f999805ed87ef7a1642b9bdbca0ea6d7936cc3461c99d2c717a476c25516",
+    "kind-chart:token:i1": "j7VQdcWVYKEJ7pM1sWN6WBYxbcPCk5w-",
+    "kind-chart:ulid:widget": "01M2Q9G7M00J43K3QTCTADHBMY",
+    "kind-chart:uuid:tenant": "adb8aa03-f711-4ed5-9739-a22f0bccdd6e",
+    "kind-choice:hex:cell-index": "5f9d05429821faf5cf03b2d29aad9f2cabce2670fdc5c3d339cc010c173b3631",
+    "kind-choice:hex:completeness": "48087dcc86b85b893a674546c4fdccf7c5a008672fc2ab0359dddeca130193af",
+    "kind-choice:hex:dedupe": "532c4b594ad23c87ea0c6cca71c00e4306968150fc0cea4c0713b6974f26de3f",
+    "kind-choice:hex:facts": "c2907514a06f9a309ab10773cb45c50dc9143fb5851dc9b4e7e5ff05a62021ba",
+    "kind-choice:hex:principal": "d0a2d6a48ae1aadf0277dce9fe0c897cd85a637cd4196dcd7d90a11195c6c46d",
+    "kind-choice:hex:scope": "7fdde0f95479608b99f5b5fb3ce220cff9ccbc935330a7ec6a7ef4e5824f0e60",
+    "kind-choice:hex:seal": "5ce1abdece3fcaee388f78e11e1a577b3a63af42dfde3e142abef4e81f36c123",
+    "kind-choice:hex:trace": "20f2367257cda3bb350e76dfce892fec3eda59f9427a679ee709471c6b9cdc96",
+    "kind-choice:token:i1": "tZ3LDzImrpnXRmpLXH_Ofc1YaTX_j2UF",
+    "kind-choice:token:i2": "YUTZ4r1LIn_4Onc5V65veP0K31o0lFX2",
+    "kind-choice:ulid:widget": "01M2Q9G7M0DVJT7SNAJ8CRYF5B",
+    "kind-choice:uuid:tenant": "4fdcb3ac-c01d-4367-a139-6f163a6a06c0",
+    "kind-client-list:hex:cell-index": "24751d571835063fb602979fcc5a068c66f072afc6527f4bec3b54451ef79218",
+    "kind-client-list:hex:completeness": "6d67783ba0d14b40a3e63f9ae300a823f3cabf734f3291c5d2d568e2603cbd88",
+    "kind-client-list:hex:dedupe": "47a15a6f05dffb35894ad4d85e960116b9e842dad73a2a2313258514835346f3",
+    "kind-client-list:hex:facts": "97790eeaf8945d01ec422533214499b9e866707825ba4745b7cb5cf443cb92ee",
+    "kind-client-list:hex:idempotency": "e3976636a569828e834bae18dfc8d955821a476f4b80c23e1fdc91a089196ab3",
+    "kind-client-list:hex:principal": "c1a31ee7ec18de92f7cb7eba4697a5795f5169e747aeb02bbd5cdaa121adb9cb",
+    "kind-client-list:hex:scope": "e0927b16d85f00740f912fc0eed920f818cf7dec53be12128e4db91d2a5bfcca",
+    "kind-client-list:hex:seal": "4c4e2f30c18422ff81c48df433108760161f407f997577df5a759f1f84f54086",
+    "kind-client-list:hex:trace": "cc5821b5b5b552215facc93a8918075d4203b169cc655b443cfab2a9353a1b57",
+    "kind-client-list:token:i1": "Cf6dim1NhunNVfugoma9GsiozkrcGdAq",
+    "kind-client-list:token:i2": "V2PXOZle6sJ37fX_pfdvLDM_C3p_FRJp",
+    "kind-client-list:ulid:widget": "01M2Q9G7M0B6JSEKAAC81SQ0R9",
+    "kind-client-list:uuid:tenant": "b8ce598e-e1e1-4fae-8e6a-236f4605e710",
+    "kind-consent-state:hex:cell-index": "fae340a9841c1353753882d627090139e36c2cf3fe5898c8709a029e0e19f201",
+    "kind-consent-state:hex:completeness": "adede1f7f8d6a6aabd8d4fa65d6902ef14626fbd21446bc02260bc8f80f6b824",
+    "kind-consent-state:hex:dedupe": "9949a9b5add153b4650cc805582c4a0a5b7d6b396e93b05b9814d408f4f4212e",
+    "kind-consent-state:hex:facts": "1852cbf3a9cc8f7d649cf5bdafae71a3e4092f1c96952a6964da9e6204fedcce",
+    "kind-consent-state:hex:principal": "b6db0e23fc0096eb38c45a43a586c0d1e4973a31a2953d375860731e6eb17a3e",
+    "kind-consent-state:hex:scope": "c794d894ea8080aee80cfaca9bef1892265a6a5dd72a76d01671f3f91dd2439f",
+    "kind-consent-state:hex:seal": "0b35045796acfe20766e16adcda6395f0b30aced121401cd37cb12bc28a424a7",
+    "kind-consent-state:hex:trace": "d909a9a3addf39c242b17e44d3e2bdb067beb5a88ba28fa44a3ed49e18d85573",
+    "kind-consent-state:token:i1": "OLXtCaaQJhQwzMglbbqdPi6CXTzRWz7o",
+    "kind-consent-state:ulid:widget": "01M2Q9G7M0SXSXJ1M3XB95YZ4V",
+    "kind-consent-state:uuid:tenant": "6b646d4a-c3cb-47c2-ae85-d8d49216fcd2",
+    "kind-form:hex:cell-index": "e3f93c49b5b4dc498e9571cb489f9b4bb249e26029342a9bdaed0b93665b2b71",
+    "kind-form:hex:completeness": "ae31d26ac73964d6704b85741af1110106b17da51d179e62a2ead022ee8ed4fb",
+    "kind-form:hex:dedupe": "91b3f9713c9c783c0a779b8e8278eb7a4e7d5ae74a5c81b7a19435739684812c",
+    "kind-form:hex:facts": "9c5d6002fc968b66c13f2aa8a35f307ffe3dab67ab6b10f69ec2046e304757f3",
+    "kind-form:hex:principal": "034b0eb165a5eeb4c572a96c8956116335d408bfa4ebba7cb524e92c4da9add8",
+    "kind-form:hex:scope": "e1ee5dd2a5ffeb84330b487e55b16fea552a7da679ce008c2c229870553bd764",
+    "kind-form:hex:seal": "ea4cab3f7006e6be6901ea2b3962a27b41cda00df7552e2a11bfe316362a2ced",
+    "kind-form:hex:trace": "8dd6a9c1e49c8754ab5c71e15f9b99d7c04e23dd5e19207da5cf194f9ba1a02b",
+    "kind-form:token:i1": "dMQm9acz-XQ52tUb-u1maQq-O1T1WIHr",
+    "kind-form:token:i2": "anRkLfFjMXqpyOQiZ2yYHme-XY5MR7dW",
+    "kind-form:ulid:widget": "01M2Q9G7M07KADMCVFPKPS3WSV",
+    "kind-form:uuid:tenant": "352b5797-eee5-4431-b30e-867e82f0da44",
+    "kind-identity-binding:hex:cell-index": "fda8c98d3945bfdb26b142c00885894e899e4206329e8fcaa243ca6c67880ef0",
+    "kind-identity-binding:hex:completeness": "c138d99b436c391e4fc7393b12a7033ee0882430a5bcff03521637c2b1bf4fa6",
+    "kind-identity-binding:hex:dedupe": "bf325a2f8c7a47a9dea9fdd1dfa15519fc65178766cb3989b72190c96a0417a6",
+    "kind-identity-binding:hex:facts": "e2185252e294378fd80aeb1f131a5cbfa16fc72a7fae9e542955a76dc8dd466d",
+    "kind-identity-binding:hex:principal": "841ff084dbe6aa85db99a2eea14b822e0f60b241e9ada9b8b63a8005f6eaffc4",
+    "kind-identity-binding:hex:scope": "578ea331f7d58dd622572d832804165bb637b67a1815d18f134372771bf4eec4",
+    "kind-identity-binding:hex:seal": "701a5e6e543a35d38a76d920a96c5ac171132f1db902dc1fe165512c6a4a47e4",
+    "kind-identity-binding:hex:trace": "78d9a313e7a2626a3cfd86c46cadf88c6d0ddc80afd80c2e7302026529ab6019",
+    "kind-identity-binding:token:i1": "pUqvtQ0xLy53FXzBeUP_uWpbTOvr1ekc",
+    "kind-identity-binding:token:i2": "tbFOgW6IlKrxGzARBtsvPj-P9QrNC9vf",
+    "kind-identity-binding:ulid:widget": "01M2Q9G7M0799W03W1BDA8W5FX",
+    "kind-identity-binding:uuid:tenant": "880bc102-a8a6-42aa-9928-7ea14d4f6606",
+    "kind-limitation-blocking:hex:cell-index": "e200f06d21c4599018c1f50d315b4df165ead6a2bf6663973965438f8b6a07ae",
+    "kind-limitation-blocking:hex:completeness": "a0e3cf8226c24502adf6a36560ca82d4a2e8358e082b9c4579708975dd6935a9",
+    "kind-limitation-blocking:hex:dedupe": "6167fba73bfea9beaae175d745c8ff359bb15db622356e3b2d1c2ad904c27d3a",
+    "kind-limitation-blocking:hex:facts": "22aec5c05e7fada334183c254baadcedf4cd6c0162160904c515d6fe29415469",
+    "kind-limitation-blocking:hex:principal": "0b2184f1b8a6be26748b838d4805b3e2d2eab4b3a9c287911a6f863be3a56039",
+    "kind-limitation-blocking:hex:scope": "981565fc5917f6981def67e9fa87a3f71cafa6995e33b92a1d24747b7d087191",
+    "kind-limitation-blocking:hex:seal": "388f0ba9f18a8904d7ef5d495654df878f8ce48dd5f45216c10d9ddfaf837f69",
+    "kind-limitation-blocking:hex:trace": "c0c81d801bc7055ae0c693b01af79b172cc1807ebe68090e8211e89935c5e1ca",
+    "kind-limitation-blocking:token:i1": "zpVdyywnv4NpZqgFscnnsQXb7IpueGYR",
+    "kind-limitation-blocking:ulid:widget": "01M2Q9G7M0N0NH83E1YY56AFH8",
+    "kind-limitation-blocking:uuid:tenant": "25558159-567e-4195-8423-2b1f536e88c8",
+    "kind-media-preview:hex:cell-index": "9a5d32c4a389e1123ad6e1b1eea4be4f2f92860e324a51c1abecd019e1c7c338",
+    "kind-media-preview:hex:completeness": "9572a5de589c5e6412cdc1aeb908365c9410596cfcbc67a996108af3ea5613a5",
+    "kind-media-preview:hex:dedupe": "27790e68901f3277ece0dfff66f658244b2a86cf36ec7aa6b3cbb3f8e078c13a",
+    "kind-media-preview:hex:facts": "d8fa03eca9a32977afde0d48e02bd0c4f6d4803d5e7af37df624d00e09b6b636",
+    "kind-media-preview:hex:principal": "485878206245b47d44b8e4286f6605da4659f3599e5fc8c02a0481558340e229",
+    "kind-media-preview:hex:scope": "08d577989599e472c116cfae1d204f9970826342040b70d4b670392256a2bab4",
+    "kind-media-preview:hex:seal": "779d8934261eab3df76d72de76dcf24bf624ec513648dc6c2d981d34e0fbfcd8",
+    "kind-media-preview:hex:trace": "aad38db8e23bb511edf4c2f56c099256a1d77723c44ed368859b2da20e8773ef",
+    "kind-media-preview:token:i1": "oWAdboXKc_a7cWopNaG2DyMhQQHICata",
+    "kind-media-preview:token:i2": "Q9oRPWNVO4Y_dgbO-LmutoQPjkGc9mNL",
+    "kind-media-preview:ulid:widget": "01M2Q9G7M00ER0NHS5KMR6VC1D",
+    "kind-media-preview:uuid:tenant": "3f4e36cd-bc59-4fcf-8173-2ff3c8dd64b7",
+    "kind-metric:hex:cell-index": "d9dfe0e7883eee800d0f32c78ed756c746093bf908e51d77f3ab4dc206cd4cb1",
+    "kind-metric:hex:completeness": "265a3638fdd7073d55588659b0931a5f9388ed0a5ac1036bb811b0fcb2deb144",
+    "kind-metric:hex:dedupe": "6e4ec7dd0ad5336d691ee06aab86ef659a8880a59afe092d59c019d148cf3295",
+    "kind-metric:hex:facts": "5e5abbbe3afc58aa1b589d7d87d7b136c7a869c2c8d90f63f4b071e2487b3bad",
+    "kind-metric:hex:principal": "5f5930b1efbe42bc88af856a53066d4bc28d4c929089f2a3d3f8606ed6a2796a",
+    "kind-metric:hex:scope": "eb027458303d63fa1d193b7ca9573aea820feef7761d614fbdb9df4449140f31",
+    "kind-metric:hex:seal": "4020b56e22d6480323431238e52ed34262d7978dbd7da9eff623d176497b6378",
+    "kind-metric:hex:trace": "85dbd4ab90913577d93e8675cc78ee35f0c1272fd66781a88092f24345e83c67",
+    "kind-metric:token:i1": "UOOTSxfHyCTYge7EPSly_qR1pvbbT6AF",
+    "kind-metric:token:i2": "qIEY-Ecrgi80aBxqFMomXc353UjUev-y",
+    "kind-metric:ulid:widget": "01M2Q9G7M0WD2RRQRPJR28VQYN",
+    "kind-metric:uuid:tenant": "7a19ed9e-e3b2-41b0-9742-2deab459fe5f",
+    "kind-payment-handoff:hex:cell-index": "3c78877c4fdf153e9ba002cbb96e6c52181f273b0df81a0a25baad9ab9ee9de7",
+    "kind-payment-handoff:hex:completeness": "1fad6b99be6ebe41cf7b2343a80a8ffae75c0b4d9a4d41925a38a06c39e4b7f0",
+    "kind-payment-handoff:hex:dedupe": "5abc6fb3446e95e478ef5e929b76e535df4595d28b1cd305eb7131fb4e892919",
+    "kind-payment-handoff:hex:facts": "05bd1dc9ccb835ae036ffb8721b67d107433e1d164eb37bc382924f84f5de93a",
+    "kind-payment-handoff:hex:idempotency": "bf6f277045ff9dcffd694cde1b91f5651e83dac26b611cd7c18a9009968142f9",
+    "kind-payment-handoff:hex:principal": "8ab11b75dc97bf2c6a780dc448cd81a3bbb7ca91e6b2ca6052ff6b5d663fa790",
+    "kind-payment-handoff:hex:scope": "5328ad436af5317c5c95801c37edac58f9355f9756edea94f233d38ef8b0b725",
+    "kind-payment-handoff:hex:seal": "7f30d67e6817e9186f64eaf6b64020fbee1958960f8030b22e06493252bab1cd",
+    "kind-payment-handoff:hex:session": "5c8801a7b1ce46992d46069545b778704261a9fc3040560f323f1b196b0337e0",
+    "kind-payment-handoff:hex:trace": "634e979ec70f0143de97cb686dcae7835e8fb3fb8245995e9cfb512b0cd0c096",
+    "kind-payment-handoff:token:i1": "W4Ctmmc2J-p3DX_mbHsJYwTUf2j0d8X_",
+    "kind-payment-handoff:token:i2": "uv2oH1LYx_cg7MQQCZjEp-TpbRy-p511",
+    "kind-payment-handoff:ulid:resume": "01M2Q9G7M03YFDS7B83M5V4M24",
+    "kind-payment-handoff:ulid:widget": "01M2Q9G7M0H8ZV1CKFRN4XJQ2V",
+    "kind-payment-handoff:uuid:tenant": "afe2157f-5119-4b46-879e-6674be80815b",
+    "kind-progress:hex:cell-index": "b884820ddf2e262500159696b164aa5fa83d7f6f8e11197d3faa31a63e91e5b2",
+    "kind-progress:hex:completeness": "0ea4a843cf8e15a66fbd8d6183969faf8235cd4c144df4bd43104138c501005e",
+    "kind-progress:hex:dedupe": "5925b8a3252cbc447f0c47d263c1f8f5cfdb1482d841b61f1f698d91d985c7c0",
+    "kind-progress:hex:facts": "10325034c8fd5a5a53d3c253b3987d1ac11a43d2822e828d9093f0d16fe1d02f",
+    "kind-progress:hex:principal": "5f7be65a101ed29b93c5af44efaa4ea8c5d5a702c9e5b0c21699e1b8df4b0e29",
+    "kind-progress:hex:scope": "cee4db707a3670933d1cfdd0fc5596a90327de5b28450218cdf980911c65e183",
+    "kind-progress:hex:seal": "be4664330727f4ce9c34ce78d115c3188c1965c8a52a0ba8bd97752b21396bb5",
+    "kind-progress:hex:trace": "7f415adddd43bce13a2ce2f9fae12ee6b23634a922082de9bb9b76d235ef8f1e",
+    "kind-progress:token:i1": "f4OIGoknUrQTBcTWR1EObjq5N1MmjF5P",
+    "kind-progress:token:i2": "jDyg0qi_tFS9kkdH7IWQlPOMdEXCTNem",
+    "kind-progress:ulid:widget": "01M2Q9G7M0MVB7AFZ9CH96PE0Z",
+    "kind-progress:uuid:tenant": "274fdbea-fb89-48d3-aa19-d27755006281",
+    "kind-report:hex:cell-index": "76c580af288ec3e78ec6e7a9700cd106e46aed23e874e6f3059f89e09c0b4af7",
+    "kind-report:hex:completeness": "e45144db45273dc64a84364a6a5aedd979cd6034f2155b24e08ab87bdcccb07d",
+    "kind-report:hex:dedupe": "7df19e9cbcbdb6876f99345c4b868305fd33c060c55f8a483877ef252cbf468c",
+    "kind-report:hex:facts": "5a8d23b1696689099039904956e375b696214627bfa8217ad955d2737eac57ab",
+    "kind-report:hex:principal": "944af080f2d9324cf1d28bbc12f1a63cbe639d30ecff9436a1b1f189541d9cb3",
+    "kind-report:hex:scope": "8c7d93499d09d663946bd5a5effa5e79543c96e352ec7415194d7ee1eb26709b",
+    "kind-report:hex:seal": "b1a3230d38130a7d020f59a224eabb9b0f8c1041f2bc0c5ab0af2f79be4283d7",
+    "kind-report:hex:trace": "6cea31f80e8a96ececbf2d75c21542d610707716a64e5cdc19bf63269d5d7003",
+    "kind-report:token:i1": "6frVvA3QOjMczm_zirFAjn5xMOW7ESHH",
+    "kind-report:token:i2": "4HgWiD2qZhXbsjH3pt4D7munab2BvOCb",
+    "kind-report:token:i3": "DVsQMJofPBkGymBKA4Co-srKZ961EYND",
+    "kind-report:ulid:widget": "01M2Q9G7M0MF4GCGYQEWV3WTX3",
+    "kind-report:uuid:tenant": "fc072357-8e51-4b89-add8-09d94428b257",
+    "kind-schedule:hex:cell-index": "16d6d71deedec07fc0b3de73d3885d50f8aa3d119083d49592349c4a9050b436",
+    "kind-schedule:hex:completeness": "c88c37f2b506f119aeb5dcee06e0fb21c0282870b0835df4d10fa9c7ab2df0f0",
+    "kind-schedule:hex:dedupe": "4afdbff94fefb7ad7632d2b1286179b453ba40294872e4c98dae46a8615a1277",
+    "kind-schedule:hex:facts": "492ad774a219a1ee1ca7da28b755e339bcbbcc61044ba01bd20157d316aeb10c",
+    "kind-schedule:hex:principal": "ea403fccfd97c4da806f9c32cc3ef6b930519d18df21e64eeaad64b22c4df2f7",
+    "kind-schedule:hex:scope": "5c2f88c148ab7821a368bc2d05a9b6600184392c66e5a7b4e9942fa850d6d6ce",
+    "kind-schedule:hex:seal": "9d644c19ed156ca4ac9a40308c2407e4b25758f420d2539111d690be316646a7",
+    "kind-schedule:hex:trace": "7b13f7f174bdd129c97ffa539d649dffed0a8584b725c28e9f989e4814eca59b",
+    "kind-schedule:token:i1": "GkGBnFjeU7CHxP5R-TRDlnlwk7vd_cNm",
+    "kind-schedule:token:i2": "anrM8Cyy_nevjnmnErbQbGlQECKx4eEH",
+    "kind-schedule:token:i3": "ZaW1vlCw-ooen_s_jE3W-uEDeS8fiq0q",
+    "kind-schedule:ulid:widget": "01M2Q9G7M0PRZRDD5BA6SJKV8K",
+    "kind-schedule:uuid:tenant": "9ace536f-911c-47be-b0d4-9db87584930c",
+    "kind-service-selector:hex:cell-index": "23dcd2dec00a5b1e69485772fa365ba0a86e025bac7c6aa3ab89058520cda9ff",
+    "kind-service-selector:hex:completeness": "2e0726d6a6374e3b0f3b9a9b9c0390a15db6614fd0ac3b5418bd2158debae271",
+    "kind-service-selector:hex:dedupe": "f02d23326904ed54f0be946f00f7f378a7531d24c46dafe5fe81a884ce010250",
+    "kind-service-selector:hex:facts": "8bc987caf62ce45da6098f5beb8ba1e5fbac09a8f95360c883c6c26a51af2435",
+    "kind-service-selector:hex:principal": "6c6c6b35dff54fc4b0f06be9054e58a50566d04adec47b483de551ddd8276698",
+    "kind-service-selector:hex:scope": "754dcea3fd5746074941acb203d29add582f1a5b99f9a8759e87b806438b22fe",
+    "kind-service-selector:hex:seal": "534ab72c8429a638f364f7290dbb411d333101782adc70c51efaa9b5e527371d",
+    "kind-service-selector:hex:trace": "b2ec05aad04bfc0408e59ab038a5372a3d71b68efa733630b4939cc61a540ade",
+    "kind-service-selector:token:i1": "nXPgv-rpfnAcI7K4aMNb607CmFA77dd2",
+    "kind-service-selector:token:i2": "7fKpeL4sq4x8nSCfuh3wnhSaxWbUe6PY",
+    "kind-service-selector:ulid:widget": "01M2Q9G7M04HXRMXKH7A0HVPTN",
+    "kind-service-selector:uuid:tenant": "0c29e808-43e1-497e-b442-c39260fac492",
+    "kind-settings-draft:hex:cell-index": "f922d980a13e04601689aad233eba8c55ee5ddad4a3ed7dcf061c6d53e854b81",
+    "kind-settings-draft:hex:completeness": "9844ac3fe07478813db35573f483d756c09306ef775e48e14aad4af12a4cab64",
+    "kind-settings-draft:hex:dedupe": "f112e0c3acc0b45cc46a95a671b0ef78d7b59883dcf257d14cbabfb507e44fc5",
+    "kind-settings-draft:hex:facts": "d9695fad394abe4ef3ea66b94a74d582c2b3b618034a4990ba1ee1e05632eba9",
+    "kind-settings-draft:hex:idempotency": "64606f05307acca1a8f2cb84746bdb9e31d953250bd17c44ef181328f5b9a077",
+    "kind-settings-draft:hex:principal": "0b22b7968a9537140aff49a8d4ecd3507235d80c1b59752b912e87ac5d60fa9e",
+    "kind-settings-draft:hex:scope": "03f9ee408f1a30d6e5ff1c4606da2c03eba6fce213ab3dd7f0b0205ac49512f2",
+    "kind-settings-draft:hex:seal": "d55bbb292358c6b5866c14c3605a6e63410c918ac5a226dbcf38dc5a832b81c5",
+    "kind-settings-draft:hex:trace": "196003f09c38ba45504d2382266d2bfc3bc26d38844d60154995c77b7c29319d",
+    "kind-settings-draft:token:i1": "fIc-7ujKYtEYiEnlCrfjhK-ACQtUY7Bz",
+    "kind-settings-draft:token:i2": "hUI7YGoTcygZa8UE7sycZGy67DxFpbgN",
+    "kind-settings-draft:ulid:widget": "01M2Q9G7M0XAWDPTXRDMCHYHQ7",
+    "kind-settings-draft:uuid:tenant": "2bd9cd03-79a1-4146-8880-b5acd9fe836f",
+    "kind-source-status:hex:cell-index": "3176998e8c93a9a82448fb789ddaf78c6ad85c41c3599098bfae74c4fcb86b73",
+    "kind-source-status:hex:completeness": "6bf890f0d5819a7580619b595d9507604e6b568f18b62e58fe5b5db90f5b87c3",
+    "kind-source-status:hex:dedupe": "4a29bcb9278e35d2538dfe2451ce2c87893a7ba06b02f1d262d740995a5bcc8d",
+    "kind-source-status:hex:facts": "0787d8fa54af06156481f127384a09ef869be37921119cb2e3b3061de80f4151",
+    "kind-source-status:hex:principal": "b7711e4b9f1bf4c1fd6da22ab57ce8c95b6ee59c2f3eade24328eb208cb71327",
+    "kind-source-status:hex:scope": "f397fa3e36f934379f6d32903c6839813fe77ff5c8b8d9d5dc4b942d4ac7ff1d",
+    "kind-source-status:hex:seal": "f0eb6a200f93192f450d95988766933c65d5a929ad181da16e3e206054993032",
+    "kind-source-status:hex:trace": "66680d04c17dbf6d109b267c60182b3f9e21bea462a971f8866b7b3e6a25cce8",
+    "kind-source-status:token:i1": "TGKN1UV9ZtyIyMkTnm83UpmV8Vjh4bqL",
+    "kind-source-status:ulid:widget": "01M2Q9G7M0XGQFYJBP72AJQNG8",
+    "kind-source-status:uuid:tenant": "13d19f91-c4dd-4cc8-96b8-c68966fbec4b",
+    "kind-staff-selector:hex:cell-index": "806e5bea4421e65d8e3f2fdb58905fe81e72d42a53bc3d92feebcc63148deb72",
+    "kind-staff-selector:hex:completeness": "51b7ed74fcffa20c3196281998215ded35d15dfe3db44d939494dec31dc8af3f",
+    "kind-staff-selector:hex:dedupe": "c1bdf4b4ad9ed21275099d3f1cc72a5f447863b7dfced007bda7a24979f926a5",
+    "kind-staff-selector:hex:facts": "b5a85b191d0dc48eccd6069483c6fe6fdbcf2ad0ee737cb602ea1e1916854e2a",
+    "kind-staff-selector:hex:principal": "5c8f41a412e6724a92ab33c14a2a8308d94baf12eb7bccc64ba000ce9fcf822f",
+    "kind-staff-selector:hex:scope": "9f3b056f9b1454741740ff864f44390e7043324275b5415e678b6260180eb794",
+    "kind-staff-selector:hex:seal": "59b56bfbd4278816a44a025147a6bf433898f53d4fc74d6b970da2ab01dd3274",
+    "kind-staff-selector:hex:trace": "fbcc43842869c94e7cf4e5d46239a024bcdd09640419b09c72865c85e0577f67",
+    "kind-staff-selector:token:i1": "fk4-Lzj9QGdkm9vFIgnX1nnd47TK8JOD",
+    "kind-staff-selector:ulid:widget": "01M2Q9G7M03F95HBNR6TH85GAG",
+    "kind-staff-selector:uuid:tenant": "cd6b7390-4070-478f-a35a-03dc27add860",
+    "kind-strategy-options:hex:cell-index": "cf114d0d615c4280bd0b5ee678edc5c691775f613d984f6fe2b1e8e7853c8fc1",
+    "kind-strategy-options:hex:completeness": "0858a82f0b68e1ccf7ff19b03c2014f5dce302c26406e9ad03f749932f4123e8",
+    "kind-strategy-options:hex:dedupe": "10dbb6ea2bb717c91d7b95cdffeb6d5979b3d5acc9314e3099af1acbb5d7c627",
+    "kind-strategy-options:hex:facts": "32957d800a25101b05c137ae0f2820cfcd7b032a81aefa6173b6052b1e101171",
+    "kind-strategy-options:hex:principal": "0e085c071dc48ff73e3957154c7fd2dd7b0e7b5f7d6f60c6fd1753973f79ad8d",
+    "kind-strategy-options:hex:scope": "93a9931a569289c5e9a8130447633a541edca91cf6c4514e679cab4f8e0cd071",
+    "kind-strategy-options:hex:seal": "a1904fb01e89b3f6153a11431c04406ed9d1092584011bddd4b1490cab3c5574",
+    "kind-strategy-options:hex:trace": "a99e0bd7dc0e69acbf7f5945a1d7a6dc98177e6abb11f4cecd35a17ce9d57807",
+    "kind-strategy-options:token:i1": "9WlImci_Nwp-k4iBklmA1J8-OWO4RHUX",
+    "kind-strategy-options:token:i2": "kvbDwSlmnccCXnyHfxs8PGCeeTMSDCLB",
+    "kind-strategy-options:ulid:widget": "01M2Q9G7M0SWSQMP80R74ZG055",
+    "kind-strategy-options:uuid:tenant": "67272e2c-f1b3-4831-a7c4-0c3f888d425e",
+    "kind-time-slot-selector:hex:cell-index": "ba03a67490fda603b519c0917c72c1d81c9c088e6e39ea760f358e884c912b49",
+    "kind-time-slot-selector:hex:completeness": "5cf6d2e1645a89b215c1cc25913d70b36fa667d8b47074f78ffc03d92e3ad5a4",
+    "kind-time-slot-selector:hex:dedupe": "a54e6664ab907dec9c11d6d26794c65d9be04c1b0b065c28a97e8381d4dffcb2",
+    "kind-time-slot-selector:hex:facts": "4f5c9d5e99aff60b5fa02b2b5ca00d5df2e38b75b6fc8b360b1bbd7bb30e3098",
+    "kind-time-slot-selector:hex:principal": "018da73e59bba877da14e8a83c004a0337fd08e0e094bc1b57e235c459ef1183",
+    "kind-time-slot-selector:hex:scope": "1205aec33750ab749df7f0b5083206ec7d0d6b4940b24d798ef6cfa6dd93ffcf",
+    "kind-time-slot-selector:hex:seal": "1e89e2f4a5eb39d3190566aa522e361969a43192da79a935f8069145761a0ce8",
+    "kind-time-slot-selector:hex:trace": "c8065111721ad2a1df9ced87ba0f63e5c7daee31706143a89a54d65590927736",
+    "kind-time-slot-selector:token:i1": "CnGCju8MUDcB8Df5v8I0GoQEdaD3abgb",
+    "kind-time-slot-selector:token:i2": "HWgE0nIt_KRVXbZH_lESNjTKyuhyR29j",
+    "kind-time-slot-selector:token:i3": "gwuBxqOSMMB1fBCQWYUSir736KiuYWVJ",
+    "kind-time-slot-selector:token:i4": "IoUqvblLZb1EBTz9L26SBXff6hR5ChET",
+    "kind-time-slot-selector:ulid:widget": "01M2Q9G7M08AG1SK6GV4MWR8KC",
+    "kind-time-slot-selector:uuid:tenant": "39131354-7285-4eec-a298-5317dbf146e8",
+    "limitation-non-blocking:hex:cell-index": "9e76a41f4428a1db3ba9a6518e9c8e94fb815bdb45e8232bf750494152c494fd",
+    "limitation-non-blocking:hex:completeness": "c6b5745ffb51556dbc84d8395902ffca95ab0835d7976fa571a489c1ca1ad6bd",
+    "limitation-non-blocking:hex:dedupe": "4313406e9138fa1e2293be98ba22556eaaf23ceadf055b780a4741abf91b84de",
+    "limitation-non-blocking:hex:facts": "04f9593e367a21e7b081dafa4a943ec5520f1dbb045d7b04079cd8d87ddbddf2",
+    "limitation-non-blocking:hex:principal": "4425842df8133351235a4141ddff1bf0c1d238a4084cc4fad1944cb7725b4f94",
+    "limitation-non-blocking:hex:scope": "3968272dca5703a6bd69e5f0772bc5a8a45a4c6544818e5caf7f30578c54437a",
+    "limitation-non-blocking:hex:seal": "8a91ba81c25c2d70f6d551106a97913ed102b3c5f2f4b89b42575ca1fde99a44",
+    "limitation-non-blocking:hex:trace": "28ccf2bb667a3fa8bf2c1010b5b82d304aed123c21c9c5e3ef331f4302ca0f1e",
+    "limitation-non-blocking:ulid:widget": "01M2Q9G7M0EXSJ0B9QAJVM332Y",
+    "limitation-non-blocking:uuid:tenant": "08039c93-1944-49d8-9ead-d7bf8e311a46",
+    "metric-class-i-ref-tampered:hex:cell-index": "4428d3779ae8883cf935e748385852cd34477a749dbd58cb4fb4948bb6712c17",
+    "metric-class-i-ref-tampered:hex:completeness": "6e57030c978569e151078909c9d199f7c3c9c68e382eb0863ccf15f5aa5e0bfb",
+    "metric-class-i-ref-tampered:hex:dedupe": "0ed2e0f1a22a3453a4d13aa08cc0c684910b9b497679121e062f0e67ff70f818",
+    "metric-class-i-ref-tampered:hex:facts": "754762893a891fcaf3c35140f9f14870a77635318e69b6f9e9d0c3e4cfb521cf",
+    "metric-class-i-ref-tampered:hex:principal": "e9368be7bca4a38a614307dba8dea657706729a54d54ff701eb2061fc5aa755a",
+    "metric-class-i-ref-tampered:hex:scope": "67672756adab53bbf93434ec823ef71a3e74874db5cb36b62d66528ff98e99b3",
+    "metric-class-i-ref-tampered:hex:seal": "e90bf1a0a2a5aa4f0042e20f604938ff08d9ed512ba3d4fb647c79e58344f22c",
+    "metric-class-i-ref-tampered:hex:trace": "3b3bbdbecc8d116ec772525f96bfb46a632962279895ca15990a49fca3bbcdce",
+    "metric-class-i-ref-tampered:token:class-i-replaced": "JJE981Cfcujv0G7PGqNg2vJYSbNBpYXg",
+    "metric-class-i-ref-tampered:token:i1": "n6ax_D2mqXCHDoPLyCcqEfeG7J0rgOpk",
+    "metric-class-i-ref-tampered:token:i2": "VQfyfY0jCF9TBj-Yi52zW-eGOQinR46j",
+    "metric-class-i-ref-tampered:ulid:widget": "01M2Q9G7M0QBYV6AS2A120RF45",
+    "metric-class-i-ref-tampered:uuid:tenant": "f080c43d-4e86-4fb0-890c-8f49c8c82c6d",
+    "metric-class-i-target:hex:cell-index": "824c2bbbf29885f999499f64f27f4b926ec1b7eb45035bffe5cfb8ec3f89523a",
+    "metric-class-i-target:hex:completeness": "3c9af73fd92db35ff1fa28be917050f5049faeb595fba8c301f1651733c28f40",
+    "metric-class-i-target:hex:dedupe": "e9b29129febe3f1041e5c70db6152460c29e3b8a4ee16c9df56176077127a527",
+    "metric-class-i-target:hex:facts": "4cc16e9eec3d8f6acb308f04394b4a8d668f668b17dc7b1df9da6a6c96c0a70e",
+    "metric-class-i-target:hex:principal": "e063d484bf4b60517aaa99c89694cf5427a247acccba08aacef355f7109b4541",
+    "metric-class-i-target:hex:scope": "26c24e0df3cada71c987fd116b0989600a394092bbf8204862517dce47a1bc66",
+    "metric-class-i-target:hex:seal": "26422d152c8ade5e5a30929e11ceb63d5f1fcd7376ac1d3add0504a174f4c47f",
+    "metric-class-i-target:hex:trace": "9dcfc9e0cd2807985c62dcd65e2f6edb973710b986eafc2c9ce14823b114fd5f",
+    "metric-class-i-target:token:i1": "n6_y32ATwJMZXvaEyEvzfvxL5jN6tw0u",
+    "metric-class-i-target:token:i2": "E18jalWrIpv7e7dDW40toWmCuEyWKZOL",
+    "metric-class-i-target:ulid:widget": "01M2Q9G7M02R21JHRCRF66E7H7",
+    "metric-class-i-target:uuid:tenant": "719efa8f-0747-4cb3-aa09-b2730baffc12",
+    "schedule-withheld-reduced:hex:cell-index": "b6b7efe797fcff931df575616b37a722e810ca12d2cd04864e5827800103be99",
+    "schedule-withheld-reduced:hex:completeness": "8cc858e88db264db7d1a1e40676ff3a9fb4efaceb35a3c39ba332167754a8fc6",
+    "schedule-withheld-reduced:hex:dedupe": "e761e69966c5028f10f449c419c9ce3abae3b44a2363a0cc39b973a55495d687",
+    "schedule-withheld-reduced:hex:facts": "f98ef6182ebc81ef427926517895322cd30970b76298cf58cd8df0fb870ab5ba",
+    "schedule-withheld-reduced:hex:principal": "86ec08079dc7e8b3c0b5e414e355290ec5d777fc8375d0797834d49eb33d82c1",
+    "schedule-withheld-reduced:hex:scope": "acba74eb09d1a0b16bd35442451f3e505baadeb13d42988582a767282587ca3a",
+    "schedule-withheld-reduced:hex:seal": "9245d78792ac13a192e4add1e30425f3e7aedf42260d0d25c25bad34075b3118",
+    "schedule-withheld-reduced:hex:trace": "800d2687ad6de6bc0e41e0b5c1ead5ff54ec48d1098ac4009a943bf9944511a4",
+    "schedule-withheld-reduced:token:i1": "RNPWYJ1wFBT-7hqULBtVqhAS0bHlmmKF",
+    "schedule-withheld-reduced:token:i2": "QPoCC7h0srwsMHwNd3TqbiczsmpjTWji",
+    "schedule-withheld-reduced:token:i3": "4573RUqK7FA9cZI2Vn8wc6g1FuQXrEa1",
+    "schedule-withheld-reduced:ulid:widget": "01M2Q9G7M070M8KCEX72D4FY2F",
+    "schedule-withheld-reduced:uuid:tenant": "16b5b51e-e367-4eab-a5d6-76c9bb99a1a2",
+    "slots-superseded-predecessor:hex:cell-index": "3eb39d3a0a22d6e3d30a5028373252dc09310e65b85fec365df6f1439262bbc2",
+    "slots-superseded-predecessor:hex:completeness": "8d2013673b178a84fd9c14e866470412da6a2864baf3b3e436082ed990471e22",
+    "slots-superseded-predecessor:hex:dedupe": "c9b28b32072711db3b17513b1224cb8bfd67dab5a537112afe76400d15fbe6a5",
+    "slots-superseded-predecessor:hex:facts": "2cc78ad352eeb0d6123233f6c349ae477dfce86a47c582b0d87d28788765273a",
+    "slots-superseded-predecessor:hex:principal": "9e7f8897f218600bdec86c11891f014de70ca93fe3c7f93fcf9be2280dd46a89",
+    "slots-superseded-predecessor:hex:scope": "1882c4ecef61b1719d81f115da182aa05440fd8769f95a3eda70bc48c6ecb863",
+    "slots-superseded-predecessor:hex:seal": "7117fbcaee5f2c965e82745a663e49dc70b714503717a2f6fe469f89b1cd0378",
+    "slots-superseded-predecessor:hex:trace": "e7f483560864fa2768140e80ae22ff3bbe31fbcc2ae855adaaacdc2a404cc0e8",
+    "slots-superseded-predecessor:token:i1": "W_TXhRrkmJxaWqroB1iKJ-bH2VkGeFEh",
+    "slots-superseded-predecessor:token:i2": "WZ_lIktd6nMBFJ5y3cQ8ygNDFt4_ndLS",
+    "slots-superseded-predecessor:token:i3": "bJxATEq13OnX-igaINanVx0HJgtSBk5w",
+    "slots-superseded-predecessor:token:i4": "EdL7frR5jw8wPW8y3cZhgRClVKOI6oXs",
+    "slots-superseded-predecessor:ulid:widget": "01M2Q9G7M0TVG8K63F7CPYH1HN",
+    "slots-superseded-predecessor:uuid:tenant": "9a36d56e-0751-4bf1-915f-71dd5f5cfcbb",
+    "slots-superseded-successor:hex:cell-index": "e7dd20165c0578acbac207939ab2b7b91843ad42aa698fe6f5bdee085bdd39de",
+    "slots-superseded-successor:hex:completeness": "de8a501585b495ab2bdc3add9580e7965122effe8118cbfd527075e23963ad29",
+    "slots-superseded-successor:hex:dedupe": "d1314c2678d6300c0487aa87c9fdedf107616ba21ebf877bef69fd7dc29c90fe",
+    "slots-superseded-successor:hex:facts": "d034ea09eaf2b080146678ec8fd587557e0e8b22b070052605cf27c6efa653f0",
+    "slots-superseded-successor:hex:principal": "371b1f10ef8564a3885d4efcdcb48b1ad4720d6f47b69ae49b96488f9aeacde9",
+    "slots-superseded-successor:hex:scope": "a23e1522936970a311ae3e7958b17de9b20a9bd935f6e525cf3b25f5c64eccee",
+    "slots-superseded-successor:hex:seal": "33439ad41f9ea9259ab986ecbd02c279c2182b2b611cbc61d85a25d1ddc4482d",
+    "slots-superseded-successor:hex:trace": "9b2d9922636fd6968510b28513dd6c601439b1ae9cdda80b490941d363944c80",
+    "slots-superseded-successor:token:i1": "G6bNz33jGnEtitOITB2bWkj8mdcooF3U",
+    "slots-superseded-successor:token:i2": "dOJHeMSAOkaQp1KMc1csd7dEtE1SHUgy",
+    "slots-superseded-successor:token:i3": "_TFbRn0L7AMCCPdK3yHWM9nOPfJGDiQB",
+    "slots-superseded-successor:token:i4": "NEiwsyJxuz3jRrAF2e0r7TDaORJ6VVdD",
+    "slots-superseded-successor:ulid:widget": "01M2Q9G7M0Y20060YJ9VTXT54Y",
+    "slots-superseded-successor:uuid:tenant": "32b3fcfc-e0af-4260-890c-cf567783fbef"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "expect": [
+    "baseline"
+  ],
+  "note": "routes.json still lists ShellRoute after the rename"
+}

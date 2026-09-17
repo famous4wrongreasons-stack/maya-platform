@@ -1,0 +1,6 @@
+{
+  "expect": [
+    "property-ban"
+  ],
+  "note": "a ninth token site in render.ts is refused although renderer.json is live"
+}

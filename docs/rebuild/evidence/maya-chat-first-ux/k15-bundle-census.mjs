@@ -17,14 +17,21 @@
 //
 // Every file this script opens is opened READ ONLY.
 //
-// Run: node docs/rebuild/evidence/maya-chat-first-ux/k15-bundle-census.mjs [--json]
+// Run: node docs/rebuild/evidence/maya-chat-first-ux/k15-bundle-census.mjs [--json] [--repo=<root>]
+//
+// `--repo=` points the census at another repository root (the tests plant successor files in a
+// throw-away root); the TypeScript used for the successor scan always comes from this script's own
+// repository.
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const repo = path.resolve(here, '../../../..');
+const ownRepo = path.resolve(here, '../../../..');
+const repoArg = process.argv.find((a) => a.startsWith('--repo='));
+const repo = repoArg ? path.resolve(repoArg.slice('--repo='.length)) : ownRepo;
 const PRIMARY = '/Users/stanislavmosin/Desktop/Projects/maya-platform';
 
 /**
@@ -78,22 +85,97 @@ for (const b of BUNDLES) {
 }
 
 // ── the successor ────────────────────────────────────────────────────────────────────────────────
-const shellDir = 'maya-chat-shell/src';
+// Two roots: the shell's sources and its HTML entry (D13). entry/ holds the one host acquisition
+// and the page itself, so a storage or authority value there is as much the successor's as one in
+// src/. Each root is named in the output, and an absent root says `absent` — a run before entry/
+// exists is never read as entry/ coverage.
+const SHELL_ROOTS = ['maya-chat-shell/src', 'maya-chat-shell/entry'];
+const SHELL_EXTENSIONS = ['.ts', '.html'];
 const shellFiles = [];
-const walk = (dir) => {
+const walk = (dir, into) => {
   const abs = path.join(repo, dir);
-  if (!fs.existsSync(abs)) return;
   for (const e of fs.readdirSync(abs, { withFileTypes: true })) {
-    if (e.isDirectory()) walk(path.join(dir, e.name));
-    else if (e.name.endsWith('.ts')) shellFiles.push(path.join(dir, e.name));
+    if (e.isDirectory()) walk(path.join(dir, e.name), into);
+    else if (SHELL_EXTENSIONS.some((x) => e.name.endsWith(x))) into.push(path.join(dir, e.name));
   }
 };
-walk(shellDir);
+const successorRoots = SHELL_ROOTS.map((root) => {
+  if (!fs.existsSync(path.join(repo, root))) return { root, present: false, files: 0 };
+  const files = [];
+  walk(root, files);
+  shellFiles.push(...files);
+  return { root, present: true, files: files.length };
+});
 const shellText = shellFiles.map((f) => fs.readFileSync(path.join(repo, f), 'utf8')).join('\n');
 const shellAuthorityHits = AUTHORITY_TOKENS.filter((t) => shellText.includes(t));
+// Raw text first (it also covers entry/index.html) …
 const shellStorageHits = ['localStorage', 'sessionStorage', 'document.cookie'].filter((t) =>
   shellText.includes(t),
 );
+// … then what the TypeScript MEANS: a raw `includes` cannot see `Reflect.get(w, 'local' + 'Storage')`
+// or `d['coo' + 'kie']`. Every name, member and string literal is read after constant-folding `+`
+// chains and literal-only templates; reflective access (Reflect, the legacy accessor lookups) is
+// counted on its own, because its key need not be a literal at all. Without TypeScript the scan
+// fails CLOSED: the storage list names the missing scan instead of reporting "never".
+const successorReflectiveAccess = [];
+let storageScan = 'ast+text';
+{
+  let ts = null;
+  try {
+    ts = createRequire(path.join(ownRepo, 'maya-saas-backend', 'package.json'))('typescript');
+  } catch {
+    storageScan = 'text-only';
+    shellStorageHits.push('AST SCAN UNAVAILABLE (typescript not installed in maya-saas-backend)');
+  }
+  if (ts) {
+    const STORAGE = [/localStorage/, /sessionStorage/, /^cookie$/];
+    const REFLECTIVE = new Set(['Reflect', '__lookupGetter__', '__lookupSetter__', '__defineGetter__', '__defineSetter__']);
+    const fold = (n) => {
+      if (!n) return null;
+      if (ts.isParenthesizedExpression(n)) return fold(n.expression);
+      if (ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n)) return n.text;
+      if (ts.isBinaryExpression(n) && n.operatorToken.kind === ts.SyntaxKind.PlusToken) {
+        const a = fold(n.left);
+        const b = fold(n.right);
+        return a === null || b === null ? null : a + b;
+      }
+      if (ts.isTemplateExpression(n)) {
+        let out = n.head.text;
+        for (const span of n.templateSpans) {
+          const v = fold(span.expression);
+          if (v === null) return null;
+          out += v + span.literal.text;
+        }
+        return out;
+      }
+      return null;
+    };
+    const seen = new Set();
+    const hit = (list, label) => {
+      if (!seen.has(label)) {
+        seen.add(label);
+        list.push(label);
+      }
+    };
+    for (const rel of shellFiles.filter((f) => f.endsWith('.ts'))) {
+      const text = fs.readFileSync(path.join(repo, rel), 'utf8');
+      const sf = ts.createSourceFile(rel, text, ts.ScriptTarget.ES2022, true, ts.ScriptKind.TS);
+      const where = (node) => `${rel.split(path.sep).join('/')}:${sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1}`;
+      const visit = (node) => {
+        let value = null;
+        if (ts.isIdentifier(node) || ts.isPrivateIdentifier(node)) value = node.text;
+        else if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) value = node.text;
+        else if (ts.isBinaryExpression(node) || ts.isTemplateExpression(node)) value = fold(node);
+        if (value !== null) {
+          for (const re of STORAGE) if (re.test(value)) hit(shellStorageHits, `${re.source.replace(/[\^$]/g, '')} (${where(node)})`);
+          if ((ts.isIdentifier(node) || ts.isPrivateIdentifier(node)) && REFLECTIVE.has(value)) hit(successorReflectiveAccess, `${value} (${where(node)})`);
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(sf);
+    }
+  }
+}
 
 // One shell source, one build. Counted from the manifest rather than asserted.
 const manifestPath = 'maya-chat-shell/dist/manifest.json';
@@ -124,6 +206,9 @@ const out = {
     .reduce((a, c) => a + c.authorityTokenOccurrences, 0),
   clientSideAuthorityValuesInSuccessor: shellAuthorityHits.length,
   successorReadsClientStorage: shellStorageHits,
+  successorReflectiveAccess,
+  storageScan,
+  successorRoots,
   unreachabilityProbeRecorded: Boolean(probe),
   mayaOsSiteUnreachableProven: probe?.mayaOsSiteUnreachable === true,
   // The latest measurement wins: after R3 the post-remediation sweep supersedes the first probe.
@@ -153,7 +238,10 @@ if (process.argv.includes('--json')) {
   console.log();
   console.log(`  client-side authority values, LEGACY:     ${out.clientSideAuthorityValuesInLegacy}   target 0`);
   console.log(`  client-side authority values, SUCCESSOR:  ${out.clientSideAuthorityValuesInSuccessor}   target 0  <- already met`);
-  console.log(`  successor reads client storage:           ${out.successorReadsClientStorage.length ? out.successorReadsClientStorage.join(', ') : 'never'}`);
+  console.log(`  successor reads client storage:           ${out.successorReadsClientStorage.length ? out.successorReadsClientStorage.join(', ') : 'never'}   (scan: ${out.storageScan})`);
+  console.log(`  successor reflective access:              ${out.successorReflectiveAccess.length ? out.successorReflectiveAccess.join(', ') : 'none'}`);
+  for (const r of out.successorRoots)
+    console.log(`  successor root walked (.ts, .html):       ${path.basename(r.root)}: ${r.present ? `${r.files} files` : 'absent'}`);
   console.log();
   console.log(`  production probe recorded:                ${out.unreachabilityProbeRecorded ? 'yes (three-bundle-probe.json)' : 'NO'}`);
   console.log(`  maya-os-site unreachable, PROVEN:         ${out.mayaOsSiteUnreachableProven ? 'yes' : 'NO'}`);

@@ -1,0 +1,198 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M0N0NH83E1YY56AFH8",
+  "kind": "LIMITATION",
+  "body_version": 1,
+  "tenant_id": "25558159-567e-4195-8423-2b1f536e88c8",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "c0c81d801bc7055ae0c693b01af79b17"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "booking.availability.read",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "severity": "blocking",
+    "headline": {
+      "phrase_key": "limitation.booking_down",
+      "rendered": "Запись сейчас недоступна"
+    },
+    "detail": {
+      "phrase_key": "limitation.booking_down.detail",
+      "rendered": "Сервис записи не отвечает. Попробуйте позже."
+    },
+    "source_limitation_codes": [
+      "PROVIDER_SILENT"
+    ],
+    "capability_gap_ref": null,
+    "remedy_intents": [
+      "i1"
+    ]
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "zpVdyywnv4NpZqgFscnnsQXb7IpueGYR",
+      "role": "remedy",
+      "label": "Проверить ещё раз",
+      "utterance_preview": "Проверить ещё раз",
+      "speech_aliases": [
+        "проверить ещё раз"
+      ],
+      "ordinal": null,
+      "priority": 0,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "booking.availability.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "booking.availability.read",
+    "capability_version": "v1",
+    "projector_id": "projector.limitation",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "22aec5c05e7fada334183c254baadcedf4cd6c0162160904c515d6fe29415469",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "981565fc5917f6981def67e9fa87a3f71cafa6995e33b92a1d24747b7d087191",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "31cc977b3612222fb76f880d697b67f08e4624d534e188bcc04c1ab598618be8",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "6167fba73bfea9beaae175d7",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Запись сейчас недоступна",
+      "body": "Сервис записи не отвечает. Попробуйте позже.",
+      "itemized": [],
+      "completeness_sentence": null,
+      "unknowns_sentence": null
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "status",
+      "label": "Запись сейчас недоступна",
+      "description": "Сервис записи не отвечает. Попробуйте позже.",
+      "reading_order": [
+        {
+          "k": "intent",
+          "id": "i1"
+        }
+      ],
+      "live_region": "assertive",
+      "accessible_names": {
+        "intent:i1": "Проверить ещё раз"
+      }
+    },
+    "fullscreen_detail": null
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 1,
+    "intents_emitted": 1,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "0f1a641aa6b918d11b370eacd9e6e210743d3cab2baffc0910183c0d97c15284",
+    "cell_index_digest": "e200f06d21c4599018c1f50d315b4df165ead6a2bf6663973965438f8b6a07ae",
+    "envelope_seal": "388f0ba9f18a8904d7ef5d495654df878f8ce48dd5f45216c10d9ddfaf837f69",
+    "seal_key_version": 1,
+    "principal_proof_hash": "0b2184f1b8a6be26748b838d4805b3e2d2eab4b3a9c287911a6f863be3a56039",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

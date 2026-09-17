@@ -1,0 +1,111 @@
+name: MAYA Chat Shell
+
+# The served MAYA web shell (K5; SHELL-PLAN v2.1 §2.8 "CI", §3.1 S8). One job: the reproducible build
+# against the committed manifest, the purity gate's bidirectional self-test, the full typecheck, the
+# node test suite, and the recorded K5 and K15 gates over src + entry.
+#
+# Nothing is deployed, nothing is published, and no secret is read. The shell has no npm dependency of
+# its own: it builds with the backend's pinned TypeScript (build.mjs refuses anything but 5.9.3) and its
+# DTO mocks use class-validator's validator from the backend lock. So the only install is `npm ci` in
+# maya-saas-backend, with install scripts off — the shell needs no native module, Prisma engine or
+# postinstall, and nothing here may phone out.
+#
+# Skips are not passes. The local-API suite needs NestJS on the isolated proof DB and the ValidationPipe
+# parity needs a built backend dist; neither exists in this job, so those tests skip with a reason that
+# says "not a PASS". The skip audit below lists every skip in the job summary and fails on a skip whose
+# reason does not say so.
+#
+# Node: plan §2.8 names Node 24; package.json engines admit >= 22.18. The job runs on both, so neither
+# the plan's runtime nor the floor can break unseen.
+#
+# Not a required check. Making it one is a repository-settings decision for the owner.
+# platform-ci.yml is integrator-owned (GIP §3.1) and is not edited by the shell.
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: maya-chat-shell-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  maya-chat-shell:
+    name: Chat shell build, gates and tests (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+        working-directory: maya-chat-shell
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: maya-saas-backend/package-lock.json
+      - name: Node is at least 22.18 (tests import .ts through type stripping)
+        run: node -e 'const [a, b] = process.versions.node.split(".").map(Number); console.log(`node ${process.version}`); if (a < 22 || (a === 22 && b < 18)) { console.error("maya-chat-shell needs node >= 22.18"); process.exit(1); }'
+      - name: Install the backend toolchain (npm ci, install scripts off)
+        working-directory: maya-saas-backend
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Reproducible - a fresh build equals the committed manifest (and build-baseline/ is gone)
+        run: node build.mjs --check --no-baseline
+      - name: Build - dist/web for the tests
+        run: |
+          cp dist/manifest.json "$RUNNER_TEMP/manifest.committed.json"
+          node build.mjs --no-baseline
+          cmp dist/manifest.json "$RUNNER_TEMP/manifest.committed.json"
+      - name: Self-test - every refuse fixture refused, every admit fixture admitted
+        run: node build.mjs --self-test
+      - name: Typecheck
+        run: node build.mjs --typecheck --no-baseline
+      - name: Node test suite
+        run: node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=tap --test-reporter-destination="$RUNNER_TEMP/shell-tests.tap" conformance.test.mjs test/*.test.mjs
+      - name: Skip audit - every skip says it is not a PASS
+        if: ${{ !cancelled() }}
+        run: |
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const tap = process.argv[1];
+            if (!fs.existsSync(tap)) { console.error(`no TAP output at ${tap}`); process.exit(1); }
+            const skips = fs.readFileSync(tap, "utf8").split("\n").filter((l) => /^\s*ok \d+ - .* # SKIP\b/.test(l)).map((l) => l.trim());
+            const unlabelled = skips.filter((l) => !/not a pass/i.test(l));
+            const lines = [`### maya-chat-shell: ${skips.length} skipped test(s) — none of them is a PASS`, "", ...skips.map((l) => `- ${l.replace(/^ok \d+ - /, "")}`)];
+            console.log(lines.join("\n"));
+            if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
+            if (unlabelled.length) { console.error(`skips that do not say "not a PASS":\n${unlabelled.join("\n")}`); process.exit(1); }
+          ' "$RUNNER_TEMP/shell-tests.tap"
+      - name: K5 exit gate (src self-mount 0, entry exactly 1, renderer and DOM mutations refused)
+        working-directory: .
+        run: bash docs/rebuild/evidence/maya-chat-first-ux/k5-exit-gate.sh
+      - name: K15 census over src + entry (successor authority values 0, client storage never)
+        working-directory: .
+        run: |
+          node docs/rebuild/evidence/maya-chat-first-ux/k15-bundle-census.mjs
+          node docs/rebuild/evidence/maya-chat-first-ux/k15-bundle-census.mjs --json > "$RUNNER_TEMP/k15.json"
+          node -e '
+            const k15 = JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8"));
+            const roots = k15.successorRoots ?? [];
+            const problems = [];
+            if (k15.clientSideAuthorityValuesInSuccessor !== 0) problems.push(`successor authority values ${k15.clientSideAuthorityValuesInSuccessor}`);
+            if (!Array.isArray(k15.successorReadsClientStorage) || k15.successorReadsClientStorage.length) problems.push(`successor reads client storage: ${k15.successorReadsClientStorage}`);
+            if (k15.storageScan !== "ast+text") problems.push(`storage scan is ${k15.storageScan}, not ast+text`);
+            if (!Array.isArray(k15.successorReflectiveAccess) || k15.successorReflectiveAccess.length) problems.push(`successor reflective access: ${k15.successorReflectiveAccess}`);
+            for (const want of ["maya-chat-shell/src", "maya-chat-shell/entry"]) {
+              const r = roots.find((x) => x.root === want);
+              if (!r || !r.present || !(r.files > 0)) problems.push(`${want} not walked`);
+            }
+            if (problems.length) { console.error(`K15 over src + entry: FAIL\n  ${problems.join("\n  ")}`); process.exit(1); }
+            console.log(`K15 over src + entry: PASS (${roots.map((r) => `${r.root} ${r.files} files`).join(", ")}; authority 0; storage never (ast+text); reflective access none)`);
+          ' "$RUNNER_TEMP/k15.json"

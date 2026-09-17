@@ -1,0 +1,16 @@
+{
+  "source": [
+    "maya-saas-backend/src/auth/auth-session.service.ts:166 @ 62fde3a3"
+  ],
+  "status": 401,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "message": "Session has been revoked.",
+    "error": {
+      "code": "session_revoked",
+      "message": "Session has been revoked."
+    }
+  }
+}

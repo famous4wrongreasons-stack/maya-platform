@@ -1,0 +1,627 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M0Y20060YJ9VTXT54Y",
+  "kind": "TIME_SLOT_SELECTOR",
+  "body_version": 1,
+  "tenant_id": "32b3fcfc-e0af-4260-890c-cf567783fbef",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "9b2d9922636fd6968510b28513dd6c60"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "booking.availability.read",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "prompt": {
+      "phrase_key": "slot.prompt",
+      "rendered": "Выберите время"
+    },
+    "timezone": "Europe/Moscow",
+    "window": {
+      "from": "2026-09-18T06:00:00.000Z",
+      "to": "2026-09-19T18:00:00.000Z"
+    },
+    "grouping": "by_day",
+    "groups": [
+      {
+        "group_id": "g-0918",
+        "label": {
+          "phrase_key": "slot.day",
+          "rendered": "Четверг, 18 сентября"
+        },
+        "slots": [
+          {
+            "slot_ref": "s-0918-1000",
+            "start": {
+              "state": "KNOWN",
+              "value": "2026-09-18T07:00:00.000Z",
+              "label": "10:00",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "slot.start",
+              "unit": "datetime",
+              "basis_key": null,
+              "basis": "расписание салона",
+              "currency": null,
+              "formatted": "10:00",
+              "comparison": null
+            },
+            "duration": {
+              "state": "KNOWN",
+              "value": 60,
+              "label": "Длительность",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "slot.duration",
+              "unit": "minutes",
+              "basis_key": null,
+              "basis": "прайс салона",
+              "currency": null,
+              "formatted": "60 мин",
+              "comparison": null
+            },
+            "staff_ref": "staff.ilya",
+            "price": null,
+            "availability": {
+              "state": "KNOWN",
+              "value": "FREE",
+              "label": "свободно",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "intent_ref": "i1"
+          },
+          {
+            "slot_ref": "s-0918-1100",
+            "start": {
+              "state": "KNOWN",
+              "value": "2026-09-18T08:00:00.000Z",
+              "label": "11:00",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "slot.start",
+              "unit": "datetime",
+              "basis_key": null,
+              "basis": "расписание салона",
+              "currency": null,
+              "formatted": "11:00",
+              "comparison": null
+            },
+            "duration": {
+              "state": "KNOWN",
+              "value": 60,
+              "label": "Длительность",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "slot.duration",
+              "unit": "minutes",
+              "basis_key": null,
+              "basis": "прайс салона",
+              "currency": null,
+              "formatted": "60 мин",
+              "comparison": null
+            },
+            "staff_ref": "staff.ilya",
+            "price": null,
+            "availability": {
+              "state": "KNOWN",
+              "value": "TAKEN",
+              "label": "занято",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "intent_ref": "i1"
+          },
+          {
+            "slot_ref": "s-0918-1200",
+            "start": {
+              "state": "KNOWN",
+              "value": "2026-09-18T09:00:00.000Z",
+              "label": "12:00",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "slot.start",
+              "unit": "datetime",
+              "basis_key": null,
+              "basis": "расписание салона",
+              "currency": null,
+              "formatted": "12:00",
+              "comparison": null
+            },
+            "duration": {
+              "state": "KNOWN",
+              "value": 60,
+              "label": "Длительность",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "slot.duration",
+              "unit": "minutes",
+              "basis_key": null,
+              "basis": "прайс салона",
+              "currency": null,
+              "formatted": "60 мин",
+              "comparison": null
+            },
+            "staff_ref": "staff.ilya",
+            "price": null,
+            "availability": {
+              "state": "UNAVAILABLE",
+              "value": null,
+              "label": "неизвестно: источник не ответил",
+              "reason_code": "PROVIDER_SILENT",
+              "fact_ref": null,
+              "as_of": null,
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "intent_ref": "i1"
+          }
+        ]
+      },
+      {
+        "group_id": "g-0919",
+        "label": {
+          "phrase_key": "slot.day",
+          "rendered": "Пятница, 19 сентября"
+        },
+        "slots": [
+          {
+            "slot_ref": "s-0919-1500",
+            "start": {
+              "state": "KNOWN",
+              "value": "2026-09-19T12:00:00.000Z",
+              "label": "15:00",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "slot.start",
+              "unit": "datetime",
+              "basis_key": null,
+              "basis": "расписание салона",
+              "currency": null,
+              "formatted": "15:00",
+              "comparison": null
+            },
+            "duration": {
+              "state": "KNOWN",
+              "value": 60,
+              "label": "Длительность",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "slot.duration",
+              "unit": "minutes",
+              "basis_key": null,
+              "basis": "прайс салона",
+              "currency": null,
+              "formatted": "60 мин",
+              "comparison": null
+            },
+            "staff_ref": "staff.ilya",
+            "price": null,
+            "availability": {
+              "state": "KNOWN",
+              "value": "FREE",
+              "label": "свободно",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "intent_ref": "i1"
+          }
+        ]
+      }
+    ],
+    "shown_count": 4,
+    "total_count": null,
+    "more_intent": "i2",
+    "widen_window_intent": "i3",
+    "none_fit_intent": "i4"
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "G6bNz33jGnEtitOITB2bWkj8mdcooF3U",
+      "role": "primary",
+      "label": "Записаться на выбранное время",
+      "utterance_preview": "Записаться на выбранное время",
+      "speech_aliases": [
+        "записаться на выбранное время"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "DRAFT",
+      "capability": {
+        "space": "AE",
+        "key": "appointments.own.create"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": {
+        "fields": [
+          {
+            "name": "selection",
+            "required": true,
+            "kind": "enum",
+            "domain_ref": "slots.window",
+            "selection_min": 1,
+            "selection_max": 1
+          }
+        ],
+        "max_total_bytes": 256,
+        "free_input_justification": null
+      },
+      "verification_floor": "BOUND_CLIENT",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "primary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "dOJHeMSAOkaQp1KMc1csd7dEtE1SHUgy",
+      "role": "more",
+      "label": "Показать ещё время",
+      "utterance_preview": "Показать ещё время",
+      "speech_aliases": [
+        "показать ещё время"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "booking.availability.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i3",
+      "intent_token": "_TFbRn0L7AMCCPdK3yHWM9nOPfJGDiQB",
+      "role": "secondary",
+      "label": "Расширить период",
+      "utterance_preview": "Расширить период",
+      "speech_aliases": [
+        "расширить период"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "booking.availability.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i4",
+      "intent_token": "NEiwsyJxuz3jRrAF2e0r7TDaORJ6VVdD",
+      "role": "remedy",
+      "label": "Ничего не подходит",
+      "utterance_preview": "Ничего не подходит",
+      "speech_aliases": [
+        "ничего не подходит"
+      ],
+      "ordinal": null,
+      "priority": 0,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "booking.availability.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i9",
+      "intent_token": null,
+      "role": "escape",
+      "label": "Закрыть",
+      "utterance_preview": "Закрыть",
+      "speech_aliases": [
+        "отмена",
+        "стоп",
+        "закрыть"
+      ],
+      "ordinal": null,
+      "priority": 0,
+      "effect": "NONE",
+      "capability": null,
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": false
+    }
+  ],
+  "provenance": {
+    "source_capability": "booking.availability.read",
+    "capability_version": "v1",
+    "projector_id": "projector.time_slot_selector",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "d034ea09eaf2b080146678ec8fd587557e0e8b22b070052605cf27c6efa653f0",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "a23e1522936970a311ae3e7958b17de9b20a9bd935f6e525cf3b25f5c64eccee",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "c967c0597a7e5bd56119efdedcc24cff606f9398ca957d6cdbcc4182e5e58f34",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "soft",
+    "on_expiry": "re_resolve",
+    "supersedes_widget_id": "01M2Q9G7M0TVG8K63F7CPYH1HN",
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "d1314c2678d6300c0487aa87",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Выберите время",
+      "body": "Четверг, 18 сентября: 10:00 свободно, 11:00 занято, 12:00 неизвестно. Пятница, 19 сентября: 15:00 свободно.",
+      "itemized": [
+        "Четверг, 18 сентября: 10:00, 11:00 (занято), 12:00 (неизвестно)",
+        "Пятница, 19 сентября: 15:00"
+      ],
+      "completeness_sentence": "Показаны 4 варианта времени.",
+      "unknowns_sentence": "Доступность в 12:00 неизвестна: источник не ответил."
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "listbox",
+      "label": "Выберите время",
+      "description": "Четверг, 18 сентября: 10:00 свободно, 11:00 занято, 12:00 неизвестно. Пятница, 19 сентября: 15:00 свободно.",
+      "reading_order": [
+        {
+          "k": "slot",
+          "id": "s-0918-1000"
+        },
+        {
+          "k": "slot",
+          "id": "s-0918-1100"
+        },
+        {
+          "k": "slot",
+          "id": "s-0918-1200"
+        },
+        {
+          "k": "slot",
+          "id": "s-0919-1500"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        },
+        {
+          "k": "intent",
+          "id": "i3"
+        },
+        {
+          "k": "intent",
+          "id": "i4"
+        },
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i9"
+        }
+      ],
+      "live_region": "polite",
+      "accessible_names": {
+        "slot:s-0918-1000": "10:00",
+        "slot:s-0918-1100": "11:00",
+        "slot:s-0918-1200": "12:00",
+        "slot:s-0919-1500": "15:00",
+        "intent:i2": "Показать ещё время",
+        "intent:i3": "Расширить период",
+        "intent:i4": "Ничего не подходит",
+        "intent:i1": "Записаться на выбранное время",
+        "intent:i9": "Закрыть"
+      }
+    },
+    "fullscreen_detail": {
+      "route_key": "fs.calendar",
+      "reason": "exceeds_chat_density"
+    }
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 5,
+    "intents_emitted": 5,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "82c79ef44b7fb40dcd71ff340ddbbc1d2c2948ebbb03bfa92fdabfc12b87f856",
+    "cell_index_digest": "e7dd20165c0578acbac207939ab2b7b91843ad42aa698fe6f5bdee085bdd39de",
+    "envelope_seal": "33439ad41f9ea9259ab986ecbd02c279c2182b2b611cbc61d85a25d1ddc4482d",
+    "seal_key_version": 1,
+    "principal_proof_hash": "371b1f10ef8564a3885d4efcdcb48b1ad4720d6f47b69ae49b96488f9aeacde9",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

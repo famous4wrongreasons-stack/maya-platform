@@ -3,10 +3,18 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "K5 \u2014 the Maya chat shell. One source, emitted once. The build that did not exist.",
+  "description": "K5 — the Maya chat shell. One source, emitted once. The build that did not exist.",
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
     "build": "node build.mjs",
     "check": "node build.mjs --check",
-    "typecheck": "../maya-saas-backend/node_modules/.bin/tsc --noEmit -p tsconfig.json"
+    "self-test": "node build.mjs --self-test",
+    "typecheck": "node build.mjs --typecheck",
+    "test": "node --test conformance.test.mjs test/*.test.mjs",
+    "serve:mock": "node dev/serve.mjs --root=dist/web --port=8787 --mock=dev/fixtures --scenario=happy",
+    "serve:api": "node dev/serve.mjs --root=dist/web --port=8788 --api=http://127.0.0.1:3310/api",
+    "verify": "node test/cdp-verify.mjs --url=http://127.0.0.1:8787/"
   }
 }

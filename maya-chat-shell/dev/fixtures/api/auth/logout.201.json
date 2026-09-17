@@ -1,0 +1,13 @@
+{
+  "source": [
+    "maya-saas-backend/src/auth/auth-session.service.ts:289 @ 62fde3a3"
+  ],
+  "status": 201,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "ok": true,
+    "revoked": true
+  }
+}

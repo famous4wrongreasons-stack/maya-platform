@@ -1,0 +1,863 @@
+/* K5 — the shell's one stylesheet (SHELL-PLAN v2.1 §1.1, §1.8, §1.11; A-4, A-9, A-10).
+ *
+ * Tokens first; light and dark from the system; forced colours honoured; no motion under reduced
+ * motion; reflow down to 320 CSS px at text scale 2.0 with no horizontal page scroll; every control
+ * at least 44 x 44 CSS px. No external resource of any kind. */
+
+:root {
+  --bg: #f6f5f2;
+  --surface: #ffffff;
+  --surface-muted: #eeece7;
+  --text: #1c1b19;
+  --text-muted: #5b5850;
+  --border: #d6d2c8;
+  --accent: #1d4ed8;
+  --accent-text: #ffffff;
+  --focus: #1d4ed8;
+  --user-bubble: #e4eaf8;
+  --notice: #f3eedf;
+  --danger-line: #8a3b12;
+  --radius: 0.75rem;
+  --gap: 0.75rem;
+  --target: 44px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121315;
+    --surface: #1b1d20;
+    --surface-muted: #24272b;
+    --text: #ecebe7;
+    --text-muted: #b3b0a8;
+    --border: #3a3e44;
+    --accent: #8fb3ff;
+    --accent-text: #0d1117;
+    --focus: #8fb3ff;
+    --user-bubble: #22304a;
+    --notice: #2d2a20;
+    --danger-line: #f0b48c;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 100%;
+  line-height: 1.45;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.vh {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+p,
+h2,
+h3,
+h4 {
+  margin: 0;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ── the app ─────────────────────────────────────────────────────────────────────────────── */
+
+/* The log takes the room that is left; chrome around it never shrinks under its content. */
+.identity,
+.composer,
+.nav,
+.timeline-status {
+  flex-shrink: 0;
+}
+
+.app {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding-bottom: var(--maya-keyboard-inset, 0px);
+  background: var(--bg);
+}
+
+.identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+
+.identity-brand {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.identity-text {
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.timeline-hint {
+  padding: 1rem 1rem 0;
+  color: var(--text-muted);
+}
+
+.timeline {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.timeline-status {
+  padding: 0 1rem;
+  color: var(--text-muted);
+  min-height: 0;
+}
+
+.turn,
+.notice {
+  max-width: 100%;
+  min-width: 0;
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+}
+
+.turn-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.turn--user {
+  align-self: flex-end;
+  background: var(--user-bubble);
+  max-width: min(100%, 36rem);
+}
+
+.turn--maya {
+  align-self: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  max-width: min(100%, 40rem);
+}
+
+.turn--sending {
+  opacity: 0.85;
+}
+
+.turn-voice {
+  color: var(--text-muted);
+}
+
+.turn-failure {
+  margin-top: 0.35rem;
+  padding-left: 0.5rem;
+  border-left: 3px solid var(--danger-line);
+  overflow-wrap: anywhere;
+}
+
+.turn-retry,
+.notice-action {
+  min-height: var(--target);
+  min-width: var(--target);
+  margin-left: 0.25rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.notice {
+  align-self: stretch;
+  background: var(--notice);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.notice-text {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.reply-link {
+  color: var(--accent);
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+}
+
+/* ── the composer ────────────────────────────────────────────────────────────────────────── */
+
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.5rem 1rem 0.75rem;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.composer-input {
+  display: block;
+  width: 100%;
+  min-height: var(--target);
+  max-height: 40vh;
+  resize: vertical;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.composer-input[aria-disabled="true"] {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+}
+
+.composer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.composer-counter--over,
+.composer-note {
+  color: var(--text);
+}
+
+.composer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.composer-send,
+.signin-button,
+.route-action,
+.fullscreen-close,
+.nav-button,
+.widget-action,
+.widget-choice,
+.voice-mic,
+.voice-send,
+.voice-cancel {
+  min-height: var(--target);
+  min-width: var(--target);
+  max-width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  text-align: center;
+}
+
+.composer-send,
+.signin-button--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+[aria-disabled="true"].composer-send,
+[aria-disabled="true"].signin-button,
+[aria-disabled="true"].widget-action {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── the voice control (dom/voice-control.ts) ───────────────────────────────────────────── */
+
+.voice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.voice-mic {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.voice-indicator {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.voice-meter {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.voice-meter-step {
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.9rem;
+  border: 1px solid var(--text-muted);
+  border-radius: 2px;
+}
+
+.voice-meter-step.is-on {
+  background: var(--text);
+}
+
+.voice-status {
+  flex-basis: 100%;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.voice-status:empty {
+  display: none;
+}
+
+.voice-unavailable {
+  color: var(--text);
+}
+
+/* ── navigation and route chrome ─────────────────────────────────────────────────────────── */
+
+.nav {
+  border-top: 1px solid var(--border);
+  padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
+  background: var(--bg);
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.nav-list > li {
+  flex: 1 1 auto;
+  display: flex;
+}
+
+.nav-button {
+  flex: 1 1 auto;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.875rem;
+  background: transparent;
+  border-color: transparent;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.nav-button[aria-current="page"] {
+  background: var(--surface);
+  border-color: var(--border);
+  font-weight: 600;
+}
+
+.panel--route {
+  overflow-y: auto;
+}
+
+.route {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--gap);
+  padding: 1rem;
+}
+
+.route-note,
+.route-identity {
+  overflow-wrap: anywhere;
+}
+
+/* ── sign-in (the signed-out root state) ─────────────────────────────────────────────────── */
+
+.signin {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  max-width: 30rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 2rem;
+}
+
+.signin-title {
+  font-size: 1.5rem;
+}
+
+.signin-reason {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  background: var(--notice);
+}
+
+.signin-status:empty,
+.signin-countdown:empty {
+  display: none;
+}
+
+.signin-status,
+.signin-countdown {
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+
+.signin-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.signin-group-title {
+  font-size: 1rem;
+}
+
+.signin-step,
+.signin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.signin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.signin-input {
+  width: 100%;
+  min-height: var(--target);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+}
+
+.signin-input[aria-invalid="true"] {
+  border-color: var(--danger-line);
+  border-width: 2px;
+}
+
+.signin-hint,
+.signin-note {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.signin-error {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.signin-businesses {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.signin-business {
+  width: 100%;
+}
+
+.signin-retry {
+  min-height: var(--target);
+  min-width: var(--target);
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.noscript {
+  padding: 1rem;
+}
+
+/* ── widgets (dom/host.ts) ───────────────────────────────────────────────────────────────── */
+
+.widget {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+
+.widget-heading {
+  font-size: 1.05rem;
+}
+
+.widget-block--group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.widget-choice {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  text-align: start;
+}
+
+.widget-choice--static,
+.widget-field {
+  min-height: var(--target);
+  padding: 0.5rem;
+  border: 1px dashed var(--border);
+  border-radius: 0.5rem;
+}
+
+.widget-field--refused {
+  border: 2px solid var(--danger-line);
+}
+
+.leaf--not-known {
+  font-style: italic;
+}
+
+.leaf-detail,
+.widget-explanation {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.widget-limitation {
+  padding-left: 0.5rem;
+  border-left: 3px solid var(--border);
+}
+
+.widget-limitation--blocking {
+  border-left-color: var(--danger-line);
+  font-weight: 600;
+}
+
+.widget-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.widget-table {
+  border-collapse: collapse;
+  min-width: 100%;
+}
+
+.widget-table caption {
+  text-align: start;
+  font-weight: 600;
+  padding-bottom: 0.25rem;
+}
+
+.widget-table th,
+.widget-table td {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.widget-table .cell--end {
+  text-align: end;
+}
+
+.widget--collapsed,
+.widget--terminal {
+  background: var(--surface-muted);
+}
+
+.widget-sentence,
+.widget-stale {
+  color: var(--text-muted);
+}
+
+/* ── the fullscreen host ─────────────────────────────────────────────────────────────────── */
+
+.fullscreen {
+  width: min(100vw, 48rem);
+  max-width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.fullscreen::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.fullscreen-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.fullscreen-title {
+  font-size: 1.1rem;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.fullscreen-body {
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+/* ── short viewports (landscape phones, an open keyboard, large text): the conversation keeps
+ *    its room — one identity line, and the five routes in one row that scrolls inside the nav ── */
+
+@media (max-height: 32rem) {
+  .identity {
+    flex-wrap: nowrap;
+    padding-block: 0.25rem;
+  }
+
+  .identity-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .composer {
+    padding-block: 0.35rem;
+  }
+
+  .composer-input {
+    height: max(var(--target), calc(1lh + 1rem + 2px));
+    max-height: 30vh;
+    resize: none;
+  }
+
+  .composer {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .composer-input {
+    flex: 1 1 10rem;
+    width: auto;
+    min-width: 0;
+  }
+
+  .composer-meta {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  .composer-meta:has(> :not([hidden])) {
+    display: flex;
+  }
+
+  .composer-meta:not(:has(> :not([hidden]))) {
+    display: none;
+  }
+
+  .composer-actions {
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+  }
+
+  .composer-send {
+    padding-inline: 0.6rem;
+  }
+
+  .voice-mic > span:last-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .nav {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: 0.25rem;
+  }
+
+  .nav-list {
+    flex-wrap: nowrap;
+  }
+
+  .nav-list > li {
+    flex: 0 0 auto;
+  }
+
+  .nav-button {
+    white-space: nowrap;
+  }
+}
+
+/* ── motion: a CSS-only reveal; the text is complete on the first frame ──────────────────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  .turn,
+  .notice,
+  .widget {
+    animation: maya-reveal 160ms ease-out both;
+  }
+
+  @keyframes maya-reveal {
+    from {
+      opacity: 0.001;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── coarse pointers ─────────────────────────────────────────────────────────────────────── */
+
+@media (pointer: coarse) {
+  .reply-link {
+    display: inline-block;
+    min-height: var(--target);
+    padding-block: 0.6rem;
+  }
+}
+
+/* ── forced colours: system colours, visible focus, state never by colour alone ──────────── */
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid CanvasText;
+    outline-offset: 2px;
+  }
+
+  .composer-input,
+  .signin-input {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .nav-button[aria-current="page"] {
+    border: 2px solid CanvasText;
+  }
+
+  .signin-input[aria-invalid="true"],
+  .widget-field--refused {
+    border: 3px double CanvasText;
+  }
+
+  .voice-meter-step.is-on {
+    background: CanvasText;
+  }
+}

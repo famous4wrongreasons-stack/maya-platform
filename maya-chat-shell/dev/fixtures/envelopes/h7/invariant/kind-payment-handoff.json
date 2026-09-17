@@ -1,0 +1,378 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M0H8ZV1CKFRN4XJQ2V",
+  "kind": "PAYMENT_HANDOFF",
+  "body_version": 1,
+  "tenant_id": "afe2157f-5119-4b46-879e-6674be80815b",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "634e979ec70f0143de97cb686dcae783"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "gift_certificate.checkout",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "order_ref": "ord-1",
+    "subject": "gift_certificate",
+    "lines": [
+      {
+        "label": {
+          "phrase_key": "payment.line.certificate",
+          "rendered": "Подарочный сертификат"
+        },
+        "amount": {
+          "state": "KNOWN",
+          "value": 3000,
+          "label": "Сумма",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "payment.line",
+          "unit": "RUB",
+          "basis_key": null,
+          "basis": "номинал сертификата",
+          "currency": "RUB",
+          "formatted": "3 000 ₽",
+          "comparison": null
+        }
+      }
+    ],
+    "amount_total": {
+      "state": "KNOWN",
+      "value": 3000,
+      "label": "Итого",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null,
+      "key": "payment.total",
+      "unit": "RUB",
+      "basis_key": null,
+      "basis": "номинал сертификата",
+      "currency": "RUB",
+      "formatted": "3 000 ₽",
+      "comparison": null
+    },
+    "beneficiary_label": {
+      "state": "KNOWN",
+      "value": "Салон «Мужская Эстетика»",
+      "label": "Салон «Мужская Эстетика»",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "acquirer_label": {
+      "state": "KNOWN",
+      "value": "Платёжный сервис салона",
+      "label": "Платёжный сервис салона",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "returns_text": {
+      "phrase_key": "payment.returns",
+      "rendered": "Сертификат придёт на ваш email."
+    },
+    "policy_notices": [
+      {
+        "phrase_key": "payment.policy",
+        "rendered": "Сертификат действует 12 месяцев."
+      }
+    ],
+    "session": {
+      "session_ref": "5c8801a7b1ce46992d46069545b77870",
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "resume_widget_id": "01M2Q9G7M03YFDS7B83M5V4M24"
+    },
+    "commit_intent": "i1",
+    "continue_intent": "i2",
+    "dismiss_intent": "i9",
+    "capability_gap_ref": null
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "W4Ctmmc2J-p3DX_mbHsJYwTUf2j0d8X_",
+      "role": "primary",
+      "label": "Оплатить 3 000 ₽",
+      "utterance_preview": "Оплатить 3 000 ₽",
+      "speech_aliases": [
+        "оплатить 3 000 ₽"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "COMMIT",
+      "capability": {
+        "space": "AE",
+        "key": "gift_certificate.checkout"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "SESSION_VERIFIED",
+      "confirmation": {
+        "risk_tier": "medium_write",
+        "reversible": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "можно отменить",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "audience_size": null,
+        "requires_explicit_confirm_step": true,
+        "requires_readback": false,
+        "readback_ref": null,
+        "readback_text": null,
+        "idempotency_key": "bf6f277045ff9dcffd694cde1b91f5651e83dac26b611cd7c18a9009968142f9",
+        "approval_policy": "none"
+      },
+      "authority_hint": {
+        "emphasis": "primary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "uv2oH1LYx_cg7MQQCZjEp-TpbRy-p511",
+      "role": "secondary",
+      "label": "Продолжить к оплате",
+      "utterance_preview": "Продолжить к оплате",
+      "speech_aliases": [
+        "продолжить к оплате"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "NAVIGATE",
+      "capability": null,
+      "handoff_capability_ref": null,
+      "target": {
+        "class": "s",
+        "ref": {
+          "route": "shell.pay",
+          "param": "5c8801a7b1ce46992d46069545b77870"
+        }
+      },
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i9",
+      "intent_token": null,
+      "role": "escape",
+      "label": "Закрыть",
+      "utterance_preview": "Закрыть",
+      "speech_aliases": [
+        "отмена",
+        "стоп",
+        "закрыть"
+      ],
+      "ordinal": null,
+      "priority": 0,
+      "effect": "NONE",
+      "capability": null,
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": false
+    }
+  ],
+  "provenance": {
+    "source_capability": "gift_certificate.checkout",
+    "capability_version": "v1",
+    "projector_id": "projector.payment_handoff",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "05bd1dc9ccb835ae036ffb8721b67d107433e1d164eb37bc382924f84f5de93a",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "5328ad436af5317c5c95801c37edac58f9355f9756edea94f233d38ef8b0b725",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "b6092906d0f6c68df3add716eb42289859323023f207c043dfb915feacfee78b",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "5abc6fb3446e95e478ef5e92",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Подарочный сертификат на 3 000 ₽",
+      "body": "Оплата 3 000 ₽ салону «Мужская Эстетика». Сертификат придёт на ваш email и действует 12 месяцев.",
+      "itemized": [
+        "Подарочный сертификат: 3 000 ₽",
+        "Получатель платежа: салон «Мужская Эстетика»"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": null
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "region",
+      "label": "Подарочный сертификат на 3 000 ₽",
+      "description": "Оплата 3 000 ₽ салону «Мужская Эстетика». Сертификат придёт на ваш email и действует 12 месяцев.",
+      "reading_order": [
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        },
+        {
+          "k": "intent",
+          "id": "i9"
+        }
+      ],
+      "live_region": "polite",
+      "accessible_names": {
+        "intent:i1": "Оплатить 3 000 ₽",
+        "intent:i2": "Продолжить к оплате",
+        "intent:i9": "Закрыть"
+      }
+    },
+    "fullscreen_detail": {
+      "route_key": "fs.payment",
+      "reason": "exact_configuration"
+    }
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 3,
+    "intents_emitted": 3,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "acc0b147b3a03182fc3a07a7f3573fd903cd5751663c53b175f7f3abb1058f62",
+    "cell_index_digest": "3c78877c4fdf153e9ba002cbb96e6c52181f273b0df81a0a25baad9ab9ee9de7",
+    "envelope_seal": "7f30d67e6817e9186f64eaf6b64020fbee1958960f8030b22e06493252bab1cd",
+    "seal_key_version": 1,
+    "principal_proof_hash": "8ab11b75dc97bf2c6a780dc448cd81a3bbb7ca91e6b2ca6052ff6b5d663fa790",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

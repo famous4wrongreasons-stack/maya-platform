@@ -1,0 +1,486 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M0N85B65GWZA3QKPJJ",
+  "kind": "BOOKING_CONFIRMATION",
+  "body_version": 1,
+  "tenant_id": "a525d485-f08d-4b75-a61e-e5e7a9ae31fa",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "ad52aeeabbabac780bb22ef67873980b"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "appointments.own.create",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "confirmation_subject": "create",
+    "draft_ref": "draft-booking-1",
+    "appointment_ref": null,
+    "lines": [
+      {
+        "label": {
+          "phrase_key": "booking.line.service",
+          "rendered": "Услуга"
+        },
+        "detail": {
+          "state": "KNOWN",
+          "value": "Мужская стрижка",
+          "label": "Мужская стрижка",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "measures": [
+          {
+            "state": "KNOWN",
+            "value": 1500,
+            "label": "Цена",
+            "reason_code": null,
+            "fact_ref": null,
+            "as_of": "2026-09-17T08:55:00.000Z",
+            "evidence_refs": [],
+            "next_intent_ref": null,
+            "key": "service.price",
+            "unit": "RUB",
+            "basis_key": null,
+            "basis": "прайс салона",
+            "currency": "RUB",
+            "formatted": "1 500 ₽",
+            "comparison": null
+          }
+        ]
+      },
+      {
+        "label": {
+          "phrase_key": "booking.line.staff",
+          "rendered": "Мастер"
+        },
+        "detail": {
+          "state": "KNOWN",
+          "value": "Илья",
+          "label": "Илья",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "measures": []
+      }
+    ],
+    "when": {
+      "state": "KNOWN",
+      "value": "2026-09-18T07:00:00.000Z",
+      "label": "Время записи",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null,
+      "key": "booking.when",
+      "unit": "datetime",
+      "basis_key": null,
+      "basis": "расписание салона",
+      "currency": null,
+      "formatted": "18 сентября, 10:00",
+      "comparison": null
+    },
+    "when_previous": null,
+    "staff_label": {
+      "state": "KNOWN",
+      "value": "Илья",
+      "label": "Илья",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "duration_total": {
+      "state": "KNOWN",
+      "value": 60,
+      "label": "Длительность",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null,
+      "key": "booking.duration",
+      "unit": "minutes",
+      "basis_key": null,
+      "basis": "прайс салона",
+      "currency": null,
+      "formatted": "60 мин",
+      "comparison": null
+    },
+    "price_total": {
+      "state": "KNOWN",
+      "value": 1500,
+      "label": "Итого",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null,
+      "key": "booking.price",
+      "unit": "RUB",
+      "basis_key": null,
+      "basis": "прайс салона",
+      "currency": "RUB",
+      "formatted": "1 500 ₽",
+      "comparison": null
+    },
+    "price_delta": null,
+    "refund_preview": null,
+    "loyalty_applied": {
+      "state": "PENDING",
+      "value": null,
+      "label": "Кешбэк будет начислен после визита",
+      "reason_code": "IN_PROGRESS",
+      "fact_ref": null,
+      "as_of": null,
+      "evidence_refs": [],
+      "next_intent_ref": null,
+      "key": "loyalty.cashback",
+      "unit": "RUB",
+      "basis_key": null,
+      "basis": "программа лояльности",
+      "currency": "RUB",
+      "formatted": "после визита",
+      "comparison": null
+    },
+    "policy_notices": [
+      {
+        "phrase_key": "policy.cancel_window",
+        "rendered": "Бесплатная отмена — не позднее чем за 3 часа."
+      }
+    ],
+    "commit_intent": "i1",
+    "amend_intents": [
+      "i2",
+      "i3"
+    ],
+    "dismiss_intent": "i9"
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "T014EJW3RWLDQyBnb8T65N56PCUpmdoH",
+      "role": "primary",
+      "label": "Подтвердить запись",
+      "utterance_preview": "Подтвердить запись",
+      "speech_aliases": [
+        "подтвердить запись"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "COMMIT",
+      "capability": {
+        "space": "AE",
+        "key": "appointments.own.create"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "SESSION_VERIFIED",
+      "confirmation": {
+        "risk_tier": "medium_write",
+        "reversible": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "можно отменить",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "audience_size": null,
+        "requires_explicit_confirm_step": true,
+        "requires_readback": false,
+        "readback_ref": null,
+        "readback_text": null,
+        "idempotency_key": "de089e6a2d047d8c4a73a7cf2e74a14a426b9d67df1f5422ca2ab64442eaabc8",
+        "approval_policy": "none"
+      },
+      "authority_hint": {
+        "emphasis": "primary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "0LQC8_Y3ID2PhHKDHiFOAv--HjPLjbyk",
+      "role": "secondary",
+      "label": "Изменить время",
+      "utterance_preview": "Изменить время",
+      "speech_aliases": [
+        "изменить время"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "booking.availability.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i3",
+      "intent_token": "IIGkdEnq4wO-h6SXkJkJPVqoHIYoHFwm",
+      "role": "secondary",
+      "label": "Выбрать другого мастера",
+      "utterance_preview": "Выбрать другого мастера",
+      "speech_aliases": [
+        "выбрать другого мастера"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "catalog.staff.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i9",
+      "intent_token": null,
+      "role": "escape",
+      "label": "Закрыть",
+      "utterance_preview": "Закрыть",
+      "speech_aliases": [
+        "отмена",
+        "стоп",
+        "закрыть"
+      ],
+      "ordinal": null,
+      "priority": 0,
+      "effect": "NONE",
+      "capability": null,
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": false
+    }
+  ],
+  "provenance": {
+    "source_capability": "appointments.own.create",
+    "capability_version": "v1",
+    "projector_id": "projector.booking_confirmation",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "38e9332de62a2503fb81a8c97e2d8b6eccba9d7c51a8ad8c5cc7387f1991f62c",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "9c28a0ff63a310fb5852e176f9fdc5a7d939a91b83f3899164165ecab092bd2a",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "52fe99634443265b22cab697516adc43cc8d8f3e984078b17f8a645cc25868d4",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2026-09-17T09:01:30.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "soft",
+    "on_expiry": "re_resolve",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "156f9ac5406c1f350855254b",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Запись к Илье на мужскую стрижку, 18 сентября, 10:00",
+      "body": "Мужская стрижка у Ильи, 18 сентября в 10:00, 60 минут, 1 500 ₽. Бесплатная отмена — не позднее чем за 3 часа.",
+      "itemized": [
+        "Услуга: мужская стрижка, 1 500 ₽",
+        "Мастер: Илья",
+        "Итого: 1 500 ₽, 60 мин"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": "Кешбэк будет начислен после визита."
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "region",
+      "label": "Запись к Илье на мужскую стрижку, 18 сентября, 10:00",
+      "description": "Мужская стрижка у Ильи, 18 сентября в 10:00, 60 минут, 1 500 ₽. Бесплатная отмена — не позднее чем за 3 часа.",
+      "reading_order": [
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        },
+        {
+          "k": "intent",
+          "id": "i3"
+        },
+        {
+          "k": "intent",
+          "id": "i9"
+        }
+      ],
+      "live_region": "polite",
+      "accessible_names": {
+        "intent:i1": "Подтвердить запись",
+        "intent:i2": "Изменить время",
+        "intent:i3": "Выбрать другого мастера",
+        "intent:i9": "Закрыть"
+      }
+    },
+    "fullscreen_detail": {
+      "route_key": "fs.booking",
+      "reason": "audit"
+    }
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 4,
+    "intents_emitted": 4,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "37c9c00a1dfcdb0908b3f698ff17746bfec023175bb2f215acaaff496b174d89",
+    "cell_index_digest": "8095f0311b78e58d2fbe2d2bd8f1b78d02441f980303a0640ad6aff12e258417",
+    "envelope_seal": "3f2dfdc23eeea83b0df60e11061e91f24443dd6e01e96cc7d401e3434b5c8ab2",
+    "seal_key_version": 1,
+    "principal_proof_hash": "9dd2fa4cec382a942796215d8d8ff006e5112e6151182e8f960c96f7788cf9d3",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

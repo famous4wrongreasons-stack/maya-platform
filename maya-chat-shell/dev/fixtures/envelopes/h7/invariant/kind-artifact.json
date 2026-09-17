@@ -1,0 +1,297 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M0PDCZ5AJMA8H2JJKH",
+  "kind": "ARTIFACT",
+  "body_version": 1,
+  "tenant_id": "276c964f-d13d-45dc-9686-4b966bafcaa8",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "7b4c057a52ff3a7fe919a27e5a5c152a"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "owner_report.download",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "artifact_ref": "f5ecdebcc657e34e327b3d11ef4da272",
+    "filename": {
+      "state": "KNOWN",
+      "value": "otchet-avgust.pdf",
+      "label": "otchet-avgust.pdf",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "format": {
+      "state": "KNOWN",
+      "value": "pdf",
+      "label": "PDF",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "size_bytes": {
+      "state": "KNOWN",
+      "value": 184320,
+      "label": "Размер",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null,
+      "key": "file.size",
+      "unit": "count",
+      "basis_key": null,
+      "basis": "файл отчёта",
+      "currency": null,
+      "formatted": "180 КБ",
+      "comparison": null
+    },
+    "contains_text": {
+      "phrase_key": "artifact.contains",
+      "rendered": "Отчёт о выручке и расходах за август."
+    },
+    "contains_pii": {
+      "state": "KNOWN",
+      "value": false,
+      "label": "без персональных данных",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "produced_at": {
+      "state": "KNOWN",
+      "value": "2026-09-17T08:55:00.000Z",
+      "label": "17 сентября, 11:40",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "fetch_intent": "i1",
+    "regenerate_intent": "i2"
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "9Svt2U1jy0A51CrB_anRndPmR0Tr1Ghf",
+      "role": "primary",
+      "label": "Скачать",
+      "utterance_preview": "Скачать",
+      "speech_aliases": [
+        "скачать"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "NAVIGATE",
+      "capability": null,
+      "handoff_capability_ref": null,
+      "target": {
+        "class": "s",
+        "ref": {
+          "route": "shell.file",
+          "param": "f5ecdebcc657e34e327b3d11ef4da272"
+        }
+      },
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "primary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "JJQi7yC2fxzN_N85qW3S6gzud9bplfB9",
+      "role": "secondary",
+      "label": "Сформировать заново",
+      "utterance_preview": "Сформировать заново",
+      "speech_aliases": [
+        "сформировать заново"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "owner_report.download"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "owner_report.download",
+    "capability_version": "v1",
+    "projector_id": "projector.artifact",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "c41cd2406120cf800987b85814d2b6893540ecf8aac74988d731df6aede3070a",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "7fa8c0d69061a71ef37679a554de7878ab4bb9a8effba6cd03dcf6bb2d72e7d9",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "98444c5eeb9e4e7324a8e859078b397dafe76b8aa40e6a83681a5a83b8e8b6e8",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "15bf979813d3fbcff6b6be37",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Файл отчёта: otchet-avgust.pdf",
+      "body": "PDF, 180 КБ: отчёт о выручке и расходах за август, без персональных данных.",
+      "itemized": [
+        "otchet-avgust.pdf",
+        "PDF, 180 КБ",
+        "Без персональных данных"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": null
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "link",
+      "label": "Файл отчёта: otchet-avgust.pdf",
+      "description": "PDF, 180 КБ: отчёт о выручке и расходах за август, без персональных данных.",
+      "reading_order": [
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        }
+      ],
+      "live_region": "off",
+      "accessible_names": {
+        "intent:i1": "Скачать, otchet-avgust.pdf, PDF, 180 КБ",
+        "intent:i2": "Сформировать заново"
+      }
+    },
+    "fullscreen_detail": null
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 2,
+    "intents_emitted": 2,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "7fa20b8be9eb64cebda152b4167731cfc39559e225d3849ef7caa3e2c1d3b749",
+    "cell_index_digest": "dc7c8a9b01a6bb077a46f7ebee1bdd59098291585e4b024fbe2b9ba0f96b232c",
+    "envelope_seal": "8dc974c572cf5b0af21768c427f52832c08b55c464d744eb066fd74b24fed547",
+    "seal_key_version": 1,
+    "principal_proof_hash": "9b7f6d59eb05f4bccd7d8568ed10ff8ef25f1096ee8eac9af8ac75b66c31589e",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

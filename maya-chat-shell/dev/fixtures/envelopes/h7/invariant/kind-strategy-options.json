@@ -1,0 +1,411 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M0SWSQMP80R74ZG055",
+  "kind": "STRATEGY_OPTIONS",
+  "body_version": 1,
+  "tenant_id": "67272e2c-f1b3-4831-a7c4-0c3f888d425e",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "a99e0bd7dc0e69acbf7f5945a1d7a6dc"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "c9.no_action",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "revision_ref": "rev-1",
+    "question": {
+      "narrative_template_id": "strategy.question",
+      "narrative_template_version": 1,
+      "slots": {},
+      "rendered": "Как вернуть клиентов, которые не приходили больше 60 дней?"
+    },
+    "alternatives": [
+      {
+        "option_id": "alt-invite",
+        "title": {
+          "state": "KNOWN",
+          "value": "Разослать приглашение",
+          "label": "Разослать приглашение",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "reasoning": {
+          "narrative_template_id": "strategy.reason.invite",
+          "narrative_template_version": 1,
+          "slots": {},
+          "rendered": "Приглашение напоминает о салоне без скидки."
+        },
+        "expected_effect": {
+          "state": "KNOWN",
+          "value": 6,
+          "label": "Ожидаемый эффект",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "effect.visits",
+          "unit": "count",
+          "basis_key": null,
+          "basis": "история рассылок",
+          "currency": null,
+          "formatted": "около 6 визитов",
+          "comparison": null
+        },
+        "risk_tier": {
+          "state": "KNOWN",
+          "value": "low_write",
+          "label": "низкий риск",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "reversible": {
+          "state": "NOT_MEASURED",
+          "value": null,
+          "label": "обратимость не указана источником",
+          "reason_code": "NOT_COLLECTED",
+          "fact_ref": null,
+          "as_of": null,
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "audience_size": {
+          "state": "KNOWN",
+          "value": 42,
+          "label": "Получателей",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "audience.size",
+          "unit": "count",
+          "basis_key": null,
+          "basis": "сегмент на 17 сентября",
+          "currency": null,
+          "formatted": "42 клиента",
+          "comparison": null
+        },
+        "select_intent": "i1"
+      },
+      {
+        "option_id": "alt-discount",
+        "title": {
+          "state": "KNOWN",
+          "value": "Скидка 10% на следующий визит",
+          "label": "Скидка 10% на следующий визит",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "reasoning": {
+          "narrative_template_id": "strategy.reason.discount",
+          "narrative_template_version": 1,
+          "slots": {},
+          "rendered": "Скидка сильнее мотивирует, но снижает средний чек."
+        },
+        "expected_effect": null,
+        "risk_tier": {
+          "state": "KNOWN",
+          "value": "medium_write",
+          "label": "средний риск",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "reversible": {
+          "state": "NOT_MEASURED",
+          "value": null,
+          "label": "обратимость не указана источником",
+          "reason_code": "NOT_COLLECTED",
+          "fact_ref": null,
+          "as_of": null,
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "audience_size": {
+          "state": "KNOWN",
+          "value": 42,
+          "label": "Получателей",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "audience.size",
+          "unit": "count",
+          "basis_key": null,
+          "basis": "сегмент на 17 сентября",
+          "currency": null,
+          "formatted": "42 клиента",
+          "comparison": null
+        },
+        "select_intent": "i1"
+      }
+    ],
+    "no_action_option": {
+      "title": {
+        "phrase_key": "strategy.no_action",
+        "rendered": "Ничего не делать"
+      },
+      "consequence": {
+        "narrative_template_id": "strategy.no_action.consequence",
+        "narrative_template_version": 1,
+        "slots": {},
+        "rendered": "Часть клиентов может не вернуться."
+      },
+      "select_intent": "i2"
+    },
+    "review_state": "not_an_approval",
+    "review_disclaimer": {
+      "phrase_key": "strategy.disclaimer",
+      "rendered": "Это варианты, а не одобрение действия."
+    }
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "9WlImci_Nwp-k4iBklmA1J8-OWO4RHUX",
+      "role": "primary",
+      "label": "Выбрать вариант",
+      "utterance_preview": "Выбрать вариант",
+      "speech_aliases": [
+        "выбрать вариант"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "c9.revision.select"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": {
+        "fields": [
+          {
+            "name": "selection",
+            "required": true,
+            "kind": "enum",
+            "domain_ref": "strategy.alternatives",
+            "selection_min": 1,
+            "selection_max": 1
+          }
+        ],
+        "max_total_bytes": 256,
+        "free_input_justification": null
+      },
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "primary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "kvbDwSlmnccCXnyHfxs8PGCeeTMSDCLB",
+      "role": "secondary",
+      "label": "Ничего не делать",
+      "utterance_preview": "Ничего не делать",
+      "speech_aliases": [
+        "ничего не делать"
+      ],
+      "ordinal": null,
+      "priority": 0,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "c9.no_action"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "c9.no_action",
+    "capability_version": "v1",
+    "projector_id": "projector.strategy_options",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "32957d800a25101b05c137ae0f2820cfcd7b032a81aefa6173b6052b1e101171",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "93a9931a569289c5e9a8130447633a541edca91cf6c4514e679cab4f8e0cd071",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "0ac7da5a06e03ce94681977564903b5c7c20f8b32aa67693318748c7774b6faf",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "10dbb6ea2bb717c91d7b95cd",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Как вернуть клиентов, которые не приходили больше 60 дней?",
+      "body": "Два варианта: разослать приглашение (около 6 визитов, низкий риск) или скидка 10% (средний риск). Или ничего не делать.",
+      "itemized": [
+        "Разослать приглашение: около 6 визитов, низкий риск, 42 клиента",
+        "Скидка 10%: средний риск, 42 клиента",
+        "Ничего не делать: часть клиентов может не вернуться"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": "Обратимость вариантов источник не указал."
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "radiogroup",
+      "label": "Как вернуть клиентов, которые не приходили больше 60 дней?",
+      "description": "Два варианта: разослать приглашение (около 6 визитов, низкий риск) или скидка 10% (средний риск). Или ничего не делать.",
+      "reading_order": [
+        {
+          "k": "option",
+          "id": "alt-invite"
+        },
+        {
+          "k": "option",
+          "id": "alt-discount"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        },
+        {
+          "k": "intent",
+          "id": "i1"
+        }
+      ],
+      "live_region": "off",
+      "accessible_names": {
+        "option:alt-invite": "Разослать приглашение",
+        "option:alt-discount": "Скидка 10% на следующий визит",
+        "intent:i2": "Ничего не делать",
+        "intent:i1": "Выбрать вариант"
+      }
+    },
+    "fullscreen_detail": null
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 2,
+    "intents_emitted": 2,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "704f018a2b98dc5dae7f45a7fd32148fac6ef19083cc650ca1420a7511e09ba1",
+    "cell_index_digest": "cf114d0d615c4280bd0b5ee678edc5c691775f613d984f6fe2b1e8e7853c8fc1",
+    "envelope_seal": "a1904fb01e89b3f6153a11431c04406ed9d1092584011bddd4b1490cab3c5574",
+    "seal_key_version": 1,
+    "principal_proof_hash": "0e085c071dc48ff73e3957154c7fd2dd7b0e7b5f7d6f60c6fd1753973f79ad8d",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

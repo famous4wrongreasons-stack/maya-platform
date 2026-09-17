@@ -1,0 +1,396 @@
+{
+  "contract": "maya.k1.s746-s747-unreachability-probe/1",
+  "recordedAt": "2026-09-17T11:31:31.054Z",
+  "head": "62fde3a3ac4db7fefe1380ec70ca31a5b4facd8f",
+  "targetCleanAtHead": true,
+  "toolchain": {
+    "node": "v22.23.2",
+    "typescript": "5.9.3",
+    "parser": "ts.createSourceFile ScriptKind.JS over each inline classic <script> block"
+  },
+  "productionEffects": 0,
+  "rows": [
+    {
+      "id": "S-746",
+      "name": "PWA hands-free voice orb — realtime client (rtStart/rtStop/rtPlay)",
+      "file": "сайт и приложение/app.html",
+      "liveStatus": "RETIRED",
+      "successorType": "NONE_SIGNED",
+      "retirementCondition": "RETIRE IN K16 after the probe is recorded"
+    },
+    {
+      "id": "S-747",
+      "name": "PWA legacy hands-free voice fallback (vmListen → chat proxy STT)",
+      "file": "сайт и приложение/app.html",
+      "liveStatus": "RETIRED",
+      "successorType": "NONE_SIGNED",
+      "retirementCondition": "RETIRE IN K16 after the probe is recorded"
+    }
+  ],
+  "target": {
+    "file": "сайт и приложение/app.html",
+    "sha256": "d23d2b73ed8516a4c8b45eaf3ac80b86083e4ef74247852ba3182131daa65dea",
+    "bytes": 2719311,
+    "scripts": {
+      "inline": 29,
+      "parsedWithDiagnostics": 0,
+      "skipped": []
+    }
+  },
+  "vmEnter": {
+    "declarations": [
+      {
+        "line": 20508,
+        "in": [
+          "AChat"
+        ]
+      }
+    ],
+    "callers": 0,
+    "scopeEscapesInEnclosingFunction": [],
+    "saasEarlyReturn": {
+      "condition": "window.__ME_SAAS_CTX && !onbOnRef.current",
+      "line": 20511,
+      "returns": "when the condition holds"
+    },
+    "mentions": {
+      "declarations": [
+        {
+          "line": 20508,
+          "in": [
+            "AChat",
+            "vmEnter"
+          ],
+          "kind": "FunctionDeclaration"
+        }
+      ],
+      "references": [],
+      "propertyMentions": [],
+      "stringMentions": [],
+      "commentMentions": 0,
+      "unattributed": 0,
+      "outsideScripts": 0
+    }
+  },
+  "s746": {
+    "rtStart": {
+      "declarations": [
+        {
+          "line": 20143,
+          "in": [
+            "AChat"
+          ]
+        }
+      ],
+      "callersOutsideVmEnter": [],
+      "mentions": {
+        "declarations": [
+          {
+            "line": 20143,
+            "in": [
+              "AChat",
+              "rtStart"
+            ],
+            "kind": "FunctionDeclaration"
+          }
+        ],
+        "references": [
+          {
+            "line": 20520,
+            "in": [
+              "AChat",
+              "vmEnter"
+            ],
+            "kind": "call",
+            "text": "rtStart()"
+          }
+        ],
+        "propertyMentions": [],
+        "stringMentions": [],
+        "commentMentions": 0,
+        "unattributed": 0,
+        "outsideScripts": 0
+      }
+    },
+    "RT_URL": {
+      "readsOutsideRtStart": [],
+      "mentions": {
+        "declarations": [
+          {
+            "line": 20015,
+            "in": [
+              "AChat"
+            ],
+            "kind": "VariableDeclaration"
+          }
+        ],
+        "references": [
+          {
+            "line": 20169,
+            "in": [
+              "AChat",
+              "rtStart",
+              "<anonymous:20144>"
+            ],
+            "kind": "value",
+            "text": "new WebSocket(RT_URL)"
+          }
+        ],
+        "propertyMentions": [],
+        "stringMentions": [],
+        "commentMentions": 0,
+        "unattributed": 0,
+        "outsideScripts": 0
+      }
+    },
+    "webSocketsOpenedOnRtUrl": [
+      {
+        "line": 20169,
+        "in": [
+          "AChat",
+          "rtStart",
+          "<anonymous:20144>"
+        ]
+      }
+    ]
+  },
+  "s747": {
+    "vmRefInitialActive": "false",
+    "activeWritesOnVmRef": [
+      {
+        "line": 20268,
+        "in": [
+          "AChat",
+          "shutdownVoiceResources"
+        ],
+        "object": "vmRef.current",
+        "vmRef": true,
+        "value": "false"
+      },
+      {
+        "line": 20513,
+        "in": [
+          "AChat",
+          "vmEnter"
+        ],
+        "object": "vmRef.current",
+        "vmRef": true,
+        "value": "true"
+      }
+    ],
+    "activeWritesOnOtherObjects": [
+      {
+        "line": 8733,
+        "object": "d",
+        "value": "false",
+        "in": "AClientHome > sheetUp"
+      },
+      {
+        "line": 31219,
+        "object": "dg",
+        "value": "false",
+        "in": "ALiveSchedule > startDrag"
+      },
+      {
+        "line": 31225,
+        "object": "dg",
+        "value": "true",
+        "in": "ALiveSchedule > startDrag > <anonymous:31224>"
+      },
+      {
+        "line": 31268,
+        "object": "dg",
+        "value": "false",
+        "in": "ALiveSchedule > endDrag"
+      },
+      {
+        "line": 32923,
+        "object": "dg",
+        "value": "false",
+        "in": "ALiveSchedule > <anonymous:32857> > onPointerCancel"
+      },
+      {
+        "line": 39808,
+        "object": "dragRef.current",
+        "value": "false",
+        "in": "AOwnerMorningBrief > onTE"
+      }
+    ],
+    "vmRefReplaced": 0,
+    "vmRefObjectAssigned": 0,
+    "activeGuards": {
+      "vmListen": {
+        "statement": 1,
+        "text": "if (!V.active) return;"
+      },
+      "vmSend": {
+        "statement": 1,
+        "text": "if (!V.active) return;"
+      }
+    },
+    "greetingRequest": [
+      {
+        "line": 20532,
+        "in": [
+          "AChat",
+          "vmEnter"
+        ]
+      }
+    ],
+    "vmListen": {
+      "mentions": {
+        "declarations": [
+          {
+            "line": 20325,
+            "in": [
+              "AChat",
+              "vmListen"
+            ],
+            "kind": "FunctionDeclaration"
+          }
+        ],
+        "references": [
+          {
+            "line": 20301,
+            "in": [
+              "AChat",
+              "vmStopRec"
+            ],
+            "kind": "call",
+            "text": "vmListen()"
+          },
+          {
+            "line": 20375,
+            "in": [
+              "AChat",
+              "vmListen",
+              "mr.onstop"
+            ],
+            "kind": "call",
+            "text": "vmListen()"
+          },
+          {
+            "line": 20488,
+            "in": [
+              "AChat",
+              "vmSend"
+            ],
+            "kind": "call",
+            "text": "vmListen()"
+          },
+          {
+            "line": 20505,
+            "in": [
+              "AChat",
+              "vmSend"
+            ],
+            "kind": "call",
+            "text": "vmListen()"
+          },
+          {
+            "line": 20540,
+            "in": [
+              "AChat",
+              "vmEnter"
+            ],
+            "kind": "call",
+            "text": "vmListen()"
+          }
+        ],
+        "propertyMentions": [],
+        "stringMentions": [],
+        "commentMentions": 0,
+        "unattributed": 0,
+        "outsideScripts": 0
+      }
+    },
+    "vmSend": {
+      "mentions": {
+        "declarations": [
+          {
+            "line": 20409,
+            "in": [
+              "AChat",
+              "vmSend"
+            ],
+            "kind": "FunctionDeclaration"
+          }
+        ],
+        "references": [
+          {
+            "line": 20302,
+            "in": [
+              "AChat",
+              "vmStopRec"
+            ],
+            "kind": "call",
+            "text": "vmSend(url)"
+          },
+          {
+            "line": 20378,
+            "in": [
+              "AChat",
+              "vmListen",
+              "mr.onstop",
+              "fr.onloadend"
+            ],
+            "kind": "call",
+            "text": "vmSend(fr.result)"
+          }
+        ],
+        "propertyMentions": [],
+        "stringMentions": [],
+        "commentMentions": 0,
+        "unattributed": 0,
+        "outsideScripts": 0
+      }
+    }
+  },
+  "verdict": {
+    "vmEnterCallers": 0,
+    "vmEnterUnreachable": true,
+    "S-746": "UNREACHABLE",
+    "S-747": "UNREACHABLE"
+  },
+  "otherCopies": [
+    {
+      "file": "maya-os-site/index.html",
+      "sha256": "c33378c0d98361ddd632343e3719e69f054727e231605f08c8c9c93014828b03",
+      "vmEnterDeclarations": 1,
+      "vmEnterCallers": 0,
+      "references": [],
+      "saasEarlyReturn": true,
+      "coveredByRows": false
+    },
+    {
+      "file": "сайт и приложение/app-tenant.html",
+      "sha256": "cb6a1b0ca42f2f61a1aab0d130ec369091e79d5c51917d996bd90a2f6c310239",
+      "vmEnterDeclarations": 1,
+      "vmEnterCallers": 1,
+      "references": [
+        {
+          "line": 9531,
+          "in": [
+            "AChat"
+          ],
+          "kind": "value",
+          "text": "onClick: vmEnter"
+        }
+      ],
+      "saasEarlyReturn": false,
+      "coveredByRows": false
+    }
+  ],
+  "productionContext": {
+    "recordedIn": "docs/rebuild/evidence/maya-chat-first-ux/three-bundle-probe.json",
+    "performedAt": "2026-09-16T16:53Z",
+    "appHtmlCanonicalUrlStatus": 404,
+    "legacyCopiesServedAfterRemediation": 0,
+    "note": "quoted from the production probe record; this probe made no request"
+  },
+  "limits": [
+    "Static proof over сайт и приложение/app.html only. The otherCopies entries are NOT covered by S-746/S-747 and carry their own vmEnter counts.",
+    "Production serving is quoted from three-bundle-probe.json, not re-probed here.",
+    "A mention the parser cannot attribute is counted as a caller (fail closed), so a non-zero count is a finding to read, not necessarily a live call."
+  ]
+}

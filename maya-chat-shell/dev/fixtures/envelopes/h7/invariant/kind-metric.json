@@ -1,0 +1,313 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M0WD2RRQRPJR28VQYN",
+  "kind": "METRIC",
+  "body_version": 1,
+  "tenant_id": "7a19ed9e-e3b2-41b0-9742-2deab459fe5f",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "85dbd4ab90913577d93e8675cc78ee35"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "c7.measurement.read",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "period_label": {
+      "phrase_key": "period.week",
+      "rendered": "Неделя 8–14 сентября"
+    },
+    "metrics": [
+      {
+        "state": "KNOWN",
+        "value": 64,
+        "label": "Визиты",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null,
+        "key": "visits.count",
+        "unit": "count",
+        "basis_key": null,
+        "basis": "журнал записей",
+        "currency": null,
+        "formatted": "64",
+        "comparison": null
+      },
+      {
+        "state": "KNOWN",
+        "value": 98500,
+        "label": "Выручка",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null,
+        "key": "revenue.net",
+        "unit": "RUB",
+        "basis_key": null,
+        "basis": "касса салона",
+        "currency": "RUB",
+        "formatted": "98 500 ₽",
+        "comparison": {
+          "baseline_label": {
+            "phrase_key": "compare.prev_week",
+            "rendered": "к прошлой неделе"
+          },
+          "baseline": {
+            "state": "KNOWN",
+            "value": 91200,
+            "label": "Выручка прошлой недели",
+            "reason_code": null,
+            "fact_ref": null,
+            "as_of": "2026-09-17T08:55:00.000Z",
+            "evidence_refs": [],
+            "next_intent_ref": null,
+            "key": "revenue.net",
+            "unit": "RUB",
+            "basis_key": null,
+            "basis": "касса салона",
+            "currency": "RUB",
+            "formatted": "91 200 ₽",
+            "comparison": null
+          },
+          "delta": 7300,
+          "direction": "up"
+        }
+      },
+      {
+        "state": "NOT_MEASURED",
+        "value": null,
+        "label": "Возвращаемость не измерена: период не закрыт",
+        "reason_code": "PERIOD_NOT_CLOSED",
+        "fact_ref": null,
+        "as_of": null,
+        "evidence_refs": [],
+        "next_intent_ref": null,
+        "key": "retention.rate",
+        "unit": "percent",
+        "basis_key": null,
+        "basis": "CRM салона",
+        "currency": null,
+        "formatted": "—",
+        "comparison": null
+      }
+    ],
+    "headline_metric_key": "revenue.net",
+    "compare_intent": "i1",
+    "drill_intent": "i2"
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "UOOTSxfHyCTYge7EPSly_qR1pvbbT6AF",
+      "role": "secondary",
+      "label": "Сравнить с другим периодом",
+      "utterance_preview": "Сравнить с другим периодом",
+      "speech_aliases": [
+        "сравнить с другим периодом"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "c7.measurement.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "qIEY-Ecrgi80aBxqFMomXc353UjUev-y",
+      "role": "secondary",
+      "label": "Подробнее",
+      "utterance_preview": "Подробнее",
+      "speech_aliases": [
+        "подробнее"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "NAVIGATE",
+      "capability": null,
+      "handoff_capability_ref": null,
+      "target": {
+        "class": "detail",
+        "ref": "fs.report"
+      },
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "c7.measurement.read",
+    "capability_version": "v1",
+    "projector_id": "projector.metric",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "5e5abbbe3afc58aa1b589d7d87d7b136c7a869c2c8d90f63f4b071e2487b3bad",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "eb027458303d63fa1d193b7ca9573aea820feef7761d614fbdb9df4449140f31",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "3326d39004606b34465c93a35888ae36ef86fd580cdce5567765cccc94109440",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "6e4ec7dd0ad5336d691ee06a",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Выручка за неделю 8–14 сентября: 98 500 ₽",
+      "body": "Выручка 98 500 ₽, на 7 300 ₽ больше, чем неделей раньше. Визитов — 64.",
+      "itemized": [
+        "Выручка: 98 500 ₽ (к прошлой неделе: 91 200 ₽)",
+        "Визиты: 64",
+        "Возвращаемость: не измерена"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": "Возвращаемость не измерена: период не закрыт."
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "group",
+      "label": "Выручка за неделю 8–14 сентября: 98 500 ₽",
+      "description": "Выручка 98 500 ₽, на 7 300 ₽ больше, чем неделей раньше. Визитов — 64.",
+      "reading_order": [
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        }
+      ],
+      "live_region": "off",
+      "accessible_names": {
+        "intent:i1": "Сравнить с другим периодом",
+        "intent:i2": "Подробнее"
+      }
+    },
+    "fullscreen_detail": null
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 2,
+    "intents_emitted": 2,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "8c5a142f7b2efd80cf44f8fe8c94f5d06f36f48fd0dac0a5e636100849966044",
+    "cell_index_digest": "d9dfe0e7883eee800d0f32c78ed756c746093bf908e51d77f3ab4dc206cd4cb1",
+    "envelope_seal": "4020b56e22d6480323431238e52ed34262d7978dbd7da9eff623d176497b6378",
+    "seal_key_version": 1,
+    "principal_proof_hash": "5f5930b1efbe42bc88af856a53066d4bc28d4c929089f2a3d3f8606ed6a2796a",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

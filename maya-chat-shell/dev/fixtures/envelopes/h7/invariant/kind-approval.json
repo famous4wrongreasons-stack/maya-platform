@@ -1,0 +1,437 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M0XX12C7H20TZJKQ7K",
+  "kind": "APPROVAL",
+  "body_version": 1,
+  "tenant_id": "aaf0280e-718b-47d3-b530-7f4a9f2d15b2",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "39400b8b5b1d83d33a1988471a94dd63"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "b35.confirm",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "approval_ref": "ap-1",
+    "subject": {
+      "state": "KNOWN",
+      "value": "Рассылка «Мы скучаем»",
+      "label": "Рассылка «Мы скучаем»",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "effect_preview": [
+      {
+        "label": {
+          "phrase_key": "approval.channel",
+          "rendered": "Канал"
+        },
+        "value": {
+          "state": "KNOWN",
+          "value": "Telegram",
+          "label": "Telegram",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        }
+      },
+      {
+        "label": {
+          "phrase_key": "approval.message",
+          "rendered": "Сообщение"
+        },
+        "value": {
+          "state": "KNOWN",
+          "value": "Приходите на стрижку — ждём вас",
+          "label": "Приходите на стрижку — ждём вас",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        }
+      }
+    ],
+    "audience_size": {
+      "state": "KNOWN",
+      "value": 42,
+      "label": "Получателей",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null,
+      "key": "audience.size",
+      "unit": "count",
+      "basis_key": null,
+      "basis": "сегмент на 17 сентября",
+      "currency": null,
+      "formatted": "42 клиента",
+      "comparison": null
+    },
+    "risk_tier": {
+      "state": "KNOWN",
+      "value": "medium_write",
+      "label": "средний риск",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "reversible": {
+      "state": "KNOWN",
+      "value": false,
+      "label": "необратимо: сообщение уйдёт клиентам",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "state": {
+      "state": "KNOWN",
+      "value": "PENDING",
+      "label": "ожидает решения",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "requested_by_label": {
+      "state": "KNOWN",
+      "value": "Администратор",
+      "label": "Администратор",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "approve_intent": "i1",
+    "reject_intent": "i2",
+    "blocked_reason": null,
+    "detail_intent": "i3"
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "6urTy6G7G_XWdBHjnnkzPXP6DZktTX4G",
+      "role": "primary",
+      "label": "Одобрить",
+      "utterance_preview": "Одобрить",
+      "speech_aliases": [
+        "одобрить"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "COMMIT",
+      "capability": {
+        "space": "AE",
+        "key": "b35.confirm"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "SESSION_VERIFIED",
+      "confirmation": {
+        "risk_tier": "medium_write",
+        "reversible": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "можно отменить",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "audience_size": {
+          "state": "KNOWN",
+          "value": 42,
+          "label": "Получателей",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "audience.size",
+          "unit": "count",
+          "basis_key": null,
+          "basis": "сегмент на 17 сентября",
+          "currency": null,
+          "formatted": "42 клиента",
+          "comparison": null
+        },
+        "requires_explicit_confirm_step": true,
+        "requires_readback": false,
+        "readback_ref": null,
+        "readback_text": null,
+        "idempotency_key": "7cf5de4ca190ff7af6f87efddbbd7b761061e73cfd17bbc01ca27bc41b00b9b0",
+        "approval_policy": "owner"
+      },
+      "authority_hint": {
+        "emphasis": "primary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "_7a_GQUbzopGDpbxXRkUuYaJC3yEgQZ7",
+      "role": "destructive",
+      "label": "Отклонить",
+      "utterance_preview": "Отклонить",
+      "speech_aliases": [
+        "отклонить"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "COMMIT",
+      "capability": {
+        "space": "AE",
+        "key": "b35.reject"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "SESSION_VERIFIED",
+      "confirmation": {
+        "risk_tier": "medium_write",
+        "reversible": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "можно отменить",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "audience_size": null,
+        "requires_explicit_confirm_step": true,
+        "requires_readback": false,
+        "readback_ref": null,
+        "readback_text": null,
+        "idempotency_key": "7cf5de4ca190ff7af6f87efddbbd7b761061e73cfd17bbc01ca27bc41b00b9b0",
+        "approval_policy": "owner"
+      },
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i3",
+      "intent_token": "_-MSNem38og3c_1V2zgOkdcaqdcuudyo",
+      "role": "secondary",
+      "label": "Подробнее",
+      "utterance_preview": "Подробнее",
+      "speech_aliases": [
+        "подробнее"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "NAVIGATE",
+      "capability": null,
+      "handoff_capability_ref": null,
+      "target": {
+        "class": "detail",
+        "ref": "fs.team-thread"
+      },
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "b35.confirm",
+    "capability_version": "v1",
+    "projector_id": "projector.approval",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "c11d7c6641f51366e09b4a081c5faa075caf9d2c93395f38366584b6a16a9aff",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "98620c099c6d953b4784e7a85d82099d14e5026608cb01d4c2d669f6e808ab90",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "1985346a5b11db5e9f2d0e239aa4f26ae6d9d45fb9bdc074d882730c8c49335d",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "e172341f6660ecb576c5dfe7",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Рассылка «Мы скучаем» ждёт решения",
+      "body": "Сообщение «Приходите на стрижку — ждём вас» уйдёт 42 клиентам в Telegram. Средний риск, необратимо.",
+      "itemized": [
+        "Канал: Telegram",
+        "Получателей: 42",
+        "Риск: средний",
+        "Необратимо"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": null
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "region",
+      "label": "Рассылка «Мы скучаем» ждёт решения",
+      "description": "Сообщение «Приходите на стрижку — ждём вас» уйдёт 42 клиентам в Telegram. Средний риск, необратимо.",
+      "reading_order": [
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        },
+        {
+          "k": "intent",
+          "id": "i3"
+        }
+      ],
+      "live_region": "polite",
+      "accessible_names": {
+        "intent:i1": "Одобрить, 42 клиента, средний риск, необратимо: сообщение уйдёт клиентам",
+        "intent:i2": "Отклонить",
+        "intent:i3": "Подробнее"
+      }
+    },
+    "fullscreen_detail": {
+      "route_key": "fs.team-thread",
+      "reason": "audit"
+    }
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 3,
+    "intents_emitted": 3,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "5036e6a7f2d3a2fd29a8bb3f97783a99d6e7c43798caeba1da6ea62353689771",
+    "cell_index_digest": "a1379f626a04c8a15ada973e17f76c017b72dcb4e93863fe1041b8f5d981b3f5",
+    "envelope_seal": "a202c61a57b73c5dd266f814a507eb9a84a345a7b784317db96d4b992e40dca9",
+    "seal_key_version": 1,
+    "principal_proof_hash": "76168476e19562f391cb12aa51717cbb94dd91ecadc59fff606b456dce38e959",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

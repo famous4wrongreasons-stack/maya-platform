@@ -1,0 +1,150 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M0EXSJ0B9QAJVM332Y",
+  "kind": "LIMITATION",
+  "body_version": 1,
+  "tenant_id": "08039c93-1944-49d8-9ead-d7bf8e311a46",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "28ccf2bb667a3fa8bf2c1010b5b82d30"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "booking.availability.read",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "severity": "limitation",
+    "headline": {
+      "phrase_key": "limitation.partial",
+      "rendered": "Часть данных не загружена"
+    },
+    "detail": {
+      "phrase_key": "limitation.partial.detail",
+      "rendered": "Отзывы за сентябрь пока не загружены; остальное актуально."
+    },
+    "source_limitation_codes": [
+      "NOT_COLLECTED"
+    ],
+    "capability_gap_ref": null,
+    "remedy_intents": []
+  },
+  "intents": [],
+  "provenance": {
+    "source_capability": "booking.availability.read",
+    "capability_version": "v1",
+    "projector_id": "projector.limitation",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "04f9593e367a21e7b081dafa4a943ec5520f1dbb045d7b04079cd8d87ddbddf2",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "3968272dca5703a6bd69e5f0772bc5a8a45a4c6544818e5caf7f30578c54437a",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "0c18c0a6bde3293a3ce96165c7863a5c97da80f5e7753a560e7f83372a8236c2",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "4313406e9138fa1e2293be98",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Часть данных не загружена",
+      "body": "Отзывы за сентябрь пока не загружены; остальное актуально.",
+      "itemized": [],
+      "completeness_sentence": null,
+      "unknowns_sentence": null
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "status",
+      "label": "Часть данных не загружена",
+      "description": "Отзывы за сентябрь пока не загружены; остальное актуально.",
+      "reading_order": [],
+      "live_region": "polite",
+      "accessible_names": {}
+    },
+    "fullscreen_detail": null
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 0,
+    "intents_emitted": 0,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "83add9fd7f7346f8e79365b0f7e68ae95d8b2ebee6d3627cbf6f0eaa9a9d2147",
+    "cell_index_digest": "9e76a41f4428a1db3ba9a6518e9c8e94fb815bdb45e8232bf750494152c494fd",
+    "envelope_seal": "8a91ba81c25c2d70f6d551106a97913ed102b3c5f2f4b89b42575ca1fde99a44",
+    "seal_key_version": 1,
+    "principal_proof_hash": "4425842df8133351235a4141ddff1bf0c1d238a4084cc4fad1944cb7725b4f94",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

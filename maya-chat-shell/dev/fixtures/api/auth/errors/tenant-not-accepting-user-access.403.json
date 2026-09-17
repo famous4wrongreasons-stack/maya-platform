@@ -1,0 +1,14 @@
+{
+  "source": [
+    "maya-saas-backend/src/auth/email-auth.service.ts:574 @ 62fde3a3"
+  ],
+  "status": 403,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "message": "Tenant is not accepting user access",
+    "error": "Forbidden",
+    "statusCode": 403
+  }
+}

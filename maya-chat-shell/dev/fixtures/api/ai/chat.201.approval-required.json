@@ -1,0 +1,60 @@
+{
+  "source": [
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts:1167 @ 62fde3a3",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts:588 @ 62fde3a3",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts:1308 @ 62fde3a3"
+  ],
+  "status": 201,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "request_id": "{{request_id}}",
+    "reply": "Действие подготовлено и ждёт вашего подтверждения.",
+    "source": "openai",
+    "redacted_input": false,
+    "action": {
+      "status": "approval_required",
+      "approval": {
+        "id": "{{approval_id}}",
+        "tool_name": "appointments.own.create",
+        "surface": "web",
+        "risk_tier": "medium_write",
+        "approval_policy": "actor",
+        "status": "pending",
+        "summary": "Запись на стрижку завтра в 12:00",
+        "payload_hash": "5f0c1c4f8c2a4f1e9b7d3a6e0c8b1d2f4a5e6c7b8d9e0f1a2b3c4d5e6f7a8b9c",
+        "payload_preview": {
+          "staff_id": "staff_1",
+          "service_ids": [
+            "service_1"
+          ],
+          "start": "2026-09-18T12:00:00.000+03:00"
+        },
+        "expires_at": "{{approval_expires_at}}",
+        "decided_at": null,
+        "executed_at": null,
+        "error_code": null,
+        "created_at": "{{now}}",
+        "updated_at": "{{now}}"
+      }
+    },
+    "tools_used": [
+      {
+        "name": "appointments.own.create",
+        "status": "approval_required",
+        "execution_id": null
+      }
+    ],
+    "grounding": {
+      "status": "not_required",
+      "domain": null,
+      "required_tools": [],
+      "evidence_tools": []
+    },
+    "brain": {
+      "persona": "admin",
+      "intent": "booking"
+    }
+  }
+}

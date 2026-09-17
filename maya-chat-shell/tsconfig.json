@@ -6,9 +6,12 @@
     "strict": true,
     "noEmit": true,
     "lib": ["ES2022", "DOM"],
+    "types": [],
     "skipLibCheck": true,
     "exactOptionalPropertyTypes": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "entry/**/*.ts"]
 }

@@ -1,0 +1,26 @@
+<!doctype html>
+<!--
+  K5 — H7 browser parity (SHELL-PLAN v2.1 §2.7 step 10b; D11, V2-2). DEV ONLY.
+  Served only under /__dev/ by dev/serve.mjs in mock mode; never emitted into dist/web.
+  It imports the EMITTED src/integrity/h7.js from /m/<digest16>/ and hashes the fixture corpus that
+  dev/make-envelopes.mjs minted with the backend canonicaliser. cdp-verify.mjs sets the locale with
+  Emulation.setLocaleOverride, reloads this page, and reads the result from
+  document.documentElement.dataset.h7 ("done" | "error") and #h7-result (JSON).
+  Query: ?module=/m/<digest16>/src/integrity/h7.js (default: /__dev/web.json, then /index.html)
+         &fixtures=/__dev/fixtures/envelopes/ (default)
+-->
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>H7 parity (dev)</title>
+    <script type="module" src="./h7-parity.mjs"></script>
+  </head>
+  <body>
+    <main>
+      <h1>H7 parity</h1>
+      <p id="h7-status" role="status">running</p>
+      <output id="h7-result" for="h7-status"></output>
+    </main>
+  </body>
+</html>

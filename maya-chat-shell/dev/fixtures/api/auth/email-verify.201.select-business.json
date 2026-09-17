@@ -1,0 +1,14 @@
+{
+  "source": [
+    "maya-saas-backend/src/auth/email-auth.service.ts:472 @ 62fde3a3"
+  ],
+  "status": 201,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "ok": true,
+    "next_step": "select_business",
+    "businesses": "{{businesses}}"
+  }
+}

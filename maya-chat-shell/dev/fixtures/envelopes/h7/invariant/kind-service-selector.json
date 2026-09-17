@@ -1,0 +1,503 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M04HXRMXKH7A0HVPTN",
+  "kind": "SERVICE_SELECTOR",
+  "body_version": 1,
+  "tenant_id": "0c29e808-43e1-497e-b442-c39260fac492",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "b2ec05aad04bfc0408e59ab038a5372a"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "catalog.services.read",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "prompt": {
+      "phrase_key": "service.prompt",
+      "rendered": "Выберите услугу"
+    },
+    "category_path": [
+      {
+        "phrase_key": "category.hair",
+        "rendered": "Стрижки и борода"
+      }
+    ],
+    "select": "single",
+    "options": [
+      {
+        "option_id": "svc-cut",
+        "label": {
+          "state": "KNOWN",
+          "value": "Мужская стрижка",
+          "label": "Мужская стрижка",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "sublabel": null,
+        "badges": [],
+        "measures": [],
+        "media": null,
+        "intent_ref": "i1",
+        "enabled": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "Доступно",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "service_ref": "svc.cut",
+        "duration": {
+          "state": "KNOWN",
+          "value": 60,
+          "label": "Длительность",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "service.duration",
+          "unit": "minutes",
+          "basis_key": null,
+          "basis": "по прайсу салона",
+          "currency": null,
+          "formatted": "60 мин",
+          "comparison": null
+        },
+        "price": {
+          "state": "KNOWN",
+          "value": 1500,
+          "label": "Цена",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "service.price",
+          "unit": "RUB",
+          "basis_key": null,
+          "basis": "прайс салона на 17 сентября",
+          "currency": "RUB",
+          "formatted": "1 500 ₽",
+          "comparison": null
+        },
+        "requires_consultation": {
+          "state": "KNOWN",
+          "value": false,
+          "label": "без консультации",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "combinable_with": [
+          "svc.beard"
+        ]
+      },
+      {
+        "option_id": "svc-beard",
+        "label": {
+          "state": "KNOWN",
+          "value": "Оформление бороды",
+          "label": "Оформление бороды",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "sublabel": null,
+        "badges": [],
+        "measures": [],
+        "media": null,
+        "intent_ref": "i1",
+        "enabled": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "Доступно",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "service_ref": "svc.beard",
+        "duration": {
+          "state": "KNOWN",
+          "value": 40,
+          "label": "Длительность",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "service.duration",
+          "unit": "minutes",
+          "basis_key": null,
+          "basis": "по прайсу салона",
+          "currency": null,
+          "formatted": "40 мин",
+          "comparison": null
+        },
+        "price": {
+          "state": "KNOWN",
+          "value": 900,
+          "label": "Цена",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "service.price",
+          "unit": "RUB",
+          "basis_key": null,
+          "basis": "прайс салона на 17 сентября",
+          "currency": "RUB",
+          "formatted": "900 ₽",
+          "comparison": null
+        },
+        "requires_consultation": {
+          "state": "KNOWN",
+          "value": false,
+          "label": "без консультации",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "combinable_with": [
+          "svc.cut"
+        ]
+      },
+      {
+        "option_id": "svc-camo",
+        "label": {
+          "state": "KNOWN",
+          "value": "Камуфляж седины",
+          "label": "Камуфляж седины",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "sublabel": null,
+        "badges": [],
+        "measures": [],
+        "media": null,
+        "intent_ref": "i1",
+        "enabled": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "Доступно",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "service_ref": "svc.camo",
+        "duration": {
+          "state": "KNOWN",
+          "value": 30,
+          "label": "Длительность",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "service.duration",
+          "unit": "minutes",
+          "basis_key": null,
+          "basis": "по прайсу салона",
+          "currency": null,
+          "formatted": "30 мин",
+          "comparison": null
+        },
+        "price": {
+          "state": "NOT_MEASURED",
+          "value": null,
+          "label": "Цена уточняется у мастера",
+          "reason_code": "NOT_COLLECTED",
+          "fact_ref": null,
+          "as_of": null,
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "service.price",
+          "unit": "RUB",
+          "basis_key": null,
+          "basis": "прайс салона на 17 сентября",
+          "currency": "RUB",
+          "formatted": "цена уточняется",
+          "comparison": null
+        },
+        "requires_consultation": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "нужна консультация",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "combinable_with": []
+      }
+    ],
+    "total_preview": null,
+    "shown_count": 3,
+    "total_count": 5,
+    "more_intent": "i2"
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "nXPgv-rpfnAcI7K4aMNb607CmFA77dd2",
+      "role": "primary",
+      "label": "Выбрать услугу",
+      "utterance_preview": "Выбрать услугу",
+      "speech_aliases": [
+        "выбрать услугу"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "catalog.services.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": {
+        "fields": [
+          {
+            "name": "selection",
+            "required": true,
+            "kind": "enum",
+            "domain_ref": "service.catalogue",
+            "selection_min": 1,
+            "selection_max": 1
+          }
+        ],
+        "max_total_bytes": 256,
+        "free_input_justification": null
+      },
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "primary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "7fKpeL4sq4x8nSCfuh3wnhSaxWbUe6PY",
+      "role": "more",
+      "label": "Все услуги",
+      "utterance_preview": "Все услуги",
+      "speech_aliases": [
+        "все услуги"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "catalog.services.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "catalog.services.read",
+    "capability_version": "v1",
+    "projector_id": "projector.service_selector",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "8bc987caf62ce45da6098f5beb8ba1e5fbac09a8f95360c883c6c26a51af2435",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "754dcea3fd5746074941acb203d29add582f1a5b99f9a8759e87b806438b22fe",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "3942e0ad4c0a6d8fa75735822704fa64efd4d4a32088fbad5c731441a2e69a2d",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "f02d23326904ed54f0be946f",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Выберите услугу",
+      "body": "Мужская стрижка — 60 мин, 1 500 ₽. Оформление бороды — 40 мин, 900 ₽. Камуфляж седины — 30 мин, цена уточняется.",
+      "itemized": [
+        "Мужская стрижка, 60 мин, 1 500 ₽",
+        "Оформление бороды, 40 мин, 900 ₽",
+        "Камуфляж седины, 30 мин, цена уточняется у мастера"
+      ],
+      "completeness_sentence": "Показаны 3 услуги из 5.",
+      "unknowns_sentence": "Цена камуфляжа седины уточняется у мастера."
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "radiogroup",
+      "label": "Выберите услугу",
+      "description": "Мужская стрижка — 60 мин, 1 500 ₽. Оформление бороды — 40 мин, 900 ₽. Камуфляж седины — 30 мин, цена уточняется.",
+      "reading_order": [
+        {
+          "k": "option",
+          "id": "svc-cut"
+        },
+        {
+          "k": "option",
+          "id": "svc-beard"
+        },
+        {
+          "k": "option",
+          "id": "svc-camo"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        },
+        {
+          "k": "intent",
+          "id": "i1"
+        }
+      ],
+      "live_region": "off",
+      "accessible_names": {
+        "option:svc-cut": "Мужская стрижка, 60 мин, 1 500 ₽",
+        "option:svc-beard": "Оформление бороды, 40 мин, 900 ₽",
+        "option:svc-camo": "Камуфляж седины, 30 мин, цена уточняется",
+        "intent:i2": "Все услуги",
+        "intent:i1": "Выбрать услугу"
+      }
+    },
+    "fullscreen_detail": {
+      "route_key": "fs.catalogue",
+      "reason": "exceeds_chat_density"
+    }
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 2,
+    "intents_emitted": 2,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "de517a9f15452e8c714ecb9020f1c600224e57713f23d0045f620002354d6138",
+    "cell_index_digest": "23dcd2dec00a5b1e69485772fa365ba0a86e025bac7c6aa3ab89058520cda9ff",
+    "envelope_seal": "534ab72c8429a638f364f7290dbb411d333101782adc70c51efaa9b5e527371d",
+    "seal_key_version": 1,
+    "principal_proof_hash": "6c6c6b35dff54fc4b0f06be9054e58a50566d04adec47b483de551ddd8276698",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

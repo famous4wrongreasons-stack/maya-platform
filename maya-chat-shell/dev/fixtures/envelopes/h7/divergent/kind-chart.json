@@ -1,0 +1,478 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M00J43K3QTCTADHBMY",
+  "kind": "CHART",
+  "body_version": 1,
+  "tenant_id": "adb8aa03-f711-4ed5-9739-a22f0bccdd6e",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "2681f999805ed87ef7a1642b9bdbca0e"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "c8.result.read",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "chart_kind": "line",
+    "dataset_ref": "ds-revenue-week",
+    "projection_ref": "proj-by-day",
+    "rows_digest": "39f22f09a276be194f484c0212f84e1d9720fadaef26fd1f7bb6cb7388b4db79",
+    "series_digest": "e492b7a11802e47d4639f6a3c3b98f6fff2c4f984f8e19077113c45b3b6a7e25",
+    "axes": {
+      "x": {
+        "label": {
+          "phrase_key": "axis.day",
+          "rendered": "День"
+        },
+        "type": "category",
+        "buckets": [
+          {
+            "state": "KNOWN",
+            "value": "Пн",
+            "label": "Пн",
+            "reason_code": null,
+            "fact_ref": null,
+            "as_of": "2026-09-17T08:55:00.000Z",
+            "evidence_refs": [],
+            "next_intent_ref": null
+          },
+          {
+            "state": "KNOWN",
+            "value": "Вт",
+            "label": "Вт",
+            "reason_code": null,
+            "fact_ref": null,
+            "as_of": "2026-09-17T08:55:00.000Z",
+            "evidence_refs": [],
+            "next_intent_ref": null
+          },
+          {
+            "state": "KNOWN",
+            "value": "Ср",
+            "label": "Ср",
+            "reason_code": null,
+            "fact_ref": null,
+            "as_of": "2026-09-17T08:55:00.000Z",
+            "evidence_refs": [],
+            "next_intent_ref": null
+          }
+        ]
+      },
+      "y": {
+        "label": {
+          "phrase_key": "axis.revenue",
+          "rendered": "Выручка"
+        },
+        "unit": "RUB"
+      }
+    },
+    "series": [
+      {
+        "series_id": "ser-revenue",
+        "label": {
+          "state": "KNOWN",
+          "value": "Выручка",
+          "label": "Выручка",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "points": [
+          {
+            "x": {
+              "state": "KNOWN",
+              "value": "Пн",
+              "label": "Пн",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "y": {
+              "state": "KNOWN",
+              "value": 14000,
+              "label": "Выручка",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "revenue.day",
+              "unit": "RUB",
+              "basis_key": null,
+              "basis": "касса салона",
+              "currency": "RUB",
+              "formatted": "14 000 ₽",
+              "comparison": null
+            }
+          },
+          {
+            "x": {
+              "state": "KNOWN",
+              "value": "Вт",
+              "label": "Вт",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "y": {
+              "state": "KNOWN",
+              "value": 16500,
+              "label": "Выручка",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "revenue.day",
+              "unit": "RUB",
+              "basis_key": null,
+              "basis": "касса салона",
+              "currency": "RUB",
+              "formatted": "16 500 ₽",
+              "comparison": null
+            }
+          },
+          {
+            "x": {
+              "state": "KNOWN",
+              "value": "Ср",
+              "label": "Ср",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "y": {
+              "state": "UNAVAILABLE",
+              "value": null,
+              "label": "нет данных за среду",
+              "reason_code": "PROVIDER_SILENT",
+              "fact_ref": null,
+              "as_of": null,
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "revenue.day",
+              "unit": "RUB",
+              "basis_key": null,
+              "basis": "касса салона",
+              "currency": "RUB",
+              "formatted": "—",
+              "comparison": null
+            }
+          }
+        ]
+      }
+    ],
+    "table_equivalent": {
+      "caption": {
+        "phrase_key": "chart.caption",
+        "rendered": "Выручка по дням"
+      },
+      "columns": [
+        {
+          "key": "day",
+          "label": {
+            "phrase_key": "col.day",
+            "rendered": "День"
+          },
+          "type": "text",
+          "sensitivity": "public",
+          "is_row_header": true
+        },
+        {
+          "key": "revenue",
+          "label": {
+            "phrase_key": "col.revenue",
+            "rendered": "Выручка"
+          },
+          "type": "measure",
+          "sensitivity": "internal",
+          "is_row_header": false,
+          "align": "end"
+        }
+      ],
+      "rows": [
+        {
+          "row_key": "d-mon",
+          "cells": {
+            "day": {
+              "state": "KNOWN",
+              "value": "Пн",
+              "label": "Пн",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "revenue": {
+              "state": "KNOWN",
+              "value": 14000,
+              "label": "Выручка",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "revenue.day",
+              "unit": "RUB",
+              "basis_key": null,
+              "basis": "касса салона",
+              "currency": "RUB",
+              "formatted": "14 000 ₽",
+              "comparison": null
+            }
+          }
+        },
+        {
+          "row_key": "d-tue",
+          "cells": {
+            "day": {
+              "state": "KNOWN",
+              "value": "Вт",
+              "label": "Вт",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "revenue": {
+              "state": "KNOWN",
+              "value": 16500,
+              "label": "Выручка",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "revenue.day",
+              "unit": "RUB",
+              "basis_key": null,
+              "basis": "касса салона",
+              "currency": "RUB",
+              "formatted": "16 500 ₽",
+              "comparison": null
+            }
+          }
+        },
+        {
+          "row_key": "d-wed",
+          "cells": {
+            "day": {
+              "state": "KNOWN",
+              "value": "Ср",
+              "label": "Ср",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": "2026-09-17T08:55:00.000Z",
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "revenue": {
+              "state": "UNAVAILABLE",
+              "value": null,
+              "label": "нет данных за среду",
+              "reason_code": "PROVIDER_SILENT",
+              "fact_ref": null,
+              "as_of": null,
+              "evidence_refs": [],
+              "next_intent_ref": null,
+              "key": "revenue.day",
+              "unit": "RUB",
+              "basis_key": null,
+              "basis": "касса салона",
+              "currency": "RUB",
+              "formatted": "—",
+              "comparison": null
+            }
+          }
+        }
+      ],
+      "row_intents": null,
+      "group_by": null
+    },
+    "gap_policy": "RENDER_GAP",
+    "drill_intent": "i1",
+    "export_intent": null
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "j7VQdcWVYKEJ7pM1sWN6WBYxbcPCk5w-",
+      "role": "secondary",
+      "label": "Подробнее по дням",
+      "utterance_preview": "Подробнее по дням",
+      "speech_aliases": [
+        "подробнее по дням"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "c8.result.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "c8.result.read",
+    "capability_version": "v1",
+    "projector_id": "projector.chart",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "ff9fb472247f9af15d52713ab00b0bf3e064bb5827fbb8f73b2d60ea4b742f60",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "6932494c842814be7c82e48f1fafe5aafd22b21ce57e00b28138e6a359008a0c",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "79a58b781974df92be3901107dbd62c9547d890bc3eda4826df866ede724bc6e",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "dcaf33944bad5f31f8f3f7f1",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Выручка по дням: понедельник — 14 000 ₽, вторник — 16 500 ₽",
+      "body": "В понедельник выручка 14 000 ₽, во вторник 16 500 ₽; за среду данных нет, на графике разрыв.",
+      "itemized": [
+        "Пн: 14 000 ₽",
+        "Вт: 16 500 ₽",
+        "Ср: нет данных"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": "За среду данных нет."
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "img",
+      "label": "Выручка по дням: понедельник — 14 000 ₽, вторник — 16 500 ₽",
+      "description": "В понедельник выручка 14 000 ₽, во вторник 16 500 ₽; за среду данных нет, на графике разрыв.",
+      "reading_order": [
+        {
+          "k": "intent",
+          "id": "i1"
+        }
+      ],
+      "live_region": "off",
+      "accessible_names": {
+        "intent:i1": "Подробнее по дням"
+      }
+    },
+    "fullscreen_detail": {
+      "route_key": "fs.report",
+      "reason": "exceeds_chat_density"
+    }
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 1,
+    "intents_emitted": 1,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "14131179b2c6858b335e097eaff591972f640a161fbb5abf40aae678b98d7dbe",
+    "cell_index_digest": "b5ef4bcde91af1aec5ddb353de772ff12fbbe3788f96b7bc3eedc7bcfaa0b3f3",
+    "envelope_seal": "0a11f07fb850289b65d7f584face1a43e5bdfd8724eb9d7084a9e7299a197e4f",
+    "seal_key_version": 1,
+    "principal_proof_hash": "18de2560765a508e2dda53184ee554bb442fbddba5191a4a15b30cf7cb34fff0",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

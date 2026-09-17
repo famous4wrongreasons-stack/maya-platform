@@ -1,8 +1,12 @@
-# The emitted bundle is derivable from the sources, so it is not committed.
+# The emitted output is derivable from the sources, so it is not committed.
 dist/maya-chat-shell.ts
-.build-check/
+dist/web/
+dist/capacitor/
 
-# The MANIFEST is committed, deliberately. It carries the digest, and a reproducibility claim
+# The MANIFEST is committed, deliberately. It carries the digests, and a reproducibility claim
 # nobody else can check is not a claim — `node build.mjs --check` compares a fresh build against
 # this file, so it has to travel with the sources.
 !dist/manifest.json
+
+# The repository root ignores every build/ directory; the build self-test fixtures are sources.
+!/test/fixtures/build/

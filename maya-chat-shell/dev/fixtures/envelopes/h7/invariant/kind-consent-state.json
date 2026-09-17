@@ -1,0 +1,293 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M0SXSXJ1M3XB95YZ4V",
+  "kind": "CONSENT_STATE",
+  "body_version": 1,
+  "tenant_id": "6b646d4a-c3cb-47c2-ae85-d8d49216fcd2",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "d909a9a3addf39c242b17e44d3e2bdb0"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "consent.register.read",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "consent_kind": "MARKETING",
+    "subject_label": {
+      "state": "KNOWN",
+      "value": "Вы",
+      "label": "Вы",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "decision": {
+      "state": "KNOWN",
+      "value": "GRANTED",
+      "label": "разрешено",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "recorded_at": {
+      "state": "KNOWN",
+      "value": "2026-08-12T10:00:00.000Z",
+      "label": "12 августа 2026",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "recorded_via": {
+      "state": "KNOWN",
+      "value": "pwa",
+      "label": "приложение салона",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "scope_text": [
+      {
+        "phrase_key": "consent.scope",
+        "rendered": "Салон может присылать предложения в Telegram."
+      }
+    ],
+    "change_effect_text": [
+      {
+        "phrase_key": "consent.change",
+        "rendered": "Если отозвать согласие, предложения приходить перестанут."
+      }
+    ],
+    "register_ref": "reg-1",
+    "change_handoff_intent": "i1",
+    "capability_gap_ref": null
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "OLXtCaaQJhQwzMglbbqdPi6CXTzRWz7o",
+      "role": "handoff",
+      "label": "Изменить согласие",
+      "utterance_preview": "Изменить согласие",
+      "speech_aliases": [
+        "изменить согласие"
+      ],
+      "ordinal": null,
+      "priority": 0,
+      "effect": "HANDOFF",
+      "capability": null,
+      "handoff_capability_ref": {
+        "space": "AE",
+        "key": "consent.marketing.revoke"
+      },
+      "target": {
+        "class": "s",
+        "ref": {
+          "route": "shell.privacy",
+          "param": null
+        }
+      },
+      "input_schema": null,
+      "verification_floor": "SESSION_VERIFIED",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i9",
+      "intent_token": null,
+      "role": "escape",
+      "label": "Закрыть",
+      "utterance_preview": "Закрыть",
+      "speech_aliases": [
+        "отмена",
+        "стоп",
+        "закрыть"
+      ],
+      "ordinal": null,
+      "priority": 0,
+      "effect": "NONE",
+      "capability": null,
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": false
+    }
+  ],
+  "provenance": {
+    "source_capability": "consent.register.read",
+    "capability_version": "v1",
+    "projector_id": "projector.consent_state",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "1852cbf3a9cc8f7d649cf5bdafae71a3e4092f1c96952a6964da9e6204fedcce",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "c794d894ea8080aee80cfaca9bef1892265a6a5dd72a76d01671f3f91dd2439f",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "d6831dab90401ef47db155cdbbdf9647c00d49c8d5a53d5e9951b10145d4825a",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "9949a9b5add153b4650cc805",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Согласие на предложения: разрешено",
+      "body": "Вы разрешили предложения 12 августа 2026 в приложении салона. Салон может присылать предложения в Telegram. Изменить согласие можно в разделе «Приватность».",
+      "itemized": [
+        "Решение: разрешено",
+        "Когда: 12 августа 2026",
+        "Где: приложение салона"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": null
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "region",
+      "label": "Согласие на предложения: разрешено",
+      "description": "Вы разрешили предложения 12 августа 2026 в приложении салона. Салон может присылать предложения в Telegram. Изменить согласие можно в разделе «Приватность».",
+      "reading_order": [
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i9"
+        }
+      ],
+      "live_region": "polite",
+      "accessible_names": {
+        "intent:i1": "Изменить согласие",
+        "intent:i9": "Закрыть"
+      }
+    },
+    "fullscreen_detail": {
+      "route_key": "fs.consent",
+      "reason": "audit"
+    }
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 2,
+    "intents_emitted": 2,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "71f07f21f6cd788d93744eb575fcb42feb7f2af619c9a78b6160d1539ce6ac23",
+    "cell_index_digest": "fae340a9841c1353753882d627090139e36c2cf3fe5898c8709a029e0e19f201",
+    "envelope_seal": "0b35045796acfe20766e16adcda6395f0b30aced121401cd37cb12bc28a424a7",
+    "seal_key_version": 1,
+    "principal_proof_hash": "b6db0e23fc0096eb38c45a43a586c0d1e4973a31a2953d375860731e6eb17a3e",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "source": [
+    "maya-saas-backend/src/auth/auth-rate-limit.exception.ts:8 @ 62fde3a3",
+    "maya-saas-backend/src/auth/auth-rate-limit.filter.ts:11 @ 62fde3a3"
+  ],
+  "status": 429,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8",
+    "Retry-After": "{{retry_after_seconds}}"
+  },
+  "body": {
+    "message": "Too many authentication attempts. Try again later.",
+    "error": {
+      "code": "auth_rate_limited",
+      "message": "Too many authentication attempts. Try again later.",
+      "retry_after_seconds": "{{retry_after_seconds}}"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "source": [
+    "maya-saas-backend/src/guards/subscription-access.guard.ts:47 @ 62fde3a3"
+  ],
+  "status": 402,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "message": "The MAYA OS trial has ended. A subscription is required.",
+    "error": {
+      "code": "subscription_required",
+      "trial_ended_at": "2026-09-01T00:00:00.000Z",
+      "past_due_at": "2026-09-01T00:00:00.000Z",
+      "grace_ended_at": "2026-09-04T00:00:00.000Z",
+      "plans_path": "/api/billing/plans",
+      "checkout_path": "/api/admin/tenants/{{tenant_id}}/billing/checkout"
+    }
+  }
+}

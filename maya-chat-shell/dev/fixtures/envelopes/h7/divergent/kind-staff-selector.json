@@ -1,0 +1,384 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M03F95HBNR6TH85GAG",
+  "kind": "STAFF_SELECTOR",
+  "body_version": 1,
+  "tenant_id": "cd6b7390-4070-478f-a35a-03dc27add860",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "fbcc43842869c94e7cf4e5d46239a024"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "catalog.staff.read",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "prompt": {
+      "phrase_key": "staff.prompt",
+      "rendered": "Выберите мастера"
+    },
+    "for_service_refs": [
+      "svc.cut"
+    ],
+    "options": [
+      {
+        "option_id": "st-ilya",
+        "label": {
+          "state": "KNOWN",
+          "value": "Илья",
+          "label": "Илья",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "sublabel": null,
+        "badges": [],
+        "measures": [],
+        "media": null,
+        "intent_ref": "i1",
+        "enabled": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "Доступно",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "staff_ref": "staff.ilya",
+        "role_label": {
+          "state": "KNOWN",
+          "value": "Старший мастер",
+          "label": "Старший мастер",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "nearest_availability": {
+          "state": "KNOWN",
+          "value": "2026-09-18T07:00:00.000Z",
+          "label": "Ближайшее время",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "staff.next_slot",
+          "unit": "datetime",
+          "basis_key": null,
+          "basis": "расписание мастера",
+          "currency": null,
+          "formatted": "завтра в 10:00",
+          "comparison": null
+        },
+        "rating": {
+          "state": "KNOWN",
+          "value": 4.9,
+          "label": "Рейтинг",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "staff.rating",
+          "unit": "ratio",
+          "basis_key": null,
+          "basis": "отзывы клиентов",
+          "currency": null,
+          "formatted": "4,9",
+          "comparison": null
+        }
+      },
+      {
+        "option_id": "st-anna",
+        "label": {
+          "state": "KNOWN",
+          "value": "Анна",
+          "label": "Анна",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "sublabel": null,
+        "badges": [],
+        "measures": [],
+        "media": null,
+        "intent_ref": "i1",
+        "enabled": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "Доступно",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "staff_ref": "staff.anna",
+        "role_label": {
+          "state": "KNOWN",
+          "value": "Мастер",
+          "label": "Мастер",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "nearest_availability": {
+          "state": "PENDING",
+          "value": null,
+          "label": "Ближайшее время не известно",
+          "reason_code": "IN_PROGRESS",
+          "fact_ref": null,
+          "as_of": null,
+          "evidence_refs": [],
+          "next_intent_ref": null,
+          "key": "staff.next_slot",
+          "unit": "datetime",
+          "basis_key": null,
+          "basis": "расписание мастера",
+          "currency": null,
+          "formatted": "время уточняется",
+          "comparison": null
+        },
+        "rating": null
+      }
+    ],
+    "any_staff_option": {
+      "option_id": "st-any",
+      "label": {
+        "state": "KNOWN",
+        "value": "Любой мастер",
+        "label": "Любой мастер",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "sublabel": null,
+      "badges": [],
+      "measures": [],
+      "media": null,
+      "intent_ref": "i1",
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      }
+    },
+    "shown_count": 2,
+    "total_count": 2,
+    "more_intent": null
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "fk4-Lzj9QGdkm9vFIgnX1nnd47TK8JOD",
+      "role": "primary",
+      "label": "Выбрать мастера",
+      "utterance_preview": "Выбрать мастера",
+      "speech_aliases": [
+        "выбрать мастера"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "REFINE",
+      "capability": {
+        "space": "C9",
+        "key": "catalog.staff.read"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": {
+        "fields": [
+          {
+            "name": "selection",
+            "required": true,
+            "kind": "enum",
+            "domain_ref": "staff.for_service",
+            "selection_min": 1,
+            "selection_max": 1
+          }
+        ],
+        "max_total_bytes": 256,
+        "free_input_justification": null
+      },
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "primary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "catalog.staff.read",
+    "capability_version": "v1",
+    "projector_id": "projector.staff_selector",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "b5a85b191d0dc48eccd6069483c6fe6fdbcf2ad0ee737cb602ea1e1916854e2a",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "9f3b056f9b1454741740ff864f44390e7043324275b5415e678b6260180eb794",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "7a90bad41ddcc98cfad82e354c706cba67edb09a3d676c23cad30fcbf280a38e",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "c1bdf4b4ad9ed21275099d3f",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Выберите мастера",
+      "body": "Илья — старший мастер, ближайшее время завтра в 10:00. Анна — мастер, ближайшее время уточняется. Или любой мастер.",
+      "itemized": [
+        "Илья, старший мастер, завтра в 10:00",
+        "Анна, мастер, время уточняется",
+        "Любой мастер"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": "Ближайшее время Анны уточняется."
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "radiogroup",
+      "label": "Выберите мастера",
+      "description": "Илья — старший мастер, ближайшее время завтра в 10:00. Анна — мастер, ближайшее время уточняется. Или любой мастер.",
+      "reading_order": [
+        {
+          "k": "option",
+          "id": "st-ilya"
+        },
+        {
+          "k": "option",
+          "id": "st-anna"
+        },
+        {
+          "k": "option",
+          "id": "st-any"
+        },
+        {
+          "k": "intent",
+          "id": "i1"
+        }
+      ],
+      "live_region": "off",
+      "accessible_names": {
+        "option:st-ilya": "Илья, завтра в 10:00",
+        "option:st-anna": "Анна, время уточняется",
+        "option:st-any": "Любой мастер",
+        "intent:i1": "Выбрать мастера"
+      }
+    },
+    "fullscreen_detail": null
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 1,
+    "intents_emitted": 1,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "f919c2c7e4c91a05fbe6f654308406515daf10aeeb3bd44eec677ed2efe1f3fd",
+    "cell_index_digest": "806e5bea4421e65d8e3f2fdb58905fe81e72d42a53bc3d92feebcc63148deb72",
+    "envelope_seal": "59b56bfbd4278816a44a025147a6bf433898f53d4fc74d6b970da2ab01dd3274",
+    "seal_key_version": 1,
+    "principal_proof_hash": "5c8f41a412e6724a92ab33c14a2a8308d94baf12eb7bccc64ba000ce9fcf822f",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

@@ -1,0 +1,324 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M0MVB7AFZ9CH96PE0Z",
+  "kind": "PROGRESS",
+  "body_version": 1,
+  "tenant_id": "274fdbea-fb89-48d3-aa19-d27755006281",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "7f415adddd43bce13a2ce2f9fae12ee6"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "owner_report.status",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "run_ref": "run-1",
+    "headline": {
+      "state": "KNOWN",
+      "value": "Шаг 2 из 3: собираю отзывы",
+      "label": "Шаг 2 из 3: собираю отзывы",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "steps": [
+      {
+        "step_id": "st-1",
+        "label": {
+          "phrase_key": "step.schedule",
+          "rendered": "Проверить расписание"
+        },
+        "state": {
+          "state": "KNOWN",
+          "value": "DONE",
+          "label": "готово",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "receipt_ref": null
+      },
+      {
+        "step_id": "st-2",
+        "label": {
+          "phrase_key": "step.reviews",
+          "rendered": "Собрать отзывы"
+        },
+        "state": {
+          "state": "KNOWN",
+          "value": "RUNNING",
+          "label": "выполняется",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "receipt_ref": null
+      },
+      {
+        "step_id": "st-3",
+        "label": {
+          "phrase_key": "step.report",
+          "rendered": "Подготовить отчёт"
+        },
+        "state": {
+          "state": "UNAVAILABLE",
+          "value": null,
+          "label": "не начат: источник отзывов не подключён",
+          "reason_code": "SOURCE_UNLINKED",
+          "fact_ref": null,
+          "as_of": null,
+          "evidence_refs": [],
+          "next_intent_ref": "i2"
+        },
+        "receipt_ref": null
+      }
+    ],
+    "step_index": 2,
+    "step_total": 3,
+    "budget_note": {
+      "phrase_key": "progress.budget",
+      "rendered": "Платные рассуждения отключены."
+    },
+    "poll_after_ms": 5000,
+    "stream_ref": null,
+    "cancel_intent": "i1"
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "f4OIGoknUrQTBcTWR1EObjq5N1MmjF5P",
+      "role": "control",
+      "label": "Остановить",
+      "utterance_preview": "Остановить",
+      "speech_aliases": [
+        "остановить"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "CONTROL",
+      "capability": {
+        "space": "CONTROL",
+        "key": "control.run.cancel"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "BOUND_CLIENT",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "jDyg0qi_tFS9kkdH7IWQlPOMdEXCTNem",
+      "role": "remedy",
+      "label": "Подключить источник отзывов",
+      "utterance_preview": "Подключить источник отзывов",
+      "speech_aliases": [
+        "подключить источник отзывов"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "HANDOFF",
+      "capability": null,
+      "handoff_capability_ref": {
+        "space": "C9",
+        "key": "support.contact-admin.request"
+      },
+      "target": {
+        "class": "s",
+        "ref": {
+          "route": "shell.connections",
+          "param": null
+        }
+      },
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "owner_report.status",
+    "capability_version": "v1",
+    "projector_id": "projector.progress",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "10325034c8fd5a5a53d3c253b3987d1ac11a43d2822e828d9093f0d16fe1d02f",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "cee4db707a3670933d1cfdd0fc5596a90327de5b28450218cdf980911c65e183",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "03614314fbe57f9c6761b2d785ff7d0dc3f661d41e56283b4f723a4d99601266",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [
+    {
+      "code": "SOURCE_UNLINKED",
+      "text": {
+        "phrase_key": "limitation.source_unlinked",
+        "rendered": "Источник отзывов не подключён."
+      },
+      "severity": "limitation",
+      "affects": [
+        "/steps/2/state"
+      ],
+      "capability_gap_ref": null
+    }
+  ],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "5925b8a3252cbc447f0c47d2",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Шаг 2 из 3: собираю отзывы",
+      "body": "Расписание проверено, отзывы собираются. Отчёт не начат: источник отзывов не подключён. Платные рассуждения отключены.",
+      "itemized": [
+        "Проверить расписание — готово",
+        "Собрать отзывы — выполняется",
+        "Подготовить отчёт — не начат"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": "Отчёт не начат: источник отзывов не подключён."
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "progressbar",
+      "label": "Шаг 2 из 3: собираю отзывы",
+      "description": "Расписание проверено, отзывы собираются. Отчёт не начат: источник отзывов не подключён. Платные рассуждения отключены.",
+      "reading_order": [
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        }
+      ],
+      "live_region": "polite",
+      "accessible_names": {
+        "intent:i1": "Остановить",
+        "intent:i2": "Подключить источник отзывов"
+      }
+    },
+    "fullscreen_detail": null
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 2,
+    "intents_emitted": 2,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "5faadc0dbdc45b0f49609433e5fc4824c0eb3fcfb989e016d74a1670b0728ef6",
+    "cell_index_digest": "b884820ddf2e262500159696b164aa5fa83d7f6f8e11197d3faa31a63e91e5b2",
+    "envelope_seal": "be4664330727f4ce9c34ce78d115c3188c1965c8a52a0ba8bd97752b21396bb5",
+    "seal_key_version": 1,
+    "principal_proof_hash": "5f7be65a101ed29b93c5af44efaa4ea8c5d5a702c9e5b0c21699e1b8df4b0e29",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

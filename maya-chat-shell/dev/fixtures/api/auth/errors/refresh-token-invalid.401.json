@@ -1,0 +1,18 @@
+{
+  "source": [
+    "maya-saas-backend/src/auth/auth-session.service.ts:144 @ 62fde3a3",
+    "maya-saas-backend/src/auth/auth-session.service.ts:570 @ 62fde3a3"
+  ],
+  "observed": "observed on the local binary (pre-HEAD, dist 2026-09-17T10:00+03:00) — s7-probe/real-bodies.txt",
+  "status": 401,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "message": "Refresh token is invalid.",
+    "error": {
+      "code": "refresh_token_invalid",
+      "message": "Refresh token is invalid."
+    }
+  }
+}

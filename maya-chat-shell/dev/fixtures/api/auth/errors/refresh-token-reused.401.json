@@ -1,0 +1,16 @@
+{
+  "source": [
+    "maya-saas-backend/src/auth/auth-session.service.ts:208 @ 62fde3a3"
+  ],
+  "status": 401,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "message": "Refresh token was already used. The session has been revoked.",
+    "error": {
+      "code": "refresh_token_reused",
+      "message": "Refresh token was already used. The session has been revoked."
+    }
+  }
+}

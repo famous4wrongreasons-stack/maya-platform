@@ -1,0 +1,28 @@
+{
+  "source": [
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts:1698 @ 62fde3a3"
+  ],
+  "note": "Hostile-input reply (§2.7 step 16): only https:, tel: and mailto: may become links.",
+  "status": 201,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "request_id": "{{request_id}}",
+    "reply": "Сайт: https://example.test/booking · Телефон: tel:+70000000000 · Почта: mailto:hello@example.test · Не ссылка: javascript:alert(1) · data:text/html,<b>x</b>",
+    "source": "safe_fallback",
+    "redacted_input": false,
+    "action": null,
+    "tools_used": [],
+    "grounding": {
+      "status": "not_required",
+      "domain": null,
+      "required_tools": [],
+      "evidence_tools": []
+    },
+    "brain": {
+      "persona": "director",
+      "intent": "general"
+    }
+  }
+}

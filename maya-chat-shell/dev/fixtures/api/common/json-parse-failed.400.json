@@ -1,0 +1,15 @@
+{
+  "source": [
+    "maya-saas-backend/src/bootstrap/configure-http-app.ts:34 @ 62fde3a3"
+  ],
+  "observed": "observed on the local binary (pre-HEAD, dist 2026-09-17T10:00+03:00) — s7-probe/real-bodies.txt",
+  "status": 400,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "message": "{{parse_message}}",
+    "error": "Bad Request",
+    "statusCode": 400
+  }
+}

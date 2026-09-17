@@ -1,0 +1,4 @@
+[
+  { "file": "src/routes/registry.ts", "rule": "contract-collision", "name": "ShellRoute", "removed_by": "S1" },
+  { "file": "src/routes/registry.ts", "rule": "type-assertion", "name": "ROUTES as Record<string, RouteDefinition | undefined>", "removed_by": "S1" }
+]

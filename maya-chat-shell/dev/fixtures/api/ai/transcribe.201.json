@@ -1,0 +1,12 @@
+{
+  "source": [
+    "maya-saas-backend/src/ai-tools/ai-speech.service.ts:120 @ 62fde3a3"
+  ],
+  "status": 201,
+  "headers": {
+    "Content-Type": "application/json; charset=utf-8"
+  },
+  "body": {
+    "transcript": "{{transcript}}"
+  }
+}

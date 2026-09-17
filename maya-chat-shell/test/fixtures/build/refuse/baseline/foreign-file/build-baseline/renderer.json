@@ -1,0 +1,8 @@
+[
+  {
+    "file": "src/shell/shell.ts",
+    "rule": "property-ban",
+    "name": "shellState.token",
+    "removed_by": "S2"
+  }
+]

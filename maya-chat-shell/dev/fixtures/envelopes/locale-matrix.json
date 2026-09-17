@@ -1,0 +1,763 @@
+{
+  "corpus": "maya.shell.h7.fixtures/1",
+  "reference": {
+    "lang": "en_US.UTF-8",
+    "resolved": "en-US",
+    "probe": "ajtyzZ"
+  },
+  "runs": [
+    {
+      "lang": "ru_RU.UTF-8",
+      "resolved": "ru-RU",
+      "probe": "ajtyzZ",
+      "changed": [],
+      "changed_invariant": [],
+      "fixtures": {
+        "kind-choice": {
+          "body_hash": "4ba963cc26935a304b7d946fd02a30b0761df65cdd067e0867784b512cf34c66",
+          "canonical_bytes": 6243,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-service-selector": {
+          "body_hash": "de517a9f15452e8c714ecb9020f1c600224e57713f23d0045f620002354d6138",
+          "canonical_bytes": 8922,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-staff-selector": {
+          "body_hash": "f919c2c7e4c91a05fbe6f654308406515daf10aeeb3bd44eec677ed2efe1f3fd",
+          "canonical_bytes": 6479,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-time-slot-selector": {
+          "body_hash": "849b64c8ed780156daa463f4664121007c4b4fb5bf99bbeb1744396fa88972b8",
+          "canonical_bytes": 10904,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-booking-confirmation": {
+          "body_hash": "87a2f5bb2daa60c750dfbe141c410fb23456da11920c9fcffd57cff6d0d10357",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-schedule": {
+          "body_hash": "25689709b5e2a45d0dbcad686e3b8c184bdc2f83e535bc09161688523b23083b",
+          "canonical_bytes": 8002,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-client-list": {
+          "body_hash": "c960dbdf6830410dd9c7561e8bef66d5cb723ddcdef507ae58c6f9615c447f55",
+          "canonical_bytes": 8148,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-metric": {
+          "body_hash": "8c5a142f7b2efd80cf44f8fe8c94f5d06f36f48fd0dac0a5e636100849966044",
+          "canonical_bytes": 5227,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-chart": {
+          "body_hash": "14131179b2c6858b335e097eaff591972f640a161fbb5abf40aae678b98d7dbe",
+          "canonical_bytes": 7528,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-report": {
+          "body_hash": "1f7b1fcf248a1f6c4100defd12e355ce11771be830632940e607179286671ec3",
+          "canonical_bytes": 9683,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-strategy-options": {
+          "body_hash": "704f018a2b98dc5dae7f45a7fd32148fac6ef19083cc650ca1420a7511e09ba1",
+          "canonical_bytes": 8059,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-approval": {
+          "body_hash": "5036e6a7f2d3a2fd29a8bb3f97783a99d6e7c43798caeba1da6ea62353689771",
+          "canonical_bytes": 7784,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-progress": {
+          "body_hash": "5faadc0dbdc45b0f49609433e5fc4824c0eb3fcfb989e016d74a1670b0728ef6",
+          "canonical_bytes": 5550,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-limitation-blocking": {
+          "body_hash": "0f1a641aa6b918d11b370eacd9e6e210743d3cab2baffc0910183c0d97c15284",
+          "canonical_bytes": 2852,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-source-status": {
+          "body_hash": "835361d30aa80cce80f10c1298b8998cc6115396bad50596db14cec93bdca39d",
+          "canonical_bytes": 4691,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-settings-draft": {
+          "body_hash": "16d418d6e553149dd98f46d1c74079577fb7b37f995be07ad744cb391fe4b91f",
+          "canonical_bytes": 6937,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-form": {
+          "body_hash": "eeca3b52de809b6f1f0b818af059e77c4706e2ace48470061f1b98b00b7a7d54",
+          "canonical_bytes": 8397,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-consent-state": {
+          "body_hash": "71f07f21f6cd788d93744eb575fcb42feb7f2af619c9a78b6160d1539ce6ac23",
+          "canonical_bytes": 5009,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-identity-binding": {
+          "body_hash": "917e4450ec36a10402b24f4b2683f0c4c8c1e44d3273ed4ad67d90940a0dd259",
+          "canonical_bytes": 5671,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-payment-handoff": {
+          "body_hash": "acc0b147b3a03182fc3a07a7f3573fd903cd5751663c53b175f7f3abb1058f62",
+          "canonical_bytes": 6672,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-media-preview": {
+          "body_hash": "f6b41680dfc46953b1f2fd86ecc5884e436f2447dcfb4a3ff3f8fe056d49f207",
+          "canonical_bytes": 4758,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-artifact": {
+          "body_hash": "7fa20b8be9eb64cebda152b4167731cfc39559e225d3849ef7caa3e2c1d3b749",
+          "canonical_bytes": 4807,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "limitation-non-blocking": {
+          "body_hash": "83add9fd7f7346f8e79365b0f7e68ae95d8b2ebee6d3627cbf6f0eaa9a9d2147",
+          "canonical_bytes": 2130,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "choice-text-only": {
+          "body_hash": "2c07a45d10f3bd2d643c59dc69dbdba05db29b54c935ccef01bd339964193b46",
+          "canonical_bytes": 6285,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "booking-expired": {
+          "body_hash": "37c9c00a1dfcdb0908b3f698ff17746bfec023175bb2f215acaaff496b174d89",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "expired"
+        },
+        "booking-tampered-body": {
+          "body_hash": "07d4e1d5e1974404511f05e7201c1c1bfc78f496baaa3fb39cb86bf0f5aa0f30",
+          "canonical_bytes": 8643,
+          "equals_reference": true,
+          "verdict": "body_mismatch"
+        },
+        "booking-token-changed": {
+          "body_hash": "6fc09473f8b00729a1f7752fd5dad1a6c0d2cbebff8b777c001d64cbeab00f4c",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "booking-receipt-pointers-changed": {
+          "body_hash": "e5d87df8e830fc0db373bb964dc4d326cc6f552830b1367639c118d5f75e0f09",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "booking-render-tier-changed": {
+          "body_hash": "7766a76623d05c313cbc78333141afc47e1a0c5d6f6940c029b72191155575d0",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "body_mismatch"
+        },
+        "booking-cell-index-digest-changed": {
+          "body_hash": "43c0f03e595788fbf1533d7e474d676ab99ae4b886b94f0b3bb3c9ce017b59b2",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "body_mismatch"
+        },
+        "booking-root-values-changed": {
+          "body_hash": "d430a8c44e23e28c689033d1245d0991aace89dbc7db33d054856f5f1d19be97",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "metric-class-i-target": {
+          "body_hash": "65b335c525a26ea272241d9d8d3c0b0a1c2f87db66da1f96a4eab7b2179f7d52",
+          "canonical_bytes": 5245,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "metric-class-i-ref-tampered": {
+          "body_hash": "9543f3ee239b31972c0760263555d2f4bc18d5e264d93fbfa73fec41f9f86d6a",
+          "canonical_bytes": 5245,
+          "equals_reference": true,
+          "verdict": "body_mismatch"
+        },
+        "schedule-withheld-reduced": {
+          "body_hash": "3d2eba7b18bc06f208f6b4260577cc705acffabe6bf35bf57fc427d95296deee",
+          "canonical_bytes": 8002,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "slots-superseded-predecessor": {
+          "body_hash": "65667c80499aee5b333f5386cd77ffb041a4bc700bbd06160140352329274909",
+          "canonical_bytes": 10904,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "slots-superseded-successor": {
+          "body_hash": "82c79ef44b7fb40dcd71ff340ddbbc1d2c2948ebbb03bfa92fdabfc12b87f856",
+          "canonical_bytes": 10904,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "approval-consumed": {
+          "body_hash": "c592d7ddea4329776309c2eb113d77ac9ecf5ba958432205d9b5d3cb35dae31d",
+          "canonical_bytes": 7784,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "collation-lt-y-j": {
+          "body_hash": "28e8e99e707036ef0d0cf2402169f980d89293314d9a65ba593cd484d00f61a2",
+          "canonical_bytes": 8080,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "collation-et-z-t": {
+          "body_hash": "b5cf385ef8dcea7a100298b05c97c0a5866513ea1a500fe85a58fe3009df339c",
+          "canonical_bytes": 8080,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "collation-digits-case": {
+          "body_hash": "fc842f01cf9f1d7b56ed1c1ca9ce298e999da14f6aeae793da2845efa288159f",
+          "canonical_bytes": 8084,
+          "equals_reference": true,
+          "verdict": "valid"
+        }
+      }
+    },
+    {
+      "lang": "et_EE.UTF-8",
+      "resolved": "et-EE",
+      "probe": "ajzZty",
+      "changed": [
+        "collation-et-z-t"
+      ],
+      "changed_invariant": [],
+      "fixtures": {
+        "kind-choice": {
+          "body_hash": "4ba963cc26935a304b7d946fd02a30b0761df65cdd067e0867784b512cf34c66",
+          "canonical_bytes": 6243,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-service-selector": {
+          "body_hash": "de517a9f15452e8c714ecb9020f1c600224e57713f23d0045f620002354d6138",
+          "canonical_bytes": 8922,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-staff-selector": {
+          "body_hash": "f919c2c7e4c91a05fbe6f654308406515daf10aeeb3bd44eec677ed2efe1f3fd",
+          "canonical_bytes": 6479,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-time-slot-selector": {
+          "body_hash": "849b64c8ed780156daa463f4664121007c4b4fb5bf99bbeb1744396fa88972b8",
+          "canonical_bytes": 10904,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-booking-confirmation": {
+          "body_hash": "87a2f5bb2daa60c750dfbe141c410fb23456da11920c9fcffd57cff6d0d10357",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-schedule": {
+          "body_hash": "25689709b5e2a45d0dbcad686e3b8c184bdc2f83e535bc09161688523b23083b",
+          "canonical_bytes": 8002,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-client-list": {
+          "body_hash": "c960dbdf6830410dd9c7561e8bef66d5cb723ddcdef507ae58c6f9615c447f55",
+          "canonical_bytes": 8148,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-metric": {
+          "body_hash": "8c5a142f7b2efd80cf44f8fe8c94f5d06f36f48fd0dac0a5e636100849966044",
+          "canonical_bytes": 5227,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-chart": {
+          "body_hash": "14131179b2c6858b335e097eaff591972f640a161fbb5abf40aae678b98d7dbe",
+          "canonical_bytes": 7528,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-report": {
+          "body_hash": "1f7b1fcf248a1f6c4100defd12e355ce11771be830632940e607179286671ec3",
+          "canonical_bytes": 9683,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-strategy-options": {
+          "body_hash": "704f018a2b98dc5dae7f45a7fd32148fac6ef19083cc650ca1420a7511e09ba1",
+          "canonical_bytes": 8059,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-approval": {
+          "body_hash": "5036e6a7f2d3a2fd29a8bb3f97783a99d6e7c43798caeba1da6ea62353689771",
+          "canonical_bytes": 7784,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-progress": {
+          "body_hash": "5faadc0dbdc45b0f49609433e5fc4824c0eb3fcfb989e016d74a1670b0728ef6",
+          "canonical_bytes": 5550,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-limitation-blocking": {
+          "body_hash": "0f1a641aa6b918d11b370eacd9e6e210743d3cab2baffc0910183c0d97c15284",
+          "canonical_bytes": 2852,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-source-status": {
+          "body_hash": "835361d30aa80cce80f10c1298b8998cc6115396bad50596db14cec93bdca39d",
+          "canonical_bytes": 4691,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-settings-draft": {
+          "body_hash": "16d418d6e553149dd98f46d1c74079577fb7b37f995be07ad744cb391fe4b91f",
+          "canonical_bytes": 6937,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-form": {
+          "body_hash": "eeca3b52de809b6f1f0b818af059e77c4706e2ace48470061f1b98b00b7a7d54",
+          "canonical_bytes": 8397,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-consent-state": {
+          "body_hash": "71f07f21f6cd788d93744eb575fcb42feb7f2af619c9a78b6160d1539ce6ac23",
+          "canonical_bytes": 5009,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-identity-binding": {
+          "body_hash": "917e4450ec36a10402b24f4b2683f0c4c8c1e44d3273ed4ad67d90940a0dd259",
+          "canonical_bytes": 5671,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-payment-handoff": {
+          "body_hash": "acc0b147b3a03182fc3a07a7f3573fd903cd5751663c53b175f7f3abb1058f62",
+          "canonical_bytes": 6672,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-media-preview": {
+          "body_hash": "f6b41680dfc46953b1f2fd86ecc5884e436f2447dcfb4a3ff3f8fe056d49f207",
+          "canonical_bytes": 4758,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-artifact": {
+          "body_hash": "7fa20b8be9eb64cebda152b4167731cfc39559e225d3849ef7caa3e2c1d3b749",
+          "canonical_bytes": 4807,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "limitation-non-blocking": {
+          "body_hash": "83add9fd7f7346f8e79365b0f7e68ae95d8b2ebee6d3627cbf6f0eaa9a9d2147",
+          "canonical_bytes": 2130,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "choice-text-only": {
+          "body_hash": "2c07a45d10f3bd2d643c59dc69dbdba05db29b54c935ccef01bd339964193b46",
+          "canonical_bytes": 6285,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "booking-expired": {
+          "body_hash": "37c9c00a1dfcdb0908b3f698ff17746bfec023175bb2f215acaaff496b174d89",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "expired"
+        },
+        "booking-tampered-body": {
+          "body_hash": "07d4e1d5e1974404511f05e7201c1c1bfc78f496baaa3fb39cb86bf0f5aa0f30",
+          "canonical_bytes": 8643,
+          "equals_reference": true,
+          "verdict": "body_mismatch"
+        },
+        "booking-token-changed": {
+          "body_hash": "6fc09473f8b00729a1f7752fd5dad1a6c0d2cbebff8b777c001d64cbeab00f4c",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "booking-receipt-pointers-changed": {
+          "body_hash": "e5d87df8e830fc0db373bb964dc4d326cc6f552830b1367639c118d5f75e0f09",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "booking-render-tier-changed": {
+          "body_hash": "7766a76623d05c313cbc78333141afc47e1a0c5d6f6940c029b72191155575d0",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "body_mismatch"
+        },
+        "booking-cell-index-digest-changed": {
+          "body_hash": "43c0f03e595788fbf1533d7e474d676ab99ae4b886b94f0b3bb3c9ce017b59b2",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "body_mismatch"
+        },
+        "booking-root-values-changed": {
+          "body_hash": "d430a8c44e23e28c689033d1245d0991aace89dbc7db33d054856f5f1d19be97",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "metric-class-i-target": {
+          "body_hash": "65b335c525a26ea272241d9d8d3c0b0a1c2f87db66da1f96a4eab7b2179f7d52",
+          "canonical_bytes": 5245,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "metric-class-i-ref-tampered": {
+          "body_hash": "9543f3ee239b31972c0760263555d2f4bc18d5e264d93fbfa73fec41f9f86d6a",
+          "canonical_bytes": 5245,
+          "equals_reference": true,
+          "verdict": "body_mismatch"
+        },
+        "schedule-withheld-reduced": {
+          "body_hash": "3d2eba7b18bc06f208f6b4260577cc705acffabe6bf35bf57fc427d95296deee",
+          "canonical_bytes": 8002,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "slots-superseded-predecessor": {
+          "body_hash": "65667c80499aee5b333f5386cd77ffb041a4bc700bbd06160140352329274909",
+          "canonical_bytes": 10904,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "slots-superseded-successor": {
+          "body_hash": "82c79ef44b7fb40dcd71ff340ddbbc1d2c2948ebbb03bfa92fdabfc12b87f856",
+          "canonical_bytes": 10904,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "approval-consumed": {
+          "body_hash": "c592d7ddea4329776309c2eb113d77ac9ecf5ba958432205d9b5d3cb35dae31d",
+          "canonical_bytes": 7784,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "collation-lt-y-j": {
+          "body_hash": "28e8e99e707036ef0d0cf2402169f980d89293314d9a65ba593cd484d00f61a2",
+          "canonical_bytes": 8080,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "collation-et-z-t": {
+          "body_hash": "f9de818b5682c2056e04c94de6e33c03f210c6d5aae0faec86241d3ca988cab1",
+          "canonical_bytes": 8080,
+          "equals_reference": false,
+          "verdict": "body_mismatch"
+        },
+        "collation-digits-case": {
+          "body_hash": "fc842f01cf9f1d7b56ed1c1ca9ce298e999da14f6aeae793da2845efa288159f",
+          "canonical_bytes": 8084,
+          "equals_reference": true,
+          "verdict": "valid"
+        }
+      }
+    },
+    {
+      "lang": "lt_LT.UTF-8",
+      "resolved": "lt-LT",
+      "probe": "ayjtzZ",
+      "changed": [
+        "kind-staff-selector",
+        "kind-chart",
+        "collation-lt-y-j"
+      ],
+      "changed_invariant": [],
+      "fixtures": {
+        "kind-choice": {
+          "body_hash": "4ba963cc26935a304b7d946fd02a30b0761df65cdd067e0867784b512cf34c66",
+          "canonical_bytes": 6243,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-service-selector": {
+          "body_hash": "de517a9f15452e8c714ecb9020f1c600224e57713f23d0045f620002354d6138",
+          "canonical_bytes": 8922,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-staff-selector": {
+          "body_hash": "d1fa2d4babb7c5e136ef2bf3a31bd237e11eeefa1d2364bc9c5ba3ac980703f6",
+          "canonical_bytes": 6479,
+          "equals_reference": false,
+          "verdict": "body_mismatch"
+        },
+        "kind-time-slot-selector": {
+          "body_hash": "849b64c8ed780156daa463f4664121007c4b4fb5bf99bbeb1744396fa88972b8",
+          "canonical_bytes": 10904,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-booking-confirmation": {
+          "body_hash": "87a2f5bb2daa60c750dfbe141c410fb23456da11920c9fcffd57cff6d0d10357",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-schedule": {
+          "body_hash": "25689709b5e2a45d0dbcad686e3b8c184bdc2f83e535bc09161688523b23083b",
+          "canonical_bytes": 8002,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-client-list": {
+          "body_hash": "c960dbdf6830410dd9c7561e8bef66d5cb723ddcdef507ae58c6f9615c447f55",
+          "canonical_bytes": 8148,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-metric": {
+          "body_hash": "8c5a142f7b2efd80cf44f8fe8c94f5d06f36f48fd0dac0a5e636100849966044",
+          "canonical_bytes": 5227,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-chart": {
+          "body_hash": "863ad3dbd2078387cdb82c12fff9b92399fbbfbf231821f8640dbc21e77f73fc",
+          "canonical_bytes": 7528,
+          "equals_reference": false,
+          "verdict": "body_mismatch"
+        },
+        "kind-report": {
+          "body_hash": "1f7b1fcf248a1f6c4100defd12e355ce11771be830632940e607179286671ec3",
+          "canonical_bytes": 9683,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-strategy-options": {
+          "body_hash": "704f018a2b98dc5dae7f45a7fd32148fac6ef19083cc650ca1420a7511e09ba1",
+          "canonical_bytes": 8059,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-approval": {
+          "body_hash": "5036e6a7f2d3a2fd29a8bb3f97783a99d6e7c43798caeba1da6ea62353689771",
+          "canonical_bytes": 7784,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-progress": {
+          "body_hash": "5faadc0dbdc45b0f49609433e5fc4824c0eb3fcfb989e016d74a1670b0728ef6",
+          "canonical_bytes": 5550,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-limitation-blocking": {
+          "body_hash": "0f1a641aa6b918d11b370eacd9e6e210743d3cab2baffc0910183c0d97c15284",
+          "canonical_bytes": 2852,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-source-status": {
+          "body_hash": "835361d30aa80cce80f10c1298b8998cc6115396bad50596db14cec93bdca39d",
+          "canonical_bytes": 4691,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-settings-draft": {
+          "body_hash": "16d418d6e553149dd98f46d1c74079577fb7b37f995be07ad744cb391fe4b91f",
+          "canonical_bytes": 6937,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-form": {
+          "body_hash": "eeca3b52de809b6f1f0b818af059e77c4706e2ace48470061f1b98b00b7a7d54",
+          "canonical_bytes": 8397,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-consent-state": {
+          "body_hash": "71f07f21f6cd788d93744eb575fcb42feb7f2af619c9a78b6160d1539ce6ac23",
+          "canonical_bytes": 5009,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-identity-binding": {
+          "body_hash": "917e4450ec36a10402b24f4b2683f0c4c8c1e44d3273ed4ad67d90940a0dd259",
+          "canonical_bytes": 5671,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-payment-handoff": {
+          "body_hash": "acc0b147b3a03182fc3a07a7f3573fd903cd5751663c53b175f7f3abb1058f62",
+          "canonical_bytes": 6672,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-media-preview": {
+          "body_hash": "f6b41680dfc46953b1f2fd86ecc5884e436f2447dcfb4a3ff3f8fe056d49f207",
+          "canonical_bytes": 4758,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "kind-artifact": {
+          "body_hash": "7fa20b8be9eb64cebda152b4167731cfc39559e225d3849ef7caa3e2c1d3b749",
+          "canonical_bytes": 4807,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "limitation-non-blocking": {
+          "body_hash": "83add9fd7f7346f8e79365b0f7e68ae95d8b2ebee6d3627cbf6f0eaa9a9d2147",
+          "canonical_bytes": 2130,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "choice-text-only": {
+          "body_hash": "2c07a45d10f3bd2d643c59dc69dbdba05db29b54c935ccef01bd339964193b46",
+          "canonical_bytes": 6285,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "booking-expired": {
+          "body_hash": "37c9c00a1dfcdb0908b3f698ff17746bfec023175bb2f215acaaff496b174d89",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "expired"
+        },
+        "booking-tampered-body": {
+          "body_hash": "07d4e1d5e1974404511f05e7201c1c1bfc78f496baaa3fb39cb86bf0f5aa0f30",
+          "canonical_bytes": 8643,
+          "equals_reference": true,
+          "verdict": "body_mismatch"
+        },
+        "booking-token-changed": {
+          "body_hash": "6fc09473f8b00729a1f7752fd5dad1a6c0d2cbebff8b777c001d64cbeab00f4c",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "booking-receipt-pointers-changed": {
+          "body_hash": "e5d87df8e830fc0db373bb964dc4d326cc6f552830b1367639c118d5f75e0f09",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "booking-render-tier-changed": {
+          "body_hash": "7766a76623d05c313cbc78333141afc47e1a0c5d6f6940c029b72191155575d0",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "body_mismatch"
+        },
+        "booking-cell-index-digest-changed": {
+          "body_hash": "43c0f03e595788fbf1533d7e474d676ab99ae4b886b94f0b3bb3c9ce017b59b2",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "body_mismatch"
+        },
+        "booking-root-values-changed": {
+          "body_hash": "d430a8c44e23e28c689033d1245d0991aace89dbc7db33d054856f5f1d19be97",
+          "canonical_bytes": 8645,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "metric-class-i-target": {
+          "body_hash": "65b335c525a26ea272241d9d8d3c0b0a1c2f87db66da1f96a4eab7b2179f7d52",
+          "canonical_bytes": 5245,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "metric-class-i-ref-tampered": {
+          "body_hash": "9543f3ee239b31972c0760263555d2f4bc18d5e264d93fbfa73fec41f9f86d6a",
+          "canonical_bytes": 5245,
+          "equals_reference": true,
+          "verdict": "body_mismatch"
+        },
+        "schedule-withheld-reduced": {
+          "body_hash": "3d2eba7b18bc06f208f6b4260577cc705acffabe6bf35bf57fc427d95296deee",
+          "canonical_bytes": 8002,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "slots-superseded-predecessor": {
+          "body_hash": "65667c80499aee5b333f5386cd77ffb041a4bc700bbd06160140352329274909",
+          "canonical_bytes": 10904,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "slots-superseded-successor": {
+          "body_hash": "82c79ef44b7fb40dcd71ff340ddbbc1d2c2948ebbb03bfa92fdabfc12b87f856",
+          "canonical_bytes": 10904,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "approval-consumed": {
+          "body_hash": "c592d7ddea4329776309c2eb113d77ac9ecf5ba958432205d9b5d3cb35dae31d",
+          "canonical_bytes": 7784,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "collation-lt-y-j": {
+          "body_hash": "6b5019307c9a7d3b96e23f2c7620076e62792379dcd3a1d3a225655cf4cdc586",
+          "canonical_bytes": 8080,
+          "equals_reference": false,
+          "verdict": "body_mismatch"
+        },
+        "collation-et-z-t": {
+          "body_hash": "b5cf385ef8dcea7a100298b05c97c0a5866513ea1a500fe85a58fe3009df339c",
+          "canonical_bytes": 8080,
+          "equals_reference": true,
+          "verdict": "valid"
+        },
+        "collation-digits-case": {
+          "body_hash": "fc842f01cf9f1d7b56ed1c1ca9ce298e999da14f6aeae793da2845efa288159f",
+          "canonical_bytes": 8084,
+          "equals_reference": true,
+          "verdict": "valid"
+        }
+      }
+    }
+  ]
+}

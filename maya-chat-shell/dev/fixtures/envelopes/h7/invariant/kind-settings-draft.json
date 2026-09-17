@@ -1,0 +1,399 @@
+{
+  "contract": "maya.widget.envelope/1",
+  "widget_id": "01M2Q9G7M0XAWDPTXRDMCHYHQ7",
+  "kind": "SETTINGS_DRAFT",
+  "body_version": 1,
+  "tenant_id": "2bd9cd03-79a1-4146-8880-b5acd9fe836f",
+  "correlation": {
+    "run_id": null,
+    "turn_id": null,
+    "message_id": null,
+    "agent_id": null,
+    "parent_widget_id": null,
+    "step_index": null,
+    "step_total": null,
+    "trace_id": "196003f09c38ba45504d2382266d2bfc"
+  },
+  "source": {
+    "from": "capability_envelope",
+    "capability": "company.business-hours.update",
+    "capability_version": "v1",
+    "fact_index": 0
+  },
+  "origin": {
+    "trigger": "user_turn",
+    "emitter": "capability_read",
+    "moment_key": null,
+    "proactive_provenance": null
+  },
+  "authority": {
+    "verification_level": "SESSION_VERIFIED",
+    "pii_class": "none",
+    "data_scope": {
+      "masked_fields": []
+    }
+  },
+  "body": {
+    "draft_ref": "sd-1",
+    "draft_class": "settings",
+    "scope_label": {
+      "state": "KNOWN",
+      "value": "Часы работы салона",
+      "label": "Часы работы салона",
+      "reason_code": null,
+      "fact_ref": null,
+      "as_of": "2026-09-17T08:55:00.000Z",
+      "evidence_refs": [],
+      "next_intent_ref": null
+    },
+    "diff": [
+      {
+        "path": "/hours/sat/close",
+        "label": {
+          "phrase_key": "settings.sat_close",
+          "rendered": "Суббота, закрытие"
+        },
+        "from": {
+          "state": "KNOWN",
+          "value": "20:00",
+          "label": "20:00",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "to": {
+          "state": "KNOWN",
+          "value": "21:00",
+          "label": "21:00",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "effect_text": {
+          "phrase_key": "settings.effect.later",
+          "rendered": "Появятся записи до 21:00."
+        },
+        "reversible": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "можно вернуть",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "bound_ref": null
+      },
+      {
+        "path": "/hours/sun/open",
+        "label": {
+          "phrase_key": "settings.sun_open",
+          "rendered": "Воскресенье, открытие"
+        },
+        "from": {
+          "state": "NOT_MEASURED",
+          "value": null,
+          "label": "не задано",
+          "reason_code": "NOT_COLLECTED",
+          "fact_ref": null,
+          "as_of": null,
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "to": {
+          "state": "KNOWN",
+          "value": "11:00",
+          "label": "11:00",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "effect_text": {
+          "phrase_key": "settings.effect.sunday",
+          "rendered": "Салон начнёт принимать по воскресеньям."
+        },
+        "reversible": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "можно вернуть",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "bound_ref": null
+      }
+    ],
+    "apply_intent": "i1",
+    "discard_intent": "i9",
+    "editor_handoff_intent": "i2"
+  },
+  "intents": [
+    {
+      "intent_ref": "i1",
+      "intent_token": "fIc-7ujKYtEYiEnlCrfjhK-ACQtUY7Bz",
+      "role": "primary",
+      "label": "Применить",
+      "utterance_preview": "Применить",
+      "speech_aliases": [
+        "применить"
+      ],
+      "ordinal": null,
+      "priority": 1,
+      "effect": "COMMIT",
+      "capability": {
+        "space": "AE",
+        "key": "company.business-hours.update"
+      },
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "SESSION_VERIFIED",
+      "confirmation": {
+        "risk_tier": "medium_write",
+        "reversible": {
+          "state": "KNOWN",
+          "value": true,
+          "label": "можно отменить",
+          "reason_code": null,
+          "fact_ref": null,
+          "as_of": "2026-09-17T08:55:00.000Z",
+          "evidence_refs": [],
+          "next_intent_ref": null
+        },
+        "audience_size": null,
+        "requires_explicit_confirm_step": true,
+        "requires_readback": false,
+        "readback_ref": null,
+        "readback_text": null,
+        "idempotency_key": "64606f05307acca1a8f2cb84746bdb9e31d953250bd17c44ef181328f5b9a077",
+        "approval_policy": "none"
+      },
+      "authority_hint": {
+        "emphasis": "primary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    },
+    {
+      "intent_ref": "i9",
+      "intent_token": null,
+      "role": "escape",
+      "label": "Отменить черновик",
+      "utterance_preview": "Отменить черновик",
+      "speech_aliases": [
+        "отмена",
+        "стоп",
+        "закрыть"
+      ],
+      "ordinal": null,
+      "priority": 0,
+      "effect": "NONE",
+      "capability": null,
+      "handoff_capability_ref": null,
+      "target": null,
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": false
+    },
+    {
+      "intent_ref": "i2",
+      "intent_token": "hUI7YGoTcygZa8UE7sycZGy67DxFpbgN",
+      "role": "handoff",
+      "label": "Открыть настройки",
+      "utterance_preview": "Открыть настройки",
+      "speech_aliases": [
+        "открыть настройки"
+      ],
+      "ordinal": null,
+      "priority": 0,
+      "effect": "HANDOFF",
+      "capability": null,
+      "handoff_capability_ref": {
+        "space": "AE",
+        "key": "company.business-hours.update"
+      },
+      "target": {
+        "class": "s",
+        "ref": {
+          "route": "shell.account",
+          "param": null
+        }
+      },
+      "input_schema": null,
+      "verification_floor": "ANONYMOUS",
+      "confirmation": null,
+      "authority_hint": {
+        "emphasis": "secondary",
+        "disabled_because": null
+      },
+      "enabled": {
+        "state": "KNOWN",
+        "value": true,
+        "label": "Доступно",
+        "reason_code": null,
+        "fact_ref": null,
+        "as_of": "2026-09-17T08:55:00.000Z",
+        "evidence_refs": [],
+        "next_intent_ref": null
+      },
+      "expires_at": "2099-12-31T23:59:59.000Z",
+      "single_use": true
+    }
+  ],
+  "provenance": {
+    "source_capability": "company.business-hours.update",
+    "capability_version": "v1",
+    "projector_id": "projector.settings_draft",
+    "source_kind": "capability_read",
+    "facts_used": [],
+    "facts_origin": [],
+    "facts_digest": "d9695fad394abe4ef3ea66b94a74d582c2b3b618034a4990ba1ee1e05632eba9",
+    "completeness": {
+      "status": "COMPLETE",
+      "requestedScopeHash": "03f9ee408f1a30d6e5ff1c4606da2c03eba6fce213ab3dd7f0b0205ac49512f2",
+      "returnedCount": 1,
+      "totalCount": 1,
+      "hasMore": false,
+      "cursorRef": null,
+      "truncated": false,
+      "reasonCodes": []
+    },
+    "completeness_envelope_hash": "8555df26bb91c0afc05d1ffa6b76b973169093506c1cefe569df786886143476",
+    "evidence_refs": [],
+    "confidence": "high",
+    "authorship": {
+      "body_values": "server_formatter",
+      "body_phrases": "server_catalogue",
+      "narrative": "none",
+      "narrative_template_id": null,
+      "narrative_template_version": null,
+      "model_contribution": "none",
+      "model_contribution_ref": null
+    }
+  },
+  "limitations": [],
+  "lifecycle": {
+    "freshness_class": "scenario",
+    "state": "LIVE",
+    "issued_at": "2026-09-17T09:00:00.000Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "flow_ttl_s": null,
+    "input_lock": "none",
+    "on_expiry": "collapse_to_summary",
+    "supersedes_widget_id": null,
+    "superseded_by_widget_id": null,
+    "delivery": {
+      "delivery_state": "live",
+      "answered_at": null,
+      "answering_channel": null,
+      "action_receipt_ref": null
+    },
+    "historised_form": "summary_bubble",
+    "timeline_placement": "chronological",
+    "dedupe_key": "f112e0c3acc0b45cc46a95a6",
+    "retention_sec": 86400,
+    "delivery_channel": "pwa"
+  },
+  "presentation": {
+    "presentation_mode": "client",
+    "density": "CARD",
+    "text_equivalent": {
+      "headline": "Изменение часов работы: 2 пункта",
+      "body": "Суббота: закрытие было в 20:00, станет в 21:00. Воскресенье: открытие не задано, станет в 11:00. Оба изменения можно вернуть.",
+      "itemized": [
+        "Суббота, закрытие: было 20:00, станет 21:00",
+        "Воскресенье, открытие: было не задано, станет 11:00"
+      ],
+      "completeness_sentence": null,
+      "unknowns_sentence": null
+    },
+    "speech": null,
+    "a11y": {
+      "role_hint": "region",
+      "label": "Изменение часов работы: 2 пункта",
+      "description": "Суббота: закрытие было в 20:00, станет в 21:00. Воскресенье: открытие не задано, станет в 11:00. Оба изменения можно вернуть.",
+      "reading_order": [
+        {
+          "k": "intent",
+          "id": "i1"
+        },
+        {
+          "k": "intent",
+          "id": "i9"
+        },
+        {
+          "k": "intent",
+          "id": "i2"
+        }
+      ],
+      "live_region": "polite",
+      "accessible_names": {
+        "intent:i1": "Применить",
+        "intent:i9": "Отменить черновик",
+        "intent:i2": "Открыть настройки"
+      }
+    },
+    "fullscreen_detail": {
+      "route_key": "fs.catalogue",
+      "reason": "exact_configuration"
+    }
+  },
+  "render": {
+    "contract": "maya.render.receipt/1",
+    "profile_id": "pwa.v1",
+    "profile_version": 1,
+    "render_tier": "RICH_INTERACTIVE",
+    "intents_minted": 3,
+    "intents_emitted": 3,
+    "intents_withheld": [],
+    "body_reductions": [],
+    "text_equivalent_is_canonical": false,
+    "escalation": null,
+    "degraded_at": "2026-09-17T09:00:00.000Z"
+  },
+  "integrity": {
+    "body_hash": "16d418d6e553149dd98f46d1c74079577fb7b37f995be07ad744cb391fe4b91f",
+    "cell_index_digest": "f922d980a13e04601689aad233eba8c55ee5ddad4a3ed7dcf061c6d53e854b81",
+    "envelope_seal": "d55bbb292358c6b5866c14c3605a6e63410c918ac5a226dbcf38dc5a832b81c5",
+    "seal_key_version": 1,
+    "principal_proof_hash": "0b22b7968a9537140aff49a8d4ecd3507235d80c1b59752b912e87ac5d60fa9e",
+    "approval_echo": null,
+    "policy_context_echo": null
+  }
+}

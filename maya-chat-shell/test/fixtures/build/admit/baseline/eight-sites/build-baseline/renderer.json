@@ -1,0 +1,8 @@
+[
+  { "file": "src/renderer/render.ts", "rule": "contract-collision", "name": "A11yEnvironment", "removed_by": "S2" },
+  { "file": "src/renderer/render.ts", "rule": "contract-collision", "name": "refKey", "removed_by": "S2" },
+  { "file": "src/renderer/render.ts", "rule": "property-ban", "name": "RenderIntent.token", "removed_by": "S2" },
+  { "file": "src/renderer/render.ts", "rule": "property-ban", "name": "RenderNode.token", "removed_by": "S2" },
+  { "file": "src/renderer/render.ts", "rule": "property-ban", "name": "render.token", "removed_by": "S2" },
+  { "file": "src/renderer/render.ts", "rule": "type-assertion", "name": "input.body as Record<string, unknown>", "removed_by": "S2" }
+]
