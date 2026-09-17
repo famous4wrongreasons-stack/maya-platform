@@ -92,6 +92,24 @@ export class ClientAppointmentRescheduleService {
     dto: ClientAppointmentRescheduleRequest,
     invocation: AppointmentActionInvocation = {},
   ) {
+    const { target, prepared } = await this.quoteOwnedReschedule(
+      tenantId,
+      userId,
+      appointmentId,
+      dto,
+    );
+    return this.executeOwnedReschedule(target, userId, prepared, invocation);
+  }
+
+  /** U-OWN·V11 read-only extraction: `forAccount` through
+   * `prepareOwnedReschedule`, stopping before `executeOwnedReschedule`. Same
+   * CLS check, same ownership transaction, same codes and order. No write. */
+  async quoteOwnedReschedule(
+    tenantId: string,
+    userId: string,
+    appointmentId: string,
+    dto: ClientAppointmentRescheduleRequest,
+  ) {
     this.context.assertTenantId(tenantId);
     const principal = this.context.get();
     if (!userId || principal?.userId !== userId)
@@ -102,7 +120,7 @@ export class ClientAppointmentRescheduleService {
       appointmentId,
     );
     const prepared = await this.prepareOwnedReschedule(target, dto);
-    return this.executeOwnedReschedule(target, userId, prepared, invocation);
+    return { target, prepared };
   }
 
   private async prepareOwnedReschedule(

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   NotFoundException,
   ServiceUnavailableException,
@@ -397,6 +398,126 @@ describe('B30 verified Client appointment reschedule authority', () => {
     await expect(
       service.forAccount('tenant-1', 'user-1', 'appt-1', dto),
     ).rejects.toBeInstanceOf(BadRequestException);
+    expect(executeInternal).not.toHaveBeenCalled();
+  });
+});
+
+/** U-OWN·V11: the read-only half of the reschedule owner. `forAccount` must be
+ * that quote plus the existing execution, with the same codes and order. */
+const CANCELLED_APPOINTMENT = {
+  id: 'appt-1',
+  tenantId: 'tenant-1',
+  clientId: null,
+  mayaClientId: 'client-1',
+  branchId: null,
+  crmExternalId: null,
+  source: 'internal',
+  staffExternalId: 'staff-1',
+  serviceIds: ['svc-1'],
+  startAt: FUTURE,
+  endAt: new Date(FUTURE.getTime() + 3_600_000),
+  blockedStartAt: FUTURE,
+  blockedEndAt: new Date(FUTURE.getTime() + 3_600_000),
+  status: 'cancelled',
+  notes: null,
+  totalPriceKopecks: 1000,
+  currency: 'RUB',
+  providerPayload: {},
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  branch: null,
+};
+
+describe('U-OWN read-only reschedule quote', () => {
+  it('quotes the owned reschedule without an execution or a post-execution read', async () => {
+    const { service, tx, prisma, executeInternal, executeCrm } = setup();
+
+    await expect(
+      service.quoteOwnedReschedule('tenant-1', 'user-1', 'appt-1', dto),
+    ).resolves.toMatchObject({
+      target: {
+        tenantId: 'tenant-1',
+        clientId: 'client-1',
+        linkId: 'link-1',
+        appointment: { id: 'appt-1' },
+      },
+      prepared: {
+        matchedSlotStart: '2026-09-20T13:00:00',
+        timezone: 'Europe/Moscow',
+        staffId: 'staff-1',
+        serviceIds: ['svc-1'],
+      },
+    });
+
+    expect(tx.appointment.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'appt-1', tenantId: 'tenant-1', mayaClientId: 'client-1' },
+      }),
+    );
+    expect(executeInternal).not.toHaveBeenCalled();
+    expect(executeCrm).not.toHaveBeenCalled();
+    expect(prisma.appointment.findFirst).not.toHaveBeenCalled();
+  });
+
+  it('runs forAccount as that quote plus the existing execution', async () => {
+    const { service, executeInternal } = setup();
+    const quote = jest.spyOn(service, 'quoteOwnedReschedule');
+
+    await service.forAccount('tenant-1', 'user-1', 'appt-1', dto);
+
+    expect(quote).toHaveBeenCalledTimes(1);
+    expect(quote).toHaveBeenCalledWith('tenant-1', 'user-1', 'appt-1', dto);
+    const quoted = (await quote.mock.results[0].value) as {
+      prepared: { start: string; staffId: string; serviceIds: string[] };
+    };
+    const calls = executeInternal.mock.calls as Array<
+      [string, Record<string, unknown>, RescheduleInvocation]
+    >;
+    // the internal branch dispatches the quote's canonical instant
+    expect(calls[0][1]).toMatchObject({
+      start: quoted.prepared.start,
+      staffId: quoted.prepared.staffId,
+      serviceIds: quoted.prepared.serviceIds,
+    });
+  });
+
+  it.each([
+    [
+      'an already cancelled appointment',
+      { appointment: CANCELLED_APPOINTMENT },
+      ConflictException,
+    ],
+    ['an unavailable slot', { slots: [] }, BadRequestException],
+    ['a foreign appointment', { appointment: null }, NotFoundException],
+    ['missing binding', { links: [] }, ForbiddenException],
+    ['a principal mismatch', { principalUserId: 'user-2' }, ForbiddenException],
+  ])(
+    'refuses %s with the owner code and no execution',
+    async (_case, options, expected) => {
+      const { service, executeInternal, executeCrm } = setup(options);
+
+      await expect(
+        service.quoteOwnedReschedule('tenant-1', 'user-1', 'appt-1', dto),
+      ).rejects.toBeInstanceOf(expected);
+      await expect(
+        service.forAccount('tenant-1', 'user-1', 'appt-1', dto),
+      ).rejects.toBeInstanceOf(expected);
+      expect(executeInternal).not.toHaveBeenCalled();
+      expect(executeCrm).not.toHaveBeenCalled();
+    },
+  );
+
+  it('refuses the wrong tenant before the ownership transaction', async () => {
+    const { service, tx, context, executeInternal } = setup();
+    context.assertTenantId.mockImplementation((tenantId: string) => {
+      if (tenantId !== 'tenant-1') throw new ForbiddenException('wrong tenant');
+      return tenantId;
+    });
+
+    await expect(
+      service.quoteOwnedReschedule('tenant-2', 'user-1', 'appt-1', dto),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(tx.appointment.findFirst).not.toHaveBeenCalled();
     expect(executeInternal).not.toHaveBeenCalled();
   });
 });

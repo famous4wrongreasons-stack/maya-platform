@@ -492,3 +492,83 @@ describe('B31 verified Client create initiator and canonical executor', () => {
     expect(h.rows).toHaveLength(0);
   });
 });
+
+/** U-OWN·V11: the read-only half of the create owner. `forAccount` runs the same
+ * extraction and then executes, so a quote can never drift from the create. */
+describe('U-OWN read-only create quote', () => {
+  const quote = (
+    h: ReturnType<typeof setup>,
+    input?: Record<string, unknown>,
+  ) =>
+    h.context.runAsAuthPrincipal(
+      { tenantId: 'tenant-1', userId: 'user-1', role: 'client' },
+      () =>
+        h.service.quoteForAccount(
+          'tenant-1',
+          'user-1',
+          (input ?? h.dto) as never,
+        ),
+    );
+
+  it('quotes the owned create without an execution or a row', async () => {
+    const h = setup();
+
+    const quoted = await quote(h);
+
+    expect(quoted).toMatchObject({
+      link: { id: 'link-1', clientId: 'client-1' },
+      source: 'internal',
+      timezone: 'Europe/Moscow',
+      bookingIdentity: { clientName: 'Guest' },
+      previous: null,
+    });
+    expect(quoted.services).toHaveLength(1);
+    expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+    expect(h.rows).toHaveLength(0);
+  });
+
+  it('answers exactly what the create then uses (one sequence)', async () => {
+    const h = setup();
+
+    const quoted = await quote(h);
+    const created = await h.run();
+
+    expect(created.bookingIdentity).toEqual(quoted.bookingIdentity);
+    expect(created.timezone).toBe(quoted.timezone);
+    expect(created.services).toEqual(quoted.services);
+    expect(h.runtime.executeWithReceipt).toHaveBeenCalledTimes(1);
+    expect(h.rows).toHaveLength(1);
+  });
+
+  it('refuses invalid services with the owner code and no execution', async () => {
+    const h = setup();
+    const input = { ...h.dto, serviceIds: ['other-service'] };
+
+    await expect(quote(h, input)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(h.run(input as never)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+    expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+    expect(h.rows).toHaveLength(0);
+  });
+
+  it('refuses an unavailable slot with the owner code and no execution', async () => {
+    const h = setup();
+    (h.crm.getAvailableSlots as jest.Mock).mockResolvedValue([]);
+
+    await expect(quote(h)).rejects.toBeInstanceOf(BadRequestException);
+    await expect(h.run()).rejects.toBeInstanceOf(BadRequestException);
+    expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+    expect(h.rows).toHaveLength(0);
+  });
+
+  it('refuses a missing verified binding before any owner read', async () => {
+    const h = setup();
+    h.prisma.clientChannelLink.findMany.mockResolvedValue([]);
+
+    await expect(quote(h)).rejects.toBeInstanceOf(ForbiddenException);
+    expect(h.prisma.client.findUnique).not.toHaveBeenCalled();
+    expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
+  });
+});

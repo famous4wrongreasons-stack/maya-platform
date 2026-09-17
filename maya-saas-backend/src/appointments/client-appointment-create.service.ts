@@ -95,6 +95,31 @@ export class ClientAppointmentCreateService {
     }
   }
 
+  /** U-OWN·V11: the read-only half of `forAccount`, for a caller that needs the
+   * owner's own quote without actuating. Same resolution, same order, same
+   * codes, same CLS check; no Action Engine execution and no write. */
+  async quoteForAccount(
+    tenantId: string,
+    userId: string,
+    dto: CreateAppointmentDto,
+    invocation: AppointmentActionInvocation = {},
+  ) {
+    try {
+      return await this.quoteVerifiedLink(
+        tenantId,
+        () => this.resolveAccount(tenantId, userId),
+        dto,
+        invocation,
+      );
+    } catch (error) {
+      if (error instanceof ActionConflictError)
+        throw new ConflictException({
+          error: { code: 'IDEMPOTENCY_CONFLICT' },
+        });
+      throw error;
+    }
+  }
+
   /** Channel authentication stays in the existing channel resolver. No User
    * identity is manufactured for this shared canonical booking initiator. */
   async forVerifiedChannel(
@@ -137,12 +162,16 @@ export class ClientAppointmentCreateService {
     }
   }
 
-  private async forVerifiedLink(
+  /** U-OWN·V11 read-only extraction. The prefix of `forVerifiedLink`: the
+   * verified-link resolution, the canonical booking target, the bound-replay
+   * lookup and the `slot_taken` check. It stops before
+   * `executeCanonicalClientCreateWithReceipt` and writes nothing.
+   * `forVerifiedLink` calls it, so both paths run one sequence. */
+  private async quoteVerifiedLink(
     tenantId: string,
     resolveLink: () => Promise<ClientChannelLink>,
     dto: CreateAppointmentDto,
     invocation: AppointmentActionInvocation,
-    preserveExecutionError = false,
   ) {
     const link = await resolveLink();
     const client = await this.prisma.client.findUnique({
@@ -296,6 +325,39 @@ export class ClientAppointmentCreateService {
       if (!findMatchingSlotByLocalStart(slots, localStart, timezone))
         throw new BadRequestException({ error: { code: 'slot_taken' } });
     }
+    return {
+      link,
+      calendarTarget,
+      source,
+      bound,
+      branch,
+      timezone,
+      localStart,
+      start,
+      key,
+      bookingIdentity,
+      services,
+      previous,
+    };
+  }
+
+  private async forVerifiedLink(
+    tenantId: string,
+    resolveLink: () => Promise<ClientChannelLink>,
+    dto: CreateAppointmentDto,
+    invocation: AppointmentActionInvocation,
+    preserveExecutionError = false,
+  ) {
+    const {
+      link,
+      calendarTarget,
+      source,
+      timezone,
+      start,
+      key,
+      bookingIdentity,
+      services,
+    } = await this.quoteVerifiedLink(tenantId, resolveLink, dto, invocation);
     const input = {
       ...dto,
       ...bookingIdentity,

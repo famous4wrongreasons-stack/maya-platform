@@ -18,7 +18,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { clientChannelSubjectHash } from './client-channel-subject';
 import { CrmService, type AppointmentActionInvocation } from './crm.service';
-import { isCanceledOutcome } from '../domain';
+import { isCanceledOutcome, parseVisitOutcome } from '../domain';
 
 type OwnedCancelTarget = {
   tenantId: string;
@@ -74,6 +74,27 @@ export class ClientAppointmentCancelService {
     appointmentId: string,
     invocation: AppointmentActionInvocation = {},
   ) {
+    const { target } = await this.readOwnedCancelTarget(
+      tenantId,
+      userId,
+      appointmentId,
+    );
+    return this.executeOwnedCancel(target, userId, invocation);
+  }
+
+  /** U-OWN·V11 read-only extraction: `forAccount` stopping before
+   * `executeOwnedCancel`. Same CLS check, same ownership transaction, same
+   * codes and order, no write.
+   *
+   * B-18: the owner admits an appointment that is already cancelled, so the
+   * canonical outcome is reported here rather than refused. A caller that must
+   * answer `already_cancelled` reads `alreadyCancelled`/`canonicalStatus`; the
+   * owner's own cancel behaviour is unchanged. */
+  async readOwnedCancelTarget(
+    tenantId: string,
+    userId: string,
+    appointmentId: string,
+  ) {
     this.context.assertTenantId(tenantId);
     const principal = this.context.get();
     if (!userId || principal?.userId !== userId)
@@ -83,7 +104,13 @@ export class ClientAppointmentCancelService {
       userId,
       appointmentId,
     );
-    return this.executeOwnedCancel(target, userId, invocation);
+    const canonicalStatus = parseVisitOutcome(target.appointment.status);
+    return {
+      target,
+      storedStatus: target.appointment.status,
+      canonicalStatus,
+      alreadyCancelled: canonicalStatus === 'canceled',
+    };
   }
 
   private async executeOwnedCancel(
