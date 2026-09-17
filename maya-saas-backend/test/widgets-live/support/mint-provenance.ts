@@ -186,7 +186,8 @@ export function claimBinStdoutCapture(): BinStdoutCapture {
   return Object.freeze({
     line: (text: string) => {
       const parsed = parseMintProvenanceStdoutLine(text);
-      if (parsed !== null && parsed !== 'malformed') CAPTURED.set(parsed, 'BIN');
+      if (parsed !== null && parsed !== 'malformed')
+        CAPTURED.set(parsed, 'BIN');
       return parsed;
     },
   });
@@ -202,7 +203,9 @@ export function mintProvenanceCallSite(): string | null {
   const stack = new Error().stack ?? '';
   Error.stackTraceLimit = limit;
   for (const frame of stack.split('\n').slice(1)) {
-    const m = /\(?((?:\/|[A-Za-z]:\\)[^()]*?):\d+:\d+\)?\s*$/.exec(frame.trim());
+    const m = /\(?((?:\/|[A-Za-z]:\\)[^()]*?):\d+:\d+\)?\s*$/.exec(
+      frame.trim(),
+    );
     if (!m) continue;
     const file = realpath(m[1]);
     if (file === THIS_FILE) continue;

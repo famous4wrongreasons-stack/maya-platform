@@ -1230,8 +1230,7 @@ describe('widgets-live harness', () => {
           .trim()
           .split('\n')
           .map(
-            (text) =>
-              JSON.parse(text) as { contract: string; reason: string },
+            (text) => JSON.parse(text) as { contract: string; reason: string },
           );
         expect(sidecar.map((l) => l.contract)).toEqual([
           'maya.widgets-evidence-mint-refused/1',
@@ -1470,7 +1469,8 @@ describe('widgets-live harness', () => {
     };
     const http = (sc: Scenario) => sc.manifest[0];
     const bin = (sc: Scenario) => sc.manifest[1];
-    const httpMint = (sc: Scenario) => sc.mint[0] as { line: Json; pid: number };
+    const httpMint = (sc: Scenario) =>
+      sc.mint[0] as { line: Json; pid: number };
     const spec = (sc: Scenario, body: string) => {
       sc.files[SPEC] = `${CLEAN_SPEC}${body}\n`;
     };
@@ -1481,192 +1481,427 @@ describe('widgets-live harness', () => {
       expect(verified.status).toBe(0);
     });
 
-    const cases: [string, string, (sc: Scenario) => void, 'P-1' | 'global'][] = [
-      ['V-L-PAIR', 'an HTTP half with no BIN half', (sc) => void sc.manifest.pop(), 'P-1'],
-      ['V-L-PAIR', 'halves offered for different clauses', (sc) => void (bin(sc).clauses = ['G4-a']), 'P-1'],
+    const cases: [string, string, (sc: Scenario) => void, 'P-1' | 'global'][] =
       [
-        'V-L-PAIR',
-        'a BIN half that claims nothing',
-        (sc) => void Object.assign(bin(sc), { claim: null, labels: [], clauses: [] }),
-        'P-1',
-      ],
-      ['V-PROV-RECORD', 'an L claim that names no record', (sc) => void (http(sc).record_hash = null), 'P-1'],
-      ['V-PROV-MINT', 'a record with no server mint line', (sc) => void sc.mint.shift(), 'P-1'],
-      ['V-PROV-MINT', 'a record with two server mint lines', (sc) => void sc.mint.push(sc.mint[0]), 'P-1'],
-      ['V-PROV-DB', 'a record missing from the database before teardown', (sc) => void (sc.database = ['hash-BIN']), 'P-1'],
-      ['V-PROV-TRIGGER', 'a mint line whose trigger is not a production trigger', (sc) => void (httpMint(sc).line.trigger = 'forged-by-test'), 'P-1'],
-      ['V-PROV-TRIGGER', 'a successor mint whose predecessor is not traced', (sc) => void (httpMint(sc).line.trigger = 'successor'), 'P-1'],
-      ['V-PROV-TRACE', "a trace id that is not the mint line's request id", (sc) => void (http(sc).trigger_trace_id = 'req-other'), 'P-1'],
-      ['V-PROV-TRACE', 'a claim with no trace id', (sc) => void (http(sc).trigger_trace_id = null), 'P-1'],
-      ['V-PROV-PID', 'a line written by another process than the capture', (sc) => void (http(sc).pid = HTTP_PID + 2), 'P-1'],
-      [
-        'V-PROV-FORGED',
-        'a capture point that refused a provenance line',
-        (sc) =>
-          void sc.mint.push({
-            contract: 'maya.widgets-evidence-mint-refused/1',
-            entry: 'HTTP',
-            reason: 'a WidgetMintProvenance call from test/widgets-live/probe.live-spec.ts',
-            pid: HTTP_PID,
-          }),
-        'global',
-      ],
-      [
-        'V-ENTRY-SOURCE',
-        'an HTTP claim from a support file',
-        (sc) => {
-          http(sc).source = 'test/widgets-live/support/probe.live-spec.ts';
-          sc.files['test/widgets-live/support/probe.live-spec.ts'] = CLEAN_SPEC;
-        },
-        'P-1',
-      ],
-      ['V-ENTRY-SOURCE', 'a BIN claim from a live spec', (sc) => void (bin(sc).source = SPEC), 'P-1'],
-      [
-        'V-PROCESS',
-        'one process writing both the HTTP and the BIN half',
-        (sc) => {
-          bin(sc).pid = HTTP_PID;
-          (sc.mint[1] as { pid: number }).pid = HTTP_PID;
-        },
-        'P-1',
-      ],
-      ['V-LABEL-CLASS', 'an E-INDEP label on an L claim', (sc) => void (http(sc).labels = ['[E-MINT]', '[E-INDEP]']), 'P-1'],
-      [
-        'V-LABEL-CLASS',
-        'an E-TAMPER label on an L claim',
-        (sc) => void (http(sc).labels = ['[E-MINT]', '[E-TAMPER:WidgetIntentRecord.verificationFloor]']),
-        'P-1',
-      ],
-      ['V-LABEL-CLASS', 'an L claim whose only label is an L-T class', (sc) => void (http(sc).labels = ['[E-INDEP(mint)]']), 'P-1'],
-      ['V-SCHEMA', 'a claim with no evidence label', (sc) => void (http(sc).labels = ['[harness]']), 'P-1'],
-      ['V-SYNTH-CLAIM', 'a G-SYNTH label on an L claim', (sc) => void (http(sc).labels = ['[E-MINT]', '[G-SYNTH]']), 'P-1'],
-      ['V-SYNTH-CLAIM', 'a synthetic label in another case', (sc) => void (http(sc).labels = ['[E-MINT]', '[Synthetic Record]']), 'P-1'],
-      ['V-GW', 'a claim on a GW line', (sc) => void (http(sc).entry = 'GW'), 'P-1'],
-      [
-        'V-INVENTORY',
-        'a clause key that is not in the inventory',
-        (sc) => {
-          http(sc).clauses = ['G4-zz'];
-          bin(sc).clauses = ['G4-zz'];
-        },
-        'P-1',
-      ],
-      [
-        'V-LT-G9-G10',
-        'an L-T claim on a Gate 9 key',
-        (sc) => void Object.assign(http(sc), { claim: 'L-T', clauses: ['9.1'], labels: ['[E-INDEP]'] }),
-        'P-1',
-      ],
-      ['V-UNVERIFIED', 'a U claim', (sc) => void (http(sc).claim = 'U'), 'P-1'],
-      [
-        'V-TAMPER-SHAPE',
-        'an E-TAMPER naming two columns besides the floor',
-        (sc) =>
-          void Object.assign(http(sc), {
-            claim: 'L-T',
-            labels: ['[E-TAMPER:WidgetIntentRecord.effect,WidgetIntentRecord.widgetKind]'],
-          }),
-        'P-1',
-      ],
-      ['V-FIXTURE-WRITE', 'Fixtures.widget through a variable argument', (sc) => spec(sc, 'await fx.widget(input);'), 'P-1'],
-      ['V-FIXTURE-WRITE', 'Fixtures.synthetic', (sc) => spec(sc, 'await fx.synthetic(input);'), 'P-1'],
-      ['V-FIXTURE-WRITE', 'a widget model write', (sc) => spec(sc, 'await ctx.prisma.widgetIntentRecord.create({ data });'), 'P-1'],
-      ['V-FIXTURE-WRITE', 'the emitter', (sc) => spec(sc, 'await emitter.emit(kind, input);'), 'P-1'],
-      ['V-FIXTURE-WRITE', 'raw SQL', (sc) => spec(sc, 'await prisma.$executeRawUnsafe(sql);'), 'P-1'],
-      ['V-FIXTURE-WRITE', 'its own database client', (sc) => spec(sc, 'const client = new PrismaClient({ adapter });'), 'P-1'],
-      [
-        'V-FIXTURE-WRITE',
-        'a logger with a provenance context assembled at run time',
-        (sc) => spec(sc, "new Logger(['Widget', 'Mint', 'Provenance'].join('')).log(line);"),
-        'P-1',
-      ],
-      ['V-FIXTURE-WRITE', "the evidence directory's files", (sc) => spec(sc, "fs.appendFileSync(path.join(dir, 'mint-provenance.jsonl'), line);"), 'P-1'],
-      ['V-FIXTURE-WRITE', 'code loaded dynamically', (sc) => spec(sc, 'vm.runInThisContext(code, { filename });'), 'P-1'],
-      [
-        'V-FIXTURE-WRITE',
-        'a helper it imports that writes',
-        (sc) => {
-          spec(sc, "import { mint } from './helpers/mint';\nawait mint();");
-          sc.files['test/widgets-live/helpers/mint.ts'] = 'export const mint = () => fx.widget(input);\n';
-        },
-        'P-1',
-      ],
-      ['V-OVERRIDE', 'a module mock', (sc) => spec(sc, "jest.mock('../../src/tenancy/tenant-context.service');"), 'P-1'],
-      [
-        'V-OVERRIDE',
-        'a providers-array binding',
-        (sc) => spec(sc, 'Test.createTestingModule({ imports: [AppModule], providers: [{ provide: TenantContextService, useValue: stub }] });'),
-        'P-1',
-      ],
-      ['V-OVERRIDE', 'a replaced property', (sc) => spec(sc, "jest.replaceProperty(gateway, 'submit', fake);"), 'P-1'],
-      [
-        'V-OVERRIDE',
-        'a spy replaced in a second statement',
-        (sc) => spec(sc, "const spy = jest.spyOn(gateway, 'submit');\nspy.mockResolvedValue(verdict);"),
-        'P-1',
-      ],
-      [
-        'V-OVERRIDE',
-        'a member assigned on a resolved provider',
-        (sc) => spec(sc, 'moduleRef.get(TenantContextService).assertTenantId = () => undefined;'),
-        'P-1',
-      ],
-      [
-        'V-OVERRIDE',
-        'a member assigned through a variable holding a resolved provider',
-        (sc) => spec(sc, 'const tenancy = app.get(TenantContextService);\ntenancy.assertTenantId = () => undefined;'),
-        'P-1',
-      ],
-      ['V-OVERRIDE', 'a guard override', (sc) => spec(sc, '.overrideGuard(FeatureGuard).useValue({ canActivate: () => true })'), 'P-1'],
-      ['V-OVERRIDE', 'a prototype member assigned', (sc) => spec(sc, 'TenantContextService.prototype.assertTenantId = () => undefined;'), 'P-1'],
-      [
-        'V-OVERRIDE',
-        'an override in a nested support directory',
-        (sc) => void (sc.files['test/widgets-live/support/extra/boot.ts'] = '.overrideProvider(TenantContextService).useValue({})\n'),
-        'global',
-      ],
-      [
-        'V-OVERRIDE',
-        'an allowlisted target overridden from a file the allowlist does not name',
-        (sc) => void (sc.files['test/widgets-live/support/other-boot.ts'] = '.overrideProvider(PrismaService).useFactory({ factory })\n'),
-        'global',
-      ],
-      ['V-MODEL-STUB', 'a module mock of the model transport', (sc) => spec(sc, "jest.mock('../../src/ai-tools/ai-core-model.service');"), 'P-1'],
-      [
-        'V-MODEL-STUB',
-        'the model transport replaced on its resolved provider',
-        (sc) => spec(sc, 'moduleRef.get(AiCoreModelService).decide = async () => null;'),
-        'P-1',
-      ],
-      [
-        'V-MODEL-STUB',
-        'a spy on decide replaced in a second statement',
-        (sc) => spec(sc, "const spy = jest.spyOn(model, 'decide');\nspy.mockResolvedValue(fake);"),
-        'P-1',
-      ],
-      [
-        'V-MODEL-STUB',
-        'a providers-array binding of the model transport in a support file',
-        (sc) =>
-          void (sc.files['test/widgets-live/support/providers.ts'] =
-            'Test.createTestingModule({ imports: [AppModule], providers: [{ provide: AiCoreModelService, useValue: { decide } }] });\n'),
-        'global',
-      ],
-      ['V-CONTROLLED', 'controlledFixtureMode', (sc) => spec(sc, 'const options = { controlledFixtureMode: true };'), 'P-1'],
-    ];
+        [
+          'V-L-PAIR',
+          'an HTTP half with no BIN half',
+          (sc) => void sc.manifest.pop(),
+          'P-1',
+        ],
+        [
+          'V-L-PAIR',
+          'halves offered for different clauses',
+          (sc) => void (bin(sc).clauses = ['G4-a']),
+          'P-1',
+        ],
+        [
+          'V-L-PAIR',
+          'a BIN half that claims nothing',
+          (sc) =>
+            void Object.assign(bin(sc), {
+              claim: null,
+              labels: [],
+              clauses: [],
+            }),
+          'P-1',
+        ],
+        [
+          'V-PROV-RECORD',
+          'an L claim that names no record',
+          (sc) => void (http(sc).record_hash = null),
+          'P-1',
+        ],
+        [
+          'V-PROV-MINT',
+          'a record with no server mint line',
+          (sc) => void sc.mint.shift(),
+          'P-1',
+        ],
+        [
+          'V-PROV-MINT',
+          'a record with two server mint lines',
+          (sc) => void sc.mint.push(sc.mint[0]),
+          'P-1',
+        ],
+        [
+          'V-PROV-DB',
+          'a record missing from the database before teardown',
+          (sc) => void (sc.database = ['hash-BIN']),
+          'P-1',
+        ],
+        [
+          'V-PROV-TRIGGER',
+          'a mint line whose trigger is not a production trigger',
+          (sc) => void (httpMint(sc).line.trigger = 'forged-by-test'),
+          'P-1',
+        ],
+        [
+          'V-PROV-TRIGGER',
+          'a successor mint whose predecessor is not traced',
+          (sc) => void (httpMint(sc).line.trigger = 'successor'),
+          'P-1',
+        ],
+        [
+          'V-PROV-TRACE',
+          "a trace id that is not the mint line's request id",
+          (sc) => void (http(sc).trigger_trace_id = 'req-other'),
+          'P-1',
+        ],
+        [
+          'V-PROV-TRACE',
+          'a claim with no trace id',
+          (sc) => void (http(sc).trigger_trace_id = null),
+          'P-1',
+        ],
+        [
+          'V-PROV-PID',
+          'a line written by another process than the capture',
+          (sc) => void (http(sc).pid = HTTP_PID + 2),
+          'P-1',
+        ],
+        [
+          'V-PROV-FORGED',
+          'a capture point that refused a provenance line',
+          (sc) =>
+            void sc.mint.push({
+              contract: 'maya.widgets-evidence-mint-refused/1',
+              entry: 'HTTP',
+              reason:
+                'a WidgetMintProvenance call from test/widgets-live/probe.live-spec.ts',
+              pid: HTTP_PID,
+            }),
+          'global',
+        ],
+        [
+          'V-ENTRY-SOURCE',
+          'an HTTP claim from a support file',
+          (sc) => {
+            http(sc).source = 'test/widgets-live/support/probe.live-spec.ts';
+            sc.files['test/widgets-live/support/probe.live-spec.ts'] =
+              CLEAN_SPEC;
+          },
+          'P-1',
+        ],
+        [
+          'V-ENTRY-SOURCE',
+          'a BIN claim from a live spec',
+          (sc) => void (bin(sc).source = SPEC),
+          'P-1',
+        ],
+        [
+          'V-PROCESS',
+          'one process writing both the HTTP and the BIN half',
+          (sc) => {
+            bin(sc).pid = HTTP_PID;
+            (sc.mint[1] as { pid: number }).pid = HTTP_PID;
+          },
+          'P-1',
+        ],
+        [
+          'V-LABEL-CLASS',
+          'an E-INDEP label on an L claim',
+          (sc) => void (http(sc).labels = ['[E-MINT]', '[E-INDEP]']),
+          'P-1',
+        ],
+        [
+          'V-LABEL-CLASS',
+          'an E-TAMPER label on an L claim',
+          (sc) =>
+            void (http(sc).labels = [
+              '[E-MINT]',
+              '[E-TAMPER:WidgetIntentRecord.verificationFloor]',
+            ]),
+          'P-1',
+        ],
+        [
+          'V-LABEL-CLASS',
+          'an L claim whose only label is an L-T class',
+          (sc) => void (http(sc).labels = ['[E-INDEP(mint)]']),
+          'P-1',
+        ],
+        [
+          'V-SCHEMA',
+          'a claim with no evidence label',
+          (sc) => void (http(sc).labels = ['[harness]']),
+          'P-1',
+        ],
+        [
+          'V-SYNTH-CLAIM',
+          'a G-SYNTH label on an L claim',
+          (sc) => void (http(sc).labels = ['[E-MINT]', '[G-SYNTH]']),
+          'P-1',
+        ],
+        [
+          'V-SYNTH-CLAIM',
+          'a synthetic label in another case',
+          (sc) => void (http(sc).labels = ['[E-MINT]', '[Synthetic Record]']),
+          'P-1',
+        ],
+        [
+          'V-GW',
+          'a claim on a GW line',
+          (sc) => void (http(sc).entry = 'GW'),
+          'P-1',
+        ],
+        [
+          'V-INVENTORY',
+          'a clause key that is not in the inventory',
+          (sc) => {
+            http(sc).clauses = ['G4-zz'];
+            bin(sc).clauses = ['G4-zz'];
+          },
+          'P-1',
+        ],
+        [
+          'V-LT-G9-G10',
+          'an L-T claim on a Gate 9 key',
+          (sc) =>
+            void Object.assign(http(sc), {
+              claim: 'L-T',
+              clauses: ['9.1'],
+              labels: ['[E-INDEP]'],
+            }),
+          'P-1',
+        ],
+        [
+          'V-UNVERIFIED',
+          'a U claim',
+          (sc) => void (http(sc).claim = 'U'),
+          'P-1',
+        ],
+        [
+          'V-TAMPER-SHAPE',
+          'an E-TAMPER naming two columns besides the floor',
+          (sc) =>
+            void Object.assign(http(sc), {
+              claim: 'L-T',
+              labels: [
+                '[E-TAMPER:WidgetIntentRecord.effect,WidgetIntentRecord.widgetKind]',
+              ],
+            }),
+          'P-1',
+        ],
+        [
+          'V-FIXTURE-WRITE',
+          'Fixtures.widget through a variable argument',
+          (sc) => spec(sc, 'await fx.widget(input);'),
+          'P-1',
+        ],
+        [
+          'V-FIXTURE-WRITE',
+          'Fixtures.synthetic',
+          (sc) => spec(sc, 'await fx.synthetic(input);'),
+          'P-1',
+        ],
+        [
+          'V-FIXTURE-WRITE',
+          'a widget model write',
+          (sc) =>
+            spec(sc, 'await ctx.prisma.widgetIntentRecord.create({ data });'),
+          'P-1',
+        ],
+        [
+          'V-FIXTURE-WRITE',
+          'the emitter',
+          (sc) => spec(sc, 'await emitter.emit(kind, input);'),
+          'P-1',
+        ],
+        [
+          'V-FIXTURE-WRITE',
+          'raw SQL',
+          (sc) => spec(sc, 'await prisma.$executeRawUnsafe(sql);'),
+          'P-1',
+        ],
+        [
+          'V-FIXTURE-WRITE',
+          'its own database client',
+          (sc) => spec(sc, 'const client = new PrismaClient({ adapter });'),
+          'P-1',
+        ],
+        [
+          'V-FIXTURE-WRITE',
+          'a logger with a provenance context assembled at run time',
+          (sc) =>
+            spec(
+              sc,
+              "new Logger(['Widget', 'Mint', 'Provenance'].join('')).log(line);",
+            ),
+          'P-1',
+        ],
+        [
+          'V-FIXTURE-WRITE',
+          "the evidence directory's files",
+          (sc) =>
+            spec(
+              sc,
+              "fs.appendFileSync(path.join(dir, 'mint-provenance.jsonl'), line);",
+            ),
+          'P-1',
+        ],
+        [
+          'V-FIXTURE-WRITE',
+          'code loaded dynamically',
+          (sc) => spec(sc, 'vm.runInThisContext(code, { filename });'),
+          'P-1',
+        ],
+        [
+          'V-FIXTURE-WRITE',
+          'a helper it imports that writes',
+          (sc) => {
+            spec(sc, "import { mint } from './helpers/mint';\nawait mint();");
+            sc.files['test/widgets-live/helpers/mint.ts'] =
+              'export const mint = () => fx.widget(input);\n';
+          },
+          'P-1',
+        ],
+        [
+          'V-OVERRIDE',
+          'a module mock',
+          (sc) =>
+            spec(sc, "jest.mock('../../src/tenancy/tenant-context.service');"),
+          'P-1',
+        ],
+        [
+          'V-OVERRIDE',
+          'a providers-array binding',
+          (sc) =>
+            spec(
+              sc,
+              'Test.createTestingModule({ imports: [AppModule], providers: [{ provide: TenantContextService, useValue: stub }] });',
+            ),
+          'P-1',
+        ],
+        [
+          'V-OVERRIDE',
+          'a replaced property',
+          (sc) => spec(sc, "jest.replaceProperty(gateway, 'submit', fake);"),
+          'P-1',
+        ],
+        [
+          'V-OVERRIDE',
+          'a spy replaced in a second statement',
+          (sc) =>
+            spec(
+              sc,
+              "const spy = jest.spyOn(gateway, 'submit');\nspy.mockResolvedValue(verdict);",
+            ),
+          'P-1',
+        ],
+        [
+          'V-OVERRIDE',
+          'a member assigned on a resolved provider',
+          (sc) =>
+            spec(
+              sc,
+              'moduleRef.get(TenantContextService).assertTenantId = () => undefined;',
+            ),
+          'P-1',
+        ],
+        [
+          'V-OVERRIDE',
+          'a member assigned through a variable holding a resolved provider',
+          (sc) =>
+            spec(
+              sc,
+              'const tenancy = app.get(TenantContextService);\ntenancy.assertTenantId = () => undefined;',
+            ),
+          'P-1',
+        ],
+        [
+          'V-OVERRIDE',
+          'a guard override',
+          (sc) =>
+            spec(
+              sc,
+              '.overrideGuard(FeatureGuard).useValue({ canActivate: () => true })',
+            ),
+          'P-1',
+        ],
+        [
+          'V-OVERRIDE',
+          'a prototype member assigned',
+          (sc) =>
+            spec(
+              sc,
+              'TenantContextService.prototype.assertTenantId = () => undefined;',
+            ),
+          'P-1',
+        ],
+        [
+          'V-OVERRIDE',
+          'an override in a nested support directory',
+          (sc) =>
+            void (sc.files['test/widgets-live/support/extra/boot.ts'] =
+              '.overrideProvider(TenantContextService).useValue({})\n'),
+          'global',
+        ],
+        [
+          'V-OVERRIDE',
+          'an allowlisted target overridden from a file the allowlist does not name',
+          (sc) =>
+            void (sc.files['test/widgets-live/support/other-boot.ts'] =
+              '.overrideProvider(PrismaService).useFactory({ factory })\n'),
+          'global',
+        ],
+        [
+          'V-MODEL-STUB',
+          'a module mock of the model transport',
+          (sc) =>
+            spec(sc, "jest.mock('../../src/ai-tools/ai-core-model.service');"),
+          'P-1',
+        ],
+        [
+          'V-MODEL-STUB',
+          'the model transport replaced on its resolved provider',
+          (sc) =>
+            spec(
+              sc,
+              'moduleRef.get(AiCoreModelService).decide = async () => null;',
+            ),
+          'P-1',
+        ],
+        [
+          'V-MODEL-STUB',
+          'a spy on decide replaced in a second statement',
+          (sc) =>
+            spec(
+              sc,
+              "const spy = jest.spyOn(model, 'decide');\nspy.mockResolvedValue(fake);",
+            ),
+          'P-1',
+        ],
+        [
+          'V-MODEL-STUB',
+          'a providers-array binding of the model transport in a support file',
+          (sc) =>
+            void (sc.files['test/widgets-live/support/providers.ts'] =
+              'Test.createTestingModule({ imports: [AppModule], providers: [{ provide: AiCoreModelService, useValue: { decide } }] });\n'),
+          'global',
+        ],
+        [
+          'V-CONTROLLED',
+          'controlledFixtureMode',
+          (sc) => spec(sc, 'const options = { controlledFixtureMode: true };'),
+          'P-1',
+        ],
+      ];
 
-    it.each(cases)('HAR-13 %s turns red on %s', (rule, _what, mutate, where) => {
-      const scenario = cleanPair();
-      mutate(scenario);
-      const verified = verifyScenario(scenario);
-      expect(verified.status).toBe(1);
-      const rules =
-        where === 'global' ? verified.globalRules : verified.rulesOf('P-1');
-      expect({ rule, rules }).toEqual({
-        rule,
-        rules: expect.arrayContaining([rule]) as unknown,
-      });
-    });
+    it.each(cases)(
+      'HAR-13 %s turns red on %s',
+      (rule, _what, mutate, where) => {
+        const scenario = cleanPair();
+        mutate(scenario);
+        const verified = verifyScenario(scenario);
+        expect(verified.status).toBe(1);
+        const rules =
+          where === 'global' ? verified.globalRules : verified.rulesOf('P-1');
+        expect({ rule, rules }).toEqual({
+          rule,
+          rules: expect.arrayContaining([rule]) as unknown,
+        });
+      },
+    );
   });
 
   describe('D-17 (3) evidence sources [BUILD]', () => {
@@ -1691,37 +1926,72 @@ describe('widgets-live harness', () => {
     it('HAR-12 [BUILD] the scan goes red on every forbidden construct in a labelled test, through a helper too, and stays quiet on unlabelled tests', () => {
       const L = (title: string) => `[E-${title}]`;
       const planted: [string, string, string, boolean][] = [
-        ['clean labelled test', 'a.live-spec.ts', `it('X-1 [HTTP] ${L('MINT')}', async () => { await http.postIntent(t, b); });`, false],
-        ['unlabelled G-SYNTH test', 'a.live-spec.ts', "it('X-2 [GW] [G-SYNTH]', async () => { await fx.widget({ tenant }); });", false],
-        ['Fixtures.widget', 'a.live-spec.ts', `it('X-3 ${L('MINT')}', async () => { await fx.widget(input); });`, true],
+        [
+          'clean labelled test',
+          'a.live-spec.ts',
+          `it('X-1 [HTTP] ${L('MINT')}', async () => { await http.postIntent(t, b); });`,
+          false,
+        ],
+        [
+          'unlabelled G-SYNTH test',
+          'a.live-spec.ts',
+          "it('X-2 [GW] [G-SYNTH]', async () => { await fx.widget({ tenant }); });",
+          false,
+        ],
+        [
+          'Fixtures.widget',
+          'a.live-spec.ts',
+          `it('X-3 ${L('MINT')}', async () => { await fx.widget(input); });`,
+          true,
+        ],
         [
           'helper indirection',
           'a.live-spec.ts',
           `async function mint() { return fx.synthetic(x); }\nit('X-4 ${L('DRIFT')}', async () => { await mint(); });`,
           true,
         ],
-        ['context in a string', 'a.live-spec.ts', `it('X-5 ${L('HOSTILE')}', () => { expect(ctx).toBe('WidgetMintProvenance'); });`, true],
+        [
+          'context in a string',
+          'a.live-spec.ts',
+          `it('X-5 ${L('HOSTILE')}', () => { expect(ctx).toBe('WidgetMintProvenance'); });`,
+          true,
+        ],
         [
           'context assembled at run time',
           'a.live-spec.ts',
           `it('X-6 ${L('MINT')}', () => { new Logger(['Widget', 'Mint', 'Provenance'].join('')).log(x); });`,
           true,
         ],
-        ['template title and the emitter', 'a.live-spec.ts', 'it(`X-7 [E-TAMPER:${col}]`, async () => { await emitter.emit(k, i); });', true],
+        [
+          'template title and the emitter',
+          'a.live-spec.ts',
+          'it(`X-7 [E-TAMPER:${col}]`, async () => { await emitter.emit(k, i); });',
+          true,
+        ],
         [
           'it.each and a model write',
           'a.live-spec.ts',
           `it.each(rows)('X-8 ${L('HOSTILE')} %s', async (r) => { await ctx.prisma.widgetIntentRecord.create({ data: r }); });`,
           true,
         ],
-        ['a labelled describe', 'a.live-spec.ts', `describe('group ${L('MINT')}', () => { it('X-9 plain', async () => { await fx.widget({}); }); });`, true],
+        [
+          'a labelled describe',
+          'a.live-spec.ts',
+          `describe('group ${L('MINT')}', () => { it('X-9 plain', async () => { await fx.widget({}); }); });`,
+          true,
+        ],
         [
           'a labelled BIN case',
           'gateX.cases.ts',
           `export const cases = [{ id: 'X-10', async run(ctx) { ctx.evidence.record({ labels: ['${L('MINT')}'] }); writeRecord(ctx); } }];`,
           true,
         ],
-        ['an unlabelled BIN case', 'gateX.cases.ts', "export const cases = [{ id: 'X-11', async run(ctx) { await fx.widget({}); } }];", false],
+        [
+          'an unlabelled BIN case',
+          'gateX.cases.ts',
+          "export const cases = [{ id: 'X-11', async run(ctx) { await fx.widget({}); } }];",
+          false,
+        ],
       ];
       const outcomes = planted.map(([name, file, text]) => [
         name,

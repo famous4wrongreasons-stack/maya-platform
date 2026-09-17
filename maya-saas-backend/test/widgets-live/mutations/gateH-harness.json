@@ -276,8 +276,8 @@
     "edits": [
       {
         "file": "test/widgets-live/support/evidence-source-scan.ts",
-        "find": "        if (FORBIDDEN_IDENTIFIERS.has(node.text)) found.add(`names ${node.text}`);\n",
-        "replace": "        if (false && FORBIDDEN_IDENTIFIERS.has(node.text)) found.add(`names ${node.text}`);\n"
+        "find": "        if (FORBIDDEN_IDENTIFIERS.has(node.text))\n          found.add(`names ${node.text}`);\n",
+        "replace": "        if (false && FORBIDDEN_IDENTIFIERS.has(node.text))\n          found.add(`names ${node.text}`);\n"
       }
     ],
     "killers": [

@@ -69,9 +69,10 @@ const titleText = (node: ts.Expression | undefined): string => {
   if (!node) return '';
   if (ts.isStringLiteralLike(node)) return node.text;
   if (ts.isTemplateExpression(node))
-    return [node.head.text, ...node.templateSpans.map((s) => s.literal.text)].join(
-      ' ',
-    );
+    return [
+      node.head.text,
+      ...node.templateSpans.map((s) => s.literal.text),
+    ].join(' ');
   if (ts.isBinaryExpression(node))
     return `${titleText(node.left)} ${titleText(node.right)}`;
   if (ts.isParenthesizedExpression(node)) return titleText(node.expression);
@@ -112,7 +113,8 @@ const forbiddenIn = (
     seen.add(scope);
     const visit = (node: ts.Node): void => {
       if (ts.isIdentifier(node)) {
-        if (FORBIDDEN_IDENTIFIERS.has(node.text)) found.add(`names ${node.text}`);
+        if (FORBIDDEN_IDENTIFIERS.has(node.text))
+          found.add(`names ${node.text}`);
         const target = functions.get(node.text);
         if (target && !seen.has(target)) queue.push(target);
       }
