@@ -21,6 +21,12 @@
 // there). An HTTP request is served in the server's async context, not the test's, so the HTTP bootstrap
 // runs the gateway's own `submit` inside the `gateway` scope instead: writes made by gates are told
 // apart from writes a guard makes during the same request (a session touch, an audit line).
+//
+// Locks are not writes (GATES-PLAN-V11 D-12). A raw statement that only takes a lock — a row lock (`SELECT … FOR
+// SHARE`, `FOR KEY SHARE`, `FOR UPDATE`, `FOR NO KEY UPDATE`) or an advisory lock (`pg_advisory_xact_lock`,
+// `pg_try_advisory_*`) — is recorded with `lock: true` and `write: false`: it leaves no durable row, and the
+// request transaction of D-1 takes such locks (the Membership read `FOR SHARE`, B-02) on refusals that must write
+// nothing. A statement that ALSO names a writing keyword, or that the recorder cannot read, is still a write.
 
 import { AsyncLocalStorage } from 'node:async_hooks';
 
@@ -32,7 +38,10 @@ import { PrismaService } from '../../../src/prisma/prisma.service';
 export interface RecordedOperation {
   readonly model: string | null;
   readonly operation: string;
+  /** A durable write. A lock-only statement is not one (`lock`). */
   readonly write: boolean;
+  /** A lock-only raw statement: a row lock or an advisory lock, and nothing that writes (D-12). */
+  readonly lock: boolean;
   readonly scope: string | null;
   /** Raw statements only: the SQL text, so a write can be told from a read. Values are never kept. */
   readonly sql?: string;
@@ -66,12 +75,16 @@ const RAW_QUERY = new Set(['$queryRaw', '$queryRawUnsafe', '$queryRawTyped']);
 const WRITING_KEYWORDS =
   /\b(insert|update|delete|merge|truncate|alter|create|drop|grant|revoke|copy|call|do|refresh|reindex|vacuum|cluster|comment|security|lock|nextval|setval)\b/i;
 /**
- * Locks a SELECT can take. `\block\b` cannot see an advisory-lock function (`_` is a word character, so
- * `pg_advisory_xact_lock` has no boundary before `lock`), and `FOR SHARE` names no keyword above
- * (`FOR UPDATE` / `FOR NO KEY UPDATE` are already caught by `update`).
+ * Row-lock clauses a SELECT can carry. They are removed before the writing keywords are looked for, so the
+ * `update` of `FOR UPDATE` / `FOR NO KEY UPDATE` does not make a lock a write.
  */
-const LOCKING_CLAUSES =
-  /\bpg_(?:try_)?advisory_\w+|\bfor\s+(?:key\s+)?share\b/i;
+const ROW_LOCK_CLAUSES =
+  /\bfor\s+(?:no\s+key\s+update|update|key\s+share|share)\b/gi;
+/**
+ * Advisory-lock functions. `\block\b` cannot see them (`_` is a word character, so `pg_advisory_xact_lock` has
+ * no boundary before `lock`).
+ */
+const ADVISORY_LOCK = /\bpg_(?:try_)?advisory_\w+/i;
 
 const sqlText = (args: unknown): string | undefined => {
   if (typeof args === 'string') return args;
@@ -86,18 +99,28 @@ const sqlText = (args: unknown): string | undefined => {
   return undefined;
 };
 
+export type StatementClass = 'read' | 'lock' | 'write';
+
 /**
- * A raw statement is a READ only when it is plainly one: it starts with SELECT, WITH or SHOW and names
- * no writing keyword and no lock anywhere. Everything else — `SET TRANSACTION`, an advisory lock
- * (`pg_advisory_*`, `pg_try_advisory_*`), a row lock (`FOR UPDATE`, `FOR SHARE`), an unreadable
- * argument — counts as a write, so the NW assertion errs toward red.
+ * A raw statement is a READ only when it is plainly one: it starts with SELECT, WITH or SHOW and names no
+ * writing keyword and no lock anywhere. It is a LOCK when it starts that way, names no writing keyword once its
+ * row-lock clauses are set aside, and takes a row lock or an advisory lock (D-12). Everything else —
+ * `SET TRANSACTION`, `LOCK TABLE`, `nextval`, a data-modifying CTE, an unreadable argument — is a WRITE, so the NW
+ * assertion errs toward red.
  */
-export const isWritingStatement = (sql: string | undefined): boolean => {
-  if (sql === undefined) return true;
+export const classifyStatement = (sql: string | undefined): StatementClass => {
+  if (sql === undefined) return 'write';
   const text = sql.trim();
-  if (!/^(select|with|show)\b/i.test(text)) return true;
-  return WRITING_KEYWORDS.test(text) || LOCKING_CLAUSES.test(text);
+  if (!/^(select|with|show)\b/i.test(text)) return 'write';
+  const withoutRowLocks = text.replace(ROW_LOCK_CLAUSES, ' ');
+  if (WRITING_KEYWORDS.test(withoutRowLocks)) return 'write';
+  if (withoutRowLocks !== text || ADVISORY_LOCK.test(text)) return 'lock';
+  return 'read';
 };
+
+/** A durable write (a lock-only statement is not one). */
+export const isWritingStatement = (sql: string | undefined): boolean =>
+  classifyStatement(sql) === 'write';
 
 export class WriteRecorder {
   private readonly scopes = new AsyncLocalStorage<string>();
@@ -108,10 +131,17 @@ export class WriteRecorder {
     return this.log;
   }
 
-  /** Writes, optionally only those inside `scope`. */
+  /** Durable writes, optionally only those inside `scope`. Locks are not among them (`locks`). */
   writes(scope?: string): RecordedOperation[] {
     return this.log.filter(
       (op) => op.write && (scope === undefined || op.scope === scope),
+    );
+  }
+
+  /** Lock-only statements (row and advisory locks), optionally only those inside `scope` (D-12). */
+  locks(scope?: string): RecordedOperation[] {
+    return this.log.filter(
+      (op) => op.lock && (scope === undefined || op.scope === scope),
     );
   }
 
@@ -150,15 +180,19 @@ export class WriteRecorder {
         $allOperations: ({ model, operation, args, query }) => {
           const raw = RAW_EXECUTE.has(operation) || RAW_QUERY.has(operation);
           const sql = raw ? sqlText(args) : undefined;
+          // An execute is a write unless its statement is lock-only; a query is a write only when it writes.
+          const rawClass = raw ? classifyStatement(sql) : null;
+          const lock = rawClass === 'lock';
           const write =
             MODEL_WRITES.has(operation) ||
-            RAW_EXECUTE.has(operation) ||
-            (RAW_QUERY.has(operation) && isWritingStatement(sql)) ||
+            (RAW_EXECUTE.has(operation) && !lock) ||
+            (RAW_QUERY.has(operation) && rawClass === 'write') ||
             (!raw && !isKnownRead(operation));
           this.log.push({
             model: model ?? null,
             operation,
             write,
+            lock,
             scope: this.scopes.getStore() ?? null,
             ...(sql === undefined ? {} : { sql }),
           });
@@ -252,10 +286,10 @@ export async function noWriteBaseline(
 }
 
 /**
- * The NW verdict for one window: every write the recorder saw inside `scope` or after the baseline's mark
- * (both, so a write is caught whether or not its async context carried the scope — at the gateway level
- * nothing else uses the recorded client while a test runs in band), the row-count delta per `Widget*`
- * model, and whether the record's columns changed. All three empty/false means NW holds.
+ * The NW verdict for one window: every durable write (never a lock, D-12) the recorder saw inside `scope` or
+ * after the baseline's mark (both, so a write is caught whether or not its async context carried the scope — at
+ * the gateway level nothing else uses the recorded client while a test runs in band), the row-count delta per
+ * `Widget*` model, and whether the record's columns changed. All three empty/false means NW holds.
  */
 export async function noWriteViolations(
   recorder: WriteRecorder,

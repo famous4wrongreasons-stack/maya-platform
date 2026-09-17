@@ -1,14 +1,26 @@
 name: Widgets Mutation
 
-# The widget gates' mutation battery (integration plan §4.5): every mutant a gate unit declares in
-# `maya-saas-backend/test/widgets-live/mutations/gate<N>.json` is applied to a temporary copy of the
-# backend, never to the checkout, and must turn its declared killer red. The report is uploaded as an
-# artifact; a flipping commit records its artifact id (§4.6). While no battery is declared the report says
-# EMPTY, which is not evidence.
+# The widget gates' mutation battery (integration plan §4.5; GATES-PLAN-V11 I-HAR): every mutant a gate unit
+# declares in `maya-saas-backend/test/widgets-live/mutations/gate<id>.json` is applied to a temporary copy of the
+# backend, never to the checkout, and must turn its declared killer red. Each battery runs in its own shard of a
+# job matrix, inside the 180-minute timeout, and uploads its report as an artifact
+# `widgets-mutation-<sha>-<battery id>`. CKPT-W step 7 dispatches this workflow for the flipping commit with
+# `gates=<every battery touched in the wave>` (it does not run on push) and records every shard's run and artifact
+# id. Only `[HTTP]` kills in a shard report count toward L/L-T (§3.2). While no battery is declared the one shard
+# reports EMPTY, which is not evidence.
+#
+# The env block is platform-ci.yml's literals plus the declared widgets-live extras
+# (`test/widgets-live/support/environment.ts`, IR-H1); `harness.live-spec.ts` (HAR-4) asserts it.
 #
 # Not a required check. Making it one is a repository-settings decision for the owner.
 on:
   workflow_dispatch:
+    inputs:
+      gates:
+        description: 'Battery ids to run, comma separated (gate<id>.json, e.g. H-harness,T-tables). Empty: every declared battery.'
+        required: false
+        default: ''
+        type: string
   pull_request:
     paths:
       - maya-saas-backend/src/widgets/**
@@ -24,10 +36,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  shards:
+    name: Battery shards
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      gates: ${{ steps.plan.outputs.gates }}
+    defaults:
+      run:
+        working-directory: maya-saas-backend
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        # The input reaches the runner as an environment value, never interpolated into the script; the runner
+        # admits only declared battery ids.
+        env:
+          REQUESTED_GATES: ${{ inputs.gates }}
+        run: node scripts/widgets-mutation-battery.mjs --shards "${REQUESTED_GATES:-}" >> "$GITHUB_OUTPUT"
+
   widgets-mutation:
-    name: Widgets mutation battery
+    name: Widgets mutation battery (${{ matrix.gate }})
+    needs: shards
     runs-on: ubuntu-latest
     timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        gate: ${{ fromJSON(needs.shards.outputs.gates) }}
     services:
       postgres:
         image: postgres:16-alpine
@@ -46,12 +81,21 @@ jobs:
       run:
         working-directory: maya-saas-backend
     env:
+      ACTION_ENGINE_IDENTITY_SECRET: test-action-engine-identity-secret-for-widgets-live-only
+      ACTION_ENGINE_PAYLOAD_ENCRYPTION_SECRET: test-action-engine-payload-secret-for-widgets-live-only
       AUTH_RATE_LIMIT_SECRET: test-auth-rate-limit-secret-for-ci-only
       AUTH_REFRESH_TOKEN_SECRET: test-refresh-token-secret-for-ci-only
       AUTH_SESSION_METADATA_SECRET: test-session-metadata-secret-for-ci-only
       CRM_ENCRYPTION_KEY: test-crm-encryption-key-for-ci-only
       DATABASE_URL: postgresql://maya_ci:maya_ci@127.0.0.1:5432/maya_ci?schema=public
       JWT_SECRET: test-jwt-signing-secret-for-ci-only
+      MAYA_GIFT_CERTIFICATE_CLAIM_SECRET: test-gift-certificate-claim-secret-for-widgets-live-only
+      MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY: test-gift-certificate-presentation-key-for-widgets-live-only
+      MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY_VERSION: widgets-live-test-1
+      MAYA_LOYALTY_REDEMPTION_CODE_PEPPER: test-loyalty-redemption-code-pepper-for-widgets-live-only
+      MAYA_REFERRAL_REWARD_CLAIM_SECRET: test-referral-reward-claim-secret-for-widgets-live-only
+      MAYA_REFERRAL_REWARD_PRESENTATION_KEY: test-referral-reward-presentation-key-for-widgets-live-only
+      MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION: widgets-live-test-1
       NODE_ENV: test
       PHONE_AUTH_SECRET: test-phone-auth-secret-for-ci-only
       SEED_DEMO_TENANT_ADMIN_EMAIL: admin@demo-business.local
@@ -69,10 +113,18 @@ jobs:
       - run: npm ci
       - run: npm run prisma:generate
       - run: npx prisma migrate deploy
-      - run: node scripts/widgets-mutation-battery.mjs --out widgets-mutation-report.json
+      - name: Run the battery shard
+        env:
+          SHARD: ${{ matrix.gate }}
+        run: |
+          if [ "$SHARD" = "*" ]; then
+            node scripts/widgets-mutation-battery.mjs --out widgets-mutation-report-all.json
+          else
+            node scripts/widgets-mutation-battery.mjs --gate "$SHARD" --out "widgets-mutation-report-$SHARD.json"
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: widgets-mutation-${{ github.sha }}
-          path: maya-saas-backend/widgets-mutation-report.json
+          name: widgets-mutation-${{ github.sha }}-${{ matrix.gate == '*' && 'all' || matrix.gate }}
+          path: maya-saas-backend/widgets-mutation-report-*.json
           if-no-files-found: error

@@ -1,0 +1,797 @@
+{
+  "contract": "maya.gate-clause-inventory/1",
+  "source": "GATES-PLAN-V11 §3.1 (plan lines 1388-1564); the 10.R1…10.R7 bullet expanded to one key per row of «Gate 10 in full», with the texts of the /2 audit",
+  "against": {
+    "document": "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md",
+    "version": "1.1",
+    "sha256": "606d7f99da5fe1977d5efe737dca91a04f2b11faecddbd666120d34a03e94a8a",
+    "lines": 7415
+  },
+  "note": "The key set of gate-conformance-audit.json must equal this inventory, gate by gate and in order, with identical clause texts; gate-audit-check.mjs enforces it. The inventory changes only with the contract (C-V12) or a re-audit commit that records why.",
+  "gates": [
+    {
+      "n": "1",
+      "name": "Token integrity",
+      "row": "C11:4720",
+      "anchors": "C11:4720; H4 C11:2615-2623; R3.9.4 C11:4907-4935; L8 C11:5506",
+      "clauses": [
+        {
+          "key": "G1-a",
+          "text": "HMAC valid: seal verified, keyed, before Gate 1 proceeds"
+        },
+        {
+          "key": "G1-b",
+          "text": "`widget_id` matches"
+        },
+        {
+          "key": "G1-c",
+          "text": "not expired"
+        },
+        {
+          "key": "G1-d",
+          "text": "not consumed when `single_use`"
+        },
+        {
+          "key": "G1-e",
+          "text": "not superseded"
+        },
+        {
+          "key": "G1-f",
+          "text": "`EXPIRED`/`SUPERSEDED` are response outcomes, with the R3.9.4 successor or the code alone (including A4's three fail-closed conditions)"
+        },
+        {
+          "key": "G1-g",
+          "text": "the successor reads nothing canonical (no projector or owner port; `EP-BUILD`)"
+        }
+      ]
+    },
+    {
+      "n": "2",
+      "name": "Transport auth",
+      "row": "C11:4721",
+      "anchors": "C11:4721",
+      "clauses": [
+        {
+          "key": "G2-a",
+          "text": "session resolved exactly as for a typed message (JWT + Membership, or a verified ClientChannelLink): the same transport chain as `POST /api/ai/chat`, proven by G2-EQ (D-16). `C9Authority.current` in `T` is the K1/K3 principal of Gates 1, 3, 5 and 6, not this clause"
+        },
+        {
+          "key": "G2-b",
+          "text": "no credential comes from the widget"
+        },
+        {
+          "key": "G2-c",
+          "text": "`REFUSED/unauthenticated`"
+        }
+      ]
+    },
+    {
+      "n": "3",
+      "name": "Principal binding",
+      "row": "C11:4722",
+      "anchors": "C11:4722; K3/K4 C11:2544-2546; SH-13",
+      "clauses": [
+        {
+          "key": "G3-a",
+          "text": "`principal_proof_hash === c9PrincipalHash(live)`, constant time"
+        },
+        {
+          "key": "G3-b",
+          "text": "a token minted for A and replayed by B fails"
+        },
+        {
+          "key": "G3-c1",
+          "text": "membership re-create or role change invalidates outstanding envelopes (the membership branch of K4, C11:2546)"
+        },
+        {
+          "key": "G3-c2",
+          "text": "client-link unlink/relink invalidates outstanding envelopes (the CLIENT_CHANNEL branch; U candidate, K14-10)"
+        },
+        {
+          "key": "G3-d",
+          "text": "`REFUSED/widget_principal_mismatch`"
+        },
+        {
+          "key": "G3-e",
+          "text": "a shared push is inert: a web-push token minted for A and submitted by B is refused, NW (T-3)"
+        },
+        {
+          "key": "G3-f",
+          "text": "a forwarded Telegram message is inert (U candidate: K14-10 PKT:485, R-03/P-33)"
+        }
+      ]
+    },
+    {
+      "n": "4",
+      "name": "Tenant scope",
+      "row": "C11:4723",
+      "anchors": "C11:4723",
+      "clauses": [
+        {
+          "key": "G4-a",
+          "text": "`TenantContextService.assertTenantId` over the record's tenant and the live principal's"
+        },
+        {
+          "key": "G4-b",
+          "text": "`REFUSED/tenant_mismatch`"
+        }
+      ]
+    },
+    {
+      "n": "5",
+      "name": "Verification floor",
+      "row": "C11:4724",
+      "anchors": "C11:4724; R3.4.2 C11:4020-4030; R3.4.5 C11:4071-4087; F52 C11:1117-1124; K10 C11:2564; K1/K2 C11:2532-2542",
+      "clauses": [
+        {
+          "key": "G5-a",
+          "text": "floor re-derived from the live registry and policy tables"
+        },
+        {
+          "key": "G5-b",
+          "text": "compared with the server-derived level (K1/K2, in `T`)"
+        },
+        {
+          "key": "G5-c",
+          "text": "capped by `profile.max_verification_level`"
+        },
+        {
+          "key": "G5-d",
+          "text": "branch per effect class"
+        },
+        {
+          "key": "G5-e",
+          "text": "any stored/recomputed difference → `SUPERSEDED/policy_floor_changed` + successor or the code alone, with the non-durable `widget_floor_divergence` counter"
+        },
+        {
+          "key": "G5-f",
+          "text": "`NEEDS_SECOND_CHANNEL`/`HANDOFF_REQUIRED` + deep link (U candidate, K6/F53; mechanism blocked on OD-4 + P-12; never Gate 13's `HandoffTarget`)"
+        }
+      ]
+    },
+    {
+      "n": "6",
+      "name": "Authority, computed from scratch",
+      "row": "C11:4725",
+      "anchors": "C11:4725, 4736-4798; AREA-A §2.1 table",
+      "clauses": [
+        {
+          "key": "G6-1",
+          "text": "dispatch on `subjectCapability(record)`, bound once"
+        },
+        {
+          "key": "G6-2",
+          "text": "`authority_hint` not read"
+        },
+        {
+          "key": "G6-3",
+          "text": "a never-rendered widget still cannot act"
+        },
+        {
+          "key": "G6-4",
+          "text": "`REFUSED/insufficient_authority`, AuthorityResolver"
+        },
+        {
+          "key": "G6-5",
+          "text": "null subject → proceeds with no owner call"
+        },
+        {
+          "key": "G6-6",
+          "text": "HANDOFF: destination fences only (registration, F48, `targetFloor('s')`, landing ingress)"
+        },
+        {
+          "key": "G6-7",
+          "text": "HANDOFF never resolves `assertCanExecute`, `c9Capability` or the allowlist"
+        },
+        {
+          "key": "G6-8",
+          "text": "(a) allowlist row"
+        },
+        {
+          "key": "G6-9",
+          "text": "(b) `policyDecision === 'ALLOW'`"
+        },
+        {
+          "key": "G6-10",
+          "text": "(c) `authenticated_request`"
+        },
+        {
+          "key": "G6-11",
+          "text": "(d) live principal role ∈ `allowedActorRoles`"
+        },
+        {
+          "key": "G6-12",
+          "text": "(e) entitlements grant `requiredFeatures`"
+        },
+        {
+          "key": "G6-13",
+          "text": "Gate 14 governs; a disagreement is refused and counted"
+        },
+        {
+          "key": "G6-14",
+          "text": "the 47: `assertCanExecute(principal, def)` with surface `'web'`"
+        },
+        {
+          "key": "G6-15",
+          "text": "non-catalogue: `WIDGET_CAPABILITY_POLICY` row (build totality + positive)"
+        },
+        {
+          "key": "G6-16",
+          "text": "`c9Capability` when `c9_domain !== null`, including BI non-READ"
+        },
+        {
+          "key": "G6-17",
+          "text": "run-less: `c9Capability` not applied"
+        },
+        {
+          "key": "G6-18",
+          "text": "CONTROL: `CONTROL_FLOOR[ref.key]` at Gate 5, Gate 3's principal binding, Gate 4's tenant assertion, then the one registered handler's own principal and tenant check (R3.2.4, C11:4771-4773); no execute-admission test"
+        },
+        {
+          "key": "G6-19",
+          "text": "TOOL unreachable/refused"
+        },
+        {
+          "key": "G6-20",
+          "text": "a raise is the refusal"
+        },
+        {
+          "key": "G6-FR14",
+          "text": "reads Membership/Staff/Client binding, never `presentation_mode`/`profile_id`/`a11y_env` (FR-14 C11:1798)"
+        }
+      ]
+    },
+    {
+      "n": "7",
+      "name": "Effect admissibility",
+      "row": "C11:4726",
+      "anchors": "C11:4726",
+      "clauses": [
+        {
+          "key": "G7-1",
+          "text": "effect within the kind's ceiling over `widget_kind`"
+        },
+        {
+          "key": "G7-2",
+          "text": "key space matches effect (R3.2.2)"
+        },
+        {
+          "key": "G7-3",
+          "text": "CONTROL keys in the control registry"
+        },
+        {
+          "key": "G7-4",
+          "text": "COMMIT carries a non-null `confirmation_of_ref`"
+        },
+        {
+          "key": "G7-5",
+          "text": "kind ≠ draft → non-null `produced_by_intent_token_hash` satisfying §3.10.2"
+        },
+        {
+          "key": "G7-6",
+          "text": "`requiredConfirmationKind(subject) === widget_kind`, re-read live (F72)"
+        },
+        {
+          "key": "G7-7",
+          "text": "the delivering tier was permitted this effect (§3.12)"
+        },
+        {
+          "key": "G7-8",
+          "text": "the two codes"
+        },
+        {
+          "key": "G7-BOOK1",
+          "text": "BOOK.1 subject = `confirmation_subject` (C11:3109)"
+        },
+        {
+          "key": "G7-FR6b",
+          "text": "exactly one pairing (C11:1786)"
+        },
+        {
+          "key": "G7-FR6d",
+          "text": "no MONEY actuation; `PAYMENT_HANDOFF` gap-blocked; F80 (C11:1788, 1524)"
+        }
+      ]
+    },
+    {
+      "n": "8",
+      "name": "Input validation",
+      "row": "C11:4727",
+      "anchors": "C11:4727",
+      "clauses": [
+        {
+          "key": "G8-1",
+          "text": "closed-domain membership (per field)"
+        },
+        {
+          "key": "G8-2",
+          "text": "cardinality"
+        },
+        {
+          "key": "G8-3",
+          "text": "bounds re-read from `bounds_source`"
+        },
+        {
+          "key": "G8-4",
+          "text": "normalizers applied"
+        },
+        {
+          "key": "G8-5t",
+          "text": "`c9SafeText` over **text** values"
+        },
+        {
+          "key": "G8-5p",
+          "text": "`c9SafeText` over **phone** values (U candidate, PKT:469)"
+        },
+        {
+          "key": "G8-6",
+          "text": "`max_total_bytes` by refusal"
+        },
+        {
+          "key": "G8-7",
+          "text": "inputs on a null schema refused"
+        },
+        {
+          "key": "G8-8",
+          "text": "the four codes"
+        },
+        {
+          "key": "G8-SCHEMA",
+          "text": "server-held and hash-bound; erased or absent → `SUPERSEDED/handle_stale`; hash failure is a fault (B-10)"
+        },
+        {
+          "key": "G8-SHAPE",
+          "text": "undeclared keys and kind conformance"
+        },
+        {
+          "key": "G8-LABELS",
+          "text": "labels from validated members; no write before 9 (R3.9.1/R3.9.2)"
+        },
+        {
+          "key": "G8-DENY",
+          "text": "a `c9Deny` is a verdict (R3.9.3)"
+        }
+      ]
+    },
+    {
+      "n": "8-R",
+      "name": "Readback",
+      "row": "C11:4728",
+      "anchors": "C11:4728",
+      "clauses": [
+        {
+          "key": "R-0",
+          "text": "reachable on the live path"
+        },
+        {
+          "key": "R-1",
+          "text": "applies exactly when `confirmation?.requires_readback === true`"
+        },
+        {
+          "key": "R-1a",
+          "text": "recomputed at ingress from effect and tier (B-17)"
+        },
+        {
+          "key": "R-2",
+          "text": "ack present (`readback_missing`)"
+        },
+        {
+          "key": "R-3",
+          "text": "`readback_ref` matches"
+        },
+        {
+          "key": "R-4",
+          "text": "`body_hash` matches (H4 integrity)"
+        },
+        {
+          "key": "R-5",
+          "text": "affirmation ∈ the closed vocabulary for the locale"
+        },
+        {
+          "key": "R-6",
+          "text": "an ack on a record that does not require one (including a null confirmation) is refused"
+        },
+        {
+          "key": "R-7",
+          "text": "refuses, never repairs; the affirmation is never logged or echoed"
+        }
+      ]
+    },
+    {
+      "n": "9",
+      "name": "Lowering",
+      "row": "C11:4729",
+      "anchors": "C11:4729; AREA-B §2.1",
+      "clauses": [
+        {
+          "key": "9.1",
+          "text": "render"
+        },
+        {
+          "key": "9.1a",
+          "text": "R3.9.2 labels only, no `inputs` parameter"
+        },
+        {
+          "key": "9.1b",
+          "text": "one slot"
+        },
+        {
+          "key": "9.2",
+          "text": "appended to the conversation"
+        },
+        {
+          "key": "9.3",
+          "text": "as a USER turn"
+        },
+        {
+          "key": "9.4",
+          "text": "authority NONE (E10)"
+        },
+        {
+          "key": "9.5",
+          "text": "first durable write (R3.9.1, E11)"
+        },
+        {
+          "key": "9.6",
+          "text": "byte-identical to a typed message from here"
+        },
+        {
+          "key": "9.7",
+          "text": "DS-03 A: superseded/handle_stale, no turn, no effect, no guessed label"
+        },
+        {
+          "key": "9.8",
+          "text": "runs in chat ingress"
+        },
+        {
+          "key": "9.9",
+          "text": "`rendered_utterance`/`selected_labels` persisted"
+        },
+        {
+          "key": "9.10",
+          "text": "F15: lowered content read only by Gate 10"
+        }
+      ]
+    },
+    {
+      "n": "10",
+      "name": "Divergence audit and refusal",
+      "row": "C11:4730",
+      "anchors": "C11:4730, 4800-4876; AREA-B §3.1",
+      "clauses": [
+        {
+          "key": "10.1",
+          "text": "router over the lowering against live intents"
+        },
+        {
+          "key": "10.2",
+          "text": "`routeUtterance` (pure, pre-LLM, escape first)"
+        },
+        {
+          "key": "10.3",
+          "text": "`liveCandidates`"
+        },
+        {
+          "key": "10.4",
+          "text": "`u`, `s`, `q`"
+        },
+        {
+          "key": "10.5",
+          "text": "`ownerSet`/`sameOwner`, undefined fails closed"
+        },
+        {
+          "key": "10.6",
+          "text": "the first row that holds decides"
+        },
+        {
+          "key": "10.7",
+          "text": "exactly one audit record per non-AGREE, in `T`, with its members"
+        },
+        {
+          "key": "10.8",
+          "text": "REFUSE → `intent_divergence`; NULL/AUDIT recorded, not refused"
+        },
+        {
+          "key": "10.9",
+          "text": "widget-layer records only; never substitutes"
+        },
+        {
+          "key": "10.10",
+          "text": "the R3.12.4 fixture duty at `EP-BUILD`"
+        },
+        {
+          "key": "10.11",
+          "text": "intent router"
+        },
+        {
+          "key": "10.R1",
+          "text": "row 1 of «Gate 10 in full»"
+        },
+        {
+          "key": "10.R2",
+          "text": "row 2 of «Gate 10 in full»"
+        },
+        {
+          "key": "10.R3",
+          "text": "row 3 of «Gate 10 in full»"
+        },
+        {
+          "key": "10.R4",
+          "text": "row 4 of «Gate 10 in full»"
+        },
+        {
+          "key": "10.R5",
+          "text": "row 5 of «Gate 10 in full» (null subject with a non-null match of the same effect)"
+        },
+        {
+          "key": "10.R6",
+          "text": "row 6 of «Gate 10 in full»"
+        },
+        {
+          "key": "10.R7",
+          "text": "row 7 of «Gate 10 in full»"
+        }
+      ]
+    },
+    {
+      "n": "11",
+      "name": "Noun resolution",
+      "row": "C11:4731",
+      "anchors": "C11:4731; AREA-C §2.1.1",
+      "clauses": [
+        {
+          "key": "G11-R1",
+          "text": "fresh read from the canonical owner"
+        },
+        {
+          "key": "G11-R2",
+          "text": "witnesses compared, not re-read"
+        },
+        {
+          "key": "G11-R3",
+          "text": "value divergence → SUPERSEDED with a rendered diff"
+        },
+        {
+          "key": "G11-R4",
+          "text": "`handle_stale`"
+        },
+        {
+          "key": "G11-R5",
+          "text": "IntentGateway + owner"
+        },
+        {
+          "key": "G11-I1",
+          "text": "R3.7.3 nouns never travel to the client"
+        },
+        {
+          "key": "G11-I2",
+          "text": "R3.7.4 Handle/Witness types"
+        },
+        {
+          "key": "G11-I3",
+          "text": "F15 exactly seven inputs"
+        },
+        {
+          "key": "G11-I4",
+          "text": "R3.11.1 approval decision reads nouns from the decision record"
+        },
+        {
+          "key": "G11-I5",
+          "text": "R3.11.3 reject and re-mint"
+        },
+        {
+          "key": "G11-I6",
+          "text": "R3.11.4 both checks in order"
+        },
+        {
+          "key": "G11-I7",
+          "text": "RT3(b)/B-21"
+        },
+        {
+          "key": "G11-I8",
+          "text": "R3.9.3 rendering"
+        },
+        {
+          "key": "G11-I9",
+          "text": "BOOK.4 booking nouns"
+        },
+        {
+          "key": "G11-I10",
+          "text": "E13 re-enters approval"
+        }
+      ]
+    },
+    {
+      "n": "12",
+      "name": "Data fence",
+      "row": "C11:4732",
+      "anchors": "C11:4732; AREA-C §2.2.1",
+      "clauses": [
+        {
+          "key": "G12-R1a",
+          "text": "REFINE body by the projector"
+        },
+        {
+          "key": "G12-R1b",
+          "text": "NAVIGATE body by the projector"
+        },
+        {
+          "key": "G12-R2",
+          "text": "the same projector"
+        },
+        {
+          "key": "G12-R3",
+          "text": "the same enforcement call sites (F95 remainder)"
+        },
+        {
+          "key": "G12-R4",
+          "text": "no widget PII path"
+        },
+        {
+          "key": "G12-R5",
+          "text": "masked body, never a leak"
+        },
+        {
+          "key": "G12-R6",
+          "text": "runs in the projector (pointer slot)"
+        },
+        {
+          "key": "G12-I1",
+          "text": "F7"
+        },
+        {
+          "key": "G12-I2",
+          "text": "L2"
+        },
+        {
+          "key": "G12-I3",
+          "text": "B-16"
+        },
+        {
+          "key": "G12-I4",
+          "text": "P9/P10"
+        },
+        {
+          "key": "G12-I5",
+          "text": "K18"
+        },
+        {
+          "key": "G12-I6",
+          "text": "`allowedKinds`/B-27"
+        },
+        {
+          "key": "G12-I7",
+          "text": "B-02/F18"
+        },
+        {
+          "key": "G12-I8",
+          "text": "B-03"
+        },
+        {
+          "key": "G12-I9",
+          "text": "RT4/RT4a"
+        },
+        {
+          "key": "G12-I10",
+          "text": "FR-14/R3.8.3"
+        },
+        {
+          "key": "G12-I11",
+          "text": "K16"
+        }
+      ]
+    },
+    {
+      "n": "13",
+      "name": "Effect routing",
+      "row": "C11:4733",
+      "anchors": "C11:4733; AREA-C §2.3.1",
+      "clauses": [
+        {
+          "key": "G13-R1",
+          "text": "NONE unreachable"
+        },
+        {
+          "key": "G13-R2",
+          "text": "NAVIGATE → projector → `next_envelope`"
+        },
+        {
+          "key": "G13-R3",
+          "text": "REFINE → projector → `next_envelope`"
+        },
+        {
+          "key": "G13-R4",
+          "text": "terminates; no business effect from a selector"
+        },
+        {
+          "key": "G13-R5",
+          "text": "CONTROL → the one registered control handler, which performs its own principal and tenant check; no Action Engine edge (row 13, C11:4733; R3.2.4). Sub-cases: dismiss, `run.cancel`, `delivery.resolve` (the last needs P-17)"
+        },
+        {
+          "key": "G13-R5b",
+          "text": "the R3.2.4 source test: each handler module imports no Prisma model outside the widget layer's own except through its owner endpoint (`EP-BUILD`, C11:3852-3861)"
+        },
+        {
+          "key": "G13-R6",
+          "text": "DRAFT → draft owner"
+        },
+        {
+          "key": "G13-R7",
+          "text": "REQUEST_APPROVAL → approval object → PENDING"
+        },
+        {
+          "key": "G13-R8",
+          "text": "HANDOFF → one `HandoffTarget`, no capability invoked"
+        },
+        {
+          "key": "G13-R9",
+          "text": "COMMIT → Gate 14 with a server-minted key"
+        },
+        {
+          "key": "G13-R10",
+          "text": "closed per-class switch (FR-1/B-28)"
+        },
+        {
+          "key": "G13-I1",
+          "text": "`approval_decision` routing"
+        },
+        {
+          "key": "G13-I2",
+          "text": "R3.11.3"
+        },
+        {
+          "key": "G13-I3",
+          "text": "F74/F75 consumption"
+        },
+        {
+          "key": "G13-I4",
+          "text": "L7/L8/L10"
+        },
+        {
+          "key": "G13-I5",
+          "text": "FR2/B-29 receipts"
+        },
+        {
+          "key": "G13-I6",
+          "text": "F15 AUDIT_RETAINED only"
+        },
+        {
+          "key": "G13-I7",
+          "text": "F33/F76"
+        },
+        {
+          "key": "G13-I8",
+          "text": "FR-11/R3.9.3"
+        },
+        {
+          "key": "G13-I9",
+          "text": "R3.11.6 approver test / P-27"
+        }
+      ]
+    },
+    {
+      "n": "14",
+      "name": "Canonical action",
+      "row": "C11:4734",
+      "anchors": "C11:4734",
+      "clauses": [
+        {
+          "key": "G14-a",
+          "text": "`prepare()` receives the key, normalized input, server-minted idempotency key and evidence refs (every G14 key is BLOCKED-DISCHARGE until a live widget COMMIT reaches `prepare()`, E2)"
+        },
+        {
+          "key": "G14-b",
+          "text": "the policy resolver owns the decision (`assertNoCallerAuthority`, `assertResolverOwnsDecision`)"
+        },
+        {
+          "key": "G14-c",
+          "text": "the Action Engine, never the widget, calls the provider owner"
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "gates": 15,
+    "clauses": 165
+  }
+}

@@ -1,0 +1,288 @@
+[
+  {
+    "id": "H-M1",
+    "description": "the recorder counts a lock as a durable write (D-12)",
+    "edits": [
+      {
+        "file": "test/widgets-live/support/no-write-recorder.ts",
+        "find": "  if (withoutRowLocks !== text || ADVISORY_LOCK.test(text)) return 'lock';",
+        "replace": "  if (withoutRowLocks !== text || ADVISORY_LOCK.test(text)) return 'write';"
+      }
+    ],
+    "killers": [
+      "HAR-3 [GW]"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "H-M2",
+    "description": "gate-audit-check skips the contract SHA compare",
+    "edits": [
+      {
+        "file": "../docs/rebuild/evidence/maya-chat-first-ux/gate-audit-check.mjs",
+        "find": "  if (documentSha !== pinned || pinned !== audited)\n",
+        "replace": "  if (false && (documentSha !== pinned || pinned !== audited))\n"
+      }
+    ],
+    "killers": [
+      "HAR-5"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "H-M3",
+    "description": "the evidence verifier skips the mint provenance cross-check (D-17 (4))",
+    "edits": [
+      {
+        "file": "scripts/widgets-evidence-verify.mjs",
+        "find": "    if (mints.length !== 1)\n",
+        "replace": "    if (false && mints.length !== 1)\n"
+      }
+    ],
+    "killers": [
+      "HAR-9 [GW]"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "H-M4",
+    "description": "the evidence verifier admits E-TAMPER on a seal-read column",
+    "edits": [
+      {
+        "file": "scripts/widgets-evidence-verify.mjs",
+        "find": "  if (sealedTampers.length > 0 && !g1aAlone)",
+        "replace": "  if (false && sealedTampers.length > 0 && !g1aAlone)"
+      }
+    ],
+    "killers": [
+      "HAR-10"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M1",
+    "description": "V-L-PAIR is dropped: an HTTP half alone would carry an L claim (D-17 (5))",
+    "edits": [
+      {
+        "file": "scripts/widgets-evidence-verify.mjs",
+        "find": "    if (clean.get(`${line.test_id}|${other}`) !== mine)\n",
+        "replace": "    if (false && clean.get(`${line.test_id}|${other}`) !== mine)\n"
+      }
+    ],
+    "killers": [
+      "HAR-13"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M2",
+    "description": "the claim's own source files are never scanned for overrides or model stubs (§3.2)",
+    "edits": [
+      {
+        "file": "scripts/widgets-evidence-verify.mjs",
+        "find": "      for (const f of scanOverrides(file, text)) violation(f.rule, line, f.reason);\n",
+        "replace": "      if (false) for (const f of scanOverrides(file, text)) violation(f.rule, line, f.reason);\n"
+      }
+    ],
+    "killers": [
+      "HAR-13"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M3",
+    "description": "the override allowlist admits everything (§3.2: it is closed)",
+    "edits": [
+      {
+        "file": "scripts/widgets-evidence-verify.mjs",
+        "find": "const allowed = (form, target, relative) =>\n",
+        "replace": "const allowed = () => true;\nconst allowedUnused = (form, target, relative) =>\n"
+      }
+    ],
+    "killers": [
+      "HAR-13"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M4",
+    "description": "V-FIXTURE-WRITE is dropped: a claim source could mint its own record",
+    "edits": [
+      {
+        "file": "scripts/widgets-evidence-verify.mjs",
+        "find": "      if (writes.length > 0)\n",
+        "replace": "      if (false && writes.length > 0)\n"
+      }
+    ],
+    "killers": [
+      "HAR-13"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M5",
+    "description": "V-SYNTH-CLAIM is dropped: a [G-SYNTH] record could be offered as L (§0.5)",
+    "edits": [
+      {
+        "file": "scripts/widgets-evidence-verify.mjs",
+        "find": "  if (strictClaim && line.labels.some((label) => SYNTHETIC_LABELS.has(label.trim().toLowerCase())))\n",
+        "replace": "  if (false && strictClaim && line.labels.some((label) => SYNTHETIC_LABELS.has(label.trim().toLowerCase())))\n"
+      }
+    ],
+    "killers": [
+      "HAR-13"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M6",
+    "description": "three seal-read columns leave the H4 list, so an E-TAMPER on them would pass (§0.5 L-T)",
+    "edits": [
+      {
+        "file": "scripts/widgets-evidence-verify.mjs",
+        "find": "  WidgetEmission: ['bodyHash', 'widgetId', 'tenantId', 'issuedAt', 'expiresAt', 'deliveryChannel'],\n",
+        "replace": "  WidgetEmission: ['bodyHash', 'expiresAt', 'deliveryChannel'],\n"
+      }
+    ],
+    "killers": [
+      "HAR-10"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M7",
+    "description": "V-GW is dropped: a gateway-level line could carry a claim (§0.5, §3.2)",
+    "edits": [
+      {
+        "file": "scripts/widgets-evidence-verify.mjs",
+        "find": "  if (claimed && line.entry === 'GW') violation('V-GW', line, 'a GW line is never evidence');\n",
+        "replace": "  if (false && claimed && line.entry === 'GW') violation('V-GW', line, 'a GW line is never evidence');\n"
+      }
+    ],
+    "killers": [
+      "HAR-13"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M8",
+    "description": "the model transport is no longer recognised, so D-15's never-stubbed rule is unenforced",
+    "edits": [
+      {
+        "file": "scripts/widgets-evidence-verify.mjs",
+        "find": "const MODEL_TRANSPORT = /\\b(AiCoreModelService|AI_CORE_MODEL|ModelTransport|decide)\\b|ai-core-model/;\n",
+        "replace": "const MODEL_TRANSPORT = /$^/;\n"
+      }
+    ],
+    "killers": [
+      "HAR-13"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M9",
+    "description": "a claim needs no evidence label at all (D-3 classes)",
+    "edits": [
+      {
+        "file": "scripts/widgets-evidence-verify.mjs",
+        "find": "    if (!line.labels.some((label) => EVIDENCE_LABEL.test(label)))\n",
+        "replace": "    if (false && !line.labels.some((label) => EVIDENCE_LABEL.test(label)))\n"
+      }
+    ],
+    "killers": [
+      "HAR-13"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M10",
+    "description": "any mint trigger is accepted, production or not (§0.5 L, D-17)",
+    "edits": [
+      {
+        "file": "scripts/widgets-evidence-verify.mjs",
+        "find": "      if (!PRODUCTION_TRIGGERS.has(mint.trigger))\n",
+        "replace": "      if (false && !PRODUCTION_TRIGGERS.has(mint.trigger))\n"
+      }
+    ],
+    "killers": [
+      "HAR-13"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M11",
+    "description": "the headline recompute counts U-state clauses as strict (§0.5: U never does)",
+    "edits": [
+      {
+        "file": "../docs/rebuild/evidence/maya-chat-first-ux/gate-audit-check.mjs",
+        "find": "  const strict = states.filter((s) => s.length > 0 && s.every((x) => x === 'L' || x === 'L-T')).length;\n",
+        "replace": "  const strict = states.filter((s) => s.length > 0 && s.every((x) => x === 'L' || x === 'L-T' || x === 'U')).length;\n"
+      }
+    ],
+    "killers": [
+      "HAR-5"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M12",
+    "description": "an HTTP claim may come from any file, a harness support file included (V-ENTRY-SOURCE)",
+    "edits": [
+      {
+        "file": "scripts/widgets-evidence-verify.mjs",
+        "find": "    if (line.entry === 'HTTP' && !HTTP_CLAIM_SOURCE.test(line.source))\n",
+        "replace": "    if (false && line.entry === 'HTTP' && !HTTP_CLAIM_SOURCE.test(line.source))\n"
+      }
+    ],
+    "killers": [
+      "HAR-13"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M13",
+    "description": "the HTTP sink captures a WidgetMintProvenance line logged from test code (review finding 3)",
+    "edits": [
+      {
+        "file": "test/widgets-live/support/mint-provenance.ts",
+        "find": "    if (!isApplicationCallSite(site)) {\n",
+        "replace": "    if (false && !isApplicationCallSite(site)) {\n"
+      }
+    ],
+    "killers": [
+      "HAR-14"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M14",
+    "description": "any writer may record a BIN line, so jest could write the BIN half of an L pair",
+    "edits": [
+      {
+        "file": "test/widgets-live/support/evidence.ts",
+        "find": "      if (this.role !== 'bin-runner')\n",
+        "replace": "      if (false && this.role !== 'bin-runner')\n"
+      }
+    ],
+    "killers": [
+      "HAR-14",
+      "HAR-13"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M15",
+    "description": "the D-17 (3) BUILD scan no longer sees a forbidden identifier in a labelled test",
+    "edits": [
+      {
+        "file": "test/widgets-live/support/evidence-source-scan.ts",
+        "find": "        if (FORBIDDEN_IDENTIFIERS.has(node.text)) found.add(`names ${node.text}`);\n",
+        "replace": "        if (false && FORBIDDEN_IDENTIFIERS.has(node.text)) found.add(`names ${node.text}`);\n"
+      }
+    ],
+    "killers": [
+      "HAR-12"
+    ],
+    "expect": "live-killed"
+  }
+]

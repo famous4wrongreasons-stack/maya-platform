@@ -17,15 +17,14 @@
 // `feature_locked` from FeatureGuard, before any grant) and every owner is shown to be constructed.
 //
 // Two entry levels:
-//   [GW]   runs now: the controller and gateway of the real `WidgetsModule`. The owners are not providers
-//          of that module, which the test reports; the prototype spies would still see a call made through
-//          any instance a slot constructed for itself.
-//   [HTTP] XF (plan §4.3). `AppModule` cannot be constructed with the platform-ci.yml literals: the referral
-//          and gift-certificate modules require keys CI does not carry (U0 S3 found `npm run test:http`
-//          failing the same way). The XF passes only on that configuration failure. It turns red when the
-//          application boots — it then runs the HTTP assertions, reports their result on stderr and returns —
-//          and must then become a plain `it`. Any other boot failure also turns it red. (U0 S5 ran it once
-//          with scratch-only placeholder keys: the application booted and every HTTP assertion held.)
+//   [GW]   the controller and gateway of the real `WidgetsModule`. The owners are not providers of that
+//          module, which the test reports; the prototype spies would still see a call made through any
+//          instance a slot constructed for itself.
+//   [HTTP] `AppModule` with every global guard (`support/http-bootstrap.ts`). It was an XF while `AppModule`
+//          could not be constructed with the platform-ci.yml literals alone; GATES-PLAN-V11 I-HAR (IR-H1)
+//          added the declared widgets-live extras (the referral, gift-certificate, loyalty and Action Engine
+//          identity keys) to the harness environment, and it is now a plain `it`: a boot failure or a failed
+//          assertion is red.
 
 import { UserRole } from '../../src/common/domain.enums';
 import type { AuthenticatedUser } from '../../src/common/authenticated-user.interface';
@@ -300,117 +299,48 @@ describe('G12-L00 — no canonical read is reachable through the widget route (r
   });
 
   describe('[HTTP]', () => {
-    /**
-     * The one failure this XF stands for: a required MAYA_* key the platform-ci.yml literals lack, reported
-     * by its own boot-time validator. Only these keys and these validators' exact messages
-     * (`referrals.module.ts`, `gift-certificates.module.ts`, `loyalty.module.ts`); any other key — e.g.
-     * `DATABASE_URL is not configured` or an Action Engine `… is not configured` — turns the XF red.
-     */
-    const CONFIGURATION_BLOCKER = new RegExp(
-      '^widgets-live HTTP level: AppModule could not be constructed with the platform-ci\\.yml literals: (?:' +
-        [
-          '(?:MAYA_REFERRAL_REWARD_PRESENTATION_KEY|MAYA_REFERRAL_REWARD_CLAIM_SECRET|MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY|MAYA_GIFT_CERTIFICATE_CLAIM_SECRET) must contain from 32 to 256 characters',
-          '(?:MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION|MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY_VERSION) is invalid',
-          'MAYA_LOYALTY_REDEMPTION_CODE_PEPPER must contain at least 32 characters',
-        ].join('|') +
-        ')$',
-    );
-    const blockerMessage = (reason: string) =>
-      `widgets-live HTTP level: AppModule could not be constructed with the platform-ci.yml literals: ${reason}`;
-
-    it.each([
-      [
-        'MAYA_REFERRAL_REWARD_PRESENTATION_KEY must contain from 32 to 256 characters',
-        true,
-      ],
-      [
-        'MAYA_GIFT_CERTIFICATE_CLAIM_SECRET must contain from 32 to 256 characters',
-        true,
-      ],
-      ['MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION is invalid', true],
-      [
-        'MAYA_LOYALTY_REDEMPTION_CODE_PEPPER must contain at least 32 characters',
-        true,
-      ],
-      ['DATABASE_URL is not configured', false],
-      ['ACTION_ENGINE_IDENTITY_SECRET is not configured', false],
-      [
-        'CLIENT_IDENTITY_HASH_SECRET must contain from 32 to 256 characters',
-        false,
-      ],
-      ['MAYA_UNKNOWN_KEY is not configured', false],
-      [
-        'MAYA_REFERRAL_REWARD_PRESENTATION_KEY must contain from 32 to 256 characters; and more',
-        false,
-      ],
-    ])('the XF blocker pattern: %j → %s', (reason, blocker) => {
-      expect(CONFIGURATION_BLOCKER.test(blockerMessage(reason))).toBe(blocker);
+    it("G12-L00 [HTTP] holds by absence: behind every global guard, the route is dark until widgets.runtime is granted; then client A's and staff S's tokens reach no owner read, answer with the controller's six keys only, add no AiToolExecution row, carry no owner byte and write nothing", async () => {
+      const http: HttpHarness = await bootHttp();
+      const fx = new Fixtures(ctx, {
+        stores: http.app.get(WidgetStoresService),
+        emitter: http.app.get(WidgetEmitterService),
+      });
+      try {
+        // At this level the application constructs every owner, so the spies watch live instances.
+        expect(ownersAbsentFrom(http.app)).toEqual([]);
+        const level: Level<string> = {
+          principal: async (tenant, user) => {
+            const token = await http.login(
+              tenant.slug,
+              user.email,
+              user.password,
+            );
+            return {
+              actor: await fx.actorFromAccessToken(token),
+              credential: token,
+            };
+          },
+          submit: async (token, intentToken) => {
+            http.recorder.clear();
+            const res = await http.postIntent(token, {
+              intent_token: intentToken,
+            });
+            return {
+              status: res.status,
+              body: res.body as Record<string, unknown>,
+            };
+          },
+          writes: () => http.recorder.writes(GATEWAY_SCOPE),
+          operations: () =>
+            http.recorder
+              .inScope(GATEWAY_SCOPE)
+              .map((op) => `${op.model}.${op.operation}`),
+        };
+        await runL00(ctx, fx, level, spies, true);
+      } finally {
+        await fx.teardown();
+        await http.close();
+      }
     });
-
-    it.failing(
-      'XF G12-L00 [HTTP]: blocked — AppModule cannot be constructed with the platform-ci.yml literals (a required MAYA_* key is absent); red once the application boots, then convert to a plain it',
-      async () => {
-        let http: HttpHarness;
-        try {
-          http = await bootHttp();
-        } catch (error) {
-          const message = (error as Error).message;
-          if (CONFIGURATION_BLOCKER.test(message)) throw error; // the documented blocker: XF passes
-          process.stderr.write(
-            `G12-L00 [HTTP] unexpected boot failure: ${message}\n`,
-          );
-          return; // any other failure turns the XF red
-        }
-
-        const fx = new Fixtures(ctx, {
-          stores: http.app.get(WidgetStoresService),
-          emitter: http.app.get(WidgetEmitterService),
-        });
-        try {
-          // At this level the application constructs every owner, so the spies watch live instances.
-          expect(ownersAbsentFrom(http.app)).toEqual([]);
-          const level: Level<string> = {
-            principal: async (tenant, user) => {
-              const token = await http.login(
-                tenant.slug,
-                user.email,
-                user.password,
-              );
-              return {
-                actor: await fx.actorFromAccessToken(token),
-                credential: token,
-              };
-            },
-            submit: async (token, intentToken) => {
-              http.recorder.clear();
-              const res = await http.postIntent(token, {
-                intent_token: intentToken,
-              });
-              return {
-                status: res.status,
-                body: res.body as Record<string, unknown>,
-              };
-            },
-            writes: () => http.recorder.writes(GATEWAY_SCOPE),
-            operations: () =>
-              http.recorder
-                .inScope(GATEWAY_SCOPE)
-                .map((op) => `${op.model}.${op.operation}`),
-          };
-          await runL00(ctx, fx, level, spies, true);
-          process.stderr.write(
-            'G12-L00 [HTTP] booted and its assertions held: convert this XF to it\n',
-          );
-        } catch (error) {
-          process.stderr.write(
-            `G12-L00 [HTTP] booted and its assertions FAILED: ${(error as Error).message}\n`,
-          );
-        } finally {
-          await fx.teardown();
-          await http.close();
-        }
-        // Reaching here, the application booted: the XF is red by construction.
-      },
-    );
   });
 });

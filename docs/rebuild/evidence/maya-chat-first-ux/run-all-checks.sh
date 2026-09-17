@@ -28,6 +28,10 @@ run k1-signature-check             $E/k1/k1-signature-check.mjs
 run widget-check-generator         $E/build-widget-checks.mjs
 run enum-member-check              $E/enum-member-check.mjs
 run contract-version-record-check  $E/contract-version-record-check.mjs
+# GATES-PLAN-V11 I-HAR: the gate audit is schema /2, pinned to the contract, keyed exactly by the clause inventory;
+# the self-test proves each of its checks can go red (HAR-5).
+run gate-audit-check               $E/gate-audit-check.mjs
+run gate-audit-check-self-test     $E/gate-audit-check.mjs --self-test
 gate widget-contract-check          inbe node scripts/widget-contract-check.mjs
 gate k3-gateway-check               inbe node scripts/k3-gateway-check.mjs
 gate k3-exit-gate                   "$ROOT/$E/k3-exit-gate.sh"

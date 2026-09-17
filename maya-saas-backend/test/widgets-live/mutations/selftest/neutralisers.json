@@ -1,0 +1,12 @@
+{
+  "NH": {
+    "description": "HAR-11 self-test: the probe's neutraliser switch (stands for a shadowing check whose return value an [E-INDEP] killer needs replaced)",
+    "edits": [
+      {
+        "file": "test/widgets-live/support/mutation-probe.ts",
+        "find": "neutraliser: false,",
+        "replace": "neutraliser: true,"
+      }
+    ]
+  }
+}

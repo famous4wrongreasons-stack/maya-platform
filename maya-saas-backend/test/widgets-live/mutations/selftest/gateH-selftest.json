@@ -1,0 +1,48 @@
+[
+  {
+    "id": "H11-M1",
+    "edits": [
+      {
+        "file": "test/widgets-live/support/mutation-probe.ts",
+        "find": "first: false,",
+        "replace": "first: true,"
+      },
+      {
+        "file": "test/widgets-live/support/mutation-probe.ts",
+        "find": "second: false,",
+        "replace": "second: true,"
+      }
+    ],
+    "killers": [{ "test": "HAR-11 probe [GW]", "neutralisers": "NH" }],
+    "expect": "live-killed"
+  },
+  {
+    "id": "H11-M2",
+    "edits": [
+      {
+        "file": "test/widgets-live/support/mutation-probe.ts",
+        "find": "first: false,",
+        "replace": "first: true,"
+      }
+    ],
+    "killers": [{ "test": "HAR-11 probe [GW]", "neutralisers": "NH" }],
+    "expect": "pending"
+  },
+  {
+    "id": "H11-M3",
+    "edits": [
+      {
+        "file": "test/widgets-live/support/mutation-probe.ts",
+        "find": "first: false,",
+        "replace": "first: true,"
+      },
+      {
+        "file": "test/widgets-live/support/mutation-probe.ts",
+        "find": "second: false,",
+        "replace": "second: true,"
+      }
+    ],
+    "killers": ["HAR-11 probe [GW]"],
+    "expect": "pending"
+  }
+]

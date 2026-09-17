@@ -10,7 +10,14 @@ name: Widgets Live
 # The database is this job's own service. The harness's guard admits `maya_ci`, and port 5432, only
 # because CI=true and GITHUB_ACTIONS=true (both set by GitHub Actions) and WIDGET_GATEWAY_PG=required;
 # no seed runs, so `widgets.runtime` reaches a tenant only through a TenantEntitlement a test creates for
-# its own tenant.
+# its own tenant. Locally the same suites run against `maya_widget_gate_proof_gates` on 127.0.0.1:55611
+# (GATES-PLAN-V11 D-19), never the shell workstream's `maya_widget_gate_proof_local`.
+#
+# The env block is platform-ci.yml's literals plus the declared widgets-live extras
+# (`test/widgets-live/support/environment.ts`, IR-H1): the keys AppModule's referral, gift-certificate and
+# loyalty modules and the Action Engine identity require. `harness.live-spec.ts` (HAR-4) asserts the block
+# equals that union. After the build, `test:widgets:http` boots the built binary with the same literals and
+# runs the declared BIN cases (EMPTY while none is declared).
 on:
   pull_request:
   push:
@@ -45,12 +52,21 @@ jobs:
       run:
         working-directory: maya-saas-backend
     env:
+      ACTION_ENGINE_IDENTITY_SECRET: test-action-engine-identity-secret-for-widgets-live-only
+      ACTION_ENGINE_PAYLOAD_ENCRYPTION_SECRET: test-action-engine-payload-secret-for-widgets-live-only
       AUTH_RATE_LIMIT_SECRET: test-auth-rate-limit-secret-for-ci-only
       AUTH_REFRESH_TOKEN_SECRET: test-refresh-token-secret-for-ci-only
       AUTH_SESSION_METADATA_SECRET: test-session-metadata-secret-for-ci-only
       CRM_ENCRYPTION_KEY: test-crm-encryption-key-for-ci-only
       DATABASE_URL: postgresql://maya_ci:maya_ci@127.0.0.1:5432/maya_ci?schema=public
       JWT_SECRET: test-jwt-signing-secret-for-ci-only
+      MAYA_GIFT_CERTIFICATE_CLAIM_SECRET: test-gift-certificate-claim-secret-for-widgets-live-only
+      MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY: test-gift-certificate-presentation-key-for-widgets-live-only
+      MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY_VERSION: widgets-live-test-1
+      MAYA_LOYALTY_REDEMPTION_CODE_PEPPER: test-loyalty-redemption-code-pepper-for-widgets-live-only
+      MAYA_REFERRAL_REWARD_CLAIM_SECRET: test-referral-reward-claim-secret-for-widgets-live-only
+      MAYA_REFERRAL_REWARD_PRESENTATION_KEY: test-referral-reward-presentation-key-for-widgets-live-only
+      MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION: widgets-live-test-1
       NODE_ENV: test
       PHONE_AUTH_SECRET: test-phone-auth-secret-for-ci-only
       SEED_DEMO_TENANT_ADMIN_EMAIL: admin@demo-business.local
@@ -71,3 +87,4 @@ jobs:
       - run: npm run typecheck:widgets-live
       - run: npm run test:widgets:live
       - run: npm run build
+      - run: npm run test:widgets:http

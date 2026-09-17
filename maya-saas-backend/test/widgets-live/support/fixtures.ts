@@ -23,6 +23,12 @@
 // Teardown deletes the tenant's rows children-first (widget FKs are RESTRICT), then the tenant. It deletes
 // only tenants this builder created, by id, and refuses any other slug. A tenant holding a verified link
 // is kept, cancelled, with only its link and `Client` (the link is append-only evidence; see `teardown`).
+// With `WIDGETS_EVIDENCE=1` it first appends the tenant's record hashes to the evidence directory, so the
+// verifier can check a manifest line against the database as it was BEFORE teardown (D-17 (4)).
+//
+// The BIN runner (`scripts/widgets-intent-http-proof.ts`) builds a `Fixtures` with no widget writers: a BIN
+// case is given only `tenant`, `user`, `staff`, `client`, `grantFeature` and `teardown` (I-HAR), and
+// `widget`/`synthetic` refuse on a builder without writers.
 
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -50,6 +56,7 @@ import { recomputeFloor } from '../../../src/widgets/gates/gate5';
 import { principalProofHash } from '../../../src/widgets/principal.util';
 import { WidgetStoresService } from '../../../src/widgets/stores/widget-stores.service';
 import type { FixtureContext } from './bootstrap';
+import { EvidenceWriter } from './evidence';
 import { assertProofDatabase } from './proof-db-guard';
 
 export const SYNTHETIC = '[synthetic record]';
@@ -83,13 +90,48 @@ export interface WidgetWriters {
   readonly emitter: WidgetEmitterService;
 }
 
+export interface FixturesOptions {
+  /** The evidence writer teardown reports record hashes through (default: one over `process.env`). */
+  readonly evidence?: EvidenceWriter;
+}
+
+/** What a BIN case may use: no widget writer (I-HAR). */
+export type BinFixtures = Pick<
+  Fixtures,
+  'tenant' | 'user' | 'staff' | 'client' | 'grantFeature' | 'teardown'
+>;
+
 export class Fixtures {
   private readonly tenants: string[] = [];
+  private readonly evidence: EvidenceWriter;
 
   constructor(
     private readonly ctx: FixtureContext,
-    private readonly writers: WidgetWriters,
-  ) {}
+    private readonly writers: WidgetWriters | null,
+    options: FixturesOptions = {},
+  ) {
+    this.evidence = options.evidence ?? new EvidenceWriter();
+  }
+
+  /** The BIN view: the six members a BIN case may call, bound to this builder, and nothing else. */
+  binView(): BinFixtures {
+    return Object.freeze({
+      tenant: this.tenant.bind(this),
+      user: this.user.bind(this),
+      staff: this.staff.bind(this),
+      client: this.client.bind(this),
+      grantFeature: this.grantFeature.bind(this),
+      teardown: this.teardown.bind(this),
+    });
+  }
+
+  private requireWriters(member: string): WidgetWriters {
+    if (this.writers === null)
+      throw new Error(
+        `widgets-live fixtures: ${member} needs the widget writers, and this builder has none (a BIN case never writes a widget record)`,
+      );
+    return this.writers;
+  }
 
   async tenant(label: string): Promise<TenantFixture> {
     const slug = `${SLUG_PREFIX}${randomUUID().replaceAll('-', '')}`;
@@ -275,10 +317,11 @@ export class Fixtures {
     ttlSeconds?: number;
     now?: Date;
   }): Promise<WidgetFixture> {
+    const writers = this.requireWriters('widget');
     const conversationId = randomUUID();
     const proof = principalProofHash(input.actor);
     const now = input.now ?? new Date();
-    const turn = await this.writers.stores.appendTurn(
+    const turn = await writers.stores.appendTurn(
       {
         tenantId: input.tenant.id,
         conversationId,
@@ -289,7 +332,7 @@ export class Fixtures {
       },
       now,
     );
-    const sealed = await this.writers.emitter.emit(
+    const sealed = await writers.emitter.emit(
       {
         tenantId: input.tenant.id,
         conversationId,
@@ -329,6 +372,7 @@ export class Fixtures {
     },
     floor?: string,
   ): Promise<void> {
+    this.requireWriters('synthetic');
     const where = {
       intentTokenHash_tenantId: {
         intentTokenHash: widget.intentTokenHash,
@@ -382,6 +426,17 @@ export class Fixtures {
           `widgets-live teardown refuses tenant ${tenantId}: not a harness tenant`,
         );
       const where = { tenantId };
+      if (this.evidence.enabled)
+        this.evidence.databaseBeforeTeardown(
+          tenantId,
+          (
+            await db.widgetIntentRecord.findMany({
+              where,
+              select: { intentTokenHash: true },
+              orderBy: { intentTokenHash: 'asc' },
+            })
+          ).map((r) => r.intentTokenHash),
+        );
       await db.widgetFreeInputLedger.deleteMany({ where });
       await db.widgetIntentReceipt.deleteMany({ where });
       await db.widgetIntentSubmissionAudit.deleteMany({ where });
