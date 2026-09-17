@@ -1,6 +1,11 @@
 # DECISION SHEET 03 — Gate 9 (Lowering): what happens when a tap cannot be lowered
 
-**Status: OPEN — owner ruling required.** One question. Nothing below is implemented.
+**Status: ANSWERED — OPTION A APPROVED by the owner (2026-09-17).** Owner's words: «Если interaction с
+frozen widget больше невозможно детерминированно превратить в исходный utterance: VERDICT: SUPERSEDED;
+CLIENT HANDLING: handle_stale; DURABLE USER TURN WRITE: NO; BUSINESS EFFECT: NO. Не угадывать новый
+label/utterance и не восстанавливать его через LLM. Реализовать Gate 9 по certified contract + этому
+ruling.» Implementation follows the Gates 6–13 integration plan (unit U9, after U8a); Gate 9 is still a
+refusing stub today.
 
 ## Why this is on the owner's desk
 
