@@ -20,10 +20,43 @@ const chk = (n, ok, ev) => out.push({ n, ok, ev });
 const read = (p) => fs.readFileSync(path.join(W, p), 'utf8');
 const sf = (p) => ts.createSourceFile(p, read(p), ts.ScriptTarget.ES2022, true);
 
+// One compiler program over every non-spec file under src/widgets, with the project's own options.
+// Check 4 resolves names through its type checker, and check 9 reads the import graph with it.
+const SRC = path.join(BE, 'src');
+const walkFiles = (dir) =>
+  fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? walkFiles(path.join(dir, e.name)) : [path.join(dir, e.name)],
+  );
+const widgetFiles = walkFiles(W).filter((f) => f.endsWith('.ts') && !f.endsWith('.spec.ts')).sort();
+const compilerOptions = {
+  ...ts.parseJsonConfigFileContent(ts.readConfigFile(path.join(BE, 'tsconfig.json'), ts.sys.readFile).config, ts.sys, BE)
+    .options,
+  noEmit: true,
+  incremental: false,
+};
+const program = ts.createProgram({ rootNames: widgetFiles, options: compilerOptions });
+const checker = program.getTypeChecker();
+const under = (f, dir) => path.resolve(f).startsWith(dir + path.sep);
+const srcKey = (f) => path.relative(SRC, f).split(path.sep).join('/');
+const wKey = (f) => path.relative(W, f).split(path.sep).join('/');
+const aliased = (s) => (s && s.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(s) : s);
+const lineIn = (s, n) => s.getLineAndCharacterOfPosition(n.getStart(s)).line + 1;
+/** The Nest decorators (`Injectable`, `Controller`, `Module`) a class carries, in order, with their nodes. */
+const nestDecorators = (cls) =>
+  (ts.canHaveDecorators(cls) ? (ts.getDecorators(cls) ?? []) : []).flatMap((d) => {
+    const callee = ts.isCallExpression(d.expression) ? d.expression.expression : d.expression;
+    const id = ts.isIdentifier(callee) ? callee : ts.isPropertyAccessExpression(callee) ? callee.name : null;
+    const name = id ? (aliased(checker.getSymbolAtLocation(id))?.name ?? id.text) : null;
+    return name === 'Injectable' || name === 'Controller' || name === 'Module' ? [{ name, node: d }] : [];
+  });
+/** The first Nest decorator a class declaration carries, if any. */
+const nestDecorator = (decl) => (ts.isClassDeclaration(decl) ? (nestDecorators(decl)[0]?.name ?? null) : null);
+const classKey = (decl) => `${srcKey(decl.getSourceFile().fileName)}#${decl.name?.text ?? 'default'}`;
+
 // ── 1. the pipeline is one ordered array ─────────────────────────────────────────────────────
 // §0.3 fixes the mechanism as "a single ordered array whose ... no branch that skips a gate".
 // An array can be counted; nested conditionals can only be read.
-const gw = sf('intent-gateway.service.ts');
+const gw = program.getSourceFile(path.join(W, 'intent-gateway.service.ts'));
 let gatesArray = null;
 const walk = (n) => {
   if (
@@ -75,11 +108,18 @@ chk(
 // U0 item 9 (integrator decision D-7) amends this check; it does not relax it.
 // - The slots are read with the compiler, not with two text patterns. A slot is an object literal
 //   whose `run` is an inline function, or a call of `pending`; any other element cannot be read, and
-//   fails. A `run` is a constant pass when every value it returns is `pass` or an object whose last
-//   outcome-setting member is `outcome: 'pass'` (through parentheses, casts, `await`, a conditional
-//   whose branches are both passes, and `Promise.resolve`), whatever its parameters and however it
-//   is written: an arrow, a block of returns, a method. Not seen: a call into another function that
-//   can only pass; that is read by the gate's own tests.
+//   fails. A `run` is a constant pass when every value it returns is a pass, whatever its parameters
+//   and whether it is an arrow, a block of returns or a method. A pass is read in exactly these forms:
+//   - the identifier `pass`, or a `const` the type checker resolves (in this file or through an
+//     import) to an initialiser that is itself a pass;
+//   - an object literal whose last outcome-setting member is `outcome: 'pass'` (the string literal or a
+//     `const` resolving to it) or a spread of a pass (`{ ...pass }`, `{ ...{ outcome: 'pass' } }`);
+//   - any of these, verdicts and outcome strings alike, through parentheses, casts, `await`, the right
+//     side of a comma and a conditional whose branches are both passes; a verdict also through
+//     `Promise.resolve`.
+//   Not seen: a call into another function that can only pass (slot 12 today calls `gate12`, which
+//   passes without a subject; that is read by the gate's own tests, not here), a property read, a
+//   `let` or `var`, a shorthand `outcome` member, and any value computed at run time.
 // - Exactly two constant passes can be admitted, each only when PROVEN, each for the one slot the
 //   §3.9 table hosts there:
 //   1. slot 2, hosted by 'HTTP middleware' — the pass is admissible because the middleware has
@@ -87,14 +127,21 @@ chk(
 //      except that it is bound to slot 2 and the guard's name is matched whole: `JwtAuthGuardX` in
 //      the APP_GUARD provider no longer reads as the JWT guard.)
 //   2. slot 12, hosted by 'Projector' — a POINTER (D-7, G12 §5.2): the data fence runs inside the
-//      projector, which Gate 13's edges call. Admitted only when (a) its `run` takes no parameter and
-//      returns nothing but a bare pass, so the slot reads nothing, and (b) the architecture proofs
-//      ARCH-12-9 (the projector is referenced only from Gate 13's REFINE/NAVIGATE edges) and
-//      ARCH-12-10 (slot 12 references nothing and `liveGateCount` excludes it) EXIST — each exactly
-//      one active `it`/`test` whose title begins with its id, in `src/widgets/projection/
-//      *.architecture.spec.ts` — and PASS, run here with jest. The proofs are only run when a slot
-//      asks for the exception. Until U12a builds them the exception is unused, and a constant-pass
-//      slot 12 fails like any other.
+//      projector, which Gate 13's edges call. Admitted only when (a) its `run` IS the pointer, so the
+//      slot reads nothing, and (b) the architecture proofs ARCH-12-9 (the projector is referenced only
+//      from Gate 13's REFINE/NAVIGATE edges) and ARCH-12-10 (slot 12 references nothing and
+//      `liveGateCount` excludes it) EXIST — each exactly one active `it`/`test` whose title begins with
+//      its id, in `src/widgets/projection/*.architecture.spec.ts` — and PASS, run here with jest.
+//      The pointer is one exact shape, not "returns only a pass": a block may run any statement before
+//      its `return`, and an arrow in a class field closes over `this` (`this.prisma`, the stores)
+//      without taking a parameter. So `run` is a non-async arrow with no parameter, no type parameter
+//      and no return type, written directly as the member's value, whose body is `pass` or
+//      `{ outcome: 'pass' }` (parentheses allowed), or a block whose only statement returns one of
+//      them; `pass` must resolve to `src/widgets/gates/verdict.ts`'s `pass`; and every node of the
+//      function is one of the kinds that shape consists of, so no `this`, call, property read or
+//      other statement can be in it. The proofs are only run when a slot asks for the exception.
+//      Until U12a builds them the exception is unused, and a constant-pass slot 12 fails like any
+//      other.
 const pendingHelper = /const pending = \([\s\S]*?\n\}\);/.exec(runner);
 const appModuleSrc = fs.readFileSync(path.join(BE, 'src/app.module.ts'), 'utf8');
 const jwtGuardGlobal =
@@ -116,22 +163,49 @@ const stripExpr = (e) => {
 };
 const memberName = (m) =>
   m.name && (ts.isIdentifier(m.name) || ts.isStringLiteralLike(m.name)) ? m.name.text : null;
-const isPassExpr = (raw) => {
+/**
+ * The initialiser of the `const` a name resolves to, in this file or through an import, or null. `seen`
+ * holds the initialisers already followed on this path, so a cycle ends instead of recursing.
+ */
+const constInitializer = (id, seen) => {
+  const decls = aliased(checker.getSymbolAtLocation(id))?.declarations ?? [];
+  const d = decls.length === 1 ? decls[0] : null;
+  const init =
+    d && ts.isVariableDeclaration(d) && d.initializer && ts.isVariableDeclarationList(d.parent) && d.parent.flags & ts.NodeFlags.Const
+      ? d.initializer
+      : null;
+  return init && !seen.has(init) ? init : null;
+};
+const isPassString = (raw, seen) => {
   const e = stripExpr(raw);
   if (!e) return false;
-  if (ts.isIdentifier(e)) return e.text === 'pass';
+  if (ts.isStringLiteralLike(e)) return e.text === 'pass';
+  if (ts.isBinaryExpression(e) && e.operatorToken.kind === ts.SyntaxKind.CommaToken) return isPassString(e.right, seen);
+  if (ts.isConditionalExpression(e)) return isPassString(e.whenTrue, seen) && isPassString(e.whenFalse, seen);
+  const init = ts.isIdentifier(e) ? constInitializer(e, seen) : null;
+  return init !== null && isPassString(init, new Set(seen).add(init));
+};
+const isPassExpr = (raw, seen = new Set()) => {
+  const e = stripExpr(raw);
+  if (!e) return false;
+  if (ts.isIdentifier(e)) {
+    if (e.text === 'pass') return true;
+    const init = constInitializer(e, seen);
+    return init !== null && isPassExpr(init, new Set(seen).add(init));
+  }
   if (ts.isObjectLiteralExpression(e)) {
     const setters = e.properties.filter(
       (p) => ts.isSpreadAssignment(p) || memberName(p) === 'outcome' || (p.name && ts.isComputedPropertyName(p.name)),
     );
     const last = setters[setters.length - 1];
+    if (last && ts.isSpreadAssignment(last)) return isPassExpr(last.expression, seen);
     if (!last || !ts.isPropertyAssignment(last) || memberName(last) !== 'outcome') return false;
-    const v = stripExpr(last.initializer);
-    return ts.isStringLiteralLike(v) && v.text === 'pass';
+    return isPassString(last.initializer, seen);
   }
-  if (ts.isConditionalExpression(e)) return isPassExpr(e.whenTrue) && isPassExpr(e.whenFalse);
-  if (ts.isCallExpression(e) && e.expression.getText(gw) === 'Promise.resolve')
-    return e.arguments.length === 1 && isPassExpr(e.arguments[0]);
+  if (ts.isBinaryExpression(e) && e.operatorToken.kind === ts.SyntaxKind.CommaToken) return isPassExpr(e.right, seen);
+  if (ts.isConditionalExpression(e)) return isPassExpr(e.whenTrue, seen) && isPassExpr(e.whenFalse, seen);
+  if (ts.isCallExpression(e) && e.expression.getText() === 'Promise.resolve')
+    return e.arguments.length === 1 && isPassExpr(e.arguments[0], seen);
   return false;
 };
 /** The values a function can return: its concise body, or each `return` of its own body. */
@@ -150,14 +224,64 @@ const isConstantPass = (fn) => {
   const r = returnsOf(fn);
   return r.length > 0 && r.every((e) => e !== null && isPassExpr(e));
 };
-const isBarePass = (fn) => {
-  const r = returnsOf(fn);
-  if (r.length !== 1 || r[0] === null) return false;
-  const e = stripExpr(r[0]);
+/** D-7's pointer: the one shape a slot 12 `run` may have. Returns why `run` is not it, or null. */
+const VERDICT_FILE = path.join(W, 'gates/verdict.ts');
+const POINTER_KINDS = new Set(
+  [
+    'ArrowFunction',
+    'EqualsGreaterThanToken',
+    'Block',
+    'ReturnStatement',
+    'ParenthesizedExpression',
+    'Identifier',
+    'ObjectLiteralExpression',
+    'PropertyAssignment',
+    'StringLiteral',
+    'NoSubstitutionTemplateLiteral',
+  ].map((k) => ts.SyntaxKind[k]),
+);
+const isVerdictPass = (e) => {
+  if (!ts.isIdentifier(e) || e.text !== 'pass') return false;
+  const decls = aliased(checker.getSymbolAtLocation(e))?.declarations ?? [];
   return (
-    (ts.isIdentifier(e) && e.text === 'pass') ||
-    (ts.isObjectLiteralExpression(e) && e.properties.length === 1 && isPassExpr(e))
+    decls.length === 1 &&
+    ts.isVariableDeclaration(decls[0]) &&
+    ts.isIdentifier(decls[0].name) &&
+    decls[0].name.text === 'pass' &&
+    path.resolve(decls[0].getSourceFile().fileName) === VERDICT_FILE
   );
+};
+const isPassLiteral = (e) =>
+  ts.isObjectLiteralExpression(e) &&
+  e.properties.length === 1 &&
+  ts.isPropertyAssignment(e.properties[0]) &&
+  memberName(e.properties[0]) === 'outcome' &&
+  ts.isStringLiteralLike(e.properties[0].initializer) &&
+  e.properties[0].initializer.text === 'pass';
+const notPointer = (run) => {
+  if (!run || !ts.isPropertyAssignment(run) || !ts.isArrowFunction(run.initializer))
+    return 'its run is not an arrow written directly as the member value';
+  const fn = run.initializer;
+  if (fn.modifiers?.length) return 'its run is async';
+  if (fn.parameters.length > 0) return 'its run takes a parameter';
+  if (fn.typeParameters?.length || fn.type) return 'its run carries a type parameter or a return type';
+  let body = fn.body;
+  if (ts.isBlock(body)) {
+    const [only] = body.statements;
+    if (body.statements.length !== 1 || !ts.isReturnStatement(only) || !only.expression)
+      return 'its block is not a single return statement';
+    body = only.expression;
+  }
+  while (ts.isParenthesizedExpression(body)) body = body.expression;
+  if (!isVerdictPass(body) && !isPassLiteral(body))
+    return "it does not return gates/verdict.ts's pass or the literal { outcome: 'pass' }";
+  const stray = new Set();
+  const visit = (n) => {
+    if (!POINTER_KINDS.has(n.kind)) stray.add(ts.SyntaxKind[n.kind]);
+    n.forEachChild(visit);
+  };
+  visit(fn);
+  return stray.size ? `its run contains ${[...stray].join(', ')}` : null;
 };
 const slotOf = (e) => {
   const text = e.getText(gw);
@@ -181,7 +305,7 @@ const slotOf = (e) => {
         : null;
   const n = str('n') ?? '?';
   if (!fn) return { kind: 'unreadable', n, why: 'its run is not an inline function' };
-  return { kind: 'object', n, host: str('host'), fn };
+  return { kind: 'object', n, host: str('host'), fn, run };
 };
 
 /** D-7's proof: ARCH-12-9 and ARCH-12-10 exist, once each and active, and pass under jest. */
@@ -246,7 +370,7 @@ const archProof = () => {
 const slots = gatesArray ? gatesArray.elements.map(slotOf) : [];
 const slotProblems = gatesArray ? [] : ['no gate array'];
 const admitted = [];
-let projectorException = 'unused: no slot hosted by Projector is a constant pass';
+let projectorException = 'unused: no slot hosted by Projector is a constant pass as read here (a call is not followed)';
 for (const s of slots) {
   if (s.kind === 'unreadable') slotProblems.push(`slot ${s.n} cannot be read (${s.why})`);
   else if (s.kind === 'call' && s.callee !== 'pending') slotProblems.push(`slot ${s.n} is a call of ${s.callee}, not pending()`);
@@ -255,9 +379,10 @@ for (const s of slots) {
       if (jwtGuardGlobal) admitted.push('2 (HTTP middleware: the JWT guard is global and the controller does not opt out)');
       else slotProblems.push('slot 2 is a constant pass, and the global JWT guard is NOT proven');
     } else if (s.host === 'Projector' && s.n === '12') {
-      if (!isBarePass(s.fn) || s.fn.parameters.length > 0) {
-        projectorException = 'refused: the slot takes a parameter or returns more than a bare pass';
-        slotProblems.push('slot 12 is a constant pass that is not a pointer (it can read)');
+      const why = notPointer(s.run);
+      if (why) {
+        projectorException = `refused: slot 12 is not the pointer (${why})`;
+        slotProblems.push(`slot 12 is a constant pass that is not the D-7 pointer, so it can read: ${why}`);
       } else {
         const proof = archProof();
         projectorException = proof.ok ? `admitted for 12: ${proof.why}` : `NOT PROVEN: ${proof.why}`;
@@ -395,11 +520,30 @@ chk(
 );
 
 // ── 7. exactly two routes ────────────────────────────────────────────────────────────────────
+// The routes are read from `widgets.controller.ts`, so that must be the only controller the widget
+// layer declares: a second one serves whatever module registers it, and its routes are not read here.
+// So no other class under src/widgets carries @Controller (U0 S4 review, mutant R4b), whether or not a
+// module registers it; check 9 holds each widget module's `controllers` member.
+const WIDGETS_CONTROLLER = 'widgets.controller.ts#WidgetsController';
 const posts = [...ctrl.matchAll(/@Post\('([^']+)'\)/g)].map((m) => m[1]);
+const widgetControllers = [];
+for (const f of widgetFiles) {
+  const visit = (n) => {
+    if (ts.isClassLike(n) && nestDecorators(n).some((d) => d.name === 'Controller'))
+      widgetControllers.push(`${wKey(f)}#${n.name?.text ?? 'anonymous'}`);
+    n.forEachChild(visit);
+  };
+  visit(program.getSourceFile(f));
+}
 chk(
   "the programme's only two new routes, and no more",
-  posts.length === 2 && posts.includes('resolve') && posts.includes('intent'),
-  posts.map((p) => `POST /widgets/${p}`).join(', '),
+  posts.length === 2 &&
+    posts.includes('resolve') &&
+    posts.includes('intent') &&
+    widgetControllers.length === 1 &&
+    widgetControllers[0] === WIDGETS_CONTROLLER,
+  `${posts.map((p) => `POST /widgets/${p}`).join(', ')}; controllers under src/widgets: ${widgetControllers.join(', ') || 'none'}` +
+    (widgetControllers.length === 1 && widgetControllers[0] === WIDGETS_CONTROLLER ? '' : ` (only ${WIDGETS_CONTROLLER})`),
 );
 
 // ── 8. dark behind an entitlement no plan grants ─────────────────────────────────────────────
@@ -434,9 +578,15 @@ chk(
 //   `WidgetOwnerPortsModule`, nothing else; `WidgetOwnerPortsModule` imports only the owner modules
 //   ENUMERATED below (none in U0; `ActionEngineModule` never); no other widget module imports a
 //   non-widget module. Every array is a literal and every element resolves to a class.
-// - the owner-ports module imports only @nestjs/common, the DI tokens, owner-ports files and the
-//   enumerated owner modules; it re-exports nothing; it provides and exports only the ENUMERATED bound
-//   port tokens (none in U0), wired to owner-ports classes.
+// - widget @Module members are closed: `WidgetsModule` has `imports`, `controllers`, `providers` and
+//   `exports`, and its `controllers` is exactly `[WidgetsController]`; every other widget module,
+//   the owner-ports module included, has only `imports`, `providers` and `exports`. The boundary
+//   serves no route (U0 S4 review, mutant R4b: a `controllers` member there passed every fence).
+// - the owner-ports module file imports only `@nestjs/common` and files that RESOLVE to di-tokens.ts,
+//   to a file under owner-ports/, or to an enumerated owner module's file. Every import form counts,
+//   and the specifier's text proves nothing (`./../../common/…` starts with './'). It re-exports
+//   nothing; it provides and exports only the ENUMERATED bound port tokens (none in U0), wired to
+//   owner-ports classes.
 // - non-widget services: a class decorated @Injectable, @Controller or @Module declared outside
 //   src/widgets is imported — by any import, `export … from`, `import()`, `require()` or `import('…')`
 //   type, value or type-only — only by files under `owner-ports/**` and `projection/canonical-read.port.ts`
@@ -465,39 +615,8 @@ const STORE_CLIENT = {
 };
 const BOUNDARY = 'owner-ports/widget-owner-ports.module.ts#WidgetOwnerPortsModule';
 
-const SRC = path.join(BE, 'src');
 const PORTS_DIR = path.join(W, 'owner-ports');
 const TOKENS_FILE = path.join(W, 'di-tokens.ts');
-const walkFiles = (dir) =>
-  fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
-    e.isDirectory() ? walkFiles(path.join(dir, e.name)) : [path.join(dir, e.name)],
-  );
-const widgetFiles = walkFiles(W).filter((f) => f.endsWith('.ts') && !f.endsWith('.spec.ts')).sort();
-const compilerOptions = {
-  ...ts.parseJsonConfigFileContent(ts.readConfigFile(path.join(BE, 'tsconfig.json'), ts.sys.readFile).config, ts.sys, BE)
-    .options,
-  noEmit: true,
-  incremental: false,
-};
-const program = ts.createProgram({ rootNames: widgetFiles, options: compilerOptions });
-const checker = program.getTypeChecker();
-const under = (f, dir) => path.resolve(f).startsWith(dir + path.sep);
-const srcKey = (f) => path.relative(SRC, f).split(path.sep).join('/');
-const wKey = (f) => path.relative(W, f).split(path.sep).join('/');
-const aliased = (s) => (s && s.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(s) : s);
-const lineIn = (s, n) => s.getLineAndCharacterOfPosition(n.getStart(s)).line + 1;
-/** The Nest decorator (`Injectable`, `Controller`, `Module`) a class declaration carries, if any. */
-const nestDecorator = (decl) => {
-  if (!ts.isClassDeclaration(decl)) return null;
-  for (const d of ts.getDecorators(decl) ?? []) {
-    const callee = ts.isCallExpression(d.expression) ? d.expression.expression : d.expression;
-    const id = ts.isIdentifier(callee) ? callee : ts.isPropertyAccessExpression(callee) ? callee.name : null;
-    const name = id ? (aliased(checker.getSymbolAtLocation(id))?.name ?? id.text) : null;
-    if (name === 'Injectable' || name === 'Controller' || name === 'Module') return name;
-  }
-  return null;
-};
-const classKey = (decl) => `${srcKey(decl.getSourceFile().fileName)}#${decl.name?.text ?? 'default'}`;
 
 /** Every import edge of a file, with the symbols it brings in (every export, when it names none). */
 const importEdges = (s) => {
@@ -602,10 +721,8 @@ const widgetModules = [];
 for (const f of widgetFiles) {
   const s = program.getSourceFile(f);
   const visit = (n) => {
-    if (ts.isClassDeclaration(n) && nestDecorator(n) === 'Module') {
-      const d = (ts.getDecorators(n) ?? []).find((x) => ts.isCallExpression(x.expression));
-      widgetModules.push({ rel: wKey(f), s, cls: n, arg: d ? d.expression.arguments[0] : undefined });
-    }
+    const d = ts.isClassDeclaration(n) ? nestDecorators(n).find((x) => x.name === 'Module')?.node : undefined;
+    if (d) widgetModules.push({ rel: wKey(f), s, cls: n, arg: ts.isCallExpression(d.expression) ? d.expression.arguments[0] : undefined });
     n.forEachChild(visit);
   };
   visit(s);
@@ -638,11 +755,26 @@ for (const { rel, s, cls, arg } of widgetModules) {
     continue;
   }
   const arrays = {};
+  const members = rel === WIDGETS_MODULE ? ['imports', 'controllers', 'providers', 'exports'] : ['imports', 'providers', 'exports'];
   for (const p of arg.properties) {
     const key = memberName(p);
     if (!ts.isPropertyAssignment(p) || key === null) boundaryBreaks.push(`${at(p)}: @Module of ${name} has a member that cannot be read`);
+    else if (!members.includes(key))
+      boundaryBreaks.push(
+        `${at(p)}: ${name} has a '${key}' member` +
+          (key === 'controllers' ? ` (only WidgetsModule registers a controller, and only ${WIDGETS_CONTROLLER})` : ` (a widget module has only ${members.join(', ')})`),
+      );
     else if (!ts.isArrayLiteralExpression(p.initializer)) boundaryBreaks.push(`${at(p)}: ${name}.${key} is not an array literal`);
     else arrays[key] = p.initializer.elements;
+  }
+  if (rel === WIDGETS_MODULE) {
+    const registered = (arrays.controllers ?? []).map((el) => {
+      const decl = ts.isIdentifier(el) ? classOf(el) : null;
+      return decl ? `${wKey(decl.getSourceFile().fileName)}#${decl.name?.text ?? 'default'}` : `?${el.getText(s)}`;
+    });
+    if (registered.length !== 1 || registered[0] !== WIDGETS_CONTROLLER)
+      boundaryBreaks.push(`${at(cls)}: WidgetsModule registers controllers [${registered.join(', ')}], not exactly [${WIDGETS_CONTROLLER}]`);
+    moduleSummary['WidgetsModule controllers'] = registered;
   }
   const imported = [];
   for (const el of arrays.imports ?? []) {
@@ -697,21 +829,22 @@ for (const { rel, s, cls, arg } of widgetModules) {
       boundaryBreaks.push(`${at(el)}: the owner-ports module exports ${el.getText(s)}, not an enumerated port token`);
   }
   moduleSummary[`${name} providers`] = bound;
-  for (const st of s.statements) {
+  for (const st of s.statements)
     if (ts.isExportDeclaration(st) && st.moduleSpecifier)
       boundaryBreaks.push(`${at(st)}: the owner-ports module re-exports '${st.moduleSpecifier.getText(s)}'`);
-    if (ts.isImportDeclaration(st) && ts.isStringLiteral(st.moduleSpecifier)) {
-      const spec = st.moduleSpecifier.text;
-      const r = ts.resolveModuleName(spec, s.fileName, compilerOptions, ts.sys).resolvedModule;
-      const file = r && !r.isExternalLibraryImport ? srcKey(r.resolvedFileName) : null;
-      const ok =
-        spec === '@nestjs/common' ||
-        spec === '../di-tokens' ||
-        spec.startsWith('./') ||
-        (file !== null && OWNER_MODULES.some((k) => k.startsWith(`${file}#`)));
-      if (!ok)
-        boundaryBreaks.push(`${at(st)}: the owner-ports module imports '${spec}' (only @nestjs/common, ../di-tokens, owner-ports files and enumerated owner modules)`);
-    }
+  for (const e of importEdges(s)) {
+    if (e.spec === null) continue; // refused above: a module that is not a string literal
+    const r = ts.resolveModuleName(e.spec, s.fileName, compilerOptions, ts.sys).resolvedModule;
+    const file = r && !r.isExternalLibraryImport ? path.resolve(r.resolvedFileName) : null;
+    const ok =
+      e.spec === '@nestjs/common' ||
+      (file !== null &&
+        (file === TOKENS_FILE || under(file, PORTS_DIR) || OWNER_MODULES.some((k) => k.startsWith(`${srcKey(file)}#`))));
+    if (!ok)
+      boundaryBreaks.push(
+        `${at(e.node)}: the owner-ports module imports '${e.spec}'${file ? `, which resolves to src/${srcKey(file)}` : ''} ` +
+          '(only @nestjs/common, di-tokens.ts, files under owner-ports/ and enumerated owner module files)',
+      );
   }
 }
 for (const required of [WIDGETS_MODULE, PORTS])
@@ -724,9 +857,9 @@ chk(
   boundaryBreaks.length === 0,
   boundaryBreaks.length
     ? `BOUNDARY: ${[...new Set(boundaryBreaks)].join('; ')}`
-    : `WidgetsModule imports [${(moduleSummary.WidgetsModule ?? []).join(', ')}]; WidgetOwnerPortsModule imports ` +
+    : `WidgetsModule imports [${(moduleSummary.WidgetsModule ?? []).join(', ')}] and registers [${(moduleSummary['WidgetsModule controllers'] ?? []).join(', ')}]; WidgetOwnerPortsModule imports ` +
         `[${(moduleSummary.WidgetOwnerPortsModule ?? []).join(', ')}] (enumerated owner modules: ${OWNER_MODULES.length ? OWNER_MODULES.join(', ') : 'none'}; ` +
-        `ActionEngineModule never) and provides [${(moduleSummary['WidgetOwnerPortsModule providers'] ?? []).join(', ')}] ` +
+        `ActionEngineModule never), registers no controller and provides [${(moduleSummary['WidgetOwnerPortsModule providers'] ?? []).join(', ')}] ` +
         `(bound port tokens: ${BOUND_PORT_TOKENS.length ? BOUND_PORT_TOKENS.join(', ') : 'none'}); ${widgetFiles.length} widget files read: ` +
         `the only non-widget DI class imported is the store client (${storeClientFiles.size} files); ` +
         `owner services under owner-ports/**: ${portServices.length ? portServices.join(', ') : 'none'}`,

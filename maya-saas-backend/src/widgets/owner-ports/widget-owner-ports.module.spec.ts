@@ -17,6 +17,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import * as DI_TOKENS from '../di-tokens';
 import { IntentGatewayService } from '../intent-gateway.service';
 import { WidgetStoresService } from '../stores/widget-stores.service';
+import { WidgetsController } from '../widgets.controller';
 import { WidgetsModule } from '../widgets.module';
 import { WidgetOwnerPortsModule } from './widget-owner-ports.module';
 
@@ -34,6 +35,17 @@ describe('D-6 — the owner-ports boundary exists and is empty; every widget DI 
     expect(meta(MODULE_METADATA.IMPORTS, WidgetsModule)).toEqual([
       PrismaModule,
       WidgetOwnerPortsModule,
+    ]);
+  });
+
+  // The boundary serves no route. A `controllers` member here passed every other fence (U0 S4 review,
+  // mutant R4b); k3 checks 7 and 9 refuse it too.
+  it('WidgetOwnerPortsModule registers no controller, and WidgetsModule registers WidgetsController only', () => {
+    expect(
+      meta(MODULE_METADATA.CONTROLLERS, WidgetOwnerPortsModule) ?? [],
+    ).toEqual([]);
+    expect(meta(MODULE_METADATA.CONTROLLERS, WidgetsModule)).toEqual([
+      WidgetsController,
     ]);
   });
 
