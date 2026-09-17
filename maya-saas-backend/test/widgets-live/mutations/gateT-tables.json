@@ -1,0 +1,76 @@
+[
+  {
+    "id": "TAB-M1",
+    "file": "src/widgets/carriers/channel-profile.ts",
+    "find": "    priority === TIER_ESCAPE.priority\n",
+    "replace": "    true\n",
+    "killers": [
+      "TAB-2"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "TAB-M2",
+    "file": "src/widget-contract/tables.ts",
+    "find": "    ANNOUNCEMENT: Object.freeze({\n      effects: Object.freeze(['NAVIGATE', 'HANDOFF'] as const),\n      escape: true,\n",
+    "replace": "    ANNOUNCEMENT: Object.freeze({\n      effects: Object.freeze(['NAVIGATE', 'HANDOFF'] as const),\n      escape: false,\n",
+    "killers": [
+      "TAB-2",
+      "TAB-9"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "TAB-M3",
+    "file": "src/widgets/carriers/channel-profile.ts",
+    "find": "  if (cell.effects.includes(effect)) return true;\n",
+    "replace": "  if (['NONE', 'NAVIGATE', 'REFINE', 'DRAFT', 'REQUEST_APPROVAL', 'COMMIT'].indexOf(effect) <= Math.max(...cell.effects.map((e) => ['NONE', 'NAVIGATE', 'REFINE', 'DRAFT', 'REQUEST_APPROVAL', 'COMMIT'].indexOf(e)))) return true;\n",
+    "killers": [
+      "TAB-2"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "TAB-M4",
+    "file": "src/widget-contract/tables.ts",
+    "find": "    RICH_CONSTRAINED: Object.freeze({\n      effects: Object.freeze([\n        'NAVIGATE',\n",
+    "replace": "    RICH_CONSTRAINED: Object.freeze({\n      effects: Object.freeze([\n        'NONE',\n        'NAVIGATE',\n",
+    "killers": [
+      "TAB-2",
+      "TAB-9"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "TAB-M5",
+    "file": "src/widget-contract/owner-classes.ts",
+    "find": "    return C9_KEYS.filter((k) => k.startsWith(prefix));\n",
+    "replace": "    return [];\n",
+    "killers": [
+      "TAB-5"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "TAB-M6",
+    "file": "src/widget-contract/owner-classes.ts",
+    "find": "      [...(RESOLVED_KEYS.get(kind) ?? [])].some((k) => REGISTERED_KEYS.has(k)),\n",
+    "replace": "      true,\n",
+    "killers": [
+      "TAB-6"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "TAB-M7",
+    "description": "INHERITED resolves to every C9 registry key again (the fail-open reading IR-TAB-2 replaced)",
+    "file": "src/widget-contract/owner-classes.ts",
+    "find": "  if (INTENT_OWNED.has(r.ownerClass)) return [];\n",
+    "replace": "  if (r.ownerClass === 'NONE') return [];\n  if (r.ownerClass === 'INHERITED')\n    return C9_KEYS.map((k) => internRef('C9', k));\n",
+    "killers": [
+      "TAB-5",
+      "TAB-7"
+    ],
+    "expect": "build-killed"
+  }
+]

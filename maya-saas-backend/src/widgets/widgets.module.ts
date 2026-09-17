@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
 
 import { PrismaModule } from '../prisma/prisma.module';
+import { assertOwnerClassesResolve } from './authority/contract-bindings';
 import { ControlRegistryService } from './control/control-registry.service';
 import { WidgetEmitterService } from './emission/emitter.service';
 import { IntentGatewayService } from './intent-gateway.service';
@@ -37,4 +39,9 @@ import { WidgetsController } from './widgets.controller';
     ControlRegistryService,
   ],
 })
-export class WidgetsModule {}
+export class WidgetsModule implements OnModuleInit {
+  /** §2.4 EP-REGISTRY-LOAD: every owner class resolves in its space, or the process does not start. */
+  onModuleInit(): void {
+    assertOwnerClassesResolve();
+  }
+}

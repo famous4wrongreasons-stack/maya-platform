@@ -247,3 +247,8 @@ export const subjectCapability = (
   if (t?.class === 'c' && t.ref) return t.ref;
   return null;
 };
+// ── §2.4 owner classes (U-TAB, IR-TAB-1) ────────────────────────────────────────────────────────
+//
+// Re-exported so `widgets.module.ts` can run the EP-REGISTRY-LOAD assertion without importing from
+// `../widget-contract/` (k3-exit-gate admits no `from '../<dir>/` import there other than prisma).
+export { assertOwnerClassesResolve } from '../../widget-contract/owner-classes';
