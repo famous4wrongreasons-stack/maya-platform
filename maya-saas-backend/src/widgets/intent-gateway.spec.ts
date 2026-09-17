@@ -27,6 +27,7 @@ import type {
   IntentRecordRow,
   SubmissionShape,
 } from './gate.types';
+import * as gate1Module from './gates/gate1';
 import * as gate5Module from './gates/gate5';
 import * as gate6Module from './gates/gate6';
 import { IntentGatewayService } from './intent-gateway.service';
@@ -557,7 +558,9 @@ describe('the pipeline after U0 — slots 8, 9 and 10 are refusing stubs', () =>
   it('T-PENDING8 / D-12, source half: the legacy Gate 8 and Gate 10 code is gone, not bypassed', () => {
     const gates = path.join(__dirname, 'gates');
     expect(fs.existsSync(path.join(gates, 'gate8.ts'))).toBe(false);
-    expect(fs.existsSync(path.join(gates, 'gate10.ts'))).toBe(false);
+    // GATES-PLAN-V11 D-18 (I-CTX): `gates/gate10.ts` exists again, as slot 10's seam. Its body is the
+    // refusing stub (the test above runs it), and the one name it declares from the list below is the
+    // seam function `gate10` itself; none of the legacy code came back with it.
     const walk = (dir: string): string[] =>
       fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
         const full = path.join(dir, e.name);
@@ -574,12 +577,30 @@ describe('the pipeline after U0 — slots 8, 9 and 10 are refusing stubs', () =>
           'effectClass' + 'Of',
         ].join('|') +
         ')\\b',
+      'g',
     );
     const declared = walk(__dirname)
       .filter((f) => f.endsWith('.ts') && !f.endsWith('.spec.ts'))
-      .filter((f) => legacy.test(fs.readFileSync(f, 'utf8')))
-      .map((f) => path.relative(__dirname, f));
-    expect(declared).toEqual([]);
+      .flatMap((f) =>
+        [...fs.readFileSync(f, 'utf8').matchAll(legacy)].map(
+          (m) =>
+            `${path.relative(__dirname, f).split(path.sep).join('/')}:${m[1]}`,
+        ),
+      );
+    expect(declared).toEqual(['gates/gate10.ts:gate10']);
+  });
+
+  it('I-CTX / D-2: the runner builds the context with principal null until P-PRINCIPAL resolves the live principal', async () => {
+    const real = gate1Module.gate1;
+    const seen: unknown[] = [];
+    jest.spyOn(gate1Module, 'gate1').mockImplementation((ctx) => {
+      seen.push(ctx.principal);
+      return real(ctx);
+    });
+    const { gateway } = gatewayFor([record({ singleUse: false })]);
+    const r = await gateway.submit(args());
+    expect(r.stoppedAt).toBe('8');
+    expect(seen).toEqual([null]);
   });
 });
 

@@ -349,8 +349,19 @@ describe('pipeline slot sources', () => {
     expect(filesOf('5')).toContain('gates/gate5.ts');
     expect(filesOf('6')).toContain('gates/gate6.ts');
     expect(filesOf('13')).toContain('gates/gate13.ts');
-    // A pending() slot calls no gate file: only its array element is its code.
-    expect(filesOf('8')).toEqual([`${GATEWAY}#slot-8`]);
+    // D-18 (I-CTX): each seamed slot calls its one seam file, and that file is the slot's code too,
+    // whether the slot is built (1, 4) or a refusing stub (8, 9, 10).
+    expect(filesOf('1')).toEqual([`${GATEWAY}#slot-1`, 'gates/gate1.ts']);
+    expect(filesOf('4')).toEqual([`${GATEWAY}#slot-4`, 'gates/gate4.ts']);
+    expect(filesOf('8')).toEqual([
+      `${GATEWAY}#slot-8`,
+      'input-validation/input-validation.gate.ts',
+    ]);
+    expect(filesOf('9')).toEqual([
+      `${GATEWAY}#slot-9`,
+      'lowering/lowering.gate.ts',
+    ]);
+    expect(filesOf('10')).toEqual([`${GATEWAY}#slot-10`, 'gates/gate10.ts']);
     expect(p.gatewayRest.source).not.toMatch(/n: '1'/);
     expect(p.otherUnits.map((u) => u.file)).toContain('gates/facts.ts');
     expect(p.otherUnits.map((u) => u.file)).not.toContain('gates/gate5.ts');

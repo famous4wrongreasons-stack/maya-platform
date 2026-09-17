@@ -40,6 +40,12 @@ const INGRESS = 'maya-saas-backend/src/action-engine/action-engine.ingress.ts';
 // in the same commit, re-point that row at the file that holds the slot's enforcing function
 // (`...logicRow('gate8')`, or an equivalent row for a service), so that the symbol, call and
 // constant-pass checks apply to the code that actually runs.
+//
+// GATES-PLAN-V11 D-18 (I-CTX) moved slots 1, 4, 8, 9 and 10 into seam files. Rows 1 and 4 read their
+// seams (`gates/gate1.ts`, `gates/gate4.ts`) as logic rows. Slots 8, 9 and 10 are no longer `pending()`
+// calls: each is an object literal that carries `pendingOn` and calls a seam whose body is the stub
+// (k3 check 4 reads that body). Below, "a `pending()` stub" means either spelling, and rows 8, 9 and 10
+// stay stubOnly with the same obligation.
 const gateFile = (name) => `maya-saas-backend/src/widgets/gates/${name}.ts`;
 const logicRow = (name) => ({ file: gateFile(name), src: read(gateFile(name)), logic: true });
 
@@ -57,10 +63,10 @@ const widgetsController = read('maya-saas-backend/src/widgets/widgets.controller
  * would move a fence away from the module that owns it.
  */
 const GATES = [
-  { n: '1', name: 'Token integrity', symbol: "n: '1'", host: 'pipeline', file: GATEWAY, src: gateway },
+  { n: '1', name: 'Token integrity', symbol: 'gate1', host: 'pipeline', ...logicRow('gate1') },
   { n: '2', name: 'Transport auth', symbol: 'JwtAuthGuard', host: 'HTTP middleware (global guard)', file: 'maya-saas-backend/src/app.module.ts', src: appModule },
   { n: '3', name: 'Principal binding', symbol: 'digestEquals', host: 'pipeline', file: GATEWAY, src: gateway },
-  { n: '4', name: 'Tenant scope', symbol: "n: '4'", host: 'pipeline', file: GATEWAY, src: gateway },
+  { n: '4', name: 'Tenant scope', symbol: 'gate4', host: 'pipeline', ...logicRow('gate4') },
   { n: '5', name: 'Verification floor', symbol: 'gate5', host: 'pipeline', ...logicRow('gate5') },
   { n: '6', name: 'Authority', symbol: 'gate6', host: 'pipeline', ...logicRow('gate6') },
   { n: '6r', name: 'R3.5.1 sensitive destination', symbol: 'gateSensitiveDest', host: 'pipeline (with 6)', ...logicRow('gate6') },
@@ -101,7 +107,8 @@ const rows = GATES.map((g) => {
   // gate whose host IS the pipeline: a gate enforced in its owning module is not made a stub by
   // anything the pipeline does or does not contain.
   const stub =
-    g.host.startsWith('pipeline') && new RegExp(`pending\\(\\s*'${g.n}'`).test(gateway);
+    g.host.startsWith('pipeline') &&
+    (new RegExp(`pending\\(\\s*'${g.n}'`).test(gateway) || /\bpendingOn\s*:/.test(slot));
   // A stubOnly row cannot see the code of a built slot (see the obligation above), so it never counts.
   return { ...g, defined, called, stub, constantPass, enforced: defined && called && !stub && !constantPass && g.stubOnly !== true };
 });

@@ -19,6 +19,8 @@
 //     is told to look away;
 //   - no object literal outside `verdict.ts` carries a `code`: a refusal code is written only
 //     through `refuse`.
+// `superseded` (GATES-PLAN-V11 I-CTX, for Gate 1's seam) writes a code too, so every rule above that
+// names `refuse` holds for it in the same words.
 // Each rule is also run against mutated sources below, so a fence that stopped seeing is red.
 
 import fs from 'node:fs';
@@ -60,6 +62,9 @@ const refusalVocabulary = (): ReadonlySet<string> => {
 };
 
 const SWITCHED_OFF = /@ts-(?:ignore|expect-error|nocheck)\b/;
+
+/** The helpers that write a code, each declared once in `verdict.ts` and fenced alike. */
+const CODE_HELPERS: ReadonlySet<string> = new Set(['refuse', 'superseded']);
 
 type Cast = ts.AsExpression | ts.TypeAssertion;
 const isCast = (n: ts.Node): n is Cast =>
@@ -115,7 +120,8 @@ const refusalFenceViolations = (
     if (isCast(n) && castForbidden(n))
       out.push(`${at(n)}: cast to ${n.type.getText()}`);
 
-    if (ts.isIdentifier(n) && n.text === 'refuse') {
+    if (ts.isIdentifier(n) && CODE_HELPERS.has(n.text)) {
+      const helper = n.text;
       const p = n.parent;
       const declaredHere =
         isVerdictFile && ts.isVariableDeclaration(p) && p.name === n;
@@ -129,12 +135,12 @@ const refusalFenceViolations = (
         const first = p.arguments[0];
         if (!first || !ts.isStringLiteral(first))
           out.push(
-            `${at(n)}: refuse's code is not a plain string literal (${first ? first.getText() : 'none'})`,
+            `${at(n)}: ${helper}'s code is not a plain string literal (${first ? first.getText() : 'none'})`,
           );
         else if (!vocabulary.has(first.text))
           out.push(`${at(n)}: '${first.text}' is not a RefusalCode`);
       } else if (!declaredHere && !importedFromVerdict)
-        out.push(`${at(n)}: refuse is used other than as a direct call`);
+        out.push(`${at(n)}: ${helper} is used other than as a direct call`);
     }
 
     if (
@@ -173,16 +179,21 @@ describe('D-10 — gate files refuse through the typed helper, with no cast', ()
     expect(offenders).toEqual([]);
   });
 
-  it('refuse takes a RefusalCode and a detail, and is declared once, in verdict.ts', () => {
+  it('refuse and superseded take a RefusalCode and a detail, and are declared once, in verdict.ts', () => {
     expect(read('verdict.ts')).toMatch(
       /export const refuse = \(code: RefusalCode, detail: string\): GateVerdict =>/,
+    );
+    expect(read('verdict.ts')).toMatch(
+      /export const superseded = \(\s*code: RefusalCode,\s*detail: string,?\s*\): GateVerdict =>/,
     );
     // This file is left out of the scan: its own assertion above spells the declaration it checks.
     const self = path.basename(__filename);
     const declarers = files
       .filter((f) => f !== self)
       .filter((f) =>
-        /\b(?:const|let|var|function)\s+(?:refuse|pass)\b/.test(read(f)),
+        /\b(?:const|let|var|function)\s+(?:refuse|pass|superseded)\b/.test(
+          read(f),
+        ),
       );
     expect(declarers).toEqual(['verdict.ts']);
   });
@@ -215,7 +226,7 @@ describe('D-10 — gate files refuse through the typed helper, with no cast', ()
     const vocabulary = refusalVocabulary();
     const header = [
       "import type { GateContext, GateVerdict, RefusalCode } from '../gate.types';",
-      "import { pass, refuse } from './verdict';",
+      "import { pass, refuse, superseded } from './verdict';",
       'declare const ctx: GateContext;',
       '',
     ].join('\n');
@@ -228,7 +239,9 @@ describe('D-10 — gate files refuse through the typed helper, with no cast', ()
         'const k = ctx.record?.effect as string;\n' +
         'const raw = ctx.record?.targetJson as unknown;\n' +
         'export const g = (): GateVerdict =>\n' +
-        "  k ? refuse('effect_not_admissible', `${k} is not admissible`) : pass;\n";
+        "  k ? refuse('effect_not_admissible', `${k} is not admissible`) : pass;\n" +
+        'export const h = (): GateVerdict =>\n' +
+        "  raw ? superseded('handle_stale', `${k} moved`) : pass;\n";
       expect(refusalFenceViolations('gateX.ts', clean, vocabulary)).toEqual([]);
     });
 
@@ -289,6 +302,30 @@ describe('D-10 — gate files refuse through the typed helper, with no cast', ()
       [
         'a verdict built by hand and cast',
         body("return { outcome: 'superseded' } as GateVerdict;"),
+      ],
+      [
+        'superseded: literal outside the vocabulary',
+        body("return superseded('invented_code', 'x');"),
+      ],
+      [
+        'superseded: code carried in an untyped value',
+        body("return superseded(JSON.parse('\"invented\"'), 'x');"),
+      ],
+      [
+        'superseded: cast to RefusalCode',
+        body("return superseded('invented' as RefusalCode, 'x');"),
+      ],
+      [
+        'superseded aliased',
+        body("{ const s = superseded; return s('handle_stale', 'x'); }"),
+      ],
+      [
+        'superseded imported under another name',
+        "import { superseded as s } from './verdict';\nexport const g = () => s('handle_stale', 'x');\n",
+      ],
+      [
+        'a superseded verdict built by hand with a code',
+        body("return { outcome: 'superseded', code: 'handle_stale' };"),
       ],
     ];
 

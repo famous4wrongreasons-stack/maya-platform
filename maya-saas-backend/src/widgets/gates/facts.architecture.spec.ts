@@ -92,26 +92,27 @@ describe('J-1 mergeFacts — write-once, producer-checked', () => {
     expect(once).toEqual({ selectedLabels: ['Стрижка'] });
   });
 
-  it('the principal has no producer until P-PRINCIPAL fixes its slot, so every slot is refused', () => {
-    const principal = {
-      kind: 'USER',
-      tenantId: 't1',
-      userId: 'u1',
-      membershipId: 'm1',
-      clientId: null,
-      channelLinkId: null,
-      branchRefs: [],
-      staffRef: null,
-      proofHash: 'a'.repeat(64),
-    } as const;
-    for (const slot of ['1', '2', '3', '4', '5', '6'])
-      expect(() =>
-        mergeFacts(
-          NO_FACTS,
-          { authority: { ...principal, branchRefs: [] } },
-          slot,
-        ),
-      ).toThrow(/authority, whose producer is not yet fixed/);
+  it('D-2: the principal is not an admission fact, so no slot can produce it; it is the base member ctx.principal', () => {
+    const principal = JSON.parse(
+      '{"authority":{"kind":"USER","tenantId":"t1","userId":"u1","membershipId":"m1","clientId":null,"channelLinkId":null,"branchRefs":[],"staffRef":null,"proofHash":"a"}}',
+    ) as Partial<Record<FactName, never>>;
+    const order = pipelineSources().order;
+    expect(order).toHaveLength(15);
+    for (const slot of order)
+      expect(() => mergeFacts(NO_FACTS, principal, slot)).toThrow(
+        /produced authority, which is not an admission fact/,
+      );
+    expect(Object.keys(FACT_SLOTS)).not.toContain('authority');
+    const sf = parseSource('gate.types.ts', typesSource);
+    const context = sf.statements.find(
+      (s): s is ts.InterfaceDeclaration =>
+        ts.isInterfaceDeclaration(s) && s.name.text === 'GateContext',
+    );
+    const member = context?.members.find(
+      (m): m is ts.PropertySignature =>
+        ts.isPropertySignature(m) && m.name.getText(sf) === 'principal',
+    );
+    expect(member?.type?.getText(sf)).toBe('PrincipalView | null');
   });
 
   it('a name AdmissionFacts does not declare, or a fact without a value, throws', () => {
@@ -268,10 +269,9 @@ describe('T-ARCH-FACTS — who may produce and who may read each fact', () => {
     // The integration plan's §2.2 table, copied here on purpose. `mergeFacts`' producer check and
     // T-ARCH-FACTS below both read FACT_SLOTS, so a drift in it (a class-C fact given a reader
     // reachable by Gate 13, a producer moved) would pass both. Changing a row needs a plan amendment,
-    // and this literal changes in the same commit. The principal's producer is null until
-    // P-PRINCIPAL fixes its slot.
+    // and this literal changes in the same commit. The principal has no row: it is not a fact
+    // (GATES-PLAN-V11 D-2).
     expect(FACT_SLOTS).toEqual({
-      authority: { producer: null, readers: ['6', '11', '12', '13'] },
       validatedInputs: { producer: '8', readers: ['12', '13'] },
       selectedLabels: { producer: '8', readers: ['9'] },
       loweringSource: { producer: '8', readers: ['9'] },

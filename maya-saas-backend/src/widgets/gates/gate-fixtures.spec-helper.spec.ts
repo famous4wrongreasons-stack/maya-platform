@@ -73,6 +73,8 @@ export const ctx = (
   intentTokenHash: r.intentTokenHash,
   tenantId: 't1',
   actor: ACTOR,
+  // D-2: the runner sets null until P-PRINCIPAL resolves the live principal (I-CTX).
+  principal: null,
   principalProofHash: PRINCIPAL,
   now: new Date('2026-06-01T00:00:00.000Z'),
   record: r,

@@ -142,6 +142,14 @@ chk(
 //      other statement can be in it. The proofs are only run when a slot asks for the exception.
 //      Until U12a builds them the exception is unused, and a constant-pass slot 12 fails like any
 //      other.
+//
+// GATES-PLAN-V11 D-18 (I-CTX) moved the unbuilt slots 8, 9 and 10 into seam files, so the gateway has no
+// `pending()` helper left. The helper's property is kept, and now read where the stub lives: a slot that
+// carries `pendingOn` must be an object literal whose `run` returns exactly one call of a named function,
+// that name must resolve through the type checker to one `const` arrow or function (in any file), and every
+// value that function returns must be a direct call of `src/widgets/gates/verdict.ts`'s `refuse` whose
+// first argument is the literal 'mechanism_absent'. A slot that carries `pendingOn` and could pass, or
+// whose stub cannot be read this way, fails.
 const pendingHelper = /const pending = \([\s\S]*?\n\}\);/.exec(runner);
 const appModuleSrc = fs.readFileSync(path.join(BE, 'src/app.module.ts'), 'utf8');
 const jwtGuardGlobal =
@@ -305,7 +313,43 @@ const slotOf = (e) => {
         : null;
   const n = str('n') ?? '?';
   if (!fn) return { kind: 'unreadable', n, why: 'its run is not an inline function' };
-  return { kind: 'object', n, host: str('host'), fn, run };
+  return { kind: 'object', n, host: str('host'), fn, run, pendingOn: member('pendingOn') !== undefined };
+};
+
+/** I-CTX's seam stub: why a slot that carries `pendingOn` is not a readable refusing stub, or null. */
+const isMechanismAbsentRefusal = (raw) => {
+  const e = stripExpr(raw);
+  if (!e || !ts.isCallExpression(e) || !ts.isIdentifier(e.expression) || e.expression.text !== 'refuse') return false;
+  const decls = aliased(checker.getSymbolAtLocation(e.expression))?.declarations ?? [];
+  const a0 = e.arguments[0];
+  return (
+    decls.length === 1 &&
+    ts.isVariableDeclaration(decls[0]) &&
+    path.resolve(decls[0].getSourceFile().fileName) === VERDICT_FILE &&
+    a0 !== undefined &&
+    ts.isStringLiteralLike(a0) &&
+    a0.text === 'mechanism_absent'
+  );
+};
+const notRefusingStub = (s) => {
+  const calls = returnsOf(s.fn);
+  const call = calls.length === 1 && calls[0] !== null ? stripExpr(calls[0]) : null;
+  if (!call || !ts.isCallExpression(call) || !ts.isIdentifier(call.expression))
+    return 'its run does not return exactly one call of a named function';
+  const name = call.expression.text;
+  const decls = aliased(checker.getSymbolAtLocation(call.expression))?.declarations ?? [];
+  const d = decls.length === 1 ? decls[0] : null;
+  const init =
+    d && ts.isVariableDeclaration(d) && d.initializer && ts.isVariableDeclarationList(d.parent) && d.parent.flags & ts.NodeFlags.Const
+      ? stripExpr(d.initializer)
+      : null;
+  const stub =
+    init && (ts.isArrowFunction(init) || ts.isFunctionExpression(init)) ? init : d && ts.isFunctionDeclaration(d) ? d : null;
+  if (!stub) return `${name} does not resolve to one const function`;
+  const values = returnsOf(stub);
+  if (values.length === 0 || !values.every((v) => v !== null && isMechanismAbsentRefusal(v)))
+    return `${name} (${wKey(d.getSourceFile().fileName)}) does not only return refuse('mechanism_absent', …)`;
+  return null;
 };
 
 /** D-7's proof: ARCH-12-9 and ARCH-12-10 exist, once each and active, and pass under jest. */
@@ -370,6 +414,8 @@ const archProof = () => {
 const slots = gatesArray ? gatesArray.elements.map(slotOf) : [];
 const slotProblems = gatesArray ? [] : ['no gate array'];
 const admitted = [];
+/** Slots that carry `pendingOn` and whose seam reads as a refusing stub. */
+const seamStubs = [];
 let projectorException = 'unused: no slot hosted by Projector is a constant pass as read here (a call is not followed)';
 for (const s of slots) {
   if (s.kind === 'unreadable') slotProblems.push(`slot ${s.n} cannot be read (${s.why})`);
@@ -391,6 +437,11 @@ for (const s of slots) {
       }
     } else slotProblems.push(`slot ${s.n} (host ${s.host}) is a constant pass`);
   }
+  if (s.kind === 'object' && s.pendingOn) {
+    const why = notRefusingStub(s);
+    if (why) slotProblems.push(`slot ${s.n} carries pendingOn, but ${why}`);
+    else seamStubs.push(s.n);
+  }
 }
 const pendingRefuses = pendingHelper === null ||
   (/outcome: 'refuse'/.test(pendingHelper[0]) && /mechanism_absent/.test(pendingHelper[0]));
@@ -399,7 +450,8 @@ chk(
   slotProblems.length === 0 && pendingRefuses,
   `${slotProblems.length ? `NOT ADMITTED: ${slotProblems.join('; ')}` : `${slots.length} slots read`}; ` +
     `proven constant passes: ${admitted.length ? admitted.join(', ') : 'none'}; Projector exception (D-7): ${projectorException}; ` +
-    (pendingHelper ? `pending() ${pendingRefuses ? 'returns refuse/mechanism_absent' : 'DOES NOT REFUSE'}` : 'no pending() helper (every gate wired)'),
+    (pendingHelper ? `pending() ${pendingRefuses ? 'returns refuse/mechanism_absent' : 'DOES NOT REFUSE'}` : 'no pending() helper') +
+    `; refusing seam stubs (slots carrying pendingOn): ${seamStubs.length ? `${seamStubs.join(', ')}, each one call that only returns refuse('mechanism_absent', …)` : 'none'}`,
 );
 
 // ── 5. BUTTON -> ENDPOINT is unrepresentable ─────────────────────────────────────────────────

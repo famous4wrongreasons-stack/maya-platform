@@ -24,46 +24,31 @@ import type { VerificationLevel } from '../widget-contract/envelope';
 import type { ChannelId } from '../widget-contract/lifecycle';
 import { digestEquals, sha256Hex } from './token.util';
 import { mergeFacts, NO_FACTS } from './gates/facts';
+import { gate1 } from './gates/gate1';
+import { gate4 } from './gates/gate4';
 import { gate5 } from './gates/gate5';
 import { gate6, gateSensitiveDest } from './gates/gate6';
 import { gate7 } from './gates/gate7';
+import {
+  INPUT_VALIDATION_PENDING_ON,
+  inputValidation,
+} from './input-validation/input-validation.gate';
 import { gate8R } from './gates/gate8r';
+import { LOWERING_PENDING_ON, lower } from './lowering/lowering.gate';
+import { GATE10_PENDING_ON, gate10 } from './gates/gate10';
 import { gate11 } from './gates/gate11';
 import { gate12 } from './gates/gate12';
 import { gate13 } from './gates/gate13';
 import { channelMaxLevel } from './authority/authority-resolver';
 
-/**
- * A gate whose mechanism is not built. It runs, and it REFUSES — "not built yet" and "allowed" must
- * never be the same branch (F5's fail-closed default).
- *
- * Three slots use it: 8, 9 and 10.
- *   - Gate 9, Lowering. The wiring commit replaced it with a function that returned `pass` and
- *     performed nothing, which is worse than a stub: the append of `rendered_utterance` as a USER
- *     turn never happened, so Gate 10 received no utterance to compare on the tap path.
- *   - Gate 8, Input validation. The function that stood here failed open: it passed every non-string
- *     value, and every value on an empty domain (G8 §5.0).
- *   - Gate 10, Divergence audit. The function that stood here read the persisted utterance rather
- *     than this request's lowering, audited into a process-local array, and classified effects with
- *     a mapping the contract does not state (G10 G-1…G-14; integrator decision D-12).
- * A stub that refuses is honest about all three. A function that passed would be counted as a gate.
- */
-const pending = (
-  n: string,
-  name: string,
-  host: Gate['host'],
-  pendingOn: string,
-): Gate => ({
-  n,
-  name,
-  host,
-  pendingOn,
-  run: () => ({
-    outcome: 'refuse' as const,
-    code: 'mechanism_absent' as const,
-    detail: `gate ${n} (${name}) is NORMATIVE-PENDING on ${pendingOn}`,
-  }),
-});
+// Slot seams (GATES-PLAN-V11 D-18, I-CTX). Slots 1, 4, 8, 9 and 10 each call one file, and that file's
+// body is what the slot ran before: the inline checks of Gates 1 and 4, and the refusing `pending()`
+// stub of Gates 8, 9 and 10. A unit that builds one of those gates changes its seam file, not this array.
+//
+// An unbuilt gate still RUNS and REFUSES `mechanism_absent`, because "not built yet" and "allowed" must
+// never be the same branch (F5's fail-closed default). Its slot carries `pendingOn`, so `liveGateCount`
+// counts it as not built. A stub that refuses is honest; a function that passed would be counted as a
+// gate. What stood in each of those slots before U0, and why it was worse, is kept in its seam file.
 
 @Injectable()
 export class IntentGatewayService {
@@ -98,35 +83,8 @@ export class IntentGatewayService {
       n: '1',
       name: 'Token integrity',
       host: 'IntentGateway',
-      run: (ctx) => {
-        const r = ctx.record;
-        if (!r)
-          return {
-            outcome: 'refuse',
-            code: 'EXPIRED',
-            detail: 'no record for this token',
-          };
-        if (r.supersededByWidgetId !== null)
-          return {
-            outcome: 'superseded',
-            code: 'SUPERSEDED',
-            detail: 'a newer envelope replaced this one',
-          };
-        if (r.expiresAt.getTime() <= ctx.now.getTime())
-          return {
-            outcome: 'refuse',
-            code: 'EXPIRED',
-            detail: 'token expired',
-          };
-        // Single use is what makes a replayed tap find a consumed row instead of a second effect.
-        if (r.singleUse && r.consumedAt !== null)
-          return {
-            outcome: 'refuse',
-            code: 'EXPIRED',
-            detail: 'token already consumed',
-          };
-        return { outcome: 'pass' };
-      },
+      // Seam: `gates/gate1.ts` (P-G15a).
+      run: (ctx) => gate1(ctx),
     },
     {
       n: '2',
@@ -162,20 +120,8 @@ export class IntentGatewayService {
       n: '4',
       name: 'Tenant scope',
       host: 'TenantResolver',
-      run: (ctx) => {
-        const r = ctx.record;
-        if (!r)
-          return {
-            outcome: 'refuse',
-            code: 'tenant_mismatch',
-            detail: 'no record',
-          };
-        // The global guard has already bound the tenant; this compares the RECORD's tenant against
-        // it, which the guard cannot do because the guard never saw the record.
-        return r.tenantId === ctx.tenantId
-          ? { outcome: 'pass' }
-          : { outcome: 'refuse', code: 'tenant_mismatch' };
-      },
+      // Seam: `gates/gate4.ts` (U4).
+      run: (ctx) => gate4(ctx),
     },
     {
       n: '5',
@@ -203,12 +149,14 @@ export class IntentGatewayService {
     // NOT BUILT. Closed-domain membership, cardinality, bounds re-read from `bounds_source`,
     // normalizers and `c9SafeText` need the schema source, the codec and the registries, and several
     // of their refusals need owner rulings before a code may be chosen (AMB-01, AMB-02a).
-    pending(
-      '8',
-      'Input validation',
-      'IntentGateway',
-      'the input-validation mechanism (schema retrieval, closed-domain codec, bounds and normalizer registries) and the owner rulings on its refusal codes',
-    ),
+    {
+      n: '8',
+      name: 'Input validation',
+      host: 'IntentGateway',
+      pendingOn: INPUT_VALIDATION_PENDING_ON,
+      // Seam: `input-validation/input-validation.gate.ts` (U8a, U8b).
+      run: (ctx) => inputValidation(ctx),
+    },
     {
       n: '8-R',
       name: 'Readback',
@@ -219,21 +167,25 @@ export class IntentGatewayService {
     // labels) is appended as a USER turn with authority NONE — the first durable write. Nothing
     // performs that append, and §3.9 defines no refusal for a lowering that cannot render (an erased
     // or absent template), so building it needs a ruling rather than an invented refusal code.
-    pending(
-      '9',
-      'Lowering',
-      'chat ingress',
-      'the USER-turn append of rendered_utterance, and a ruling on the refusal when it cannot render',
-    ),
+    {
+      n: '9',
+      name: 'Lowering',
+      host: 'chat ingress',
+      pendingOn: LOWERING_PENDING_ON,
+      // Seam: `lowering/lowering.gate.ts` (U9b).
+      run: (ctx) => lower(ctx),
+    },
     // NOT BUILT. The router runs over THIS request's lowering (Gate 9's fact), and a divergence is
     // written to a durable audit record. What the router resolves against, what "canonical owner"
     // means, a null result and the audit record's store are owner rulings (AMB-29 … AMB-32, AMB-09).
-    pending(
-      '10',
-      'Divergence audit',
-      'intent router',
-      "the deterministic router over Gate 9's lowered utterance, a durable divergence audit record, and the owner rulings on the router, the canonical owner, a null resolution and the audit store",
-    ),
+    {
+      n: '10',
+      name: 'Divergence audit',
+      host: 'intent router',
+      pendingOn: GATE10_PENDING_ON,
+      // Seam: `gates/gate10.ts` (U10b).
+      run: (ctx) => gate10(ctx),
+    },
     {
       n: '11',
       name: 'Noun resolution',
@@ -255,8 +207,8 @@ export class IntentGatewayService {
     // Gate 14 stays with the Action Engine, which enforces it on its own ingress — on-path and
     // correct. Moving it here for a tidier count would move a fence away from its owner.
     //
-    // The slot is kept so the array is §3.9's fifteen and not a subset, but it is NOT a
-    // `pending()` stub: `pending` means "a later package builds this", and this one is built. It
+    // The slot is kept so the array is §3.9's fifteen and not a subset, but it carries no
+    // `pendingOn`: that means "a later package builds this", and this one is built. It
     // is also unreachable — Gate 13 terminates by routing — so the honest thing for it to say is
     // where the enforcement actually is.
     {
@@ -320,6 +272,9 @@ export class IntentGatewayService {
       intentTokenHash,
       tenantId: args.tenantId,
       actor: args.actor,
+      // D-2 (I-CTX): the live principal is a base member. P-PRINCIPAL resolves it inside the request
+      // transaction; until then it is null on every request, and no slot reads it.
+      principal: null,
       principalProofHash: args.principalProofHash,
       now: args.now ?? new Date(),
       record,

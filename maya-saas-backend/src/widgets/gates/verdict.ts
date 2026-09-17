@@ -27,3 +27,12 @@ export const refuse = (code: RefusalCode, detail: string): GateVerdict => ({
   code,
   detail,
 });
+
+// `superseded` is the same helper for the `superseded` outcome, typed and fenced exactly as `refuse`
+// is. It lets a gate file return that outcome without an object literal that carries a code, which the
+// fence forbids outside this file. Added by GATES-PLAN-V11 I-CTX for Gate 1's seam, `gates/gate1.ts`.
+export const superseded = (code: RefusalCode, detail: string): GateVerdict => ({
+  outcome: 'superseded',
+  code,
+  detail,
+});

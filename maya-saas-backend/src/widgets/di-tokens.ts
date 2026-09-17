@@ -9,8 +9,9 @@
 // lands with its unit and, where the plan says so, its ruling, in the same commit as the test that
 // pins it (plan §3.5 item 7).
 //
-// Not here: `GATE_8R_OWNERS`. The Gate 8-R spec places that token beside its frozen unruled value in
-// `gates/gate-8r.owners.ts` (U8R).
+// GATES-PLAN-V11 I-CTX declares the tokens its later units bind, so no unit spells one of its own. That
+// includes `GATE_8R_OWNERS`: the token lives here, and `gates/gate-8r.owners.ts` (U8R) holds only its
+// frozen unruled value.
 //
 // The values follow the Gate 8-R spec's convention: each token is a string equal to its own name.
 
@@ -34,3 +35,24 @@ export const CAPABILITY_FACTS = 'CAPABILITY_FACTS';
 
 /** Gate 11's noun-resolution ports; every port unbound until AMB-33/34/36/37 (U11a, U11b). */
 export const NOUN_RESOLUTION_PORTS = 'NOUN_RESOLUTION_PORTS';
+
+/** D-1: the one request transaction `T` that `submit()` opens (P-PRINCIPAL). */
+export const REQUEST_TX = 'REQUEST_TX';
+
+/** D-2: resolves `GateContext.principal` inside `T` through `C9Authority.current` (P-PRINCIPAL). */
+export const PRINCIPAL_RESOLVER = 'PRINCIPAL_RESOLVER';
+
+/** H4: verifies the keyed envelope seal; provided by the emission module, B-22 (P-SEAL, P-G15a). */
+export const SEAL_VERIFIER = 'SEAL_VERIFIER';
+
+/** R3.9.4 and L7: minter (2)'s successor entry for the gateway's edges (P-MINT-CORE). */
+export const SUCCESSOR_MINTER = 'SUCCESSOR_MINTER';
+
+/** Gate 13's HANDOFF edge: the `HandoffTarget` signer (U13b). */
+export const HANDOFF_SIGNER = 'HANDOFF_SIGNER';
+
+/** Gate 8-R's owner set; bound to `GATE_8R_OWNERS_UNRULED` in `gates/gate-8r.owners.ts` (U8R, R8R-1). */
+export const GATE_8R_OWNERS = 'GATE_8R_OWNERS';
+
+/** Gate 4: `TenantContextService.assertTenantId` through the tenancy port (U4, IR4-1 and IR4-2). */
+export const TENANT_SCOPE = 'TENANT_SCOPE';

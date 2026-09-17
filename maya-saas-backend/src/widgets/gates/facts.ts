@@ -28,12 +28,14 @@ export interface FactSlots {
 const slots = (producer: string | null, readers: string[]): FactSlots =>
   Object.freeze({ producer, readers: Object.freeze(readers) });
 
-/** The integration plan's §2.2 table. Every member of `AdmissionFacts` has exactly one row. */
+/**
+ * The integration plan's §2.2 table. Every member of `AdmissionFacts` has exactly one row.
+ *
+ * No `authority` row: the live principal is the base member `GateContext.principal`, not a fact
+ * (GATES-PLAN-V11 D-2), so `mergeFacts` refuses it from every slot as undeclared.
+ */
 export const FACT_SLOTS: { readonly [K in FactName]: FactSlots } =
   Object.freeze({
-    // The principal slot is P-PRINCIPAL's to fix (Gate 3, or a principal-resolving slot of its own
-    // spec). Until then no slot may produce the principal, and none does.
-    authority: slots(null, ['6', '11', '12', '13']),
     validatedInputs: slots('8', ['12', '13']),
     selectedLabels: slots('8', ['9']),
     loweringSource: slots('8', ['9']),

@@ -20,7 +20,11 @@ export const gate8R = (ctx: GateContext): GateVerdict => {
   const ack = ctx.submission.readback_ack;
   if (!ack)
     return refuse('readback_missing', 'a spoken actuation requires a readback');
-  if (ack.body_hash !== r.bodyHash)
+  // R8R-2 (I-CTX) retyped the ack to `unknown`. This read is the one the untyped value got before:
+  // a member the value lacks, or a value that is not an object, reads as `undefined`.
+  const bodyHash =
+    typeof ack === 'object' && 'body_hash' in ack ? ack.body_hash : undefined;
+  if (bodyHash !== r.bodyHash)
     return refuse(
       'readback_mismatch',
       'the affirmation names a different body',

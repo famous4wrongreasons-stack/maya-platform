@@ -14,6 +14,7 @@ import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import type { C9Principal } from '../orchestration/c9.contract';
 import type { C9Domain } from '../widget-contract/ambient';
 import type { VerificationLevel } from '../widget-contract/envelope';
+import type { Presentation } from '../widget-contract/envelope-roots';
 import type { ChannelId } from '../widget-contract/lifecycle';
 
 /** Where a gate runs. §3.9's "Runs in" column, kept so the table and the code can be compared. */
@@ -79,10 +80,11 @@ export type ResolvedNouns = { readonly __brand: 'ResolvedNouns' };
  * producer in `FACT_SLOTS` and held at the source by `gates/facts.architecture.spec.ts`.
  *
  * Facts are never serialised: the controller's response has no member for them.
+ *
+ * The live principal is not a fact (GATES-PLAN-V11 D-2): Gates 1 and 3 read it before slot 2, and a fact
+ * produced at slot 2 or later cannot be read at slot 1. It is the base member `GateContext.principal`.
  */
 export interface AdmissionFacts {
-  /** The live principal (request state). Producer: the principal slot, which P-PRINCIPAL fixes. */
-  readonly authority: C9Principal;
   /** Class A: validated closed-domain option ids per declared field; null for a null schema. */
   readonly validatedInputs: {
     readonly closed: ReadonlyMap<string, readonly string[]>;
@@ -139,6 +141,15 @@ export type GateVerdict =
       readonly detail?: string;
     }
   /**
+   * L8 (C11:5506-5507, Block B B-29): `EXPIRED` is an outcome of the gateway's response, not a refusal
+   * code. Declared here by I-CTX so later units code against it; no gate returns it until P-G15a, which
+   * also takes `EXPIRED` and `SUPERSEDED` out of `RefusalCode`.
+   */
+  | {
+      readonly outcome: 'expired';
+      readonly detail?: string;
+    }
+  /**
    * Ends the pipeline by design rather than by refusal: Gate 13 once it has routed, and Gate 14's
    * pointer. Gate 9 does not terminate — on success it passes, carrying its facts.
    */
@@ -147,6 +158,24 @@ export type GateVerdict =
       readonly why: string;
       readonly route?: RouteResult;
     };
+
+/**
+ * D-2 — the live principal, as the gates read it.
+ *
+ * P-PRINCIPAL resolves it inside the one request transaction `T` (D-1):
+ *   - `authority` from `C9Authority.current(T)` (K1, K3);
+ *   - `role` from the tenancy owner's in-transaction Membership read (B-02);
+ *   - `presentationMode` per B-02, and `verificationLevel` per K1;
+ *   - `proofHash` = `c9PrincipalHash(authority)` (K4).
+ * `presentationMode` is carried for presentation only: slot 6 and its owner ports never read it (FR-14).
+ */
+export interface PrincipalView {
+  readonly authority: C9Principal;
+  readonly role: string | null;
+  readonly presentationMode: Presentation['presentation_mode'];
+  readonly verificationLevel: VerificationLevel;
+  readonly proofHash: string;
+}
 
 /**
  * What a gate may read. Deliberately narrow: a gate that could reach the request object could
@@ -162,6 +191,12 @@ export interface GateContext {
    * rules which read supplies the live principal's role (`gate-context.source.spec.ts`).
    */
   readonly actor: Readonly<AuthenticatedUser>;
+  /**
+   * D-2: the live principal, a base member rather than a fact. `null` when `C9Authority.current` denies a
+   * session the transport admitted; slot 3 refuses that (D-16, P-PRINCIPAL). Until P-PRINCIPAL lands, the
+   * runner sets `null` on every request and no slot reads it (I-CTX).
+   */
+  readonly principal: PrincipalView | null;
   readonly principalProofHash: string;
   readonly now: Date;
   /** The stored record, once Gate 1 has found one. Null before that, and after a refusal. */
@@ -268,11 +303,11 @@ export interface IntentRecordRow {
 export interface SubmissionShape {
   readonly intent_token: string;
   readonly inputs?: Readonly<Record<string, unknown>> | null;
-  readonly readback_ack?: {
-    readonly readback_ref: string;
-    readonly body_hash: string;
-    readonly affirmation: string;
-  } | null;
+  /**
+   * R8R-2: `unknown`. Nothing about the value's shape is established before Gate 8-R reads it, so the
+   * type does not claim one; Gate 8-R narrows it.
+   */
+  readonly readback_ack?: unknown;
 }
 
 export interface Gate {
