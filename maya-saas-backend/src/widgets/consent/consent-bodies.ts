@@ -28,13 +28,14 @@ import {
  * The class-`s` destinations these kinds may hand off to, and the shell route each resolves to.
  *
  * Two spellings for one place is how destination lists drift, so the mapping is declared rather
- * than assumed: the contract names `shell.privacy`, the shell's route registry names
- * `privacy-and-data`, and the spec asserts every value here is a live route in that registry.
+ * than assumed. Since S1 the shell's route registry uses the contract's own spelling, so each
+ * destination maps to itself; the spec still reads the registry and asserts every value is a live
+ * route there, which is what catches the next rename on either side.
  */
 export const SENSITIVE_DESTINATIONS: Readonly<Record<string, string>> =
   Object.freeze({
-    'shell.privacy': 'privacy-and-data',
-    'shell.connections': 'connections',
+    'shell.privacy': 'shell.privacy',
+    'shell.connections': 'shell.connections',
   });
 
 export const resolvesToLiveShellRoute = (destination: string): boolean =>
