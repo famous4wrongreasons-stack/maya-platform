@@ -3,13 +3,18 @@
 // D-9: the context carries the JWT-validated actor, and the resolved-roles member is gone. Carrying the actor
 // constructs no principal (K5), but it does put a `role` within reach of Gate 6 — and which read
 // supplies the live principal's role is AMB-03, unruled. So Gate 6's code may not read the actor's
-// role, by any spelling, until that ruling is made and this test is changed in the same commit.
+// role until that ruling is made and this test is changed in the same commit. Held at the source, and
+// closed rather than enumerated: Gate 6 may use the actor object only by reading a literal member
+// name other than `role`. Any other use (a helper, a spread, `Object.*`, `JSON.*`, a rest element)
+// hands the object to code where a role read could not be seen, so it is red itself. The spellings
+// that reach the object are shared with T-ARCH-FACTS (`memberUses`). Not seen: the actor reached by a
+// computed key on the context itself, or the whole context handed to a module outside Gate 6's slot.
 //
 // S-ROW / D-3: the record a gate sees is the plan's §2.4 union, every column of it AUDIT_RETAINED.
 // The classification is read from `schema.prisma`'s own `// A` / `// C` / `// X` markers, not copied
 // here. `confirmationJson` is selected only to be projected: the raw object is never a row member.
 //
-// Class BUILD: structure only. Each rule also runs over mutated sources.
+// Class BUILD: structure only. Each rule also runs over mutated sources, each red for its own reason.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,7 +22,9 @@ import ts from 'typescript';
 
 import {
   GATEWAY,
+  memberUses,
   parseSource,
+  patternMembers,
   pipelineSources,
   readWidget,
   type SourceUnit,
@@ -55,76 +62,56 @@ const interfaceMemberType = (
 
 // ── D-9 ──────────────────────────────────────────────────────────────────────────────────────────
 
-/** Every read of the actor's role in `unit`: `.role`, `['role']` or a `role` binding, through aliases. */
+/** Every read of the actor's role in `unit`: `.role`, `['role']`, a computed key or a `role` binding, through aliases. */
 const actorRoleReads = (unit: SourceUnit): string[] => {
   const out: string[] = [];
   const sf = parseSource(unit.file, unit.source);
   const at = (n: ts.Node): string =>
     `${unit.file}:${sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1}`;
-
-  const actorNames = new Set<string>(['actor']);
-  const isActor = (e: ts.Expression): boolean => {
-    let x: ts.Expression = e;
-    while (ts.isParenthesizedExpression(x) || ts.isNonNullExpression(x))
-      x = x.expression;
-    return (
-      (ts.isPropertyAccessExpression(x) && x.name.text === 'actor') ||
-      (ts.isElementAccessExpression(x) &&
-        ts.isStringLiteral(x.argumentExpression) &&
-        x.argumentExpression.text === 'actor') ||
-      (ts.isIdentifier(x) && actorNames.has(x.text))
-    );
-  };
-  const collect = (n: ts.Node): void => {
-    if (ts.isVariableDeclaration(n) && n.initializer !== undefined) {
-      if (ts.isIdentifier(n.name) && isActor(n.initializer))
-        actorNames.add(n.name.text);
-    }
-    // `const { actor } = ctx` / `({ actor }) => …` / `const { actor: a } = ctx`
-    if (
-      ts.isBindingElement(n) &&
-      ts.isIdentifier(n.name) &&
-      (n.propertyName ?? n.name).getText(sf) === 'actor'
-    )
-      actorNames.add(n.name.text);
-    ts.forEachChild(n, collect);
-  };
-  collect(sf);
-
-  const visit = (n: ts.Node): void => {
-    if (
-      ts.isPropertyAccessExpression(n) &&
-      n.name.text === 'role' &&
-      isActor(n.expression)
-    )
-      out.push(`${at(n)}: reads the actor's role`);
-    if (
-      ts.isElementAccessExpression(n) &&
-      isActor(n.expression) &&
-      !(
-        ts.isStringLiteral(n.argumentExpression) &&
-        n.argumentExpression.text !== 'role'
-      )
-    )
-      out.push(`${at(n)}: reads the actor by a role or computed key`);
-    if (ts.isObjectBindingPattern(n)) {
-      const parent = n.parent;
-      const fromActor =
-        (ts.isVariableDeclaration(parent) &&
-          parent.initializer !== undefined &&
-          isActor(parent.initializer)) ||
-        (ts.isBindingElement(parent) &&
-          (parent.propertyName ?? parent.name).getText(sf) === 'actor');
-      if (fromActor)
-        for (const el of n.elements)
-          if ((el.propertyName ?? el.name).getText(sf) === 'role')
-            out.push(`${at(el)}: destructures the actor's role`);
-    }
-    ts.forEachChild(n, visit);
-  };
-  visit(sf);
+  for (const use of memberUses(sf, 'actor')) {
+    if (use.kind === 'member' && use.name === 'role')
+      out.push(`${at(use.node)}: reads the actor's role`);
+    if (use.kind === 'computed')
+      out.push(`${at(use.node)}: reads the actor by a computed key`);
+    if (use.kind === 'destructure')
+      for (const el of patternMembers(use.pattern))
+        if (el.name === 'role')
+          out.push(`${at(el.node)}: destructures the actor's role`);
+        else if (!el.rest && el.name === null)
+          out.push(`${at(el.node)}: destructures the actor by a computed key`);
+  }
   return out;
 };
+
+/**
+ * Every way `unit` lets the actor object go somewhere a role read could no longer be seen: any use of
+ * it other than a read of a literal member name (a call argument, a spread, a return, `Object.*`,
+ * `JSON.*`, `in`, an assignment) and a rest element that copies it. Applied to Gate 6's code, where
+ * AMB-03 forbids the role, and not to the controller, whose job is to hand the actor on.
+ */
+const actorEscapes = (unit: SourceUnit): string[] => {
+  const out: string[] = [];
+  const sf = parseSource(unit.file, unit.source);
+  const at = (n: ts.Node): string =>
+    `${unit.file}:${sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1}`;
+  for (const use of memberUses(sf, 'actor')) {
+    if (use.kind === 'escape')
+      out.push(
+        `${at(use.node)}: uses the actor other than by a named read (${use.how})`,
+      );
+    if (use.kind === 'destructure')
+      for (const el of patternMembers(use.pattern))
+        if (el.rest)
+          out.push(`${at(el.node)}: copies the actor by a rest element`);
+  }
+  return out;
+};
+
+/** What Gate 6's code may not do with the actor until AMB-03 is ruled. */
+const gate6ActorViolations = (unit: SourceUnit): string[] => [
+  ...actorRoleReads(unit),
+  ...actorEscapes(unit),
+];
 
 describe('D-9 — the actor is carried, the resolved-roles member is gone, and Gate 6 reads no role (AMB-03)', () => {
   it('GateContext carries the JWT-validated actor and J-1 facts, and no resolved roles', () => {
@@ -185,56 +172,153 @@ describe('D-9 — the actor is carried, the resolved-roles member is gone, and G
     expect(units.map((u) => u.file)).toEqual(
       expect.arrayContaining([`${GATEWAY}#slot-6`, 'gates/gate6.ts']),
     );
-    expect(units.flatMap(actorRoleReads)).toEqual([]);
+    expect(units.flatMap(gate6ActorViolations)).toEqual([]);
   });
 
-  describe('the role fence goes red on each way around it (mutations)', () => {
+  describe('the role fence goes red on each way around it that it names (mutations)', () => {
     const unit = (body: string): SourceUnit => ({
       slot: '6',
       file: 'gate6-mutant.ts',
       source: `declare const ctx: any;\nexport const gate6 = () => {\n${body}\n};\n`,
     });
 
-    it('CONTROL: reading the actor’s user id, or a record’s presentation role, is clean', () => {
+    it('CONTROL: reading the actor’s other members by name, by any spelling, or a record’s presentation role, is clean', () => {
       expect(
-        actorRoleReads(
+        gate6ActorViolations(
           unit(
             "const u = ctx.actor.userId; const r = ctx.record.role; const t = ctx.actor['tenantId']; return [u, r, t];",
           ),
         ),
       ).toEqual([]);
+      expect(
+        gate6ActorViolations(
+          unit(
+            'const { userId, email } = ctx.actor; const a = ctx.actor; const s = a.sessionId; const { actor: b } = ctx; const m = (b as any)!.membershipId; return [userId, email, s, m];',
+          ),
+        ),
+      ).toEqual([]);
     });
 
-    const mutants: ReadonlyArray<readonly [string, string]> = [
-      ['ctx.actor.role', 'return ctx.actor.role;'],
-      ["ctx.actor['role']", "return ctx.actor['role'];"],
-      ["ctx['actor'].role", "return ctx['actor'].role;"],
+    it("CONTROL: handing the actor on (the controller's job) reads no role, but in Gate 6 it is red", () => {
+      const handsOn = unit(
+        'return submit({ actor: ctx.actor, hash: principalProofHash(ctx.actor) });',
+      );
+      expect(actorRoleReads(handsOn)).toEqual([]);
+      // In Gate 6 the object may not leave by any route a role read could hide behind.
+      expect(actorEscapes(handsOn)).toHaveLength(2);
+    });
+
+    // [name, mutant body, the violation it must be red for]
+    const mutants: ReadonlyArray<readonly [string, string, RegExp]> = [
+      ['ctx.actor.role', 'return ctx.actor.role;', /reads the actor's role/],
+      [
+        "ctx.actor['role']",
+        "return ctx.actor['role'];",
+        /reads the actor's role/,
+      ],
+      [
+        "ctx['actor'].role",
+        "return ctx['actor'].role;",
+        /reads the actor's role/,
+      ],
       [
         'a computed key on the actor',
         "const k = 'ro' + 'le'; return ctx.actor[k];",
+        /reads the actor by a computed key/,
       ],
       [
         'destructured from the actor',
         'const { role } = ctx.actor; return role;',
+        /destructures the actor's role/,
       ],
       [
         'renamed while destructured',
         'const { role: r } = ctx.actor; return r;',
+        /destructures the actor's role/,
+      ],
+      [
+        'destructured under a computed key',
+        "const k = 'role'; const { [k]: r } = ctx.actor; return r;",
+        /destructures the actor by a computed key/,
       ],
       [
         'destructured through the context',
         'const { actor: { role } } = ctx; return role;',
+        /destructures the actor's role/,
       ],
-      ['through an alias', 'const a = ctx.actor; return a.role;'],
+      [
+        'through an alias',
+        'const a = ctx.actor; return a.role;',
+        /reads the actor's role/,
+      ],
       [
         'through a destructured actor',
         'const { actor } = ctx; return actor.role;',
+        /reads the actor's role/,
       ],
-      ['through a parameter', 'return (({ actor }: any) => actor.role)(ctx);'],
+      [
+        'through a renamed destructured actor',
+        'const { actor: a } = ctx; return a.role;',
+        /reads the actor's role/,
+      ],
+      [
+        'through a parameter',
+        'return (({ actor }: any) => actor.role)(ctx);',
+        /reads the actor's role/,
+      ],
+      [
+        'R6: the actor handed to a helper that reads the role',
+        'const roleOf = (u: { role: string }) => u.role; return roleOf(ctx.actor);',
+        /uses the actor other than by a named read \(CallExpression\)/,
+      ],
+      [
+        'the actor spread into a local',
+        'const a = { ...ctx.actor }; return a.role;',
+        /uses the actor other than by a named read \(SpreadAssignment\)/,
+      ],
+      [
+        'Object.values over the actor',
+        'return Object.values(ctx.actor);',
+        /uses the actor other than by a named read \(CallExpression\)/,
+      ],
+      [
+        'a JSON round trip of the actor',
+        'return JSON.parse(JSON.stringify(ctx.actor)).role;',
+        /uses the actor other than by a named read \(CallExpression\)/,
+      ],
+      [
+        'the actor returned whole',
+        'return ctx.actor;',
+        /uses the actor other than by a named read \(ReturnStatement\)/,
+      ],
+      [
+        'the role key tested with `in`',
+        "return 'role' in ctx.actor;",
+        /uses the actor other than by a named read \(BinaryExpression\)/,
+      ],
+      [
+        'an alias of the actor handed to a helper',
+        'const { actor: a } = ctx; return Object.entries(a);',
+        /uses the actor other than by a named read \(CallExpression\)/,
+      ],
+      [
+        'the actor bound by a destructuring assignment of the context',
+        'let a: any; ({ actor: a } = ctx); return a.role;',
+        /uses the actor other than by a named read \(destructuring assignment\)/,
+      ],
+      [
+        'the actor copied by a rest element',
+        'const { userId, ...rest } = ctx.actor; return [userId, rest.role];',
+        /copies the actor by a rest element/,
+      ],
     ];
 
-    it.each(mutants)('RED: %s', (_name, body) => {
-      expect(actorRoleReads(unit(body)).length).toBeGreaterThan(0);
+    it.each(mutants)('RED: %s', (_name, body, reason) => {
+      const violations = gate6ActorViolations(unit(body));
+      expect({
+        violations,
+        red: violations.some((v) => reason.test(v)),
+      }).toEqual({ violations, red: true });
     });
   });
 });

@@ -601,20 +601,30 @@ describe('findRecord — one tenant-scoped read of the §2.4 union, with confirm
   });
 
   it('a gate receives the flattened envelope members and no class C byte', async () => {
-    const { row } = await recordSeenByGate5([
-      record({
-        c9Domain: 'OCCUPANCY',
-        runId: 'run-1',
-        revisionId: 'rev-1',
-        approvalOfIntentRef: 'appr-1',
-        frozenNounsJson: [{ noun: 'client', handle: 'h1' }],
-      }),
-    ]);
+    // Neither value is the default a hard-coded member would carry (the route's carrier is 'pwa',
+    // and an emission starts 'MINTED'), so the row can only hold them by reading the envelope.
+    const { row } = await recordSeenByGate5(
+      [
+        record({
+          c9Domain: 'OCCUPANCY',
+          runId: 'run-1',
+          revisionId: 'rev-1',
+          approvalOfIntentRef: 'appr-1',
+          frozenNounsJson: [{ noun: 'client', handle: 'h1' }],
+        }),
+      ],
+      [
+        emission({
+          deliveryChannel: 'telegram-miniapp',
+          lifecycleState: 'LIVE',
+        }),
+      ],
+    );
     expect(row).not.toBeNull();
     const seen = row as unknown as Record<string, unknown>;
     expect(seen).toMatchObject({
-      deliveryChannel: 'pwa',
-      emissionLifecycleState: 'MINTED',
+      deliveryChannel: 'telegram-miniapp',
+      emissionLifecycleState: 'LIVE',
       supersededByWidgetId: null,
       c9Domain: 'OCCUPANCY',
       requestedScopeHash: sha256Hex('scope'),

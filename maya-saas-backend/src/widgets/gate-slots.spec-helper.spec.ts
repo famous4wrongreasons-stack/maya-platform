@@ -149,6 +149,181 @@ export const pipelineSources = (
   return { order, slotUnits, gatewayRest, otherUnits };
 };
 
+// ── uses of one context member ───────────────────────────────────────────────────────────────────
+//
+// Both source fences ask the same question about one member of the context (`facts`, `actor`): where
+// does the object it holds go? Answering it in one place keeps the two fences from disagreeing about
+// which spellings reach the object (`ctx.m`, `ctx['m']`, `{ m }`, `{ m: alias }`, `const a = …`,
+// through parentheses, `!` and casts) and about which uses are a named read.
+
+/** One use of the object a context member holds. */
+export type MemberUse =
+  /** `o.name`, `o['name']` */
+  | { readonly kind: 'member'; readonly name: string; readonly node: ts.Node }
+  /** `o[k]`, with a key that is not a literal */
+  | { readonly kind: 'computed'; readonly node: ts.Node }
+  /** `const { … } = o`, or `{ m: { … } }` in a binding of the context */
+  | {
+      readonly kind: 'destructure';
+      readonly pattern: ts.ObjectBindingPattern;
+      readonly node: ts.Node;
+    }
+  /** anything else: a call argument, a spread, a return, an operand of `in`, an assignment, … */
+  | { readonly kind: 'escape'; readonly how: string; readonly node: ts.Node };
+
+type Found = MemberUse | { readonly kind: 'alias'; readonly name: string };
+
+/** One element of a destructure: its literal member name (`null`: computed), or a rest element. */
+export interface PatternMember {
+  readonly name: string | null;
+  readonly rest: boolean;
+  readonly node: ts.BindingElement;
+}
+
+export const patternMembers = (
+  pattern: ts.ObjectBindingPattern,
+): PatternMember[] =>
+  pattern.elements.map((el) => {
+    const key = el.propertyName ?? el.name;
+    const name =
+      ts.isIdentifier(key) || ts.isStringLiteralLike(key) ? key.text : null;
+    return { name, rest: el.dotDotDotToken !== undefined, node: el };
+  });
+
+/** A wrapper that does not change which object its operand denotes. */
+const isTransparent = (n: ts.Node): boolean =>
+  ts.isParenthesizedExpression(n) ||
+  ts.isNonNullExpression(n) ||
+  ts.isAsExpression(n) ||
+  ts.isTypeAssertionExpression(n) ||
+  ts.isSatisfiesExpression(n);
+
+/** An identifier that denotes a value, rather than naming a declaration, a property or a type. */
+const isValueReference = (id: ts.Identifier): boolean => {
+  const p = id.parent;
+  if (ts.isShorthandPropertyAssignment(p)) return true;
+  if (ts.isPropertyAccessExpression(p)) return p.expression === id;
+  if (ts.isQualifiedName(p) || ts.isTypeNode(p)) return false;
+  const named = p as {
+    name?: ts.Node;
+    propertyName?: ts.Node;
+    label?: ts.Node;
+  };
+  return named.name !== id && named.propertyName !== id && named.label !== id;
+};
+
+/**
+ * Every use, in `sf`, of the object held by the context member `member`. The object is reached as
+ * `x.member`, `x['member']`, an identifier named `member`, or an alias bound from one of those — by
+ * `const a = …`, or by a binding element `{ member: a }` in a declaration or a parameter. A
+ * destructuring ASSIGNMENT of the member (`({ member: a } = x)`) is reported as an escape. Aliases are
+ * followed by name, not by scope, so the answer over-approximates: a fence built on it can be too
+ * red, never too green, about the spellings above.
+ *
+ * Not seen: the member reached through a computed key on the context itself (`ctx[k]`), or the
+ * whole context handed to code outside `sf`.
+ */
+export const memberUses = (sf: ts.SourceFile, member: string): MemberUse[] => {
+  const names = new Set<string>([member]);
+
+  const isRoot = (n: ts.Node): boolean =>
+    (ts.isPropertyAccessExpression(n) && n.name.text === member) ||
+    (ts.isElementAccessExpression(n) &&
+      ts.isStringLiteralLike(n.argumentExpression) &&
+      n.argumentExpression.text === member) ||
+    (ts.isIdentifier(n) && names.has(n.text) && isValueReference(n));
+
+  const isMemberBinding = (n: ts.Node): n is ts.BindingElement => {
+    if (!ts.isBindingElement(n) || n.dotDotDotToken !== undefined) return false;
+    const key = n.propertyName ?? n.name;
+    return (
+      (ts.isIdentifier(key) || ts.isStringLiteralLike(key)) &&
+      key.text === member
+    );
+  };
+
+  const useOf = (root: ts.Node): Found => {
+    let x = root;
+    while (isTransparent(x.parent)) x = x.parent;
+    const p = x.parent;
+    if (ts.isPropertyAccessExpression(p) && p.expression === x)
+      return { kind: 'member', name: p.name.text, node: p };
+    if (ts.isElementAccessExpression(p) && p.expression === x)
+      return ts.isStringLiteralLike(p.argumentExpression)
+        ? { kind: 'member', name: p.argumentExpression.text, node: p }
+        : { kind: 'computed', node: p };
+    if (ts.isVariableDeclaration(p) && p.initializer === x) {
+      if (ts.isIdentifier(p.name)) return { kind: 'alias', name: p.name.text };
+      if (ts.isObjectBindingPattern(p.name))
+        return { kind: 'destructure', pattern: p.name, node: p };
+    }
+    return { kind: 'escape', how: ts.SyntaxKind[p.kind], node: p };
+  };
+
+  // `({ member: a } = ctx)`: an object literal that is the target of an assignment destructures
+  // rather than builds. The alias it binds is not followed; the destructure itself is an escape.
+  const isAssignedFrom = (n: ts.Node): n is ts.PropertyAssignment => {
+    if (
+      !ts.isPropertyAssignment(n) ||
+      !(ts.isIdentifier(n.name) || ts.isStringLiteralLike(n.name)) ||
+      n.name.text !== member
+    )
+      return false;
+    let x: ts.Node = n.parent;
+    for (;;) {
+      const p = x.parent;
+      if (ts.isPropertyAssignment(p) && p.initializer === x) x = p.parent;
+      else if (
+        ts.isArrayLiteralExpression(p) ||
+        ts.isSpreadElement(p) ||
+        ts.isSpreadAssignment(p)
+      )
+        x = p;
+      else break;
+    }
+    const p = x.parent;
+    return (
+      (ts.isBinaryExpression(p) &&
+        p.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+        p.left === x) ||
+      ((ts.isForOfStatement(p) || ts.isForInStatement(p)) &&
+        p.initializer === x)
+    );
+  };
+
+  const bindingUse = (b: ts.BindingElement): Found =>
+    ts.isIdentifier(b.name)
+      ? { kind: 'alias', name: b.name.text }
+      : ts.isObjectBindingPattern(b.name)
+        ? { kind: 'destructure', pattern: b.name, node: b }
+        : { kind: 'escape', how: ts.SyntaxKind[b.name.kind], node: b };
+
+  const collect = (): Found[] => {
+    const found: Found[] = [];
+    const visit = (n: ts.Node): void => {
+      if (isRoot(n)) found.push(useOf(n));
+      if (isMemberBinding(n)) found.push(bindingUse(n));
+      if (isAssignedFrom(n))
+        found.push({
+          kind: 'escape',
+          how: 'destructuring assignment',
+          node: n,
+        });
+      ts.forEachChild(n, visit);
+    };
+    visit(sf);
+    return found;
+  };
+
+  // Aliases of aliases: grow the name set until it stops growing.
+  for (;;) {
+    const before = names.size;
+    for (const u of collect()) if (u.kind === 'alias') names.add(u.name);
+    if (names.size === before) break;
+  }
+  return collect().filter((u): u is MemberUse => u.kind !== 'alias');
+};
+
 describe('pipeline slot sources', () => {
   it('derives every slot of §3.9, and the gate files the slots call', () => {
     const p = pipelineSources();
@@ -179,5 +354,55 @@ describe('pipeline slot sources', () => {
     expect(p.gatewayRest.source).not.toMatch(/n: '1'/);
     expect(p.otherUnits.map((u) => u.file)).toContain('gates/facts.ts');
     expect(p.otherUnits.map((u) => u.file)).not.toContain('gates/gate5.ts');
+  });
+
+  it('follows a context member through each spelling that reaches it, and classifies each use', () => {
+    const uses = (body: string): string[] =>
+      memberUses(
+        parseSource('probe.ts', `declare const ctx: any;\n${body}\n`),
+        'm',
+      ).map((u) => {
+        switch (u.kind) {
+          case 'member':
+            return `member:${u.name}`;
+          case 'computed':
+            return 'computed';
+          case 'destructure':
+            return `destructure:${patternMembers(u.pattern)
+              .map((e) => (e.rest ? '...' : (e.name ?? '[]')))
+              .join(',')}`;
+          case 'escape':
+            return `escape:${u.how}`;
+        }
+      });
+    expect(uses("ctx.m.a; ctx['m'].b; (ctx.m as any)!.c; ctx.m[k];")).toEqual([
+      'member:a',
+      'member:b',
+      'member:c',
+      'computed',
+    ]);
+    expect(
+      uses(
+        'const a = ctx.m; const b = a; b.x; const { m: c } = ctx; c.y; (({ m }: any) => m.z)(ctx);',
+      ),
+    ).toEqual(['member:x', 'member:y', 'member:z']);
+    expect(
+      uses(
+        "const { p, ...r } = ctx.m; const { m: { q, [k]: s } } = ctx; f(ctx.m); ({ ...ctx.m }); 'p' in ctx.m; ({ m: t } = ctx); [{ m: u }] = [ctx]; return ctx.m;",
+      ),
+    ).toEqual([
+      'destructure:p,...',
+      'destructure:q,[]',
+      'escape:CallExpression',
+      'escape:SpreadAssignment',
+      'escape:BinaryExpression',
+      'escape:destructuring assignment',
+      'escape:destructuring assignment',
+      'escape:ReturnStatement',
+    ]);
+    // Names that only spell the member are not uses of it.
+    expect(
+      uses('const o = { m: 1 }; type T = { m: string }; o.q; ctx.n.m2;'),
+    ).toEqual([]);
   });
 });

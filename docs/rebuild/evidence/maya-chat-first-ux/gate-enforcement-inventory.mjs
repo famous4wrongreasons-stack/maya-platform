@@ -32,6 +32,14 @@ const INGRESS = 'maya-saas-backend/src/action-engine/action-engine.ingress.ts';
 // function reads that gate's own file; the checks applied to it are the same as before the split.
 // A slot that is a `pending()` stub has no gate file: its row reads the gateway, as Gate 9's always
 // has. Since U0, slots 8 and 10 are such stubs, and their former files are deleted.
+//
+// Such a row is `stubOnly`. Its symbol is the slot's NAME, so "defined" and "called" are true for any
+// slot that exists, and no constant-pass test can apply to it: the row can show that a stub is there
+// and nothing else. So a stubOnly row is never counted as enforced, and the moment its slot stops being
+// a `pending()` stub the script prints INCOHERENT. OBLIGATION of the unit that builds slot 8, 9 or 10:
+// in the same commit, re-point that row at the file that holds the slot's enforcing function
+// (`...logicRow('gate8')`, or an equivalent row for a service), so that the symbol, call and
+// constant-pass checks apply to the code that actually runs.
 const gateFile = (name) => `maya-saas-backend/src/widgets/gates/${name}.ts`;
 const logicRow = (name) => ({ file: gateFile(name), src: read(gateFile(name)), logic: true });
 
@@ -57,10 +65,10 @@ const GATES = [
   { n: '6', name: 'Authority', symbol: 'gate6', host: 'pipeline', ...logicRow('gate6') },
   { n: '6r', name: 'R3.5.1 sensitive destination', symbol: 'gateSensitiveDest', host: 'pipeline (with 6)', ...logicRow('gate6') },
   { n: '7', name: 'Effect admissibility', symbol: 'gate7', host: 'pipeline', ...logicRow('gate7') },
-  { n: '8', name: 'Input validation', symbol: "'Input validation'", host: 'pipeline', file: GATEWAY, src: gateway },
+  { n: '8', name: 'Input validation', symbol: "'Input validation'", host: 'pipeline', file: GATEWAY, src: gateway, stubOnly: true },
   { n: '8-R', name: 'Readback', symbol: 'gate8R', host: 'pipeline', ...logicRow('gate8r') },
-  { n: '9', name: 'Lowering', symbol: "'Lowering'", host: 'pipeline', file: GATEWAY, src: gateway },
-  { n: '10', name: 'Divergence audit', symbol: "'Divergence audit'", host: 'pipeline', file: GATEWAY, src: gateway },
+  { n: '9', name: 'Lowering', symbol: "'Lowering'", host: 'pipeline', file: GATEWAY, src: gateway, stubOnly: true },
+  { n: '10', name: 'Divergence audit', symbol: "'Divergence audit'", host: 'pipeline', file: GATEWAY, src: gateway, stubOnly: true },
   { n: '11', name: 'Noun resolution', symbol: 'gate11', host: 'pipeline', ...logicRow('gate11') },
   { n: '12', name: 'Data fence', symbol: 'gate12', host: 'pipeline', ...logicRow('gate12') },
   { n: '13', name: 'Effect routing', symbol: 'gate13', host: 'pipeline', ...logicRow('gate13') },
@@ -94,7 +102,8 @@ const rows = GATES.map((g) => {
   // anything the pipeline does or does not contain.
   const stub =
     g.host.startsWith('pipeline') && new RegExp(`pending\\(\\s*'${g.n}'`).test(gateway);
-  return { ...g, defined, called, stub, constantPass, enforced: defined && called && !stub && !constantPass };
+  // A stubOnly row cannot see the code of a built slot (see the obligation above), so it never counts.
+  return { ...g, defined, called, stub, constantPass, enforced: defined && called && !stub && !constantPass && g.stubOnly !== true };
 });
 
 // REACHABILITY. The runner stops at the first non-pass verdict, so a correct gate placed after a
@@ -155,13 +164,16 @@ console.log(`  ${audit.headline}`);
 // these are the places where judgement may not contradict the code:
 //   - COMPLETE needs every mechanical check, and reachability;
 //   - PARTIAL means "reachable, and some clauses execute", so it needs reachability too;
-//   - NOT_BUILT is exactly a refusing pending() stub, and every stub is NOT_BUILT.
+//   - NOT_BUILT is exactly a refusing pending() stub, and every stub is NOT_BUILT;
+//   - a stubOnly row describes a stub, so its slot must still be one (not audit judgement: the row
+//     itself is stale, and the unit that built the slot owes it a re-point).
 const mech = (n) => contractGates.find((r) => r.n === n);
 const incoherent = [
   ...audit.tally.COMPLETE.filter((n) => !(mech(n)?.enforced && mech(n)?.reachable)).map((n) => `gate ${n}: audit COMPLETE, mechanical checks or reachability fail`),
   ...(audit.tally.PARTIAL ?? []).filter((n) => !mech(n)?.reachable).map((n) => `gate ${n}: audit PARTIAL, but unreachable behind gate ${ORDER[firstStub]}`),
   ...(audit.tally.NOT_BUILT ?? []).filter((n) => !mech(n)?.stub).map((n) => `gate ${n}: audit NOT_BUILT, but the slot is not a pending() stub`),
   ...contractGates.filter((r) => r.stub && !(audit.tally.NOT_BUILT ?? []).includes(r.n)).map((r) => `gate ${r.n}: a pending() stub the audit does not call NOT_BUILT`),
+  ...rows.filter((r) => r.stubOnly && !r.stub).map((r) => `gate ${r.n}: its row reads the gateway by slot name and can only see a stub, but the slot is no longer a pending() stub — re-point the row at the slot's enforcing file (logicRow) before anything may count it`),
 ];
 for (const line of incoherent) console.log(`  INCOHERENT: ${line}`);
 
