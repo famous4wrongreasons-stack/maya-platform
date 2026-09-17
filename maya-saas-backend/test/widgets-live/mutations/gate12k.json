@@ -1,0 +1,29 @@
+[
+  {
+    "id": "K4K8-M1",
+    "description": "The widget-layer PII path comes back: CARRIER_PII_CEILING and PII_RANK are restored into an authority module, the shape P-K4K8 removed. F95 item 2 (C11:1882-1886) forbids a widget-layer module implementing PII masking of its own, so K4K8-1 must go red, and ARCH-12-2 with it once U12a has merged.",
+    "file": "src/widgets/authority/capability-policy.ts",
+    "find": "import { C9_CAPABILITIES } from '../../orchestration/c9.registry';\n",
+    "replace": "import { C9_CAPABILITIES } from '../../orchestration/c9.registry';\n\n/** Restored widget-layer PII path (mutant). */\nexport const CARRIER_PII_CEILING: Readonly<Record<string, string>> =\n  Object.freeze({\n    pwa: 'client_identified',\n    'web-push': 'none',\n  });\nexport const PII_RANK: Readonly<Record<string, number>> = Object.freeze({\n  none: 0,\n  business_aggregate: 1,\n  client_identified: 2,\n});\n",
+    "killers": ["K4K8-1", "ARCH-12-2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "K4K8-M2",
+    "description": "The fourth presentation mode comes back: a PresentationMode declaration inside the widget layer regains 'system', which F18's three modes (C11:292-296, C.5 correction C11:7333) exclude. K4K8-2 must go red.",
+    "file": "src/widgets/authority/capability-policy.ts",
+    "find": "const CLIENT_ROLES = new Set(['client', 'customer']);\n",
+    "replace": "export type PresentationMode = 'client' | 'staff' | 'owner' | 'system';\n\nconst CLIENT_ROLES = new Set(['client', 'customer']);\n",
+    "killers": ["K4K8-2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "K4K8-M3",
+    "description": "The ratchet is blinded instead of the path restored: the scan stops at the top level of src/widgets, so a PII path in any subdirectory is no longer seen and K4K8-1 and K4K8-2 pass vacuously. The guard's own scan-coverage case must go red, before and after IR-K4K8-1 alike.",
+    "file": "src/widgets/gates/gate12-pii-path.source.spec.ts",
+    "find": "        ? walk(path.join(dir, e.name))\n",
+    "replace": "        ? []\n",
+    "killers": ["K4K8-0"],
+    "expect": "build-killed"
+  }
+]
