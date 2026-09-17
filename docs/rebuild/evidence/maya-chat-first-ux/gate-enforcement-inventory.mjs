@@ -150,31 +150,62 @@ console.log('  the symbol exists, the path calls it, and it is not a stub.');
 // 6dc37bc8 was that blind spot. The clause-by-clause reading is a recorded audit — judgement, kept in
 // a file so it can be argued with — and the headline figure is taken from it, never from the count
 // above.
+//
+// Since I-AUD0 (GATES-PLAN-V11) the audit is schema /2 against Contract V1.1: one state per clause
+// (L, L-T, U, STOPPED:<id>, BLOCKED-DISCHARGE, false). A gate is COMPLETE when every clause is L or
+// L-T, COMPLETE-U when U is also admitted. The figures are recomputed here from the clause states and
+// compared with the recorded tally and headline; `built` is an annotation and never counts.
 const audit = JSON.parse(read('docs/rebuild/evidence/maya-chat-first-ux/gate-conformance-audit.json'));
+const AUDIT_SCHEMA = 'maya.gate-conformance-audit/2';
+const schemaOk = audit.contract === AUDIT_SCHEMA && Array.isArray(audit.gates);
+const tally = audit.tally ?? {};
+const clausesOf = (g) => Object.entries(g.clauses ?? {});
+const allIn = (g, ok) => clausesOf(g).length > 0 && clausesOf(g).every(([, c]) => ok.includes(c?.state));
+const auditGates = schemaOk ? audit.gates : [];
+const strictGates = auditGates.filter((g) => allIn(g, ['L', 'L-T'])).map((g) => g.n);
+const withUGates = auditGates.filter((g) => allIn(g, ['L', 'L-T', 'U'])).map((g) => g.n);
+const clauseStates = auditGates.flatMap((g) => clausesOf(g).map(([, c]) => String(c?.state)));
+const stoppedClauses = clauseStates.filter((s) => s.startsWith('STOPPED')).length;
+const blockedClauses = clauseStates.filter((s) => s === 'BLOCKED-DISCHARGE').length;
+const derivedHeadline = `GATES LIVE CONTRACT-COMPLETE ${strictGates.length}/15 · WITH U-CLASS ${withUGates.length}/15 · STOPPED CLAUSES ${stoppedClauses} · BLOCKED-DISCHARGE CLAUSES ${blockedClauses}`;
 console.log();
-console.log('CONFORMANCE TO §3.9, clause by clause (gate-conformance-audit.json)');
-for (const [cls, ids] of Object.entries(audit.tally)) console.log(`  ${cls.padEnd(10)} ${String(ids.length).padStart(2)}  gate ${ids.join(', ')}`);
-for (const g of audit.gates) {
-  const open = Object.entries(g.clauses).filter(([, ok]) => !ok).map(([c]) => c);
-  if (open.length) console.log(`    gate ${g.n.padEnd(4)} open: ${open.join('; ')}`);
+console.log(`CONFORMANCE TO CONTRACT V1.1 §3.9, clause by clause (gate-conformance-audit.json, ${audit.contract})`);
+for (const [cls, ids] of Object.entries(tally)) console.log(`  ${cls.padEnd(15)} ${String(ids.length).padStart(2)}  gate ${ids.join(', ') || '—'}`);
+for (const g of auditGates) {
+  const cl = clausesOf(g);
+  const count = (s) => cl.filter(([, c]) => c?.state === s).length;
+  const open = cl.filter(([, c]) => !['L', 'L-T'].includes(c?.state)).map(([k]) => k);
+  console.log(
+    `    gate ${g.n.padEnd(4)} ${String(g.class).padEnd(15)} L/L-T ${count('L') + count('L-T')}/${cl.length}  U ${count('U')}  ` +
+      `BLOCKED-DISCHARGE ${count('BLOCKED-DISCHARGE')}  built ${cl.filter(([, c]) => c?.built === true).length}` +
+      (open.length ? `  open: ${open.join(', ')}` : ''),
+  );
 }
 console.log();
 console.log(`  ${audit.headline}`);
 // Consistency between the recorded audit and what the mechanical checks see. The audit is judgement;
-// these are the places where judgement may not contradict the code:
-//   - COMPLETE needs every mechanical check, and reachability;
-//   - PARTIAL means "reachable, and some clauses execute", so it needs reachability too;
+// these are the places where judgement may not contradict the code, or itself:
+//   - the audit is schema /2, has fifteen gates, and its tally and headline equal what its clause
+//     states give;
+//   - COMPLETE and COMPLETE-U need every mechanical check, and reachability;
+//   - PARTIAL (and PARTIAL-STOPPED) means "reachable, and some clauses execute", so it needs reachability too;
 //   - NOT_BUILT is exactly a refusing pending() stub, and every stub is NOT_BUILT;
 //   - a stubOnly row describes a stub, so its slot must still be one (not audit judgement: the row
 //     itself is stale, and the unit that built the slot owes it a re-point).
 const mech = (n) => contractGates.find((r) => r.n === n);
+const sameSet = (a = [], b = []) => a.length === b.length && a.every((x) => b.includes(x));
 const incoherent = [
-  ...audit.tally.COMPLETE.filter((n) => !(mech(n)?.enforced && mech(n)?.reachable)).map((n) => `gate ${n}: audit COMPLETE, mechanical checks or reachability fail`),
-  ...(audit.tally.PARTIAL ?? []).filter((n) => !mech(n)?.reachable).map((n) => `gate ${n}: audit PARTIAL, but unreachable behind gate ${ORDER[firstStub]}`),
-  ...(audit.tally.NOT_BUILT ?? []).filter((n) => !mech(n)?.stub).map((n) => `gate ${n}: audit NOT_BUILT, but the slot is not a pending() stub`),
-  ...contractGates.filter((r) => r.stub && !(audit.tally.NOT_BUILT ?? []).includes(r.n)).map((r) => `gate ${r.n}: a pending() stub the audit does not call NOT_BUILT`),
+  ...(schemaOk ? [] : [`the audit is ${audit.contract ?? 'unversioned'}, not ${AUDIT_SCHEMA}: nothing below may be read from it`]),
+  ...(schemaOk && audit.gates.length !== 15 ? [`the audit records ${audit.gates.length} gates, not 15`] : []),
+  ...(schemaOk && !sameSet(tally.COMPLETE, strictGates) ? [`tally COMPLETE [${(tally.COMPLETE ?? []).join(', ')}] is not the gates whose every clause is L or L-T [${strictGates.join(', ')}]`] : []),
+  ...(schemaOk && !sameSet(tally['COMPLETE-U'], withUGates.filter((n) => !strictGates.includes(n))) ? [`tally COMPLETE-U [${(tally['COMPLETE-U'] ?? []).join(', ')}] does not match the clause states`] : []),
+  ...(schemaOk && audit.headline !== derivedHeadline ? [`recorded headline "${audit.headline}" != recomputed "${derivedHeadline}"`] : []),
+  ...[...(tally.COMPLETE ?? []), ...(tally['COMPLETE-U'] ?? [])].filter((n) => !(mech(n)?.enforced && mech(n)?.reachable)).map((n) => `gate ${n}: audit COMPLETE, mechanical checks or reachability fail`),
+  ...[...(tally.PARTIAL ?? []), ...(tally['PARTIAL-STOPPED'] ?? [])].filter((n) => !mech(n)?.reachable).map((n) => `gate ${n}: audit PARTIAL, but unreachable behind gate ${ORDER[firstStub]}`),
+  ...(tally.NOT_BUILT ?? []).filter((n) => !mech(n)?.stub).map((n) => `gate ${n}: audit NOT_BUILT, but the slot is not a pending() stub`),
+  ...contractGates.filter((r) => r.stub && !(tally.NOT_BUILT ?? []).includes(r.n)).map((r) => `gate ${r.n}: a pending() stub the audit does not call NOT_BUILT`),
   ...rows.filter((r) => r.stubOnly && !r.stub).map((r) => `gate ${r.n}: its row reads the gateway by slot name and can only see a stub, but the slot is no longer a pending() stub — re-point the row at the slot's enforcing file (logicRow) before anything may count it`),
 ];
 for (const line of incoherent) console.log(`  INCOHERENT: ${line}`);
 
-process.exitCode = audit.tally.COMPLETE.length === contractGates.length && !incoherent.length ? 0 : 1;
+process.exitCode = strictGates.length === contractGates.length && !incoherent.length ? 0 : 1;

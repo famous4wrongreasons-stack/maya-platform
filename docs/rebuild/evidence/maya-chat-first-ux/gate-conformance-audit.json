@@ -1,39 +1,2317 @@
 {
-  "contract": "maya.gate-conformance-audit/1",
-  "performedAt": "2026-09-16",
-  "revisedAt": "2026-09-17",
-  "revision": "U0 step S2 of the Gates 6-13 integration plan: slot 8 and slot 10 are refusing pending() stubs (legacy gate8, MAX_SUBMISSION_BYTES, gate10, DivergenceRecord, divergences[] and effectClassOf deleted); J-1 facts, the actor base member and the union findRecord select exist, but no gate produces or reads a fact yet. Nothing became live: the first refusing stub moved from Gate 9 to Gate 8, so Gate 8-R left the reachable set.",
-  "against": "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md §3.9, the gate table (lines 4335-4348) and «Gate 6 in full» (line 4352)",
-  "why": "The 15/15 reported at 6dc37bc8 counted gates whose function exists, is called, and is not a stub. That test cannot see a gate that implements part of its row, runs with no input, or passes without doing its step. This audit reads each certified row clause by clause against the code on the admission path.",
-  "classes": {
-    "COMPLETE": "every clause of the row executes on the live admission path with real input",
-    "PARTIAL": "reachable, and some clauses execute, but named clauses do not",
-    "NOT_BUILT": "the step is absent; the slot is a refusing NORMATIVE-PENDING stub",
-    "NOT_LIVE": "the function exists and is unit-tested, but on the live path it is unreachable behind the first refusing stub (Gate 9 until 2026-09-16; Gate 8 since U0 S2), and it lacks its input or its dispatch as well"
+  "contract": "maya.gate-conformance-audit/2",
+  "performedAt": "2026-09-17",
+  "unit": "I-AUD0 (GATES-PLAN-V11, Wave 0): re-baseline against Contract V1.1",
+  "baseCommit": "d5ecca98b2f7455c4770ad8bbfd01e61da82aa6b",
+  "against": {
+    "document": "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md",
+    "version": "1.1",
+    "sha256": "606d7f99da5fe1977d5efe737dca91a04f2b11faecddbd666120d34a03e94a8a",
+    "lines": 7415,
+    "gateTable": "C11:4718-4734",
+    "gate6InFull": "C11:4736-4798",
+    "gate10InFull": "C11:4800-4876",
+    "lineRef": "C11:n is line n of the document at this SHA"
+  },
+  "supersedes": {
+    "contract": "maya.gate-conformance-audit/1",
+    "blob": "git show d5ecca98:docs/rebuild/evidence/maya-chat-first-ux/gate-conformance-audit.json (blob 94e38221)",
+    "headline": "GATES CONFORMING TO §3.9 ON THE LIVE PATH: 6/15",
+    "complete": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "14"
+    ],
+    "why": "The /1 audit was scored against V1 clause lists and V1 line anchors (lines 4335-4348 and 4352), and it counted module presence as conformance. Against V1.1 and the evidence rules of §0.5 no gate conforms: Gate 1 lacks the keyed seal, widget_id and the L8 outcomes with the R3.9.4 successor; Gate 3 compares a local sha256, not c9PrincipalHash; Gate 4 does not call assertTenantId; Gate 5 lacks SUPERSEDED, the successor, the counter and the in-transaction level; Gate 2 is a constant pass in slot 2 with G2-EQ not run; Gate 14 is a terminate pointer that no widget submission passes (AREA-C F-1; review findings 1 and 2). This re-baseline lowers the headline from 6 to 0 and flips nothing up."
+  },
+  "why": "Each V1.1 row is split into the clause keys of the plan's §3.1 inventory (the keys of gate-clause-inventory.json, added by I-HAR). A clause counts only when its state is L or L-T (strict) or also U (with U-class), with evidence entries, mutant artifact ids and ruling pins. `built: true` records that code for the clause exists at the base commit; it never counts. GATE MODULE EXISTS ≠ GATE ENFORCED.",
+  "clauseStates": {
+    "L": "executed on the live admission path with real input: HTTP (AppModule, all six APP_GUARDs, FeatureGuard not overridden, widgets.runtime granted by Fixtures.grantFeature) AND BIN (dist/src/main), on a record minted by P-MINT-CORE from a production trigger (T-2b, T-2a, T-1, T-3, or a qualifying successor edge), provenance verified per D-17; counts strict and U",
+    "L (EP-BUILD clause)": "a clause whose certified evaluation point is EP-BUILD: its EP-BUILD test green in the flipping commit's CI and, where it protects a runtime property, an L test on the same commit; counts strict and U",
+    "L-T": "a defence-in-depth refusal evidenced by E-TAMPER (never on a SealVerifier column except G1-a) or E-INDEP on the live path, only with an L positive for the same clause and every declared mutant live-killed by an [HTTP] killer; never for Gate 9/10 clauses; counts strict and U",
+    "U": "no conformant input this cycle by certified text or settled scope, with all four proof duties of §0.5 and the quoted basis; counts toward the U count only (OD-3)",
+    "STOPPED:<id>": "held by a Sheet 06 STOP (§0.4); counts toward neither",
+    "BLOCKED-DISCHARGE": "needs an actuating mint (D-4); counts toward neither until E2",
+    "false": "anything else, including G-SYNTH, RI, stub owners, GW-only runs, unit tests, hand fixtures, a green mutation run alone, k3 presence or liveGateCount; counts toward neither"
+  },
+  "clauseFields": {
+    "text": "the clause as §3.1 states it",
+    "state": "one of clauseStates",
+    "conforms": "true only when state is L or L-T (the strict count); false for every clause at I-AUD0",
+    "built": "code for the clause exists at baseCommit (annotation only; never evidence)",
+    "built_evidence": "where that code is",
+    "built_note": "what is present and what is missing",
+    "u_candidate": "true when OD-3 lists the clause (or a named part, see u_candidate_scope) as a U candidate; recorded false until the four U duties are met",
+    "u_basis": "the certified or settled sentence the U claim would quote",
+    "reason": "\"not built (DEV-1; OD-1)\" on every DEV-1 clause",
+    "blocked": "why a BLOCKED-DISCHARGE clause is blocked",
+    "blocked_part": "a sub-case of a non-blocked key that is BLOCKED-DISCHARGE until E2",
+    "false_part": "a sub-case that stays false on a delivery dependency",
+    "after_discharge": "what the state becomes after E2 without the named registration",
+    "waits_on": "delivery dependencies or owner decisions (a slip keeps the clause false; it never moves it to U)",
+    "evidence": "evidence-manifest lines (test id, entry HTTP/BIN, trigger trace, record hash, labels); empty at I-AUD0",
+    "mutants": "mutant ids with the widgets-mutation artifact id and status; empty at I-AUD0",
+    "rulings": "ruling pins (DS-03 A, A3 rows, B-nn, AMB-nn, D-n)"
+  },
+  "gateClasses": {
+    "COMPLETE": "every clause L or L-T",
+    "COMPLETE-U": "every clause L, L-T or U, with at least one U",
+    "PARTIAL-STOPPED": "some clause STOPPED; cannot be COMPLETE",
+    "PARTIAL": "reachable on the live path, and code for some clauses executes, but the gate is not COMPLETE",
+    "NOT_BUILT": "the slot is a refusing pending() stub (mechanism_absent)",
+    "NOT_LIVE": "the function or module exists, but no live widget submission reaches it (behind the first refusing stub at slot 8, and/or with no input or dispatch)"
   },
   "gates": [
-    { "n": "1", "class": "COMPLETE", "clauses": { "token resolves to its record (hash lookup)": true, "not expired": true, "not consumed when single_use": true, "not superseded": true }, "note": "widget_id match is implicit: one token hash resolves to exactly one record, and the submission carries no widget_id to compare." },
-    { "n": "2", "class": "COMPLETE", "clauses": { "session resolved as for a typed message (global JwtAuthGuard, APP_GUARD)": true, "widgets controller does not opt out (@Public absent)": true } },
-    { "n": "3", "class": "COMPLETE", "clauses": { "principal_proof_hash equals the live principal's, constant-time": true } },
-    { "n": "4", "class": "COMPLETE", "clauses": { "record tenant equals the live principal's tenant": true } },
-    { "n": "5", "class": "COMPLETE", "clauses": { "floor recomputed from live tables": true, "any stored/recomputed difference refuses": true, "level capped by the carrier ceiling": true, "branch per effect class": true, "level derived server-side from an active membership (JwtStrategy sets tenantId only from getActiveMembership)": true }, "deviations": ["policy_floor_changed is emitted with outcome refuse; the row names SUPERSEDED / policy_floor_changed", "HANDOFF_REQUIRED carries no deep link"] },
-    { "n": "6", "class": "PARTIAL", "clauses": { "dispatch on subjectCapability, not record.capability": true, "null subject proceeds": true, "TOOL ref refused": true, "C9: registered and has a WIDGET_CAPABILITY_POLICY row": true, "C9, the 47 catalogue keys: AiToolPolicyService.assertCanExecute(principal, def)": false, "C9: c9Capability domain admission when c9_domain is non-null": false, "AE (a): allowlist row required for EVERY key": false, "AE (b): policyDecision === ALLOW": false, "AE (c): allowedSourceTypes includes authenticated_request": false, "AE (d): live principal role in allowedActorRoles": false, "AE (e): entitlements grant requiredFeatures": false, "HANDOFF resolves destination fences only": false, "R3.5.1 sensitive destination admits class-s HANDOFF only": true }, "note": "The principal's role is never read. resolvedRoles is deleted; the controller passes the JWT-validated actor, and a source test forbids Gate 6 from reading actor.role until AMB-03 rules which read supplies the live principal's role. For the catalogue keys this is the check that decides whether THIS principal may exercise THIS capability." },
-    { "n": "7", "class": "PARTIAL", "clauses": { "COMMIT names an AE key": true, "COMMIT key is allowlisted": true, "COMMIT carries a non-null confirmation_of_ref": true, "effect within the kind's declared ceiling": false, "key space matches effect for every effect (R3.2.2)": false, "CONTROL keys are in the control registry": false, "produced_by_intent_token_hash when confirmation kind !== draft (§3.10.2)": false, "requiredConfirmationKind(subject) === record.widget_kind, re-read live (F72)": false, "delivering tier permitted this effect (§3.12)": false } },
-    { "n": "8", "class": "NOT_BUILT", "clauses": { "closed-domain membership for enum/ref": false, "cardinality within [selection_min, selection_max]": false, "bounds re-read from bounds_source": false, "normalizers applied": false, "c9SafeText over text/phone": false, "max_total_bytes enforced by refusal": false, "inputs for a null schema refused": false }, "note": "A refusing pending() stub (mechanism_absent) since U0 S2. The legacy gate8 it replaced failed open (it passed every non-string value, and every value on an empty domain; G8 spec 5.0), so its two clauses previously recorded true were not enforcement and are gone with it. Every submission that passes Gate 7 stops here." },
-    { "n": "8-R", "class": "NOT_LIVE", "clauses": { "readback required on a spoken actuation": true, "ack body_hash equals record body_hash": true, "reachable on the live path": false, "applies exactly when record.confirmation.requires_readback": false, "readback_ref matches": false, "affirmation is a member of the closed vocabulary": false, "a readback_ack on a record that does not require one is refused": false }, "note": "Unreachable since U0 S2: slot 8 refuses every submission first. Keyed on the carrier, not on the record's confirmation, so the row's trigger is not the one implemented. findRecord now projects confirmation.requires_readback and readback_ref (D-3), but gate8R does not read them yet." },
-    { "n": "9", "class": "NOT_BUILT", "clauses": { "rendered_utterance rendered from the template and canonical labels": false, "appended as a USER turn with authority NONE": false }, "note": "Restored to a refusing stub; see DECISION-SHEET-03. The wiring commit had replaced it with a function returning pass. Unreachable since U0 S2 as well: slot 8 refuses first." },
-    { "n": "10", "class": "NOT_BUILT", "clauses": { "router over the lowered utterance": false, "cross effect class refuses (owner ruling)": false, "same class audited": false, "the audit record is written durably": false, "an utterance exists to compare on the tap path": false }, "note": "A refusing pending() stub (mechanism_absent) since U0 S2, integrator decision D-12. The legacy gate10 it replaced read the persisted utterance instead of this request's lowering, audited into a process-local array, and classified effects with a mapping the contract does not state (G10 G-1...G-14); it, DivergenceRecord, divergences[] and effectClassOf are deleted, so the three clauses previously recorded true are false." },
-    { "n": "11", "class": "NOT_LIVE", "clauses": { "handle compared with a fresh read": true, "a fresh read from the canonical owner is supplied on the path": false, "divergence returns SUPERSEDED": false }, "note": "The slot calls gate11(ctx) with no reader, so it passes. Divergence is emitted with outcome refuse, not SUPERSEDED. Unreachable behind slot 8's stub." },
-    { "n": "12", "class": "NOT_LIVE", "clauses": { "the four PII rules (cross-tenant, cross-principal, carrier ceiling, own scope)": true, "a data subject is supplied on the path": false, "the projector that produces the body": false }, "note": "The slot calls gate12(ctx) with no subject, so it passes. The contract marks the projector [TO BUILD]. Unreachable behind slot 8's stub." },
-    { "n": "13", "class": "NOT_LIVE", "clauses": { "unknown space refused": true, "NAVIGATE/REFINE -> projector -> next_envelope": false, "CONTROL -> the control handler": false, "DRAFT -> draft owner": false, "REQUEST_APPROVAL -> approval object": false, "COMMIT -> Gate 14": false }, "note": "Returns a terminate verdict with a route label and dispatches nothing. No business effect is reachable through the widget runtime. Unreachable behind slot 8's stub; the terminate verdict's typed route member exists but gate13 sets none." },
-    { "n": "14", "class": "COMPLETE", "clauses": { "CanonicalActionIngressService: assertNoCallerAuthority before any effect": true, "the policy resolver owns the decision": true } }
+    {
+      "n": "1",
+      "name": "Token integrity",
+      "class": "PARTIAL",
+      "row": "C11:4720",
+      "anchors": "H4 C11:2615-2623; R3.9.4 C11:4907-4935; L8 C11:5506",
+      "figures": {
+        "clauses": 7,
+        "L": 0,
+        "L-T": 0,
+        "U": 0,
+        "STOPPED": 0,
+        "BLOCKED-DISCHARGE": 0,
+        "false": 7,
+        "built": 3,
+        "u_candidates": 0,
+        "dev1": 0
+      },
+      "ceiling": {
+        "strict": "E1 (W5)",
+        "withU": "E1"
+      },
+      "clauses": {
+        "G1-a": {
+          "text": "HMAC valid: seal verified, keyed, before Gate 1 proceeds",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "not built: slot 1 resolves the record by token hash and verifies no keyed seal (P-SEAL)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G1-b": {
+          "text": "`widget_id` matches",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "not built. The /1 note \"widget_id match is implicit\" is OBSOLETE: V1.1 row 1 names the clause, and the submission is compared with nothing (AREA-C F-1)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G1-c": {
+          "text": "not expired",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "intent-gateway.service.ts slot 1: expiresAt <= now refuses EXPIRED",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G1-d": {
+          "text": "not consumed when `single_use`",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "intent-gateway.service.ts slot 1: singleUse && consumedAt !== null refuses EXPIRED",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G1-e": {
+          "text": "not superseded",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "intent-gateway.service.ts slot 1: supersededByWidgetId !== null answers outcome superseded / SUPERSEDED",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G1-f": {
+          "text": "`EXPIRED`/`SUPERSEDED` are response outcomes, with the R3.9.4 successor or the code alone (including A4's three fail-closed conditions)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "not built: EXPIRED is emitted with outcome refuse (L8 C11:5506, B-29) and no successor exists (P-G15a, P-G15b)",
+          "rulings": [
+            "B-29"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G1-g": {
+          "text": "the successor reads nothing canonical (no projector or owner port; `EP-BUILD`)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "not built: no successor exists",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        }
+      }
+    },
+    {
+      "n": "2",
+      "name": "Transport auth",
+      "class": "PARTIAL",
+      "row": "C11:4721",
+      "anchors": "D-16",
+      "figures": {
+        "clauses": 3,
+        "L": 0,
+        "L-T": 0,
+        "U": 0,
+        "STOPPED": 0,
+        "BLOCKED-DISCHARGE": 0,
+        "false": 3,
+        "built": 2,
+        "u_candidates": 0,
+        "dev1": 0
+      },
+      "ceiling": {
+        "strict": "E1 (W5)",
+        "withU": "E1"
+      },
+      "v1_evidence": {
+        "session resolved as for a typed message (global JwtAuthGuard, APP_GUARD)": true,
+        "widgets controller does not opt out (@Public absent)": true
+      },
+      "note": "All three clauses start false (review finding 2). The /1 audit counted Gate 2 COMPLETE on the global guard alone; V1.1 row 2 asks for resolution \"exactly as for a typed message\", which only G2-EQ (a live principal matrix on both routes) can show.",
+      "clauses": {
+        "G2-a": {
+          "text": "session resolved exactly as for a typed message (JWT + Membership, or a verified ClientChannelLink): the same transport chain as `POST /api/ai/chat`, proven by G2-EQ (D-16). `C9Authority.current` in `T` is the K1/K3 principal of Gates 1, 3, 5 and 6, not this clause",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "global JwtAuthGuard as APP_GUARD (app.module.ts); widgets.controller.ts has no @Public; the principal comes from @CurrentUser()",
+          "note": "slot 2 is a constant pass; G2-EQ (D-16) not run",
+          "rulings": [
+            "D-16"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G2-b": {
+          "text": "no credential comes from the widget",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "SubmitIntentDto declares only intent_token, inputs and readback_ack, under the global forbidNonWhitelisted pipe; the actor comes from @CurrentUser(). The runtime forbidden-key walk (P-F88) is not built",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G2-c": {
+          "text": "`REFUSED/unauthenticated`",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "transport stage: the global guard answers 401 with no session. In-array: slot 2 is `run: () => ({ outcome: 'pass' })` and never refuses `unauthenticated` (G2-IN, E-INDEP on N2, not built)",
+          "rulings": [
+            "D-16"
+          ],
+          "evidence": [],
+          "mutants": []
+        }
+      }
+    },
+    {
+      "n": "3",
+      "name": "Principal binding",
+      "class": "PARTIAL",
+      "row": "C11:4722",
+      "anchors": "K3/K4 C11:2544-2546; SH-13",
+      "figures": {
+        "clauses": 7,
+        "L": 0,
+        "L-T": 0,
+        "U": 0,
+        "STOPPED": 0,
+        "BLOCKED-DISCHARGE": 0,
+        "false": 7,
+        "built": 2,
+        "u_candidates": 2,
+        "dev1": 0
+      },
+      "ceiling": {
+        "strict": "never this cycle",
+        "withU": "E1, if OD-3 is accepted and P-MT3 delivers"
+      },
+      "clauses": {
+        "G3-a": {
+          "text": "`principal_proof_hash === c9PrincipalHash(live)`, constant time",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "constant-time compare exists (digestEquals, slot 3) but over a local sha256(userId, tenantId, membershipId, sessionId) (principal.util.ts), not c9PrincipalHash (K4 C11:2546, SH-13); P-PRINCIPAL",
+          "rulings": [
+            "SH-13"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G3-b": {
+          "text": "a token minted for A and replayed by B fails",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "slot 3 digestEquals over a hash that includes userId",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G3-c1": {
+          "text": "membership re-create or role change invalidates outstanding envelopes (the membership branch of K4, C11:2546)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "half: a re-created membership changes membershipId and so the local hash; a role change does not change it",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G3-c2": {
+          "text": "client-link unlink/relink invalidates outstanding envelopes (the CLIENT_CHANNEL branch; U candidate, K14-10)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_basis": "K14-10 PKT:485 (Telegram, the only CLIENT_CHANNEL carrier, carries no callback tokens); R-03/P-33 C11:6620. Duty (2) runs at GW over C9Authority.current(T, proof), disclosed",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G3-d": {
+          "text": "`REFUSED/widget_principal_mismatch`",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "slot 3 refuses widget_principal_mismatch",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G3-e": {
+          "text": "a shared push is inert: a web-push token minted for A and submitted by B is refused, NW (T-3)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "not built: no web-push minter (P-MT3)",
+          "waits_on": [
+            "P-MT3"
+          ],
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G3-f": {
+          "text": "a forwarded Telegram message is inert (U candidate: K14-10 PKT:485, R-03/P-33)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_basis": "K14-10 PKT:485; R-03/P-33 C11:6620: no Telegram callback-token carrier this cycle",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        }
+      }
+    },
+    {
+      "n": "4",
+      "name": "Tenant scope",
+      "class": "PARTIAL",
+      "row": "C11:4723",
+      "anchors": "D-9",
+      "figures": {
+        "clauses": 2,
+        "L": 0,
+        "L-T": 0,
+        "U": 0,
+        "STOPPED": 0,
+        "BLOCKED-DISCHARGE": 0,
+        "false": 2,
+        "built": 1,
+        "u_candidates": 0,
+        "dev1": 0
+      },
+      "ceiling": {
+        "strict": "E1 (W5)",
+        "withU": "E1"
+      },
+      "clauses": {
+        "G4-a": {
+          "text": "`TenantContextService.assertTenantId` over the record's tenant and the live principal's",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "not built: slot 4 compares r.tenantId === ctx.tenantId as strings (intent-gateway.service.ts); the row names the assertTenantId call (U4)",
+          "rulings": [
+            "D-9"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G4-b": {
+          "text": "`REFUSED/tenant_mismatch`",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "slot 4 refuses tenant_mismatch",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        }
+      }
+    },
+    {
+      "n": "5",
+      "name": "Verification floor",
+      "class": "PARTIAL",
+      "row": "C11:4724",
+      "anchors": "R3.4.2 C11:4020-4030; R3.4.5 C11:4071-4087; F52 C11:1117-1124; K10 C11:2564; K1/K2 C11:2532-2542",
+      "figures": {
+        "clauses": 6,
+        "L": 0,
+        "L-T": 0,
+        "U": 0,
+        "STOPPED": 0,
+        "BLOCKED-DISCHARGE": 0,
+        "false": 6,
+        "built": 3,
+        "u_candidates": 1,
+        "dev1": 0
+      },
+      "ceiling": {
+        "strict": "never this cycle",
+        "withU": "E1, if OD-3 is accepted"
+      },
+      "clauses": {
+        "G5-a": {
+          "text": "floor re-derived from the live registry and policy tables",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "gates/gate5.ts recomputeFloor -> verificationFloor over the record's own terms",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G5-b": {
+          "text": "compared with the server-derived level (K1/K2, in `T`)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "compared with a level from resolveVerificationLevel over JWT fields (intent-submit-args.ts), not the AuthorityResolver level in the request transaction (P-PRINCIPAL, D-1)",
+          "rulings": [
+            "D-1"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G5-c": {
+          "text": "capped by `profile.max_verification_level`",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "gate5.ts effectiveLevel caps verificationLevel by channelMaxLevel",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G5-d": {
+          "text": "branch per effect class",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "gate5.ts: CONTROL/DRAFT/REQUEST_APPROVAL/COMMIT refuse needs_second_channel, the rest handoff_required",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G5-e": {
+          "text": "any stored/recomputed difference → `SUPERSEDED/policy_floor_changed` + successor or the code alone, with the non-durable `widget_floor_divergence` counter",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "half: a difference refuses, but with outcome refuse, no successor and no counter (P-G15a)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G5-f": {
+          "text": "`NEEDS_SECOND_CHANNEL`/`HANDOFF_REQUIRED` + deep link (U candidate, K6/F53; mechanism blocked on OD-4 + P-12; never Gate 13's `HandoffTarget`)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_basis": "K6 C11:2550; F53 C11:1126: a conformant fitter withholds an intent above the session level, and a level change also changes the proof hash; the step-up landing needs P-12 (no package, C11:6635)",
+          "waits_on": [
+            "OD-4",
+            "P-12"
+          ],
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        }
+      }
+    },
+    {
+      "n": "6",
+      "name": "Authority, computed from scratch",
+      "class": "PARTIAL",
+      "row": "C11:4725",
+      "anchors": "«Gate 6 in full» C11:4736-4798; AREA-A §2.1",
+      "figures": {
+        "clauses": 21,
+        "L": 0,
+        "L-T": 0,
+        "U": 0,
+        "STOPPED": 0,
+        "BLOCKED-DISCHARGE": 6,
+        "false": 15,
+        "built": 6,
+        "u_candidates": 0,
+        "dev1": 0
+      },
+      "ceiling": {
+        "strict": "E2 (OD-1, OD-2) + LANDING-VERIFY",
+        "withU": "same"
+      },
+      "note": "The /1 key \"R3.5.1 sensitive destination admits class-s HANDOFF only\" (recorded true) is REMOVED: it is no clause of V1.1 row 6, and gateSensitiveDest runs floor.ts sensitiveDest on every effect rather than F48 in the HANDOFF branch (AREA-A §3.1; U6-L1 deletes it, A1 follow-up C11:7399).",
+      "clauses": {
+        "G6-1": {
+          "text": "dispatch on `subjectCapability(record)`, bound once",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "gate6.ts switches on subjectOf(r).space, never record.capability",
+          "built_note": "not bound once: subjectOf(r) is recomputed in gate6, gateSensitiveDest, gate7 and gate13",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-2": {
+          "text": "`authority_hint` not read",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "no read of authority_hint under src/widgets (by absence; no source test pins it)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-3": {
+          "text": "a never-rendered widget still cannot act",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-4": {
+          "text": "`REFUSED/insufficient_authority`, AuthorityResolver",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "gate6.ts refuses insufficient_authority on every branch",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-5": {
+          "text": "null subject → proceeds with no owner call",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "gate6.ts: subject === null returns pass",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-6": {
+          "text": "HANDOFF: destination fences only (registration, F48, `targetFloor('s')`, landing ingress)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "waits_on": [
+            "LANDING-VERIFY"
+          ],
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-7": {
+          "text": "HANDOFF never resolves `assertCanExecute`, `c9Capability` or the allowlist",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-8": {
+          "text": "(a) allowlist row",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-9": {
+          "text": "(b) `policyDecision === 'ALLOW'`",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-10": {
+          "text": "(c) `authenticated_request`",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-11": {
+          "text": "(d) live principal role ∈ `allowedActorRoles`",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-12": {
+          "text": "(e) entitlements grant `requiredFeatures`",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-13": {
+          "text": "Gate 14 governs; a disagreement is refused and counted",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "rulings": [
+            "AMB-G6-7"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G6-14": {
+          "text": "the 47: `assertCanExecute(principal, def)` with surface `'web'`",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "blocked_part": "the DRAFT-subject half is BLOCKED-DISCHARGE until E2 (§0.3 OD-1, §3.2 row 6)",
+          "rulings": [
+            "B-03"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G6-15": {
+          "text": "non-catalogue: `WIDGET_CAPABILITY_POLICY` row (build totality + positive)",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "gate6.ts C9 branch: c9Registry.tryGet and a WIDGET_CAPABILITY_POLICY row, else refuse",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-16": {
+          "text": "`c9Capability` when `c9_domain !== null`, including BI non-READ",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "waits_on": [
+            "P-MT1"
+          ],
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-17": {
+          "text": "run-less: `c9Capability` not applied",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "holds vacuously: no path calls c9Capability, so the run-less/run-bearing distinction is not built",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-18": {
+          "text": "CONTROL: `CONTROL_FLOOR[ref.key]` at Gate 5, Gate 3's principal binding, Gate 4's tenant assertion, then the one registered handler's own principal and tenant check (R3.2.4, C11:4771-4773); no execute-admission test",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "half: slot 6 passes CONTROL with no admission test; no handler is dispatched (Gate 13 terminates)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-19": {
+          "text": "TOOL unreachable/refused",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "gate6.ts TOOL branch refuses insufficient_authority",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-20": {
+          "text": "a raise is the refusal",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "not built: no owner call exists on the path to raise",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G6-FR14": {
+          "text": "reads Membership/Staff/Client binding, never `presentation_mode`/`profile_id`/`a11y_env` (FR-14 C11:1798)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "negative half holds by absence (no presentation_mode/profile_id/a11y_env read in src/widgets/gates; gate-context.source.spec.ts forbids an actor.role read); the Membership/Staff/Client read is not built (P-PRINCIPAL, U6-L3)",
+          "rulings": [
+            "D-2"
+          ],
+          "evidence": [],
+          "mutants": []
+        }
+      }
+    },
+    {
+      "n": "7",
+      "name": "Effect admissibility",
+      "class": "PARTIAL",
+      "row": "C11:4726",
+      "anchors": "AMB-02b; AMB-11; AMB-12; AMB-13",
+      "figures": {
+        "clauses": 11,
+        "L": 0,
+        "L-T": 0,
+        "U": 0,
+        "STOPPED": 0,
+        "BLOCKED-DISCHARGE": 6,
+        "false": 5,
+        "built": 2,
+        "u_candidates": 0,
+        "dev1": 0
+      },
+      "ceiling": {
+        "strict": "E2",
+        "withU": "E2"
+      },
+      "note": "The /1 true keys \"COMMIT names an AE key\" and \"COMMIT key is allowlisted\" are no V1.1 row-7 clauses of their own; their code is recorded as built evidence under G7-2 and G7-FR6b.",
+      "clauses": {
+        "G7-1": {
+          "text": "effect within the kind's ceiling over `widget_kind`",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "not built: gate7 reads no kind ceiling (U-TAB KIND_PERMITTED_EFFECTS, U7a)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G7-2": {
+          "text": "key space matches effect (R3.2.2)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "COMMIT only: gate7 refuses a COMMIT whose subject space is not AE; no other effect is checked",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G7-3": {
+          "text": "CONTROL keys in the control registry",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G7-4": {
+          "text": "COMMIT carries a non-null `confirmation_of_ref`",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": true,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "built_evidence": "gate7.ts refuses booking_confirmation_required when confirmationOfRef is null",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G7-5": {
+          "text": "kind ≠ draft → non-null `produced_by_intent_token_hash` satisfying §3.10.2",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G7-6": {
+          "text": "`requiredConfirmationKind(subject) === widget_kind`, re-read live (F72)",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G7-7": {
+          "text": "the delivering tier was permitted this effect (§3.12)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "blocked_part": "the DRAFT-on-web-push refusal is BLOCKED-DISCHARGE until E2; the restricted-tier positives need P-MT3",
+          "waits_on": [
+            "U-TAB",
+            "P-MT3"
+          ],
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G7-8": {
+          "text": "the two codes",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "gate7.ts emits effect_not_admissible and booking_confirmation_required",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G7-BOOK1": {
+          "text": "BOOK.1 subject = `confirmation_subject` (C11:3109)",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "rulings": [
+            "AMB-13"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G7-FR6b": {
+          "text": "exactly one pairing (C11:1786)",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "built_note": "half: the booking allowlist pairs a COMMIT with one confirmation kind (rowFor); F38 AE_PROPOSE_PAIRING rows (P-25) are not built",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G7-FR6d": {
+          "text": "no MONEY actuation; `PAYMENT_HANDOFF` gap-blocked; F80 (C11:1788, 1524)",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "built_note": "half: gate6.ts refuses a MONEY AE capability that is not allowlisted; PAYMENT_HANDOFF emittable=false (U-TAB) is not built",
+          "rulings": [
+            "AMB-12"
+          ],
+          "evidence": [],
+          "mutants": []
+        }
+      }
+    },
+    {
+      "n": "8",
+      "name": "Input validation",
+      "class": "NOT_BUILT",
+      "row": "C11:4727",
+      "anchors": "AMB-02a; AMB-17…AMB-21; B-09…B-12; D-10",
+      "figures": {
+        "clauses": 13,
+        "L": 0,
+        "L-T": 0,
+        "U": 0,
+        "STOPPED": 0,
+        "BLOCKED-DISCHARGE": 4,
+        "false": 9,
+        "built": 0,
+        "u_candidates": 1,
+        "dev1": 0
+      },
+      "ceiling": {
+        "strict": "never this cycle",
+        "withU": "never this cycle (needs a bounds/normalizer registration after E2)"
+      },
+      "note": "Slot 8 is a refusing pending() stub (mechanism_absent) until U8a (null-schema lane) and U8b (schema lane). No clause is built.",
+      "clauses": {
+        "G8-1": {
+          "text": "closed-domain membership (per field)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G8-2": {
+          "text": "cardinality",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G8-3": {
+          "text": "bounds re-read from `bounds_source`",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "after_discharge": "false without a registered bounds source (AMB-21d is an unapproved engineering choice; not U)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G8-4": {
+          "text": "normalizers applied",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "after_discharge": "false without a registered normalizer (AMB-21d unapproved; not U)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G8-5t": {
+          "text": "`c9SafeText` over **text** values",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "after_discharge": "false without a minted non-closed text field and its registrations (not U)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G8-5p": {
+          "text": "`c9SafeText` over **phone** values (U candidate, PKT:469)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_basis": "PKT:469 \"No phone field is minted this cycle\"",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G8-6": {
+          "text": "`max_total_bytes` by refusal",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "rulings": [
+            "AMB-19"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G8-7": {
+          "text": "inputs on a null schema refused",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "rulings": [
+            "B-01"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G8-8": {
+          "text": "the four codes",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "rulings": [
+            "AMB-02a",
+            "D-10"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G8-SCHEMA": {
+          "text": "server-held and hash-bound; erased or absent → `SUPERSEDED/handle_stale`; hash failure is a fault (B-10)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "rulings": [
+            "B-10"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G8-SHAPE": {
+          "text": "undeclared keys and kind conformance",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G8-LABELS": {
+          "text": "labels from validated members; no write before 9 (R3.9.1/R3.9.2)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G8-DENY": {
+          "text": "a `c9Deny` is a verdict (R3.9.3)",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "after_discharge": "false without a registered normalizer/bounds source (AMB-21d unapproved; not U)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        }
+      }
+    },
+    {
+      "n": "8-R",
+      "name": "Readback",
+      "class": "NOT_LIVE",
+      "row": "C11:4728",
+      "anchors": "AMB-02c; AMB-27; B-17; PKT:471",
+      "figures": {
+        "clauses": 9,
+        "L": 0,
+        "L-T": 0,
+        "U": 0,
+        "STOPPED": 0,
+        "BLOCKED-DISCHARGE": 1,
+        "false": 8,
+        "built": 2,
+        "u_candidates": 6,
+        "dev1": 0
+      },
+      "ceiling": {
+        "strict": "never this cycle",
+        "withU": "E2, if OD-3 is accepted"
+      },
+      "note": "The /1 key \"readback required on a spoken actuation\" (recorded true) is REMOVED: it is not a clause of V1.1 row 8-R, and it is keyed on the carrier (AREA-A §3.1). NOT_LIVE: slot 8 refuses first.",
+      "clauses": {
+        "R-0": {
+          "text": "reachable on the live path",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "unreachable: slot 8 refuses every submission first",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "R-1": {
+          "text": "applies exactly when `confirmation?.requires_readback === true`",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "not built: gate8r.ts is keyed on the carrier (realtime-voice) and the effect, not on the record's confirmation; findRecord projects requires_readback but gate8R does not read it",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "R-1a": {
+          "text": "recomputed at ingress from effect and tier (B-17)",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "u_candidate": true,
+          "u_candidate_scope": "only the SPOKEN recompute-true half (PKT:471; C11:4386-4389); the key as a whole is BLOCKED-DISCHARGE (the recompute needs a COMMIT)",
+          "rulings": [
+            "B-17"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "R-2": {
+          "text": "ack present (`readback_missing`)",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "gate8r.ts refuses readback_missing when no ack (on the carrier-keyed branch)",
+          "u_candidate": true,
+          "u_basis": "PKT:471: no SPOKEN carrier fit this cycle",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "R-3": {
+          "text": "`readback_ref` matches",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_basis": "PKT:471",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "R-4": {
+          "text": "`body_hash` matches (H4 integrity)",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "gate8r.ts refuses readback_mismatch when ack.body_hash !== record bodyHash",
+          "u_candidate": true,
+          "u_basis": "PKT:471",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "R-5": {
+          "text": "affirmation ∈ the closed vocabulary for the locale",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_basis": "PKT:471 (no vocabulary; waits for a SPOKEN carrier)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "R-6": {
+          "text": "an ack on a record that does not require one (including a null confirmation) is refused",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "rulings": [
+            "AMB-02c"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "R-7": {
+          "text": "refuses, never repairs; the affirmation is never logged or echoed",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_candidate_scope": "only the required half (PKT:471); the unrequired half is L-able (marker affirmation never logged)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        }
+      }
+    },
+    {
+      "n": "9",
+      "name": "Lowering",
+      "class": "NOT_BUILT",
+      "row": "C11:4729",
+      "anchors": "AREA-B §2.1; DS-03 A; D-11",
+      "figures": {
+        "clauses": 12,
+        "L": 0,
+        "L-T": 0,
+        "U": 0,
+        "STOPPED": 0,
+        "BLOCKED-DISCHARGE": 0,
+        "false": 12,
+        "built": 0,
+        "u_candidates": 0,
+        "dev1": 0
+      },
+      "ceiling": {
+        "strict": "never this cycle",
+        "withU": "never this cycle"
+      },
+      "note": "Slot 9 is a refusing pending() stub. L-T is not admitted for Gate 9 clauses.",
+      "clauses": {
+        "9.1": {
+          "text": "render",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "9.1a": {
+          "text": "R3.9.2 labels only, no `inputs` parameter",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "9.1b": {
+          "text": "one slot",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "9.2": {
+          "text": "appended to the conversation",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "9.3": {
+          "text": "as a USER turn",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "9.4": {
+          "text": "authority NONE (E10)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "9.5": {
+          "text": "first durable write (R3.9.1, E11)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "9.6": {
+          "text": "byte-identical to a typed message from here",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "waits_on": [
+            "TYPED-TURN (P-03/K5)"
+          ],
+          "note": "false this cycle: the typed chat ingress does not persist user turns through the same writer; T9-TYPED-1 is a self-comparison and never flips it",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "9.7": {
+          "text": "DS-03 A: superseded/handle_stale, no turn, no effect, no guessed label",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "waits_on": [
+            "P-RT6"
+          ],
+          "rulings": [
+            "DS-03 A",
+            "D-11"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "9.8": {
+          "text": "runs in chat ingress",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "9.9": {
+          "text": "`rendered_utterance`/`selected_labels` persisted",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "9.10": {
+          "text": "F15: lowered content read only by Gate 10",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        }
+      }
+    },
+    {
+      "n": "10",
+      "name": "Divergence audit and refusal",
+      "class": "NOT_BUILT",
+      "row": "C11:4730",
+      "anchors": "«Gate 10 in full» C11:4800-4876; AREA-B §3.1; DS-02; A3",
+      "figures": {
+        "clauses": 18,
+        "L": 0,
+        "L-T": 0,
+        "U": 0,
+        "STOPPED": 0,
+        "BLOCKED-DISCHARGE": 0,
+        "false": 18,
+        "built": 0,
+        "u_candidates": 1,
+        "dev1": 0
+      },
+      "ceiling": {
+        "strict": "never this cycle",
+        "withU": "E1, if OD-3 is accepted"
+      },
+      "note": "Slot 10 is a refusing pending() stub (mechanism_absent) until U10b. L-T is not admitted for Gate 10 clauses; 10.R5 is the only U clause on Gate 10.",
+      "clauses": {
+        "10.1": {
+          "text": "router over the lowering against live intents",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "10.2": {
+          "text": "`routeUtterance` (pure, pre-LLM, escape first)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "rulings": [
+            "AMB-29",
+            "D-11"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "10.3": {
+          "text": "`liveCandidates`",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "10.4": {
+          "text": "`u`, `s`, `q`",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "10.5": {
+          "text": "`ownerSet`/`sameOwner`, undefined fails closed",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "rulings": [
+            "AMB-30"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "10.6": {
+          "text": "the first row that holds decides",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "10.7": {
+          "text": "exactly one audit record per non-AGREE, in `T`, with its members",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "rulings": [
+            "AMB-32",
+            "D-1"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "10.8": {
+          "text": "REFUSE → `intent_divergence`; NULL/AUDIT recorded, not refused",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "10.9": {
+          "text": "widget-layer records only; never substitutes",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "10.10": {
+          "text": "the R3.12.4 fixture duty at `EP-BUILD`",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "10.11": {
+          "text": "intent router",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "10.R1": {
+          "text": "row 1 of «Gate 10 in full»",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "10.R2": {
+          "text": "row 2 of «Gate 10 in full»",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "note": "not blocked by discharge: L via CONTROL records; its DRAFT/COMMIT variants only add depth at E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "10.R3": {
+          "text": "row 3 of «Gate 10 in full»",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "10.R4": {
+          "text": "row 4 of «Gate 10 in full»",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "10.R5": {
+          "text": "row 5 of «Gate 10 in full» (null subject with a non-null match of the same effect)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_basis": "C11:2801 \"'c' is permitted on no kind in this contract version\", with F69 (C11:1356ff) and subjectCapability (C11:4132-4139)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "10.R6": {
+          "text": "row 6 of «Gate 10 in full»",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "10.R7": {
+          "text": "row 7 of «Gate 10 in full»",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "rulings": [
+            "AMB-31"
+          ],
+          "evidence": [],
+          "mutants": []
+        }
+      }
+    },
+    {
+      "n": "11",
+      "name": "Noun resolution",
+      "class": "NOT_LIVE",
+      "row": "C11:4731",
+      "anchors": "AREA-C §2.1.1; AMB-33…AMB-39",
+      "figures": {
+        "clauses": 15,
+        "L": 0,
+        "L-T": 0,
+        "U": 0,
+        "STOPPED": 0,
+        "BLOCKED-DISCHARGE": 1,
+        "false": 14,
+        "built": 1,
+        "u_candidates": 4,
+        "dev1": 0
+      },
+      "ceiling": {
+        "strict": "never this cycle",
+        "withU": "E2, if OD-3 is accepted"
+      },
+      "note": "NOT_LIVE: slot 8 refuses first, and slot 11 is supplied no reader.",
+      "clauses": {
+        "G11-R1": {
+          "text": "fresh read from the canonical owner",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "not built: slot 11 calls gate11(ctx) with no reader, so it passes; gate11 compares a bodyHash only when a reader is passed",
+          "blocked_part": "the COMMIT variants are BLOCKED-DISCHARGE until E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G11-R2": {
+          "text": "witnesses compared, not re-read",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "blocked_part": "the COMMIT variants are BLOCKED-DISCHARGE until E2",
+          "rulings": [
+            "AMB-35"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G11-R3": {
+          "text": "value divergence → SUPERSEDED with a rendered diff",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "not built: gate11 refuses handle_stale on divergence (no SUPERSEDED, no diff)",
+          "blocked_part": "the COMMIT variants are BLOCKED-DISCHARGE until E2",
+          "rulings": [
+            "B-23"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G11-R4": {
+          "text": "`handle_stale`",
+          "state": "false",
+          "conforms": false,
+          "built": true,
+          "built_evidence": "gate11.ts emits handle_stale",
+          "blocked_part": "the COMMIT variants are BLOCKED-DISCHARGE until E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G11-R5": {
+          "text": "IntentGateway + owner",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G11-I1": {
+          "text": "R3.7.3 nouns never travel to the client",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G11-I2": {
+          "text": "R3.7.4 Handle/Witness types",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G11-I3": {
+          "text": "F15 exactly seven inputs",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "rulings": [
+            "B-19"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G11-I4": {
+          "text": "R3.11.1 approval decision reads nouns from the decision record",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_basis": "C11:5073; SH-11 PKT:476 (no approval decision this cycle)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G11-I5": {
+          "text": "R3.11.3 reject and re-mint",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_basis": "C11:5073; SH-11 PKT:476",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G11-I6": {
+          "text": "R3.11.4 both checks in order",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_basis": "C11:5073; SH-11 PKT:476",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G11-I7": {
+          "text": "RT3(b)/B-21",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "rulings": [
+            "B-21"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G11-I8": {
+          "text": "R3.9.3 rendering",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G11-I9": {
+          "text": "BOOK.4 booking nouns",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G11-I10": {
+          "text": "E13 re-enters approval",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_basis": "C11:5073; SH-11 PKT:476",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        }
+      }
+    },
+    {
+      "n": "12",
+      "name": "Data fence",
+      "class": "NOT_LIVE",
+      "row": "C11:4732",
+      "anchors": "AREA-C §2.2.1; AMB-48",
+      "figures": {
+        "clauses": 18,
+        "L": 0,
+        "L-T": 0,
+        "U": 0,
+        "STOPPED": 0,
+        "BLOCKED-DISCHARGE": 0,
+        "false": 18,
+        "built": 0,
+        "u_candidates": 0,
+        "dev1": 2
+      },
+      "ceiling": {
+        "strict": "E2 (OD-1, then U12c)",
+        "withU": "E2"
+      },
+      "note": "The /1 true key \"the four PII rules\" described legacy gate12(ctx), which slot 12 calls with no subject, so on the live path it only passes; it maps to no V1.1 clause (G12-R4 forbids a widget PII path). While DEV-1 stands, Gate 12 cannot be COMPLETE in either count.",
+      "clauses": {
+        "G12-R1a": {
+          "text": "REFINE body by the projector",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-R1b": {
+          "text": "NAVIGATE body by the projector",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "reason": "not built (DEV-1; OD-1)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-R2": {
+          "text": "the same projector",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-R3": {
+          "text": "the same enforcement call sites (F95 remainder)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-R4": {
+          "text": "no widget PII path",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "not built: legacy gates/gate12.ts is itself a widget PII path (carrier ceilings with no contract source); P-K4K8 removes it",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-R5": {
+          "text": "masked body, never a leak",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "waits_on": [
+            "OD-5 (conditional)"
+          ],
+          "note": "evidenced on unnarrowed rows; the reading is disclosed here while OD-5 is open",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-R6": {
+          "text": "runs in the projector (pointer slot)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-I1": {
+          "text": "F7",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-I2": {
+          "text": "L2",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-I3": {
+          "text": "B-16",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-I4": {
+          "text": "P9/P10",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-I5": {
+          "text": "K18",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-I6": {
+          "text": "`allowedKinds`/B-27",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "rulings": [
+            "B-27"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G12-I7": {
+          "text": "B-02/F18",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-I8": {
+          "text": "B-03",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-I9": {
+          "text": "RT4/RT4a",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-I10": {
+          "text": "FR-14/R3.8.3",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G12-I11": {
+          "text": "K16",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "reason": "not built (DEV-1; OD-1)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        }
+      }
+    },
+    {
+      "n": "13",
+      "name": "Effect routing",
+      "class": "NOT_LIVE",
+      "row": "C11:4733",
+      "anchors": "AREA-C §2.3.1; R3.2.4 C11:3852-3861; FR-1/B-28",
+      "figures": {
+        "clauses": 20,
+        "L": 0,
+        "L-T": 0,
+        "U": 0,
+        "STOPPED": 0,
+        "BLOCKED-DISCHARGE": 4,
+        "false": 16,
+        "built": 0,
+        "u_candidates": 4,
+        "dev1": 1
+      },
+      "ceiling": {
+        "strict": "never this cycle",
+        "withU": "E2, if OD-1, OD-2 and OD-3 are answered, P-17 delivers and LANDING-VERIFY exists"
+      },
+      "note": "NOT_LIVE: slot 8 refuses first, and gate13 returns terminate verdicts with no dispatch. The /1 true key \"unknown space refused\" is recorded as built evidence under G13-R10. While DEV-1 stands, Gate 13 cannot be COMPLETE in either count.",
+      "clauses": {
+        "G13-R1": {
+          "text": "NONE unreachable",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "not built: the K3 emitter mints effect NONE intent records with a token (emission/emitter.service.ts); gate13 terminates NONE",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-R2": {
+          "text": "NAVIGATE → projector → `next_envelope`",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "reason": "not built (DEV-1; OD-1)",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-R3": {
+          "text": "REFINE → projector → `next_envelope`",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-R4": {
+          "text": "terminates; no business effect from a selector",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "half: gate13 terminates every route and dispatches nothing, so no business effect is reachable; no projector exists",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-R5": {
+          "text": "CONTROL → the one registered control handler, which performs its own principal and tenant check; no Action Engine edge (row 13, C11:4733; R3.2.4). Sub-cases: dismiss, `run.cancel`, `delivery.resolve` (the last needs P-17)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "false_part": "the delivery.resolve sub-case stays false while P-17 is undelivered",
+          "waits_on": [
+            "P-17"
+          ],
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-R5b": {
+          "text": "the R3.2.4 source test: each handler module imports no Prisma model outside the widget layer's own except through its owner endpoint (`EP-BUILD`, C11:3852-3861)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-R6": {
+          "text": "DRAFT → draft owner",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-R7": {
+          "text": "REQUEST_APPROVAL → approval object → PENDING",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_basis": "C11:5073",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-R8": {
+          "text": "HANDOFF → one `HandoffTarget`, no capability invoked",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "waits_on": [
+            "LANDING-VERIFY"
+          ],
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-R9": {
+          "text": "COMMIT → Gate 14 with a server-minted key",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-R10": {
+          "text": "closed per-class switch (FR-1/B-28)",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "built_note": "half: gate13 has a closed switch with a refusing default, but over capability space, not effect class",
+          "rulings": [
+            "B-28"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G13-I1": {
+          "text": "`approval_decision` routing",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_basis": "C11:5073",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-I2": {
+          "text": "R3.11.3",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_basis": "C11:5073",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-I3": {
+          "text": "F74/F75 consumption",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-I4": {
+          "text": "L7/L8/L10",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-I5": {
+          "text": "FR2/B-29 receipts",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "blocked_part": "the actuating receipts are BLOCKED-DISCHARGE until E2",
+          "rulings": [
+            "B-29"
+          ],
+          "evidence": [],
+          "mutants": []
+        },
+        "G13-I6": {
+          "text": "F15 AUDIT_RETAINED only",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-I7": {
+          "text": "F33/F76",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": false,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-I8": {
+          "text": "FR-11/R3.9.3",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G13-I9": {
+          "text": "R3.11.6 approver test / P-27",
+          "state": "false",
+          "conforms": false,
+          "built": false,
+          "u_candidate": true,
+          "u_candidate_scope": "only the approver-test half (C11:5073); the P-27 half is EP-BUILD and L-able",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        }
+      }
+    },
+    {
+      "n": "14",
+      "name": "Canonical action",
+      "class": "NOT_LIVE",
+      "row": "C11:4734",
+      "anchors": "action-engine.ingress.ts:71/:161 (assertNoCallerAuthority), :107/:141 (assertResolverOwnsDecision)",
+      "figures": {
+        "clauses": 3,
+        "L": 0,
+        "L-T": 0,
+        "U": 0,
+        "STOPPED": 0,
+        "BLOCKED-DISCHARGE": 3,
+        "false": 0,
+        "built": 3,
+        "u_candidates": 0,
+        "dev1": 0
+      },
+      "ceiling": {
+        "strict": "E2 (OD-1, OD-2)",
+        "withU": "E2"
+      },
+      "v1_evidence": {
+        "CanonicalActionIngressService: assertNoCallerAuthority before any effect": true,
+        "the policy resolver owns the decision": true
+      },
+      "note": "All three clauses start false (review finding 1). Slot 14 is `terminate` (\"enforced at action-engine.ingress.ts:71\"), Gate 13 dispatches nothing, and D-4 forbids a COMMIT mint before P-DISCHARGE. `action-engine:proof` shows the module exists, not that the gate is enforced on the widget path; it is a regression check, never this gate's evidence.",
+      "clauses": {
+        "G14-a": {
+          "text": "`prepare()` receives the key, normalized input, server-minted idempotency key and evidence refs (every G14 key is BLOCKED-DISCHARGE until a live widget COMMIT reaches `prepare()`, E2)",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": true,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "built_evidence": "CanonicalActionIngressService.prepare() (action-engine.ingress.ts) receives a TrustedActionExecutionRequestV1; no widget path builds one",
+          "note": "module exists; no widget COMMIT reaches `prepare()` before E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G14-b": {
+          "text": "the policy resolver owns the decision (`assertNoCallerAuthority`, `assertResolverOwnsDecision`)",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": true,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "built_evidence": "action-engine.ingress.ts:71 calls assertNoCallerAuthority (defined :161); :107 calls assertResolverOwnsDecision (defined :141)",
+          "note": "module exists; no widget COMMIT reaches `prepare()` before E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        },
+        "G14-c": {
+          "text": "the Action Engine, never the widget, calls the provider owner",
+          "state": "BLOCKED-DISCHARGE",
+          "conforms": false,
+          "built": true,
+          "blocked": "needs an actuating mint (D-4): no DRAFT/REQUEST_APPROVAL/COMMIT is minted before P-01 is discharged (A2.2 C11:6723; OD-1, OD-2); flips only at E2",
+          "built_evidence": "the kernel behind the ingress executes; slot 14 is a terminate pointer and the widget layer imports no provider",
+          "note": "module exists; no widget COMMIT reaches `prepare()` before E2",
+          "evidence": [],
+          "mutants": [],
+          "rulings": []
+        }
+      }
+    }
   ],
   "tally": {
-    "COMPLETE": ["1", "2", "3", "4", "5", "14"],
-    "PARTIAL": ["6", "7"],
-    "NOT_BUILT": ["8", "9", "10"],
-    "NOT_LIVE": ["8-R", "11", "12", "13"]
+    "COMPLETE": [],
+    "COMPLETE-U": [],
+    "PARTIAL-STOPPED": [],
+    "PARTIAL": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7"
+    ],
+    "NOT_BUILT": [
+      "8",
+      "9",
+      "10"
+    ],
+    "NOT_LIVE": [
+      "8-R",
+      "11",
+      "12",
+      "13",
+      "14"
+    ]
   },
-  "headline": "GATES CONFORMING TO §3.9 ON THE LIVE PATH: 6/15",
-  "exposure": "None today, and the reason is not the gates. Production has no widget tables and no plan grants widgets.runtime. Gate 8 refuses every submission that reaches it (Gates 9 and 10 are refusing stubs behind it). Gate 13 dispatches nothing. So no widget submission can produce a business effect, and the partial gates 6 and 7 stand in front of an effect path that does not exist yet. They, and every gate after them, must be completed before one does. The interim refusal code mechanism_absent has no R3.9.3 rendering and must be gone or ruled (AMB-02) before widgets.runtime is granted to any tenant."
+  "counts": {
+    "gates": 15,
+    "clauses": 165,
+    "byState": {
+      "L": 0,
+      "L-T": 0,
+      "U": 0,
+      "STOPPED": 0,
+      "BLOCKED-DISCHARGE": 25,
+      "false": 140
+    },
+    "built": 25,
+    "uCandidates": 19,
+    "dev1Clauses": 3,
+    "strictComplete": 0,
+    "withUClass": 0,
+    "stoppedClauses": 0,
+    "blockedDischargeClauses": 25
+  },
+  "headline": "GATES LIVE CONTRACT-COMPLETE 0/15 · WITH U-CLASS 0/15 · STOPPED CLAUSES 0 · BLOCKED-DISCHARGE CLAUSES 25",
+  "removedKeys": [
+    {
+      "gate": "6",
+      "key": "R3.5.1 sensitive destination admits class-s HANDOFF only",
+      "was": true,
+      "why": "not a clause of V1.1 row 6; gateSensitiveDest runs floor.ts sensitiveDest on every effect, not F48 in the HANDOFF branch (AREA-A §3.1). U6-L1 deletes floor.ts sensitiveDest (A1 follow-up, C11:7399)"
+    },
+    {
+      "gate": "8-R",
+      "key": "readback required on a spoken actuation",
+      "was": true,
+      "why": "not a clause of V1.1 row 8-R, which applies exactly when record.confirmation.requires_readback === true; the code is keyed on the carrier (AREA-A §3.1)"
+    }
+  ],
+  "obsoleteNotes": [
+    {
+      "gate": "1",
+      "note": "widget_id match is implicit: one token hash resolves to exactly one record, and the submission carries no widget_id to compare.",
+      "why": "V1.1 row 1 names \"`widget_id` matches\" as a clause (G1-b); nothing compares it (AREA-C F-1)"
+    }
+  ],
+  "exposure": "None today, and the reason is not the gates. Production had 0 widget tables at the read-only snapshot of 2026-09-16T14:14Z, every deploy is blocked (Sheet 05 S5-1), and no plan or trial grants widgets.runtime: the only grant is Fixtures.grantFeature on the guarded proof DB (127.0.0.1:55611). Slot 8 refuses every submission that reaches it with mechanism_absent, slots 9 and 10 are the same stub, Gate 13 dispatches nothing, and no DRAFT/REQUEST_APPROVAL/COMMIT may be minted before P-01 is discharged (A2.2 C11:6723, D-4). mechanism_absent has no R3.9.3 rendering: it exists only while dark, leaves slot 10 at U10b and slot 8 and RefusalCode at U8b (D-10), P-RENDER's REN-3 interlock stays red until then, and it must be gone before widgets.runtime is granted to any tenant outside the proof DB.",
+  "note": {
+    "summary": "I-AUD0 re-baselines the audit to Contract V1.1 and schema /2 (D-14). Every clause is `conforms: false`; 25 keys are BLOCKED-DISCHARGE and the rest `false`; none is STOPPED (S6-1…S6-6 govern no gate clause). The headline may not be quoted without its four numbers. An audit COMPLETE is not a discharge: every P-row of §A2 stays NORMATIVE-PENDING until P-DISCHARGE (Wave 6). Flips happen only at E1 (A-W5) and E2 (FINAL), by gate-audit-build.mjs from the evidence manifest, the mutation report and the inventory; an independent reviewer may only downgrade.",
+    "decisions": {
+      "D-1": "One request transaction T: opened by submit() before the principal and record reads, ReadCommitted with an explicit timeout; slots 9 and 10 write only through T; commits on a non-pass verdict at slot ≤ 10 or when slot 10 returns; slots 11–13 run after the commit.",
+      "D-2": "The principal is the base member ctx.principal {authority, role, presentationMode, verificationLevel, proofHash} | null, set before slot 1; authority leaves FACT_SLOTS; principal === null is refused at slot 3 (D-16); presentationMode is never read by slot 6.",
+      "D-3": "Clause states L, L-T, U, STOPPED, BLOCKED-DISCHARGE, false; L-T only for defence-in-depth refusals with an L positive and live-killed mutants, never Gate 9/10; U never counts strict; both counts always printed.",
+      "D-4": "No DRAFT/REQUEST_APPROVAL/COMMIT is minted on the proof DB until P-DISCHARGE (Wave 6); actuating clauses are built and G-SYNTH-tested before then and flip only at E2.",
+      "D-5": "U-TAB (Wave 0) owns build-tables.mjs, tables.ts, owner-classes.ts (KIND_OWNER_CLASS, ownerClassKeys, emittable, allowedKinds) and carriers/channel-profile.ts (carrierAdmits); consumers import them.",
+      "D-6": "P-25 (Wave 1) owns authority/propose-pairing.ts with F38's rows; U7 imports it.",
+      "D-7": "U8b-c (Wave 1) builds the pure input-schema codec; U8b (Wave 3) builds the gate's schema lane.",
+      "D-8": "One integrator migration fold, I-MIG2, into 20260916120100_widget_layer_runtime, relying on deploys staying blocked (S5-1).",
+      "D-9": "Unit U4: slot 4 calls TenantContextService.assertTenantId(record.tenantId) through a tenancy port; a throw refuses tenant_mismatch.",
+      "D-10": "Code mapping per AMB-02a/02b; unregistered normalizer_ref → use_secure_surface, unregistered bounds_source → bound_violation; AMB-27 divergence → readback_mismatch; mechanism_absent leaves slot 10 at U10b, slot 8 and RefusalCode at U8b; EXPIRED/SUPERSEDED become response outcomes at P-G15a.",
+      "D-11": "Router residuals as AREA-B states them; Gate 9 residual narrowed to DS-03 A: every render impossibility answers superseded/handle_stale with no write; only a missing Gate 8 fact throws; MINT-11 slotted-template rule.",
+      "D-12": "NW = zero durable writes to every Widget* model, with locks recorded separately; on the Gate 1/5 successor branches \"zero conversation writes\" is zero WidgetTimelineTurn writes.",
+      "D-13": "Clean whole-commit export checkpoints (git archive of the commit, node_modules linked); no worktree, no stash.",
+      "D-14": "This file moves to maya.gate-conformance-audit/2: per-clause state, evidence entries, mutant artifact ids and ruling pins; gate-audit-check.mjs joins run-all-checks.sh at I-HAR.",
+      "D-15": "Minter (2) is one in-process hook at the completion of a registered C9 READ inside AiToolRuntimeService.execute, behind widgets.runtime, owner-side reviewed; T-2b is the model-free producer; the model transport is never stubbed.",
+      "D-16": "Gate 2 is the transport session chain the typed route uses (the six global APP_GUARDs, no @Public) on /api/ai/chat and /api/widgets/intent alike; a principal the chain admits but C9Authority.current denies is refused at slot 3; slot 2 refuses unauthenticated in-array only with no transport session; G2-a flips only on G2-EQ.",
+      "D-17": "A record counts as trigger-minted only when the server says so: WidgetMintProvenance log lines (BIN stdout, HTTP sink), a BUILD ban on writer calls in evidence tests, a DB cross-check before teardown, and HTTP+BIN pairing; no schema column.",
+      "D-18": "Implementers add; the integrator deletes. I-CTX lands slot seams for slots 1, 4, 8, 9, 10; [GW]/[HTTP]/[BIN] exits that need an IR are merge-step exits.",
+      "D-19": "Separate databases on 55611: the programme uses maya_widget_gate_proof_gates (plus maya_c06_*_gates_w<n> and maya_gates_smoke_w<n>) and never touches maya_widget_gate_proof_local; the cluster is stopped at CKPT-W only with no foreign connection."
+    },
+    "planDeviation": {
+      "DEV-1": {
+        "status": "standing; the owner is asked to accept it or direct otherwise (OD-1 (ii))",
+        "what": "composeNavigate → degraded with zero reads; Gate 13's NAVIGATE edge answers degraded (a B-16 text turn, no next_envelope) for every NAVIGATE class. This departs from certified row 13 \"NAVIGATE … → projector → next_envelope\" (C11:4733) and row 12's NAVIGATE body (C11:4732). It is a plan deviation, not a STOP: a within-text detail/w re-projection must read provenance.source_capability, which §0.4 F15 fails (C11:7373).",
+        "clauses": [
+          "G12-R1b",
+          "G12-I11",
+          "G13-R2"
+        ],
+        "consequence": "the three clauses are false with reason \"not built (DEV-1; OD-1)\"; Gates 12 and 13 cannot be COMPLETE in either count; the live test is labelled \"holds by absence (DEV-1)\" and flips nothing; through A2.6(3) P-01 cannot be discharged, so every actuating clause is BLOCKED-DISCHARGE"
+      }
+    },
+    "ownerDecisions": {
+      "OD-1": {
+        "status": "OPEN (hard blocker)",
+        "question": "S6-4 (A5): A, an AUDIT_RETAINED source-capability member sealed at mint (recommended), or B, re-sign A5; and meanwhile accept DEV-1 or direct that the certified NAVIGATE edge be built",
+        "blocks": "G12-R1b, G12-I11, G13-R2 and the /widgets/resolve detail request; through A2.6(3)/A2.7 P-01's discharge and so every actuating clause (the 25 BLOCKED-DISCHARGE keys and the blocked parts of G6-14, G7-7, G11-R1…R4, G13-I5)"
+      },
+      "OD-2": {
+        "status": "OPEN (needs a sheet)",
+        "question": "discharge scope of P-01 and P-30 when a part has no conformant content by settled scope: A, record a reading; B, keep them pending; C, a version bump that splits P-01 and P-30 (recommended)",
+        "blocks": "the same actuating set as OD-1"
+      },
+      "OD-3": {
+        "status": "OPEN",
+        "question": "do clauses with no conformant input this cycle count toward \"15/15\"? A, accept U and print it separately (recommended); B, bring them into scope; C, keep those gates PARTIAL",
+        "candidates": "G3-c2, G3-f, G5-f, G8-5p, R-2, R-3, R-4, R-5, the required half of R-7, the SPOKEN half of R-1a, 10.R5, G11-I4, G11-I5, G11-I6, G11-I10, G13-R7, G13-I1, G13-I2, the approver half of G13-I9",
+        "notU": "G8-3, G8-4, G8-5t and G8-DENY (AMB-21d unapproved); the G13-R5 delivery.resolve sub-case (P-17)"
+      },
+      "OD-4": {
+        "status": "OPEN",
+        "question": "Gate 5 deep link for every effect class: A, name the route and response member (a contract bump) with P-12; B, accept U under OD-3 (recommended this cycle)",
+        "blocks": "every mechanism of G5-f; HandoffTarget is not reused at Gate 5"
+      },
+      "OD-5": {
+        "status": "OPEN (conditional)",
+        "question": "AMB-48(vi): how principal-dependent narrowing reaches data_scope.masked_fields: A, the owner names the D-class composer-input carrier; B, scope the audit clause to owner-shaped output",
+        "blocks": "projector rows whose owner narrows by principal, and G12-R5 if read as requiring a principal-narrowed projection; meanwhile Gate 12 is evidenced on unnarrowed rows and the reading is disclosed"
+      }
+    },
+    "contractStatus": "Contract V1.1 (SHA 606d7f99…). P-01, P-23, P-26 and P-30 are NORMATIVE-PENDING until P-DISCHARGE; no audit figure discharges a row.",
+    "expected": {
+      "A-W5": "strict 3/15 (1, 2, 4); with U 6/15 (+3, 5, 10)",
+      "FINAL": "strict up to 7/15; with U up to 12/15 (13/15 only with P-17 and LANDING-VERIFY); strict 15/15 not reachable this cycle"
+    }
+  }
 }

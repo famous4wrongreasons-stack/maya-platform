@@ -128,7 +128,9 @@ say "PRIMARY NAV" "$F_PRIMARY_NAV  (successor shell: $F_SHELL_ROUTES)"
 say "OWNER/STAFF/CLIENT PRESENTATION MODES" "$F_PRESENTATION_MODES"
 say "BACKEND AUTHORITY ROLES" "$F_BACKEND_ROLES"
 echo
-say "GATES EXECUTABLE" "$F_GATES"
+# The Contract V1.1 clause-level audit (schema /2), recomputed from its clause states by final-figures.mjs.
+# The /1 label "GATES EXECUTABLE" read module presence as conformance; this figure is live contract-completeness.
+say "GATES LIVE CONTRACT-COMPLETE" "$F_GATES"
 say "WIDGET CONTRACT" "$F_CONTRACT_CHECK"
 say "BUTTON -> ENDPOINT PATHS" "$F_BUTTON_ENDPOINT"
 say "DIRECT UI -> PROVIDER WRITES" "$F_UI_PROVIDER"
