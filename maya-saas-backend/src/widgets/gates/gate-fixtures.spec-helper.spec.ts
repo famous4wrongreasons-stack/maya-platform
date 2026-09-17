@@ -6,7 +6,10 @@
 //
 // These are function-level regression aids. They are never proof that a gate runs on the live path.
 
+import type { AuthenticatedUser } from '../../common/authenticated-user.interface';
+import { UserRole } from '../../common/domain.enums';
 import type { GateContext, GateVerdict, IntentRecordRow } from '../gate.types';
+import { NO_FACTS } from './facts';
 import { assertPolicyTotality } from '../authority/capability-policy';
 import { assertAliasesResolve } from '../routing/deterministic-router';
 
@@ -38,8 +41,29 @@ export const rec = (over: Partial<IntentRecordRow> = {}): IntentRecordRow => ({
   confirmationOfKind: null,
   confirmationOfRef: null,
   producedByIntentTokenHash: null,
-  renderedUtterance: null,
+  c9Domain: null,
+  deliveryChannel: 'pwa',
+  emissionLifecycleState: 'MINTED',
+  confirmation: null,
+  confirmationIdempotencyKey: null,
+  frozenNounsJson: null,
+  requestedScopeHash: 'e'.repeat(64),
+  runId: null,
+  revisionId: null,
+  approvalOfIntentRef: null,
   ...over,
+});
+
+/** The JWT-validated user a function-level context carries. Its role is read by no gate (AMB-03). */
+export const ACTOR: Readonly<AuthenticatedUser> = Object.freeze({
+  userId: 'u1',
+  sessionId: 's1',
+  tenantId: 't1',
+  role: UserRole.ADMINISTRATOR,
+  email: 'u1@example.test',
+  branchId: null,
+  membershipId: 'm1',
+  membershipStatus: 'active',
 });
 
 export const ctx = (
@@ -48,6 +72,7 @@ export const ctx = (
 ): GateContext => ({
   intentTokenHash: r.intentTokenHash,
   tenantId: 't1',
+  actor: ACTOR,
   principalProofHash: PRINCIPAL,
   now: new Date('2026-06-01T00:00:00.000Z'),
   record: r,
@@ -55,7 +80,7 @@ export const ctx = (
   verificationLevel: 'SESSION_VERIFIED',
   channelMaxLevel: 'SESSION_VERIFIED',
   carrier: 'pwa',
-  resolvedRoles: [],
+  facts: NO_FACTS,
   ...over,
 });
 
@@ -74,5 +99,7 @@ describe('gate spec fixtures', () => {
     expect(c.record?.principalProofHash).toBe(c.principalProofHash);
     expect(c.record?.tenantId).toBe(c.tenantId);
     expect(c.carrier).toBe('pwa');
+    expect(c.actor.tenantId).toBe(c.tenantId);
+    expect(c.facts).toEqual({});
   });
 });

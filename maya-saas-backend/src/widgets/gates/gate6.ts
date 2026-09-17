@@ -1,8 +1,9 @@
 // ── Gate 6 — authority, computed from scratch ────────────────────────────────────────────────────
 //
 // "May THIS live principal exercise THIS capability." Dispatched on the subject's SPACE, per F54's
-// four branches, and fail-closed on every one of them. Nothing here reads a role from the client:
-// `ctx.resolvedRoles` is what the server resolved on this request.
+// four branches, and fail-closed on every one of them. Nothing here reads a role — not from the
+// client, and not from `ctx.actor` either: which read supplies the live principal's role is AMB-03's
+// ruling, and until it is made no gate reads one (`gate-context.source.spec.ts`).
 
 import type { GateContext, GateVerdict } from '../gate.types';
 import {

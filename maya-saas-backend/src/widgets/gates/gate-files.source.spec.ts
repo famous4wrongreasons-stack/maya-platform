@@ -157,6 +157,7 @@ describe('D-10 — gate files refuse through the typed helper, with no cast', ()
         'verdict.ts',
         'subject.ts',
         'effect-sets.ts',
+        'facts.ts',
         'gate5.ts',
         'gate6.ts',
         'gate7.ts',

@@ -51,28 +51,6 @@ export const resolveCapability = (utterance: string): CapabilityRef | null => {
   return c9Registry.tryGet(key) ? { space: 'C9', key } : null;
 };
 
-/**
- * The effect class a capability would carry, from §3.2's existing eight — no new taxonomy.
- *
- * Derived from the capability's own `mode`, which is the orchestrator's published statement of what
- * it does: a READ is a REFINE-shaped read, and a PROPOSE_ONLY or OWNER_HANDOFF prepares rather than
- * commits. A key the registry does not hold returns null, and Gate 10 does not refuse on a null.
- */
-export const effectClassOf = (ref: CapabilityRef): string | null => {
-  const cap = c9Registry.tryGet(ref.key);
-  if (!cap) return null;
-  switch (cap.mode) {
-    case 'READ':
-      return 'REFINE';
-    case 'PROPOSE_ONLY':
-      return 'DRAFT';
-    case 'OWNER_HANDOFF':
-      return 'HANDOFF';
-    default:
-      return null;
-  }
-};
-
 /** Every alias must resolve in the live registry, or the process does not start. */
 export const assertAliasesResolve = (): void => {
   const keys = new Set(C9_CAPABILITIES.map((c) => c.capabilityKey));

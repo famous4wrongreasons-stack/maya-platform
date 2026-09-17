@@ -10,6 +10,9 @@
 //   - a gate cannot let a submission through silently, because it returns a verdict, not void
 //   - a gate cannot be skipped, because the runner walks the array and the array is the pipeline
 
+import type { AuthenticatedUser } from '../common/authenticated-user.interface';
+import type { C9Principal } from '../orchestration/c9.contract';
+import type { C9Domain } from '../widget-contract/ambient';
 import type { VerificationLevel } from '../widget-contract/envelope';
 import type { ChannelId } from '../widget-contract/lifecycle';
 
@@ -18,6 +21,8 @@ export type GateHost =
   | 'IntentGateway'
   | 'HTTP middleware'
   | 'TenantResolver'
+  // Gate 11's row, copied verbatim from §3.9 (C:4347).
+  | 'IntentGateway + capability owner'
   | 'ChannelProfileRegistry + AuthorityResolver'
   | 'AuthorityResolver'
   | 'chat ingress'
@@ -56,8 +61,73 @@ export type RefusalCode =
   // passing, because "not built yet" and "allowed" must never be the same branch.
   | 'mechanism_absent';
 
+/**
+ * `LoweredUtterance` is Gate 9's product: a string only `renderUtterance` may brand (G9 §3.0). It is
+ * stated here, with G9's brand, until the Gate 9 unit owns `lowering/lowering.ts`.
+ */
+export type LoweredUtterance = string & {
+  readonly __brand: 'LoweredUtterance';
+};
+
+/** Gate 11's resolved nouns. Opaque on purpose: their shape is AMB-33's ruling, not this file's. */
+export type ResolvedNouns = { readonly __brand: 'ResolvedNouns' };
+
+/**
+ * J-1 — what an earlier gate hands a later one. A `pass` verdict may carry some of these; the runner
+ * merges them into a NEW context through `mergeFacts` (`gates/facts.ts`), which admits each fact only
+ * from its one producer slot and only once. Which slots may READ each fact is declared beside the
+ * producer in `FACT_SLOTS` and held at the source by `gates/facts.architecture.spec.ts`.
+ *
+ * Facts are never serialised: the controller's response has no member for them.
+ */
+export interface AdmissionFacts {
+  /** The live principal (request state). Producer: the principal slot, which P-PRINCIPAL fixes. */
+  readonly authority: C9Principal;
+  /** Class A: validated closed-domain option ids per declared field; null for a null schema. */
+  readonly validatedInputs: {
+    readonly closed: ReadonlyMap<string, readonly string[]>;
+  } | null;
+  /** Class C: `null` = a validated member's label is unresolvable; `[]` = nothing was selected. */
+  readonly selectedLabels: readonly string[] | null;
+  /** Class C (template) / A: read once, inside slot 8, after validation passes (D-2). */
+  readonly loweringSource: {
+    readonly utteranceTemplate: string | null;
+    readonly erasedAt: Date | null;
+    readonly conversationId: string;
+  };
+  /** Class C: the lowered utterance. Its only reader is Gate 10 (D-11). */
+  readonly lowering: { readonly renderedUtterance: LoweredUtterance };
+  /** Class A: the USER turn Gate 9 appended (D-11). */
+  readonly loweredTurn: {
+    readonly turnId: string;
+    readonly conversationId: string;
+  };
+  /** Class A: Gate 11's resolution. */
+  readonly resolvedNouns: ResolvedNouns;
+}
+
+/**
+ * The four receipt outcomes D12's CHECK `WidgetIntentReceipt_outcome_check` admits. Not a new
+ * vocabulary: the column's own, which G13 A14 (AMB-56) may widen.
+ */
+export type IntentReceiptOutcome =
+  'ACCEPTED' | 'REFUSED' | 'NEEDS_CONFIRMATION' | 'NEEDS_VERIFICATION';
+
+/** What Gate 13's routing returns inside a `terminate` (G13 §6). Each `unknown` is `null` when absent. */
+export interface RouteResult {
+  /** `null` exactly when no D12 member fits (G13 A14). */
+  readonly receipt_outcome: IntentReceiptOutcome | null;
+  readonly next_envelope: unknown;
+  readonly resolved_widget: unknown;
+  readonly owner_decision: unknown;
+}
+
 export type GateVerdict =
-  | { readonly outcome: 'pass' }
+  | {
+      readonly outcome: 'pass';
+      /** J-1: merged by the runner through `mergeFacts`; never returned to a client. */
+      readonly facts?: Partial<AdmissionFacts>;
+    }
   | {
       readonly outcome: 'refuse';
       readonly code: RefusalCode;
@@ -68,8 +138,15 @@ export type GateVerdict =
       readonly code: RefusalCode;
       readonly detail?: string;
     }
-  /** Gates 9 and 13 terminate the pipeline by design rather than by refusal. */
-  | { readonly outcome: 'terminate'; readonly why: string };
+  /**
+   * Ends the pipeline by design rather than by refusal: Gate 13 once it has routed, and Gate 14's
+   * pointer. Gate 9 does not terminate — on success it passes, carrying its facts.
+   */
+  | {
+      readonly outcome: 'terminate';
+      readonly why: string;
+      readonly route?: RouteResult;
+    };
 
 /**
  * What a gate may read. Deliberately narrow: a gate that could reach the request object could
@@ -79,6 +156,12 @@ export interface GateContext {
   /** The hash of the presented token. The token itself is never stored, only compared. */
   readonly intentTokenHash: string;
   readonly tenantId: string;
+  /**
+   * The JWT-validated user, exactly as `@CurrentUser()` delivers it (`JwtStrategy.validate`). Passing
+   * the validated actor constructs no principal (K5). Its `role` is read by no gate until AMB-03
+   * rules which read supplies the live principal's role (`gate-context.source.spec.ts`).
+   */
+  readonly actor: Readonly<AuthenticatedUser>;
   readonly principalProofHash: string;
   readonly now: Date;
   /** The stored record, once Gate 1 has found one. Null before that, and after a refusal. */
@@ -103,10 +186,10 @@ export interface GateContext {
    */
   readonly carrier: ChannelId;
   /**
-   * The roles the server resolved for this principal, for Gate 6. Never client-supplied — FR-3's
-   * `assertNoCallerAuthority` forbids caller-supplied authority outright.
+   * J-1: facts earlier slots produced, `{}` before the first. Grown only by the runner, through
+   * `mergeFacts`; a gate never writes it.
    */
-  readonly resolvedRoles: readonly string[];
+  readonly facts: Readonly<Partial<AdmissionFacts>>;
 }
 
 /** The stored record, as the widget layer holds it. A subset of §3.7 — K3 reads only this much. */
@@ -143,8 +226,37 @@ export interface IntentRecordRow {
   readonly confirmationOfKind: string | null;
   readonly confirmationOfRef: string | null;
   readonly producedByIntentTokenHash: string | null;
-  /** Gate 10 compares the router's resolution against the capability, over THIS utterance. */
-  readonly renderedUtterance: string | null;
+
+  // ── the union select of the Gates 6–13 plan (§2.4) ─────────────────────────────────────────────
+  // Every member below is an AUDIT_RETAINED (class A) column or a projection of one. No class C or X
+  // column is on this row (S-ROW, `gate-context.source.spec.ts`): the lowering source is read lazily
+  // inside slot 8 (D-2), and `renderedUtterance` left with legacy Gate 10 (D-12).
+  readonly c9Domain: C9Domain | null;
+  /** `WidgetEmission.deliveryChannel`, flattened: the channel the envelope was fitted for. */
+  readonly deliveryChannel: ChannelId;
+  /** `WidgetEmission.lifecycleState`, flattened. */
+  readonly emissionLifecycleState: string;
+  /**
+   * D-3: `confirmationJson`, projected to the two members Gate 8-R reads. The values are copied
+   * verbatim — no coercion — so a stored `'true'` stays the string. A member the stored object lacks
+   * is `undefined`; a column that holds no plain object (SQL null, an array, a scalar) projects to
+   * `null`. The raw object is never placed on this row: `readback_text` and `approval_policy` do not
+   * reach a gate.
+   */
+  readonly confirmation: {
+    readonly requires_readback: unknown;
+    readonly readback_ref: unknown;
+  } | null;
+  /**
+   * D-3: `confirmationJson.idempotency_key` alone, verbatim (G13 A19); `null` when the column holds no
+   * plain object, `undefined` when the object lacks the member.
+   */
+  readonly confirmationIdempotencyKey: unknown;
+  readonly frozenNounsJson: unknown;
+  readonly requestedScopeHash: string;
+  readonly runId: string | null;
+  readonly revisionId: string | null;
+  readonly approvalOfIntentRef: string | null;
 }
 
 /**

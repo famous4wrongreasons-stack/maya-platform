@@ -30,6 +30,8 @@ const GATEWAY = 'maya-saas-backend/src/widgets/intent-gateway.service.ts';
 const INGRESS = 'maya-saas-backend/src/action-engine/action-engine.ingress.ts';
 // Gates 5–13 were one file (`gate-logic.ts`) and are now one file per gate. A row for a gate
 // function reads that gate's own file; the checks applied to it are the same as before the split.
+// A slot that is a `pending()` stub has no gate file: its row reads the gateway, as Gate 9's always
+// has. Since U0, slots 8 and 10 are such stubs, and their former files are deleted.
 const gateFile = (name) => `maya-saas-backend/src/widgets/gates/${name}.ts`;
 const logicRow = (name) => ({ file: gateFile(name), src: read(gateFile(name)), logic: true });
 
@@ -55,10 +57,10 @@ const GATES = [
   { n: '6', name: 'Authority', symbol: 'gate6', host: 'pipeline', ...logicRow('gate6') },
   { n: '6r', name: 'R3.5.1 sensitive destination', symbol: 'gateSensitiveDest', host: 'pipeline (with 6)', ...logicRow('gate6') },
   { n: '7', name: 'Effect admissibility', symbol: 'gate7', host: 'pipeline', ...logicRow('gate7') },
-  { n: '8', name: 'Input validation', symbol: 'gate8', host: 'pipeline', ...logicRow('gate8') },
+  { n: '8', name: 'Input validation', symbol: "'Input validation'", host: 'pipeline', file: GATEWAY, src: gateway },
   { n: '8-R', name: 'Readback', symbol: 'gate8R', host: 'pipeline', ...logicRow('gate8r') },
   { n: '9', name: 'Lowering', symbol: "'Lowering'", host: 'pipeline', file: GATEWAY, src: gateway },
-  { n: '10', name: 'Divergence audit', symbol: 'gate10', host: 'pipeline', ...logicRow('gate10') },
+  { n: '10', name: 'Divergence audit', symbol: "'Divergence audit'", host: 'pipeline', file: GATEWAY, src: gateway },
   { n: '11', name: 'Noun resolution', symbol: 'gate11', host: 'pipeline', ...logicRow('gate11') },
   { n: '12', name: 'Data fence', symbol: 'gate12', host: 'pipeline', ...logicRow('gate12') },
   { n: '13', name: 'Effect routing', symbol: 'gate13', host: 'pipeline', ...logicRow('gate13') },
@@ -99,6 +101,9 @@ const rows = GATES.map((g) => {
 // refusing stub is never reached by any live request. It is wired, and it is tested as a function,
 // but on the admission path it enforces nothing. Only pipeline gates are ordered this way; Gates 2
 // and 14 run in their own hosts regardless of the pipeline.
+//
+// The boundary is the FIRST stub in §3.9 order, whichever slot that is — Gate 9 until U0, Gate 8
+// since. The stub itself runs (it refuses); nothing after it runs.
 const ORDER = ['1', '2', '3', '4', '5', '6', '6r', '7', '8', '8-R', '9', '10', '11', '12', '13'];
 const firstStub = ORDER.findIndex((n) => rows.find((r) => r.n === n)?.stub);
 for (const r of rows) {
@@ -125,6 +130,7 @@ console.log(`  of which in the central pipeline: ${enforced.filter((r) => r.host
 console.log(`  of which in an owning module:     ${enforced.filter((r) => !r.host.startsWith('pipeline')).length}   (Gate 2: global guard; Gate 14: Action Engine)`);
 console.log(`  still a pending() stub:           ${rows.filter((r) => r.stub).length}${rows.some((r) => r.stub) ? `  (gate ${rows.filter((r) => r.stub).map((r) => r.n).join(', ')})` : ''}`);
 console.log(`  a function that can only pass:    ${rows.filter((r) => r.constantPass).length}`);
+console.log(`  reachability ends at:             ${firstStub < 0 ? 'no stub (every pipeline slot is reachable)' : `gate ${ORDER[firstStub]}, the first pending() stub — no pipeline gate after it runs`}`);
 console.log();
 console.log('  GATE MODULE EXISTS != GATE ENFORCED — each row above is checked for all three:');
 console.log('  the symbol exists, the path calls it, and it is not a stub.');
@@ -145,8 +151,18 @@ for (const g of audit.gates) {
 }
 console.log();
 console.log(`  ${audit.headline}`);
-// Consistency: a gate the audit calls COMPLETE must also pass every mechanical check.
-const incoherent = audit.tally.COMPLETE.filter((n) => !contractGates.find((r) => r.n === n)?.enforced);
-if (incoherent.length) console.log(`  INCOHERENT: audit says COMPLETE but mechanical checks fail for gate ${incoherent.join(', ')}`);
+// Consistency between the recorded audit and what the mechanical checks see. The audit is judgement;
+// these are the places where judgement may not contradict the code:
+//   - COMPLETE needs every mechanical check, and reachability;
+//   - PARTIAL means "reachable, and some clauses execute", so it needs reachability too;
+//   - NOT_BUILT is exactly a refusing pending() stub, and every stub is NOT_BUILT.
+const mech = (n) => contractGates.find((r) => r.n === n);
+const incoherent = [
+  ...audit.tally.COMPLETE.filter((n) => !(mech(n)?.enforced && mech(n)?.reachable)).map((n) => `gate ${n}: audit COMPLETE, mechanical checks or reachability fail`),
+  ...(audit.tally.PARTIAL ?? []).filter((n) => !mech(n)?.reachable).map((n) => `gate ${n}: audit PARTIAL, but unreachable behind gate ${ORDER[firstStub]}`),
+  ...(audit.tally.NOT_BUILT ?? []).filter((n) => !mech(n)?.stub).map((n) => `gate ${n}: audit NOT_BUILT, but the slot is not a pending() stub`),
+  ...contractGates.filter((r) => r.stub && !(audit.tally.NOT_BUILT ?? []).includes(r.n)).map((r) => `gate ${r.n}: a pending() stub the audit does not call NOT_BUILT`),
+];
+for (const line of incoherent) console.log(`  INCOHERENT: ${line}`);
 
 process.exitCode = audit.tally.COMPLETE.length === contractGates.length && !incoherent.length ? 0 : 1;

@@ -11,6 +11,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 
+import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import type {
   Gate,
@@ -22,12 +23,11 @@ import type {
 import type { VerificationLevel } from '../widget-contract/envelope';
 import type { ChannelId } from '../widget-contract/lifecycle';
 import { digestEquals, sha256Hex } from './token.util';
+import { mergeFacts, NO_FACTS } from './gates/facts';
 import { gate5 } from './gates/gate5';
 import { gate6, gateSensitiveDest } from './gates/gate6';
 import { gate7 } from './gates/gate7';
-import { gate8 } from './gates/gate8';
 import { gate8R } from './gates/gate8r';
-import { gate10 } from './gates/gate10';
 import { gate11 } from './gates/gate11';
 import { gate12 } from './gates/gate12';
 import { gate13 } from './gates/gate13';
@@ -37,9 +37,16 @@ import { channelMaxLevel } from './authority/authority-resolver';
  * A gate whose mechanism is not built. It runs, and it REFUSES — "not built yet" and "allowed" must
  * never be the same branch (F5's fail-closed default).
  *
- * One slot uses it: Gate 9, Lowering. The wiring commit replaced it with a function that returned
- * `pass` and performed nothing, which is worse than a stub: the append of `rendered_utterance` as a
- * USER turn never happened, so Gate 10 received no utterance to compare on the tap path.
+ * Three slots use it: 8, 9 and 10.
+ *   - Gate 9, Lowering. The wiring commit replaced it with a function that returned `pass` and
+ *     performed nothing, which is worse than a stub: the append of `rendered_utterance` as a USER
+ *     turn never happened, so Gate 10 received no utterance to compare on the tap path.
+ *   - Gate 8, Input validation. The function that stood here failed open: it passed every non-string
+ *     value, and every value on an empty domain (G8 §5.0).
+ *   - Gate 10, Divergence audit. The function that stood here read the persisted utterance rather
+ *     than this request's lowering, audited into a process-local array, and classified effects with
+ *     a mapping the contract does not state (G10 G-1…G-14; integrator decision D-12).
+ * A stub that refuses is honest about all three. A function that passed would be counted as a gate.
  */
 const pending = (
   n: string,
@@ -193,12 +200,15 @@ export class IntentGatewayService {
       host: 'IntentGateway',
       run: (ctx) => gate7(ctx),
     },
-    {
-      n: '8',
-      name: 'Input validation',
-      host: 'IntentGateway',
-      run: (ctx) => gate8(ctx),
-    },
+    // NOT BUILT. Closed-domain membership, cardinality, bounds re-read from `bounds_source`,
+    // normalizers and `c9SafeText` need the schema source, the codec and the registries, and several
+    // of their refusals need owner rulings before a code may be chosen (AMB-01, AMB-02a).
+    pending(
+      '8',
+      'Input validation',
+      'IntentGateway',
+      'the input-validation mechanism (schema retrieval, closed-domain codec, bounds and normalizer registries) and the owner rulings on its refusal codes',
+    ),
     {
       n: '8-R',
       name: 'Readback',
@@ -215,16 +225,19 @@ export class IntentGatewayService {
       'chat ingress',
       'the USER-turn append of rendered_utterance, and a ruling on the refusal when it cannot render',
     ),
-    {
-      n: '10',
-      name: 'Divergence audit',
-      host: 'intent router',
-      run: (ctx) => gate10(ctx),
-    },
+    // NOT BUILT. The router runs over THIS request's lowering (Gate 9's fact), and a divergence is
+    // written to a durable audit record. What the router resolves against, what "canonical owner"
+    // means, a null result and the audit record's store are owner rulings (AMB-29 … AMB-32, AMB-09).
+    pending(
+      '10',
+      'Divergence audit',
+      'intent router',
+      "the deterministic router over Gate 9's lowered utterance, a durable divergence audit record, and the owner rulings on the router, the canonical owner, a null resolution and the audit store",
+    ),
     {
       n: '11',
       name: 'Noun resolution',
-      host: 'IntentGateway',
+      host: 'IntentGateway + capability owner',
       run: (ctx) => gate11(ctx),
     },
     {
@@ -275,6 +288,8 @@ export class IntentGatewayService {
   async submit(args: {
     intentToken: string;
     tenantId: string;
+    /** The JWT-validated user from `@CurrentUser()` (D-9). No role or principal is built from it. */
+    actor: Readonly<AuthenticatedUser>;
     principalProofHash: string;
     submission: SubmissionShape;
     now?: Date;
@@ -285,7 +300,6 @@ export class IntentGatewayService {
      */
     verificationLevel: VerificationLevel;
     carrier: ChannelId;
-    resolvedRoles: readonly string[];
   }): Promise<{ verdict: GateVerdict; stoppedAt: string | null; ran: number }> {
     const token = this.step0(args.submission);
     if (!token)
@@ -302,9 +316,10 @@ export class IntentGatewayService {
     const intentTokenHash = sha256Hex(token);
     const record = await this.findRecord(intentTokenHash, args.tenantId);
 
-    const ctx: GateContext = {
+    let ctx: GateContext = {
       intentTokenHash,
       tenantId: args.tenantId,
+      actor: args.actor,
       principalProofHash: args.principalProofHash,
       now: args.now ?? new Date(),
       record,
@@ -312,7 +327,7 @@ export class IntentGatewayService {
       verificationLevel: args.verificationLevel,
       channelMaxLevel: channelMaxLevel(args.carrier),
       carrier: args.carrier,
-      resolvedRoles: args.resolvedRoles,
+      facts: NO_FACTS,
     };
 
     let ran = 0;
@@ -323,6 +338,10 @@ export class IntentGatewayService {
         this.log.debug(`gate ${gate.n} (${gate.name}) -> ${verdict.outcome}`);
         return { verdict: this.normalise(verdict), stoppedAt: gate.n, ran };
       }
+      // J-1: a later gate sees what an earlier one established only through a NEW context, and only
+      // what `mergeFacts` admits — each fact from its one producer slot, once. It throws otherwise.
+      if (verdict.facts)
+        ctx = { ...ctx, facts: mergeFacts(ctx.facts, verdict.facts, gate.n) };
     }
     return { verdict: { outcome: 'pass' }, stoppedAt: null, ran };
   }
@@ -345,6 +364,11 @@ export class IntentGatewayService {
   /**
    * The record lookup is tenant-scoped in the query itself rather than filtered afterwards, so a
    * cross-tenant token cannot be read and then rejected — it is never read.
+   *
+   * ONE read serves every gate: the union select of the plan's §2.4. Every column in it is
+   * AUDIT_RETAINED (class A). No conversation content is loaded here: the lowering source is read
+   * lazily, inside slot 8, once validation has passed (D-2), so a token refused at Gates 1–8 never
+   * brings a template or a label into memory.
    */
   private async findRecord(
     intentTokenHash: string,
@@ -379,21 +403,87 @@ export class IntentGatewayService {
         confirmationOfKind: true,
         confirmationOfRef: true,
         producedByIntentTokenHash: true,
-        renderedUtterance: true,
+        // §2.4's additions, each named by the gate that reads it: Gate 6 (c9Domain), Gates 11–13
+        // (frozen nouns, requested scope, run and revision, the approval ref), and Gates 8-R and 13
+        // through the confirmation projection below.
+        c9Domain: true,
+        requestedScopeHash: true,
+        runId: true,
+        revisionId: true,
+        approvalOfIntentRef: true,
+        frozenNounsJson: true,
+        // Selected so it can be PROJECTED (D-3). The object itself never leaves this method.
+        confirmationJson: true,
         // Supersession is a property of the ENVELOPE, not of the record: a record points at a
         // widgetId, and WidgetEmission.supersededByWidgetId is where a newer envelope replacing an
         // older one is written. Reading it here rather than duplicating it onto the record keeps
-        // one answer to "was this superseded" instead of two that can disagree.
-        emission: { select: { supersededByWidgetId: true } },
+        // one answer to "was this superseded" instead of two that can disagree. The delivery channel
+        // (Gate 7) and the lifecycle state (Gates 12–13) are the envelope's too.
+        emission: {
+          select: {
+            supersededByWidgetId: true,
+            deliveryChannel: true,
+            lifecycleState: true,
+          },
+        },
       },
     });
     if (!row) return null;
-    const { emission, ...rest } = row as typeof row & {
-      emission: { supersededByWidgetId: string | null } | null;
+    const { emission, confirmationJson, ...rest } = row as typeof row & {
+      emission: {
+        supersededByWidgetId: string | null;
+        deliveryChannel: string;
+        lifecycleState: string;
+      } | null;
     };
+    // `WidgetIntentRecord_2_fkey` makes the envelope mandatory. A record without one is a store that
+    // has stopped meaning what the schema says, which is a fault to raise, not a channel to guess.
+    if (!emission)
+      throw new Error(
+        'invariant: a WidgetIntentRecord was read without its WidgetEmission',
+      );
     return {
-      ...(rest as Omit<IntentRecordRow, 'supersededByWidgetId'>),
-      supersededByWidgetId: emission?.supersededByWidgetId ?? null,
+      ...(rest as Omit<
+        IntentRecordRow,
+        | 'supersededByWidgetId'
+        | 'deliveryChannel'
+        | 'emissionLifecycleState'
+        | 'confirmation'
+        | 'confirmationIdempotencyKey'
+      >),
+      supersededByWidgetId: emission.supersededByWidgetId,
+      // CHECK over the eleven ChannelIds (migration `WidgetEmission` deliveryChannel CHECK).
+      deliveryChannel: emission.deliveryChannel as ChannelId,
+      emissionLifecycleState: emission.lifecycleState,
+      ...projectConfirmation(confirmationJson),
     };
   }
 }
+
+type ConfirmationProjection = Pick<
+  IntentRecordRow,
+  'confirmation' | 'confirmationIdempotencyKey'
+>;
+
+/**
+ * D-3. The stored `confirmationJson` reduced to what gates may read: `requires_readback` and
+ * `readback_ref` (Gate 8-R) and `idempotency_key` (Gate 13). Each is copied as stored — an own member
+ * of the stored object, with no coercion — so a `'true'` stays a string and a missing member stays
+ * missing. A column that holds no plain object projects to `null`, which Gate 8-R's
+ * `isPlainObject(c) && c.requires_readback === true` reads exactly as it would read that column.
+ */
+const projectConfirmation = (stored: unknown): ConfirmationProjection => {
+  if (typeof stored !== 'object' || stored === null || Array.isArray(stored))
+    return { confirmation: null, confirmationIdempotencyKey: null };
+  const own = (member: string): unknown =>
+    Object.prototype.hasOwnProperty.call(stored, member)
+      ? (stored as Record<string, unknown>)[member]
+      : undefined;
+  return {
+    confirmation: {
+      requires_readback: own('requires_readback'),
+      readback_ref: own('readback_ref'),
+    },
+    confirmationIdempotencyKey: own('idempotency_key'),
+  };
+};

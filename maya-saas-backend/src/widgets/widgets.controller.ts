@@ -82,13 +82,15 @@ export class WidgetsController {
       // The tenant comes from the authenticated principal, never from the body. A body-supplied
       // tenant is the shape of every tenant-confusion bug, and the DTO has no field for one.
       tenantId: actor.tenantId ?? '',
+      // The JWT-validated user, as `@CurrentUser()` delivers it (D-9). Nothing here reads its role or
+      // builds a principal from it (K5): which read supplies the live principal's role is AMB-03's.
+      actor,
       principalProofHash: principalProofHash(actor),
       submission: dto,
       verificationLevel,
       // The carrier of an HTTP submission. A carrier is a ceiling, not a claim: `channelMaxLevel`
       // caps whatever the session says.
       carrier: 'pwa',
-      resolvedRoles: [],
     });
 
     return {
