@@ -23,5 +23,15 @@
         "replace": "        return digestEquals(r.principalProofHash, ctx.principalProofHash) ||\n          ctx.intentTokenHash.length > 0\n          ? { outcome: 'pass' }\n          : { outcome: 'refuse', code: 'widget_principal_mismatch' };\n"
       }
     ]
+  },
+  "N6-FLOOR": {
+    "description": "U6-L1: Gate 5's level comparison is neutralised — the RETURN VALUE of the shadowing check is replaced, never a line deleted (§0.5 E-INDEP). A TOOL ref and an unregistered C9 key both derive STEP_UP_VERIFIED (K4 fail-closed), which a pwa session cannot meet, so on a conformant build they stop at slot 5 and never reach Gate 6. With this set they reach it, and S-TOOL / S-REG read Gate 6's own DETAIL.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate5.ts",
+        "find": "  if (meets(effective, recomputed)) return pass;\n",
+        "replace": "  if (meets(effective, recomputed) || true) return pass;\n"
+      }
+    ]
   }
 }

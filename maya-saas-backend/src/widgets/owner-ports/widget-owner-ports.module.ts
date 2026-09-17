@@ -1,8 +1,11 @@
 import { Module } from '@nestjs/common';
 
+import { AiToolPolicyModule } from '../../ai-tools/ai-tool-policy.module';
+import { EntitlementsModule } from '../../entitlements/entitlements.module';
 import { C9Module } from '../../orchestration/c9.module';
 import { TenancyModule } from '../../tenancy/tenancy.module';
-import { PRINCIPAL_RESOLVER, TENANT_SCOPE } from '../di-tokens';
+import { GATE6_OWNERS, PRINCIPAL_RESOLVER, TENANT_SCOPE } from '../di-tokens';
+import { Gate6OwnersAdapter } from './gate6.owners.provider';
 import { PrincipalAdapter } from './principal.adapter';
 import { TenantScopeAdapter } from './tenant-scope.provider';
 
@@ -19,17 +22,21 @@ import { TenantScopeAdapter } from './tenant-scope.provider';
  * B-02's in-transaction role read, so `C9Module` and `TenancyModule` are imported here and the k3 check
  * 9 enumeration names them in the same commit. U4 binds `TENANT_SCOPE` through the same
  * `TenancyModule`, which is `@Global()` — the import is documentation rather than resolution, and k3's
- * ports rule is what makes naming it required. `AiToolPolicyModule` and `EntitlementsModule` come with
- * U6; `CrmModule` with U11b; `AiToolsModule`, `MeasurementModule` and `C8Module` with U12b/U13b.
+ * ports rule is what makes naming it required. U6-L1 binds `GATE6_OWNERS` (R6-2), so
+ * `AiToolPolicyModule` (C20's `assertCanExecute`, C11:4761-4762) and `EntitlementsModule` ((e)'s
+ * `requiredFeatures`, C11:4755) are imported here and enumerated in k3 check 9 in the same commit;
+ * `CrmModule` comes with U11b, `AiToolsModule`, `MeasurementModule` and `C8Module` with U12b/U13b.
  * `ActionEngineModule` is never imported here. An owner module that is merely present is not an
  * enforced gate.
  */
 @Module({
-  imports: [C9Module, TenancyModule],
+  imports: [AiToolPolicyModule, C9Module, EntitlementsModule, TenancyModule],
   providers: [
+    Gate6OwnersAdapter,
     { provide: PRINCIPAL_RESOLVER, useClass: PrincipalAdapter },
     { provide: TENANT_SCOPE, useClass: TenantScopeAdapter },
+    { provide: GATE6_OWNERS, useExisting: Gate6OwnersAdapter },
   ],
-  exports: [PRINCIPAL_RESOLVER, TENANT_SCOPE],
+  exports: [GATE6_OWNERS, PRINCIPAL_RESOLVER, TENANT_SCOPE],
 })
 export class WidgetOwnerPortsModule {}

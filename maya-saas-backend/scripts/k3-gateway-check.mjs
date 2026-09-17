@@ -682,12 +682,16 @@ const WIDGETS_MODULE = 'widgets.module.ts';
  * (plan §3.5 item 7). U0: none.
  */
 const OWNER_MODULES = [
+  // U6-L1 (R6-2): C20's owner, `AiToolPolicyService.assertCanExecute` (C11:4761-4762).
+  'ai-tools/ai-tool-policy.module.ts#AiToolPolicyModule',
   // P-PRINCIPAL (D-1, D-2): K1's resolver (C11:2536-2539) and B-02's in-transaction Membership read.
   'orchestration/c9.module.ts#C9Module',
+  // U6-L1 (R6-2): (e)'s owner, `EntitlementsService` grants every `requiredFeatures` entry (C11:4755).
+  'entitlements/entitlements.module.ts#EntitlementsModule',
   'tenancy/tenancy.module.ts#TenancyModule',
 ];
 /** DI tokens of `di-tokens.ts` the owner-ports module may provide and export. */
-const BOUND_PORT_TOKENS = ['PRINCIPAL_RESOLVER', 'TENANT_SCOPE'];
+const BOUND_PORT_TOKENS = ['GATE6_OWNERS', 'PRINCIPAL_RESOLVER', 'TENANT_SCOPE'];
 const NEVER_IMPORTED = ['action-engine/action-engine.module.ts#ActionEngineModule'];
 /** The widget layer's own store client, and where it may be imported (`null`: any widget file). */
 const STORE_CLIENT = {

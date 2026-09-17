@@ -1,6 +1,31 @@
-// Gate 6, as a function, with R3.5.1's sensitive-destination check that runs in the same slot.
+// Gate 6 as a function — the block of «Gate 6 in full» (C11:4736-4798), branch by branch.
+//
+// CLASS [U] and [RI]. Nothing here is evidence under §0.5: a function-level test cannot show that the
+// gate RUNS. `test/widgets-live/gate6-authority.live-spec.ts` runs the same subjects through the real
+// pipeline, and E1 runs them on records a production trigger minted. What this file is for is the
+// cases the live path cannot reach at all this cycle:
+//
+//   - the AE branch. D-4 forbids minting any DRAFT, REQUEST_APPROVAL or COMMIT on the proof database
+//     until P-DISCHARGE, and an AE subject is only ever one of those. So (a), (b), (c), the
+//     TRANSITIONAL veto and the held (d) are [RI] here and BLOCKED-DISCHARGE in the audit.
+//   - the HELD LANE with a live principal present. `ctx.principal` is null on every request until the
+//     integrator's IR-P-GW lands P-PRINCIPAL's principal step, so "pending U6-L3" is reachable only by
+//     injecting a principal.
+//
+// Each refusal asserts its DETAIL, not only its code. Every branch of this gate answers
+// `insufficient_authority`, so a test that asserted the code alone would be satisfied by the wrong
+// fence firing — which is exactly how a deleted registry check survived the previous suite.
 
-import { gate6, gateSensitiveDest } from './gate6';
+import { C9_CAPABILITIES } from '../../orchestration/c9.registry';
+import type { C9Domain } from '../../widget-contract/ambient';
+import type { GateContext, GateVerdict, PrincipalView } from '../gate.types';
+import {
+  AE_WIDGET_COMMIT_ALLOWLIST,
+  MAYA_AI_TOOL_CATALOG_BY_NAME,
+  actionCapabilityRegistry,
+} from '../authority/contract-bindings';
+import type { Gate6Owners } from '../owner-ports/gate6.owners.provider';
+import { gate6, heldGate6Owners } from './gate6';
 import {
   code,
   ctx,
@@ -10,96 +35,504 @@ import {
 
 beforeAll(guardRegistries);
 
-describe('Gate 6 — may THIS principal exercise THIS capability', () => {
-  it('POSITIVE: a registered C9 capability with a policy row passes', () => {
-    expect(gate6(ctx(rec())).outcome).toBe('pass');
+const detail = (v: GateVerdict): string | null =>
+  'detail' in v ? (v.detail ?? null) : null;
+
+/** An owner set whose every member fails the test if slot 6 reaches it. */
+const unreachableOwners = (): Gate6Owners =>
+  Object.freeze({
+    assertCanExecute: () => {
+      throw new Error('Gate 6 reached an owner on a branch that resolves none');
+    },
+    grantsRequiredFeatures: () => {
+      throw new Error('Gate 6 reached an owner on a branch that resolves none');
+    },
   });
 
-  it('a null subject passes — there is nothing to authorise', () => {
-    // NONE, and every w/i/s/detail NAVIGATE. Refusing here would make the mandatory escape unusable.
+/** A live principal, for the held lane's second arm only. No member of it is read by U6-L1. */
+const PRINCIPAL: PrincipalView = Object.freeze({
+  authority: Object.freeze({
+    kind: 'USER',
+    tenantId: 't1',
+    userId: 'u1',
+    membershipId: 'm1',
+    clientId: null,
+    channelLinkId: null,
+    branchRefs: [],
+    staffRef: null,
+    proofHash: 'a'.repeat(64),
+  }),
+  role: 'tenant_owner',
+  presentationMode: 'owner',
+  verificationLevel: 'SESSION_VERIFIED',
+  proofHash: 'a'.repeat(64),
+});
+
+const withPrincipal = (c: GateContext): GateContext => ({
+  ...c,
+  principal: PRINCIPAL,
+});
+
+/** One of the nine non-catalogue C9 keys — the branch `WIDGET_CAPABILITY_POLICY` and `c9Capability` own. */
+const NINE = 'owner_report.status';
+/** One of the 47 — the branch `assertCanExecute` owns (C20). */
+const CATALOGUE = 'catalog.services.read';
+/** K7's allowlist, read from the binding rather than transcribed. */
+const ALLOWLISTED = Object.keys(AE_WIDGET_COMMIT_ALLOWLIST);
+
+const handoff = (key: string, cls: unknown, space = 'C9') =>
+  rec({
+    effect: 'HANDOFF',
+    capabilitySpace: null,
+    capabilityKey: null,
+    handoffSpace: space,
+    handoffKey: key,
+    targetJson: cls === null ? null : { class: cls },
+  });
+
+describe('Gate 6 — the subject is bound once, and the dispatch is scoped by effect (G6-1)', () => {
+  it('G6-5: a null subject proceeds, and no owner is reached', async () => {
+    // NONE, and every `w`/`i`/`s`/`detail` NAVIGATE (C11:4740-4741). A5 adds no branch here, and a
+    // branch that called an owner would be M28.
+    for (const target of [
+      null,
+      { class: 'w' },
+      { class: 'detail' },
+      { class: 's' },
+      { class: 'i' },
+    ]) {
+      const v = await gate6(
+        ctx(
+          rec({
+            effect: 'NAVIGATE',
+            capabilitySpace: null,
+            capabilityKey: null,
+            targetJson: target,
+          }),
+        ),
+        unreachableOwners(),
+      );
+      expect({ target, outcome: v.outcome }).toEqual({
+        target,
+        outcome: 'pass',
+      });
+    }
+  });
+
+  it('G6-1: the dispatch reads the SUBJECT, not `record.capability` — a handoff with a null capability is dispatched on its destination', async () => {
+    // `subjectCapability` falls through to `handoff_capability_ref` (§3.5). A gate that read
+    // `record.capability` would see null here and pass everything.
+    const v = await gate6(
+      ctx(handoff('control.not.registered', 's', 'CONTROL')),
+    );
+    expect([code(v), detail(v)]).toEqual([
+      'insufficient_authority',
+      'HANDOFF destination is not registered in its space',
+    ]);
+  });
+
+  it('G6-1c: a class-`c` NAVIGATE is dispatched on `target.ref` — the third arm of `subjectCapability`', async () => {
+    const v = await gate6(
+      ctx(
+        rec({
+          effect: 'NAVIGATE',
+          capabilitySpace: null,
+          capabilityKey: null,
+          targetJson: {
+            class: 'c',
+            ref: { space: 'C9', key: 'c9.not.registered' },
+          },
+        }),
+      ),
+    );
+    expect(detail(v)).toBe('unregistered C9 key');
+  });
+
+  it('G6-NOREC: no record is a refusal, not a pass', async () => {
+    expect(detail(await gate6(ctx(rec(), { record: null })))).toBe('no record');
+  });
+});
+
+describe('Gate 6 — HANDOFF resolves the DESTINATION fences only (G6-6, G6-7)', () => {
+  it('G6-6-NONSENS: a registered, non-sensitive destination passes at every target class', async () => {
+    for (const cls of ['s', 'w', 'i', 'detail']) {
+      const v = await gate6(
+        ctx(handoff('settings.update', cls)),
+        unreachableOwners(),
+      );
+      expect({ cls, outcome: v.outcome }).toEqual({ cls, outcome: 'pass' });
+    }
+  });
+
+  it('F48: a SENSITIVE destination admits a class-`s` target and nothing else (R3.5.1 at Gate 6)', async () => {
+    // `owner_report.download` is `personal_data` under the signed policy, so SENSITIVE_DEST holds.
     expect(
-      gate6(ctx(rec({ capabilitySpace: null, capabilityKey: null }))).outcome,
+      (await gate6(ctx(handoff('owner_report.download', 's')))).outcome,
+    ).toBe('pass');
+    for (const cls of ['w', 'i', 'detail', null, 7, ['s'], undefined]) {
+      const v = await gate6(ctx(handoff('owner_report.download', cls)));
+      expect({ cls, detail: detail(v) }).toEqual({
+        cls,
+        detail:
+          'a sensitive HANDOFF destination admits a class-s target and nothing else',
+      });
+    }
+  });
+
+  it('G6-6-REG: an unregistered destination is refused in every space', async () => {
+    for (const [space, key] of [
+      ['C9', 'c9.not.registered'],
+      ['AE', 'not.registered.v1'],
+      ['CONTROL', 'control.not.registered'],
+    ] as const) {
+      const v = await gate6(ctx(handoff(key, 's', space)));
+      expect({ space, detail: detail(v) }).toEqual({
+        space,
+        detail: 'HANDOFF destination is not registered in its space',
+      });
+    }
+  });
+
+  it('G6-7: a HANDOFF to a catalogue key, to an AE key and to a run-bearing C9 key never reaches an owner', async () => {
+    // The three admission mechanisms the block forbids on this branch: `assertCanExecute`, the AE
+    // commit allowlist and `c9Capability`'s domain/mode admission. The AE destination below has NO
+    // allowlist row and the C9 one would fail `c9Capability` under `BUSINESS_INTELLIGENCE` — both
+    // pass here, which is what "destination fences ONLY" means (C11:4790-4798).
+    const owners = unreachableOwners();
+    expect((await gate6(ctx(handoff(CATALOGUE, 's')), owners)).outcome).toBe(
+      'pass',
+    );
+    expect(
+      (await gate6(ctx(handoff('crm.visit.payment.v1', 's', 'AE')), owners))
+        .outcome,
+    ).toBe('pass');
+    expect(
+      (
+        await gate6(
+          ctx({
+            ...handoff('a22.configuration', 's'),
+            c9Domain: 'BUSINESS_INTELLIGENCE',
+          }),
+          owners,
+        )
+      ).outcome,
     ).toBe('pass');
   });
 
-  it('REFUSAL: a TOOL-spaced ref may never be an intent subject', () => {
-    const v = gate6(
-      ctx(
-        rec({
-          capabilitySpace: 'TOOL',
-          capabilityKey: 'catalog.services.read',
-        }),
-      ),
+  it('G6-19 is total over effect classes: a TOOL-spaced destination is refused, not fenced as a destination', async () => {
+    const v = await gate6(ctx(handoff(CATALOGUE, 's', 'TOOL')));
+    expect(detail(v)).toBe('a TOOL ref may not be an intent subject');
+  });
+});
+
+describe('Gate 6 — the C9 branch (C11:4760-4769)', () => {
+  it('G6-19: a TOOL-spaced subject may never be an intent subject', async () => {
+    const v = await gate6(
+      ctx(rec({ capabilitySpace: 'TOOL', capabilityKey: CATALOGUE })),
     );
-    expect(code(v)).toBe('insufficient_authority');
+    expect(detail(v)).toBe('a TOOL ref may not be an intent subject');
   });
 
-  it('REFUSAL: an unregistered key refuses at the REGISTRY check, not the policy one', () => {
-    // Asserting only the code let a mutant through: with the registry check deleted, an
-    // unregistered key still refused — at the policy-row check, because it has no row either. The
-    // two are not redundant (a key can be registered and unclassified, or the reverse), so the
-    // test names which branch fired.
-    const v = gate6(ctx(rec({ capabilityKey: 'c9.not.registered' })));
-    expect(code(v)).toBe('insufficient_authority');
-    expect('detail' in v && v.detail).toBe('unregistered C9 key');
-  });
-
-  it('REFUSAL: a registered key with no policy row refuses at the POLICY check', () => {
-    // The other branch, exercised on its own so neither can stand in for the other.
-    const v = gate6(ctx(rec({ capabilityKey: 'catalog.services.read' })));
-    expect(v.outcome).toBe('pass'); // it HAS a row — 56/56 are total
-  });
-
-  it('REFUSAL: a CONSENT capability — the widget layer cannot confer consent', () => {
-    const v = gate6(
-      ctx(
-        rec({
-          capabilitySpace: 'AE',
-          capabilityKey: 'package5.wave3.record-client-consent.execute.v1',
-        }),
-      ),
-    );
-    expect(code(v)).toBe('insufficient_authority');
-    expect('detail' in v && v.detail).toMatch(/cannot confer consent/);
-  });
-
-  it('REFUSAL: an IDENTITY capability', () => {
-    const v = gate6(
-      ctx(
-        rec({
-          capabilitySpace: 'AE',
-          capabilityKey: 'package5.wave2.revoke-all-sessions.execute.v1',
-        }),
-      ),
-    );
-    expect(code(v)).toBe('insufficient_authority');
-  });
-
-  it('REFUSAL: a MONEY capability that is not allowlisted is gap-keyed', () => {
-    const v = gate6(
-      ctx(
-        rec({ capabilitySpace: 'AE', capabilityKey: 'crm.visit.payment.v1' }),
-      ),
-    );
-    expect(code(v)).toBe('insufficient_authority');
-    expect('detail' in v && v.detail).toMatch(/gap-keyed/);
-  });
-
-  it('R3.5.1: a sensitive destination admits a class-s HANDOFF and nothing else', () => {
-    // `clients.dossier.read` is `personal_data` under the signed policy, so SENSITIVE_DEST holds.
-    const asRefine = rec({ capabilityKey: 'clients.dossier.read' });
-    expect(code(gateSensitiveDest(ctx(asRefine)))).toBe(
+  it('S-REG-U: an unregistered key refuses at the REGISTRY check, not at the policy one', async () => {
+    // The two are not redundant (a key can be registered and unclassified, or the reverse), so the
+    // test names which branch fired. Asserting the code alone once let a deleted check through.
+    const v = await gate6(ctx(rec({ capabilityKey: 'c9.not.registered' })));
+    expect([code(v), detail(v)]).toEqual([
       'insufficient_authority',
-    );
-
-    const asHandoff = rec({
-      effect: 'HANDOFF',
-      capabilitySpace: null,
-      capabilityKey: null,
-      handoffSpace: 'C9',
-      handoffKey: 'clients.dossier.read',
-      targetJson: { class: 's' },
-    });
-    expect(gateSensitiveDest(ctx(asHandoff)).outcome).toBe('pass');
+      'unregistered C9 key',
+    ]);
   });
+
+  it('G6-15: the `WIDGET_CAPABILITY_POLICY` row is total over the nine, so its refusal cannot fire at runtime', async () => {
+    // C11:4792-4795 says so explicitly, and this is the positive half of the evidence the audit
+    // takes: totality at BUILD (`assertPolicyTotality`) plus a pass here, never a runtime refusal.
+    const nine = C9_CAPABILITIES.filter(
+      (c) => !MAYA_AI_TOOL_CATALOG_BY_NAME.has(c.capabilityKey),
+    );
+    expect(nine).toHaveLength(9);
+    for (const cap of nine) {
+      const v = await gate6(
+        ctx(rec({ effect: 'REFINE', capabilityKey: cap.capabilityKey })),
+        unreachableOwners(),
+      );
+      expect({ key: cap.capabilityKey, outcome: v.outcome }).toEqual({
+        key: cap.capabilityKey,
+        outcome: 'pass',
+      });
+    }
+  });
+
+  it('G6-17: on a run-less mint path `c9_domain` is null and the `c9Capability` half is NOT applied', async () => {
+    const v = await gate6(
+      ctx(rec({ effect: 'REFINE', capabilityKey: NINE, c9Domain: null })),
+    );
+    expect(v.outcome).toBe('pass');
+  });
+
+  it('G6-16: with `c9_domain` non-null the key must be admitted for THAT domain', async () => {
+    // `owner_report.status` is registered for ADMIN and BUSINESS_INTELLIGENCE and for no other.
+    for (const domain of ['ADMIN', 'BUSINESS_INTELLIGENCE'] as const) {
+      const v = await gate6(
+        ctx(rec({ effect: 'REFINE', capabilityKey: NINE, c9Domain: domain })),
+      );
+      expect({ domain, outcome: v.outcome }).toEqual({
+        domain,
+        outcome: 'pass',
+      });
+    }
+    for (const domain of ['OCCUPANCY', 'CLIENT_LIFECYCLE'] as const) {
+      const v = await gate6(
+        ctx(rec({ effect: 'REFINE', capabilityKey: NINE, c9Domain: domain })),
+      );
+      expect({
+        domain,
+        code: code(v),
+        raised: detail(v)?.startsWith('owner raised:'),
+      }).toEqual({ domain, code: 'insufficient_authority', raised: true });
+    }
+  });
+
+  it("G6-16: the `BUSINESS_INTELLIGENCE`/non-`READ` arm is `c9Capability`'s own, and is vacuous over today's registry", async () => {
+    // The block says `c9Capability` "additionally refuses BUSINESS_INTELLIGENCE for any mode !==
+    // 'READ'" (C11:4764-4768). It is NOT restated in the gate: a second copy of one rule is a second
+    // thing that can disagree with the registry the rule lives in. This test records WHY the arm
+    // cannot be observed through Gate 6 today — every non-catalogue key carrying BI is `READ` — so
+    // the day one is added the list below stops being empty and the omission becomes visible.
+    const biNonRead = C9_CAPABILITIES.filter(
+      (c) =>
+        !MAYA_AI_TOOL_CATALOG_BY_NAME.has(c.capabilityKey) &&
+        c.domains.includes('BUSINESS_INTELLIGENCE') &&
+        c.mode !== 'READ',
+    );
+    expect(biNonRead.map((c) => c.capabilityKey)).toEqual([]);
+    // A non-`READ` key whose domains exclude BI is refused by the same call, on its domain arm.
+    const v = await gate6(
+      ctx(
+        rec({
+          effect: 'REFINE',
+          capabilityKey: 'a22.configuration',
+          c9Domain: 'BUSINESS_INTELLIGENCE',
+        }),
+      ),
+    );
+    expect(detail(v)).toMatch(/^owner raised: /);
+  });
+
+  it('P-F48-NONHANDOFF: a SENSITIVE subject outside a HANDOFF is Gate 6’s to pass (A1, C11:1836)', async () => {
+    // The check this replaces refused it. R3.5.1 is evaluated at EP-MINT and at INV-8', and at Gate 6
+    // "in its HANDOFF destination branch only" — so a `REFINE` on a `personal_data` key reaches the
+    // C9 branch on its own merits.
+    const v = await gate6(
+      ctx(rec({ effect: 'REFINE', capabilityKey: 'owner_report.download' })),
+    );
+    expect(v.outcome).toBe('pass');
+  });
+
+  it('G6-14-HELD: C20 is HELD (AMB-01a): a catalogue key refuses, and says which half is held', async () => {
+    const base = ctx(rec({ effect: 'REFINE', capabilityKey: CATALOGUE }));
+    // N-C9-47-NOPRINCIPAL [RI]: the live path today, where `ctx.principal` is null.
+    expect([code(await gate6(base)), detail(await gate6(base))]).toEqual([
+      'insufficient_authority',
+      'C20 no live principal',
+    ]);
+    // The other arm, reachable only by injecting the principal IR-P-GW will supply.
+    expect(detail(await gate6(withPrincipal(base)))).toBe('C20 pending U6-L3');
+  });
+
+  it('G6-14-ALL: the held lane refuses for EVERY one of the 47, so none of them is admitted by omission', async () => {
+    for (const name of MAYA_AI_TOOL_CATALOG_BY_NAME.keys()) {
+      const v = await gate6(
+        ctx(rec({ effect: 'REFINE', capabilityKey: name })),
+        unreachableOwners(),
+      );
+      expect({ name, outcome: v.outcome }).toEqual({ name, outcome: 'refuse' });
+    }
+  });
+});
+
+describe('Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB before P-DISCHARGE, D-4)', () => {
+  const ae = (key: string) =>
+    ctx(rec({ effect: 'COMMIT', capabilitySpace: 'AE', capabilityKey: key }));
+
+  it('S-REG-AE: an unregistered AE key refuses at the registration check', async () => {
+    expect(detail(await gate6(ae('not.registered.v1')))).toBe(
+      'unregistered AE key',
+    );
+  });
+
+  it('T-TRANSITIONAL-VETO: a CONSENT capability is refused, and the veto names itself', async () => {
+    // This check is NOT one of (a)-(e). It is carried until P-23 lands F31's start-up vetoes and
+    // U6-L2 deletes it; the detail is what makes that deletion a visible change rather than a silent
+    // one, because behind (a) the same key would refuse anyway and nothing would look different.
+    const v = await gate6(
+      ae('package5.wave3.record-client-consent.execute.v1'),
+    );
+    expect(detail(v)).toMatch(/^TRANSITIONAL veto: CONSENT capability/);
+  });
+
+  it('T-TRANSITIONAL-VETO: an IDENTITY capability likewise', async () => {
+    const v = await gate6(ae('package5.wave2.revoke-all-sessions.execute.v1'));
+    expect(detail(v)).toMatch(/^TRANSITIONAL veto: IDENTITY capability/);
+  });
+
+  it('S-A: (a) a registered key with no `AE_WIDGET_COMMIT_ALLOWLIST` row refuses — MONEY included, which is why the `MONEY && !isAllowlisted` check could go', async () => {
+    const v = await gate6(ae('crm.visit.payment.v1'));
+    expect(detail(v)).toBe('(a) no AE_WIDGET_COMMIT_ALLOWLIST row');
+  });
+
+  it('S-B / S-C: (a) SHADOWS (b) and (c) over today’s registry, which is why their refusals need a neutraliser', () => {
+    // Every registered key whose `policyDecision` is not ALLOW, and every one whose
+    // `allowedSourceTypes` omits `authenticated_request`, is also outside the allowlist. So no input
+    // reaches (b) or (c) and fails it: their refusals are defence in depth (§3.2 Gate 6 M17b/M18b on
+    // neutralisers M17a′/M18a′, IR-G6-BATT). This test states the shadowing rather than leaving it to
+    // be discovered when a mutant survives — and it goes red the day a key stops being shadowed.
+    const shadowed = allowlistedRows().filter(
+      (c) =>
+        (c.policyDecision !== 'ALLOW' ||
+          !c.allowedSourceTypes.includes('authenticated_request')) &&
+        AE_WIDGET_COMMIT_ALLOWLIST[c.capability] !== undefined,
+    );
+    expect(shadowed.map((c) => c.capability)).toEqual([]);
+  });
+
+  it('S-B / S-C positive: each allowlisted key is carried PAST (a), (b) and (c) to the held (d)', async () => {
+    // Reaching `(d)` is the statement that (a), (b) and (c) admitted, so this is their positive.
+    expect(ALLOWLISTED).toHaveLength(3);
+    for (const key of ALLOWLISTED) {
+      const v = await gate6(ae(key));
+      expect({ key, detail: detail(v) }).toEqual({
+        key,
+        detail: '(d) no live principal',
+      });
+    }
+  });
+
+  it('N-AE-NOPRINCIPAL [RI]: the held (d) names the half that is held, on both arms', async () => {
+    const base = ae(ALLOWLISTED[0]);
+    expect(code(await gate6(base))).toBe('insufficient_authority');
+    expect(detail(await gate6(base))).toBe('(d) no live principal');
+    expect(detail(await gate6(withPrincipal(base)))).toBe('(d) pending U6-L3');
+  });
+});
+
+describe('Gate 6 — CONTROL passes with no execute-admission test (G6-18)', () => {
+  it('G6-18: each registered CONTROL key passes, and no owner is reached', async () => {
+    for (const key of [
+      'control.widget.dismiss',
+      'control.run.cancel',
+      'control.delivery.resolve',
+    ]) {
+      const v = await gate6(
+        ctx(
+          rec({
+            effect: 'CONTROL',
+            capabilitySpace: 'CONTROL',
+            capabilityKey: key,
+          }),
+        ),
+        unreachableOwners(),
+      );
+      expect({ key, outcome: v.outcome }).toEqual({ key, outcome: 'pass' });
+    }
+  });
+
+  it('G6-18-REG: a CONTROL key outside the closed space is refused', async () => {
+    const v = await gate6(
+      ctx(
+        rec({
+          effect: 'CONTROL',
+          capabilitySpace: 'CONTROL',
+          capabilityKey: 'control.not.registered',
+        }),
+      ),
+    );
+    expect(detail(v)).toBe('unregistered CONTROL key');
+  });
+});
+
+describe('Gate 6 — a raise IS the refusal (G6-20, C11:4779-4781)', () => {
+  it('G6-20: an owner that rejects becomes `insufficient_authority`, never a thrown request', async () => {
+    const v = await gate6(
+      ctx(
+        rec({ effect: 'REFINE', capabilityKey: NINE, c9Domain: 'OCCUPANCY' }),
+      ),
+    );
+    expect(code(v)).toBe('insufficient_authority');
+    expect(detail(v)).toMatch(/^owner raised: /);
+  });
+
+  it('G6-20-UNBOUND: the unbound port raises rather than admitting, so an unwired build refuses', async () => {
+    // `as unknown as`, not a cast to the bottom type: `gate-files.source.spec.ts` forbids that cast
+    // anywhere in this directory, because it switches the compiler's own vocabulary check off — and
+    // the fence is a TEXT scan, so naming the forbidden spelling here would trip it too.
+    const anyPrincipal = {} as unknown as Parameters<
+      Gate6Owners['assertCanExecute']
+    >[0];
+    const anyDefinition = {} as unknown as Parameters<
+      Gate6Owners['assertCanExecute']
+    >[1];
+    await expect(
+      heldGate6Owners.assertCanExecute(anyPrincipal, anyDefinition),
+    ).rejects.toThrow(/GATE6_OWNERS is not bound/);
+    await expect(
+      heldGate6Owners.grantsRequiredFeatures('t1', []),
+    ).rejects.toThrow(/GATE6_OWNERS is not bound/);
+  });
+});
+
+describe('R3.5.1 left slot 6’s front door (A1, C11:7399)', () => {
+  it('A1-SUPERSEDED: the class-s rule fires in Gate 6’s HANDOFF branch', async () => {
+    // `gateSensitiveDest` and `floor.ts#sensitiveDest` are DELETED (R6-1b, this merge commit). Their
+    // body refused a `REFINE` on a `personal_data` key — exactly what A1 makes mintable — so the two
+    // properties left to assert are that such a REFINE passes and that the class-`s` fence still
+    // fires, in the HANDOFF branch, on the same key.
+    expect(
+      (
+        await gate6(
+          ctx(
+            rec({ effect: 'REFINE', capabilityKey: 'owner_report.download' }),
+          ),
+        )
+      ).outcome,
+    ).toBe('pass');
+    expect(
+      detail(await gate6(ctx(handoff('owner_report.download', 'w')))),
+    ).toBe(
+      'a sensitive HANDOFF destination admits a class-s target and nothing else',
+    );
+  });
+});
+
+/** The AE registry as rows, through the binding the gate reads. */
+function allowlistedRows(): readonly {
+  capability: string;
+  policyDecision: string;
+  allowedSourceTypes: readonly string[];
+}[] {
+  const rows: {
+    capability: string;
+    policyDecision: string;
+    allowedSourceTypes: readonly string[];
+  }[] = [];
+  for (const key of Object.keys(AE_WIDGET_COMMIT_ALLOWLIST)) {
+    const cap = actionCapabilityRegistry.tryGet(key);
+    if (cap)
+      rows.push({
+        capability: cap.capability,
+        policyDecision: String(cap.policyDecision),
+        allowedSourceTypes: cap.allowedSourceTypes,
+      });
+  }
+  return rows;
+}
+
+/** Keeps the `C9Domain` import honest: every domain used above is one of the union's members. */
+const DOMAINS: readonly C9Domain[] = [
+  'ADMIN',
+  'CLIENT_LIFECYCLE',
+  'OCCUPANCY',
+  'BUSINESS_INTELLIGENCE',
+];
+it('the four C9 domains this file names are the contract’s own union', () => {
+  expect(new Set(DOMAINS).size).toBe(4);
 });

@@ -1,16 +1,21 @@
-// K4 — the floor lookup over the four bound spaces, and the sensitive-destination test.
+// K4 — the floor lookup over the four bound spaces.
 //
-// Two functions, and both are TOTAL by construction rather than by a default branch. A default
-// branch is where a floor goes to die: `default: return 'ANONYMOUS'` reads as tidy and means "any
-// capability I have not thought about is public".
+// `subjectFloorFor` is TOTAL by construction rather than by a default branch. A default branch is
+// where a floor goes to die: `default: return 'ANONYMOUS'` reads as tidy and means "any capability
+// I have not thought about is public".
+//
+// The hand-written `sensitiveDest` that used to sit beside it is DELETED (GATES-PLAN-V11 R6-1b,
+// U6-L1's merge). It classified by SUBSTRING over a key's spelling, where F48's generated
+// `SENSITIVE_DEST` (`authority/verification-floor.runtime.ts`) reads the signed `consent_class` row;
+// where the two disagreed the generated one is the contract's text. C11:1836 places Gate 6's
+// evaluation of SENSITIVE_DEST "in its HANDOFF destination branch only", and V1.1 A1 (C11:7090,
+// 7169, 7399) makes the `REFINE`/`DRAFT` the paraphrase refused on booking-owner keys mintable, so
+// the copy had no conformant reader left. `authority/totality.spec.ts` (K4's "SENSITIVE_DEST is
+// total and fail-closed", the string `k4-exit-gate.sh` pins) tests F48's predicate instead.
 
 import type { VerificationLevel } from '../../widget-contract/envelope';
 import { C9_CAPABILITIES } from '../../orchestration/c9.registry';
-import {
-  CONTROL_KEYS,
-  type CapabilityRefLike,
-  resolves,
-} from './registry-binding';
+import { type CapabilityRefLike, resolves } from './registry-binding';
 
 /** The top rung: what an unresolvable subject gets, so that it cannot be acted on by anyone. */
 const FAIL_CLOSED: VerificationLevel = 'STEP_UP_VERIFIED';
@@ -78,34 +83,4 @@ export const subjectFloorFor = (
     default:
       return FAIL_CLOSED;
   }
-};
-
-/**
- * Is this destination sensitive — money, personal data, or an identity binding?
- *
- * Fail-closed, and the asymmetry is deliberate: a false positive costs a confirmation, a false
- * negative costs an unconfirmed effect on someone's money or personal data. Those are not the same
- * mistake, so they do not get the same default.
- */
-export const sensitiveDest = (ref: CapabilityRefLike | null): boolean => {
-  if (!ref || !resolves(ref)) return true;
-
-  if (ref.space === 'CONTROL') return !CONTROL_KEYS.has(ref.key);
-  if (ref.space === 'AE') return true; // every Action Engine edge is a business effect
-
-  const row = c9ByKey().get(ref.key);
-  if (!row) return true;
-  // A pure source read of non-personal data is the only thing that is not sensitive. Anything that
-  // proposes, hands off, or touches an owner is.
-  if (row.mode !== 'READ') return true;
-  const SENSITIVE_MARKERS = [
-    'client',
-    'payment',
-    'money',
-    'finance',
-    'consent',
-    'identity',
-    'contact',
-  ];
-  return SENSITIVE_MARKERS.some((m) => row.capabilityKey.includes(m));
 };

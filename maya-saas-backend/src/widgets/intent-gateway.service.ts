@@ -21,15 +21,18 @@ import type {
   SubmissionShape,
 } from './gate.types';
 import type { ChannelId } from '../widget-contract/lifecycle';
-import { PRINCIPAL_RESOLVER, TENANT_SCOPE } from './di-tokens';
+import { GATE6_OWNERS, PRINCIPAL_RESOLVER, TENANT_SCOPE } from './di-tokens';
 import type { PrincipalResolver, RequestTx } from './authority/principal-view';
 import type { TenantScopePort } from './owner-ports/tenant-scope.provider';
+// R6-1: `import type`, never a value import. A value import would put `AiToolPolicyService` and
+// `EntitlementsService` in the gateway's run-time closure through slot 6 and break P-SEAL's SEAL-5.
+import type { Gate6Owners } from './owner-ports/gate6.owners.provider';
 import { digestEquals, sha256Hex } from './token.util';
 import { mergeFacts, NO_FACTS } from './gates/facts';
 import { gate1 } from './gates/gate1';
 import { gate4 } from './gates/gate4';
 import { gate5 } from './gates/gate5';
-import { gate6, gateSensitiveDest } from './gates/gate6';
+import { gate6 } from './gates/gate6';
 import { gate7 } from './gates/gate7';
 import {
   INPUT_VALIDATION_PENDING_ON,
@@ -110,6 +113,8 @@ export class IntentGatewayService {
     private readonly principals: PrincipalResolver,
     @Inject(TENANT_SCOPE)
     private readonly tenantScope: TenantScopePort,
+    @Inject(GATE6_OWNERS)
+    private readonly gate6Owners: Gate6Owners,
   ) {}
 
   /**
@@ -222,11 +227,11 @@ export class IntentGatewayService {
       name: 'Authority, computed from scratch',
       host: 'AuthorityResolver',
       // R3.5.1 runs with Gate 6 rather than as a sixteenth gate: it is a property OF the subject
-      // capability, and splitting it out would put one rule in two places.
-      run: (ctx) => {
-        const sensitive = gateSensitiveDest(ctx);
-        return sensitive.outcome === 'pass' ? gate6(ctx) : sensitive;
-      },
+      // capability, and splitting it out would put one rule in two places. V1.1 A1 (C11:7090, 7169,
+      // 7399) and C11:1836 place that evaluation "in its HANDOFF destination branch only", which is
+      // where `gate6` runs F48's generated predicate — so the front-door call this slot used to make
+      // over EVERY effect is gone with `gateSensitiveDest` itself (R6-1b).
+      run: (ctx) => gate6(ctx, this.gate6Owners),
     },
     {
       n: '7',

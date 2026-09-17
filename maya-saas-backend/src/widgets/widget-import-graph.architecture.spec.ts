@@ -47,8 +47,12 @@ const SRC = path.join(BE, 'src');
  * (plan §3.5 item 7), here AND in k3 check 9. U0: none.
  */
 const OWNER_MODULES: readonly string[] = [
+  // U6-L1 (R6-2): C20's owner, `AiToolPolicyService.assertCanExecute` (C11:4761-4762).
+  'ai-tools/ai-tool-policy.module.ts#AiToolPolicyModule',
   // P-PRINCIPAL (D-1, D-2): K1's resolver (C11:2536-2539) and B-02's in-transaction Membership read.
   'orchestration/c9.module.ts#C9Module',
+  // U6-L1 (R6-2): (e)'s owner, `EntitlementsService` grants every `requiredFeatures` entry (C11:4755).
+  'entitlements/entitlements.module.ts#EntitlementsModule',
   'tenancy/tenancy.module.ts#TenancyModule',
 ];
 const NEVER_IMPORTED: readonly string[] = [
@@ -156,6 +160,22 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
   'tenancy/tenant-context.service.ts': {
     why: "Gate 4's tenancy owner: row 4 names TenantContextService.assertTenantId (C11:4723); reached only through the TENANT_SCOPE adapter",
     only: ['owner-ports/tenant-scope.provider.ts'],
+  },
+  'ai-tools/ai-tool-policy.service.ts': {
+    why: "C20's owner: AiToolPolicyService.assertCanExecute, the 47 (C11:4761)",
+    only: ['owner-ports/gate6.owners.provider.ts'],
+  },
+  'entitlements/entitlements.service.ts': {
+    why: "(e)'s owner: EntitlementsService grants requiredFeatures (C11:4755)",
+    only: ['owner-ports/gate6.owners.provider.ts'],
+  },
+  'ai-tools/ai-tool-policy.module.ts': {
+    why: "C20's owner module, so the boundary can resolve GATE6_OWNERS (R6-2)",
+    only: ['owner-ports/widget-owner-ports.module.ts'],
+  },
+  'entitlements/entitlements.module.ts': {
+    why: "(e)'s owner module, so the boundary can resolve GATE6_OWNERS (R6-2)",
+    only: ['owner-ports/widget-owner-ports.module.ts'],
   },
 };
 
@@ -890,6 +910,10 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       'orchestration/c9.module.ts',
       'tenancy/tenancy.module.ts',
       'tenancy/tenant-context.service.ts',
+      'ai-tools/ai-tool-policy.service.ts',
+      'entitlements/entitlements.service.ts',
+      'ai-tools/ai-tool-policy.module.ts',
+      'entitlements/entitlements.module.ts',
     ]);
   }, 60_000);
 
@@ -1010,6 +1034,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       ),
     );
     expect(values.get('BOUND_PORT_TOKENS')).toEqual([
+      'GATE6_OWNERS',
       'PRINCIPAL_RESOLVER',
       'TENANT_SCOPE',
     ]);

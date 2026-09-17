@@ -1,0 +1,201 @@
+[
+  {
+    "id": "M1",
+    "description": "the subject is bound TWICE: the dispatch gets a fresh `subjectOf(r)` instead of the one binding. G6-1 (C11:4739) says 'bound once; NOT record.capability', and two bindings are how a gate starts authorising one capability and admitting another. Build-killed: both bindings agree on every input a conformant record can carry, which is exactly why the fence is at the source.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "    return dispatch(ctx, r, ref);\n",
+    "replace": "    return dispatch(ctx, r, subjectOf(r));\n",
+    "killers": ["S-4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M2",
+    "description": "the HANDOFF scope is removed, so a destination falls through to the space switch and meets an execute-admission test. The certified note says why that is wrong: it would block a BI run from even OFFERING `a22.configuration` (C11:4790-4798). Live-killed: the AE destination of P-HANDOFF-AE has no allowlist row and would refuse at (a).",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  if (r.effect === 'HANDOFF') return handoffDestination(r, ref);\n",
+    "replace": "  if (false && r.effect === 'HANDOFF') return handoffDestination(r, ref);\n",
+    "killers": ["P-HANDOFF-A22", "G6-7"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M3",
+    "description": "F48's destination test is deleted from the HANDOFF branch: a consent or identity destination stops being held to a class-`s` target (R3.5.1 at Gate 6, C11:1836).",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  if (SENSITIVE_DEST(ref) && targetClass(r) !== 's')\n",
+    "replace": "  if (false && SENSITIVE_DEST(ref) && targetClass(r) !== 's')\n",
+    "killers": ["N-HANDOFF-SENS-C9", "F48"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M4a",
+    "description": "the class half of F48's test always holds, so every target class is admitted to a sensitive destination.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "targetClass(r) !== 's'",
+    "replace": "false",
+    "killers": ["N-HANDOFF-SENS-C9", "F48"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M4b",
+    "description": "`targetClass` coerces instead of reading: a `class` of `['s']` becomes the string 's'. A target whose class is not a string is not class `s`, and the coercion is the quiet way that stops being true. Build-killed: the live cases send string classes, so only the [U] vectors distinguish it.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  return typeof t?.class === 'string' ? t.class : null;\n",
+    "replace": "  return t?.class === undefined || t?.class === null ? null : String(t.class);\n",
+    "killers": ["F48"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M5",
+    "description": "the sensitivity test is inverted: a sensitive destination is admitted at any class and a safe one is held to `s`. Killed from both sides — N-HANDOFF-SENS-C9 stops refusing and P-HANDOFF-W-NONSENS starts.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "SENSITIVE_DEST(ref) &&",
+    "replace": "!SENSITIVE_DEST(ref) &&",
+    "killers": ["N-HANDOFF-SENS-C9", "P-HANDOFF-W-NONSENS"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M8b",
+    "description": "the HANDOFF branch stops testing that the destination is registered in its own space (G6-6). A class-`s` HANDOFF at priority 0 is FLOOR_EXEMPT, so Gate 5 admits it and Gate 6 is the only fence left.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  if (!resolves(ref))\n    return refuse(\n      'insufficient_authority',\n      'HANDOFF destination is not registered in its space',\n    );\n",
+    "replace": "  if (false)\n    return refuse(\n      'insufficient_authority',\n      'HANDOFF destination is not registered in its space',\n    );\n",
+    "killers": ["N-HANDOFF-UNREG-CONTROL", "G6-6-REG"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M10",
+    "description": "the `c9Capability` half is never applied, so a run-bearing record is admitted for a domain its key is not registered for (G6-16, C11:4764-4768).",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  if (r.c9Domain !== null) c9Capability(ref.key, r.c9Domain, C9_REGISTRY_HASH);\n",
+    "replace": "  if (r.c9Domain !== null && false)\n    c9Capability(ref.key, r.c9Domain, C9_REGISTRY_HASH);\n",
+    "killers": ["N-C9-DOMAIN", "P-C9-9-RUN"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M11",
+    "description": "the domain asked about is a literal rather than the RECORD's `c9_domain`: the gate answers for a domain nobody minted. A comparison of a value with itself is the shape this mutant stands for.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "c9Capability(ref.key, r.c9Domain, C9_REGISTRY_HASH)",
+    "replace": "c9Capability(ref.key, 'ADMIN', C9_REGISTRY_HASH)",
+    "killers": ["N-C9-DOMAIN", "P-C9-9-RUN"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M13",
+    "description": "the raise stops being the refusal: the catch passes instead. G6-20 (C11:4779-4781) says a throwing accessor is correct here BECAUSE Gate 6 is a refusal point — swallow the raise and the reason it is correct is gone.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "    return refuse(\n      'insufficient_authority',\n      `owner raised: ${error instanceof Error ? error.message : String(error)}`,\n    );\n",
+    "replace": "    void error;\n    return pass;\n",
+    "killers": ["N-C9-DOMAIN", "G6-20"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M15",
+    "description": "the C9 branch swallows `c9Capability`'s raise locally, so the domain admission becomes advisory. Distinct from M13: the outer catch still works, and only this one call stops refusing.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  if (r.c9Domain !== null) c9Capability(ref.key, r.c9Domain, C9_REGISTRY_HASH);\n  return pass;\n",
+    "replace": "  try {\n    if (r.c9Domain !== null) c9Capability(ref.key, r.c9Domain, C9_REGISTRY_HASH);\n  } catch {\n    /* swallowed */\n  }\n  return pass;\n",
+    "killers": ["N-C9-DOMAIN"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M16b",
+    "description": "(a) is deleted: an AE key with no `AE_WIDGET_COMMIT_ALLOWLIST` row is carried on (C11:4750). Build-killed this cycle — D-4 forbids minting any COMMIT or REQUEST_APPROVAL on the proof database before P-DISCHARGE, so the AE branch has no live input and S-A is the only killer. Its E-INDEP form (neutraliser M16a′) is E2's.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  if (AE_WIDGET_COMMIT_ALLOWLIST[ref.key] === undefined)\n    return refuse(\n      'insufficient_authority',\n      '(a) no AE_WIDGET_COMMIT_ALLOWLIST row',\n    );\n",
+    "replace": "  if (false)\n    return refuse(\n      'insufficient_authority',\n      '(a) no AE_WIDGET_COMMIT_ALLOWLIST row',\n    );\n",
+    "killers": ["S-A"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M17b",
+    "description": "(b) `policyDecision === 'ALLOW'` is deleted (C11:4751). PENDING, and the reason is stated rather than hidden: every registered capability whose decision is not ALLOW is also outside the allowlist, so (a) shadows (b) over today's registry and NO input distinguishes this build. Its killer is the E-INDEP pair (neutraliser M17a′ = (a) neutralised, IR-G6-BATT) on an E-MINT COMMIT record, which D-4 defers to E2.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  if (cap.policyDecision !== 'ALLOW')\n",
+    "replace": "  if (false)\n",
+    "killers": ["S-B"],
+    "expect": "pending"
+  },
+  {
+    "id": "M18b",
+    "description": "(c) `allowedSourceTypes` includes `authenticated_request` is deleted (C11:4752, F33). PENDING for the same reason as M17b: (a) shadows it over today's registry. Its killer is the E-INDEP pair (neutraliser M18a′) at E2.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  if (!cap.allowedSourceTypes.includes('authenticated_request'))\n",
+    "replace": "  if (false)\n",
+    "killers": ["S-B"],
+    "expect": "pending"
+  },
+  {
+    "id": "M19b",
+    "description": "the TOOL refusal is deleted (G6-19, R3.2.2, C11:4775-4776). Gate 5 shadows it on a conformant build — an unresolvable ref derives `STEP_UP_VERIFIED` and stops at slot 5 — so the kill is E-INDEP on `N6-FLOOR`, the neutraliser that makes Gate 5's level comparison admit. S-TOOL then reaches slot 6 and must be refused there, with the TOOL detail.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  if (ref.space === 'TOOL')\n    return refuse(\n      'insufficient_authority',\n      'a TOOL ref may not be an intent subject',\n    );\n",
+    "replace": "  if (false)\n    return refuse(\n      'insufficient_authority',\n      'a TOOL ref may not be an intent subject',\n    );\n",
+    "killers": [
+      {
+        "test": "S-TOOL",
+        "neutralisers": "N6-FLOOR"
+      }
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M20b",
+    "description": "the C9 registration check is deleted. The policy-row check does NOT stand in for it: an unregistered key has no row either, so the build still refuses — for the wrong reason. The kill is therefore the DETAIL, on `N6-FLOOR` where an unresolvable ref reaches slot 6 at all. `S-REG` is its own live test for exactly this reason: a killer names a test by its title, and one title cannot name two.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  if (!resolves(ref))\n    return refuse('insufficient_authority', 'unregistered C9 key');\n",
+    "replace": "  if (false)\n    return refuse('insufficient_authority', 'unregistered C9 key');\n",
+    "killers": [
+      {
+        "test": "S-REG",
+        "neutralisers": "N6-FLOOR"
+      }
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M21",
+    "description": "the HANDOFF registration check is narrowed to CONTROL, so an unregistered C9 or AE destination is admitted. Build-killed: the live case uses a CONTROL destination (the only one FLOOR_EXEMPT lets past Gate 5 at priority 0), and the [U] vectors are what quantify over the spaces.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "    return refuse(\n      'insufficient_authority',\n      'HANDOFF destination is not registered in its space',\n    );\n",
+    "replace": "    return ref.space === 'CONTROL'\n      ? refuse(\n          'insufficient_authority',\n          'HANDOFF destination is not registered in its space',\n        )\n      : pass;\n",
+    "killers": ["G6-6-REG"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M22",
+    "description": "the TRANSITIONAL CONSENT veto is deleted. It is not one of (a)-(e) and U6-L2 retires it in P-23's commit — until then its deletion must be visible, which is what the named detail and this mutant are for. RETIRE WITH U6-L2.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  if (CONSENT(cap))\n    return refuse(\n      'insufficient_authority',\n      'TRANSITIONAL veto: CONSENT capability - the widget layer cannot confer consent',\n    );\n",
+    "replace": "  if (false)\n    return refuse(\n      'insufficient_authority',\n      'TRANSITIONAL veto: CONSENT capability - the widget layer cannot confer consent',\n    );\n",
+    "killers": ["T-TRANSITIONAL-VETO"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M23",
+    "description": "the catalogue surface stops being the literal `'web'` (C11:4762). A surface that is not `web` admits a different set of the 47 — and a surface the CALLER could choose would be caller-supplied authority (FR-3). Build-killed by S-SURFACE; N-C9-SURFACE live-kills it once U6-L3 calls the port.",
+    "file": "src/widgets/owner-ports/gate6.owners.provider.ts",
+    "find": "export const GATE6_SURFACE = 'web' as const;\n",
+    "replace": "export const GATE6_SURFACE = 'native' as const;\n",
+    "killers": ["S-SURFACE"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M25",
+    "description": "slot 6 reads a role from the JWT-validated actor instead of the live principal (D-9, B-02, K5). Two answers to 'what is this principal's role' can disagree while nothing goes red, and the owner's is the one the rest of the application acts on. Build-killed by S-TX, which is where the property is visible.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  void owners; // bound at U6-L3, where (d), (e) and C20 leave the held lane.\n",
+    "replace": "  void owners;\n  const liveRole = ctx.actor.role;\n  void liveRole;\n",
+    "killers": ["S-TX"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M28",
+    "description": "A5's detail branch is added and it calls an owner. S6-4 holds A5's check out of the body and NO clause changes (C11:7173): a `detail` NAVIGATE has a null subject and Gate 6 has nothing to check (C11:4740-4741). This mutant is the shape the STOP forbids, and P-NULL-DETAIL is what keeps it dead.",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  if (ref === null) return pass;\n",
+    "replace": "  if (ref === null) {\n    const t = r.targetJson as { class?: unknown } | null;\n    if (t?.class === 'detail')\n      await owners.assertCanExecute(\n        undefined as unknown as Parameters<typeof owners.assertCanExecute>[0],\n        undefined as unknown as Parameters<typeof owners.assertCanExecute>[1],\n      );\n    return pass;\n  }\n",
+    "killers": ["P-NULL", "G6-5"],
+    "expect": "live-killed"
+  }
+]

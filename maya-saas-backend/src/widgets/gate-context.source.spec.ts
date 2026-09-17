@@ -450,6 +450,72 @@ describe('D-9 — the actor is carried, the resolved-roles member is gone, and G
     expect(units.flatMap(gate6ActorViolations)).toEqual([]);
   });
 
+  // R6-5 (U6-L1's merge) — the positive half of the same fence. The rule above says where slot 6 may
+  // NOT get a role; this one says it has exactly one source and names it: `ctx.principal.role`, which
+  // P-PRINCIPAL sets from the tenancy owner's `FOR SHARE` Membership read INSIDE `T` (B-02,
+  // C11:7189-7191) through `PRINCIPAL_RESOLVER`. Closed, and at the source: every `role` read in
+  // slot 6 or in a file the slot calls must be rooted at `principal`, and the adapter that produces
+  // it must take the role from the owner's service and from nothing else. Without this half, deleting
+  // the actor read and substituting a role from the RECORD would pass the rule above.
+  it('R6-5: the only role input to slot 6 is the owner port’s transaction-scoped Membership read', () => {
+    const rootOf = (n: ts.PropertyAccessExpression): string => {
+      let e: ts.Expression = n.expression;
+      while (ts.isPropertyAccessExpression(e)) e = e.expression;
+      return ts.isIdentifier(e) ? e.text : e.getText();
+    };
+    const roleRootViolations = (units: readonly SourceUnit[]): string[] => {
+      const out: string[] = [];
+      for (const unit of units) {
+        const sf = parseSource(unit.file, unit.source);
+        const visit = (n: ts.Node): void => {
+          if (ts.isPropertyAccessExpression(n) && n.name.text === 'role') {
+            const chain = n.expression.getText(sf);
+            if (!/(^|\.)principal\b/.test(chain) && rootOf(n) !== 'principal')
+              out.push(`${unit.file}: role read off ${chain}`);
+          }
+          ts.forEachChild(n, visit);
+        };
+        visit(sf);
+      }
+      return out;
+    };
+
+    expect(
+      roleRootViolations(
+        pipelineSources().slotUnits.filter((u) => u.slot === '6'),
+      ),
+    ).toEqual([]);
+
+    // The rule is vacuous over today's slot 6 — the held lane (AMB-01a) reads no role at all until
+    // U6-L3 binds the live principal — so it is also run over a PLANTED read, and must go red. Without
+    // this arm the fence would report green the day it stopped seeing.
+    expect(
+      roleRootViolations([
+        {
+          slot: '6',
+          file: 'gate6-planted.ts',
+          source:
+            'declare const ctx: any;\nexport const gate6 = () => ctx.record.role;\n',
+        },
+        {
+          slot: '6',
+          file: 'gate6-planted-2.ts',
+          source:
+            'declare const ctx: any;\nexport const gate6 = () => ctx.principal.role;\n',
+        },
+      ]),
+    ).toEqual(['gate6-planted.ts: role read off ctx.record']);
+
+    // ...and the producer of that member is the owner, called inside `T`.
+    const adapter = readWidget('owner-ports/principal.adapter.ts');
+    expect(adapter).toMatch(/MembershipsService/);
+    expect(/role\s*[:,]/.test(adapter)).toBe(true);
+    // The role never comes from the request body or from the record.
+    expect(/role\s*[:=]\s*(?:dto|submission|record|r)\./.test(adapter)).toBe(
+      false,
+    );
+  });
+
   describe('the role fence goes red on each way around it that it names (mutations)', () => {
     const unit = (body: string): SourceUnit => ({
       slot: '6',

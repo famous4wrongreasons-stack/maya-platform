@@ -9,6 +9,9 @@
 // pass at this binding used the wrong field name, reported ONE C9 capability instead of 56, and
 // typechecked cleanly. A transcribed 56 would have looked right and been wrong.
 
+import fs from 'node:fs';
+import path from 'node:path';
+
 import { C9_CAPABILITIES } from '../../orchestration/c9.registry';
 import { LADDER, VERIFICATION_RANK, maxLevel } from './ladder';
 import {
@@ -19,7 +22,14 @@ import {
   resolves,
   spaceOverlap,
 } from './registry-binding';
-import { sensitiveDest, subjectFloorFor } from './floor';
+import { subjectFloorFor } from './floor';
+// F48's predicate, not `floor.ts`'s hand-written `sensitiveDest` (GATES-PLAN-V11 U6-L1, R6-1b). The
+// two disagree, and the generated one is the contract's: it is emitted from §0.8's own text by
+// `scripts/widget-contract/emit-runtime-floor.mjs`, whose `--check` mode fails if the emitted body
+// and the certified derivation ever diverge. Gate 6 evaluates SENSITIVE_DEST "in its HANDOFF
+// destination branch only" (C11:1836) and evaluates THIS one; the hand-written copy has no reader
+// left once R6-1b deletes it in U6-L1's merge commit, so this suite stopped importing it first.
+import { SENSITIVE_DEST } from './verification-floor.runtime';
 
 describe('K4 — the four key spaces, bound to the live registries', () => {
   it('counts what the registries actually contain', () => {
@@ -84,19 +94,72 @@ describe('K4 — verificationFloor is TOTAL over all four spaces', () => {
 });
 
 describe('K4 — SENSITIVE_DEST is total and fail-closed', () => {
+  // REPOINTED to F48 (GATES-PLAN-V11 U6-L1). The predicate under test is now the GENERATED one, the
+  // one Gate 6's HANDOFF destination branch and `FLOOR_EXEMPT`'s fourth clause both call
+  // (C11:1836, C11:4743-4745). The hand-written `floor.ts#sensitiveDest` this suite used to test is
+  // deleted by R6-1b; it had no other reader, and where the two disagreed the generated one is the
+  // contract's text and the other was a paraphrase — it classified by SUBSTRING over a key's
+  // spelling (`'client'`, `'payment'`, …) where F48 reads the signed `consent_class` row.
+
   it('answers for every ref in all four spaces', () => {
     for (const ref of allRefs())
-      expect(typeof sensitiveDest(ref)).toBe('boolean');
+      expect(typeof SENSITIVE_DEST(ref)).toBe('boolean');
+  });
+
+  it('is TOTAL by type rather than by a default branch', () => {
+    // The switch has no `default:` and does not need one: `CapabilityRef['space']` is closed at four
+    // and the compiler checks the exhaustiveness. A default here would be the place a fifth space
+    // silently inherited "not sensitive", which is the failure this whole file exists to prevent.
+    const source = fs.readFileSync(
+      path.join(__dirname, 'verification-floor.runtime.ts'),
+      'utf8',
+    );
+    const body = /export function SENSITIVE_DEST[\s\S]*?\n}/.exec(source)?.[0];
+    expect(body).toBeDefined();
+    for (const space of [
+      "case 'AE'",
+      "case 'C9'",
+      "case 'CONTROL'",
+      "case 'TOOL'",
+    ])
+      expect(body).toContain(space);
+    expect(body).not.toContain('default:');
   });
 
   it('treats an unknown destination as SENSITIVE, not as safe', () => {
     // The asymmetry is the whole point: a false positive costs a confirmation, a false negative
     // costs an unconfirmed effect on someone's money or personal data.
-    expect(sensitiveDest({ space: 'C9', key: 'c9.unknown.destination' })).toBe(
+    expect(SENSITIVE_DEST({ space: 'C9', key: 'c9.unknown.destination' })).toBe(
       true,
     );
-    expect(sensitiveDest({ space: 'NOPE' as never, key: 'x' })).toBe(true);
-    expect(sensitiveDest(null)).toBe(true);
+    expect(SENSITIVE_DEST({ space: 'AE', key: 'not.registered.v1' })).toBe(
+      true,
+    );
+    // A TOOL ref: no intent of any effect class may carry one (R3.2.2), so it is sensitive by
+    // construction rather than by classification.
+    expect(
+      SENSITIVE_DEST({ space: 'TOOL', key: 'catalog.services.read' }),
+    ).toBe(true);
+  });
+
+  it('classifies a registered C9 destination by its signed `consent_class`, not by its spelling', () => {
+    // The paraphrase this replaces answered `true` for anything whose KEY contained `client`,
+    // `payment`, `money`, `finance`, `consent`, `identity` or `contact`. F48 reads the row.
+    expect(SENSITIVE_DEST({ space: 'C9', key: 'owner_report.download' })).toBe(
+      true,
+    ); // personal_data
+    expect(SENSITIVE_DEST({ space: 'C9', key: 'owner_report.status' })).toBe(
+      false,
+    ); // none
+    expect(SENSITIVE_DEST({ space: 'C9', key: 'settings.update' })).toBe(false);
+  });
+
+  it('a null destination is "nothing named", and Gate 6 never asks it that', () => {
+    // F48 answers `false` for null because there is no destination to classify — and the deleted
+    // paraphrase answered `true`. The difference is safe because no caller reaches it with null:
+    // Gate 6 returns at G6-5 before the HANDOFF branch when the subject is null (C11:4740-4741),
+    // and `FLOOR_EXEMPT` reads it only inside a clause that already requires `target.class === 's'`.
+    expect(SENSITIVE_DEST(null)).toBe(false);
   });
 });
 

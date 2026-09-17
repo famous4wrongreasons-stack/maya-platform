@@ -6,7 +6,9 @@
 // `di-tokens.ts` is still unbound in the real `WidgetsModule`. The unit that binds a token or imports an
 // owner module changes the matching assertion in the same commit, with the test that pins what it binds
 // (plan §3.5 item 7). P-PRINCIPAL is the first: `PRINCIPAL_RESOLVER`, through `C9Module` and
-// `TenancyModule` (D-1, D-2).
+// `TenancyModule` (D-1, D-2). U6-L1 is the second: `GATE6_OWNERS`, through `AiToolPolicyModule` (C20's
+// `assertCanExecute`, C11:4761-4762) and `EntitlementsModule` ((e)'s `requiredFeatures`, C11:4755).
+// `ActionEngineModule` is never imported here: the Action Engine's rows arrive as values (R6-2).
 //
 // Class BUILD: metadata and DI resolution. `PrismaService` is replaced by an empty value because only
 // resolution is under test and no query runs.
@@ -15,11 +17,14 @@ import { MODULE_METADATA } from '@nestjs/common/constants';
 import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
+import { AiToolPolicyModule } from '../../ai-tools/ai-tool-policy.module';
+import { EntitlementsModule } from '../../entitlements/entitlements.module';
 import { C9Module } from '../../orchestration/c9.module';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TenancyModule } from '../../tenancy/tenancy.module';
 import * as DI_TOKENS from '../di-tokens';
+import { Gate6OwnersAdapter } from './gate6.owners.provider';
 import { PrincipalAdapter } from './principal.adapter';
 import { TenantScopeAdapter } from './tenant-scope.provider';
 import { IntentGatewayService } from '../intent-gateway.service';
@@ -61,14 +66,19 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
 
   it('WidgetOwnerPortsModule imports and provides exactly what is bound today, and no more', () => {
     expect(meta(MODULE_METADATA.IMPORTS, WidgetOwnerPortsModule)).toEqual([
+      AiToolPolicyModule,
       C9Module,
+      EntitlementsModule,
       TenancyModule,
     ]);
     expect(meta(MODULE_METADATA.PROVIDERS, WidgetOwnerPortsModule)).toEqual([
+      Gate6OwnersAdapter,
       { provide: DI_TOKENS.PRINCIPAL_RESOLVER, useClass: PrincipalAdapter },
       { provide: DI_TOKENS.TENANT_SCOPE, useClass: TenantScopeAdapter },
+      { provide: DI_TOKENS.GATE6_OWNERS, useExisting: Gate6OwnersAdapter },
     ]);
     expect(meta(MODULE_METADATA.EXPORTS, WidgetOwnerPortsModule)).toEqual([
+      DI_TOKENS.GATE6_OWNERS,
       DI_TOKENS.PRINCIPAL_RESOLVER,
       DI_TOKENS.TENANT_SCOPE,
     ]);
@@ -103,6 +113,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
     // Every token bound so far. A token leaves this list only by being bound, in the commit that binds
     // it: that is what keeps "unbound" from drifting into "nobody checked".
     const BOUND: readonly string[] = [
+      DI_TOKENS.GATE6_OWNERS,
       DI_TOKENS.PRINCIPAL_RESOLVER,
       DI_TOKENS.TENANT_SCOPE,
       // P-SEAL binds this one in `widgets.module.ts`, not at the boundary (B-22): the seal key is the
@@ -134,6 +145,9 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       expect(
         moduleRef.get<unknown>(DI_TOKENS.TENANT_SCOPE, { strict: false }),
       ).toBeInstanceOf(TenantScopeAdapter);
+      expect(
+        moduleRef.get<unknown>(DI_TOKENS.GATE6_OWNERS, { strict: false }),
+      ).toBeInstanceOf(Gate6OwnersAdapter);
       for (const token of Object.values(DI_TOKENS).filter(
         (t) => !BOUND.includes(t),
       ))
