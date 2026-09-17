@@ -422,26 +422,58 @@ describe('K3 CI exit — indistinguishable latency', () => {
     }
   });
 
-  it('the principal comparison is constant-time, so a near-miss costs what a far-miss costs', async () => {
-    // A `===` returns as soon as two hashes differ, so a hash sharing 63 of 64 characters would be
-    // measurably slower to reject than one differing at the first. digestEquals removes that.
+  it('the principal comparison is structurally constant-time: slot 3 compares through digestEquals, which uses timingSafeEqual', () => {
+    // This is the detector. A timing test cannot be one at this scale: a short-circuiting `===` over
+    // two 64-character digests differs by nanoseconds, while one gateway submission costs far more,
+    // so the measured spread is noise either way. That was proven by mutation on 2026-09-17: with
+    // slot 3's compare replaced by `===`, the timing test below still passed 3 of 3 runs.
+    const gw = fs.readFileSync(
+      path.join(__dirname, 'intent-gateway.service.ts'),
+      'utf8',
+    );
+    const slot3 = gw.slice(gw.indexOf("n: '3'"), gw.indexOf("n: '4'"));
+    expect(slot3).toMatch(
+      /digestEquals\(\s*r\.principalProofHash,\s*ctx\.principalProofHash\s*\)/,
+    );
+    expect(slot3).not.toMatch(/principalProofHash\s*[!=]==/);
+    const util = fs.readFileSync(path.join(__dirname, 'token.util.ts'), 'utf8');
+    const body = util.slice(util.indexOf('export const digestEquals'));
+    expect(body).toMatch(/timingSafeEqual\(/);
+    expect(body.slice(0, body.indexOf('};'))).not.toMatch(/\ba\s*===\s*b\b/);
+  });
+
+  it('refusal latency does not separate a near-miss from a far-miss beyond noise (a sanity bound, not the detector)', async () => {
+    // Warmed up, interleaved and compared by median, because the first version timed one path cold
+    // and then the other warm: JIT warm-up alone produced a 0.69 spread on a loaded machine.
     const nearMiss =
       PRINCIPAL.slice(0, 63) + (PRINCIPAL.endsWith('a') ? 'b' : 'a');
     const farMiss =
       (PRINCIPAL.startsWith('a') ? 'b' : 'a') + PRINCIPAL.slice(1);
-    const time = async (principal: string) => {
-      const { gateway } = gatewayFor([record()]);
+    const { gateway } = gatewayFor([record()]);
+    const round = async (principal: string, n: number) => {
       const t0 = process.hrtime.bigint();
-      for (let i = 0; i < 200; i += 1)
+      for (let i = 0; i < n; i += 1)
         await gateway.submit(args({ principalProofHash: principal }));
-      return Number(process.hrtime.bigint() - t0) / 200;
+      return Number(process.hrtime.bigint() - t0) / n;
     };
-    const near = await time(nearMiss);
-    const far = await time(farMiss);
-    const spread = Math.abs(near - far) / Math.max(near, far);
-    // Generous, because a unit test shares a machine with everything else. It still fails loudly if
-    // someone reintroduces a short-circuiting compare, which separates these by far more than this.
-    expect(spread).toBeLessThan(0.5);
+    await round(nearMiss, 50);
+    await round(farMiss, 50);
+    const near: number[] = [];
+    const far: number[] = [];
+    for (let r = 0; r < 10; r += 1) {
+      if (r % 2 === 0) {
+        near.push(await round(nearMiss, 40));
+        far.push(await round(farMiss, 40));
+      } else {
+        far.push(await round(farMiss, 40));
+        near.push(await round(nearMiss, 40));
+      }
+    }
+    const median = (xs: number[]) =>
+      [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)];
+    const n = median(near);
+    const f = median(far);
+    expect(Math.abs(n - f) / Math.max(n, f)).toBeLessThan(0.5);
   });
 
   it('no refusal reveals which gate it failed through its verdict shape', async () => {
