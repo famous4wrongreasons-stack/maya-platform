@@ -25,6 +25,7 @@ import {
   applyWidgetsLiveEnvironment,
   assertNoEnvFiles,
   PLATFORM_CI_TEST_LITERALS,
+  widgetsLiveChildEnvironment,
 } from './support/environment';
 import { Fixtures } from './support/fixtures';
 import {
@@ -49,85 +50,163 @@ describe('widgets-live harness', () => {
   describe('proof-database guard', () => {
     const local = (url: string | undefined) =>
       url === undefined ? {} : { DATABASE_URL: url };
+    /** What GitHub Actions sets (CI, GITHUB_ACTIONS) plus the workflows' WIDGET_GATEWAY_PG. */
     const ci = (url: string) => ({
       DATABASE_URL: url,
       CI: 'true',
+      GITHUB_ACTIONS: 'true',
       WIDGET_GATEWAY_PG: 'required',
     });
 
+    // Each fixture breaks exactly one rule, on a dedicated port unless the port is the rule, and the
+    // refusal must name that rule: a fixture refused for another reason would pin nothing.
     it.each([
-      ['missing', local(undefined)],
-      ['blank', local('   ')],
-      ['not a URL', local('maya_widget_gate_proof_x')],
-      ['mysql', local('mysql://maya@127.0.0.1:3306/maya_widget_gate_proof_x')],
+      ['missing', local(undefined), /DATABASE_URL is not set/],
+      ['blank', local('   '), /DATABASE_URL is not set/],
+      ['not a URL', local('maya_widget_gate_proof_x'), /is not a URL/],
+      [
+        'mysql',
+        local('mysql://maya@127.0.0.1:3306/maya_widget_gate_proof_x'),
+        /protocol mysql: is not postgresql:/,
+      ],
       [
         'localhost',
         local('postgresql://maya@localhost:55611/maya_widget_gate_proof_x'),
+        /host "localhost" is not exactly 127\.0\.0\.1/,
       ],
       [
         'another host',
-        local('postgresql://maya@10.0.0.5:5432/maya_widget_gate_proof_x'),
+        local('postgresql://maya@10.0.0.5:55611/maya_widget_gate_proof_x'),
+        /host "10\.0\.0\.5" is not exactly 127\.0\.0\.1/,
       ],
       [
         'a host parameter',
         local(
           'postgresql://maya@127.0.0.1:55611/maya_widget_gate_proof_x?host=10.0.0.5',
         ),
+        /query parameter "host" is not admitted/,
       ],
       [
         'a dbname parameter',
         local(
           'postgresql://maya@127.0.0.1:55611/maya_widget_gate_proof_x?dbname=maya_saas',
         ),
+        /query parameter "dbname" is not admitted/,
       ],
-      ['maya_saas', local('postgresql://maya@127.0.0.1:5432/maya_saas')],
-      ['postgres', local('postgresql://maya@127.0.0.1:5432/postgres')],
+      [
+        'no port (the driver would use 5432)',
+        local('postgresql://maya@127.0.0.1/maya_widget_gate_proof_x'),
+        /names no port/,
+      ],
+      [
+        'an empty port',
+        local('postgresql://maya@127.0.0.1:/maya_widget_gate_proof_x'),
+        /names no port/,
+      ],
+      [
+        'port 5432 locally',
+        local('postgresql://maya@127.0.0.1:5432/maya_widget_gate_proof_x'),
+        /port 5432 is the shared local cluster/,
+      ],
+      [
+        'port 05432 locally',
+        local('postgresql://maya@127.0.0.1:05432/maya_widget_gate_proof_x'),
+        /port 5432 is the shared local cluster/,
+      ],
+      [
+        'maya_saas',
+        local('postgresql://maya@127.0.0.1:55611/maya_saas'),
+        /contains "maya_saas"/,
+      ],
+      [
+        'postgres',
+        local('postgresql://maya@127.0.0.1:55611/postgres'),
+        /contains "postgres"/,
+      ],
       [
         'a prod clone with the prefix',
         local(
-          'postgresql://maya@127.0.0.1:5432/maya_widget_gate_proof_prod_clone',
+          'postgresql://maya@127.0.0.1:55611/maya_widget_gate_proof_prod_clone',
         ),
+        /contains "prod"/,
       ],
       [
         'a clone with the prefix',
-        local('postgresql://maya@127.0.0.1:5432/maya_widget_gate_proof_clone1'),
+        local(
+          'postgresql://maya@127.0.0.1:55611/maya_widget_gate_proof_clone1',
+        ),
+        /contains "clone"/,
       ],
       [
         'no prefix',
-        local('postgresql://maya@127.0.0.1:5432/maya_c06_appointment_x'),
+        local('postgresql://maya@127.0.0.1:55611/maya_c06_appointment_x'),
+        /does not match/,
       ],
       [
         'an upper-case name',
-        local('postgresql://maya@127.0.0.1:5432/maya_widget_gate_proof_X'),
+        local('postgresql://maya@127.0.0.1:55611/maya_widget_gate_proof_X'),
+        /does not match/,
       ],
       [
-        'maya_ci without CI',
+        'maya_ci without CI mode',
         local(
-          'postgresql://maya_ci:maya_ci@127.0.0.1:5432/maya_ci?schema=public',
+          'postgresql://maya_ci:maya_ci@127.0.0.1:55611/maya_ci?schema=public',
         ),
+        /maya_ci is admitted only in CI mode/,
       ],
       [
         'maya_ci with CI but no WIDGET_GATEWAY_PG',
         {
-          DATABASE_URL: 'postgresql://maya_ci:maya_ci@127.0.0.1:5432/maya_ci',
+          DATABASE_URL: 'postgresql://maya_ci:maya_ci@127.0.0.1:55611/maya_ci',
           CI: 'true',
+          GITHUB_ACTIONS: 'true',
         },
+        /maya_ci is admitted only in CI mode/,
+      ],
+      [
+        'maya_ci with CI and WIDGET_GATEWAY_PG but not on GitHub Actions',
+        {
+          DATABASE_URL: 'postgresql://maya_ci:maya_ci@127.0.0.1:55611/maya_ci',
+          CI: 'true',
+          WIDGET_GATEWAY_PG: 'required',
+        },
+        /maya_ci is admitted only in CI mode/,
+      ],
+      [
+        "the workflows' maya_ci URL (port 5432) without GITHUB_ACTIONS",
+        {
+          DATABASE_URL:
+            'postgresql://maya_ci:maya_ci@127.0.0.1:5432/maya_ci?schema=public',
+          CI: 'true',
+          WIDGET_GATEWAY_PG: 'required',
+        },
+        /port 5432 is the shared local cluster/,
+      ],
+      [
+        'maya_ci without a port in CI mode',
+        ci('postgresql://maya_ci:maya_ci@127.0.0.1/maya_ci'),
+        /names no port/,
       ],
       [
         'a proof name in CI mode',
         ci('postgresql://maya@127.0.0.1:5432/maya_widget_gate_proof_x'),
+        /the only database admitted is maya_ci/,
       ],
       [
         'a prod name in CI mode',
         ci('postgresql://maya@127.0.0.1:5432/maya_ci_prod'),
+        /contains "prod"/,
       ],
-    ])('refuses %s', (_label, env) => {
+    ])('refuses %s', (_label, env, reason) => {
       expect(() => assertProofDatabase(env as NodeJS.ProcessEnv)).toThrow(
         ProofDatabaseRefused,
       );
+      expect(() => assertProofDatabase(env as NodeJS.ProcessEnv)).toThrow(
+        reason,
+      );
     });
 
-    it('admits a proof database on 127.0.0.1 locally, and maya_ci only in CI mode', () => {
+    it('admits a proof database on 127.0.0.1 and a dedicated port locally, and maya_ci (port 5432 included) only in CI mode', () => {
       expect(
         assertProofDatabase(
           local(
@@ -145,8 +224,30 @@ describe('widgets-live harness', () => {
             'postgresql://maya_ci:maya_ci@127.0.0.1:5432/maya_ci?schema=public',
           ) as NodeJS.ProcessEnv,
         ),
-      ).toMatchObject({ database: 'maya_ci', mode: 'ci' });
+      ).toMatchObject({ database: 'maya_ci', port: '5432', mode: 'ci' });
     });
+
+    it.each(['widgets-live.yml', 'widgets-mutation.yml'])(
+      "admits %s's DATABASE_URL in CI mode, and refuses it once GITHUB_ACTIONS is absent",
+      (file) => {
+        const workflow = fs.readFileSync(
+          path.join(BACKEND, '..', '.github', 'workflows', file),
+          'utf8',
+        );
+        const url = /^ {6}DATABASE_URL: (\S+)$/m.exec(workflow)?.[1];
+        expect(/^ {6}WIDGET_GATEWAY_PG: required$/m.test(workflow)).toBe(true);
+        expect(url).toBeDefined();
+        expect(assertProofDatabase(ci(url as string))).toMatchObject({
+          database: 'maya_ci',
+          mode: 'ci',
+        });
+        const notOnActions: NodeJS.ProcessEnv = { ...ci(url as string) };
+        delete notOnActions.GITHUB_ACTIONS;
+        expect(() => assertProofDatabase(notOnActions)).toThrow(
+          ProofDatabaseRefused,
+        );
+      },
+    );
 
     it('never echoes the password in a refusal', () => {
       expect(() =>
@@ -206,6 +307,64 @@ describe('widgets-live harness', () => {
       ).toThrow(ProofDatabaseRefused);
     });
 
+    it("builds a child process's environment by the same scrub, on a copy, plus fixed settings", () => {
+      const source: NodeJS.ProcessEnv = {
+        PATH: '/usr/bin',
+        DATABASE_URL:
+          'postgresql://maya@127.0.0.1:55611/maya_widget_gate_proof_x',
+        OPENAI_API_KEY: 'from the shell',
+        MAYA_REFERRAL_REWARD_CLAIM_SECRET: 'from the shell',
+        JWT_SECRET: 'from the shell',
+      };
+      const snapshot = { ...source };
+      const { env, database } = widgetsLiveChildEnvironment(source, {
+        PORT: '3121',
+        NODE_ENV: 'test',
+      });
+      expect(source).toEqual(snapshot);
+      expect(database).toMatchObject({
+        database: 'maya_widget_gate_proof_x',
+        port: '55611',
+      });
+      expect(env).toEqual({
+        PATH: '/usr/bin',
+        DATABASE_URL:
+          'postgresql://maya@127.0.0.1:55611/maya_widget_gate_proof_x',
+        ...PLATFORM_CI_TEST_LITERALS,
+        PORT: '3121',
+        NODE_ENV: 'test',
+      });
+      expect(() =>
+        widgetsLiveChildEnvironment(
+          { DATABASE_URL: 'postgresql://maya@127.0.0.1:5432/maya_saas' },
+          {},
+        ),
+      ).toThrow(ProofDatabaseRefused);
+      expect(() =>
+        widgetsLiveChildEnvironment(
+          {
+            DATABASE_URL:
+              'postgresql://maya@127.0.0.1:55611/maya_widget_gate_proof_x',
+          },
+          { DATABASE_URL: 'postgresql://maya@127.0.0.1:5432/maya_saas' },
+        ),
+      ).toThrow(/not a child setting/);
+    });
+
+    it('the BIN runner spawns the binary with the child environment, never the raw shell', () => {
+      const runner = fs.readFileSync(
+        path.join(BACKEND, 'scripts', 'widgets-intent-http-proof.ts'),
+        'utf8',
+      );
+      expect(runner).toContain('widgetsLiveChildEnvironment(');
+      expect(runner).toContain('startServer(serverEnv)');
+      expect(runner).not.toMatch(/\.\.\.process\.env/);
+      expect(runner.match(/\bspawn\(/g)).toHaveLength(1);
+      expect(runner).toMatch(
+        /spawn\([^)]*\{\s*cwd: process\.cwd\(\),\s*env,\s*stdio:/,
+      );
+    });
+
     it("this suite's own environment was scrubbed before it loaded", () => {
       for (const [name, value] of Object.entries(PLATFORM_CI_TEST_LITERALS))
         expect({ name, value: process.env[name] }).toEqual({ name, value });
@@ -252,7 +411,17 @@ describe('widgets-live harness', () => {
     it.each([
       ['SELECT 1', false],
       ['  with x as (select 1) select * from x', false],
-      ['SELECT pg_advisory_xact_lock(1)', false],
+      ['SELECT "shareCount", "advisory" FROM "WidgetDraft"', false],
+      ['SELECT pg_advisory_xact_lock(1)', true],
+      ['select pg_try_advisory_xact_lock(1)', true],
+      [
+        "SELECT pg_advisory_xact_lock_shared(hashtextextended('k', 0))::text",
+        true,
+      ],
+      ['SELECT pg_advisory_unlock_all()', true],
+      ['SELECT id FROM "Tenant" WHERE id = $1 FOR SHARE', true],
+      ['SELECT id FROM "Tenant" WHERE id = $1 FOR KEY SHARE', true],
+      ['SELECT id FROM "Tenant" WHERE id = $1 FOR NO KEY UPDATE', true],
       ['SET TRANSACTION READ ONLY', true],
       ['INSERT INTO "WidgetDraft" VALUES (1)', true],
       [

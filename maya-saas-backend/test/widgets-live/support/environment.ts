@@ -76,6 +76,25 @@ export function applyWidgetsLiveEnvironment(
 }
 
 /**
+ * The environment of a child process that runs the application (the BIN runner's `dist/src/main`): a COPY
+ * of `source` scrubbed and guarded exactly as `applyWidgetsLiveEnvironment` does for a jest suite, then
+ * the caller's fixed test settings. `source` is left unchanged. `DATABASE_URL` is refused as a setting:
+ * it reaches the child only through the guard.
+ */
+export function widgetsLiveChildEnvironment(
+  source: NodeJS.ProcessEnv,
+  settings: Readonly<Record<string, string>>,
+): { env: NodeJS.ProcessEnv; database: ProofDatabase } {
+  if (Object.prototype.hasOwnProperty.call(settings, 'DATABASE_URL'))
+    throw new Error(
+      'widgets-live: DATABASE_URL is not a child setting; it is admitted only through the proof-database guard',
+    );
+  const env: NodeJS.ProcessEnv = { ...source };
+  const database = applyWidgetsLiveEnvironment(env);
+  return { env: { ...env, ...settings }, database };
+}
+
+/**
  * `AppModule` configures `ConfigModule.forRoot({ envFilePath: ['.env.local', '.env'] })` relative to
  * the working directory. The harness cannot change that module, so it refuses to boot it while either
  * file exists. Only existence is checked; the files are never opened.

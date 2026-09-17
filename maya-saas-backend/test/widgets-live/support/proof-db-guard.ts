@@ -5,8 +5,13 @@
 // refuses everything else:
 //   - `DATABASE_URL` missing or blank FAILS. A live suite that skipped would read as green.
 //   - the host is exactly `127.0.0.1` (not `localhost`, not a socket path);
-//   - the database is `maya_ci` only when `CI=true` and `WIDGET_GATEWAY_PG=required` (the widgets-live
-//     workflow's service database); otherwise it matches `^maya_widget_gate_proof_[a-z0-9_]+$`;
+//   - the port is written in the URL. Without one the driver connects to 5432, and 5432 on a developer
+//     machine is the shared cluster (G8 spec §4.2, G12 spec §6.2: a dedicated port). Locally 5432 is
+//     refused; only CI mode (below) admits it, because there it is the job's own service container;
+//   - CI mode is `CI=true`, `WIDGET_GATEWAY_PG=required` and `GITHUB_ACTIONS=true` together (the
+//     widgets-live and widgets-mutation workflows run on GitHub Actions, which sets the first and the
+//     third). In CI mode the only database is `maya_ci`, the workflow's service database; outside it the
+//     database matches `^maya_widget_gate_proof_[a-z0-9_]+$` and `maya_ci` is refused;
 //   - a name containing `prod`, `clone`, `maya_saas` or `postgres` is refused whatever else holds;
 //   - the only query parameter admitted is Prisma's `schema`: libpq-style parameters such as `host`,
 //     `hostaddr`, `port`, `dbname` or `service` would redirect the connection away from what the URL's
@@ -16,6 +21,8 @@
 
 export const PROOF_DATABASE_PATTERN = /^maya_widget_gate_proof_[a-z0-9_]+$/;
 export const CI_DATABASE = 'maya_ci';
+/** PostgreSQL's default port: the shared local cluster on a developer machine. */
+export const SHARED_CLUSTER_PORT = '5432';
 const REFUSED_FRAGMENTS = ['prod', 'clone', 'maya_saas', 'postgres'] as const;
 const ADMITTED_PARAMETERS = new Set(['schema']);
 
@@ -80,24 +87,39 @@ export function assertProofDatabase(
       `database ${JSON.stringify(database)} contains ${JSON.stringify(fragment)}`,
     );
 
-  const ci = env.CI === 'true' && env.WIDGET_GATEWAY_PG === 'required';
+  // WHATWG URL and the pg driver read the port alike (`05432` is 5432 to both); an empty port is the
+  // driver's default, 5432.
+  if (!url.port)
+    throw new ProofDatabaseRefused(
+      `DATABASE_URL names no port, so the driver would connect to ${SHARED_CLUSTER_PORT}; write the dedicated proof port`,
+    );
+
+  const ci =
+    env.CI === 'true' &&
+    env.WIDGET_GATEWAY_PG === 'required' &&
+    env.GITHUB_ACTIONS === 'true';
   if (ci) {
     if (database !== CI_DATABASE)
       throw new ProofDatabaseRefused(
-        `with CI=true and WIDGET_GATEWAY_PG=required the only database admitted is ${CI_DATABASE}, not ${JSON.stringify(database)}`,
+        `in CI mode (CI=true, WIDGET_GATEWAY_PG=required, GITHUB_ACTIONS=true) the only database admitted is ${CI_DATABASE}, not ${JSON.stringify(database)}`,
       );
-  } else if (!PROOF_DATABASE_PATTERN.test(database)) {
-    throw new ProofDatabaseRefused(
-      database === CI_DATABASE
-        ? `${CI_DATABASE} is admitted only with CI=true and WIDGET_GATEWAY_PG=required`
-        : `database ${JSON.stringify(database)} does not match ${String(PROOF_DATABASE_PATTERN)}`,
-    );
+  } else {
+    if (url.port === SHARED_CLUSTER_PORT)
+      throw new ProofDatabaseRefused(
+        `port ${SHARED_CLUSTER_PORT} is the shared local cluster; outside CI mode a proof database must be on a dedicated port`,
+      );
+    if (!PROOF_DATABASE_PATTERN.test(database))
+      throw new ProofDatabaseRefused(
+        database === CI_DATABASE
+          ? `${CI_DATABASE} is admitted only in CI mode (CI=true, WIDGET_GATEWAY_PG=required, GITHUB_ACTIONS=true)`
+          : `database ${JSON.stringify(database)} does not match ${String(PROOF_DATABASE_PATTERN)}`,
+      );
   }
 
   return Object.freeze({
     connectionString: raw,
     host: url.hostname,
-    port: url.port || '5432',
+    port: url.port,
     database,
     mode: ci ? 'ci' : 'local',
   });

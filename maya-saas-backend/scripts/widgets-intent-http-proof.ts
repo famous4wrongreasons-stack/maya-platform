@@ -10,8 +10,10 @@
 //   - DATABASE_URL must pass the widgets-live proof-database guard (the same module the jest harness
 //     uses), so the binary cannot be pointed at a working or production database;
 //   - the binary would read `.env.local`/`.env` from its working directory, so the runner refuses to
-//     start while either exists (existence only); the server's environment is the caller's plus fixed
-//     test settings.
+//     start while either exists (existence only);
+//   - the server's environment is the jest harness's (`widgetsLiveChildEnvironment`): the caller's
+//     process-level variables, the guarded DATABASE_URL and the platform-ci.yml literals, scrubbed of
+//     everything else in the caller's shell, plus the fixed test settings below.
 //
 // Run from maya-saas-backend, after `npm run build`:
 //   ts-node --project tsconfig.scripts.json --transpile-only scripts/widgets-intent-http-proof.ts
@@ -21,8 +23,10 @@ import { once } from 'node:events';
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { assertNoEnvFiles } from '../test/widgets-live/support/environment';
-import { assertProofDatabase } from '../test/widgets-live/support/proof-db-guard';
+import {
+  assertNoEnvFiles,
+  widgetsLiveChildEnvironment,
+} from '../test/widgets-live/support/environment';
 
 export interface HttpProofContext {
   /** e.g. `http://127.0.0.1:3121/api` */
@@ -48,6 +52,14 @@ const CASES_DIR = path.join(__dirname, 'widgets-http-proof');
 const CASE_FILE = /^gate[0-9A-Za-z-]+\.cases\.ts$/;
 const port = process.env.WIDGETS_HTTP_PROOF_PORT ?? '3121';
 const apiBase = `http://127.0.0.1:${port}/api`;
+/** Fixed settings of the server under test, on top of the scrubbed widgets-live environment. */
+const SERVER_SETTINGS: Readonly<Record<string, string>> = Object.freeze({
+  HOST: '127.0.0.1',
+  NODE_ENV: 'test',
+  PORT: port,
+  SWAGGER_ENABLED: 'false',
+  AI_CORE_PROVIDER: 'safe',
+});
 
 function discoverCaseFiles(): string[] {
   if (!fs.existsSync(CASES_DIR)) return [];
@@ -73,18 +85,10 @@ function loadCases(files: readonly string[]): WidgetsHttpProofCase[] {
   return cases;
 }
 
-function startServer(databaseUrl: string): ChildProcess {
+function startServer(env: NodeJS.ProcessEnv): ChildProcess {
   return spawn(process.execPath, ['--enable-source-maps', 'dist/src/main'], {
     cwd: process.cwd(),
-    env: {
-      ...process.env,
-      DATABASE_URL: databaseUrl,
-      HOST: '127.0.0.1',
-      NODE_ENV: 'test',
-      PORT: port,
-      SWAGGER_ENABLED: 'false',
-      AI_CORE_PROVIDER: 'safe',
-    },
+    env,
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 }
@@ -119,7 +123,11 @@ async function stopServer(child: ChildProcess): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  const database = assertProofDatabase(process.env);
+  // The guard runs here, on a copy; process.env itself is neither trusted by the child nor modified.
+  const { env: serverEnv, database } = widgetsLiveChildEnvironment(
+    process.env,
+    SERVER_SETTINGS,
+  );
   assertNoEnvFiles();
   const cases = loadCases(discoverCaseFiles());
   if (cases.length === 0) {
@@ -135,7 +143,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  const child = startServer(database.connectionString);
+  const child = startServer(serverEnv);
   const output: string[] = [];
   child.stdout?.on('data', (chunk: Buffer) => output.push(chunk.toString()));
   child.stderr?.on('data', (chunk: Buffer) => output.push(chunk.toString()));

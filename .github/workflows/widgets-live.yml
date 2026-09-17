@@ -7,9 +7,10 @@ name: Widgets Live
 #
 # Not a required check. Making it one is a repository-settings decision for the owner.
 #
-# The database is this job's own service. The harness's guard admits `maya_ci` only because CI=true
-# (set by GitHub Actions) and WIDGET_GATEWAY_PG=required; no seed runs, so `widgets.runtime` reaches a
-# tenant only through a TenantEntitlement a test creates for its own tenant.
+# The database is this job's own service. The harness's guard admits `maya_ci`, and port 5432, only
+# because CI=true and GITHUB_ACTIONS=true (both set by GitHub Actions) and WIDGET_GATEWAY_PG=required;
+# no seed runs, so `widgets.runtime` reaches a tenant only through a TenantEntitlement a test creates for
+# its own tenant.
 on:
   pull_request:
   push:

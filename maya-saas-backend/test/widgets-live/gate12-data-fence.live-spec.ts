@@ -300,9 +300,52 @@ describe('G12-L00 — no canonical read is reachable through the widget route (r
   });
 
   describe('[HTTP]', () => {
-    /** The one failure this XF stands for: a configuration key the platform-ci.yml literals lack. */
-    const CONFIGURATION_BLOCKER =
-      /^widgets-live HTTP level: AppModule could not be constructed with the platform-ci\.yml literals: [A-Z][A-Z0-9_]* (must contain from \d+ to \d+ characters|is invalid|is not configured)$/;
+    /**
+     * The one failure this XF stands for: a required MAYA_* key the platform-ci.yml literals lack, reported
+     * by its own boot-time validator. Only these keys and these validators' exact messages
+     * (`referrals.module.ts`, `gift-certificates.module.ts`, `loyalty.module.ts`); any other key — e.g.
+     * `DATABASE_URL is not configured` or an Action Engine `… is not configured` — turns the XF red.
+     */
+    const CONFIGURATION_BLOCKER = new RegExp(
+      '^widgets-live HTTP level: AppModule could not be constructed with the platform-ci\\.yml literals: (?:' +
+        [
+          '(?:MAYA_REFERRAL_REWARD_PRESENTATION_KEY|MAYA_REFERRAL_REWARD_CLAIM_SECRET|MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY|MAYA_GIFT_CERTIFICATE_CLAIM_SECRET) must contain from 32 to 256 characters',
+          '(?:MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION|MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY_VERSION) is invalid',
+          'MAYA_LOYALTY_REDEMPTION_CODE_PEPPER must contain at least 32 characters',
+        ].join('|') +
+        ')$',
+    );
+    const blockerMessage = (reason: string) =>
+      `widgets-live HTTP level: AppModule could not be constructed with the platform-ci.yml literals: ${reason}`;
+
+    it.each([
+      [
+        'MAYA_REFERRAL_REWARD_PRESENTATION_KEY must contain from 32 to 256 characters',
+        true,
+      ],
+      [
+        'MAYA_GIFT_CERTIFICATE_CLAIM_SECRET must contain from 32 to 256 characters',
+        true,
+      ],
+      ['MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION is invalid', true],
+      [
+        'MAYA_LOYALTY_REDEMPTION_CODE_PEPPER must contain at least 32 characters',
+        true,
+      ],
+      ['DATABASE_URL is not configured', false],
+      ['ACTION_ENGINE_IDENTITY_SECRET is not configured', false],
+      [
+        'CLIENT_IDENTITY_HASH_SECRET must contain from 32 to 256 characters',
+        false,
+      ],
+      ['MAYA_UNKNOWN_KEY is not configured', false],
+      [
+        'MAYA_REFERRAL_REWARD_PRESENTATION_KEY must contain from 32 to 256 characters; and more',
+        false,
+      ],
+    ])('the XF blocker pattern: %j → %s', (reason, blocker) => {
+      expect(CONFIGURATION_BLOCKER.test(blockerMessage(reason))).toBe(blocker);
+    });
 
     it.failing(
       'XF G12-L00 [HTTP]: blocked — AppModule cannot be constructed with the platform-ci.yml literals (a required MAYA_* key is absent); red once the application boots, then convert to a plain it',

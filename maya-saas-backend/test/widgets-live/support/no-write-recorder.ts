@@ -65,6 +65,13 @@ const RAW_EXECUTE = new Set(['$executeRaw', '$executeRawUnsafe']);
 const RAW_QUERY = new Set(['$queryRaw', '$queryRawUnsafe', '$queryRawTyped']);
 const WRITING_KEYWORDS =
   /\b(insert|update|delete|merge|truncate|alter|create|drop|grant|revoke|copy|call|do|refresh|reindex|vacuum|cluster|comment|security|lock|nextval|setval)\b/i;
+/**
+ * Locks a SELECT can take. `\block\b` cannot see an advisory-lock function (`_` is a word character, so
+ * `pg_advisory_xact_lock` has no boundary before `lock`), and `FOR SHARE` names no keyword above
+ * (`FOR UPDATE` / `FOR NO KEY UPDATE` are already caught by `update`).
+ */
+const LOCKING_CLAUSES =
+  /\bpg_(?:try_)?advisory_\w+|\bfor\s+(?:key\s+)?share\b/i;
 
 const sqlText = (args: unknown): string | undefined => {
   if (typeof args === 'string') return args;
@@ -81,14 +88,15 @@ const sqlText = (args: unknown): string | undefined => {
 
 /**
  * A raw statement is a READ only when it is plainly one: it starts with SELECT, WITH or SHOW and names
- * no writing keyword anywhere. Everything else — `SET TRANSACTION`, an advisory lock, an unreadable
+ * no writing keyword and no lock anywhere. Everything else — `SET TRANSACTION`, an advisory lock
+ * (`pg_advisory_*`, `pg_try_advisory_*`), a row lock (`FOR UPDATE`, `FOR SHARE`), an unreadable
  * argument — counts as a write, so the NW assertion errs toward red.
  */
 export const isWritingStatement = (sql: string | undefined): boolean => {
   if (sql === undefined) return true;
   const text = sql.trim();
   if (!/^(select|with|show)\b/i.test(text)) return true;
-  return WRITING_KEYWORDS.test(text);
+  return WRITING_KEYWORDS.test(text) || LOCKING_CLAUSES.test(text);
 };
 
 export class WriteRecorder {
