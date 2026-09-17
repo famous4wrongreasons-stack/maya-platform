@@ -114,10 +114,84 @@ chk(
 // The check follows it rather than loosening: the controller submits exactly that derivation and
 // nothing else, the derivation sets the tenant once and from the actor, and neither file sets a
 // tenant from the DTO.
+//
+// Those text tests read `intent-submit-args.ts`, which is only the code the controller runs if the
+// controller's `intentSubmitArgs` IS that file's derivation. A controller importing the name from a
+// sibling that lets the body override the tenant passed all of them (U0 S3 review, mutant M1), and
+// so would `intent-submit-args.ts` re-exporting the name from such a sibling. So the binding is read
+// with the compiler at both ends, closed rather than enumerated:
+// - the controller has exactly one import declaration of './intent-submit-args'; it binds
+//   `intentSubmitArgs` by name, un-aliased and as a value; and every other occurrence of the name in
+//   the file is the callee of a call — so no import, declaration, parameter or assignment rebinds it;
+// - `intent-submit-args.ts` declares the name once, as its exported top-level `const`; it has no
+//   export declaration (no re-export); the name occurs nowhere else; and the one `tenantId:` member
+//   lies inside that declaration.
 const ctrl = read('widgets.controller.ts');
 const submitArgs = read('intent-submit-args.ts');
 const ctrlSubmits = [...ctrl.matchAll(/\.submit\(/g)].length;
 const tenantAssignments = [...submitArgs.matchAll(/tenantId:/g)].length;
+const ARGS_NAME = 'intentSubmitArgs';
+const ARGS_MODULE = './intent-submit-args';
+const lineOf = (s, n) => s.getLineAndCharacterOfPosition(n.getStart(s)).line + 1;
+const occurrences = (s, name) => {
+  const found = [];
+  const visit = (n) => {
+    if (ts.isIdentifier(n) && n.text === name) found.push(n);
+    n.forEachChild(visit);
+  };
+  visit(s);
+  return found;
+};
+const bindingBreaks = [];
+const ctrlSf = sf('widgets.controller.ts');
+const argsImports = ctrlSf.statements.filter(
+  (s) => ts.isImportDeclaration(s) && ts.isStringLiteral(s.moduleSpecifier) && s.moduleSpecifier.text === ARGS_MODULE,
+);
+let importedName = null;
+if (argsImports.length !== 1)
+  bindingBreaks.push(`widgets.controller.ts has ${argsImports.length} import declarations of '${ARGS_MODULE}'`);
+else {
+  const clause = argsImports[0].importClause;
+  const bound =
+    clause && !clause.isTypeOnly && clause.namedBindings && ts.isNamedImports(clause.namedBindings)
+      ? clause.namedBindings.elements.filter((e) => !e.isTypeOnly && !e.propertyName && e.name.text === ARGS_NAME)
+      : [];
+  if (bound.length === 1) importedName = bound[0].name;
+  else bindingBreaks.push(`'${ARGS_MODULE}' does not bind ${ARGS_NAME} by name, un-aliased, as a value`);
+}
+for (const id of occurrences(ctrlSf, ARGS_NAME))
+  if (id !== importedName && !(ts.isCallExpression(id.parent) && id.parent.expression === id))
+    bindingBreaks.push(`widgets.controller.ts:${lineOf(ctrlSf, id)}: ${ARGS_NAME} in a ${ts.SyntaxKind[id.parent.kind]}`);
+const argsSf = sf('intent-submit-args.ts');
+const derivations = [];
+for (const s of argsSf.statements) {
+  if (ts.isExportDeclaration(s) || ts.isExportAssignment(s))
+    bindingBreaks.push(`intent-submit-args.ts:${lineOf(argsSf, s)}: an export declaration`);
+  if (
+    ts.isVariableStatement(s) &&
+    s.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword) &&
+    s.declarationList.flags & ts.NodeFlags.Const
+  )
+    for (const d of s.declarationList.declarations)
+      if (ts.isIdentifier(d.name) && d.name.text === ARGS_NAME && d.initializer && ts.isArrowFunction(d.initializer))
+        derivations.push(d);
+}
+if (derivations.length !== 1)
+  bindingBreaks.push(`intent-submit-args.ts has ${derivations.length} exported top-level const arrow ${ARGS_NAME}`);
+for (const id of occurrences(argsSf, ARGS_NAME))
+  if (derivations.length !== 1 || id !== derivations[0].name)
+    bindingBreaks.push(`intent-submit-args.ts:${lineOf(argsSf, id)}: ${ARGS_NAME} in a ${ts.SyntaxKind[id.parent.kind]}`);
+const tenantMembers = [];
+const tenantVisit = (n) => {
+  if (ts.isPropertyAssignment(n) && n.name.getText(argsSf) === 'tenantId') tenantMembers.push(n);
+  n.forEachChild(tenantVisit);
+};
+tenantVisit(argsSf);
+if (
+  derivations.length === 1 &&
+  !tenantMembers.every((m) => m.pos >= derivations[0].initializer.pos && m.end <= derivations[0].initializer.end)
+)
+  bindingBreaks.push(`intent-submit-args.ts: a tenantId member outside the exported ${ARGS_NAME}`);
 chk(
   'the tenant comes from the authenticated principal, never from the body',
   /this\.gateway\.submit\(intentSubmitArgs\(dto, actor\)\)/.test(ctrl) &&
@@ -125,9 +199,13 @@ chk(
     tenantAssignments === 1 &&
     /tenantId: actor\.tenantId/.test(submitArgs) &&
     !/tenantId: dto\./.test(ctrl) &&
-    !/tenantId: dto\./.test(submitArgs),
+    !/tenantId: dto\./.test(submitArgs) &&
+    bindingBreaks.length === 0,
   `controller submits intentSubmitArgs(dto, actor) (${ctrlSubmits} submit call); intentSubmitArgs sets the tenant ` +
-    `${tenantAssignments} time(s), from actor.tenantId; the DTO has no tenant field to read`,
+    `${tenantAssignments} time(s), from actor.tenantId; the DTO has no tenant field to read; ` +
+    (bindingBreaks.length
+      ? `BINDING: ${bindingBreaks.join('; ')}`
+      : `the controller's ${ARGS_NAME} is the one imported from '${ARGS_MODULE}', which declares and exports it once`),
 );
 
 // ── 7. exactly two routes ────────────────────────────────────────────────────────────────────

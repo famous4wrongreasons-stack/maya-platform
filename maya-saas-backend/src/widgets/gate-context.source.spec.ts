@@ -113,6 +113,123 @@ const gate6ActorViolations = (unit: SourceUnit): string[] => [
   ...actorEscapes(unit),
 ];
 
+const ARGS_NAME = 'intentSubmitArgs';
+const ARGS_MODULE = './intent-submit-args';
+
+/** Every identifier spelled `name` in `sf`, wherever it stands. */
+const identifiersNamed = (sf: ts.SourceFile, name: string): ts.Identifier[] => {
+  const found: ts.Identifier[] = [];
+  const visit = (n: ts.Node): void => {
+    if (ts.isIdentifier(n) && n.text === name) found.push(n);
+    ts.forEachChild(n, visit);
+  };
+  visit(sf);
+  return found;
+};
+
+/**
+ * Every way the controller's `intentSubmitArgs` could stop being the derivation in
+ * `intent-submit-args.ts`, the file this test and K3 check 6 read. Without it, a controller importing
+ * the name from a sibling that lets the body override the tenant passed both (U0 S3 review, mutant
+ * M1). Closed, and the same rule as K3 check 6: the controller has one import declaration of
+ * './intent-submit-args', which binds the name by name, un-aliased and as a value, and every other
+ * occurrence of the name is a call's callee; `intent-submit-args.ts` declares the name once, as its
+ * exported top-level const arrow, has no export declaration, and sets `tenantId` only inside it.
+ */
+const submitArgsBindingBreaks = (
+  ctrlSrc: string,
+  argsSrc: string,
+): string[] => {
+  const out: string[] = [];
+  const ctrlSf = parseSource('widgets.controller.ts', ctrlSrc);
+  const argsSf = parseSource('intent-submit-args.ts', argsSrc);
+  const at = (sf: ts.SourceFile, n: ts.Node): string =>
+    `${sf.fileName}:${sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1}`;
+
+  const imports = ctrlSf.statements.filter(
+    (s): s is ts.ImportDeclaration =>
+      ts.isImportDeclaration(s) &&
+      ts.isStringLiteral(s.moduleSpecifier) &&
+      s.moduleSpecifier.text === ARGS_MODULE,
+  );
+  let imported: ts.Identifier | null = null;
+  if (imports.length !== 1)
+    out.push(
+      `widgets.controller.ts has ${imports.length} import declarations of '${ARGS_MODULE}'`,
+    );
+  else {
+    const clause = imports[0].importClause;
+    const bound =
+      clause &&
+      !clause.isTypeOnly &&
+      clause.namedBindings &&
+      ts.isNamedImports(clause.namedBindings)
+        ? clause.namedBindings.elements.filter(
+            (e) =>
+              !e.isTypeOnly && !e.propertyName && e.name.text === ARGS_NAME,
+          )
+        : [];
+    if (bound.length === 1) imported = bound[0].name;
+    else
+      out.push(
+        `'${ARGS_MODULE}' does not bind ${ARGS_NAME} by name, un-aliased, as a value`,
+      );
+  }
+  for (const id of identifiersNamed(ctrlSf, ARGS_NAME))
+    if (
+      id !== imported &&
+      !(ts.isCallExpression(id.parent) && id.parent.expression === id)
+    )
+      out.push(
+        `${at(ctrlSf, id)}: ${ARGS_NAME} in a ${ts.SyntaxKind[id.parent.kind]}`,
+      );
+
+  const derivations: ts.VariableDeclaration[] = [];
+  for (const s of argsSf.statements) {
+    if (ts.isExportDeclaration(s) || ts.isExportAssignment(s))
+      out.push(`${at(argsSf, s)}: an export declaration`);
+    if (
+      ts.isVariableStatement(s) &&
+      (ts.getModifiers(s) ?? []).some(
+        (m) => m.kind === ts.SyntaxKind.ExportKeyword,
+      ) &&
+      (s.declarationList.flags & ts.NodeFlags.Const) !== 0
+    )
+      for (const d of s.declarationList.declarations)
+        if (
+          ts.isIdentifier(d.name) &&
+          d.name.text === ARGS_NAME &&
+          d.initializer &&
+          ts.isArrowFunction(d.initializer)
+        )
+          derivations.push(d);
+  }
+  const derivation = derivations.length === 1 ? derivations[0] : null;
+  if (!derivation)
+    out.push(
+      `intent-submit-args.ts has ${derivations.length} exported top-level const arrow ${ARGS_NAME}`,
+    );
+  for (const id of identifiersNamed(argsSf, ARGS_NAME))
+    if (id !== derivation?.name)
+      out.push(
+        `${at(argsSf, id)}: ${ARGS_NAME} in a ${ts.SyntaxKind[id.parent.kind]}`,
+      );
+  const body = derivation?.initializer;
+  const visitTenant = (n: ts.Node): void => {
+    if (
+      ts.isPropertyAssignment(n) &&
+      n.name.getText(argsSf) === 'tenantId' &&
+      !(body && n.pos >= body.pos && n.end <= body.end)
+    )
+      out.push(
+        `${at(argsSf, n)}: a tenantId member outside the exported ${ARGS_NAME}`,
+      );
+    ts.forEachChild(n, visitTenant);
+  };
+  visitTenant(argsSf);
+  return out;
+};
+
 describe('D-9 — the actor is carried, the resolved-roles member is gone, and Gate 6 reads no role (AMB-03)', () => {
   it('GateContext carries the JWT-validated actor and J-1 facts, and no resolved roles', () => {
     const members = interfaceMembers(typesSource, 'GateContext');
@@ -182,6 +299,147 @@ describe('D-9 — the actor is carried, the resolved-roles member is gone, and G
       ['intent-submit-args.ts', argsSrc],
     ] as const)
       expect(actorRoleReads({ slot: null, file, source })).toEqual([]);
+    // What was read above is what the controller runs: its `intentSubmitArgs` is the one
+    // `intent-submit-args.ts` declares and exports.
+    expect(submitArgsBindingBreaks(ctrlSrc, argsSrc)).toEqual([]);
+  });
+
+  describe("the controller's intentSubmitArgs is the derivation read above (mutations)", () => {
+    // Mutants are applied inside each test, so a change to the real files fails that test, not the
+    // collection of the suite.
+    const IMPORT = `import { ${ARGS_NAME} } from '${ARGS_MODULE}';`;
+    const DECL = `export const ${ARGS_NAME} = (`;
+    const CALL = `const result = await this.gateway.submit(${ARGS_NAME}(dto, actor));`;
+    const swap =
+      (from: string, to: string) =>
+      (source: string): string => {
+        if (source.split(from).length !== 2)
+          throw new Error(`not exactly one ${JSON.stringify(from)}`);
+        return source.replace(from, () => to);
+      };
+    const breaksOf = (
+      target: 'controller' | 'derivation',
+      mutate: (source: string) => string,
+    ): string[] => {
+      const ctrlSrc = readWidget('widgets.controller.ts');
+      const argsSrc = readWidget('intent-submit-args.ts');
+      return target === 'controller'
+        ? submitArgsBindingBreaks(mutate(ctrlSrc), argsSrc)
+        : submitArgsBindingBreaks(ctrlSrc, mutate(argsSrc));
+    };
+
+    it('CONTROL: the sources as they are, and a type binding added to the import, are clean', () => {
+      expect(breaksOf('controller', (s) => s)).toEqual([]);
+      expect(
+        breaksOf(
+          'controller',
+          swap(
+            IMPORT,
+            `import { ${ARGS_NAME}, type IntentSubmitArgs } from '${ARGS_MODULE}';\ntype Unused = IntentSubmitArgs;`,
+          ),
+        ),
+      ).toEqual([]);
+    });
+
+    // [name, the file mutated, the mutation, the break it must be red for]
+    const mutants: ReadonlyArray<
+      readonly [
+        string,
+        'controller' | 'derivation',
+        (source: string) => string,
+        RegExp,
+      ]
+    > = [
+      [
+        'M1: the controller imports the name from a sibling file',
+        'controller',
+        swap(IMPORT, `import { ${ARGS_NAME} } from './evil-args';`),
+        /has 0 import declarations of '\.\/intent-submit-args'/,
+      ],
+      [
+        'the derivation imported under an alias, the name declared beside it',
+        'controller',
+        swap(
+          IMPORT,
+          `import { ${ARGS_NAME} as derive } from '${ARGS_MODULE}';\nconst ${ARGS_NAME} = (d: SubmitIntentDto, a: AuthenticatedUser) => ({ ...derive(d, a), tenantId: (d as unknown as { t: string }).t });`,
+        ),
+        /does not bind intentSubmitArgs by name, un-aliased/,
+      ],
+      [
+        'a second import of the module',
+        'controller',
+        swap(IMPORT, `${IMPORT}\nimport '${ARGS_MODULE}';`),
+        /has 2 import declarations of '\.\/intent-submit-args'/,
+      ],
+      [
+        'the name also imported, aliased, from a sibling',
+        'controller',
+        swap(
+          IMPORT,
+          `${IMPORT}\nimport { ${ARGS_NAME} as evil } from './evil-args';`,
+        ),
+        /widgets\.controller\.ts:\d+: intentSubmitArgs in a ImportSpecifier/,
+      ],
+      [
+        'a default import of the name from a sibling',
+        'controller',
+        swap(IMPORT, `import ${ARGS_NAME} from './evil-args';`),
+        /widgets\.controller\.ts:\d+: intentSubmitArgs in a ImportClause/,
+      ],
+      [
+        'a type-only import of the name',
+        'controller',
+        swap(IMPORT, `import type { ${ARGS_NAME} } from '${ARGS_MODULE}';`),
+        /does not bind intentSubmitArgs by name, un-aliased, as a value/,
+      ],
+      [
+        'the import kept, the name shadowed inside the handler',
+        'controller',
+        swap(CALL, `const ${ARGS_NAME} = evilArgs;\n    ${CALL}`),
+        /widgets\.controller\.ts:\d+: intentSubmitArgs in a VariableDeclaration/,
+      ],
+      [
+        'the import kept, the name reassigned',
+        'controller',
+        swap(CALL, `${ARGS_NAME} = evilArgs;\n    ${CALL}`),
+        /widgets\.controller\.ts:\d+: intentSubmitArgs in a BinaryExpression/,
+      ],
+      [
+        'intent-submit-args.ts re-exports the name from a sibling',
+        'derivation',
+        swap(
+          DECL,
+          `export { ${ARGS_NAME} } from './evil-args';\nexport const derive = (`,
+        ),
+        /intent-submit-args\.ts:\d+: an export declaration/,
+      ],
+      [
+        'intent-submit-args.ts exports a wrapper under the name, the derivation renamed',
+        'derivation',
+        (s) =>
+          swap(DECL, 'const derive = (')(s) +
+          `\nexport const ${ARGS_NAME} = (dto: SubmitIntentDto, actor: AuthenticatedUser): IntentSubmitArgs => ({ ...derive(dto, actor), ['tenant' + 'Id']: (dto as unknown as { t: string }).t });\n`,
+        /a tenantId member outside the exported intentSubmitArgs/,
+      ],
+      [
+        'intent-submit-args.ts declares the name as a function, not the exported const',
+        'derivation',
+        (s) =>
+          swap(
+            '): IntentSubmitArgs => {',
+            '): IntentSubmitArgs {',
+          )(swap(DECL, `export function ${ARGS_NAME}(`)(s)),
+        /has 0 exported top-level const arrow intentSubmitArgs/,
+      ],
+    ];
+
+    it.each(mutants)('RED: %s', (_name, target, mutate, reason) => {
+      const breaks = breaksOf(target, mutate);
+      expect({ breaks, red: breaks.some((b) => reason.test(b)) }).toEqual({
+        breaks,
+        red: true,
+      });
+    });
   });
 
   it("Gate 6 — its slot and every file the slot calls — does not read the actor's role", () => {
