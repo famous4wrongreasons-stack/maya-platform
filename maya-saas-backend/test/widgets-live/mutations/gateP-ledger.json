@@ -1,0 +1,65 @@
+[
+  {
+    "id": "LED-M1",
+    "description": "drop MG-P-01 — the IntentGateway row leaves the ledger, so §A1's P-01 is bound to no gap key (A2.4)",
+    "file": "src/widget-contract/mechanism-gap-ledger.runtime.ts",
+    "find": "  {\n    gap_key: 'MG-P-01',\n    p_ref: 'P-01',\n    component: 'IntentGateway',\n    status: '[ABSENT]',\n    package: 'K3',\n    blocking_rules: [],\n  },\n",
+    "replace": "",
+    "killers": ["LED-1a", "LED-1b", "LED-1d", "LED-3a", "LED-4a"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "LED-M2",
+    "description": "neutralise the assertion — §A2.4 stops throwing, so a ledger that no longer binds boots anyway",
+    "file": "src/widgets/authority/ledger-startup.assert.ts",
+    "find": "  const problems = ledgerStartupProblems(ledgers);\n  if (problems.length) throw new LedgerStartupAssertionError(problems);\n",
+    "replace": "  ledgerStartupProblems(ledgers);\n",
+    "killers": ["LED-3b"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "LED-M3",
+    "description": "the binding is asserted for [ABSENT] alone — A2.6 (3) puts [PARTIAL] on identical terms, and P-09 is [PARTIAL]",
+    "file": "src/widgets/authority/ledger-startup.assert.ts",
+    "find": "    if (row.status === '[EXISTS]') continue;\n",
+    "replace": "    if (row.status !== '[ABSENT]') continue;\n",
+    "killers": ["LED-3c"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "LED-M4",
+    "description": "the two ledgers' key shapes stop being disjoint (F35's build assertion)",
+    "file": "src/widgets/authority/ledger-startup.assert.ts",
+    "find": "  for (const row of capabilityRows)\n    if (row.gap_key.startsWith(MECHANISM_GAP_KEY_PREFIX))\n      problems.push(\n        `F35: capability key ${row.gap_key} is shaped like a mechanism gap`,\n      );\n",
+    "replace": "",
+    "killers": ["LED-3f"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "LED-M5",
+    "description": "the generator reads §A1's status from a default instead of from the cell, so P-09's [PARTIAL] and P-19's [UNENFORCEABLE-TODAY] flatten to [ABSENT]",
+    "file": "scripts/widget-contract/emit-ledgers.mjs",
+    "find": "      status: stated ? stated[1] : '[ABSENT]',\n",
+    "replace": "      status: '[ABSENT]',\n",
+    "killers": ["LED-4a", "LED-4b", "LED-4c"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "LED-M6",
+    "description": "the F92 counts are transcribed instead of derived — the printed status line stops following the rows (§A5)",
+    "file": "scripts/widget-contract/emit-ledgers.mjs",
+    "find": "const byStatus = mech.reduce((acc, r) => ((acc[r.status] = (acc[r.status] ?? 0) + 1), acc), {});\n",
+    "replace": "const byStatus = { '[ABSENT]': 34, '[EXISTS]': 0, '[PARTIAL]': 0, '[UNENFORCEABLE-TODAY]': 0 };\n",
+    "killers": ["LED-4b"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "LED-M7",
+    "description": "P-07 admits any GAP--shaped string, so a minter could clear the gap fence by naming a key nothing opened",
+    "file": "src/widget-contract/capability-gap-ledger.runtime.ts",
+    "find": "export const isCapabilityGapKey = (ref: string | null | undefined): boolean =>\n  typeof ref === 'string' &&\n  Object.prototype.hasOwnProperty.call(CAPABILITY_GAP_LEDGER_RUNTIME, ref);\n",
+    "replace": "export const isCapabilityGapKey = (ref: string | null | undefined): boolean =>\n  typeof ref === 'string' && ref.startsWith('GAP-');\n",
+    "killers": ["LED-2b"],
+    "expect": "build-killed"
+  }
+]

@@ -3,6 +3,7 @@ import type { OnModuleInit } from '@nestjs/common';
 
 import { PrismaModule } from '../prisma/prisma.module';
 import { assertOwnerClassesResolve } from './authority/contract-bindings';
+import { assertLedgersBindAtRegistryLoad } from './authority/ledger-startup.assert';
 import { ControlRegistryService } from './control/control-registry.service';
 import { WidgetEmitterService } from './emission/emitter.service';
 import { IntentGatewayService } from './intent-gateway.service';
@@ -40,8 +41,16 @@ import { WidgetsController } from './widgets.controller';
   ],
 })
 export class WidgetsModule implements OnModuleInit {
-  /** §2.4 EP-REGISTRY-LOAD: every owner class resolves in its space, or the process does not start. */
+  /**
+   * §2.4 EP-REGISTRY-LOAD: every owner class resolves in its space, or the process does not start.
+   *
+   * A2.4 (P-LEDGER, IR-LED-1) runs first: every `[ABSENT]` §A1 row must be bound to a gap key, or the
+   * process does not start either. A ledger fault is then the first thing a failed boot reports, which
+   * is what D-4's backstop rests on — the mechanism that says "not built" must exist before anything
+   * may say "allowed".
+   */
   onModuleInit(): void {
+    assertLedgersBindAtRegistryLoad();
     assertOwnerClassesResolve();
   }
 }
