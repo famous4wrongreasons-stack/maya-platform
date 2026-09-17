@@ -1,6 +1,6 @@
-# MAYA WIDGET CONTRACT v1
+# MAYA WIDGET CONTRACT v1.1
 
-*Canonical. Normative. Consolidated 2026-09-15 on branch `codex/maya-identity-consent-20260913`.*
+*Canonical. Normative. Version 1.1. Version 1 is this file at commit `81bcc5ec` (SHA-256 `15c383f1d173ad7bc83b6b4df8138b06c96c4131452d5fe05549ed6d59aca4d3`), consolidated 2026-09-15 on branch `codex/maya-identity-consent-20260913`. The owner decisions this version carries are recorded in Annex C, which states no rule.*
 
 **One document, one place per rule.** This contract has no errata layer and no precedence
 chain. Every rule is stated once, where it belongs, in its final form. A reader never needs to
@@ -20,11 +20,20 @@ admits**.
 
 **What this contract does not do.** `[NON-NORMATIVE — this preamble is a summary; every figure
 in it is declared, and governs, in the section named beside it.]` It adds no Action Engine
-capability, no C9 capability and no registry field; `C9_REGISTRY_HASH` is unchanged; no C6–C9
-canonical business contract is modified. It introduces exactly **two** deliberate floor
-reductions, both disclosed in **§0.17** with their compensating fences. Exactly **two** new
-routes exist in the whole programme, `POST /api/widgets/resolve` and `POST /api/widgets/intent`,
-declared in **§A1.1 P-01**.
+capability and no registry field. It adds exactly the fifteen C9 read keys of **§0.7 F36a**, under
+owner ruling R-01; when that set registers, `C9_REGISTRY_HASH` changes to the value F36a pins. Under
+owner ruling R-04 it adds one staff-revoke branch to the actor policy and the executable input
+contract of the existing consent capability, stated in **§3.5 R3.5.5 (j)**; no other C6–C9 canonical
+business contract is modified. It introduces exactly **two** deliberate
+floor reductions, both disclosed in **§0.17** with their compensating fences. Exactly **three** new
+routes exist in the chat-first widget programme, all declared in **§A1.1 P-01**: the two widget routes
+`POST /api/widgets/resolve` and `POST /api/widgets/intent`, and one internal service-to-service
+ingress for Telegram command delivery, which is not a widget route, is built under **§A1.1 P-33**
+and is stated in **§3.12 R3.12.7**. Owner ruling R-04 authorises exactly **one** further ingress,
+counted beside those three: a staff door onto the existing canonical consent owner that can only
+withdraw marketing consent, which is not a widget route and which neither the widget gateway nor that
+Telegram ingress reaches; it is built under **§A1.3 P-34** and stated in **§3.5 R3.5.5**. Beyond the
+R-01 read set, that door's revoke-only staff authority is the only backend authority this contract adds.
 
 ---
 
@@ -49,13 +58,15 @@ it is no rule, with the additional harm that it reads as one. *Mechanism:* a bui
 resolves every identifier cited in a normative sentence against a declaration. *Evaluation
 point:* `EP-BUILD`.
 
-**F3 — what this contract requires of the running system.** No change to any C9 contract: no
-new key in `C9_CAPABILITIES`, no new field on `C9Capability`, no new field on
-`RegisteredActionCapabilityV1`, no change to `C9_REGISTRY_HASH` (`c9.registry.ts:177`, a hash
-of the `C9_CAPABILITIES` array). No change to any canonical business schema. It does commission
-additive widget-layer stores (§0.21 residual 1). *Mechanism:* a CI test asserts
-`C9_REGISTRY_HASH` is unchanged by this contract's packages, that `RegisteredActionCapabilityV1`
-gains no field, and that no canonical table gains a column. *Evaluation point:* `EP-BUILD`.
+**F3 — what this contract requires of the running system.** The C9 contract changes by exactly
+the enumerated read set of §0.7 F36a, registered as one unit, and by nothing else; the keys, members
+and hash of that change, and the registry pin test that asserts them, are stated in F36a.
+`C9Capability` gains no field. `RegisteredActionCapabilityV1` gains no field. No change to any
+canonical business schema. It does commission additive widget-layer stores (§0.21 residual 1). Any
+C9 change outside F36a is a version bump of this contract carrying a recorded owner decision (§1.8
+K11). *Mechanism:* the registry pin test of §0.7 F36a; plus a CI test asserting that `C9Capability`
+and `RegisteredActionCapabilityV1` gain no field and that no canonical table gains a column.
+*Evaluation point:* `EP-BUILD`.
 
 **F4 — the three repairs that are preserved exactly.** Nothing in this contract weakens:
 
@@ -213,11 +224,13 @@ exactly `{ capability, frozen_nouns, requested_scope_hash, principal_proof_hash,
 confirmation_of_ref, produced_by_intent_token_hash }` — every one of them `AUDIT_RETAINED`.
 `utterance_template`, `selected_labels`, `rendered_utterance`, `spoken_transcript` and the
 `selection_domain` **labels** are `CONVERSATION_CONTENT` and are read by nothing after the
-utterance-rendering gate. Consequently, erasing conversation history while an approval is
+utterance-rendering gate except Gate 10, which reads the utterance Gate 9 lowered in the same
+request and whose result is its own refusal and an all-`AUDIT_RETAINED` `DivergenceAuditRecord`
+(§3.9 «Gate 10 in full»). Consequently, erasing conversation history while an approval is
 PENDING cannot leave it undecidable. *Mechanism:* a build-time reachability test — for every
-field read on any code path that reaches the approval gate, the effect-routing gate, canonical
+field read whose value flows into the approval gate (Gate 11), the effect-routing gate, canonical
 ingress, or an owner's approve/reject route, the field's erasure class must be
-`AUDIT_RETAINED`; a read of any other class on those paths fails the build. *Evaluation point:*
+`AUDIT_RETAINED`; such a read of any other class fails the build. *Evaluation point:*
 `EP-BUILD`. It is complemented, not replaced, by the history-blind replay test, which exercises
 the canonical read and action paths with the timeline store unreadable.
 
@@ -229,6 +242,9 @@ content. **`readback_ack.affirmation` is `CONVERSATION_CONTENT`**: it is a word 
 subject said, it is compared against the closed affirmation vocabulary at submission time only,
 and no later path reads it. The `selection_domain` **field** is `AUDIT_RETAINED`; the
 `selection_domain` **labels** are `CONVERSATION_CONTENT`, and the two are distinct.
+`confirmation_subject`, `approval_decision`, `confirmation.idempotency_key`,
+`confirmation.approval_policy` and every member of `DivergenceAuditRecord` (§3.9) are likewise
+`AUDIT_RETAINED`; `confirmation.readback_text` is `CONVERSATION_CONTENT`, kept where §4.4.3 states.
 
 ### 0.5 The three root members declared here
 
@@ -277,7 +293,7 @@ interface TextEquivalent {
 snapshot; `WidgetComposerInput` has no member for it. It may reorder, relabel and hide; it may
 never add, remove or enable an intent, and no intent's `capability` may vary by it.
 *Mechanism:* absence of the composer field, plus a property test asserting a byte-identical
-intent set across all four presentation modes. *Evaluation point:* `EP-BUILD`.
+intent set across all three presentation modes of `Presentation.presentation_mode`. *Evaluation point:* `EP-BUILD`.
 
 ### 0.6 The three key spaces and the capability reference
 
@@ -290,7 +306,7 @@ is closed at three keys and has no registry row anywhere in the backend.
 |---|---|---|---|
 | **Identifier type** | `C9Capability.capabilityKey: string` | `AiToolDefinition.name: string` | `RegisteredActionCapabilityV1.capability: string` |
 | **Declared at** | `src/orchestration/c9.registry.ts:52–70` (type), `:110–160` (population) | `src/ai-tools/ai-tool.types.ts` (type), `src/ai-tools/ai-tool.catalog.ts` (`MAYA_AI_TOOL_CATALOG`) | `src/action-engine/action-engine.contract.ts:170–195` (type), `action-engine.registry.ts:3444` (`CAPABILITIES`), `:3889` (`ActionCapabilityRegistry`) |
-| **Cardinality (verified by enumeration)** | **56** = the 47 catalogue names + 9 extras | **47** | **226** |
+| **Cardinality (verified by enumeration)** | **56** = the 47 catalogue names + 9 extras; **71** = the 47 + 24 C9-only keys once §0.7 F36a registers its fifteen as one unit | **47** | **226** |
 | **Lookup** | `c9Capability(key, domain, registryHash)` — `c9.registry.ts:180` | `AiToolRegistryService.get(name)` | `ActionCapabilityRegistry.get(key)` — `:3894`; `.list()` — `:3913` |
 | **Governs** | the **C9 orchestration run**: `mode` (`READ`/`PROPOSE_ONLY`/`OWNER_HANDOFF`), `resourceClass` (`LOCAL`/`SOURCE_READ`/`SOURCE_HANDOFF`), `domains`, `principalKinds`, timeouts, byte caps, `evidencePolicy`, `approvalAdapter`, `idempotencyAdapter` | the **AI-tool surface**: which tool names an LLM principal may see and call — `allowedRoles`, `allowedSurfaces`, `riskTier`, `approvalPolicy`, `requiredFeatures`, enforced by `AiToolPolicyService.listAllowed` / `.assertCanExecute` / `.assertCanDecide` | **whether an effect happens.** `actionClass`, `targetKind`, `allowedSourceTypes`, `riskFacets`, `policyKey`/`policyVersion`, `policyDecision`, `autonomyLevel`, `approvalRequirement`, `approvalTtlMs`, `executorKey`, `normalizeInput`, retention — enforced by `CanonicalActionPolicyResolver.resolve()` and `ActionEngineKernel` |
 | **Does NOT govern** | **whether any effect happens.** `mode` is a run mode of a C9 capability, read by no Action Engine code path and appearing nowhere under `src/action-engine/` | **whether any effect happens**, and anything about an Action Engine capability: `assertCanExecute(principal, definition)` **cannot be called with an AE-CAP key at all**, because no `AiToolDefinition` exists for one | the widget layer's presentation, the C9 run, or the AI-tool surface. `RegisteredActionCapabilityV1` carries no role, no surface, no `riskTier`, no `approvalPolicy` and no `mode` |
@@ -314,7 +330,7 @@ sentence is void.**
 type CapabilitySpace = 'C9' | 'TOOL' | 'AE' | 'CONTROL';
 
 type CapabilityRef =
-  | { space: 'C9';      key: string }          // C9Capability.capabilityKey              — 56
+  | { space: 'C9';      key: string }          // C9Capability.capabilityKey              — 56; 71 once §0.7 F36a registers
   | { space: 'TOOL';    key: string }          // AiToolDefinition.name                   — 47
   | { space: 'AE';      key: string }          // RegisteredActionCapabilityV1.capability — 226
   | { space: 'CONTROL'; key: ControlKey };     // §0.7, closed at 3
@@ -382,7 +398,8 @@ rather than of any map derived from it, so F3 holds. *Status:* `NORMATIVE-PENDIN
 **F24 — the spelling relationships, verified by enumeration.** TOOL-DEF ⊂ C9-CAP **by
 spelling**: all 47 catalogue names are C9-CAP keys. The 9 C9-only extras are
 `c7.measurement.read`, `c8.result.read`, `b35.preview`, `b35.status`, `b35.confirm`,
-`a22.configuration`, `owner_report.status`, `owner_report.download`, `c9.no_action`.
+`a22.configuration`, `owner_report.status`, `owner_report.download`, `c9.no_action`. Once §0.7 F36a
+registers its set, its fifteen keys are C9-only keys as well, twenty-four in all.
 **AE-CAP ∩ (C9-CAP ∪ TOOL-DEF) = ∅** — the two spaces share no spelling. A key that resolves in
 one space and not another therefore cannot be diagnosed by "the key is wrong"; it is **in the
 wrong space**, and the only way to see that is to name the space.
@@ -419,7 +436,11 @@ A missing `CONTROL_FLOOR` row fails the build.
 and over those only.** Its columns — `min_verification`, `consent_class` and `dispatch_is_synchronous` (R3.11.5's flag: false where the owner queues dispatch after `APPROVED`, so a `REQUEST_APPROVAL` or `COMMIT` **whose pairing row names that key as `propose`** refuses until the owner declares it — the flag is read through the propose key, never through the AE key, because this table has no AE rows) — are C9/TOOL
 concepts and have no meaning over AE-CAP. A C9 key with no row fails the build; the 226 AE keys
 are covered instead by F31's totality assertion. Any change to a row's `consent_class` or a
-lowering of a `min_verification` is a contract version bump. *Mechanism:* a totality test
+lowering of a `min_verification` is a contract version bump. Once §0.7 F36a registers its set, the
+table is total over the seventy-one keys that registration leaves, and over those only, with F36a's
+rows for its fifteen. A row for a key of §0.7 F36a, absent from Version 1's table, is that set's
+admission and not a lowering; for every other key the monotonicity test compares against the
+previous contract version's row, and a key with no row there fails it. *Mechanism:* a totality test
 enumerating `C9_CAPABILITIES` against the table, and a monotonicity test. *Evaluation point:*
 `EP-REGISTRY-LOAD`, with the enumeration also asserted at `EP-BUILD`.
 
@@ -568,8 +589,8 @@ control). A **mechanism gap** is "this component is not built yet":
 
 ```ts
 interface MechanismGap {
-  gap_key: `MG-${string}`;      // one per prerequisite row: MG-P01 … MG-P32
-  p_ref: string;                // 'P-01' … 'P-32'
+  gap_key: `MG-${string}`;      // one per prerequisite row: MG-P01 … MG-P34
+  p_ref: string;                // 'P-01' … 'P-34'
   component: string;
   status: '[ABSENT]' | '[EXISTS]' | '[PARTIAL]' | '[UNENFORCEABLE-TODAY]';
   package: string;              // the K-package that builds it
@@ -578,7 +599,7 @@ interface MechanismGap {
 declare const MECHANISM_GAP_LEDGER: Readonly<Record<string, MechanismGap>>;
 ```
 
-At `EP-REGISTRY-LOAD`, over the thirty-two prerequisite rows: (1) every row whose `status` is
+At `EP-REGISTRY-LOAD`, over the thirty-four prerequisite rows: (1) every row whose `status` is
 not `[EXISTS]` resolves in `MECHANISM_GAP_LEDGER` under its own `gap_key`; (2) every
 `NORMATIVE-PENDING` clause appears in **at least one** row's `blocking_rules`, and in **every**
 row whose `p_ref` that clause's status names; (3) the binding is the **pair** `(clause, p_ref)`,
@@ -602,6 +623,121 @@ Verified by enumeration over the working tree at branch
 | the eight reserved consent/identity/erasure names — `consent.pd.grant`, `consent.pd.withdraw`, `consent.marketing.grant`, `consent.marketing.revoke`, `identity.staff.telegram.unbind`, `identity.client.channel.unbind`, `consent.register.export`, `conversation.history.erase` | resolve in **no** space | **Declared GAPs.** Each emits `capability_gap_ref` and **no intent**: `GAP-CONSENT-PD-GRANT`, `GAP-CONSENT-PD-WITHDRAW`, `GAP-CONSENT-MKT-GRANT`, `GAP-CONSENT-MKT-REVOKE`, `GAP-IDENTITY-STAFF-UNBIND`, `GAP-IDENTITY-CLIENT-UNBIND`, `GAP-CONSENT-REGISTER-EXPORT`, `GAP-HISTORY-ERASE` |
 | `consent.*` read owner, `identity.*`, commerce/loyalty **write**, `cutmatch.*` | no | blocked: `GAP-CONSENT-READ`, `GAP-IDENTITY-READ`, `GAP-COMMERCE-GIFT`, `GAP-LOYALTY-REDEEM`, `GAP-TIPS`, `GAP-MEDIA-GENERATION` |
 | every other key cited in §2 — `catalog.services.read`, `catalog.staff.read`, `booking.availability.read`, `booking.group-availability.read`, `appointments.own.{create,reschedule,cancel,list}`, `staff.schedule.{read,own.read,update}`, `operations.journal.read`, `company.business-hours.read`, `clients.*`, `customers.count`, `b35.{preview,status,confirm}`, `c7.measurement.read`, `analytics.team-kpi.read`, `c8.result.read`, `analytics.business.{query,profit}`, `analytics.revenue.forecast`, `analytics.branches.compare`, `reports.recovered`, `expenses.{read,create}`, `clients.dossier.read`, `support.{integration-status.read,contact-admin.request}`, `settings.{read,update}`, `notifications.appointments.{read,update}`, `tasks.create`, `a22.configuration`, `owner_report.{download,status}`, `c9.no_action` | **resolve** | unchanged |
+| the fifteen keys of F36a — `billing.subscription.read`, `tenant.status.read`, `crm.providers.catalog.read`, `staff.journal.own.read`, `team.feed.read`, `calendar.internal.setup.read`, `customers.list.read`, `tenant.client-invite.read`, `inbox.items.read`, `native_feedback.management.read`, `commerce.memberships.own.read`, `referrals.own.read`, `loyalty.own.transactions.read`, `owner_report.list`, `owner_report.snapshot` | **resolve** once F36a registers them | registered as one unit by F36a under owner ruling R-01 |
+
+**F36a — the R-01 read set: the only C9 registry change this contract makes.** `OWNER RULING R-01.`
+This contract registers one enumerated set of read-only C9 keys over canonical owners that already
+exist, and nothing else. *Mechanism:* the registry pin test below. *Evaluation point:* `EP-BUILD`.
+`[NON-NORMATIVE]` The set contains no CRM mutation, no money write, no new business owner, no generic
+CRM write and no capability added only to raise G2, and it does not replace the future
+Conversational CRM Control / YCLIENTS Full API Capability Audit (Decision Sheet 04, ruling R-01).
+
+```ts
+// The R-01 read set. Every row is a C9Capability whose members are the READ defaults of
+// c9.registry.ts's entry() except those named in the row.
+type R01ReadRow = {
+  domains: readonly C9Domain[];
+  ownerKey: string;                       // an existing canonical owner
+  ownerReads: readonly string[];          // existing owner methods; the only calls its projector makes
+  principalKinds: readonly ('USER' | 'CLIENT_CHANNEL')[];
+  featureRefs: readonly string[];
+};
+declare const R01_READ_SET: Readonly<Record<string, R01ReadRow>>;   // exactly the fifteen rows below
+declare const C9_REGISTRY_HASH_R01: string;
+      // the digest of the C9_CAPABILITIES array with R01_READ_SET registered, recorded as a
+      // literal by the registry pin test in the commit that registers the set
+```
+
+| key | domains | ownerKey | ownerReads | principalKinds | featureRefs |
+|---|---|---|---|---|---|
+| `billing.subscription.read` | ADMIN | `BillingService` | `getSubscriptionSummary` | USER | — |
+| `tenant.status.read` | ADMIN | `AdminService` | `getTenant` (session tenant id only) | USER | — |
+| `crm.providers.catalog.read` | ADMIN | `crm-provider-catalog` | `listCrmProviderCapabilities` | USER | — |
+| `staff.journal.own.read` | OCCUPANCY | `CrmService` | `getJournal` with `providerId` pinned to the actor's own active staff binding | USER | — |
+| `team.feed.read` | ADMIN | `TeamCommunicationsService` | `feed` | USER | — |
+| `calendar.internal.setup.read` | OCCUPANCY, ADMIN | `InternalCalendarService` | `getSetup` | USER | — |
+| `customers.list.read` | CLIENT_LIFECYCLE | `CustomersService` | `listCustomers` | USER | `customers.core` |
+| `tenant.client-invite.read` | ADMIN, CLIENT_LIFECYCLE | `TenantPwaService` | `getInstallMetadata` (session tenant slug only) | USER | — |
+| `inbox.items.read` | ADMIN | `InboxService` | `listForUser` (own user only) | USER | — |
+| `native_feedback.management.read` | BUSINESS_INTELLIGENCE, CLIENT_LIFECYCLE | `NativeFeedbackService` | `managementPage`, `readManagement` | USER | — |
+| `commerce.memberships.own.read` | CLIENT_LIFECYCLE | `ClientChannelRuntimeService` | `cabinetProjection` over the live session's own `maya_jwt` channel proof (subscription section only) | USER | — |
+| `referrals.own.read` | CLIENT_LIFECYCLE | `ClientChannelRuntimeService` | `cabinetProjection` over the live session's own `maya_jwt` channel proof (referral counters only) | USER | — |
+| `loyalty.own.transactions.read` | CLIENT_LIFECYCLE | `LoyaltyService` | `listTransactions` | USER | `loyalty` |
+| `owner_report.list` | ADMIN, BUSINESS_INTELLIGENCE | `OwnerReportRun` | `OwnerReportStore.snapshots` | USER | — |
+| `owner_report.snapshot` | ADMIN, BUSINESS_INTELLIGENCE | `OwnerReportRun` | `OwnerReportStore.snapshot` | USER | — |
+
+Their `WIDGET_CAPABILITY_POLICY` rows (§0.7 F28) and `C9_FLOOR_BASELINE` rows (§0.8 F51) are:
+
+| key | `min_verification` | `consent_class` | `dispatch_is_synchronous` | `C9_FLOOR_BASELINE` |
+|---|---|---|---|---|
+| `billing.subscription.read` | `CHANNEL_IDENTITY` | `none` | `true` | `CHANNEL_IDENTITY` |
+| `tenant.status.read` | `CHANNEL_IDENTITY` | `none` | `true` | `CHANNEL_IDENTITY` |
+| `crm.providers.catalog.read` | `CHANNEL_IDENTITY` | `none` | `true` | `CHANNEL_IDENTITY` |
+| `staff.journal.own.read` | `SESSION_VERIFIED` | `personal_data` | `true` | `SESSION_VERIFIED` |
+| `team.feed.read` | `SESSION_VERIFIED` | `personal_data` | `true` | `SESSION_VERIFIED` |
+| `calendar.internal.setup.read` | `CHANNEL_IDENTITY` | `none` | `true` | `CHANNEL_IDENTITY` |
+| `customers.list.read` | `SESSION_VERIFIED` | `personal_data` | `true` | `SESSION_VERIFIED` |
+| `tenant.client-invite.read` | `CHANNEL_IDENTITY` | `none` | `true` | `CHANNEL_IDENTITY` |
+| `inbox.items.read` | `SESSION_VERIFIED` | `personal_data` | `true` | `SESSION_VERIFIED` |
+| `native_feedback.management.read` | `SESSION_VERIFIED` | `personal_data` | `true` | `SESSION_VERIFIED` |
+| `commerce.memberships.own.read` | `SESSION_VERIFIED` | `personal_data` | `true` | `SESSION_VERIFIED` |
+| `referrals.own.read` | `SESSION_VERIFIED` | `personal_data` | `true` | `SESSION_VERIFIED` |
+| `loyalty.own.transactions.read` | `SESSION_VERIFIED` | `personal_data` | `true` | `SESSION_VERIFIED` |
+| `owner_report.list` | `CHANNEL_IDENTITY` | `none` | `true` | `CHANNEL_IDENTITY` |
+| `owner_report.snapshot` | `SESSION_VERIFIED` | `personal_data` | `true` | `SESSION_VERIFIED` |
+
+`min_verification` is `CHANNEL_IDENTITY` for a row whose `consent_class` is `none`, which is the
+derivation for a key with no catalogue entry and mode `READ`, and `SESSION_VERIFIED` for a row whose
+`consent_class` is `personal_data`, as §3.4 R3.4.4 requires of every `personal_data` key.
+`consent_class` applies the owner's group rules to each key's data contract; a row whose key prefix
+and data contract disagree is classified by its data contract. `C9_FLOOR_BASELINE` is `c9Floor` over
+the row (§0.8 F46), so no row of this set is a floor reduction.
+
+**Four fences hold for every F36a key.**
+1. **No catalogue tool.** No F36a key is a `MAYA_AI_TOOL_CATALOG` entry and no catalogue entry
+   changes, so the AI-tool surface is unchanged, and no F36a key is a reader of orchestrator run
+   context. *Mechanism:* the pin test's catalogue clause, plus a build test asserting that neither
+   `C9Sources.contextProjection` nor the orchestrator's source-to-reader map names an F36a key.
+   *Evaluation point:* `EP-BUILD`.
+2. **One owner, own reads.** The registered projector for an F36a key calls only that key's
+   `ownerReads`, under the live principal, and never a write method of the same owner.
+   *Mechanism:* an architecture test over each projector's imports and call sites. *Evaluation
+   point:* `EP-BUILD`.
+3. **The owner keeps its own fence.** The owner's own role fence and actor scoping are evaluated
+   inside `ownerReads` when the projector calls them. A principal outside the owner's named set is
+   refused by the owner, and the body is never offered to the minter. Where that fence is today
+   only a controller role decorator (`billing.subscription.read`, `calendar.internal.setup.read`,
+   `customers.list.read`, `inbox.items.read`, `staff.journal.own.read`), the same named role constant
+   is asserted inside the owner read; no fence is widened or narrowed. *Mechanism:* one fence test per
+   key driving a principal outside the set through the owner read. *Evaluation points:* `EP-COMPOSE`
+   (the refusal), `EP-BUILD` (the test). *Status:* [TO BUILD] for those five keys; the registry pin
+   test runs every fence test, so no F36a key is registered before every fence passes.
+4. **Own visits only.** `staff.journal.own.read` returns only the acting principal's own
+   appointments. Its owner read refuses a principal whose live role is outside the role set the
+   owner's own journal route admits, a principal with no active staff binding, and a foreign
+   provider, whatever else the principal holds, and it pins the provider to the actor's own active
+   staff binding; a salon-wide journal or client-name read is not an F36a key (Decision Sheet 04,
+   ruling R-02). *Mechanism:* the actor-taking owner read and its fence test. *Evaluation points:*
+   `EP-COMPOSE`, `EP-BUILD`. *Status:* [TO BUILD] — `CrmService.getJournal` takes no actor today;
+   the registry pin test runs this fence test.
+
+**The registry pin test.** It asserts that:
+- (i) the sorted `capabilityKey` list equals the fifty-six C9-CAP keys registered before this set
+  (the forty-seven catalogue names and the nine C9-only keys §0.6 F24 names first), plus the
+  fifteen keys above;
+- (ii) each F36a key's full `C9Capability` object equals `entry()`'s `READ` object built from its
+  row;
+- (iii) every previously registered object, `catalog.staff.read` among them, is unchanged;
+- (iv) `MAYA_AI_TOOL_CATALOG` holds the same forty-seven entries, each unchanged;
+- (v) `C9_REGISTRY_HASH === C9_REGISTRY_HASH_R01`;
+- (vi) `WIDGET_CAPABILITY_POLICY` and `C9_FLOOR_BASELINE` carry exactly the rows above for these
+  keys, and their previous rows unchanged;
+- (vii) every fence test of fences 3 and 4 passes.
+
+It lands in the commit that registers the set, as one unit, and replaces FR-16's unchanged-hash
+assertion in that same commit. *Evaluation point:* `EP-BUILD`. *Status:* `[ABSENT]` as a test.
+`[NON-NORMATIVE]` Until that commit the registry holds the fifty-six keys, which is why every count
+this contract gives for the registered set names both figures.
 
 **F37 — the AE-CAP gap keys.** `GAP-APPOINTMENT-DETAIL-COMMIT`
 (`crm.appointment.{attendance,duration,services,fields}.v1` — no propose key exists in any space
@@ -763,7 +899,7 @@ function subjectFloor(ref: CapabilityRef | null): VerificationLevel {
 **F46 — the C9 branch reads C9-CAP's own mandatory fields and calls no throwing accessor.**
 
 ```ts
-// Total over all 56 C9-CAP keys.
+// Total over all 56 C9-CAP keys; 71 once §0.7 F36a registers its set.
 function c9Floor(ref: CapabilityRef): VerificationLevel {
   const cap = c9Registry.tryGet(ref.key);                 // pure lookup over C9_CAPABILITIES
   if (cap === undefined)  return 'STEP_UP_VERIFIED';      // FAIL CLOSED — unregistered
@@ -808,7 +944,9 @@ function C9_RESOURCE_FLOOR(rc: string): VerificationLevel {
 `mode` and `resourceClass` are closed unions in the type system (`c9.registry.ts:56,68`), so both
 tables are total **by type**; the `default:` branches are fail-closed guards against a future
 widening. Observed distributions over the 56, by enumeration: `mode` READ 41 / PROPOSE_ONLY 13 /
-OWNER_HANDOFF 2; `resourceClass` SOURCE_READ 40 / SOURCE_HANDOFF 15 / LOCAL 1. The catalogue's
+OWNER_HANDOFF 2; `resourceClass` SOURCE_READ 40 / SOURCE_HANDOFF 15 / LOCAL 1. Once §0.7 F36a
+registers its fifteen `READ` / `SOURCE_READ` rows, `mode` READ is 56 and `resourceClass` SOURCE_READ
+55. The catalogue's
 47 `riskTier` values are read 35 / medium_write 7 / low_write 3 / high_write 2 — **zero
 `restricted`** — so the risk term never yielded `STEP_UP_VERIFIED` for a catalogue name.
 
@@ -966,12 +1104,12 @@ intent. There is no default-to-zero path and no `undefined.min_verification` rea
 **F51 — no floor may be lowered without changing a reviewed constant.**
 
 ```
-declare const C9_FLOOR_BASELINE: Readonly<Record<string, VerificationLevel>>;   // 56 rows, pinned
+declare const C9_FLOOR_BASELINE: Readonly<Record<string, VerificationLevel>>;   // 56 rows, pinned; 71 once §0.7 F36a registers its set
 ∀ ref ∈ C9-CAP : c9Floor(ref) ≥ C9_FLOOR_BASELINE[ref.key]                      // build assertion
 ∀ ref ∈ C9-CAP : c9Floor(ref) !== 'STEP_UP_VERIFIED' ∨ ref.key ∈ DELIBERATELY_WITHHELD
 ```
 
-`C9_FLOOR_BASELINE` is the vector this contract pins, so no later edit may lower any of the 56
+`C9_FLOOR_BASELINE` is the vector this contract pins, so no later edit may lower any of the 56 (71 once §0.7 F36a registers its set)
 without a reviewed diff. `DELIBERATELY_WITHHELD` is **the empty set in this contract version**,
 so any key evaluating to the fail-closed level fails the build rather than silently withholding.
 *Evaluation point:* `EP-BUILD`.
@@ -979,8 +1117,9 @@ so any key evaluating to the fail-closed level fails the build rather than silen
 **F52 — divergence: one rule, one code.** At Gate 5 the gateway recomputes `verificationFloor()`
 from the live tables and the record, and compares the session against **its own** result, never
 the stored one. **Any** difference between the stored and the recomputed floor — raised or
-lowered — refuses the submission with `SUPERSEDED / policy_floor_changed`, returns a freshly
-composed envelope, and increments `widget_floor_divergence`. The same remedy applies either way,
+lowered — refuses the submission with `SUPERSEDED / policy_floor_changed`, returns the §3.9
+R3.9.4 successor — or the code alone where R3.9.4 issues none — and increments
+`widget_floor_divergence`. The same remedy applies either way,
 and a second branch would be a second code path over a security-critical field. *Mechanism:*
 pure-function re-evaluation plus one comparison. *Evaluation point:* `EP-INGRESS` Gate 5.
 
@@ -1017,10 +1156,12 @@ Here a throwing accessor is correct: Gate 6 is a refusal point and a raise *is* 
 unlike a floor derivation, which must return a level. **The second C9 branch is weaker than the
 first, and saying so is the point:** `c9Capability` refuses an unregistered key, a registry-hash
 mismatch, a domain mismatch and a non-`READ` mode under `BUSINESS_INTELLIGENCE`, but applies
-**no role, surface, feature or risk-tier test**. For the nine non-catalogue keys the role and
-risk fences are their `WIDGET_CAPABILITY_POLICY` row's `min_verification` and `consent_class`,
-carried through `c9Floor` at Gate 5 — a real fence, and a different one. And because
-`WIDGET_CAPABILITY_POLICY` is total over all 56 with a build-time failure on a missing row, the
+**no role, surface, feature or risk-tier test**. For the C9-only keys — nine, and twenty-four once
+§0.7 F36a registers its set — the role and risk fences are their `WIDGET_CAPABILITY_POLICY` row's
+`min_verification` and `consent_class`, carried through `c9Floor` at Gate 5 — a real fence, and a
+different one — and for the fifteen of §0.7 F36a the owner's own role fence also runs inside the
+owner read at `EP-COMPOSE` (F36a, fences 3 and 4). And because `WIDGET_CAPABILITY_POLICY` is total
+over all 56 (71 once F36a registers) with a build-time failure on a missing row, the
 policy-row test above can never fire at runtime: it is a build-time totality restatement, not a
 second runtime check. *Evaluation point:* `EP-INGRESS` Gate 6. *Status:* `NORMATIVE-PENDING` on
 **P-01**, **P-26**, **P-30**.
@@ -1294,8 +1435,9 @@ both approval decisions are structurally unmintable.
 > | `'approval'` (an APPROVAL decision) | `REQUEST_APPROVAL` | the record's **AE** capability equals the `ae` side of that same row — i.e. it equals the `COMMIT`'s own AE key |
 
 The identities differ because only `REFINE`, `DRAFT`, `HANDOFF` and a class-`c` `NAVIGATE` may
-carry a C9 ref while only `COMMIT` and `REQUEST_APPROVAL` may carry an AE ref, and the two spaces
-share no spelling: "equal to the propose key" can never hold for the approval case, so requiring
+carry a C9 ref while only `COMMIT` and `REQUEST_APPROVAL` may carry an AE ref as their `capability`
+(a `HANDOFF` names a C9 or AE destination in `handoff_capability_ref`, which §0.12 F69 admits and
+nothing invokes), and the two spaces share no spelling: "equal to the propose key" can never hold for the approval case, so requiring
 it would refuse every APPROVAL decision unconditionally.
 
 **What the guard holds, in full, in both rows:** a `COMMIT` may not be minted from a bare
@@ -1546,9 +1688,12 @@ values** **must not change the authority decision** for identical authority inpu
 required and neither substitutes for the other. The **replay** varies only `role` across one
 emission fixture and asserts that `verificationFloor`, Gate 6's dispatch and Gate 7's verdict are
 byte-identical. The **absence proof** asserts that no authority function performs a property read
-named `role` at all — which is the stronger of the two, because it refuses the *capability* to
+named `role` on a `WidgetIntent`, a `RenderReceipt`, an `IntentRecord`, an envelope or a submission
+at all — which is the stronger of the two, because it refuses the *capability* to
 branch rather than sampling the branches a fixture happens to take. A presentation field that could
-move an authority decision would not be a presentation field.
+move an authority decision would not be a presentation field. `[NON-NORMATIVE]` The ban covers the
+presentation role only: the live principal's role that §3.9 «Gate 6 in full» (d) tests is read from
+`Membership` inside the request transaction, and is not a presentation role.
 *Evaluated at:* `EP-MINT`, `EP-INGRESS`, and `EP-BUILD` for the invariance replay.
 *Status:* `NORMATIVE-PENDING` on **P-01** — K3 builds the validator, these vectors and F88.2's table together.
 
@@ -1612,7 +1757,9 @@ implementation is expressible by key name alone.
 
 **Required invariance.** Changing a presentation `role` — at either of its two admitted locations —
 **must not change the authority result** for identical authority inputs. The proof is by absence:
-no authority function may perform a property read named `role`, so none can branch on one. A read
+no authority function may perform a property read named `role` on a `WidgetIntent`, a
+`RenderReceipt`, an `IntentRecord`, an envelope or a submission, so none can branch on a
+presentation role (§0.15 F88.1). A read
 introduced later fails the test, which is stronger than replaying fixtures, because it refuses the
 capability to branch rather than sampling the branches taken.
 
@@ -1632,10 +1779,10 @@ running fence.
 |---|---|---|---|---|---|
 | **FR-1** | **WIDGET ≠ BUSINESS OWNER** | — | The effect router is a closed switch whose only write edges are the widget layer's own stores, the three control-registry handlers, and `CanonicalActionIngressService.prepare()`; a build import test asserts the gateway module imports no Prisma model outside the widget layer's own | `EP-INGRESS` Gate 13 | `[ABSENT]` over an `[EXISTS]` ingress — holds fail-closed: no router exists |
 | **FR-2** | **WIDGET STATE ≠ BUSINESS STATE** | — | `WidgetIntentSubmission` has no `body` and no state member, and no canonical table holds a column referencing `widget_id` — asserted by a schema test | `EP-INGRESS` (shape) | `[ABSENT]` — holds fail-closed |
-| **FR-3** | **BUTTON ≠ AUTHORITY** | **AE-CAP** | `CanonicalActionPolicyResolver.resolve()` → `resolveActorPermission()` against `CanonicalActionPolicyDefinitionV1.allowedActorRoles` + `requiredFeatures` + `evaluateTenantAccessState`, over a `Membership` read inside the deciding request; `assertNoCallerAuthority` forbids caller-supplied authority; `authority_hint` is read by no server decision. Gate 6 pre-screens the same key against the allowlist and the same role set, and Gate 14's answer governs any disagreement | `EP-CANONICAL` (binding); `EP-INGRESS` Gate 6 (pre-screen, via `preview()`) | resolver `[EXISTS]`; Gate 6 dispatch `[ABSENT]` — **holds fail-closed today: with no allowlist there is no actuating button** |
+| **FR-3** | **BUTTON ≠ AUTHORITY** | **AE-CAP** | `CanonicalActionPolicyResolver.resolve()` → `resolveActorPermission()` against `CanonicalActionPolicyDefinitionV1.allowedActorRoles` + `requiredFeatures` + `evaluateTenantAccessState`, over a `Membership` read inside the deciding request; `assertNoCallerAuthority` forbids caller-supplied authority; `authority_hint` is read by no server decision. Gate 6 pre-screens the same key against the allowlist and the same role set, and Gate 14's answer governs any disagreement | `EP-CANONICAL` (binding); `EP-INGRESS` Gate 6 (pre-screen, evaluating §3.9 «Gate 6 in full»'s five conditions directly) | resolver `[EXISTS]`; Gate 6 dispatch `[ABSENT]` — **holds fail-closed today: with no allowlist there is no actuating button** |
 | **FR-4** | **CHANNEL IDENTITY ≠ BUSINESS AUTHORITY** | all four | `verificationFloor()` recomputed from the live tables and the record and compared against the server-derived `verification_level`, capped by `profile.max_verification_level`; every actuating class floors at ≥ `BOUND_CLIENT` and every `COMMIT` at ≥ `SESSION_VERIFIED` | `EP-INGRESS` Gate 5 | `[ABSENT]` — holds fail-closed |
 | **FR-5** | **WIDGET EVENT → TYPED INTENT → CURRENT AUTHORITY CHECK → CANONICAL OWNER**, no shortcut | — | One ordered gate pipeline is the single ingress for all five carriers (Step 0), with no branch that skips a gate | `EP-INGRESS` | `[ABSENT]` — holds fail-closed |
-| **FR-6a** | No widget kind confers **consent** | **AE-CAP** | `CONSENT(cap)` ⟹ excluded from `AE_WIDGET_COMMIT_ALLOWLIST`, asserted at start-up; the only widget affordance is a `HANDOFF` of class `s` to `shell.privacy` at `≥ SESSION_VERIFIED`. Backed at the engine by `actorPolicy: 'VERIFIED_CLIENT_CHANNEL'` + `assertConsentChannelBinding` against a live, unrevoked `ClientChannelLink`, and by `allowedSourceTypes: ['legacy_bridge']` for the invalidation capability | `EP-REGISTRY-LOAD` (exclusion), `EP-MINT` (refusal), `EP-CANONICAL` (engine fence) | exclusion `[ABSENT]`; engine fence `[EXISTS]` — holds |
+| **FR-6a** | No widget kind confers **consent** | **AE-CAP** | `CONSENT(cap)` ⟹ excluded from `AE_WIDGET_COMMIT_ALLOWLIST`, asserted at start-up; the only widget affordance is a `HANDOFF` of class `s` to `shell.privacy` at `≥ SESSION_VERIFIED`. Backed at the engine by `actorPolicy: 'VERIFIED_CLIENT_CHANNEL'` + `assertConsentChannelBinding` against a live, unrevoked `ClientChannelLink`, with one exception that no widget path reaches — the staff marketing-revoke branch of §3.5 R3.5.5 (j) — and by `allowedSourceTypes: ['legacy_bridge']` for the invalidation capability | `EP-REGISTRY-LOAD` (exclusion), `EP-MINT` (refusal), `EP-CANONICAL` (engine fence) | exclusion `[ABSENT]`; engine fence `[EXISTS]` — holds; its §3.5 R3.5.5 (j) exception `NORMATIVE-PENDING` on **P-34** |
 | **FR-6b** | No widget kind confers **booking authority** | **AE-CAP** | `BOOKING(cap)` (§0.7 F32); an allowlist row must be `BOOKING_CONFIRMATION` and the `ae` side of exactly one pairing row; plus F74's `confirmation_of_ref` + `produced_by_intent_token_hash` guard | `EP-REGISTRY-LOAD`, `EP-MINT`, `EP-INGRESS` Gate 7 | `[ABSENT]` — holds fail-closed |
 | **FR-6c** | No widget kind confers **marketing permission** | **AE-CAP** | `communication.bulk-campaign.admit.v2` is the **only** `MARKETING_FANOUT` capability on the allowlist, asserted by cardinality at start-up; its own `approvalRequirement: 'REQUIRED'` + `approverPolicyKey: 'tenant-owner'` + `allowedActorRoles: [TENANT_OWNER, BUSINESS_OWNER]` + `actorPolicy: 'REQUIRED'` are the fence. The other three are `GAP-BULK-SEND-DIRECT` | `EP-CANONICAL` (the fence); `EP-REGISTRY-LOAD` (the cardinality assertion) | AE fence `[EXISTS]` and running; cardinality assertion `[ABSENT]` — holds |
 | **FR-6d** | No widget kind confers **finance permission** | **AE-CAP** | `MONEY(cap)` (facet ∪ targetKind — **92 of 226**, against 12 for the `'financial'` token) is a build-time **veto**; the fence is that **no money-mutating capability is on the allowlist at all**, all 92 being gap-keyed, and `PAYMENT_HANDOFF` is gap-blocked with a null `commit_intent` and no button | `EP-REGISTRY-LOAD`, `EP-MINT`, `EP-INGRESS` Gate 7 | `[ABSENT]` — **holds today by absence: no money-mutating capability has a button** |
@@ -1650,7 +1797,7 @@ running fence.
 | **FR-13** | **CHAT-FIRST ≠ CHAT-ONLY** | — | The emission validator requires a non-null `presentation.fullscreen_detail` on every `FORM` body, every settings-class body and every envelope whose `InputSchema` carries a non-closed field | `EP-MINT` | `[ABSENT]` |
 | **FR-14** | **Role removal from UX ≠ role removal from security** | — | Gate 6 reads Membership / Staff / Client binding and never `presentation_mode`, `profile_id` or `a11y_env` | `EP-INGRESS` Gate 6 | policy `[EXISTS]`; wiring `[ABSENT]` |
 | **FR-15** | **One interaction contract across platforms** | — | One gateway, one gate pipeline, one profile registry; a `native-shell` profile that differs from `pwa` in any field other than `native_bridge`, `a11y_env`, `motion`, `text_scale`, `color_scheme`, `viewport_min_css_px` is refused | `EP-REGISTRY-LOAD` | `[ABSENT]` |
-| **FR-16** | **No C9 contract change, no canonical schema change** | — | A build test asserting `C9_REGISTRY_HASH` is unchanged, that `RegisteredActionCapabilityV1` gains no field, and that no canonical table gains a column | `EP-BUILD` | `[ABSENT]` as a test; the property holds — this contract adds no field to either registry |
+| **FR-16** | **No C9 contract change beyond the enumerated R-01 read set, no canonical schema change** | C9-CAP | The registry pin test of §0.7 F36a, plus the build test that `RegisteredActionCapabilityV1` gains no field and no canonical table gains a column | `EP-BUILD` | `[ABSENT]` as a test; this contract adds no field to either registry, and F36a's keys are not registered until that test lands |
 
 **F90 — four honest limits of the AE-CAP role and approver fences, recorded so nobody over-reads
 them.**
@@ -1680,11 +1827,13 @@ them.**
 
 **F91 — no repair in this contract admits a capability, widens an allowlist, or relaxes a veto.
 Two repairs lower a floor, deliberately, and each names its compensating fence. There are
-exactly two, and this table is where a reader auditing the contract finds both.**
+exactly two, and this table is where a reader auditing the contract finds both.** `[NON-NORMATIVE]`
+The one admission this contract makes is not a repair: the enumerated read set of §0.7 F36a is
+admitted by owner ruling R-01 and lowers no existing floor.
 
 | Reduction | What it lowers | Why, and what still holds |
 |---|---|---|
-| **the nine non-catalogue C9-CAP keys** (F46) | from a raise (the borrowed TOOL-DEF term applied to a key the catalogue does not carry) or `STEP_UP_VERIFIED` to: **three** `SOURCE_HANDOFF` keys (`b35.preview`, `b35.confirm`, `a22.configuration`) → `SESSION_VERIFIED`; **five** `SOURCE_READ` keys (`c7.measurement.read`, `c8.result.read`, `b35.status`, `owner_report.status`, `owner_report.download`) → whatever their own `WIDGET_CAPABILITY_POLICY` row and consent class require; and `c9.no_action` → `ANONYMOUS` | `STEP_UP_VERIFIED` is **unreachable**, so the prior value was not a fence but a permanent withholding that made `STRATEGY_OPTIONS`, `CLIENT_LIST`, `METRIC`, `CHART`, `PROGRESS` and `ARTIFACT` unemittable — `c9.no_action` is `STRATEGY_OPTIONS`'s mandatory "do nothing" option, and a contract that makes declining harder than proceeding is inverted. What still fences these nine: their `WIDGET_CAPABILITY_POLICY` row and `CONSENT_CLASS_FLOOR`, carried through `c9Floor` at Gate 5 on **every** path — and, **on the run-bearing path only AND only where the intent's effect is not `HANDOFF`**, Gate 6's second C9 branch with `c9Capability`'s own admission (F54 scopes Gate 6 by effect, and F55 withdraws that admission on both run-less mint paths). **`resourceClass` does not determine effect class**: the same key may be the subject of a `REFINE` or a `DRAFT`, so no effect may be inferred from it. The residual fence splits by exemption rather than conjoining terms that never all hold at once: **for a `HANDOFF` that is not `FLOOR_EXEMPT`** it is `C9_MODE_FLOOR`/`C9_RESOURCE_FLOOR` of `SESSION_VERIFIED` at Gate 5 **together with** `targetFloor('s')`; **for a `FLOOR_EXEMPT` class-`s` `HANDOFF`** both are waived and the fence is `SENSITIVE_DEST` plus the landing surface's own ingress. Within `verificationFloor`, `SENSITIVE_DEST` participates in exactly one place — `FLOOR_EXEMPT`'s fourth clause — so there and only there it and the two floors are alternatives rather than a conjunction. It is evaluated **again**, independently, at the emission validator's INV-8′ and at Gate 6, and those evaluations are unaffected by this reduction. The bulk-send path additionally keeps `AE_FAMILY_FLOOR['marketing_fanout'] = STEP_UP_VERIFIED` and `communication.bulk-campaign.admit.v2`'s owner-only, approval-bound AE fence, which is `[EXISTS]` and running today: **the proposal becomes visible; the send does not** |
+| **the nine non-catalogue C9-CAP keys** (F46) | from a raise (the borrowed TOOL-DEF term applied to a key the catalogue does not carry) or `STEP_UP_VERIFIED` to: **three** `SOURCE_HANDOFF` keys (`b35.preview`, `b35.confirm`, `a22.configuration`) → `SESSION_VERIFIED`; **five** `SOURCE_READ` keys (`c7.measurement.read`, `c8.result.read`, `b35.status`, `owner_report.status`, `owner_report.download`) → whatever their own `WIDGET_CAPABILITY_POLICY` row and consent class require; and `c9.no_action` → `ANONYMOUS` | `STEP_UP_VERIFIED` is **unreachable**, so the prior value was not a fence but a permanent withholding that made `STRATEGY_OPTIONS`, `CLIENT_LIST`, `METRIC`, `CHART`, `PROGRESS` and `ARTIFACT` unemittable — `c9.no_action` is `STRATEGY_OPTIONS`'s mandatory "do nothing" option, and a contract that makes declining harder than proceeding is inverted. What still fences these nine: their `WIDGET_CAPABILITY_POLICY` row and `CONSENT_CLASS_FLOOR`, carried through `c9Floor` at Gate 5 on **every** path — and, **on the run-bearing path only AND only where the intent's effect is not `HANDOFF`**, Gate 6's second C9 branch with `c9Capability`'s own admission (F54 scopes Gate 6 by effect, and F55 withdraws that admission on both run-less mint paths). **`resourceClass` does not determine effect class**: the same key may be the subject of a `REFINE` or a `DRAFT`, so no effect may be inferred from it. The residual fence splits by exemption rather than conjoining terms that never all hold at once: **for a `HANDOFF` that is not `FLOOR_EXEMPT`** it is `C9_MODE_FLOOR`/`C9_RESOURCE_FLOOR` of `SESSION_VERIFIED` at Gate 5 **together with** `targetFloor('s')`; **for a `FLOOR_EXEMPT` class-`s` `HANDOFF`** both are waived and the fence is `SENSITIVE_DEST` plus the landing surface's own ingress. Within `verificationFloor`, `SENSITIVE_DEST` participates in exactly one place — `FLOOR_EXEMPT`'s fourth clause — so there and only there it and the two floors are alternatives rather than a conjunction. It is evaluated **again**, independently, at the emission validator's INV-8′ — under R3.5.1's `BOOKING_OWNER_PROPOSAL` exception, which exempts no intent from `SENSITIVE_DEST` itself — and at Gate 6, in its `HANDOFF` destination branch only (§3.9 «Gate 6 in full»); those evaluations are unaffected by this reduction. The bulk-send path additionally keeps `AE_FAMILY_FLOOR['marketing_fanout'] = STEP_UP_VERIFIED` and `communication.bulk-campaign.admit.v2`'s owner-only, approval-bound AE fence, which is `[EXISTS]` and running today: **the proposal becomes visible; the send does not**. The fifteen `SOURCE_READ` keys of §0.7 F36a, once registered, take the same `c9Floor` branch; none had a prior floor, so none is a reduction, and each takes what its own F36a policy row and consent class require |
 | **the five `FLOOR_EXEMPT` intents** (F48–F49) | `EFFECT_FLOOR`, `KIND_FLOOR` and `targetFloor` waived for all five; `subjectFloor` waived for the **two class-`s` `HANDOFF`s only**, which floor at `ANONYMOUS`. The escape verb, `discard_intent` and the no-action option keep their own `subjectFloor` | The set is derived, not listed, and its build vetoes make an actuating intent unconstructible: `COMMIT` and `DRAFT` excluded by effect; `REQUEST_APPROVAL` and `REFINE` excluded over AE and C9 respectively by the capability clause, which admits only a `CONTROL` ref or the unique `resourceClass: 'LOCAL'` C9 row; and a `priority: 0` `CONTROL` may only be `control.widget.dismiss`. `control.run.cancel` retains `CONTROL_FLOOR: BOUND_CLIENT` even at `priority: 0`, and `SENSITIVE_DEST` excludes consent and identity destinations outright. The residual is `targetFloor('s')` on a handoff, and it is tolerable for a stated reason: a `HANDOFF` never invokes its destination capability, and the shell routes re-check the principal proof at `EP-FETCH` |
 
 **A floor raise is a defect too, and one was removed.** The first formulation of the C9 branch
@@ -1695,8 +1844,8 @@ Gate 6. An unasked-for raise withholds capability while looking like caution.
 
 ### 0.18 Prerequisites and what "pending" means
 
-**F92 — thirty-two prerequisite rows carry the build status of every mechanism this contract
-names**, each with a `MG-P01` … `MG-P32` key in `MECHANISM_GAP_LEDGER`. A row leaves
+**F92 — thirty-four prerequisite rows carry the build status of every mechanism this contract
+names**, each with a `MG-P01` … `MG-P34` key in `MECHANISM_GAP_LEDGER`. A row leaves
 `NORMATIVE-PENDING` when, **and only when**, (a) the named mechanism exists at a stated path,
 (b) `EP-BUILD` carries a test that fails if it is removed, and (c) the corresponding gap key is
 withdrawn from the capability-gap ledger in the same commit. Withdrawing a gap key without (a)
@@ -1803,10 +1952,10 @@ about the running system. No implementation may cite one as an enforcing mechani
     — read through the one declared non-throwing accessor, with a fail-closed default that makes
     an unregistered C9 key satisfy the predicate. The emission validator refuses any intent whose
     `subjectCapability(i)` satisfies `RUN_OPENING` on an envelope whose `origin.trigger` is
-    `'proactive'`. Membership is **15 of 56** (13 `PROPOSE_ONLY` + 2 `OWNER_HANDOFF`), enumerated
+    `'proactive'`. Membership is **15 of 56**, and 15 of 71 once §0.7 F36a registers its `READ` keys (13 `PROPOSE_ONLY` + 2 `OWNER_HANDOFF`), enumerated
     in process; `READ` keys are provenance, and a proactive envelope legitimately names
     `c7.measurement.read` as the source of a metric. *Evaluation point:* `EP-MINT`. **No field is
-    added, so `C9_REGISTRY_HASH` is unchanged.**
+    added, so this rule leaves `C9_REGISTRY_HASH` unchanged.**
 
 ### 0.20 `[NON-NORMATIVE]` Repository observations
 
@@ -1904,8 +2053,9 @@ registered capabilities carry the token.*
 6. **Renderer sandboxing is a convention.** The shipping frontend is a hand-edited single file
    with no sources and no build script in the repository, so the import-graph allowlist behind
    FR-1's CI test cannot run there. Until a build exists, those are discouraged, not proven.
-7. **Gate 10 is a shadow gate.** "Three front doors, one function" is measured, not enforced,
-   until a promotion criterion is set.
+7. **Gate 10's criterion is set (owner decision DS-02, 2026-09-16; §3.9 «Gate 10 in full»).** Within
+   one effect class and one canonical owner, "three front doors, one function" remains measured,
+   not enforced.
 8. **`GAP-ATTENDANCE-CONFIRM` remains open**: «клиент подтвердил» is not a claim this system can
    make, and no reminder body may imply it.
 ---
@@ -2151,7 +2301,7 @@ type ReasonCode =
 
 **C4 — UNKNOWN is a statement, not a failure.** `label` MUST NOT match `/ошибк|error|fail|сбо[йя]|недоступн.*попроб/i`. No renderer may bind a non-`KNOWN` state to a `danger`/`destructive`/`alert` theme token, an error icon, `role="alert"`, or an automatic retry. The permitted rendering is neutral-dim plus the `next_intent_ref` affordance. A non-`KNOWN` Cell blocks only its dependents — one report section, one chart series, one row — never the envelope. *Mechanisms:* the label lint at `EP-MINT` and `EP-BUILD`; a renderer conformance suite that asserts the five-branch rendering and the absence of error tokens for non-`KNOWN` states. *Evaluation points:* `EP-MINT`, `EP-BUILD` (the conformance suite, run over fixtures).
 
-**C5 — the remedy is named or the gap is declared.** For `state ∈ {NOT_MEASURED, UNAVAILABLE}`: if the canon contains a capability that could resolve the unknown for this principal, `next_intent_ref` MUST name an intent present in this envelope; if it does not, `next_intent_ref` MUST be `null` **and** the envelope MUST carry a `Limitation` whose `capability_gap_ref` is non-null. *Mechanism:* a validator cross-check against the canon and against the emitted intents' `intent_ref`s. *Evaluation point:* `EP-MINT`. `[NON-NORMATIVE]` This is where "no button for a capability with no owner" stops being a convention: the Cell either points at a real intent or forces the gap onto the record.
+**C5 — the remedy is named or the gap is declared, and a permission mask is neither.** For `state ∈ {NOT_MEASURED, UNAVAILABLE}` with `reason_code !== 'PERMISSION'`: if the canon contains a capability that could resolve the unknown for this principal, `next_intent_ref` MUST name an intent present in this envelope; if it does not, `next_intent_ref` MUST be `null` **and** the envelope MUST carry a `Limitation` whose `capability_gap_ref` is non-null. For a Cell whose `reason_code === 'PERMISSION'` — a value or control masked from this principal by authority (§2 K18, §2.6.6 SCHED.4) — `next_intent_ref` MUST be `null` and the Cell requires no `Limitation`: a canonical owner exists, so no `capability_gap_ref` is minted on its account (§1.6.7). *Mechanism:* a validator cross-check against the canon and against the emitted intents' `intent_ref`s, with the `PERMISSION` branch keyed on `reason_code`. *Evaluation point:* `EP-MINT`. `[NON-NORMATIVE]` This is where "no button for a capability with no owner" stops being a convention: the Cell either points at a real intent or forces the gap onto the record.
 
 **C6 — renderer conformance.** A renderer with fewer than five branches per Cell fails the conformance suite. *Evaluation point:* `EP-BUILD` (fixture-driven render of one envelope per kind per profile).
 
@@ -2411,7 +2561,7 @@ The first edition let the emitter author the floor under the name `required_veri
 
 **K9 — every intent carries a floor, including `HANDOFF`.** `verification_floor` is an intent-level field present on **every** `WidgetIntent` regardless of effect class, not a member of an optional confirmation object. A `HANDOFF` intent MUST carry a non-null `handoff_capability_ref` so that `verificationFloor` and the never-chat-actuated predicate both have a key to evaluate. *Mechanism:* the intent shape (§3.1) plus the derivation above. *Evaluation point:* `EP-MINT`. `[NON-NORMATIVE]` Without this, the floor comparison and the never-chat-actuated list are predicates that cannot become true for exactly the intents that carry consent and identity acts — the first edition's structural defect #1.
 
-**K10 — computed at mint, recomputed at the gateway, hinted by nobody.** The minter writes `verification_floor = verificationFloor(...)`. At `EP-INGRESS` Gate 5 the gateway recomputes it from the `IntentRecord` and the live tables and compares the session against **its own** result; it never reads the stored value for a decision. **Any** difference between the stored and the recomputed floor — raised or lowered — refuses the submission with `SUPERSEDED / policy_floor_changed`, returns a freshly composed envelope, and increments `widget_floor_divergence`. *Mechanisms:* E5 (no composer field to supply it); pure-function re-evaluation plus one comparison. *Evaluation points:* `EP-MINT`, `EP-INGRESS` Gate 5.
+**K10 — computed at mint, recomputed at the gateway, hinted by nobody.** The minter writes `verification_floor = verificationFloor(...)`. At `EP-INGRESS` Gate 5 the gateway recomputes it from the `IntentRecord` and the live tables and compares the session against **its own** result; it never reads the stored value for a decision. **Any** difference between the stored and the recomputed floor — raised or lowered — refuses the submission with `SUPERSEDED / policy_floor_changed`, returns the §3.9 R3.9.4 successor — or the code alone where R3.9.4 issues none — and increments `widget_floor_divergence`. *Mechanisms:* E5 (no composer field to supply it); pure-function re-evaluation plus one comparison. *Evaluation points:* `EP-MINT`, `EP-INGRESS` Gate 5.
 
 **K11 — table totality and monotonicity.** `WIDGET_CAPABILITY_POLICY` MUST have a row for every key the derivation can be asked about; a key with no row makes the build fail, and at runtime an unmapped key refuses emission rather than defaulting. A floor may never be **lowered** except by a version bump of this contract carrying a recorded owner decision. *Mechanisms:* an `EP-BUILD` totality test over the canon; an `EP-BUILD` monotonicity test comparing the table against the previous contract version's. `[NON-NORMATIVE]` The totality test is what keeps a newly registered consent-bearing capability from arriving with an implicit floor of zero.
 
@@ -2705,6 +2855,10 @@ declare function ownerClassKeys(kind: WidgetKind): ReadonlySet<CapabilityRef>;
        // the registry keys KIND_REGISTRY[kind].owner_class resolves to, at EP-REGISTRY-LOAD.
        // Total over WidgetKind: 'NONE' resolves to the empty set and 'INHERITED' to the keys
        // the intent's own capability names, so neither is a partial branch.
+
+declare function allowedKinds(capability: CapabilityRef): ReadonlySet<WidgetKind>;
+       // the inverse of ownerClassKeys: { kind ∈ WidgetKind : capability ∈ ownerClassKeys(kind) },
+       // derived at EP-REGISTRY-LOAD.
 ```
 
 At `EP-REGISTRY-LOAD`, or the process does not start: every `OwnerClass` member other than
@@ -2712,7 +2866,9 @@ At `EP-REGISTRY-LOAD`, or the process does not start: every `OwnerClass` member 
 and every `KindRule.owner_class` is a member of the union above. A kind whose owner class
 resolves to the empty set is `emittable: false` and emits a `LIMITATION` carrying the mapped
 `capability_gap_ref` — which is exactly how the five blocked kinds of §2.7 are blocked, by
-derivation rather than by a list.
+derivation rather than by a list. `allowedKinds` is derived from `ownerClassKeys` at the same point
+and is its inverse; nothing else populates it. *Mechanism:* the derivation over `KIND_REGISTRY`.
+*Evaluation point:* `EP-REGISTRY-LOAD`.
 
 `Owner class` resolves to a set of C9 capability-registry keys at REGISTRY LOAD. `Ceiling` is the derived phrase of K3, computed over the ordered members alone. `FS` is the fullscreen rule. `Cap` is the density cap that forces escalation. `CONTROL` is a permitted effect on every row and appears in none of the ceilings.
 
@@ -2950,7 +3106,7 @@ interface BookingConfirmationBody {
 
 **Ceiling** COMMIT. **Owner** `BOOKING_OWNER` → `appointments.own.create` / `.reschedule` / `.cancel`; the provider owner alone touches YClients, and a reschedule uses the non-destructive `PUT record/{company}/{id}`. **Fullscreen** OPTIONAL (`audit`, `correction`). **`role_hint`** `region`. **Interactive paths** `commit_intent`, `amend_intents[]`, `dismiss_intent`. **Text** headline = a one-sentence statement of the subject; order `lead → items → totals → policy → readback → options → as_of → expiry`; `readback_template` REQUIRED; parity `full`. **Expiry ceiling** 120 s, and never longer than the canonical draft's hold TTL.
 
-- **BOOK.1 — every booking effect has exactly one canonical confirmation, cancellation included.** `confirmation_subject` discriminates the three effects. The subject→key mapping is **`AE_WIDGET_COMMIT_ALLOWLIST`'s own booking rows** (§0.7 F30), not a second table: `confirmation_subject` selects among `crm.appointment.{create,reschedule,cancel}.v1`, which are exactly the three allowlisted `BOOKING_CONFIRMATION` rows (F34), and `commit_intent.capability` must equal the one the subject selects. A second table would be a second allowlist, and `row XOR gap` (F31) is total over AE-CAP precisely so that no second one exists. *Mechanism:* MINT/INTENT compares the minted capability against the table, and INGRESS Gate 7 re-derives the subject from the submitted capability against the widget layer's own `IntentRecord` and refuses when the emission's `confirmation_subject` disagrees. *Evaluated at:* MINT/INTENT and INGRESS Gate 7.
+- **BOOK.1 — every booking effect has exactly one canonical confirmation, cancellation included.** `confirmation_subject` discriminates the three effects. The subject→key mapping is **`AE_WIDGET_COMMIT_ALLOWLIST`'s own booking rows** (§0.7 F30), not a second table: `confirmation_subject` selects among `crm.appointment.{create,reschedule,cancel}.v1`, which are exactly the three allowlisted `BOOKING_CONFIRMATION` rows (F34), and `commit_intent.capability` must equal the one the subject selects. A second table would be a second allowlist, and `row XOR gap` (F31) is total over AE-CAP precisely so that no second one exists. *Mechanism:* MINT/INTENT compares the minted capability against the table, and INGRESS Gate 7 re-derives the subject from `subjectCapability(record)` through the same three allowlist rows and refuses unless it equals `IntentRecord.confirmation_subject` (§3.7) — an `AUDIT_RETAINED` member, so the check reads no body field (§0.4 F15). *Evaluated at:* MINT/INTENT and INGRESS Gate 7. *Status:* the Gate 7 half is `NORMATIVE-PENDING` on **P-30**; until `confirmation_subject` is stored, Gate 7 refuses every `BOOKING_CONFIRMATION` `COMMIT`.
 - **BOOK.2 — the required confirmation kind is a table lookup, and this kind claims no derivation of its own.** `requiredConfirmationKind(ref)` is declared once, in §0.13 F72, and is **not restated here**: it refuses a non-`AE` ref outright, then reads `AE_WIDGET_COMMIT_ALLOWLIST[ref.key]` and calls `refuseMint('capability_not_allowlisted')` when there is no row. It has **no default branch**, so an un-allowlisted key resolves to no kind at all rather than to `SETTINGS_DRAFT`. What §2.6.5 owns is the consequence for this body: a `COMMIT` minted onto a kind other than the row's `confirmation_kind` is refused. *Mechanism:* §0.13 F72's lookup. *Evaluated at:* `EP-MINT` and `EP-INGRESS` Gate 7.
 
   [NON-NORMATIVE] The earlier form of this clause read the capability's own facets — financial ⟹ `PAYMENT_HANDOFF`, `targetKind: 'appointment'` ⟹ `BOOKING_CONFIRMATION`, everything else ⟹ `SETTINGS_DRAFT`. Measured against the registry, that chain routes **118 of 226 capabilities — 94 of the 105 widget-reachable — onto `SETTINGS_DRAFT`, a COMMIT-bearing kind, by falling off the end of a two-test chain**. A fence whose negative branch renders a commit button is not a fence, which is why F72 has no default branch.
@@ -3394,7 +3550,7 @@ interface PaymentHandoffBody {
   [NON-NORMATIVE] Modelled as `HANDOFF`, this would be a button reaching an external payment provider with no capability, no Action Engine, no idempotency key, no receipt and no canonical owner — and it would pass every invariant *because* handoff intents are capability-null, which makes the registry check and the no-owner rule both vacuous. The project's documented double-payment incident is the exact failure an idempotency-free provider handoff reproduces.
 - **PAY.2 — the redirect is a first-party route, issued after the commit.** `continue_intent` may exist only after a receipt exists; its target is the closed shell route `{ route: 'shell.pay', param: <session_ref> }` — one opaque, server-minted parameter, a first-party route with a `SESSION_VERIFIED` floor that performs the redirect server-side. No body field, no intent target and no receipt field may contain a provider URL, a checkout id, a card token, a bridge method name or a native-scheme URL. *Mechanism:* the body schema contains no URL-typed field; `IntentTarget.ref` is validated against the closed shell-route table, which admits a parameter on exactly two routes and null elsewhere; K8's structural validator refuses the forbidden keys at any depth. *Evaluated at:* MINT/VALIDATE and on every submission.
 - **PAY.3 — the amount is never client-supplied.** `amount_total` and every `lines[].amount` are `Measure`s read from the commerce owner; `commit_intent.input_schema === null` (K12); the amount travels as a frozen noun resolved by a fresh read at the INPUT VALIDATION gate, and a divergence returns `SUPERSEDED` with a rendered diff. *Evaluated at:* MINT/INTENT and the INPUT VALIDATION gate.
-- **PAY.4 — until the owners are registered, this kind emits a gap and no button.** `commit_allowed` is derived at REGISTRY LOAD from `permitted_effects` and the owner-class resolution, so it is false while no payment-class owner is registered; while it is false, every emission carries `capability_gap_ref` (`GAP-COMMERCE-GIFT`, `GAP-LOYALTY-REDEEM`, or the tips gap), a null `commit_intent` and a null `continue_intent`, and states in text that the purchase cannot be completed in the product yet. A gap-blocked commit renders as prose, never as a disabled-styled button. *Mechanism:* K20's derivation plus a conditional schema clause. *Evaluated at:* REGISTRY LOAD, MINT/COMPOSE and MINT/VALIDATE.
+- **PAY.4 — until the owners are registered, this kind emits a gap and no button.** `commit_allowed` is derived at REGISTRY LOAD from `permitted_effects` alone (§0.9 F57, §2.4 K11); what is false while no payment-class owner is registered is K20's `emittable`, and while no payment-class owner is registered, every emission carries `capability_gap_ref` (`GAP-COMMERCE-GIFT`, `GAP-LOYALTY-REDEEM`, or the tips gap), a null `commit_intent` and a null `continue_intent`, and states in text that the purchase cannot be completed in the product yet. A gap-blocked commit renders as prose, never as a disabled-styled button. *Mechanism:* K20's derivation plus a conditional schema clause. *Evaluated at:* REGISTRY LOAD, MINT/COMPOSE and MINT/VALIDATE.
 - **PAY.5 — tips are not an exception.** A tip is a payment-class capability like any other and follows PAY.1 through PAY.4. There is no bridge-initiated payment path, and no field in which a bridge method could be named. *Evaluated at:* MINT/VALIDATE (K8).
 
 ---
@@ -3670,8 +3826,10 @@ validator runs over the record). *Status:* [TO BUILD].
 effect classes.** Every capability-valued member of an intent, of an `IntentRecord`, of a
 class-`c` target and of every row key of `WIDGET_CAPABILITY_POLICY` is a `CapabilityRef`,
 never a bare string. Only `REFINE`, `DRAFT`, `HANDOFF` and a class-`c` `NAVIGATE` may carry a
-`C9` ref; only `COMMIT` and `REQUEST_APPROVAL` may carry an `AE` ref; only `CONTROL` may carry
-a `CONTROL` ref; **no intent of any effect class may carry a `TOOL` ref.**
+`C9` ref; only `COMMIT` and `REQUEST_APPROVAL` may carry an `AE` ref in `capability`, and a
+`HANDOFF` may also name an `AE` destination in `handoff_capability_ref`, referenced and never
+invoked (§0.12 F69); only `CONTROL` may carry a `CONTROL` ref; **no intent of any effect class may
+carry a `TOOL` ref.**
 *Mechanism:* the discriminated `CapabilityRef` union, plus `validateEnvelope`'s per-effect
 membership check against `C9_CAPABILITIES`, `ActionCapabilityRegistry` and `CONTROL_REGISTRY`
 respectively; a source test asserts that no member named `capability` or `handoff_capability_ref` on `WidgetIntent`, `IntentRecord` or `IntentTarget`, and no `WIDGET_CAPABILITY_POLICY` key, is typed `string` — narrower than «zero `capability: string` in the widget layer», which would also condemn `AE_WIDGET_COMMIT_ALLOWLIST`'s own string-keyed rows.
@@ -3808,8 +3966,9 @@ gateway wiring [TO BUILD].
 version, so this rule is defence in depth over a class nothing may currently emit.
 
 **R3.3.3 — a consent-bearing or identity-binding handoff may use `s` only.** If
-`SENSITIVE_DEST(subjectCapability(i))` (§0.8 F48) then `i.effect === 'HANDOFF'` and
-`i.target.class === 's'`. *Mechanism:* emission validator. *Evaluated at:* `EP-MINT`.
+`SENSITIVE_DEST(subjectCapability(i))` (§0.8 F48) and not `BOOKING_OWNER_PROPOSAL(i)`
+(§3.5 R3.5.1), then `i.effect === 'HANDOFF'` and `i.target.class === 's'`. *Mechanism:*
+emission validator. *Evaluated at:* `EP-MINT`.
 *Status:* [TO BUILD]. [NON-NORMATIVE] `s` is the only class with a stated
 `SESSION_VERIFIED` floor and the only class that is a destination rather than a
 re-resolution, which is why the 152-FZ acts land there and nowhere else.
@@ -3862,8 +4021,8 @@ passed), plus a CI test asserting no assignment to `verification_floor` outside
 the gateway recomputes `verificationFloor()` from the **live** registry and policy tables and
 compares the session against **its own** result, never the stored one. Any difference between
 the stored floor and the recomputed floor — raised or lowered — refuses the submission
-`SUPERSEDED / policy_floor_changed`, returns a freshly composed envelope, and increments
-`widget_floor_divergence`. *Mechanism:* pure-function re-evaluation plus one comparison against
+`SUPERSEDED / policy_floor_changed`, returns the §3.9 R3.9.4 successor — or the code alone where
+R3.9.4 issues none — and increments `widget_floor_divergence`. *Mechanism:* pure-function re-evaluation plus one comparison against
 `AiToolRegistryService`, `ActionCapabilityRegistry` and the widget capability policy table.
 *Evaluated at:* `EP-INGRESS` Gate 5. *Status:* [TO BUILD].
 [NON-NORMATIVE] The same remedy applies either way, and a second branch would be a second code
@@ -3872,7 +4031,7 @@ already in flight, including tokens sitting in a Telegram message from an hour a
 
 **R3.4.3 — the policy table is total, and unmapped fails closed in two independent ways.**
 `WIDGET_CAPABILITY_POLICY` is keyed on `CapabilityRef` and is total over `C9_CAPABILITIES`
-(56 rows); a key with no row fails the build, and a lowered row without a contract version bump
+(56 rows; 71 once §0.7 F36a registers its set); a key with no row fails the build, and a lowered row without a contract version bump
 fails the monotonicity test. Totality over AE-CAP is carried instead by
 `AE_WIDGET_COMMIT_ALLOWLIST` ∪ `AE_CAPABILITY_GAP_LEDGER`, jointly total over all 226
 registered capabilities. At runtime an unmapped ref yields `STEP_UP_VERIFIED`, which is
@@ -3906,7 +4065,8 @@ is present at `SESSION_VERIFIED` or higher, plus the start-up allowlist-exclusio
 *Evaluated at:* `EP-BUILD`, `EP-REGISTRY-LOAD`, and at every `subjectFloor()` call.
 *Status:* policy table [TO BUILD]; the engine-side backing fence — `actorPolicy:
 'VERIFIED_CLIENT_CHANNEL'` with `assertConsentChannelBinding` against a live, unrevoked
-`ClientChannelLink` — [EXISTS] at `action-engine.policy-resolver.ts`.
+`ClientChannelLink` — [EXISTS] at `action-engine.policy-resolver.ts`; its one exception, the staff
+marketing-revoke branch of §3.5 R3.5.5 (j), which no widget path reaches, is `NORMATIVE-PENDING` on **P-34**.
 
 **R3.4.5 — how a shortfall behaves depends on the effect class, and is never an error.**
 At Gate 5, with `v = authority.verification_level` (server-derived) and
@@ -3993,10 +4153,30 @@ const NEVER_CHAT_ACTUATED = [
 ] as const;
 ```
 
-**R3.5.1 — a consent or identity subject admits a class-`s` handoff and nothing else.** For
-every minted intent:
+```ts
+const BOOKING_OWNER_KEYS = [
+  'appointments.own.create', 'appointments.own.reschedule', 'appointments.own.cancel',
+] as const;
 
-> `SENSITIVE_DEST(subjectCapability(i))  ⟹  i.effect === 'HANDOFF' ∧ i.target.class === 's' ∧ i.verification_floor ≥ 'SESSION_VERIFIED'`
+function BOOKING_OWNER_PROPOSAL(i: FloorSubject): boolean {
+  const s = subjectCapability(i);
+  return (i.effect === 'REFINE' || i.effect === 'DRAFT')
+      && s !== null && s.space === 'C9'
+      && (BOOKING_OWNER_KEYS as readonly string[]).includes(s.key);
+}
+```
+
+`BOOKING_OWNER_KEYS` is the key set of the `BOOKING_OWNER` owner class and nothing else. *Mechanism:* a start-up
+assertion that `{ { space: 'C9', key: k } : k ∈ BOOKING_OWNER_KEYS }` equals `ownerClassKeys('BOOKING_CONFIRMATION')`
+(§2.4 row 5) and that every member resolves in `C9_CAPABILITIES`; the process does not start otherwise.
+*Evaluated at:* `EP-REGISTRY-LOAD`. *Status:* [TO BUILD].
+
+**R3.5.1 — a consent or identity subject admits a class-`s` handoff and nothing else, except a `REFINE` or `DRAFT` on
+the booking owner's own keys.** For every minted intent:
+
+> `SENSITIVE_DEST(subjectCapability(i)) ∧ ¬BOOKING_OWNER_PROPOSAL(i)  ⟹  i.effect === 'HANDOFF' ∧ i.target.class === 's' ∧ i.verification_floor ≥ 'SESSION_VERIFIED'`
+>
+> `BOOKING_OWNER_PROPOSAL(i)  ⟹  i.verification_floor ≥ 'SESSION_VERIFIED'`
 
 *Mechanism:* emission validator over the fully-typed intent; the predicate is total because
 `subjectCapability` is non-null for every effect class that can actuate (all five require
@@ -4006,6 +4186,17 @@ spaces by type and fails closed on an unregistered key, an unclassified row and 
 The residual null cases are `NONE` (no token, no submission) and `NAVIGATE` to
 `w`/`i`/`s`/`detail`, none of which has an edge to a capability at Gate 13.
 *Evaluated at:* `EP-MINT` (emission, and again over the minted record). *Status:* [TO BUILD].
+
+The exception moves no floor and exempts nothing from `SENSITIVE_DEST`: §0.8 F48's `SENSITIVE_DEST` and `FLOOR_EXEMPT`
+are unchanged, the three keys keep `consent_class: 'personal_data'`, and the second implication asserts at emission the
+`SESSION_VERIFIED` floor their `CONSENT_CLASS_FLOOR` and `C9_MODE_FLOOR` terms already derive. It admits no other
+effect — a class-`c` `NAVIGATE`, a `HANDOFF` to a non-`s` target, `CONTROL`, `REQUEST_APPROVAL` or `COMMIT` on these
+keys still falls under the first implication — and no other key. *Mechanism:* the same emission validator, with
+`BOOKING_OWNER_PROPOSAL` and `BOOKING_OWNER_KEYS` (above) as its only exception. *Evaluated at:* `EP-MINT` (emission,
+and again over the minted record). *Status:* [TO BUILD].
+[NON-NORMATIVE] §0.13 F78, §3.10 R3.10.6, §2.6.2 SERVICE.1, §2.6.6 SCHED.2 and §2.6.5 BOOK.3 require exactly these
+`REFINE`/`DRAFT` intents; without the exception they were unmintable under rule 5. Owner decision: Decision Sheet 04,
+Block A, A1.
 
 [NON-NORMATIVE] Two fields make both predicates total: a mandatory non-null
 `handoff_capability_ref`, which is a registry key that is referenced and never invoked, and a
@@ -4025,8 +4216,8 @@ refused at Gate 5 on any channel that cannot establish a first-party session.
 (derivation), `EP-REGISTRY-LOAD` (exclusion) and `EP-INGRESS` Gate 5 (re-derivation).
 *Status:* `NORMATIVE-PENDING` on **P-22**, **P-23**.
 
-**R3.5.3 — `handoff_capability_ref` is referenced, never invoked.** Gate 13 routes
-`HANDOFF` to a signed target and has no edge to a capability invoker. The field has exactly
+**R3.5.3 — `handoff_capability_ref` is referenced, never invoked.** Gate 13 answers
+`HANDOFF` with the R3.8.5 route handle and has no edge to a capability invoker. The field has exactly
 four readers and no fifth: R3.5.1, the floor derivation of §0.8 F43, Gate 6's destination-fence
 branch for `effect === 'HANDOFF'` (§3.9 Gate 6), and the help generator. *Mechanism:* effect
 router, closed switch; a reference test asserts the reader set. *Evaluated at:* `EP-INGRESS`
@@ -4038,6 +4229,144 @@ owner, the envelope carries a `Limitation` with a `capability_gap_ref` and **no 
 *Mechanism:* emission validator resolves `target.ref.route` against the shipped shell-route
 table and `subjectCapability` against the registry. *Evaluated at:* `EP-MINT`. *Status:*
 [TO BUILD].
+
+**R3.5.5 — the staff marketing-revoke door: one ingress outside the widget layer, which can only withdraw marketing
+consent.** `OWNER RULING R-04.` Counted beside the three routes of §A1.1 P-01, exactly one further ingress exists: a
+door through which a staff principal records a client's withdrawal of marketing consent, requested by phone or e-mail,
+with the existing canonical consent owner — «к существующему canonical consent owner». The owner is
+`Package5Wave3CanonicalCutoverService` (`package5-wave3/package5-wave3-canonical-cutover.service.ts`), writing through
+`package5.wave3.record-client-consent.execute.v1` (§A1.6.2). The door is not a widget route, neither the widget
+gateway nor the ingress of §3.12 R3.12.7 reaches it, and it is the only path by which a staff principal reaches that
+owner's consent write. Its request is closed:
+
+```ts
+interface StaffMarketingRevokeRequest {      // "maya.consent.staff-marketing-revoke/1"
+  contract: 'maya.consent.staff-marketing-revoke/1';
+  client_id: string;                         // the client whose marketing consent is withdrawn
+  request_channel: 'phone' | 'email';        // the channel the client's request arrived through
+  request_contact: string;                   // the phone number or e-mail address it arrived from; never stored
+  idempotency_key: string;                   // idempotency of this door only
+}
+```
+
+(a) **Staff authority, and no other.** The door admits only an authenticated user whose `Membership` in the client's
+tenant is active and whose role is one of exactly ten tenant staff roles, the governed staff role set of
+`package5-wave1/governed-settings.contract.ts` today: `tenant_owner`, `business_owner`, `tenant_admin`,
+`administrator`, `manager`, `branch_manager`, `accountant`, `provider`, `employee`, `staff`. Every other role is
+refused: `platform_owner`, `platform_admin`, `client`, `customer`, `integration_service`, and any role added later. No
+request member names a tenant or a role, and no widget or intent token, `TelegramCommandIngress` credential or legacy
+bridge credential of §3.12 R3.12.7 (f) is authority. The owner re-reads the membership in its own transaction and
+asserts the tenant through `TenantContextService.assertTenantId`; the engine re-checks the role under (j).
+*Mechanism:* the owner's staff-revoke branch; an `EP-BUILD` test pinning the ten roles; an `EP-BUILD` test refusing,
+with no consent fact written, each role refused above, a client session, a widget or intent token, the §3.12 R3.12.7
+credential and either legacy bridge credential. *Evaluation points:* `EP-CANONICAL`, `EP-BUILD`.
+
+(b) **Marketing consent only; privacy consent never.** «Staff bridge может только отзывать marketing consent»; it
+cannot «менять privacy consent». The door calls the owner with `kind: 'marketing'` as a literal, and
+`StaffMarketingRevokeRequest` declares no consent-kind member; an undeclared member at any depth is refused. The
+owner's staff-revoke branch refuses every other kind before any write, and the engine refuses it again under (j).
+*Mechanism:* the closed request shape; an `EP-BUILD` source test over the door's call asserting the literal; the
+staff-branch refusal and the engine branch of (j); an `EP-BUILD` test submitting `kind: 'privacy'` through the
+staff-revoke branch, and one submitting it with a staff actor straight to `CanonicalActionIngressService`, each
+asserting refusal with no consent fact written. *Evaluation points:* `EP-BUILD`, `EP-CANONICAL`.
+
+(c) **Revoke only; a grant never.** It cannot «выдавать consent». The door calls the owner with `granted: false` as a
+literal, and the request declares no decision or `granted` member. The owner's staff-revoke branch refuses
+`granted: true` before any write, and the engine refuses a staff `decision: 'grant'` under (j), so every consent fact
+written with a staff actor is a marketing revoke. *Mechanism:* the closed request shape; an `EP-BUILD` source test over
+the call's literal; the staff-branch refusal and the engine branch of (j); an `EP-BUILD` test submitting a grant
+through the staff-revoke branch, and one submitting it with a staff actor straight to `CanonicalActionIngressService`,
+each asserting refusal with no consent fact written. *Evaluation points:* `EP-BUILD`, `EP-CANONICAL`.
+
+(d) **Only for a confirmed phone or e-mail request.** The bridge serves «для подтверждённых phone/e-mail requests». A
+request is confirmed when the contact it arrived from is a contact the canonical record holds for that client in that
+channel: for `phone`, the phone match key of `request_contact`, keyed as `ClientIdentityService` keys every phone
+match, equals the client's `Client.phoneHash`; for `email`, the match key is `request_contact` trimmed and
+lower-cased, and it equals the `User.email`, trimmed and lower-cased, of the account the client record names
+(`Client.userId`). The owner's staff-revoke
+branch refuses before any write when the client holds no such contact or the contact does not match, and the engine
+refuses a staff consent write that carries no request channel or confirmation digest under (j). `request_contact` is
+never stored and never logged; only its match key enters `sourceIdentityHash` under (e). *Mechanism:* the literal
+union of the closed request shape; the staff-branch match and refusal; the engine branch of (j); an `EP-BUILD` test for
+each refusal, a contact that belongs to another client of the same tenant included. *Evaluation points:* `EP-BUILD`,
+`EP-CANONICAL`.
+
+(e) **Provenance in the existing consent-fact columns; no second consent owner.** It cannot «создавать второго
+consent owner». The withdrawal is written by the executor of `package5.wave3.record-client-consent.execute.v1`
+(`Package5Wave3ExecutableService`, `package5-wave3/package5-wave3.service.ts`) and by no other writer, as one
+`ClientConsentFact` (`prisma/schema.prisma`) whose provenance is carried only by that model's existing columns:
+`actorUserId` is the staff principal; `sourceType` is `'staff_phone_request'` or `'staff_email_request'`, after
+`request_channel`, and never `'client_command'`; `sourceIdentityHash` is `EncryptionService.opaqueReference` under the
+domain `'package5.wave3.client-consent.staff-revoke'` over the tenant, the client, the door's idempotency key,
+`request_channel` and the match key of (d); `occurredAt` and `actionExecutionId` are set as for every consent fact.
+The executor takes `sourceType` from the normalized command instead of its `'client_command'` literal, both where it
+writes the fact and where it looks a fact up by `(tenantId, sourceType, sourceIdentityHash)`; a client command keeps
+`'client_command'`, so the existing unique key on those three columns keeps the two sources apart, and a replay of one
+staff request resolves to its own fact. The door adds no column, table, model, Action Engine capability, C9 key or
+control key, and holds no persistence client of its own; §0.1 F3 is unchanged. *Mechanism:* an `EP-BUILD` source test
+asserting that the one writer of `ClientConsentFact` is that executor, that a fact written with a staff actor never
+carries `'client_command'` and a client command never carries a staff source type, and that the door's module has no
+persistence-client edge; §0.1 F3's CI test that no canonical table gains a column. *Evaluation point:* `EP-BUILD`.
+
+(f) **Nothing in chat history or provider state.** It cannot «записывать consent в chat history/provider state».
+The door and the owner's staff-revoke branch write no row of the widget layer's stores (§4.4.1), no conversation,
+inbox or message record, and no CRM or messaging provider state; a withdrawal leaves each of them byte-identical.
+*Mechanism:* an `EP-BUILD` import test over the door's module and the staff-revoke branch asserting no edge to the
+widget layer's stores, to the conversation and inbox modules or to any provider adapter; an `EP-BUILD` test
+asserting those stores are unchanged by a withdrawal. *Evaluation point:* `EP-BUILD`.
+
+(g) **Every successful revoke ends in a canonical consent receipt.** «Любой successful revoke должен закончиться
+canonical consent receipt.» The door answers success only with the `ClientConsentFact` the owner wrote and the
+`ActionExecution` that fact names (`actionExecutionId`); every other outcome is answered as not recorded.
+*Mechanism:* the door's success answer is built from the returned fact and execution and has no other constructor;
+an `EP-BUILD` test asserting that no success answer exists without both. *Evaluation points:* `EP-CANONICAL`,
+`EP-BUILD`.
+
+(h) **Not a widget route, and reachable from neither the gateway nor the Telegram ingress.** The door's module and
+the owner's staff-revoke branch are declared outside the widget layer and outside the module of §3.12 R3.12.7. Only
+the closed request shape above is generated, as every `ts` declaration of this contract is, into the generated
+contract types, from which the door imports it as a type (§0.2 F6a). The door accepts no `WidgetIntentSubmission` and
+no `TelegramCommandIngress`, and no gate, effect-router branch, control handler or ingress handler has an edge to it
+or to the owner's staff-revoke branch. No widget kind confers consent (§0.16 FR-6a), and
+`package5.wave3.record-client-consent.execute.v1` keeps the registration §A1.6.2 states and stays outside
+`AE_WIDGET_COMMIT_ALLOWLIST`. *Mechanism:* an `EP-BUILD` import test asserting that no module of the widget layer and
+no module of the ingress of §3.12 R3.12.7 imports the door or the staff-revoke branch; §0.16 FR-1's closed effect
+router; §0.7 F31's start-up veto. *Evaluation points:* `EP-BUILD`, `EP-REGISTRY-LOAD`.
+
+(i) **No fixed copy promises a revoke that is not recorded.** «До появления executable path текст не должен обещать
+уже выполненный revoke.» While **P-34** is not `[EXISTS]`, no fixed copy the bot, the shell or the widget layer
+delivers — a bot or shell string, a server phrase catalogue entry, a `NARRATIVE_TEMPLATES` or `MOMENT_TEMPLATES`
+body — states that a marketing-consent withdrawal has been performed; once it is, such a statement is composed only
+from a receipt of (g). *Mechanism:* an `EP-BUILD` copy test over every string of the bot and the shell and over the
+server phrase catalogue, `NARRATIVE_TEMPLATES` and `MOMENT_TEMPLATES`, which reads P-34's status from
+`MECHANISM_GAP_LEDGER`; the composition of (g). *Evaluation point:* `EP-BUILD`. `[NON-NORMATIVE]` Widget prose has
+no other source (§1.6.5, §4.9.3 PR3b). Maya's model-composed conversational text is not fixed copy and no evaluation
+point of this contract reaches it, so this clause does not claim to fence it.
+
+(j) **One staff branch in the Action Engine, and no other staff consent authority.** Today the engine admits a
+consent write on `package5.wave3.record-client-consent.execute.v1` only from the client's own verified channel: the
+policy resolver's `'VERIFIED_CLIENT_CHANNEL'` branch requires a durable channel binding
+(`action-engine/action-engine.policy-resolver.ts`), and the executable input contract refuses a consent input without
+client channel authority (`action-engine/package5-wave3-executable.contract.ts`). The door needs exactly one
+exception, the one change this contract makes to a canonical Action Engine contract: a staff-revoke branch in both,
+admissible
+only when the input's `operation` is `record_client_consent`, its `kind` is `'marketing'`, its `decision` is
+`'revoke'`, it carries no `consentChannel`, its `actorRole` is one of the ten roles of (a) with `actorMembershipId`
+naming that active membership, and it carries the request channel and a confirmation digest of (d) and (e). Every
+other consent input without client channel authority is refused as today. The branch adds no capability, no registry
+field and no `actorPolicy` value; the capability's `policyDecision`, `approvalRequirement`, `targetKind` and
+`allowedSourceTypes` (§A1.6.2) are unchanged, `CONSENT(cap)` still holds for it, and no other capability gains a
+staff consent path. *Mechanism:* the resolver's and the input contract's staff-revoke branch; an `EP-BUILD` test that
+drives a staff actor straight at `CanonicalActionIngressService` with a grant, with `kind: 'privacy'`, without the
+request channel or the digest, with a role outside the ten and with a platform role, and asserts refusal with no
+consent fact written; an `EP-BUILD` registry test asserting the four registration members above unchanged.
+*Evaluation points:* `EP-CANONICAL`, `EP-BUILD`.
+
+`[NON-NORMATIVE]` The in-app revoke surface the same ruling orders is owner decision D9-A's remediation lane, which
+that decision places outside this programme; this clause neither states nor counts it, and §0.16 FR-6a still binds
+every widget affordance that hands off to it.
+
+*Status:* `NORMATIVE-PENDING` on **P-34**.
 
 ---
 
@@ -4164,14 +4493,28 @@ interface IntentRecord {
   handoff_capability_ref: CapabilityRef | null;
   target: IntentTarget | null;
   verification_floor: VerificationLevel;
-  confirmation: ConfirmationRequirement | null;
+  confirmation: Omit<ConfirmationRequirement, 'readback_text'> | null;
+                                              // readback_text is CONVERSATION_CONTENT and is not
+                                              // persisted here; it stays in the sealed envelope
+                                              // in the timeline store (§4.4.3)
+  confirmation_subject: 'create' | 'reschedule' | 'cancel' | null;
+                                              // NON-NULL IFF widget_kind === 'BOOKING_CONFIRMATION'.
+                                              // Copied at mint from the sealed body's
+                                              // confirmation_subject (R3.7.5); read by Gate 7
+                                              // for §2.6.5 BOOK.1.
+  approval_decision: 'approve' | 'reject' | null;
+                                              // NON-NULL IFF widget_kind === 'APPROVAL' AND
+                                              // effect === 'COMMIT' (R3.7.5). Gate 13 routes an
+                                              // APPROVAL decision on this member, never on
+                                              // WidgetIntent.role (§0.15 F88.1).
   input_schema_hash: string | null;
   requested_scope_hash: string;
   body_hash: string;                          // written at mint from the sealed emission;
                                               // read by Gate 8-R and the SUPERSEDED comparison
   selection_domain: string;                   // the closed domain this token may select from;
                                               // read by the SUPERSEDED comparison. The domain's
-                                              // LABELS are conversation content and live below.
+                                              // LABELS are conversation content and live below,
+                                              // in selection_domain_labels.
   c9_domain: C9Domain | null;                 // the orchestrator's own published union
                                               // ('ADMIN' | 'CLIENT_LIFECYCLE' | 'OCCUPANCY' |
                                               //  'BUSINESS_INTELLIGENCE'), imported, never
@@ -4200,16 +4543,19 @@ interface IntentRecord {
   utterance_template: string;                 // '{{selection}}' is the only slot
   rendered_utterance: string | null;          // what was written to the transcript
   selected_labels: string[] | null;           // canonical labels, server-resolved
+  selection_domain_labels: Record<string, Record<string, string>> | null;
+                                              // D — field -> option id -> canonical label;
+                                              // column selectionDomainLabelsJson
   spoken_transcript: string | null;           // voice turns only; authority NONE
 }
 ```
 
-`widget_kind`, `priority`, `body_hash`, `selection_domain` and `c9_domain` are mint class **D**
-— derived by the minter, never authored — and are `AUDIT_RETAINED`: a kind name, an integer, two
-hashes and a domain enum carry no conversation content, so the erasure-reachability test stays
-green. All five are components of the gateway prerequisite **P-30**, so a gateway built without
-any of them fails its own completeness assertion rather than shipping a Gate 5 that cannot
-recompute or a Gate 6 that cannot call its own fence.
+`widget_kind`, `priority`, `body_hash`, `selection_domain`, `c9_domain`, `confirmation_subject` and `approval_decision`
+are mint class **D** — derived by the minter, never authored — and are `AUDIT_RETAINED`: a kind name, an integer, two
+hashes, a domain enum and two closed decision enums carry no conversation content, so the erasure-reachability test
+stays green. All seven are components of the gateway prerequisite **P-30**, so a gateway built without any of them
+fails its own completeness assertion rather than shipping a Gate 5 that cannot recompute, a Gate 6 that cannot call its
+own fence, a Gate 7 that cannot check BOOK.1, or a Gate 13 that cannot tell an approval from a rejection.
 
 **R3.7.1 — `c9_domain` is derived on the run-bearing path and null by construction on the
 others.** On the run-bearing path — `correlation.run_id !== null` — an envelope carrying an
@@ -4250,6 +4596,14 @@ would destroy the anti-drift guarantee they exist for; divergence yields `SUPERS
 rendered diff. *Mechanism:* the noun resolver's type distinguishes `Handle` from `Witness`
 and has no re-read path for the latter. *Evaluated at:* `EP-INGRESS` Gate 11. *Status:*
 [TO BUILD].
+
+**R3.7.5 — `confirmation_subject` and `approval_decision` are copied at mint, never authored.** At `EP-MINT` the
+record writer sets `IntentRecord.confirmation_subject` to the sealed `BookingConfirmationBody.confirmation_subject` for
+every intent of a `BOOKING_CONFIRMATION` envelope and to `null` for every other kind, and sets
+`IntentRecord.approval_decision` to `'approve'` for the intent `ApprovalBody.approve_intent` names, to `'reject'` for the
+intent `ApprovalBody.reject_intent` names, and to `null` for every other intent. *Mechanism:* the record writer's
+derivation from the sealed body inside the mint transaction, plus the closed-shape validator's two biconditional checks.
+*Evaluated at:* `EP-MINT`. *Status:* `NORMATIVE-PENDING` on **P-30**.
 
 ---
 
@@ -4319,6 +4673,34 @@ receipt, never from the fact that a button was pressed. An optimistic *spinner* 
 state member; the envelope is the only source of rendered state. *Evaluated at:* `EP-INGRESS`.
 *Status:* [TO BUILD].
 
+**R3.8.5 — a `HANDOFF` answers with a signed, principal-bound route handle, and the landing route decides.** Gate 13
+answers an admitted `HANDOFF` with no capability invocation and one `HandoffTarget`, returned in `resolved_widget`:
+
+```ts
+interface HandoffTarget {        // resolved_widget member for effect === 'HANDOFF' (Gate 13)
+  route_key: string;             // D — derived from the record's own target; never client-supplied
+  opaque_handle: string;         // M — /^[A-Za-z0-9_-]{8,64}$/ (§0.12 F71); a server-minted keyed
+                                 // signature over route_key, the record's intent_token_hash and the
+                                 // live principal's principal_proof_hash
+}
+
+interface HandoffAnswer {        // the member of the gateway's answer to a HANDOFF submission that
+                                 // R3.8.4 and §4.1.2 L6 name; no other member of that answer is declared here
+  resolved_widget: HandoffTarget;
+}
+```
+
+`opaque_handle` is computed with `ActionIdentityService.hmac` under its own key namespace — the one keyed scheme §1.9 H6
+admits, and not the envelope seal key of §4.1.1 L1. The landing route accepts a handle only after recomputing it for
+the live principal's `principal_proof_hash`, and then re-validates that principal's current authority at its own
+ingress; a handle that does not verify produces a sentence, never a screen (§3.13 E14). *Mechanism:* Gate 13's
+`HANDOFF` branch, which holds the handle signer and no capability invoker and serializes `resolved_widget` from
+`route_key` and `opaque_handle` and nothing else, with a test asserting that key set; the landing route's handle
+verification. *Evaluated at:* `EP-INGRESS` Gate 13 (the handle), `EP-FETCH` (verification and authority at the landing
+route), `EP-BUILD` (the key-set test). *Status:* `NORMATIVE-PENDING` on **P-01**.
+`[NON-NORMATIVE]` `HandoffTarget` is not a root of §0.15 F88's walk: the serializer and its test close it at two
+members, and F88 forbids neither.
+
 ---
 
 ### 3.9 The gate sequence — fourteen gates and one readback gate, in one order
@@ -4329,24 +4711,26 @@ Web push: `event.action` **is** the token. Voice: audio → transcription → de
 match on `speech_aliases` ∪ `ordinal` **before any LLM** → the same token, transcript stored
 with authority NONE. SMS / e-mail: an `i`-class carrier link, which renders the confirmation
 and never fires (R3.3.5). A slash command or a typed sentence hits the deterministic router
-and resolves to the **same** token. *Status:* [TO BUILD].
+and resolves to the **same** token. A Telegram command or message reaches that router only through
+the internal ingress of §3.12 R3.12.7.
+*Status:* [TO BUILD].
 
 | # | Gate | What it checks | Rejects with | Runs in | Status |
 |---|---|---|---|---|---|
-| 1 | **Token integrity** | HMAC valid; `widget_id` matches; not expired; not consumed when `single_use`; not superseded | `EXPIRED` / `SUPERSEDED` + fresh `next_envelope` | IntentGateway | [TO BUILD] |
+| 1 | **Token integrity** | HMAC valid; `widget_id` matches; not expired; not consumed when `single_use`; not superseded | `EXPIRED` / `SUPERSEDED` + the R3.9.4 successor (no canonical read), or the code alone | IntentGateway | [TO BUILD] |
 | 2 | **Transport auth** | session resolved exactly as for a typed message — JWT + Membership, or a verified `ClientChannelLink`. **No credential comes from the widget** | `REFUSED / unauthenticated` | HTTP middleware | [EXISTS] |
 | 3 | **Principal binding** | `IntentRecord.principal_proof_hash` equals the live principal's proof hash. A token minted for A and replayed by B fails; a forwarded Telegram message or a shared push is inert; an unlink/relink invalidates every outstanding envelope retroactively | `REFUSED / widget_principal_mismatch` | IntentGateway | [TO BUILD] |
 | 4 | **Tenant scope** | `TenantContextService.assertTenantId` over the record's tenant and the live principal's | `REFUSED / tenant_mismatch` | TenantResolver | [EXISTS] |
-| 5 | **Verification floor** | `verificationFloor(record, record.widget_kind)` re-derived from the live registry and policy tables (R3.4.2); compared to the server-derived `verification_level`, capped by `profile.max_verification_level`; branch per effect class (R3.4.5). **Any** difference between the stored and the recomputed floor refuses | `NEEDS_SECOND_CHANNEL` / `HANDOFF_REQUIRED` + deep link; `SUPERSEDED / policy_floor_changed` | ChannelProfileRegistry + AuthorityResolver | [TO BUILD] |
+| 5 | **Verification floor** | `verificationFloor(record, record.widget_kind)` re-derived from the live registry and policy tables (R3.4.2); compared to the server-derived `verification_level`, capped by `profile.max_verification_level`; branch per effect class (R3.4.5). **Any** difference between the stored and the recomputed floor refuses | `NEEDS_SECOND_CHANNEL` / `HANDOFF_REQUIRED` + deep link; `SUPERSEDED / policy_floor_changed` + the R3.9.4 successor, or the code alone | ChannelProfileRegistry + AuthorityResolver | [TO BUILD] |
 | 6 | **Authority, computed from scratch** | dispatched on `subjectCapability(record)` and scoped by effect — the four branches below. `authority_hint` is **not read**. A widget that should never have been rendered still cannot act | `REFUSED / insufficient_authority` | AuthorityResolver | policy [EXISTS] — `ai-tool-policy.service.ts`, `action-engine.policy-resolver.ts`; wiring [TO BUILD] |
 | 7 | **Effect admissibility** | `effect` is within the kind's declared ceiling, checked over `IntentRecord.widget_kind`; the capability's key space matches the effect (R3.2.2); `CONTROL` keys are in the control registry; a `COMMIT` record carries a non-null `confirmation_of_ref` and, where its `kind !== 'draft'`, a non-null `produced_by_intent_token_hash` satisfying §3.10.2; **for a `COMMIT`, `requiredConfirmationKind(subjectCapability(record)) === record.widget_kind`, re-read from the live allowlist (§0.13 F72) — this is F72's second evaluation point, and a key whose allowlist row was withdrawn between mint and submission refuses here**; the delivering tier was permitted to carry this effect (§3.12) | `REFUSED / effect_not_admissible`, `REFUSED / booking_confirmation_required` | IntentGateway | [TO BUILD] |
 | 8 | **Input validation** | closed-domain membership for `enum`/`ref`; cardinality in `[selection_min, selection_max]`; **bounds re-read from `bounds_source` and the value validated against the fresh bound**; normalizers applied; `c9SafeText` over every `text`/`phone` value; `max_total_bytes` enforced by refusal, never truncation; a submission carrying `inputs` for a null schema is refused | `REFUSED / selection_out_of_domain`, `REFUSED / bound_violation`, `REFUSED / use_secure_surface`, `REFUSED / oversize_submission` | IntentGateway | shape [TO BUILD]; `c9SafeText` [EXISTS] |
 | **8-R** | **Readback** | applies exactly when `record.confirmation?.requires_readback === true`. Refuses unless **all four** hold: `readback_ack` is present; `readback_ack.readback_ref === record.confirmation.readback_ref`; `readback_ack.body_hash === record.body_hash`; `readback_ack.affirmation` is an exact member of the server-published closed affirmation vocabulary for the envelope's locale. A submission carrying `readback_ack` whose record does **not** satisfy `confirmation?.requires_readback === true` — including one whose `confirmation` is null — is **also** refused. Refuses, never repairs | `REFUSED / readback_missing`, `REFUSED / readback_mismatch` | IntentGateway | [TO BUILD] |
 | 9 | **Lowering** | `rendered_utterance = render(utterance_template, server-resolved canonical labels)` is appended to the conversation as a **USER turn with authority NONE**. **This is the first durable write of the whole sequence.** From here the path is byte-identical to a typed message | — | chat ingress | [TO BUILD] |
-| 10 | **Divergence audit (shadow first)** | the deterministic text router is run over the lowered utterance; if its resolved capability ≠ `subjectCapability(record)`, an audit record is written. Hard refusal behind a flag | `REFUSED / intent_divergence` (when gated) | intent router | [TO BUILD] |
+| 10 | **Divergence audit and refusal** | the deterministic router is run over the lowered utterance against the live intents, and its match is compared with the tapped record through `subjectCapability`; the outcome — AGREE, NULL, AUDIT or REFUSE — and the one `DivergenceAuditRecord` written for every outcome except AGREE are fixed by «Gate 10 in full» below | `REFUSED / intent_divergence` | intent router | [TO BUILD] |
 | 11 | **Noun resolution** | each frozen noun is resolved by a **fresh read from its canonical owner**; the three witnesses (R3.7.4) are compared, not re-read; a value divergence returns `SUPERSEDED` with a rendered diff | `SUPERSEDED / handle_stale` | IntentGateway + capability owner | [TO BUILD] |
 | 12 | **Data fence** | for `REFINE` / `NAVIGATE`, the new body is produced by the same projector behind the same five client-preview / PII enforcement points. No widget-specific PII path exists, so none of the five can be bypassed by a widget | masked body, never a leak | Projector | five points [EXISTS]; projector [TO BUILD] |
-| 13 | **Effect routing** | `NONE` — unreachable (no token). `NAVIGATE` / `REFINE` → projector → `next_envelope`, **terminates here; no business effect is reachable from a selector**. `CONTROL` → the one registered control handler, which performs its own principal and tenant check; no Action Engine edge. `DRAFT` → canonical draft owner. `REQUEST_APPROVAL` → approval object → PENDING. `HANDOFF` → signed target, no capability invoked. `COMMIT` → Gate 14 | per class | effect router | [TO BUILD] |
+| 13 | **Effect routing** | `NONE` — unreachable (no token). `NAVIGATE` / `REFINE` → projector → `next_envelope`, **terminates here; no business effect is reachable from a selector**. `CONTROL` → the one registered control handler, which performs its own principal and tenant check; no Action Engine edge. `DRAFT` → canonical draft owner. `REQUEST_APPROVAL` → approval object → PENDING. `HANDOFF` → one R3.8.5 `HandoffTarget` in `resolved_widget`, no capability invoked. `COMMIT` → Gate 14 | per class | effect router | [TO BUILD] |
 | 14 | **Canonical action** | `CanonicalActionIngressService.prepare()` receives the capability key, the normalized input, the **server-minted** idempotency key and the evidence refs; the policy resolver — not the caller — owns the decision (`assertNoCallerAuthority` at `action-engine.ingress.ts:161`, `assertResolverOwnsDecision` at `:141`); the Action Engine, never the widget, chat or renderer, calls the provider owner | policy decision | CanonicalActionIngressService → ActionEngineKernel → provider owner | [EXISTS] — `action-engine.ingress.ts` |
 
 **Gate 6 in full.** The subject is bound once and the dispatch reads it, never `record.capability`:
@@ -4376,7 +4760,7 @@ ref.space === 'AE'   (COMMIT, REQUEST_APPROVAL):
 ref.space === 'C9'   (REFINE, DRAFT, class-'c' NAVIGATE):
   def = MAYA_AI_TOOL_CATALOG_BY_NAME.get(ref.key)
   if (def !== undefined) → AiToolPolicyService.assertCanExecute(principal, def)      // the 47
-  else                   → WIDGET_CAPABILITY_POLICY[capKey(ref)] must exist, AND      // the 9
+  else                   → WIDGET_CAPABILITY_POLICY[capKey(ref)] must exist, AND      // the 9; 24 once F36a registers
                            when record.c9_domain !== null,
                            c9Capability(ref.key, record.c9_domain, C9_REGISTRY_HASH)
                            must admit — it throws capability_not_registered otherwise,
@@ -4400,16 +4784,96 @@ level. *Evaluated at:* `EP-INGRESS` Gate 6. *Status:* `NORMATIVE-PENDING` on **P
 [NON-NORMATIVE] The second C9 branch is **weaker** than the first and a reader must not take it
 for an equivalent. `c9Capability` refuses an unregistered key, a registry-hash mismatch, a
 domain mismatch and a non-`READ` mode under `BUSINESS_INTELLIGENCE`, but it applies **no role,
-surface, feature or risk-tier test**, which `assertCanExecute` does. For those nine keys the
-role and risk fences are their `WIDGET_CAPABILITY_POLICY` row's `min_verification` and
-`consent_class`, carried through `c9Floor` at Gate 5, plus `CONSENT_CLASS_FLOOR` — not Gate 6.
+surface, feature or risk-tier test**, which `assertCanExecute` does. For those keys — nine, and
+twenty-four once §0.7 F36a registers its set — the role and risk fences are their
+`WIDGET_CAPABILITY_POLICY` row's `min_verification` and `consent_class`, carried through `c9Floor`
+at Gate 5, plus `CONSENT_CLASS_FLOOR` — not Gate 6; for the fifteen of §0.7 F36a the owner's own
+fence also applies inside the owner read.
 The `WIDGET_CAPABILITY_POLICY` row test is likewise a build-time totality restatement rather
-than a second runtime check: the table is total over all 56 C9 keys and a missing row fails the
+than a second runtime check: the table is total over all 56 C9 keys (71 once F36a registers) and a missing row fails the
 **build**, so at runtime the row always exists for a registered C9 ref and that refusal can
 never fire. Scoping by effect matters for the same reason: applying an execute-admission test
 to a `HANDOFF` destination would make `c9Capability`'s `BUSINESS_INTELLIGENCE`/non-`READ`
 refusal block a BI run from even *offering* the `a22.configuration` or `b35.confirm` handoff,
 and would demand an allowlist row for an AE destination that is being routed to, not committed.
+
+**Gate 10 in full.** Owner decision DS-02 (Decision Sheet 02, 2026-09-16: refusal on effect-class divergence) with the
+router, same-owner and null readings of Decision Sheet 04, Block A, A3. Gate 10 runs after Gate 9, reads the lowered
+utterance and widget-layer records only, and reads nothing canonical.
+
+```ts
+declare function routeUtterance(utterance: string,
+                                candidates: readonly IntentRecord[]): IntentRecord | null;
+      // THE deterministic router of Step 0, R3.12.4 and §4.7 V1: one pure, pre-LLM function
+      // shared by Gate 10, typed sentences, slash commands and spoken utterances. Escape aliases
+      // are matched before any other candidate (§4.7 V9). It returns the matched candidate,
+      // whose intent_token_hash is «the same token», or null.
+
+declare function liveCandidates(record: IntentRecord): readonly IntentRecord[];
+      // every IntentRecord binding record.tenant_id and record.principal_proof_hash whose
+      // expires_at has not passed and whose consumed_at is null — record itself included.
+
+declare function ownerSet(ref: CapabilityRef): ReadonlySet<string> | undefined;
+      // defined below; undefined fails closed.
+
+interface DivergenceAuditRecord {              // intent-audit store (§4.4.1); written by Gate 10 only
+  tenant_id: string;                           // D
+  widget_id: string;                           // D — the tapped record's
+  tapped_intent_token_hash: string;            // D — the submitted IntentRecord
+  resolved_intent_token_hash: string | null;   // D — the router's match; null when it matched nothing
+  resolved_effect: EffectClass | null;         // D — the match's effect; null iff the hash is null
+  refusal_code: 'intent_divergence' | null;    // D — null when recorded and not refused
+  observed_at: string;                         // D — RFC3339
+}
+```
+
+**Owner sets.**
+
+```
+ownerSet(ref), by ref.space:
+  C9      → undefined when c9Registry.tryGet(ref.key) is undefined; otherwise
+            { KIND_REGISTRY[k].owner_class : k ∈ WidgetKind,
+              KIND_REGISTRY[k].owner_class ∉ {'INHERITED', 'NONE'},
+              ref ∈ ownerClassKeys(k) }
+  AE      → undefined unless exactly one AE_PROPOSE_PAIRING row p has p.ae equal to ref;
+            otherwise ownerSet(p.propose)
+  CONTROL → undefined when ref.key is not a CONTROL_REGISTRY key; otherwise
+            { the §0.7 F27 «owner endpoint» cell of ref.key }
+  TOOL    → undefined
+
+sameOwner(a, b) := ownerSet(a) ≠ undefined ∧ ownerSet(b) ≠ undefined ∧ ownerSet(a) ∩ ownerSet(b) ≠ ∅
+```
+
+**Outcome.** With `matched := routeUtterance(u, liveCandidates(record))`, where `u` is the utterance Gate 9 lowered in
+this request (§0.4 F15), `s := subjectCapability(record)` and `q := matched === null ? null : subjectCapability(matched)`,
+the first row that holds decides:
+
+| # | condition | outcome |
+|---|---|---|
+| 1 | `s ≠ null ∧ q ≠ null ∧ q.space = s.space ∧ q.key = s.key` | **AGREE** — pass; no record is written |
+| 2 | `q = null ∧ record.effect ∈ {CONTROL, DRAFT, REQUEST_APPROVAL, COMMIT}` | **REFUSE** |
+| 3 | `q = null` | **NULL** — pass |
+| 4 | `matched.effect ≠ record.effect` | **REFUSE** |
+| 5 | `s = null` | **NULL** — pass |
+| 6 | `¬sameOwner(s, q)` | **REFUSE** |
+| 7 | otherwise | **AUDIT** — pass |
+
+Every outcome except AGREE writes exactly one `DivergenceAuditRecord` in the request transaction, with
+`resolved_intent_token_hash = matched?.intent_token_hash ?? null`, `resolved_effect = matched?.effect ?? null` and
+`refusal_code = 'intent_divergence'` for REFUSE, `null` otherwise. REFUSE answers `REFUSED / intent_divergence`. NULL and
+AUDIT are recorded and are not on their own grounds refused. Under R3.12.4 a tap's own lowered utterance must route to
+its own record: an emission fixture whose rendered `utterance_template` does not do so through `routeUtterance` fails
+the build, so rule 2 refuses at runtime only what the build did not catch.
+
+*Mechanism:* pipeline slot 10 calling `routeUtterance`, `liveCandidates` and `ownerSet` (pure lookups over
+`c9Registry`, `KIND_REGISTRY`, `ownerClassKeys`, `AE_PROPOSE_PAIRING` and `CONTROL_REGISTRY`) and writing the record; a
+build test over recorded emission fixtures for the R3.12.4 routing duty. *Evaluated at:* `EP-INGRESS` Gate 10;
+`EP-BUILD` (the fixture test). *Status:* `NORMATIVE-PENDING` on **P-01**.
+
+[NON-NORMATIVE] Gate 10 never substitutes the matched record for the tapped one: Gates 11–14 process the tapped record,
+whose floor, authority, allowlist row and approval requirement Gates 5, 6, 7 and 14 re-derive. Under this router every
+READ→WRITE, PREPARE→COMMIT and escalation is an effect-class change (row 4), and booking→settings is an owner change
+(row 6).
 
 **R3.9.1 — the order is normative, and validation precedes lowering.** Gates 5–8 and Gate 8-R
 complete before Gate 9 writes anything durable. *Mechanism:* the gateway is a single ordered
@@ -4439,6 +4903,36 @@ faults** — `paid_capability_not_activated`, `capability_not_registered`, `revi
 genuine transport fault may look like a fault. *Mechanism:* the code-space mapping table
 plus the anti-error lint. *Evaluated at:* projection, and `EP-BUILD`. *Status:* mapping
 [TO BUILD]; deny codes [EXISTS] — `orchestration/c9.contract.ts:40`.
+
+**R3.9.4 — an expired, superseded or floor-changed tap is answered with a successor that reads nothing canonical.**
+When Gate 1 refuses `EXPIRED` or `SUPERSEDED`, or Gate 5 refuses `SUPERSEDED / policy_floor_changed`, the gateway issues
+no projector call and no canonical read, and returns the refusal code with **one successor**: the predecessor's stored
+`presentation.text_equivalent`, byte-copied from the widget layer's own timeline store and never recomposed, plus
+**exactly one** `remedy` intent (R3.9.3) — `role: 'remedy'`, `effect: 'REFINE'` — whose `capability` is the widget's own
+owner capability: the predecessor envelope's `provenance.source_capability`, as a `C9` ref, where that key is a member of
+`ownerClassKeys(record.widget_kind)` or the kind's owner class is `'INHERITED'`. The remedy is minted by minter (2) of
+§4.1.1 L1 as an ordinary intent — its own `IntentRecord`, its own derived floor, its own expiry — so that its tap passes
+Gates 1–13 as any token does. It carries no draft and no flow position: both stay server-side, in the server-owned draft
+store and in the stored predecessor's `correlation.step_index` / `step_total`.
+
+The successor is issued **only** when `record.principal_proof_hash` equals the live principal's proof hash and
+`record.tenant_id` passes `TenantContextService.assertTenantId` for the live principal. Otherwise — and also when
+`'REFINE'` is not a member of `KIND_REGISTRY[record.widget_kind].permitted_effects`, when no capability satisfies the
+clause above, or when the stored predecessor cannot be read or its `text_equivalent` has been erased — **the code alone**
+is returned.
+
+*Mechanism:* the Gate 1 and Gate 5 refusal branches of the one pipeline, which hold no projector port and no
+canonical-owner port and read only the refused `IntentRecord` and the stored predecessor; a build test asserts that
+neither branch reaches a projector or a canonical owner. *Evaluated at:* `EP-INGRESS` Gate 1 and Gate 5; `EP-BUILD` (the
+port test). *Status:* `NORMATIVE-PENDING` on **P-01**.
+
+[NON-NORMATIVE] Re-composing at the refusal would issue a canonical read before Gate 3 (at Gate 1) or before Gate 6 (at
+Gate 5), for a submission already refused. The price of not doing so is one tap; the re-read then happens after Gate 6
+(§4.1.3 L10). Of the stored predecessor this rule reads two fields. `presentation.text_equivalent` is returned and
+decides nothing. `provenance.source_capability` enters only the minter: the refused submission reaches no later gate,
+the remedy's `capability` is sealed at `EP-MINT` into its own `IntentRecord`, which §4.4.3 classifies `AUDIT_RETAINED`
+and which is all its tap's gates read, and an erased predecessor yields the code alone. §0.4 F15's test therefore finds
+no read of another class flowing into a decision gate.
 
 ---
 
@@ -4530,7 +5024,7 @@ on the confirmation body, with the ceiling table admitting `COMMIT` only there.
 **R3.10.5 — a selector holds no lock, and there is no `hold_token`.** The availability a
 selector renders is `Cell<'FREE' | 'TAKEN'>` — **two value members plus not-`KNOWN`** — and
 `HELD` is not a member of it or of any other enum in this contract. The widget layer never
-creates, extends or expires an occupancy hold. Staleness is handled by Gate 11 and R3.11.2
+creates, extends or expires an occupancy hold. Staleness is handled by Gate 11 and R3.11.3
 returning `SUPERSEDED` with a rendered diff. *Mechanism:* the absence of `HELD` from the enum
 and of any hold field from the contract; there is nothing to mint and nothing to reconcile.
 *Evaluated at:* `EP-MINT` (shape). *Status:* [TO BUILD]. [NON-NORMATIVE] A soft lock the
@@ -4572,21 +5066,29 @@ exclusive decisions on **one** approval object, not two commits on two subjects.
 *Mechanism:* the veto and the single-use pairing. *Evaluated at:* `EP-BUILD`, `EP-MINT`.
 *Status:* [TO BUILD].
 
+Gate 13 routes an admitted `COMMIT` whose `record.widget_kind === 'APPROVAL'` to the approval owner's decision route,
+`ActionEngineKernel.decideApproval()`, with the decision `record.approval_decision` names, and reads no
+`WidgetIntent.role` to choose it. *Mechanism:* the effect router's `APPROVAL` branch keyed on the `AUDIT_RETAINED`
+member. *Evaluated at:* `EP-INGRESS` Gate 13. *Status:* `NORMATIVE-PENDING` on **P-01**, **P-30**.
+[NON-NORMATIVE] Unreachable this cycle: no approval-requiring key is allowlisted for emission yet.
+
 **R3.11.3 — divergence at decision time does not execute.** If any noun has diverged since
 the approval was requested, the gateway does **not** call the owner's approve route. It
 returns `SUPERSEDED` with the rendered diff, rejects the standing approval through the
 owner's existing reject path, and mints a fresh `APPROVAL` envelope carrying the new values.
-*Mechanism:* ordering — the approve call sits behind the Gate 11 result; the reject path is
-`ai-tool-runtime.service.ts` `rejectApproval`, which transitions `PENDING → REJECTED` under
-`assertPayloadHash`. *Evaluated at:* `EP-INGRESS` Gate 11 → Gate 13. *Status:* owner reject
+*Mechanism:* ordering — the approve call sits behind the Gate 11 result; the reject path is the approval owner's own
+decision route, `ActionEngineKernel.decideApproval()` (`action-engine.kernel.ts:521`) called with the rejection
+decision, which transitions the execution's approval to `REJECTED` only while it is still pending and only against its
+durable canonical policy binding (§0.15 F85). *Evaluated at:* `EP-INGRESS` Gate 11 → Gate 13. *Status:* owner reject
 path [EXISTS]; the ordering [TO BUILD].
 
-**R3.11.4 — the payload hash and the fresh read are complementary and both are required.**
-`assertPayloadHash(approval, dto.payloadHash)` pins **what was approved**; Gate 11 pins
-**the world it was approved against**. Neither substitutes for the other.
-*Mechanism:* both checks, in that order. *Evaluated at:* `EP-INGRESS` Gate 11, then the
-owner's approve route. *Status:* `assertPayloadHash` [EXISTS] —
-`ai-tool-runtime.service.ts:209,301`; Gate 11 [TO BUILD].
+**R3.11.4 — the approval binding and the fresh read are complementary and both are required.** The execution's durable
+canonical policy binding — `policyContextHash`, `policyEvidenceJson`, `policyEvaluatedAt`, `policyValidUntil` and
+`approvalBindingHash`, which `ActionEngineKernel.decideApproval()` requires non-null while accepting no caller-supplied
+approval flag or hash (§0.15 F85) — pins **what was approved**; Gate 11 pins **the world it was approved against**.
+Neither substitutes for the other. *Mechanism:* both checks, in that order. *Evaluated at:* `EP-INGRESS` Gate 11, then
+the owner's approve route. *Status:* `ActionEngineKernel.decideApproval()` [EXISTS] — `action-engine.kernel.ts:521`;
+Gate 11 [TO BUILD].
 
 **R3.11.5 — where approval and dispatch are separated in time, the owner must re-resolve,
 and until it does the intent is not mintable.** A capability whose owner queues dispatch
@@ -4629,9 +5131,10 @@ harnesses, and until that test exists this rule's strength is bounded by it
 
 ### 3.12 Carriers — what each channel may deliver
 
-**R3.12.1 — an announcement tier carries `NAVIGATE` and `HANDOFF` only.** For every
+**R3.12.1 — an announcement tier carries `NAVIGATE`, `HANDOFF` and the escape.** For every
 registered profile whose fitted `render_tier === 'ANNOUNCEMENT'`, the deliverable effect set
-is the literal `{NAVIGATE, HANDOFF}`. There is no risk-tiered exception and no
+is the literal `{NAVIGATE, HANDOFF}`, plus the one tokened `CONTROL` escape intent of §0.9 F60,
+which carries `control.widget.dismiss` and no other key. There is no risk-tiered exception and no
 per-capability opt-in. A push action lands on a confirmation body inside a verified surface;
 it never actuates. *Mechanism:* two independent ones — (a) the server mints per delivery, so
 a notification payload physically contains no `COMMIT` token (non-existence); (b) Gate 7
@@ -4665,8 +5168,9 @@ is an opaque handle into `IntentRecord` rather than a self-describing blob, whic
 
 **R3.12.4 — one capability, three front doors, one function.** `utterance_preview` and
 `speech_aliases` must resolve deterministically — regex/corpus, pre-LLM — to the same
-capability and the same token as the tap. *Mechanism:* the deterministic router is the same
-module for all three, and Gate 10 audits divergence. *Evaluated at:* routing, and
+capability and the same token as the tap. *Mechanism:* the deterministic router is
+`routeUtterance` (§3.9 «Gate 10 in full»), one function for all three, and Gate 10 audits or
+refuses divergence as that block fixes. *Evaluated at:* routing, and
 `EP-INGRESS` Gate 10. *Status:* [TO BUILD]. *Consequence:* a screen-reader user who types the
 sentence, a voice user who says it, and a thumb that taps travel one code path and produce one
 audit line.
@@ -4688,6 +5192,105 @@ evaluated over **every intent whose `role` is not `'escape'`**, so the escape do
 beyond `control.widget.dismiss`, no target and no consent decision.
 *Mechanism:* the fitter's escape branch, then the closed-shape validator over the fitted
 envelope. *Evaluated at:* `EP-FIT`, `EP-MINT`, `EP-INGRESS` Gate 13. *Status:* [TO BUILD].
+
+**R3.12.7 — the Telegram command ingress: one internal service-to-service route, no widget route, no authority
+of its own.** `OWNER RULING R-03.` Telegram is a delivery and handoff channel: a polling bot
+establishes no first-party principal (§1.7 K7), and a tier that cannot establish one carries nothing above
+`NAVIGATE`/`HANDOFF` (R3.12.2). A Telegram command or message — a slash command, a reply-keyboard text, an
+administrator's natural-language message or a legacy administrator callback string — reaches the path of (d)
+through exactly one door, one internal route declared outside the widget layer, and through no other. The route
+is Step 0's decode for the Telegram typed carrier (§3.9); it is not a second gate pipeline. Its request is closed:
+
+```ts
+interface TelegramCommandIngress {          // "maya.telegram.command-ingress/1"
+  contract: 'maya.telegram.command-ingress/1';
+  update_id: number;                         // the Telegram update id; idempotency of this ingress only
+  door: 'command' | 'message' | 'callback';  // the Telegram door the utterance arrived through
+  utterance: string;                         // verbatim; authority NONE (§3.13 E10)
+  channel_subject: string;                   // the sender, as §1.7 K1's channel subject; never a principal
+}
+```
+
+(a) **Authenticated service to service, with a credential of its own.** The route admits a request only when
+the transport credential it carries equals, under constant-time comparison, the one credential configured for
+this route, which no other route accepts; a missing, unconfigured or unequal credential is refused before any
+read. The credential authenticates the calling bot process and nothing else: it is not a principal, a
+membership, a role, a tenant selector or a verification level. The tenant is the one fixed by the server-side
+configuration bound to that credential; no request member names a tenant, and every read and mint the route
+causes runs under `TenantContextService.assertTenantId` for that tenant (§0.16 FR-6e). *Mechanism:* the route
+guard; an `EP-BUILD` source test asserting that no other route — every other route of the controller that
+declares this one included — reads the credential the guard reads, and that the guard reads no credential any
+other route reads. *Evaluation points:* `EP-INGRESS` (Step 0), `EP-BUILD`.
+
+(b) **Not a widget route, and not public.** The route is not served by the widget layer's controller. It
+accepts no `WidgetIntentSubmission`, no `intent_token`, and no string of §4.5.7's `callback_data` encoding as a
+token, and it changes nothing in §3.8; `WidgetIntentSubmission` declares no Telegram update, `door` or
+`channel_subject` member. No public edge forwards a request to the route: every edge configuration committed in
+the repository that forwards requests to the backend refuses the route's path, or the route is served on a
+listener no such edge reaches. *Mechanism:* the closed shape of `WidgetIntentSubmission`, which refuses an
+undeclared member at any depth; the build test that the widget layer declares exactly one controller, serving
+exactly the two widget routes; an `EP-BUILD` test asserting the ingress is declared outside the widget layer; an
+`EP-BUILD` test over the committed edge configurations asserting that none forwards the route's path.
+*Evaluation points:* `EP-INGRESS`, `EP-BUILD`. `[NON-NORMATIVE]` Whether a deployed edge matches its committed
+configuration is observed at that deploy's own go/no-go, which is not an evaluation point of this contract.
+
+(c) **No direct business or provider command.** The utterance is an input to the path of (d) and to nothing
+else. The route dispatches on no operation name, and its module has no edge to
+`CanonicalActionIngressService.prepare()`, to a canonical draft owner, to an approval owner, to a
+control-registry handler or to any provider owner; what the route receives reaches one of those only as a token
+the one gate pipeline admits. *Mechanism:* the closed request shape above — no operation, argument, capability,
+endpoint, URL, provider, tenant, role or payload member, and an undeclared member at any depth is refused; an
+`EP-BUILD` import test over the route's module asserting none of those edges. *Evaluation points:* `EP-INGRESS`,
+`EP-BUILD`.
+
+(d) **The same typed-intent and authority path.** The route hands the utterance to the path a typed sentence
+travels and to no path of its own: `routeUtterance` (§3.9 «Gate 10 in full») over the live `IntentRecord`s bound
+to the resolved principal and tenant, escape aliases first, so that a `/cancel` reaches a live escape (§0.9 F60)
+through this door; a matched record's token goes to the one gate pipeline (Step 0), and an unmatched utterance
+takes the natural-language path identical to typed text (§4.7 V1). The principal is resolved by the widget
+layer's principal resolver, and the route constructs none of its own (§1.7 K5); the effective verification level
+is capped at `CHANNEL_IDENTITY` for the `telegram-bot` carrier (§1.7 K7), so Gate 5 refuses every `DRAFT`,
+`REQUEST_APPROVAL` and `COMMIT`, and every `CONTROL` whose floor exceeds that level (R3.12.2); every floor is
+`verificationFloor()` (§0.8 F43). Every envelope that path composes for this route is fitted for `telegram-bot`
+at `EP-FIT`, sealed by the one minter at `EP-MINT` with each of its intents recorded as an `IntentRecord` (§3.7),
+carries intents whose effect is `HANDOFF` only, and carries no body for which §0.9 F60 requires an escape
+intent; what reaches Telegram is text and URL buttons. Because a `HANDOFF` invokes nothing (§0.12 F69), the
+route adds no Action Engine capability, no C9 key and no control key. *Mechanism:* the route's handler calls the
+router, principal resolver, floor function, fitter and minter the widget layer already defines and defines none
+of its own, asserted by an `EP-BUILD` source test; an `EP-BUILD` test over every command, reply-keyboard text and
+administrator callback prefix the bot registers asserting that each envelope the path composes for this route
+carries `HANDOFF` intents only; the Telegram adapter's button shape for these envelopes, which has a URL member
+and no `callback_data` member. *Evaluation points:* `EP-INGRESS`, `EP-FIT`, `EP-MINT`, `EP-DELIVER`, `EP-BUILD`.
+
+(e) **No Telegram-specific business authority.** The ingress confers nothing. No capability, policy row,
+allowlist row, floor, consent class, role or membership is added for, or keyed on, the `telegram-bot` carrier or
+this route; the carrier's only authority-relevant datum is the ceiling K7 already applies. Neither the route's
+credential nor `channel_subject` is an input to any authority decision, and every decision on what the route
+causes is the one §3.4 and §3.9 make from the server-derived level. A `HANDOFF` it delivers lands on a first-party
+surface that re-checks the live principal at `EP-FETCH` (§3.3). *Mechanism:* K7's cap in the gateway; an
+`EP-BUILD` source test asserting that no authority function reads the route's credential or `channel_subject`,
+and none reads the carrier id except through K7's cap. *Evaluation points:* `EP-INGRESS`, `EP-BUILD`.
+
+(f) **No legacy bridge is revived.** The ingress is neither the pre-programme dispatcher
+`POST /api/internal/legacy/client-commands/:operation` (`LegacyClientChannelController`,
+`crm/client-channel.controller.ts:145`) nor a route of the legacy bot's inbox bridge (the `internal/*` routes of
+`InboxController`, `inbox/inbox.controller.ts:44-82`). It is declared in neither controller, on a path with no
+`legacy` segment and no path parameter; it dispatches on no operation, accepts neither bridge's credential, and
+calls none of their handlers over HTTP or in-process; neither controller gains a route or an operation.
+*Mechanism:* an `EP-BUILD` source test asserting that the ingress path has no `legacy` segment and no path
+parameter, that neither controller declares it or gains a route or an operation, and that the bot's command path
+imports no legacy client-command or inbox bridge module; the credential-disjointness test of (a); an HTTP test
+asserting that a request carrying either bridge's credential is refused. *Evaluation point:* `EP-BUILD`.
+
+(g) **One door.** No other route admits a Telegram command or message, and the bot sends commands and messages
+to no other backend path. *Mechanism:* an `EP-BUILD` source test asserting that the path of (d) is entered with a
+Telegram utterance from this route's handler only, and a bot-side source test over the command path.
+*Evaluation point:* `EP-BUILD`.
+
+`[NON-NORMATIVE]` K14's exit evidence on this path is the minted `HANDOFF`-only `IntentRecord`s with receipts
+(Decision Sheet 04, A13); the CI ledger and `AuditLog` rows are shadow evidence only.
+
+*Status:* `NORMATIVE-PENDING` on **P-33**.
 
 ---
 
@@ -4743,7 +5346,7 @@ second rule.
 | # | Invariant | Enforced by |
 |---|---|---|
 | INV-6′ | The effect/field table of §3.2 holds for every intent; an intent that sets a cell the table marks `null` is unrepresentable, and every capability-valued member is a space-qualified `CapabilityRef` | closed-shape validator, `EP-MINT` |
-| INV-8′ | `SENSITIVE_DEST(subjectCapability(i)) ⟹ effect === 'HANDOFF' ∧ target.class === 's' ∧ verification_floor ≥ SESSION_VERIFIED`; the predicate is total over all four key spaces and fails closed | emission validator |
+| INV-8′ | `SENSITIVE_DEST(subjectCapability(i)) ∧ ¬BOOKING_OWNER_PROPOSAL(i) ⟹ effect === 'HANDOFF' ∧ target.class === 's' ∧ verification_floor ≥ SESSION_VERIFIED`, and `BOOKING_OWNER_PROPOSAL(i) ⟹ verification_floor ≥ SESSION_VERIFIED` (§3.5 R3.5.1); the predicate is total over all four key spaces and fails closed | emission validator |
 | INV-19 | `verification_floor` is non-null on every intent and equals `verificationFloor()` recomputed from the live registry; any difference at Gate 5 refuses `SUPERSEDED / policy_floor_changed` | mint + Gate 5, plus a CI test that no other assignment to the field exists |
 | INV-20 | Every `NAVIGATE`/`HANDOFF` intent carries a `target` of one of the five classes; no intent carries a URL, host, origin or query string, and a shell route's `param` matches `/^[A-Za-z0-9_-]{8,64}$/` | closed shape + `c9SafeText` |
 | INV-21 | `effect: 'NONE'` ⟹ `intent_token === null`; no control-registry key, routing-map entry or gateway branch exists for `NONE` | closed shape + routing table test |
@@ -4752,10 +5355,10 @@ second rule.
 | INV-23a | No envelope carries both a non-closed `InputField` and a `COMMIT` intent; every `COMMIT` record has a non-null `confirmation_of_ref` | emission validator + mint refusal |
 | INV-24 | A submission refused at Gates 1–8-R produces zero conversation writes | pipeline ordering test |
 | INV-25 | Every `IntentRecord` field is classified exactly once as `AUDIT_RETAINED` or as conversation content; erasure tombstones the second block and touches neither the first nor any canonical row | field classifier + CI completeness test |
-| INV-26 | No fitted `render_tier === 'ANNOUNCEMENT'` delivery carries an intent whose effect is outside `{NAVIGATE, HANDOFF}` | mint-per-delivery + Gate 7 |
+| INV-26 | No fitted `render_tier === 'ANNOUNCEMENT'` delivery carries an intent whose effect is outside `{NAVIGATE, HANDOFF}`, other than the one §0.9 F60 escape carrying `control.widget.dismiss` | mint-per-delivery + Gate 7 |
 | INV-27 | The availability enum has no `HELD` member and no hold field exists anywhere in the contract | the types themselves |
 | INV-28 | `FLOOR_EXEMPT(i) ⟹ i.effect ∉ {NAVIGATE, DRAFT, REQUEST_APPROVAL, COMMIT}`; a `priority: 0` `CONTROL` intent carries `control.widget.dismiss` and no other key; `\|{c ∈ C9_CAPABILITIES : c.resourceClass === 'LOCAL'}\| === 1` | three build vetoes |
-| INV-29 | `c9Floor` is total over all 56 C9-CAP keys, calls no throwing accessor, and no key evaluates to the fail-closed `STEP_UP_VERIFIED`; `∀ key : c9Floor(ref) ≥ C9_FLOOR_BASELINE[key]` | two build assertions over a pinned vector |
+| INV-29 | `c9Floor` is total over all 56 C9-CAP keys (71 once §0.7 F36a registers its set), calls no throwing accessor, and no key evaluates to the fail-closed `STEP_UP_VERIFIED`; `∀ key : c9Floor(ref) ≥ C9_FLOOR_BASELINE[key]` | two build assertions over a pinned vector |
 | INV-30 | No gate keys its antecedent on a client-supplied value; Gate 8-R keys on `record.confirmation?.requires_readback`, which is server-set and sealed inside `body_hash` | source test over gate antecedents |
 | INV-31 | `max_commit_intents === 2` holds for `APPROVAL` alone; both commits carry the same `confirmation_of_ref.ref` and the same AE capability, and consuming either marks the other consumed | build veto + mint pairing check |
 
@@ -4787,9 +5390,11 @@ second rule.
    `fetch`/`XHR`/`WebSocket`/storage/provider SDK. That is lint-enforceable only where a
    build pipeline exists; the shipping frontend is a hand-edited single file with no sources
    and no build script in the repository. Discouraged, not proven.
-5. **Gate 10 is a shadow gate.** Divergence between the tap's capability and the deterministic
-   router's reading of the lowered sentence is audited, not refused, until a promotion
-   criterion is set. Until then, "three front doors, one function" is measured, not enforced.
+5. **Gate 10 refuses what DS-02 refuses and audits the rest.** A divergence that changes the effect class or the
+   canonical owner, or that leaves an actuating tap with no reading, is refused; a divergence within one effect class and
+   one owner, and a null reading against a pointer record, are recorded and not on their own grounds refused (§3.9
+   «Gate 10 in full»; owner decision DS-02, 2026-09-16). "Three front doors, one function" is enforced across effect
+   class and owner, and measured within them.
 6. **`Lifecycle.delivery` has no canonical owner for attendance.** FR-2 forbids any
    surface presenting it as a business fact, which is a prohibition, not a capability. Until
    an appointment-acknowledgement owner is registered, "клиент подтвердил" is not a claim this
@@ -4798,9 +5403,10 @@ second rule.
    the closed delivery-template set is linted for the business predicates the delivery-record
    rules enumerate. *Evaluated at:* `EP-BUILD`.
 7. **Gate 6's second C9 branch is a weaker fence than its first**, and R3.9's non-normative
-   note says exactly how. A reader must not take the nine non-catalogue keys' Gate 6 treatment
-   for an equivalent of `assertCanExecute`; their role and risk fences are the policy row and
-   the consent class, carried at Gate 5.
+   note says exactly how. A reader must not take the C9-only keys' Gate 6 treatment (nine, and
+   twenty-four once §0.7 F36a registers its set) for an equivalent of `assertCanExecute`; their role
+   and risk fences are the policy row and the consent class, carried at Gate 5, and for the fifteen
+   of §0.7 F36a also the owner's own fence inside the owner read.
 8. **Two floor reductions exist in this contract and both are in §0.17.** A reader auditing
    this section should be able to find every one of them by reading that rule. There are two.
 ---
@@ -4897,8 +5503,8 @@ interface Lifecycle {
 *Mechanism:* `superseded_by_widget_id` written by the gateway when it mints `next_envelope`; the adapter's update path is the only write path to a delivered message.
 *Evaluated at:* gateway, when `next_envelope` is minted.
 
-**L8 — expiry is never an error.** Interacting with an expired envelope returns `outcome: 'EXPIRED'` with either a freshly composed equivalent envelope or a `LIMITATION` body with a remedy. No renderer may bind expiry to an error theme token, an error icon, `role="alert"`, or an automatic retry.
-*Mechanism:* §1.3 C4's anti-error label lint over `Cell.label` and the renderer theme-token ban; `EXPIRED` is a member of the receipt `outcome` union, not of any error type.
+**L8 — expiry is never an error.** Interacting with an expired envelope returns `outcome: 'EXPIRED'` with the §3.9 R3.9.4 successor — the predecessor's frozen `text_equivalent` plus one `REFINE` remedy — or, where R3.9.4 issues none, the code alone. No renderer may bind expiry to an error theme token, an error icon, `role="alert"`, or an automatic retry.
+*Mechanism:* §1.3 C4's anti-error label lint over `Cell.label` and the renderer theme-token ban; `EXPIRED` is an `outcome` of the gateway's response to the submission — not a member of the persisted receipt's outcome set, and not of any error type.
 *Evaluated at:* gateway token-integrity gate; renderer conformance suite (five branches per Cell).
 
 **L9 — a stale affordance must be withdrawn where the channel allows it, and refused where it does not.** On transition to `SUPERSEDED`, `EXPIRED`, `CANCELLED` or `HISTORISED`, the delivering adapter issues a best-effort withdrawal: Telegram `editMessageReplyMarkup` with empty markup; web push `getNotifications()` + `close()` by `dedupe_key`; no-op for SMS and email. **Correctness never depends on the withdrawal succeeding** — a tap on a withdrawn-but-still-visible control is refused by token integrity.
@@ -4942,8 +5548,8 @@ Rows 18–22 each carry a server-minted, expiring handle — a register read, a 
 *Evaluated at:* `EP-REGISTRY-LOAD`, `EP-MINT`.
 
 **L10 — a token ceiling is not a time limit on the user.** Every envelope whose `input_lock !== 'none'` has `on_expiry: 're_resolve'`. Re-resolution re-mints the envelope **from the canonical draft or the canonical read**, preserving the flow position (`correlation.step_index` / `step_total`) and any server-owned draft. A slow reader loses a token, never a place in the flow and never entered data that a canonical owner already holds.
-*Mechanism:* the `on_expiry` column above compiled into the emission validator as a per-kind constant; the re-resolve path is the gateway's `EXPIRED → next_envelope` branch, which reads `draft_ref` where the body has one.
-*Evaluated at:* `EP-MINT` (validator) and gateway (on submission of an expired token).
+*Mechanism:* the `on_expiry` column above compiled into the emission validator as a per-kind constant; re-resolution happens only when the §3.9 R3.9.4 remedy `REFINE` is submitted and has passed Gates 1–13 — after Gate 6 — and is performed by Gate 13's `REFINE` edge, which re-mints from the canonical draft where the server holds one (`draft_ref`) or from the canonical read. The gateway's `EXPIRED` branch itself reads nothing canonical.
+*Evaluated at:* `EP-MINT` (validator) and `EP-INGRESS` Gate 13 (on submission of the remedy).
 
 **L11 — `collapse_to_summary` requires an extension affordance.** An envelope may carry `on_expiry: 'collapse_to_summary'` only where re-resolution is impossible (the source no longer exists). It must then carry exactly one `priority: 0`, `role: 'remedy'`, `effect: 'REFINE'` intent whose activation restores the flow, and that intent is undroppable by degradation.
 *Mechanism:* emission validator rule `on_expiry === 'collapse_to_summary' ⇒ ∃! intent{priority:0, role:'remedy', effect:'REFINE'}`; the fitting algorithm's PIN step (§4.5.4 step 4) cannot drop `priority: 0`. This remedy is a `REFINE` on the widget's **own owner capability** — a principal below that capability's floor could not have received the widget at all — so it needs no floor exemption and takes none; the step-4 capacity PIN is its whole protection.
@@ -4983,7 +5589,7 @@ interface TerminalLine {
 ```
 
 **`TerminalOutcome` is derived from the `IntentReceipt`, or from the delivery record when there is none. It is never derived from the fact that a control was pressed.**
-*Mechanism:* the historisation job reads the receipt store keyed by `intent_token_hash`; it has no access to renderer state, and renderer state is never transmitted.
+*Mechanism:* the historisation job reads the intent-audit store (§4.4.1) keyed by `intent_token_hash`; it has no access to renderer state, and renderer state is never transmitted.
 *Evaluated at:* historisation job; CI test asserting `outcome === 'CONFIRMED' ⟺ action_receipt_ref !== null`.
 
 **FR3 — exactly one re-read affordance, minted at read time under current authority.** A historised envelope carries no live intent. The timeline read endpoint verifies `envelope_seal` server-side, then returns:
@@ -5070,7 +5676,7 @@ interface DeliveryRecord {
 | store | holds | ceiling | erasable on a conversation-erasure request |
 |---|---|---|---|
 | **Timeline store** | conversation turns, envelopes, bodies, minted text, `spoken_transcript`, rendered utterances | `T_TIMELINE = 180 days` from turn creation; earlier per-kind body drop (§4.4.2) | **yes, fully** |
-| **Intent-audit store** | `IntentRecord`, `WidgetIntentSubmission` metadata, `RenderReceipt`, `SuppressedEmission` | `T_AUDIT = 1095 days` (three years) from `issued_at` | **audit fields no; content fields yes** (§4.4.3) |
+| **Intent-audit store** | `IntentRecord`, `WidgetIntentSubmission` metadata, `RenderReceipt`, `SuppressedEmission`, `DivergenceAuditRecord` (§3.9) | `T_AUDIT = 1095 days` (three years) from `issued_at` (for `DivergenceAuditRecord`, from `observed_at`) | **audit fields no; content fields yes** (§4.4.3) |
 | **Receipt store** | Action Engine receipts, approval decisions, consent records, the tombstone log | append-only; retention set by the canonical owner of the action, floor `T_AUDIT` | **no** |
 
 **RT1 — the receipt store is separate and append-only.** It is written only by the Action Engine and the approval owner, never by the widget layer, the chat ingress or the gateway. It has no foreign key into the timeline store.
@@ -5124,17 +5730,24 @@ type ErasureClass =
 |---|---|
 | `intent_token_hash`, `widget_id`, `tenant_id`, `principal_proof_hash` | `AUDIT_RETAINED` |
 | `effect`, `capability`, `handoff_capability_ref`, `target`, `priority`, `widget_kind` | `AUDIT_RETAINED` |
-| `verification_floor`, `confirmation` (risk tier, reversibility, audience size, `requires_readback`, `readback_ref`, `consent_scope` registry key) | `AUDIT_RETAINED` |
+| `confirmation_subject`, `approval_decision` | `AUDIT_RETAINED` |
+| `verification_floor`, `confirmation` (risk tier, reversibility, audience size, `requires_readback`, `readback_ref`, `idempotency_key`, `approval_policy`, `consent_scope` registry key) | `AUDIT_RETAINED` |
 | `input_schema_hash`, `requested_scope_hash`, `body_hash` | `AUDIT_RETAINED` |
 | `selection_domain` (the closed-domain option ids), `c9_domain` | `AUDIT_RETAINED` |
 | `issued_at`, `expires_at`, `single_use`, `consumed_at`, `run_ref`, `approval_of_intent_ref`, `confirmation_of_ref`, `produced_by_intent_token_hash`, `action_receipt_ref` | `AUDIT_RETAINED` |
 | `frozen_nouns` (opaque handles naming canonical rows) | `AUDIT_RETAINED` |
 | `utterance_template`, `rendered_utterance`, `selected_labels`, `spoken_transcript` | `CONVERSATION_CONTENT` |
-| `selection_domain` **labels** (the human strings) | `CONVERSATION_CONTENT` |
+| `selection_domain_labels` (the human strings of `selection_domain`'s option ids, keyed by field; column `selectionDomainLabelsJson`) | `CONVERSATION_CONTENT` |
 
 The table is total over §3.7's declared members and over no others: RT5's build-time test
 enumerates the columns from the schema and fails on any column with no class or more than one,
 so a member added to §3.7 without a row here breaks the build rather than defaulting.
+
+`ConfirmationRequirement.readback_text` is `CONVERSATION_CONTENT` — a sentence the person is told — and is **not** a
+member of the persisted `IntentRecord.confirmation` (§3.7); it lives only in the sealed envelope in the timeline store,
+where RT6 erases it. *Mechanism:* the record writer's projection of `confirmation` without `readback_text`, and RT5's
+column test over that member. *Evaluated at:* `EP-MINT` (record write), `EP-BUILD` (RT5). *Status:*
+`NORMATIVE-PENDING` on **P-02**.
 
 `WidgetIntentSubmission` as persisted:
 
@@ -5142,15 +5755,27 @@ so a member added to §3.7 without a row here breaks the build rather than defau
 |---|---|
 | `widget_id`, `intent_token`, `client_nonce`, `profile_id`, `client_emitted_at` | `AUDIT_RETAINED` |
 | `readback_ack.readback_ref`, `readback_ack.body_hash` | `AUDIT_RETAINED` |
-| `inputs[k]` where the schema type is `enum` or `ref` (closed-domain option ids) | `AUDIT_RETAINED` |
-| `inputs[k]` where the schema type is `string` (free text) | `CONVERSATION_CONTENT` |
-| `inputs[k]` where the schema type is `phone`, or sensitivity is `pii` | `CANONICAL_ELSEWHERE` |
+| `inputs[k]` where the field kind is `enum` or `ref` (closed-domain option ids) | `AUDIT_RETAINED` |
+| `inputs[k]` where the field kind is `text` (free text) | `CONVERSATION_CONTENT` |
+| `inputs[k]` where the field kind is `phone` | `CANONICAL_ELSEWHERE` |
 | `readback_ack.affirmation` | `CONVERSATION_CONTENT` |
 | `spoken_transcript` | `CONVERSATION_CONTENT` |
 
 `readback_ack.affirmation` is a word the data subject said, so it is erased with the conversation; it is read at submission time only, compared against the closed affirmation vocabulary, and by no later path — which is what keeps the build-time reachability test over `AUDIT_RETAINED`-only gate inputs green.
 
-Timeline turn: the rendered utterance (`IntentReceipt.utterance_echo` as stored), the envelope `body`, `presentation.text_equivalent`, `presentation.a11y.accessible_names`, `speech`, and every narrative string are `CONVERSATION_CONTENT`. `widget_id`, `kind`, `action_receipt_ref[]` and `TerminalLine.outcome` are `AUDIT_RETAINED`.
+`DivergenceAuditRecord` as persisted:
+
+| field | class |
+|---|---|
+| `tenant_id`, `widget_id`, `tapped_intent_token_hash`, `resolved_intent_token_hash`, `resolved_effect`, `refusal_code`, `observed_at` | `AUDIT_RETAINED` |
+
+It has no `CONVERSATION_CONTENT` member: the lowered utterance the router read stays in `IntentRecord.rendered_utterance`
+and the timeline store, so RT6 erases nothing here and the audit line survives erasure as «this token's words resolved
+to that token». The table is total over `DivergenceAuditRecord`'s declared members and over no others; RT5 enumerates
+its columns like every other column of the three stores. *Mechanism:* RT5's build-time column test. *Evaluated at:*
+`EP-BUILD`.
+
+Timeline turn: the rendered utterance (`IntentReceipt.utterance_echo` as stored), the envelope `body`, `presentation.text_equivalent`, `presentation.a11y.accessible_names`, `speech`, and every narrative string are `CONVERSATION_CONTENT`. `widget_id`, `kind`, `lifecycle.delivery_channel`, `action_receipt_ref[]` and `TerminalLine.outcome` are `AUDIT_RETAINED`.
 
 **RT5 — the classification is total, and a new column cannot dodge it.** Every persisted column of the three stores carries exactly one `ErasureClass`.
 *Mechanism:* a build-time test enumerates the columns of each store from the schema and fails on any column with no class or more than one. Adding a column without classifying it breaks the build.
@@ -5261,17 +5886,17 @@ type TokenCarrier =
 |---|---|---|---|---|
 | `RICH_INTERACTIVE` | `pwa`, `native-shell`, `telegram-miniapp` | 12 | `json_body` | up to `COMMIT` |
 | `RICH_CONSTRAINED` | `telegram-bot` | 8 | `callback_data` (64 B) | up to `COMMIT` |
-| `ANNOUNCEMENT` | `web-push` | 0–2 | `notification_action` | **`NAVIGATE` / `HANDOFF` only** |
+| `ANNOUNCEMENT` | `web-push` | 0–2 | `notification_action` | **`NAVIGATE` / `HANDOFF` only**, plus the F60 escape (CH1) |
 | `SPOKEN` | `realtime-voice` | 5 + overflow | `spoken_alias` | up to `COMMIT`, readback mandatory |
-| `TEXT_ONLY` | `sms`, `email` | 1 | `signed_path_segment` | **`HANDOFF` only** |
-| `PUBLIC_READ` | `web-public`, `public-community` | 2 | `json_body` | **`NAVIGATE` / `HANDOFF`** |
-| `ANONYMOUS_CHAT` | `guest-chat` | 4 | `json_body` | **`REFINE` / `HANDOFF`** |
+| `TEXT_ONLY` | `sms`, `email` | 1 | `signed_path_segment` | **`HANDOFF` only**, plus the F60 escape (CH1) |
+| `PUBLIC_READ` | `web-public`, `public-community` | 2 | `json_body` | **`NAVIGATE` / `HANDOFF`**, plus the F60 escape (CH1) |
+| `ANONYMOUS_CHAT` | `guest-chat` | 4 | `json_body` | **`REFINE` / `HANDOFF`**, plus the F60 escape (CH1) |
 
-**CH1 — the tier ceiling is a maximum, never a permission.** A tier can only remove effect classes. Whether a surviving intent may be *actuated* is decided by the server-derived `VerificationLevel` against the intent's `verification_floor`, which is derived from the capability registry and policy, not from the tier and not from the emitter.
+**CH1 — the tier ceiling is a maximum, never a permission.** A tier can only remove effect classes: each effect-ceiling cell is an allowlist of effect classes, and on every tier whose cell does not reach `CONTROL`, the one tokened escape intent of §0.9 F60, carrying `control.widget.dismiss` and no other key, is admitted as well. Whether a surviving intent may be *actuated* is decided by the server-derived `VerificationLevel` against the intent's `verification_floor`, which is derived from the capability registry and policy, not from the tier and not from the emitter.
 *Mechanism:* the fitter's CARRIER CEILING step subtracts; the verification floor is a separate, earlier subtraction and is re-evaluated at the gateway on submission.
 *Evaluated at:* `EP-FIT` (subtraction) and IntentGateway verification-floor gate (actuation).
 
-**CH2 — web push carries `NAVIGATE` and `HANDOFF` only.** No `DRAFT`, `REQUEST_APPROVAL` or `COMMIT` intent is ever emitted onto a notification action, regardless of risk tier or reversibility.
+**CH2 — web push carries `NAVIGATE`, `HANDOFF` and the escape.** No `DRAFT`, `REQUEST_APPROVAL` or `COMMIT` intent, and no `CONTROL` intent other than the §0.9 F60 escape carrying `control.widget.dismiss`, is ever emitted onto a notification action, regardless of risk tier or reversibility.
 *Mechanism:* the tier table above is a compiled constant in the fitter; `web-push` maps to `ANNOUNCEMENT` with a two-member effect allowlist. At the gateway the refusal is keyed on the **record's** effect and the envelope's minted `delivery_channel`, never on the submitted `profile_id`, which is advisory.
 *Evaluated at:* `EP-FIT`, before the envelope is handed to the push adapter; and `EP-INGRESS`.
 
@@ -5836,10 +6461,10 @@ RUN_OPENING(r: CapabilityRef | null) :=
                  //    fail-closed direction.
 ```
 
-*Mechanism:* (a) the emission validator refuses any intent whose `subjectCapability(i)` satisfies `RUN_OPENING` on an envelope whose `origin.trigger` is `'proactive'`. `subjectCapability(i)` returns `null` for a `NONE` effect and for a `w`/`i`/`s`/`detail` `NAVIGATE`, which is why `RUN_OPENING` is stated ref-nullably and is total over what it is passed. **No field is added to any C9 contract**: `mode` is an existing mandatory closed-union member of `C9Capability`, and `C9_REGISTRY_HASH` is unchanged. (b) A standing query — *any `IntentRecord` with a non-null `run_ref` whose emitting envelope had `trigger: 'proactive'`* — is one of the named leak tests, run in CI against recorded emissions.
+*Mechanism:* (a) the emission validator refuses any intent whose `subjectCapability(i)` satisfies `RUN_OPENING` on an envelope whose `origin.trigger` is `'proactive'`. `subjectCapability(i)` returns `null` for a `NONE` effect and for a `w`/`i`/`s`/`detail` `NAVIGATE`, which is why `RUN_OPENING` is stated ref-nullably and is total over what it is passed. **No field is added to any C9 contract**: `mode` is an existing mandatory closed-union member of `C9Capability`, and this rule leaves `C9_REGISTRY_HASH` unchanged. (b) A standing query — *any `IntentRecord` with a non-null `run_ref` whose emitting envelope had `trigger: 'proactive'`* — is one of the named leak tests, run in CI against recorded emissions.
 *Evaluated at:* `EP-MINT` (a), `EP-BUILD` over recorded emissions (b).
 
-`[NON-NORMATIVE]` `mode` distinguishes exactly the right set: `READ` keys are provenance — a proactive envelope legitimately names a measurement read as the source of a metric — while `PROPOSE_ONLY` and `OWNER_HANDOFF` can only be exercised *inside* a run, so an intent naming one is a run-opener by construction. Membership is 15 of the 56 registered keys (13 `PROPOSE_ONLY` + 2 `OWNER_HANDOFF`), verified by enumerating the live registry.
+`[NON-NORMATIVE]` `mode` distinguishes exactly the right set: `READ` keys are provenance — a proactive envelope legitimately names a measurement read as the source of a metric — while `PROPOSE_ONLY` and `OWNER_HANDOFF` can only be exercised *inside* a run, so an intent naming one is a run-opener by construction. Membership is 15 of the 56 registered keys (13 `PROPOSE_ONLY` + 2 `OWNER_HANDOFF`), verified by enumerating the live registry; once §0.7 F36a registers its set, which adds only `READ` keys, it is 15 of 71.
 
 Companion leak queries, named now and run later: a proactive envelope that produced a run with no human-actuated intent; an `AgentTask` persisted with an autonomy level above shadow; any `IntentRecord` with effect `DRAFT` or `COMMIT` whose emitting envelope was proactive.
 
@@ -5955,7 +6580,7 @@ At `EP-REGISTRY-LOAD`, or the process does not start: `MOMENT_REGISTRY` carries 
 
 # Annex A — Prerequisites, build status and scope rulings
 
-*Appended to MAYA WIDGET CONTRACT v1. Normative.*
+*Appended to MAYA WIDGET CONTRACT v1.1. Normative.*
 
 ---
 
@@ -5986,11 +6611,12 @@ Consequently **every row of §A1 is a prerequisite, not a regression**, and ever
 
 Columns: **Component** — the named artefact. **Depends on it** — the contract rules that become inoperative without it. **Status** — `[ABSENT]` (nothing exists), `[PARTIAL]` (something exists but does not do the work the rule names), `[UNENFORCEABLE-TODAY]` (buildable in principle, but no substrate exists in which the mechanism can run). **Package** — the package of the 16 (K1–K16, 6 waves) that must build it.
 
-### A1.1 The gateway, its two routes, and the stores
+### A1.1 The gateway, the programme's three routes, and the stores
 
 | # | Component | Depends on it | Status | Package |
 |---|---|---|---|---|
-| **P-01** | **`IntentGateway`** — Step 0 plus Gates 1–13, one ordered pipeline, and the programme's only two new routes `POST /api/widgets/resolve`, `POST /api/widgets/intent` | FR-1, FR-2, FR-3, FR-4, FR-5, FR-7, FR-9, FR-13; §3.9 R3.9.1; every `EP-INGRESS` rule in the contract | `[ABSENT]` — `api/widgets` 0 hits; `IntentGateway` 0 hits | **K3** (wave 2) |
+| **P-01** | **`IntentGateway`** — Step 0 plus Gates 1–13, one ordered pipeline, and the programme's only three new routes: the two widget routes `POST /api/widgets/resolve`, `POST /api/widgets/intent`, and the internal Telegram command ingress of §3.12 R3.12.7 (owner ruling R-03), which is not a widget route and whose build is row **P-33**. The one further ingress owner ruling R-04 authorises, the staff revoke-only consent door of §3.5 R3.5.5, is counted beside these three; it is not a widget route, none of the three reaches it, and its build is row **P-34** | FR-1, FR-2, FR-3, FR-4, FR-5, FR-7, FR-9, FR-13; §3.9 R3.9.1; every `EP-INGRESS` rule in the contract other than §3.12 R3.12.7 | `[ABSENT]` — `api/widgets` 0 hits; `IntentGateway` 0 hits | **K3** (wave 2) |
+| **P-33** | **The internal Telegram command ingress** — the one internal service-to-service route of §3.12 R3.12.7, declared outside the widget layer and reachable through no public edge, with the tests its clauses name | §3.12 R3.12.7; §3.9 Step 0 for the Telegram typed carrier | `[ABSENT]` — no such route is declared in `maya-saas-backend/src` | **K14** (wave 6) |
 | **P-02** | **`IntentRecord`** — the stored record and its type, including `principal_proof_hash`, `capability`, `effect`, `verification_floor`, `widget_kind`, `frozen_nouns` | Gate 1 single-use consumption, Gate 3 principal binding, Gate 7's COMMIT check, §3.7, §4.2's frozen receipt, §0.4 F15's noun-resolver input set, idempotency of a tap, "who pressed what" audit | `[ABSENT]` — 0 hits | **K3** (wave 2) |
 | **P-03** | **Timeline store** — conversation turns, envelopes, bodies, minted text, `spoken_transcript`, rendered utterances | §4.2's week-later receipt; §4.4.2 retention and per-kind body drop; §4.4.1 RT3(b)'s history-blind replay; §4.7 V5's "stored exactly once"; `EP-FETCH` timeline read | `[ABSENT]` — 0 hits | **K3** (wave 2) |
 | **P-04** | **Receipt store** — append-only, written only by the Action Engine and the approval owner, no FK into the timeline store | §4.2 FR2 (`TerminalLine.outcome === 'CONFIRMED' ⟺ action_receipt_ref !== null`), invoked by §4.3 DR2; §4.4.1 RT1; §4.4.3's tombstone log; FR-12 | `[ABSENT]` — 0 hits. `C9WorkReceipt` is a different artefact | **K3** creates it; **K7/K9/K11/K12** write it; **K12** proves the split by erasure replay |
@@ -5999,7 +6625,7 @@ Columns: **Component** — the named artefact. **Depends on it** — the contrac
 | **P-07** | **Capability-gap ledger** — the 8 gap keys as first-class entries with `owner: NONE`, plus the gaps §0.7 F37 and §4.3 DR4 add | §1.6.7 P2; §1.3 C5; §2 K20; §2.6.14 LIMIT.1; §2.6.18 CONSENT.5; §2.6.20 PAY.4; §2.6.22 ARTIFACT.4; **§A2's entire mechanism** | `[ABSENT]` — `capability_gap_ref` 0 hits | **K1** (wave 1 — the only wave executable under this cycle's fence) |
 | **P-08** | **Server-owned draft store** — the canonical draft owner's draft, named by `confirmation_of_ref.kind === 'draft'` | §0.12 F69's key-space rule (the draft owner names the Action Engine key); §0.13 F74; §3.2's effect table ("draft store only"); FR-6b, FR-7 | `[ABSENT]` — 0 hits | **K3** (store) + **K7** (booking draft owner, wave 3) |
 | **P-09** | **Consent-register read projection** — the `CONSENT_REGISTER` owner class resolving to a registered `consent.*` **read** capability, and `register_ref` as an append-only handle | `CONSENT_STATE` emittability (§2.7, §2 K23); §2.6.18 CONSENT.1–6; the `scope_text` / `change_effect_text` body | `[PARTIAL]` — the canonical facts **do** exist: `prisma/schema.prisma:1593 model ClientConsentFact`, `:1573-1574 privacyConsentAt/marketingConsentAt`, `:2584 MarketingConsentEvidence`, and a reader `effectiveClientConsents` (`src/crm/client-effective-consent.ts:53`, used at `client-profile-read.service.ts:177`). What is absent is a **registered read key**: `MAYA_AI_TOOL_CATALOG` has 47 names, **zero** containing `consent`, `identity` or `privacy`, so `ownerClassKeys(CONSENT_STATE) ∩ REGISTERED_KEYS = ∅` and K20 derives `emittable = false` | **K12** (wave 5) |
-| **P-10** | **`WIDGET_CAPABILITY_POLICY`** (`min_verification`, `consent_class` and `dispatch_is_synchronous` per key, total over `C9_CAPABILITIES`'s 56 keys **and over those only** — §0.7 F28; AE-CAP totality is carried instead by `AE_WIDGET_COMMIT_ALLOWLIST` ∪ `AE_CAPABILITY_GAP_LEDGER` under F31) and **`CONTROL_REGISTRY`** (closed at three keys) | §0.8 F45 `subjectFloor`; §0.8 F45's totality and monotonicity; §0.8 F50's fail-closed default; §0.8 F54 Gate 6 for `CONTROL`; §0.14 F80's `consent_class` fence; FR-4, FR-6d | `[ABSENT]` — both 0 hits | **K2** (the tables, wave 1) over **K1**'s canon |
+| **P-10** | **`WIDGET_CAPABILITY_POLICY`** (`min_verification`, `consent_class` and `dispatch_is_synchronous` per key, total over `C9_CAPABILITIES`'s 56 keys (71 once §0.7 F36a registers its set) **and over those only** — §0.7 F28; AE-CAP totality is carried instead by `AE_WIDGET_COMMIT_ALLOWLIST` ∪ `AE_CAPABILITY_GAP_LEDGER` under F31) and **`CONTROL_REGISTRY`** (closed at three keys) | §0.8 F45 `subjectFloor`; §0.8 F45's totality and monotonicity; §0.8 F50's fail-closed default; §0.8 F54 Gate 6 for `CONTROL`; §0.14 F80's `consent_class` fence; FR-4, FR-6d | `[ABSENT]` — both 0 hits | **K2** (the tables, wave 1) over **K1**'s canon |
 
 ### A1.2 The derivations, and the floor that cannot be reached
 
@@ -6020,6 +6646,7 @@ Columns: **Component** — the named artefact. **Depends on it** — the contrac
 | — | *(context)* the five base routes `shell.root`, `shell.account`, `shell.connections`, `shell.privacy`, `shell.notifications` | `targetFloor('s')`; every `HANDOFF`; §3.5 R3.5.4 ("a handoff whose target has no live surface is not emitted") | `[ABSENT]` — `shell.root` 0, `shell.account` 0, `route_key`/`routeKey` 0 in `app.html`. The shipping frontend has an `S` router map (`сайт и приложение/app.html:39981`) keyed on its own screen names, which is not a `route_key` registry | **K5** (wave 2) |
 | **P-16** | **`control.widget.dismiss`** — the handler that sets `Lifecycle.delivery` on one emission, `CONTROL_FLOOR = ANONYMOUS` | §0.9 F60's escape verb on **every non-`RICH_INTERACTIVE` tier** — i.e. Telegram, web push, SMS, e-mail, voice. Without it the mandatory escape is unreachable off the PWA, contradicting §3.12.6, §4.7 V9, §4.8 A-5 | `[ABSENT]` — 0 hits | **K3** (handler, wave 2) + **K6** (the `EP-FIT` branch that selects it, wave 2) |
 | **P-17** | **`control.delivery.resolve`** — the handler that resolves one `dedupe_key` across channels, `CONTROL_FLOOR = BOUND_CLIENT` | §0.7 F27; cross-channel duplicate suppression; §4.9's proactive `dedupe_key` | `[ABSENT]` — 0 hits | **K13** (wave 5 — "0 duplicate deliveries across push, chat and the Telegram mirror over a 14-day window") |
+| **P-34** | **The staff marketing-revoke door** — the one staff ingress of §3.5 R3.5.5 onto the existing canonical consent owner (owner ruling R-04), declared outside the widget layer and outside the ingress of §3.12 R3.12.7, with the owner's staff-revoke branch and contact match, the executor's staff source types, the Action Engine's staff-revoke branch of R3.5.5 (j), and the tests its clauses name | §3.5 R3.5.5; the engine exception named in §0.16 FR-6a and §3.4 R3.4.4 | `[ABSENT]` — no staff path records a marketing-consent withdrawal: the owner refuses any actor but the client's own verified channel link (`package5-wave3/package5-wave3-canonical-cutover.service.ts:265-289`), the policy resolver requires a durable channel binding (`action-engine/action-engine.policy-resolver.ts:748-756`), the capability's input contract requires client channel authority for every consent write (`action-engine/package5-wave3-executable.contract.ts:278`), and the executor writes every consent fact as `'client_command'` (`package5-wave3/package5-wave3.service.ts:1384`) | **K14** (wave 6) |
 
 *`control.run.cancel` is the only one of the three control keys whose owner endpoint exists today: `src/orchestration/c9.controller.ts:92`, write-once under `cancelKeyHash`, principal- and tenant-locked, `c9.store.ts:588-615`. The key itself is not a C9 canon member, by design (§0.7 F27).*
 
@@ -6034,7 +6661,7 @@ Columns: **Component** — the named artefact. **Depends on it** — the contrac
 | # | Component | Depends on it | Status | Package |
 |---|---|---|---|---|
 | **P-19** | **Renderer sandboxing / import-graph allowlist** — renderer modules receive no token-bearing props and import no `fetch`/`XHR`/`WebSocket`/storage/provider SDK | §4.2 FR1; §3.16.4; §0.16 F89's FR-1 row and its build import test; **and, through NT1, every §4 clause whose evaluation point resolves to `EP-BUILD`** — A-1's renderer conformance suite, A-4's visual regression matrix, A-9's `prefers-reduced-motion` snapshots, A-10's viewport matrix, A-11, A-12, A-15, A-17, A-18, A-21 (gate G10), §4.5.4 CH3, C6, V7, V8, V10, V11, NT2's G6 lint, NT8's G12 parser check, and FR-11's renderer conformance suite | `[UNENFORCEABLE-TODAY]` — the shipping frontend is a hand-edited single file: `сайт и приложение/app.html` is **42,453 lines / 2.70 MB**, with **no sources, no build script and no bundler**. The only `package.json` anywhere in either tree outside `node_modules` is `maya-saas-backend/package.json`. `app-aurora.html` and `build.js` do not exist. There is no import graph to allowlist, and no lint stage in which to run one | **K5** ("exactly one shell source, emitted once", wave 2) must create the build; **K15** (wave 6) proves the bundle disposition. Until a build exists these are **discouraged, not proven** — Section 0 names three dependents; the true dependent set is the ~two dozen listed at left |
-| **P-20** | **Gate 10 promotion criterion** — the rule that converts the divergence audit from shadow to refusal | "Three front doors, one function" — the guarantee that a tap, a typed sentence and a spoken utterance resolve to the *same* capability. Gate 10 runs the deterministic text router over the lowered utterance and compares its resolved capability to `IntentRecord.capability` | `[ABSENT]` **twice over**: the gate itself is `[TO BUILD]` (P-01), *and* no promotion criterion is defined anywhere in the contract. §3.16.5 states it plainly — divergence is "audited, not refused, until a promotion criterion is set", so "three front doors, one function" is **measured, not enforced** | **K3** builds the gate (wave 2); **K14** exercises it across the ~45 Telegram commands (wave 6). **The criterion itself is an owner decision, not a package deliverable** — it must be set before Gate 10 may refuse |
+| **P-20** | **Gate 10 refusal criterion** — set by owner decision DS-02 (2026-09-16) and stated in §3.9 «Gate 10 in full» | "Three front doors, one function" — Gate 10 runs the deterministic router over the lowered utterance and compares its match with the tapped record through `subjectCapability(record)` | `[ABSENT]` — the gate is `[TO BUILD]` (P-01); the criterion is defined | **K3** builds the gate (wave 2); **K14** exercises it across the ~45 Telegram commands (wave 6) |
 
 ### A1.6 Acts with no canonical owner
 
@@ -6058,14 +6685,14 @@ Columns: **Component** — the named artefact. **Depends on it** — the contrac
 
 **Corrected figure: three acts with no owner at all, one with an owner unreachable from the widget source type, four with a reachable registered owner under a different name.** That residual's operative consequence is unchanged — none of the eight reserved names is a registry member — but its *stake* is larger than stated, and this must be carried into §0.7 F37's registration gate:
 
-> **A1.6.2 — NORMATIVE.** `package5.wave3.record-client-consent.execute.v1` is registered today with `policyDecision: ALLOW`, `approvalRequirement: 'NONE'`, `targetKind: 'client_consent'` and `allowedSourceTypes` including `authenticated_request`. It is therefore the *reachable* canonical owner of all four consent acts, under a name none of the eight reserved names matches. **The fence that keeps it out of the widget layer is already declared, and it is not a policy row.** §0.7 F32's `CONSENT(cap)` — a two-disjunct predicate, restated nowhere — holds for this key on its `targetKind` disjunct; §0.7 F31's start-up assertion set carries `row ⇒ CONSENT(cap) ∨ IDENTITY(cap) ⇒ fail`, so the key can **never** hold a row in `AE_WIDGET_COMMIT_ALLOWLIST`; and §0.13 F72's `requiredConfirmationKind` is a lookup with **no default branch**, so an un-allowlisted key resolves to no confirmation kind at all and `refuseMint('capability_not_allowlisted')` fires. No `COMMIT` naming it is mintable onto `SETTINGS_DRAFT` or onto any other kind. **No `WIDGET_CAPABILITY_POLICY` row is required or permitted for it**: §0.7 F28 makes that table total over C9-CAP's 56 rows *and over those only*, and this is an AE-CAP key. *Mechanism:* F31's `EP-REGISTRY-LOAD` veto, F72's `EP-MINT` refusal, and Gate 7's re-check. *Evaluation points:* `EP-REGISTRY-LOAD`, `EP-MINT`, `EP-INGRESS` Gate 7. This is what FR-6a holding **fail-closed and non-vacuously** looks like once the owner is named: the act has a reachable owner, and the widget layer still cannot reach it. *(§2.7's own `[NON-NORMATIVE]` note anticipates the other half: the marketing-consent change path can be routed to that owner from a shell surface — a class-`s` `HANDOFF`, which confers nothing — well before any `consent.*` read key is registered.)*
+> **A1.6.2 — NORMATIVE.** `package5.wave3.record-client-consent.execute.v1` is registered today with `policyDecision: ALLOW`, `approvalRequirement: 'NONE'`, `targetKind: 'client_consent'` and `allowedSourceTypes` including `authenticated_request`. It is therefore the *reachable* canonical owner of all four consent acts, under a name none of the eight reserved names matches. **The fence that keeps it out of the widget layer is already declared, and it is not a policy row.** §0.7 F32's `CONSENT(cap)` — a two-disjunct predicate, restated nowhere — holds for this key on its `targetKind` disjunct; §0.7 F31's start-up assertion set carries `row ⇒ CONSENT(cap) ∨ IDENTITY(cap) ⇒ fail`, so the key can **never** hold a row in `AE_WIDGET_COMMIT_ALLOWLIST`; and §0.13 F72's `requiredConfirmationKind` is a lookup with **no default branch**, so an un-allowlisted key resolves to no confirmation kind at all and `refuseMint('capability_not_allowlisted')` fires. No `COMMIT` naming it is mintable onto `SETTINGS_DRAFT` or onto any other kind. **No `WIDGET_CAPABILITY_POLICY` row is required or permitted for it**: §0.7 F28 makes that table total over C9-CAP's 56 rows (71 once §0.7 F36a registers its set) *and over those only*, and this is an AE-CAP key. *Mechanism:* F31's `EP-REGISTRY-LOAD` veto, F72's `EP-MINT` refusal, and Gate 7's re-check. *Evaluation points:* `EP-REGISTRY-LOAD`, `EP-MINT`, `EP-INGRESS` Gate 7. This is what FR-6a holding **fail-closed and non-vacuously** looks like once the owner is named: the act has a reachable owner, and the widget layer still cannot reach it. *(§2.7's own `[NON-NORMATIVE]` note anticipates the other half: the marketing-consent change path can be routed to that owner from a shell surface — a class-`s` `HANDOFF`, which confers nothing — well before any `consent.*` read key is registered.)*
 
 ---
 
 ### A1.7 The contract's own machinery — P-23 … P-32
 
-§0.18 F92 declares **thirty-two** prerequisite rows; F93 names the thirteen this contract's own machinery depends on, and §A1.1–§A1.7 together carry all thirty-two. §A1.1–§A1.6 detail the
-twenty-two that are components of the product. The remaining ten are components of **this
+§0.18 F92 declares **thirty-four** prerequisite rows; F93 names the thirteen this contract's own machinery depends on, and §A1.1–§A1.7 together carry all thirty-four. §A1.1–§A1.6 detail the
+twenty-four that are components of the product (P-01 … P-22, P-33 and P-34). The remaining ten are components of **this
 contract's own enforcement machinery** — the registries, assertions and ledgers without which
 the contract's rules are statements rather than fences. They were cited by `NORMATIVE-PENDING`
 statuses throughout §§0–4 with no row to resolve them against; the rows are here.
@@ -6080,8 +6707,8 @@ Every one is `[ABSENT]`: the widget layer does not exist in any form (§A0.5).
 | **P-26** | **Gate 6's key-space dispatch** — the four-branch dispatch on `subjectCapability(record).space`, scoped by effect | §0.8 F54; §3.9 «Gate 6 in full»; FR-6a … FR-6f | **K4** (wave 2) |
 | **P-27** | **The `controlledFixtureMode === false` build assertion** — without it `APPROVER_ROLES` admits six roles where the canonical policy names two | §0.16 F90(4), which bounds the FR-6f row; §3.11 R3.11.6 | **K3** (wave 2) |
 | **P-28** | **The widget `ActionSourceType` discipline** — the widget layer's own source type, and the assertion that a widget-minted request never claims `legacy_bridge` or `synthetic_shadow` | §0.7's `allowedSourceTypes` conditions; Gate 14; FR-3 | **K4** (wave 2) |
-| **P-29** | **`MECHANISM_GAP_LEDGER`** — the ledger itself, `MG-P01` … `MG-P32`, total over these thirty-two rows, from which every status count is printed at build | §0.18 F92; §A2's entire mechanism; §A5's refusal to transcribe a tally | **K1** (wave 1) |
-| **P-30** | **The gateway's record fields and the spoken-readback path** — `IntentRecord`'s `priority`, `widget_kind`, `body_hash`, `selection_domain`, `c9_domain` and `produced_by_intent_token_hash`, plus `ReadbackAck` and Gate 8-R | §3.7's declaration; Gate 5's recompute; Gate 8-R; §4.7 V4 | **K3** (wave 2) + **K6** (voice) |
+| **P-29** | **`MECHANISM_GAP_LEDGER`** — the ledger itself, `MG-P01` … `MG-P34`, total over these thirty-four rows, from which every status count is printed at build | §0.18 F92; §A2's entire mechanism; §A5's refusal to transcribe a tally | **K1** (wave 1) |
+| **P-30** | **The gateway's record fields and the spoken-readback path** — `IntentRecord`'s `priority`, `widget_kind`, `body_hash`, `selection_domain`, `c9_domain`, `confirmation_subject`, `approval_decision` and `produced_by_intent_token_hash`, plus `ReadbackAck` and Gate 8-R | §3.7's declaration and R3.7.5; Gate 5's recompute; §2.6.5 BOOK.1's Gate 7 half; Gate 13's `APPROVAL` decision routing; Gate 8-R; §4.7 V4 | **K3** (wave 2) + **K6** (voice) |
 | **P-31** | **`A11yBlock.accessible_names`** — the total, closed name map keyed through `refKey(ref)`, and `nameSourceOf`'s seven branches | §4.8 A-0, A-2, A-3; §0.11 F67–F68 | **K5** (wave 2) |
 | **P-32** | **The moment, notification-consent and template catalogues** — `MOMENT_REGISTRY` (twelve rows), `NOTIFICATION_CONSENT_REGISTRY`, `MOMENT_TEMPLATES`, and the `EP-REGISTRY-LOAD` resolution chain over them | §4.9.3 PR3; `ProactiveProvenance`; every proactive emission | **K13** (wave 5) |
 
@@ -6101,7 +6728,7 @@ Every one is `[ABSENT]`: the widget layer does not exist in any form (§A0.5).
 |---|---|---|
 | **§2 K20** — `emittable(kind) = ∃ k ∈ ownerClassKeys(kind) : k ∈ REGISTERED_KEYS` | `composeEnvelope` **refuses** a kind whose `emittable` is false and emits a `LIMITATION` carrying the `capability_gap_ref` mapped from that owner class, with no intent. `emittable` is **derived, never authored** | `EP-REGISTRY-LOAD`, then `EP-COMPOSE` on every emission |
 | **§1.6.7 P2** — the /unsubscribe clause | If a remedy has no canonical owner, the envelope MUST carry a `Limitation` with a non-null `capability_gap_ref` and MUST NOT carry an intent that promises the remedy | `EP-MINT` |
-| **§1.3 C5** — the remedy-or-gap rule | A `Cell` in state `NOT_MEASURED`/`UNAVAILABLE` either names a real intent present in this envelope or forces `next_intent_ref: null` **and** a non-null `capability_gap_ref`. This forces the gap onto the record from the *Cell* side, so it cannot be omitted by an emitter that simply declines to mint an intent | `EP-MINT` |
+| **§1.3 C5** — the remedy-or-gap rule | A `Cell` in state `NOT_MEASURED`/`UNAVAILABLE` either names a real intent present in this envelope or forces `next_intent_ref: null` **and** a non-null `capability_gap_ref` — except a `PERMISSION` mask, which forces `next_intent_ref: null` and no gap (§1.3 C5). This forces the gap onto the record from the *Cell* side, so it cannot be omitted by an emitter that simply declines to mint an intent | `EP-MINT` |
 | **§2.6.14 LIMIT.1** — no button for a capability with no owner | When `capability_gap_ref` is non-null, `remedy_intents` must be empty and the text must carry the gap sentence | `EP-MINT` |
 
 **A2.4 — the evaluation point.** NORMATIVE-PENDING is evaluated at **`EP-REGISTRY-LOAD`, and again at `EP-COMPOSE` on every emission.** At `EP-REGISTRY-LOAD` the capability-gap ledger (P-07) is read and every `[ABSENT]` mechanism named in §A1 is bound to its gap key; a §A1 row with no gap key fails the start-up assertion and the process does not start. At `EP-COMPOSE` K20's derivation runs per emission. `EP-MINT` is the backstop: P2, C5 and LIMIT.1 refuse an envelope that reached the minter with an actuating intent and a non-null gap ref. **Three points, all fail-closed, none of them the renderer.**
@@ -6122,13 +6749,13 @@ Every one is `[ABSENT]`: the widget layer does not exist in any form (§A0.5).
 
 ## A3 The schema-scope ruling
 
-The owner's hard constraint reads: **"The contract must require NO C9 contract change and NO schema change."** The C9 half holds and is verified. The schema half needs an honest, three-part answer rather than a yes or a no.
+The owner's hard constraint reads: **"The contract must require NO C9 contract change and NO schema change."** The C9 half holds and is verified for the fifty-six keys registered before §0.7 F36a. The one C9 change the owner's later ruling R-01 (Decision Sheet 04) admits is F36a's enumerated read set, which F36a's registry pin test verifies in the commit that registers it. The schema half needs an honest, three-part answer rather than a yes or a no.
 
 **A3.1 — THIS ARCHITECTURE CYCLE makes 0 schema changes. This is a fact, and it is already true.**
 
 Verified: the canonical repository's working tree at branch `codex/maya-identity-consent-20260913` carries exactly **one** modified file — `docs/rebuild/MAYA-CHAT-FIRST-UX-OWNER-DECISIONS.md`, a documentation file. **Zero** changes to `maya-saas-backend/prisma/schema.prisma`; **zero** new entries under `prisma/migrations` (97, unchanged, latest `20260913160000_chapter9_orchestration_foundation`). The primary working tree carries no Prisma or migration change either. §3's and §4's own scope discipline states it: *"Architecture only. Runtime changes: 0. Schema changes: 0. Migrations: 0."* **This is not a promise about the future; it is a verified property of the present.**
 
-The C9 half is likewise verified and is not in question: §0.7 F36 deletes every capability key §§1–4 invented (`orchestration.run.read`, `orchestration.run.cancel`, `booking.reschedule.propose` — 0 hits each); the `booking_effect` registry flag is void (0 hits); §0.13 F72 and §0.7 F33 derive the confirmation kind from **existing** `RegisteredActionCapabilityV1` fields (`targetKind`, `riskFacets`, `policyDecision`); the three control keys are widget-layer-only by design; and FR-16 asserts `C9_REGISTRY_HASH` (`src/orchestration/c9.registry.ts:177`) unchanged at `EP-BUILD`. `C9_CAPABILITIES` = 47 catalogue names + 9 extras = **56 keys**, unchanged.
+The C9 half is likewise verified and is not in question: §0.7 F36 deletes every capability key §§1–4 invented (`orchestration.run.read`, `orchestration.run.cancel`, `booking.reschedule.propose` — 0 hits each); the `booking_effect` registry flag is void (0 hits); §0.13 F72 and §0.7 F33 derive the confirmation kind from **existing** `RegisteredActionCapabilityV1` fields (`targetKind`, `riskFacets`, `policyDecision`); the three control keys are widget-layer-only by design; and FR-16 asserts, through §0.7 F36a's registry pin test, that `C9_REGISTRY_HASH` (`src/orchestration/c9.registry.ts:177`) equals the value that set pins once it registers, at `EP-BUILD`. `C9_CAPABILITIES` = 47 catalogue names + 9 extras = **56 keys**, and 47 + 24 = **71 keys** once §0.7 F36a registers its set.
 
 **A3.2 — the IMPLEMENTATION requires additive widget-layer stores. They touch no canonical business table and hold no business state.**
 
@@ -6255,7 +6882,7 @@ All copies embed the same `PARTNER_TOKEN` (`'U7nDBjvTOj21WqF0y94l'`), set `Acces
 
 ## A5 Closing statement
 
-§A1 enumerates the prerequisite components P-01 … P-32 — the twenty-two product components of §A1.1–§A1.6 and the ten machinery components of §A1.7. **Their per-status counts are not transcribed here.** F92 requires the build status of every mechanism this contract names to be printed from `MECHANISM_GAP_LEDGER` at `EP-BUILD`, and a tally written into prose is a second record of the same thing that drifts the moment one row changes — which is what happened to the count that stood here. §A2 binds each of them to the existing capability-gap machinery with a fail-closed default evaluated at `EP-REGISTRY-LOAD`, `EP-COMPOSE` and `EP-MINT`. §A3 states the schema position without narrowing it silently and hands the decision to the owner as D12. §A4 records five repository defects that the contract cannot reach and does not claim to.
+§A1 enumerates the prerequisite components P-01 … P-34 — the twenty-four product components of §A1.1–§A1.6 (P-01 … P-22, P-33 and P-34) and the ten machinery components of §A1.7. **Their per-status counts are not transcribed here.** F92 requires the build status of every mechanism this contract names to be printed from `MECHANISM_GAP_LEDGER` at `EP-BUILD`, and a tally written into prose is a second record of the same thing that drifts the moment one row changes — which is what happened to the count that stood here. §A2 binds each of them to the existing capability-gap machinery with a fail-closed default evaluated at `EP-REGISTRY-LOAD`, `EP-COMPOSE` and `EP-MINT`. §A3 states the schema position without narrowing it silently and hands the decision to the owner as D12. §A4 records five repository defects that the contract cannot reach and does not claim to.
 
 Against the owner's bar, and for the class of finding this annex addresses: **an unmarked claim about an unbuilt mechanism is an unproven claim; a marked one, bound to a gap key and a refusal, is a declared prerequisite.** Every such claim in this contract is now marked. `[NON-NORMATIVE]` The residual findings this annex does not close are the ones §0.16 F90 and §0.21 carry, in the wording those clauses use; this statement does not enumerate them a second time. What follows was written against an earlier body and is retained only as the reason the annex exists. The two findings this annex does **not** close, because they are not in its scope, are the two conferral-fence falsifications (FR-6c's bulk-send ceiling and FR-6d's `'financial'`-token classifier) and the FR-3 authority-gate gap over the Action Engine key space — those are defects in Section 0's derivations, not missing components, and they require an edit to Section 0 rather than a status marker. §A1.6.2 is the one place where this annex adds a normative fence of its own, because a registration gate with four live keys behind it is a materially different gate from one with none.
 
@@ -6362,3 +6989,427 @@ the defect generator, not any single rule.
 | EC-18 | §2.6.13 PROGRESS; §2 K22's derivation; §4.9.4 PR5b | `steps[].unknown.next_intent_ref` as a live path; `reading_order` = exactly `interactive_paths`; "each moment template declares `required_cells`" | **Amended / declared.** §0.19 deleted `steps[].unknown`, so PROGRESS's path becomes `steps[].state.next_intent_ref`. K22's derivation appends **every emitted intent not already denoted by a produced ref** — the closed form, because a role list left `role: 'more'` unsatisfiable on eighteen kinds — in `emitted` order with the escape last. No authority widens: the operand ranges over intents that already passed the floor and the ladder, and `reading_order` is an accessibility ordering that gates nothing. (The first draft justified this by "both are `priority: 0` and `FLOOR_EXEMPT`", which is fals |
 | EC-17 | §2 K22, its enumeration | "the union of `option_id`, `field_key`, `row_key`, `entry_ref`, `series_id` and bare `intent_token`" | **VOID as an enumeration.** It names `series_id` — which §1.4 classes **structural**, "never rendered", and which no kind's `interactive_paths` produces — and omits `section_id`. `InteractiveRef`'s **seven** members are the typed authority — the seventh, `{k:'slot'}`, added by §0C.22-sexies because `TIME_SLOT_SELECTOR`'s declared path `groups[].slots[].slot_ref` could be denoted by none of the six; K22's rule and mechanism stand **as amended by EC-18 item 2 and EC-20** (every emitted intent not already denoted by a produced ref joins the list, in `emitted` order). §0C.28-bis, §0C.22-sexies |
 
+# Annex C — Version record (v1 → v1.1)
+
+`[NON-NORMATIVE]` **This annex is a record, not rule.** It lists the owner decisions this contract
+version carries and, for each, the clauses of the body that now state it. It restates no rule: the
+body is the only place a rule is stated, in its final form. A reader who wants to know what a rule
+says reads the clause named here, never this annex.
+
+**Version 1** is this file at commit `81bcc5ec`, SHA-256
+`15c383f1d173ad7bc83b6b4df8138b06c96c4131452d5fe05549ed6d59aca4d3`.
+
+**Source of the decisions.** The owner rulings recorded at checkpoint `ffbd684a` on the published
+ruling packet `docs/rebuild/DECISION-SHEET-04-RULING-PACKET.md` (SHA-256 `ac0993e3943409ac16c936323fbd1f932addf577adbdf899fee6cf29251a3efd`).
+Quoted text below is verbatim; the packet's `C:N` line citations refer to Version 1, not to this
+version.
+
+## C.1 Owner rulings
+
+The owner's ruling text, verbatim:
+
+DECISION SHEET 04 — OWNER RULINGS
+R-01 — C9 capability registry
+APPROVE: READS ONLY.
+Contract V1.1 может добавить одним явно определённым set read-only C9 keys для уже существующих canonical business owners.
+Не добавлять через R-01:
+
+* CRM mutations;
+* MONEY writes;
+* новые business owners;
+* generic CRM write;
+* новые capabilities только ради увеличения G2.
+
+Это решение не заменяет будущий Conversational CRM Control / YCLIENTS Full API Capability Audit.
+R-02 — Master's appointment journal
+APPROVE: OWN VISITS ONLY.
+Обычный master видит только свои appointments/visits в пределах существующей authority.
+Salon-wide journal/client names требуют отдельного права, которого роль master сама по себе не создаёт.
+R-03 — Telegram command path
+APPROVE: ONE INTERNAL BOT → BACKEND ROUTE.
+Добавить в Contract V1.1 один typed internal ingress для Telegram command delivery.
+Он:
+
+* authenticated service-to-service;
+* не является public widget route;
+* не принимает direct business/provider commands;
+* переводит command/message в тот же typed-intent/authority path Maya;
+* не создаёт Telegram-specific business authority;
+* не возрождает legacy bridge.
+
+Telegram остаётся `DELIVERY / HANDOFF CHANNEL`.
+R-04 — Marketing withdrawal
+APPROVE recommended combined path:
+
+1. ship canonical in-app marketing revoke surface;
+2. добавить минимальный staff `REVOKE ONLY` bridge к существующему canonical consent owner для подтверждённых phone/e-mail requests.
+
+Staff bridge может только отзывать marketing consent.
+Он не может:
+
+* выдавать consent;
+* менять privacy consent;
+* создавать второго consent owner;
+* записывать consent в chat history/provider state.
+
+Любой successful revoke должен закончиться canonical consent receipt.
+До появления executable path текст не должен обещать уже выполненный revoke.
+R-05
+DEFER AS PROPOSED.
+Android/TWA carrier определить непосредственно перед native cutover.
+До этого:
+`NATIVE/PWA: NOT PROVEN`.
+BLOCK A
+APPROVE ALL 13 READINGS AS PRESENTED IN DECISION-SHEET-04, при условии что они являются именно теми 13 readings, которые были challenge/refutation-checked и опубликованы в `DECISION-SHEET-04-RULING-PACKET.md`.
+Зафиксировать их exact text/IDs в Contract V1.1 decision record.
+В частности подтверждаю:
+
+* booking remains in Maya chat; fullscreen не обязателен;
+* Gate 10 получает необходимые durable audit fields;
+* Gate 10 использует утверждённые router/same-owner/null-result semantics из packet;
+* expired/stale tap получает утверждённый successor/handling;
+* pre-sign-in browser refresh-token behavior исправляется согласно packet.
+
+Если при переносе обнаружится, что какой-либо из 13 пунктов materially отличается от опубликованного packet — STOP только на этом пункте.
+BLOCK B
+APPROVE ALL 47 ONE-LINE READINGS AS PRESENTED IN DECISION-SHEET-04.
+Не расширять их смысл при переносе в Contract V1.1.
+
+| Ruling | Packet option it selects | Disposition in this version | Clauses that state it |
+|---|---|---|---|
+| R-01 | Option B «Reads only» (PACKET:71-75), limited by the ruling's own exclusions: existing canonical business owners only; no CRM mutation, money write, new business owner, generic CRM write or G2-only capability | TRANSFERRED — one enumerated set of fifteen read-only C9 keys, registered as one unit; every count of the registered set names 56 now and 71 once it registers. No existing key changes. The candidates that failed the ruling's limits, and the two owner questions its transfer raises for step 5, are listed in C.6 | preamble; §0.1 F3; §0.6 F19 (cardinality row), F21 (comment), F24; §0.7 F28 (totality and monotonicity sentences), F36 (register row), F36a; §0.8 F46, F51, F54; §0.16 FR-16; §0.17 F91 and its first row; §0.19 F95 item 27; §3.4 R3.4.3; §3.9 «Gate 6 in full» and its note; §3.15 INV-29; §3.16 item 7; §4.9.2 PR2; §A1.1 P-10; §A3 |
+| R-02 | Option A «Actor-scoped» (PACKET:101-102) | TRANSFERRED — stated only in §0.7 F36a, which confines the one R-01 key that reads a master's appointments to the actor's own visits, within the role set the owner's own journal route admits; no clause creates a salon-wide journal or client-name right | §0.7 F36a fences 3 and 4 (`staff.journal.own.read`) |
+| R-03 | Option A «One internal, read-only bot→Nest route … recorded as an amendment to P-01» (PACKET:126-129) | TRANSFERRED — one typed internal ingress, declared outside the widget layer and forwarded by no public edge, which hands a command or message to the typed-intent path; its build is its own prerequisite row, P-33; the widget routes and §3.8 are untouched | preamble; §0.7 (`MechanismGap` row range and count); §0.18 F92; §3.9 Step 0; §3.12 R3.12.7; §A1.1 heading, P-01 and P-33; §A1.7 (row count, P-29); §A5 |
+| R-04 | The recommendation «(iii) as the permanent fix, with (i) as the bridge» (PACKET:172-173) | TRANSFERRED — the staff door, as the text consequence of the approved ruling (class (a)) and not as a new decision: «добавить минимальный staff `REVOKE ONLY` bridge к существующему canonical consent owner для подтверждённых phone/e-mail requests». It is counted as the one ingress beside the programme's three routes in the preamble, §A1.1 P-01 and the envelope's G8; it is not a widget route, and neither the widget gateway nor the Telegram ingress reaches it. Each limit of the ruling is one clause of §3.5 R3.5.5: marketing consent only and never privacy consent; revoke only, never a grant; only on a confirmed phone or e-mail request; provenance in the existing consent-fact columns and no second consent owner; nothing written to chat history or provider state; a canonical consent receipt for every successful revoke; and no fixed copy promising a revoke before the door is executable. The door needs one exception in the Action Engine, which today admits a consent write only from the client's own verified channel: a staff-revoke branch on the existing consent capability's actor policy and input contract, admissible only for a confirmed marketing revoke by a staff role. It is named in the preamble, FR-6a, R3.4.4 and the envelope's G8, and it adds no capability, registry field or actor-policy value. Two readings are disclosed: «staff» is the ten tenant staff roles of the governed staff role set, platform roles refused; and a request is «подтверждённый» when its phone number or e-mail address matches the contact the canonical record holds for that client in that channel, a contact that is never stored. The door's build is its own prerequisite row, P-34, in K14. Item 1, the in-app revoke surface, is owner decision D9-A's remediation lane: it changes no clause and stays bound by FR-6a, R3.4.4, CONSENT.1–CONSENT.6, §A1.6 (A1.6.2) and FR-12 | preamble; §0.7 (`MechanismGap` row range and count); §0.16 FR-6a; §0.18 F92; §3.4 R3.4.4; §3.5 R3.5.5; §A1.1 P-01; §A1.3 P-34; §A1.7 (row count, P-29); §A5 |
+| R-05 | DEFER (PACKET:180-203; recommendation «do not ask now») | DEFERRED — `NATIVE/PWA: NOT PROVEN`; no clause changes | none |
+
+## C.2 Block A — the thirteen readings as published
+
+Packet lines 211–286, verbatim:
+
+- **A1 [V1.1] Booking in chat (AMB-16, G2-02).** R3.5.1 and its copies (R3.3.3, INV-8′, the Gate 6 re-check) stop
+  forcing a class-s HANDOFF for REFINE/DRAFT on BOOKING_OWNER's own keys `appointments.own.{create,reschedule,cancel}`.
+  F48 SENSITIVE_DEST and FLOOR_EXEMPT are unchanged, so rule 5 stands and no floor moves. This restores ENV:133 K7,
+  F78, SERVICE.1, SCHED.2 and BOOK.3. Whether clients.*/customers.*/loyalty.own.read refines get the same treatment
+  (a predicate split) makes no difference this cycle; it comes back if R-01 registers a client-data refine.
+- **A2 [V1.1] Amendment-packet members.** All are additive widget-layer columns under D12-B, folded into migration 2
+  before first deploy (or ENV G8's migration count is amended):
+  - AMB-13: an AUDIT_RETAINED `confirmation_subject` record member. Until it exists, every booking COMMIT refuses at
+    Gate 7.
+  - AMB-32: an all-AUDIT_RETAINED Gate 10 divergence audit member (tenant, widget, tapped/resolved token hash,
+    resolved effect, code, time; no utterance).
+  - AMB-43: an AUDIT_RETAINED approve|reject decision member, plus the R3.11.3/4 route-name errata. Unreachable
+    this cycle.
+  - AMB-49: C5 exempts PERMISSION masks: `next_intent_ref` null, `capability_gap_ref` null.
+  - AMB-60: a HANDOFF «signed target» is a principal-bound `{route_key, opaque_handle}` signed with
+    `ActionIdentityService.hmac` and returned in `resolved_widget`; the landing route re-validates authority.
+  - AMB-63: `confirmation.idempotency_key` and `approval_policy` are AUDIT_RETAINED; `readback_text` is
+    CONVERSATION_CONTENT and not stored in `confirmationJson`.
+- **A3 Gate 10 under DS-02.**
+  - (a) Router (AMB-29): one candidate matcher over the live intents that returns a token, escape aliases first,
+    compared through `subjectCapability`. This is reading C, not the corpus in DS-02's retained build list.
+  - (b) Canonical owner (AMB-30, K14-07): §2.4 OwnerClass membership through `ownerClassKeys`. An AE key takes its
+    paired propose key's owner; a CONTROL key takes its F27 owner endpoint; unregistered or TOOL keys fail closed.
+    Two keys have the same owner iff their owner sets intersect, so overlapping reads are audited and booking→settings
+    is refused.
+  - (c) Null (AMB-31, K14-08): null against an actuating record (CONTROL, DRAFT, REQUEST_APPROVAL, COMMIT) refuses;
+    null against a pointer record is recorded and published as NULL; AGREE requires both sides non-null. A tap
+    whose own lowered utterance does not resolve is a mint/build defect under R3.12.4, caught in CI.
+- **A4 [V1.1 clarification] Expired or superseded tap (AMB-50).**
+  - At Gate 1 EXPIRED/SUPERSEDED and Gate 5 `policy_floor_changed`, return a successor minted with no canonical
+    read: the predecessor's frozen `text_equivalent` plus one REFINE remedy on the widget's own owner capability,
+    with draft and flow position kept server-side.
+  - It is issued only when the record binds the live principal and tenant; otherwise the code alone is returned.
+  - The remedy tap passes Gates 1–13. L10's re-mint happens after Gate 6, and L10's mechanism sentence is
+    clarified.
+- **A5 Detail and NAVIGATE reads (AMB-47, SH-03).**
+  - Detail is filled by a NAVIGATE(detail) submission through the gateway (Gate 13 → projector → `next_envelope`).
+  - Class w returns the stored sealed envelope under FR4, with no re-projection.
+  - A detail or i-class re-projection first evaluates the source capability's floor and Gate 6 authority for the
+    live principal.
+  - K16's `(widget_id, density)` describes that detail branch, not the `/widgets/resolve` request set.
+- **A6 Credential at rest (SH-01).**
+  - Before the G09 sign-in rows retire, only the refresh token (never the access token) is kept in `localStorage`.
+    Only `net/session.ts` reads it, only to call `/auth/refresh`, and never to route before the server answers.
+  - Memory-only stays the default during the dark window.
+  - An httpOnly cookie is excluded by the topology: CORS runs with credentials false, the relay forwards no Cookie,
+    and iOS runs on a `capacitor://` origin.
+- **A7 Signed needed-but-absent static reads (G2-07, G2-29).**
+  - Build the tenant broadcast template catalogue (S-419/420/421/516) as an authenticated, static, read-only
+    catalogue that only pre-fills `b35.preview`.
+  - Build the S-352 release-notes card with a working seen-state write and without the broken freed-slot promise.
+  - Both READ keys go on R-01's list.
+- **A8 S-241 owner brief (G2-06).** Amend the signed successor: drop the expandable list of client phones and keep
+  alerts and summary. Reminders run only through `b35.preview` → APPROVAL → `b35.confirm`. C8 contracts forbid
+  contacts, and S-499 keeps client phones out of conversation surfaces.
+- **A9 Platform cost view S-044 (G2-05).** Measured AI and server cost stays on the legacy read-only GOD screen,
+  an operator surface outside the tenant shell (B14 D2-A). No new platform owner; S-369 is not built. The screen is
+  dormant behind the maintenance page today.
+- **A10 Kept fullscreen surfaces (G2-03).**
+  - No new route class.
+  - A kept surface nests in a base route only where D2 or ENV Part 4 already put it: credentials and channels in
+    connections, devices and mutes in notifications, consent in privacy.
+  - Everything else stays NOT RETIRED outside the served shell: S-200, S-496's role grant, S-499, S-044, the
+    editors and the inbox.
+  - Accept that ENV G9 («rows without fullscreen_intent 0 of 76») stays red for the vetoed rows.
+- **A11 K12 builds staff Telegram unbind and history erasure (G2-38, G2-39; corrects K14-12).**
+  - This is approved K12 scope (SPG:68) and gate G4 («owner: NONE = 0 of 8»).
+  - Erasure is a class-s HANDOFF to privacy-and-data at SESSION_VERIFIED.
+  - Unbind is built in the canonical identity owner: self-service at connections, offboarding on the owner's
+    staff-access surface, and each unbind rotates `principal_proof_hash`.
+- **A12 Onboarding voice (G2-04).** No new transcription route. Pre-tenant onboarding voice stays on the existing
+  relay as G07 signs it (K1DOS:355, :363), with the transcript fed into the typed path. Voice is off by default,
+  refused during the contact step, and fenced until S-745 lands.
+- **A13 K14 exit evidence (K14-06).** K14's parity proof is minted HANDOFF-only IntentRecords with receipts on the
+  live path. The CI ledger and AuditLog are shadow evidence only, and no CONTROL or callback tokens are used.
+  Waits on R-03.
+
+| ID | Disposition in this version | Clauses that state it |
+|---|---|---|
+| A1 | TRANSFERRED | §0.17 first row (the Gate 6 re-check sentence); §3.3 R3.3.3; §3.5 `BOOKING_OWNER_KEYS`, `BOOKING_OWNER_PROPOSAL`, R3.5.1; §3.15 INV-8′ |
+| A2 | TRANSFERRED — AMB-13, AMB-32, AMB-43 (with the R3.11.3/R3.11.4 route-name errata), AMB-49, AMB-60, AMB-63; the columns fold into migration 2 before its first deploy | §0.4 F16; §1.3 C5; §2.6.5 BOOK.1; §3.5 R3.5.3; §3.7 `IntentRecord`, R3.7.5; §3.8 R3.8.5; §3.9 Gate 13 row, «Gate 10 in full» (`DivergenceAuditRecord`); §3.11 R3.11.2, R3.11.3, R3.11.4; §4.4.1; §4.4.3; §A1.7 P-30; §A2 (A2.3) |
+| A3 | TRANSFERRED — under owner decision DS-02 (Decision Sheet 02, answered 2026-09-16) | §0.4 F15 (Gate 10 as the one reader of the lowered utterance); §0.21 residual 7; §3.9 Gate 10 row and «Gate 10 in full»; §3.12 R3.12.4; §3.16 item 5; §A1.5 P-20 |
+| A4 | TRANSFERRED — with three fail-closed conditions the certified text forces: the code alone is also returned when the tapped kind does not permit `REFINE` (`APPROVAL`, `LIMITATION`, `SOURCE_STATUS`, `CONSENT_STATE`, `IDENTITY_BINDING`, `ARTIFACT`), when no owner capability of the kind matches, and when the stored predecessor or its `text_equivalent` cannot be read | §0.8 F52; §1.8 K10; §3.4 R3.4.2; §3.9 Gate 1 and Gate 5 rows, R3.9.4; §4.1.2 L8; §4.1.3 L10 |
+| A5 | STOPPED (C.6) — the item as a whole; stating its `detail` half needs a decision the published item does not carry, and no clause changes | none |
+| A6 | RECORDED — the contract governs renderer modules only (P-19); credential storage in `net/session.ts` is shell-plan and K15 evaluator scope | none |
+| A7 | STOPPED (C.6) — the item as a whole; no bullet is recorded as an approved build, and no clause changes | none |
+| A8 | RECORDED — amends the signed S-241 successor; the contract names neither S-241 nor a call list | none |
+| A9 | RECORDED — re-records S-044 and S-369; no route, key, owner class or shell destination is added | none |
+| A10 | RECORDED — `IntentTarget` classes and `ShellRoute` are already closed; ENV G9 stays red for the vetoed rows by owner acceptance | none |
+| A11 | RECORDED — approved K12 scope inside existing canonical owners; GAP-IDENTITY-STAFF-UNBIND/GAP-HISTORY-ERASE routing and the K3/K4 proof-hash mechanism already hold | none |
+| A12 | RECORDED — §4.7 V1, V6 and V7 already hold; onboarding is pre-auth, outside the gateway | none |
+| A13 | RECORDED — K14 exit evidence is envelope scope; the envelope's K14 parity proof now reads `subjectCapability(record)`, and R3.12.7 carries a non-normative pointer | §3.12 R3.12.7 (non-normative note) |
+
+## C.3 Block B — the forty-seven readings as published
+
+Packet lines 290–355, verbatim (forty-seven top-level bullets):
+
+**Gates**
+- **AMB-01a** · NORMATIVE-PENDING refuses clause by clause: an unbuilt clause refuses only the cases it governs, and built clauses evaluate.
+- **AMB-03, AMB-04** · The live role comes from the Membership read inside the request transaction (FOR SHARE, `m.id === authority.membershipId`).
+  - presentation_mode: client for CLIENT_CHANNEL, client or customer; owner for tenant_owner or business_owner; staff for any other role.
+  - F88.1's ban on reading `role` covers the presentation role only.
+- **AMB-05** · Every widget submission gives `assertCanExecute` the surface `'web'`. `staff.schedule.update`, which is native-only, is reached through a HANDOFF.
+- **AMB-06** · Gate 6's Action Engine pre-screen evaluates §3.9's five conditions directly; `preview()` is used inside the approval owner at Gate 13.
+- **AMB-07** · For approval decisions, Gate 6 (d) applies as written; R3.11.6's approver test at EP-CANONICAL governs.
+- **AMB-09** · A reader of `handoff_capability_ref` means direct member access; `subjectCapability` is that reader.
+- **Escape (SH-05, AMB-11, AMB-62)**
+  - On pwa, a server-matched «отмена/стоп/хватит» returns a dismiss outcome `{widget_id}` with no model call, token or submission, and the shell dismisses locally.
+  - On restricted tiers the tokened `control.widget.dismiss` is admitted, including ANNOUNCEMENT; tier cells are allowlists.
+  - Dismiss changes delivery state only; a draft ends at its TTL.
+- **AMB-15** · Gate 7's withdrawn-row sentence is a re-read duty; Gate 5 refuses first.
+- **AMB-17** · Closed-domain membership is checked per field, and `selection_domain` is keyed by field. The labels member is `selectionDomainLabelsJson` (C).
+- **AMB-18** · An erased or absent stored schema gives SUPERSEDED/handle_stale with no write; a hash failure is an integrity fault.
+- **AMB-20** · Selections are sets: duplicates refuse, required governs presence, and min/max apply to a present value.
+- **AMB-21a** · Gate 8 re-reads `bounds_source` and refuses with `bound_violation`; `bound_ref` is a display echo.
+- **AMB-21e** · A boolean is a closed two-member domain, so Gate 8 checks its type only.
+- **AMB-21f** · `text.max_len` is enforced with `bound_violation`; c9SafeText keeps its own default.
+- **AMB-24** · Envelopes with `client_identified` get no label interpolation (slot-less templates).
+- **AMB-25** · A degrade-to-text answer is the composer's deterministic text, stored as an assistant timeline turn; model reads pass the anonymiser.
+- **AMB-27** · `requires_readback` is recomputed at ingress from `record.effect` and the delivery tier; body_hash integrity is the H4 seal.
+- **AMB-36** · Gate 11 outcomes:
+  - not_found, already_cancelled, slot taken or stale revision → SUPERSEDED.
+  - Policy fences pass through to Gates 13/14.
+  - Transport errors are faults, not verdicts.
+- **AMB-37** · F15's «exactly seven» limits only the noun resolver's record-field inputs.
+- **AMB-38** · Body `*_ref` members are envelope-scoped opaque refs, not record handles.
+- **AMB-39** · RT3(b) scopes canonical owners' paths; the widget path fails closed when the timeline store cannot be read.
+- **AMB-40** · There is no fourth holder of the seal key: «the gateway mints» means the gateway causes minter (2) to mint.
+- **AMB-41** · The Gate 11 diff uses AUDIT_RETAINED facts plus fresh owner values. The successor is a same-kind confirmation if the nouns still resolve, otherwise the amend selector.
+- **AMB-42** · A successor carries its predecessor's `delivery_channel`.
+- **AMB-44** · The fresh noun read happens at Gate 11.
+- **AMB-46** · In F15, «reaches» means value flow; the approval gate is Gate 11.
+- **AMB-52** · `allowedKinds` is the inverse of `ownerClassKeys`; a REFINE successor keeps the tapped kind unless a kind clause names another.
+- **AMB-53** · FR-1 is read together with row 13: canonical writes go through the Action Engine ingress, and other edges go only to row-13 owners, enumerated by the import test.
+- **AMB-56** · The receipt CHECK is unchanged: EXPIRED/SUPERSEDED are response outcomes; an Action Engine UNKNOWN is receipted as ACCEPTED and its ref is set on reconciliation.
+- **AMB-57** · The `control.run.cancel` handler delegates to the C9 owner endpoint's service.
+- **AMB-59** · The FORM.2/SETTINGS.1 allowlist is indexed by the Action Engine key the draft owner names, via AE_PROPOSE_PAIRING.
+
+**Shell**
+- **SH-04, G2-14 · sign-in**
+  - Sign-in is the signed-out state of the root screen: not a route, not in nav, not in shell.account, and no hand-off to a legacy login page.
+  - Social sign-in uses the canonical Yandex/Telegram OAuth with PKCE.
+  - VK is never added, and the legacy VK branch stays until G09's evidence is in.
+  - No production login flag is flipped.
+- **SH-06** · An `approval_required` reply shows the server's text plus a neutral «pending» notice kept outside history, with no control, link or route. Suggested copy: «Действие ждёт подтверждения; подтвердить его здесь пока нельзя.»
+- **SH-07** · `stripIntentToken` removes only `intent_token`. body_hash is checked in a stage before drawing, and the drawing module gets a token-free view plus the verdict.
+
+**K14**
+- **K14-02** · Delete the `/unsubscribe` sentence in `privacy_policy.py:17` in a separate, undeployed commit; the exact bytes follow R-04.
+- **K14-20** · `consent_gate` sits alone in the lowest handler group (for example −10) under a ratchet; `site_publication_bot` must register after it.
+- **K14-21** · K14 covers every door: slash commands, reply-keyboard text, admin NLU, and every admin callback prefix including `bcast_*` and `broadcast_send`.
+
+**G2**
+- **G2-12** · The referral card shows counters and programme status only: no personal code or link, no copy/share.
+- **G2-18** · AI onboarding is a pre-auth mount over the existing `@Public` draft routes, outside the widget gateway. Logo upload is a LIMITATION under GAP-TENANT-ADMIN.
+- **G2-19** · The trial form honours SELF_SERVE_TRIAL_SIGNUP and shows its 403 legibly with a contact path. `/maya-start.html` stays until the release decision is recorded.
+- **G2-24** · The owner-initiated A16 grant satisfies S-435; no two-party request/approve flow is built.
+- **G2-27** · Client channel linking lands on connections; the in-chat status is a LIMITATION under GAP-IDENTITY-READ.
+- **G2-37** · The live-demo CTA goes to the pre-auth Maya entry, carrying its origin; there is no anonymous demo conversation.
+- **G2-41** · The loyalty-spend and repeat-booking offers are recorded as explicit drops, because the moment set is closed at 12.
+- **G2-42** · The waitlist read is a method in ClientWantedSlotService. Its roles translate the legacy `permissions.analytics`; it is read-only and PII-fenced.
+- **G2-44** · The privacy fence lives in `C9Authority.current` and `realtimeAuthority`. Blocking is on privacy only; marketing is an independent fact.
+- **G2-46** · A feedback-request key, if R-01 admits it, is a catalogue PROPOSE_ONLY key confirmed per request.
+
+| # | ID as published | Clauses that state it |
+|---|---|---|
+| B-01 | AMB-01a | none |
+| B-02 | AMB-03, AMB-04 | §0.5 F18 (three presentation modes); §0.15 F88.1 and F88.2 (the `role` ban's presentation-role scope) |
+| B-03 | AMB-05 | none |
+| B-04 | AMB-06 | §0.16 FR-3 (Gate 6's evaluation point) |
+| B-05 | AMB-07 | none |
+| B-06 | AMB-09 | §A1.5 P-20 (`subjectCapability(record)`) |
+| B-07 | Escape (SH-05, AMB-11, AMB-62) | §3.12 R3.12.1; §3.15 INV-26; §4.5.3 tier table, CH1, CH2 |
+| B-08 | AMB-15 | none |
+| B-09 | AMB-17 | §3.7 `IntentRecord.selection_domain_labels`; §4.4.3 |
+| B-10 | AMB-18 | none |
+| B-11 | AMB-20 | none |
+| B-12 | AMB-21a | none |
+| B-13 | AMB-21e | none |
+| B-14 | AMB-21f | none |
+| B-15 | AMB-24 | none |
+| B-16 | AMB-25 | none |
+| B-17 | AMB-27 | none |
+| B-18 | AMB-36 | none |
+| B-19 | AMB-37 | none |
+| B-20 | AMB-38 | none |
+| B-21 | AMB-39 | none |
+| B-22 | AMB-40 | none |
+| B-23 | AMB-41 | none |
+| B-24 | AMB-42 | none |
+| B-25 | AMB-44 | none |
+| B-26 | AMB-46 | §0.4 F15 (its mechanism) |
+| B-27 | AMB-52 | §2.4 `allowedKinds` (the first sentence; the second changes no clause) |
+| B-28 | AMB-53 | none |
+| B-29 | AMB-56 | §4.1.2 L8 (its mechanism) |
+| B-30 | AMB-57 | none |
+| B-31 | AMB-59 | none |
+| B-32 | SH-04, G2-14 · sign-in | none |
+| B-33 | SH-06 | none |
+| B-34 | SH-07 | none |
+| B-35 | K14-02 | none |
+| B-36 | K14-20 | none |
+| B-37 | K14-21 | §3.12 R3.12.7 (its `door` member) |
+| B-38 | G2-12 | §0.7 F36a (`referrals.own.read`: counters only) |
+| B-39 | G2-18 | none |
+| B-40 | G2-19 | none |
+| B-41 | G2-24 | none |
+| B-42 | G2-27 | none |
+| B-43 | G2-37 | none |
+| B-44 | G2-41 | none |
+| B-45 | G2-42 | none — no waitlist key is registered (C.6, the read still to be built) |
+| B-46 | G2-44 | none |
+| B-47 | G2-46 | none — inoperative: ruling R-01 admits read keys only, so no PROPOSE_ONLY key is admitted |
+
+A reading whose last cell is «none» changes no clause of this version.
+
+## C.4 The R-01 read set
+
+Ruling R-01 is carried by exactly these keys, each over an owner that already exists. The keys, their
+owners, reads, policy rows and baselines are stated in §0.7 F36a and nowhere else.
+
+| key | packet candidate | owner |
+|---|---|---|
+| `billing.subscription.read` | CAP-07 | `BillingService` |
+| `tenant.status.read` | CAP-08 | `AdminService` |
+| `crm.providers.catalog.read` | CAP-16 | `crm-provider-catalog` |
+| `staff.journal.own.read` | CAP-18 | `CrmService` |
+| `team.feed.read` | CAP-19 (feed) | `TeamCommunicationsService` |
+| `calendar.internal.setup.read` | CAP-20 | `InternalCalendarService` |
+| `customers.list.read` | CAP-23 | `CustomersService` |
+| `tenant.client-invite.read` | CAP-26 | `TenantPwaService` |
+| `inbox.items.read` | CAP-28 (read) | `InboxService` |
+| `native_feedback.management.read` | CAP-32 | `NativeFeedbackService` |
+| `commerce.memberships.own.read` | CAP-43 | `ClientChannelRuntimeService` |
+| `referrals.own.read` | CAP-44 | `ClientChannelRuntimeService` |
+| `loyalty.own.transactions.read` | CAP-45 | `LoyaltyService` |
+| `owner_report.list` | CAP-49 | `OwnerReportRun` |
+| `owner_report.snapshot` | CAP-49 | `OwnerReportRun` |
+
+## C.5 Text corrections carried because an approved item requires them
+
+| Correction | Required by | Test it meets | Clauses |
+|---|---|---|---|
+| AMB-03: F18's «four» modes becomes three | Block B AMB-03/AMB-04 | (b) agreement with the certified `presentation_mode` union | §0.5 F18 |
+| AMB-10, K14-13: R3.2.2 and the F74 prose admit an AE destination in `handoff_capability_ref` | settled AMB-10/K14-13 | (b) agreement with §0.12 F69 | §0.13 F74 prose; §3.2 R3.2.2 |
+| AMB-12: PAY.4 derives `commit_allowed` from `permitted_effects` alone | certified §0.9 F57 and §2.4 K11 | (b) agreement with certified text of this contract | §2.6.20 PAY.4 |
+| AMB-14: `lifecycle.delivery_channel` classified `AUDIT_RETAINED` | settled AMB-14; Block B AMB-42 | (b) agreement with the approved envelope and RT5 | §4.4.3 (timeline turn) |
+| AMB-17: the labels member `selection_domain_labels` (column `selectionDomainLabelsJson`) | Block B AMB-17 | (a) text consequence | §3.7; §4.4.3 |
+| AMB-21h: the `inputs[k]` rows name the field kind `text` and drop the sensitivity clause | certified `InputField` and §3.6 R3.6.5 | (b) agreement with certified text; the boolean half is not carried (C.6) | §4.4.3 |
+| AMB-45: R3.10.5 points to R3.11.3 | certified §3.11 R3.11.3 | (b) a cross-reference made to agree with certified text | §3.10 R3.10.5 |
+| AMB-52: declare `allowedKinds` | Block B AMB-52 (first sentence) | (a) and (c) — named at §1.1.1 and never declared (F2) | §2.4 |
+| AMB-55: FR2 reads the intent-audit store | settled AMB-55 | (b) agreement with the approved envelope and RT1 | §4.2 FR2 |
+| A4: L10's mechanism sentence | Block A A4 | (a) part of the approved reading | §4.1.3 L10 |
+| AMB-43: the R3.11.3/R3.11.4 route names | Block A A2 | (a) part of the approved reading; agrees with §0.15 F85 | §3.11 R3.11.3, R3.11.4 |
+| HYG-02: cite DS-02; P-20 reads `subjectCapability(record)` | Block A A3; DS-02 answered; Block B AMB-09 | (b) and (a) | §0.21 residual 7; §3.16 item 5; §A1.5 P-20 |
+| R3.4.4 agreement: the nine `personal_data` rows of F36a carry `min_verification: SESSION_VERIFIED` | ruling R-01 | (b) agreement with certified §3.4 R3.4.4; effective floors unchanged | §0.7 F36a |
+| Counts and scope that R-01 would otherwise make false: every count of the registered set names 56 now and 71 once F36a registers; the Gate 6 dispatch comment; §3.16 item 7; the hash sentences of PR2 and F95 item 27 | ruling R-01 | (c) statable without a false sentence | §0.6 F19, F21, F24; §0.7 F28; §0.8 F46, F51, F54; §0.19 F95 item 27; §3.4 R3.4.3; §3.9 «Gate 6 in full»; §3.15 INV-29; §3.16 item 7; §4.9.2 PR2; §A1.1 P-10; §A3 |
+| A key new to the policy table is an admission, not a lowering, only when it is an F36a key | ruling R-01 | (c) the monotonicity test is otherwise undefined for the set | §0.7 F28 |
+| F88.1's and F88.2's ban on reading `role` covers the presentation role on the widget layer's shapes | Block B AMB-03/AMB-04 | (a) text consequence | §0.15 F88.1, F88.2 |
+| Gate 6's pre-screen evaluates its five conditions directly | Block B AMB-06 (first half) | (a) text consequence | §0.16 FR-3 |
+| Restricted tiers, `ANNOUNCEMENT` included, admit the tokened escape; tier cells are allowlists | Block B Escape (SH-05, AMB-11, AMB-62) | (a) text consequence | §3.12 R3.12.1; §3.15 INV-26; §4.5.3 tier table, CH1, CH2 |
+| `EXPIRED` is a response outcome, not a receipt outcome | Block B AMB-56 (first half) | (a) text consequence | §4.1.2 L8 |
+| F15's test reads «reaches» as value flow into Gate 11, the effect-routing gate, canonical ingress and owner routes; Gate 10 is the one reader of the lowered utterance after Gate 9 | Block B AMB-46; Block A A3 | (a) for AMB-46; (c) for A3, whose Gate 10 reads the lowered utterance | §0.4 F15; §3.9 «Gate 10 in full» |
+| `resolved_widget` is declared, as `HandoffAnswer`, closed at `HandoffTarget`'s two members | Block A A2 (AMB-60) | (c) named by the approved item and declared nowhere (F2) | §3.8 R3.8.5 |
+| The Telegram ingress has its own prerequisite row, P-33 | ruling R-03 | (c) one build status per row (F92) | §0.7 (`MechanismGap`); §0.18 F92; §A1.1 P-01, P-33; §A1.7; §A5 |
+| The R-04 door is counted: the programme keeps its three routes, and the preamble, §A1.1 P-01, the envelope's G8 and K14 rows and the mapping's P-01, K3 and K14 rows name the one further ingress, counted beside them, and its revoke-only staff authority | ruling R-04 | (a) text consequence of the approved door | preamble; §A1.1 P-01; envelope G8 and K14, mapping P-01, K3, K14 and its Web Interaction Contract section (not this contract) |
+| The R-04 door has its own prerequisite row, P-34, in K14 | ruling R-04 | (c) one build status per row (F92); K14, because the packet groups R-04 with K14 and every item R-04 unblocks is K14 copy | §0.7 (`MechanismGap`); §0.18 F92; §A1.3 P-34; §A1.7; §A5 |
+| The envelope's K14 parity proof reads `subjectCapability(record)` | Block A A13 | (b) a HANDOFF-only record has `capability: null` | envelope K14 (not this contract) |
+| The Action Engine exception the R-04 door needs is named where the engine fence is stated: one staff-revoke branch on the consent capability's actor policy and input contract | ruling R-04 | (a) text consequence of the approved door: the capability admits no staff actor today | preamble; §0.16 FR-6a; §3.4 R3.4.4; §3.5 R3.5.5; envelope G8 and K14, mapping K14 (not this contract) |
+| The prerequisite-ledger range names P-33 and P-34 outside the contract as well | rulings R-03 and R-04 | (c) one build status per row (F92) | envelope `WidgetMechanismGap`, mapping P-29 (not this contract) |
+| The count of the registered set in §A1.6 (A1.6.2) names 71 once F36a registers, and each package's «`C9_REGISTRY_HASH` unchanged» figure is scoped to F36a, whose registration no package owns | ruling R-01 | (c) statable without a false sentence | §A1.6 (A1.6.2); envelope K2, K10, K11 and the C9 flow, mapping K3, K10, K11 and its prerequisite register (not this contract) |
+| The mapping's P-20 row and paragraph cite DS-02, and its K14 exit reads `subjectCapability(record)` | Block A A3 and A13; DS-02 answered | (b) agreement with the contract's P-20 and with the envelope | mapping P-20 and K14 (not this contract) |
+| R3.9.4 notes why its read of the predecessor's source capability meets F15: the value is sealed at the minter into the remedy's own `AUDIT_RETAINED` record | Block A A4 | (c) the approved successor stated without contradicting §0.4 F15 | §3.9 R3.9.4 (non-normative note) |
+
+## C.6 Not carried by this version
+
+**Stopped on transfer — an owner decision is needed, and nothing below is stated in the body.**
+
+| Item | Why it is not in the body | The decision it needs |
+|---|---|---|
+| A7 (the whole item) | Its second bullet's release-notes key needs a canonical owner that does not exist, which R-01 excludes, and «a working seen-state write» is a persisted per-principal write, which R-01 (reads only) cannot carry and `control.widget.dismiss` (delivery state on one emission, Block B Escape) does not provide. Its first bullet's catalogue exists only in legacy Python, so its key is a read still to be built (next row). The owner stops a materially different item as a whole, so no bullet is recorded as an approved build. | Owner decision: for the release-notes card, (i) name a canonical owner for tenant release notes and authorise a persisted seen-state write, (ii) re-sign S-352 as an on-request card whose «seen» is only the per-emission dismiss, or (iii) record S-352 as withdrawn from chat parity; for the template catalogue, the question of the next row. |
+| R-01 candidates CAP-47, SC-21, SC-22 (summary) and SC-24, and A7's template-catalogue key | The canonical business owner exists, but the read does not exist in it today: `ClientWantedSlotService` has no read method (Block B G2-42 fixes where one goes), the summaries would be new C7 kinds rather than C9 keys, and A7's catalogue lives only in legacy Python. Every key this version transfers reads an owner method that returns its data today; what F36a adds to those reads (a role assertion inside the owner read, the actor pinning R-02 orders) narrows an existing read and builds no new one. Whether R-01 also admits a read still to be built inside an existing owner is a reading of the ruling this version does not make. | Owner decision: does R-01 admit a read to be built inside an existing owner (and, for SC-21/22/24, a new C7 kind), or only reads that exist today? If admitted, the keys join a later version bump. |
+| CAP-06 and CAP-46: an output version 2 of `catalog.staff.read` | R-01 admits adding a set of read-only C9 keys; this would change an existing key. `catalog.staff.read` is an AI-tool catalogue entry whose output reaches the model, and version 2 would add staff ratings and salon links its handler does not read today. | Owner decision: does R-01 cover changing the output contract of an existing AI-tool catalogue key, adding staff rating and salon links to model-visible output? |
+| A5 (the whole item) | Its third bullet has Gate 13 evaluate a `detail` target's source capability for the live principal. A `NAVIGATE` to a `detail` target carries no capability on its `IntentRecord` (the key-space rule of §0.12 admits a `C9` ref only for class `c`), so the only record Gate 13 could read while deciding that tap is the emitting envelope's `provenance.source_capability` in the timeline store, which is not `AUDIT_RETAINED`; the read's value would flow into the effect-routing gate deciding that same submission, and §0.4 F15's test fails it. §3.9 R3.9.4 reads the same field without that defect: it reads it at a refusal, the refused submission reaches no later gate, and the value is sealed at the minter into the remedy's own `AUDIT_RETAINED` `IntentRecord.capability`, which is all the remedy's tap reads. A5 has no such member to seal into. Stating the bullet needs an `AUDIT_RETAINED` source-capability member on the record of a `NAVIGATE` whose target class is `detail`, which A2 does not enumerate, or that erasure class for the envelope field; a `detail` branch that only refused would disable the certified K16 detail route, which A5 does not say. | Owner decision: approve an `AUDIT_RETAINED` source-capability member, sealed at mint on the record of a `NAVIGATE` whose target class is `detail` (or that erasure class for the envelope's `provenance.source_capability`), or re-sign A5; A5 then transfers whole in a later version bump. |
+
+**Owner questions this version's transfer raises for step 5.** Neither blocks this version; each blocks
+the G2 rows named.
+
+| Question | Why it arises | Rows it blocks |
+|---|---|---|
+| Do `REFINE` and `DRAFT` on the client-data keys of §0.7 F36a get A1's treatment (the predicate split)? | A1 says the split «comes back if R-01 registers a client-data refine». Nine F36a keys are `personal_data`, and §3.5 R3.5.1 still forces a class-`s` `HANDOFF` for a `REFINE` on any of them. | every successor that refines a client-data read in chat |
+| Which F36a keys join which §2.4 owner classes? | No F36a key is a member of an owner class, so they feed only `INHERITED` kinds and `LIMITATION`. `SCHEDULE`, `CLIENT_LIST`, `METRIC`, `REPORT` and `ARTIFACT` successors on these keys need owner-class rows the ruling does not state. | the successors of those kinds on F36a keys |
+
+**Excluded by the ruling itself.**
+
+| Item | Why |
+|---|---|
+| SC-30 (master tips) | no owner exists; tips are F81 finance data under GAP-TIPS; R-01 forbids new business owners |
+| G2-46 feedback-request key | a PROPOSE_ONLY key; R-01 is reads only |
+| Write halves of CAP-19 (send, withdraw, attachments) and CAP-28 (`markRead`) | writes; R-01 is reads only |
+
+**Engineering choices and errata of the packet that were not separately approved.** None is stated in
+the body; each stays implementable only where the body already permits it.
+
+| Item | Why it is not in the body | Where it stands |
+|---|---|---|
+| AMB-02a, AMB-02b | packet engineering choices; rows 7 and 8 already name the codes | implementable now |
+| AMB-02c, AMB-19, AMB-21c, AMB-21d, AMB-21g, AMB-23, AMB-26c, AMB-26d, AMB-28, AMB-33, AMB-34, AMB-35, AMB-54, AMB-58, AMB-61 | packet engineering choices, not approved; none is needed to state an approved item | implementable where the certified text already permits |
+| AMB-48 | packet engineering choice that names «the V1.1 text»; not approved and not needed by any approved item | not stated; the minter still never re-decides PII (F95) |
+| A1 follow-up | code alignment of the live Gate 6 name-based `sensitiveDest`; certified «Gate 6 in full» already confines `SENSITIVE_DEST` to the HANDOFF branch | required for A1 to be observable on the live path; step 2 |
+| A4 follow-up | equal-latency refusal is already binding at ENV K3 and G13 | implementation constraint on R3.9.4 |
+| SH-08, SH-18 | the `/widgets/resolve` wire shape; no transferred item needs it, and SH-08's first bullet contradicts A5 bullet 4 | implementable without contract text; must drop the `(widget_id, density)` request bullet |
+| SH-16 | EP-MINT collation rule; no approved item | locale pinning is deployment configuration |
+| SH-17 | choice between two settled sources (certified ULID vs frozen D12 UUID) | CONFORMANCE FLAG: built K3 code uses UUID; certified text says ULID |
+| SH-19 | `/ai/chat` resolution member; not a contract route | implementable |
+| SH-20, SH-21 | shell sign-in and build-defect choices | shell plan |
+| SH-22 | declaring `IntentReceipt` adds a declaration rather than agreeing with an existing clause, and no approved item needs it | pre-existing F2 residual: named at §4.2 and §4.4.3, declared nowhere |
+| SH-23 | narrowing `DetailRouteKey` adds a restriction rather than agreeing with an existing clause, and no approved item needs it | the shell registry holds the nine keys |
+| AMB-01c | a `//` comment choice between two options, not an agreement with an existing clause; F5 and §A2 already require the gap key | implementable now |
+| AMB-51 | enumerating the five PII points adds content F95 downgraded; native scope under R-05 | not stated |
+| K14-04, K14-14, K14-16 | K14 bot engineering | K14 plan |
+| K14-17 | the variable name, «env-only» and the :8080 bind check; R3.12.7 (a) states the route's own credential and (b) the committed-edge test without them | engineering after R-03; the live bind check needs production permission |
+| The ingress path (K14 plan K-g) | a path choice; R3.12.7 fences the route without naming it | K14 plan; the path must satisfy R3.12.7 (b) and (f) |
+| AMB-21h, the boolean half | a retention class for a boolean answer: Block B AMB-21e concerns Gate 8's check only, and §0.4 F16 classifies a data subject's affirmation as `CONVERSATION_CONTENT` | not stated; booleans and scalars stay unclassified until an owner or privacy decision |
+| G2-15, G2-17 | pre-auth credential and trial forms | shell and G2 plan |
+| G2-36 (SC-17) | master-scoped client list with a chat key «through R-01»; not in the ruling's set | not registered |

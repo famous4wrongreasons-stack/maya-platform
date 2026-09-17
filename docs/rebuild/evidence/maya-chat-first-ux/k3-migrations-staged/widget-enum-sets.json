@@ -145,7 +145,7 @@
    "record",
    "approval"
   ],
-  "why": "contract `IntentRecord.kind` (intent.ts:261)"
+  "why": "contract `IntentRecord.kind` (intent.ts:303)"
  },
  "MechanismGapStatus": {
   "members": [

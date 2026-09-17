@@ -536,7 +536,7 @@ for (const f of widgetFiles) {
   visit(program.getSourceFile(f));
 }
 chk(
-  "the programme's only two new routes, and no more",
+  "the two widget routes, and no more",
   posts.length === 2 &&
     posts.includes('resolve') &&
     posts.includes('intent') &&

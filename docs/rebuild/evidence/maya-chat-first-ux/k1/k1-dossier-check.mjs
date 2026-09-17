@@ -26,7 +26,7 @@ chk('the authorized 34 re-dispositions reproduce from the data',
 chk('five survivors are named', redis.survivors.length===5, redis.survivors.map(s=>s.n).join(', '));
 chk('the capability-gap ledger carries the eight tracked acts',
   cap.filter(r=>r.isOneOfTheEight).length===8, `${cap.length} keys, ${cap.filter(r=>r.isOneOfTheEight).length} of the eight`);
-chk('the mechanism-gap ledger is total over the thirty-two prerequisites', mech.length===32, `${mech.length}`);
+chk('the mechanism-gap ledger is total over the thirty-four prerequisites', mech.length===34, `${mech.length}`);
 chk('P-12 is owned by no package, and the ledger says so',
   mech.some(r=>r.pRef==='P-12'&&r.packageKey.startsWith('NONE')), 'STEP_UP_VERIFIED is outside the sixteen');
 let bad=0; console.log('K1 SURFACE DOSSIER CHECKS\n');

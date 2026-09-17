@@ -37,7 +37,7 @@ ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_verification
 -- C9Domain (4) — contract union `C9Domain` (ambient.ts)
 ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_c9Domain_check" CHECK ("c9Domain" IN ('ADMIN', 'CLIENT_LIFECYCLE', 'OCCUPANCY', 'BUSINESS_INTELLIGENCE'));
 
--- ConfirmationOfKind (3) — contract `IntentRecord.kind` (intent.ts:261)
+-- ConfirmationOfKind (3) — contract `IntentRecord.kind` (intent.ts:303)
 ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_confirmationOfKind_check" CHECK ("confirmationOfKind" IN ('draft', 'record', 'approval'));
 
 -- IntentReceiptOutcome (4) — mapping §5.5 states the four members in full (not a count)

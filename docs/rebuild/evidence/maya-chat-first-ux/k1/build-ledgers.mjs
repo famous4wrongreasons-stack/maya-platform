@@ -27,7 +27,7 @@ const capGap=gapKeys.map(k=>({
   isOneOfTheEight: !!EIGHT[k],
 }));
 
-// ── 2. the mechanism-gap ledger: one row per prerequisite, MG-P01 .. MG-P32 ──
+// ── 2. the mechanism-gap ledger: one row per prerequisite, MG-P01 .. MG-P34 ──
 const pRows=[...con.matchAll(/^\| \*\*(P-\d\d)\*\* \| \*\*(.+?)\*\*(.*)$/gm)];
 const mechGap=pRows.map(m=>{
   const [_,p,component,rest]=m;

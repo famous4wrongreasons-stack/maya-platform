@@ -5,8 +5,14 @@
 set -u
 cd "$(dirname "$0")/../../../.." || exit 1; ROOT=$(pwd)
 D=docs/rebuild; E=$D/evidence/maya-chat-first-ux; fail=0
-run(){ printf '%-34s ' "$1"; shift; out=$(node "$@" 2>&1 | tail -1); echo "$out"
+run(){ printf '%-34s ' "$1"; shift; all=$(node "$@" 2>&1); rc=$?; out=$(printf '%s\n' "$all" | tail -1); echo "$out"
+       [ "$rc" -eq 0 ] || fail=1
        case "$out" in *FAIL*|*Error*|*error*) fail=1;; esac; }
+# A gate or a backend check: its exit status decides, and its last line is printed. The status is read from
+# the checker itself, never through `| tail`, which would replace it with tail's.
+gate(){ printf '%-34s ' "$1"; shift; all=$("$@" 2>&1); rc=$?; out=$(printf '%s\n' "$all" | tail -1); echo "$out"
+        [ "$rc" -eq 0 ] || { fail=1; printf '%-34s exit %s\n' '' "$rc"; }; }
+inbe(){ ( cd maya-saas-backend && "$@" ); }
 run consolidated-mechanical-audit  $E/consolidated-mechanical-audit.mjs
 run citation-target-check          $E/citation-target-check.mjs
 run per-kind-totality-check        $E/per-kind-totality-check.mjs
@@ -21,22 +27,14 @@ run k1-human-dossier               $E/k1/build-human-dossier.mjs
 run k1-signature-check             $E/k1/k1-signature-check.mjs
 run widget-check-generator         $E/build-widget-checks.mjs
 run enum-member-check              $E/enum-member-check.mjs
-printf '%-34s ' widget-contract-check
-( cd maya-saas-backend && node scripts/widget-contract-check.mjs 2>&1 | tail -1 )
-printf '%-34s ' k3-gateway-check
-( cd maya-saas-backend && node scripts/k3-gateway-check.mjs 2>&1 | tail -1 )
-printf '%-34s ' k3-exit-gate
-( "$ROOT/$E/k3-exit-gate.sh" 2>&1 | tail -1 )
-printf '%-34s ' k4-exit-gate
-( "$ROOT/$E/k4-exit-gate.sh" 2>&1 | tail -1 )
-printf '%-34s ' k5-exit-gate
-( "$ROOT/$E/k5-exit-gate.sh" 2>&1 | tail -1 )
-printf '%-34s ' k6-exit-gate
-( "$ROOT/$E/k6-exit-gate.sh" 2>&1 | tail -1 )
-printf '%-34s ' wave-3-final-gate
-( "$ROOT/$E/wave-3-final-gate.sh" 2>&1 | tail -1 )
-printf '%-34s ' wave-4-final-gate
-( "$ROOT/$E/wave-4-final-gate.sh" 2>&1 | tail -1 )
-printf '%-34s ' f88-mutation-battery
-( cd maya-saas-backend && "$ROOT/$E/f88-mutation-battery.sh" 2>&1 | tail -1 )
+run contract-version-record-check  $E/contract-version-record-check.mjs
+gate widget-contract-check          inbe node scripts/widget-contract-check.mjs
+gate k3-gateway-check               inbe node scripts/k3-gateway-check.mjs
+gate k3-exit-gate                   "$ROOT/$E/k3-exit-gate.sh"
+gate k4-exit-gate                   "$ROOT/$E/k4-exit-gate.sh"
+gate k5-exit-gate                   "$ROOT/$E/k5-exit-gate.sh"
+gate k6-exit-gate                   "$ROOT/$E/k6-exit-gate.sh"
+gate wave-3-final-gate              "$ROOT/$E/wave-3-final-gate.sh"
+gate wave-4-final-gate              "$ROOT/$E/wave-4-final-gate.sh"
+gate f88-mutation-battery           inbe "$ROOT/$E/f88-mutation-battery.sh"
 exit $fail

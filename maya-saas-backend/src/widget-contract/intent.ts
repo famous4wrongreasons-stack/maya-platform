@@ -17,11 +17,12 @@ import { FormJustification, WidgetKind } from './kinds';
 import { Lifecycle } from './lifecycle';
 import {
   FLOOR_EXEMPT,
+  FloorSubject,
   IntentSubject,
   verificationFloor,
 } from './verification-floor';
 
-// --- section 3.1 (contract line 3379) ---
+// --- section 3.1 (contract line 3678) ---
 export interface WidgetIntent {
   // --- identity ---
   intent_ref: string; // envelope-local, e.g. 'i1'. The only value any
@@ -75,14 +76,14 @@ export interface WidgetIntent {
   single_use: boolean;
 }
 
-// --- section 3.1 (contract line 3430) ---
+// --- section 3.1 (contract line 3729) ---
 export interface AuthorityHint {
   // RENDERING ONLY. Never read by any server decision (FR-3).
   emphasis: 'primary' | 'secondary' | 'muted';
   disabled_because: ReasonCode | null; // see R3.1.0 — the equality is a rule, not a comment
 }
 
-// --- section 3.2 (contract line 3491) ---
+// --- section 3.2 (contract line 3790) ---
 export type EffectClass =
   | 'NONE' // no gateway submission exists at all
   | 'NAVIGATE' // resolve a typed target; no business effect
@@ -94,7 +95,7 @@ export type EffectClass =
   | 'HANDOFF'; // carry the user to a surface that may act
 // There is no 'MUTATE' and no 'EXECUTE'.
 
-// --- section 3.3 (contract line 3615) ---
+// --- section 3.3 (contract line 3916) ---
 export type IntentTarget =
   | { class: 'w'; ref: string } // widget_id — re-resolve an emission
   | { class: 'i'; ref: string } // intent_token — a carrier
@@ -118,7 +119,7 @@ export type ShellRoute =
 export type DetailRouteKey = string; // must equal presentation.fullscreen_detail.route_key
 // of the SAME envelope (R3.3.4)
 
-// --- section 3.5 (contract line 3828) ---
+// --- section 3.5 (contract line 4131) ---
 export function subjectCapability(i: IntentSubject): CapabilityRef | null {
   if (i.capability !== null) return i.capability; // REFINE/CONTROL/DRAFT/
   // REQUEST_APPROVAL/COMMIT
@@ -128,7 +129,7 @@ export function subjectCapability(i: IntentSubject): CapabilityRef | null {
   // NAVIGATE
 }
 
-// --- section 3.5 (contract line 3844) ---
+// --- section 3.5 (contract line 4147) ---
 export const NEVER_CHAT_ACTUATED = [
   'consent.pd.grant',
   'consent.pd.withdraw',
@@ -140,7 +141,34 @@ export const NEVER_CHAT_ACTUATED = [
   'conversation.history.erase',
 ] as const;
 
-// --- section 3.6 (contract line 3903) ---
+// --- section 3.5 (contract line 4156) ---
+export const BOOKING_OWNER_KEYS = [
+  'appointments.own.create',
+  'appointments.own.reschedule',
+  'appointments.own.cancel',
+] as const;
+
+export function BOOKING_OWNER_PROPOSAL(i: FloorSubject): boolean {
+  const s = subjectCapability(i);
+  return (
+    (i.effect === 'REFINE' || i.effect === 'DRAFT') &&
+    s !== null &&
+    s.space === 'C9' &&
+    (BOOKING_OWNER_KEYS as readonly string[]).includes(s.key)
+  );
+}
+
+// --- section 3.5 (contract line 4242) ---
+export interface StaffMarketingRevokeRequest {
+  // "maya.consent.staff-marketing-revoke/1"
+  contract: 'maya.consent.staff-marketing-revoke/1';
+  client_id: string; // the client whose marketing consent is withdrawn
+  request_channel: 'phone' | 'email'; // the channel the client's request arrived through
+  request_contact: string; // the phone number or e-mail address it arrived from; never stored
+  idempotency_key: string; // idempotency of this door only
+}
+
+// --- section 3.6 (contract line 4375) ---
 export interface ConfirmationRequirement {
   // non-null iff effect ∈ {REQUEST_APPROVAL, COMMIT}
   risk_tier:
@@ -166,7 +194,7 @@ export interface ConfirmationRequirement {
   consent_scope?: string;
 }
 
-// --- section 3.6 (contract line 3949) ---
+// --- section 3.6 (contract line 4421) ---
 export interface InputSchema {
   fields: InputField[];
   max_total_bytes: number; // hard cap; oversize submissions are REFUSED, never truncated
@@ -221,7 +249,7 @@ export type InputField =
     }
   | { name: string; required: boolean; kind: 'boolean' };
 
-// --- section 3.7 (contract line 4008) ---
+// --- section 3.7 (contract line 4480) ---
 export interface IntentRecord {
   // --- authority and audit: AUDIT_RETAINED through conversation erasure ---
   intent_token_hash: string;
@@ -239,14 +267,28 @@ export interface IntentRecord {
   handoff_capability_ref: CapabilityRef | null;
   target: IntentTarget | null;
   verification_floor: VerificationLevel;
-  confirmation: ConfirmationRequirement | null;
+  confirmation: Omit<ConfirmationRequirement, 'readback_text'> | null;
+  // readback_text is CONVERSATION_CONTENT and is not
+  // persisted here; it stays in the sealed envelope
+  // in the timeline store (§4.4.3)
+  confirmation_subject: 'create' | 'reschedule' | 'cancel' | null;
+  // NON-NULL IFF widget_kind === 'BOOKING_CONFIRMATION'.
+  // Copied at mint from the sealed body's
+  // confirmation_subject (R3.7.5); read by Gate 7
+  // for §2.6.5 BOOK.1.
+  approval_decision: 'approve' | 'reject' | null;
+  // NON-NULL IFF widget_kind === 'APPROVAL' AND
+  // effect === 'COMMIT' (R3.7.5). Gate 13 routes an
+  // APPROVAL decision on this member, never on
+  // WidgetIntent.role (§0.15 F88.1).
   input_schema_hash: string | null;
   requested_scope_hash: string;
   body_hash: string; // written at mint from the sealed emission;
   // read by Gate 8-R and the SUPERSEDED comparison
   selection_domain: string; // the closed domain this token may select from;
   // read by the SUPERSEDED comparison. The domain's
-  // LABELS are conversation content and live below.
+  // LABELS are conversation content and live below,
+  // in selection_domain_labels.
   c9_domain: C9Domain | null; // the orchestrator's own published union
   // ('ADMIN' | 'CLIENT_LIFECYCLE' | 'OCCUPANCY' |
   //  'BUSINESS_INTELLIGENCE'), imported, never
@@ -281,10 +323,13 @@ export interface IntentRecord {
   utterance_template: string; // '{{selection}}' is the only slot
   rendered_utterance: string | null; // what was written to the transcript
   selected_labels: string[] | null; // canonical labels, server-resolved
+  selection_domain_labels: Record<string, Record<string, string>> | null;
+  // D — field -> option id -> canonical label;
+  // column selectionDomainLabelsJson
   spoken_transcript: string | null; // voice turns only; authority NONE
 }
 
-// --- section 3.8 (contract line 4115) ---
+// --- section 3.8 (contract line 4612) ---
 export interface WidgetIntentSubmission {
   // "maya.widget.intent.submission/1"
   contract: 'maya.widget.intent.submission/1';
@@ -305,4 +350,61 @@ export interface ReadbackAck {
   // — CONVERSATION_CONTENT: it is a word the data subject said,
   // erased with the conversation, and compared against the closed
   // affirmation vocabulary at submission time only.
+}
+
+// --- section 3.8 (contract line 4679) ---
+export interface HandoffTarget {
+  // resolved_widget member for effect === 'HANDOFF' (Gate 13)
+  route_key: string; // D — derived from the record's own target; never client-supplied
+  opaque_handle: string; // M — /^[A-Za-z0-9_-]{8,64}$/ (§0.12 F71); a server-minted keyed
+  // signature over route_key, the record's intent_token_hash and the
+  // live principal's principal_proof_hash
+}
+
+export interface HandoffAnswer {
+  // the member of the gateway's answer to a HANDOFF submission that
+  // R3.8.4 and §4.1.2 L6 name; no other member of that answer is declared here
+  resolved_widget: HandoffTarget;
+}
+
+// --- section 3.9 (contract line 4804) ---
+export declare function routeUtterance(
+  utterance: string,
+  candidates: readonly IntentRecord[],
+): IntentRecord | null;
+// THE deterministic router of Step 0, R3.12.4 and §4.7 V1: one pure, pre-LLM function
+// shared by Gate 10, typed sentences, slash commands and spoken utterances. Escape aliases
+// are matched before any other candidate (§4.7 V9). It returns the matched candidate,
+// whose intent_token_hash is «the same token», or null.
+
+export declare function liveCandidates(
+  record: IntentRecord,
+): readonly IntentRecord[];
+// every IntentRecord binding record.tenant_id and record.principal_proof_hash whose
+// expires_at has not passed and whose consumed_at is null — record itself included.
+
+export declare function ownerSet(
+  ref: CapabilityRef,
+): ReadonlySet<string> | undefined;
+// defined below; undefined fails closed.
+
+export interface DivergenceAuditRecord {
+  // intent-audit store (§4.4.1); written by Gate 10 only
+  tenant_id: string; // D
+  widget_id: string; // D — the tapped record's
+  tapped_intent_token_hash: string; // D — the submitted IntentRecord
+  resolved_intent_token_hash: string | null; // D — the router's match; null when it matched nothing
+  resolved_effect: EffectClass | null; // D — the match's effect; null iff the hash is null
+  refusal_code: 'intent_divergence' | null; // D — null when recorded and not refused
+  observed_at: string; // D — RFC3339
+}
+
+// --- section 3.12 (contract line 5204) ---
+export interface TelegramCommandIngress {
+  // "maya.telegram.command-ingress/1"
+  contract: 'maya.telegram.command-ingress/1';
+  update_id: number; // the Telegram update id; idempotency of this ingress only
+  door: 'command' | 'message' | 'callback'; // the Telegram door the utterance arrived through
+  utterance: string; // verbatim; authority NONE (§3.13 E10)
+  channel_subject: string; // the sender, as §1.7 K1's channel subject; never a principal
 }

@@ -91,8 +91,9 @@ import { SystemMetricsService } from './system-metrics.service';
     BranchesModule,
     CrmModule,
     CustomersModule,
-    // K3, wave 2. Registered so the two routes exist; gated by `widgets.runtime`, which no plan
-    // grants, so the runtime is dark. Registering it is what makes the gate pipeline testable.
+    // K3, wave 2. Registered so the programme's two widget routes exist; gated by
+    // `widgets.runtime`, which no plan grants, so the runtime is dark. Registering it is what makes
+    // the gate pipeline testable.
     WidgetsModule,
     CustomerSubscriptionsModule,
     CustomerPortalModule,

@@ -37,7 +37,7 @@ import {
 import { WidgetKind } from './kinds';
 import { AE_WIDGET_COMMIT_ALLOWLIST, AeCommitRow } from './registries';
 
-// --- section 0.8 (contract line 662) ---
+// --- section 0.8 (contract line 798) ---
 // The intent shape the floor derivation reads: §3's WidgetIntent with its two capability
 // members retyped per F21.
 export type MintedIntent = Omit<
@@ -66,7 +66,7 @@ export declare function subjectCapability(
 // which §0.2's map gives the subject capability and the consent fence. A signature here
 // and a body there is one declaration, not two; no third statement of either exists.
 
-// --- section 0.8 (contract line 697) ---
+// --- section 0.8 (contract line 833) ---
 // INPUTS: exactly i.effect, i.capability, i.handoff_capability_ref, i.target, i.priority,
 // and kind. No other value is read. There is no `audience` term.
 export function verificationFloor(
@@ -89,7 +89,7 @@ export function verificationFloor(
   );
 }
 
-// --- section 0.8 (contract line 751) ---
+// --- section 0.8 (contract line 887) ---
 export function subjectFloor(ref: CapabilityRef | null): VerificationLevel {
   if (ref === null) return 'ANONYMOUS'; // NONE; w/i/s/detail NAVIGATE
   switch (ref.space) {
@@ -104,8 +104,8 @@ export function subjectFloor(ref: CapabilityRef | null): VerificationLevel {
   }
 }
 
-// --- section 0.8 (contract line 765) ---
-// Total over all 56 C9-CAP keys.
+// --- section 0.8 (contract line 901) ---
+// Total over all 56 C9-CAP keys; 71 once §0.7 F36a registers its set.
 export function c9Floor(ref: CapabilityRef): VerificationLevel {
   const cap = c9Registry.tryGet(ref.key); // pure lookup over C9_CAPABILITIES
   if (cap === undefined) return 'STEP_UP_VERIFIED'; // FAIL CLOSED — unregistered
@@ -154,7 +154,7 @@ export function C9_RESOURCE_FLOOR(rc: string): VerificationLevel {
   }
 }
 
-// --- section 0.8 (contract line 817) ---
+// --- section 0.8 (contract line 955) ---
 export function aeFloor(key: string): VerificationLevel {
   const cap = actionCapabilityRegistry.tryGet(key);
   if (cap === undefined) return 'STEP_UP_VERIFIED'; // FAIL CLOSED — unregistered
@@ -206,7 +206,7 @@ export const AE_FAMILY_FLOOR: Readonly<
   tenant_authority: 'STEP_UP_VERIFIED',
 };
 
-// --- section 0.8 (contract line 864) ---
+// --- section 0.8 (contract line 1002) ---
 export function FLOOR_EXEMPT(i: FloorSubject): boolean {
   return (
     i.priority === 0 &&
@@ -250,7 +250,7 @@ export function SENSITIVE_DEST(r: CapabilityRef | null): boolean {
   }
 }
 
-// --- section 0.8 (contract line 1032) ---
+// --- section 0.8 (contract line 1173) ---
 // on IntentRecord — mint class D, AUDIT_RETAINED
 // [MEMBER FRAGMENT] c9_domain: C9Domain | null;   // the orchestrator's own published union
 // ('ADMIN' | 'CLIENT_LIFECYCLE' | 'OCCUPANCY' |

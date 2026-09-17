@@ -10,6 +10,14 @@
    "blockingRules": []
   },
   {
+   "gapKey": "MG-P-33",
+   "pRef": "P-33",
+   "component": "The internal Telegram command ingress",
+   "status": "[ABSENT]",
+   "packageKey": "K14",
+   "blockingRules": []
+  },
+  {
    "gapKey": "MG-P-02",
    "pRef": "P-02",
    "component": "IntentRecord",
@@ -138,6 +146,14 @@
    "blockingRules": []
   },
   {
+   "gapKey": "MG-P-34",
+   "pRef": "P-34",
+   "component": "The staff marketing-revoke door",
+   "status": "[ABSENT]",
+   "packageKey": "K14",
+   "blockingRules": []
+  },
+  {
    "gapKey": "MG-P-18",
    "pRef": "P-18",
    "component": "produced_by_intent_token_hash: string \\| null",
@@ -156,7 +172,7 @@
   {
    "gapKey": "MG-P-20",
    "pRef": "P-20",
-   "component": "Gate 10 promotion criterion",
+   "component": "Gate 10 refusal criterion",
    "status": "[ABSENT]",
    "packageKey": "K3+K14",
    "blockingRules": []

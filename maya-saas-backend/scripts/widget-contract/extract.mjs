@@ -34,6 +34,9 @@ for(const [m,bs] of Object.entries(mods)){
   const names=bs.flatMap(decls);
   console.log(`  ${m.padEnd(20)} ${String(bs.length).padStart(2)} blocks, ${String(names.length).padStart(3)} declarations`);
 }
+// A declaration in a section the map above does not assign would be silently dropped from every module.
+const miscDecl=(mods.misc||[]).flatMap(decls);
+if(miscDecl.length){ console.error('declarations in unmapped sections: '+miscDecl.join(', ')); process.exit(1); }
 fs.writeFileSync(process.argv[2], JSON.stringify(mods,null,1));
 // every declared name, and where
 const all={};

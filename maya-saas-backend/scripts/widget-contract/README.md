@@ -9,6 +9,9 @@ node scripts/widget-contract/emit.mjs         /tmp/blocks.json src/widget-contra
 node scripts/widget-contract/build-tables.mjs src/widget-contract/tables.ts
 cp   scripts/widget-contract/derived-shapes.ts.tmpl src/widget-contract/derived-shapes.ts
 node scripts/widget-contract/postprocess.mjs  src/widget-contract
+npx prettier --write 'src/widget-contract/**/*.ts'
+node scripts/widget-contract/emit-runtime-floor.mjs
+node scripts/widget-contract/emit-runtime-floor.mjs --check
 npx tsc --noEmit --project tsconfig.widget-contract.json
 node scripts/widget-contract-check.mjs
 ```

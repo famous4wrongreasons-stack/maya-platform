@@ -29,8 +29,8 @@ const source = fs.readFileSync(SRC, 'utf8');
 // The body is everything after the generated import block. Splitting on the first declaration
 // keeps the split deterministic: an import added upstream moves the boundary, it does not silently
 // land inside the body.
-const MARKER = '// --- section 0.8 (contract line 662) ---';
-const at = source.indexOf(MARKER);
+const MARKER = /\/\/ --- section 0\.8 \(contract line \d+\) ---/;
+const at = source.search(MARKER);
 if (at === -1)
   throw new Error(
     'the section-0.8 marker is gone from verification-floor.ts — the generator changed shape, ' +

@@ -7,10 +7,10 @@ import { stableActionJson } from './ambient';
 import { CorrelationRefs, IntentProposal, WidgetBody } from './derived-shapes';
 import { AuthorityEnvelope, Origin, Presentation } from './envelope-roots';
 import { WidgetIntent } from './intent';
-import { WidgetKind } from './kinds';
+import { WidgetKind, allowedKinds } from './kinds';
 import { Lifecycle, RenderReceipt } from './lifecycle';
 
-// --- section 1.1.1 (contract line 1793) ---
+// --- section 1.1.1 (contract line 2086) ---
 export interface WidgetEnvelope {
   contract: 'maya.widget.envelope/1'; // literal
   widget_id: string; // ULID, 26 chars, unique per EMISSION
@@ -32,7 +32,7 @@ export interface WidgetEnvelope {
   integrity: Integrity; // §1.9
 }
 
-// --- section 1.1.2 (contract line 1850) ---
+// --- section 1.1.2 (contract line 2143) ---
 export interface WidgetComposerInput {
   // the ONLY type a projector may hand the minter
   kind_proposal: WidgetKind; // E — validated against allowedKinds(capability)
@@ -58,7 +58,7 @@ export type SlotBinding =
       params?: Record<string, number /* fact_index */>;
     };
 
-// --- section 1.1.4 (contract line 1882) ---
+// --- section 1.1.4 (contract line 2175) ---
 export interface Correlation {
   run_id: string | null; // E — C9 run id when the orchestrator minted it; NULLABLE BY DESIGN
   turn_id: string | null; // E
@@ -71,7 +71,7 @@ export interface Correlation {
   trace_id: string; // M — the request trace
 }
 
-// --- section 1.1.5 (contract line 1901) ---
+// --- section 1.1.5 (contract line 2194) ---
 export type WidgetSource =
   | {
       from: 'capability_envelope';
@@ -108,7 +108,7 @@ export type AgentResultPath =
   | `/limitations/${number}`
   | '/confidence';
 
-// --- section 1.2 (contract line 1940) ---
+// --- section 1.2 (contract line 2233) ---
 export interface CellIndex {
   // artefact of buildCellIndex; recorded in the emission fixture
   schema_digest: string; // sha256 over the kind's leaf schema at this body_version
@@ -121,7 +121,7 @@ export interface CellIndexEntry {
   phrase_key: string | null; // non-null iff class === 'phrase' and the leaf is a Phrase
 }
 
-// --- section 1.2 (contract line 1957) ---
+// --- section 1.2 (contract line 2250) ---
 export interface Phrase {
   phrase_key: string; // E — key in `WIDGET_PHRASES@<catalogue_version>`
   params?: Record<string, CellPointer>; // E — every interpolation slot names a Cell in THIS body
@@ -129,7 +129,7 @@ export interface Phrase {
 }
 export type CellPointer = string; // JSON Pointer into `body`, must resolve to a Cell/Measure
 
-// --- section 1.3 (contract line 1974) ---
+// --- section 1.3 (contract line 2267) ---
 export type CellState =
   'KNOWN' | 'PARTIAL' | 'NOT_MEASURED' | 'UNAVAILABLE' | 'PENDING';
 
@@ -155,7 +155,7 @@ export type ReasonCode =
   | 'SUPERSEDED'
   | 'IN_PROGRESS';
 
-// --- section 1.4 (contract line 2019) ---
+// --- section 1.4 (contract line 2312) ---
 export interface Measure extends Cell<number | string> {
   key: string; // E — stable id, e.g. 'revenue.net', 'slot.duration_min'; ≤ 64 chars
   unit: 'RUB' | 'minutes' | 'count' | 'percent' | 'ratio' | 'datetime' | 'none'; // C
@@ -172,7 +172,7 @@ export interface Measure extends Cell<number | string> {
   } | null;
 }
 
-// --- section 1.6 (contract line 2060) ---
+// --- section 1.6 (contract line 2353) ---
 export interface Provenance {
   source_capability: string; // E — must resolve in the capability canon
   capability_version: string; // E — §1.1.3
@@ -196,7 +196,7 @@ export interface Provenance {
   authorship: Authorship; // D — §1.6.5
 }
 
-// --- section 1.6.1 (contract line 2083) ---
+// --- section 1.6.1 (contract line 2376) ---
 export interface FactUsed {
   // element-for-element identical to AgentResult@1.facts_used[i]
   capability: string; // c9Id, ≤ 128 chars
@@ -208,7 +208,7 @@ export interface FactUsed {
   currency?: string | null; // optional, /^[A-Z]{3}$/ or null
 }
 
-// --- section 1.6.2 (contract line 2097) ---
+// --- section 1.6.2 (contract line 2390) ---
 export interface Completeness {
   // c9.contract.ts:314-323
   status: 'COMPLETE' | 'PARTIAL' | 'UNAVAILABLE'; // PRESENT. The first edition omitted it.
@@ -221,7 +221,7 @@ export interface Completeness {
   reasonCodes: string[]; // 0..20, each ≤ 128 chars
 }
 
-// --- section 1.6.5 (contract line 2128) ---
+// --- section 1.6.5 (contract line 2421) ---
 export interface Authorship {
   body_values: 'server_formatter'; // literal — every datum leaf; §1.2–§1.4
   body_phrases: 'server_catalogue'; // literal — every phrase leaf; §1.2
@@ -232,7 +232,7 @@ export interface Authorship {
   model_contribution_ref: string | null; // the projector-input field the model wrote, if any
 }
 
-// --- section 1.6.5 (contract line 2142) ---
+// --- section 1.6.5 (contract line 2435) ---
 export interface Narrative {
   // a phrase-class leaf with typed slots
   narrative_template_id: string; // E — a registered template id
@@ -255,14 +255,14 @@ export declare const NARRATIVE_TEMPLATES: Readonly<
   Record<`${string}@${number}`, NarrativeTemplate>
 >;
 
-// --- section 1.6.6 (contract line 2171) ---
+// --- section 1.6.6 (contract line 2464) ---
 export interface EvidenceRef {
   ref: string; // C — verbatim; 'h_<32..64 hex>' for a C9 handle
   class: 'c9_invocation_handle' | 'source_receipt'; // D
   dereferenceable_until: string | null; // D — c9Instant; null ⇒ already an audit label
 }
 
-// --- section 1.6.7 (contract line 2183) ---
+// --- section 1.6.7 (contract line 2476) ---
 export interface Limitation {
   code: string; // C — a canonical reason code, ≤ 128 chars
   text: Phrase; // M — from the reason-code phrase table
@@ -271,7 +271,7 @@ export interface Limitation {
   capability_gap_ref: string | null; // D — non-null iff no canonical owner exists for the remedy
 }
 
-// --- section 1.6.7 (contract line 2195) ---
+// --- section 1.6.7 (contract line 2488) ---
 export interface LimitationReason {
   reason_code: string; // the closed key
   severity: 'limitation' | 'caveat'; // NEVER 'error' — there is no error severity (§2.1)
@@ -281,7 +281,7 @@ export declare const LIMITATION_REASON_TABLE: Readonly<
   Record<string, LimitationReason>
 >;
 
-// --- section 1.6.7 (contract line 2209) ---
+// --- section 1.6.7 (contract line 2502) ---
 export interface DenialProjection {
   cell_state: CellState; // never a failure state
   reason_code: string; // a LIMITATION_REASON_TABLE key
@@ -291,7 +291,7 @@ export declare const C9_DENIAL_PROJECTION: Readonly<
   Record<string, DenialProjection>
 >;
 
-// --- section 1.7 (contract line 2228) ---
+// --- section 1.7 (contract line 2521) ---
 export type VerificationLevel =
   | 'ANONYMOUS' // rank 0
   | 'CHANNEL_IDENTITY' // rank 1 — IDENTIFIED, NOT VERIFIED
@@ -304,7 +304,7 @@ export declare const VERIFICATION_RANK: Record<
   0 | 1 | 2 | 3 | 4
 >;
 
-// --- section 1.9 (contract line 2281) ---
+// --- section 1.9 (contract line 2574) ---
 export interface Integrity {
   body_hash: string; // M — 64 lowercase hex
   cell_index_digest: string; // M — §1.2 V2

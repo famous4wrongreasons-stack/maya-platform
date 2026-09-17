@@ -14,7 +14,7 @@ for(const l of c.split('\n')){const x=l.match(/^\| \*\*(P-\d\d)\*\* \|/); if(x) 
 for(const l of m.split('\n')){const x=l.match(/^\| (P-\d\d) \|/); if(x) mP[x[1]]=pk(l.split('|').slice(-2)[0]);}
 const pAll=[...new Set([...Object.keys(cP),...Object.keys(mP)])].sort();
 const pBad=pAll.filter(p=>cP[p]!==mP[p]);
-chk('every prerequisite row agrees with Annex A on its package', pBad.length===0 && pAll.length===32,
+chk('every prerequisite row agrees with Annex A on its package', pBad.length===0 && pAll.length===34,
     `${pAll.length} rows, ${pBad.length} disagreements${pBad.length?': '+pBad.map(p=>`${p} contract=${cP[p]} mapping=${mP[p]}`).join(' | '):''}`);
 
 // 2. all 24 gate conditions owned, and each named in a package section

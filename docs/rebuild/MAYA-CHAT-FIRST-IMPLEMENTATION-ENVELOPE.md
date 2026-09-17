@@ -49,7 +49,7 @@ accepted in any of them.
 | **SURFACES** | None. |
 | **WIDGET TYPES** | Declares all 22; emits none. |
 | **DEPENDENCIES** | K1 (the canon it types). |
-| **AUTHORITY/SECURITY BOUNDARY** | Types plus tests. Reads the three registries at build; changes none of them. `C9_REGISTRY_HASH` unchanged. |
+| **AUTHORITY/SECURITY BOUNDARY** | Types plus tests. Reads the three registries at build; changes none of them. `C9_REGISTRY_HASH` is unchanged by this package: it changes only when contract §0.7 F36a's read set registers, which none of the sixteen packages does (mapping §3.3). |
 | **SCHEMA IMPACT** | `WidgetCapabilityPolicy` — 7 columns. Registries are compiled-in with a start-up assertion, never runtime-editable: a control registry that can grow a fourth key without review is not closed. |
 | **MIGRATION** | Migration 1. |
 | **PARITY PROOF** | — |
@@ -61,7 +61,7 @@ accepted in any of them.
 |---|---|
 | **PACKAGE** | K3 — wave 2 |
 | **PURPOSE** | Build the gateway, and with it make `BUTTON → ENDPOINT` **unrepresentable** rather than merely unused. |
-| **WHAT CHANGES** | `IntentGateway`: Step 0 plus Gates 1–13 and Gate 8-R as one ordered pipeline. The programme's **only two new routes**, `POST /api/widgets/resolve` and `POST /api/widgets/intent`. All ten runtime stores. `control.widget.dismiss`. |
+| **WHAT CHANGES** | `IntentGateway`: Step 0 plus Gates 1–13 and Gate 8-R as one ordered pipeline. The programme's **two widget routes**, `POST /api/widgets/resolve` and `POST /api/widgets/intent`; the programme's third new route, the internal Telegram command ingress, is K14's (contract §3.12 R3.12.7, §A1.1 P-33). All ten runtime stores. `control.widget.dismiss`. |
 | **USER-VISIBLE RESULT** | **None in production.** Read-only emission behind an entitlement, dark, to nobody. |
 | **SURFACES** | None directly — K3 is the substrate every later surface emits through. |
 | **WIDGET TYPES** | `METRIC`, `SCHEDULE`, `SOURCE_STATUS`, `PROGRESS`, `LIMITATION` — read-only, behind the entitlement. |
@@ -185,7 +185,7 @@ accepted in any of them.
 | **SURFACES** | The analytics and report rows. |
 | **WIDGET TYPES** | `METRIC`, `REPORT`, `ARTIFACT` (narrowly — `owner_report.download`, `owner_report.status`), and `CHART` **only once P-13 ships**. |
 | **DEPENDENCIES** | K4, K5. |
-| **AUTHORITY/SECURITY BOUNDARY** | An `ARTIFACT` is minted for **one** principal: the delivery route re-compares the live principal's proof hash at `EP-FETCH`, and `contains_pii` is stated **before** the file is fetched. The facade is a new field on a **widget-layer** read facade — **not a change to any C9 contract**; `C9_REGISTRY_HASH` unchanged. |
+| **AUTHORITY/SECURITY BOUNDARY** | An `ARTIFACT` is minted for **one** principal: the delivery route re-compares the live principal's proof hash at `EP-FETCH`, and `contains_pii` is stated **before** the file is fetched. The facade is a new field on a **widget-layer** read facade — **not a change to any C9 contract**; `C9_REGISTRY_HASH` is unchanged by this package, and changes only when contract §0.7 F36a's read set registers. |
 | **SCHEMA IMPACT** | None canonical. |
 | **MIGRATION** | None. |
 | **PARITY PROOF** | Recomputed digests match the projector's rows for every fixture. |
@@ -202,7 +202,7 @@ accepted in any of them.
 | **SURFACES** | The orchestration rows. |
 | **WIDGET TYPES** | `STRATEGY_OPTIONS`, `APPROVAL`, `PROGRESS`. |
 | **DEPENDENCIES** | K3, K4. |
-| **AUTHORITY/SECURITY BOUNDARY** | **`risk_tier`, `reversible` and `audience_size` are copied, never recomputed** — a widget that recomputes a risk tier is a widget that can lower one. `NO_ACTION` is **equally selectable**, and it is the unique `resourceClass: 'LOCAL'` row (`c9.no_action`), verified by enumeration. **No C9 contract changes; `C9_REGISTRY_HASH` unchanged.** |
+| **AUTHORITY/SECURITY BOUNDARY** | **`risk_tier`, `reversible` and `audience_size` are copied, never recomputed** — a widget that recomputes a risk tier is a widget that can lower one. `NO_ACTION` is **equally selectable**, and it is the unique `resourceClass: 'LOCAL'` row (`c9.no_action`), verified by enumeration. **No C9 contract changes in this package; `C9_REGISTRY_HASH` is unchanged by it, and changes only when contract §0.7 F36a's read set registers.** |
 | **SCHEMA IMPACT** | C9 approvals through the orchestrator's own contract. No new model. |
 | **MIGRATION** | None. |
 | **PARITY PROOF** | Recomputed `risk_tier`/`reversible`/`audience_size` **0** across the fixture corpus. |
@@ -248,15 +248,15 @@ accepted in any of them.
 |---|---|
 | **PACKAGE** | K14 — wave 6 |
 | **PURPOSE** | Put Telegram on the same gateway as everything else, at its true tier. |
-| **WHAT CHANGES** | The Telegram channel profile; the ~45 commands mapped to the one gateway; the escape verb as `/cancel`; Gate 10 exercised across the command surface. |
+| **WHAT CHANGES** | The Telegram channel profile; the ~45 commands mapped to the one gateway through the one internal Telegram command ingress (contract §3.12 R3.12.7, §A1.1 P-33); the escape verb as `/cancel`; Gate 10 exercised across the command surface; the one staff revoke-only marketing-consent door of owner ruling R-04 onto the existing consent owner (contract §3.5 R3.5.5, §A1.3 P-34). |
 | **USER-VISIBLE RESULT** | **Telegram becomes Maya, not a second product** — and this is the first wave where a real user sees anything. |
 | **SURFACES** | The Telegram rows. |
 | **WIDGET TYPES** | Every kind, fitted to `TEXT_ONLY` / `ANNOUNCEMENT`. |
 | **DEPENDENCIES** | K6, K12, K13. |
-| **AUTHORITY/SECURITY BOUNDARY** | One gateway, one floor derivation, one gate order. A Telegram tap and a typed sentence resolve to the **same** capability, or Gate 10 records a divergence. |
+| **AUTHORITY/SECURITY BOUNDARY** | One gateway, one floor derivation, one gate order. A Telegram tap and a typed sentence resolve to the **same** capability, or Gate 10 records a divergence. The one staff authority K14 adds is the R-04 door's marketing withdrawal (contract §3.5 R3.5.5, §A1.3 P-34), outside the gateway, with the one Action Engine staff-revoke branch it needs (contract §3.5 R3.5.5 (j)). |
 | **SCHEMA IMPACT** | Receipts through the gateway. No new model. |
 | **MIGRATION** | None. |
-| **PARITY PROOF** | Every command's resolved capability recorded against `IntentRecord.capability`, **with the divergence count published**. |
+| **PARITY PROOF** | Every command's resolved capability recorded against `subjectCapability(record)`, **with the divergence count published**. |
 | **PRODUCTION CUTOVER CONDITION** | **One CI job green**: Telegram commands executing into an unreachable body **0**. *The existing owner/staff command-reachability defect is a defect in the running bot, fixed on its own schedule — **it is not a justification for this architecture**, and no dead command is restored merely because it exists in the code.* |
 
 ### K15 · Legacy Authority Retirement and Bundle Disposition
@@ -439,8 +439,8 @@ rounds proving that, and the counters exist so that no figure here is typed by h
 | `WidgetDraft` | the server-owned draft a COMMIT confirms | 11 A / 1 C = **12** | `@@unique([tenantId, draftRef])`; CHECK `DraftClass` (5), `CapabilitySpace`; FK → `Tenant` | `T_AUDIT`, `expiresAt` bounded | named by `confirmation_of_ref.kind === 'draft'`; the draft owner is canonical |
 | `WidgetErasureTombstone` | the record that an erasure happened | **7**, all A | CHECK `TombstoneStore`; FK → `Tenant` | append-only, floor `T_AUDIT` — **never erased** | in the receipt store by rule; the Action Engine receipts themselves are **not re-declared** here |
 | `WidgetCapabilityGap` | the eight `owner: NONE` acts, and every gap a later package opens | **8**, registry | `@@unique([gapKey])`; CHECK `GapOwnerState` | n/a — no data subject | names acts that have no owner; depends on none |
-| `WidgetMechanismGap` | `MG-P01 … MG-P32`, one per prerequisite | **7**, registry | `@@unique([gapKey])`; CHECK `MechanismGapStatus` | n/a | every build-status count is **printed from here, never transcribed** |
-| `WidgetCapabilityPolicy` | `min_verification`, `consent_class`, `dispatch_is_synchronous` per key | **7**, registry | `@@unique([capabilitySpace, capabilityKey])`; CHECK `CapabilitySpace`, `VerificationLevel`, `ConsentClass` | n/a | **total over C9-CAP's 56 keys and over those only** — AE-CAP totality is the allowlist's and the gap ledger's job |
+| `WidgetMechanismGap` | `MG-P01 … MG-P34`, one per prerequisite | **7**, registry | `@@unique([gapKey])`; CHECK `MechanismGapStatus` | n/a | every build-status count is **printed from here, never transcribed** |
+| `WidgetCapabilityPolicy` | `min_verification`, `consent_class`, `dispatch_is_synchronous` per key | **7**, registry | `@@unique([capabilitySpace, capabilityKey])`; CHECK `CapabilitySpace`, `VerificationLevel`, `ConsentClass` | n/a | **total over C9-CAP's 56 keys (71 once contract §0.7 F36a registers its set) and over those only** — AE-CAP totality is the allowlist's and the gap ledger's job |
 
 **Erasure classes, every column exactly once:** 140 `AUDIT_RETAINED` · 18 `CONVERSATION_CONTENT` ·
 1 `CANONICAL_ELSEWHERE` · 22 registry = **181**.
@@ -603,7 +603,7 @@ CHAT → ORCHESTRATOR → AGENTS → STRATEGY WIDGET → APPROVAL → C6 EXECUTI
 | **CHAT → ORCHESTRATOR** | The conversation asks for options. **A widget never initiates a strategy** — envelopes that do: 0. |
 | **AGENTS → STRATEGY WIDGET** | `STRATEGY_OPTIONS`, ≤3 alternatives plus a **required, equally selectable** `NO_ACTION`. `risk_tier`, `reversible` and `audience_size` are **copied from the agent result, never recomputed** — a widget that recomputes a risk tier is a widget that can lower one. |
 | **APPROVAL** | `APPROVAL` carries exactly **two** COMMIT intents on **one** subject: approve and reject, mutually exclusive, same `approval_ref`, same AE capability, and consuming either marks the other consumed. |
-| **C6 EXECUTION** | Through the orchestrator's own contract. **No C9 contract changes; `C9_REGISTRY_HASH` unchanged.** |
+| **C6 EXECUTION** | Through the orchestrator's own contract. **No C9 contract changes in this flow; `C9_REGISTRY_HASH` changes only when contract §0.7 F36a's read set registers.** |
 | **PROGRESS** | `PROGRESS`, minted by the orchestrator from orchestrator state. Cancellation is `control.run.cancel` — a `CONTROL` key under its owner endpoint's own write-once lock, **not** a C9 canon member, by design. |
 
 **And the honest limit:** the approval path is **role-gated, not separation of duties**. The
@@ -628,10 +628,12 @@ submission's `profile_id`, which R3.8.3 declares advisory and not an authority i
 `CONVERSATION_CONTENT` — erased with the conversation.
 
 **The proof obligation this creates** is Gate 10: the router is run over the lowered utterance and
-its resolved capability compared with `IntentRecord.capability`. Today that divergence is
-**audited, not refused** — *"three front doors, one function" is measured, not enforced* — because
-the promotion criterion that would convert the audit into a refusal is **an owner decision and is
-not set**. No package may set it.
+its match compared with the tapped record through `subjectCapability(record)`. The promotion
+criterion is **an owner decision**, and the owner set it in Decision Sheet 02 (2026-09-16, «GATE 10:
+REFUSAL ON EFFECT-CLASS DIVERGENCE»); contract §3.9 «Gate 10 in full» states it. A divergence that
+changes the effect class or the canonical owner, or that leaves an actuating tap with no reading, is
+**refused**; the rest is **audited, not refused** — *"three front doors, one function" is enforced
+across effect class and owner, and measured within them*. No package may change the criterion.
 
 ---
 
@@ -649,8 +651,8 @@ complete. There is no partial completion and no «complete with caveats».
 | **G4** | capability gaps closed | canon entries with `owner: NONE` = 0 of 8; recovery rows with no home = 0 of 10 | K1 · K12 |
 | **G5** | widget contract certified — portability | R1 failures 0; forbidden keys accepted 0; `MUTATE`/`EXECUTE`/`ERROR`/`overlay` 0 | K2 |
 | **G6** | provenance of numbers | numerals without a `Measure` 0; `Cell.label` from the error lexicon 0 | K3 · K10 |
-| **G7** | role modes out of UX, not out of security | mode switchers in UI 0; intent-set difference across the four modes **0 bytes**; server control points ≥ baseline | K4 · K5 |
-| **G8** | backend authority unchanged | C6–C9 diff 0; **modified business tables 0**; migrations other than the two 0; **FKs into business tables 0**; routes ≤ 2 | K2 |
+| **G7** | role modes out of UX, not out of security | mode switchers in UI 0; intent-set difference across the three modes **0 bytes**; server control points ≥ baseline | K4 · K5 |
+| **G8** | backend authority unchanged beyond the recorded R-01 read set and the R-04 revoke-only staff authority | C6–C9 diff = **exactly contract §0.7 F36a's enumerated read set**, asserted by F36a's registry pin test, **plus the one R-04 staff-revoke branch of contract §3.5 R3.5.5 (j)** on `package5.wave3.record-client-consent.execute.v1`'s actor policy and executable input contract, and every other C6–C9 contract diff 0; **modified business tables 0**; migrations other than the two 0; **FKs into business tables 0**; routes: ≤ 3 widget-programme routes — P-01's two widget routes and the internal Telegram command ingress of contract §3.12 R3.12.7 — plus exactly 1 R-04 consent door, the staff revoke-only door of contract §3.5 R3.5.5; staff consent authority other than that door's marketing withdrawal 0 | K2 |
 | **G9** | fullscreen parity, overlays gone | rows without `fullscreen_intent` 0 of 76; self-mounting hosts 0; 6 overlays → 9 route keys | K5 |
 | **G10** | bundle disposition | bundles with the shell 1; shell sources 1; `maya-os-site/index.html` unreachable, **probe recorded** | K15 |
 | **G11** | primary-nav target reached | ≤ the accepted number (5); members without justification 0; ratchet **non-increasing** | K5 · K16 |
@@ -682,8 +684,10 @@ complete. There is no partial completion and no «complete with caveats».
    sixteen packages**. The cheapest path to closing it runs through the native bundle, which can
    host a platform biometric prompt; that is recorded so the owner knows the option exists, not
    planned.
-3. **It does not set Gate 10's promotion criterion.** *"Three front doors, one function"* stays
-   **measured, not enforced**, until the owner sets it. No package may set it on the owner's behalf.
+3. **It does not set Gate 10's promotion criterion.** The owner set it in Decision Sheet 02
+   (2026-09-16); contract §3.9 «Gate 10 in full» states it. Within one effect class and one
+   canonical owner, *"three front doors, one function"* stays **measured, not enforced**. No package
+   may change the criterion on the owner's behalf.
 4. **It does not register `GAP-ATTENDANCE-CONFIRM`'s owner.** Until one exists, an
    `appointment_reminder` carries a `Limitation` and intents of effect `NONE`, `NAVIGATE` or
    `HANDOFF` only. **A «Приду» control that writes nothing is not emitted, and «клиент подтвердил»

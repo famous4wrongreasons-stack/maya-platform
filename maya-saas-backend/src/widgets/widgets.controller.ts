@@ -1,4 +1,4 @@
-// K3 — the programme's only two new routes.
+// K3 — the programme's two widget routes.
 //
 // §3 P-01 fixes them: `POST /api/widgets/resolve` and `POST /api/widgets/intent`. Two, and no more.
 // Every widget interaction in the product, on every carrier, arrives through these — which is what

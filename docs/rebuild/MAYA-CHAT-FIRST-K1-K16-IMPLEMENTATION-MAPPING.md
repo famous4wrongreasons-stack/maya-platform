@@ -129,12 +129,12 @@ cannot be a dependency of its producers.
 
 ## 3. The prerequisite register, mapped to packages
 
-Annex A of the contract registers twenty-two prerequisite components. Every one is assigned
+Annex A of the contract registers twenty-four product prerequisite components (P-01 … P-22, P-33 and P-34). Every one is assigned
 here. **Two are assigned to no package, and that is a finding, not an omission.**
 
 | # | Component | Status today | Package |
 |---|---|---|---|
-| P-01 | `IntentGateway` + the two routes `POST /api/widgets/resolve`, `POST /api/widgets/intent` | `[ABSENT]` | **K3** |
+| P-01 | `IntentGateway` + the two widget routes `POST /api/widgets/resolve`, `POST /api/widgets/intent`; the programme's third new route, the internal Telegram command ingress of contract §3.12 R3.12.7, is P-33; the one further ingress of owner ruling R-04, the staff revoke-only consent door of contract §3.5 R3.5.5, is counted beside those three, is not a widget route and is P-34 | `[ABSENT]` | **K3** |
 | P-02 | `IntentRecord` — the stored record and its type | `[ABSENT]` | **K3** |
 | P-03 | Timeline store | `[ABSENT]` | **K3** |
 | P-04 | Receipt store (append-only; no FK into the timeline) | `[ABSENT]` | **K3** creates · K7/K9/K11/K12 write · K12 proves the split by erasure replay |
@@ -154,13 +154,15 @@ here. **Two are assigned to no package, and that is a finding, not an omission.*
 | P-17 | `control.delivery.resolve` | `[ABSENT]` | **K13** |
 | P-18 | `produced_by_intent_token_hash` on `IntentRecord` | `[ABSENT]` | **K3** (field) + **K7** (static proof of no other mint path) |
 | P-19 | Renderer sandboxing / import-graph allowlist | `[UNENFORCEABLE-TODAY]` — no build exists | **K5** must create the build · **K15** proves bundle disposition |
-| P-20 | Gate 10 promotion criterion | `[ABSENT]` twice over | **K3** builds the gate · **K14** exercises it · **the criterion is an owner decision** |
+| P-20 | Gate 10 refusal criterion — set by owner decision DS-02 (2026-09-16) and stated in contract §3.9 «Gate 10 in full» | `[ABSENT]` — the gate is `[TO BUILD]`; the criterion is defined | **K3** builds the gate · **K14** exercises it · **no package may change the criterion** |
 | P-21 | `GAP-ATTENDANCE-CONFIRM` canonical owner | `[ABSENT]` | **K13** surfaces reminders; **the owner registration is outside the widget layer** |
 | P-22 | `NEVER_CHAT_ACTUATED` — the eight reserved names | `[ABSENT]` as keys | **K12** |
+| P-33 | The internal Telegram command ingress of contract §3.12 R3.12.7 (owner ruling R-03) | `[ABSENT]` | **K14** |
+| P-34 | The staff revoke-only marketing-consent door of contract §3.5 R3.5.5 (owner ruling R-04) | `[ABSENT]` | **K14** |
 
 ### 3.2 The contract's own machinery — P-23 … P-32
 
-Annex A registers thirty-two prerequisites, not twenty-two. The other ten are components of the
+Annex A registers thirty-four prerequisites, not twenty-four. The other ten are components of the
 contract's **enforcement machinery** — the registries, assertions and ledgers without which its
 rules are statements rather than fences. Every one is `[ABSENT]`: the widget layer does not exist
 in any form.
@@ -173,7 +175,7 @@ in any form.
 | P-26 | Gate 6's four-branch key-space dispatch, scoped by effect | **K4** |
 | P-27 | the `controlledFixtureMode === false` build assertion | **K3** |
 | P-28 | the widget `ActionSourceType` discipline — a widget-minted request never claims `legacy_bridge` or `synthetic_shadow` | **K4** |
-| P-29 | `MECHANISM_GAP_LEDGER` (`MG-P01` … `MG-P32`), from which every status count is **printed at build, never transcribed** | **K1** |
+| P-29 | `MECHANISM_GAP_LEDGER` (`MG-P01` … `MG-P34`), from which every status count is **printed at build, never transcribed** | **K1** |
 | P-30 | the gateway's record fields (`priority`, `widget_kind`, `body_hash`, `selection_domain`, `c9_domain`, `produced_by_intent_token_hash`) plus `ReadbackAck` and Gate 8-R | **K3** + **K6** (voice) |
 | P-31 | `A11yBlock.accessible_names` — total, closed, keyed through `refKey`, with `nameSourceOf`'s seven branches | **K5** |
 | P-32 | `MOMENT_REGISTRY` (twelve rows), `NOTIFICATION_CONSENT_REGISTRY`, `MOMENT_TEMPLATES` and the `EP-REGISTRY-LOAD` resolution chain over them | **K13** |
@@ -193,12 +195,14 @@ from chat no matter how many of the sixteen packages ship. It belongs to the aut
 subsystem and is outside these sixteen. **The owner should know this before wave 1, not
 discover it when a restricted capability refuses in wave 3.**
 
-**P-20 — "three front doors, one function" is measured, not enforced.** Gate 10 runs the
-deterministic text router over the lowered utterance and compares the resolved capability with
-`IntentRecord.capability`. K3 builds the gate and K14 exercises it across the Telegram command
-surface — but **the promotion criterion that converts the audit from shadow to refusal is an
-owner decision and is not defined anywhere in the contract.** Until it is set, divergence is
-logged and nothing refuses. No package may set it on the owner's behalf.
+**P-20 — "three front doors, one function" is enforced across effect class and owner, and measured
+within them.** Gate 10 runs the deterministic text router over the lowered utterance and compares its
+match with the tapped record through `subjectCapability(record)`. K3 builds the gate and K14 exercises
+it across the Telegram command surface. **The refusal criterion is an owner decision, and the owner set
+it in Decision Sheet 02** (2026-09-16, «GATE 10: REFUSAL ON EFFECT-CLASS DIVERGENCE»); contract §3.9
+«Gate 10 in full» states it. A divergence that changes the effect class or the canonical owner, or that
+leaves an actuating tap with no reading, is refused; the rest is audited, not refused. No package may
+change the criterion on the owner's behalf.
 
 **Also outside the sixteen:** P-21's canonical owner. Registering an attendance-acknowledgement
 owner is a canonical-owner change, not a widget-layer change. Until it exists, an
@@ -206,6 +210,13 @@ owner is a canonical-owner change, not a widget-layer change. Until it exists, a
 'GAP-ATTENDANCE-CONFIRM'` and intents of effect `NONE`, `NAVIGATE` or `HANDOFF` only. **A
 «Приду» control that writes nothing is not emitted, and «клиент подтвердил» is not a claim any
 surface may make.**
+
+**Also outside the sixteen:** the registration of contract §0.7 F36a's read set (owner ruling R-01).
+Its fifteen read keys, their policy rows and the registry pin test land together, as one unit, in one
+commit of the owner's execution step 5 (G2 read exposure), which none of the sixteen packages owns;
+until that commit the registry holds the fifty-six keys. Each package's «`C9_REGISTRY_HASH` unchanged»
+figure is that package's own, and G8 (K2) measures the programme's whole C6–C9 diff against F36a's set
+and the one R-04 engine branch of contract §3.5 R3.5.5 (j).
 
 ---
 
@@ -276,13 +287,13 @@ Wave 2's fence: **one additive table, zero business-table changes, zero modified
 
 | | |
 |---|---|
-| **Delivers** | `IntentGateway` — Step 0 plus Gates 1–13 and Gate 8-R as **one ordered pipeline**; the programme's only two new routes `POST /api/widgets/resolve` and `POST /api/widgets/intent`; the timeline store, the intent-audit store, the receipt store's shell, the server-owned draft store and the free-input ledger; `control.widget.dismiss`; the mint/compose/fit/seal path for read-only emission. |
+| **Delivers** | `IntentGateway` — Step 0 plus Gates 1–13 and Gate 8-R as **one ordered pipeline**; the programme's two widget routes `POST /api/widgets/resolve` and `POST /api/widgets/intent` (its third route, the internal Telegram command ingress, and the R-04 consent door are K14's); the timeline store, the intent-audit store, the receipt store's shell, the server-owned draft store and the free-input ledger; `control.widget.dismiss`; the mint/compose/fit/seal path for read-only emission. |
 | **Discharges** | P-01, P-02, P-03, P-04 (creates), P-05 (store), P-06, P-08 (store), P-16 (handler), P-18 (field), P-20 (the gate, not the criterion) |
 | **Surfaces** | none directly — K3 is the substrate every later surface emits through. |
 | **Kinds** | read-only emission of `METRIC`, `SCHEDULE`, `SOURCE_STATUS`, `PROGRESS`, `LIMITATION` behind the entitlement |
 | **Writes** | the five widget-layer stores of §5. **One additive migration.** No business table. |
 | **Authority** | **the whole of it.** K3 holds the envelope seal key, mints intent tokens, and is the only component that may consume one. Gate 5 recomputes `verificationFloor` from the stored `IntentRecord` and refuses on **any** divergence. Gate 6 dispatches on `subjectCapability(record).space` and is **scoped by effect** — a `HANDOFF` resolves destination fences only. |
-| **Canonical owners** | reads only. C6/C7/C8/C9 are called through their existing read services; **no C9 contract changes and `C9_REGISTRY_HASH` is unchanged.** |
+| **Canonical owners** | reads only. C6/C7/C8/C9 are called through their existing read services; **K3 changes no C9 contract, and `C9_REGISTRY_HASH` changes only when contract §0.7 F36a's read set registers (§3.3).** |
 | **Exit** | **one CI job green**: a mutated, an expired, a replayed and a foreign-principal token are each refused, with **indistinguishable latency**; the wire format has **no member able to carry an endpoint, a URL, a capability name, a table, a provider, a tenant or a role**, proved by the shape plus the forbidden-key walk; zero capability calls on the timeline read path. |
 | **Gate rows** | G13, G21 (the store-split half), G6 (provenance plumbing) |
 
@@ -407,7 +418,7 @@ The only writes in wave 4 are C9 approvals — the orchestrator's own contract.
 | **Kinds** | `METRIC`, `CHART` (emittable **only** once P-13 ships), `REPORT`, `ARTIFACT` (narrowly — `owner_report.download`, `owner_report.status`) |
 | **Writes** | nothing canonical |
 | **Authority** | `ARTIFACT` is minted for **one** principal: the delivery route re-compares the live principal's proof hash at `EP-FETCH`. `contains_pii` is stated before the file is fetched. |
-| **Canonical owners** | `MeasurementReadService` (C7, `c7.measurement.read`) and `C8ReadService` (`c8.result.read`). **The facade is a new field on a widget-layer read facade, not a change to any C9 contract** — `C9_REGISTRY_HASH` unchanged. |
+| **Canonical owners** | `MeasurementReadService` (C7, `c7.measurement.read`) and `C8ReadService` (`c8.result.read`). **The facade is a new field on a widget-layer read facade, not a change to any C9 contract** — `C9_REGISTRY_HASH` is unchanged by K10, and changes only when contract §0.7 F36a's read set registers (§3.3). |
 | **Exit** | **one CI job green**: cells that are not C7/C8 projections = **0**; numerals originating from an LLM = **0**; every `Measure` traces to a `FactUsed`; `rows_digest`/`series_digest` recomputed on the read path match the projector's rows for every fixture. |
 | **Gate rows** | G6, G18 |
 
@@ -421,7 +432,7 @@ The only writes in wave 4 are C9 approvals — the orchestrator's own contract.
 | **Kinds** | `STRATEGY_OPTIONS`, `APPROVAL`, `PROGRESS` |
 | **Writes** | C9 approvals through the orchestrator's own contract |
 | **Authority** | **`risk_tier`, `reversible` and `audience_size` are copied, never recomputed** — a widget that recomputes a risk tier is a widget that can lower one. `NO_ACTION` must be **equally selectable**, and it is the unique `resourceClass: 'LOCAL'` row (`c9.no_action`), verified by enumeration. |
-| **Canonical owners** | C9. **No C9 contract changes; `C9_REGISTRY_HASH` unchanged.** `PROGRESS`'s owner class resolves at `EP-REGISTRY-LOAD` to the existence of the run plus `owner_report.status` — `orchestration.run.read` is not a registry key and is not used. |
+| **Canonical owners** | C9. **K11 changes no C9 contract; `C9_REGISTRY_HASH` changes only when contract §0.7 F36a's read set registers (§3.3).** `PROGRESS`'s owner class resolves at `EP-REGISTRY-LOAD` to the existence of the run plus `owner_report.status` — `orchestration.run.read` is not a registry key and is not used. |
 | **Exit** | **one CI job green**: 3/3 widgets present; recomputed `risk_tier`/`reversible`/`audience_size` = **0**; `STRATEGY_OPTIONS` bodies without a selectable `NO_ACTION` = **0**; envelopes that initiate a strategy = **0**. |
 | **Gate rows** | G19 |
 
@@ -482,14 +493,14 @@ any surface may make.** Registering that owner is canonical-owner work outside t
 
 | | |
 |---|---|
-| **Delivers** | the Telegram channel profile at its true tier; the ~45 commands mapped to the same gateway; the escape verb as `/cancel`; Gate 10 exercised across the command surface. |
-| **Discharges** | P-20 (exercises the gate) |
+| **Delivers** | the Telegram channel profile at its true tier; the internal Telegram command ingress of contract §3.12 R3.12.7; the ~45 commands mapped to the same gateway; the escape verb as `/cancel`; Gate 10 exercised across the command surface; the staff revoke-only marketing-consent door of contract §3.5 R3.5.5 (owner ruling R-04). |
+| **Discharges** | P-20 (exercises the gate), P-33, P-34 |
 | **Surfaces** | the Telegram rows |
 | **Kinds** | every kind, fitted to `TEXT_ONLY`/`ANNOUNCEMENT` |
-| **Writes** | receipts through the gateway |
-| **Authority** | one gateway, one floor derivation, one gate order. A Telegram tap and a typed sentence resolve to the **same** capability or Gate 10 records a divergence. |
-| **Canonical owners** | unchanged |
-| **Exit** | **one CI job green**: Telegram commands executing into an unreachable body = **0**; every command's resolved capability recorded against `IntentRecord.capability`, with the divergence count **published**. |
+| **Writes** | receipts through the gateway; a marketing-consent withdrawal from the R-04 door, only through the existing canonical consent owner |
+| **Authority** | one gateway, one floor derivation, one gate order. A Telegram tap and a typed sentence resolve to the **same** capability or Gate 10 records a divergence. The one staff authority K14 adds is the R-04 door's marketing withdrawal, outside the gateway, with the one Action Engine staff-revoke branch it needs (contract §3.5 R3.5.5 (j)). |
+| **Canonical owners** | no new owner; the R-04 door reaches the existing consent owner, adds its staff-revoke branch and its executor's staff source types (contract §3.5 R3.5.5 (a)–(e)), and creates no second one |
+| **Exit** | **one CI job green**: Telegram commands executing into an unreachable body = **0**; every command's resolved capability recorded against `subjectCapability(record)`, with the divergence count **published**. |
 | **Gate rows** | G24 (Telegram half) |
 
 **The owner/staff command reachability defect is not a justification for this architecture, and
@@ -928,8 +939,8 @@ model WidgetCapabilityGap {
 
 model WidgetMechanismGap {
   id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // —  surrogate key
-  gapKey        String                                          // —  'MG-P01' … 'MG-P32'
-  pRef          String                                          // —  'P-01' … 'P-32'
+  gapKey        String                                          // —  'MG-P01' … 'MG-P34'
+  pRef          String                                          // —  'P-01' … 'P-34'
   component     String                                          // —
   status        String                                          // —  CHECK: MechanismGapStatus (4)
   packageKey    String                                          // —  'K1' … 'K16'
@@ -1163,7 +1174,7 @@ submitted intent X against capability Y at time T"* without holding what they sa
 ## 6. One Web Interaction Contract, for native and PWA both
 
 **D11-B: there is one contract, not two.** The native build and the PWA render the same
-envelopes through the same renderer, over the same two routes, against the same floor. What
+envelopes through the same renderer, over the same two widget routes, against the same floor. What
 differs between them is a **channel profile**, which is data, not a second implementation.
 
 ### 6.1 What native is today, stated before anything is designed on top of it

@@ -7,7 +7,7 @@ import { Phrase, VerificationLevel } from './envelope';
 import { FullscreenReason } from './kinds';
 import { A11yBlock, ChannelProfile, ProactiveProvenance } from './lifecycle';
 
-// --- section 0.5 (contract line 239) ---
+// --- section 0.5 (contract line 255) ---
 export interface Origin {
   // root member `origin`
   trigger: 'user_turn' | 'proactive' | 'system_reply'; // E
