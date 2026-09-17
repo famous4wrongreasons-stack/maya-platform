@@ -332,14 +332,39 @@ const buildMirror = (edits) => {
   return backend;
 };
 
-const failedTests = (jsonFile) => {
-  if (!fs.existsSync(jsonFile)) return [];
-  const result = JSON.parse(fs.readFileSync(jsonFile, 'utf8'));
-  return result.testResults.flatMap((file) =>
-    file.assertionResults
-      .filter((a) => a.status === 'failed')
-      .map((a) => ({ title: a.title, ancestors: a.ancestorTitles ?? [], fullName: a.fullName ?? a.title })),
-  );
+/**
+ * The failing tests of one jest `--json --outputFile` report, and what is wrong with the report itself.
+ * A report that was never written, or that does not parse, is NOT an empty failure list: a jest run that dies
+ * (a killed worker, an out-of-memory child) exits non-zero and writes nothing, and reading that as "nothing
+ * failed" turns a crash into a SURVIVED mutant. Every such case is returned as a problem, and the caller makes
+ * the mutant UNEXPECTED. A suite that could not run at all (`testExecError`, or a failed file with no failed
+ * assertion) is a problem too: its tests never reported, so no killer in it could fail.
+ */
+const failedTests = (jsonFile, ran) => {
+  if (!ran) return { failed: [], problems: [] };
+  if (!fs.existsSync(jsonFile))
+    return { failed: [], problems: [`${path.basename(jsonFile)}: jest wrote no report; the run did not finish`] };
+  let result;
+  try {
+    result = JSON.parse(fs.readFileSync(jsonFile, 'utf8'));
+  } catch (error) {
+    return { failed: [], problems: [`${path.basename(jsonFile)}: the report does not parse (${String(error)})`] };
+  }
+  const files = result.testResults ?? [];
+  return {
+    failed: files.flatMap((file) =>
+      file.assertionResults
+        .filter((a) => a.status === 'failed')
+        .map((a) => ({ title: a.title, ancestors: a.ancestorTitles ?? [], fullName: a.fullName ?? a.title })),
+    ),
+    problems: files
+      .filter(
+        (file) =>
+          file.testExecError ||
+          (file.status === 'failed' && !file.assertionResults.some((a) => a.status === 'failed')),
+      )
+      .map((file) => `${path.basename(jsonFile)}: the suite ${file.name} did not run to a result`),
+  };
 };
 
 const run = (cwd, command, commandArgs) => {
@@ -366,6 +391,8 @@ const runSteps = (edits, steps) => {
   const backend = buildMirror(edits);
   const unitJson = path.join(MIRROR_ROOT, 'unit.json');
   const liveJson = path.join(MIRROR_ROOT, 'live.json');
+  // Never read a previous run's report: if this run's jest dies before writing, the file must be absent.
+  for (const stale of [unitJson, liveJson]) fs.rmSync(stale, { force: true });
   const cache = `--cacheDirectory=${JEST_CACHE}`;
   const outcome = {};
   if (steps.includes('unit'))
@@ -384,10 +411,13 @@ const runSteps = (edits, steps) => {
       ...(liveFilter ? ['-t', liveFilter] : []),
       ...(liveTests ? [liveTests] : []),
     ]);
+  const unit = failedTests(unitJson, steps.includes('unit'));
+  const live = failedTests(liveJson, steps.includes('live'));
   return {
     outcome,
-    unitFailed: failedTests(unitJson),
-    liveFailed: failedTests(liveJson),
+    unitFailed: unit.failed,
+    liveFailed: live.failed,
+    problems: [...unit.problems, ...live.problems],
   };
 };
 
@@ -403,6 +433,7 @@ const controlFor = (set, steps) => {
       steps,
       exits: Object.fromEntries(Object.entries(result.outcome).map(([k, o]) => [k, o.status])),
       failed: [...result.unitFailed, ...result.liveFailed].map((t) => t.fullName),
+      problems: result.problems,
     };
   }
   return controls.get(key);
@@ -418,6 +449,7 @@ for (const m of mutants) {
   const vacuous = [];
   const tails = {};
   const exits = {};
+  const problems = [];
   let unexplained = false;
   try {
     for (const set of [...new Set(m.killers.map((k) => k.neutralisers))]) {
@@ -454,11 +486,17 @@ for (const m of mutants) {
           kills.push({ killer: killer.test, test: null, step: 'k3', entry: 'BUILD', neutralisers: set, evidence: false });
       }
 
+      // A report this run did not produce (a dead jest) makes the mutant unreadable, not innocent.
+      problems.push(
+        ...result.problems.map((p) => `${label}: ${p}`),
+        ...control.problems.map((p) => `${label} control: ${p}`),
+      );
       const newlyFailed = [...result.unitFailed, ...result.liveFailed].filter((t) => !controlFailed.has(t.fullName));
       const failingSteps = Object.entries(result.outcome).filter(
         ([step, o]) => o.status !== 0 && control.outcome[step]?.status === 0,
       );
-      if (newlyFailed.length > 0 || failingSteps.length > 0) unexplained = true;
+      if (newlyFailed.length > 0 || failingSteps.length > 0 || result.problems.length > 0 || control.problems.length > 0)
+        unexplained = true;
     }
   } catch (error) {
     tails.runner = String(error?.stack ?? error);
@@ -488,6 +526,7 @@ for (const m of mutants) {
     killedBy: [...new Set(kills.map((k) => k.killer))],
     kills,
     vacuous,
+    ...(problems.length > 0 ? { problems } : {}),
     live_evidence: kills.some((k) => k.evidence),
     exits,
     ...(status === m.expect ? {} : { tails }),
