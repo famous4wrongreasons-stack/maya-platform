@@ -12,7 +12,6 @@
 
 import type { VerificationLevel } from '../../widget-contract/envelope';
 import type { ChannelId } from '../../widget-contract/lifecycle';
-import { VERIFICATION_RANK } from './ladder';
 
 /**
  * What the server has established about the caller, by the time a submission reaches the gateway.
@@ -74,13 +73,6 @@ export const CHANNEL_MAX_LEVEL: Readonly<
 export const channelMaxLevel = (carrier: ChannelId): VerificationLevel =>
   CHANNEL_MAX_LEVEL[carrier] ?? 'ANONYMOUS';
 
-/** The effective level: the session's rung, capped by what the carrier can establish. */
-export const effectiveLevel = (
-  sessionLevel: VerificationLevel,
-  carrier: ChannelId,
-): VerificationLevel => {
-  const ceiling = channelMaxLevel(carrier);
-  return VERIFICATION_RANK[sessionLevel] <= VERIFICATION_RANK[ceiling]
-    ? sessionLevel
-    : ceiling;
-};
+// The effective level (the session's rung capped by this ceiling) is stated once, as
+// `effectiveLevel(ctx)` in `gates/gate5.ts`, over `GateContext.channelMaxLevel`, which the gateway
+// sets from `channelMaxLevel(carrier)`. It is not restated here.

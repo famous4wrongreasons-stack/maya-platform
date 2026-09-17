@@ -6,7 +6,7 @@
 
 import type { GateContext, GateVerdict } from '../gate.types';
 import type { ChannelId } from '../../widget-contract/lifecycle';
-import { ACTUATING } from './gate7';
+import { ACTUATING } from './effect-sets';
 import { pass, refuse } from './verdict';
 
 const SPOKEN_CARRIERS: readonly ChannelId[] = ['realtime-voice'];

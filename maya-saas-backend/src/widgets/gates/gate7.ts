@@ -6,17 +6,9 @@
 
 import type { GateContext, GateVerdict } from '../gate.types';
 import { isAllowlisted, rowFor } from '../booking/booking-allowlist';
+import { ACTUATING } from './effect-sets';
 import { subjectOf } from './subject';
 import { pass, refuse } from './verdict';
-
-/** Stated once, here; Gate 8-R reads the same set (`gate8r.ts`). */
-export const ACTUATING = [
-  'COMMIT',
-  'DRAFT',
-  'REQUEST_APPROVAL',
-  'REFINE',
-  'CONTROL',
-];
 
 export const gate7 = (ctx: GateContext): GateVerdict => {
   const r = ctx.record;

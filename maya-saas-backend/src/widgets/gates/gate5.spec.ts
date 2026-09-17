@@ -4,11 +4,13 @@
 // exercises was a stub that refused everything. That is the point: `mechanism_absent` is not a
 // fence, and a suite that could not tell a fence from a blanket refusal is not a suite.
 
+import fs from 'node:fs';
+import path from 'node:path';
+
 import type { ChannelId } from '../../widget-contract/lifecycle';
 import {
   CHANNEL_MAX_LEVEL,
   channelMaxLevel,
-  effectiveLevel as sessionCappedByCarrier,
   resolveVerificationLevel,
 } from '../authority/authority-resolver';
 import { effectiveLevel, gate5, recomputeFloor } from './gate5';
@@ -92,6 +94,24 @@ describe('Gate 5 — the floor is recomputed, not read', () => {
     );
   });
 
+  it('the cap is stated once: effectiveLevel is declared in gate5.ts and nowhere else in the widget layer', () => {
+    const widgets = path.join(__dirname, '..');
+    const walk = (dir: string): string[] =>
+      fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+        const p = path.join(dir, e.name);
+        return e.isDirectory() ? walk(p) : [p];
+      });
+    const declarers = walk(widgets)
+      .filter((f) => f.endsWith('.ts') && !f.endsWith('.spec.ts'))
+      .filter((f) =>
+        /\b(?:const|let|var|function)\s+effectiveLevel\b/.test(
+          fs.readFileSync(f, 'utf8'),
+        ),
+      )
+      .map((f) => path.relative(widgets, f).split(path.sep).join('/'));
+    expect(declarers).toEqual(['gates/gate5.ts']);
+  });
+
   it('the carrier ceiling is keyed by ChannelId, and a channel with no row caps at the bottom', () => {
     expect(channelMaxLevel('telegram-bot')).toBe('BOUND_CLIENT');
     expect(channelMaxLevel('sms')).toBe('CHANNEL_IDENTITY');
@@ -114,10 +134,18 @@ describe('Gate 5 — the floor is recomputed, not read', () => {
       'telegram-bot',
       'web-push',
     ]);
-    expect(sessionCappedByCarrier('SESSION_VERIFIED', 'sms')).toBe(
-      'CHANNEL_IDENTITY',
-    );
-    expect(sessionCappedByCarrier('ANONYMOUS', 'pwa')).toBe('ANONYMOUS');
+    expect(
+      effectiveLevel({
+        verificationLevel: 'SESSION_VERIFIED',
+        channelMaxLevel: channelMaxLevel('sms'),
+      }),
+    ).toBe('CHANNEL_IDENTITY');
+    expect(
+      effectiveLevel({
+        verificationLevel: 'ANONYMOUS',
+        channelMaxLevel: channelMaxLevel('pwa'),
+      }),
+    ).toBe('ANONYMOUS');
   });
 
   it('the resolver never returns the unreachable rung', () => {

@@ -75,10 +75,17 @@ else say "CONSENT/IDENTITY READ KEYS REGISTERED:" "$KEYS"; fail=1; fi
 
 # The CONTROL space is closed at the contract's three keys, and the floor table's domain equals it.
 # Indentation is prettier's business, so neither expression anchors on it.
-CK=$(grep -cE "'control\.[a-z.]+'," src/widgets/authority/registry-binding.ts)
+# The keys are counted where F27 states them, in the generated CONTROL_REGISTRY. registry-binding.ts
+# no longer spells them: since D-14 it derives its set from that table, so it is held to deriving it
+# (and to spelling no key of its own) rather than counted, which would read a second statement of F27.
+CK=$(sed -n '/^export const CONTROL_REGISTRY/,/^});$/p' src/widget-contract/tables.ts \
+  | grep -cE "'control\.[a-z.]+': Object\.freeze\(")
 CF=$(grep -cE "'control\.[a-z.]+': '" src/widgets/authority/floor.ts)
-if [ "$CK" = "3" ] && [ "$CF" = "3" ]; then say "CONTROL SPACE / FLOOR DOMAIN:" "3 = 3  (closed, and total)"
-else say "CONTROL SPACE / FLOOR DOMAIN:" "$CK / $CF"; fail=1; fi
+CD=no
+grep -q 'Object.keys(CONTROL_REGISTRY)' src/widgets/authority/registry-binding.ts \
+  && ! grep -qE "'control\.[a-z.]+'" src/widgets/authority/registry-binding.ts && CD=yes
+if [ "$CK" = "3" ] && [ "$CF" = "3" ] && [ "$CD" = "yes" ]; then say "CONTROL SPACE / FLOOR DOMAIN:" "3 = 3  (closed, and total)"
+else say "CONTROL SPACE / FLOOR DOMAIN:" "$CK / $CF  (binding derived from CONTROL_REGISTRY: $CD)"; fail=1; fi
 
 # A moment absent from MOMENT_REGISTRY cannot be emitted — the registry is the only door.
 M=$(sed -n '/^export const MOMENT_REGISTRY/,/^});$/p' src/widgets/proactive/moments.ts \
