@@ -16,12 +16,13 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 
-import { WidgetStoresService } from '../stores/widget-stores.service';
 import {
-  AE_WIDGET_COMMIT_ALLOWLIST,
-  isAllowlisted,
-  rowFor,
-} from './booking-allowlist';
+  confirmationKindMismatch,
+  confirmationRefProblem,
+  producingRecordMissing,
+} from '../authority/commit-guard';
+import { WidgetStoresService } from '../stores/widget-stores.service';
+import { AE_WIDGET_COMMIT_ALLOWLIST, isAllowlisted } from './booking-allowlist';
 
 export type BookingStage = 'service' | 'staff' | 'slot' | 'confirm';
 
@@ -80,37 +81,42 @@ export class BookingCommitService {
         'effect_not_admissible',
         `${record.aeCapability} is not on the widget COMMIT allowlist`,
       );
-    const row = rowFor(record.aeCapability)!;
 
-    // 2. F72's second evaluation point: the confirmation kind is re-read from the live allowlist,
-    // so a key whose row was withdrawn between mint and submission refuses HERE rather than
-    // committing on a stale decision.
-    if (record.widgetKind !== row.confirmationKind)
-      throw new CommitRefused(
-        'booking_confirmation_required',
-        `${record.aeCapability} requires ${row.confirmationKind}, got ${record.widgetKind}`,
-      );
+    // 2, 3 and 4 are §0.13's, not this package's (U7a). F72 and F74 govern all four COMMIT-bearing
+    // kinds, and this guard used to hold a SECOND copy of both — reached from no request path, while
+    // the gate held a third that never compared with `widget_kind` at all. The bodies now live once,
+    // in `authority/commit-guard.ts`, and Gate 7 calls the same three functions on the live path.
+    const subject = {
+      widgetKind: record.widgetKind,
+      ae: { space: 'AE' as const, key: record.aeCapability },
+      confirmationOfKind: record.confirmationOfKind,
+      confirmationOfRef: record.confirmationOfRef,
+      producedByIntentTokenHash: record.producedByIntentTokenHash,
+    };
+
+    // 2. F72's second evaluation point: the confirmation kind is re-read from the live allowlist, so
+    // a key whose row was withdrawn between mint and submission refuses HERE rather than committing
+    // on a stale decision.
+    const kind = confirmationKindMismatch(
+      record.aeCapability,
+      record.widgetKind,
+    );
+    if (kind) throw new CommitRefused('booking_confirmation_required', kind);
 
     // 3. F74: a COMMIT carries a non-null confirmation_of_ref, and its kind matches the row.
-    if (!record.confirmationOfRef)
-      throw new CommitRefused(
-        'booking_confirmation_required',
-        'a COMMIT confirms nothing',
-      );
-    if (record.confirmationOfKind !== row.confirmationOfKind)
-      throw new CommitRefused(
-        'booking_confirmation_required',
-        `${record.aeCapability} confirms a ${row.confirmationOfKind}, got ${record.confirmationOfKind}`,
-      );
+    const confirmation = confirmationRefProblem(subject);
+    if (confirmation)
+      throw new CommitRefused('booking_confirmation_required', confirmation);
 
     // 4. F74's bypass guard: where the confirmation is NOT a draft, the COMMIT must name the
     // consumed record that produced it. Without this, a cancel could be minted against an
-    // appointment the person never saw.
-    if (row.confirmationOfKind !== 'draft' && !record.producedByIntentTokenHash)
-      throw new CommitRefused(
-        'effect_not_admissible',
-        'a non-draft COMMIT must name the consumed record that produced it',
-      );
+    // appointment the person never saw. The code is `booking_confirmation_required` rather than the
+    // former `effect_not_admissible`: AMB-02b (PKT:366) assigns that code to every COMMIT-confirmation
+    // clause, and this is one. Whether the record was actually CONSUMED, and whether its capability
+    // carries F74's identity, needs a store read and is Gate 7's C5a/C5b — off this path.
+    const producing = producingRecordMissing(subject);
+    if (producing)
+      throw new CommitRefused('booking_confirmation_required', producing);
   }
 
   /** Stage transitions. Each mints a REFINE — never a COMMIT — which is why the flow is safe to walk. */

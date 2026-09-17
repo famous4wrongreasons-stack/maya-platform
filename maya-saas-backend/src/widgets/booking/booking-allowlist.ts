@@ -11,17 +11,36 @@
 // authority cannot be checked, and the honest response to that is to refuse it rather than to invent
 // the missing key. Adding a fourth row here is not an implementation decision.
 
+import type { AeCommitRow } from '../../widget-contract/registries';
 import { MONEY_FACETS, MONEY_TARGET_KINDS } from '../../widget-contract/tables';
 
 export interface AllowlistRow {
   /** The AE capability a COMMIT may name. */
   readonly ae: string;
-  /** The C9 propose key it pairs with. Gate 7 resolves authority through THIS, not through `ae`. */
+  /**
+   * The C9 propose key K7 recorded for this row. **Gate 7 does not read this column.** F70
+   * (C11:1236-1238): the widget layer "records the pairing against `AE_PROPOSE_PAIRING`; it does not
+   * compute it" — and these three values (`c9.booking.*`) resolve in no registry. The pairing Gate 7's
+   * C5b and C6a use is P-25's `AE_PROPOSE_PAIRING`; a source fence in `gate7.pipeline.spec.ts` holds
+   * that neither the gate nor the commit guard reads this column.
+   */
   readonly proposeKey: string;
-  /** The widget kind whose confirmation must precede it. F72's table, for these three rows. */
-  readonly confirmationKind: 'BOOKING_CONFIRMATION';
-  /** `confirmation_of_ref.kind` — F74. `create` is a draft; the other two name an existing record. */
-  readonly confirmationOfKind: 'draft' | 'record';
+  /**
+   * The widget kind whose confirmation must precede it — F72's lookup column (C11:1393-1398).
+   *
+   * WIDENED by U7a from the literal `'BOOKING_CONFIRMATION'` to the generated union of the four
+   * COMMIT-bearing kinds (F73, C11:1413). **No row value changes**: all three rows are still
+   * `BOOKING_CONFIRMATION`. The narrow type made those three the only expressible rows, so F72's
+   * comparison could not be exercised over a `SETTINGS_DRAFT`, `APPROVAL` or `PAYMENT_HANDOFF` row
+   * even in a test — and a fence that is never shown refusing is not a fence.
+   */
+  readonly confirmationKind: AeCommitRow['confirmation_kind'];
+  /**
+   * `confirmation_of_ref.kind` — F74 (C11:1419-1428). `create` is a draft; reschedule and cancel name
+   * an existing record. WIDENED by U7a to F74's third member, `'approval'`, which an `APPROVAL`
+   * decision row carries; no row value changes.
+   */
+  readonly confirmationOfKind: 'draft' | 'record' | 'approval';
 }
 
 /** The whole of it. */

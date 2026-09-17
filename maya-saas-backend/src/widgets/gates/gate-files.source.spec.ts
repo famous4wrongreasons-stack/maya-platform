@@ -349,7 +349,10 @@ describe('D-10 — gate files refuse through the typed helper, with no cast', ()
         ),
     );
     expect(crossGate).toEqual([]);
-    expect(read('gate7.ts')).toMatch(/from '\.\/effect-sets'/);
+    // U7a (IR-U7A-2): `gate7.ts` no longer imports `ACTUATING`. C1 runs `KIND_PERMITTED_EFFECTS`
+    // over EVERY effect, so the set the old early return needed is gone; the rule this line served —
+    // "a set two gates read lives in a shared file" — is carried by `gate8r.ts`, which still imports
+    // it, and by the `crossGate` check above, which forbids any `./gate<digit>` import outright.
     expect(read('gate8r.ts')).toMatch(/from '\.\/effect-sets'/);
   });
 });

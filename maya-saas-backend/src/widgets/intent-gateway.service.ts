@@ -23,6 +23,7 @@ import type {
 import type { ChannelId } from '../widget-contract/lifecycle';
 import { GATE6_OWNERS, PRINCIPAL_RESOLVER, TENANT_SCOPE } from './di-tokens';
 import type { PrincipalResolver, RequestTx } from './authority/principal-view';
+import type { ProducingRecordRow } from './authority/commit-guard';
 import type { TenantScopePort } from './owner-ports/tenant-scope.provider';
 // R6-1: `import type`, never a value import. A value import would put `AiToolPolicyService` and
 // `EntitlementsService` in the gateway's run-time closure through slot 6 and break P-SEAL's SEAL-5.
@@ -237,7 +238,14 @@ export class IntentGatewayService {
       n: '7',
       name: 'Effect admissibility',
       host: 'IntentGateway',
-      run: (ctx) => gate7(ctx),
+      // R7-1 (IR-U7A-1): C5a (F74) names a PRODUCING record, so slot 7 is handed a loader for it
+      // rather than a second store client. The loader closes over THIS request's tenant, and its
+      // query is tenant-scoped in its own `where` — a filter applied after the read would have read
+      // the foreign row first. `gate7`'s default is `UNWIRED_PRODUCING_RECORDS`, which resolves
+      // nothing and therefore refuses every non-draft COMMIT; T7-WIRED is what stops that interim
+      // becoming the live path by omission.
+      run: (ctx) =>
+        gate7(ctx, (hash) => this.findProducingRecord(hash, ctx.tenantId)),
     },
     // NOT BUILT. Closed-domain membership, cardinality, bounds re-read from `bounds_source`,
     // normalizers and `c9SafeText` need the schema source, the codec and the registries, and several
@@ -568,6 +576,30 @@ export class IntentGatewayService {
       emissionLifecycleState: emission.lifecycleState,
       ...projectConfirmation(confirmationJson),
     };
+  }
+
+  /**
+   * Gate 7's C5a (F74): the record a non-draft COMMIT names in `confirmation_of_ref`.
+   *
+   * Tenant-scoped IN THE QUERY for the same reason `findRecord` is, and selecting exactly the four
+   * AUDIT_RETAINED columns the identity reads (§4.4.3, C11:5766-5776). Slot 7 calls it only for a
+   * non-draft COMMIT, so every other submission still performs exactly one read of ITS OWN record;
+   * a read of a different row is not a second read of the submitted one, which is what the one-read
+   * assertions count.
+   */
+  private findProducingRecord(
+    intentTokenHash: string,
+    tenantId: string,
+  ): Promise<ProducingRecordRow | null> {
+    return this.prisma.widgetIntentRecord.findFirst({
+      where: { intentTokenHash, tenantId },
+      select: {
+        effect: true,
+        capabilitySpace: true,
+        capabilityKey: true,
+        consumedAt: true,
+      },
+    });
   }
 }
 

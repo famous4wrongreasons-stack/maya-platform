@@ -1,0 +1,317 @@
+[
+  {
+    "id": "M7-18",
+    "description": "slot 7 admits everything — the shape row 7 was in before U7a, stated as a mutant so the battery has one that every live case must kill. If this survives, no Gate 7 case in the live spec is proving anything.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  const r = ctx.record;\n  if (!r) return no('C1', 'no record');\n",
+    "replace": "  const admitEverything: boolean = true;\n  if (admitEverything) return pass;\n  const r = ctx.record;\n  if (!r) return no('C1', 'no record');\n",
+    "killers": ["T7-C7", "T7-C1", "T7-C2", "T7-C7-ALLOWLIST", "T7-C7-ESC-P1"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M7-3",
+    "description": "the `ACTUATING` early return is restored: NONE, NAVIGATE and HANDOFF skip C1, C2, C3 and C7 entirely. This is exactly what stood in `gate7.ts` before U7a, and it is why a `NONE` on a notification channel passed slot 7.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  // ── C1 — effect within the kind's declared ceiling, over `widget_kind` ────────────────────────",
+    "replace": "  if (!['COMMIT', 'DRAFT', 'REQUEST_APPROVAL', 'REFINE', 'CONTROL'].includes(r.effect))\n    return pass;\n  // ── C1 — effect within the kind's declared ceiling, over `widget_kind` ────────────────────────",
+    "killers": ["T7-C7", "T7-C7-TIER", "T7-C7-CARRIER", "T7-C7-ALLOWLIST"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M7-4",
+    "description": "the F69 key-space check is computed and then discarded: C2 and C3 stop refusing. A REFINE that names no capability, and a NONE that names one, both reach the input gates.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  if (spaceProblem) return spaceProblem;\n",
+    "replace": "  void spaceProblem;\n",
+    "killers": ["T7-C2", "T7-C2-NONE"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M7-14",
+    "description": "C7 is keyed on `ctx.carrier` instead of the record's minted `delivery_channel` (CH2, C11:5899). The route hard-codes `pwa`, so every record passes the tier clause whatever channel its envelope was fitted for — the defect F42 records, in its Gate 7 form.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  if (!carrierAdmits(r.deliveryChannel, effect, subject, r.priority))",
+    "replace": "  if (!carrierAdmits(ctx.carrier, effect, subject, r.priority))",
+    "killers": ["T7-C7", "T7-C7-CARRIER", "T7-C7-TIER", "T7-C7-ALLOWLIST"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M7-33",
+    "description": "G7's old A1 interim: the F60 escape is refused on `ANNOUNCEMENT`. AMB-11 (C11:7196-7199, CH1) reverses it — the escape is admitted on EVERY tier whose cell does not reach CONTROL, `ANNOUNCEMENT` included.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  if (effect !== 'COMMIT') return pass;",
+    "replace": "  if (effect === 'CONTROL' && r.deliveryChannel === 'web-push')\n    return no('C7', 'the old A1 interim: no escape on ANNOUNCEMENT');\n  if (effect !== 'COMMIT') return pass;",
+    "killers": ["T7-POS-ESCAPE"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M7-37",
+    "description": "the escape predicate loses its priority term: `control.widget.dismiss` is admitted on a restricted tier at ANY priority. F60 (C11:1096) and INV-28 fix the escape as ONE intent — this effect, this key, priority 0.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  if (!carrierAdmits(r.deliveryChannel, effect, subject, r.priority))",
+    "replace": "  if (\n    !carrierAdmits(r.deliveryChannel, effect, subject, r.priority) &&\n    !(effect === 'CONTROL' && subject !== null && subject.key === 'control.widget.dismiss')\n  )",
+    "killers": ["T7-C7-ESC-P1"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M7-31",
+    "description": "a §4.5.3 tier cell read as an ORDERED CEILING rather than an allowlist (ambiguity A11's other side). The two readings differ in exactly one cell: `ANONYMOUS_CHAT` gains NAVIGATE. CH2 calls the entry \"a two-member effect allowlist\" (C11:5899).",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  if (!carrierAdmits(r.deliveryChannel, effect, subject, r.priority))",
+    "replace": "  if (\n    !carrierAdmits(r.deliveryChannel, effect, subject, r.priority) &&\n    !(effect === 'NAVIGATE' && r.deliveryChannel === 'guest-chat')\n  )",
+    "killers": ["T7-C7-ALLOWLIST"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M7-38",
+    "description": "`NONE` is admitted off `RICH_INTERACTIVE`. R3.2.3 (C11:3685-3687) keeps it on that tier alone, and a `NONE` token should not exist at all (INV-21) — so admitting one on a notification channel is two defects at once.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  if (!carrierAdmits(r.deliveryChannel, effect, subject, r.priority))",
+    "replace": "  if (!carrierAdmits(r.deliveryChannel, effect, subject, r.priority) && effect !== 'NONE')",
+    "killers": ["T7-C7", "T7-C7-TIER"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M7-1",
+    "description": "C1 is deleted: the kind's `permitted_effects` cell stops being a fence. Build-killed rather than live-killed, because every record this battery can mint today that C1 alone refuses is also refused by C2 (it names no capability) — an honest limit of the pre-P-MINT fixtures, not of the clause.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  if (!permitted.includes(r.effect as EffectClass))\n    return no('C1', `${r.effect} is not permitted on ${r.widgetKind}`);\n",
+    "replace": "  void permitted;\n",
+    "killers": ["G7-N1a", "G7-N1b", "G7-N1c", "G7-N1d"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-2",
+    "description": "C1 as an ORDERED RANK against the cell's greatest member instead of membership in it. It admits `REFINE` on `APPROVAL`, whose cell is `NONE, NAVIGATE, CONTROL, COMMIT, HANDOFF` — the case F57 (C11:1069) and §2.4's off-order classes exist to decide.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  if (!permitted.includes(r.effect as EffectClass))\n    return no('C1', `${r.effect} is not permitted on ${r.widgetKind}`);\n",
+    "replace": "  const rank = Object.keys(EFFECT_KEY_SPACES);\n  const ceiling = Math.max(...permitted.map((e) => rank.indexOf(e)));\n  if (rank.indexOf(r.effect) > ceiling)\n    return no('C1', `${r.effect} is not permitted on ${r.widgetKind}`);\n",
+    "killers": ["G7-N1b"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-5",
+    "description": "CONTROL membership is taken against Gate 13's DISPATCH set (`ControlRegistryService.CONTROL_KEYS`, one key) instead of F27's SPACE (three keys). `control.run.cancel` is a submitted intent by R3.2.6 (C11:3718-3721), so this refuses a conformant record.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  if (!resolves(subject))",
+    "replace": "  if (\n    !(subject.space === 'CONTROL'\n      ? subject.key === 'control.widget.dismiss'\n      : resolves(subject))\n  )",
+    "killers": ["G7-P5"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-6",
+    "description": "the CONTROL space has no membership check at all: any `control.*` key passes. Once Gate 6 is conformant, Gate 7 is the only fence an unregistered CONTROL key meets — Gate 5 recomputes `ANONYMOUS` for it and admits it.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  if (!resolves(subject))\n    // C3 is this same membership for the CONTROL space: F27's three keys, through K4's one\n    // `resolves`, never `ControlRegistryService.CONTROL_KEYS`, which is Gate 13's DISPATCH set.\n    return no(\n      subject.space === 'CONTROL' ? 'C3' : 'C2',\n      `${capKey(subject)} resolves in no registry`,\n    );\n",
+    "replace": "  if (!resolves(subject) && subject.space !== 'CONTROL')\n    return no('C2', `${capKey(subject)} resolves in no registry`);\n",
+    "killers": ["G7-N3a"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-16",
+    "description": "a null or unknown `delivery_channel` passes C7 instead of refusing. The column's CHECK forbids it in Postgres, which is why this is build-killed: the mutant is about the gate's default branch, not about a record the store can hold.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  if (!carrierAdmits(r.deliveryChannel, effect, subject, r.priority))",
+    "replace": "  if (r.deliveryChannel && !carrierAdmits(r.deliveryChannel, effect, subject, r.priority))",
+    "killers": ["G7-N7e"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-7",
+    "description": "C5a is reduced to the non-null check K7's off-path guard had: a `produced_by_intent_token_hash` that resolves to nothing, resolves unconsumed, or resolves to the wrong producing effect all pass. F74 (C11:1445-1447) requires \"a record the gateway itself consumed\".",
+    "file": "src/widgets/authority/commit-guard.ts",
+    "find": "  const missing = producingRecordMissing(r);\n  if (missing) return { clause: 'C5a', message: missing };\n",
+    "replace": "  const missing = producingRecordMissing(r);\n  if (missing) return { clause: 'C5a', message: missing };\n  if (missing === null) return null;\n",
+    "killers": ["G7-N5a", "G7-N5f", "G7-N5h", "G7-FC2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-9",
+    "description": "the `consumedAt !== null` term is dropped: a producing REFINE that was rendered and never submitted satisfies C5a. That is the bypass F74 names — a COMMIT minted against something the person never acted on.",
+    "file": "src/widgets/authority/commit-guard.ts",
+    "find": "  if (producing.consumedAt === null)",
+    "replace": "  if (producing.consumedAt === undefined)",
+    "killers": ["G7-N5a"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-10",
+    "description": "C5b's identity is taken against the ALLOWLIST's `propose` column instead of `AE_PROPOSE_PAIRING`. F70 (C11:1236-1238) forbids computing the pairing, and K7's column names `c9.booking.*` keys that resolve in no registry — so the identity would hold against a key nothing owns.",
+    "file": "src/widgets/authority/commit-guard.ts",
+    "find": "    row.confirmationOfKind === 'approval' ? pairing.ae : pairing.propose;",
+    "replace": "    row.confirmationOfKind === 'approval'\n      ? pairing.ae\n      : ({ space: 'C9', key: row.proposeKey } as CapabilityRef);",
+    "killers": ["S-G7-PAIR", "G7-FC2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-11",
+    "description": "C6 is computed and discarded: F72's second evaluation point stops comparing. A COMMIT on `SETTINGS_DRAFT`, `APPROVAL` or `PAYMENT_HANDOFF` recomputes the same Gate 5 floor as on `BOOKING_CONFIRMATION`, so nothing before slot 7 tells them apart.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "    if (mismatch) return unconfirmed('C6', mismatch);",
+    "replace": "    void mismatch;",
+    "killers": ["G7-N6a"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-12",
+    "description": "C6 compares against a hard-coded kind rather than the row the LIVE allowlist holds. F72's whole value is that the table is re-read in the running process (C11:4726), so a row changed after the mint still decides.",
+    "file": "src/widgets/authority/commit-guard.ts",
+    "find": "  const required = requiredConfirmationKind({ space: 'AE', key: aeKey });",
+    "replace": "  const required =\n    (requiredConfirmationKind({ space: 'AE', key: aeKey }),\n    'BOOKING_CONFIRMATION');",
+    "killers": ["G7-N6d"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-13",
+    "description": "F72's `MintRefusal` is swallowed as a pass. Its two branches — a non-AE ref and a key with no allowlist row — are the fail-closed half of a lookup with no default branch; swallowed, an un-allowlisted key commits.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "    if (e instanceof MintRefusal) return no('C6', e.message);",
+    "replace": "    if (e instanceof MintRefusal) return pass;",
+    "killers": ["G7-N6e"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-17",
+    "description": "the INTERIM loader resolves a fabricated consumed record instead of nothing. A fail-OPEN default is the defect the interim exists to avoid: until R7-1 wires `findProducingRecord`, a non-draft COMMIT must refuse at C5a, not pass on a record no store holds.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "export const UNWIRED_PRODUCING_RECORDS: ProducingRecordLoader = () =>\n  Promise.resolve(null);",
+    "replace": "export const UNWIRED_PRODUCING_RECORDS: ProducingRecordLoader = () =>\n  Promise.resolve({\n    effect: 'REFINE',\n    capabilitySpace: 'C9',\n    capabilityKey: 'appointments.own.reschedule',\n    consumedAt: new Date(0),\n  });",
+    "killers": ["T7-UNWIRED"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-20",
+    "description": "Gate 7 reads the live principal — it becomes a second authority gate (I21), and its verdict stops being a property of the record alone (I18). FR-14 (C11:1798) also forbids slot 6's ports to read presentation; slot 7 has no business reading the principal at all.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  const r = ctx.record;\n  if (!r) return no('C1', 'no record');\n",
+    "replace": "  const r = ctx.record;\n  if (!r) return no('C1', 'no record');\n  if (ctx.principal !== null && ctx.principal.role === 'client')\n    return no('C1', 'a client may not act');\n",
+    "killers": ["S-G7-I18", "S-G7-I21"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-21",
+    "description": "C9b is inverted: `PAYMENT_HANDOFF` is admitted exactly when K20 says it is NOT emittable. FR-6d (C11:1788) gap-blocks it with a null `commit_intent` and no button.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "    if (r.widgetKind === 'PAYMENT_HANDOFF' && !emittable('PAYMENT_HANDOFF'))",
+    "replace": "    if (r.widgetKind === 'PAYMENT_HANDOFF' && emittable('PAYMENT_HANDOFF'))",
+    "killers": ["G7-FC4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-22",
+    "description": "C11 is deleted, so a `BOOKING_CONFIRMATION` COMMIT passes Gate 7 with no `confirmation_subject` at all. BOOK.1 (C11:3109) states the interim itself: \"until `confirmation_subject` is stored, Gate 7 refuses every `BOOKING_CONFIRMATION` `COMMIT`.\"",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "    if (r.widgetKind === 'BOOKING_CONFIRMATION') {\n      const stored = confirmationSubject(r);",
+    "replace": "    const c11: boolean = false;\n    if (c11 && r.widgetKind === 'BOOKING_CONFIRMATION') {\n      const stored = confirmationSubject(r);",
+    "killers": ["G7-FC1", "G7-FC2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-23",
+    "description": "C5b's `approval` identity is taken against the pairing's PROPOSE side. F74 is explicit that it cannot be: \"the two spaces share no spelling, so 'equal to the propose key' can never hold for the approval case\" (C11:1438-1441) — it would refuse every APPROVAL decision unconditionally.",
+    "file": "src/widgets/authority/commit-guard.ts",
+    "find": "    row.confirmationOfKind === 'approval' ? pairing.ae : pairing.propose;",
+    "replace": "    pairing.propose;",
+    "killers": ["G7-FC3"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-24",
+    "description": "C9a is deleted: a money-mutating capability becomes actuatable from a widget the moment one reaches the allowlist. FR-6d's fence is that no such key is on the allowlist AT ALL (C11:1788); the gate's own predicate is the second half of it.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  if (MONEY(cap)) return no('C9a', `${ae.key} is MONEY (§3.10)`);",
+    "replace": "  const isMoney: boolean = MONEY(cap) && false;\n  if (isMoney) return no('C9a', `${ae.key} is MONEY (§3.10)`);",
+    "killers": ["G7-N9a"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-25",
+    "description": "C9a is implemented as F31's VETO (`MONEY ⇒ confirmation_kind === 'PAYMENT_HANDOFF'`) instead of FR-6d's predicate. F31 ADMITS a money row on `PAYMENT_HANDOFF` — as F82 routes `loyalty.internal-adjust.execute.v1` — so the mutant lets exactly the key the fence is named for through C9a.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  if (MONEY(cap)) return no('C9a', `${ae.key} is MONEY (§3.10)`);",
+    "replace": "  if (MONEY(cap) && r.widgetKind !== 'PAYMENT_HANDOFF')\n    return no('C9a', `${ae.key} is MONEY (§3.10)`);",
+    "killers": ["G7-N9b"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-26",
+    "description": "C8a never fires: a BOOKING capability whose allowlist row is not `BOOKING_CONFIRMATION` is admitted. With C6 it is the other direction of FR-6b's pin, and without it a booking COMMIT can sit on a settings confirmation.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "    if (BOOKING(cap) && requiredConfirmationKind(ae) !== 'BOOKING_CONFIRMATION')",
+    "replace": "    if (BOOKING(cap) && requiredConfirmationKind(ae) !== requiredConfirmationKind(ae))",
+    "killers": ["G7-N8a"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-27",
+    "description": "Gate 7 reads the envelope body. §4.4.3 classifies it CONVERSATION_CONTENT (class C), and F15 (C11:216-235) forbids this path to reach one: a gate whose antecedent is erasable stops meaning what it says after a retention run.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  const effect = r.effect as EffectClass;",
+    "replace": "  const effect = r.effect as EffectClass;\n  void (r as unknown as { bodyJson?: unknown }).bodyJson;",
+    "killers": ["S-G7-F15"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-35",
+    "description": "C11 reads `confirmation_subject` out of `WidgetEmission.bodyJson`, the only place it is persisted today. That is the reading BOOK.1 rules out — the member it names is `IntentRecord.confirmation_subject`, AUDIT_RETAINED, \"so the check reads no body field (§0.4 F15)\".",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "      const stored = confirmationSubject(r);",
+    "replace": "      const stored = (r as unknown as { bodyJson?: { confirmation_subject?: unknown } })\n        .bodyJson?.confirmation_subject;",
+    "killers": ["S-G7-F15"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-36",
+    "description": "Gate 7 reads `handoff_capability_ref` directly instead of through `subjectCapability`. R3.5.3 (C11:4219-4224) gives the field exactly four readers and AMB-09 (B-06, C11:7195) rules that a gate asks `subjectCapability`; a fifth reader is how a destination fence drifts from the one that resolves it.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  const subject = subjectOf(r);\n\n  // (c) F69's \"may carry\"",
+    "replace": "  const subject =\n    r.handoffSpace && r.handoffKey\n      ? ({ space: r.handoffSpace, key: r.handoffKey } as ReturnType<typeof subjectOf>)\n      : subjectOf(r);\n\n  // (c) F69's \"may carry\"",
+    "killers": ["R353-READERS"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-28",
+    "description": "K7's guard keeps its own F72 comparison beside the gate's. Two answers to \"has this been confirmed\" can disagree without anything going red, and the one that runs on the live path is the gate's — so the off-path copy would be the one nobody notices is wrong.",
+    "file": "src/widgets/booking/booking-commit.service.ts",
+    "find": "    const kind = confirmationKindMismatch(\n      record.aeCapability,\n      record.widgetKind,\n    );\n    if (kind) throw new CommitRefused('booking_confirmation_required', kind);",
+    "replace": "    const confirmationKind = 'BOOKING_CONFIRMATION';\n    if (record.widgetKind !== confirmationKind)\n      throw new CommitRefused(\n        'booking_confirmation_required',\n        `${record.aeCapability} requires ${confirmationKind}, got ${record.widgetKind}`,\n      );",
+    "killers": ["S-G7-F72-K7", "S-G7-F72-ONCE", "K7-F72-DELEGATES"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-29",
+    "description": "the refusal helper writes a code the compiler was told not to check. §3.9 gives every gate a code from a closed vocabulary; a cast to the bottom type switches that check off, which is how a gate starts answering with a word no caller handles.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "const no = (clause: string, why: string): GateVerdict =>\n  refuse('effect_not_admissible', `G7.${clause}: ${why}`);",
+    "replace": "const no = (clause: string, why: string): GateVerdict => ({\n  outcome: 'refuse',\n  code: 'not_admissible' as never,\n  detail: `G7.${clause}: ${why}`,\n});",
+    "killers": ["S-G7-VOCAB", "S-G7-VOCAB-NEVER"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-30",
+    "description": "a channel literal comes back into the gate: the tier table starts being restated where K6 owns it, and the fitter's CARRIER CEILING and Gate 7 can then disagree about a cell (D-5).",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  if (effect !== 'COMMIT') return pass;",
+    "replace": "  if (r.deliveryChannel === 'pwa' && effect === 'NONE') return pass;\n  if (effect !== 'COMMIT') return pass;",
+    "killers": ["S-G7-TIER"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-32",
+    "description": "a second space-membership function beside K4's `resolves`: the CONTROL space is checked against a set spelled out in the gate. F27 (C11:408-416) closes the space at three keys, and it has one runtime statement — a second one is free to drift from it.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  if (!resolves(subject))",
+    "replace": "  const CONTROL_KEYS = new Set(['control.widget.dismiss', 'control.run.cancel']);\n  if (\n    !(subject.space === 'CONTROL'\n      ? CONTROL_KEYS.has(subject.key)\n      : resolves(subject))\n  )",
+    "killers": ["S-G7-F27-ONE", "G7-P5"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-8",
+    "description": "The producing-record read loses its tenant filter: C5a would resolve a record of ANOTHER tenant and, if it were CONSUMED and of F74's class, admit the COMMIT. Declared by U7a against `intent-gateway.service.ts`, which the unit may not edit, and added by the integrator in the same commit as R7-1 (IR-U7A-6). `T7-WIRED` holds the tenant-scoped `where` at BUILD; this mutant is what makes that pin bite.",
+    "file": "src/widgets/intent-gateway.service.ts",
+    "find": "  private findProducingRecord(\n    intentTokenHash: string,\n    tenantId: string,\n  ): Promise<ProducingRecordRow | null> {\n    return this.prisma.widgetIntentRecord.findFirst({\n      where: { intentTokenHash, tenantId },\n",
+    "replace": "  private findProducingRecord(\n    intentTokenHash: string,\n    tenantId: string,\n  ): Promise<ProducingRecordRow | null> {\n    void tenantId;\n    return this.prisma.widgetIntentRecord.findFirst({\n      where: { intentTokenHash },\n",
+    "killers": ["T7-WIRED"],
+    "expect": "build-killed"
+  }
+]

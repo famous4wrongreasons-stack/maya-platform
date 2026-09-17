@@ -10,12 +10,12 @@
     ]
   },
   "N4": {
-    "description": "U4: the two mechanisms that shadow slot 4 — `findRecord`'s tenant filter, and slot 3's principal compare. Re-quoted against the gateway AS MERGED (P-PRINCIPAL rewrote slot 3, D-16); slot 3's new null-principal branch needs no neutraliser, because the request under test carries a principal that resolves — it is the RECORD that belongs to another tenant.",
+    "description": "U4: the two mechanisms that shadow slot 4 — `findRecord`'s tenant filter, and slot 3's principal compare. Re-quoted against the gateway AS MERGED (P-PRINCIPAL rewrote slot 3, D-16); slot 3's new null-principal branch needs no neutraliser, because the request under test carries a principal that resolves — it is the RECORD that belongs to another tenant. Re-anchored in U7a's merge: R7-1 adds `findProducingRecord`, whose `where` is spelled the same way, so the anchor now carries the `tx.widgetIntentRecord.findFirst({` line above it and matches the SUBMITTED record's read alone.",
     "edits": [
       {
         "file": "src/widgets/intent-gateway.service.ts",
-        "find": "      where: { intentTokenHash, tenantId },\n",
-        "replace": "      where: {\n        intentTokenHash,\n        tenantId: tenantId === '' ? tenantId : undefined,\n      },\n"
+        "find": "    const row = await tx.widgetIntentRecord.findFirst({\n      where: { intentTokenHash, tenantId },\n",
+        "replace": "    const row = await tx.widgetIntentRecord.findFirst({\n      where: {\n        intentTokenHash,\n        tenantId: tenantId === '' ? tenantId : undefined,\n      },\n"
       },
       {
         "file": "src/widgets/intent-gateway.service.ts",

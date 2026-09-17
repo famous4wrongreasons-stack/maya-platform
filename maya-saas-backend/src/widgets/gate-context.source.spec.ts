@@ -690,13 +690,13 @@ interface SelectTree {
 }
 
 /** The `select` of `findRecord`'s one `findFirst`, top level and `emission.select`. */
-const findRecordSelect = (gatewaySource: string): SelectTree => {
+const methodSelect = (gatewaySource: string, method: string): SelectTree => {
   const sf = parseSource(GATEWAY, gatewaySource);
   const selects: ts.ObjectLiteralExpression[] = [];
   const visit = (n: ts.Node): void => {
     if (
       ts.isMethodDeclaration(n) &&
-      n.name.getText(sf) === 'findRecord' &&
+      n.name.getText(sf) === method &&
       n.body !== undefined
     ) {
       const inner = (m: ts.Node): void => {
@@ -715,7 +715,7 @@ const findRecordSelect = (gatewaySource: string): SelectTree => {
   };
   visit(sf);
   if (selects.length !== 1)
-    throw new Error(`findRecord has ${selects.length} top-level selects`);
+    throw new Error(`${method} has ${selects.length} top-level selects`);
   const columns: string[] = [];
   let emission: string[] = [];
   for (const p of selects[0].properties) {
@@ -736,6 +736,9 @@ const findRecordSelect = (gatewaySource: string): SelectTree => {
   }
   return { columns, emission };
 };
+
+const findRecordSelect = (gatewaySource: string): SelectTree =>
+  methodSelect(gatewaySource, 'findRecord');
 
 /** Every S-ROW / D-3 violation of a gateway + gate.types pair. */
 const rowViolations = (gatewaySource: string, types: string): string[] => {
@@ -820,7 +823,25 @@ describe('S-ROW and D-3 — the record gates read is AUDIT_RETAINED, and confirm
       'lifecycleState',
       'supersededByWidgetId',
     ]);
-    expect(gatewaySource.match(/\.findFirst\(/g)).toHaveLength(1);
+    // R7-1 (U7a's merge) adds the SECOND read this file admits, and it is enumerated rather than
+    // counted away. `findRecord` reads the SUBMITTED record once and serves every gate; slot 7's
+    // `findProducingRecord` reads a DIFFERENT row — the one a non-draft COMMIT names in
+    // `confirmation_of_ref` (F74, C5a) — and only for that shape. Two reads, two methods, and the
+    // gateway may hold no third: a third `findFirst` fails this line.
+    expect(gatewaySource.match(/\.findFirst\(/g)).toHaveLength(2);
+    const producing = methodSelect(gatewaySource, 'findProducingRecord');
+    expect([...producing.columns].sort()).toEqual(
+      ['effect', 'capabilitySpace', 'capabilityKey', 'consumedAt'].sort(),
+    );
+    expect(producing.emission).toEqual([]);
+    // Tenant-scoped IN THE QUERY, for the same reason `findRecord` is: a filter applied after the
+    // read would have read the foreign row first.
+    const producingBody = gatewaySource.slice(
+      gatewaySource.indexOf('private findProducingRecord('),
+    );
+    expect(producingBody).toMatch(
+      /where:\s*\{\s*intentTokenHash,\s*tenantId\s*\}/,
+    );
   });
 
   it('no selected column and no row member is class C or X, and the raw confirmation is not a member', () => {

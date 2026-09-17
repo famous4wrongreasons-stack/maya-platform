@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { ActionCapabilityRegistry } from '../../action-engine/action-engine.registry';
+import { C9_CAP_BY_KEY } from '../authority/contract-bindings';
+import { proposeForAe } from '../authority/propose-pairing';
 import { MONEY_FACETS, MONEY_TARGET_KINDS } from '../../widget-contract/tables';
 import {
   AE_WIDGET_COMMIT_ALLOWLIST,
@@ -59,9 +61,32 @@ describe('BOOKING ALLOWLIST: EXACTLY 3 KEYS', () => {
     }
   });
 
-  it('pairs every row with a C9 propose key, because Gate 7 resolves through that and not the AE key', () => {
-    for (const r of AE_WIDGET_COMMIT_ALLOWLIST)
-      expect(r.proposeKey.startsWith('c9.')).toBe(true);
+  it('K7-PROPOSE-COLUMN: every row still carries the `c9.booking.*` propose key K7 recorded — and NOTHING reads it any more (U7a)', () => {
+    // The column is kept, because deleting it is the integrator's to do (D-18), and because it is the
+    // record of what K7 traced. But the claim that used to stand here — "Gate 7 resolves through
+    // that" — was wrong in a way worth naming: these three keys resolve in NO registry. Authority for
+    // a COMMIT is resolved through `AE_PROPOSE_PAIRING`'s propose side (F70, C11:1236-1238), which
+    // names `appointments.own.{create,reschedule,cancel}`, and a source fence in
+    // `gates/gate7.pipeline.spec.ts` holds that neither Gate 7 nor the commit guard reads this column.
+    for (const r of AE_WIDGET_COMMIT_ALLOWLIST) {
+      expect(r.proposeKey.startsWith('c9.booking.')).toBe(true);
+      expect(C9_CAP_BY_KEY.has(r.proposeKey)).toBe(false);
+      expect(proposeForAe(r.ae)?.key).toMatch(/^appointments\.own\./);
+    }
+  });
+
+  it('K7-F72-DELEGATES: the guard’s confirmation-kind and `confirmation_of_ref` checks are §0.13’s one body, not a second copy (U7a)', () => {
+    const src = fs.readFileSync(
+      path.join(__dirname, 'booking-commit.service.ts'),
+      'utf8',
+    );
+    expect(src).toContain("from '../authority/commit-guard'");
+    for (const owner of [
+      'confirmationKindMismatch',
+      'confirmationRefProblem',
+      'producingRecordMissing',
+    ])
+      expect(src).toContain(owner);
   });
 });
 
