@@ -63,12 +63,15 @@ export type RefusalCode =
   | 'mechanism_absent';
 
 /**
- * `LoweredUtterance` is Gate 9's product: a string only `renderUtterance` may brand (G9 §3.0). It is
- * stated here, with G9's brand, until the Gate 9 unit owns `lowering/lowering.ts`.
+ * `LoweredUtterance` is Gate 9's product: a string only `renderUtterance` may brand (G9 §3.0).
+ *
+ * IR-9a-1 (U9a's merge): it is DECLARED in `lowering/lowering.ts` now and re-exported here, so the
+ * brand has one definition and the file that may produce it is the file that declares it. Two
+ * identical brands are two types that happen to agree today; one is a type that cannot disagree. The
+ * edge is type-only, so it creates no runtime cycle.
  */
-export type LoweredUtterance = string & {
-  readonly __brand: 'LoweredUtterance';
-};
+import type { LoweredUtterance } from './lowering/lowering';
+export type { LoweredUtterance };
 
 /** Gate 11's resolved nouns. Opaque on purpose: their shape is AMB-33's ruling, not this file's. */
 export type ResolvedNouns = { readonly __brand: 'ResolvedNouns' };

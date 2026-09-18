@@ -1,0 +1,28 @@
+[
+  {
+    "id": "9A-M1",
+    "description": "the slot is filled with `String.prototype.replace` instead of split/join. `replace` treats the REPLACEMENT as a pattern: `$&` becomes the matched slot text, `$$` collapses to one `$`, `$1` becomes a capture group — so a server-resolved canonical label carrying any of them reaches the transcript as different bytes than the server resolved (9.1, R3.9.2 C11:4889-4895). It also replaces only the FIRST occurrence, so a template with the slot twice keeps a raw `{{selection}}` in a USER turn. Both are silent: every label without a `$` renders identically.",
+    "edits": [
+      {
+        "file": "src/widgets/lowering/lowering.ts",
+        "find": "  return {\n    ok: true,\n    utterance: template\n      .split(SELECTION_SLOT)\n      .join(selectedLabels[0]) as LoweredUtterance,\n  };\n",
+        "replace": "  return {\n    ok: true,\n    utterance: template.replace(\n      SELECTION_SLOT,\n      selectedLabels[0],\n    ) as LoweredUtterance,\n  };\n"
+      }
+    ],
+    "killers": ["U9a-1a", "U9a-1c", "U9a-1e"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "9A-M2",
+    "description": "the lowering function gains a parameter of the submission's `inputs` type. R3.9.2 (C11:4889-4895) states the signature itself: it \"accepts `selected_labels: string[]` and has no parameter of the submission's `inputs` type\", because a function that CAN reach raw client bytes can interpolate them into the transcript by accident. The mutant compiles, every existing call still passes two arguments, and no runtime test can see the third — which is why 9.1a is held at the source (T-ARCH-SIG).",
+    "edits": [
+      {
+        "file": "src/widgets/lowering/lowering.ts",
+        "find": "export const renderUtterance = (\n  template: string | null,\n  selectedLabels: readonly string[],\n): RenderOutcome => {\n",
+        "replace": "export const renderUtterance = (\n  template: string | null,\n  selectedLabels: readonly string[],\n  inputs?: Readonly<Record<string, unknown>> | null,\n): RenderOutcome => {\n  void inputs;\n"
+      }
+    ],
+    "killers": ["T-ARCH-SIG", "T-ARCH-SIG-2"],
+    "expect": "build-killed"
+  }
+]
