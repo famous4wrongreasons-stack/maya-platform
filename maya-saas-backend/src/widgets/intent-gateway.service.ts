@@ -21,7 +21,12 @@ import type {
   SubmissionShape,
 } from './gate.types';
 import type { ChannelId } from '../widget-contract/lifecycle';
-import { GATE6_OWNERS, PRINCIPAL_RESOLVER, TENANT_SCOPE } from './di-tokens';
+import {
+  GATE6_OWNERS,
+  INPUT_VALIDATION,
+  PRINCIPAL_RESOLVER,
+  TENANT_SCOPE,
+} from './di-tokens';
 import type { PrincipalResolver, RequestTx } from './authority/principal-view';
 import type { ProducingRecordRow } from './authority/commit-guard';
 import type { TenantScopePort } from './owner-ports/tenant-scope.provider';
@@ -35,10 +40,7 @@ import { gate4 } from './gates/gate4';
 import { gate5 } from './gates/gate5';
 import { gate6 } from './gates/gate6';
 import { gate7 } from './gates/gate7';
-import {
-  INPUT_VALIDATION_PENDING_ON,
-  inputValidation,
-} from './input-validation/input-validation.gate';
+import type { InputValidationGate } from './input-validation/input-validation.gate';
 import { gate8R } from './gates/gate8r';
 import { LOWERING_PENDING_ON, lower } from './lowering/lowering.gate';
 import { GATE10_PENDING_ON, gate10 } from './gates/gate10';
@@ -116,6 +118,8 @@ export class IntentGatewayService {
     private readonly tenantScope: TenantScopePort,
     @Inject(GATE6_OWNERS)
     private readonly gate6Owners: Gate6Owners,
+    @Inject(INPUT_VALIDATION)
+    private readonly inputValidation: InputValidationGate,
   ) {}
 
   /**
@@ -247,16 +251,18 @@ export class IntentGatewayService {
       run: (ctx) =>
         gate7(ctx, (hash) => this.findProducingRecord(hash, ctx.tenantId)),
     },
-    // NOT BUILT. Closed-domain membership, cardinality, bounds re-read from `bounds_source`,
-    // normalizers and `c9SafeText` need the schema source, the codec and the registries, and several
-    // of their refusals need owner rulings before a code may be chosen (AMB-01, AMB-02a).
+    // BUILT, in one lane of two (U8a, B-01 C11:7188). The NULL-SCHEMA lane is row 8's: a record whose
+    // `input_schema_hash` is null passes with the submission's `inputs` absent or `null`, and refuses
+    // `selection_out_of_domain` on anything else — `{}` included, because "an empty object" is not
+    // "nothing was submitted". A SCHEMA-BEARING record refuses `mechanism_absent` and the path stays
+    // dark until U8b builds the codec lane: "not built yet" and "allowed" are different branches (F5).
+    // The slot no longer carries `pendingOn`, because the gate it calls decides rather than stubs.
     {
       n: '8',
       name: 'Input validation',
       host: 'IntentGateway',
-      pendingOn: INPUT_VALIDATION_PENDING_ON,
-      // Seam: `input-validation/input-validation.gate.ts` (U8a, U8b).
-      run: (ctx) => inputValidation(ctx),
+      // Seam: `input-validation/input-validation.gate.ts` (U8a, then U8b).
+      run: (ctx) => this.inputValidation.run(ctx),
     },
     {
       n: '8-R',

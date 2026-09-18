@@ -31,6 +31,8 @@ import type {
 import * as gate1Module from './gates/gate1';
 import * as gate5Module from './gates/gate5';
 import * as gate6Module from './gates/gate6';
+import { InputValidationGate } from './input-validation/input-validation.gate';
+import type { LoweringSourceRow } from './stores/lowering-source.read';
 import { IntentGatewayService } from './intent-gateway.service';
 import { sha256Hex } from './token.util';
 
@@ -241,8 +243,17 @@ const ACTOR: Readonly<AuthenticatedUser> = Object.freeze({
   membershipStatus: 'active',
 });
 
+/**
+ * IR-8a-3 (U8a's merge): `inputs: {}` is part of the DEFAULT submission now.
+ *
+ * Slot 8 is built (the null-schema lane), and K12 reads "the member was carried, and `{}` is not
+ * `nothing was submitted`" — so a default that omitted `inputs` would PASS slot 8 and carry every
+ * test in this file past the slot it is about. `{}` keeps the default submission stopping at 8, which
+ * is what each test below was written against, and it makes the stop a DECISION rather than a stub.
+ */
 const submission = (token: string): SubmissionShape => ({
   intent_token: token,
+  inputs: {},
 });
 
 /** The whole argument set the controller passes, so no test omits a required input. */
@@ -315,10 +326,36 @@ const gatewayFor = (
         );
     },
   };
+  // U6-L1 (R6-1): slot 6's owner port. `gate6`'s own parameter default is `heldGate6Owners`, which
+  // REJECTS on every member, so passing `undefined` here is the fail-closed binding and not an
+  // omission — the AE and catalogue branches this file never reaches would refuse.
+  const gate6Owners = undefined;
+  // U8a (IR-8a-1): slot 8 is a PROVIDER now, so the gateway takes it as a constructor argument and a
+  // test has to supply one. It is the real gate over a reader double: the lane's decision is the
+  // thing under test, and the read it performs on a pass is the double's one row.
+  const loweringSource = {
+    reads: 0,
+    read: (): Promise<LoweringSourceRow> => {
+      loweringSource.reads += 1;
+      return Promise.resolve({
+        utteranceTemplate: 'show me {{selection}}',
+        erasedAt: null,
+        conversationId: 'conversation-a',
+      });
+    },
+  };
+  const inputValidation = new InputValidationGate(loweringSource);
   return {
     prisma,
     live,
-    gateway: new IntentGatewayService(prisma as never, resolver, tenantScope),
+    loweringSource,
+    gateway: new IntentGatewayService(
+      prisma as never,
+      resolver,
+      tenantScope,
+      gate6Owners as never,
+      inputValidation,
+    ),
   };
 };
 
@@ -546,23 +583,26 @@ describe('K3 CI exit — indistinguishable latency', () => {
   });
 });
 
-describe('the pipeline after U0 — slots 8, 9 and 10 are refusing stubs', () => {
-  it('a valid token runs the REAL gates 1..7, then refuses at the unbuilt Gate 8', async () => {
+describe('the pipeline after U8a — slots 9 and 10 are refusing stubs', () => {
+  it('a valid token runs the REAL gates 1..8, and Gate 8 DECIDES — the default submission carries `inputs: {}`, which K12 refuses', async () => {
     // Before U0 this token passed a legacy Gate 8 that failed open, and a Gate 8-R keyed on the
-    // carrier, and stopped at Gate 9. Slot 8 is a refusing stub now (G8 §5.0), so nothing past it
-    // is reached. The route is dark, so no client sees the difference.
-    const { gateway, prisma } = gatewayFor([record({ singleUse: false })]);
+    // carrier, and stopped at Gate 9. After U0 slot 8 was a refusing stub. After U8a (IR-8a-1) it is
+    // the built null-schema lane, so the stop at 8 is now a DECISION about what the submission
+    // carries (K12, C11:2902) rather than a statement that nothing is built. The route is dark, so
+    // no client sees the difference.
+    const { gateway, prisma, loweringSource } = gatewayFor([
+      record({ singleUse: false }),
+    ]);
     const r = await gateway.submit(args());
     expect(r.verdict.outcome).toBe('refuse');
-    expect(code(r.verdict)).toBe('mechanism_absent');
-    expect('detail' in r.verdict && r.verdict.detail).toMatch(
-      /^gate 8 \(Input validation\) is NORMATIVE-PENDING on /,
-    );
+    expect(code(r.verdict)).toBe('selection_out_of_domain');
     expect(r.stoppedAt).toBe('8');
     // 1, 2, 3, 4, 5, 6, 7 ran and passed; 8 ran and refused.
     expect(r.ran).toBe(8);
-    // One read, and the double has no write method at all: a refusal at 8 wrote nothing.
+    // One read, and the double has no write method at all: a refusal at 8 wrote nothing. The lowering
+    // source is read only after a PASS (D-2), so a refusal reads it zero times.
     expect(prisma.reads).toBe(1);
+    expect(loweringSource.reads).toBe(0);
   });
 
   it('it stops at 8 whatever the submission carries: inputs and a readback reach no gate', async () => {
@@ -581,11 +621,11 @@ describe('the pipeline after U0 — slots 8, 9 and 10 are refusing stubs', () =>
         },
       }),
     );
-    expect(code(r.verdict)).toBe('mechanism_absent');
+    expect(code(r.verdict)).toBe('selection_out_of_domain');
     expect(r.stoppedAt).toBe('8');
   });
 
-  it('exactly three slots are pending() stubs: 8, 9 and 10; twelve run their own logic', () => {
+  it('exactly two slots are pending() stubs: 9 and 10; thirteen run their own logic', () => {
     const { gateway } = gatewayFor([record()]);
     // GATE MODULE EXISTS != GATE ENFORCED. A slot that refuses because it is not built is counted
     // as not built, never as a gate that runs.
@@ -593,9 +633,9 @@ describe('the pipeline after U0 — slots 8, 9 and 10 are refusing stubs', () =>
       slotsOf(gateway)
         .filter((g) => g.pendingOn !== undefined)
         .map((g) => g.n),
-    ).toEqual(['8', '9', '10']);
+    ).toEqual(['9', '10']);
     expect(gateway.gateCount).toBe(15);
-    expect(gateway.liveGateCount).toBe(12);
+    expect(gateway.liveGateCount).toBe(13);
   });
 
   it('every pending slot refuses mechanism_absent, naming itself', async () => {

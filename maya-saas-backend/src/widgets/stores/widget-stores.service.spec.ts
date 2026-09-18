@@ -543,13 +543,18 @@ describe('the stores split (U0, D-6): four sub-stores behind one facade, one ten
     for (const w of wheres) expect(w).toMatch(/: where: scoped\(/);
   });
 
-  it('the divergence store and the lowering-source reader are skeletons: no method pretends to write or read', () => {
-    // Converted by the unit that builds each one (U10b after AMB-32; U8a), in the same commit.
-    for (const [file, name] of SUB_STORES.slice(2))
-      expect(
-        classOf(file, name)
-          .members.filter((m) => !ts.isConstructorDeclaration(m))
-          .map((m) => m.name?.getText() ?? '?'),
-      ).toEqual([]);
+  it('the divergence store is a skeleton, and the lowering-source reader has exactly the one read U8a builds', () => {
+    // IR-8a-4, converted in U8a's merge commit — the one the comment already named. The divergence
+    // store stays a skeleton until U10b builds it (AMB-32); the lowering-source reader now has D-2's
+    // ONE lazy read and nothing else, so "no second read crept in" is a property this line holds
+    // rather than a sentence in a header.
+    const membersOf = (i: number): string[] => {
+      const [file, name] = SUB_STORES[i];
+      return classOf(file, name)
+        .members.filter((m) => !ts.isConstructorDeclaration(m))
+        .map((m) => m.name?.getText() ?? '?');
+    };
+    expect(membersOf(2)).toEqual([]);
+    expect(membersOf(3)).toEqual(['read']);
   });
 });

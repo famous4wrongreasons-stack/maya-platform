@@ -97,6 +97,38 @@ export const pipelineSources = (
       );
   }
 
+  /**
+   * A slot may reach its code through DI instead of through a value import: slot 8 is
+   * `this.inputValidation.run(ctx)`, where `inputValidation` is a constructor member declared as
+   * `InputValidationGate` and that type is imported (type-only) from the gate's own file.
+   *
+   * Without this the seam would vanish from the slot's file set the day it became a provider, and
+   * every fence that reads "slot N and every file the slot calls" would quietly stop reading the
+   * gate. So the constructor's members are mapped to the files their DECLARED TYPES come from, and a
+   * `this.<member>` in a slot pulls that file in exactly as a call to an imported function does.
+   *
+   * `owner-ports/**` is EXCLUDED, and the exclusion is the point of the D-6 boundary rather than a
+   * convenience: a port adapter is the one place the widget layer may name an owner's service, and
+   * the fences that read a slot's own code say "slot 4 names no tenancy service" precisely because
+   * the adapter does. Folding the adapter into the slot would make that sentence unsayable. What
+   * fences the adapters instead is `widget-import-graph.architecture.spec.ts` and k3 check 9.
+   */
+  const memberFile = new Map<string, string>();
+  const classDecl = sf.statements.find((st): st is ts.ClassDeclaration =>
+    ts.isClassDeclaration(st),
+  );
+  for (const m of classDecl?.members ?? [])
+    if (ts.isConstructorDeclaration(m))
+      for (const param of m.parameters) {
+        if (!ts.isIdentifier(param.name) || param.type === undefined) continue;
+        const named = ts.isTypeReferenceNode(param.type)
+          ? param.type.typeName.getText(sf)
+          : null;
+        const file = named === null ? undefined : importedFrom.get(named);
+        if (file !== undefined && !file.startsWith('owner-ports/'))
+          memberFile.set(param.name.text, file);
+      }
+
   const array = gatesArray(sf);
   const order: string[] = [];
   const slotUnits: SourceUnit[] = [];
@@ -114,6 +146,14 @@ export const pipelineSources = (
     const visit = (n: ts.Node): void => {
       if (ts.isIdentifier(n)) {
         const f = importedFrom.get(n.text);
+        if (f !== undefined) files.add(f);
+      }
+      // `this.<member>`: the file the member's declared type is imported from (see `memberFile`).
+      if (
+        ts.isPropertyAccessExpression(n) &&
+        n.expression.kind === ts.SyntaxKind.ThisKeyword
+      ) {
+        const f = memberFile.get(n.name.text);
         if (f !== undefined) files.add(f);
       }
       ts.forEachChild(n, visit);
@@ -350,9 +390,13 @@ describe('pipeline slot sources', () => {
     expect(filesOf('6')).toContain('gates/gate6.ts');
     expect(filesOf('13')).toContain('gates/gate13.ts');
     // D-18 (I-CTX): each seamed slot calls its one seam file, and that file is the slot's code too,
-    // whether the slot is built (1, 4) or a refusing stub (8, 9, 10).
+    // whether the slot is built (1, 4, 8) or a refusing stub (9, 10). Slot 8 reaches its seam through
+    // a DI member rather than a value import (U8a, IR-8a-1) and the derivation follows it, so a fence
+    // that reads "the slot and every file it calls" keeps reading the gate. Slots 4 and 6 also carry
+    // DI members, but theirs are OWNER PORTS, which the derivation excludes — see `memberFile`.
     expect(filesOf('1')).toEqual([`${GATEWAY}#slot-1`, 'gates/gate1.ts']);
     expect(filesOf('4')).toEqual([`${GATEWAY}#slot-4`, 'gates/gate4.ts']);
+    expect(filesOf('6')).toEqual([`${GATEWAY}#slot-6`, 'gates/gate6.ts']);
     expect(filesOf('8')).toEqual([
       `${GATEWAY}#slot-8`,
       'input-validation/input-validation.gate.ts',

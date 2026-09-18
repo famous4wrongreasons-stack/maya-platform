@@ -195,10 +195,15 @@ describe('T-F11/B-1 — the pipeline order on the live code path [GW]', () => {
         code: 'effect_not_admissible',
       },
       {
+        // IR-8a-3 (U8a's merge). This stopped at 8 while slot 8 was the I-CTX stub. Slot 8 is the
+        // built null-schema lane now, and the harness body carries `inputs: null` (IR-F88-3's fill of
+        // §3.8's required member), which is the lane's PASS — so the first slot that still has no
+        // mechanism is 9. The claim the row makes is unchanged: `ran` equals the stopping slot's
+        // position in §3.9, and the wall moved by exactly one built gate.
         label: 'valid',
         actor: a,
         token: valid.intentToken,
-        stop: '8',
+        stop: '9',
         code: 'mechanism_absent',
       },
     ];
@@ -229,7 +234,7 @@ describe('T-F11/B-1 — the pipeline order on the live code path [GW]', () => {
       })),
     );
     const stops = [...new Set(observed.map((o) => o.ran))];
-    expect(stops).toEqual([0, 1, 3, 5, 7, 8]);
+    expect(stops).toEqual([0, 1, 3, 5, 7, 10]);
   });
 
   it('T-F11/B-1 (c): only slot 9 may produce the lowering facts (J-1 producer map)', () => {

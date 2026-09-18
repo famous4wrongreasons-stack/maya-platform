@@ -390,13 +390,19 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
     );
     // MERGE FIX (U7a's merge), for the reason given at `refusedAtSeven`: the record read is counted
     // on its own, and the principal's in-`T` reads by the property that matters — locks, no writes.
+    // MERGE FIX (U8a's merge): the admitted submission now reaches slot 8, whose null-schema lane
+    // performs ONE lowering-source read after its pass (D-2) — the same model, so the record read and
+    // it are two entries. The refused one still reads once, which is the property NW needs here.
     expect({
       writes: admitted.writes,
       recordOperations: admitted.recordOperations,
       wrote: admitted.wrote,
     }).toEqual({
       writes: [],
-      recordOperations: ['WidgetIntentRecord.findFirst'],
+      recordOperations: [
+        'WidgetIntentRecord.findFirst',
+        'WidgetIntentRecord.findFirst',
+      ],
       wrote: false,
     });
     gw.recorder.clear();

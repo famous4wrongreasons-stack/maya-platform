@@ -648,9 +648,14 @@ describe('P-PRINCIPAL — the wired pipeline [merge-step exits, D-18]', () => {
       kind: 'METRIC',
       body: { value: 1 },
     });
+    // MERGE FIX (U8a's merge): the submission carries `inputs: {}` now. `inputs: null` on a
+    // null-schema record is slot 8's PASS since IR-8a-1, and a submission that passes slot 8 performs
+    // the lane's one lowering-source read (D-2) — a second read of the same model. The K3 exit wording
+    // this test holds is about a REFUSAL, so the case is made a refusal again, at slot 8 (K12), rather
+    // than the assertion being widened to admit a second read.
     await gw.submit(
       actor,
-      submission(widget.widgetId, widget.intentToken),
+      { ...submission(widget.widgetId, widget.intentToken), inputs: {} },
       'PR-12',
     );
     const recorded = gw.recorder.inScope('PR-12');

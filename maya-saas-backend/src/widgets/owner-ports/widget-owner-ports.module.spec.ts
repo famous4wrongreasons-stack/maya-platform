@@ -119,6 +119,10 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       // P-SEAL binds this one in `widgets.module.ts`, not at the boundary (B-22): the seal key is the
       // minter's, and it moves to the emission module in P-MINT-CORE's merge.
       DI_TOKENS.SEAL_VERIFIER,
+      // U8a (IR-8a-1) binds slot 8's gate in `widgets.module.ts` too, and for the same kind of
+      // reason: `InputValidationGate` is widget-internal and reaches no owner, so the D-6 boundary
+      // has nothing to say about it and k3 check 9's owner enumeration is unchanged.
+      DI_TOKENS.INPUT_VALIDATION,
     ];
     const moduleRef = await Test.createTestingModule({
       // The owner modules the boundary now imports resolve configuration the way the application does:

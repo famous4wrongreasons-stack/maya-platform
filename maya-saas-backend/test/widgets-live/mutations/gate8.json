@@ -1,0 +1,56 @@
+[
+  {
+    "id": "M-NULL-PASS",
+    "description": "the null-schema lane stops refusing a submission that carries `inputs`: K12's clause (C11:2902, row 8 C11:4727) becomes unreachable and every value a client sends is admitted on a record that declares no schema. Killed live by T-NULL-OBJ and T-NULL-EMPTY, which are [GW RI]/[HTTP RI] until IR-8a-1 rewires slot 8 — so the kill is NOT evidence (§3.2: only an [HTTP] kill of the unbound path is). The integrator re-runs this battery after the merge, when the same killers run unbound.",
+    "file": "src/widgets/input-validation/input-validation.ts",
+    "find": "  if (presence === 'values')\n    return {\n      lane: 'null-schema',\n      verdict: 'refuse',\n      code: 'selection_out_of_domain',\n      detail:\n        'the record declares no input schema, and the submission carries `inputs` (K12)',\n      presence,\n    };\n  return { lane: 'null-schema', verdict: 'pass', presence };",
+    "replace": "  return { lane: 'null-schema', verdict: 'pass', presence };",
+    "killers": ["T-NULL-OBJ", "T-NULL-EMPTY"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M-EMPTY-OBJ",
+    "description": "`{}` is read as \"nothing was submitted\" and passes: the one body a hostile client can always produce becomes the one body that is never refused. K12 refuses a submission CARRYING `inputs`, and §3.8 already distinguishes omitted from null from `{}` (P-F88). Killed live by T-NULL-EMPTY.",
+    "file": "src/widgets/input-validation/input-validation.ts",
+    "find": "  if (inputs === null) return 'null';\n  return 'values';",
+    "replace": "  if (inputs === null) return 'null';\n  if (\n    typeof inputs === 'object' &&\n    !Array.isArray(inputs) &&\n    Object.keys(inputs as object).length === 0\n  )\n    return 'null';\n  return 'values';",
+    "killers": ["T-NULL-EMPTY"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M-READ-EARLY",
+    "description": "the lowering source is read BEFORE the decision instead of after it (D-2, plan §2.5): the read count per submission is unchanged, but a submission the gate then refuses has already loaded the class-C template and the turn join. Killed live by T-HELD and T-NULL-OBJ (their store-operation lists gain a second `WidgetIntentRecord.findFirst`) and by T-READ-ONCE (the reader is called on the refusal).",
+    "edits": [
+      {
+        "file": "src/widgets/input-validation/input-validation.gate.ts",
+        "find": "  const decision = decideForContext(ctx);",
+        "replace": "  const early = await reader.read(ctx.tenantId, ctx.intentTokenHash);\n  const decision = decideForContext(ctx);"
+      },
+      {
+        "file": "src/widgets/input-validation/input-validation.gate.ts",
+        "find": "  const loweringSource: LoweringSourceRow = await reader.read(\n    ctx.tenantId,\n    ctx.intentTokenHash,\n  );",
+        "replace": "  const loweringSource: LoweringSourceRow = early;"
+      }
+    ],
+    "killers": ["T-HELD", "T-READ-ONCE", "T-NULL-OBJ"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M-FACT-SLOT",
+    "description": "slot 8's pass carries a fact slot 8 does not produce (`loweredTurn`, whose producer is slot 9). J-1's `mergeFacts` throws on it — a fact has exactly one producer slot — so the submission raises instead of returning a verdict. This is the mutant the producer map is FOR: without `mergeFacts` the gate could hand Gate 13 a turn nobody appended. Killed live by T-NULL-NULL (the pass path), and at [U] by G8a-G3.",
+    "file": "src/widgets/input-validation/input-validation.gate.ts",
+    "find": "  return {\n    outcome: 'pass',\n    facts: { validatedInputs, selectedLabels, loweringSource },\n  };",
+    "replace": "  return {\n    outcome: 'pass',\n    facts: {\n      validatedInputs,\n      selectedLabels,\n      loweringSource,\n      loweredTurn: {\n        turnId: 'slot-8',\n        conversationId: loweringSource.conversationId,\n      },\n    },\n  };",
+    "killers": ["T-NULL-NULL", "G8a-G3"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M-TRUNC",
+    "description": "row 8's \"enforced by refusal, never truncation\", at the null lane: the gate REPAIRS the submission — it drops whatever `inputs` carried and decides on the repaired value, so `{a:1}` and `{}` both pass. A gate that repairs is a gate that does not refuse. Killed live by T-NULL-OBJ and T-NULL-EMPTY.",
+    "file": "src/widgets/input-validation/input-validation.gate.ts",
+    "find": "  const decision = decideForContext(ctx);",
+    "replace": "  const decision = decideForContext({\n    ...ctx,\n    submission: { ...ctx.submission, inputs: null },\n  });",
+    "killers": ["T-NULL-OBJ", "T-NULL-EMPTY"],
+    "expect": "live-killed"
+  }
+]

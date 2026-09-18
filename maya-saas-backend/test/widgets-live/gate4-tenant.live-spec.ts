@@ -261,12 +261,24 @@ async function noWrites<C>(fx: Fixtures, level: Level<C>): Promise<void> {
       writes: [],
     });
     // As above: the principal's reads are the resolver's (P-PRINCIPAL, D-1); the record read is one.
+    //
+    // MERGE FIX (U8a's merge): the `own` record is ADMITTED past slot 4 and now reaches slot 8, whose
+    // null-schema lane performs ONE lowering-source read after its pass (D-2). That read is on the
+    // same model, so the count is stated per outcome instead of as a single literal: a record that is
+    // refused reads once, and an admitted one reads twice — the record, then the lowering source. NW
+    // is untouched, and it is the clause's own property; neither read writes.
     expect({
       scope,
       records: level
         .operations(scope)
         .filter((op) => op.startsWith('WidgetIntentRecord')),
-    }).toEqual({ scope, records: ['WidgetIntentRecord.findFirst'] });
+    }).toEqual({
+      scope,
+      records:
+        label === 'foreign'
+          ? ['WidgetIntentRecord.findFirst']
+          : ['WidgetIntentRecord.findFirst', 'WidgetIntentRecord.findFirst'],
+    });
   }
 }
 

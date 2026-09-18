@@ -5,12 +5,14 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { assertOwnerClassesResolve } from './authority/contract-bindings';
 import { assertLedgersBindAtRegistryLoad } from './authority/ledger-startup.assert';
 import { ControlRegistryService } from './control/control-registry.service';
-import { SEAL_VERIFIER } from './di-tokens';
+import { INPUT_VALIDATION, SEAL_VERIFIER } from './di-tokens';
 import { WidgetEmitterService } from './emission/emitter.service';
 import { SealService } from './emission/seal.service';
 import { SealVerifierService } from './emission/seal-verifier.service';
+import { InputValidationGate } from './input-validation/input-validation.gate';
 import { IntentGatewayService } from './intent-gateway.service';
 import { WidgetOwnerPortsModule } from './owner-ports/widget-owner-ports.module';
+import { LoweringSourceReader } from './stores/lowering-source.read';
 import { WidgetStoresService } from './stores/widget-stores.service';
 import { WidgetsController } from './widgets.controller';
 
@@ -43,6 +45,11 @@ import { WidgetsController } from './widgets.controller';
     SealService,
     SealVerifierService,
     { provide: SEAL_VERIFIER, useExisting: SealVerifierService },
+    // U8a (IR-8a-1): slot 8's built gate, and the one store read its pass performs (D-2). Both are
+    // widget-internal — no owner module is imported and no owner is reachable through them — so they
+    // are bound here rather than at the D-6 boundary, and k3 check 9's owner enumeration is unchanged.
+    LoweringSourceReader,
+    { provide: INPUT_VALIDATION, useClass: InputValidationGate },
   ],
   exports: [
     IntentGatewayService,
