@@ -1,0 +1,74 @@
+[
+  {
+    "id": "M8C-1",
+    "description": "the codec accepts a duplicate option id and de-duplicates it silently. B-11/AMB-20 (C11:7203) and SCHED.1 (C11:3148) make selections SETS: a repeated id is a mint defect, and a codec that swallows it lets a minter emit a domain it did not mean. Build-killed: no submission can reach the encoder, so the fence is on the source.",
+    "file": "src/widgets/input-schema/codec.ts",
+    "find": "      if (seen.has(id)) {\n        // B-11/AMB-20: selections are sets. A duplicate is a defect, never a silent de-duplication:\n        // de-duplicating would let a minter emit a domain it did not mean and never hear about it.\n        defects.push({ at: `.${field}[${index}]`, why: 'duplicate option id' });\n        return;\n      }\n",
+    "replace": "      if (seen.has(id)) {\n        return;\n      }\n",
+    "killers": ["SD-3"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M8C-2",
+    "description": "`input_schema_hash` is taken over `JSON.stringify` instead of the one canonicaliser H6 names (C11:2627). Two sides that canonicalise differently report a schema the server itself wrote as tampered (B-10, C11:7202). Killed twice: by the digest's exact canonical form and by the directory's own H6 fence.",
+    "file": "src/widgets/input-schema/input-schema-hash.ts",
+    "find": "  sha256Hex(stableActionJson(schema));\n",
+    "replace": "  sha256Hex(JSON.stringify(schema));\n",
+    "killers": ["HS-5", "ISC-4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M8C-3",
+    "description": "`selection_domain_labels` is decoded FLAT: a level that is not an object is accepted and kept as a field with no options, so an id -> label map (no field key at all) decodes as if it were conformant. AMB-17 (C11:7201) is the ruling that ids are meaningful only per field, and C11:4546 declares the member nested.",
+    "file": "src/widgets/input-schema/codec.ts",
+    "find": "    if (!isRecord(labels)) {\n      defects.push({\n        at: `.${field}`,\n        why: 'labels are keyed by field and then by option id (C11:4546); this level is not an object',\n      });\n      continue;\n    }\n",
+    "replace": "    if (!isRecord(labels)) {\n      out.set(field, new Map());\n      continue;\n    }\n",
+    "killers": ["LB-2", "LB-3"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M8C-4",
+    "description": "the decoder stops refusing a non-canonical stored spelling. `selection_domain` is a STRING compared by Gate 10's SUPERSEDED comparison (C11:4514-4515); with two spellings admitted, two equal domains compare unequal and the comparison stops meaning anything.",
+    "file": "src/widgets/input-schema/codec.ts",
+    "find": "  if (!re.ok || re.value !== encoded) {\n",
+    "replace": "  if (!re.ok) {\n",
+    "killers": ["SD-4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M8C-5",
+    "description": "the option ids are no longer sorted before the canonicaliser sees them (the comparator is neutralised), so the encoding is canonical in the field axis only. The same domain then has one spelling per insertion order.",
+    "file": "src/widgets/input-schema/codec.ts",
+    "find": "const byCodeUnit = (a: string, b: string): number =>\n  a < b ? -1 : a > b ? 1 : 0;\n",
+    "replace": "const byCodeUnit = (a: string, b: string): number => (a === b ? 0 : 0);\n",
+    "killers": ["SD-2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M8C-6",
+    "description": "`max_total_bytes` is measured in CHARACTERS instead of UTF-8 bytes. AMB-19 fixes it as the UTF-8 length of `stableActionJson(inputs)`; measured in `String.length` the cap is a different cap for a Cyrillic tenant than for a Latin one, and `oversize_submission` becomes a locale artefact.",
+    "file": "src/widgets/input-schema/inputs-bytes.ts",
+    "find": "  Buffer.byteLength(stableActionJson(inputs), 'utf8');\n",
+    "replace": "  stableActionJson(inputs).length;\n",
+    "killers": ["IB-1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M8C-7",
+    "description": "the parser stops refusing an undeclared member. R3.8.1/R3.8.2 (C11:4635-4660) refuse a key the contract does not declare, and R3.6.5 (C11:4456-4463) exists so that no `InputField` can carry a sensitivity class at all — a parser that keeps unknown members is how one would arrive.",
+    "file": "src/widgets/input-schema/parse-input-schema.ts",
+    "find": "    if (!known.has(key)) {\n      out.push({ at: `${at}.${key}`, why: 'undeclared member' });\n    }\n",
+    "replace": "    if (!known.has(key) && key === 'never_a_declared_key') {\n      out.push({ at: `${at}.${key}`, why: 'undeclared member' });\n    }\n",
+    "killers": ["PS-3"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M8C-8",
+    "description": "R3.6.6 (C11:4465, E-16 C11:6925) stops being enforced: a schema carrying a non-closed field parses with no `free_input_justification`, which is exactly the emission P-06's free-input ledger would never see.",
+    "file": "src/widgets/input-schema/parse-input-schema.ts",
+    "find": "  if (nonClosed) {\n",
+    "replace": "  if (nonClosed && justification === undefined) {\n",
+    "killers": ["PS-7", "PS-1"],
+    "expect": "build-killed"
+  }
+]

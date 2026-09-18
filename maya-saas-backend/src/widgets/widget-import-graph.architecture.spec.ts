@@ -77,8 +77,16 @@ interface Allowed {
 /** Non-widget modules any widget file may import. Closed: a module not listed here is refused. */
 const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
   'action-engine/action-engine.identity.ts': {
-    why: "H4/H6: the platform's one keyed-HMAC discipline (`ActionIdentityService.hmac`); a plain class, constructed as a value, no DI (D-6 registries)",
-    only: ['emission/seal.service.ts'],
+    why: "H4/H6: the platform's one keyed-HMAC discipline (`ActionIdentityService.hmac`) and its one canonicaliser (`stableActionJson`); a plain class and a pure function over static code, constructed as values, no DI (D-6 registries)",
+    only: [
+      'emission/seal.service.ts',
+      // U8b-c (IR-8C-1): the input-schema codec reaches the UNKEYED half of the same discipline.
+      // H6 admits no canonicalisation scheme other than `stableActionJson`, and §2.2 rule 3 forbids a
+      // local copy of a shared codec — so the three pure files import it rather than restating it.
+      'input-schema/codec.ts',
+      'input-schema/input-schema-hash.ts',
+      'input-schema/inputs-bytes.ts',
+    ],
   },
   'prisma/prisma.service.ts': {
     why: "the widget layer's store client; its delegates are fenced by FR-1 below",
