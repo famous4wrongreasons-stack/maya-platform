@@ -26,6 +26,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
+import { pipelineSources } from '../gate-slots.spec-helper.spec';
 
 const GATES = __dirname;
 const read = (f: string): string =>
@@ -96,11 +97,32 @@ const memberName = (n: ts.ObjectLiteralElementLike): string | null => {
   return null;
 };
 
-/** Every way `source` (a non-spec gate file named `file`) could write a code the vocabulary lacks. */
+/**
+ * Options that differ between the two sets this fence scans (see `D-10-PIPE`).
+ *
+ * `objectLiteralCode` is the one rule that is about this DIRECTORY's shape rather than about the
+ * compiler's check: inside `gates/` a refusal is written only through `refuse`, so an object literal
+ * carrying a `code` is always a hand-built verdict. Outside it a `code` member is an ordinary datum
+ * (`input-validation`'s own decision type carries one, and hands it to `refuse` as a literal), so the
+ * rule would forbid a shape that breaks nothing. The rules that actually defeat the compiler's
+ * `refuse(code: RefusalCode, …)` signature — casts, `@ts-` directives, and a first argument that is
+ * not a listed string literal — apply to both sets unchanged.
+ */
+interface FenceOptions {
+  readonly objectLiteralCode: boolean;
+}
+const DIRECTORY_RULES: FenceOptions = { objectLiteralCode: true };
+const COMPILER_RULES_ONLY: FenceOptions = { objectLiteralCode: false };
+
+/** `./verdict` from inside `gates/`, `../gates/verdict` from a seam directory: the same module. */
+const VERDICT_MODULE = /(?:^|\/)verdict$/;
+
+/** Every way `source` (a non-spec pipeline file named `file`) could write a code the vocabulary lacks. */
 const refusalFenceViolations = (
   file: string,
   source: string,
   vocabulary: ReadonlySet<string>,
+  options: FenceOptions = DIRECTORY_RULES,
 ): string[] => {
   const out: string[] = [];
   const sf = ts.createSourceFile(
@@ -112,7 +134,9 @@ const refusalFenceViolations = (
   );
   const at = (n: ts.Node): string =>
     `${file}:${sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1}`;
-  const isVerdictFile = file === 'verdict.ts';
+  // `verdict.ts` inside `gates/`, `gates/verdict.ts` from the pipeline-wide scan: the same file, which
+  // is the one place `refuse` and `superseded` are DECLARED rather than called.
+  const isVerdictFile = /(?:^|\/)verdict\.ts$/.test(file);
   if (SWITCHED_OFF.test(source))
     out.push(`${file}: a @ts- directive switches the compiler's check off`);
 
@@ -130,7 +154,7 @@ const refusalFenceViolations = (
         p.name === n &&
         p.propertyName === undefined &&
         ts.isStringLiteral(p.parent.parent.parent.moduleSpecifier) &&
-        p.parent.parent.parent.moduleSpecifier.text === './verdict';
+        VERDICT_MODULE.test(p.parent.parent.parent.moduleSpecifier.text);
       if (ts.isCallExpression(p) && p.expression === n) {
         const first = p.arguments[0];
         if (!first || !ts.isStringLiteral(first))
@@ -144,6 +168,7 @@ const refusalFenceViolations = (
     }
 
     if (
+      options.objectLiteralCode &&
       !isVerdictFile &&
       ts.isObjectLiteralExpression(n) &&
       n.properties.some((m) => memberName(m) === 'code')
@@ -360,4 +385,114 @@ describe('D-10 — gate files refuse through the typed helper, with no cast', ()
       [],
     );
   });
+});
+
+// ── D-10-PIPE ────────────────────────────────────────────────────────────────────────────────────
+//
+// CKPT-W1 review fix. Everything above is scoped to `__dirname`, i.e. to `src/widgets/gates/`. D-10's
+// rule is not: it is "every refusal A GATE FILE writes is checked against §3.9's closed vocabulary",
+// and a gate file is whatever a slot calls. U8a made `input-validation/input-validation.gate.ts` a
+// BUILT gate that writes two real refusal codes, and `lowering/lowering.gate.ts` writes one; both sit
+// in sibling directories, so neither was scanned. The header of `input-validation.gate.ts` says as
+// much in its own words — "the `gates/` fence's rule, KEPT HERE BY HAND" — and a rule kept by hand is
+// the thing this file exists to replace, because the only other protection is the compiler's
+// `refuse(code: RefusalCode, …)` signature and a cast defeats exactly that.
+//
+// The set is derived from the pipeline rather than from a directory listing, the same way
+// `gate-antecedents.inv30.spec.ts` derives its own: `pipelineSources().slotUnits` already follows
+// each slot's imports and its DI members to the files that slot calls, so a gate that moves to a new
+// directory tomorrow is scanned the same day and nobody has to remember to add it.
+describe('D-10-PIPE — the refusal fence covers every file a SLOT calls, not only the gates directory', () => {
+  const vocabulary = refusalVocabulary();
+  const WIDGETS = path.resolve(GATES, '..');
+  const slotFiles = (): readonly string[] =>
+    [
+      ...new Set(
+        pipelineSources()
+          .slotUnits.map((u) => u.file)
+          .filter((f) => f.endsWith('.ts') && !f.includes('#')),
+      ),
+    ].sort();
+  const readWidget = (f: string): string =>
+    fs.readFileSync(path.join(WIDGETS, f), 'utf8');
+
+  it('D-10-PIPE-a: the scan reaches the two seam gates outside `gates/`, and every other file a slot calls', () => {
+    const scanned = slotFiles();
+    expect(scanned).toEqual(
+      expect.arrayContaining([
+        'input-validation/input-validation.gate.ts',
+        'lowering/lowering.gate.ts',
+      ]),
+    );
+    // Not a tautology: the gates directory's own files must still be in the same set, so the scan
+    // cannot shrink to the seams and call itself pipeline-wide.
+    expect(
+      scanned.filter((f) => f.startsWith('gates/')).length,
+    ).toBeGreaterThan(4);
+  });
+
+  it('D-10-PIPE-b: no file a slot calls writes a refusal code the compiler was told not to check', () => {
+    const violations = slotFiles().flatMap((f) =>
+      refusalFenceViolations(f, readWidget(f), vocabulary, COMPILER_RULES_ONLY),
+    );
+    expect(violations).toEqual([]);
+  });
+
+  it('D-10-PIPE-c: the two seam gates write only codes the union lists, through the imported helper', () => {
+    // Read from the files rather than pinned by hand, so this goes red if a code is renamed AND the
+    // union is not, which is the drift the vocabulary read protects against.
+    for (const f of [
+      'input-validation/input-validation.gate.ts',
+      'lowering/lowering.gate.ts',
+    ]) {
+      const written = [
+        ...readWidget(f).matchAll(/\brefuse\(\s*'([a-z_]+)'/g),
+      ].map((m) => m[1]);
+      expect({ f, written: written.length > 0 }).toEqual({ f, written: true });
+      for (const code of written)
+        expect({ f, code, listed: vocabulary.has(code) }).toEqual({
+          f,
+          code,
+          listed: true,
+        });
+    }
+  });
+
+  it.each([
+    ['cast to RefusalCode', "refuse('invented' as RefusalCode, 'x');"],
+    ['cast to any', "refuse('invented' as any, 'x');"],
+    ['cast to the bottom type', `refuse('invented' as ${BOTTOM}, 'x');`],
+    [
+      'double cast through unknown',
+      "refuse('invented' as unknown as RefusalCode, 'x');",
+    ],
+    [
+      'compiler told to look away',
+      "// @ts-expect-error\nrefuse('invented','x');",
+    ],
+    ['a code outside the vocabulary', "refuse('invented_code', 'x');"],
+    [
+      'a code that is not a literal',
+      "refuse(String('x') as RefusalCode, 'y');",
+    ],
+  ])(
+    'D-10-PIPE-d RED: a planted %s in EACH seam gate turns the fence red',
+    (_name, planted) => {
+      // The point of the RED arm: before this fix the same plant in the same two files was invisible,
+      // because the scan never opened them. Each seam file is mutated on its own, so a fence that
+      // stopped reading one of them cannot hide behind the other.
+      for (const f of [
+        'input-validation/input-validation.gate.ts',
+        'lowering/lowering.gate.ts',
+      ]) {
+        const mutated = `${readWidget(f)}\nexport const planted = () => {\n  ${planted}\n};\n`;
+        expect({
+          f,
+          red:
+            refusalFenceViolations(f, mutated, vocabulary, COMPILER_RULES_ONLY)
+              .length > 0,
+        }).toEqual({ f, red: true });
+      }
+    },
+  );
 });
