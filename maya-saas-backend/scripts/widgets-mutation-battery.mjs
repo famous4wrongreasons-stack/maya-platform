@@ -240,6 +240,13 @@ const batteryFiles = fs.existsSync(mutationsDir)
       .sort()
   : [];
 
+// A battery requested by name must exist. `--shards` already refuses an id it cannot find; the run path did not,
+// so the filter above selected nothing, `mutants` stayed empty, and the runner reported EMPTY and exited 0 — a
+// mistyped or stale id (`--gate gate7` for `--gate 7`, a renamed battery) read as a battery that had run green.
+// That is the "check that cannot fail" this file exists to forbid, and it is how gate 7's battery was recorded
+// as run when it never ran (CKPT-W1 closing regression). EMPTY stays exit 0 only when nothing is DECLARED.
+if (gate !== undefined && batteryFiles.length === 0) usage(`no battery gate${gate}.json is declared`);
+
 const mutants = [];
 for (const name of batteryFiles) {
   const entries = readJson(path.join(mutationsDir, name), name);
@@ -813,6 +820,24 @@ function selfTest() {
   } finally {
     fs.rmSync(plantedDir, { recursive: true, force: true });
   }
+
+  // CKPT-W1 closing regression: a `--gate` id naming no declared battery must be a usage error too. Before the
+  // check in the load path it selected nothing, reported EMPTY and exited 0, so a mistyped or stale id read as a
+  // battery that had run green — how gate 7's battery was recorded as run while it never ran. `--shards` refuses
+  // the same id with exit 2; these two checks pin both halves, so the run path cannot drift from the matrix path.
+  const unknownGate = spawnRunner(['--gate', 'nonesuch']);
+  expectThat(
+    'an unknown --gate id is refused with exit 2, as --shards refuses it',
+    unknownGate.status === 2 && /no battery gatenonesuch\.json is declared/.test(unknownGate.stderr ?? ''),
+    `exit ${unknownGate.status}: ${(unknownGate.stderr ?? '').trim().slice(0, 120)}`,
+  );
+  const knownGate = spawnRunner(['--gate', '7']);
+  expectThat(
+    'a known --gate id still loads its battery (the check refuses only what is undeclared)',
+    knownGate.status === 0,
+    `exit ${knownGate.status}`,
+  );
+
   for (const c of checks) process.stdout.write(`${c.ok ? 'ok  ' : 'BAD '} ${c.id} (${c.detail})\n`);
   const bad = checks.filter((c) => !c.ok).length;
   if (bad > 0 && child.stderr) process.stdout.write(child.stderr.split('\n').slice(-20).join('\n') + '\n');
