@@ -935,41 +935,194 @@ describe('S-ROW and D-3 — the record gates read is AUDIT_RETAINED, and confirm
 // single-connection.
 //
 // The wiring is fixed; this is what keeps it fixed. A slot at or before `LAST_TRANSACTIONAL_SLOT` may
-// not name the ambient store client. It must take the transaction it was handed, or read nothing.
-describe('D-1-TX — no slot inside `T` reads through the ambient store client', () => {
-  const AMBIENT = /\bthis\.prisma\b/;
-  const IN_TX = ['1', '2', '3', '4', '5', '6', '7', '8', '8-R', '9', '10'];
-
-  /** Each slot ELEMENT of the gateway's array, by slot: the `run` the runner calls, and nothing else. */
-  const slotElements = (): readonly SourceUnit[] =>
-    pipelineSources().slotUnits.filter((u) => u.file.includes('#slot-'));
-
-  const ambientReads = (units: readonly SourceUnit[]): string[] =>
-    units.filter((u) => AMBIENT.test(u.source)).map((u) => u.file);
-
-  it('D-1-TX-a the scan sees the whole ordered array, and the transactional range is in it', () => {
-    // Not vacuous: a parser that found no elements would pass every assertion below.
-    const slots = slotElements().map((u) => u.slot);
-    expect(slots).toEqual(
-      expect.arrayContaining(['1', '7', '8', '8-R', '10', '13']),
+// not read on the ambient store client. It must read through the transaction it was handed, or read
+// nothing.
+//
+// CKPT-W1 CLOSE review fix. The first version of this fence could not have caught the defect it was
+// written for, and said so in its commit message anyway. Two independent reasons, both fixed here:
+//
+//   THE SCAN DID NOT REACH THE READ. It filtered `pipelineSources().slotUnits` to the slot ELEMENTS
+//   (`u.file.includes('#slot-')`), and the ambient read was never in an element — it was in the
+//   gateway's own private method `findProducingRecord`, which slot 7 calls. `pipelineSources` models
+//   a slot as "the element, and the FILES it calls into", and a private method of the gateway is
+//   neither: it is the slot's own code, factored out. The reach below closes that gap by pulling in
+//   the gateway methods a transactional slot calls, transitively. Measured: reverting the source fix
+//   and re-running left this arm GREEN, and planting the read back into the method body while leaving
+//   the call site intact left all 66 widget suites / 1082 tests green.
+//
+//   THE RULE WAS THE WRONG RULE. `/\bthis\.prisma\b/` over the source text cannot tell the defect
+//   from the fix: the fix IS `(tx ?? this.prisma)`, and a seam that serves callers outside `T` says
+//   `client = this.prisma` as a parameter default. So the rule is not "do not NAME the ambient
+//   client" but "do not READ ON it" — no `this.prisma.<model>` dereference. Naming it is how a read
+//   is handed a choice between `T` and the pool; dereferencing it is the read going out on the pool,
+//   whatever the surrounding code was handed.
+//
+// `D-1-TX-a` is the non-vacuity arm and is the one that was missing: it asserts the reach actually
+// contains the store read this rule is about. A fence that scans nothing passes.
+describe('D-1-TX — no slot inside `T` reads on the ambient store client', () => {
+  /** The gateway's own methods and method-valued properties, by name. */
+  const gatewayMethods = (gatewaySource: string): Map<string, string> => {
+    const sf = parseSource(GATEWAY, gatewaySource);
+    const cls = sf.statements.find((s): s is ts.ClassDeclaration =>
+      ts.isClassDeclaration(s),
     );
-    expect(slots.length).toBeGreaterThan(13);
-    // The range this rule governs is read from the gateway's own constant, never pinned here.
-    expect(readWidget(GATEWAY)).toContain(
-      "const LAST_TRANSACTIONAL_SLOT = '10';",
+    const out = new Map<string, string>();
+    for (const m of cls?.members ?? []) {
+      if (!m.name) continue;
+      const fn =
+        ts.isMethodDeclaration(m) ||
+        (ts.isPropertyDeclaration(m) &&
+          m.initializer !== undefined &&
+          (ts.isArrowFunction(m.initializer) ||
+            ts.isFunctionExpression(m.initializer)));
+      if (fn) out.set(m.name.getText(sf), m.getText(sf));
+    }
+    return out;
+  };
+
+  /** Every `this.<name>` in `source` that names one of those methods. */
+  const methodsCalled = (
+    file: string,
+    source: string,
+    methods: ReadonlyMap<string, string>,
+  ): string[] => {
+    const sf = parseSource(file, source);
+    const out: string[] = [];
+    const visit = (n: ts.Node): void => {
+      if (
+        ts.isPropertyAccessExpression(n) &&
+        n.expression.kind === ts.SyntaxKind.ThisKeyword &&
+        methods.has(n.name.text)
+      )
+        out.push(n.name.text);
+      ts.forEachChild(n, visit);
+    };
+    visit(sf);
+    return out;
+  };
+
+  /**
+   * The slots that run inside `T`, read from the gateway's own `LAST_TRANSACTIONAL_SLOT` and its own
+   * array order rather than pinned here, so moving the commit point moves this rule with it.
+   */
+  const transactionalSlots = (gatewaySource: string): readonly string[] => {
+    const m = /const LAST_TRANSACTIONAL_SLOT = '([^']+)';/.exec(gatewaySource);
+    if (!m) throw new Error('the gateway declares no LAST_TRANSACTIONAL_SLOT');
+    const { order } = pipelineSources(gatewaySource);
+    const last = order.indexOf(m[1]);
+    if (last < 0)
+      throw new Error(`LAST_TRANSACTIONAL_SLOT ${m[1]} is not a slot`);
+    return order.slice(0, last + 1);
+  };
+
+  /**
+   * Everything that runs as a slot at or before the commit: each element, the files it calls into,
+   * and — transitively — the gateway methods it calls. The third is the part `pipelineSources` does
+   * not model and the part the defect lived in.
+   */
+  const transactionalReach = (
+    gatewaySource: string = readWidget(GATEWAY),
+  ): readonly SourceUnit[] => {
+    const inTx = new Set(transactionalSlots(gatewaySource));
+    const units = pipelineSources(gatewaySource).slotUnits.filter((u) =>
+      inTx.has(u.slot ?? ''),
+    );
+    const methods = gatewayMethods(gatewaySource);
+    const out: SourceUnit[] = [...units];
+    const taken = new Set<string>();
+    const queue: string[] = units.map((u) => u.source);
+    while (queue.length > 0) {
+      const source = queue.shift() as string;
+      for (const name of methodsCalled(GATEWAY, source, methods)) {
+        if (taken.has(name)) continue;
+        taken.add(name);
+        const wrapped = `class C {\n${methods.get(name) as string}\n}\n`;
+        out.push({
+          slot: null,
+          file: `${GATEWAY}#method-${name}`,
+          source: wrapped,
+        });
+        queue.push(wrapped);
+      }
+    }
+    return out;
+  };
+
+  /**
+   * Every read that goes out on the ambient store client: a `this.prisma.<x>` or `this.prisma[<x>]`
+   * dereference, as `file:line`. Naming the client is not the offence — see the header — so
+   * `(tx ?? this.prisma).widgetIntentRecord` and `client: C = this.prisma` are both admitted, and
+   * what is refused is the read that reaches a model delegate through the pool while `T` is open.
+   */
+  const ambientReads = (units: readonly SourceUnit[]): string[] => {
+    const isThisPrisma = (n: ts.Node): boolean =>
+      ts.isPropertyAccessExpression(n) &&
+      n.expression.kind === ts.SyntaxKind.ThisKeyword &&
+      n.name.text === 'prisma';
+    const out: string[] = [];
+    for (const u of units) {
+      const sf = parseSource(u.file, u.source);
+      const visit = (n: ts.Node): void => {
+        if (
+          (ts.isPropertyAccessExpression(n) ||
+            ts.isElementAccessExpression(n)) &&
+          isThisPrisma(n.expression)
+        )
+          out.push(
+            `${u.file}:${sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1}`,
+          );
+        ts.forEachChild(n, visit);
+      };
+      visit(sf);
+    }
+    return out;
+  };
+
+  /** A `file:line` locator without its line, so a RED arm pins the SITE and not a line number. */
+  const site = (locator: string): string => locator.replace(/:\d+$/, '');
+
+  it('D-1-TX-a the reach is the whole transactional range AND contains the store read it governs', () => {
+    // Not vacuous, part one: the range is the gateway's own, and it is the range D-1 names.
+    expect(transactionalSlots(readWidget(GATEWAY))).toEqual([
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '8-R',
+      '9',
+      '10',
+    ]);
+    const reach = transactionalReach();
+    expect(reach.filter((u) => u.file.includes('#slot-')).length).toBe(11);
+
+    // Not vacuous, part two — THE ARM THAT WAS MISSING. The previous fence scanned 15 slot elements
+    // and never once read the code that performs the transactional store read, so it was green on a
+    // tree where the read went out on the pool. Assert the read site is IN the scanned set, by name
+    // and by content, so a reach that stops resolving is red here instead of silently passing below.
+    const producing = reach.find(
+      (u) => u.file === `${GATEWAY}#method-findProducingRecord`,
+    );
+    expect(producing).toBeDefined();
+    expect(producing?.source).toContain('widgetIntentRecord.findFirst');
+    // And the seam Gate 8 reads through is in the scanned set too.
+    expect(reach.map((u) => u.file)).toContain(
+      'input-validation/input-validation.gate.ts',
     );
   });
 
-  it('D-1-TX-b no slot at or before slot 10 names `this.prisma`: it reads through `T` or not at all', () => {
-    expect(
-      ambientReads(slotElements().filter((u) => IN_TX.includes(u.slot ?? ''))),
-    ).toEqual([]);
+  it('D-1-TX-b nothing in the transactional reach reads on the ambient client', () => {
+    expect(ambientReads(transactionalReach())).toEqual([]);
   });
 
   it('D-1-TX-c the two slots that DO read a second row take the transaction as a parameter', () => {
     // The positive half. Without it, deleting both reads would satisfy the rule above.
     const by = (slot: string): string =>
-      slotElements().find((u) => u.slot === slot)?.source ?? '';
+      transactionalReach().find((u) => u.file === `${GATEWAY}#slot-${slot}`)
+        ?.source ?? '';
     expect(by('7')).toMatch(/run:\s*\(ctx,\s*tx\)/);
     expect(by('7')).toMatch(/findProducingRecord\([^)]*tx\)/);
     expect(by('8')).toMatch(/run:\s*\(ctx,\s*tx\)/);
@@ -981,21 +1134,65 @@ describe('D-1-TX — no slot inside `T` reads through the ambient store client',
     );
   });
 
-  it('D-1-TX-d RED: the fence goes red on a planted ambient read in a transactional slot', () => {
+  it('D-1-TX-d RED: the real defect, planted back into the gateway, turns the fence red', () => {
+    // The mutation is the fix run backwards over the REAL source — not a hand-written string that
+    // only proves the matcher matches itself, which is what let the blindness stand. Slot 7's call
+    // site is left ALONE, so `D-1-TX-c` still passes and this arm is the only thing standing between
+    // the pipeline and a read on a second connection.
+    const gateway = readWidget(GATEWAY);
+    const reverted = gateway.replace(
+      '(tx ?? this.prisma).widgetIntentRecord.findFirst(',
+      'this.prisma.widgetIntentRecord.findFirst(',
+    );
+    expect(reverted).not.toEqual(gateway);
+    expect(reverted).toContain(
+      'this.findProducingRecord(hash, ctx.tenantId, tx)',
+    );
+    // Located by SITE, not by line: a comment added above the method must not decide whether the
+    // programme's transaction rule is enforced.
+    expect(ambientReads(transactionalReach(reverted)).map(site)).toEqual([
+      `${GATEWAY}#method-findProducingRecord`,
+    ]);
+  });
+
+  it('D-1-TX-e RED: a planted read in a slot ELEMENT turns it red, and the guarded forms do not', () => {
+    // The element case, also as a mutation of the real source.
+    const planted = readWidget(GATEWAY).replace(
+      'gate7(ctx, (hash) => this.findProducingRecord(hash, ctx.tenantId, tx))',
+      'gate7(ctx, (hash) => this.prisma.widgetIntentRecord.findFirst({ where: { hash } }))',
+    );
+    expect(planted).not.toEqual(readWidget(GATEWAY));
+    expect(ambientReads(transactionalReach(planted)).map(site)).toEqual([
+      `${GATEWAY}#slot-7`,
+    ]);
+
+    // And the fence is about the CONNECTION a read goes out on, not about the identifier: the two
+    // shapes that hand a read its choice of client are admitted. Without this, the rule would forbid
+    // its own fix and the next integrator would weaken it back.
     expect(
       ambientReads([
         {
           slot: '7',
-          file: 'gateway#slot-7-planted',
+          file: 'admitted#guarded',
           source:
-            "({ n: '7', run: (ctx) => gate7(ctx, (h) => this.prisma.widgetIntentRecord.findFirst({ where: { h } })) });\n",
+            'class C { m(tx: T | null) { return (tx ?? this.prisma).widgetIntentRecord.findFirst({}); } }\n',
+        },
+        {
+          slot: '8',
+          file: 'admitted#default-parameter',
+          source:
+            'class C { read(client: LoweringSourceClient = this.prisma) { return client.widgetIntentRecord.findFirst({}); } }\n',
         },
       ]),
-    ).toEqual(['gateway#slot-7-planted']);
-    // And a slot AFTER the commit is outside the rule, so the fence is about `T` and not about Prisma.
-    expect(
-      ambientReads(slotElements().filter((u) => !IN_TX.includes(u.slot ?? '')))
-        .length,
-    ).toBeGreaterThanOrEqual(0);
+    ).toEqual([]);
+  });
+
+  it('D-1-TX-f the reach stops at the commit: a slot after it is outside the rule', () => {
+    // `submit()` itself opens the transaction on the ambient client (`this.prisma.$transaction`), and
+    // must: it is the runner, not a slot. The rule would be false if the reach swallowed it.
+    const reach = transactionalReach().map((u) => u.file);
+    expect(reach).not.toContain(`${GATEWAY}#method-submit`);
+    expect(reach).not.toContain(`${GATEWAY}#slot-13`);
+    expect(readWidget(GATEWAY)).toContain('this.prisma.$transaction(');
   });
 });
