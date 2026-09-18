@@ -23,6 +23,7 @@ import type {
 import type { ChannelId } from '../widget-contract/lifecycle';
 import {
   GATE6_OWNERS,
+  GATE_8R_OWNERS,
   INPUT_VALIDATION,
   PRINCIPAL_RESOLVER,
   TENANT_SCOPE,
@@ -42,6 +43,7 @@ import { gate6 } from './gates/gate6';
 import { gate7 } from './gates/gate7';
 import type { InputValidationGate } from './input-validation/input-validation.gate';
 import { gate8R } from './gates/gate8r';
+import type { Gate8ROwners } from './gates/gate-8r.owners';
 import { LOWERING_PENDING_ON, lower } from './lowering/lowering.gate';
 import { GATE10_PENDING_ON, gate10 } from './gates/gate10';
 import { gate11 } from './gates/gate11';
@@ -120,6 +122,8 @@ export class IntentGatewayService {
     private readonly gate6Owners: Gate6Owners,
     @Inject(INPUT_VALIDATION)
     private readonly inputValidation: InputValidationGate,
+    @Inject(GATE_8R_OWNERS)
+    private readonly gate8ROwners: Gate8ROwners,
   ) {}
 
   /**
@@ -268,7 +272,11 @@ export class IntentGatewayService {
       n: '8-R',
       name: 'Readback',
       host: 'IntentGateway',
-      run: (ctx) => gate8R(ctx),
+      // R8R-1: the owner set is INJECTED, not read from the gate file's own default. The bound value
+      // is `GATE_8R_OWNERS_UNRULED` — the affirmation vocabulary has no owner in production until
+      // A1/A2 are ruled (PKT:471), so every REQUIRED readback refuses. A null owner that refuses is
+      // the mechanism being complete against its interface, not the mechanism being absent.
+      run: (ctx) => gate8R(ctx, this.gate8ROwners),
     },
     // NOT BUILT. §3.9: rendered_utterance = render(utterance_template, server-resolved canonical
     // labels) is appended as a USER turn with authority NONE — the first durable write. Nothing

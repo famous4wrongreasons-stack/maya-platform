@@ -123,6 +123,9 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       // reason: `InputValidationGate` is widget-internal and reaches no owner, so the D-6 boundary
       // has nothing to say about it and k3 check 9's owner enumeration is unchanged.
       DI_TOKENS.INPUT_VALIDATION,
+      // U8R (R8R-1) binds slot 8-R's owner set in `widgets.module.ts` as a VALUE. It reaches no owner
+      // either — the production vocabulary owner is `null` (A1/A2 unruled, PKT:471).
+      DI_TOKENS.GATE_8R_OWNERS,
     ];
     const moduleRef = await Test.createTestingModule({
       // The owner modules the boundary now imports resolve configuration the way the application does:

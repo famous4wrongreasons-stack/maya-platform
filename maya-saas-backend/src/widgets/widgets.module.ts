@@ -5,10 +5,11 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { assertOwnerClassesResolve } from './authority/contract-bindings';
 import { assertLedgersBindAtRegistryLoad } from './authority/ledger-startup.assert';
 import { ControlRegistryService } from './control/control-registry.service';
-import { INPUT_VALIDATION, SEAL_VERIFIER } from './di-tokens';
+import { GATE_8R_OWNERS, INPUT_VALIDATION, SEAL_VERIFIER } from './di-tokens';
 import { WidgetEmitterService } from './emission/emitter.service';
 import { SealService } from './emission/seal.service';
 import { SealVerifierService } from './emission/seal-verifier.service';
+import { GATE_8R_OWNERS_UNRULED } from './gates/gate-8r.owners';
 import { InputValidationGate } from './input-validation/input-validation.gate';
 import { IntentGatewayService } from './intent-gateway.service';
 import { WidgetOwnerPortsModule } from './owner-ports/widget-owner-ports.module';
@@ -50,6 +51,10 @@ import { WidgetsController } from './widgets.controller';
     // are bound here rather than at the D-6 boundary, and k3 check 9's owner enumeration is unchanged.
     LoweringSourceReader,
     { provide: INPUT_VALIDATION, useClass: InputValidationGate },
+    // U8R (R8R-1): slot 8-R's owner set, as a VALUE. `GATE_8R_OWNERS_UNRULED`'s vocabulary owner is
+    // `null` (A1/A2 unruled, PKT:471), so a required readback refuses; the token exists so the day an
+    // owner is ruled, the binding changes here and in no gate file.
+    { provide: GATE_8R_OWNERS, useValue: GATE_8R_OWNERS_UNRULED },
   ],
   exports: [
     IntentGatewayService,

@@ -1,0 +1,389 @@
+[
+  {
+    "id": "M1",
+    "description": "the CARRIER antecedent comes back: 8-R applies only on a spoken carrier, so a readback duty stored on a record is ignored on the pwa route. This is the defect row 8-R names (C11:4728) and the one the replaced code had.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  const r = ctx.record;\n  if (!r) return refuse('readback_missing', 'no record');\n",
+        "replace": "  const r = ctx.record;\n  if (!r) return refuse('readback_missing', 'no record');\n  if (CHANNEL_TIER[ctx.carrier] !== 'SPOKEN') return pass;\n"
+      }
+    ],
+    "killers": ["T5", "T10-ri", "T10", "SMOKE-G8R-UNREQUIRED-ACK"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M2a",
+    "description": "the antecedent becomes the EFFECT (`r.effect === 'COMMIT'`): a record's stored duty is never read, and a COMMIT with the duty erased is held anyway.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  const stored = c !== null && isPlainObject(c) && c.requires_readback === true;\n",
+        "replace": "  const stored = r.effect === 'COMMIT';\n"
+      }
+    ],
+    "killers": ["T-DIV-2", "T-DIV-1", "T-DIV-1-http"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M2b",
+    "description": "the antecedent becomes the ACTUATING effect set, as the replaced code had it.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "import { GATE_8R_OWNERS_UNRULED, type Gate8ROwners } from './gate-8r.owners';\n",
+        "replace": "import { GATE_8R_OWNERS_UNRULED, type Gate8ROwners } from './gate-8r.owners';\nimport { ACTUATING } from './effect-sets';\n"
+      },
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  const stored = c !== null && isPlainObject(c) && c.requires_readback === true;\n",
+        "replace": "  const stored = ACTUATING.includes(r.effect);\n"
+      }
+    ],
+    "killers": ["T-DIV-2", "T-DIV-1", "T-DIV-1-http"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M3a",
+    "description": "the stored duty is coerced, UNGUARDED (`c?.requires_readback !== false`): a record with no confirmation at all reads as requiring a readback.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  const stored = c !== null && isPlainObject(c) && c.requires_readback === true;\n",
+        "replace": "  const stored = c?.requires_readback !== false;\n"
+      }
+    ],
+    "killers": ["T3-ri", "T3"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M3b",
+    "description": "the stored duty is coerced, GUARDED (`Boolean(c.requires_readback)`): a stored string \"true\" reads as the boolean true (F-DEF-COERCE).",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  const stored = c !== null && isPlainObject(c) && c.requires_readback === true;\n",
+        "replace": "  const stored = c !== null && isPlainObject(c) && Boolean(c.requires_readback);\n"
+      }
+    ],
+    "killers": ["T3d-ri", "T3d"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M22",
+    "description": "STORED-ONLY: the recompute is neutralised (`recomputed = stored`), so a row may carry any duty it likes and the ingress never checks it against the record's own effect and tier (B-17, C11:7209).",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  const recomputed = recomputeRequiresReadback(r);\n",
+        "replace": "  const recomputed = stored;\n"
+      }
+    ],
+    "killers": ["T-DIV-2", "T-DIV-1-http"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M23",
+    "description": "RECOMPUTE-ONLY: the stored value is ignored and the recompute stands in for it, so a mint defect on the row is invisible rather than refused.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  const stored = c !== null && isPlainObject(c) && c.requires_readback === true;\n",
+        "replace": "  const stored = recomputeRequiresReadback(r);\n"
+      }
+    ],
+    "killers": ["T-DIV-2", "T-DIV-1", "T-DIV-1-http"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M24",
+    "description": "the recompute is keyed on the SUBMISSION's carrier instead of the record's delivery channel — the same class of defect as M1, hidden inside B-17's half.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  const recomputed = recomputeRequiresReadback(r);\n",
+        "replace": "  const recomputed =\n    r.effect === 'COMMIT' && CHANNEL_TIER[ctx.carrier] === 'SPOKEN';\n"
+      }
+    ],
+    "killers": ["T-DIV-2", "T-DIV-1-http"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M25",
+    "description": "DIVERGENCE ADMITTED: stored and recomputed are both computed and the disagreement is no longer a refusal (AMB-27, D-10).",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  if (stored !== recomputed)\n    return refuse(\n      'readback_mismatch',\n      'the stored readback duty is not the one this record recomputes',\n    );\n",
+        "replace": "  void recomputed;\n"
+      }
+    ],
+    "killers": ["T-DIV-2", "T-DIV-1", "T-DIV-1-http"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M4",
+    "description": "the R-6 branch is deleted: an ack on a record that requires none is ignored instead of refused, so a client may claim a ceremony that never happened.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  if (!stored)\n    return carried\n      ? refuse('readback_mismatch', 'a readback on a record that requires none')\n      : pass;\n",
+        "replace": "  if (!stored) return pass;\n"
+      }
+    ],
+    "killers": ["T10-ri", "T10", "SMOKE-G8R-UNREQUIRED-ACK"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M9",
+    "description": "the two refusal codes are swapped, so the answer names the wrong failure (R-7's closed pair).",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  if (!carried)\n    return refuse('readback_missing', 'this record requires a readback');\n",
+        "replace": "  if (!carried)\n    return refuse('readback_mismatch', 'this record requires a readback');\n"
+      },
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  if (!stored)\n    return carried\n      ? refuse('readback_mismatch', 'a readback on a record that requires none')\n      : pass;\n",
+        "replace": "  if (!stored)\n    return carried\n      ? refuse('readback_missing', 'a readback on a record that requires none')\n      : pass;\n"
+      }
+    ],
+    "killers": ["T5", "T10-ri"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M17",
+    "description": "a NULL ack passes on an unrequired record (`carried = ack !== undefined && ack !== null`): AMB-02c reversed below the route. At HTTP P-F88 answers a null ack 400, so this branch is reachable only through `submit`.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  const carried = ack !== undefined;\n",
+        "replace": "  const carried = ack !== undefined && ack !== null;\n"
+      }
+    ],
+    "killers": ["T12"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M5a",
+    "description": "the `readback_ref` equality is deleted: any ref echoes.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "    ack.readback_ref === c.readback_ref &&\n",
+        "replace": ""
+      }
+    ],
+    "killers": ["T6-stub"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M5b",
+    "description": "the `typeof` string guards on `readback_ref` are dropped, so two nulls compare equal and an absent echo reads as a match (R-3's iff).",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "    isPlainObject(ack) &&\n    typeof ack.readback_ref === 'string' &&\n    c !== null &&\n    typeof c.readback_ref === 'string' &&\n    ack.readback_ref === c.readback_ref &&\n",
+        "replace": "    isPlainObject(ack) &&\n    c !== null &&\n    ack.readback_ref === c.readback_ref &&\n"
+      }
+    ],
+    "killers": ["T13c-stub"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M6",
+    "description": "the `body_hash` comparison is deleted: affirming a body other than the one read out passes (H4 integrity, B-17).",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "    typeof ack.body_hash === 'string' &&\n    ack.body_hash === r.bodyHash &&\n",
+        "replace": "    typeof ack.body_hash === 'string' &&\n"
+      }
+    ],
+    "killers": ["T7-stub"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M7",
+    "description": "any non-empty affirmation is accepted and the owner is never asked: membership becomes the gate's decision instead of the owner's, and the unruled production binding stops refusing.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "    owners.isReadbackAffirmation !== null &&\n    owners.isReadbackAffirmation({ affirmation: ack.affirmation, record: r });\n",
+        "replace": "    ack.affirmation.length > 0;\n"
+      }
+    ],
+    "killers": ["T-DEF3", "T1-stub"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M8",
+    "description": "the affirmation is NORMALISED before the owner call (`trim().toLowerCase()`): the gate decides membership while appearing to ask, and \"an exact member\" stops being exact.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "    owners.isReadbackAffirmation({ affirmation: ack.affirmation, record: r });\n",
+        "replace": "    owners.isReadbackAffirmation({\n      affirmation: ack.affirmation.trim().toLowerCase(),\n      record: r,\n    });\n"
+      }
+    ],
+    "killers": ["T9-stub"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M10",
+    "description": "the required branch always refuses: the gate cannot be satisfied even by a conformant ack, so a ruled vocabulary would change nothing.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  return matches\n    ? pass\n",
+        "replace": "  return false\n    ? pass\n"
+      }
+    ],
+    "killers": ["T1-stub"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M16",
+    "description": "an absent owner (`isReadbackAffirmation === null`) is treated as a PASS: \"not built yet\" and \"allowed\" become the same branch, which F5 forbids and which is the whole reason the production binding is null.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "    owners.isReadbackAffirmation !== null &&\n    owners.isReadbackAffirmation({ affirmation: ack.affirmation, record: r });\n",
+        "replace": "    (owners.isReadbackAffirmation === null ||\n      owners.isReadbackAffirmation({ affirmation: ack.affirmation, record: r }));\n"
+      }
+    ],
+    "killers": ["T-DEF3"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M18",
+    "description": "the `isPlainObject(ack)` guard is dropped from the required branch: a null ack raises rather than refusing (HTTP 500 through the route, a rejected promise through `submit`).",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "    isPlainObject(ack) &&\n    typeof ack.readback_ref === 'string' &&\n",
+        "replace": "    typeof (ack as Record<string, unknown>).readback_ref === 'string' &&\n"
+      }
+    ],
+    "killers": ["T13d", "T13b-direct"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M19",
+    "description": "a non-null vocabulary owner is bound in PRODUCTION while A1/A2 are unruled: an affirmation nobody ruled becomes a member.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate-8r.owners.ts",
+        "find": "  isReadbackAffirmation: null,\n",
+        "replace": "  isReadbackAffirmation: (input) => input.affirmation.length > 0,\n"
+      }
+    ],
+    "killers": ["T-DEF3"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M20",
+    "description": "the gate IGNORES the owner set it is handed and hard-codes the unruled one: wiring the port (R8R-1) would then change nothing, and a ruled vocabulary would never reach the gate.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  const r = ctx.record;\n",
+        "replace": "  owners = GATE_8R_OWNERS_UNRULED;\n  const r = ctx.record;\n"
+      }
+    ],
+    "killers": ["T1-stub"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M13a",
+    "description": "the affirmation is LOGGED: CONVERSATION_CONTENT reaches an application log (F16, §4.4.3, V5, R-7).",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  const ack: unknown = ctx.submission.readback_ack;\n",
+        "replace": "  const ack: unknown = ctx.submission.readback_ack;\n  console.log('8-R readback', JSON.stringify(ack));\n"
+      }
+    ],
+    "killers": ["T15-ri", "T15"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M13b",
+    "description": "the affirmation is echoed into the refusal DETAIL, where a log or an audit row would pick it up.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "    : refuse('readback_mismatch', 'the readback does not match the record');\n",
+        "replace": "    : refuse(\n        'readback_mismatch',\n        `the readback does not match the record: ${JSON.stringify(ack)}`,\n      );\n"
+      }
+    ],
+    "killers": ["T15"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M15",
+    "description": "the gate reads a LOCALE off the submission to pick a vocabulary, which A2 gives no carrier to the ingress and INV-30 forbids.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  const ack: unknown = ctx.submission.readback_ack;\n",
+        "replace": "  const locale = (ctx.submission as { locale?: string }).locale ?? 'ru-RU';\n  void locale;\n  const ack: unknown = ctx.submission.readback_ack;\n"
+      }
+    ],
+    "killers": ["T-SRC-8R"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M21",
+    "description": "the gate reads the claimed render profile (`profile_id`), which R3.8.3 declares ADVISORY and INV-30 keeps out of every gate antecedent.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate8r.ts",
+        "find": "  const ack: unknown = ctx.submission.readback_ack;\n",
+        "replace": "  const claimed = (ctx.submission as { profile_id?: string }).profile_id;\n  if (claimed === 'pwa.default') return pass;\n  const ack: unknown = ctx.submission.readback_ack;\n"
+      }
+    ],
+    "killers": ["T-SRC-8R"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M11",
+    "description": "`confirmationJson` is dropped from `findRecord`'s select: the duty never reaches the gate, so every record reads as requiring nothing. It is the defect a FakePrisma that ignores `select` cannot see (G8R §4.1).",
+    "edits": [
+      {
+        "file": "src/widgets/intent-gateway.service.ts",
+        "find": "        confirmationJson: true,\n",
+        "replace": ""
+      }
+    ],
+    "killers": ["RI-PROJ"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M12",
+    "description": "the route builds the submission WITHOUT `readback_ack`, so the gate is handed a body the client did not send and R-6 can never fire.",
+    "edits": [
+      {
+        "file": "src/widgets/intent-submit-args.ts",
+        "find": "    submission: dto,\n",
+        "replace": "    submission: { intent_token: dto.intent_token, inputs: dto.inputs },\n"
+      }
+    ],
+    "killers": ["T10", "SMOKE-G8R-UNREQUIRED-ACK"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M14",
+    "description": "slot 8-R is moved AFTER Gate 9, so a submission reaches the first durable write before its readback is checked (F11, T17). Re-anchored in U8R's merge (R8R-1 injects the owner set, so the slot's text changed).",
+    "edits": [
+      {
+        "file": "src/widgets/intent-gateway.service.ts",
+        "find": "    {\n      n: '8-R',\n      name: 'Readback',\n      host: 'IntentGateway',\n      // R8R-1: the owner set is INJECTED, not read from the gate file's own default. The bound value\n      // is `GATE_8R_OWNERS_UNRULED` — the affirmation vocabulary has no owner in production until\n      // A1/A2 are ruled (PKT:471), so every REQUIRED readback refuses. A null owner that refuses is\n      // the mechanism being complete against its interface, not the mechanism being absent.\n      run: (ctx) => gate8R(ctx, this.gate8ROwners),\n    },\n    // NOT BUILT. §3.9: rendered_utterance = render(utterance_template, server-resolved canonical\n    // labels) is appended as a USER turn with authority NONE — the first durable write. Nothing\n    // performs that append, and §3.9 defines no refusal for a lowering that cannot render (an erased\n    // or absent template), so building it needs a ruling rather than an invented refusal code.\n    {\n      n: '9',\n      name: 'Lowering',\n      host: 'chat ingress',\n      pendingOn: LOWERING_PENDING_ON,\n      // Seam: `lowering/lowering.gate.ts` (U9b).\n      run: (ctx) => lower(ctx),\n    },\n    // NOT BUILT. The router runs over THIS request's lowering (Gate 9's fact), and a divergence is\n    // written to a durable audit record. What the router resolves against, what \"canonical owner\"\n    // means, a null result and the audit record's store are owner rulings (AMB-29 … AMB-32, AMB-09).\n",
+        "replace": "    // NOT BUILT. §3.9: rendered_utterance = render(utterance_template, server-resolved canonical\n    // labels) is appended as a USER turn with authority NONE — the first durable write. Nothing\n    // performs that append, and §3.9 defines no refusal for a lowering that cannot render (an erased\n    // or absent template), so building it needs a ruling rather than an invented refusal code.\n    {\n      n: '9',\n      name: 'Lowering',\n      host: 'chat ingress',\n      pendingOn: LOWERING_PENDING_ON,\n      // Seam: `lowering/lowering.gate.ts` (U9b).\n      run: (ctx) => lower(ctx),\n    },\n    // NOT BUILT. The router runs over THIS request's lowering (Gate 9's fact), and a divergence is\n    // written to a durable audit record. What the router resolves against, what \"canonical owner\"\n    // means, a null result and the audit record's store are owner rulings (AMB-29 … AMB-32, AMB-09).\n    {\n      n: '8-R',\n      name: 'Readback',\n      host: 'IntentGateway',\n      // R8R-1: the owner set is INJECTED, not read from the gate file's own default. The bound value\n      // is `GATE_8R_OWNERS_UNRULED` — the affirmation vocabulary has no owner in production until\n      // A1/A2 are ruled (PKT:471), so every REQUIRED readback refuses. A null owner that refuses is\n      // the mechanism being complete against its interface, not the mechanism being absent.\n      run: (ctx) => gate8R(ctx, this.gate8ROwners),\n    },\n"
+      }
+    ],
+    "killers": ["T10", "SMOKE-G8R-UNREQUIRED-ACK"],
+    "expect": "live-killed"
+  }
+]

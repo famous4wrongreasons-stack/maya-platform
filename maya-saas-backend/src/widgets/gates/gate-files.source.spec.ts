@@ -349,10 +349,15 @@ describe('D-10 — gate files refuse through the typed helper, with no cast', ()
         ),
     );
     expect(crossGate).toEqual([]);
-    // U7a (IR-U7A-2): `gate7.ts` no longer imports `ACTUATING`. C1 runs `KIND_PERMITTED_EFFECTS`
-    // over EVERY effect, so the set the old early return needed is gone; the rule this line served —
-    // "a set two gates read lives in a shared file" — is carried by `gate8r.ts`, which still imports
-    // it, and by the `crossGate` check above, which forbids any `./gate<digit>` import outright.
-    expect(read('gate8r.ts')).toMatch(/from '\.\/effect-sets'/);
+    // U7a (IR-U7A-2) and U8R (R8R-6): NO gate file imports `./effect-sets` any more. Row 7's C1 runs
+    // `KIND_PERMITTED_EFFECTS` over every effect, and row 8-R's antecedent is the RECORD's stored duty
+    // and the B-17 recompute — the effect-keyed antecedent was the defect the row names, so
+    // `ACTUATING` had to leave both. The file is still read, from outside `gates/`
+    // (`noun-resolution/noun-resolution.ts`), which is why it is not deleted here; R7-4 removes the
+    // export when its last importer goes. What holds the rule this line used to state is `crossGate`
+    // above: no gate file may import another gate's file, whatever a set is named.
+    expect(files.filter((f) => /from '\.\/effect-sets'/.test(read(f)))).toEqual(
+      [],
+    );
   });
 });
