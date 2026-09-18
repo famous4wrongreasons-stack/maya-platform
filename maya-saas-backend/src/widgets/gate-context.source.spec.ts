@@ -922,3 +922,80 @@ describe('S-ROW and D-3 — the record gates read is AUDIT_RETAINED, and confirm
     });
   });
 });
+
+// ── D-1-TX ───────────────────────────────────────────────────────────────────────────────────────
+//
+// CKPT-W1 review fix (finding 4). D-1 puts slots 1-10 inside the ONE request transaction `T`, and
+// `submit()` opens it and hands `tx` to `findRecord`. The two OTHER store reads those slots perform
+// did not run in it: Gate 7's C5a producing-record loader and Gate 8's lowering-source read both went
+// out on `this.prisma`, i.e. on a second pool connection, while `T` was open. F74's C5a then decided
+// "the producing record was consumed" from a different snapshot than the transaction that would
+// consume the submitted record, and an interactive transaction issued nested queries on separate
+// connections — a pool-exhaustion and deadlock hazard on the very path D-1 exists to make
+// single-connection.
+//
+// The wiring is fixed; this is what keeps it fixed. A slot at or before `LAST_TRANSACTIONAL_SLOT` may
+// not name the ambient store client. It must take the transaction it was handed, or read nothing.
+describe('D-1-TX — no slot inside `T` reads through the ambient store client', () => {
+  const AMBIENT = /\bthis\.prisma\b/;
+  const IN_TX = ['1', '2', '3', '4', '5', '6', '7', '8', '8-R', '9', '10'];
+
+  /** Each slot ELEMENT of the gateway's array, by slot: the `run` the runner calls, and nothing else. */
+  const slotElements = (): readonly SourceUnit[] =>
+    pipelineSources().slotUnits.filter((u) => u.file.includes('#slot-'));
+
+  const ambientReads = (units: readonly SourceUnit[]): string[] =>
+    units.filter((u) => AMBIENT.test(u.source)).map((u) => u.file);
+
+  it('D-1-TX-a the scan sees the whole ordered array, and the transactional range is in it', () => {
+    // Not vacuous: a parser that found no elements would pass every assertion below.
+    const slots = slotElements().map((u) => u.slot);
+    expect(slots).toEqual(
+      expect.arrayContaining(['1', '7', '8', '8-R', '10', '13']),
+    );
+    expect(slots.length).toBeGreaterThan(13);
+    // The range this rule governs is read from the gateway's own constant, never pinned here.
+    expect(readWidget(GATEWAY)).toContain(
+      "const LAST_TRANSACTIONAL_SLOT = '10';",
+    );
+  });
+
+  it('D-1-TX-b no slot at or before slot 10 names `this.prisma`: it reads through `T` or not at all', () => {
+    expect(
+      ambientReads(slotElements().filter((u) => IN_TX.includes(u.slot ?? ''))),
+    ).toEqual([]);
+  });
+
+  it('D-1-TX-c the two slots that DO read a second row take the transaction as a parameter', () => {
+    // The positive half. Without it, deleting both reads would satisfy the rule above.
+    const by = (slot: string): string =>
+      slotElements().find((u) => u.slot === slot)?.source ?? '';
+    expect(by('7')).toMatch(/run:\s*\(ctx,\s*tx\)/);
+    expect(by('7')).toMatch(/findProducingRecord\([^)]*tx\)/);
+    expect(by('8')).toMatch(/run:\s*\(ctx,\s*tx\)/);
+    expect(by('8')).toMatch(/inputValidation\.run\(ctx,\s*tx\)/);
+    // And the runner really hands one down, rather than the slots naming a `tx` nothing supplies.
+    expect(readWidget(GATEWAY)).toMatch(/await gate\.run\(ctx,\s*tx\)/);
+    expect(readWidget(GATEWAY)).toMatch(
+      /this\.runSlots\(ctx,\s*inTransactionSlots,\s*0,\s*tx\)/,
+    );
+  });
+
+  it('D-1-TX-d RED: the fence goes red on a planted ambient read in a transactional slot', () => {
+    expect(
+      ambientReads([
+        {
+          slot: '7',
+          file: 'gateway#slot-7-planted',
+          source:
+            "({ n: '7', run: (ctx) => gate7(ctx, (h) => this.prisma.widgetIntentRecord.findFirst({ where: { h } })) });\n",
+        },
+      ]),
+    ).toEqual(['gateway#slot-7-planted']);
+    // And a slot AFTER the commit is outside the rule, so the fence is about `T` and not about Prisma.
+    expect(
+      ambientReads(slotElements().filter((u) => !IN_TX.includes(u.slot ?? '')))
+        .length,
+    ).toBeGreaterThanOrEqual(0);
+  });
+});

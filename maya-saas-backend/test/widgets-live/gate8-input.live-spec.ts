@@ -34,6 +34,7 @@ import { WIDGET_INTENT_SUBMISSION_CONTRACT } from '../../src/widgets/dto/submit-
 import { WidgetEmitterService } from '../../src/widgets/emission/emitter.service';
 import { WidgetStoresService } from '../../src/widgets/stores/widget-stores.service';
 import { LoweringSourceReader } from '../../src/widgets/stores/lowering-source.read';
+import { PrismaService } from '../../src/prisma/prisma.service';
 import {
   bootFixtureContext,
   bootGateway,
@@ -349,10 +350,25 @@ describe('Gate 8 — input validation, the null-schema lane [U8a]', () => {
 
       await gw.submit(actor, body(record, null), 'T-READ-ONCE/pass');
       expect(read).toHaveBeenCalledTimes(1);
-      expect(read).toHaveBeenCalledWith(
-        record.tenantId,
-        record.intentTokenHash,
-      );
+      // CKPT-W1 review fix (finding 4). This read `toHaveBeenCalledWith(tenantId, hash)` — two
+      // arguments, which is what the wiring passed and what made the read run OUTSIDE the request
+      // transaction, on a second pool connection, while `T` was open (D-1). Slot 8 hands the reader
+      // `T` now, so the call carries a third argument, and the assertion is stronger for it: the
+      // tenant and the hash are what they were, AND the client the read goes through is the
+      // transaction rather than the ambient store. The arguments are read positionally instead of
+      // through `toHaveBeenCalledWith`, because the transaction is a proxy and matching it
+      // structurally makes jest enumerate it (`'ownKeys' on proxy`), which says nothing about the
+      // property under test.
+      const [tenantArg, hashArg, clientArg] = read.mock.calls[0];
+      expect({ tenantArg, hashArg }).toEqual({
+        tenantArg: record.tenantId,
+        hashArg: record.intentTokenHash,
+      });
+      expect(clientArg).toBeDefined();
+      // `T`, not the ambient client: the transaction the gateway opened is a DIFFERENT object from
+      // the module's `PrismaService`, and it is the one the delegate came from.
+      expect(clientArg).not.toBe(gw.moduleRef.get(PrismaService));
+      expect(typeof clientArg?.widgetIntentRecord?.findFirst).toBe('function');
 
       // A second pass reads once more: the read is per submission, and it is never cached across one.
       await gw.submit(actor, body(record, null), 'T-READ-ONCE/pass-2');

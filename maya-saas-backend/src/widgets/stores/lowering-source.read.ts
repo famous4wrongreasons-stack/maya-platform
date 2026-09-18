@@ -26,9 +26,21 @@ export interface LoweringSourceRow {
   readonly conversationId: string;
 }
 
-/** What slot 8 needs of this store. A port, so the gate file names no store client (GATE-FILE). */
+/**
+ * What slot 8 needs of this store. A port, so the gate file names no store client (GATE-FILE).
+ *
+ * CKPT-W1 review fix (finding 4): `client` is on the PORT, not only on the class. Slot 8 runs inside
+ * the request transaction `T` (D-1) and must read through it; a port that could not carry `T` forced
+ * the caller to reach past the port for the concrete reader, which is the seam this file exists to
+ * close. It stays optional, and `LoweringSourceClient` is a delegate shape rather than a transaction
+ * type, so naming it commits no caller to a store client (FR-1, D-6).
+ */
 export interface LoweringSourcePort {
-  read(tenantId: string, intentTokenHash: string): Promise<LoweringSourceRow>;
+  read(
+    tenantId: string,
+    intentTokenHash: string,
+    client?: LoweringSourceClient,
+  ): Promise<LoweringSourceRow>;
 }
 
 /**

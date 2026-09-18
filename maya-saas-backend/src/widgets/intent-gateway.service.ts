@@ -91,6 +91,33 @@ const REQUEST_TX_OPTIONS = {
   timeout: 15_000,
 } as const;
 
+/**
+ * A slot, as the GATEWAY holds it: `Gate` plus the one thing D-1 gives a slot that no gate file may
+ * ever name — the request transaction `T`.
+ *
+ * CKPT-W1 review fix (finding 4). D-1 puts slots 1–10 inside `T`, and `submit()` does open it and
+ * hand `tx` to `findRecord`. But the two OTHER store reads those slots perform ran on `this.prisma`:
+ * Gate 7's C5a producing-record loader and Gate 8's lowering-source read. `LoweringSourceReader.read`
+ * even carries a `client` parameter whose documented purpose is "how the integrator can pass `T` here
+ * without this file naming a transaction type", and slot 8's wiring never passed it. Two consequences,
+ * both real: F74's C5a decided "the producing record was consumed" from a different snapshot and a
+ * different connection than the transaction that would consume the submitted record; and an
+ * interactive transaction issued nested queries on separate pool connections, which is a
+ * pool-exhaustion and deadlock hazard on the very path D-1 exists to keep single-connection.
+ *
+ * `tx` is a SECOND parameter of the slot's own runner rather than a member of `GateContext`, and that
+ * is deliberate: `GateContext` is what a gate file reads, `gate.types.ts` is what every gate file
+ * imports, and a store client on either would be exactly the FR-1/D-6 breach the import fences exist
+ * to prevent. A slot may pass `T` on; a gate may not see it. Slots after the commit are handed `null`,
+ * because there is no transaction left to run in — `T` has committed by then (D-1, PR-9b).
+ */
+interface Slot extends Omit<Gate, 'run'> {
+  run(
+    ctx: GateContext,
+    tx: RequestTx | null,
+  ): Promise<GateVerdict> | GateVerdict;
+}
+
 /** What one contiguous range of the pipeline answered, and the context it left behind. */
 interface SlotRun {
   readonly ctx: GateContext;
@@ -169,7 +196,7 @@ export class IntentGatewayService {
    * tenant guard, both global. They are kept in the array rather than dropped so the order stays
    * readable against §3.9 and so the count is the contract's count, not a subset of it.
    */
-  private readonly gates: readonly Gate[] = [
+  private readonly gates: readonly Slot[] = [
     {
       n: '1',
       name: 'Token integrity',
@@ -261,8 +288,11 @@ export class IntentGatewayService {
       // the foreign row first. `gate7`'s default is `UNWIRED_PRODUCING_RECORDS`, which resolves
       // nothing and therefore refuses every non-draft COMMIT; T7-WIRED is what stops that interim
       // becoming the live path by omission.
-      run: (ctx) =>
-        gate7(ctx, (hash) => this.findProducingRecord(hash, ctx.tenantId)),
+      // CKPT-W1 review fix (finding 4): the loader reads through `T`. C5a asks whether the PRODUCING
+      // record has been consumed, and the transaction that will consume the SUBMITTED one is this one
+      // — answering from a second connection's snapshot is answering about a different world.
+      run: (ctx, tx) =>
+        gate7(ctx, (hash) => this.findProducingRecord(hash, ctx.tenantId, tx)),
     },
     // BUILT, in one lane of two (U8a, B-01 C11:7188). The NULL-SCHEMA lane is row 8's: a record whose
     // `input_schema_hash` is null passes with the submission's `inputs` absent or `null`, and refuses
@@ -275,7 +305,10 @@ export class IntentGatewayService {
       name: 'Input validation',
       host: 'IntentGateway',
       // Seam: `input-validation/input-validation.gate.ts` (U8a, then U8b).
-      run: (ctx) => this.inputValidation.run(ctx),
+      // CKPT-W1 review fix (finding 4): the lane's one store read goes through `T`, like the record
+      // read above it. D-1 puts this slot inside the transaction; a read on a second connection was
+      // not in it.
+      run: (ctx, tx) => this.inputValidation.run(ctx, tx),
     },
     {
       n: '8-R',
@@ -443,7 +476,7 @@ export class IntentGatewayService {
           facts: NO_FACTS,
         };
 
-        return this.runSlots(ctx, inTransactionSlots, 0);
+        return this.runSlots(ctx, inTransactionSlots, 0, tx);
       }, REQUEST_TX_OPTIONS);
     } catch (error) {
       this.transactions.rolledBack += 1;
@@ -462,6 +495,9 @@ export class IntentGatewayService {
       inTransaction.ctx,
       afterCommitSlots,
       inTransaction.ran,
+      // `T` has committed: there is nothing left for a slot to read through, and saying so is the
+      // point. Slots 11-13 run after the commit so no row lock is held while an owner runs (D-1).
+      null,
     );
     return {
       verdict: this.normalise(afterCommit.verdict),
@@ -480,14 +516,15 @@ export class IntentGatewayService {
    */
   private async runSlots(
     start: GateContext,
-    slots: readonly Gate[],
+    slots: readonly Slot[],
     already: number,
+    tx: RequestTx | null,
   ): Promise<SlotRun> {
     let ctx = start;
     let ran = already;
     for (const gate of slots) {
       ran += 1;
-      const verdict = await gate.run(ctx);
+      const verdict = await gate.run(ctx, tx);
       if (verdict.outcome !== 'pass') {
         this.log.debug(`gate ${gate.n} (${gate.name}) -> ${verdict.outcome}`);
         return { ctx, verdict, stoppedAt: gate.n, ran };
@@ -626,8 +663,9 @@ export class IntentGatewayService {
   private findProducingRecord(
     intentTokenHash: string,
     tenantId: string,
+    tx: RequestTx | null,
   ): Promise<ProducingRecordRow | null> {
-    return this.prisma.widgetIntentRecord.findFirst({
+    return (tx ?? this.prisma).widgetIntentRecord.findFirst({
       where: { intentTokenHash, tenantId },
       select: {
         effect: true,

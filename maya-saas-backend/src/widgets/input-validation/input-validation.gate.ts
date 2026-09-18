@@ -27,6 +27,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { GateContext, GateVerdict } from '../gate.types';
 import { refuse } from '../gates/verdict';
 import type {
+  LoweringSourceClient,
   LoweringSourcePort,
   LoweringSourceRow,
 } from '../stores/lowering-source.read';
@@ -75,7 +76,7 @@ export const runInputValidation = async (
 
 /**
  * Slot 8's provider (`INPUT_VALIDATION`, `di-tokens.ts`). IR-8a-1 binds it and rewires the slot to
- * `run: (ctx) => this.inputValidation.run(ctx)`.
+ * `run: (ctx, tx) => this.inputValidation.run(ctx, tx)`.
  */
 @Injectable()
 export class InputValidationGate {
@@ -89,7 +90,26 @@ export class InputValidationGate {
     private readonly loweringSource: LoweringSourcePort,
   ) {}
 
-  run(ctx: GateContext): Promise<GateVerdict> {
-    return runInputValidation(ctx, this.loweringSource);
+  /**
+   * CKPT-W1 review fix (finding 4). Slot 8 runs INSIDE the request transaction `T` (D-1), so its one
+   * store read has to run there too. `LoweringSourceReader.read`'s third parameter exists for exactly
+   * this — its own comment calls it "how the integrator can pass `T` here without this file naming a
+   * transaction type" — and the wiring never passed it, so the lane's read went out on a second pool
+   * connection while `T` was open, on the very path D-1 was written to keep single-connection.
+   *
+   * `T` is bound to the PORT here rather than threaded through `runInputValidation`, so the gate
+   * function below still takes a `LoweringSourcePort` and still names no transaction and no store
+   * client (GATE-FILE, FR-1). The parameter's type is the reader's own client shape, so this file does
+   * not name a transaction type either; `null` is what a slot outside `T` would be handed.
+   */
+  run(ctx: GateContext, tx: LoweringSourceClient | null): Promise<GateVerdict> {
+    const source: LoweringSourcePort =
+      tx === null
+        ? this.loweringSource
+        : {
+            read: (tenantId, intentTokenHash) =>
+              this.loweringSource.read(tenantId, intentTokenHash, tx),
+          };
+    return runInputValidation(ctx, source);
   }
 }
