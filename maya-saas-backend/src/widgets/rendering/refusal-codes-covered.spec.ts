@@ -22,6 +22,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 import { LIMITATION_REASON_TABLE } from '../../widget-contract/reason-table';
+import { reasonText, reasonTextOrNull } from './reason-text';
 
 describe('P-RENDER — R3.9.3 rendering: the map is total and the grant path is one', () => {
   const BE = path.resolve(__dirname, '..', '..', '..');
@@ -213,6 +214,39 @@ describe('P-RENDER — R3.9.3 rendering: the map is total and the grant path is 
       expect(uncovered).toEqual([]);
     },
   );
+
+  it('REN-3b the interim is honest: an uncovered §3.9 code renders NOTHING, never P10(b)’s silent-source phrase', () => {
+    // CKPT-W1 review fix, and the reason REN-3 above may stay `it.failing` without leaving the live
+    // path unguarded. While REN-3 is red there IS a member of the union with no row, and the route
+    // must still answer something for it. `reasonText` is total and falls back to
+    // `widget.limitation.provider_silent` — P10(b)'s default, which is declared for the `c9_*` DENIAL
+    // space (`denial-projection.ts` cites it there), where "the source pays no answer" is true of an
+    // upstream that really went quiet. `mechanism_absent` is not that: it marks a gate NOBODY BUILT,
+    // and since U8a moved the wall from slot 8 to slot 9 it is the answer to every conformant
+    // submission. Rendering it as «Источник пока не отвечает.» put a falsehood on R3.9.3's own
+    // surface — the clause that exists to separate a policy fence from a fault — on every tap.
+    // `reasonTextOrNull` is what the controller calls now; this is its ratchet.
+    const uncovered = refusalCodeMembers().filter(
+      (code) =>
+        !Object.prototype.hasOwnProperty.call(LIMITATION_REASON_TABLE, code),
+    );
+    expect(uncovered.length).toBeGreaterThan(0);
+    for (const code of uncovered) {
+      expect({ code, rendered: reasonTextOrNull(code) }).toEqual({
+        code,
+        rendered: null,
+      });
+      // And the phrase it would otherwise have borrowed really is P10(b)'s, so this test is about a
+      // fallback that was reached and not about one nobody used.
+      expect({ code, key: reasonText(code).phrase_key }).toEqual({
+        code,
+        key: 'widget.limitation.provider_silent',
+      });
+    }
+    // A covered code is untouched: the fix narrows nothing that had an honest row of its own.
+    expect(reasonTextOrNull('EXPIRED')).toEqual(reasonText('EXPIRED'));
+    expect(reasonTextOrNull(null)).toBeNull();
+  });
 
   // ── REN-6: one grant path for `widgets.runtime` ────────────────────────────────────────────────
 

@@ -20,7 +20,7 @@ import { SubmitIntentDto } from './dto/submit-intent.dto';
 import { F88SubmissionPipe } from './validation/f88-walk';
 import { ResolveWidgetDto } from './dto/resolve-widget.dto';
 import { intentSubmitArgs } from './intent-submit-args';
-import { reasonText } from './rendering/reason-text';
+import { reasonTextOrNull } from './rendering/reason-text';
 
 @ApiTags('widgets')
 @ApiBearerAuth()
@@ -88,7 +88,13 @@ export class WidgetsController {
       // P-G15a: when EXPIRED/SUPERSEDED become response OUTCOMES with no code (L8, D-10), this
       // expression widens by one line to mint from `result.verdict.outcome`. The table already
       // carries those keys.
-      reason_text: code === null ? null : reasonText(code),
+      // CKPT-W1 review fix: `reasonTextOrNull`, not `reasonText`. A §3.9 code with no row — today
+      // exactly `mechanism_absent`, the not-built marker every conformant submission now meets at
+      // slot 9 — rendered through `reasonText`'s P10(b) fallback, which says the SOURCE is silent.
+      // That default belongs to the `c9_*` denial space, and carrying it here told the reader a
+      // falsehood about an unbuilt gate on R3.9.3's own surface. The route says nothing instead;
+      // REN-3 is the ratchet that keeps "nothing" from covering a second code. See `reason-text.ts`.
+      reason_text: reasonTextOrNull(code),
       stopped_at_gate: result.stoppedAt,
       gates_run: result.ran,
       gates_total: this.gateway.gateCount,
