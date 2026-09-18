@@ -21,23 +21,60 @@
 //   W    a witness is present (`revisionId !== null`)  → compare it (R3.7.4). While the witness port is
 //        unbound: `superseded/handle_stale` with ZERO owner calls (AMB-01a — a clause-level fail-closed
 //        lane, never a whole-gate refusal). A witness that agrees falls through to the noun rows.
-//   A1   an actuating effect, noun port bound          → fresh read
+//   A1   a discharge-blocked effect, noun port bound   → fresh read
 //   N1   frozen nouns present, noun port bound         → fresh read
-//   A0   an actuating effect, no port bound            → J-1 invariant throw
+//   A0   a discharge-blocked effect, no port bound     → J-1 invariant throw
 //   N0   frozen nouns present, no port bound           → J-1 invariant throw
 //   P    nothing to resolve                            → pass, with an empty `resolvedNouns`
 //
-// A0/N0 THROW rather than refuse, and that is deliberate. Before P-01's discharge no actuating record
-// is minted at all (D-4, A2.2 C11:6723), so the rows are unreachable; after it, P-MINT-CORE's mint
+// A0/N0 THROW rather than refuse, and that is deliberate — but ONLY because they are unreachable, and
+// that is a claim about a SET, not a mood. Before P-01's discharge no record of an effect A2.2 names
+// is minted at all (D-4, C11:6723), so the rows cannot be entered; after it, P-MINT-CORE's mint
 // refusal guarantees every mintable subject has a port, so reaching them means the pipeline was built
 // wrong. D-11 fixes that shape: "Only a pipeline construction defect throws". A refusal there would
 // report a construction defect as drift and would let a missing port ship quietly.
+//
+// CKPT-W1 REVIEW FIX — which set "actuating" means. This file read `ACTUATING` from
+// `gates/effect-sets.ts`, whose own comment says it "is the legacy set, `REFINE` included. Which set
+// each gate should read is for those gates' specs to settle". Read here, it made a record owe a
+// canonical read on `REFINE` and `CONTROL` too — and for those two the unreachability claim above is
+// simply FALSE: D-4 and AREA-C F-3 block `DRAFT`, `REQUEST_APPROVAL` and `COMMIT` and nothing else,
+// while `REFINE` and `CONTROL` are this cycle's non-actuating evidence backbone (plan §0.3: "10.R2 is
+// not blocked: it is L via CONTROL records"; §3.2 Gate 11 reads SCHED.2 REFINE nouns). A
+// `control.widget.dismiss` carries no runId, no revisionId and no frozen noun, so with the ports
+// still `NOUN_RESOLUTION_PORTS_UNBOUND` it took row A0 and `gate11.ts` threw — an HTTP 500 raised
+// after `T` had already committed Gate 9's durable USER turn, which is exactly the fault R3.9.3
+// forbids ("only a genuine transport fault may look like a fault", C11:4902-4903). Slots 9 and 10 are
+// refusing stubs today so nothing reaches slot 11 yet, but U9b (W2) and U10b (W3) open them and U11b,
+// which binds these ports, is W4 — the window is three waves wide.
+//
+// So Gate 11 states its own set, HERE, rather than importing one two other gates share. Row 11's
+// antecedent is "each frozen noun is resolved by a fresh read from its canonical owner" (C11:4731):
+// on the contract's own words a record that froze no noun owes no read at all, whatever its effect.
+// The three members below are kept as the fail-closed margin the applicability table was written
+// around — and they are the three D-4 blocks, so the A0 throw is now honestly unreachable. Widening
+// row 11's antecedent back to an effect-keyed read with no frozen nouns needs an owner citation, and
+// A0/N0 would then have to answer `superseded/handle_stale` rather than throw, because an unbound
+// port is a policy gap and not a transport fault.
 
 import type { AuthenticatedUser } from '../../common/authenticated-user.interface';
+import type { EffectClass } from '../../widget-contract/intent';
 import type { IntentRecordRow } from '../gate.types';
-import { ACTUATING } from '../gates/effect-sets';
 import { asHandle, asWitness, type Handle, type Witness } from './noun-handles';
 import type { NounResolutionPorts } from './noun-resolution.ports';
+
+/**
+ * Gate 11's own effect set: the three A2.2 (C11:6723) forbids minting until P-01 discharges. It is
+ * deliberately NOT `gates/effect-sets.ts#ACTUATING` — that set is Gate 7's and Gate 8-R's, carries
+ * `REFINE` and `CONTROL`, and a change made for one of those gates must not silently widen row 11's
+ * antecedent. `satisfies EffectClass[]` keeps the members spellings the contract knows.
+ */
+export const GATE11_DISCHARGE_BLOCKED_EFFECTS: readonly string[] =
+  Object.freeze([
+    'COMMIT',
+    'DRAFT',
+    'REQUEST_APPROVAL',
+  ] satisfies EffectClass[]);
 
 // ── the seven, and the two legal extras ──────────────────────────────────────────────────────────
 
@@ -147,7 +184,9 @@ export const nounRow = (
   applicability: Gate11Applicability,
   ports: NounResolutionPorts | null,
 ): Exclude<ApplicabilityRow, 'W'> => {
-  const actuating = ACTUATING.includes(applicability.effect);
+  const actuating = GATE11_DISCHARGE_BLOCKED_EFFECTS.includes(
+    applicability.effect,
+  );
   const nouns = input.frozenNouns.size > 0;
   if (!actuating && !nouns) return 'P';
   const bound = ports !== null && ports.nouns !== null;

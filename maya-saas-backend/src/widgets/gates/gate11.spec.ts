@@ -35,9 +35,10 @@ import {
   type NounActor,
   type NounResolverInput,
 } from '../noun-resolution/noun-resolution';
-import type {
-  NounReadResult,
-  NounResolutionPorts,
+import {
+  NOUN_RESOLUTION_PORTS_UNBOUND,
+  type NounReadResult,
+  type NounResolutionPorts,
 } from '../noun-resolution/noun-resolution.ports';
 import { gate11 } from './gate11';
 import { ctx, guardRegistries, rec } from './gate-fixtures.spec-helper.spec';
@@ -308,10 +309,19 @@ describe('G11-N9 [U] — the applicability table is six rows, total, and each an
     }).toEqual({ reads: 0, witness: 0 });
   });
 
-  it('G11-N9-k: the ACTUATING set is what makes a noun-less record owe a read, and it is the shared one', () => {
+  it('G11-N9-k: only the three effects D-4 blocks make a NOUN-LESS record owe a read, and the set is Gate 11’s own', () => {
     const bound = portSpy({
       read: { kind: 'resolved', values: new Map() },
     }).ports;
+    // CKPT-W1 review fix. This pinned `REFINE: 'A1', CONTROL: 'A1'` and read the legacy five-member
+    // `ACTUATING` out of `gates/effect-sets.ts`. Row 11's antecedent is "each frozen noun is resolved
+    // by a fresh read from its canonical owner" (C11:4731) — a record that froze NO noun owes no read
+    // — and the only ground the wider reading had was the claim, written into `noun-resolution.ts`,
+    // that rows A0/N0 are unreachable before P-01's discharge. D-4 and AREA-C F-3 block exactly
+    // `DRAFT`, `REQUEST_APPROVAL` and `COMMIT`; `REFINE` and `CONTROL` are mintable this cycle and
+    // are the plan's own non-actuating evidence backbone (§0.3 "10.R2 … is L via CONTROL records";
+    // §3.2 Gate 11 reads SCHED.2 REFINE nouns). The claim was false for those two, so the set is
+    // narrowed to the three the justification actually covers, and stated in Gate 11's own file.
     expect(
       Object.fromEntries(
         EFFECTS.map((effect) => [
@@ -323,12 +333,44 @@ describe('G11-N9 [U] — the applicability table is six rows, total, and each an
       NONE: 'P',
       NAVIGATE: 'P',
       HANDOFF: 'P',
-      REFINE: 'A1',
-      CONTROL: 'A1',
+      REFINE: 'P',
+      CONTROL: 'P',
       DRAFT: 'A1',
       REQUEST_APPROVAL: 'A1',
       COMMIT: 'A1',
     });
+  });
+
+  it('G11-N9-l: a CONTROL or REFINE record with no frozen noun and NO port bound is row P — a pass with zero owner calls, never A0', async () => {
+    // CKPT-W1 review fix, the reachable half of G11-N9-k. `control.widget.dismiss` carries no runId,
+    // no revisionId and no frozen noun, and a noun-less `REFINE` is equally ordinary. Slots 9 and 10
+    // are refusing stubs today, so neither reaches slot 11 yet; U9b (W2) and U10b (W3) open them
+    // while U11b — which BINDS these ports — is W4. Under the five-member set both took row A0 with
+    // `NOUN_RESOLUTION_PORTS_UNBOUND`, and A0 THROWS: an HTTP 500 raised after `T` had already
+    // committed Gate 9's durable USER turn. A widget layer may refuse; it may not fault (R3.9.3,
+    // C11:4902-4903: "only a genuine transport fault may look like a fault"). This is the ratchet.
+    for (const effect of ['CONTROL', 'REFINE'] as const) {
+      const spy = portSpy({});
+      expect(nounRow(input(), applies({ effect }), spy.ports)).toBe('P');
+      expect(
+        applicabilityRow(
+          input(),
+          applies({ effect }),
+          NOUN_RESOLUTION_PORTS_UNBOUND,
+        ),
+      ).toBe('P');
+      const verdict = await gate11(
+        input(),
+        applies({ effect }),
+        ACTOR,
+        NOUN_RESOLUTION_PORTS_UNBOUND,
+      );
+      expect(answer(verdict)).toEqual({ outcome: 'pass', code: null });
+      expect({
+        reads: spy.readCalls.length,
+        witness: spy.witnessCalls.length,
+      }).toEqual({ reads: 0, witness: 0 });
+    }
   });
 });
 

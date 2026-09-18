@@ -87,10 +87,15 @@ const resolve = async (
   const row = nounRow(input, applicability, ports);
   // Row P: nothing to resolve.
   if (row === 'P') return passResolved(resolvedNothing(row));
-  // Rows A0/N0: a duty with no port. Unreachable before P-01's discharge (D-4: no actuating record is
-  // minted at all) and unreachable after it (P-MINT-CORE refuses to mint a subject whose port is
-  // missing), so arriving here means the pipeline was assembled wrong. D-11: only a construction
-  // defect throws. A refusal here would report a missing owner as drift and let it ship quietly.
+  // Rows A0/N0: a duty with no port. Unreachable before P-01's discharge — D-4 and AREA-C F-3 block
+  // minting `DRAFT`, `REQUEST_APPROVAL` and `COMMIT`, and those three ARE the set `nounRow` reads for
+  // the noun-less half (`GATE11_DISCHARGE_BLOCKED_EFFECTS`; before the CKPT-W1 review fix it read the
+  // five-member legacy `ACTUATING`, which made this sentence false for `REFINE` and `CONTROL` and put
+  // a 500 on the dismiss path) — and unreachable after it (P-MINT-CORE refuses to mint a subject
+  // whose port is missing), so arriving here means the pipeline was assembled wrong. D-11: only a
+  // construction defect throws. A refusal here would report a missing owner as drift and ship it
+  // quietly. If row 11's antecedent is ever widened past the frozen nouns, this branch must become a
+  // `superseded/handle_stale` refusal instead: an unbound port is not a transport fault (R3.9.3).
   if (row === 'A0' || row === 'N0')
     throw new Error(
       `J-1: slot 11 owes a fresh read on row ${row} and no noun port is bound; the pipeline was assembled without Gate 11's capability owner`,
