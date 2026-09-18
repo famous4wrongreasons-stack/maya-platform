@@ -676,14 +676,75 @@ describe('P-PRINCIPAL — the wired pipeline [merge-step exits, D-18]', () => {
     expect(recorded.some((op) => op.write)).toBe(false);
   });
 
-  it('G2-IN [GW][E-INDEP]: with the transport guard neutralised so no session reaches the gateway, slot 2 refuses `unauthenticated` in-array and writes nothing (NW)', () => {
-    // The mutant `N2` in `mutations/selftest/neutralisers.json`'s sibling set makes `JwtAuthGuard` admit
-    // without a user; slot 2's narrowed refusal is what answers. Nothing to assert until slot 2 stops
-    // being a constant pass, which is this unit's IR.
-    const slot2 = (
-      gw.gateway as unknown as { gates: { n: string; run: unknown }[] }
-    ).gates.find((g) => g.n === '2');
-    expect(String(slot2?.run)).not.toContain("outcome: 'pass'");
+  it('G2-IN [GW]: with no transport session on the request, slot 2 refuses `unauthenticated` IN-ARRAY and writes nothing (NW)', async () => {
+    // CKPT-W1 REVIEW FIX. What stood here made no submission at all: it read slot 2's `run` back out
+    // of the gates array, stringified the function and asserted the text did not contain
+    // `outcome: 'pass'`. Its own comment still said "Nothing to assert until slot 2 stops being a
+    // constant pass, which is this unit's IR" — stale since that IR landed at `5a1c1377`. So a test
+    // carrying `[E-INDEP]`, named as the L-T carrier for G2-c's in-array refusal (§3.2 Gate 2) and
+    // declared the killer of `P-M9`, measured a source string and never the runtime outcome its own
+    // title asserts. A source check is a BUILD property; it cannot carry an evidence class.
+    //
+    // What the mutant `N2` does at HTTP is make `JwtAuthGuard` admit with no user, so the request
+    // reaches the route with no transport session on it. At [GW] there is no guard to neutralise —
+    // the harness calls the gateway directly — so the ARRIVAL STATE is what is reproduced here: an
+    // actor with no session. That is exactly what `transportSessionPresent(ctx.actor)` decides on,
+    // and slot 2 is the only thing that answers it.
+    //
+    // The record is real and conformant, so slot 1 passes and slot 2 is REACHED: `stopped_at_gate`
+    // of '2' with `gates_run` of 2 is what "in-array" means — the refusal comes from inside the
+    // ordered pipeline, not from a pre-gate that never entered it.
+    //
+    // THE `[E-INDEP]` LABEL IS GONE, and its absence is the honest half of this fix. The record below
+    // is minted by `Fixtures.widget`, and D-17 (3) forbids a labelled evidence test from calling it —
+    // HAR-12 is the BUILD test that says so, and it caught this rewrite when the label was left on.
+    // §0.5 is the reason: L-T by E-INDEP needs an `[HTTP]` entry on a TRIGGER-MINTED record with
+    // verified provenance, and this wave mints none (`mint_provenance.captured = 0`). So this test
+    // proves slot 2's runtime behaviour, which the source check it replaced did not, and it claims no
+    // evidence class while doing it. §3.2 Gate 2's L-T carrier for G2-c's in-array refusal is E1's
+    // job, on a T-2b-minted record over HTTP; this is the ratchet that keeps slot 2 honest until then,
+    // and `mutations/gateP-principal.json#P-M9` (slot 2 back to a constant pass) is what it kills.
+    const tenant = await fx.tenant('G2-IN');
+    const user = await fx.user(tenant, UserRole.ADMINISTRATOR);
+    const actor = await fx.actor(tenant, user);
+    const widget = await fx.widget({
+      tenant,
+      actor,
+      kind: 'METRIC',
+      body: { value: 1 },
+    });
+
+    // Both halves of "a transport session reached the gateway": the session and the user it belongs
+    // to. Each is run on its own, so a slot that had learned only one of them cannot hide.
+    for (const [name, sessionless] of [
+      ['no session id', { ...actor, sessionId: '' }],
+      ['no user id', { ...actor, userId: '' }],
+    ] as const) {
+      const scope = `G2-IN:${name}`;
+      const result = await gw.submit(
+        sessionless,
+        submission(widget.widgetId, widget.intentToken),
+        scope,
+      );
+      expect({ name, stoppedAt: result.stoppedAt }).toEqual({
+        name,
+        stoppedAt: '2',
+      });
+      expect({ name, ...result.verdict }).toMatchObject({
+        name,
+        outcome: 'refuse',
+        code: 'unauthenticated',
+      });
+      expect({ name, ran: result.ran }).toEqual({ name, ran: 2 });
+      // NW (D-12): zero durable writes to every `Widget*` model. Locks are not writes — the record
+      // read and the principal's `FOR SHARE` reads are counted by the property that matters, exactly
+      // as PR-12 and T4-NW do.
+      const recorded = gw.recorder.inScope(scope);
+      expect({ name, wrote: recorded.some((op) => op.write) }).toEqual({
+        name,
+        wrote: false,
+      });
+    }
   });
 });
 
