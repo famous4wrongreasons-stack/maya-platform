@@ -823,19 +823,33 @@ describe('S-ROW and D-3 — the record gates read is AUDIT_RETAINED, and confirm
       'lifecycleState',
       'supersededByWidgetId',
     ]);
-    // R7-1 (U7a's merge) adds the SECOND read this file admits, and it is enumerated rather than
-    // counted away. `findRecord` reads the SUBMITTED record once and serves every gate; slot 7's
+    // R7-1 (U7a's merge) adds a SECOND read to the gateway, and it is enumerated rather than counted
+    // away. `findRecord` reads the SUBMITTED record once and serves every gate; slot 7's
     // `findProducingRecord` reads a DIFFERENT row — the one a non-draft COMMIT names in
     // `confirmation_of_ref` (F74, C5a) — and only for that shape. Two reads, two methods, and the
-    // gateway may hold no third: a third `findFirst` fails this line.
+    // gateway may hold no third: a third `findFirst` fails this line. What that second read may
+    // select and how it must be scoped is `T7-PRODUCING-SCOPE` below.
     expect(gatewaySource.match(/\.findFirst\(/g)).toHaveLength(2);
+  });
+
+  /**
+   * The producing-record read, held on its own so a mutant can name it.
+   *
+   * It is a separate `it` with a leading id because `gate7.json`'s **M7-8** — "the producing-record
+   * read without `tenantId` in the `where`" — needs a killer that actually bites it, and `T7-WIRED`
+   * does not: its `where:\s*\{[^}]*tenantId[^}]*\}` matches `findRecord`'s clause further up the same
+   * file, so it stays green while `findProducingRecord` reads across tenants. Measured, not assumed
+   * (Merge-B, §4.2): with M7-8's edit applied in memory, T7-WIRED's three assertions all still pass
+   * and this one is the only thing that goes red.
+   */
+  it('T7-PRODUCING-SCOPE: slot 7’s producing-record read selects C5a’s four AUDIT_RETAINED columns and is tenant-scoped IN THE QUERY', () => {
     const producing = methodSelect(gatewaySource, 'findProducingRecord');
     expect([...producing.columns].sort()).toEqual(
       ['effect', 'capabilitySpace', 'capabilityKey', 'consumedAt'].sort(),
     );
     expect(producing.emission).toEqual([]);
     // Tenant-scoped IN THE QUERY, for the same reason `findRecord` is: a filter applied after the
-    // read would have read the foreign row first.
+    // read would have read the foreign row first — it would have READ it.
     const producingBody = gatewaySource.slice(
       gatewaySource.indexOf('private findProducingRecord('),
     );

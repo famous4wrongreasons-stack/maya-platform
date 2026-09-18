@@ -307,11 +307,11 @@
   },
   {
     "id": "M7-8",
-    "description": "The producing-record read loses its tenant filter: C5a would resolve a record of ANOTHER tenant and, if it were CONSUMED and of F74's class, admit the COMMIT. Declared by U7a against `intent-gateway.service.ts`, which the unit may not edit, and added by the integrator in the same commit as R7-1 (IR-U7A-6). `T7-WIRED` holds the tenant-scoped `where` at BUILD; this mutant is what makes that pin bite.",
+    "description": "The producing-record read loses its tenant filter: C5a would resolve a record of ANOTHER tenant and, if it were CONSUMED and of F74's class, admit the COMMIT. Declared by U7a against `intent-gateway.service.ts`, which the unit may not edit, and added by the integrator in the same commit as R7-1 (IR-U7A-6). Its killer was `T7-WIRED`, which does NOT bite: that test's `where:\\\\s*\\\\{[^}]*tenantId[^}]*\\\\}` matches `findRecord`'s clause further up the same file and stays green. Corrected in Merge-B after the mutant reported UNEXPECTED three times: the killer is `T7-PRODUCING-SCOPE` in `gate-context.source.spec.ts`, which reads THIS method's own `where`.",
     "file": "src/widgets/intent-gateway.service.ts",
     "find": "  private findProducingRecord(\n    intentTokenHash: string,\n    tenantId: string,\n  ): Promise<ProducingRecordRow | null> {\n    return this.prisma.widgetIntentRecord.findFirst({\n      where: { intentTokenHash, tenantId },\n",
     "replace": "  private findProducingRecord(\n    intentTokenHash: string,\n    tenantId: string,\n  ): Promise<ProducingRecordRow | null> {\n    void tenantId;\n    return this.prisma.widgetIntentRecord.findFirst({\n      where: { intentTokenHash },\n",
-    "killers": ["T7-WIRED"],
+    "killers": ["T7-PRODUCING-SCOPE"],
     "expect": "build-killed"
   }
 ]
