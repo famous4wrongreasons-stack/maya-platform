@@ -1078,26 +1078,32 @@ describe('D-1-TX — no slot inside `T` reads on the ambient store client', () =
     return out;
   };
 
+  /** The commit point, as the gateway spells it. The only slot literal this fence carries. */
+  const LAST_TRANSACTIONAL_SLOT = '10';
+
   /** A `file:line` locator without its line, so a RED arm pins the SITE and not a line number. */
   const site = (locator: string): string => locator.replace(/:\d+$/, '');
 
   it('D-1-TX-a the reach is the whole transactional range AND contains the store read it governs', () => {
-    // Not vacuous, part one: the range is the gateway's own, and it is the range D-1 names.
-    expect(transactionalSlots(readWidget(GATEWAY))).toEqual([
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '8-R',
-      '9',
-      '10',
-    ]);
+    // Not vacuous, part one: the range is DERIVED from the gateway — a prefix of its own array,
+    // ending at its own constant — rather than pinned as a literal list here. Pinning it would make
+    // this arm red for any reordering of the array, which is another rule's business entirely
+    // (`gate8r.json#M14` moves slot 8-R past Gate 9, and `T10` is what should catch that, not this).
+    const { order } = pipelineSources();
+    const inTx = transactionalSlots(readWidget(GATEWAY));
+    expect(inTx).toEqual(order.slice(0, inTx.length));
+    expect(inTx[inTx.length - 1]).toBe(LAST_TRANSACTIONAL_SLOT);
+    expect(readWidget(GATEWAY)).toContain(
+      `const LAST_TRANSACTIONAL_SLOT = '${LAST_TRANSACTIONAL_SLOT}';`,
+    );
+    // There ARE slots after the commit, so "everything is transactional" cannot pass by accident,
+    // and the two slots that actually read a second row are inside the range.
+    expect(order.length).toBeGreaterThan(inTx.length);
+    expect(inTx).toEqual(expect.arrayContaining(['1', '7', '8']));
     const reach = transactionalReach();
-    expect(reach.filter((u) => u.file.includes('#slot-')).length).toBe(11);
+    expect(reach.filter((u) => u.file.includes('#slot-')).length).toBe(
+      inTx.length,
+    );
 
     // Not vacuous, part two — THE ARM THAT WAS MISSING. The previous fence scanned 15 slot elements
     // and never once read the code that performs the transactional store read, so it was green on a
