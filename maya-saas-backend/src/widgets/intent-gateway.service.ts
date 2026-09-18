@@ -25,6 +25,7 @@ import {
   GATE6_OWNERS,
   GATE_8R_OWNERS,
   INPUT_VALIDATION,
+  NOUN_RESOLUTION_PORTS,
   PRINCIPAL_RESOLVER,
   TENANT_SCOPE,
 } from './di-tokens';
@@ -47,6 +48,12 @@ import type { Gate8ROwners } from './gates/gate-8r.owners';
 import { LOWERING_PENDING_ON, lower } from './lowering/lowering.gate';
 import { GATE10_PENDING_ON, gate10 } from './gates/gate10';
 import { gate11 } from './gates/gate11';
+import {
+  gate11ApplicabilityOf,
+  nounActor,
+  nounResolverInput,
+} from './noun-resolution/noun-resolution';
+import type { NounResolutionPorts } from './noun-resolution/noun-resolution.ports';
 import { gate12 } from './gates/gate12';
 import { gate13 } from './gates/gate13';
 import { channelMaxLevel } from './authority/authority-resolver';
@@ -124,6 +131,8 @@ export class IntentGatewayService {
     private readonly inputValidation: InputValidationGate,
     @Inject(GATE_8R_OWNERS)
     private readonly gate8ROwners: Gate8ROwners,
+    @Inject(NOUN_RESOLUTION_PORTS)
+    private readonly nounPorts: NounResolutionPorts,
   ) {}
 
   /**
@@ -305,7 +314,17 @@ export class IntentGatewayService {
       n: '11',
       name: 'Noun resolution',
       host: 'IntentGateway + capability owner',
-      run: (ctx) => gate11(ctx),
+      // IR-11a-1: the slot PROJECTS three views and hands them over, rather than handing the whole
+      // context to the gate. Gate 11 decides applicability and divergence; what a record IS — its
+      // resolver input, its applicability row, its actor — is the projection's answer, and a gate that
+      // could read `ctx.record` could read a column its row does not admit.
+      run: (ctx) =>
+        gate11(
+          nounResolverInput(ctx.record),
+          gate11ApplicabilityOf(ctx.record),
+          nounActor(ctx.actor),
+          this.nounPorts,
+        ),
     },
     {
       n: '12',

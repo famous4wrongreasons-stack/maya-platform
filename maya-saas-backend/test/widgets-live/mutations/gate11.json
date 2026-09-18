@@ -1,0 +1,88 @@
+[
+  {
+    "id": "MUT-1",
+    "description": "the witness lane PASSES while it is unbound — the replaced body's `if (!fresh) return pass`, reintroduced at row W. A widget frozen against a run that has since moved would act on a stale world, and nothing on the live path would say so. Build-killed: the lane is unbound on every build the runner can construct, so no input a conformant mint produces differs — which is exactly why the fence is at the source and in [U].",
+    "file": "src/widgets/gates/gate11.ts",
+    "find": "    if (ports === null || ports.witness === null || w.run === null)\n      return superseded('handle_stale', 'witness lane unbound');\n",
+    "replace": "    if (ports === null || ports.witness === null || w.run === null)\n      return passResolved(resolvedNothing('W'));\n",
+    "killers": ["G11-N9-c", "G11-N9-d", "G11-N10-g", "INTERIM"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MUT-3",
+    "description": "the witness lane loses precedence: the table answers a noun row first, so a witnessed actuating record reads the canonical owner BEFORE the frozen revision is compared. Row 11 compares first for a reason — a read made against a stale world is a read that should not have happened.",
+    "file": "src/widgets/noun-resolution/noun-resolution.ts",
+    "find": "  applicability.witness !== null ? 'W' : nounRow(input, applicability, ports);",
+    "replace": "  nounRow(input, applicability, ports) === 'P' && applicability.witness !== null\n    ? 'W'\n    : nounRow(input, applicability, ports);",
+    "killers": ["G11-N9-b"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MUT-9",
+    "description": "`witnessesAgree` treats an absent current revision as agreement. \"Cannot be compared\" and \"compared equal\" become the same branch, so a run the canonical owner no longer knows about passes the anti-drift fence (F5, fail closed).",
+    "file": "src/widgets/noun-resolution/noun-handles.ts",
+    "find": "): boolean => live !== null && frozen === live;",
+    "replace": "): boolean => live === null || frozen === live;",
+    "killers": ["G11-N9-f"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MUT-11",
+    "description": "rows A0/N0 refuse instead of throwing: a pipeline assembled without Gate 11's capability owner reports itself as drift (`handle_stale`) and ships quietly. D-11 fixes the shape — only a construction defect throws, and a construction defect must not be able to look like a stale handle.",
+    "file": "src/widgets/gates/gate11.ts",
+    "find": "  if (row === 'A0' || row === 'N0')\n    throw new Error(\n      `J-1: slot 11 owes a fresh read on row ${row} and no noun port is bound; the pipeline was assembled without Gate 11's capability owner`,\n    );\n",
+    "replace": "  if (row === 'A0' || row === 'N0')\n    return superseded('handle_stale', 'no noun port');\n",
+    "killers": ["G11-N9-i", "G11-N10-g"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MUT-12",
+    "description": "a value divergence returns `refuse` instead of `superseded` — the outcome the replaced body returned, and the one row 11 does not name. Two edits, because the helper has to be imported before it can be written; that import is itself what G11-ARCH-5 watches.",
+    "edits": [
+      {
+        "file": "src/widgets/gates/gate11.ts",
+        "find": "import { superseded } from './verdict';",
+        "replace": "import { refuse, superseded } from './verdict';"
+      },
+      {
+        "file": "src/widgets/gates/gate11.ts",
+        "find": "      return superseded('handle_stale', 'value divergence');",
+        "replace": "      return refuse('handle_stale', 'value divergence');"
+      }
+    ],
+    "killers": ["G11-N10-a", "G11-ARCH-5"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MUT-16",
+    "description": "F15's «exactly seven» is widened: the projection adds `bodyHash`, the very term the replaced body compared. One extra member is all it takes for the decision path to start reading the record again, so the seven are asserted against the contract's own sentence (G11-N15-a), by the compiler (G11-N5's `Exact`), and at [U] (G11-N10-h).",
+    "edits": [
+      {
+        "file": "src/widgets/noun-resolution/noun-resolution.ts",
+        "find": "  readonly producedByIntentTokenHash: string | null;\n}",
+        "replace": "  readonly producedByIntentTokenHash: string | null;\n  readonly bodyHash: string;\n}"
+      },
+      {
+        "file": "src/widgets/noun-resolution/noun-resolution.ts",
+        "find": "  producedByIntentTokenHash: Object.freeze(['producedByIntentTokenHash']),\n});",
+        "replace": "  producedByIntentTokenHash: Object.freeze(['producedByIntentTokenHash']),\n  bodyHash: Object.freeze(['bodyHash']),\n});"
+      },
+      {
+        "file": "src/widgets/noun-resolution/noun-resolution.ts",
+        "find": "    producedByIntentTokenHash: r.producedByIntentTokenHash,\n  });",
+        "replace": "    producedByIntentTokenHash: r.producedByIntentTokenHash,\n    bodyHash: r.bodyHash,\n  });"
+      }
+    ],
+    "killers": ["G11-N15-a", "G11-N15-e"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MUT-19",
+    "description": "R3.7.4's re-read path is opened: the witness port takes the FROZEN witness instead of the run's handle, so the hash that exists to be compared becomes a lookup key and the anti-drift guarantee it exists for is gone. Killed at the source (G11-ARCH-2) and by the compiler — G11-N5's `@ts-expect-error` stops erroring, and the gate's own call no longer type-checks.",
+    "file": "src/widgets/noun-resolution/noun-resolution.ports.ts",
+    "find": "  currentRevision(run: Handle, actor: NounActor): Promise<Witness | null>;",
+    "replace": "  currentRevision(run: Witness, actor: NounActor): Promise<Witness | null>;",
+    "killers": ["G11-ARCH-2", "typecheck:widgets-live"],
+    "expect": "build-killed"
+  }
+]

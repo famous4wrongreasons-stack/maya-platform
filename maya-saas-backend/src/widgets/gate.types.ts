@@ -73,8 +73,17 @@ export type RefusalCode =
 import type { LoweredUtterance } from './lowering/lowering';
 export type { LoweredUtterance };
 
-/** Gate 11's resolved nouns. Opaque on purpose: their shape is AMB-33's ruling, not this file's. */
-export type ResolvedNouns = { readonly __brand: 'ResolvedNouns' };
+/**
+ * Gate 11's resolved nouns (AMB-43b, U11a; IR-11a-2).
+ *
+ * It was an opaque brand, "their shape is AMB-33's ruling, not this file's". AMB-43b settles the two
+ * members slots 12 and 13 read — `diverged` and `diff` — so the brand is replaced by the concrete
+ * type the gate actually produces, declared where it is produced. While the brand stood, the only way
+ * to put a value behind it was a cast; a concrete type removes the cast rather than relocating it.
+ */
+import type { ResolvedNounsValue } from './noun-resolution/noun-resolution';
+export type { ResolvedNounsValue as ResolvedNouns };
+type ResolvedNouns = ResolvedNounsValue;
 
 /**
  * J-1 — what an earlier gate hands a later one. A `pass` verdict may carry some of these; the runner

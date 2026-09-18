@@ -126,6 +126,10 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       // U8R (R8R-1) binds slot 8-R's owner set in `widgets.module.ts` as a VALUE. It reaches no owner
       // either — the production vocabulary owner is `null` (A1/A2 unruled, PKT:471).
       DI_TOKENS.GATE_8R_OWNERS,
+      // U11a (IR-11a-3) binds Gate 11's ports in `widgets.module.ts` as the FROZEN ALL-NULL record.
+      // It reaches no owner either; U11b moves the binding to the boundary with its adapters, and the
+      // k3 check 9 enumeration lands in that commit (§2.6 item 7).
+      DI_TOKENS.NOUN_RESOLUTION_PORTS,
     ];
     const moduleRef = await Test.createTestingModule({
       // The owner modules the boundary now imports resolve configuration the way the application does:

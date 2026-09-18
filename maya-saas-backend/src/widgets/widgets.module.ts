@@ -5,7 +5,12 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { assertOwnerClassesResolve } from './authority/contract-bindings';
 import { assertLedgersBindAtRegistryLoad } from './authority/ledger-startup.assert';
 import { ControlRegistryService } from './control/control-registry.service';
-import { GATE_8R_OWNERS, INPUT_VALIDATION, SEAL_VERIFIER } from './di-tokens';
+import {
+  GATE_8R_OWNERS,
+  INPUT_VALIDATION,
+  NOUN_RESOLUTION_PORTS,
+  SEAL_VERIFIER,
+} from './di-tokens';
 import { WidgetEmitterService } from './emission/emitter.service';
 import { SealService } from './emission/seal.service';
 import { SealVerifierService } from './emission/seal-verifier.service';
@@ -13,6 +18,7 @@ import { GATE_8R_OWNERS_UNRULED } from './gates/gate-8r.owners';
 import { InputValidationGate } from './input-validation/input-validation.gate';
 import { IntentGatewayService } from './intent-gateway.service';
 import { WidgetOwnerPortsModule } from './owner-ports/widget-owner-ports.module';
+import { NOUN_RESOLUTION_PORTS_UNBOUND } from './noun-resolution/noun-resolution.ports';
 import { assertRoutingResolves } from './routing/deterministic-router';
 import { LoweringSourceReader } from './stores/lowering-source.read';
 import { WidgetStoresService } from './stores/widget-stores.service';
@@ -56,6 +62,12 @@ import { WidgetsController } from './widgets.controller';
     // `null` (A1/A2 unruled, PKT:471), so a required readback refuses; the token exists so the day an
     // owner is ruled, the binding changes here and in no gate file.
     { provide: GATE_8R_OWNERS, useValue: GATE_8R_OWNERS_UNRULED },
+    // U11a (IR-11a-3): Gate 11's ports, as the FROZEN ALL-NULL record. It is bound here rather than at
+    // the D-6 boundary because it reaches no owner, so k3 check 9's owner enumeration does not change;
+    // U11b replaces the `useValue` with its adapters and moves the binding to the boundary, with the
+    // enumeration in that commit (§2.6 item 7). Row W refuses `superseded/handle_stale` with 0 calls
+    // while it stands — an unbound port that REFUSES is the fail-closed half of AMB-01a.
+    { provide: NOUN_RESOLUTION_PORTS, useValue: NOUN_RESOLUTION_PORTS_UNBOUND },
   ],
   exports: [
     IntentGatewayService,
