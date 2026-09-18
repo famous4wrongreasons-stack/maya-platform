@@ -635,7 +635,11 @@ describe('the pipeline after U8a — slots 9 and 10 are refusing stubs', () => {
         .map((g) => g.n),
     ).toEqual(['9', '10']);
     expect(gateway.gateCount).toBe(15);
-    expect(gateway.liveGateCount).toBe(13);
+    // IR-K4K8-1 (g) / IR-12a-2, U12a's merge: slot 12 is the D-7 POINTER — it reads nothing, routes
+    // nothing and refuses nothing, because the data fence runs in `WidgetProjectorService`, which
+    // Gate 13 calls on its edges. It carries no `pendingOn` (nothing is "not built yet" about it) and
+    // `liveGateCount` excludes it BY NAME, so a pointer is never counted as a gate that runs.
+    expect(gateway.liveGateCount).toBe(12);
   });
 
   it('every pending slot refuses mechanism_absent, naming itself', async () => {

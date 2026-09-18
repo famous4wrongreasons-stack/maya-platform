@@ -283,15 +283,26 @@ describe('F88 — the one structural validator, at runtime', () => {
   });
 
   describe('F88-7 [BUILD] — no gate antecedent reads the submission `profile_id` (R3.8.3)', () => {
-    it('F88-7 [BUILD] finds no read of it anywhere under src/widgets outside the DTO that declares it', () => {
+    it('F88-7 [BUILD] finds no read of it in any RUNTIME module under src/widgets outside the DTO that declares it', () => {
       // A READ, not a mention: the ratchet matches `.profile_id`, `['profile_id']` and a destructuring
       // of it, after comments are stripped. The record's own column is `profileId` and is a different
       // name — R3.8.3 itself says Gate 8-R keys on the record, not on the submission.
+      //
+      // MERGE FIX (U12a's merge; R8R-7 names it). `*.spec.ts` is excluded, and the exclusion is the
+      // rule rather than a hole in it: a SPEC is not a gate antecedent — it ships in no build and
+      // runs in no request — and a fence that forbids a read must be able to PLANT one to prove it
+      // can still see. Two of them do: `gates/gate-antecedents.inv30.spec.ts` (T-SRC-INV30, U8R's
+      // R8R-3) and `projection/projector-fences.architecture.spec.ts` (ARCH-12-3, U12a). Counting a
+      // fence's own planted violation would have forced every such fence to spell its plant in parts
+      // — which U8R did and U12a did not — and the first one that forgot would look conformant.
+      // What covers the runtime half MORE strongly than this line ever did is T-SRC-INV30, which
+      // scans every runtime module reachable from the gateway for five spellings, not one.
       const reads = widgetSources()
         .filter(
           ({ file }) =>
             !file.startsWith('src/widgets/dto/') &&
-            !file.startsWith('src/widgets/validation/'),
+            !file.startsWith('src/widgets/validation/') &&
+            !file.endsWith('.spec.ts'),
         )
         .filter(({ text }) => {
           const code = withoutComments(text);
@@ -303,6 +314,24 @@ describe('F88 — the one structural validator, at runtime', () => {
         })
         .map(({ file }) => file);
       expect(reads).toEqual([]);
+    });
+
+    it('F88-7c [BUILD] the spec exclusion is not a hole: the fences that plant a read are named, and the runtime fence that replaced this reach exists', () => {
+      // If neither fence planted one any more, this line goes red and the exclusion is reconsidered
+      // rather than inherited.
+      const planters = widgetSources()
+        .filter(({ file }) => file.endsWith('.spec.ts'))
+        .filter(({ text }) => /\.\s*profile_id\b/.test(withoutComments(text)))
+        .map(({ file }) => file);
+      expect(planters.length).toBeGreaterThan(0);
+      expect(
+        fs.existsSync(
+          path.join(
+            BACKEND,
+            'src/widgets/gates/gate-antecedents.inv30.spec.ts',
+          ),
+        ),
+      ).toBe(true);
     });
 
     it('F88-7b [BUILD] the ratchet can go red', () => {

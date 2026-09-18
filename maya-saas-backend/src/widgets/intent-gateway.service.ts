@@ -54,7 +54,7 @@ import {
   nounResolverInput,
 } from './noun-resolution/noun-resolution';
 import type { NounResolutionPorts } from './noun-resolution/noun-resolution.ports';
-import { gate12 } from './gates/gate12';
+import { pass } from './gates/verdict';
 import { gate13 } from './gates/gate13';
 import { channelMaxLevel } from './authority/authority-resolver';
 
@@ -330,7 +330,10 @@ export class IntentGatewayService {
       n: '12',
       name: 'Data fence',
       host: 'Projector',
-      run: (ctx) => gate12(ctx),
+      // D-7, G12 §5.2: a POINTER. The data fence runs in `WidgetProjectorService`, which Gate 13
+      // calls on its REFINE/NAVIGATE edges. This slot reads nothing, routes nothing and refuses
+      // nothing, and `liveGateCount` excludes it (k3 check 4; ARCH-12-9 and ARCH-12-10).
+      run: () => pass,
     },
     {
       n: '13',
@@ -362,7 +365,7 @@ export class IntentGatewayService {
   }
 
   get liveGateCount(): number {
-    return this.gates.filter((g) => !g.pendingOn).length;
+    return this.gates.filter((g) => !g.pendingOn && g.n !== '12').length;
   }
 
   /**

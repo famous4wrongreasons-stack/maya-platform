@@ -1,11 +1,13 @@
-// K8 and K9 exits.
+// K9's exit.
+//
+// K8's half of this file — "the five PII fences fire against a client presentation, 5/5" — is gone
+// with `client/client-presentation.ts` (IR-K4K8-1, P-K4K8's merge, landed with U12a). F95 item 2
+// (C11:1882-1886) states no count and says masking stays in the OWNERS, and F18 with the C.5
+// correction (C11:292-296, C11:7333) declares three presentation modes, not the four
+// `client-presentation.ts` carried. What replaces it is `gates/gate12-pii-path.source.spec.ts` and
+// `projection/projector-fences.architecture.spec.ts` ARCH-12-2: no widget-layer file implements a PII
+// path of its own.
 
-import {
-  CLIENT_KINDS,
-  KINDS_REFUSED_TO_CLIENTS,
-  evaluatePresentation,
-  type PresentationRequest,
-} from './client-presentation';
 import {
   FinanceFenceRefusal,
   SESSION_REF_PATTERN,
@@ -15,85 +17,6 @@ import {
   mintShellPaySession,
   paymentUnavailable,
 } from '../commerce/payment-handoff';
-
-const req = (over: Partial<PresentationRequest> = {}): PresentationRequest => ({
-  mode: 'client',
-  kind: 'METRIC',
-  body: { visits: 3 },
-  deliveryChannel: 'pwa',
-  spokenText: 'you have three visits',
-  artifact: { contains_pii: false },
-  principalCapabilities: ['booking.read'],
-  requiredCapabilities: ['booking.read'],
-  piiCeiling: 'none',
-  ...over,
-});
-
-describe('K8 — the five PII fences fire against a client presentation, 5/5', () => {
-  it('evaluates all five on every request, so "5/5 fired" is observable per run', () => {
-    const v = evaluatePresentation(req());
-    expect(v.fences).toHaveLength(5);
-    expect(new Set(v.fences.map((f) => f.fence)).size).toBe(5);
-    expect(v.admitted).toBe(true);
-  });
-
-  it('refuses a client body carrying personal data, and names which fence did it', () => {
-    const v = evaluatePresentation(
-      req({ body: { client: { full_name: 'X', phone: '+7900' } } }),
-    );
-    expect(v.admitted).toBe(false);
-    expect(v.refusals.some((r) => r.startsWith('client_preview'))).toBe(true);
-    expect(v.refusals.some((r) => r.startsWith('llm_boundary'))).toBe(true);
-  });
-
-  it('refuses CLIENT_LIST outright under presentation_mode client', () => {
-    // Not "the principal lacks it" — the kind is refused for this mode. A client must never be
-    // shown a list of other clients, whatever they hold.
-    for (const kind of KINDS_REFUSED_TO_CLIENTS) {
-      const v = evaluatePresentation(
-        req({
-          kind,
-          principalCapabilities: ['everything'],
-          requiredCapabilities: [],
-        }),
-      );
-      expect(v.admitted).toBe(false);
-      expect(
-        v.refusals.some((r) =>
-          r.includes("refused under presentation_mode 'client'"),
-        ),
-      ).toBe(true);
-    }
-  });
-
-  it("refuses pii_ceiling 'client_identified' on a client presentation", () => {
-    const v = evaluatePresentation(req({ piiCeiling: 'client_identified' }));
-    expect(v.admitted).toBe(false);
-  });
-
-  it('carries no capability the LIVE principal does not hold — replayed under a downgrade', () => {
-    // The exit's own method: replay the same emission under a downgraded principal. What was
-    // admissible must stop being admissible, or the check is reading the envelope instead of the
-    // principal.
-    const full = req({
-      requiredCapabilities: ['booking.read', 'loyalty.read'],
-      principalCapabilities: ['booking.read', 'loyalty.read'],
-    });
-    expect(evaluatePresentation(full).admitted).toBe(true);
-    const downgraded = { ...full, principalCapabilities: ['booking.read'] };
-    const v = evaluatePresentation(downgraded);
-    expect(v.admitted).toBe(false);
-    expect(v.refusals.some((r) => r.includes('loyalty.read'))).toBe(true);
-  });
-
-  it('emits only read and refine kinds to a client', () => {
-    for (const k of CLIENT_KINDS)
-      expect(evaluatePresentation(req({ kind: k })).admitted).toBe(true);
-    // None of the five commits anything — there is no BOOKING_CONFIRMATION in this set, because
-    // confirming is K7's path and arrives through the booking flow rather than a client read.
-    expect(CLIENT_KINDS).not.toContain('BOOKING_CONFIRMATION');
-  });
-});
 
 describe('K9 — the finance fence', () => {
   it('money-mutating capabilities on the allowlist = 0 (asserted in the booking spec, restated here)', () => {

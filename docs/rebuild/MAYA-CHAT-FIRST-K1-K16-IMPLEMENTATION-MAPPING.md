@@ -307,14 +307,14 @@ and it is smaller and truer than "a submission cannot contain a date".
 
 | | |
 |---|---|
-| **Delivers** | `verificationFloor()` at runtime over the five-rung ladder; `subjectFloor`/`c9Floor`/`aeFloor`/`CONTROL_FLOOR`; `FLOOR_EXEMPT` as a **derived** predicate keyed on `priority === 0` plus its three exclusion clauses, with the build veto and the LOCAL-uniqueness assertion; `SENSITIVE_DEST` total over four spaces, fail-closed; the five PII fences; the `SECURE_SURFACE_ONLY` fence. |
+| **Delivers** | `verificationFloor()` at runtime over the five-rung ladder; `subjectFloor`/`c9Floor`/`aeFloor`/`CONTROL_FLOOR`; `FLOOR_EXEMPT` as a **derived** predicate keyed on `priority === 0` plus its three exclusion clauses, with the build veto and the LOCAL-uniqueness assertion; `SENSITIVE_DEST` total over four spaces, fail-closed; ~~the five PII fences~~ (deleted, IR-K4K8-3 — see **Exit**); the `SECURE_SURFACE_ONLY` fence. |
 | **Discharges** | P-11 (runtime half) |
 | **Surfaces** | the 121 `SECURITY/AUTHORITY ONLY` rows — as fences, not as screens |
 | **Kinds** | none of its own |
 | **Writes** | nothing. K4 decides; it does not persist. |
 | **Authority** | the derivation itself. **Exactly two floor reductions exist** — the nine non-catalogue C9-CAP keys, and the five `FLOOR_EXEMPT` intents — and both are enumerated in contract §0.17 and nowhere else. K4 may introduce no third. |
 | **Canonical owners** | none written |
-| **Exit** | **one CI job green**: `verificationFloor` is total over every key in all four spaces; the five PII fences fire **independently, 5/5**; `SECURE_SURFACE_ONLY` emissions in chat = 0; floor-reduction count computed from code = **2**, compared against §0.17 and failing on any difference. |
+| **Exit** | **one CI job green**: `verificationFloor` is total over every key in all four spaces; `SECURE_SURFACE_ONLY` emissions in chat = 0; floor-reduction count computed from code = **2**, compared against §0.17 and failing on any difference. ~~the five PII fences fire independently, 5/5~~ — **RE-RECORDED (IR-K4K8-3, GATES-PLAN-V11 P-K4K8): this is NOT a mechanism.** F95 item 2 (C11:1882-1886) states no count — it says no widget-layer module may implement PII masking of its own, and masking stays in the OWNERS — and F18 with the C.5 correction (C11:292-296, C11:7333) declares three presentation modes, not four. The five widget-layer fences (`authority/pii-fences.ts`, `client/client-presentation.ts`) were the thing the clause forbids, so "5/5 fired" measured the wrong object. They are deleted; what stands in their place is a source ratchet — `gates/gate12-pii-path.source.spec.ts` (K4K8-1/-2/-3) and `projection/projector-fences.architecture.spec.ts` ARCH-12-2 — pinned by `k4-exit-gate.sh`. |
 | **Gate rows** | G7 (the server-control half), G13, G16, G17 (fence half) |
 
 #### K5 — Chat Shell, Renderer and Route Registry · wave 2 · depends on K2, K3
@@ -383,9 +383,9 @@ is deleted.
 | **Surfaces** | the bulk of the 115 `MOVE INTO CHAT WIDGET` rows |
 | **Kinds** | `CHOICE`, `METRIC`, `LIMITATION`, `SOURCE_STATUS`, `FORM` |
 | **Writes** | nothing of its own |
-| **Authority** | **the five PII fences fire here or nowhere.** A client-presented envelope never carries `pii_ceiling: 'client_identified'` for a segment; `CLIENT_LIST` is refused outright under `presentation_mode: 'client'`. |
+| **Authority** | ~~**the five PII fences fire here or nowhere.**~~ RE-RECORDED (IR-K4K8-3): masking is the OWNERS' (F95 item 2), and the widget layer implements no PII path of its own. A client-presented envelope never carries `pii_ceiling: 'client_identified'` for a segment; `CLIENT_LIST` is refused outright under `presentation_mode: 'client'` — both of which are the emission validator's and the owners', not a widget-layer fence's. |
 | **Canonical owners** | C6 reads, loyalty reads |
-| **Exit** | **one CI job green**: the five PII fences fire independently **5/5** against a client presentation; no client-facing envelope carries a capability the live principal does not hold, verified by replaying every emission fixture under a downgraded principal. |
+| **Exit** | **one CI job green**: no client-facing envelope carries a capability the live principal does not hold, verified by replaying every emission fixture under a downgraded principal. ~~the five PII fences fire independently 5/5 against a client presentation~~ — **RE-RECORDED (IR-K4K8-3, GATES-PLAN-V11 P-K4K8): this is NOT a mechanism.** F95 item 2 (C11:1882-1886) states no count — it says no widget-layer module may implement PII masking of its own, and masking stays in the OWNERS — and F18 with the C.5 correction (C11:292-296, C11:7333) declares three presentation modes, not four. The five widget-layer fences (`authority/pii-fences.ts`, `client/client-presentation.ts`) were the thing the clause forbids, so "5/5 fired" measured the wrong object. They are deleted; what stands in their place is a source ratchet — `gates/gate12-pii-path.source.spec.ts` (K4K8-1/-2/-3) and `projection/projector-fences.architecture.spec.ts` ARCH-12-2 — pinned by `k4-exit-gate.sh`. `wave-3-final-gate.sh` prints `K8 COMPLETE: YES` unconditionally on success and greps nothing that was removed, so it stays green; that is exactly why this line is needed, because after the deletion there is no K8 fence proof behind that sentence. |
 | **Gate rows** | G16 |
 
 #### K9 — Commerce and Loyalty Redemption · wave 3 · depends on K7

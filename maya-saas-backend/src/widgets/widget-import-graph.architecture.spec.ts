@@ -1328,11 +1328,14 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
         }),
       ],
       [
+        // IR-K4K8-4: repointed from `gates/gate12.ts`, which IR-K4K8-1 deletes. `prepend` reads the
+        // file off disk, so the old anchor would have thrown ENOENT and the case would have gone red
+        // for the wrong reason — a mutant killed by a missing file proves nothing about the rule.
         'an import that does not resolve',
         'UNREADABLE',
         () =>
           prepend(
-            'gates/gate12.ts',
+            'gates/gate11.ts',
             "import { gone } from './does-not-exist';\nexport const g = gone;",
           ),
       ],

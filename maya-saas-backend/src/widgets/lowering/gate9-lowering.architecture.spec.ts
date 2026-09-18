@@ -376,12 +376,19 @@ const F15_FORBIDDEN_FILES: readonly SrcPath[] = [
   // branch now, which is why the file is still on this list.)
   'widgets/gates/gate6.ts',
   'widgets/gates/gate11.ts',
-  'widgets/gates/gate12.ts',
+  // `widgets/gates/gate12.ts` IS GONE (IR-K4K8-1, U12a's merge): slot 12 is the D-7 pointer and the
+  // data fence lives in `projection/widget-projector.service.ts`, which is covered by the
+  // `widgets/projection/` entry in `F15_FORBIDDEN_DIRECTORIES` below — a directory, so the successor
+  // is scanned whole rather than by one file name that could go stale again.
   'widgets/gates/gate13.ts',
 ];
 const F15_FORBIDDEN_DIRECTORIES: readonly string[] = [
   'action-engine/',
   'widgets/authority/',
+  // U12a's merge: the successor to `widgets/gates/gate12.ts`. Gate 12's decision moved into the
+  // projector, so the directory is scanned whole — a directory cannot go stale the way one file name
+  // did when IR-K4K8-1 deleted it.
+  'widgets/projection/',
 ];
 /** Slots after the rendering gate. Slot 10 is F15's one exception, and only for `facts.lowering`. */
 const F15_FORBIDDEN_SLOTS: readonly string[] = ['11', '12', '13', '14'];

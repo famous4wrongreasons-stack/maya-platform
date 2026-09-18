@@ -1,0 +1,65 @@
+[
+  {
+    "id": "MUT-12-J",
+    "description": "A carrier PII table and its refusal come back into the data fence — this time inside the projector, where the composition happens. F95 item 2 (C11:1882-1886) forbids a widget-layer module implementing PII masking of its own, and there is no carrier-PII refusal in the contract at all (a REFINE cannot be delivered on ANNOUNCEMENT/TEXT_ONLY by R3.12.1, which is Gate 7's, and a low-ceiling session is capped at Gate 5). ARCH-12-2 and ARCH-12-3 must go red. MERGE-STEP: ARCH-12-2 is red on the unmutated tree until IR-K4K8-1 deletes pii-fences.ts, client-presentation.ts and the legacy gates/gate12.ts, so this battery is run by the integrator in the U12a merge commit, never before — pre-IR the killer would be scored vacuous.",
+    "file": "src/widgets/projection/widget-projector.service.ts",
+    "find": "export type DegradedReason =\n",
+    "replace": "/** Restored widget-layer PII path (mutant). */\nexport const CARRIER_PII_CEILING: Readonly<Record<string, string>> =\n  Object.freeze({ pwa: 'client_identified', 'web-push': 'none' });\nexport const PII_RANK: Readonly<Record<string, number>> = Object.freeze({\n  none: 0,\n  business_aggregate: 1,\n  client_identified: 2,\n});\n\nexport type DegradedReason =\n",
+    "killers": ["ARCH-12-2", "ARCH-12-3"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MUT-12-O",
+    "description": "A projector row is registered while its blockers still stand: no port binding, no B-16 degrade-to-text carrier, and OD-5 (AMB-48(vi)) still an open owner decision. §2.6 item 6 requires a row to land in one commit with the ruling reference and the test pinning it; ARCH-12-13 is that test, and it must go red. The row also names a subject key the C9 canon does not carry and a `result_kind` whose owner class does not contain it, so ARCH-12-7 catches it independently.",
+    "file": "src/widgets/projection/projector.registry.ts",
+    "find": "export const PROJECTOR_REGISTRY: readonly ProjectorRow[] = Object.freeze([]);\n",
+    "replace": "export const PROJECTOR_REGISTRY: readonly ProjectorRow[] = Object.freeze([\n  {\n    projector_id: 'mutant.metric.read',\n    tapped_kind: 'METRIC',\n    subject_key: 'C9:c7.measurement.read',\n    result_kind: 'METRIC',\n    source_kind: 'capability_read',\n    slots: {},\n    arguments: {},\n    completeness: { total_field: null, exhausted_field: null },\n    unblocked_by: '',\n  },\n]);\n",
+    "killers": ["ARCH-12-13", "ARCH-12-7"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MUT-12-K",
+    "description": "Slot 12 looks the projector registry up. D-7 and G12 §5.2 make the slot a POINTER: it has no read, no registry lookup, no mode test and no verdict other than pass, and the only proof that Gate 12 is enforced is the G12-L suite on Gate 13's projector edges. A slot that consulted the registry would be a second place where the data fence decides. ARCH-12-10 must go red, and k3 check 4's slot-12 exception with it. MERGE-STEP: the `host: 'Projector',` line is IR-stable, but ARCH-12-10 is red on the unmutated tree until IR-K4K8-1 writes the pointer, so this runs in the merge commit.",
+    "edits": [
+      {
+        "file": "src/widgets/intent-gateway.service.ts",
+        "find": "import { gate13 } from './gates/gate13';\n",
+        "replace": "import { gate13 } from './gates/gate13';\nimport { PROJECTOR_REGISTRY } from './projection/projector.registry';\n"
+      },
+      {
+        "file": "src/widgets/intent-gateway.service.ts",
+        "find": "      host: 'Projector',\n",
+        "replace": "      host: PROJECTOR_REGISTRY.length > 0 ? 'Projector' : 'Projector',\n"
+      }
+    ],
+    "killers": ["ARCH-12-10", "k3"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MUT-12-M",
+    "description": "Slot 12 returns a refusal. Nothing in row 12 gives the slot a refusal to make — the data fence's outcome is 'masked body, never a leak', enforced inside the projector — so a refusal here is an invented gate decision, and `use_secure_surface` is Gate 8's code besides (D-10). ARCH-12-10 must go red, and k3 with it. MERGE-STEP ANCHOR: `run: () => pass,` is written by IR-K4K8-1; this mutant applies only to the post-IR tree, and the integrator runs the battery in the merge commit.",
+    "edits": [
+      {
+        "file": "src/widgets/intent-gateway.service.ts",
+        "find": "import { gate13 } from './gates/gate13';\n",
+        "replace": "import { gate13 } from './gates/gate13';\nimport { refuse } from './gates/verdict';\n"
+      },
+      {
+        "file": "src/widgets/intent-gateway.service.ts",
+        "find": "      run: () => pass,\n",
+        "replace": "      run: () => refuse('use_secure_surface', 'mutant: slot 12 decides'),\n"
+      }
+    ],
+    "killers": ["ARCH-12-10", "k3"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MUT-12-T",
+    "description": "Slot 12 is counted by `liveGateCount` again. The pointer enforces nothing, so counting it would report the pipeline as one gate more built than it is — the same failure mode `pendingOn` exists to prevent, in the other direction. ARCH-12-10 asserts the exclusion on a constructed gateway and must go red. MERGE-STEP ANCHOR: the `&& g.n !== '12'` term is written by IR-K4K8-1; this mutant applies only to the post-IR tree.",
+    "file": "src/widgets/intent-gateway.service.ts",
+    "find": "    return this.gates.filter((g) => !g.pendingOn && g.n !== '12').length;\n",
+    "replace": "    return this.gates.filter((g) => !g.pendingOn).length;\n",
+    "killers": ["ARCH-12-10"],
+    "expect": "build-killed"
+  }
+]

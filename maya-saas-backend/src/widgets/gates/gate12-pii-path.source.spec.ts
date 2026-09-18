@@ -150,26 +150,23 @@ describe('P-K4K8 — no widget-layer PII path (F95 item 2, F18)', () => {
     expect(offenders).toEqual([]);
   });
 
-  it.failing(
-    'K4K8-3 [BUILD; XF→IR-K4K8-1] the deleted modules are gone, nothing imports them, and no P-K4K8 file still names them',
-    () => {
-      for (const f of DELETED_MODULES)
-        expect([f, fs.existsSync(path.join(WIDGETS, f))]).toEqual([f, false]);
+  it('K4K8-3 [BUILD] the deleted modules are gone, nothing imports them, and no P-K4K8 file still names them', () => {
+    for (const f of DELETED_MODULES)
+      expect([f, fs.existsSync(path.join(WIDGETS, f))]).toEqual([f, false]);
 
-      const importers = widgetFiles()
-        .filter(([name]) => name !== rel(__filename))
-        .filter(([, text]) => DELETED_MODULE_SPECIFIER.test(text))
-        .map(([name]) => name);
-      expect(importers).toEqual([]);
+    const importers = widgetFiles()
+      .filter(([name]) => name !== rel(__filename))
+      .filter(([, text]) => DELETED_MODULE_SPECIFIER.test(text))
+      .map(([name]) => name);
+    expect(importers).toEqual([]);
 
-      const survivors = widgetFiles()
-        .filter(([name]) => name !== rel(__filename))
-        .flatMap(([name, text]) =>
-          DELETED_SYMBOLS.filter((s) =>
-            new RegExp(`\\b${s}\\b`).test(text),
-          ).map((s) => `${name}: ${s}`),
-        );
-      expect(survivors).toEqual([]);
-    },
-  );
+    const survivors = widgetFiles()
+      .filter(([name]) => name !== rel(__filename))
+      .flatMap(([name, text]) =>
+        DELETED_SYMBOLS.filter((s) => new RegExp(`\\b${s}\\b`).test(text)).map(
+          (s) => `${name}: ${s}`,
+        ),
+      );
+    expect(survivors).toEqual([]);
+  });
 });

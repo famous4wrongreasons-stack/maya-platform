@@ -101,20 +101,30 @@ const capRegistry = (() => {
 // Each returns GREEN / RED / NOT_APPLICABLE with a reason. A requirement with no evaluator is RED
 // and says so — the default is never a pass.
 
+// IR-K4K8-4: `authority/pii-fences.ts` is DELETED (IR-K4K8-1, F95 item 2 C11:1882-1886). This was a
+// top-level IIFE doing an unguarded read, so after the deletion the whole script threw ENOENT before
+// evaluating anything. It is wired into neither `run-all-checks.sh` nor any workflow, so nothing
+// turned red — the script simply stopped working, which is the worse failure.
 const piiFenceNames = (() => {
-  const src = read('maya-saas-backend/src/widgets/authority/pii-fences.ts');
-  const m = /export const PII_FENCES = \[([\s\S]*?)\]/.exec(src);
+  const file = 'maya-saas-backend/src/widgets/authority/pii-fences.ts';
+  if (!exists(file)) return [];
+  const m = /export const PII_FENCES = \[([\s\S]*?)\]/.exec(read(file));
   return m ? [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1]) : [];
 })();
 
 const fencesProvedIndependently = (() => {
-  // "the fence fires independently of any UI, proved by test" — the five fences are pure functions
-  // taking no UI, and K4's suite asserts each fires with the others removed. Both halves are
-  // checked here: the fences exist as independent exports, and a spec exercises them.
-  const spec = exists('maya-saas-backend/src/widgets/authority/authority.spec.ts')
-    ? read('maya-saas-backend/src/widgets/authority/authority.spec.ts')
-    : '';
-  return piiFenceNames.length === 5 && /independen/i.test(spec);
+  // WITHDRAWN, not merely false (IR-K4K8-3). This asked whether five fences fire independently.
+  // F95 item 2 (C11:1882-1886) states NO count: it says no widget-layer module may implement PII
+  // masking of its own, and that masking stays in the OWNERS. The five widget-layer fences were the
+  // thing the clause forbids, so "5/5 fired" was never the mechanism — it was a measurement of the
+  // wrong object. What replaces it is a source ratchet: `gate12-pii-path.source.spec.ts` and
+  // `projector-fences.architecture.spec.ts` ARCH-12-2.
+  if (piiFenceNames.length > 0)
+    return { state: 'RED', why: 'a widget-layer PII path came back (F95 item 2)' };
+  return {
+    state: 'NOT_APPLICABLE',
+    why: 'F95 item 2 states no count; the widget-layer PII path is deleted and masking is the owners\' (IR-K4K8-1/-3)',
+  };
 })();
 
 const consentHandoffProved = (() => {
@@ -156,8 +166,11 @@ const EVALUATORS = {
   // fences fire independently, that the class-s handoff rule exists. A true statement about the
   // system is not evidence about a row, so each now also needs the row's OWN verified successor.
   'the fence fires independently of any UI, proved by test': (row) => {
-    if (!fencesProvedIndependently)
-      return { verdict: 'RED', why: 'the fences are not proved to fire independently of the UI' };
+    // IR-K4K8-3: the programme-level half is WITHDRAWN rather than answered. It asked for a count
+    // F95 item 2 does not state, over a widget-layer mechanism the same clause forbids. The row's own
+    // successor is still required — which is the half that was always doing the work.
+    if (fencesProvedIndependently.state === 'RED')
+      return { verdict: 'RED', why: fencesProvedIndependently.why };
     const v = verifySuccessor(successorImpl, proposals[row.id]);
     return v.resolved && proposals[row.id].successorType === 'FENCE'
       ? { verdict: 'GREEN', why: `this row's canonical fence ${v.successor} is located, refuses, and is bound by a test` }

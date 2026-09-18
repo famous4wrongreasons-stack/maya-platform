@@ -19,6 +19,7 @@ import { InputValidationGate } from './input-validation/input-validation.gate';
 import { IntentGatewayService } from './intent-gateway.service';
 import { WidgetOwnerPortsModule } from './owner-ports/widget-owner-ports.module';
 import { NOUN_RESOLUTION_PORTS_UNBOUND } from './noun-resolution/noun-resolution.ports';
+import { WidgetProjectorService } from './projection/widget-projector.service';
 import { assertRoutingResolves } from './routing/deterministic-router';
 import { LoweringSourceReader } from './stores/lowering-source.read';
 import { WidgetStoresService } from './stores/widget-stores.service';
@@ -68,6 +69,12 @@ import { WidgetsController } from './widgets.controller';
     // enumeration in that commit (§2.6 item 7). Row W refuses `superseded/handle_stale` with 0 calls
     // while it stands — an unbound port that REFUSES is the fail-closed half of AMB-01a.
     { provide: NOUN_RESOLUTION_PORTS, useValue: NOUN_RESOLUTION_PORTS_UNBOUND },
+    // U12a (IR-12a-1): the projector. It has NO constructor dependency, so it adds no boot blast
+    // radius and needs no module import, and it is deliberately NOT exported: nothing outside this
+    // module may reference it until Gate 13's edges land (ARCH-12-9 admits `widgets.module.ts` and
+    // `gates/gate13.ts`, and only Gate 13 may CALL it). Its registry is empty and every compose
+    // answers `degraded` with zero reads, which is DEV-1 — a plan deviation, not a mechanism.
+    WidgetProjectorService,
   ],
   exports: [
     IntentGatewayService,
