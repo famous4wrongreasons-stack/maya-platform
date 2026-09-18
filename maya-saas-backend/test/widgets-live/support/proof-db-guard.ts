@@ -13,6 +13,13 @@
 //     third). In CI mode the only database is `maya_ci`, the workflow's service database; outside it the
 //     database matches `^maya_widget_gate_proof_[a-z0-9_]+$` and `maya_ci` is refused;
 //   - a name containing `prod`, `clone`, `maya_saas` or `postgres` is refused whatever else holds;
+//   - `maya_widget_gate_proof_local` is refused BY NAME, in either mode. It matches the proof pattern
+//     above and it sits on this very port, because it is the CONCURRENT shell workstream's proof
+//     database (GATES-PLAN-V11 D-19). Until this line, the rule "never the shell workstream's
+//     database" was upheld only by whatever `DATABASE_URL` the operator typed: the two workstreams
+//     share 127.0.0.1:55611, so a stray environment variable let this harness seed and TRUNCATE the
+//     other side's evidence with no objection from the fence built to prevent exactly that. The shell
+//     side pins the mirror image of this rule in its own code; this is the half that was missing;
 //   - the only query parameter admitted is Prisma's `schema`: libpq-style parameters such as `host`,
 //     `hostaddr`, `port`, `dbname` or `service` would redirect the connection away from what the URL's
 //     authority says, so the name and host checked above would not be the ones connected to.
@@ -24,6 +31,11 @@ export const CI_DATABASE = 'maya_ci';
 /** PostgreSQL's default port: the shared local cluster on a developer machine. */
 export const SHARED_CLUSTER_PORT = '5432';
 const REFUSED_FRAGMENTS = ['prod', 'clone', 'maya_saas', 'postgres'] as const;
+/**
+ * The concurrent shell workstream's proof database, on the same cluster and the same port as this
+ * one. It matches `PROOF_DATABASE_PATTERN`, so only naming it keeps it out.
+ */
+export const FOREIGN_WORKSTREAM_DATABASE = 'maya_widget_gate_proof_local';
 const ADMITTED_PARAMETERS = new Set(['schema']);
 
 export interface ProofDatabase {
@@ -81,6 +93,12 @@ export function assertProofDatabase(
     throw new ProofDatabaseRefused('no single database name in DATABASE_URL');
 
   const lowered = database.toLowerCase();
+  // Before the fragment scan, because this name breaks none of the other rules: it is a well-formed
+  // proof database on the right host and the right port, and it belongs to somebody else.
+  if (lowered === FOREIGN_WORKSTREAM_DATABASE)
+    throw new ProofDatabaseRefused(
+      `database ${JSON.stringify(database)} is the shell workstream's proof database on this same cluster (D-19); this harness uses its own`,
+    );
   const fragment = REFUSED_FRAGMENTS.find((f) => lowered.includes(f));
   if (fragment)
     throw new ProofDatabaseRefused(

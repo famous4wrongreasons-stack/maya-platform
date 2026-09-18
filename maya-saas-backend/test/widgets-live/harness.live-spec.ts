@@ -105,6 +105,8 @@ import {
 } from './support/owner-spies';
 import {
   assertProofDatabase,
+  FOREIGN_WORKSTREAM_DATABASE,
+  PROOF_DATABASE_PATTERN,
   ProofDatabaseRefused,
 } from './support/proof-db-guard';
 
@@ -335,6 +337,26 @@ describe('widgets-live harness', () => {
         ci('postgresql://maya@127.0.0.1:5432/maya_ci_prod'),
         /contains "prod"/,
       ],
+      // CKPT-W1 CLOSE review fix. `maya_widget_gate_proof_local` is the CONCURRENT shell
+      // workstream's proof database, and it lives on this very cluster and this very port. It breaks
+      // no other rule here — right prefix, right host, dedicated port — so before the guard named it,
+      // a stray DATABASE_URL let this harness seed and truncate the other workstream's evidence while
+      // the fence stayed silent. Both modes, because it is never right in either.
+      [
+        "the shell workstream's database",
+        local('postgresql://maya@127.0.0.1:55611/maya_widget_gate_proof_local'),
+        /is the shell workstream's proof database on this same cluster/,
+      ],
+      [
+        "the shell workstream's database in CI mode",
+        ci('postgresql://maya@127.0.0.1:5432/maya_widget_gate_proof_local'),
+        /is the shell workstream's proof database on this same cluster/,
+      ],
+      [
+        "the shell workstream's database upper-cased",
+        local('postgresql://maya@127.0.0.1:55611/MAYA_WIDGET_GATE_PROOF_LOCAL'),
+        /is the shell workstream's proof database on this same cluster/,
+      ],
     ])('refuses %s', (_label, env, reason) => {
       expect(() => assertProofDatabase(env as NodeJS.ProcessEnv)).toThrow(
         ProofDatabaseRefused,
@@ -363,6 +385,18 @@ describe('widgets-live harness', () => {
           ) as NodeJS.ProcessEnv,
         ),
       ).toMatchObject({ database: 'maya_ci', port: '5432', mode: 'ci' });
+      // And the deny above is ONE NAME, not the prefix: a sibling proof database is still admitted.
+      expect(
+        assertProofDatabase(
+          local(
+            'postgresql://maya@127.0.0.1:55611/maya_widget_gate_proof_localised',
+          ) as NodeJS.ProcessEnv,
+        ),
+      ).toMatchObject({ database: 'maya_widget_gate_proof_localised' });
+      expect(FOREIGN_WORKSTREAM_DATABASE).toBe('maya_widget_gate_proof_local');
+      expect(PROOF_DATABASE_PATTERN.test(FOREIGN_WORKSTREAM_DATABASE)).toBe(
+        true,
+      );
     });
 
     it.each(['widgets-live.yml', 'widgets-mutation.yml'])(
