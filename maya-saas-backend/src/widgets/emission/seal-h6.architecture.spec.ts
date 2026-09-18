@@ -280,4 +280,95 @@ describe('P-SEAL — SEAL-5: no seal key under the gateway', () => {
     );
     expect(holders.map(key)).toEqual(['emission/seal.service.ts']);
   });
+
+  // ── SEAL-5c ────────────────────────────────────────────────────────────────────────────────────
+  //
+  // CKPT-W1 review fix, and a DEVIATION made visible rather than argued away. P-SEAL's scope states
+  // B-22 as "the gateway module never holds the key; `SEAL_VERIFIER` is provided by the emission
+  // module". There is no emission module in Wave 1 — `emission/**` outside `seal*.ts` is
+  // P-MINT-CORE's (Wave 2) — so `SealService`, `SealVerifierService` and the `SEAL_VERIFIER` token
+  // stand in `WidgetsModule`, which also declares `IntentGatewayService`. The tests above hold the
+  // property at the IMPORT GRAPH: the gateway's run-time closure reaches neither class. They cannot
+  // hold it at the DI CONTAINER, where any provider of a module may inject any other by class — so
+  // for as long as the two live in the gateway's own module, "the gateway cannot obtain the key" is
+  // a fact about the gateway's CONSTRUCTOR, and a fact has to be asserted.
+  //
+  // This is that assertion. It retires when P-MINT-CORE lands `emission.module.ts` and moves the two
+  // providers there; until then it is what stops the deviation from becoming a habit.
+  describe('SEAL-5c [BUILD] the gateway cannot inject a key holder, while the two share its module', () => {
+    const KEY_HOLDERS = ['SealService', 'SealVerifierService'];
+    const gatewaySource = (): string =>
+      fs.readFileSync(path.join(WIDGETS, GATEWAY), 'utf8');
+    const parseText = (source: string): ts.SourceFile =>
+      ts.createSourceFile(
+        GATEWAY,
+        source,
+        ts.ScriptTarget.Latest,
+        true,
+        ts.ScriptKind.TS,
+      );
+
+    /** Every key-holder name the class's CONSTRUCTOR names, in a parameter type or a decorator. */
+    const keyHoldersInConstructor = (source: string): string[] => {
+      const sf = parseText(source);
+      const out: string[] = [];
+      const visit = (n: ts.Node): void => {
+        if (ts.isConstructorDeclaration(n))
+          for (const p of n.parameters) {
+            const text = p.getText(sf);
+            for (const name of KEY_HOLDERS)
+              if (new RegExp(`\\b${name}\\b`).test(text))
+                out.push(`${name} in ${p.name.getText(sf)}`);
+          }
+        ts.forEachChild(n, visit);
+      };
+      visit(sf);
+      return out;
+    };
+
+    const constructorParameters = (source: string): number => {
+      const sf = parseText(source);
+      let parameters = 0;
+      const count = (n: ts.Node): void => {
+        if (ts.isConstructorDeclaration(n)) parameters += n.parameters.length;
+        ts.forEachChild(n, count);
+      };
+      count(sf);
+      return parameters;
+    };
+
+    it('SEAL-5c the gateway’s constructor names neither seal service', () => {
+      // Not vacuous: the constructor really does take injected members, so a parser that found no
+      // parameters at all would be caught here rather than passing by silence.
+      expect(constructorParameters(gatewaySource())).toBeGreaterThan(3);
+      expect(keyHoldersInConstructor(gatewaySource())).toEqual([]);
+    });
+
+    it('SEAL-5c RED: a planted injection of either service turns it red', () => {
+      for (const name of KEY_HOLDERS) {
+        const planted = gatewaySource().replace(
+          'private readonly prisma: PrismaService,',
+          `private readonly prisma: PrismaService,\n    private readonly seal: ${name},`,
+        );
+        expect({
+          name,
+          planted: planted !== gatewaySource(),
+          found: keyHoldersInConstructor(planted).length > 0,
+        }).toEqual({ name, planted: true, found: true });
+      }
+    });
+
+    it('SEAL-5c the deviation is bounded: the two providers stand in ONE module, and it is named', () => {
+      // If they are ever provided in two places, "move them in P-MINT-CORE's merge" stops being one
+      // edit, and the note above stops being true.
+      const providers = widgetFiles().filter((file) => {
+        const text = fs.readFileSync(file, 'utf8');
+        return (
+          file.endsWith('.module.ts') &&
+          KEY_HOLDERS.every((n) => new RegExp(`\\b${n}\\b`).test(text))
+        );
+      });
+      expect(providers.map(key)).toEqual(['widgets.module.ts']);
+    });
+  });
 });
