@@ -22,9 +22,16 @@
 //   `AE_WIDGET_COMMIT_ALLOWLIST` row is refused by the allowlist test itself, and two statements of
 //   one rule are two things that can disagree.
 //
-//   (a)-(e) AND THE CATALOGUE BRANCH ARE STATED. (a), (b) and (c) are decided here now. (d) and C20
-//   are a HELD LANE (AMB-01a) until U6-L3 binds the live principal: they REFUSE, with a detail that
-//   says which half is held. "Not built yet" and "allowed" are never the same branch (F5).
+//   (a)-(e) AND THE CATALOGUE BRANCH ARE STATED. (a), (b) and (c) are decided here now. (d), (e) and
+//   C20 are a HELD LANE (AMB-01a) until U6-L3 binds the live principal: they REFUSE, with a detail
+//   that says which half is held. "Not built yet" and "allowed" are never the same branch (F5).
+//
+//   CKPT-W1 CLOSE review fix: this line said "(d) and C20", and the refusal a caller actually reads
+//   said "(d)" alone, although the branch holds BOTH (d) the allowedActorRoles test and (e) the
+//   EntitlementsService requiredFeatures test. §3.9 lists five conditions for row 6; a reader of the
+//   refusal could not tell that the entitlement half was unbuilt too. Nothing was mis-decided — the
+//   branch refuses either way — but the wave's disclosure standard was breached in the one place it
+//   is read from, so both halves are named in the detail now.
 //
 //   NO DETAIL / i-CLASS BRANCH. A5 is STOPPED (S6-4, C11:7173) and adds no branch: a `detail`, `w`,
 //   `i` or `s` NAVIGATE has a null subject and passes with zero owner calls (C11:4740-4741). The
@@ -178,8 +185,8 @@ const aeSubject = (ctx: GateContext, ref: CapabilityRef): GateVerdict => {
   // allowedActorRoles, and (e) EntitlementsService grants every requiredFeatures entry. HELD
   // (AMB-01a) until U6-L3 binds `ctx.principal` and the owner port. Both halves REFUSE.
   return ctx.principal === null
-    ? refuse('insufficient_authority', '(d) no live principal')
-    : refuse('insufficient_authority', '(d) pending U6-L3');
+    ? refuse('insufficient_authority', '(d)/(e) no live principal')
+    : refuse('insufficient_authority', '(d)/(e) pending U6-L3');
 };
 
 /**

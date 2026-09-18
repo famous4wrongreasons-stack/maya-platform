@@ -402,7 +402,7 @@ describe('Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB 
       const v = await gate6(ae(key));
       expect({ key, detail: detail(v) }).toEqual({
         key,
-        detail: '(d) no live principal',
+        detail: '(d)/(e) no live principal',
       });
     }
   });
@@ -410,8 +410,10 @@ describe('Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB 
   it('N-AE-NOPRINCIPAL [RI]: the held (d) names the half that is held, on both arms', async () => {
     const base = ae(ALLOWLISTED[0]);
     expect(code(await gate6(base))).toBe('insufficient_authority');
-    expect(detail(await gate6(base))).toBe('(d) no live principal');
-    expect(detail(await gate6(withPrincipal(base)))).toBe('(d) pending U6-L3');
+    expect(detail(await gate6(base))).toBe('(d)/(e) no live principal');
+    expect(detail(await gate6(withPrincipal(base)))).toBe(
+      '(d)/(e) pending U6-L3',
+    );
   });
 });
 
