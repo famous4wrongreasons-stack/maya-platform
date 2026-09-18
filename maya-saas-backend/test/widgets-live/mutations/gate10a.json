@@ -1,0 +1,67 @@
+[
+  {
+    "id": "M10-7",
+    "description": "ownerSet includes INHERITED and NONE, so every registered C9 key shares an owner with every other (C11:4836)",
+    "edits": [
+      {
+        "file": "src/widgets/routing/owner-set.ts",
+        "find": "        const ownerClass = KIND_OWNER_CLASS[kind];\n        if (NOT_AN_OWNER.has(ownerClass)) continue;\n        if (isOwnerClassKey(kind, ref)) owners.add(ownerClass);\n",
+        "replace": "        const ownerClass = KIND_OWNER_CLASS[kind];\n        if (isOwnerClassKey(kind, ref) || NOT_AN_OWNER.has(ownerClass))\n          owners.add(ownerClass);\n"
+      }
+    ],
+    "killers": ["U10A-OS-1", "U10A-OS-4", "U10A-OS-15"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-8",
+    "description": "the AE branch takes the FIRST of several AE_PROPOSE_PAIRING rows instead of refusing (FR-6b, C11:4838-4839)",
+    "edits": [
+      {
+        "file": "src/widgets/routing/owner-set.ts",
+        "find": "      if (rows.length !== 1) return undefined;\n",
+        "replace": "      if (rows.length === 0) return undefined;\n"
+      }
+    ],
+    "killers": ["U10A-OS-8"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-14",
+    "description": "the escape verb is matched AFTER the ordinary candidates instead of before them (§4.7 V9, C11:4809, 6124)",
+    "edits": [
+      {
+        "file": "src/widgets/routing/deterministic-router.ts",
+        "find": "  if (ESCAPE_VERB_SET.has(said)) {\n    const escape = candidates.find(isEscapeCandidate);\n    if (escape !== undefined) return escape;\n  }\n  return candidates.find((c) => saysExactly(c, said)) ?? null;\n",
+        "replace": "  const ordinary = candidates.find((c) => saysExactly(c, said));\n  if (ordinary !== undefined) return ordinary;\n  if (ESCAPE_VERB_SET.has(said)) {\n    const escape = candidates.find(isEscapeCandidate);\n    if (escape !== undefined) return escape;\n  }\n  return null;\n"
+      }
+    ],
+    "killers": ["U10A-R-15"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-15",
+    "description": "the router re-orders its candidates (newest first) instead of answering in the order it was given — the build-scale stand-in for 'the tapped record ordered first', whose live form is M10-15 in gate10.json (U10b)",
+    "edits": [
+      {
+        "file": "src/widgets/routing/deterministic-router.ts",
+        "find": "  return candidates.find((c) => saysExactly(c, said)) ?? null;\n",
+        "replace": "  return (\n    [...candidates]\n      .sort((a, b) => b.issuedAt.getTime() - a.issuedAt.getTime())\n      .find((c) => saysExactly(c, said)) ?? null\n  );\n"
+      }
+    ],
+    "killers": ["U10A-R-6"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-24",
+    "description": "the match becomes a substring match, so a longer sentence routes to a shorter intent (C11:4807 'one pure, pre-LLM function' — a guessing router manufactures divergences)",
+    "edits": [
+      {
+        "file": "src/widgets/routing/deterministic-router.ts",
+        "find": "  renderingsOf(c).some(\n    (rendering) => normaliseUtterance(rendering) === normalised,\n  );\n",
+        "replace": "  renderingsOf(c).some((rendering) =>\n    normaliseUtterance(rendering).includes(normalised),\n  );\n"
+      }
+    ],
+    "killers": ["U10A-R-5"],
+    "expect": "build-killed"
+  }
+]

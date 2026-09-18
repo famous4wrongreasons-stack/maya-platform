@@ -27,11 +27,10 @@ export const INPUT_BOUNDS_REGISTRY = 'INPUT_BOUNDS_REGISTRY';
 /** Gate 8's normalizer registry; an empty frozen map until AMB-21. */
 export const INPUT_NORMALIZER_REGISTRY = 'INPUT_NORMALIZER_REGISTRY';
 
-/** Gate 10's router (`routing/deterministic-router.ts`); signature per AMB-29 (U10b). */
-export const DETERMINISTIC_ROUTER = 'DETERMINISTIC_ROUTER';
-
-/** Gate 10's capability facts (`routing/capability-facts.provider.ts`; U10b). */
-export const CAPABILITY_FACTS = 'CAPABILITY_FACTS';
+// U10a (IR-U10A-3): `DETERMINISTIC_ROUTER` and `CAPABILITY_FACTS` are DELETED. Under V1.1 the router
+// and `ownerSet` are pure value imports over the frozen registries, not DI providers (AREA-B §3.2), so
+// a token for each would be a port that will never be bound — and an unbound token that no unit will
+// ever bind is the kind of thing that reads as "planned" for a year. Neither was imported anywhere.
 
 /** Gate 11's noun-resolution ports; every port unbound until AMB-33/34/36/37 (U11a, U11b). */
 export const NOUN_RESOLUTION_PORTS = 'NOUN_RESOLUTION_PORTS';

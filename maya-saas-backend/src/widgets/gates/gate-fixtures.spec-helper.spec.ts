@@ -11,7 +11,7 @@ import { UserRole } from '../../common/domain.enums';
 import type { GateContext, GateVerdict, IntentRecordRow } from '../gate.types';
 import { NO_FACTS } from './facts';
 import { assertPolicyTotality } from '../authority/capability-policy';
-import { assertAliasesResolve } from '../routing/deterministic-router';
+import { assertRoutingResolves } from '../routing/deterministic-router';
 
 export const PRINCIPAL = 'a'.repeat(64);
 export const OTHER = 'b'.repeat(64);
@@ -88,10 +88,16 @@ export const ctx = (
 
 export const code = (v: GateVerdict) => ('code' in v ? v.code : null);
 
-/** The two load-time assertions the gate specs run behind, as the undivided suite did. */
+/**
+ * The two load-time assertions the gate specs run behind, as the undivided suite did.
+ *
+ * IR-U10A-2 (U10a's merge): the second was `assertAliasesResolve`, V1's name for a speech-alias table
+ * V1.1 does not have. It is deleted, and the assertion it delegated to is called by its own name —
+ * `assertRoutingResolves`, which is also what `WidgetsModule.onModuleInit` runs at boot (IR-U10A-1).
+ */
 export const guardRegistries = (): void => {
   assertPolicyTotality();
-  assertAliasesResolve();
+  assertRoutingResolves();
 };
 
 describe('gate spec fixtures', () => {

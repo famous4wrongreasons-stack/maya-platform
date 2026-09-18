@@ -13,6 +13,7 @@ import { GATE_8R_OWNERS_UNRULED } from './gates/gate-8r.owners';
 import { InputValidationGate } from './input-validation/input-validation.gate';
 import { IntentGatewayService } from './intent-gateway.service';
 import { WidgetOwnerPortsModule } from './owner-ports/widget-owner-ports.module';
+import { assertRoutingResolves } from './routing/deterministic-router';
 import { LoweringSourceReader } from './stores/lowering-source.read';
 import { WidgetStoresService } from './stores/widget-stores.service';
 import { WidgetsController } from './widgets.controller';
@@ -77,5 +78,9 @@ export class WidgetsModule implements OnModuleInit {
   onModuleInit(): void {
     assertLedgersBindAtRegistryLoad();
     assertOwnerClassesResolve();
+    // U10a (IR-U10A-1): §3.12's router and `ownerSet` resolve against the live registries, or the
+    // process does not start. A router that cannot answer Gate 10 is a divergence audit that silently
+    // has nothing to compare, which is the one failure mode row 10 exists to prevent.
+    assertRoutingResolves();
   }
 }
