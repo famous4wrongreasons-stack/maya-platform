@@ -127,8 +127,8 @@
     "edits": [
       {
         "file": "test/widgets-live/support/bootstrap.ts",
-        "find": "import { SubmitIntentDto } from '../../../src/widgets/dto/submit-intent.dto';\n",
-        "replace": "import { SubmitIntentDto } from '../../../src/widgets/dto/submit-intent.dto';\nimport { PRINCIPAL_RESOLVER } from '../../../src/widgets/di-tokens';\n"
+        "find": "} from '../../../src/widgets/dto/submit-intent.dto';\n",
+        "replace": "} from '../../../src/widgets/dto/submit-intent.dto';\nimport { PRINCIPAL_RESOLVER } from '../../../src/widgets/di-tokens';\n"
       },
       {
         "file": "test/widgets-live/support/bootstrap.ts",

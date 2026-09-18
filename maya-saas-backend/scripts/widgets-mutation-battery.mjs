@@ -140,6 +140,77 @@ const simulate = (where, edits) => {
   return contents;
 };
 
+// ── every killer id must resolve to a TEST (CKPT-W1 review finding 9) ─────────────────────────────────────────
+//
+// A kill is credited by `killerMatches(failingTest.title, killer.test)` — against the `it` TITLE alone,
+// never against the `describe` that encloses it. So an id that lives only on a `describe` can never be
+// credited: whatever it catches is reported UNEXPECTED with an empty kill list, and a mutant it really
+// does kill looks like a mutant nothing kills. That is how `T-SRC-INV30` came to be added to
+// `gate-antecedents.inv30.spec.ts` (R8R-3) and written up as carrying `gate8r.json#M21` when it could
+// carry nothing at all. A dead `find` anchor already fails the load (`simulate`); a dead killer id now
+// fails it the same way, or a battery reports a health it does not have.
+//
+// The check is a leading-token match over every `it`/`test` title in the repository's specs, using the
+// SAME predicate the crediting code uses, so the two cannot disagree.
+//
+// `it.each` needs one extra step, and it is not a loophole. Jest substitutes the table's row into the
+// title, so `it.each([['T-NULL-OBJ', …], ['T-NULL-EMPTY', …]])('%s [GW]: …')` really does produce two
+// tests whose titles BEGIN with those ids, and `gate8.json`'s killers name them. The parameter only
+// counts when the title actually interpolates (`%s`, `%d`, `$name`, …); a templated title with no
+// placeholder, and every plain string in a table that is not interpolated, is ignored. This is why
+// `T-SRC-INV30` is still rejected: it appears in a `describe` title, which jest never substitutes.
+const NON_TEST_KILLERS = ['typecheck:widgets-live', 'k3'];
+const SPEC_ROOTS = ['src', 'test'];
+// A quoted literal, with the quote as group `before + 1` and the text as group `before + 2`. The
+// offset is not decoration: the back-reference that closes the quote must name its OWN group, and a
+// pattern with a capture in front of it renumbers every group after it.
+const stringLiteral = (before) => {
+  const quote = before + 1; // the group the closing back-reference must name
+  return `(['"\`])((?:\\\\.|(?!\\${quote})[^\\\\])*)\\${quote}`;
+};
+const TITLE_CALL = new RegExp(
+  String.raw`\b(?:it|test)(?:\.(?:failing|only|skip|concurrent))?\s*\(\s*` + stringLiteral(0),
+  'g',
+);
+const EACH_CALL = new RegExp(
+  String.raw`\b(?:it|test)\.each\s*\(([\s\S]*?)\)\s*\(\s*` + stringLiteral(1),
+  'g',
+);
+const INTERPOLATES = /%[sdifjop#%]|\$[A-Za-z_]/;
+
+const specTitles = () => {
+  const titles = [];
+  const walk = (dir) => {
+    if (!fs.existsSync(dir)) return;
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) {
+        if (e.name !== 'node_modules' && e.name !== '.git') walk(full);
+        continue;
+      }
+      if (!/\.(?:spec|live-spec)\.ts$/.test(e.name)) continue;
+      const text = fs.readFileSync(full, 'utf8');
+      for (const m of text.matchAll(TITLE_CALL)) titles.push(m[2]);
+      for (const m of text.matchAll(EACH_CALL)) {
+        const [table, , title] = [m[1], m[2], m[3]];
+        titles.push(title);
+        // The rows jest will substitute into the title, so a killer may name a row's own id.
+        if (INTERPOLATES.test(title))
+          for (const row of table.matchAll(new RegExp(stringLiteral(0), 'g'))) titles.push(row[2]);
+      }
+    }
+  };
+  for (const root of SPEC_ROOTS) walk(path.join(BACKEND, root));
+  return titles;
+};
+
+let SPEC_TITLES = null;
+const killerResolves = (killer) => {
+  if (NON_TEST_KILLERS.includes(killer)) return true;
+  SPEC_TITLES ??= specTitles();
+  return SPEC_TITLES.some((title) => killerMatches(title, killer));
+};
+
 // ── load and validate the batteries and the neutraliser sets (read-only) ──────────────────────────────────────
 const readJson = (file, what) => {
   try {
@@ -192,6 +263,11 @@ for (const name of batteryFiles) {
       }
       return usage(`${where}: a killer is a string or { test, neutralisers }`);
     });
+    for (const k of killers)
+      if (!killerResolves(k.test))
+        usage(
+          `${where}: killer ${k.test} names no test — no it()/test() title in src/ or test/ begins with it as a whole token (an id on a describe cannot be credited)`,
+        );
     const expect = m.expect ?? 'live-killed';
     if (!['live-killed', 'build-killed', 'pending'].includes(expect)) usage(`${where}: unknown expect ${expect}`);
     const sets = [...new Set(killers.map((k) => k.neutralisers))];
@@ -378,14 +454,42 @@ export function killerMatches(title, killer) {
   return title === killer || (title.startsWith(killer) && !/^[A-Za-z0-9_.-]/.test(title.slice(killer.length)));
 }
 
-/** `[GW]`, `[HTTP]` or `[BIN]` from the title, else from the innermost describe that carries one; else null. */
+/**
+ * The entry tag from the title, else from the innermost describe that carries one; else null.
+ *
+ * CKPT-W1 review finding 7 widened the vocabulary past `[GW]`/`[HTTP]`/`[BIN]`. §1.0 declares five
+ * more tags, and `[RI]` and `[G-SYNTH]` are the two that matter here: §0.5 says they never count as
+ * evidence. Reading only three of the eight left an `[RI]` killer recorded as `entry: null`, which
+ * reads as "unknown" when the test in fact SAYS what it is — 13 of gate 8-R's live-killed mutants
+ * are killed by `[RI]` killers alone, and nothing in the artifact said so. A tag that is declared is
+ * recorded; `null` now means the test really carries no tag.
+ */
+const ENTRY_TAGS = /\[(GW|HTTP|BIN|RI|G-SYNTH|BUILD|U)\]/;
 export const entryLevel = (test) => {
   for (const text of [test.title, ...[...test.ancestors].reverse()]) {
-    const m = /\[(GW|HTTP|BIN)\]/.exec(text);
+    const m = ENTRY_TAGS.exec(text);
     if (m) return m[1];
   }
   return null;
 };
+
+/**
+ * Why a kill is, or is not, marked `evidence` — CKPT-W1 review finding 7.
+ *
+ * The flag itself is right as far as it goes: §3.2 says "a live kill counts toward L/L-T only when
+ * the failing killer is an `[HTTP]` test", and that is exactly what it reads. What it does NOT read
+ * is the rest of §0.5's L: the record under test must be MINTED BY A PRODUCTION TRIGGER with D-17
+ * provenance, and an L claim needs an HTTP line and a BIN line for the same test id. In Wave 1 no
+ * such record exists anywhere — `test:widgets:http` reports `mint_provenance.captured = 0`, and
+ * every `[HTTP]` killer here runs on a `Fixtures.widget`-minted record, which §0.5 L and §3.2 forbid
+ * as evidence. So a reader of this artifact could take `live_evidence: true` for an L claim on
+ * eleven mutants that carry none. The flag keeps its meaning and gains a BASIS that states the
+ * meaning, so the artifact cannot be read for more than it measured.
+ */
+const evidenceBasis = (step, entry) =>
+  step === 'live' && entry === 'HTTP'
+    ? 'http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner'
+    : null;
 
 const runSteps = (edits, steps) => {
   const backend = buildMirror(edits);
@@ -478,12 +582,13 @@ for (const m of mutants) {
         ])
           for (const t of failed.filter((x) => killerMatches(x.title, killer.test))) {
             const entry = step === 'live' ? entryLevel(t) : 'BUILD';
-            kills.push({ killer: killer.test, test: t.fullName, step, entry, neutralisers: set, evidence: step === 'live' && entry === 'HTTP' });
+            const basis = evidenceBasis(step, entry);
+            kills.push({ killer: killer.test, test: t.fullName, step, entry, neutralisers: set, evidence: basis !== null, evidence_basis: basis });
           }
         if (killer.test === 'typecheck:widgets-live' && result.outcome.typecheck?.status && !control.outcome.typecheck?.status)
-          kills.push({ killer: killer.test, test: null, step: 'typecheck', entry: 'BUILD', neutralisers: set, evidence: false });
+          kills.push({ killer: killer.test, test: null, step: 'typecheck', entry: 'BUILD', neutralisers: set, evidence: false, evidence_basis: null });
         if (killer.test === 'k3' && result.outcome.k3?.status && !control.outcome.k3?.status)
-          kills.push({ killer: killer.test, test: null, step: 'k3', entry: 'BUILD', neutralisers: set, evidence: false });
+          kills.push({ killer: killer.test, test: null, step: 'k3', entry: 'BUILD', neutralisers: set, evidence: false, evidence_basis: null });
       }
 
       // A report this run did not produce (a dead jest) makes the mutant unreadable, not innocent.
@@ -528,6 +633,11 @@ for (const m of mutants) {
     vacuous,
     ...(problems.length > 0 ? { problems } : {}),
     live_evidence: kills.some((k) => k.evidence),
+    // The entry level of every killer that bit, counted. §0.5: a `[GW]`, `[RI]`, `[G-SYNTH]` or `[U]`
+    // kill never counts as evidence, and `live_evidence` above says only that ONE killer was `[HTTP]`.
+    // Printed per mutant so "25 live-killed" cannot be read as "25 killed at the route" — 13 of gate
+    // 8-R's are killed by `[RI]` killers alone (CKPT-W1 review finding 7).
+    kills_by_entry: kills.reduce((acc, k) => ({ ...acc, [k.entry ?? 'untagged']: (acc[k.entry ?? 'untagged'] ?? 0) + 1 }), {}),
     exits,
     ...(status === m.expect ? {} : { tails }),
   };
@@ -543,6 +653,16 @@ fs.rmSync(MIRROR_ROOT, { recursive: true, force: true });
 report.status = mismatches === 0 ? 'AS-DECLARED' : 'MISMATCH';
 report.mismatches = mismatches;
 report.live_evidence_mutants = report.mutants.filter((x) => x.live_evidence).map((x) => `${x.battery}#${x.id}`);
+// CKPT-W1 review finding 7: what `live_evidence` above does and does not assert, stated IN the artifact
+// rather than in a report beside it, because the artifact is what a §3.3 re-audit reads.
+report.evidence_rule = {
+  flag_means: 'a declared killer tagged [HTTP] failed in the live step (§3.2)',
+  not_verified_here: [
+    "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+    'an L claim also needs a BIN line for the same test id (§0.5 L)',
+  ],
+  therefore: 'live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)',
+};
 finish(mismatches === 0 ? 0 : 1);
 
 // ── the CI shard list (widgets-mutation.yml) ─────────────────────────────────────────────────────────────────
@@ -641,6 +761,58 @@ function selfTest() {
   expectThat('H11-M2 one edit on NH survives (pending): both edits are needed', byId('H11-M2')?.status === 'pending', byId('H11-M2')?.status);
   expectThat('H11-M3 both edits without NH survive (pending): the set is needed', byId('H11-M3')?.status === 'pending', byId('H11-M3')?.status);
   expectThat('no [GW] kill counted as live evidence', (r?.live_evidence_mutants ?? ['?']).length === 0, JSON.stringify(r?.live_evidence_mutants));
+  // CKPT-W1 review finding 7: the artifact says what its evidence flag does NOT assert, and a kill
+  // that is not [HTTP] carries no basis at all.
+  expectThat(
+    'the report states the evidence rule and its two unverified duties',
+    (r?.evidence_rule?.not_verified_here ?? []).length === 2 && typeof r?.evidence_rule?.flag_means === 'string',
+    JSON.stringify(r?.evidence_rule?.not_verified_here?.length),
+  );
+  expectThat(
+    'a [GW] kill carries a null evidence_basis, and its entry is counted',
+    m1?.kills?.[0]?.evidence_basis === null && m1?.kills_by_entry?.GW === 1,
+    JSON.stringify({ basis: m1?.kills?.[0]?.evidence_basis, byEntry: m1?.kills_by_entry }),
+  );
+  // CKPT-W1 review finding 9: a killer id that names no `it` must be a usage error, exactly as a dead
+  // `find` anchor is. Run as a subprocess, because the check lives in the runner's load path (which
+  // this self-test has not reached) and because it is the WHOLE declared set that must be clean, not
+  // the self-test's toy battery. A planted id that resolves to no test must be refused with exit 2.
+  const spawnRunner = (extra, mutations) =>
+    spawnSync(
+      process.execPath,
+      [path.join(HERE, 'widgets-mutation-battery.mjs'), ...(mutations ? ['--mutations', mutations] : []), '--dry-run', ...extra],
+      { cwd: BACKEND, encoding: 'utf8', env: process.env, maxBuffer: 256 * 1024 * 1024 },
+    );
+  const allClean = spawnRunner([]);
+  expectThat('every declared battery dry-runs clean: no dead anchor, no dead killer id', allClean.status === 0, `exit ${allClean.status}`);
+
+  const plantedDir = fs.mkdtempSync(path.join(os.tmpdir(), 'widgets-battery-deadkiller-'));
+  try {
+    fs.writeFileSync(
+      path.join(plantedDir, 'gateZZ-deadkiller.json'),
+      `${JSON.stringify(
+        [
+          {
+            id: 'ZZ-1',
+            edits: [{ file: 'package.json', find: '"name"', replace: '"name"' }],
+            // An id that exists only as a `describe` title in the repository: the exact shape of the defect.
+            killers: ['T-SRC-INV30'],
+            expect: 'build-killed',
+          },
+        ],
+        null,
+        2,
+      )}\n`,
+    );
+    const planted = spawnRunner([], plantedDir);
+    expectThat(
+      'an id that lives only on a describe is refused with exit 2',
+      planted.status === 2 && /names no test/.test(planted.stderr ?? ''),
+      `exit ${planted.status}: ${(planted.stderr ?? '').trim().slice(0, 120)}`,
+    );
+  } finally {
+    fs.rmSync(plantedDir, { recursive: true, force: true });
+  }
   for (const c of checks) process.stdout.write(`${c.ok ? 'ok  ' : 'BAD '} ${c.id} (${c.detail})\n`);
   const bad = checks.filter((c) => !c.ok).length;
   if (bad > 0 && child.stderr) process.stdout.write(child.stderr.split('\n').slice(-20).join('\n') + '\n');

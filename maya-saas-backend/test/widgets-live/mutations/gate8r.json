@@ -344,7 +344,7 @@
         "replace": "  const claimed = (ctx.submission as { profile_id?: string }).profile_id;\n  if (claimed === 'pwa.default') return pass;\n  const ack: unknown = ctx.submission.readback_ack;\n"
       }
     ],
-    "killers": ["T-SRC-8R"],
+    "killers": ["T-SRC-8R", "T-SRC-INV30-b"],
     "expect": "build-killed"
   },
   {

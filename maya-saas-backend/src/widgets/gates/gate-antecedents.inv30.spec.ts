@@ -102,7 +102,7 @@ describe('T-SRC-INV30 — no gate antecedent names a claimed render profile, a l
     files.map((f) => [f, fs.readFileSync(path.join(W, f), 'utf8')]),
   );
 
-  it('the scan reaches the pipeline it claims to: the gateway, its slots and its seams', () => {
+  it('T-SRC-INV30-a the scan reaches the pipeline it claims to: the gateway, its slots and its seams', () => {
     // Not vacuous, and not a hand-written list: the set is derived, and these are the files the
     // pipeline cannot be without.
     expect(files.length).toBeGreaterThan(20);
@@ -123,11 +123,11 @@ describe('T-SRC-INV30 — no gate antecedent names a claimed render profile, a l
     expect(all.length).toBeGreaterThanOrEqual(files.length);
   });
 
-  it('no reachable runtime module names one of the five spellings', () => {
+  it('T-SRC-INV30-b no reachable runtime module names one of the five spellings', () => {
     expect(violations(sources)).toEqual([]);
   });
 
-  it('each enumerated exception exists, still carries the spelling, and says why it is a declaration', () => {
+  it('T-SRC-INV30-c each enumerated exception exists, still carries the spelling, and says why it is a declaration', () => {
     for (const [file, why] of Object.entries(DECLARED_NOT_READ)) {
       expect(fs.existsSync(path.join(W, file))).toBe(true);
       const code = stripComments(fs.readFileSync(path.join(W, file), 'utf8'));
@@ -136,7 +136,7 @@ describe('T-SRC-INV30 — no gate antecedent names a claimed render profile, a l
     }
   });
 
-  it('RED: the fence goes red on a planted read, on any of the five spellings, and a comment is not a read', () => {
+  it('T-SRC-INV30-d RED: the fence goes red on a planted read, on any of the five spellings, and a comment is not a read', () => {
     for (const needle of FORBIDDEN)
       expect(
         violations(
