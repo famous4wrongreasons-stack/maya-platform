@@ -638,7 +638,7 @@ describe('P-PRINCIPAL — the wired pipeline [merge-step exits, D-18]', () => {
     },
   );
 
-  it('PR-12 [GW]: every refusal performs exactly one principal read and one record read (K3 exit wording)', async () => {
+  it('PR-12 [GW]: every refusal performs one principal resolution and the two required record reads', async () => {
     const tenant = await fx.tenant('PR-12');
     const user = await fx.user(tenant, UserRole.ADMINISTRATOR);
     const actor = await fx.actor(tenant, user);
@@ -660,14 +660,16 @@ describe('P-PRINCIPAL — the wired pipeline [merge-step exits, D-18]', () => {
     );
     const recorded = gw.recorder.inScope('PR-12');
     const operations = recorded.map((op) => `${op.model}.${op.operation}`);
-    // The principal's own reads, then exactly ONE `WidgetIntentRecord.findFirst`, and nothing after
-    // it: the record read is the last thing `T` does before the array runs.
+    // P-G15a adds the transaction-scoped seal-term read; the gateway then loads its union record.
+    // Slot 8 refuses before the lowering-source read, so those are the only two record reads.
     expect(
       operations.filter((op) => op.startsWith('WidgetIntentRecord')),
-    ).toEqual(['WidgetIntentRecord.findFirst']);
-    expect(operations[operations.length - 1]).toBe(
+    ).toEqual(['WidgetIntentRecord.findFirst', 'WidgetIntentRecord.findFirst']);
+    expect(operations.slice(-3)).toEqual([
       'WidgetIntentRecord.findFirst',
-    );
+      'WidgetEmission.findFirst',
+      'WidgetRenderReceipt.findFirst',
+    ]);
     // IR-P-FLIP: the implementer's version expected `Membership.queryRaw`. The recorder classifies a
     // raw statement with `model: null` (it is SQL, not a delegate call), so the two `FOR SHARE` reads
     // — K1's membership/user read in `C9Authority.current` and B-02's role read — are counted by the

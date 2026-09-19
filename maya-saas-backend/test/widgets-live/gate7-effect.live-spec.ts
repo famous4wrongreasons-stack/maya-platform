@@ -155,8 +155,14 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
         ttlSeconds: 600,
         freshnessClass: 'live',
       });
+      const envelopeSeal = await fx.resealLegacyEmission(
+        sealed,
+        tenant.id,
+        proof,
+      );
       widget = {
         ...sealed,
+        envelopeSeal,
         tenantId: tenant.id,
         kind,
         conversationId,
@@ -226,7 +232,10 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
     // applied to T4-INDEP, T4-NW and PR-12.
     expect({ scope, recordOperations: a.recordOperations }).toEqual({
       scope,
-      recordOperations: ['WidgetIntentRecord.findFirst'],
+      recordOperations: [
+        'WidgetIntentRecord.findFirst',
+        'WidgetIntentRecord.findFirst',
+      ],
     });
     expect({ scope, locks: a.locks, wrote: a.wrote }).toEqual({
       scope,
@@ -402,6 +411,7 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
       recordOperations: [
         'WidgetIntentRecord.findFirst',
         'WidgetIntentRecord.findFirst',
+        'WidgetIntentRecord.findFirst',
       ],
       wrote: false,
     });
@@ -416,7 +426,10 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
       wrote: refused.wrote,
     }).toEqual({
       writes: [],
-      recordOperations: ['WidgetIntentRecord.findFirst'],
+      recordOperations: [
+        'WidgetIntentRecord.findFirst',
+        'WidgetIntentRecord.findFirst',
+      ],
       wrote: false,
     });
   }, 120_000);
@@ -481,8 +494,14 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
         ttlSeconds: 600,
         freshnessClass: 'live',
       });
+      const envelopeSeal = await hfx.resealLegacyEmission(
+        sealed,
+        htenant.id,
+        proof,
+      );
       const widget: WidgetFixture = {
         ...sealed,
+        envelopeSeal,
         tenantId: htenant.id,
         kind,
         conversationId,

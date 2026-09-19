@@ -98,8 +98,8 @@ describe('P-F88 — the §3.8 submission and F88’s walk, at the shape stage [H
       status: 200,
       body: {
         contract: 'maya.widget.intent/1',
-        outcome: 'refuse',
-        code: 'EXPIRED',
+        outcome: 'expired',
+        code: null,
         // P-RENDER (IR-REN-1): R3.9.3's `reason_text`, minted from the code's own row. Written out
         // rather than matched loosely, so a member added to this response later fails here too.
         reason_text: {

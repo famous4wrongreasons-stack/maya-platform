@@ -77,20 +77,28 @@ const CONTROLLER_KEYS = [
 const WORLDS: Readonly<
   Record<
     string,
-    { readonly code: string; readonly ran: number; readonly why: string }
+    {
+      readonly outcome: 'expired' | 'refuse';
+      readonly code: string | null;
+      readonly ran: number;
+      readonly why: string;
+    }
   >
 > = {
   '1': {
-    code: 'EXPIRED',
+    outcome: 'expired',
+    code: null,
     ran: 1,
     why: 'conformant: findRecord is tenant-scoped, so the foreign row is never read',
   },
   '3': {
+    outcome: 'refuse',
     code: 'widget_principal_mismatch',
     ran: 3,
     why: "N4-FILTER: the row is read, and the principal proof hash covers the record's tenant",
   },
   '4': {
+    outcome: 'refuse',
     code: 'tenant_mismatch',
     ran: 4,
     why: 'N4: the row is read and slot 3 is neutralised, so slot 4 is the only stop left',
@@ -230,7 +238,7 @@ async function foreignRecord<C>(fx: Fixtures, level: Level<C>): Promise<void> {
     ran: body.gates_run,
   }).toEqual({
     scope,
-    outcome: 'refuse',
+    outcome: world.outcome,
     code: world.code,
     ran: world.ran,
   });
@@ -244,7 +252,10 @@ async function foreignRecord<C>(fx: Fixtures, level: Level<C>): Promise<void> {
     records: level
       .operations(scope)
       .filter((op) => op.startsWith('WidgetIntentRecord')),
-  }).toEqual({ scope, records: ['WidgetIntentRecord.findFirst'] });
+  }).toEqual({
+    scope,
+    records: ['WidgetIntentRecord.findFirst', 'WidgetIntentRecord.findFirst'],
+  });
 }
 
 /** T4-NW: neither an admitted nor a refused submission writes anything durable. */
@@ -276,8 +287,12 @@ async function noWrites<C>(fx: Fixtures, level: Level<C>): Promise<void> {
       scope,
       records:
         label === 'foreign'
-          ? ['WidgetIntentRecord.findFirst']
-          : ['WidgetIntentRecord.findFirst', 'WidgetIntentRecord.findFirst'],
+          ? ['WidgetIntentRecord.findFirst', 'WidgetIntentRecord.findFirst']
+          : [
+              'WidgetIntentRecord.findFirst',
+              'WidgetIntentRecord.findFirst',
+              'WidgetIntentRecord.findFirst',
+            ],
     });
   }
 }
