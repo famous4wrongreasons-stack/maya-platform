@@ -34,11 +34,23 @@ ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_handoffSpace
 -- VerificationLevel (5) — contract union `VerificationLevel` (envelope.ts)
 ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_verificationFloor_check" CHECK ("verificationFloor" IN ('ANONYMOUS', 'CHANNEL_IDENTITY', 'BOUND_CLIENT', 'SESSION_VERIFIED', 'STEP_UP_VERIFIED'));
 
+-- ConfirmationSubject (3) — contract §2.6.5 BOOK.1 and §3.7 R3.7.5 — the three booking confirmation subjects
+ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_confirmationSubject_check" CHECK ("confirmationSubject" IN ('create', 'reschedule', 'cancel'));
+
+-- WidgetApprovalDecision (2) — contract §3.7 R3.7.5 — the two approval decisions carried by an approval widget
+ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_approvalDecision_check" CHECK ("approvalDecision" IN ('approve', 'reject'));
+
 -- C9Domain (4) — contract union `C9Domain` (ambient.ts)
 ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_c9Domain_check" CHECK ("c9Domain" IN ('ADMIN', 'CLIENT_LIFECYCLE', 'OCCUPANCY', 'BUSINESS_INTELLIGENCE'));
 
 -- ConfirmationOfKind (3) — contract `IntentRecord.kind` (intent.ts:303)
 ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_confirmationOfKind_check" CHECK ("confirmationOfKind" IN ('draft', 'record', 'approval'));
+
+-- EffectClass (8) — contract union `EffectClass` (intent.ts)
+ALTER TABLE "WidgetIntentDivergenceAudit" ADD CONSTRAINT "WidgetIntentDivergenceAudit_resolvedEffect_check" CHECK ("resolvedEffect" IN ('NONE', 'NAVIGATE', 'REFINE', 'CONTROL', 'DRAFT', 'REQUEST_APPROVAL', 'COMMIT', 'HANDOFF'));
+
+-- DivergenceRefusalCode (1) — contract §3.9 Gate 10 — the sole divergence refusal code
+ALTER TABLE "WidgetIntentDivergenceAudit" ADD CONSTRAINT "WidgetIntentDivergenceAudit_refusalCode_check" CHECK ("refusalCode" IN ('intent_divergence'));
 
 -- IntentReceiptOutcome (4) — mapping §5.5 states the four members in full (not a count)
 ALTER TABLE "WidgetIntentReceipt" ADD CONSTRAINT "WidgetIntentReceipt_outcome_check" CHECK ("outcome" IN ('ACCEPTED', 'REFUSED', 'NEEDS_CONFIRMATION', 'NEEDS_VERIFICATION'));
@@ -87,3 +99,6 @@ ALTER TABLE "WidgetRenderReceipt" ADD CONSTRAINT "WidgetRenderReceipt_emitted_wi
 
 -- a count of emitted intents is not negative
 ALTER TABLE "WidgetRenderReceipt" ADD CONSTRAINT "WidgetRenderReceipt_emitted_nonneg_check" CHECK ("intentsEmitted" >= 0);
+
+-- contract §3.9 — the resolved token and effect are absent or present together
+ALTER TABLE "WidgetIntentDivergenceAudit" ADD CONSTRAINT "WidgetIntentDivergenceAudit_resolved_pair_check" CHECK (("resolvedIntentTokenHash" IS NULL) = ("resolvedEffect" IS NULL));

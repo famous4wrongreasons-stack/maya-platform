@@ -61,13 +61,13 @@ accepted in any of them.
 |---|---|
 | **PACKAGE** | K3 — wave 2 |
 | **PURPOSE** | Build the gateway, and with it make `BUTTON → ENDPOINT` **unrepresentable** rather than merely unused. |
-| **WHAT CHANGES** | `IntentGateway`: Step 0 plus Gates 1–13 and Gate 8-R as one ordered pipeline. The programme's **two widget routes**, `POST /api/widgets/resolve` and `POST /api/widgets/intent`; the programme's third new route, the internal Telegram command ingress, is K14's (contract §3.12 R3.12.7, §A1.1 P-33). All ten runtime stores. `control.widget.dismiss`. |
+| **WHAT CHANGES** | `IntentGateway`: Step 0 plus Gates 1–13 and Gate 8-R as one ordered pipeline. The programme's **two widget routes**, `POST /api/widgets/resolve` and `POST /api/widgets/intent`; the programme's third new route, the internal Telegram command ingress, is K14's (contract §3.12 R3.12.7, §A1.1 P-33). All eleven runtime stores. `control.widget.dismiss`. |
 | **USER-VISIBLE RESULT** | **None in production.** Read-only emission behind an entitlement, dark, to nobody. |
 | **SURFACES** | None directly — K3 is the substrate every later surface emits through. |
 | **WIDGET TYPES** | `METRIC`, `SCHEDULE`, `SOURCE_STATUS`, `PROGRESS`, `LIMITATION` — read-only, behind the entitlement. |
 | **DEPENDENCIES** | K2. |
 | **AUTHORITY/SECURITY BOUNDARY** | **The whole of it.** Holds the envelope seal key; mints intent tokens; is the only component that may consume one. Gate 5 recomputes `verificationFloor` from the stored record and refuses on **any** divergence, raised or lowered. Gate 6 dispatches on `subjectCapability(record).space`, scoped by effect — a `HANDOFF` resolves destination fences only. |
-| **SCHEMA IMPACT** | 10 models, **159 columns**. No business table. |
+| **SCHEMA IMPACT** | 11 models, **169 columns**. No business table. |
 | **MIGRATION** | Migration 2. |
 | **PARITY PROOF** | Three front doors — tap, typed sentence, spoken utterance — resolve through one pipeline; Gate 10 records divergence. |
 | **PRODUCTION CUTOVER CONDITION** | **One CI job green**: a mutated, an expired, a replayed and a foreign-principal token each refused, at **indistinguishable latency**; the wire format has no member able to carry an endpoint, a URL, a capability name, a table, a provider, a tenant or a role; **0 capability calls on the timeline read path**. |
@@ -363,8 +363,8 @@ after the dark window.**
 ## Part 3 — the D12 schema envelope
 
 ```
-WIDGET-LAYER MODELS: 13
-PHYSICAL FIELDS:    181
+WIDGET-LAYER MODELS: 14
+PHYSICAL FIELDS:    191
 MIGRATIONS:           2
 ```
 
@@ -380,9 +380,9 @@ rounds proving that, and the counters exist so that no figure here is typed by h
 |---|---|
 | **MODEL** | `WidgetIntentRecord` — intent-audit store |
 | **PURPOSE** | The stored intent. Idempotency of a tap, principal binding, and the record Gate 5 recomputes the floor from. |
-| **PHYSICAL FIELDS** | **38** — 33 `AUDIT_RETAINED`, 5 `CONVERSATION_CONTENT` |
-| **IMPORTANT UNIQUE/CHECK/FK** | `@@unique([intentTokenHash, tenantId])` — one row per token, ever, which is what makes a replayed tap find a consumed row instead of a second effect. **The token itself is never stored**, only its `Char(64)` hash. 7 CHECKs: `WidgetKind`, `EffectClass`, `CapabilitySpace` ×2, `VerificationLevel`, `C9Domain`, `ConfirmationOfKind`. FK → `Tenant`, → `WidgetEmission`. |
-| **RETENTION** | `T_AUDIT` = 1095 d from `issuedAt`. Erasure nulls the 5 content columns and keeps the 33 audit ones. |
+| **PHYSICAL FIELDS** | **40** — 35 `AUDIT_RETAINED`, 5 `CONVERSATION_CONTENT` |
+| **IMPORTANT UNIQUE/CHECK/FK** | `@@unique([intentTokenHash, tenantId])` — one row per token, ever, which is what makes a replayed tap find a consumed row instead of a second effect. **The token itself is never stored**, only its `Char(64)` hash. 9 CHECKs: `WidgetKind`, `EffectClass`, `CapabilitySpace` ×2, `VerificationLevel`, `C9Domain`, `ConfirmationOfKind`, `ConfirmationSubject`, `WidgetApprovalDecision`. FK → `Tenant`, → `WidgetEmission`. |
+| **RETENTION** | `T_AUDIT` = 1095 d from `issuedAt`. Erasure nulls the 5 content columns and keeps the 35 audit ones. |
 | **BUSINESS OWNER DEPENDENCY** | `actionReceiptRef` is **the only pointer to a business fact**, and it is a one-way reference the widget layer reads and never writes. |
 
 #### `WidgetRenderReceipt`
@@ -429,12 +429,13 @@ rounds proving that, and the counters exist so that no figure here is typed by h
 | **RETENTION** | `T_AUDIT`. |
 | **BUSINESS OWNER DEPENDENCY** | **None.** The ledger counts; it does not carry what was typed. |
 
-### The eight supporting models
+### The nine supporting models
 
 | MODEL | PURPOSE | FIELDS | KEY CONSTRAINT | RETENTION | BUSINESS OWNER |
 |---|---|---:|---|---|---|
 | `WidgetTimelineTurn` | conversation turns | 10 A / 2 C = **12** | `@@unique([tenantId, conversationId, turnIndex])`; CHECK `TurnRole`, `ChannelId`; FK → `Tenant` | `T_TIMELINE` 180 d — **fully erasable** | none |
 | `WidgetEmission` | the sealed envelope, its lifecycle and its delivery record | 22 A / 4 C = **26** | `@@unique([widgetId, tenantId])`; CHECK `WidgetKind`, `LifecycleState`, `FreshnessClass`, `ChannelId`; FK → `Tenant`, → `WidgetTimelineTurn` | `T_TIMELINE`, with per-kind body drop at `retentionSec` | `deliveryStateJson` is **presentation bookkeeping only** — no surface may read it as a statement about intention, attendance, agreement or consent |
+| `WidgetIntentDivergenceAudit` | Gate 10's durable audit of how the submitted token's words resolved | **8**, all A | CHECK `EffectClass`, `DivergenceRefusalCode`, and token/effect nullity pair; FK → `Tenant`, → tapped `WidgetIntentRecord` | `T_AUDIT` from `observedAt`; never conversation content | none — records a routing comparison and never confers authority |
 | `WidgetIntentSubmissionAudit` | what arrived at ingress | 12 A / 3 C / 1 X = **16** | FK → `Tenant`, → `WidgetIntentRecord` | `T_AUDIT` | `inputsPiiJson` is `CANONICAL_ELSEWHERE` — erased here, retained there |
 | `WidgetDraft` | the server-owned draft a COMMIT confirms | 11 A / 1 C = **12** | `@@unique([tenantId, draftRef])`; CHECK `DraftClass` (5), `CapabilitySpace`; FK → `Tenant` | `T_AUDIT`, `expiresAt` bounded | named by `confirmation_of_ref.kind === 'draft'`; the draft owner is canonical |
 | `WidgetErasureTombstone` | the record that an erasure happened | **7**, all A | CHECK `TombstoneStore`; FK → `Tenant` | append-only, floor `T_AUDIT` — **never erased** | in the receipt store by rule; the Action Engine receipts themselves are **not re-declared** here |
@@ -442,8 +443,8 @@ rounds proving that, and the counters exist so that no figure here is typed by h
 | `WidgetMechanismGap` | `MG-P01 … MG-P34`, one per prerequisite | **7**, registry | `@@unique([gapKey])`; CHECK `MechanismGapStatus` | n/a | every build-status count is **printed from here, never transcribed** |
 | `WidgetCapabilityPolicy` | `min_verification`, `consent_class`, `dispatch_is_synchronous` per key | **7**, registry | `@@unique([capabilitySpace, capabilityKey])`; CHECK `CapabilitySpace`, `VerificationLevel`, `ConsentClass` | n/a | **total over C9-CAP's 56 keys (71 once contract §0.7 F36a registers its set) and over those only** — AE-CAP totality is the allowlist's and the gap ledger's job |
 
-**Erasure classes, every column exactly once:** 140 `AUDIT_RETAINED` · 18 `CONVERSATION_CONTENT` ·
-1 `CANONICAL_ELSEWHERE` · 22 registry = **181**.
+**Erasure classes, every column exactly once:** 150 `AUDIT_RETAINED` · 18 `CONVERSATION_CONTENT` ·
+1 `CANONICAL_ELSEWHERE` · 22 registry = **191**.
 
 ### The three confirmations
 
@@ -454,12 +455,12 @@ WIDGET STATE USED AS BUSINESS STATE: 0
 ```
 
 **`BUSINESS TABLE → WIDGET TABLE FK: 0`.** The boundary has a direction and the direction is the
-whole of it. A widget table may name a `Tenant` — 10 of the 13 do — because a widget row that
+whole of it. A widget table may name a `Tenant` — 11 of the 14 do — because a widget row that
 cannot be tenant-fenced cannot be fenced at all. **No business table names a widget row**, because
 then deleting conversation history would leave a business record incomplete.
 
 **`BUSINESS SCHEMA OWNERS CHANGED: 0`, stated precisely enough to check.** Every statement in both
-migrations is `CREATE TABLE`. The `Tenant` *model* in `schema.prisma` gains **10 virtual
+migrations is `CREATE TABLE`. The `Tenant` *model* in `schema.prisma` gains **11 virtual
 back-relation fields**, because Prisma requires both sides of a relation declared — and a
 one-to-many back-relation **generates no SQL**: the foreign key lives on the child. **Chapter 9 is
 the precedent and the proof**: `Tenant` already carries `c9Runs`, `c9StrategyRevisions`,
@@ -484,7 +485,7 @@ joins on a conversation id — which is why the replay is the one that governs.)
 `WidgetCapabilityGap`, `WidgetMechanismGap`, `WidgetCapabilityPolicy`.
 
 **`MIGRATION 2` — `<stamp>_widget_layer_runtime` (K3, wave 2)**
-10 models · 159 columns · 18 unique · 20 index · 29 CHECK · 16 FK (10 → `Tenant`, 6 widget → widget).
+11 models · 169 columns · 19 unique · 22 index · 34 CHECK · 18 FK (11 → `Tenant`, 7 widget → widget).
 
 **Why two, and not one.** Because the waves have different fences, and one migration would
 collapse them.
@@ -498,7 +499,7 @@ collapse them.
    content. Its ten tables carry all 16 foreign keys and all 18 `CONVERSATION_CONTENT` columns.
 3. **A single migration would put runtime tables into a wave whose exit criterion is «no runtime».**
    Wave 1 could then no longer be accepted on its own terms, and the rollback story would change
-   from *revert a commit* to *drop ten tables holding conversation content*.
+   from *revert a commit* to *drop eleven tables holding conversation content*.
 4. **The dependency is real, not cosmetic**: `WidgetCapabilityPolicy` must exist before K4 can
    derive a floor against it, and K2 is the package that fills it. A wave-2 migration would put the
    table after the first reader.

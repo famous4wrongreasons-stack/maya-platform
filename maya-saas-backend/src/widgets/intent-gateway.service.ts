@@ -604,6 +604,8 @@ export class IntentGatewayService {
         revisionId: true,
         approvalOfIntentRef: true,
         frozenNounsJson: true,
+        confirmationSubject: true,
+        approvalDecision: true,
         // Selected so it can be PROJECTED (D-3). The object itself never leaves this method.
         confirmationJson: true,
         // Supersession is a property of the ENVELOPE, not of the record: a record points at a

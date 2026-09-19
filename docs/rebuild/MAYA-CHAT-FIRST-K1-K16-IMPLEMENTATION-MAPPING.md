@@ -574,26 +574,26 @@ trusting this table.
 
 | | |
 |---|---:|
-| **NEW WIDGET MODELS** | **13** |
-| **WIDGET-LAYER PHYSICAL FIELDS** | **181** (13 surrogate keys, 168 substantive) |
-| **ENUMS** (closed value sets, each a `CHECK`) | **17** |
-| **FK** | **16** — 10 → `Tenant`, 6 widget → widget |
-| **CHECK** | **34** — 27 enum-valued, 7 range/ordering |
-| **UNIQUE** | **21** |
-| **INDEXES** | **23** |
+| **NEW WIDGET MODELS** | **14** |
+| **WIDGET-LAYER PHYSICAL FIELDS** | **191** (14 surrogate keys, 177 substantive) |
+| **ENUMS** (closed value sets, each a `CHECK`) | **20** |
+| **FK** | **18** — 11 → `Tenant`, 7 widget → widget |
+| **CHECK** | **39** — 31 enum-valued, 8 range/ordering |
+| **UNIQUE** | **22** |
+| **INDEXES** | **25** |
 | **MIGRATIONS EXPECTED** | **2** |
 | **BUSINESS SCHEMA OWNERS CHANGED** | **0** |
-| erasure classes, every column exactly one | `AUDIT_RETAINED` 140 · `CONVERSATION_CONTENT` 18 · `CANONICAL_ELSEWHERE` 1 · registry (no data subject) 22 = **181** |
+| erasure classes, every column exactly one | `AUDIT_RETAINED` 150 · `CONVERSATION_CONTENT` 18 · `CANONICAL_ELSEWHERE` 1 · registry (no data subject) 22 = **191** |
 
 Per wave: **wave 1** — 3 models, 22 columns, 3 unique, 3 index, 5 check, 0 FK.
-**wave 2** — 10 models, 159 columns, 18 unique, 20 index, 29 check, 16 FK.
+**wave 2** — 11 models, 169 columns, 19 unique, 22 index, 34 check, 18 FK.
 
 ### 5.1 The three stores, and which packages write them
 
 | store | holds | ceiling | erasable on a conversation-erasure request | created by |
 |---|---|---|---:|---|
 | **Timeline** | `WidgetTimelineTurn`, `WidgetEmission` | `T_TIMELINE` = 180 d | **yes, fully** | K3 |
-| **Intent-audit** | `WidgetIntentRecord`, `WidgetIntentSubmissionAudit`, `WidgetIntentReceipt`, `WidgetRenderReceipt`, `WidgetSuppressedEmission`, `WidgetFreeInputLedger`, `WidgetDraft` | `T_AUDIT` = 1095 d | audit fields **no**; content fields **yes** | K3 |
+| **Intent-audit** | `WidgetIntentRecord`, `WidgetIntentDivergenceAudit`, `WidgetIntentSubmissionAudit`, `WidgetIntentReceipt`, `WidgetRenderReceipt`, `WidgetSuppressedEmission`, `WidgetFreeInputLedger`, `WidgetDraft` | `T_AUDIT` = 1095 d | audit fields **no**; content fields **yes** | K3 |
 | **Receipt** | Action Engine receipts (already exist, not re-declared) + `WidgetErasureTombstone` | append-only; floor `T_AUDIT` | **no** | K3 creates the tombstone log · K7/K9/K11/K12 write receipts **through the Action Engine** |
 | *(registries)* | `WidgetCapabilityGap`, `WidgetMechanismGap`, `WidgetCapabilityPolicy` | n/a — no data subject | n/a | K1, K2 |
 
@@ -603,12 +603,12 @@ and the approval owner. The CI schema test asserts both.
 
 ### 5.2 The five D12 stores, and the one the contract never shaped
 
-Of the thirteen models, **five are the stores D12 named**, and one of those five had no shape
+Of the fourteen models, **five are the stores D12 named**, and one of those five had no shape
 anywhere in the contract:
 
 | D12 store | model | columns | note |
 |---|---|---:|---|
-| intent idempotency | `WidgetIntentRecord` | 38 | §3.7's `IntentRecord`, persisted |
+| intent idempotency | `WidgetIntentRecord` | 40 | §3.7's `IntentRecord`, persisted |
 | render/emission receipt | `WidgetRenderReceipt` | 17 | `maya.render.receipt/1`, §4.5.5 |
 | **receipt persistence** | **`WidgetIntentReceipt`** | **11** | **the contract names `IntentReceipt` twice — §4.2 FR2 derives `TerminalOutcome` from it, §4.4.3 classifies its `utterance_echo` — and declares it nowhere. This is that shape.** |
 | suppressed emission | `WidgetSuppressedEmission` | 8 | §4.9 PR5b's evidence that silence was chosen |
@@ -730,6 +730,8 @@ model WidgetIntentRecord {
   targetJson                Json?     @db.JsonB                 // A  IntentTarget; targetFloor reads .class
   verificationFloor         String                              // A  CHECK: VerificationLevel (5) — Gate 5 compares
   confirmationJson          Json?     @db.JsonB                 // A  risk tier, reversible, audience, readback
+  confirmationSubject       String?                             // A  CHECK: ConfirmationSubject (3)
+  approvalDecision          String?                             // A  CHECK: WidgetApprovalDecision (2)
   inputSchemaHash           String?   @db.Char(64)              // A
   requestedScopeHash        String    @db.Char(64)              // A
   bodyHash                  String    @db.Char(64)              // A  Gate 8-R; SUPERSEDED comparison
@@ -763,6 +765,24 @@ model WidgetIntentRecord {
   @@index([tenantId, expiresAt, consumedAt], map: "WidgetIntentRecord_2_idx")
   @@index([tenantId, principalProofHash, issuedAt], map: "WidgetIntentRecord_3_idx")
   @@index([tenantId, capabilityKey, effect], map: "WidgetIntentRecord_4_idx")
+}
+
+model WidgetIntentDivergenceAudit {
+  id                      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid   // A
+  tenantId                String                                           // A
+  widgetId                String   @db.Uuid                                 // A
+  tappedIntentTokenHash   String   @db.Char(64)                             // A
+  resolvedIntentTokenHash String?  @db.Char(64)                             // A
+  resolvedEffect          String?                                          // A  CHECK: EffectClass (8)
+  refusalCode             String?                                          // A  CHECK: DivergenceRefusalCode (1)
+  observedAt              DateTime @db.Timestamptz(3)                       // A
+
+  tenant Tenant             @relation("WidgetIntentDivergenceAudit_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetIntentDivergenceAudit_1_fkey")
+  record WidgetIntentRecord @relation("WidgetIntentDivergenceAudit_2_fkey", fields: [tappedIntentTokenHash, tenantId], references: [intentTokenHash, tenantId], onDelete: Restrict, onUpdate: Restrict, map: "WidgetIntentDivergenceAudit_2_fkey")
+
+  @@unique([id, tenantId], map: "WidgetIntentDivergenceAudit_1_key")
+  @@index([tenantId, widgetId, observedAt], map: "WidgetIntentDivergenceAudit_1_idx")
+  @@index([tenantId, tappedIntentTokenHash, observedAt], map: "WidgetIntentDivergenceAudit_2_idx")
 }
 
 model WidgetIntentSubmissionAudit {
@@ -828,8 +848,8 @@ model WidgetRenderReceipt {
   escalationJson           Json?     @db.JsonB                  // A
   degradedAt               DateTime  @db.Timestamptz(3)         // A
   deliveryChannel          String                               // A  CHECK: ChannelId (5)
-  composedEnvelopeJson     Json      @db.JsonB                  // C  the undegraded envelope (C6)
-  emittedEnvelopeJson      Json      @db.JsonB                  // C  what was actually sent (C6)
+  composedEnvelopeJson     Json?     @db.JsonB                  // C  the undegraded envelope (C6)
+  emittedEnvelopeJson      Json?     @db.JsonB                  // C  what was actually sent (C6)
   erasedAt                 DateTime? @db.Timestamptz(3)         // A
 
   tenant   Tenant         @relation("WidgetRenderReceipt_1_fkey", fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "WidgetRenderReceipt_1_fkey")
@@ -888,7 +908,7 @@ model WidgetDraft {
   ownerCapabilitySpace String                                   // A  CHECK: CapabilitySpace (4)
   ownerCapabilityKey   String                                   // A
   principalProofHash   String    @db.Char(64)                   // A
-  diffJson             Json      @db.JsonB                      // C  server-computed diff
+  diffJson             Json?     @db.JsonB                      // C  server-computed diff
   createdAt            DateTime  @db.Timestamptz(3)             // A
   expiresAt            DateTime  @db.Timestamptz(3)             // A
   consumedAt           DateTime? @db.Timestamptz(3)             // A
@@ -1056,6 +1076,9 @@ IntentReceiptOutcome    4  ACCEPTED REFUSED NEEDS_CONFIRMATION NEEDS_VERIFICATIO
 TombstoneStore          2  timeline intent_audit
 GapOwnerState           3  none unreachable registered_elsewhere
 TurnRole                2  user assistant
+ConfirmationSubject     3  create reschedule cancel
+WidgetApprovalDecision  2  approve reject
+DivergenceRefusalCode   1  intent_divergence
 ```
 <!-- END GENERATED ENUM MEMBERS -->
 
@@ -1092,6 +1115,7 @@ ALTER TABLE "WidgetCapabilityPolicy" ADD CONSTRAINT "WidgetCapabilityPolicy_cons
 CREATE TABLE "WidgetTimelineTurn"          ( ... );
 CREATE TABLE "WidgetEmission"              ( ... );
 CREATE TABLE "WidgetIntentRecord"          ( ... );
+CREATE TABLE "WidgetIntentDivergenceAudit" ( ... );
 CREATE TABLE "WidgetIntentSubmissionAudit" ( ... );
 CREATE TABLE "WidgetIntentReceipt"         ( ... );
 CREATE TABLE "WidgetRenderReceipt"         ( ... );
@@ -1100,8 +1124,8 @@ CREATE TABLE "WidgetFreeInputLedger"       ( ... );
 CREATE TABLE "WidgetDraft"                 ( ... );
 CREATE TABLE "WidgetErasureTombstone"      ( ... );
 
--- 18 unique indexes, 20 secondary indexes, 29 CHECK constraints, 16 FK constraints
--- (10 → "Tenant", 6 widget → widget), each as its own ALTER TABLE on a WIDGET table.
+-- 19 unique indexes, 22 secondary indexes, 34 CHECK constraints, 18 FK constraints
+-- (11 → "Tenant", 7 widget → widget), each as its own ALTER TABLE on a WIDGET table.
 
 -- ═════════════════════════════════════════════════════════════════════════════
 -- WHAT IS ABSENT FROM BOTH FILES, and is the point of them
@@ -1119,7 +1143,7 @@ CREATE TABLE "WidgetErasureTombstone"      ( ... );
 ```
 
 **`BUSINESS SCHEMA OWNERS CHANGED: 0`, stated precisely enough to be checked.** The `Tenant`
-*model* in `schema.prisma` gains **10 virtual back-relation fields** (`widgetIntentRecords
+*model* in `schema.prisma` gains **11 virtual back-relation fields** (`widgetIntentRecords
 WidgetIntentRecord[]`, and so on). Prisma requires both sides of a relation to be declared, and a
 one-to-many back-relation **generates no SQL**: the foreign key lives on the child. Chapter 9 is
 the precedent and the proof — `Tenant` carries `c9Runs`, `c9StrategyRevisions`, `c9PlanSteps`,

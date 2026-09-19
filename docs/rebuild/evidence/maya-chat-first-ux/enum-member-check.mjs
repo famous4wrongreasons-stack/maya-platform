@@ -11,7 +11,7 @@
 //   2. every count in that table == its canonical set size
 //   3. every CHECK constraint in the staged SQL admits exactly the canonical set
 //   4. no CHECK admits a member no canonical definition contains
-//   5. the six Prisma back-relations reached no physical table
+//   5. the seven Prisma back-relations reached no physical table
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -86,17 +86,17 @@ const unknown = emitted.flatMap((e) =>
 chk('no CHECK admits a member absent from every canonical definition', unknown.length === 0, unknown.join(', ') || 'none');
 
 // ── the count, and the one deliberately missing ──────────────────────────────────────────────
-const ranges = (sql.match(/_check" CHECK \(\s*"/g) || []).length - emitted.length;
+const ranges = (sql.match(/ADD CONSTRAINT "[^"]+_check" CHECK/g) || []).length - emitted.length;
 const missing = Object.keys(SETS).filter((k) => !SETS[k]);
 chk(
-  'CHECKS GENERATED == 34, or the shortfall is named',
-  emitted.length + ranges === 34,
-  `${emitted.length} enum + ${ranges} range = ${emitted.length + ranges} of 34` +
-    (emitted.length + ranges < 34 ? ` — blocked: ${missing.join(', ') || 'unnamed'}` : ''),
+  'CHECKS GENERATED == 39, or the shortfall is named',
+  emitted.length + ranges === 39,
+  `${emitted.length} enum + ${ranges} range = ${emitted.length + ranges} of 39` +
+    (emitted.length + ranges < 39 ? ` — blocked: ${missing.join(', ') || 'unnamed'}` : ''),
 );
 
 // ── 5. the back-relation guard the wave-2 ruling requires ────────────────────────────────────
-// Six Prisma back-relations were added so the relation graph validates. They are virtual: if one of
+// Seven Prisma back-relations were added so the relation graph validates. They are virtual: if one of
 // them reached the database it would appear here as an ALTER on a business table.
 const migs = fs
   .readdirSync(STAGED)
@@ -106,7 +106,7 @@ const migs = fs
 const tenantAlters = (migs.match(/ALTER TABLE "Tenant"/g) || []).length;
 const nonWidget = [...new Set([...migs.matchAll(/(?:ALTER|CREATE) TABLE "(\w+)"/g)].map((m) => m[1]).filter((t) => !t.startsWith('Widget')))];
 chk(
-  'the six back-relations add no physical column: no ALTER TABLE "Tenant"',
+  'the seven back-relations add no physical column: no ALTER TABLE "Tenant"',
   tenantAlters === 0 && nonWidget.length === 0,
   tenantAlters
     ? `${tenantAlters} ALTER TABLE "Tenant"`

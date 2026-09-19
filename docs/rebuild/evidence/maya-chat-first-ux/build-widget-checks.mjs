@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Generates all 34 CHECK constraints for the widget layer from CANONICAL DEFINITIONS, and refuses
+// Generates all 39 CHECK constraints for the widget layer from CANONICAL DEFINITIONS, and refuses
 // to guess. Every member set below is traced to one of the three kinds of evidence the owner ruling
 // admits — a normative union, the contract compiled from it, or a registry whose exact domain the
 // contract defines — and each emitted constraint carries its provenance in a comment, so a reader
@@ -7,7 +7,7 @@
 //
 // What it will NOT do: infer members from examples, guess from a name, or pad a set to reach an
 // expected count. An enum with no canonical definition is reported and left unemitted, which is
-// what makes the 34/34 figure mean something.
+// what makes the 39/39 figure mean something.
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -76,7 +76,7 @@ const registryDomain = (file, field, why) => {
   return vals.length ? { members: vals, why, observed: true } : null;
 };
 
-// ── the seventeen sets, each with its evidence ───────────────────────────────────────────────
+// ── the twenty sets, each with its evidence ─────────────────────────────────────────────────
 const SETS = {
   WidgetKind: named.WidgetKind,
   EffectClass: named.EffectClass,
@@ -110,10 +110,22 @@ const SETS = {
   // lives in `spokenTranscript`. A widget is not a role — Maya's answer is one `assistant` turn
   // plus zero or more widgets, and interacting with one mints a new typed user intent.
   TurnRole: { members: ['user', 'assistant'], why: 'OWNER RULING, wave 2 — the two participants a conversation has' },
+  ConfirmationSubject: {
+    members: ['create', 'reschedule', 'cancel'],
+    why: 'contract §2.6.5 BOOK.1 and §3.7 R3.7.5 — the three booking confirmation subjects',
+  },
+  WidgetApprovalDecision: {
+    members: ['approve', 'reject'],
+    why: 'contract §3.7 R3.7.5 — the two approval decisions carried by an approval widget',
+  },
+  DivergenceRefusalCode: {
+    members: ['intent_divergence'],
+    why: 'contract §3.9 Gate 10 — the sole divergence refusal code',
+  },
 };
 
-// ── the seven range/ordering constraints ─────────────────────────────────────────────────────
-// The mapping fixes their COUNT per model (27 enum + 7 range = 34) but names none of them. Each one
+// ── the eight range/ordering constraints ─────────────────────────────────────────────────────
+// The mapping fixes their COUNT per model (31 enum + 8 range = 39). Each one
 // below is the ordering the column's own contract semantics already require, so none adds a rule:
 // an envelope that expires before it is issued, or a fitter that emits more intents than it minted,
 // is not a policy question.
@@ -125,6 +137,7 @@ const RANGES = [
   ['WidgetIntentRecord', 'expiry_after_issue', '"expiresAt" > "issuedAt"', 'Gate 1 reads expiry; an inverted window is never valid'],
   ['WidgetRenderReceipt', 'emitted_within_minted', '"intentsEmitted" <= "intentsMinted"', '§4.5.5 — the fitter withholds, it cannot mint'],
   ['WidgetRenderReceipt', 'emitted_nonneg', '"intentsEmitted" >= 0', 'a count of emitted intents is not negative'],
+  ['WidgetIntentDivergenceAudit', 'resolved_pair', '("resolvedIntentTokenHash" IS NULL) = ("resolvedEffect" IS NULL)', 'contract §3.9 — the resolved token and effect are absent or present together'],
 ];
 
 // ── the columns each enum constrains, read from the D12 block ────────────────────────────────
@@ -191,7 +204,7 @@ if (bi >= 0 && ei > bi) {
   fs.writeFileSync(MAPPATH, mapdoc);
 }
 
-console.log(`CHECKS EXPECTED:   34`);
+console.log(`CHECKS EXPECTED:   39`);
 console.log(`CHECKS GENERATED:  ${emit.length}   (migration 1: ${m1.length}, migration 2: ${m2.length})`);
 console.log(`  enum-valued      ${emit.length - RANGES.length}`);
 console.log(`  range/ordering   ${RANGES.length}`);
@@ -199,4 +212,4 @@ if (blocked.length) {
   console.log(`\nBLOCKED — no canonical exact member definition:`);
   for (const b of blocked) console.log(`  ${b.set.padEnd(20)} constrains ${b.model}.${b.col}`);
 }
-process.exit(emit.length === 34 ? 0 : 1);
+process.exit(emit.length === 39 ? 0 : 1);

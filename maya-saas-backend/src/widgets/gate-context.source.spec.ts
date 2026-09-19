@@ -816,6 +816,8 @@ describe('S-ROW and D-3 — the record gates read is AUDIT_RETAINED, and confirm
         'approvalOfIntentRef',
         'frozenNounsJson',
         'confirmationJson',
+        'confirmationSubject',
+        'approvalDecision',
       ].sort(),
     );
     expect([...sel.emission].sort()).toEqual([

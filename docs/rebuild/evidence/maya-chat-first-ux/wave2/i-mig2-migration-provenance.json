@@ -1,0 +1,34 @@
+{
+  "checkedAt": "2026-09-19T23:33:12+03:00",
+  "checkpointBeforeFold": "a1cd3c50e6438508c4f950c032b979d0d1500b3b",
+  "question": "ORIGINAL WIDGET MIGRATION APPLIED ANYWHERE RELEVANT",
+  "answer": "NO",
+  "productionRelevantEvidence": {
+    "release": "20260914-c9-wave4-7c9da983",
+    "migrationRowsFor20260916120000And20260916120100": 0,
+    "widgetTables": 0,
+    "widgetIntentRecord": null,
+    "widgetIntentDivergenceAudit": null,
+    "migrationTotal": 99,
+    "queryMode": "read-only psql through the existing Beget-to-VPS control path",
+    "secretsRecorded": 0
+  },
+  "repositoryEvidence": {
+    "source": "docs/rebuild/evidence/maya-chat-first-ux/pre-cutover-reconciliation.json",
+    "productionWidgetMigrations": 0,
+    "productionWidgetTables": 0
+  },
+  "disposableProofDatabase": {
+    "name": "maya_widget_gate_proof_gates",
+    "productionRelevant": false,
+    "previousStateDiscarded": true,
+    "recreatedFromZero": true,
+    "appliedMigrations": 98,
+    "widgetTables": 14,
+    "widgetChecks": 39,
+    "migrationDiff": "EMPTY",
+    "approvedNullableColumns": 3
+  },
+  "decision": "Approved fold into the undeployed 20260916120100_widget_layer_runtime migration",
+  "productionMutation": false
+}

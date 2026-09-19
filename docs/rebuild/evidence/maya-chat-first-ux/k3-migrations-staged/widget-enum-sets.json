@@ -187,5 +187,26 @@
    "assistant"
   ],
   "why": "OWNER RULING, wave 2 — the two participants a conversation has"
+ },
+ "ConfirmationSubject": {
+  "members": [
+   "create",
+   "reschedule",
+   "cancel"
+  ],
+  "why": "contract §2.6.5 BOOK.1 and §3.7 R3.7.5 — the three booking confirmation subjects"
+ },
+ "WidgetApprovalDecision": {
+  "members": [
+   "approve",
+   "reject"
+  ],
+  "why": "contract §3.7 R3.7.5 — the two approval decisions carried by an approval widget"
+ },
+ "DivergenceRefusalCode": {
+  "members": [
+   "intent_divergence"
+  ],
+  "why": "contract §3.9 Gate 10 — the sole divergence refusal code"
  }
 }

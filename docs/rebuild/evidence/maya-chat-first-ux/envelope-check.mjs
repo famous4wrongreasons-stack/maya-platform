@@ -23,8 +23,8 @@ chk('all 24 gate rows present', (env.match(/^\| \*\*G\d+\*\* \|/gm)||[]).length=
 chk('gate rows match the architecture §14.4 set',
   [...new Set([...arc.matchAll(/\*\*(G\d+)\*\*/g)].map(m=>m[1]))].every(g=>new RegExp('\\| \\*\\*'+g+'\\*\\* \\|').test(env)),
   '24/24');
-chk('13 model entries (5 detailed + 8 in the table)',
-  (env.match(/\*\*MODEL\*\*/g)||[]).length===5 && (env.match(/^\| `Widget\w+` \|/gm)||[]).length===8,
+chk('14 model entries (5 detailed + 9 in the table)',
+  (env.match(/\*\*MODEL\*\*/g)||[]).length===5 && (env.match(/^\| `Widget\w+` \|/gm)||[]).length===9,
   `${(env.match(/\*\*MODEL\*\*/g)||[]).length} detailed + ${(env.match(/^\| `Widget\w+` \|/gm)||[]).length} tabular`);
 
 // figures re-derived
@@ -32,22 +32,22 @@ const countModels=(sch.match(/^model\s+\w+\s*\{/gm)||[]).length;
 let F=0,cur=null;
 for(const l of sch.split('\n')){ if(/^model\s/.test(l)){cur=1;continue;} if(/^\}/.test(l)){cur=null;continue;}
   if(cur&&/^\s{2}\w+\s+\S/.test(l)&&!/^\s*@@/.test(l)&&!/@relation/.test(l))F++; }
-chk('WIDGET-LAYER MODELS: 13', countModels===13 && /WIDGET-LAYER MODELS: 13/.test(env), `${countModels}`);
-chk('PHYSICAL FIELDS: 181', F===181 && /PHYSICAL FIELDS:\s+181/.test(env), `${F}`);
+chk('WIDGET-LAYER MODELS: 14', countModels===14 && /WIDGET-LAYER MODELS: 14/.test(env), `${countModels}`);
+chk('PHYSICAL FIELDS: 191', F===191 && /PHYSICAL FIELDS:\s+191/.test(env), `${F}`);
 chk('MIGRATIONS: 2', /MIGRATIONS:\s+2/.test(env) && /\*\*MIGRATIONS EXPECTED\*\* \| \*\*2\*\*/.test(map), '2');
 // per-model field counts quoted in the envelope match the schema
 const perModel={}; cur=null;
 for(const l of sch.split('\n')){ const m=l.match(/^model\s+(\w+)/); if(m){cur=m[1];perModel[cur]=0;continue;}
   if(/^\}/.test(l)){cur=null;continue;}
   if(cur&&/^\s{2}\w+\s+\S/.test(l)&&!/^\s*@@/.test(l)&&!/@relation/.test(l))perModel[cur]++; }
-const quoted={WidgetIntentRecord:38,WidgetRenderReceipt:17,WidgetIntentReceipt:11,WidgetSuppressedEmission:8,WidgetFreeInputLedger:12,
+const quoted={WidgetIntentRecord:40,WidgetIntentDivergenceAudit:8,WidgetRenderReceipt:17,WidgetIntentReceipt:11,WidgetSuppressedEmission:8,WidgetFreeInputLedger:12,
   WidgetTimelineTurn:12,WidgetEmission:26,WidgetIntentSubmissionAudit:16,WidgetDraft:12,WidgetErasureTombstone:7,
   WidgetCapabilityGap:8,WidgetMechanismGap:7,WidgetCapabilityPolicy:7};
 const wrong=Object.entries(quoted).filter(([k,v])=>perModel[k]!==v);
-chk('every per-model field count matches the schema', wrong.length===0, wrong.length?wrong.map(([k,v])=>`${k} quoted ${v} actual ${perModel[k]}`).join(' | '):'13/13');
-chk('per-wave split: 22 + 159 = 181',
+chk('every per-model field count matches the schema', wrong.length===0, wrong.length?wrong.map(([k,v])=>`${k} quoted ${v} actual ${perModel[k]}`).join(' | '):'14/14');
+chk('per-wave split: 22 + 169 = 191',
   /3 models · 22 columns · 3 unique · 3 index · 5 CHECK · \*\*0 FK\*\*/.test(env) &&
-  /10 models · 159 columns · 18 unique · 20 index · 29 CHECK · 16 FK/.test(env), '22+159');
+  /11 models · 169 columns · 19 unique · 22 index · 34 CHECK · 18 FK/.test(env), '22+169');
 
 // contract-derived claims
 for(const [n,re] of [

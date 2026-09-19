@@ -5,7 +5,7 @@ const M=process.argv[2];
 const doc=fs.readFileSync(M,'utf8');
 const sch=doc.slice(doc.indexOf('```prisma')+9, doc.indexOf('\n```', doc.indexOf('```prisma')));
 const REG=new Set(['WidgetCapabilityGap','WidgetMechanismGap','WidgetCapabilityPolicy']);
-const EXTRA={WidgetIntentRecord:1,WidgetEmission:3,WidgetTimelineTurn:1,WidgetRenderReceipt:2};
+const EXTRA={WidgetIntentRecord:1,WidgetEmission:3,WidgetTimelineTurn:1,WidgetRenderReceipt:2,WidgetIntentDivergenceAudit:1};
 let models=0,F=0,R=0,U=0,I=0,C=0,RT=0,cls={A:0,C:0,X:0,'—':0},cur=null;
 for(const l of sch.split('\n')){
   const m=l.match(/^model\s+(\w+)\s*\{/);
@@ -35,7 +35,7 @@ for(const [n,d,p] of rows){const ok=d===p; if(!ok)bad++; console.log(`${ok?'PASS
 const total=cls.A+cls.C+cls.X+cls['—'];
 const ok=total===F; if(!ok)bad++;
 console.log(`${ok?'PASS':'FAIL'}  every column classified exactly once  A ${cls.A} · C ${cls.C} · X ${cls.X} · registry ${cls['—']} = ${total} of ${F}`);
-const okT=RT===10; if(!okT)bad++;
+const okT=RT===11; if(!okT)bad++;
 console.log(`${okT?'PASS':'FAIL'}  FKs to Tenant                   derived ${RT}   (widget→widget ${R-RT})`);
 const okB=!/business table[^\n]*──FK──► widget-layer\s+ALLOWED/.test(doc); if(!okB)bad++;
 console.log(`${okB?'PASS':'FAIL'}  no business → widget FK is declared anywhere`);

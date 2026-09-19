@@ -299,6 +299,10 @@ export interface IntentRecordRow {
    * plain object, `undefined` when the object lacks the member.
    */
   readonly confirmationIdempotencyKey: unknown;
+  /** BOOK.1/R3.7.5: server-derived booking subject; never client-supplied authority. */
+  readonly confirmationSubject: string | null;
+  /** R3.7.5: server-derived approve/reject decision for an approval widget. */
+  readonly approvalDecision: string | null;
   readonly frozenNounsJson: unknown;
   readonly requestedScopeHash: string;
   readonly runId: string | null;

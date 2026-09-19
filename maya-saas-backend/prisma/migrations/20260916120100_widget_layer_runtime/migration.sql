@@ -71,6 +71,8 @@ CREATE TABLE "WidgetIntentRecord" (
     "targetJson" JSONB,
     "verificationFloor" TEXT NOT NULL,
     "confirmationJson" JSONB,
+    "confirmationSubject" TEXT,
+    "approvalDecision" TEXT,
     "inputSchemaHash" CHAR(64),
     "requestedScopeHash" CHAR(64) NOT NULL,
     "bodyHash" CHAR(64) NOT NULL,
@@ -96,6 +98,20 @@ CREATE TABLE "WidgetIntentRecord" (
     "erasedAt" TIMESTAMPTZ(3),
 
     CONSTRAINT "WidgetIntentRecord_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "WidgetIntentDivergenceAudit" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "tenantId" TEXT NOT NULL,
+    "widgetId" UUID NOT NULL,
+    "tappedIntentTokenHash" CHAR(64) NOT NULL,
+    "resolvedIntentTokenHash" CHAR(64),
+    "resolvedEffect" TEXT,
+    "refusalCode" TEXT,
+    "observedAt" TIMESTAMPTZ(3) NOT NULL,
+
+    CONSTRAINT "WidgetIntentDivergenceAudit_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -153,8 +169,8 @@ CREATE TABLE "WidgetRenderReceipt" (
     "escalationJson" JSONB,
     "degradedAt" TIMESTAMPTZ(3) NOT NULL,
     "deliveryChannel" TEXT NOT NULL,
-    "composedEnvelopeJson" JSONB NOT NULL,
-    "emittedEnvelopeJson" JSONB NOT NULL,
+    "composedEnvelopeJson" JSONB,
+    "emittedEnvelopeJson" JSONB,
     "erasedAt" TIMESTAMPTZ(3),
 
     CONSTRAINT "WidgetRenderReceipt_pkey" PRIMARY KEY ("id")
@@ -201,7 +217,7 @@ CREATE TABLE "WidgetDraft" (
     "ownerCapabilitySpace" TEXT NOT NULL,
     "ownerCapabilityKey" TEXT NOT NULL,
     "principalProofHash" CHAR(64) NOT NULL,
-    "diffJson" JSONB NOT NULL,
+    "diffJson" JSONB,
     "createdAt" TIMESTAMPTZ(3) NOT NULL,
     "expiresAt" TIMESTAMPTZ(3) NOT NULL,
     "consumedAt" TIMESTAMPTZ(3),
@@ -267,6 +283,15 @@ CREATE UNIQUE INDEX "WidgetIntentRecord_1_key" ON "WidgetIntentRecord"("id", "te
 
 -- CreateIndex
 CREATE UNIQUE INDEX "WidgetIntentRecord_2_key" ON "WidgetIntentRecord"("intentTokenHash", "tenantId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "WidgetIntentDivergenceAudit_1_key" ON "WidgetIntentDivergenceAudit"("id", "tenantId");
+
+-- CreateIndex
+CREATE INDEX "WidgetIntentDivergenceAudit_1_idx" ON "WidgetIntentDivergenceAudit"("tenantId", "widgetId", "observedAt");
+
+-- CreateIndex
+CREATE INDEX "WidgetIntentDivergenceAudit_2_idx" ON "WidgetIntentDivergenceAudit"("tenantId", "tappedIntentTokenHash", "observedAt");
 
 -- CreateIndex
 CREATE INDEX "WidgetIntentSubmissionAudit_1_idx" ON "WidgetIntentSubmissionAudit"("tenantId", "intentTokenHash");
@@ -353,6 +378,12 @@ ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_1_fkey" FORE
 ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_2_fkey" FOREIGN KEY ("widgetId", "tenantId") REFERENCES "WidgetEmission"("widgetId", "tenantId") ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 -- AddForeignKey
+ALTER TABLE "WidgetIntentDivergenceAudit" ADD CONSTRAINT "WidgetIntentDivergenceAudit_1_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+-- AddForeignKey
+ALTER TABLE "WidgetIntentDivergenceAudit" ADD CONSTRAINT "WidgetIntentDivergenceAudit_2_fkey" FOREIGN KEY ("tappedIntentTokenHash", "tenantId") REFERENCES "WidgetIntentRecord"("intentTokenHash", "tenantId") ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+-- AddForeignKey
 ALTER TABLE "WidgetIntentSubmissionAudit" ADD CONSTRAINT "WidgetIntentSubmissionAudit_1_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 -- AddForeignKey
@@ -421,11 +452,23 @@ ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_handoffSpace
 -- VerificationLevel (5) — contract union `VerificationLevel` (envelope.ts)
 ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_verificationFloor_check" CHECK ("verificationFloor" IN ('ANONYMOUS', 'CHANNEL_IDENTITY', 'BOUND_CLIENT', 'SESSION_VERIFIED', 'STEP_UP_VERIFIED'));
 
+-- ConfirmationSubject (3) — contract §2.6.5 BOOK.1 and §3.7 R3.7.5 — the three booking confirmation subjects
+ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_confirmationSubject_check" CHECK ("confirmationSubject" IN ('create', 'reschedule', 'cancel'));
+
+-- WidgetApprovalDecision (2) — contract §3.7 R3.7.5 — the two approval decisions carried by an approval widget
+ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_approvalDecision_check" CHECK ("approvalDecision" IN ('approve', 'reject'));
+
 -- C9Domain (4) — contract union `C9Domain` (ambient.ts)
 ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_c9Domain_check" CHECK ("c9Domain" IN ('ADMIN', 'CLIENT_LIFECYCLE', 'OCCUPANCY', 'BUSINESS_INTELLIGENCE'));
 
--- ConfirmationOfKind (3) — contract `IntentRecord.kind` (intent.ts:261)
+-- ConfirmationOfKind (3) — contract `IntentRecord.kind` (intent.ts:303)
 ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_confirmationOfKind_check" CHECK ("confirmationOfKind" IN ('draft', 'record', 'approval'));
+
+-- EffectClass (8) — contract union `EffectClass` (intent.ts)
+ALTER TABLE "WidgetIntentDivergenceAudit" ADD CONSTRAINT "WidgetIntentDivergenceAudit_resolvedEffect_check" CHECK ("resolvedEffect" IN ('NONE', 'NAVIGATE', 'REFINE', 'CONTROL', 'DRAFT', 'REQUEST_APPROVAL', 'COMMIT', 'HANDOFF'));
+
+-- DivergenceRefusalCode (1) — contract §3.9 Gate 10 — the sole divergence refusal code
+ALTER TABLE "WidgetIntentDivergenceAudit" ADD CONSTRAINT "WidgetIntentDivergenceAudit_refusalCode_check" CHECK ("refusalCode" IN ('intent_divergence'));
 
 -- IntentReceiptOutcome (4) — mapping §5.5 states the four members in full (not a count)
 ALTER TABLE "WidgetIntentReceipt" ADD CONSTRAINT "WidgetIntentReceipt_outcome_check" CHECK ("outcome" IN ('ACCEPTED', 'REFUSED', 'NEEDS_CONFIRMATION', 'NEEDS_VERIFICATION'));
@@ -474,3 +517,6 @@ ALTER TABLE "WidgetRenderReceipt" ADD CONSTRAINT "WidgetRenderReceipt_emitted_wi
 
 -- a count of emitted intents is not negative
 ALTER TABLE "WidgetRenderReceipt" ADD CONSTRAINT "WidgetRenderReceipt_emitted_nonneg_check" CHECK ("intentsEmitted" >= 0);
+
+-- contract §3.9 — the resolved token and effect are absent or present together
+ALTER TABLE "WidgetIntentDivergenceAudit" ADD CONSTRAINT "WidgetIntentDivergenceAudit_resolved_pair_check" CHECK (("resolvedIntentTokenHash" IS NULL) = ("resolvedEffect" IS NULL));

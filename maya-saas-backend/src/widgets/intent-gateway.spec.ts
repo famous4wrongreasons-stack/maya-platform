@@ -68,6 +68,8 @@ interface RecordRow {
   handoffKey: string | null;
   targetJson: unknown;
   confirmationJson: unknown;
+  confirmationSubject: string | null;
+  approvalDecision: string | null;
   bodyHash: string;
   selectionDomain: string;
   inputSchemaHash: string | null;
@@ -196,6 +198,8 @@ const record = (over: Partial<RecordRow> = {}): RecordRow => ({
   handoffKey: null,
   targetJson: null,
   confirmationJson: null,
+  confirmationSubject: null,
+  approvalDecision: null,
   bodyHash: sha256Hex('body'),
   selectionDomain: '',
   inputSchemaHash: null,

@@ -495,6 +495,8 @@ export class Fixtures {
       await db.widgetIntentReceipt.deleteMany({ where });
       await db.widgetIntentSubmissionAudit.deleteMany({ where });
       await db.widgetRenderReceipt.deleteMany({ where });
+      // I-MIG2 / MIG-7: the divergence row has a RESTRICT FK to WidgetIntentRecord.
+      await db.widgetIntentDivergenceAudit.deleteMany({ where });
       await db.widgetIntentRecord.deleteMany({ where });
       await db.widgetSuppressedEmission.deleteMany({ where });
       await db.widgetDraft.deleteMany({ where });

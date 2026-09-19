@@ -34,12 +34,12 @@ for(const m of widget){
 const n=(re)=>(sql.match(re)||[]).length;
 const nonWidget=[...new Set([...sql.matchAll(/(?:ALTER|CREATE) TABLE "(\w+)"/g)].map(m=>m[1]).filter(t=>!t.startsWith("Widget")))];
 const rows=[
- ["MODELS:", widget.length+"/13", widget.length===13],
- ["PHYSICAL FIELDS:", fields, fields===181],
- ["FKS:", n(/FOREIGN KEY/g), n(/FOREIGN KEY/g)===16],
- ["  TENANT FKS:", n(/REFERENCES "Tenant"/g), n(/REFERENCES "Tenant"/g)===10],
- ["  WIDGET->WIDGET FKS:", n(/REFERENCES "Widget/g), n(/REFERENCES "Widget/g)===6],
- ["CHECKS:", n(/_check" CHECK/g)+"/34", n(/_check" CHECK/g)===34],
+ ["MODELS:", widget.length+"/14", widget.length===14],
+ ["PHYSICAL FIELDS:", fields, fields===191],
+ ["FKS:", n(/FOREIGN KEY/g), n(/FOREIGN KEY/g)===18],
+ ["  TENANT FKS:", n(/REFERENCES "Tenant"/g), n(/REFERENCES "Tenant"/g)===11],
+ ["  WIDGET->WIDGET FKS:", n(/REFERENCES "Widget/g), n(/REFERENCES "Widget/g)===7],
+ ["CHECKS:", n(/_check" CHECK/g)+"/39", n(/_check" CHECK/g)===39],
  ["DROPS:", n(/DROP /g), n(/DROP /g)===0],
  ["BUSINESS TABLE ALTERATIONS:", nonWidget.length?nonWidget.join(","):0, nonWidget.length===0],
  ["ALTER TABLE \"Tenant\":", n(/ALTER TABLE "Tenant"/g), n(/ALTER TABLE "Tenant"/g)===0],
@@ -57,12 +57,12 @@ else say "ENUM MEMBER SETS:" "FAIL"; bad; fi
 # ── applicability: the migrations must be exactly the diff from today's schema to stage B ────
 # Re-derived rather than trusted: if someone edits the staged SQL by hand, the DDL below stops
 # matching what Prisma would produce and this line is the one that notices.
-(cd "$BE" && npx prisma migrate diff --from-schema prisma/schema.prisma \
+(cd "$BE" && npx prisma migrate diff --from-schema "$ROOT/$S/schema-stage-a.prisma" \
    --to-schema "$ROOT/$S/schema-stage-b.prisma" --script > /tmp/.k3diff.sql 2>/dev/null)
 EXPECT=$(grep -c 'CREATE TABLE' /tmp/.k3diff.sql)
-HAVE=$(cat "$S"/*.assembled.sql | grep -c 'CREATE TABLE')
-if [ "$EXPECT" = "$HAVE" ] && [ "$EXPECT" = "13" ]; then
-  say "MIGRATION APPLICABILITY:" "PASS  (13 tables, and the staged SQL is the diff Prisma derives)"
+HAVE=$(grep -c 'CREATE TABLE' "$S/20260916120100_widget_layer_runtime.assembled.sql")
+if [ "$EXPECT" = "$HAVE" ] && [ "$EXPECT" = "11" ]; then
+  say "MIGRATION APPLICABILITY:" "PASS  (11 runtime tables, and the staged SQL is the stage-A→stage-B diff Prisma derives)"
 else say "MIGRATION APPLICABILITY:" "FAIL  prisma derives $EXPECT, staged has $HAVE"; bad; fi
 rm -f /tmp/.k3diff.sql
 
