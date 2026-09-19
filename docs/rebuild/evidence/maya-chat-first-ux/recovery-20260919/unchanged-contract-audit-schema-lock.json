@@ -1,0 +1,32 @@
+[
+  {
+    "path": "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md",
+    "before_sha256": "606d7f99da5fe1977d5efe737dca91a04f2b11faecddbd666120d34a03e94a8a",
+    "recovered_sha256": "606d7f99da5fe1977d5efe737dca91a04f2b11faecddbd666120d34a03e94a8a",
+    "unchanged": true
+  },
+  {
+    "path": "docs/rebuild/evidence/maya-chat-first-ux/gate-conformance-audit.json",
+    "before_sha256": "da83364732fd6d96cac8539f16fe30dc1ce5ff044f78ccdac396feb343757c3c",
+    "recovered_sha256": "da83364732fd6d96cac8539f16fe30dc1ce5ff044f78ccdac396feb343757c3c",
+    "unchanged": true
+  },
+  {
+    "path": "docs/rebuild/evidence/maya-chat-first-ux/gate-clause-inventory.json",
+    "before_sha256": "dced2564793d3ebadf5806494eded68157cfb91251fbcc5fc5f7b8d0cb592edf",
+    "recovered_sha256": "dced2564793d3ebadf5806494eded68157cfb91251fbcc5fc5f7b8d0cb592edf",
+    "unchanged": true
+  },
+  {
+    "path": "maya-saas-backend/prisma/schema.prisma",
+    "before_sha256": "73917b59ed2ba45c4a48e92574457b79853aaf8cf3307b82c24f0e2e31bd231a",
+    "recovered_sha256": "73917b59ed2ba45c4a48e92574457b79853aaf8cf3307b82c24f0e2e31bd231a",
+    "unchanged": true
+  },
+  {
+    "path": "maya-saas-backend/package-lock.json",
+    "before_sha256": "68d421274cff9c9e772002dd25471cf6188ccb544947277793e5ba54b3616b41",
+    "recovered_sha256": "68d421274cff9c9e772002dd25471cf6188ccb544947277793e5ba54b3616b41",
+    "unchanged": true
+  }
+]

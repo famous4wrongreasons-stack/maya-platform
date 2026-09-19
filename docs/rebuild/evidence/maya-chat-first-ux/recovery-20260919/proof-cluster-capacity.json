@@ -1,0 +1,7 @@
+{
+  "ownedClusterOnly": true,
+  "port": 55619,
+  "foreignConnectionsBeforeRestart": 0,
+  "maxConnections": 800,
+  "reason": "Eight CI-style isolated shards share one newly created local server. Provision 8 x default 100 connections to avoid an artificial shared connection-cap bottleneck. Each battery has a distinct database. No test expectation or production configuration changes."
+}

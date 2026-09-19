@@ -1,0 +1,53 @@
+[
+  {
+    "proof": "HTTP smoke",
+    "baseline": "a2f98a520768fedc65e54b4a19fc3931ddf34d48",
+    "recovered": "df6c3a5a56819194c9df9d39b902f26dc6ea33c5",
+    "baselineExit": 1,
+    "recoveredExit": 1,
+    "baselineErrors": [
+      "{\"ok\":false,\"error\":{\"code\":\"http_smoke_failed\",\"message\":\"Expected values to be strictly equal:\\n+ actual - expected\\n\\n+ 'validation'\\n- 'trial_activation_token_required'\\n\"}}"
+    ],
+    "recoveredErrors": [
+      "{\"ok\":false,\"error\":{\"code\":\"http_smoke_failed\",\"message\":\"Expected values to be strictly equal:\\n+ actual - expected\\n\\n+ 'validation'\\n- 'trial_activation_token_required'\\n\"}}"
+    ],
+    "sameErrors": true,
+    "baselineLogSha256": "72ff28d15b2763a89308b8047ed27ff09a1fa39acf6f1f65329848a22d898698",
+    "recoveredLogSha256": "55b16452e43349960c803c38b4790f6cf0dd3a75d2810a5580cbc8a60ab97d5c",
+    "expectationsChanged": false
+  },
+  {
+    "proof": "Appointment owner",
+    "baseline": "a2f98a520768fedc65e54b4a19fc3931ddf34d48",
+    "recovered": "df6c3a5a56819194c9df9d39b902f26dc6ea33c5",
+    "baselineExit": 1,
+    "recoveredExit": 1,
+    "baselineErrors": [
+      "Appointment Action Engine proof failed at create appointment success: ActionExecutionTerminalError: Action policy or approval did not allow execution"
+    ],
+    "recoveredErrors": [
+      "Appointment Action Engine proof failed at create appointment success: ActionExecutionTerminalError: Action policy or approval did not allow execution"
+    ],
+    "sameErrors": true,
+    "baselineLogSha256": "e0add630e01ae5152a8514dfb107781821b0c59556b68c23205398630677af8e",
+    "recoveredLogSha256": "e29d98457466eca946df160b1ee609f9f003c00d256f4d0cac48a145a3147bf4",
+    "expectationsChanged": false
+  },
+  {
+    "proof": "Action Engine kernel",
+    "baseline": "a2f98a520768fedc65e54b4a19fc3931ddf34d48",
+    "recovered": "df6c3a5a56819194c9df9d39b902f26dc6ea33c5",
+    "baselineExit": 1,
+    "recoveredExit": 1,
+    "baselineErrors": [
+      "Action Engine kernel proof failed at architecture_barrier: AssertionError [ERR_ASSERTION]: /crm/"
+    ],
+    "recoveredErrors": [
+      "Action Engine kernel proof failed at architecture_barrier: AssertionError [ERR_ASSERTION]: /crm/"
+    ],
+    "sameErrors": true,
+    "baselineLogSha256": "450811a3a8de64f7f859b83ff5d4e46c897aba10550f975656a0971fb1a377a8",
+    "recoveredLogSha256": "995dc5a6373a9b42ac5ffa40c97b9c8fcb7a49f870dd2f583bdb3593e3c50cbe",
+    "expectationsChanged": false
+  }
+]

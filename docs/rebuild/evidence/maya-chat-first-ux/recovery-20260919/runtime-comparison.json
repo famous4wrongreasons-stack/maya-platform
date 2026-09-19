@@ -1,0 +1,21 @@
+{
+  "runtimes": [
+    {
+      "node": "v24.15.0",
+      "v8": "13.6.233.17-node.48",
+      "platform": "darwin",
+      "arch": "arm64"
+    },
+    {
+      "node": "v22.23.2",
+      "v8": "12.4.254.21-node.56",
+      "platform": "darwin",
+      "arch": "arm64"
+    }
+  ],
+  "ciDeclaredNodeMajor": 22,
+  "hostCpuCount": 16,
+  "hostMemoryGiB": 128,
+  "codeOrTestExpectationsChanged": false,
+  "causeLimit": "Native V8 crash observed on Node 24; upstream root cause not proven. Node 22 is a tested CI-runtime mitigation, not a repair of Node 24."
+}

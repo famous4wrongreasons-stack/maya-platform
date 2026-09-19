@@ -1,0 +1,54 @@
+[
+  {
+    "label": "node24-w4",
+    "exit": 1,
+    "seconds": 127.8,
+    "node": "v24.15.0",
+    "numTotalTestSuites": 530,
+    "numPassedTestSuites": 529,
+    "numFailedTestSuites": 1,
+    "numTotalTests": 5017,
+    "numPassedTests": 5017,
+    "numFailedTests": 0,
+    "success": false
+  },
+  {
+    "label": "node24-w2",
+    "exit": 1,
+    "seconds": 175.52,
+    "node": "v24.15.0",
+    "numTotalTestSuites": 530,
+    "numPassedTestSuites": 529,
+    "numFailedTestSuites": 1,
+    "numTotalTests": 5014,
+    "numPassedTests": 5014,
+    "numFailedTests": 0,
+    "success": false
+  },
+  {
+    "label": "node22-w4",
+    "exit": 0,
+    "seconds": 126.23,
+    "node": "v22.23.2",
+    "numTotalTestSuites": 530,
+    "numPassedTestSuites": 530,
+    "numFailedTestSuites": 0,
+    "numTotalTests": 5022,
+    "numPassedTests": 5022,
+    "numFailedTests": 0,
+    "success": true
+  },
+  {
+    "label": "node22-inband",
+    "exit": 0,
+    "seconds": 378.88,
+    "node": "v22.23.2",
+    "numTotalTestSuites": 530,
+    "numPassedTestSuites": 530,
+    "numFailedTestSuites": 0,
+    "numTotalTests": 5022,
+    "numPassedTests": 5022,
+    "numFailedTests": 0,
+    "success": true
+  }
+]

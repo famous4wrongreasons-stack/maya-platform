@@ -1,0 +1,13 @@
+[
+  {
+    "id": "TX-BODY-ONLY",
+    "description": "Reintroduce the exact ambient-connection defect in the production method body; retain tx parameter and call-site wiring. D-1-TX-b must be the failing assertion, not a compiler error.",
+    "file": "src/widgets/intent-gateway.service.ts",
+    "find": "(tx ?? this.prisma).widgetIntentRecord.findFirst(",
+    "replace": "this.prisma.widgetIntentRecord.findFirst(",
+    "killers": [
+      "D-1-TX-b"
+    ],
+    "expect": "build-killed"
+  }
+]

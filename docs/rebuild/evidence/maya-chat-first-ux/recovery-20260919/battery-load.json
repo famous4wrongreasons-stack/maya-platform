@@ -1,0 +1,4213 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "startedAt": "2026-09-19T09:24:38.061Z",
+  "batteries": [
+    "gate10a.json",
+    "gate11.json",
+    "gate12.json",
+    "gate12k.json",
+    "gate4.json",
+    "gate6.json",
+    "gate7.json",
+    "gate8.json",
+    "gate8c.json",
+    "gate8r.json",
+    "gate9a.json",
+    "gateH-harness.json",
+    "gateP-f88.json",
+    "gateP-ledger.json",
+    "gateP-pairing.json",
+    "gateP-principal.json",
+    "gateP-render.json",
+    "gateP-seal.json",
+    "gateT-tables.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-1a4b34bf51",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-1a4b34bf51",
+  "neutraliser_controls": {},
+  "baseline_controls": {},
+  "mutants": [
+    {
+      "battery": "gate10a.json",
+      "id": "M10-7",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/routing/owner-set.ts"
+      ],
+      "killers": [
+        {
+          "test": "U10A-OS-1",
+          "neutralisers": null
+        },
+        {
+          "test": "U10A-OS-4",
+          "neutralisers": null
+        },
+        {
+          "test": "U10A-OS-15",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate10a.json",
+      "id": "M10-8",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/routing/owner-set.ts"
+      ],
+      "killers": [
+        {
+          "test": "U10A-OS-8",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate10a.json",
+      "id": "M10-14",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/routing/deterministic-router.ts"
+      ],
+      "killers": [
+        {
+          "test": "U10A-R-15",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate10a.json",
+      "id": "M10-15",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/routing/deterministic-router.ts"
+      ],
+      "killers": [
+        {
+          "test": "U10A-R-6",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate10a.json",
+      "id": "M10-24",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/routing/deterministic-router.ts"
+      ],
+      "killers": [
+        {
+          "test": "U10A-R-5",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate11.json",
+      "id": "MUT-1",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate11.ts"
+      ],
+      "killers": [
+        {
+          "test": "G11-N9-c",
+          "neutralisers": null
+        },
+        {
+          "test": "G11-N9-d",
+          "neutralisers": null
+        },
+        {
+          "test": "G11-N10-g",
+          "neutralisers": null
+        },
+        {
+          "test": "INTERIM",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate11.json",
+      "id": "MUT-3",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/noun-resolution/noun-resolution.ts"
+      ],
+      "killers": [
+        {
+          "test": "G11-N9-b",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate11.json",
+      "id": "MUT-9",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/noun-resolution/noun-handles.ts"
+      ],
+      "killers": [
+        {
+          "test": "G11-N9-f",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate11.json",
+      "id": "MUT-11",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate11.ts"
+      ],
+      "killers": [
+        {
+          "test": "G11-N9-i",
+          "neutralisers": null
+        },
+        {
+          "test": "G11-N10-g",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate11.json",
+      "id": "MUT-12",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate11.ts",
+        "src/widgets/gates/gate11.ts"
+      ],
+      "killers": [
+        {
+          "test": "G11-N10-a",
+          "neutralisers": null
+        },
+        {
+          "test": "G11-ARCH-5",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate11.json",
+      "id": "MUT-16",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/noun-resolution/noun-resolution.ts",
+        "src/widgets/noun-resolution/noun-resolution.ts",
+        "src/widgets/noun-resolution/noun-resolution.ts"
+      ],
+      "killers": [
+        {
+          "test": "G11-N15-a",
+          "neutralisers": null
+        },
+        {
+          "test": "G11-N15-e",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate11.json",
+      "id": "MUT-19",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/noun-resolution/noun-resolution.ports.ts"
+      ],
+      "killers": [
+        {
+          "test": "G11-ARCH-2",
+          "neutralisers": null
+        },
+        {
+          "test": "typecheck:widgets-live",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate12.json",
+      "id": "MUT-12-J",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/projection/widget-projector.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "ARCH-12-2",
+          "neutralisers": null
+        },
+        {
+          "test": "ARCH-12-3",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate12.json",
+      "id": "MUT-12-O",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/projection/projector.registry.ts"
+      ],
+      "killers": [
+        {
+          "test": "ARCH-12-13",
+          "neutralisers": null
+        },
+        {
+          "test": "ARCH-12-7",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate12.json",
+      "id": "MUT-12-K",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/intent-gateway.service.ts",
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "ARCH-12-10",
+          "neutralisers": null
+        },
+        {
+          "test": "k3",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate12.json",
+      "id": "MUT-12-M",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/intent-gateway.service.ts",
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "ARCH-12-10",
+          "neutralisers": null
+        },
+        {
+          "test": "k3",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate12.json",
+      "id": "MUT-12-T",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "ARCH-12-10",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate12k.json",
+      "id": "K4K8-M1",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/capability-policy.ts"
+      ],
+      "killers": [
+        {
+          "test": "K4K8-1",
+          "neutralisers": null
+        },
+        {
+          "test": "ARCH-12-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate12k.json",
+      "id": "K4K8-M2",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/capability-policy.ts"
+      ],
+      "killers": [
+        {
+          "test": "K4K8-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate12k.json",
+      "id": "K4K8-M3",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate12-pii-path.source.spec.ts"
+      ],
+      "killers": [
+        {
+          "test": "K4K8-0",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate4.json",
+      "id": "M4-1",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate4.ts"
+      ],
+      "killers": [
+        {
+          "test": "T4-SRC-a",
+          "neutralisers": null
+        },
+        {
+          "test": "T4-SRC-b",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate4.json",
+      "id": "M4-2",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate4.ts"
+      ],
+      "killers": [
+        {
+          "test": "T4-INDEP",
+          "neutralisers": "N4"
+        }
+      ]
+    },
+    {
+      "battery": "gate4.json",
+      "id": "M4-3",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate4.ts"
+      ],
+      "killers": [
+        {
+          "test": "T4-INDEP",
+          "neutralisers": "N4"
+        }
+      ]
+    },
+    {
+      "battery": "gate4.json",
+      "id": "M4-4",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "T4-WIRED",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M1",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-4",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M2",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "P-HANDOFF-A22",
+          "neutralisers": null
+        },
+        {
+          "test": "G6-7",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M3",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "N-HANDOFF-SENS-C9",
+          "neutralisers": null
+        },
+        {
+          "test": "F48",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M4a",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "N-HANDOFF-SENS-C9",
+          "neutralisers": null
+        },
+        {
+          "test": "F48",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M4b",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "F48",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M5",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "N-HANDOFF-SENS-C9",
+          "neutralisers": null
+        },
+        {
+          "test": "P-HANDOFF-W-NONSENS",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M8b",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "N-HANDOFF-UNREG-CONTROL",
+          "neutralisers": null
+        },
+        {
+          "test": "G6-6-REG",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M10",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "N-C9-DOMAIN",
+          "neutralisers": null
+        },
+        {
+          "test": "P-C9-9-RUN",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M11",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "N-C9-DOMAIN",
+          "neutralisers": null
+        },
+        {
+          "test": "P-C9-9-RUN",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M13",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "N-C9-DOMAIN",
+          "neutralisers": null
+        },
+        {
+          "test": "G6-20",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M15",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "N-C9-DOMAIN",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M16b",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-A",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M17b",
+      "expect": "pending",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-B",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M18b",
+      "expect": "pending",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-B",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M19b",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-TOOL",
+          "neutralisers": "N6-FLOOR"
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M20b",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-REG",
+          "neutralisers": "N6-FLOOR"
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M21",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "G6-6-REG",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M22",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-TRANSITIONAL-VETO",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M23",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/owner-ports/gate6.owners.provider.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-SURFACE",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M25",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-TX",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M28",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "killers": [
+        {
+          "test": "P-NULL",
+          "neutralisers": null
+        },
+        {
+          "test": "G6-5",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-18",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "T7-C7",
+          "neutralisers": null
+        },
+        {
+          "test": "T7-C1",
+          "neutralisers": null
+        },
+        {
+          "test": "T7-C2",
+          "neutralisers": null
+        },
+        {
+          "test": "T7-C7-ALLOWLIST",
+          "neutralisers": null
+        },
+        {
+          "test": "T7-C7-ESC-P1",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-3",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "T7-C7",
+          "neutralisers": null
+        },
+        {
+          "test": "T7-C7-TIER",
+          "neutralisers": null
+        },
+        {
+          "test": "T7-C7-CARRIER",
+          "neutralisers": null
+        },
+        {
+          "test": "T7-C7-ALLOWLIST",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-4",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "T7-C2",
+          "neutralisers": null
+        },
+        {
+          "test": "T7-C2-NONE",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-14",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "T7-C7",
+          "neutralisers": null
+        },
+        {
+          "test": "T7-C7-CARRIER",
+          "neutralisers": null
+        },
+        {
+          "test": "T7-C7-TIER",
+          "neutralisers": null
+        },
+        {
+          "test": "T7-C7-ALLOWLIST",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-33",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "T7-POS-ESCAPE",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-37",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "T7-C7-ESC-P1",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-31",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "T7-C7-ALLOWLIST",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-38",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "T7-C7",
+          "neutralisers": null
+        },
+        {
+          "test": "T7-C7-TIER",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-1",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-N1a",
+          "neutralisers": null
+        },
+        {
+          "test": "G7-N1b",
+          "neutralisers": null
+        },
+        {
+          "test": "G7-N1c",
+          "neutralisers": null
+        },
+        {
+          "test": "G7-N1d",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-2",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-N1b",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-5",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-P5",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-6",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-N3a",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-16",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-N7e",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-7",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/commit-guard.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-N5a",
+          "neutralisers": null
+        },
+        {
+          "test": "G7-N5f",
+          "neutralisers": null
+        },
+        {
+          "test": "G7-N5h",
+          "neutralisers": null
+        },
+        {
+          "test": "G7-FC2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-9",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/commit-guard.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-N5a",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-10",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/commit-guard.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-G7-PAIR",
+          "neutralisers": null
+        },
+        {
+          "test": "G7-FC2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-11",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-N6a",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-12",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/commit-guard.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-N6d",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-13",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-N6e",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-17",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "T7-UNWIRED",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-20",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-G7-I18",
+          "neutralisers": null
+        },
+        {
+          "test": "S-G7-I21",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-21",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-FC4",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-22",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-FC1",
+          "neutralisers": null
+        },
+        {
+          "test": "G7-FC2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-23",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/commit-guard.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-FC3",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-24",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-N9a",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-25",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-N9b",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-26",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "G7-N8a",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-27",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-G7-F15",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-35",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-G7-F15",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-36",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "R353-READERS",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-28",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/booking/booking-commit.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-G7-F72-K7",
+          "neutralisers": null
+        },
+        {
+          "test": "S-G7-F72-ONCE",
+          "neutralisers": null
+        },
+        {
+          "test": "K7-F72-DELEGATES",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-29",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-G7-VOCAB",
+          "neutralisers": null
+        },
+        {
+          "test": "S-G7-VOCAB-NEVER",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-30",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-G7-TIER",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-32",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "killers": [
+        {
+          "test": "S-G7-F27-ONE",
+          "neutralisers": null
+        },
+        {
+          "test": "G7-P5",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-8",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "T7-PRODUCING-SCOPE",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8.json",
+      "id": "M-NULL-PASS",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/input-validation/input-validation.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-NULL-OBJ",
+          "neutralisers": null
+        },
+        {
+          "test": "T-NULL-EMPTY",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8.json",
+      "id": "M-EMPTY-OBJ",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/input-validation/input-validation.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-NULL-EMPTY",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8.json",
+      "id": "M-READ-EARLY",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/input-validation/input-validation.gate.ts",
+        "src/widgets/input-validation/input-validation.gate.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-HELD",
+          "neutralisers": null
+        },
+        {
+          "test": "T-READ-ONCE",
+          "neutralisers": null
+        },
+        {
+          "test": "T-NULL-OBJ",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8.json",
+      "id": "M-FACT-SLOT",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/input-validation/input-validation.gate.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-NULL-NULL",
+          "neutralisers": null
+        },
+        {
+          "test": "G8a-G3",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8.json",
+      "id": "M-TRUNC",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/input-validation/input-validation.gate.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-NULL-OBJ",
+          "neutralisers": null
+        },
+        {
+          "test": "T-NULL-EMPTY",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-1",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/input-schema/codec.ts"
+      ],
+      "killers": [
+        {
+          "test": "SD-3",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-2",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/input-schema/input-schema-hash.ts"
+      ],
+      "killers": [
+        {
+          "test": "HS-5",
+          "neutralisers": null
+        },
+        {
+          "test": "ISC-4",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-3",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/input-schema/codec.ts"
+      ],
+      "killers": [
+        {
+          "test": "LB-2",
+          "neutralisers": null
+        },
+        {
+          "test": "LB-3",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-4",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/input-schema/codec.ts"
+      ],
+      "killers": [
+        {
+          "test": "SD-4",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-5",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/input-schema/codec.ts"
+      ],
+      "killers": [
+        {
+          "test": "SD-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-6",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/input-schema/inputs-bytes.ts"
+      ],
+      "killers": [
+        {
+          "test": "IB-1",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-7",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/input-schema/parse-input-schema.ts"
+      ],
+      "killers": [
+        {
+          "test": "PS-3",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-8",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/input-schema/parse-input-schema.ts"
+      ],
+      "killers": [
+        {
+          "test": "PS-7",
+          "neutralisers": null
+        },
+        {
+          "test": "PS-1",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M1",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T5",
+          "neutralisers": null
+        },
+        {
+          "test": "T10-ri",
+          "neutralisers": null
+        },
+        {
+          "test": "T10",
+          "neutralisers": null
+        },
+        {
+          "test": "SMOKE-G8R-UNREQUIRED-ACK",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M2a",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-DIV-2",
+          "neutralisers": null
+        },
+        {
+          "test": "T-DIV-1",
+          "neutralisers": null
+        },
+        {
+          "test": "T-DIV-1-http",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M2b",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts",
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-DIV-2",
+          "neutralisers": null
+        },
+        {
+          "test": "T-DIV-1",
+          "neutralisers": null
+        },
+        {
+          "test": "T-DIV-1-http",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M3a",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T3-ri",
+          "neutralisers": null
+        },
+        {
+          "test": "T3",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M3b",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T3d-ri",
+          "neutralisers": null
+        },
+        {
+          "test": "T3d",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M22",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-DIV-2",
+          "neutralisers": null
+        },
+        {
+          "test": "T-DIV-1-http",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M23",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-DIV-2",
+          "neutralisers": null
+        },
+        {
+          "test": "T-DIV-1",
+          "neutralisers": null
+        },
+        {
+          "test": "T-DIV-1-http",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M24",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-DIV-2",
+          "neutralisers": null
+        },
+        {
+          "test": "T-DIV-1-http",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M25",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-DIV-2",
+          "neutralisers": null
+        },
+        {
+          "test": "T-DIV-1",
+          "neutralisers": null
+        },
+        {
+          "test": "T-DIV-1-http",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M4",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T10-ri",
+          "neutralisers": null
+        },
+        {
+          "test": "T10",
+          "neutralisers": null
+        },
+        {
+          "test": "SMOKE-G8R-UNREQUIRED-ACK",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M9",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts",
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T5",
+          "neutralisers": null
+        },
+        {
+          "test": "T10-ri",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M17",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T12",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M5a",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T6-stub",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M5b",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T13c-stub",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M6",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T7-stub",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M7",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-DEF3",
+          "neutralisers": null
+        },
+        {
+          "test": "T1-stub",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M8",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T9-stub",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M10",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T1-stub",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M16",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-DEF3",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M18",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T13d",
+          "neutralisers": null
+        },
+        {
+          "test": "T13b-direct",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M19",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate-8r.owners.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-DEF3",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M20",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T1-stub",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M13a",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T15-ri",
+          "neutralisers": null
+        },
+        {
+          "test": "T15",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M13b",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T15",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M15",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-SRC-8R",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M21",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-SRC-8R",
+          "neutralisers": null
+        },
+        {
+          "test": "T-SRC-INV30-b",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M11",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "RI-PROJ",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M12",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/intent-submit-args.ts"
+      ],
+      "killers": [
+        {
+          "test": "T10",
+          "neutralisers": null
+        },
+        {
+          "test": "SMOKE-G8R-UNREQUIRED-ACK",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M14",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "T10",
+          "neutralisers": null
+        },
+        {
+          "test": "SMOKE-G8R-UNREQUIRED-ACK",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate9a.json",
+      "id": "9A-M1",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/lowering/lowering.ts"
+      ],
+      "killers": [
+        {
+          "test": "U9a-1a",
+          "neutralisers": null
+        },
+        {
+          "test": "U9a-1c",
+          "neutralisers": null
+        },
+        {
+          "test": "U9a-1e",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gate9a.json",
+      "id": "9A-M2",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/lowering/lowering.ts"
+      ],
+      "killers": [
+        {
+          "test": "T-ARCH-SIG",
+          "neutralisers": null
+        },
+        {
+          "test": "T-ARCH-SIG-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "H-M1",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "test/widgets-live/support/no-write-recorder.ts"
+      ],
+      "killers": [
+        {
+          "test": "HAR-3 [GW]",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "H-M2",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "../docs/rebuild/evidence/maya-chat-first-ux/gate-audit-check.mjs"
+      ],
+      "killers": [
+        {
+          "test": "HAR-5",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "H-M3",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "scripts/widgets-evidence-verify.mjs"
+      ],
+      "killers": [
+        {
+          "test": "HAR-9 [GW]",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "H-M4",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "scripts/widgets-evidence-verify.mjs"
+      ],
+      "killers": [
+        {
+          "test": "HAR-10",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "R-M1",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "scripts/widgets-evidence-verify.mjs"
+      ],
+      "killers": [
+        {
+          "test": "HAR-13",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "R-M2",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "scripts/widgets-evidence-verify.mjs"
+      ],
+      "killers": [
+        {
+          "test": "HAR-13",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "R-M3",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "scripts/widgets-evidence-verify.mjs"
+      ],
+      "killers": [
+        {
+          "test": "HAR-13",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "R-M4",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "scripts/widgets-evidence-verify.mjs"
+      ],
+      "killers": [
+        {
+          "test": "HAR-13",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "R-M5",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "scripts/widgets-evidence-verify.mjs"
+      ],
+      "killers": [
+        {
+          "test": "HAR-13",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "R-M6",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "scripts/widgets-evidence-verify.mjs"
+      ],
+      "killers": [
+        {
+          "test": "HAR-10",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "R-M7",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "scripts/widgets-evidence-verify.mjs"
+      ],
+      "killers": [
+        {
+          "test": "HAR-13",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "R-M8",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "scripts/widgets-evidence-verify.mjs"
+      ],
+      "killers": [
+        {
+          "test": "HAR-13",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "R-M9",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "scripts/widgets-evidence-verify.mjs"
+      ],
+      "killers": [
+        {
+          "test": "HAR-13",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "R-M10",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "scripts/widgets-evidence-verify.mjs"
+      ],
+      "killers": [
+        {
+          "test": "HAR-13",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "R-M11",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "../docs/rebuild/evidence/maya-chat-first-ux/gate-audit-check.mjs"
+      ],
+      "killers": [
+        {
+          "test": "HAR-5",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "R-M12",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "scripts/widgets-evidence-verify.mjs"
+      ],
+      "killers": [
+        {
+          "test": "HAR-13",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "R-M13",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "test/widgets-live/support/mint-provenance.ts"
+      ],
+      "killers": [
+        {
+          "test": "HAR-14",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "R-M14",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "test/widgets-live/support/evidence.ts"
+      ],
+      "killers": [
+        {
+          "test": "HAR-14",
+          "neutralisers": null
+        },
+        {
+          "test": "HAR-13",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "R-M15",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "test/widgets-live/support/evidence-source-scan.ts"
+      ],
+      "killers": [
+        {
+          "test": "HAR-12",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M1",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/validation/f88-walk.ts"
+      ],
+      "killers": [
+        {
+          "test": "F88-1",
+          "neutralisers": null
+        },
+        {
+          "test": "F88-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M2",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/validation/f88-walk.ts"
+      ],
+      "killers": [
+        {
+          "test": "F88-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M3",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/validation/f88-walk.ts"
+      ],
+      "killers": [
+        {
+          "test": "F88-1",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M4",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/validation/f88-walk.ts"
+      ],
+      "killers": [
+        {
+          "test": "F88-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M5",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widget-contract/f88.generated.ts"
+      ],
+      "killers": [
+        {
+          "test": "F88-1",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M6",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/dto/submit-intent.dto.ts"
+      ],
+      "killers": [
+        {
+          "test": "F88-5",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M7",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/dto/submit-intent.dto.ts"
+      ],
+      "killers": [
+        {
+          "test": "F88-4",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M8",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/dto/submit-intent.dto.ts"
+      ],
+      "killers": [
+        {
+          "test": "F88-1",
+          "neutralisers": null
+        },
+        {
+          "test": "F88-2",
+          "neutralisers": null
+        },
+        {
+          "test": "F88-4",
+          "neutralisers": null
+        },
+        {
+          "test": "F88-5",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M9",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/validation/f88-walk.ts"
+      ],
+      "killers": [
+        {
+          "test": "F88-U6",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M10",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/validation/f88-walk.ts"
+      ],
+      "killers": [
+        {
+          "test": "F88-U3",
+          "neutralisers": null
+        },
+        {
+          "test": "F88-U6",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M11",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/validation/f88-walk.ts"
+      ],
+      "killers": [
+        {
+          "test": "F88-U2",
+          "neutralisers": null
+        },
+        {
+          "test": "F88-U4",
+          "neutralisers": null
+        },
+        {
+          "test": "F88-U6",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M12",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widget-contract/f88.generated.ts"
+      ],
+      "killers": [
+        {
+          "test": "F88-U2",
+          "neutralisers": null
+        },
+        {
+          "test": "F88-8b",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M13",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widget-contract/f88.generated.ts"
+      ],
+      "killers": [
+        {
+          "test": "F88-U6",
+          "neutralisers": null
+        },
+        {
+          "test": "F88-8b",
+          "neutralisers": null
+        },
+        {
+          "test": "F88-8c",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M14",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "scripts/widget-contract/emit-f88.mjs"
+      ],
+      "killers": [
+        {
+          "test": "F88-8b",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M1",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widget-contract/mechanism-gap-ledger.runtime.ts"
+      ],
+      "killers": [
+        {
+          "test": "LED-1a",
+          "neutralisers": null
+        },
+        {
+          "test": "LED-1b",
+          "neutralisers": null
+        },
+        {
+          "test": "LED-1d",
+          "neutralisers": null
+        },
+        {
+          "test": "LED-3a",
+          "neutralisers": null
+        },
+        {
+          "test": "LED-4a",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M2",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/ledger-startup.assert.ts"
+      ],
+      "killers": [
+        {
+          "test": "LED-3b",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M3",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/ledger-startup.assert.ts"
+      ],
+      "killers": [
+        {
+          "test": "LED-3c",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M4",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/ledger-startup.assert.ts"
+      ],
+      "killers": [
+        {
+          "test": "LED-3f",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M5",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "scripts/widget-contract/emit-ledgers.mjs"
+      ],
+      "killers": [
+        {
+          "test": "LED-4a",
+          "neutralisers": null
+        },
+        {
+          "test": "LED-4b",
+          "neutralisers": null
+        },
+        {
+          "test": "LED-4c",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M6",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "scripts/widget-contract/emit-ledgers.mjs"
+      ],
+      "killers": [
+        {
+          "test": "LED-4b",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M7",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widget-contract/capability-gap-ledger.runtime.ts"
+      ],
+      "killers": [
+        {
+          "test": "LED-2b",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-pairing.json",
+      "id": "PAIR-M1",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/propose-pairing.ts"
+      ],
+      "killers": [
+        {
+          "test": "PAIR-1",
+          "neutralisers": null
+        },
+        {
+          "test": "PAIR-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-pairing.json",
+      "id": "PAIR-M2",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/propose-pairing.ts"
+      ],
+      "killers": [
+        {
+          "test": "PAIR-1",
+          "neutralisers": null
+        },
+        {
+          "test": "PAIR-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-pairing.json",
+      "id": "PAIR-M3",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/propose-pairing.ts"
+      ],
+      "killers": [
+        {
+          "test": "PAIR-1",
+          "neutralisers": null
+        },
+        {
+          "test": "PAIR-3",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-pairing.json",
+      "id": "PAIR-M4",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/propose-pairing.ts"
+      ],
+      "killers": [
+        {
+          "test": "PAIR-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-pairing.json",
+      "id": "PAIR-M5",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/propose-pairing.ts"
+      ],
+      "killers": [
+        {
+          "test": "PAIR-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-pairing.json",
+      "id": "PAIR-M6",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/propose-pairing.ts"
+      ],
+      "killers": [
+        {
+          "test": "PAIR-3",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M1",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/authority/principal-view.ts"
+      ],
+      "killers": [
+        {
+          "test": "PR-6U-2",
+          "neutralisers": null
+        },
+        {
+          "test": "PR-6",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M2",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/principal-view.ts"
+      ],
+      "killers": [
+        {
+          "test": "PR-6U-2",
+          "neutralisers": null
+        },
+        {
+          "test": "PR-6",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M3",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/principal-view.ts"
+      ],
+      "killers": [
+        {
+          "test": "PR-7U-1",
+          "neutralisers": null
+        },
+        {
+          "test": "PR-7",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M4",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/owner-ports/principal.adapter.ts",
+        "src/widgets/owner-ports/principal.adapter.ts"
+      ],
+      "killers": [
+        {
+          "test": "PR-7",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M5",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/owner-ports/principal.adapter.ts"
+      ],
+      "killers": [
+        {
+          "test": "PR-3",
+          "neutralisers": null
+        },
+        {
+          "test": "PR-6",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M6",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/tenancy/memberships.service.ts",
+        "src/tenancy/memberships.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "PR-8",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M7",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/owner-ports/principal.adapter.ts"
+      ],
+      "killers": [
+        {
+          "test": "PR-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M8",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/authority/principal-view.ts"
+      ],
+      "killers": [
+        {
+          "test": "PR-VIEW-1",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M9",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "G2-IN",
+          "neutralisers": "N2"
+        }
+      ]
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M10",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "PR-4",
+          "neutralisers": null
+        },
+        {
+          "test": "PR-5",
+          "neutralisers": null
+        },
+        {
+          "test": "G2-EQ",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M11",
+      "expect": "pending",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "PR-9b",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M12",
+      "expect": "live-killed",
+      "steps": [
+        "live"
+      ],
+      "edits": [
+        "test/widgets-live/support/bootstrap.ts",
+        "test/widgets-live/support/bootstrap.ts"
+      ],
+      "killers": [
+        {
+          "test": "PR-12",
+          "neutralisers": null
+        },
+        {
+          "test": "PR-8",
+          "neutralisers": null
+        },
+        {
+          "test": "PR-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M1",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widget-contract/reason-table.ts"
+      ],
+      "killers": [
+        {
+          "test": "REN-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M2",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widget-contract/reason-table.ts"
+      ],
+      "killers": [
+        {
+          "test": "REN-1",
+          "neutralisers": null
+        },
+        {
+          "test": "REN-4",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M3",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widget-contract/reason-table.ts"
+      ],
+      "killers": [
+        {
+          "test": "REN-1",
+          "neutralisers": null
+        },
+        {
+          "test": "REN-4",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M4",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widget-contract/reason-table.ts"
+      ],
+      "killers": [
+        {
+          "test": "REN-2",
+          "neutralisers": null
+        },
+        {
+          "test": "REN-4",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M5",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/rendering/reason-text.ts"
+      ],
+      "killers": [
+        {
+          "test": "REN-4",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M6",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "prisma/seed.ts"
+      ],
+      "killers": [
+        {
+          "test": "REN-6",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M7",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/rendering/denial-projection.ts"
+      ],
+      "killers": [
+        {
+          "test": "REN-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M8",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/orchestration/c9.contract.ts"
+      ],
+      "killers": [
+        {
+          "test": "REN-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-seal.json",
+      "id": "SEAL-M1",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/emission/seal.service.ts",
+        "src/widgets/emission/seal.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "SEAL-1",
+          "neutralisers": null
+        },
+        {
+          "test": "SEAL-4",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-seal.json",
+      "id": "SEAL-M2",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/emission/seal.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "SEAL-1",
+          "neutralisers": null
+        },
+        {
+          "test": "SEAL-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-seal.json",
+      "id": "SEAL-M3",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/emission/seal-verifier.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "SEAL-6",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-seal.json",
+      "id": "SEAL-M4",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/emission/seal-verifier.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "SEAL-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-seal.json",
+      "id": "SEAL-M5",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/emission/seal-verifier.service.ts"
+      ],
+      "killers": [
+        {
+          "test": "SEAL-3",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateP-seal.json",
+      "id": "SEAL-M6",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/emission/seal-h6.architecture.spec.ts"
+      ],
+      "killers": [
+        {
+          "test": "SEAL-4",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateT-tables.json",
+      "id": "TAB-M1",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/carriers/channel-profile.ts"
+      ],
+      "killers": [
+        {
+          "test": "TAB-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateT-tables.json",
+      "id": "TAB-M2",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widget-contract/tables.ts"
+      ],
+      "killers": [
+        {
+          "test": "TAB-2",
+          "neutralisers": null
+        },
+        {
+          "test": "TAB-9",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateT-tables.json",
+      "id": "TAB-M3",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widgets/carriers/channel-profile.ts"
+      ],
+      "killers": [
+        {
+          "test": "TAB-2",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateT-tables.json",
+      "id": "TAB-M4",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widget-contract/tables.ts"
+      ],
+      "killers": [
+        {
+          "test": "TAB-2",
+          "neutralisers": null
+        },
+        {
+          "test": "TAB-9",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateT-tables.json",
+      "id": "TAB-M5",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widget-contract/owner-classes.ts"
+      ],
+      "killers": [
+        {
+          "test": "TAB-5",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateT-tables.json",
+      "id": "TAB-M6",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widget-contract/owner-classes.ts"
+      ],
+      "killers": [
+        {
+          "test": "TAB-6",
+          "neutralisers": null
+        }
+      ]
+    },
+    {
+      "battery": "gateT-tables.json",
+      "id": "TAB-M7",
+      "expect": "build-killed",
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "edits": [
+        "src/widget-contract/owner-classes.ts"
+      ],
+      "killers": [
+        {
+          "test": "TAB-5",
+          "neutralisers": null
+        },
+        {
+          "test": "TAB-7",
+          "neutralisers": null
+        }
+      ]
+    }
+  ],
+  "status": "DRY-RUN",
+  "finishedAt": "2026-09-19T09:24:38.062Z"
+}

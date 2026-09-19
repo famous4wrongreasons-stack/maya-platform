@@ -1,0 +1,72 @@
+[
+  {
+    "run": "node24-w4",
+    "sha256": "c306b0e528dbda0fa3a7904dad4fd6cfb74db7fa572bff452b34589bdaa87429",
+    "numTotalTestSuites": 530,
+    "numPassedTestSuites": 529,
+    "numFailedTestSuites": 1,
+    "numTotalTests": 5017,
+    "numPassedTests": 5017,
+    "numFailedTests": 0,
+    "success": false,
+    "failedSuites": [
+      {
+        "name": "src/action-engine/package5-r08-native-feedback.architecture.spec.ts",
+        "message": "  \u25cf Test suite failed to run\n\n    A jest worker process (pid=55337) was terminated by another process: signal=SIGSEGV, exitCode=null. Operating system logs may contain more information on why this occurred.\n\n      at ChildProcessWorker._onExit (../node_modules/jest-worker/build/index.js:964:23)\n"
+      }
+    ]
+  },
+  {
+    "run": "node24-w2",
+    "sha256": "7ad623fd6c3e5a90f86d6674a49cfc68433da34494d1950a3c9c720c8fb91e60",
+    "numTotalTestSuites": 530,
+    "numPassedTestSuites": 529,
+    "numFailedTestSuites": 1,
+    "numTotalTests": 5014,
+    "numPassedTests": 5014,
+    "numFailedTests": 0,
+    "success": false,
+    "failedSuites": [
+      {
+        "name": "src/crm/client-loyalty-read.architecture.spec.ts",
+        "message": "  \u25cf Test suite failed to run\n\n    A jest worker process (pid=55876) was terminated by another process: signal=SIGSEGV, exitCode=null. Operating system logs may contain more information on why this occurred.\n\n      at ChildProcessWorker._onExit (../node_modules/jest-worker/build/index.js:964:23)\n"
+      }
+    ]
+  },
+  {
+    "run": "node22-w4",
+    "sha256": "859547730a21f32629fe2559e2f552357b66e14fefeeddb0cdf9687268b28b4e",
+    "numTotalTestSuites": 530,
+    "numPassedTestSuites": 530,
+    "numFailedTestSuites": 0,
+    "numTotalTests": 5022,
+    "numPassedTests": 5022,
+    "numFailedTests": 0,
+    "success": true,
+    "failedSuites": []
+  },
+  {
+    "run": "node22-inband",
+    "sha256": "3ff144f8828c078e12357653db8c35c38d18b96037c25e7dbae86db6995f8304",
+    "numTotalTestSuites": 530,
+    "numPassedTestSuites": 530,
+    "numFailedTestSuites": 0,
+    "numTotalTests": 5022,
+    "numPassedTests": 5022,
+    "numFailedTests": 0,
+    "success": true,
+    "failedSuites": []
+  },
+  {
+    "run": "export-closing-regression",
+    "sha256": "8c2191e1b594b8e74279255005b9e7a89b1d8cd1267a9ae12aeb33bc17c68b90",
+    "numTotalTestSuites": 530,
+    "numPassedTestSuites": 530,
+    "numFailedTestSuites": 0,
+    "numTotalTests": 5022,
+    "numPassedTests": 5022,
+    "numFailedTests": 0,
+    "success": true,
+    "failedSuites": []
+  }
+]

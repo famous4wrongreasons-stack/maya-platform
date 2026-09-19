@@ -1,0 +1,14 @@
+{
+  "baselineRun": 35269541157,
+  "recoveredRun": 35433039533,
+  "baselinePythonFailures": 64,
+  "recoveredPythonFailures": 64,
+  "sameFailureIdentifiers": true,
+  "newFailureIdentifiers": [],
+  "resolvedIdentifiers": [],
+  "backendAudit": "12 vulnerabilities (1 moderate, 11 high) in both runs",
+  "frontendError": "missing isolated SaaS chat storage in both runs",
+  "mutationWorkflowRegistered": false,
+  "mutationDispatch": "HTTP 404; no run created",
+  "defaultBranchOrSettingsChanged": false
+}

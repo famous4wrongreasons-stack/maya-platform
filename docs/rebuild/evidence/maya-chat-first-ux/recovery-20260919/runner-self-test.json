@@ -1,0 +1,7 @@
+{
+  "exit": 0,
+  "checks": 16,
+  "status": "PASS",
+  "logSha256": "a2d145bd9ddbf561fee69b3a5e0c75cea684af2fa3cad744e16d97983a973127",
+  "scope": "runner classification/negative controls, not completion of declared mutation batteries"
+}

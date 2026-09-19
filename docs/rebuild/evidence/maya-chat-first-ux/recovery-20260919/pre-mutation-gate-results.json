@@ -1,0 +1,304 @@
+[
+  {
+    "label": "export-closing-regression",
+    "exit": 0,
+    "seconds": 390.99,
+    "command": [
+      "node",
+      "node_modules/jest/bin/jest.js",
+      "--runInBand",
+      "--silent",
+      "--json",
+      "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-closing-regression.json"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "typecheck",
+    "exit": 0,
+    "seconds": 8.12,
+    "command": [
+      "npm",
+      "run",
+      "typecheck"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "typecheck-scripts",
+    "exit": 0,
+    "seconds": 18.46,
+    "command": [
+      "npm",
+      "run",
+      "typecheck:scripts"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "typecheck-live",
+    "exit": 0,
+    "seconds": 7.69,
+    "command": [
+      "npm",
+      "run",
+      "typecheck:widgets-live"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "lint",
+    "exit": 0,
+    "seconds": 57.89,
+    "command": [
+      "npm",
+      "run",
+      "lint"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "prisma-validate",
+    "exit": 0,
+    "seconds": 0.73,
+    "command": [
+      "npx",
+      "prisma",
+      "validate"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "build",
+    "exit": 0,
+    "seconds": 21.55,
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "k3-check",
+    "exit": 0,
+    "seconds": 3.16,
+    "command": [
+      "node",
+      "scripts/k3-gateway-check.mjs"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "live",
+    "exit": 0,
+    "seconds": 26.04,
+    "command": [
+      "npm",
+      "run",
+      "test:widgets:live",
+      "--",
+      "--json",
+      "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/live.json"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "binary",
+    "exit": 0,
+    "seconds": 9.15,
+    "command": [
+      "npm",
+      "run",
+      "test:widgets:http"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "live-evidence-verify",
+    "exit": 0,
+    "seconds": 0.04,
+    "command": [
+      "node",
+      "scripts/widgets-evidence-verify.mjs"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "e2e",
+    "exit": 0,
+    "seconds": 0.8,
+    "command": [
+      "npm",
+      "run",
+      "test:e2e",
+      "--",
+      "--runInBand"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "maya_gates_smoke_recovery_20260919-migrate",
+    "exit": 0,
+    "seconds": 1.22,
+    "command": [
+      "npx",
+      "prisma",
+      "migrate",
+      "deploy"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "maya_gates_smoke_recovery_20260919-seed",
+    "exit": 0,
+    "seconds": 0.6,
+    "command": [
+      "npm",
+      "run",
+      "prisma:seed"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "maya_gates_smoke_recovery_20260919-proof",
+    "exit": 1,
+    "seconds": 4.25,
+    "command": [
+      "npm",
+      "run",
+      "test:http"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "maya_c06_appointment_recovery_20260919-migrate",
+    "exit": 0,
+    "seconds": 1.27,
+    "command": [
+      "npx",
+      "prisma",
+      "migrate",
+      "deploy"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "maya_c06_appointment_recovery_20260919-proof",
+    "exit": 1,
+    "seconds": 1.03,
+    "command": [
+      "npm",
+      "run",
+      "action-engine:appointment-proof:ts"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "maya_c06_recovery_20260919-migrate",
+    "exit": 0,
+    "seconds": 1.21,
+    "command": [
+      "npx",
+      "prisma",
+      "migrate",
+      "deploy"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "maya_c06_recovery_20260919-proof",
+    "exit": 1,
+    "seconds": 1.25,
+    "command": [
+      "npm",
+      "run",
+      "action-engine:proof:ts"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "all-contract-checks",
+    "exit": 0,
+    "seconds": 197.52,
+    "command": [
+      "bash",
+      "docs/rebuild/evidence/maya-chat-first-ux/run-all-checks.sh"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a"
+  },
+  {
+    "label": "historical-wave-2-gate",
+    "exit": 0,
+    "seconds": 134.69,
+    "command": [
+      "bash",
+      "docs/rebuild/evidence/maya-chat-first-ux/wave-2-final-gate.sh"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent"
+  },
+  {
+    "label": "historical-wave-3-gate",
+    "exit": 0,
+    "seconds": 67.01,
+    "command": [
+      "bash",
+      "docs/rebuild/evidence/maya-chat-first-ux/wave-3-final-gate.sh"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent"
+  },
+  {
+    "label": "historical-wave-4-gate",
+    "exit": 0,
+    "seconds": 58.97,
+    "command": [
+      "bash",
+      "docs/rebuild/evidence/maya-chat-first-ux/wave-4-final-gate.sh"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent"
+  },
+  {
+    "label": "historical-wave-5-gate",
+    "exit": 0,
+    "seconds": 60.21,
+    "command": [
+      "bash",
+      "docs/rebuild/evidence/maya-chat-first-ux/wave-5-final-gate.sh"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent"
+  },
+  {
+    "label": "final-figures",
+    "exit": 0,
+    "seconds": 1.9,
+    "command": [
+      "node",
+      "docs/rebuild/evidence/maya-chat-first-ux/final-figures.mjs"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent"
+  },
+  {
+    "label": "battery-load",
+    "exit": 0,
+    "seconds": 0.09,
+    "command": [
+      "node",
+      "scripts/widgets-mutation-battery.mjs",
+      "--dry-run",
+      "--out",
+      "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/battery-load.json"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  },
+  {
+    "label": "battery-self-test",
+    "exit": 0,
+    "seconds": 12.27,
+    "command": [
+      "node",
+      "scripts/widgets-mutation-battery.mjs",
+      "--self-test"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/maya-saas-backend"
+  }
+]

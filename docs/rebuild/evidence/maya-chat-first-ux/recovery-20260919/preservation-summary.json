@@ -1,0 +1,19 @@
+{
+  "initialRemote": "a2f98a520768fedc65e54b4a19fc3931ddf34d48",
+  "recoveredLocal": "df6c3a5a56819194c9df9d39b902f26dc6ea33c5",
+  "initialAhead": 33,
+  "initialBehind": 0,
+  "initialCanonicalWorktreeDirtyEntries": 0,
+  "recoveredCommits": 33,
+  "registeredWorktrees": 31,
+  "existingWorktreesInspected": 22,
+  "recentRefOrReflogCommitsOutsideRecoveredHead": 0,
+  "mainDefaultStatusEntries": 25,
+  "mainExpandedStatusEntries": 31,
+  "mainProtectedFileHashes": 23,
+  "forbiddenDestructiveGitOperations": 0,
+  "bundleSha256": "ec5413d5ac548dfc1cbc9732ab901b8d68506efd50c6856323f51dd180745578",
+  "wholeCommitExportSha256": "871c6bce7f7a3fa728e0bf1ab03a1d11168179e2e1cef308f9418b35383948f5",
+  "publication": "ordinary fast-forward push to canonical branch; not certification",
+  "privateEvidenceLocation": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919"
+}

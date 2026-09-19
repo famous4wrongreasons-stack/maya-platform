@@ -1,0 +1,253 @@
+{
+  "recordedAt": "2026-09-19T11:00:51.849020+00:00",
+  "verificationComplete": false,
+  "wave1Certified": false,
+  "codeHead": "df6c3a5a56819194c9df9d39b902f26dc6ea33c5",
+  "declaredBatteries": 19,
+  "completedBatteries": 11,
+  "completedResults": [
+    {
+      "gate": "8",
+      "worker": 7,
+      "database": "maya_widget_gate_proof_recovery_20260919_g8",
+      "exit": 0,
+      "seconds": 180.97,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "8",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/mutation-shards/gate8.json",
+        "--keep"
+      ],
+      "report": "gate8.json",
+      "status": "AS-DECLARED",
+      "mutants": 5,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "f16b1adfbec06576a06fff0d1347afb7a3146cab275bd264c6c00f07be7d41bd"
+    },
+    {
+      "gate": "4",
+      "worker": 4,
+      "database": "maya_widget_gate_proof_recovery_20260919_g4",
+      "exit": 0,
+      "seconds": 1411.83,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "4",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/mutation-shards/gate4.json",
+        "--keep"
+      ],
+      "report": "gate4.json",
+      "status": "AS-DECLARED",
+      "mutants": 4,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "774566323ca705f7372b0ae57b61000e6720df2cba88c2bb02cbc72d7636c97a"
+    },
+    {
+      "gate": "12k",
+      "worker": 3,
+      "database": "maya_widget_gate_proof_recovery_20260919_g12k",
+      "exit": 0,
+      "seconds": 1742.36,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "12k",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/mutation-shards/gate12k.json",
+        "--keep"
+      ],
+      "report": "gate12k.json",
+      "status": "AS-DECLARED",
+      "mutants": 3,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "2ce74b7b073417f35ffac9294946df4826f143ca33a35620926da54321a93a79"
+    },
+    {
+      "gate": "12",
+      "worker": 2,
+      "database": "maya_widget_gate_proof_recovery_20260919_g12",
+      "exit": 0,
+      "seconds": 2829.24,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "12",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/mutation-shards/gate12.json",
+        "--keep"
+      ],
+      "report": "gate12.json",
+      "status": "AS-DECLARED",
+      "mutants": 5,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "5d817f1275651a6d4efa3cbfecda38cf5d5931b83e0eaf1ff890c8c635bb105d"
+    },
+    {
+      "gate": "10a",
+      "worker": 0,
+      "database": "maya_widget_gate_proof_recovery_20260919_g10a",
+      "exit": 0,
+      "seconds": 2830.49,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "10a",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/mutation-shards/gate10a.json",
+        "--keep"
+      ],
+      "report": "gate10a.json",
+      "status": "AS-DECLARED",
+      "mutants": 5,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "8a542c6ac34f9016b18d40626ad78e251e92bc25c0409b870fa608f19fff612f"
+    },
+    {
+      "gate": "9a",
+      "worker": 3,
+      "database": "maya_widget_gate_proof_recovery_20260919_g9a",
+      "exit": 0,
+      "seconds": 1592.81,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "9a",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/mutation-shards/gate9a.json",
+        "--keep"
+      ],
+      "report": "gate9a.json",
+      "status": "AS-DECLARED",
+      "mutants": 2,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "f3c1e5350d64e96c2e8ba28c8c1e66673d2d76db3b97999e36d0d7443d8b4551"
+    },
+    {
+      "gate": "H-harness",
+      "worker": 2,
+      "database": "maya_widget_gate_proof_recovery_20260919_gh_harness",
+      "exit": 0,
+      "seconds": 633.77,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "H-harness",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/mutation-shards/gateH-harness.json",
+        "--keep"
+      ],
+      "report": "gateH-harness.json",
+      "status": "AS-DECLARED",
+      "mutants": 19,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "dd6951662350101998763f87c6cc6fd64529bef3a6bb8dec21c80c1eb85b078a"
+    },
+    {
+      "gate": "11",
+      "worker": 1,
+      "database": "maya_widget_gate_proof_recovery_20260919_g11",
+      "exit": 0,
+      "seconds": 3924.87,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "11",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/mutation-shards/gate11.json",
+        "--keep"
+      ],
+      "report": "gate11.json",
+      "status": "AS-DECLARED",
+      "mutants": 7,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "b827abafb5c694503040dc773f8b551fdcaf0bb98a797fd4ba3890211e6e038d"
+    },
+    {
+      "gate": "6",
+      "worker": 5,
+      "database": "maya_widget_gate_proof_recovery_20260919_g6",
+      "exit": 0,
+      "seconds": 4375.49,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "6",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/mutation-shards/gate6.json",
+        "--keep"
+      ],
+      "report": "gate6.json",
+      "status": "AS-DECLARED",
+      "mutants": 21,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "7f7600b9ea5f8f657473bf912fa86ba8201e3ffdb93b50c85c4f802b5c1801ce"
+    },
+    {
+      "gate": "8c",
+      "worker": 7,
+      "database": "maya_widget_gate_proof_recovery_20260919_g8c",
+      "exit": 0,
+      "seconds": 4313.69,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "8c",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/mutation-shards/gate8c.json",
+        "--keep"
+      ],
+      "report": "gate8c.json",
+      "status": "AS-DECLARED",
+      "mutants": 8,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "8855b376b37cd6bcb2cfa2ab808a027564146b84811e26e7bf33692ed904ce72"
+    },
+    {
+      "gate": "8r",
+      "worker": 4,
+      "database": "maya_widget_gate_proof_recovery_20260919_g8r",
+      "exit": 0,
+      "seconds": 3280.12,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "8r",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/mutation-shards/gate8r.json",
+        "--keep"
+      ],
+      "report": "gate8r.json",
+      "status": "AS-DECLARED",
+      "mutants": 29,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "9ee41c1f8453e5c7cee460312d29a11e9fcaf0c6fa5ed1d1551ddc33c5235942"
+    }
+  ],
+  "note": "Intermediate preservation checkpoint only. Final mutation-results.json supersedes this snapshot when all batteries finish."
+}

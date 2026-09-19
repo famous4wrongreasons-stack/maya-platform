@@ -1,0 +1,130 @@
+{
+  "testedCode": "df6c3a5a",
+  "live": {
+    "numTotalTestSuites": 12,
+    "numPassedTestSuites": 12,
+    "numTotalTests": 244,
+    "numPassedTests": 244,
+    "success": true
+  },
+  "binary": {
+    "contract": "maya.widgets-intent-http-proof/2",
+    "database": "maya_widget_gate_proof_recovery_20260919",
+    "cases_dir": "scripts/widgets-http-proof",
+    "cases_dir_explicit": false,
+    "evidence": {
+      "enabled": true,
+      "dir": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/live-evidence"
+    },
+    "cases": 10,
+    "status": "PASS",
+    "failed": 0,
+    "binary": {
+      "health": 200
+    },
+    "mint_provenance": {
+      "captured": 0,
+      "malformed": 0
+    },
+    "results": [
+      {
+        "id": "SMOKE-G11-CONTROL",
+        "gate": "11",
+        "proofClass": "CONTROL",
+        "source": "scripts/widgets-http-proof/gate11.cases.ts",
+        "ok": true,
+        "retainedTenants": []
+      },
+      {
+        "id": "SMOKE-G12-CONTROL",
+        "gate": "12",
+        "proofClass": "CONTROL",
+        "source": "scripts/widgets-http-proof/gate12.cases.ts",
+        "ok": true,
+        "retainedTenants": []
+      },
+      {
+        "id": "SMOKE-G4-CONTROL",
+        "gate": "4",
+        "proofClass": "CONTROL",
+        "source": "scripts/widgets-http-proof/gate4.cases.ts",
+        "ok": true,
+        "retainedTenants": []
+      },
+      {
+        "id": "SMOKE-G6-CONTROL",
+        "gate": "6",
+        "proofClass": "CONTROL",
+        "source": "scripts/widgets-http-proof/gate6.cases.ts",
+        "ok": true,
+        "retainedTenants": []
+      },
+      {
+        "id": "SMOKE-G6-BODY",
+        "gate": "6",
+        "proofClass": "CONTROL",
+        "source": "scripts/widgets-http-proof/gate6.cases.ts",
+        "ok": true,
+        "retainedTenants": []
+      },
+      {
+        "id": "SMOKE-G7-CONTROL",
+        "gate": "7",
+        "proofClass": "CONTROL",
+        "source": "scripts/widgets-http-proof/gate7.cases.ts",
+        "ok": true,
+        "retainedTenants": []
+      },
+      {
+        "id": "SMOKE-G8-NULL-INPUTS",
+        "gate": "8",
+        "proofClass": "CONTROL",
+        "source": "scripts/widgets-http-proof/gate8.cases.ts",
+        "ok": true,
+        "retainedTenants": []
+      },
+      {
+        "id": "SMOKE-G8R-CONTROL",
+        "gate": "8-R",
+        "proofClass": "CONTROL",
+        "source": "scripts/widgets-http-proof/gate8r.cases.ts",
+        "ok": true,
+        "retainedTenants": []
+      },
+      {
+        "id": "P-F88",
+        "gate": "shape",
+        "proofClass": "LIVE",
+        "source": "scripts/widgets-http-proof/gateP-f88.cases.ts",
+        "ok": true,
+        "retainedTenants": []
+      },
+      {
+        "id": "PR-G2EQ-BIN",
+        "gate": "2",
+        "proofClass": "LIVE-TRANSPORT",
+        "source": "scripts/widgets-http-proof/gateP-principal.cases.ts",
+        "ok": true,
+        "retainedTenants": []
+      }
+    ]
+  },
+  "evidenceVerifier": {
+    "contract": "maya.widgets-evidence-verify/1",
+    "manifest": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/live-evidence/evidence-manifest.jsonl",
+    "manifest_sha256": "1b63a75c714f6230e2f0348237bb6a88b17e32ac841b44a836141ff65553401e",
+    "inventory": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/export-df6c3a5a/docs/rebuild/evidence/maya-chat-first-ux/gate-clause-inventory.json",
+    "lines": 2,
+    "claims": 0,
+    "captured_mints": {
+      "HTTP": 0,
+      "BIN": 0
+    },
+    "refused_mints": 0,
+    "records_before_teardown": 139,
+    "harness_files_scanned": 16,
+    "violations": []
+  },
+  "productionRuntimeContacted": false,
+  "productionMutations": 0
+}
