@@ -1,3 +1,13 @@
+import {
+  readHttpAdmissionCounts,
+  withHttpSetupTrial,
+  seedHttpLoyaltyAccount,
+  seedHttpCrmPreview,
+  withHttpActiveTenant,
+  requireHttpProofDatabase,
+  seedHttpQuotaPrerequisite,
+  seedHttpVerifiedClient,
+} from './http-smoke-fixtures';
 import assert from 'node:assert/strict';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
@@ -22,6 +32,7 @@ const demoPassword =
   process.env.SEED_DEMO_TENANT_ADMIN_PASSWORD ?? 'ChangeMe123!';
 const fixedPhoneCode = '123456';
 const demoTenantSlug = 'demo-business';
+let commandNumber = 0;
 const smokeRunId = randomUUID().replace(/-/g, '');
 const smokeClientIp = `2001:db8:${smokeRunId.slice(0, 4)}:${smokeRunId.slice(4, 8)}::1`;
 
@@ -80,6 +91,12 @@ async function request(
 ): Promise<ApiResponse> {
   const headers = new Headers(init.headers);
   headers.set('x-forwarded-for', smokeClientIp);
+  // Each scripted command is an explicit test event. Replay tests supply their own stable key.
+  if (
+    ['POST', 'PATCH', 'PUT', 'DELETE'].includes(init.method ?? '') &&
+    !headers.has('idempotency-key')
+  )
+    headers.set('idempotency-key', `smoke:${smokeRunId}:${++commandNumber}`);
   const response = await fetch(`${apiBase}${path}`, { ...init, headers });
   let data: unknown = null;
 
@@ -101,7 +118,7 @@ async function expectStatus(
   assert.equal(
     response.status,
     expectedStatus,
-    `${init.method ?? 'GET'} ${path} returned ${response.status}`,
+    `${init.method ?? 'GET'} ${path} returned ${response.status}: ${JSON.stringify(response.data)}`,
   );
   return response.data;
 }
@@ -162,7 +179,7 @@ function startServer() {
       AUTH_TRUST_PROXY: '127.0.0.1,::1',
       HOST: '127.0.0.1',
       AI_CORE_PROVIDER: 'safe',
-      HTTP_SMOKE_ENABLE_LEGACY_AI_ONBOARDING: 'true',
+      HTTP_SMOKE_ENABLE_LEGACY_AI_ONBOARDING: 'false',
       NODE_ENV: 'test',
       PHONE_AUTH_DEBUG: 'true',
       PHONE_AUTH_FIXED_CODE: fixedPhoneCode,
@@ -285,9 +302,9 @@ async function runSmoke() {
   assert.equal(aiBlueprint.categoryId, 'business_barbershop');
   assert.equal(aiBlueprint.templateId, 'barbershop');
   assert.equal(aiBlueprint.industryPresetId, 'barbershop');
-  assert.equal(aiBlueprint.providerCount, 2);
-  assert.equal(asArray(aiBlueprint.services).length, 17);
-  assert.equal(asArray(aiBlueprint.weeklyRules).length, 7);
+  assert.equal(aiBlueprint.providerCount, null);
+  assert.equal(asArray(aiBlueprint.services).length, 0);
+  assert.equal(aiBlueprint.calendarSource, 'external');
   assert.deepEqual(aiDraft.missing_fields, ['calendar_source']);
   assert(Array.isArray(aiDraft.quick_replies));
   assert.equal(aiDraft.interpreter_source, 'safe_fallback');
@@ -307,13 +324,29 @@ async function runSmoke() {
       }),
     }),
   );
-  assert.deepEqual(completedAiDraft.missing_fields, []);
+  assert.deepEqual(completedAiDraft.missing_fields, ['calendar_source']);
 
+  const admissionsBeforeRefusals = await readHttpAdmissionCounts();
+  const missingRevision = asRecord(
+    await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/confirm`, 400, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        draftToken: aiDraftToken,
+        ownerEmail: `ai-smoke-${aiSuffix}@example.ru`,
+        ownerName: 'AI Smoke Owner',
+        ownerPhone: '+79990000000',
+      }),
+    }),
+  );
+  assert.equal(asRecord(missingRevision.error).code, 'validation');
+  assert.equal(asRecord(missingRevision.error).field, 'expectedDraftRevision');
   await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/confirm`, 400, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
       draftToken: aiDraftToken,
+      expectedDraftRevision: numberField(completedAiDraft, 'revision'),
       ownerEmail: `ai-smoke-${aiSuffix}@example.ru`,
       ownerPhone: `+7997${String(aiSuffix % 10_000_000).padStart(7, '0')}`,
     }),
@@ -324,34 +357,44 @@ async function runSmoke() {
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
       draftToken: aiDraftToken,
+      expectedDraftRevision: numberField(completedAiDraft, 'revision'),
       ownerEmail: `ai-smoke-${aiSuffix}@example.ru`,
       ownerName: 'AI Smoke Owner',
     }),
   });
 
+  const claimFixture = await seedHttpCrmPreview(aiDraftId);
   const missingTrialActivation = asRecord(
+    await expectStatus(
+      `/onboarding/ai/drafts/${claimFixture.id}/confirm`,
+      400,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          draftToken: claimFixture.token,
+          expectedDraftRevision: claimFixture.revision,
+          ownerEmail: `ai-smoke-${aiSuffix}@example.ru`,
+          ownerName: 'AI Smoke Owner',
+          ownerPhone: `+7997${String(aiSuffix % 10_000_000).padStart(7, '0')}`,
+        }),
+      },
+    ),
+  );
+  // A26/B4 receipt confirmation superseded the pre-receipt error taxonomy.
+  // This well-formed request reaches the canonical claim gate, not DTO validation.
+  assert.equal(
+    missingTrialActivation.message,
+    'Trial activation claim required',
+  );
+
+  const internalAiRefusal = asRecord(
     await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/confirm`, 400, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         draftToken: aiDraftToken,
-        ownerEmail: `ai-smoke-${aiSuffix}@example.ru`,
-        ownerName: 'AI Smoke Owner',
-        ownerPhone: `+7997${String(aiSuffix % 10_000_000).padStart(7, '0')}`,
-      }),
-    }),
-  );
-  assert.equal(
-    asRecord(missingTrialActivation.error).code,
-    'trial_activation_token_required',
-  );
-
-  const confirmedAiSignup = asRecord(
-    await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/confirm`, 201, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        draftToken: aiDraftToken,
+        expectedDraftRevision: numberField(completedAiDraft, 'revision'),
         trialActivationToken,
         ownerEmail: `ai-smoke-${aiSuffix}@example.ru`,
         ownerName: 'AI Smoke Owner',
@@ -359,8 +402,58 @@ async function runSmoke() {
       }),
     }),
   );
-  assert.equal(confirmedAiSignup.branding_mode, 'logo_only');
-  assert.equal(confirmedAiSignup.next_step, 'upload_logo_or_open_app');
+  assert.equal(internalAiRefusal.message, 'AI onboarding draft is incomplete');
+  const rejectedDraft = asRecord(
+    await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/read`, 200, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ draftToken: aiDraftToken }),
+    }),
+  );
+  assert.equal(rejectedDraft.status, 'draft');
+  assert.equal(rejectedDraft.revision, completedAiDraft.revision);
+  const afterRefusals = asRecord(
+    await expectStatus('/admin/analytics/trials', 200, {
+      headers: authHeaders(ownerToken),
+    }),
+  );
+  assert.equal(
+    numberField(asRecord(afterRefusals.totals), 'connected_businesses'),
+    numberField(totalsBefore, 'connected_businesses'),
+  );
+
+  assert.deepEqual(await readHttpAdmissionCounts(), admissionsBeforeRefusals);
+
+  // The approved internal path is a separate explicit A26 activation, followed
+  // by A28 commands. Never reuse the draft-bound activation or bypass its receipt.
+  const internalActivation = asRecord(
+    await expectStatus('/onboarding/trial-activations', 201, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ source: 'maya_os' }),
+    }),
+  );
+  const confirmedAiSignup = asRecord(
+    await expectStatus('/onboarding/trial', 201, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        trialActivationToken: stringField(
+          internalActivation,
+          'activation_token',
+        ),
+        name: `AI Smoke ${aiSuffix}`,
+        slug: `ai-smoke-${aiSuffix}`,
+        ownerEmail: `ai-smoke-${aiSuffix}@example.ru`,
+        ownerName: 'AI Smoke Owner',
+        ownerPhone: `+7997${String(aiSuffix % 10_000_000).padStart(7, '0')}`,
+        industryPresetId: 'barbershop',
+        calendarSource: 'internal',
+        branchTimezone: 'Europe/Moscow',
+      }),
+    }),
+  );
+  assert.equal(confirmedAiSignup.next_step, 'configure_internal_calendar');
   assert.equal(asRecord(confirmedAiSignup.trial).days, 10);
   assert.equal(asRecord(confirmedAiSignup.trial).full_access, true);
   assert.equal(
@@ -372,6 +465,81 @@ async function runSmoke() {
   const aiTenantSlug = stringField(aiTenant, 'slug');
   assert.equal(stringField(aiTenant, 'name'), `AI Smoke ${aiSuffix}`);
   assert(aiTenantSlug.startsWith('ai-smoke-'));
+  const fullTrialEntitlements = asRecord(
+    await expectStatus('/features/effective', 200, {
+      headers: authHeaders(stringField(confirmedAiSignup, 'access_token')),
+    }),
+  );
+  const fullTrialFeatureKeys = asArray(fullTrialEntitlements.featureKeys);
+  assert(fullTrialFeatureKeys.includes('ai.owner'));
+  assert(fullTrialFeatureKeys.includes('ai.admin'));
+  assert(fullTrialFeatureKeys.includes('ai.consultant'));
+  assert(fullTrialFeatureKeys.includes('loyalty'));
+  assert(fullTrialFeatureKeys.includes('customer.portal'));
+  assert(
+    !fullTrialFeatureKeys.includes('video_analytics'),
+    'Planned video feature must not be granted: ' +
+      JSON.stringify(fullTrialFeatureKeys),
+  );
+
+  await seedHttpQuotaPrerequisite(aiTenantId);
+  const internalOwnerToken = stringField(confirmedAiSignup, 'access_token');
+  await expectStatus('/internal-calendar/providers', 201, {
+    method: 'POST',
+    headers: {
+      ...authHeaders(internalOwnerToken),
+      'content-type': 'application/json',
+      'idempotency-key': `smoke:${smokeRunId}:second-provider`,
+    },
+    body: JSON.stringify({ displayName: 'Smoke Barber', title: 'Barber' }),
+  });
+  for (const [index, service] of asArray(
+    asArray(onboardingTemplates.templates)
+      .map(asRecord)
+      .find((t) => t.id === 'barbershop')!.suggested_services,
+  )
+    .map(asRecord)
+    .entries()) {
+    await expectStatus('/internal-calendar/services', 201, {
+      method: 'POST',
+      headers: {
+        ...authHeaders(internalOwnerToken),
+        'content-type': 'application/json',
+        'idempotency-key': `smoke:${smokeRunId}:service:${index}`,
+      },
+      body: JSON.stringify({
+        name: service.name,
+        price: service.price,
+        durationMinutes: service.durationMinutes,
+      }),
+    });
+  }
+  const provisionedSetup = asRecord(
+    await expectStatus('/internal-calendar/setup', 200, {
+      headers: authHeaders(internalOwnerToken),
+    }),
+  );
+  for (const provider of asArray(provisionedSetup.providers).map(asRecord)) {
+    await expectStatus(
+      `/internal-calendar/providers/${stringField(provider, 'id')}/schedule`,
+      200,
+      {
+        method: 'PUT',
+        headers: {
+          ...authHeaders(internalOwnerToken),
+          'content-type': 'application/json',
+          'idempotency-key': `smoke:${smokeRunId}:schedule:${stringField(provider, 'id')}`,
+        },
+        body: JSON.stringify({
+          rules: Array.from({ length: 7 }, (_, weekday) => ({
+            weekday,
+            startTime: '10:00',
+            endTime: '20:00',
+          })),
+        }),
+      },
+    );
+  }
 
   const analyticsAfterRegistration = asRecord(
     await expectStatus('/admin/analytics/trials', 200, {
@@ -396,7 +564,7 @@ async function runSmoke() {
   const totalsWithAbandonedSwipe = asRecord(analyticsWithAbandonedSwipe.totals);
   assert.equal(
     numberField(totalsWithAbandonedSwipe, 'trial_swipes'),
-    numberField(totalsBefore, 'trial_swipes') + 2,
+    numberField(totalsBefore, 'trial_swipes') + 3,
   );
   assert.equal(
     numberField(totalsWithAbandonedSwipe, 'connected_businesses'),
@@ -426,6 +594,19 @@ async function runSmoke() {
   const staffQuotaBeforeProviderLink = asRecord(quotaBeforeProviderLink.staff);
   const staffEmail = `barber-smoke-${aiSuffix}@example.ru`;
   const staffPassword = 'BarberSmoke123!';
+  // Tenant-owner onboarding does not confer the platform/tenant-admin staff provisioning role.
+  await expectStatus(
+    `/admin/tenants/${aiTenantId}/providers/${stringField(unlinkedBarber, 'id')}/user`,
+    403,
+    {
+      method: 'POST',
+      headers: {
+        ...authHeaders(aiSignupToken),
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ email: staffEmail, password: staffPassword }),
+    },
+  );
   const providerUser = asRecord(
     await expectStatus(
       `/admin/tenants/${aiTenantId}/providers/${stringField(unlinkedBarber, 'id')}/user`,
@@ -433,7 +614,7 @@ async function runSmoke() {
       {
         method: 'POST',
         headers: {
-          ...authHeaders(aiSignupToken),
+          ...authHeaders(ownerToken),
           'content-type': 'application/json',
         },
         body: JSON.stringify({
@@ -444,7 +625,7 @@ async function runSmoke() {
       },
     ),
   );
-  assert.equal(asRecord(providerUser.user).role, 'staff');
+  assert.equal(asRecord(providerUser.user).role, 'provider');
   assert.equal(providerUser.temporary_password, null);
   const quotaAfterProviderLink = asRecord(
     await expectStatus('/quotas', 200, {
@@ -462,7 +643,7 @@ async function runSmoke() {
     {
       method: 'POST',
       headers: {
-        ...authHeaders(aiSignupToken),
+        ...authHeaders(ownerToken),
         'content-type': 'application/json',
       },
       body: JSON.stringify({
@@ -483,12 +664,25 @@ async function runSmoke() {
     }),
   );
   const staffToken = stringField(staffLogin, 'access_token');
-  assert.equal(asRecord(staffLogin.user).role, 'staff');
-  const staffAnalytics = asRecord(
+  assert.equal(asRecord(staffLogin.user).role, 'provider');
+  const trialMeasurementRefusal = asRecord(
     await expectStatus(
       '/analytics/me?from=2026-07-01T00%3A00%3A00.000Z&to=2026-08-01T00%3A00%3A00.000Z',
-      200,
+      403,
       { headers: authHeaders(staffToken) },
+    ),
+  );
+  assert.equal(
+    trialMeasurementRefusal.message,
+    'measurement_membership_revoked',
+  );
+  const staffAnalytics = asRecord(
+    await withHttpActiveTenant(aiTenantId, () =>
+      expectStatus(
+        '/analytics/me?from=2026-07-01T00%3A00%3A00.000Z&to=2026-08-01T00%3A00%3A00.000Z',
+        200,
+        { headers: authHeaders(staffToken) },
+      ),
     ),
   );
   assert.equal(
@@ -503,18 +697,6 @@ async function runSmoke() {
   await expectStatus('/internal-calendar/setup', 403, {
     headers: authHeaders(staffToken),
   });
-  const fullTrialEntitlements = asRecord(
-    await expectStatus('/features/effective', 200, {
-      headers: authHeaders(aiSignupToken),
-    }),
-  );
-  const fullTrialFeatureKeys = asArray(fullTrialEntitlements.featureKeys);
-  assert(fullTrialFeatureKeys.includes('ai.owner'));
-  assert(fullTrialFeatureKeys.includes('ai.admin'));
-  assert(fullTrialFeatureKeys.includes('ai.consultant'));
-  assert(fullTrialFeatureKeys.includes('loyalty'));
-  assert(fullTrialFeatureKeys.includes('customer.portal'));
-  assert(!fullTrialFeatureKeys.includes('video_analytics'));
 
   await expectStatus(`/admin/tenants/${aiTenantId}`, 200, {
     method: 'PATCH',
@@ -522,7 +704,7 @@ async function runSmoke() {
       ...authHeaders(ownerToken),
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ allowSelfRegistration: true }),
+    body: JSON.stringify({ allowSelfRegistration: true, bookingMode: 'live' }),
   });
   const liveBarbershopConfig = asRecord(
     await expectStatus(`/mobile/config/${aiTenantSlug}`, 200),
@@ -556,9 +738,10 @@ async function runSmoke() {
     barbershopClientLogin,
     'access_token',
   );
-  const barbershopClientId = stringField(
-    asRecord(barbershopClientLogin.user),
-    'id',
+  const barbershopAccountId = stringField(barbershopClientLogin.user, 'id');
+  const barbershopClientId = await seedHttpVerifiedClient(
+    aiTenantId,
+    barbershopAccountId,
   );
   await expectStatus('/me', 200, {
     method: 'PATCH',
@@ -635,6 +818,7 @@ async function runSmoke() {
       headers: {
         ...authHeaders(barbershopClientToken),
         'content-type': 'application/json',
+        'idempotency-key': 'barbershop:' + smokeRunId,
       },
       body: JSON.stringify(barbershopAppointmentPayload),
     }),
@@ -643,14 +827,24 @@ async function runSmoke() {
   assert.equal(barbershopAppointment.source, 'internal');
   assert(numberField(barbershopAppointment, 'duration_minutes') > 0);
   assert(numberField(barbershopAppointment, 'total_price') > 0);
-  await expectStatus('/appointments', 400, {
-    method: 'POST',
-    headers: {
-      ...authHeaders(barbershopClientToken),
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify(barbershopAppointmentPayload),
-  });
+  // B31 preserves the existing duplicate policy: distinct aliases bind the same outcome.
+  for (const key of [
+    'barbershop:' + smokeRunId,
+    'barbershop-alias:' + smokeRunId,
+  ]) {
+    const retry = asRecord(
+      await expectStatus('/appointments', 201, {
+        method: 'POST',
+        headers: {
+          ...authHeaders(barbershopClientToken),
+          'content-type': 'application/json',
+          'idempotency-key': key,
+        },
+        body: JSON.stringify(barbershopAppointmentPayload),
+      }),
+    );
+    assert.equal(retry.id, barbershopAppointmentId);
+  }
 
   const barbershopAppointments = asArray(
     await expectStatus('/appointments/my', 200, {
@@ -694,10 +888,12 @@ async function runSmoke() {
   );
 
   const barbershopAnalytics = asRecord(
-    await expectStatus(
-      `/analytics/business?from=${encodeURIComponent(barbershopJournalFrom)}&to=${encodeURIComponent(barbershopJournalTo)}`,
-      200,
-      { headers: authHeaders(aiSignupToken) },
+    await withHttpActiveTenant(aiTenantId, () =>
+      expectStatus(
+        `/analytics/business?from=${encodeURIComponent(barbershopJournalFrom)}&to=${encodeURIComponent(barbershopJournalTo)}`,
+        200,
+        { headers: authHeaders(aiSignupToken) },
+      ),
     ),
   );
   const barbershopAnalyticsAppointments = asRecord(
@@ -711,9 +907,23 @@ async function runSmoke() {
     numberField(barbershopService, 'price') * 100,
   );
 
+  const missingLoyalty = asRecord(
+    await expectStatus('/loyalty/me', 409, {
+      headers: authHeaders(barbershopClientToken),
+    }),
+  );
+  assert.equal(
+    asRecord(missingLoyalty.error).code,
+    'loyalty_account_not_established',
+  );
+  await seedHttpLoyaltyAccount(
+    aiTenantId,
+    barbershopClientId,
+    barbershopAccountId,
+  );
   const loyaltyIdempotencyKey = randomUUID();
   const adjustedLoyalty = asRecord(
-    await expectStatus(`/admin/loyalty/${barbershopClientId}/adjust`, 201, {
+    await expectStatus(`/admin/loyalty/${barbershopAccountId}/adjust`, 201, {
       method: 'POST',
       headers: {
         ...authHeaders(aiSignupToken),
@@ -728,7 +938,7 @@ async function runSmoke() {
   );
   assert.equal(adjustedLoyalty.balance, 5_000);
   const replayedLoyalty = asRecord(
-    await expectStatus(`/admin/loyalty/${barbershopClientId}/adjust`, 201, {
+    await expectStatus(`/admin/loyalty/${barbershopAccountId}/adjust`, 201, {
       method: 'POST',
       headers: {
         ...authHeaders(aiSignupToken),
@@ -799,10 +1009,13 @@ async function runSmoke() {
     }),
   );
   assert.equal(asRecord(canceledBarbershop.appointment).status, 'canceled');
-  await expectStatus(`/appointments/${barbershopAppointmentId}/cancel`, 409, {
-    method: 'POST',
-    headers: authHeaders(barbershopClientToken),
-  });
+  const canceledAgain = asRecord(
+    await expectStatus(`/appointments/${barbershopAppointmentId}/cancel`, 201, {
+      method: 'POST',
+      headers: authHeaders(barbershopClientToken),
+    }),
+  );
+  assert.deepEqual(canceledAgain, canceledBarbershop);
 
   const confirmedDraft = asRecord(
     await expectStatus(`/onboarding/ai/drafts/${aiDraftId}/read`, 200, {
@@ -811,7 +1024,8 @@ async function runSmoke() {
       body: JSON.stringify({ draftToken: aiDraftToken }),
     }),
   );
-  assert.equal(confirmedDraft.status, 'confirmed');
+  assert.equal(confirmedDraft.status, 'draft');
+  assert.equal(confirmedDraft.revision, completedAiDraft.revision);
 
   await expectStatus(`/admin/tenants/${aiTenantId}`, 200, {
     method: 'PATCH',
@@ -853,9 +1067,12 @@ async function runSmoke() {
     (plan) => plan.name === 'business_plus',
   );
   assert(businessPlusPlan, 'Expected seeded business_plus plan');
-  const businessPlusPlanId = stringField(businessPlusPlan, 'id');
-  await expectStatus(`/admin/tenants/${aiTenantId}`, 200, {
+  assert(typeof businessPlusPlan.id === 'string');
+  await expectStatus(`/admin/tenants/${aiTenantId}`, 403, {
     headers: authHeaders(aiSignupToken),
+  });
+  await expectStatus(`/admin/tenants/${aiTenantId}`, 200, {
+    headers: authHeaders(ownerToken),
   });
 
   const demoConfig = asRecord(
@@ -946,6 +1163,10 @@ async function runSmoke() {
     }),
   );
   const clientToken = stringField(phoneLogin, 'access_token');
+  await seedHttpVerifiedClient(
+    demoTenantId,
+    stringField(phoneLogin.user, 'id'),
+  );
   const clientAiTools = asArray(
     asRecord(
       await expectStatus('/ai/tools?surface=web', 200, {
@@ -1061,11 +1282,22 @@ async function runSmoke() {
   assert.equal(asRecord(blockedLive.error).code, 'live_booking_disabled');
 
   const trialSlug = `smoke-${Date.now()}`;
+  const previewActivation = asRecord(
+    await expectStatus('/onboarding/trial-activations', 201, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ source: 'maya_os' }),
+    }),
+  );
   const trial = asRecord(
     await expectStatus('/onboarding/trial', 201, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
+        trialActivationToken: stringField(
+          previewActivation,
+          'activation_token',
+        ),
         name: 'Smoke Tenant',
         slug: trialSlug,
         ownerEmail: `${trialSlug}@example.test`,
@@ -1082,31 +1314,45 @@ async function runSmoke() {
   const trialConfig = asRecord(
     await expectStatus(`/mobile/config/${trialSlug}`, 200),
   );
-  assert.equal(trialConfig.client_registration_enabled, false);
+  assert.equal(trialConfig.client_registration_enabled, true);
   assert.equal(asRecord(trialConfig.industry_preset).id, 'education');
-  const blockedRegistration = asRecord(
-    await expectStatus('/auth/register', 403, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        tenantSlug: trialSlug,
-        name: 'Blocked Client',
-        email: `client-${trialSlug}@example.test`,
-        password: 'ClientPass123!',
+  await withHttpSetupTrial(stringField(trial.tenant, 'id'), async () => {
+    const setupConfig = asRecord(
+      await expectStatus(`/mobile/config/${trialSlug}`, 200),
+    );
+    assert.equal(setupConfig.client_registration_enabled, false);
+    const blockedRegistration = asRecord(
+      await expectStatus('/auth/register', 403, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          tenantSlug: trialSlug,
+          name: 'Blocked Client',
+          email: `client-${trialSlug}@example.test`,
+          password: 'ClientPass123!',
+        }),
       }),
-    }),
-  );
-  assert.equal(
-    asRecord(blockedRegistration.error).code,
-    'trial_client_registration_disabled',
-  );
+    );
+    assert.equal(
+      asRecord(blockedRegistration.error).code,
+      'trial_client_registration_disabled',
+    );
+  });
 
   const soloSlug = `solo-${Date.now()}`;
+  const soloActivation = asRecord(
+    await expectStatus('/onboarding/trial-activations', 201, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ source: 'maya_os' }),
+    }),
+  );
   const soloSignup = asRecord(
     await expectStatus('/onboarding/trial', 201, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
+        trialActivationToken: stringField(soloActivation, 'activation_token'),
         name: 'Smoke Solo Specialist',
         slug: soloSlug,
         ownerEmail: `${soloSlug}@example.test`,
@@ -1114,7 +1360,6 @@ async function runSmoke() {
         ownerPhone: `+7998${String(Date.now() % 10_000_000).padStart(7, '0')}`,
         industryPresetId: 'solo_specialist',
         calendarSource: 'internal',
-        planId: businessPlusPlanId,
         password: 'StrongPass123!',
         branchName: 'Private Studio',
         branchTimezone: 'Europe/Moscow',
@@ -1127,6 +1372,7 @@ async function runSmoke() {
   assert.equal(soloSignup.calendar_source, 'internal');
   assert.equal(soloTenant.calendar_source, 'internal');
 
+  await seedHttpQuotaPrerequisite(soloTenantId);
   const initialSoloSetup = asRecord(
     await expectStatus('/internal-calendar/setup', 200, {
       headers: authHeaders(soloToken),
@@ -1185,7 +1431,6 @@ async function runSmoke() {
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      status: 'active',
       bookingMode: 'live',
       allowSelfRegistration: true,
     }),
@@ -1215,6 +1460,10 @@ async function runSmoke() {
     }),
   );
   const soloClientToken = stringField(soloClientLogin, 'access_token');
+  await seedHttpVerifiedClient(
+    soloTenantId,
+    stringField(soloClientLogin.user, 'id'),
+  );
   await expectStatus('/me', 200, {
     method: 'PATCH',
     headers: {
@@ -1260,6 +1509,7 @@ async function runSmoke() {
       headers: {
         ...authHeaders(soloClientToken),
         'content-type': 'application/json',
+        'idempotency-key': 'solo:' + smokeRunId,
       },
       body: JSON.stringify(soloAppointmentPayload),
     }),
@@ -1267,14 +1517,21 @@ async function runSmoke() {
   assert.equal(soloAppointment.source, 'internal');
   assert.equal(soloAppointment.crm_external_id, null);
   const soloAppointmentId = stringField(soloAppointment, 'id');
-  await expectStatus('/appointments', 400, {
-    method: 'POST',
-    headers: {
-      ...authHeaders(soloClientToken),
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify(soloAppointmentPayload),
-  });
+  // B31 preserves the existing duplicate policy: distinct aliases bind the same outcome.
+  for (const key of ['solo:' + smokeRunId, 'solo-alias:' + smokeRunId]) {
+    const retry = asRecord(
+      await expectStatus('/appointments', 201, {
+        method: 'POST',
+        headers: {
+          ...authHeaders(soloClientToken),
+          'content-type': 'application/json',
+          'idempotency-key': key,
+        },
+        body: JSON.stringify(soloAppointmentPayload),
+      }),
+    );
+    assert.equal(retry.id, soloAppointmentId);
+  }
 
   const soloRemainingSlots = asArray(
     await expectStatus(
@@ -1348,10 +1605,14 @@ async function runSmoke() {
     }),
   );
   assert.equal(replayedAiCancel.replayed, true);
-  await expectStatus(`/appointments/${soloAppointmentId}/cancel`, 409, {
-    method: 'POST',
-    headers: authHeaders(soloClientToken),
-  });
+  const canceledSoloAgain = asRecord(
+    await expectStatus(`/appointments/${soloAppointmentId}/cancel`, 201, {
+      method: 'POST',
+      headers: authHeaders(soloClientToken),
+    }),
+  );
+  assert.equal(asRecord(canceledSoloAgain.appointment).id, soloAppointmentId);
+  assert.equal(asRecord(canceledSoloAgain.appointment).status, 'canceled');
   await expectStatus(
     `/internal-calendar/providers/${soloProviderId}/time-off`,
     201,
@@ -1396,11 +1657,12 @@ async function runSmoke() {
   });
 
   console.log(
-    'HTTP smoke passed: verified barbershop onboarding/catalog/staff, client booking/reschedule/cancel, journal, analytics, loyalty, portal, trial lifecycle, tenant fence, auth rotation and CRM preview',
+    'HTTP smoke passed: verified barbershop onboarding/catalog/staff, client booking/reschedule/cancel, journal, analytics, loyalty, portal, trial lifecycle, tenant fence, auth rotation and incomplete CRM-preview/claim refusal',
   );
 }
 
 async function main() {
+  requireHttpProofDatabase();
   const child = startServer();
   const serverOutput: string[] = [];
 
@@ -1432,6 +1694,7 @@ function reportFailure(error: unknown): void {
       error: {
         code: 'http_smoke_failed',
         message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
       },
     }) + '\n',
   );

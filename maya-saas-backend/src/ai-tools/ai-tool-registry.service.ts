@@ -318,7 +318,7 @@ export class AiToolRegistryService {
       case 'appointments.own.cancel':
         this.assertAllowedKeys(args, ['appointment_id']);
         return {
-          appointment_id: this.assertEntityId(
+          appointment_id: this.assertAppointmentId(
             args.appointment_id,
             'appointment_id',
           ),
@@ -352,7 +352,7 @@ export class AiToolRegistryService {
           'branch_id',
         ]);
         return {
-          appointment_id: this.assertEntityId(
+          appointment_id: this.assertAppointmentId(
             args.appointment_id,
             'appointment_id',
           ),
@@ -887,6 +887,20 @@ export class AiToolRegistryService {
       this.invalidArguments(`${field} is invalid`);
     }
     return candidate;
+  }
+
+  /** Internal B31 bookings use the stable ActionExecution-derived identifier.
+   * This is syntax only; B29/B30 still resolve exact tenant/Client ownership. */
+  private assertAppointmentId(value: unknown, field: string): string {
+    if (
+      typeof value === 'string' &&
+      /^appointment-action:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
+        value,
+      )
+    ) {
+      return value;
+    }
+    return this.assertEntityId(value, field);
   }
 
   private assertEntityId(value: unknown, field: string): string {

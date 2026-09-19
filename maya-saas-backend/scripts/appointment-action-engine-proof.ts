@@ -17,7 +17,6 @@ import {
   ActionContractError,
   ActionEngineKernel,
   ActionEngineRuntimeService,
-  ActionExecutionTerminalError,
   ActionExecutionUncertainError,
   type ActionRuntimeHandlers,
   type TrustedActionExecutionRequestV1,
@@ -263,6 +262,11 @@ async function createTenantAndOwner(
     data: {
       id: tenantId,
       name: `Appointment proof ${label}`,
+      // A26 full-access trial pre-state. Production policy/entitlements stay real;
+      // an unactivated/default trial cannot authorize a CRM write.
+      status: 'trial',
+      trialFullAccess: true,
+      trialEndsAt: new Date(Date.now() + 86_400_000),
       slug: `${label}-${randomUUID()}`.toLowerCase(),
       users: {
         create: {
@@ -294,7 +298,10 @@ async function expectReject(
     await operation();
   } catch (error) {
     rejected = true;
-    assert(error instanceof errorType);
+    assert(
+      error instanceof errorType,
+      `Expected ${errorType.name}, received ${error instanceof Error ? error.constructor.name + ': ' + error.message : String(error)}`,
+    );
   }
   assert.equal(rejected, true);
 }
@@ -914,6 +921,7 @@ async function main(): Promise<void> {
     assert.equal(unauthorizedDispatches, 0);
     matrix.unauthorizedRequesterRejectedBeforeDispatch = true;
 
+    stage('rejected controlled approval and production namespace fence');
     const approvalRequest = syntheticApprovalRequest(primary.tenantId);
     const approvalExecution =
       await proofKernel.createExecutionForControlledFixture(approvalRequest);
@@ -936,8 +944,44 @@ async function main(): Promise<void> {
             reconcile: async () => ({ outcome: 'STILL_UNKNOWN' }),
           }),
         ),
-      ActionExecutionTerminalError,
+      ActionContractError,
     );
+    // Production ingress rejects kernel.test.* before dispatch. Prove the separate
+    // terminal approval invariant at the real kernel claim boundary as well.
+    await assert.rejects(
+      () =>
+        proofKernel.claimExecution({
+          tenantId: primary.tenantId,
+          executionId: approvalExecution.id,
+          workerId: 'proof.rejected',
+        }),
+      (error: unknown) =>
+        Boolean(
+          error &&
+          typeof error === 'object' &&
+          'code' in error &&
+          error.code === 'EXECUTION_TERMINAL',
+        ),
+    );
+    assert.equal(
+      (
+        await proofKernel.getExecutionResult(
+          primary.tenantId,
+          approvalExecution.id,
+        )
+      ).state,
+      ActionExecutionState.NOT_EXECUTED,
+    );
+    assert.equal(
+      await prisma.actionAttempt.count({
+        where: {
+          tenantId: primary.tenantId,
+          actionExecutionId: approvalExecution.id,
+        },
+      }),
+      0,
+    );
+    matrix.syntheticCapabilityRejectedByProductionIngress = true;
     assert.equal(rejectedApprovalDispatches, 0);
     matrix.rejectedApprovalNeverDispatches = true;
 

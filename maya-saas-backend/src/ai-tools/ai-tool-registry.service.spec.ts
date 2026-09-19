@@ -14,6 +14,33 @@ describe('AiToolRegistryService', () => {
     ).toThrow(BadRequestException);
   });
 
+  it.each(['appointments.own.cancel', 'appointments.own.reschedule'])(
+    'accepts canonical executor Appointment identity for %s without admitting arbitrary paths',
+    (tool) => {
+      const extra = tool.endsWith('reschedule')
+        ? { start: '2027-01-01T10:00:00.000Z' }
+        : {};
+      const id = 'appointment-action:461ba982-b96b-4479-b01a-9400d0605473';
+      expect(
+        service.validateArguments(tool, { ...extra, appointment_id: id }),
+      ).toMatchObject({ appointment_id: id });
+      for (const invalid of [
+        'appointment-action:short',
+        'other:461ba982-b96b-4479-b01a-9400d0605473',
+        '../' + id,
+        id + '?tenant=other',
+        id + '/cancel',
+      ]) {
+        expect(() =>
+          service.validateArguments(tool, {
+            ...extra,
+            appointment_id: invalid,
+          }),
+        ).toThrow(BadRequestException);
+      }
+    },
+  );
+
   it('normalizes bounded analytics ranges', () => {
     expect(
       service.validateArguments('analytics.business.profit', {
