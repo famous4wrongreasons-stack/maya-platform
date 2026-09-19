@@ -324,5 +324,23 @@
       "T-SRC-INV30-b"
     ],
     "expect": "build-killed"
+  },
+  {
+    "id": "M7-39",
+    "description": "C8b is deleted: a BOOKING capability no longer has to be the ae side of exactly one real AE_PROPOSE_PAIRING row. FR-6b requires that fail-closed lookup independently of the allowlist row.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "    if (BOOKING(cap) && !hasExactlyOnePairing(ae.key))\n      return unconfirmed(",
+    "replace": "    if (false && BOOKING(cap) && !hasExactlyOnePairing(ae.key))\n      return unconfirmed(",
+    "killers": ["G7-C8b"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7-40",
+    "description": "C6a is deleted: SETTINGS_DRAFT no longer reads the real pairing and WIDGET_CAPABILITY_POLICY consent class. F80 requires the live row and fails closed on absent or personal_data policy.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "    if (r.widgetKind === 'SETTINGS_DRAFT') {\n      const pairing = pairingForAe(ae.key);",
+    "replace": "    if (false && r.widgetKind === 'SETTINGS_DRAFT') {\n      const pairing = pairingForAe(ae.key);",
+    "killers": ["G7-N6g", "G7-N6g-2"],
+    "expect": "build-killed"
   }
 ]
