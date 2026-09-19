@@ -19,6 +19,12 @@ This checkpoint publishes remediation for verification; **Wave 1 is not yet cert
 
 The HTTP sweep also exposed a narrow current defect: AI argument validation rejected canonical internal Appointment IDs (`appointment-action:<UUID>`). The registry now accepts only that exact additional syntax for cancel/reschedule. B29/B30 tenant/Client ownership, approval and executor checks still decide authority. Positive and malformed-ID tests plus the actual HTTP approval/retry lifecycle cover it.
 
+The first published closure attempt (`d4dac79a`) correctly failed the Package 4 writer ratchet: the new guarded fixture was not registered among the exact controlled proofs. The correction retains the production owner list and every existing negative assertion, adds only this exact guarded fixture, and executes a new boundary suite against its actual guard. It denies non-test mode, non-PostgreSQL/remote/production databases, `maya_ci` outside GitHub Actions, external servers and malformed API targets before Prisma construction. The empty loyalty account is explicit synthetic pre-state, **not a claim that HTTP GET creates an account or that account bootstrap is being implemented**.
+
+A second independently reproduced environment gap was hidden behind the old CI failures: Platform CI's HTTP step omitted AppModule's required referral/gift/loyalty boot settings. With exactly its old environment the application fails at the real referral boot validator. The HTTP step now declares the same nine public prerequisite literals already approved by Widgets Live; job-level HAR-4 literals remain unchanged, and an additional HAR-4 equality check prevents drift. No boot validator is weakened. The corrected exact CI environment passes the same HTTP smoke.
+
+The first actual CI backend run also exposed `spawnSync rg ENOENT` in the unchanged C8 consumer ratchet. This is an explicit missing runner prerequisite, not an assertion failure or reason to exclude C8. Platform backend and mutation jobs now install `ripgrep` when absent. The existing scanner and its exact assertions are unchanged. The superseded mutation run is cancelled after these known baseline defects are established; its partial results are not final evidence.
+
 ## Python disposition and authority
 
 The original 64 identifiers remain in recovery evidence. The full suite still contains 613 tests; no suite is excluded.

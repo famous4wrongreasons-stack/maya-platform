@@ -15,9 +15,16 @@ export function requireHttpProofDatabase(): string {
   const connection = process.env.DATABASE_URL ?? '';
   const url = new URL(connection);
   const database = decodeURIComponent(url.pathname.slice(1));
+  assert(['postgres:', 'postgresql:'].includes(url.protocol));
   assert.equal(process.env.NODE_ENV, 'test');
   assert(['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname));
-  assert(database === 'maya_ci' || database.startsWith('maya_gates_smoke_'));
+  assert(
+    (database === 'maya_ci' &&
+      process.env.CI === 'true' &&
+      process.env.GITHUB_ACTIONS === 'true') ||
+      database.startsWith('maya_gates_smoke_'),
+    'HTTP smoke fixture refuses non-disposable databases',
+  );
   assert.notEqual(process.env.HTTP_SMOKE_EXTERNAL_SERVER, 'true');
   const api = new URL(
     process.env.HTTP_SMOKE_BASE_URL ??

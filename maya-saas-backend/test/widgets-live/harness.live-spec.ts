@@ -436,6 +436,30 @@ describe('widgets-live harness', () => {
   });
 
   describe('environment', () => {
+    it('HAR-4 Platform HTTP smoke declares the same explicit AppModule prerequisites', () => {
+      const workflow = fs.readFileSync(
+        path.join(REPO, '.github/workflows/platform-ci.yml'),
+        'utf8',
+      );
+      const step = workflow.split(
+        '      - name: HTTP smoke with explicit AppModule test prerequisites\n',
+      )[1];
+      expect(step).toBeDefined();
+      const block = step.split('        env:\n')[1].split('        run:')[0];
+      const env = Object.fromEntries(
+        block
+          .trimEnd()
+          .split('\n')
+          .map((line) => {
+            const match = /^ {10}([A-Z0-9_]+): (.+)$/.exec(line);
+            expect(match).not.toBeNull();
+            return [match![1], match![2]];
+          }),
+      );
+      expect(env).toEqual({ ...WIDGETS_LIVE_EXTRA_LITERALS });
+      expect(step.split('\n\n')[0]).toContain('run: npm run test:http');
+    });
+
     it("HAR-4 carries exactly platform-ci.yml's platform-backend literals (DATABASE_URL excepted), plus the declared widgets-live extras", () => {
       const platform = workflowJobEnv('platform-ci.yml', 'platform-backend');
       delete platform.DATABASE_URL;

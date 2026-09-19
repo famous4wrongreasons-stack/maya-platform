@@ -53,6 +53,11 @@ const CANONICAL_OWNER_FILES = new Set([
 
 const CONTROLLED_VALUE_PROOFS = [
   {
+    path: 'scripts/http-smoke-fixtures.ts',
+    databaseGuard: "database.startsWith('maya_gates_smoke_')",
+    refusalMarker: 'HTTP smoke fixture refuses non-disposable databases',
+  },
+  {
     path: 'scripts/chapter7-finance-proof.ts',
     databaseGuard: "assert.equal(url.pathname, '/maya_c7_replay')",
     refusalMarker:

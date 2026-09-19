@@ -57,6 +57,12 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: maya-saas-backend/package-lock.json
+      - name: Install architectural scanner prerequisite
+        run: |
+          if ! command -v rg >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y ripgrep
+          fi
       - run: npm ci
       - run: npm audit --omit=dev --audit-level=high
       - run: npm run prisma:generate
@@ -72,7 +78,20 @@ jobs:
       - run: npm test -- --runInBand
       - run: npm run test:e2e -- --runInBand
       - run: npm run build
-      - run: npm run test:http
+      - name: HTTP smoke with explicit AppModule test prerequisites
+        # The same public fixture literals as Widgets Live; no production secrets
+        # and no relaxed boot validators. Job-level HAR-4 literals stay unchanged.
+        env:
+          ACTION_ENGINE_IDENTITY_SECRET: test-action-engine-identity-secret-for-widgets-live-only
+          ACTION_ENGINE_PAYLOAD_ENCRYPTION_SECRET: test-action-engine-payload-secret-for-widgets-live-only
+          MAYA_GIFT_CERTIFICATE_CLAIM_SECRET: test-gift-certificate-claim-secret-for-widgets-live-only
+          MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY: test-gift-certificate-presentation-key-for-widgets-live-only
+          MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY_VERSION: widgets-live-test-1
+          MAYA_LOYALTY_REDEMPTION_CODE_PEPPER: test-loyalty-redemption-code-pepper-for-widgets-live-only
+          MAYA_REFERRAL_REWARD_CLAIM_SECRET: test-referral-reward-claim-secret-for-widgets-live-only
+          MAYA_REFERRAL_REWARD_PRESENTATION_KEY: test-referral-reward-presentation-key-for-widgets-live-only
+          MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION: widgets-live-test-1
+        run: npm run test:http
 
   legacy-python:
     name: Legacy Python

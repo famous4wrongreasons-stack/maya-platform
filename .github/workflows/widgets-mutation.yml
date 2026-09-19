@@ -115,6 +115,12 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: maya-saas-backend/package-lock.json
+      - name: Install architectural scanner prerequisite
+        run: |
+          if ! command -v rg >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y ripgrep
+          fi
       - run: npm ci
       - run: npm run prisma:generate
       - run: npx prisma migrate deploy
