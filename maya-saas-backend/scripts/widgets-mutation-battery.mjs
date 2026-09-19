@@ -56,7 +56,9 @@
 //
 //   node scripts/widgets-mutation-battery.mjs [--gate <id>] [--mutations <dir>] [--steps unit,typecheck,k3,live]
 //        [--live-tests <path>] [--live-filter <name pattern>] [--unit-tests <path>]
-//        [--out <report.json>] [--dry-run] [--keep]
+//        [--partition <index/count>] [--out <report.json>] [--dry-run] [--keep]
+//   A partition requires one --gate; it retains full per-mutant steps/controls and reports
+//   PARTITION-AS-DECLARED. Only widgets-mutation-ci.mjs may assemble a complete CI receipt.
 //   node scripts/widgets-mutation-battery.mjs --self-test      (HAR-11; needs DATABASE_URL like a live run)
 //   node scripts/widgets-mutation-battery.mjs --shards "<id,id,…>"   prints `gates=<JSON array>` for the CI matrix:
 //        the requested battery ids (each must exist), or every declared battery when the list is empty, or ["*"]
@@ -69,6 +71,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { selectPartition } from './widgets-mutation-ci.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BACKEND = path.resolve(HERE, '..');
@@ -107,6 +110,8 @@ for (const step of explicitSteps ?? []) if (!STEPS.includes(step)) usage(`unknow
 const liveTests = option('--live-tests');
 const liveFilter = option('--live-filter');
 const unitTests = option('--unit-tests');
+const partitionOption = option('--partition');
+if (partitionOption !== undefined && gate === undefined) usage('--partition requires exactly one --gate');
 
 // ── edits: validation against the repository (read-only) ─────────────────────────────────────────────────────
 const resolveEditTarget = (where, file) => {
@@ -247,7 +252,7 @@ const batteryFiles = fs.existsSync(mutationsDir)
 // as run when it never ran (CKPT-W1 closing regression). EMPTY stays exit 0 only when nothing is DECLARED.
 if (gate !== undefined && batteryFiles.length === 0) usage(`no battery gate${gate}.json is declared`);
 
-const mutants = [];
+let mutants = [];
 for (const name of batteryFiles) {
   const entries = readJson(path.join(mutationsDir, name), name);
   if (!Array.isArray(entries)) usage(`${name} is not an array of mutants`);
@@ -284,8 +289,19 @@ for (const name of batteryFiles) {
   }
 }
 
+let partition = null;
+if (partitionOption !== undefined) {
+  try {
+    const part = selectPartition(mutants, partitionOption);
+    mutants = part.selected;
+    partition = part.metadata;
+  } catch (error) { usage(error.message); }
+}
 const report = {
   contract: 'maya.widgets-mutation-battery/2',
+  source_head: spawnSync('git', ['rev-parse', 'HEAD'], { cwd: REPO, encoding: 'utf8' }).stdout?.trim() ?? null,
+  battery_hashes: Object.fromEntries(batteryFiles.map((file) => [file, crypto.createHash('sha256').update(fs.readFileSync(path.join(mutationsDir, file))).digest('hex')])),
+  partition,
   startedAt: new Date().toISOString(),
   batteries: batteryFiles,
   neutraliser_sets: Object.keys(neutralisers),
@@ -657,7 +673,7 @@ for (const m of mutants) {
 }
 fs.rmSync(MIRROR_ROOT, { recursive: true, force: true });
 
-report.status = mismatches === 0 ? 'AS-DECLARED' : 'MISMATCH';
+report.status = mismatches === 0 ? (partition ? 'PARTITION-AS-DECLARED' : 'AS-DECLARED') : 'MISMATCH';
 report.mismatches = mismatches;
 report.live_evidence_mutants = report.mutants.filter((x) => x.live_evidence).map((x) => `${x.battery}#${x.id}`);
 // CKPT-W1 review finding 7: what `live_evidence` above does and does not assert, stated IN the artifact

@@ -2,9 +2,11 @@ name: Widgets Mutation
 
 # The widget gates' mutation battery (integration plan §4.5; GATES-PLAN-V11 I-HAR): every mutant a gate unit
 # declares in `maya-saas-backend/test/widgets-live/mutations/gate<id>.json` is applied to a temporary copy of the
-# backend, never to the checkout, and must turn its declared killer red. Each battery runs in its own shard of a
-# job matrix, inside the 180-minute timeout, and uploads its report as an artifact
-# `widgets-mutation-<sha>-<battery id>`. CKPT-W step 7 dispatches this workflow for the flipping commit with
+# backend, never to the checkout, and must turn its declared killer red. Gate 7's measured full run exceeds
+# the unchanged 180-minute job budget, so its mutants run in four partitions with UNFILTERED tests and
+# independent controls. Other batteries run whole. Mandatory aggregation refuses missing/duplicate/stale
+# parts, restricted tests, crashes and vacuous kills before publishing 19 complete battery receipts.
+# CKPT-W step 7 dispatches this workflow for the flipping commit with
 # `gates=<every battery touched in the wave>` (pushes to the canonical closure branch also run every battery) and records every shard's run and artifact
 # id. Only `[HTTP]` kills in a shard report count toward L/L-T (§3.2). While no battery is declared the one shard
 # reports EMPTY, which is not evidence.
@@ -32,6 +34,8 @@ on:
       - maya-saas-backend/src/widget-contract/**
       - maya-saas-backend/prisma/**
       - maya-saas-backend/test/widgets-live/**
+      - maya-saas-backend/scripts/widgets-mutation*
+      - .github/workflows/widgets-mutation.yml
 
 permissions:
   contents: read
@@ -47,27 +51,32 @@ jobs:
     timeout-minutes: 5
     outputs:
       gates: ${{ steps.plan.outputs.gates }}
+      matrix: ${{ steps.plan.outputs.matrix }}
     defaults:
       run:
         working-directory: maya-saas-backend
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify scheduling and fail-closed receipt assembly
+        run: node --test scripts/widgets-mutation-ci.test.mjs
       - id: plan
         # The input reaches the runner as an environment value, never interpolated into the script; the runner
         # admits only declared battery ids.
         env:
           REQUESTED_GATES: ${{ inputs.gates }}
-        run: node scripts/widgets-mutation-battery.mjs --shards "${REQUESTED_GATES:-}" >> "$GITHUB_OUTPUT"
+        run: node scripts/widgets-mutation-ci.mjs plan "${REQUESTED_GATES:-}" >> "$GITHUB_OUTPUT"
 
   widgets-mutation:
-    name: Widgets mutation battery (${{ matrix.gate }})
+    name: Widgets mutation battery (${{ matrix.slot }})
     needs: shards
     runs-on: ubuntu-latest
     timeout-minutes: 180
     strategy:
       fail-fast: false
-      matrix:
-        gate: ${{ fromJSON(needs.shards.outputs.gates) }}
+      matrix: ${{ fromJSON(needs.shards.outputs.matrix) }}
     services:
       postgres:
         image: postgres:16-alpine
@@ -127,15 +136,47 @@ jobs:
       - name: Run the battery shard
         env:
           SHARD: ${{ matrix.gate }}
+          PARTITION: ${{ matrix.partition }}
+          SLOT: ${{ matrix.slot }}
         run: |
-          if [ "$SHARD" = "*" ]; then
-            node scripts/widgets-mutation-battery.mjs --out widgets-mutation-report-all.json
+          if [ -n "$PARTITION" ]; then
+            node scripts/widgets-mutation-battery.mjs --gate "$SHARD" --partition "$PARTITION" --out "widgets-mutation-part-$SLOT.json"
           else
-            node scripts/widgets-mutation-battery.mjs --gate "$SHARD" --out "widgets-mutation-report-$SHARD.json"
+            node scripts/widgets-mutation-battery.mjs --gate "$SHARD" --out "widgets-mutation-part-$SLOT.json"
           fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: widgets-mutation-${{ github.sha }}-${{ matrix.gate == '*' && 'all' || matrix.gate }}
-          path: maya-saas-backend/widgets-mutation-report-*.json
+          name: widgets-mutation-part-${{ github.sha }}-${{ matrix.slot }}
+          path: maya-saas-backend/widgets-mutation-part-*.json
+          if-no-files-found: error
+
+  receipt:
+    name: Complete mutation receipt (all requested batteries)
+    needs: [shards, widgets-mutation]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Require every partition job to succeed
+        env:
+          RESULT: ${{ needs.widgets-mutation.result }}
+        run: test "$RESULT" = success
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: widgets-mutation-part-${{ github.sha }}-*
+          path: mutation-parts
+          merge-multiple: true
+      - name: Verify complete unrestricted declaration coverage
+        env:
+          REQUESTED_GATES: ${{ inputs.gates }}
+        run: node maya-saas-backend/scripts/widgets-mutation-ci.mjs assemble mutation-parts mutation-receipt "$GITHUB_SHA" "${REQUESTED_GATES:-}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: widgets-mutation-complete-${{ github.sha }}
+          path: mutation-receipt/widgets-mutation-report-*.json
           if-no-files-found: error
