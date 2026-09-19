@@ -32,7 +32,7 @@ import { Injectable } from '@nestjs/common';
 
 import { AiToolPolicyService } from '../../ai-tools/ai-tool-policy.service';
 import type { AiToolDefinition } from '../../ai-tools/ai-tool.types';
-import type { UserRole } from '../../common/domain.enums';
+import { canonicalProductionPolicyDefinitions } from '../../action-engine/action-engine.policy-registry';
 import { EntitlementsService } from '../../entitlements/entitlements.service';
 
 /**
@@ -59,6 +59,12 @@ export interface Gate6Owners {
     tenantId: string,
     features: readonly string[],
   ) => Promise<boolean>;
+  readonly actionPolicy: (capability: string) =>
+    | {
+        readonly allowedActorRoles: readonly string[];
+        readonly requiredFeatures: readonly string[];
+      }
+    | undefined;
 }
 
 /**
@@ -74,6 +80,9 @@ export interface Gate6Owners {
  */
 @Injectable()
 export class Gate6OwnersAdapter implements Gate6Owners {
+  private readonly actionPolicies = new Map(
+    canonicalProductionPolicyDefinitions().map((row) => [row.capability, row]),
+  );
   constructor(
     private readonly policy: AiToolPolicyService,
     private readonly entitlements: EntitlementsService,
@@ -88,7 +97,7 @@ export class Gate6OwnersAdapter implements Gate6Owners {
     const principal = this.policy.buildPrincipal(
       tenantId,
       userId,
-      role as UserRole,
+      role as Parameters<AiToolPolicyService['buildPrincipal']>[2],
       GATE6_SURFACE,
     );
     return this.policy.assertCanExecute(principal, definition);
@@ -107,5 +116,20 @@ export class Gate6OwnersAdapter implements Gate6Owners {
       )
         return false;
     return true;
+  }
+
+  actionPolicy(capability: string):
+    | {
+        readonly allowedActorRoles: readonly string[];
+        readonly requiredFeatures: readonly string[];
+      }
+    | undefined {
+    const row = this.actionPolicies.get(capability);
+    return row
+      ? {
+          allowedActorRoles: row.allowedActorRoles,
+          requiredFeatures: row.requiredFeatures,
+        }
+      : undefined;
   }
 }

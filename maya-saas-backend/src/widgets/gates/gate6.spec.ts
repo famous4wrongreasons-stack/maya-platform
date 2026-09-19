@@ -47,12 +47,19 @@ const unreachableOwners = (): Gate6Owners =>
     grantsRequiredFeatures: () => {
       throw new Error('Gate 6 reached an owner on a branch that resolves none');
     },
+    actionPolicy: () => {
+      throw new Error('Gate 6 reached an owner on a branch that resolves none');
+    },
   });
 
 const admittingOwners = (): Gate6Owners =>
   Object.freeze({
     assertCanExecute: jest.fn().mockResolvedValue(undefined),
     grantsRequiredFeatures: jest.fn().mockResolvedValue(true),
+    actionPolicy: jest.fn().mockReturnValue({
+      allowedActorRoles: ['tenant_owner'],
+      requiredFeatures: ['crm.integration'],
+    }),
   });
 
 /** A live principal, for the held lane's second arm only. No member of it is read by U6-L1. */
@@ -439,7 +446,7 @@ describe('Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB 
     );
   });
 
-  it('P-AE / P-F78: an admitted role plus every canonical required feature passes', async () => {
+  it('P-F78 / P-AE: an admitted role plus every canonical required feature passes', async () => {
     const owners = admittingOwners();
     const grants = owners.grantsRequiredFeatures as jest.Mock;
     const v = await gate6(withPrincipal(ae(ALLOWLISTED[0])), owners);
@@ -462,6 +469,10 @@ describe('Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB 
     const owners: Gate6Owners = {
       assertCanExecute: jest.fn().mockResolvedValue(undefined),
       grantsRequiredFeatures: jest.fn().mockResolvedValue(false),
+      actionPolicy: jest.fn().mockReturnValue({
+        allowedActorRoles: ['tenant_owner'],
+        requiredFeatures: ['crm.integration'],
+      }),
     };
     const v = await gate6(withPrincipal(ae(ALLOWLISTED[0])), owners);
     expect(detail(v)).toBe('(e) required feature is absent');
@@ -520,6 +531,10 @@ describe('Gate 6 — a raise IS the refusal (G6-20, C11:4779-4781)', () => {
         .fn()
         .mockRejectedValue(new Error('canonical owner denied')),
       grantsRequiredFeatures: jest.fn().mockResolvedValue(true),
+      actionPolicy: jest.fn().mockReturnValue({
+        allowedActorRoles: ['tenant_owner'],
+        requiredFeatures: ['crm.integration'],
+      }),
     };
     const v = await gate6(
       withPrincipal(ctx(rec({ effect: 'REFINE', capabilityKey: CATALOGUE }))),
@@ -549,6 +564,9 @@ describe('Gate 6 — a raise IS the refusal (G6-20, C11:4779-4781)', () => {
     await expect(
       heldGate6Owners.grantsRequiredFeatures('t1', []),
     ).rejects.toThrow(/GATE6_OWNERS is not bound/);
+    expect(() => heldGate6Owners.actionPolicy('appointment.create')).toThrow(
+      /GATE6_OWNERS is not bound/,
+    );
   });
 });
 

@@ -46,8 +46,6 @@
 // nothing here a genuine transport fault could be confused with (NW, D-12).
 
 import { c9Capability } from '../../orchestration/c9.registry';
-import { canonicalProductionPolicyDefinitions } from '../../action-engine/action-engine.policy-registry';
-import type { UserRole } from '../../common/domain.enums';
 import type { CapabilityRef } from '../../widget-contract/capability-ref';
 import type { GateContext, GateVerdict, IntentRecordRow } from '../gate.types';
 import {
@@ -96,6 +94,9 @@ export const heldGate6Owners: Gate6Owners = Object.freeze({
     Promise.reject(
       new Gate6OwnerUnbound('GATE6_OWNERS is not bound (R6-1, R6-2)'),
     ),
+  actionPolicy: () => {
+    throw new Gate6OwnerUnbound('GATE6_OWNERS is not bound (R6-1, R6-2)');
+  },
 });
 
 /** The target's class, as a string or nothing. A target with no readable class is not class `s`. */
@@ -103,10 +104,6 @@ const targetClass = (r: IntentRecordRow): string | null => {
   const t = r.targetJson as { class?: unknown } | null | undefined;
   return typeof t?.class === 'string' ? t.class : null;
 };
-
-const ACTION_POLICY_BY_CAPABILITY = new Map(
-  canonicalProductionPolicyDefinitions().map((row) => [row.capability, row]),
-);
 
 /**
  * The HANDOFF destination fences, and ONLY those (G6-6, G6-7; C11:4743-4747).
@@ -193,15 +190,16 @@ const aeSubject = async (
 
   // (d) reads the role already resolved inside T. A second membership read here could disagree with
   // the principal Gate 3 bound, and the JWT role is not the canonical membership role (D-2).
-  if (ctx.principal?.role === null || ctx.principal === null)
+  const principal = ctx.principal;
+  if (principal === null || principal.role === null)
     return refuse('insufficient_authority', '(d) no live principal role');
-  const policy = ACTION_POLICY_BY_CAPABILITY.get(ref.key);
+  const policy = owners.actionPolicy(ref.key);
   if (policy === undefined)
     return refuse('insufficient_authority', '(d) no canonical action policy');
-  if (!policy.allowedActorRoles.includes(ctx.principal.role as UserRole))
+  if (!policy.allowedActorRoles.includes(principal.role))
     return refuse(
       'insufficient_authority',
-      `(d) role ${ctx.principal.role} is not admitted`,
+      `(d) role ${principal.role} is not admitted`,
     );
 
   // (e) asks the entitlement owner for the conjunction. No feature list supplied by the caller is
@@ -244,17 +242,18 @@ const c9Subject = async (
 
   const def = MAYA_AI_TOOL_CATALOG_BY_NAME.get(ref.key);
   if (def !== undefined) {
-    if (ctx.principal?.role === null || ctx.principal === null)
+    const principal = ctx.principal;
+    if (principal === null || principal.role === null)
       return refuse('insufficient_authority', 'C20 no live principal role');
     if (
-      ctx.principal.authority.kind !== 'USER' ||
-      ctx.principal.authority.userId === null
+      principal.authority.kind !== 'USER' ||
+      principal.authority.userId === null
     )
       return refuse('insufficient_authority', 'C20 principal is not a user');
     await owners.assertCanExecute(
       ctx.tenantId,
-      ctx.principal.authority.userId,
-      ctx.principal.role,
+      principal.authority.userId,
+      principal.role,
       def,
     );
     return pass;
