@@ -22,6 +22,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { randomUUID } from 'node:crypto';
 
 import { UserRole } from '../../src/common/domain.enums';
 import type { Gate } from '../../src/widgets/gate.types';
@@ -141,14 +142,16 @@ describe('T-F11/B-1 — the pipeline order on the live code path [GW]', () => {
       label: string;
       actor: typeof a;
       token: string;
+      widgetId: string;
       stop: string;
-      code: string;
+      code: string | null;
     }[] = [
       // Step 0: a token of only whitespace passes the DTO (16 characters) and is not a token.
       {
         label: 'blank token',
         actor: a,
         token: ' '.repeat(16),
+        widgetId: randomUUID(),
         stop: '0',
         code: 'unauthenticated',
       },
@@ -156,27 +159,31 @@ describe('T-F11/B-1 — the pipeline order on the live code path [GW]', () => {
         label: 'never minted',
         actor: a,
         token: 'x'.repeat(43),
+        widgetId: randomUUID(),
         stop: '1',
-        code: 'EXPIRED',
+        code: null,
       },
       {
         label: 'expired',
         actor: a,
         token: expired.intentToken,
+        widgetId: expired.widgetId,
         stop: '1',
-        code: 'EXPIRED',
+        code: null,
       },
       {
         label: "a foreign tenant's token (never read: slot 4 cannot fire)",
         actor: a,
         token: foreignToken.intentToken,
+        widgetId: foreignToken.widgetId,
         stop: '1',
-        code: 'EXPIRED',
+        code: null,
       },
       {
         label: "another principal's token",
         actor: b,
         token: valid.intentToken,
+        widgetId: valid.widgetId,
         stop: '3',
         code: 'widget_principal_mismatch',
       },
@@ -184,6 +191,7 @@ describe('T-F11/B-1 — the pipeline order on the live code path [GW]', () => {
         label: `${SYNTHETIC} stored floor differs from the recomputed floor`,
         actor: a,
         token: floorChanged.intentToken,
+        widgetId: floorChanged.widgetId,
         stop: '5',
         code: 'policy_floor_changed',
       },
@@ -191,6 +199,7 @@ describe('T-F11/B-1 — the pipeline order on the live code path [GW]', () => {
         label: `${SYNTHETIC} a DRAFT with no subject capability`,
         actor: a,
         token: draftWithoutSubject.intentToken,
+        widgetId: draftWithoutSubject.widgetId,
         stop: '7',
         code: 'effect_not_admissible',
       },
@@ -203,6 +212,7 @@ describe('T-F11/B-1 — the pipeline order on the live code path [GW]', () => {
         label: 'valid',
         actor: a,
         token: valid.intentToken,
+        widgetId: valid.widgetId,
         stop: '9',
         code: 'mechanism_absent',
       },
@@ -212,7 +222,7 @@ describe('T-F11/B-1 — the pipeline order on the live code path [GW]', () => {
     for (const c of cases) {
       const result = await gw.submit(
         c.actor,
-        { intent_token: c.token },
+        { intent_token: c.token, widget_id: c.widgetId },
         c.label,
       );
       const code = 'code' in result.verdict ? result.verdict.code : null;
