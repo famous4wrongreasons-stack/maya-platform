@@ -313,5 +313,16 @@
     "replace": "  private findProducingRecord(\n    intentTokenHash: string,\n    tenantId: string,\n    tx: RequestTx | null,\n  ): Promise<ProducingRecordRow | null> {\n    void tenantId;\n    return (tx ?? this.prisma).widgetIntentRecord.findFirst({\n      where: { intentTokenHash },\n",
     "killers": ["T7-PRODUCING-SCOPE"],
     "expect": "build-killed"
+  },
+  {
+    "id": "M7-INV30",
+    "description": "Counterfactual for T-SRC-INV30 outside slot 8-R: Gate 7 uses the caller-claimed render profile as an admission antecedent. A real property read must fail the pipeline-wide source fence, not merely a comment or a TypeScript error.",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "  const r = ctx.record;\n  if (!r) return no('C1', 'no record');\n",
+    "replace": "  const r = ctx.record;\n  if (!r) return no('C1', 'no record');\n  const claimed = ctx.submission as unknown as { profileId?: string };\n  if (claimed.profileId === 'rich_interactive') return pass;\n",
+    "killers": [
+      "T-SRC-INV30-b"
+    ],
+    "expect": "build-killed"
   }
 ]

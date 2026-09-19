@@ -5,7 +5,7 @@ name: Widgets Mutation
 # backend, never to the checkout, and must turn its declared killer red. Each battery runs in its own shard of a
 # job matrix, inside the 180-minute timeout, and uploads its report as an artifact
 # `widgets-mutation-<sha>-<battery id>`. CKPT-W step 7 dispatches this workflow for the flipping commit with
-# `gates=<every battery touched in the wave>` (it does not run on push) and records every shard's run and artifact
+# `gates=<every battery touched in the wave>` (pushes to the canonical closure branch also run every battery) and records every shard's run and artifact
 # id. Only `[HTTP]` kills in a shard report count toward L/L-T (§3.2). While no battery is declared the one shard
 # reports EMPTY, which is not evidence.
 #
@@ -14,6 +14,11 @@ name: Widgets Mutation
 #
 # Not a required check. Making it one is a repository-settings decision for the owner.
 on:
+  # workflow_dispatch cannot discover a workflow absent from the default branch.
+  # A real canonical-branch push receipt is mandatory for Wave 1 closure.
+  push:
+    branches:
+      - codex/maya-identity-consent-20260913
   workflow_dispatch:
     inputs:
       gates:
