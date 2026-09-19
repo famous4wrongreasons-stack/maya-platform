@@ -1,0 +1,5 @@
+
+> maya-saas-backend@0.0.1 test:http
+> ts-node --project tsconfig.scripts.json --transpile-only scripts/http-smoke.ts
+
+HTTP smoke passed: verified barbershop onboarding/catalog/staff, client booking/reschedule/cancel, journal, analytics, loyalty, portal, trial lifecycle, tenant fence, auth rotation and incomplete CRM-preview/claim refusal
