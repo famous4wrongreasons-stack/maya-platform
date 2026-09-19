@@ -26,7 +26,7 @@ const base = {
   NODE_ENV: 'test',
   DATABASE_URL: 'postgresql://proof@127.0.0.1:55620/maya_gates_smoke_fixture',
 };
-function run(env: Record<string, string>) {
+function run(env: Record<string, string | undefined>) {
   return runInNewContext(code + '\nrequireHttpProofDatabase()', {
     assert,
     URL,
@@ -64,9 +64,7 @@ describe('HTTP synthetic pre-state has no production writer authority', () => {
   ])(
     'rejects unsafe fixture context %j before opening a connection',
     (override) => {
-      expect(() =>
-        run({ ...base, ...override } as Record<string, string>),
-      ).toThrow();
+      expect(() => run({ ...base, ...override })).toThrow();
     },
   );
 
