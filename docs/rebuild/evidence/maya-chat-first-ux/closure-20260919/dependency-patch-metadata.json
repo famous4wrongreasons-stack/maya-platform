@@ -1,0 +1,44 @@
+[
+  {
+    "package": "deepmerge-ts@8",
+    "exit": 0,
+    "metadata": "[\n  {\n    \"version\": \"8.0.0\",\n    \"engines\": {\n      \"node\": \">=16.0.0\"\n    },\n    \"exports\": {\n      \"types\": {\n        \"import\": \"./dist/index.d.mts\",\n        \"require\": \"./dist/index.d.cts\"\n      },\n      \"import\": \"./dist/index.mjs\",\n      \"require\": \"./dist/index.cjs\"\n    }\n  },\n  {\n    \"version\": \"8.0.1\",\n    \"engines\": {\n      \"node\": \">=16.0.0\"\n    },\n    \"exports\": {\n      \"types\": {\n        \"import\": \"./dist/index.d.mts\",\n        \"require\": \"./dist/index.d.cts\"\n      },\n      \"import\": \"./dist/index.mjs\",\n      \"require\": \"./dist/index.cjs\"\n    }\n  },\n  {\n    \"version\": \"8.0.2\",\n    \"engines\": {\n      \"node\": \">=16.9.0\"\n    },\n    \"exports\": {\n      \"types\": {\n        \"import\": \"./dist/index.d.mts\",\n        \"require\": \"./dist/index.d.cts\"\n      },\n      \"import\": \"./dist/index.mjs\",\n      \"require\": \"./dist/index.cjs\"\n    }\n  }\n]\n",
+    "error": ""
+  },
+  {
+    "package": "mysql2@latest",
+    "exit": 0,
+    "metadata": "{\n  \"version\": \"3.24.4\",\n  \"engines\": {\n    \"node\": \">= 8.0\"\n  },\n  \"exports\": {\n    \".\": \"./index.js\",\n    \"./promise\": \"./promise.js\",\n    \"./promise.js\": \"./promise.js\",\n    \"./package.json\": \"./package.json\"\n  }\n}\n",
+    "error": ""
+  },
+  {
+    "package": "multer@2.3.0",
+    "exit": 0,
+    "metadata": "{\n  \"version\": \"2.3.0\",\n  \"engines\": {\n    \"node\": \">= 10.16.0\"\n  }\n}\n",
+    "error": ""
+  },
+  {
+    "package": "fast-uri@3.1.6",
+    "exit": 0,
+    "metadata": "\"3.1.6\"\n",
+    "error": ""
+  },
+  {
+    "package": "nodemailer@9.1.1",
+    "exit": 0,
+    "metadata": "{\n  \"version\": \"9.1.1\",\n  \"engines\": {\n    \"node\": \">=6.0.0\"\n  }\n}\n",
+    "error": ""
+  },
+  {
+    "package": "qs@6.16.0",
+    "exit": 0,
+    "metadata": "{\n  \"version\": \"6.16.0\",\n  \"engines\": {\n    \"node\": \">=0.6\"\n  }\n}\n",
+    "error": ""
+  },
+  {
+    "package": "sharp@0.35.4",
+    "exit": 0,
+    "metadata": "{\n  \"version\": \"0.35.4\",\n  \"engines\": {\n    \"node\": \">=20.9.0\"\n  },\n  \"exports\": {\n    \".\": {\n      \"import\": {\n        \"types\": \"./dist/index.d.mts\",\n        \"default\": \"./dist/index.mjs\"\n      },\n      \"require\": {\n        \"types\": \"./dist/index.d.cts\",\n        \"default\": \"./dist/index.cjs\"\n      }\n    }\n  }\n}\n",
+    "error": ""
+  }
+]

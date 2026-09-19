@@ -4,7 +4,7 @@ This closes only the six outstanding duties accepted at `df2d175c`. Gate Wave 2 
 
 ## Evidence status
 
-This checkpoint publishes remediation for verification; **Wave 1 is not yet certified**. Final certification requires every mandatory gate on the published final HEAD, including actual Platform CI and all 19 Widgets Mutation shards. Earlier green results are diagnostic, not final-HEAD receipts.
+This document records the remediation and the acceptance boundary. Certification is made **after publication**, from the exact published HEAD: every mandatory local gate, actual Platform CI, and all 19 Widgets Mutation shards must pass. The final owner-facing report identifies that SHA and the completed CI run IDs. The pre-publication results below never substitute for final-HEAD receipts.
 
 ## Disposition of the six gaps
 
@@ -58,3 +58,15 @@ Primary advisories: [deepmerge-ts](https://github.com/advisories/GHSA-ggr8-5vv4-
 ## Required final receipts
 
 Contract/static checks; architectural ratchets; live suites and evidence verifier; production-binary suites; 19/19 complete mutation batteries; the independent transaction-body and Gate 7 counterfactuals; Appointment/kernel PostgreSQL proofs; seeded HTTP smoke; Platform CI; Widgets Mutation CI; full backend/e2e/Python regression; lint, both application/scripts plus live typechecks, build, Prisma and clean migration replay. No earlier-HEAD result substitutes for these.
+
+## Pre-publication checkpoint and final-head handoff
+
+`e28bfd042cb10b5a33bfda1d2e05b743cec78845` has a complete passing local queue: backend **531 suites / 5037 tests**, live **12 suites / 245 tests**, binary **10/10**, Appointment **20/20**, kernel **26/26**, HTTP, e2e, all contract/static and historical regression gates, three typechecks, lint (0 errors, 9 unchanged warnings), build, Prisma, 98-migration clean replay and no drift. Production dependency audit reports **0** vulnerabilities. Independent TX-body and Gate 7 INV30 counterfactuals pass with their exact killers; runner self-tests pass.
+
+Actual pre-publication [Platform CI](https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092417), [Widgets Live](https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092390), [Widget Contract](https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092415) and [Chat Shell](https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092416) pass. Python runs **613 tests** in 758.262 seconds in CI. Every step is checked, including non-blocking workflow steps. The 19-shard mutation run is not certified from partial completion.
+
+See [bound evidence index](evidence/maya-chat-first-ux/closure-20260919/README.md). The publication commit changes documentation/evidence only. Its exact HEAD is still rerun through the full mandatory gate, including all 19 CI shards; code identity is not used to excuse that rerun. Final receipt artifacts remain attached to the corresponding GitHub Actions run and final local output is retained in the isolated closure evidence directory. No further runtime/test edit may be hidden behind these receipts.
+
+The superseded `989a82f8` run passed full regression but failed scripts typecheck on an optional environment value in the newly added guard test. `e28bfd04` corrects the type to `Record<string, string | undefined>`; it does not cast away the error or change the test. Superseded runs, including explicitly cancelled mutation matrices, remain non-acceptance evidence.
+
+The protected main status and all recorded dirty-file hashes remain unchanged. All local database writes belong to the new closure cluster; proof databases must be dumped/dropped and that cluster stopped after final-head verification. No deployment, production proof effects or Gate Wave 2 implementation is authorized by this report.

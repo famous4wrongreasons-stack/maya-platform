@@ -1,0 +1,34 @@
+[
+  {
+    "sha": "193f5d97851e5931bc39341007c8dd9b896cbfe7",
+    "subject": "fix(wave1): restore canonical HTTP and appointment proof fixtures"
+  },
+  {
+    "sha": "253459365e7d5628ec82977ab39fbbf5ea8e7de6",
+    "subject": "fix(action-engine): keep neutral contracts outside CRM and marketing owners"
+  },
+  {
+    "sha": "cc0011dc37081360eb9b7b85d9b593dc57236012",
+    "subject": "fix(deps): patch current production dependency vulnerabilities"
+  },
+  {
+    "sha": "a21314f6f599ed479407c1116a6bd3fae4f16d2d",
+    "subject": "test(wave1): align Python fixtures with canonical authority and retirements"
+  },
+  {
+    "sha": "c403622b638faf5bf68855822483399262403ab5",
+    "subject": "fix(pwa): fail closed on missing SaaS history session and prove release guards"
+  },
+  {
+    "sha": "d4dac79ae6e52215422c744402658306ffa567f5",
+    "subject": "test(wave1): require canonical mutation CI and Gate 7 INV30 counterfactual"
+  },
+  {
+    "sha": "989a82f8ac8faf1bf023aae083bc3579bbb0596f",
+    "subject": "test(wave1): qualify controlled smoke writers and provision exact CI prerequisites"
+  },
+  {
+    "sha": "e28bfd042cb10b5a33bfda1d2e05b743cec78845",
+    "subject": "test(wave1): type fixture environment as optional process variables"
+  }
+]

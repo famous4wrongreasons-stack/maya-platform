@@ -1,0 +1,84 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "startedAt": "2026-09-19T15:51:56.071Z",
+  "batteries": [
+    "gateTX-recovery.json"
+  ],
+  "neutraliser_sets": [],
+  "steps": [
+    "unit"
+  ],
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": "src/widgets/gate-context.source.spec.ts"
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-57218bfe3f",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-57218bfe3f",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "baseline|unit": {
+      "set": null,
+      "steps": [
+        "unit"
+      ],
+      "exits": {
+        "unit": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "mutants": [
+    {
+      "battery": "gateTX-recovery.json",
+      "id": "TX-BODY-ONLY",
+      "files": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "D-1-TX-b"
+      ],
+      "kills": [
+        {
+          "killer": "D-1-TX-b",
+          "test": "D-1-TX — no slot inside `T` reads on the ambient store client D-1-TX-b nothing in the transactional reach reads on the ambient client",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-09-19T15:51:58.838Z"
+}

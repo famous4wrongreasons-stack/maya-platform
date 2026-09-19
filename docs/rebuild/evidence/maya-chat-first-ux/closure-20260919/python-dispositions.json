@@ -1,0 +1,522 @@
+{
+  "source": "docs/rebuild/evidence/maya-chat-first-ux/recovery-20260919/ci-python-failure-identifiers.json",
+  "originalFailures": 34,
+  "originalErrors": 30,
+  "sameIdentifiersOnThreePriorCheckpoints": true,
+  "runtimeFilesChanged": 0,
+  "excludedTests": 0,
+  "dispositions": [
+    {
+      "originalIdentifier": "test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send (test_package2_communication_ratchet.Package2CommunicationRatchetTests.test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send) (file='bot.py', function='_director_briefing_job')",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "R05 owner reports, R06 operational alerts/retirement, B34 review retirement",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_package2_communication_ratchet.py"
+    },
+    {
+      "originalIdentifier": "test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send (test_package2_communication_ratchet.Package2CommunicationRatchetTests.test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send) (file='bot.py', function='_dual_role_guard_job')",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "R05 owner reports, R06 operational alerts/retirement, B34 review retirement",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_package2_communication_ratchet.py"
+    },
+    {
+      "originalIdentifier": "test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send (test_package2_communication_ratchet.Package2CommunicationRatchetTests.test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send) (file='bot.py', function='_god_watch_job')",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "R05 owner reports, R06 operational alerts/retirement, B34 review retirement",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_package2_communication_ratchet.py"
+    },
+    {
+      "originalIdentifier": "test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send (test_package2_communication_ratchet.Package2CommunicationRatchetTests.test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send) (file='lead_alerts.py', function='scan_and_alert')",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "R05 owner reports, R06 operational alerts/retirement, B34 review retirement",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_package2_communication_ratchet.py"
+    },
+    {
+      "originalIdentifier": "test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send (test_package2_communication_ratchet.Package2CommunicationRatchetTests.test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send) (file='webhook_server.py', function='_notify_owner_reputation')",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "R05 owner reports, R06 operational alerts/retirement, B34 review retirement",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_package2_communication_ratchet.py"
+    },
+    {
+      "originalIdentifier": "test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send (test_package2_communication_ratchet.Package2CommunicationRatchetTests.test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send) (file='webhook_server.py', function='_send_growth_role_briefs_once')",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "R05 owner reports, R06 operational alerts/retirement, B34 review retirement",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_package2_communication_ratchet.py"
+    },
+    {
+      "originalIdentifier": "test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send (test_package2_communication_ratchet.Package2CommunicationRatchetTests.test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send) (file='webhook_server.py', function='_send_master_day_briefs_once')",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "R05 owner reports, R06 operational alerts/retirement, B34 review retirement",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_package2_communication_ratchet.py"
+    },
+    {
+      "originalIdentifier": "test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send (test_package2_communication_ratchet.Package2CommunicationRatchetTests.test_a11_a13_producers_have_one_canonical_owner_and_no_direct_send) (file='webhook_server.py', function='_send_shift_reminders_once')",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "R05 owner reports, R06 operational alerts/retirement, B34 review retirement",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_package2_communication_ratchet.py"
+    },
+    {
+      "originalIdentifier": "test_all_remaining_production_entry_points_declare_a_known_origin (test_legacy_appointment_bridge_ratchet.LegacyAppointmentBridgeRatchetTests.test_all_remaining_production_entry_points_declare_a_known_origin)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "R01 retired three raw client appointment initiators; exact remaining origin inventory retained",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_legacy_appointment_bridge_ratchet.py"
+    },
+    {
+      "originalIdentifier": "test_bare_profit_inherits_recent_user_period (test_chat_routing.ChatRoutingTests.test_bare_profit_inherits_recent_user_period)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 verified principal middleware; raw identity denied; B35 legacy bulk retired",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_routing.py"
+    },
+    {
+      "originalIdentifier": "test_booking_redemption_applies_only_one_service_per_visit (test_loyalty_backfill.LoyaltyBackfillTests.test_booking_redemption_applies_only_one_service_per_visit)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "P4-03 legacy phone/LTV/card value writers retired; exact exception and unchanged transaction state",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_loyalty_backfill.py"
+    },
+    {
+      "originalIdentifier": "test_booking_redemption_finalizes_a_reserved_balance (test_loyalty_backfill.LoyaltyBackfillTests.test_booking_redemption_finalizes_a_reserved_balance)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "P4-03 legacy phone/LTV/card value writers retired; exact exception and unchanged transaction state",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_loyalty_backfill.py"
+    },
+    {
+      "originalIdentifier": "test_booking_redemption_refuses_an_insufficient_balance (test_loyalty_backfill.LoyaltyBackfillTests.test_booking_redemption_refuses_an_insufficient_balance)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "P4-03 legacy phone/LTV/card value writers retired; exact exception and unchanged transaction state",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_loyalty_backfill.py"
+    },
+    {
+      "originalIdentifier": "test_booking_redemption_uses_the_confirmed_current_quote (test_loyalty_backfill.LoyaltyBackfillTests.test_booking_redemption_uses_the_confirmed_current_quote)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "P4-03 legacy phone/LTV/card value writers retired; exact exception and unchanged transaction state",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_loyalty_backfill.py"
+    },
+    {
+      "originalIdentifier": "test_build_context_keeps_client_history_for_staff_client (test_memory_regressions.MemoryRegressionTests.test_build_context_keeps_client_history_for_staff_client)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE",
+      "disposition": "R02 verified staff principal preserves authorized Client history",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_memory_regressions.py"
+    },
+    {
+      "originalIdentifier": "test_bulk_backfill_uses_cap_and_phone_deduplication (test_loyalty_backfill.LoyaltyBackfillTests.test_bulk_backfill_uses_cap_and_phone_deduplication)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "P4-03 legacy phone/LTV/card value writers retired; exact exception and unchanged transaction state",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_loyalty_backfill.py"
+    },
+    {
+      "originalIdentifier": "test_client_retention_uses_previous_cohort_and_future_booking (test_owner_ai.OwnerAITests.test_client_retention_uses_previous_cohort_and_future_booking)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "C8 D16/L01-L08 unavailable derived projection; R04 work owner; source schedule/booked facts preserved",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_owner_ai.py"
+    },
+    {
+      "originalIdentifier": "test_command_center_builds_stable_owner_os_contract (test_owner_ai.OwnerAITests.test_command_center_builds_stable_owner_os_contract)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "C8 D16/L01-L08 unavailable derived projection; R04 work owner; source schedule/booked facts preserved",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_owner_ai.py"
+    },
+    {
+      "originalIdentifier": "test_compound_today_schedule_question_answers_bookings_money_and_upsell (test_chat_routing.ChatRoutingTests.test_compound_today_schedule_question_answers_bookings_money_and_upsell)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 verified principal middleware; raw identity denied; B35 legacy bulk retired",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_routing.py"
+    },
+    {
+      "originalIdentifier": "test_daily_briefing_formatter_uses_only_verified_schedule_groups (test_owner_ai.OwnerAITests.test_daily_briefing_formatter_uses_only_verified_schedule_groups)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "C8 D16/L01-L08 unavailable derived projection; R04 work owner; source schedule/booked facts preserved",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_owner_ai.py"
+    },
+    {
+      "originalIdentifier": "test_daily_briefing_marks_baseline_schedule_conflict (test_owner_ai.OwnerAITests.test_daily_briefing_marks_baseline_schedule_conflict)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "C8 D16/L01-L08 unavailable derived projection; R04 work owner; source schedule/booked facts preserved",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_owner_ai.py"
+    },
+    {
+      "originalIdentifier": "test_daily_briefing_ranks_money_and_prepares_action_card (test_owner_ai.OwnerAITests.test_daily_briefing_ranks_money_and_prepares_action_card)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "C8 D16/L01-L08 unavailable derived projection; R04 work owner; source schedule/booked facts preserved",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_owner_ai.py"
+    },
+    {
+      "originalIdentifier": "test_existing_yclients_card_replaces_capped_welcome_with_real_balance (test_loyalty_backfill.LoyaltyBackfillTests.test_existing_yclients_card_replaces_capped_welcome_with_real_balance)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "P4-03 legacy phone/LTV/card value writers retired; exact exception and unchanged transaction state",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_loyalty_backfill.py"
+    },
+    {
+      "originalIdentifier": "test_explicit_business_revenue_uses_company_total (test_chat_routing.ChatRoutingTests.test_explicit_business_revenue_uses_company_total)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 verified principal middleware; raw identity denied; B35 legacy bulk retired",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_routing.py"
+    },
+    {
+      "originalIdentifier": "test_founder_can_prepare_salon_action_without_execution (test_claude_ai_rbac.ClaudeAIRBACTests.test_founder_can_prepare_salon_action_without_execution)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 authenticated principal; R04 retired legacy operational tools stay absent",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_claude_ai_rbac.py"
+    },
+    {
+      "originalIdentifier": "test_founder_can_read_master_performance (test_claude_ai_rbac.ClaudeAIRBACTests.test_founder_can_read_master_performance)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 authenticated principal; R04 retired legacy operational tools stay absent",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_claude_ai_rbac.py"
+    },
+    {
+      "originalIdentifier": "test_founder_can_read_owner_command_center (test_claude_ai_rbac.ClaudeAIRBACTests.test_founder_can_read_owner_command_center)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 authenticated principal; R04 retired legacy operational tools stay absent",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_claude_ai_rbac.py"
+    },
+    {
+      "originalIdentifier": "test_founder_can_set_growth_goal (test_claude_ai_rbac.ClaudeAIRBACTests.test_founder_can_set_growth_goal)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 authenticated principal; R04 retired legacy operational tools stay absent",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_claude_ai_rbac.py"
+    },
+    {
+      "originalIdentifier": "test_founder_daily_business_question_uses_verified_shortcut (test_chat_routing.ChatRoutingTests.test_founder_daily_business_question_uses_verified_shortcut)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 verified principal middleware; raw identity denied; B35 legacy bulk retired",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_routing.py"
+    },
+    {
+      "originalIdentifier": "test_founder_master_profit_question_returns_numeric_analytics (test_chat_routing.ChatRoutingTests.test_founder_master_profit_question_returns_numeric_analytics)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 verified principal middleware; raw identity denied; B35 legacy bulk retired",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_routing.py"
+    },
+    {
+      "originalIdentifier": "test_gross_profit_typo_uses_one_deterministic_company_formula (test_chat_routing.ChatRoutingTests.test_gross_profit_typo_uses_one_deterministic_company_formula)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 verified principal middleware; raw identity denied; B35 legacy bulk retired",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_routing.py"
+    },
+    {
+      "originalIdentifier": "test_growth_engine_returns_auditable_decisions (test_owner_ai.OwnerAITests.test_growth_engine_returns_auditable_decisions)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "C8 D16/L01-L08 unavailable derived projection; R04 work owner; source schedule/booked facts preserved",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_owner_ai.py"
+    },
+    {
+      "originalIdentifier": "test_lazy_backfill_is_capped_and_idempotent (test_loyalty_backfill.LoyaltyBackfillTests.test_lazy_backfill_is_capped_and_idempotent)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "P4-03 legacy phone/LTV/card value writers retired; exact exception and unchanged transaction state",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_loyalty_backfill.py"
+    },
+    {
+      "originalIdentifier": "test_lazy_backfill_prefers_yclients_card_over_ltv_formula (test_loyalty_backfill.LoyaltyBackfillTests.test_lazy_backfill_prefers_yclients_card_over_ltv_formula)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "P4-03 legacy phone/LTV/card value writers retired; exact exception and unchanged transaction state",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_loyalty_backfill.py"
+    },
+    {
+      "originalIdentifier": "test_lazy_backfill_skips_phone_claimed_by_another_identity (test_loyalty_backfill.LoyaltyBackfillTests.test_lazy_backfill_skips_phone_claimed_by_another_identity)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "P4-03 legacy phone/LTV/card value writers retired; exact exception and unchanged transaction state",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_loyalty_backfill.py"
+    },
+    {
+      "originalIdentifier": "test_legacy_cutover_flags_cannot_reenable_payment_write (test_payment_close_unknown.PaymentCutoverTests.test_legacy_cutover_flags_cannot_reenable_payment_write)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE",
+      "disposition": "Patch actual bridge module; isolate exact production tombstones from unrelated sys.modules loader pollution",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_payment_close_unknown.py"
+    },
+    {
+      "originalIdentifier": "test_legacy_founder_binding_cannot_supply_canonical_staff_identity (test_chat_routing.ChatRoutingTests.test_legacy_founder_binding_cannot_supply_canonical_staff_identity)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 verified principal middleware; raw identity denied; B35 legacy bulk retired",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_routing.py"
+    },
+    {
+      "originalIdentifier": "test_legacy_push_does_not_fabricate_canonical_client_chat_history (test_chat_routing.ChatRoutingTests.test_legacy_push_does_not_fabricate_canonical_client_chat_history)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 verified principal middleware; raw identity denied; B35 legacy bulk retired",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_routing.py"
+    },
+    {
+      "originalIdentifier": "test_manager_admin_cannot_call_owner_director_tools (test_claude_ai_rbac.ClaudeAIRBACTests.test_manager_admin_cannot_call_owner_director_tools)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 authenticated principal; R04 retired legacy operational tools stay absent",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_claude_ai_rbac.py"
+    },
+    {
+      "originalIdentifier": "test_manager_can_read_maya_audience_stats (test_claude_ai_rbac.ClaudeAIRBACTests.test_manager_can_read_maya_audience_stats)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 authenticated principal; R04 retired legacy operational tools stay absent",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_claude_ai_rbac.py"
+    },
+    {
+      "originalIdentifier": "test_manager_gets_only_role_aware_growth_plan (test_claude_ai_rbac.ClaudeAIRBACTests.test_manager_gets_only_role_aware_growth_plan)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 authenticated principal; R04 retired legacy operational tools stay absent",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_claude_ai_rbac.py"
+    },
+    {
+      "originalIdentifier": "test_missing_surface_keeps_founder_role_tools_for_telegram (test_claude_ai_rbac.ClaudeAIRBACTests.test_missing_surface_keeps_founder_role_tools_for_telegram)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 authenticated principal; R04 retired legacy operational tools stay absent",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_claude_ai_rbac.py"
+    },
+    {
+      "originalIdentifier": "test_net_profit_is_not_invented_without_complete_expenses (test_chat_routing.ChatRoutingTests.test_net_profit_is_not_invented_without_complete_expenses)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 verified principal middleware; raw identity denied; B35 legacy bulk retired",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_routing.py"
+    },
+    {
+      "originalIdentifier": "test_pay_visit_is_provider_deferred_and_never_dispatches (test_payment_close_unknown.PaymentCutoverTests.test_pay_visit_is_provider_deferred_and_never_dispatches)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE",
+      "disposition": "Patch actual bridge module; isolate exact production tombstones from unrelated sys.modules loader pollution",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_payment_close_unknown.py"
+    },
+    {
+      "originalIdentifier": "test_personal_cycle_queue_exposes_contacts_only_to_owner_ui (test_owner_ai.OwnerAITests.test_personal_cycle_queue_exposes_contacts_only_to_owner_ui)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "C8 D16/L01-L08 unavailable derived projection; R04 work owner; source schedule/booked facts preserved",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_owner_ai.py"
+    },
+    {
+      "originalIdentifier": "test_plan_fact_uses_manual_owner_target_when_set (test_owner_ai.OwnerAITests.test_plan_fact_uses_manual_owner_target_when_set)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "C8 D16/L01-L08 unavailable derived projection; R04 work owner; source schedule/booked facts preserved",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_owner_ai.py"
+    },
+    {
+      "originalIdentifier": "test_pwa_and_proxy_have_no_retired_controls (test_package5_b14_god_boundaries.Package5B14GodBoundaryTest.test_pwa_and_proxy_have_no_retired_controls)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INFRA/ENVIRONMENT",
+      "disposition": "Use committed sanitized PHP fixture; no dependence on missing secret production file",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_package5_b14_god_boundaries.py"
+    },
+    {
+      "originalIdentifier": "test_real_card_import_works_when_fallback_backfill_is_disabled (test_loyalty_backfill.LoyaltyBackfillTests.test_real_card_import_works_when_fallback_backfill_is_disabled)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "P4-03 legacy phone/LTV/card value writers retired; exact exception and unchanged transaction state",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_loyalty_backfill.py"
+    },
+    {
+      "originalIdentifier": "test_return_candidates_empty_state_does_not_invent_money (test_owner_ai.OwnerAITests.test_return_candidates_empty_state_does_not_invent_money)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "C8 D16/L01-L08 unavailable derived projection; R04 work owner; source schedule/booked facts preserved",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_owner_ai.py"
+    },
+    {
+      "originalIdentifier": "test_salon_gross_profit_is_not_routed_to_master_ranking (test_chat_routing.ChatRoutingTests.test_salon_gross_profit_is_not_routed_to_master_ranking)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 verified principal middleware; raw identity denied; B35 legacy bulk retired",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_routing.py"
+    },
+    {
+      "originalIdentifier": "test_short_amount_followup_inherits_previous_gross_profit_metric (test_chat_routing.ChatRoutingTests.test_short_amount_followup_inherits_previous_gross_profit_metric)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 verified principal middleware; raw identity denied; B35 legacy bulk retired",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_routing.py"
+    },
+    {
+      "originalIdentifier": "test_single_free_slot_uses_correct_russian_inflection (test_owner_ai.OwnerAITests.test_single_free_slot_uses_correct_russian_inflection)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "C8 D16/L01-L08 unavailable derived projection; R04 work owner; source schedule/booked facts preserved",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_owner_ai.py"
+    },
+    {
+      "originalIdentifier": "test_smart_plan_uses_weekday_history_and_separates_forecast (test_owner_ai.OwnerAITests.test_smart_plan_uses_weekday_history_and_separates_forecast)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "C8 D16/L01-L08 unavailable derived projection; R04 work owner; source schedule/booked facts preserved",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_owner_ai.py"
+    },
+    {
+      "originalIdentifier": "test_staff_mode_payload_is_not_trusted_for_plain_client (test_chat_routing.ChatRoutingTests.test_staff_mode_payload_is_not_trusted_for_plain_client)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 verified principal middleware; raw identity denied; B35 legacy bulk retired",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_routing.py"
+    },
+    {
+      "originalIdentifier": "test_staff_surface_blocks_booking_tool_even_if_called_directly (test_claude_ai_rbac.ClaudeAIRBACTests.test_staff_surface_blocks_booking_tool_even_if_called_directly)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 authenticated principal; R04 retired legacy operational tools stay absent",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_claude_ai_rbac.py"
+    },
+    {
+      "originalIdentifier": "test_staff_surface_removes_client_booking_tools_for_founder (test_claude_ai_rbac.ClaudeAIRBACTests.test_staff_surface_removes_client_booking_tools_for_founder)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 authenticated principal; R04 retired legacy operational tools stay absent",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_claude_ai_rbac.py"
+    },
+    {
+      "originalIdentifier": "test_standalone_general_followup_switches_personal_revenue_to_business (test_chat_routing.ChatRoutingTests.test_standalone_general_followup_switches_personal_revenue_to_business)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 verified principal middleware; raw identity denied; B35 legacy bulk retired",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_routing.py"
+    },
+    {
+      "originalIdentifier": "test_status_question_uses_server_journal (test_owner_chat_safety.OwnerChatSafetyTests.test_status_question_uses_server_journal)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE",
+      "disposition": "R02 verified platform principal before authorized owner history read",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_owner_chat_safety.py"
+    },
+    {
+      "originalIdentifier": "test_successful_staff_telegram_message_is_mirrored_once (test_chat_message_ids.ChatMessageIdTests.test_successful_staff_telegram_message_is_mirrored_once)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "Raw Telegram send cannot mint canonical Communication Delivery/history",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_message_ids.py"
+    },
+    {
+      "originalIdentifier": "test_tip_offer_triggers_on_attendance_transition_even_with_other_changes (test_chat_tips.ChatTipsTests.test_tip_offer_triggers_on_attendance_transition_even_with_other_changes)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "R06 canonical operational alert trigger replaces raw staff tip fanout",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_tips.py"
+    },
+    {
+      "originalIdentifier": "test_typo_amount_followup_inherits_previous_profit_metric (test_chat_routing.ChatRoutingTests.test_typo_amount_followup_inherits_previous_profit_metric)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 verified principal middleware; raw identity denied; B35 legacy bulk retired",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_routing.py"
+    },
+    {
+      "originalIdentifier": "test_unavailable_yclients_transactions_never_render_zero_revenue (test_chat_routing.ChatRoutingTests.test_unavailable_yclients_transactions_never_render_zero_revenue)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE / STALE TEST",
+      "disposition": "R02 verified principal middleware; raw identity denied; B35 legacy bulk retired",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_chat_routing.py"
+    },
+    {
+      "originalIdentifier": "test_work_records_include_saved_pii_free_advice (test_master_client_advice.MasterClientAdviceTests.test_work_records_include_saved_pii_free_advice)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "INVALID PROOF FIXTURE",
+      "disposition": "R02 exact verified staff identity",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_master_client_advice.py"
+    },
+    {
+      "originalIdentifier": "test_zero_balance_discount_card_does_not_replace_welcome_fallback (test_loyalty_backfill.LoyaltyBackfillTests.test_zero_balance_discount_card_does_not_replace_welcome_fallback)",
+      "preExisting": true,
+      "wave1Regression": false,
+      "classification": "STALE TEST",
+      "disposition": "P4-03 legacy phone/LTV/card value writers retired; exact exception and unchanged transaction state",
+      "testFile": "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_loyalty_backfill.py"
+    }
+  ]
+}

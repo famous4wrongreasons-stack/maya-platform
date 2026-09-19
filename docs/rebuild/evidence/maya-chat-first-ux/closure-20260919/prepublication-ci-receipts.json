@@ -1,0 +1,978 @@
+[
+  {
+    "conclusion": "success",
+    "databaseId": 35453092417,
+    "headSha": "e28bfd042cb10b5a33bfda1d2e05b743cec78845",
+    "jobs": [
+      {
+        "completedAt": "2026-09-19T16:06:14Z",
+        "conclusion": "success",
+        "databaseId": 105923584072,
+        "name": "NestJS and Prisma",
+        "startedAt": "2026-09-19T15:51:26Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-09-19T15:51:27Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-09-19T15:51:26Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:39Z",
+            "conclusion": "success",
+            "name": "Initialize containers",
+            "number": 2,
+            "startedAt": "2026-09-19T15:51:27Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:44Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v4",
+            "number": 3,
+            "startedAt": "2026-09-19T15:51:39Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:47Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-node@v4",
+            "number": 4,
+            "startedAt": "2026-09-19T15:51:44Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:58Z",
+            "conclusion": "success",
+            "name": "Install architectural scanner prerequisite",
+            "number": 5,
+            "startedAt": "2026-09-19T15:51:47Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:52:09Z",
+            "conclusion": "success",
+            "name": "Run npm ci",
+            "number": 6,
+            "startedAt": "2026-09-19T15:51:58Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:52:09Z",
+            "conclusion": "success",
+            "name": "Run npm audit --omit=dev --audit-level=high",
+            "number": 7,
+            "startedAt": "2026-09-19T15:52:09Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:52:15Z",
+            "conclusion": "success",
+            "name": "Run npm run prisma:generate",
+            "number": 8,
+            "startedAt": "2026-09-19T15:52:09Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:52:16Z",
+            "conclusion": "success",
+            "name": "Run npx prisma validate",
+            "number": 9,
+            "startedAt": "2026-09-19T15:52:15Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:52:21Z",
+            "conclusion": "success",
+            "name": "Run npx prisma migrate deploy",
+            "number": 10,
+            "startedAt": "2026-09-19T15:52:16Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:52:22Z",
+            "conclusion": "success",
+            "name": "Run npm run prisma:seed",
+            "number": 11,
+            "startedAt": "2026-09-19T15:52:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:52:37Z",
+            "conclusion": "success",
+            "name": "Run npm run typecheck",
+            "number": 12,
+            "startedAt": "2026-09-19T15:52:22Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:10Z",
+            "conclusion": "success",
+            "name": "Run npm run typecheck:scripts",
+            "number": 13,
+            "startedAt": "2026-09-19T15:52:37Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:54:59Z",
+            "conclusion": "success",
+            "name": "Run npm run lint",
+            "number": 14,
+            "startedAt": "2026-09-19T15:53:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:55:05Z",
+            "conclusion": "success",
+            "name": "Run node scripts/k3-gateway-check.mjs",
+            "number": 15,
+            "startedAt": "2026-09-19T15:54:59Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T16:05:17Z",
+            "conclusion": "success",
+            "name": "Run npm test -- --runInBand",
+            "number": 16,
+            "startedAt": "2026-09-19T15:55:05Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T16:05:18Z",
+            "conclusion": "success",
+            "name": "Run npm run test:e2e -- --runInBand",
+            "number": 17,
+            "startedAt": "2026-09-19T16:05:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T16:05:59Z",
+            "conclusion": "success",
+            "name": "Run npm run build",
+            "number": 18,
+            "startedAt": "2026-09-19T16:05:18Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T16:06:10Z",
+            "conclusion": "success",
+            "name": "HTTP smoke with explicit AppModule test prerequisites",
+            "number": 19,
+            "startedAt": "2026-09-19T16:05:59Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T16:06:10Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@v4",
+            "number": 36,
+            "startedAt": "2026-09-19T16:06:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T16:06:10Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v4",
+            "number": 37,
+            "startedAt": "2026-09-19T16:06:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T16:06:11Z",
+            "conclusion": "success",
+            "name": "Stop containers",
+            "number": 38,
+            "startedAt": "2026-09-19T16:06:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T16:06:11Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 39,
+            "startedAt": "2026-09-19T16:06:11Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092417/job/105923584072"
+      },
+      {
+        "completedAt": "2026-09-19T16:04:30Z",
+        "conclusion": "success",
+        "databaseId": 105923584137,
+        "name": "Legacy Python",
+        "startedAt": "2026-09-19T15:51:25Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-09-19T15:51:27Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-09-19T15:51:26Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:32Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v4",
+            "number": 2,
+            "startedAt": "2026-09-19T15:51:27Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:33Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-python@v5",
+            "number": 3,
+            "startedAt": "2026-09-19T15:51:32Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:47Z",
+            "conclusion": "success",
+            "name": "Run python -m pip install --disable-pip-version-check -r \"ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/requirements.txt\"",
+            "number": 4,
+            "startedAt": "2026-09-19T15:51:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:47Z",
+            "conclusion": "success",
+            "name": "Run cp \"ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/config.example.py\" \"ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/config.py\"",
+            "number": 5,
+            "startedAt": "2026-09-19T15:51:47Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:48Z",
+            "conclusion": "success",
+            "name": "Run python -m compileall -q \"ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440\"",
+            "number": 6,
+            "startedAt": "2026-09-19T15:51:47Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T16:04:28Z",
+            "conclusion": "success",
+            "name": "Run python -m unittest discover -s \"ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440\" -p \"test_*.py\"",
+            "number": 7,
+            "startedAt": "2026-09-19T15:51:48Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T16:04:28Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-python@v5",
+            "number": 13,
+            "startedAt": "2026-09-19T16:04:28Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T16:04:28Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v4",
+            "number": 14,
+            "startedAt": "2026-09-19T16:04:28Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T16:04:28Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 15,
+            "startedAt": "2026-09-19T16:04:28Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092417/job/105923584137"
+      },
+      {
+        "completedAt": "2026-09-19T15:51:35Z",
+        "conclusion": "success",
+        "databaseId": 105923584200,
+        "name": "Frontend bundles",
+        "startedAt": "2026-09-19T15:51:26Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-09-19T15:51:27Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-09-19T15:51:26Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:32Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v4",
+            "number": 2,
+            "startedAt": "2026-09-19T15:51:27Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:33Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-node@v4",
+            "number": 3,
+            "startedAt": "2026-09-19T15:51:32Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:33Z",
+            "conclusion": "success",
+            "name": "Parse inline scripts",
+            "number": 4,
+            "startedAt": "2026-09-19T15:51:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:33Z",
+            "conclusion": "success",
+            "name": "Verify prepublication safety contracts",
+            "number": 5,
+            "startedAt": "2026-09-19T15:51:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:33Z",
+            "conclusion": "success",
+            "name": "Prove prepublication isolation and routing counterfactuals",
+            "number": 6,
+            "startedAt": "2026-09-19T15:51:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:33Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@v4",
+            "number": 11,
+            "startedAt": "2026-09-19T15:51:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:34Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v4",
+            "number": 12,
+            "startedAt": "2026-09-19T15:51:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:34Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 13,
+            "startedAt": "2026-09-19T15:51:34Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092417/job/105923584200"
+      }
+    ],
+    "name": "Platform CI",
+    "status": "completed",
+    "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092417"
+  },
+  {
+    "conclusion": "success",
+    "databaseId": 35453092390,
+    "headSha": "e28bfd042cb10b5a33bfda1d2e05b743cec78845",
+    "jobs": [
+      {
+        "completedAt": "2026-09-19T15:54:30Z",
+        "conclusion": "success",
+        "databaseId": 105923547970,
+        "name": "Widgets live path",
+        "startedAt": "2026-09-19T15:51:24Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-09-19T15:51:26Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-09-19T15:51:25Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:35Z",
+            "conclusion": "success",
+            "name": "Initialize containers",
+            "number": 2,
+            "startedAt": "2026-09-19T15:51:26Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:40Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v4",
+            "number": 3,
+            "startedAt": "2026-09-19T15:51:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:42Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-node@v4",
+            "number": 4,
+            "startedAt": "2026-09-19T15:51:40Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:57Z",
+            "conclusion": "success",
+            "name": "Run npm ci",
+            "number": 5,
+            "startedAt": "2026-09-19T15:51:42Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:52:02Z",
+            "conclusion": "success",
+            "name": "Run npm run prisma:generate",
+            "number": 6,
+            "startedAt": "2026-09-19T15:51:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:52:07Z",
+            "conclusion": "success",
+            "name": "Run npx prisma migrate deploy",
+            "number": 7,
+            "startedAt": "2026-09-19T15:52:02Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:52:26Z",
+            "conclusion": "success",
+            "name": "Run npm run typecheck:widgets-live",
+            "number": 8,
+            "startedAt": "2026-09-19T15:52:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:21Z",
+            "conclusion": "success",
+            "name": "Run npm run test:widgets:live",
+            "number": 9,
+            "startedAt": "2026-09-19T15:52:26Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:54:13Z",
+            "conclusion": "success",
+            "name": "Run npm run build",
+            "number": 10,
+            "startedAt": "2026-09-19T15:53:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:54:28Z",
+            "conclusion": "success",
+            "name": "Run npm run test:widgets:http",
+            "number": 11,
+            "startedAt": "2026-09-19T15:54:13Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:54:28Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@v4",
+            "number": 20,
+            "startedAt": "2026-09-19T15:54:28Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:54:29Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v4",
+            "number": 21,
+            "startedAt": "2026-09-19T15:54:28Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:54:29Z",
+            "conclusion": "success",
+            "name": "Stop containers",
+            "number": 22,
+            "startedAt": "2026-09-19T15:54:29Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:54:29Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 23,
+            "startedAt": "2026-09-19T15:54:29Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092390/job/105923547970"
+      }
+    ],
+    "name": "Widgets Live",
+    "status": "completed",
+    "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092390"
+  },
+  {
+    "conclusion": "success",
+    "databaseId": 35453092415,
+    "headSha": "e28bfd042cb10b5a33bfda1d2e05b743cec78845",
+    "jobs": [
+      {
+        "completedAt": "2026-09-19T15:51:39Z",
+        "conclusion": "success",
+        "databaseId": 105923548255,
+        "name": "K1 surface dossier (non-blocking)",
+        "startedAt": "2026-09-19T15:51:25Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-09-19T15:51:26Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-09-19T15:51:26Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:32Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v4",
+            "number": 2,
+            "startedAt": "2026-09-19T15:51:26Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:36Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-node@v4",
+            "number": 3,
+            "startedAt": "2026-09-19T15:51:32Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:36Z",
+            "conclusion": "success",
+            "name": "The dossier covers every surface, and the ledgers are complete",
+            "number": 4,
+            "startedAt": "2026-09-19T15:51:36Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:36Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@v4",
+            "number": 7,
+            "startedAt": "2026-09-19T15:51:36Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:36Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v4",
+            "number": 8,
+            "startedAt": "2026-09-19T15:51:36Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:36Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 9,
+            "startedAt": "2026-09-19T15:51:36Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092415/job/105923548255"
+      },
+      {
+        "completedAt": "2026-09-19T15:51:53Z",
+        "conclusion": "success",
+        "databaseId": 105923548371,
+        "name": "Widget Contract (non-blocking)",
+        "startedAt": "2026-09-19T15:51:24Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-09-19T15:51:26Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-09-19T15:51:25Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:32Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v4",
+            "number": 2,
+            "startedAt": "2026-09-19T15:51:26Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:35Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-node@v4",
+            "number": 3,
+            "startedAt": "2026-09-19T15:51:32Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:45Z",
+            "conclusion": "success",
+            "name": "Run npm ci",
+            "number": 4,
+            "startedAt": "2026-09-19T15:51:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:49Z",
+            "conclusion": "success",
+            "name": "The certified contract compiles",
+            "number": 5,
+            "startedAt": "2026-09-19T15:51:45Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:50Z",
+            "conclusion": "success",
+            "name": "Widget Contract checkers",
+            "number": 6,
+            "startedAt": "2026-09-19T15:51:49Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:50Z",
+            "conclusion": "success",
+            "name": "Wave 1 fence - the contract module is excluded from the build",
+            "number": 7,
+            "startedAt": "2026-09-19T15:51:50Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:51Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@v4",
+            "number": 13,
+            "startedAt": "2026-09-19T15:51:50Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:51Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v4",
+            "number": 14,
+            "startedAt": "2026-09-19T15:51:51Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:51Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 15,
+            "startedAt": "2026-09-19T15:51:51Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092415/job/105923548371"
+      }
+    ],
+    "name": "Widget Contract",
+    "status": "completed",
+    "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092415"
+  },
+  {
+    "conclusion": "success",
+    "databaseId": 35453092416,
+    "headSha": "e28bfd042cb10b5a33bfda1d2e05b743cec78845",
+    "jobs": [
+      {
+        "completedAt": "2026-09-19T15:53:45Z",
+        "conclusion": "success",
+        "databaseId": 105923547984,
+        "name": "Chat shell build, gates and tests (node 22)",
+        "startedAt": "2026-09-19T15:51:25Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-09-19T15:51:26Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-09-19T15:51:25Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:33Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v4",
+            "number": 2,
+            "startedAt": "2026-09-19T15:51:26Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:36Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-node@v4",
+            "number": 3,
+            "startedAt": "2026-09-19T15:51:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:36Z",
+            "conclusion": "success",
+            "name": "Node is at least 22.18 (tests import .ts through type stripping)",
+            "number": 4,
+            "startedAt": "2026-09-19T15:51:36Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:46Z",
+            "conclusion": "success",
+            "name": "Install the backend toolchain (npm ci, install scripts off)",
+            "number": 5,
+            "startedAt": "2026-09-19T15:51:36Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:53Z",
+            "conclusion": "success",
+            "name": "Reproducible - a fresh build equals the committed manifest (and build-baseline/ is gone)",
+            "number": 6,
+            "startedAt": "2026-09-19T15:51:46Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:52:00Z",
+            "conclusion": "success",
+            "name": "Build - dist/web for the tests",
+            "number": 7,
+            "startedAt": "2026-09-19T15:51:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:52:08Z",
+            "conclusion": "success",
+            "name": "Self-test - every refuse fixture refused, every admit fixture admitted",
+            "number": 8,
+            "startedAt": "2026-09-19T15:52:00Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:52:14Z",
+            "conclusion": "success",
+            "name": "Typecheck",
+            "number": 9,
+            "startedAt": "2026-09-19T15:52:08Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:10Z",
+            "conclusion": "success",
+            "name": "Node test suite",
+            "number": 10,
+            "startedAt": "2026-09-19T15:52:14Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:10Z",
+            "conclusion": "success",
+            "name": "Skip audit - every skip says it is not a PASS",
+            "number": 11,
+            "startedAt": "2026-09-19T15:53:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:41Z",
+            "conclusion": "success",
+            "name": "K5 exit gate (src self-mount 0, entry exactly 1, renderer and DOM mutations refused)",
+            "number": 12,
+            "startedAt": "2026-09-19T15:53:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:42Z",
+            "conclusion": "success",
+            "name": "K15 census over src + entry (successor authority values 0, client storage never)",
+            "number": 13,
+            "startedAt": "2026-09-19T15:53:41Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:42Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@v4",
+            "number": 25,
+            "startedAt": "2026-09-19T15:53:42Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:42Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v4",
+            "number": 26,
+            "startedAt": "2026-09-19T15:53:42Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:43Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 27,
+            "startedAt": "2026-09-19T15:53:42Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092416/job/105923547984"
+      },
+      {
+        "completedAt": "2026-09-19T15:53:43Z",
+        "conclusion": "success",
+        "databaseId": 105923548100,
+        "name": "Chat shell build, gates and tests (node 24)",
+        "startedAt": "2026-09-19T15:51:25Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-09-19T15:51:27Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-09-19T15:51:26Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:32Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v4",
+            "number": 2,
+            "startedAt": "2026-09-19T15:51:27Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:35Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-node@v4",
+            "number": 3,
+            "startedAt": "2026-09-19T15:51:32Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:35Z",
+            "conclusion": "success",
+            "name": "Node is at least 22.18 (tests import .ts through type stripping)",
+            "number": 4,
+            "startedAt": "2026-09-19T15:51:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:46Z",
+            "conclusion": "success",
+            "name": "Install the backend toolchain (npm ci, install scripts off)",
+            "number": 5,
+            "startedAt": "2026-09-19T15:51:35Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:53Z",
+            "conclusion": "success",
+            "name": "Reproducible - a fresh build equals the committed manifest (and build-baseline/ is gone)",
+            "number": 6,
+            "startedAt": "2026-09-19T15:51:46Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:51:59Z",
+            "conclusion": "success",
+            "name": "Build - dist/web for the tests",
+            "number": 7,
+            "startedAt": "2026-09-19T15:51:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:52:07Z",
+            "conclusion": "success",
+            "name": "Self-test - every refuse fixture refused, every admit fixture admitted",
+            "number": 8,
+            "startedAt": "2026-09-19T15:51:59Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:52:13Z",
+            "conclusion": "success",
+            "name": "Typecheck",
+            "number": 9,
+            "startedAt": "2026-09-19T15:52:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:09Z",
+            "conclusion": "success",
+            "name": "Node test suite",
+            "number": 10,
+            "startedAt": "2026-09-19T15:52:13Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:09Z",
+            "conclusion": "success",
+            "name": "Skip audit - every skip says it is not a PASS",
+            "number": 11,
+            "startedAt": "2026-09-19T15:53:09Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:40Z",
+            "conclusion": "success",
+            "name": "K5 exit gate (src self-mount 0, entry exactly 1, renderer and DOM mutations refused)",
+            "number": 12,
+            "startedAt": "2026-09-19T15:53:09Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:41Z",
+            "conclusion": "success",
+            "name": "K15 census over src + entry (successor authority values 0, client storage never)",
+            "number": 13,
+            "startedAt": "2026-09-19T15:53:40Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:41Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-node@v4",
+            "number": 25,
+            "startedAt": "2026-09-19T15:53:41Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:41Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v4",
+            "number": 26,
+            "startedAt": "2026-09-19T15:53:41Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-09-19T15:53:41Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 27,
+            "startedAt": "2026-09-19T15:53:41Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092416/job/105923548100"
+      }
+    ],
+    "name": "MAYA Chat Shell",
+    "status": "completed",
+    "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/35453092416"
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "head": "e28bfd042cb10b5a33bfda1d2e05b743cec78845",
+  "exit": 0,
+  "envSource": ".github/workflows/platform-ci.yml platform-backend.env",
+  "overrides": [
+    "loopback isolated proof DATABASE_URL",
+    "HTTP_SMOKE_PORT=3164"
+  ],
+  "productionEffects": 0
+}

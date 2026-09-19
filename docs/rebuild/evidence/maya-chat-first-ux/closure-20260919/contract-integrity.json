@@ -1,0 +1,32 @@
+[
+  {
+    "path": "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md",
+    "unchangedFrom": "df2d175c",
+    "sha256": "606d7f99da5fe1977d5efe737dca91a04f2b11faecddbd666120d34a03e94a8a"
+  },
+  {
+    "path": "docs/rebuild/evidence/maya-chat-first-ux/gate-conformance-audit.json",
+    "unchangedFrom": "df2d175c",
+    "sha256": "da83364732fd6d96cac8539f16fe30dc1ce5ff044f78ccdac396feb343757c3c"
+  },
+  {
+    "path": "docs/rebuild/DECISION-SHEET-04-RULING-PACKET.md",
+    "unchangedFrom": "df2d175c",
+    "sha256": "ac0993e3943409ac16c936323fbd1f932addf577adbdf899fee6cf29251a3efd"
+  },
+  {
+    "path": "docs/rebuild/DECISION-SHEET-05-RELAY-GATE-RECONCILIATION.md",
+    "unchangedFrom": "df2d175c",
+    "sha256": "9fec8774b736c2c12f15bf47e8062ec68181885a696791913294a943aa25320b"
+  },
+  {
+    "path": "docs/rebuild/DECISION-SHEET-06-CONTRACT-V1.1-STOPS.md",
+    "unchangedFrom": "df2d175c",
+    "sha256": "06d3d2cd51385fcf9a801b95b449bfd3c97a10199f4e7fb15dc4c8392bbf0ac2"
+  },
+  {
+    "path": "docs/rebuild/DECISION-SHEET-07-GATES-LIVE-SCOPE.md",
+    "unchangedFrom": "df2d175c",
+    "sha256": "d1dbbc7f2b81a144e3497f76b005ec39f189548e67bc5b95105b72c8e1b7ab9b"
+  }
+]

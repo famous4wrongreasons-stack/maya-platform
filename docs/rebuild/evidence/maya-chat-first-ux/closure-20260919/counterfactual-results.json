@@ -1,0 +1,17 @@
+[
+  {
+    "label": "runner-selftest",
+    "exit": 0,
+    "head": "e28bfd042cb10b5a33bfda1d2e05b743cec78845"
+  },
+  {
+    "label": "tx-counterfactual",
+    "exit": 0,
+    "head": "e28bfd042cb10b5a33bfda1d2e05b743cec78845"
+  },
+  {
+    "label": "inv30-counterfactual",
+    "exit": 0,
+    "head": "e28bfd042cb10b5a33bfda1d2e05b743cec78845"
+  }
+]
