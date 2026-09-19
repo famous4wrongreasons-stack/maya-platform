@@ -138,8 +138,8 @@ const verify = async (
   scope?: { tenantId?: string; sealKeyVersion?: string | null },
 ): Promise<{ verdict: SealVerification; calls: Call[] }> => {
   const { prisma, calls } = prismaOver(db);
-  const verifier = new SealVerifierService(prisma as never, seal);
-  const verdict = await verifier.verify(TOKEN_HASH, scope);
+  const verifier = new SealVerifierService(seal);
+  const verdict = await verifier.verify(TOKEN_HASH, scope, prisma as never);
   return { verdict, calls };
 };
 

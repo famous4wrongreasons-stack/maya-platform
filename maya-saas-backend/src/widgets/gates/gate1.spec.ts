@@ -1,8 +1,8 @@
-import type { SealVerifier } from '../emission/seal-verifier.service';
+import type { SealCheck } from '../emission/seal-verifier.service';
 import { ctx as baseCtx, rec } from './gate-fixtures.spec-helper.spec';
 import { gate1 } from './gate1';
 
-const verifier = (ok = true): SealVerifier & { verify: jest.Mock } => ({
+const verifier = (ok = true): SealCheck & { verify: jest.Mock } => ({
   verify: jest.fn().mockResolvedValue({
     ok,
     reason: ok ? 'verified' : 'seal_mismatch',

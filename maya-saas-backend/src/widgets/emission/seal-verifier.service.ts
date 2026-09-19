@@ -24,7 +24,7 @@
 
 import { Injectable } from '@nestjs/common';
 
-import { PrismaService } from '../../prisma/prisma.service';
+import type { RequestTx } from '../authority/principal-view';
 import { scoped } from '../stores/tenant-scope';
 import { digestEquals } from '../token.util';
 import { CURRENT_SEAL_KEY_VERSION, SealService } from './seal.service';
@@ -54,6 +54,15 @@ export interface SealScope {
  * the interface is a type, so importing it moves no key into the gateway's run-time graph.
  */
 export interface SealVerifier {
+  verify(
+    recordHash: string,
+    scope: SealScope | undefined,
+    tx: RequestTx,
+  ): Promise<SealVerification>;
+}
+
+/** The transaction-bound view Gate 1 receives. It carries no store client into the gate file. */
+export interface SealCheck {
   verify(recordHash: string, scope?: SealScope): Promise<SealVerification>;
 }
 
@@ -74,10 +83,7 @@ const realDate = (value: Date | null | undefined): value is Date =>
 
 @Injectable()
 export class SealVerifierService implements SealVerifier {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly seal: SealService,
-  ) {}
+  constructor(private readonly seal: SealService) {}
 
   /** The versions this build verifies under. One, until a rotation adds the column and a second key. */
   get acceptedKeyVersions(): readonly string[] {
@@ -87,6 +93,7 @@ export class SealVerifierService implements SealVerifier {
   async verify(
     recordHash: string,
     scope?: SealScope,
+    tx?: RequestTx,
   ): Promise<SealVerification> {
     const version = scope?.sealKeyVersion ?? CURRENT_SEAL_KEY_VERSION;
     if (version !== CURRENT_SEAL_KEY_VERSION) {
@@ -95,7 +102,10 @@ export class SealVerifierService implements SealVerifier {
     if (!present(recordHash)) return REFUSED('record_absent');
 
     const askedTenantId = scope?.tenantId;
-    const record = await this.prisma.widgetIntentRecord.findFirst({
+    if (tx === undefined)
+      throw new Error('seal verification requires the request transaction');
+
+    const record = await tx.widgetIntentRecord.findFirst({
       where: present(askedTenantId)
         ? scoped(askedTenantId, { intentTokenHash: recordHash })
         : { intentTokenHash: recordHash },
@@ -103,7 +113,7 @@ export class SealVerifierService implements SealVerifier {
     });
     if (!record) return REFUSED('record_absent');
 
-    const emission = await this.prisma.widgetEmission.findFirst({
+    const emission = await tx.widgetEmission.findFirst({
       where: scoped(record.tenantId, { widgetId: record.widgetId }),
       select: {
         tenantId: true,
@@ -132,7 +142,7 @@ export class SealVerifierService implements SealVerifier {
 
     // The channel selects the receipt: an envelope degraded for one channel must not verify as the
     // richer one it was composed from. No receipt means the term is null, which the seal covers too.
-    const receipt = await this.prisma.widgetRenderReceipt.findFirst({
+    const receipt = await tx.widgetRenderReceipt.findFirst({
       where: scoped(record.tenantId, {
         widgetId: record.widgetId,
         deliveryChannel: emission.deliveryChannel,
