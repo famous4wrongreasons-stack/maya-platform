@@ -180,18 +180,18 @@ class LoyaltyBackfillTests(unittest.TestCase):
     def test_welcome_points_are_capped_at_one_thousand(self):
         self.assertEqual(self.loyalty._welcome_points(62_150), 1_000)
 
-    def test_lazy_backfill_is_capped_and_idempotent(self):
+    def test_retired_lazy_backfill_is_capped_and_idempotent(self):
         self.loyalty._yc_search_sold_amount = lambda _phone: 62_150
 
-        first = self.loyalty.lazy_backfill_for_client(25, "+70000000000")
-        second = self.loyalty.lazy_backfill_for_client(25, "+70000000000")
+        # P4-03: legacy phone/LTV/card heuristics cannot mint canonical value.
+        import copy
+        before = copy.deepcopy(self.database.transactions)
+        for _retry in range(2):
+            with self.assertRaisesRegex(self.loyalty.LegacyLoyaltyCutoverError, "p4_03_legacy_mutation_disabled"):
+                self.loyalty.lazy_backfill_for_client(25, "+70000000000")
+            self.assertEqual(self.database.transactions, before)
 
-        self.assertEqual(first, {"points": 1_000, "sold_amount": 62_150})
-        self.assertIsNone(second)
-        self.assertEqual(len(self.database.transactions), 1)
-        self.assertEqual(self.database.transactions[0]["points"], 1_000)
-
-    def test_existing_yclients_card_replaces_capped_welcome_with_real_balance(self):
+    def test_retired_existing_yclients_card_replaces_capped_welcome_with_real_balance(self):
         self.database.add_loyalty_transaction(
             client_id=25,
             type_="backfill",
@@ -206,20 +206,15 @@ class LoyaltyBackfillTests(unittest.TestCase):
             "type": {"title": "Кешбек карта"},
         }]
 
-        first = self.loyalty.import_yclients_loyalty_balance(25, "+70000000000")
-        second = self.loyalty.import_yclients_loyalty_balance(25, "+70000000000")
+        # P4-03: legacy phone/LTV/card heuristics cannot mint canonical value.
+        import copy
+        before = copy.deepcopy(self.database.transactions)
+        for _retry in range(2):
+            with self.assertRaisesRegex(self.loyalty.LegacyLoyaltyCutoverError, "p4_03_legacy_mutation_disabled"):
+                self.loyalty.import_yclients_loyalty_balance(25, "+70000000000")
+            self.assertEqual(self.database.transactions, before)
 
-        self.assertEqual(first["previous_balance"], 1_000)
-        self.assertEqual(first["balance"], 2_133)
-        self.assertEqual(first["delta"], 1_133)
-        self.assertIsNone(second)
-        self.assertEqual(self.database.loyalty_balance(25), 2_133)
-        self.assertEqual(
-            [tx["type"] for tx in self.database.transactions],
-            ["backfill", "yc_import"],
-        )
-
-    def test_lazy_backfill_prefers_yclients_card_over_ltv_formula(self):
+    def test_retired_lazy_backfill_prefers_yclients_card_over_ltv_formula(self):
         self.loyalty._yc_search_sold_amount = lambda _phone: 62_150
         self.loyalty._yc.find_client_by_phone = lambda _phone: {"id": 104600668}
         self.loyalty._yc.get_client_loyalty_cards = lambda _client_id: [{
@@ -229,13 +224,13 @@ class LoyaltyBackfillTests(unittest.TestCase):
             "programs": [{"loyalty_type": {"is_cashback": True}}],
         }]
 
-        result = self.loyalty.lazy_backfill_for_client(25, "+70000000000")
-
-        self.assertEqual(result["source"], "yclients_card")
-        self.assertEqual(result["balance"], 2_133)
-        self.assertEqual(self.database.loyalty_balance(25), 2_133)
-        self.assertEqual(len(self.database.transactions), 1)
-        self.assertEqual(self.database.transactions[0]["type"], "yc_import")
+        # P4-03: legacy phone/LTV/card heuristics cannot mint canonical value.
+        import copy
+        before = copy.deepcopy(self.database.transactions)
+        for _retry in range(2):
+            with self.assertRaisesRegex(self.loyalty.LegacyLoyaltyCutoverError, "p4_03_legacy_mutation_disabled"):
+                self.loyalty.lazy_backfill_for_client(25, "+70000000000")
+            self.assertEqual(self.database.transactions, before)
 
     def test_affordable_care_uses_current_yclients_titles_and_prices(self):
         catalog = [
@@ -294,7 +289,7 @@ class LoyaltyBackfillTests(unittest.TestCase):
         self.assertEqual(service["id"], 9)
         self.assertEqual(service["price"], 475)
 
-    def test_booking_redemption_uses_the_confirmed_current_quote(self):
+    def test_retired_booking_redemption_uses_the_confirmed_current_quote(self):
         self.database.add_loyalty_transaction(
             client_id=25, type_="yc_import", points=600,
         )
@@ -304,33 +299,39 @@ class LoyaltyBackfillTests(unittest.TestCase):
             "matched_service": True,
         }
 
-        result = self.loyalty.apply_redemption_for_booking(
-            client_id=25,
-            record_id=77,
-            service_titles=["Массаж"],
-            service_quotes=[{"title": "Массаж", "price": 475}],
-        )
+        # P4-03: legacy phone/LTV/card heuristics cannot mint canonical value.
+        import copy
+        before = copy.deepcopy(self.database.transactions)
+        for _retry in range(2):
+            with self.assertRaisesRegex(self.loyalty.LegacyLoyaltyCutoverError, "p4_03_legacy_mutation_disabled"):
+                self.loyalty.apply_redemption_for_booking(
+                            client_id=25,
+                            record_id=77,
+                            service_titles=["Массаж"],
+                            service_quotes=[{"title": "Массаж", "price": 475}],
+                        )
+            self.assertEqual(self.database.transactions, before)
 
-        self.assertEqual(result["total_points"], 475)
-        self.assertEqual(self.database.transactions[-1]["points"], -475)
-
-    def test_booking_redemption_refuses_an_insufficient_balance(self):
+    def test_retired_booking_redemption_refuses_an_insufficient_balance(self):
         self.database.add_loyalty_transaction(
             client_id=25, type_="yc_import", points=300,
         )
         self.database.loyalty_redemption_exists = lambda *_args: False
 
-        result = self.loyalty.apply_redemption_for_booking(
-            client_id=25,
-            record_id=78,
-            service_titles=["Массаж"],
-            service_quotes=[{"title": "Массаж", "price": 475}],
-        )
+        # P4-03: legacy phone/LTV/card heuristics cannot mint canonical value.
+        import copy
+        before = copy.deepcopy(self.database.transactions)
+        for _retry in range(2):
+            with self.assertRaisesRegex(self.loyalty.LegacyLoyaltyCutoverError, "p4_03_legacy_mutation_disabled"):
+                self.loyalty.apply_redemption_for_booking(
+                            client_id=25,
+                            record_id=78,
+                            service_titles=["Массаж"],
+                            service_quotes=[{"title": "Массаж", "price": 475}],
+                        )
+            self.assertEqual(self.database.transactions, before)
 
-        self.assertEqual(result["total_points"], 0)
-        self.assertEqual(self.database.loyalty_balance(25), 300)
-
-    def test_booking_redemption_applies_only_one_service_per_visit(self):
+    def test_retired_booking_redemption_applies_only_one_service_per_visit(self):
         self.database.add_loyalty_transaction(
             client_id=25, type_="yc_import", points=1_000,
         )
@@ -340,21 +341,23 @@ class LoyaltyBackfillTests(unittest.TestCase):
             "matched_service": True,
         }
 
-        result = self.loyalty.apply_redemption_for_booking(
-            client_id=25,
-            record_id=79,
-            service_titles=["Патчи", "Массаж"],
-            service_quotes=[
-                {"title": "Патчи", "price": 100},
-                {"title": "Массаж", "price": 475},
-            ],
-        )
+        # P4-03: legacy phone/LTV/card heuristics cannot mint canonical value.
+        import copy
+        before = copy.deepcopy(self.database.transactions)
+        for _retry in range(2):
+            with self.assertRaisesRegex(self.loyalty.LegacyLoyaltyCutoverError, "p4_03_legacy_mutation_disabled"):
+                self.loyalty.apply_redemption_for_booking(
+                            client_id=25,
+                            record_id=79,
+                            service_titles=["Патчи", "Массаж"],
+                            service_quotes=[
+                                {"title": "Патчи", "price": 100},
+                                {"title": "Массаж", "price": 475},
+                            ],
+                        )
+            self.assertEqual(self.database.transactions, before)
 
-        self.assertEqual(result["total_points"], 100)
-        self.assertEqual(len(result["items"]), 1)
-        self.assertEqual(self.database.loyalty_balance(25), 900)
-
-    def test_booking_redemption_finalizes_a_reserved_balance(self):
+    def test_retired_booking_redemption_finalizes_a_reserved_balance(self):
         self.database.add_loyalty_transaction(
             client_id=25, type_="yc_import", points=600,
         )
@@ -367,19 +370,21 @@ class LoyaltyBackfillTests(unittest.TestCase):
             client_id=25, points=475, request_id="booking_123",
         )
 
-        result = self.loyalty.apply_redemption_for_booking(
-            client_id=25,
-            record_id=80,
-            service_titles=["Массаж"],
-            service_quotes=[{"title": "Массаж", "price": 475}],
-            reservation_id="booking_123",
-        )
+        # P4-03: legacy phone/LTV/card heuristics cannot mint canonical value.
+        import copy
+        before = copy.deepcopy(self.database.transactions)
+        for _retry in range(2):
+            with self.assertRaisesRegex(self.loyalty.LegacyLoyaltyCutoverError, "p4_03_legacy_mutation_disabled"):
+                self.loyalty.apply_redemption_for_booking(
+                            client_id=25,
+                            record_id=80,
+                            service_titles=["Массаж"],
+                            service_quotes=[{"title": "Массаж", "price": 475}],
+                            reservation_id="booking_123",
+                        )
+            self.assertEqual(self.database.transactions, before)
 
-        self.assertTrue(hold["ok"])
-        self.assertEqual(result["total_points"], 475)
-        self.assertEqual(self.database.loyalty_balance(25), 125)
-
-    def test_real_card_import_works_when_fallback_backfill_is_disabled(self):
+    def test_retired_real_card_import_works_when_fallback_backfill_is_disabled(self):
         self.loyalty.BACKFILL_ENABLED = False
         self.loyalty._yc.find_client_by_phone = lambda _phone: {"id": 104600668}
         self.loyalty._yc.get_client_loyalty_cards = lambda _client_id: [{
@@ -388,12 +393,15 @@ class LoyaltyBackfillTests(unittest.TestCase):
             "programs": [{"loyalty_type": {"is_cashback": True}}],
         }]
 
-        result = self.loyalty.lazy_backfill_for_client(25, "+70000000000")
+        # P4-03: legacy phone/LTV/card heuristics cannot mint canonical value.
+        import copy
+        before = copy.deepcopy(self.database.transactions)
+        for _retry in range(2):
+            with self.assertRaisesRegex(self.loyalty.LegacyLoyaltyCutoverError, "p4_03_legacy_mutation_disabled"):
+                self.loyalty.lazy_backfill_for_client(25, "+70000000000")
+            self.assertEqual(self.database.transactions, before)
 
-        self.assertEqual(result["source"], "yclients_card")
-        self.assertEqual(self.database.loyalty_balance(25), 2_133)
-
-    def test_zero_balance_discount_card_does_not_replace_welcome_fallback(self):
+    def test_retired_zero_balance_discount_card_does_not_replace_welcome_fallback(self):
         self.loyalty._yc_search_sold_amount = lambda _phone: 8_000
         self.loyalty._yc.find_client_by_phone = lambda _phone: {"id": 104600668}
         self.loyalty._yc.get_client_loyalty_cards = lambda _client_id: [{
@@ -403,10 +411,13 @@ class LoyaltyBackfillTests(unittest.TestCase):
             "programs": [{"loyalty_type": {"is_cashback": False}}],
         }]
 
-        result = self.loyalty.lazy_backfill_for_client(25, "+70000000000")
-
-        self.assertEqual(result, {"points": 400, "sold_amount": 8_000})
-        self.assertEqual(self.database.loyalty_balance(25), 400)
+        # P4-03: legacy phone/LTV/card heuristics cannot mint canonical value.
+        import copy
+        before = copy.deepcopy(self.database.transactions)
+        for _retry in range(2):
+            with self.assertRaisesRegex(self.loyalty.LegacyLoyaltyCutoverError, "p4_03_legacy_mutation_disabled"):
+                self.loyalty.lazy_backfill_for_client(25, "+70000000000")
+            self.assertEqual(self.database.transactions, before)
 
     def test_cashback_card_wins_over_discount_card_even_with_zero_balance(self):
         selected = self.loyalty.select_yclients_cashback_card([
@@ -426,16 +437,19 @@ class LoyaltyBackfillTests(unittest.TestCase):
 
         self.assertEqual(selected["id"], 222)
 
-    def test_lazy_backfill_skips_phone_claimed_by_another_identity(self):
+    def test_retired_lazy_backfill_skips_phone_claimed_by_another_identity(self):
         self.database.phone_claimed = True
         self.loyalty._yc_search_sold_amount = lambda _phone: 62_150
 
-        result = self.loyalty.lazy_backfill_for_client(25, "+70000000000")
+        # P4-03: legacy phone/LTV/card heuristics cannot mint canonical value.
+        import copy
+        before = copy.deepcopy(self.database.transactions)
+        for _retry in range(2):
+            with self.assertRaisesRegex(self.loyalty.LegacyLoyaltyCutoverError, "p4_03_legacy_mutation_disabled"):
+                self.loyalty.lazy_backfill_for_client(25, "+70000000000")
+            self.assertEqual(self.database.transactions, before)
 
-        self.assertIsNone(result)
-        self.assertEqual(self.database.transactions, [])
-
-    def test_bulk_backfill_uses_cap_and_phone_deduplication(self):
+    def test_retired_bulk_backfill_uses_cap_and_phone_deduplication(self):
         self.database.clients = [
             {"id": 25, "phone": "+70000000000"},
             {"id": 26, "phone": "+70000000000"},
@@ -450,11 +464,13 @@ class LoyaltyBackfillTests(unittest.TestCase):
             self.database.phone_claimed = True
 
         self.database.add_loyalty_transaction = add_and_claim
-        summary = asyncio.run(self.loyalty.run_backfill_job())
-
-        self.assertEqual(summary["backfilled"], 1)
-        self.assertEqual(summary["already_done"], 1)
-        self.assertEqual(summary["total_points"], 1_000)
+        # P4-03: legacy phone/LTV/card heuristics cannot mint canonical value.
+        import copy
+        before = copy.deepcopy(self.database.transactions)
+        for _retry in range(2):
+            with self.assertRaisesRegex(self.loyalty.LegacyLoyaltyCutoverError, "p4_03_legacy_mutation_disabled"):
+                asyncio.run(self.loyalty.run_backfill_job())
+            self.assertEqual(self.database.transactions, before)
 
 
 if __name__ == "__main__":

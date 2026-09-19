@@ -101,7 +101,7 @@ class ChatMessageIdTests(unittest.TestCase):
         self.assertEqual(len(response["data"]["messages"]), 45)
         self.assertEqual(len(memory._store[key]), 45)
 
-    def test_successful_staff_telegram_message_is_mirrored_once(self):
+    def test_successful_raw_staff_telegram_message_cannot_mint_canonical_history(self):
         ws = self._load()
         memory = sys.modules["memory"]
         database = sys.modules["database"]
@@ -131,15 +131,8 @@ class ChatMessageIdTests(unittest.TestCase):
         asyncio.run(bot.send_message(chat_id=12345, text="MAYA · план на сегодня"))
 
         key = ws._chat_history_key(12345, "staff")
-        self.assertEqual(len(memory._store[key]), 1)
-        stored = memory._store[key][0]
-        self.assertTrue(stored["protected"])
-        self.assertNotIn("план на сегодня", stored["content"])
-        self.assertNotIn("план на сегодня", stored["content_enc"])
-        self.assertEqual(
-            ws._chat_history_payload([stored])[0]["text"],
-            "MAYA · план на сегодня",
-        )
+        self.assertNotIn(key, memory._store)
+        self.assertEqual(memory._store, {})
 
     def test_retired_delete_preserves_exact_id_text_and_index_targets(self):
         ws = self._load()

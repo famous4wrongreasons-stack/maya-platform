@@ -14,19 +14,15 @@ PRODUCTION_CALLERS = (
 )
 EXPECTED_ORIGINS = Counter(
     {
-        "webhook.chat": 1,
         "webhook.panel": 3,
-        "telegram.bot": 3,
+        "telegram.bot": 1,
     }
 )
 EXPECTED_ENTRY_POINTS = Counter(
     {
-        ("create_booking", "webhook.chat"): 1,
         ("create_record_admin", "webhook.panel"): 1,
         ("reschedule_booking", "webhook.panel"): 1,
         ("cancel_booking", "webhook.panel"): 1,
-        ("create_booking", "telegram.bot"): 1,
-        ("cancel_booking", "telegram.bot"): 1,
         ("pay_visit", "telegram.bot"): 1,
     }
 )
@@ -114,7 +110,7 @@ class LegacyAppointmentBridgeRatchetTests(unittest.TestCase):
 
         self.assertEqual(origins, EXPECTED_ORIGINS)
         self.assertEqual(entry_points, EXPECTED_ENTRY_POINTS)
-        self.assertEqual(sum(origins.values()), 7)
+        self.assertEqual(sum(origins.values()), 4)  # B31–B33 retired the three raw Client initiators
 
     def test_migrated_wrappers_have_exactly_one_bridge_dispatch(self):
         tree = parsed(ROOT / "yclients.py")

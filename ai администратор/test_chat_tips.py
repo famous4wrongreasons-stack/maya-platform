@@ -2,6 +2,7 @@ import asyncio
 import os
 import sys
 import unittest
+from unittest.mock import AsyncMock, patch
 
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -95,7 +96,7 @@ class ChatTipsTests(unittest.TestCase):
         self.assertEqual(message["widget"], "tips")
         self.assertEqual(message["widget_data"], item["widget_data"])
 
-    def test_tip_offer_triggers_on_attendance_transition_even_with_other_changes(self):
+    def test_attendance_update_only_wakes_canonical_operational_owner(self):
         ws = self._load()
         record = {
             "id": 991,
@@ -122,11 +123,13 @@ class ChatTipsTests(unittest.TestCase):
             offered.append(record_id)
 
         ws._offer_tip_to_client = fake_offer
-        result = asyncio.run(ws._process_record_update(object(), 991))
-
-        self.assertEqual(offered, [991])
-        self.assertEqual(result["status"], "updated")
-        self.assertTrue(result["services_changed"])
+        # R06 owns occurrence/audience admission. Provider updates may wake it,
+        # but cannot send a raw-identity tip offer or invent a delivery outcome.
+        with patch("canonical_operational_alerts.trigger", new_callable=AsyncMock) as trigger:
+            result = asyncio.run(ws._process_record_update(object(), 991))
+        trigger.assert_awaited_once_with()
+        self.assertEqual(offered, [])
+        self.assertEqual(result, {"status": "canonical_event_owner_pending", "record_id": 991})
 
     def test_tip_sent_retires_unverified_thank_you_signal(self):
         ws = self._load()

@@ -1,3 +1,4 @@
+from test_support_canonical_principal import verified_request
 import json
 import os
 import sys
@@ -127,6 +128,7 @@ class OwnerChatSafetyTests(unittest.TestCase):
         self.assertEqual(sent, "Готово. Отправила сообщения: 2.")
         self.assertIn("не вернул подтверждённое число", unverified)
 
+    @verified_request('platform_owner', 948205934)
     def test_status_question_uses_server_journal(self):
         self.db.list_owner_actions = lambda limit=20: [{
             "job": "cycle",

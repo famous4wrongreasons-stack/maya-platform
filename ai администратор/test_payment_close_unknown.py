@@ -1,12 +1,26 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from yclients import YClientsAPI
+import ast
+from pathlib import Path
+
+
+def real_payment_api():
+    # Other legacy test loaders replace sys.modules['yclients']. Compile the
+    # exact two production tombstones, without importing provider/config state.
+    source = Path(__file__).with_name('yclients.py').read_text()
+    owner = next(n for n in ast.parse(source).body if isinstance(n, ast.ClassDef) and n.name == 'YClientsAPI')
+    methods = [n for n in owner.body if isinstance(n, ast.FunctionDef) and n.name in {'pay_visit', 'set_record_paid'}]
+    assert len(methods) == 2
+    namespace = {}
+    for method in methods:
+        exec('from __future__ import annotations\n' + ast.get_source_segment(source, method), namespace)
+    return type('ProductionPaymentTombstones', (), {m.name: namespace[m.name] for m in methods})
 
 
 class PaymentCutoverTests(unittest.TestCase):
     def api(self):
-        api = object.__new__(YClientsAPI)
+        api = real_payment_api()()
         api.company_id = 42
         return api
 
@@ -24,7 +38,7 @@ class PaymentCutoverTests(unittest.TestCase):
         api._put.assert_not_called()
         api.create_finance_transaction.assert_not_called()
 
-    @patch("yclients.dispatch_appointment_action")
+    @patch("legacy_appointment_bridge.dispatch_appointment_action")
     def test_pay_visit_is_provider_deferred_and_never_dispatches(self, dispatch):
         api = self.api()
 
@@ -43,7 +57,7 @@ class PaymentCutoverTests(unittest.TestCase):
         )
         dispatch.assert_not_called()
 
-    @patch("yclients.dispatch_appointment_action")
+    @patch("legacy_appointment_bridge.dispatch_appointment_action")
     def test_legacy_cutover_flags_cannot_reenable_payment_write(self, dispatch):
         api = self.api()
 

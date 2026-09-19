@@ -1,3 +1,4 @@
+from test_support_canonical_principal import verified_request
 import json
 import os
 import sys
@@ -32,6 +33,7 @@ class MasterClientAdviceTests(unittest.TestCase):
         self.assertEqual(requirement.domain, "personal_work_records")
         self.assertEqual(requirement.tools, frozenset({"get_my_work_records"}))
 
+    @verified_request('staff', 12345, staff_id=7)
     def test_work_records_include_saved_pii_free_advice(self):
         claude_ai, _logs = _load_claude_ai()
         claude_ai.database.get_master_by_chat_id = lambda _chat_id: {

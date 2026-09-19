@@ -32,20 +32,20 @@ def called_names(node) -> set[str]:
 
 PACKAGE2_PRODUCERS = {
     "webhook_server.py": {
-        "_send_growth_role_briefs_once": "publish_inbox_item",
-        "_send_master_day_briefs_once": "publish_inbox_item",
-        "_send_shift_reminders_once": "publish_inbox_item",
+        "_send_growth_role_briefs_once": "trigger_owner_report",
+        "_send_master_day_briefs_once": "trigger_owner_report",
+        "_send_shift_reminders_once": "trigger",
         "notify_owner_cycle_candidates": "publish_inbox_item",
-        "_notify_owner_reputation": "publish_inbox_item",
+        "_notify_owner_reputation": None,
     },
     "bot.py": {
         "notify_owner": "publish_owner_message",
-        "_director_briefing_job": "notify_owner",
+        "_director_briefing_job": "trigger_owner_report",
         "_daily_report_job": "trigger_owner_daily_report",
-        "_god_watch_job": "publish_inbox_item",
-        "_dual_role_guard_job": "publish_inbox_item",
+        "_god_watch_job": None,
+        "_dual_role_guard_job": None,
     },
-    "lead_alerts.py": {"scan_and_alert": "publish_inbox_item"},
+    "lead_alerts.py": {"scan_and_alert": None},
     "birthday.py": {"run_birthday_job": "publish_inbox_item"},
 }
 
@@ -67,7 +67,15 @@ class Package2CommunicationRatchetTests(unittest.TestCase):
                     calls = called_names(node)
                     source = ast.unparse(node)
 
-                    self.assertIn(canonical_call, calls)
+                    if canonical_call is None:
+                        # B34/R06 retired these initiators. No calls at all is
+                        # stricter than permitting the former Inbox admission.
+                        self.assertEqual(calls, set())
+                        self.assertIn("retired", source.lower())
+                    else:
+                        self.assertIn(canonical_call, calls)
+                    if function_name == "_send_shift_reminders_once":
+                        self.assertIn("from canonical_operational_alerts import trigger", source)
                     self.assertTrue(FORBIDDEN_DIRECT_SENDS.isdisjoint(calls))
                     self.assertNotIn("legacy fallback", source.lower())
 

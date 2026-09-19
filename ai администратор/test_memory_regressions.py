@@ -1,3 +1,4 @@
+from test_support_canonical_principal import verified_request
 import sys
 import types
 import unittest
@@ -98,6 +99,7 @@ class MemoryRegressionTests(unittest.TestCase):
             [{"title": "Стрижка машинкой + фейд", "cost": 0}],
         )
 
+    @verified_request('staff', 948205934, staff_id=7)
     def test_build_context_keeps_client_history_for_staff_client(self):
         history = [
             {

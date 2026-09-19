@@ -179,7 +179,7 @@ class Package5B14GodBoundaryTest(unittest.IsolatedAsyncioTestCase):
         app = (ROOT.parent / "сайт и приложение" / "app.html").read_text(encoding="utf-8")
         site = (ROOT.parent / "maya-os-site" / "index.html").read_text(encoding="utf-8")
         proxy = (
-            ROOT.parent / "сайт и приложение" / "pwa-assets" / "tg-auth" / "api-proxy.php"
+            ROOT.parent / "maya-saas-backend" / "test" / "fixtures" / "beget" / "api-proxy.sanitized.php"
         ).read_text(encoding="utf-8")
         for source in (app, site):
             self.assertNotIn("function editRenewal", source)

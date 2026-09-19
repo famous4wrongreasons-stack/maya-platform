@@ -1,3 +1,4 @@
+from test_support_canonical_principal import verified_request
 import importlib
 import asyncio
 import os
@@ -210,6 +211,7 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertIsNone(ws._client_chat_shortcut(screenshot_question))
         self.assertFalse(ws._allow_client_chat_shortcuts({"mode": "staff"}, 948205934, question))
 
+    @verified_request('platform_owner', 948205934)
     def test_founder_master_profit_question_returns_numeric_analytics(self):
         ws = _load_webhook_server()
 
@@ -252,6 +254,7 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertIn("марже", reply)
         self.assertNotIn("Команда:", reply)
 
+    @verified_request('platform_owner', 948205934)
     def test_founder_daily_business_question_uses_verified_shortcut(self):
         ws = _load_webhook_server()
         owner_ai = sys.modules["owner_ai"]
@@ -270,6 +273,7 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertIn("Стас Мосин — выходной", reply)
         self.assertIn("Илья Третьяков — нужна сверка", reply)
 
+    @verified_request('platform_owner', 948205934)
     def test_compound_today_schedule_question_answers_bookings_money_and_upsell(self):
         ws = _load_webhook_server()
         owner_ai = sys.modules["owner_ai"]
@@ -360,10 +364,11 @@ class ChatRoutingTests(unittest.TestCase):
         authority = ws._panel_resolve_role(948205934)
         self.assertFalse(authority["is_master"])
         self.assertIsNone(authority["staff_id"])
-        self.assertIn("Общая статистика бизнеса", reply)
+        self.assertIn("только владельцу или администратору", reply)
         self.assertNotIn("99 400 ₽", reply)
         self.assertNotIn("Ваша личная статистика", reply)
 
+    @verified_request('platform_owner', 948205934)
     def test_explicit_business_revenue_uses_company_total(self):
         ws = _load_webhook_server()
         sys.modules["database"].get_master_by_chat_id = lambda _tg_id: {
@@ -405,6 +410,7 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertIn("300", reply)
         self.assertNotIn("Ваша личная статистика", reply)
 
+    @verified_request('platform_owner', 948205934)
     def test_gross_profit_typo_uses_one_deterministic_company_formula(self):
         ws = _load_webhook_server()
         fake_analytics = types.ModuleType("analytics")
@@ -437,6 +443,7 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertNotIn("лидер", reply.lower())
         self.assertEqual(requested_periods, ["month"])
 
+    @verified_request('platform_owner', 948205934)
     def test_salon_gross_profit_is_not_routed_to_master_ranking(self):
         ws = _load_webhook_server()
         fake_analytics = types.ModuleType("analytics")
@@ -464,6 +471,7 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertIn("343 650 ₽", reply)
         self.assertNotIn("Илья Третьяков", reply)
 
+    @verified_request('platform_owner', 948205934)
     def test_short_amount_followup_inherits_previous_gross_profit_metric(self):
         ws = _load_webhook_server()
         fake_analytics = types.ModuleType("analytics")
@@ -491,6 +499,7 @@ class ChatRoutingTests(unittest.TestCase):
 
         self.assertIn("343 650 ₽", reply)
 
+    @verified_request('platform_owner', 948205934)
     def test_typo_amount_followup_inherits_previous_profit_metric(self):
         ws = _load_webhook_server()
         fake_analytics = types.ModuleType("analytics")
@@ -518,6 +527,7 @@ class ChatRoutingTests(unittest.TestCase):
 
         self.assertIn("343 650 ₽", reply)
 
+    @verified_request('platform_owner', 948205934)
     def test_standalone_general_followup_switches_personal_revenue_to_business(self):
         ws = _load_webhook_server()
         sys.modules["database"].get_master_by_chat_id = lambda _tg_id: {
@@ -563,6 +573,7 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertNotIn("99 400 ₽", reply)
         self.assertNotIn("Ваша личная статистика", reply)
 
+    @verified_request('platform_owner', 948205934)
     def test_bare_profit_inherits_recent_user_period(self):
         ws = _load_webhook_server()
         fake_analytics = types.ModuleType("analytics")
@@ -591,6 +602,7 @@ class ChatRoutingTests(unittest.TestCase):
         self.assertEqual(requested_periods, ["week"])
         self.assertIn("60 000 ₽", reply)
 
+    @verified_request('platform_owner', 948205934)
     def test_net_profit_is_not_invented_without_complete_expenses(self):
         ws = _load_webhook_server()
         fake_analytics = types.ModuleType("analytics")
@@ -623,6 +635,7 @@ class ChatRoutingTests(unittest.TestCase):
             "Как увеличить выручку за месяц?",
         ))
 
+    @verified_request('platform_owner', 948205934)
     def test_unavailable_yclients_transactions_never_render_zero_revenue(self):
         ws = _load_webhook_server()
         sys.modules["database"].get_master_by_chat_id = lambda _tg_id: {
@@ -701,7 +714,7 @@ class ChatRoutingTests(unittest.TestCase):
         ws = _load_webhook_server()
 
         self.assertEqual(ws._chat_effective_mode({"mode": "staff"}, 123456789), "client")
-        self.assertEqual(ws._chat_effective_mode({"mode": "staff"}, 948205934), "staff")
+        self.assertEqual(ws._chat_effective_mode({"mode": "staff"}, 948205934), "client")
 
     def test_pwa_chat_history_key_is_split_by_surface(self):
         ws = _load_webhook_server()
@@ -1042,11 +1055,9 @@ class ChatRoutingTests(unittest.TestCase):
                 sent.append((chat_id, text, parse_mode))
 
         ws.WEBPUSH_VAPID_PRIVATE_KEY = ""
-        result = asyncio.run(ws.broadcast_send_to_base(_FakeBot(), "Привет, {name}! Новая акция."))
-
-        self.assertEqual(result["sent"], 1)
-        self.assertEqual(sent[0][0], 948205934)
-        self.assertIn("Стас", sent[0][1])
+        with self.assertRaisesRegex(RuntimeError, "B35_CANONICAL_OWNER_APPROVAL_REQUIRED_USE_PANEL"):
+            asyncio.run(ws.broadcast_send_to_base(_FakeBot(), "Привет, {name}! Новая акция."))
+        self.assertEqual(sent, [])
 
         history = mem.load_conversations().get("pwa:client:948205934") or []
         # B23/B24 retired the raw chat-id push/cache authority; this legacy

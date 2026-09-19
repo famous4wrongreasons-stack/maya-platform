@@ -311,12 +311,14 @@ class OwnerAITests(unittest.TestCase):
 
         result = owner_ai.return_candidates()
 
-        self.assertIsNone(result["count"])
-        self.assertNotIn("potential_return_revenue_rub", result)
-        self.assertEqual(result["action"], "reactivation")
-        self.assertIn("Ещё не считалось", result["note"])
+        self.assertFalse(result['available'])
+        self.assertEqual(result['reason'], 'qualified_c8_tenant_read_required')
+        self.assertIsNone(result['count'])
+        self.assertIsNone(result['potential_return_revenue_rub'])
+        self.assertEqual(result['candidates'], [])
+        self.assertEqual(result['decision_options'], [])
 
-    def test_personal_cycle_queue_exposes_contacts_only_to_owner_ui(self):
+    def test_legacy_cycle_queue_cannot_expose_contacts_or_qualify_c8(self):
         cycle_payload = {
             "version": "maya_cycle_candidates_v1",
             "generated_at": date.today().isoformat() + "T09:00:00",
@@ -367,36 +369,26 @@ class OwnerAITests(unittest.TestCase):
         llm_view = owner_ai.return_candidates()
         owner_view = owner_ai.return_candidates(include_personal_data=True)
 
-        self.assertEqual(llm_view["cycle_due_count"], 2)
-        self.assertEqual(llm_view["cycle_overdue_count"], 1)
-        self.assertNotIn("candidates", llm_view)
-        self.assertNotIn("Иван", json.dumps(llm_view, ensure_ascii=False))
-        self.assertEqual(owner_view["candidates"][0]["name"], "Иван Петров")
-        self.assertTrue(owner_view["candidates"][0]["call_url"].startswith("tel:+"))
-        self.assertEqual(owner_view["decision_options"][0]["job"], "cycle")
-        self.assertEqual(owner_view["owner_alert"]["event_id"], "cycle-20260711T090000-test")
+        # C8 L08: neither an owner UI flag nor old SQLite candidates qualify C8 evidence.
+        for view in (llm_view, owner_view):
+            self.assertFalse(view['available'])
+            self.assertEqual(view['reason'], 'qualified_c8_tenant_read_required')
+            self.assertEqual(view['candidates'], [])
+            self.assertEqual(view['decision_options'], [])
+            self.assertIsNone(view['cycle_due_count'])
+            self.assertIsNone(view['cycle_potential_return_revenue_rub'])
+            self.assertNotIn('Иван', json.dumps(view, ensure_ascii=False))
+            self.assertNotIn('tel:', json.dumps(view))
 
-        safe_center = owner_ai.command_center()
-        owner_center = owner_ai.command_center(include_personal_data=True)
-        self.assertNotIn("Иван", json.dumps(safe_center, ensure_ascii=False))
-        self.assertTrue(owner_center["owner_alert"]["active"])
-        clients_card = next(
-            card for card in owner_center["briefing"]["cards"] if card["key"] == "clients"
-        )
-        self.assertEqual(clients_card["candidate_count"], 2)
-        self.assertEqual(clients_card["candidate_queue"][0]["name"], "Иван Петров")
-        self.assertEqual(clients_card["owner_alert"]["new_count"], 2)
-        self.assertIn("MAYA уже отобрала 2", clients_card["analysis"])
-
-    def test_daily_briefing_ranks_money_and_prepares_action_card(self):
+    def test_daily_briefing_keeps_schedule_facts_without_legacy_strategy(self):
         owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
 
         brief = owner_ai.daily_briefing()
 
         self.assertEqual(brief["today"]["booked"], 2)
-        self.assertEqual(brief["today"]["avg_check_rub"], 2000)
-        self.assertEqual(brief["today"]["expected_revenue_rub"], 4000)
-        self.assertEqual(brief["today"]["free_capacity_today"], 14)
+        self.assertIsNone(brief["today"]["avg_check_rub"])
+        self.assertIsNone(brief["today"]["expected_revenue_rub"])
+        self.assertIsNone(brief["today"]["free_capacity_today"])
         self.assertEqual(
             [
                 row["name"]
@@ -413,28 +405,10 @@ class OwnerAITests(unittest.TestCase):
         )
         self.assertEqual(brief["today"]["staff_schedule"]["status"], "verified")
         self.assertFalse(brief["grounding_contract"]["infer_staff_names"])
-        self.assertEqual(brief["top_priority"]["type"], "empty_windows")
-        self.assertEqual(brief["top_priority"]["potential_rub"], 28000)
-        self.assertTrue(brief["top_priority"]["estimate"])
-        self.assertEqual(brief["top_action"]["kind"], "run_job")
-        self.assertEqual(brief["top_action"]["job"], "cycle")
-        self.assertTrue(brief["next_best_actions"])
-        self.assertTrue(brief["execution_plan"]["steps"])
-        self.assertEqual(
-            brief["execution_plan"]["summary"]["steps_count"],
-            len(brief["execution_plan"]["steps"]),
-        )
-        self.assertTrue(brief["task_center"]["tasks"])
-        self.assertEqual(
-            brief["task_center"]["summary"]["tasks_count"],
-            len(brief["task_center"]["tasks"]),
-        )
-        self.assertTrue(brief["control_focus"]["items"])
-        self.assertEqual(brief["control_focus"]["summary"]["focus_count"], len(brief["control_focus"]["items"]))
-        self.assertTrue(brief["control_queue"])
-        self.assertEqual(brief["owner_advisor"]["version"], "maya_owner_advisor_v1")
-        self.assertEqual(len(brief["owner_advisor"]["dimensions"]), 6)
-        self.assertIn("оценка", brief["note"].lower())
+        self.assertIsNone(brief['top_priority'])
+        self.assertIsNone(brief['top_action'])
+        self.assertEqual(brief['next_best_actions'], [])
+        self.assertFalse(brief['owner_advisor']['available'])
 
     def test_daily_briefing_marks_baseline_schedule_conflict(self):
         owner_ai = _load_owner_ai(
@@ -467,7 +441,7 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(schedule["conflicts"][0]["yclients_status"], "working")
         self.assertEqual(schedule["conflicts"][0]["baseline_status"], "off")
         self.assertEqual(brief["today"]["confirmed_working_masters"], 1)
-        self.assertEqual(brief["today"]["free_capacity_today"], 6)
+        self.assertIsNone(brief["today"]["free_capacity_today"])
         self.assertNotIn("Мастер 2", brief["today"]["idle_masters"])
 
     def test_daily_briefing_formatter_uses_only_verified_schedule_groups(self):
@@ -526,10 +500,11 @@ class OwnerAITests(unittest.TestCase):
         self.assertIn("YClients показывает смену 12:00–21:00", text)
         self.assertIn("базовый график показывает выходной", text)
         self.assertIn("записей на день: 7", text)
-        self.assertIn("41 900 ₽", text)
+        self.assertNotIn("41 900 ₽", text)
+        self.assertIn("Прогноз выручки недоступен", text)
         self.assertNotIn("ты, Илья", text)
 
-    def test_single_free_slot_uses_correct_russian_inflection(self):
+    def test_single_free_slot_cannot_create_unqualified_money_or_risk(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
         snap = {
             "free_capacity_today": 1,
@@ -539,214 +514,30 @@ class OwnerAITests(unittest.TestCase):
             "week_trend": {},
         }
 
-        opportunity = next(
-            row for row in owner_ai.money_opportunities(snap=snap, exp={}, ret={})
-            if row["type"] == "empty_windows"
-        )
-        risk = next(
-            row for row in owner_ai.risk_signals(snap=snap, exp={}, ret={}, svc={})["risks"]
-            if row["type"] == "idle_capacity"
-        )
-
-        self.assertIn("1 свободный слот", opportunity["detail"])
-        self.assertIn("1 свободный слот", risk["detail"])
+        self.assertEqual(owner_ai.money_opportunities(snap=snap, exp={}, ret={}), [])
+        risks = owner_ai.risk_signals(snap=snap, exp={}, ret={}, svc={})
+        self.assertFalse(risks['available'])
+        self.assertEqual(risks['risks'], [])
 
     def test_command_center_builds_stable_owner_os_contract(self):
         owner_ai = _load_owner_ai(reactivation_payload={"count": 10, "at": "2026-07-07"})
 
         center = owner_ai.command_center()
 
-        self.assertEqual(center["version"], "owner_command_center_v1")
-        self.assertTrue(center["read_only"])
-        self.assertIn(center["status"], {"ok", "warn", "risk"})
-        self.assertGreater(center["summary"]["money_at_stake_rub"], 0)
-        self.assertEqual(center["summary"]["booked_today"], 2)
-        self.assertEqual(center["summary"]["free_capacity_today"], 14)
-        keys = {section["key"] for section in center["sections"]}
-        self.assertEqual(
-            {
-                "today",
-                "money",
-                "autonomous_director",
-                "autopilot_supervisor",
-                "execution_loop",
-                "kpi_scorecard",
-                "financial_director",
-                "business_goals",
-                "growth_plan",
-                "owner_advisor",
-                "reputation",
-                "decision_memory",
-                "operating_rhythm",
-                "plan_fact",
-                "control",
-                "owner_review",
-                "risks",
-                "clients",
-                "services",
-                "masters",
-                "actions",
-                "automations",
-                "automation_queue",
-                "journal",
-            },
-            keys,
-        )
-        self.assertEqual(center["summary"]["daily_target_rub"], 2000)
-        self.assertIsNotNone(center["summary"]["plan_progress_pct"])
-        self.assertEqual(center["plan_fact"]["daily_target_rub"], 2000)
-        self.assertEqual(center["growth_plan"]["version"], "maya_growth_plan_v1")
-        self.assertEqual(center["summary"]["top_profit_master"]["name"], "Мастер 1")
-        self.assertEqual(center["master_performance"]["top_profit_master"]["profit_after_salary_rub"], 26000)
-        self.assertTrue(center["next_best_actions"])
-        self.assertTrue(center["control_queue"])
-        self.assertTrue(center["attention_feed"])
-        self.assertEqual(center["summary"]["attention_count"], len(center["attention_feed"]))
-        self.assertEqual(center["summary"]["top_control"], center["control_queue"][0])
-        self.assertTrue(center["execution_plan"]["steps"])
-        self.assertEqual(
-            center["summary"]["execution_steps_count"],
-            center["execution_plan"]["summary"]["steps_count"],
-        )
-        self.assertLessEqual(center["execution_plan"]["summary"]["steps_count"], 3)
-        self.assertTrue(center["execution_plan"]["summary"]["actionable_count"])
-        self.assertTrue(center["task_center"]["tasks"])
-        self.assertEqual(center["summary"]["task_count"], center["task_center"]["summary"]["tasks_count"])
-        self.assertIn("overdue_task_count", center["summary"])
-        self.assertIn("owner_review_count", center["summary"])
-        self.assertIn("automation_queue_count", center["summary"])
-        self.assertIn("kpi_score", center["summary"])
-        self.assertIn("autonomous_task_candidates_count", center["summary"])
-        self.assertIn("autonomous_open_tasks_count", center["summary"])
-        self.assertIn("autopilot_supervision_count", center["summary"])
-        self.assertIn("autopilot_safe_actions_count", center["summary"])
-        self.assertIn("autopilot_overdue_count", center["summary"])
-        self.assertIn("execution_loop_open_count", center["summary"])
-        self.assertIn("execution_loop_broken_count", center["summary"])
-        self.assertIn("execution_loop_score", center["summary"])
-        self.assertIn("execution_loop_safe_actions_count", center["summary"])
-        self.assertIn("approval_required_count", center["summary"])
-        self.assertIn("projected_month_gross_rub", center["summary"])
-        self.assertIn("projected_month_contribution_after_salary_rub", center["summary"])
-        self.assertIn("business_goals_off_track_count", center["summary"])
-        self.assertIn("business_goals_risk_count", center["summary"])
-        self.assertIn("month_goal_progress_pct", center["summary"])
-        self.assertIn("month_goal_gap_rub", center["summary"])
-        self.assertIn("daily_load_pct", center["summary"])
-        self.assertIn("owner_advisor_score", center["summary"])
-        self.assertIn("owner_advisor_attention_count", center["summary"])
-        self.assertIn("maps_sources_connected", center["summary"])
-        self.assertIn("retention_90d_pct", center["summary"])
-        self.assertIn("decision_memory_count", center["summary"])
-        self.assertIn("open_decisions_count", center["summary"])
-        self.assertIn("unverified_results_count", center["summary"])
-        self.assertIn("positive_decision_signals_count", center["summary"])
-        self.assertIn("operating_rhythm_last_run_at", center["summary"])
-        self.assertIn("operating_rhythm_last_created_count", center["summary"])
-        self.assertIn("operating_rhythm_last_updated_count", center["summary"])
-        self.assertEqual(center["autonomous_director"]["version"], "maya_os_v2_autonomous_director")
-        self.assertIn(center["autonomous_director"]["mode"], {"supervised_autopilot"})
-        self.assertEqual(center["autopilot_supervisor"]["version"], "autopilot_supervisor_v1")
-        self.assertEqual(center["autopilot_supervisor"]["mode"], "internal_supervision")
-        self.assertEqual(center["execution_loop"]["version"], "maya_os_v3_closed_loop")
-        self.assertEqual(center["execution_loop"]["mode"], "closed_loop_control")
-        self.assertIn(center["execution_loop"]["status"], {"ok", "warn", "risk"})
-        self.assertGreaterEqual(center["execution_loop"]["summary"]["closed_loop_score"], 0)
-        self.assertLessEqual(center["execution_loop"]["summary"]["closed_loop_score"], 100)
-        self.assertIn(center["kpi_scorecard"]["status"], {"ok", "warn", "risk"})
-        self.assertGreaterEqual(center["kpi_scorecard"]["score"], 0)
-        self.assertLessEqual(center["kpi_scorecard"]["score"], 100)
-        self.assertIn("projected_month_gross_rub", center["financial_director"]["summary"])
-        self.assertEqual(center["business_goals"]["version"], "maya_os_v4_business_goals")
-        self.assertEqual(center["business_goals"]["mode"], "plan_fact_goals")
-        self.assertIn(center["business_goals"]["status"], {"ok", "warn", "risk"})
-        goal_keys = {row["key"] for row in center["business_goals"]["goals"]}
-        self.assertTrue({"daily_revenue", "month_gross", "daily_load", "avg_check"}.issubset(goal_keys))
-        self.assertEqual(
-            center["business_goals"]["summary"]["goals_count"],
-            len(center["business_goals"]["goals"]),
-        )
-        self.assertEqual(center["owner_advisor"]["version"], "maya_owner_advisor_v1")
-        self.assertEqual(center["owner_advisor"]["mode"], "evidence_based_advice")
-        advisor_keys = {row["key"] for row in center["owner_advisor"]["dimensions"]}
-        self.assertEqual(
-            {"revenue", "load", "avg_check", "bookings", "retention", "quality"},
-            advisor_keys,
-        )
-        self.assertEqual(center["briefing"]["version"], "maya_owner_brief_v1")
-        self.assertEqual(center["growth_engine"]["version"], "maya_growth_engine_v1")
-        self.assertEqual(center["growth_engine"]["mode"], "evidence_to_action")
-        self.assertEqual(len(center["briefing"]["cards"]), 6)
-        self.assertEqual(
-            {row["key"] for row in center["briefing"]["cards"]},
-            {"pulse", "revenue", "load", "clients", "quality", "market"},
-        )
-        self.assertIn("simple_goal", center["briefing"])
-        self.assertEqual(center["briefing"]["simple_goal"]["title"], "План на сегодня")
-        leader = next(
-            row for row in center["briefing"]["quick_stats"]
-            if row["key"] == "top_master_today"
-        )
-        self.assertEqual(leader["label"], "Лидер сегодня")
-        self.assertEqual(leader["value"], "Мастер 2 · 3 000 ₽")
-        self.assertNotIn("money_at_stake_rub", center["briefing"])
-        self.assertEqual(
-            center["market_intelligence"]["version"],
-            "maya_market_intelligence_v1",
-        )
-        self.assertEqual(center["reputation"]["version"], "maya_reputation_v1")
-        self.assertEqual(center["client_retention"]["version"], "maya_client_retention_v1")
-        self.assertEqual(center["decision_memory"]["version"], "maya_os_v5_decision_memory")
-        self.assertEqual(center["decision_memory"]["mode"], "operating_memory")
-        self.assertIn(center["decision_memory"]["status"], {"ok", "warn", "risk"})
-        self.assertGreaterEqual(
-            center["decision_memory"]["summary"]["items_count"],
-            len(center["decision_memory"]["items"]),
-        )
-        self.assertEqual(center["decision_memory"]["summary"]["positive_signals_count"], 0)
-        self.assertFalse([
-            row for row in center["decision_memory"]["items"]
-            if row.get("kind") == "lesson"
-        ])
-        self.assertEqual(center["operating_rhythm"]["version"], "maya_os_v6_operating_rhythm")
-        self.assertEqual(center["operating_rhythm"]["mode"], "safe_scheduler")
-        self.assertTrue(center["operating_rhythm"]["summary"]["safe_only"])
-        self.assertEqual(center["approval_matrix"]["version"], "approval_matrix_v1")
-        self.assertTrue(center["approval_matrix"]["rows"])
-        self.assertEqual(
-            center["summary"]["autonomous_task_candidates_count"],
-            len(center["autonomous_director"]["task_candidates"]),
-        )
-        self.assertTrue([
-            task for task in center["task_center"]["tasks"]
-            if task.get("assigned_to") in ("owner", "maya")
-        ])
-        self.assertTrue(center["control_focus"]["items"])
-        self.assertEqual(center["summary"]["control_focus_count"], center["control_focus"]["summary"]["focus_count"])
-        self.assertIn("control", {section["key"] for section in center["sections"]})
-        self.assertEqual(center["journal"], [])
-        self.assertEqual(center["next_best_actions"][0]["kind"], "run_job")
-        self.assertNotIn("execute", center["next_best_actions"][0])
-        self.assertTrue(center["automation_status"])
-        self.assertTrue(center["automation_queue"]["items"])
-        self.assertTrue(center["automation_queue"]["summary"]["items_count"])
-        self.assertEqual(len(center["automation_status"]), 5)
-        self.assertIn(
-            "automation_attention_count",
-            center["summary"],
-        )
-        self.assertTrue([
-            row for row in center["automation_status"]
-            if row.get("job") == "cycle" and row.get("recommended")
-        ])
-        cycle_auto = [
-            row for row in center["automation_status"]
-            if row.get("job") == "cycle"
-        ][0]
-        self.assertFalse(cycle_auto["last_action_id"])
-        self.assertFalse(cycle_auto["last_evaluated_at"])
-        self.assertFalse(cycle_auto["last_summary"])
-        self.assertFalse(cycle_auto["last_impact_status"])
+        self.assertEqual(center['version'], 'owner_command_center_v1')
+        self.assertTrue(center['read_only'])
+        self.assertEqual(center['summary']['booked_today'], 2)
+        for key in ('money_at_stake_rub', 'free_capacity_today', 'daily_target_rub', 'plan_progress_pct'):
+            self.assertIsNone(center['summary'][key])
+        # Readable source observations remain; parallel C8 scores/strategies do not.
+        self.assertEqual(center['master_performance']['top_profit_master']['profit_after_salary_rub'], 26000)
+        for key in ('kpi_scorecard', 'financial_director', 'business_goals', 'owner_advisor', 'growth_engine'):
+            self.assertFalse(center[key]['available'])
+            self.assertIsNone(center[key]['score'])
+            self.assertEqual(center[key]['reason'], 'qualified_c8_tenant_read_required')
+        self.assertEqual(center['next_best_actions'], [])
+        self.assertEqual(center['journal'], [])
+        self.assertEqual(center['client_retention']['version'], 'c8.legacy.unavailable/1')
 
 
     def test_autonomous_director_tick_creates_only_internal_control_tasks(self):
@@ -893,7 +684,7 @@ class OwnerAITests(unittest.TestCase):
             self.assertEqual(result["business_mutations"], 0)
         self.assertEqual(sys.modules["database"].list_owner_actions(), before)
 
-    def test_plan_fact_uses_manual_owner_target_when_set(self):
+    def test_legacy_manual_target_cannot_replace_a22(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
         sys.modules["database"].get_setting = lambda key, default=None: (
             "45000" if key == "owner_daily_target_rub" else default
@@ -906,13 +697,13 @@ class OwnerAITests(unittest.TestCase):
             "avg_check_rub": 2000,
         })
 
-        self.assertEqual(plan["target_source"], "manual_setting")
-        self.assertEqual(plan["daily_target_rub"], 45000)
-        self.assertEqual(plan["needed_visits_to_target"], 21)
-        self.assertEqual(plan["methodology_version"], "maya_smart_plan_v2")
-        self.assertIn("potential_revenue_rub", plan)
+        # A22 owns targets; legacy settings cannot be promoted to a measured plan.
+        self.assertFalse(plan['available'])
+        self.assertEqual(plan['target_source'], 'canonical_a22_required')
+        for key in ('daily_target_rub', 'actual_revenue_rub', 'projected_revenue_rub', 'progress_pct', 'confidence'):
+            self.assertIsNone(plan[key])
 
-    def test_smart_plan_uses_weekday_history_and_separates_forecast(self):
+    def test_weekday_history_cannot_create_uncalibrated_forecast(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
         target = date.today()
         rows = []
@@ -942,13 +733,13 @@ class OwnerAITests(unittest.TestCase):
             "avg_check_rub": 2000,
         })
 
-        self.assertEqual(plan["target_source"], "weekday_history_baseline")
-        self.assertGreater(plan["daily_target_rub"], plan["baseline"]["calendar_daily_average_rub"])
-        self.assertEqual(plan["projected_revenue_rub"], 6000)
-        self.assertEqual(plan["potential_revenue_rub"], 12000)
-        self.assertIn(plan["confidence"], {"medium", "high"})
+        # C8 L08: weekday history does not authorize an uncalibrated numeric forecast.
+        self.assertFalse(plan['available'])
+        self.assertEqual(plan['target_source'], 'canonical_a22_required')
+        for key in ('daily_target_rub', 'expected_revenue_rub', 'projected_revenue_rub', 'progress_pct', 'confidence'):
+            self.assertIsNone(plan[key])
 
-    def test_growth_engine_returns_auditable_decisions(self):
+    def test_legacy_growth_engine_cannot_create_c8_decisions(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
 
         engine = owner_ai._growth_engine(
@@ -963,14 +754,10 @@ class OwnerAITests(unittest.TestCase):
             },
         )
 
-        self.assertEqual(engine["mode"], "evidence_to_action")
-        self.assertTrue(engine["decisions"])
-        first = engine["decisions"][0]
-        self.assertTrue(first["evidence"])
-        self.assertTrue(first["action"])
-        self.assertTrue(first["kpi"])
-        self.assertIn("expected_effect", first)
-        self.assertTrue(first["requires_owner_approval"])
+        self.assertFalse(engine['available'])
+        self.assertEqual(engine['reason'], 'qualified_c8_tenant_read_required')
+        self.assertEqual(engine['decisions'], [])
+        self.assertIsNone(engine['score'])
 
     def test_master_performance_ranks_profit_after_salary(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
@@ -982,7 +769,7 @@ class OwnerAITests(unittest.TestCase):
         self.assertEqual(perf["profit_after_salary_total_rub"], 38000)
         self.assertIn("общие расходы", perf["note"])
 
-    def test_client_retention_uses_previous_cohort_and_future_booking(self):
+    def test_legacy_retention_cohort_cannot_qualify_c8_measurement(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)
         today = date.today()
         rows = [
@@ -1013,16 +800,12 @@ class OwnerAITests(unittest.TestCase):
 
         result = owner_ai.client_retention(force=True)
 
-        self.assertEqual(result["summary"]["previous_cohort_clients"], 2)
-        self.assertEqual(result["summary"]["returned_clients"], 1)
-        self.assertEqual(result["summary"]["retention_90d_pct"], 50)
-        self.assertEqual(result["summary"]["forward_booking_pct"], 100)
-        self.assertEqual(result["snapshot_state"], "fresh")
-        self.assertEqual(result["data_source"], "yclients_records")
-
-        owner_ai._retention_cache.update(val=None, ts=0.0)
-        cached = owner_ai.client_retention()
-        self.assertEqual(cached["summary"], result["summary"])
+        self.assertFalse(result['available'])
+        self.assertFalse(result['complete'])
+        self.assertEqual(result['reason'], 'qualified_c8_tenant_read_required')
+        for key in ('previous_cohort_clients', 'returned_clients', 'retention_90d_pct', 'forward_booking_pct'):
+            self.assertIsNone(result['summary'][key])
+        self.assertEqual(owner_ai.client_retention()['summary'], result['summary'])
 
     def test_expiring_assets_counts_only_sold_certificates(self):
         owner_ai = _load_owner_ai(reactivation_payload=None)

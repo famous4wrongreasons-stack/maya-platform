@@ -1,3 +1,4 @@
+from test_support_canonical_principal import verified_request
 import importlib
 import json
 import sys
@@ -246,6 +247,7 @@ def _load_claude_ai():
 
 
 class ClaudeAIRBACTests(unittest.TestCase):
+    @verified_request('administrator', 339683535)
     def test_manager_gets_only_role_aware_growth_plan(self):
         claude_ai, _ = _load_claude_ai()
         result = json.loads(claude_ai._execute_tool("get_growth_plan", {}, user_id=339683535))
@@ -253,6 +255,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertTrue(claude_ai._authorize("manager", "get_growth_plan"))
         self.assertFalse(claude_ai._authorize("client", "get_growth_plan"))
 
+    @verified_request('platform_owner', 948205934)
     def test_founder_can_set_growth_goal(self):
         claude_ai, _ = _load_claude_ai()
         result = json.loads(claude_ai._execute_tool(
@@ -263,6 +266,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(result["goal"]["target_rub"], 1500000)
 
+    @verified_request('administrator', 339683535)
     def test_manager_can_read_maya_audience_stats(self):
         claude_ai, logs = _load_claude_ai()
 
@@ -290,6 +294,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertEqual(logs[-1][3], "read")
         self.assertFalse(logs[-1][4])
 
+    @verified_request('administrator', 339683535)
     def test_manager_admin_cannot_call_owner_director_tools(self):
         claude_ai, logs = _load_claude_ai()
 
@@ -333,6 +338,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertEqual(logs[-1][2], "run_operating_rhythm_tick")
         self.assertFalse(logs[-1][4])
 
+    @verified_request('platform_owner', 948205934)
     def test_founder_can_prepare_salon_action_without_execution(self):
         claude_ai, logs = _load_claude_ai()
 
@@ -352,6 +358,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertEqual(logs[-1][2], "salon_action")
         self.assertTrue(logs[-1][4])
 
+    @verified_request('platform_owner', 948205934)
     def test_founder_can_read_master_performance(self):
         claude_ai, logs = _load_claude_ai()
 
@@ -391,6 +398,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertNotIn("salary", result["masters"][0])
         self.assertNotIn("profit_after_salary_rub", result["masters"][0])
 
+    @verified_request('platform_owner', 948205934)
     def test_founder_can_read_owner_command_center(self):
         claude_ai, logs = _load_claude_ai()
 
@@ -1089,12 +1097,12 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIn("get_business_report", names)
         self.assertIn("get_daily_briefing", names)
         self.assertIn("get_owner_command_center", names)
-        self.assertIn("create_owner_control_task", names)
-        self.assertIn("update_owner_control_task", names)
-        self.assertIn("run_autonomous_director_tick", names)
-        self.assertIn("run_autopilot_supervision_tick", names)
-        self.assertIn("run_execution_loop_tick", names)
-        self.assertIn("run_operating_rhythm_tick", names)
+        self.assertNotIn("create_owner_control_task", names)  # R04: no legacy operational owner
+        self.assertNotIn("update_owner_control_task", names)  # R04: no legacy operational owner
+        self.assertNotIn("run_autonomous_director_tick", names)  # R04: no legacy operational owner
+        self.assertNotIn("run_autopilot_supervision_tick", names)  # R04: no legacy operational owner
+        self.assertNotIn("run_execution_loop_tick", names)  # R04: no legacy operational owner
+        self.assertNotIn("run_operating_rhythm_tick", names)  # R04: no legacy operational owner
         self.assertIn("get_master_performance", names)
         self.assertIn("salon_action", names)
 
@@ -1109,12 +1117,12 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertIn("get_business_report", names)
         self.assertIn("get_daily_briefing", names)
         self.assertIn("get_owner_command_center", names)
-        self.assertIn("create_owner_control_task", names)
-        self.assertIn("update_owner_control_task", names)
-        self.assertIn("run_autonomous_director_tick", names)
-        self.assertIn("run_autopilot_supervision_tick", names)
-        self.assertIn("run_execution_loop_tick", names)
-        self.assertIn("run_operating_rhythm_tick", names)
+        self.assertNotIn("create_owner_control_task", names)  # R04: no legacy operational owner
+        self.assertNotIn("update_owner_control_task", names)  # R04: no legacy operational owner
+        self.assertNotIn("run_autonomous_director_tick", names)  # R04: no legacy operational owner
+        self.assertNotIn("run_autopilot_supervision_tick", names)  # R04: no legacy operational owner
+        self.assertNotIn("run_execution_loop_tick", names)  # R04: no legacy operational owner
+        self.assertNotIn("run_operating_rhythm_tick", names)  # R04: no legacy operational owner
         self.assertIn("salon_action", names)
         self.assertNotIn("request_booking", names)
         self.assertNotIn("find_nearest_slots", names)
@@ -1157,6 +1165,7 @@ class ClaudeAIRBACTests(unittest.TestCase):
         self.assertNotIn("── РОЛЬ: АДМИНИСТРАТОР ──", prompt)
         self.assertLess(prompt.index("test"), prompt.index("── РОЛЬ: ДИРЕКТОР ──"))
 
+    @verified_request('platform_owner', 948205934)
     def test_staff_surface_blocks_booking_tool_even_if_called_directly(self):
         claude_ai, logs = _load_claude_ai()
 
