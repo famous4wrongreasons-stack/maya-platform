@@ -19009,6 +19009,8 @@ function AChat() {
       }
       return;
     }
+    // A missing/expired SaaS bundle never falls through to legacy history.
+    if (window.__ME_SAAS_CTX) return;
     if (chatSyncBlocked()) return;
     const syncRevision = chatMutationRef.current.revision;
     try {

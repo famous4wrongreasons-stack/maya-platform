@@ -115,3 +115,5 @@ jobs:
           "сайт и приложение/oauth-callback.html"
       - name: Verify prepublication safety contracts
         run: node scripts/verify-prepublication-contracts.mjs
+      - name: Prove prepublication isolation and routing counterfactuals
+        run: node --test scripts/verify-prepublication-contracts.test.mjs
