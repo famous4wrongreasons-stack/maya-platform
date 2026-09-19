@@ -6,12 +6,13 @@
 // there. The `detail` prefix (`G7.C1:` …) is asserted, so two clauses sharing a code are told apart.
 //
 // The COMMIT cases that need an allowlist row the live table does not hold are marked
-// **fixture-only** and run under a substituted `booking-allowlist`. That substitution is the only one
+// **fixture-only** and run under a substituted P-23 runtime allowlist. That substitution is the only one
 // in this file, it is named at every call site, and it never substitutes a registry or a policy row.
 
 import type { EffectClass } from '../../widget-contract/intent';
 import type { ProducingRecordRow } from '../authority/commit-guard';
 import type { ProposePairingRow } from '../authority/propose-pairing';
+import { AE_WIDGET_COMMIT_ALLOWLIST as P23_ALLOWLIST } from '../authority/ae-commit-allowlist.runtime';
 import type { AllowlistRow } from '../booking/booking-allowlist';
 import type { GateVerdict, IntentRecordRow } from '../gate.types';
 import {
@@ -91,10 +92,9 @@ interface Substitutes {
 }
 
 /**
- * Re-loads Gate 7 with `booking-allowlist` (and optionally `AE_PROPOSE_PAIRING`) replaced. Used only
- * where the case says "fixture-only": the live allowlist holds three booking rows, so F72's
- * comparison over a `SETTINGS_DRAFT`, `APPROVAL` or `PAYMENT_HANDOFF` row cannot be exercised at all
- * without one — and a fence that is never shown refusing is not a fence.
+ * Re-loads Gate 7 with the P-23 runtime allowlist (and optionally `AE_PROPOSE_PAIRING`) replaced.
+ * Used only where the case says "fixture-only": the live allowlist deliberately has no MONEY,
+ * consent, identity or tenant-authority row, and a fence never shown refusing is not a fence.
  */
 const withSubstitutes = async <T>(
   subs: Substitutes,
@@ -102,13 +102,41 @@ const withSubstitutes = async <T>(
 ): Promise<T> => {
   let loaded: { gate7: typeof gate7 } | undefined;
   jest.isolateModules(() => {
+    if (subs.allowlist || subs.pairing) {
+      const rows = subs.allowlist;
+      const runtimeRows = rows
+        ? Object.fromEntries(
+            rows.map((candidate) => [
+              candidate.ae,
+              {
+                confirmation_kind: candidate.confirmationKind,
+                family:
+                  candidate.confirmationKind === 'BOOKING_CONFIRMATION'
+                    ? 'booking'
+                    : 'settings',
+                min_verification: 'SESSION_VERIFIED',
+                requires_ae_approval: false,
+                propose: { space: 'C9', key: candidate.proposeKey },
+              },
+            ]),
+          )
+        : P23_ALLOWLIST;
+      jest.doMock('../authority/ae-commit-allowlist.runtime', () => ({
+        ...jest.requireActual<object>(
+          '../authority/ae-commit-allowlist.runtime',
+        ),
+        AE_WIDGET_COMMIT_ALLOWLIST: runtimeRows,
+      }));
+    }
     if (subs.allowlist) {
       const rows = subs.allowlist;
       jest.doMock('../booking/booking-allowlist', () => ({
         ...jest.requireActual<object>('../booking/booking-allowlist'),
         AE_WIDGET_COMMIT_ALLOWLIST: rows,
-        isAllowlisted: (ae: string) => rows.some((r) => r.ae === ae),
-        rowFor: (ae: string) => rows.find((r) => r.ae === ae) ?? null,
+        isAllowlisted: (ae: string) =>
+          rows.some((candidate) => candidate.ae === ae),
+        rowFor: (ae: string) =>
+          rows.find((candidate) => candidate.ae === ae) ?? null,
       }));
     }
     if (subs.pairing) {
@@ -134,6 +162,7 @@ const withSubstitutes = async <T>(
     if (!loaded) throw new Error('the substituted Gate 7 did not load');
     return await work(loaded.gate7);
   } finally {
+    jest.dontMock('../authority/ae-commit-allowlist.runtime');
     jest.dontMock('../booking/booking-allowlist');
     jest.dontMock('../authority/propose-pairing');
     jest.resetModules();

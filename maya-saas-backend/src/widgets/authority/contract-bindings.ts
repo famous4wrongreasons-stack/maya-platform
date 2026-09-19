@@ -26,16 +26,10 @@ import {
   C9_REGISTRY_HASH as REAL_C9_HASH,
   type C9Capability,
 } from '../../orchestration/c9.registry';
-import {
-  MONEY_FACETS,
-  MONEY_TARGET_KINDS,
-  TARGET_FLOOR,
-} from '../../widget-contract/tables';
+import { TARGET_FLOOR } from '../../widget-contract/tables';
 import type { VerificationLevel } from '../../widget-contract/envelope';
 import type { CapabilityRef } from '../../widget-contract/capability-ref';
 import type { IntentTarget } from '../../widget-contract/intent';
-import type { AeCommitRow } from '../../widget-contract/registries';
-import { AE_WIDGET_COMMIT_ALLOWLIST as K7_ALLOWLIST } from '../booking/booking-allowlist';
 import { VERIFICATION_RANK } from './ladder';
 
 // ── the three registries, as the contract names them ─────────────────────────────────────────────
@@ -126,100 +120,21 @@ export const stableActionJson = (v: unknown): string => {
 export const sha256Hex = (s: string): string =>
   createHash('sha256').update(s, 'utf8').digest('hex');
 
-// ── §0.7 F32's family predicates, each stated once ───────────────────────────────────────────────
-//
-// Each is the contract's own two-disjunct form. `CONSENT` and `IDENTITY` are re-exported from K12,
-// which already owns them and whose suite already exercises both arms — there is no second copy.
-
-export {
-  isConsentCapability as CONSENT,
-  isIdentityCapability as IDENTITY,
-} from '../consent/data-subject-acts';
-
-export const BOOKING = (cap: RegisteredActionCapabilityV1): boolean =>
-  (cap as { targetKind?: string }).targetKind === 'appointment';
-
-const MARKETING_ACTION_CLASSES = [
-  'deliver_bulk_campaign',
-  'send_bulk_campaign',
-];
-const MARKETING_TARGET_KINDS = [
-  'marketing_campaign',
-  'marketing_client_recipient',
-  'audience',
-];
-export const MARKETING_FANOUT = (
-  cap: RegisteredActionCapabilityV1,
-): boolean => {
-  const c = cap as { actionClass?: string; targetKind?: string };
-  return (
-    MARKETING_ACTION_CLASSES.includes(c.actionClass ?? '') ||
-    MARKETING_TARGET_KINDS.includes(c.targetKind ?? '')
-  );
-};
-
-const TENANT_TARGET_KINDS = ['tenant', 'tenant_settings', 'tenant_billing'];
-export const TENANT_AUTHORITY = (cap: RegisteredActionCapabilityV1): boolean =>
-  TENANT_TARGET_KINDS.includes(
-    (cap as { targetKind?: string }).targetKind ?? '',
-  );
-
-/** §3.10's predicate, over the sets extracted from the contract — 92 of the 226. */
-export const MONEY = (cap: RegisteredActionCapabilityV1): boolean => {
-  const c = cap as { targetKind?: string; riskFacets?: readonly string[] };
-  const facets = new Set<string>(MONEY_FACETS as readonly string[]);
-  const kinds = new Set<string>(MONEY_TARGET_KINDS as readonly string[]);
-  return (
-    (c.riskFacets ?? []).some((f) => facets.has(f)) ||
-    kinds.has(c.targetKind ?? '')
-  );
-};
-
 // ── the two tables the generated modules declare and do not define ───────────────────────────────
 
 export { WIDGET_CAPABILITY_POLICY } from './capability-policy';
 
-export interface AeCommitRowLike {
-  /**
-   * F72's lookup column: the widget kind whose confirmation must precede a COMMIT on this key. The
-   * generated union, not `string`, so a kind outside the four COMMIT-bearing kinds does not compile.
-   */
-  readonly confirmation_kind: AeCommitRow['confirmation_kind'];
-  /** The generated union, not `string` — AE_FAMILY_FLOOR is keyed by it and must stay total. */
-  readonly family: AeCommitRow['family'];
-  readonly min_verification: VerificationLevel;
-  readonly requires_ae_approval: boolean;
-  readonly propose: CapabilityRef;
-}
-
-/**
- * `AE_WIDGET_COMMIT_ALLOWLIST` in the keyed shape the derivation reads.
- *
- * DERIVED from K7's three rows, which remain the only allowlist. The columns the generated shape
- * adds are not authored here either: `confirmation_kind` is K7's own `confirmationKind` column,
- * copied; `family` is `booking` because all three rows are booking capabilities;
- * `requires_ae_approval` is read from the live registry, which the contract requires it to EQUAL;
- * and `min_verification` is `SESSION_VERIFIED` because the generated type's own comment fixes it —
- * "≥ SESSION_VERIFIED for every row".
- */
-export const AE_WIDGET_COMMIT_ALLOWLIST: Readonly<
-  Record<string, AeCommitRowLike>
-> = Object.freeze(
-  Object.fromEntries(
-    K7_ALLOWLIST.map((row) => [
-      row.ae,
-      Object.freeze({
-        confirmation_kind: row.confirmationKind,
-        family: 'booking' as const,
-        min_verification: 'SESSION_VERIFIED',
-        requires_ae_approval:
-          (aeByKey.get(row.ae) as { approvalRequirement?: string } | undefined)
-            ?.approvalRequirement === 'REQUIRED',
-        propose: { space: 'C9' as const, key: row.proposeKey },
-      }),
-    ]),
-  ),
-);
+// P-23 is the one runtime statement of F31/F32. Re-exporting it keeps every existing gate reader
+// on the completed table without creating a second predicate or three-row booking-only shadow.
+export {
+  AE_WIDGET_COMMIT_ALLOWLIST,
+  BOOKING,
+  CONSENT,
+  IDENTITY,
+  MARKETING_FANOUT,
+  MONEY,
+  TENANT_AUTHORITY,
+} from './ae-commit-allowlist.runtime';
 
 // ── §3.5's subject capability, one body ──────────────────────────────────────────────────────────
 

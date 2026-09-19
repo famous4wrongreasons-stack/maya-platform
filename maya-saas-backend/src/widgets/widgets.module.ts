@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import type { OnModuleInit } from '@nestjs/common';
 
 import { PrismaModule } from '../prisma/prisma.module';
+import { assertAllowlistAtRegistryLoad } from './authority/allowlist-startup.assert';
 import { assertOwnerClassesResolve } from './authority/contract-bindings';
 import { assertLedgersBindAtRegistryLoad } from './authority/ledger-startup.assert';
 import { ControlRegistryService } from './control/control-registry.service';
@@ -96,6 +97,7 @@ export class WidgetsModule implements OnModuleInit {
    */
   onModuleInit(): void {
     assertLedgersBindAtRegistryLoad();
+    assertAllowlistAtRegistryLoad();
     assertOwnerClassesResolve();
     // U10a (IR-U10A-1): §3.12's router and `ownerSet` resolve against the live registries, or the
     // process does not start. A router that cannot answer Gate 10 is a divergence audit that silently

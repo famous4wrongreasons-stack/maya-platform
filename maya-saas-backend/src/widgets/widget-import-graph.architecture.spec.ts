@@ -109,6 +109,10 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
   'action-engine/action-engine.registry.ts': {
     why: 'the Action Engine capability registry: a plain class over static rows, constructed as a value (D-6 registries)',
   },
+  'action-engine/action-engine.policy-registry.ts': {
+    why: 'P-23 reads the canonical production policy definitions at registry load; a deterministic registry factory with no injected owner',
+    only: ['authority/allowlist-startup.assert.ts'],
+  },
   'action-engine/action-engine.contract.ts': {
     why: 'Action Engine contract types',
   },

@@ -397,7 +397,7 @@ describe('Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB 
 
   it('S-B / S-C positive: each allowlisted key is carried PAST (a), (b) and (c) to the held (d)', async () => {
     // Reaching `(d)` is the statement that (a), (b) and (c) admitted, so this is their positive.
-    expect(ALLOWLISTED).toHaveLength(3);
+    expect(ALLOWLISTED).toHaveLength(10);
     for (const key of ALLOWLISTED) {
       const v = await gate6(ae(key));
       expect({ key, detail: detail(v) }).toEqual({

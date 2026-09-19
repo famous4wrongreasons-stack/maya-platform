@@ -34,7 +34,18 @@
 // so the fence can be exercised over injected rows rather than only over the real thirteen.
 
 import type { CapabilityRef } from '../../widget-contract/capability-ref';
-import { AE_CAP_BY_KEY, C9_CAP_BY_KEY } from './contract-bindings';
+import { ActionCapabilityRegistry } from '../../action-engine/action-engine.registry';
+import { C9_CAPABILITIES } from '../../orchestration/c9.registry';
+
+// These indexes are deliberately local. P-23's runtime allowlist reads the pairing table, while the
+// public contract bindings re-export the completed allowlist. Importing those bindings here would
+// make the registry-load assertion depend on a partially initialised cycle.
+const AE_CAP_BY_KEY = new Map(
+  new ActionCapabilityRegistry().list().map((cap) => [cap.capability, cap]),
+);
+const C9_CAP_BY_KEY = new Map(
+  C9_CAPABILITIES.map((cap) => [cap.capabilityKey, cap]),
+);
 
 /** The declared row shape of `AE_PROPOSE_PAIRING` (registries.ts:36), named so callers can hold one. */
 export interface ProposePairingRow {

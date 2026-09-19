@@ -1,0 +1,29 @@
+[
+  {
+    "id": "AL-M1",
+    "description": "drop the MONEY startup veto so an injected financial capability can acquire a widget commit row",
+    "file": "src/widgets/authority/allowlist-startup.assert.ts",
+    "find": "    if (MONEY(cap)) problems.push(`AL-2 ${cap.capability}: MONEY veto`);\n",
+    "replace": "",
+    "killers": ["AL-2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "AL-M2",
+    "description": "hard-code every admitted family to settings instead of carrying the live derived family",
+    "file": "src/widgets/authority/ae-commit-allowlist.runtime.ts",
+    "find": "        family,\n",
+    "replace": "        family: 'settings',\n",
+    "killers": ["AL-4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "AL-M3",
+    "description": "put every capability in the gap ledger, including allowlisted rows, violating row XOR gap",
+    "file": "src/widgets/authority/ae-capability-gap-ledger.runtime.ts",
+    "find": "        .filter(\n          (cap) => AE_WIDGET_COMMIT_ALLOWLIST[cap.capability] === undefined,\n        )\n",
+    "replace": "        .filter((_cap) => true)\n",
+    "killers": ["AL-1"],
+    "expect": "build-killed"
+  }
+]

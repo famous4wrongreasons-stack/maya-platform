@@ -9,11 +9,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { CONTROL_REGISTRY } from '../../widget-contract/tables';
-import {
-  AE_WIDGET_COMMIT_ALLOWLIST as K7_ROWS,
-  rowFor,
-} from '../booking/booking-allowlist';
+import { AE_WIDGET_COMMIT_ALLOWLIST as K7_ROWS } from '../booking/booking-allowlist';
 import { AE_WIDGET_COMMIT_ALLOWLIST } from './contract-bindings';
+import { AE_WIDGET_COMMIT_ALLOWLIST as P23_RUNTIME } from './ae-commit-allowlist.runtime';
+import { pairingForAe } from './propose-pairing';
 import { CONTROL_KEYS, allRefs, census, resolves } from './registry-binding';
 
 describe('D-14 — the CONTROL arm is F27’s table, read once', () => {
@@ -48,14 +47,18 @@ describe('D-14 — the CONTROL arm is F27’s table, read once', () => {
 });
 
 describe('the runtime allowlist binding carries confirmation_kind', () => {
-  it('every keyed row names the confirmation kind of the K7 row it is derived from', () => {
-    expect(Object.keys(AE_WIDGET_COMMIT_ALLOWLIST).sort()).toEqual(
+  it('the three booking rows remain exactly K7 and every other row comes from P-23', () => {
+    const bookingRows = Object.entries(AE_WIDGET_COMMIT_ALLOWLIST).filter(
+      ([, row]) => row.family === 'booking',
+    );
+    expect(bookingRows.map(([ae]) => ae).sort()).toEqual(
       K7_ROWS.map((r) => r.ae).sort(),
     );
-    for (const [ae, row] of Object.entries(AE_WIDGET_COMMIT_ALLOWLIST)) {
-      expect(row.confirmation_kind).toBe(rowFor(ae)?.confirmationKind);
+    for (const [ae, row] of bookingRows) {
       expect(row.confirmation_kind).toBe('BOOKING_CONFIRMATION');
+      expect(row.propose.key).toBe(pairingForAe(ae)?.propose.key);
     }
+    expect(Object.keys(AE_WIDGET_COMMIT_ALLOWLIST)).toHaveLength(10);
   });
 
   it('the other row values are unchanged', () => {
@@ -63,7 +66,7 @@ describe('the runtime allowlist binding carries confirmation_kind', () => {
       const row = AE_WIDGET_COMMIT_ALLOWLIST[k7.ae];
       expect(row.family).toBe('booking');
       expect(row.min_verification).toBe('SESSION_VERIFIED');
-      expect(row.propose).toEqual({ space: 'C9', key: k7.proposeKey });
+      expect(row.propose).toEqual(pairingForAe(k7.ae)?.propose);
       expect(typeof row.requires_ae_approval).toBe('boolean');
       expect(Object.keys(row).sort()).toEqual([
         'confirmation_kind',
@@ -73,5 +76,14 @@ describe('the runtime allowlist binding carries confirmation_kind', () => {
         'requires_ae_approval',
       ]);
     }
+  });
+
+  it('re-exports the single P-23 runtime table rather than a booking-only shadow', () => {
+    expect(AE_WIDGET_COMMIT_ALLOWLIST).toBe(P23_RUNTIME);
+    expect(
+      Object.values(AE_WIDGET_COMMIT_ALLOWLIST).filter(
+        (row) => row.family === 'marketing_fanout',
+      ),
+    ).toHaveLength(1);
   });
 });
