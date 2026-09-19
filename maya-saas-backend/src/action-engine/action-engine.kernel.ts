@@ -16,7 +16,7 @@ import {
   type BoundClientBookingSnapshot,
   type ClientBookingSnapshot,
 } from './client-booking-intent.contract';
-import type { ConsentChannelBinding } from '../crm/client-consent-authority';
+import type { ConsentChannelBinding } from '../common/client-channel-binding';
 import { randomBytes, randomUUID } from 'node:crypto';
 
 import {

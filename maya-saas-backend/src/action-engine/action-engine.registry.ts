@@ -19,7 +19,7 @@ import {
   BULK_SLOT_CAPABILITY,
   normalizeBulkAdmission,
   normalizeBulkSlotAdmission,
-} from '../marketing/canonical-bulk.contract';
+} from './bulk-admission.contract';
 import { normalizeReminderPlan } from '../communication-delivery/appointment-reminder.contract';
 import { normalizeClientWebPushDelivery } from '../communication-delivery/communication-web-push.contract';
 import { clientHabitsCapability } from './client-habits.contract';

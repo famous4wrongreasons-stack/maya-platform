@@ -10,7 +10,8 @@ import { Prisma, type PrismaClient } from '@prisma/client';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 
 type Tx = Prisma.TransactionClient;
-export type ClientChannelProvider = 'maya_user' | 'telegram';
+import type { ClientChannelProvider } from '../common/client-channel-binding';
+export type { ClientChannelProvider } from '../common/client-channel-binding';
 
 export interface VerifiedClientChannelProof {
   tenantId: string;

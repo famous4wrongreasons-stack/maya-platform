@@ -1,14 +1,8 @@
 import { ForbiddenException } from '@nestjs/common';
 import type { Prisma, PrismaClient } from '@prisma/client';
 
-import type { ClientChannelProvider } from './client-channel-link.service';
-
-export interface ConsentChannelBinding {
-  linkId: string;
-  provider: ClientChannelProvider;
-  providerSubjectHash: string;
-  verificationEvidenceHash: string;
-}
+import type { ConsentChannelBinding } from '../common/client-channel-binding';
+export type { ConsentChannelBinding } from '../common/client-channel-binding';
 
 /** A durable verified Client link is the only consent identity source. */
 export async function assertConsentChannelBinding(

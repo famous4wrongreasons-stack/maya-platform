@@ -1,6 +1,6 @@
 import { verifiedClientChannelCapability } from './client-preferences.contract';
 import { readClientActionPrincipal } from './client-action-principal.contract';
-import type { ConsentChannelBinding } from '../crm/client-consent-authority';
+import type { ConsentChannelBinding } from '../common/client-channel-binding';
 import { Injectable } from '@nestjs/common';
 import {
   ActionPolicyDecision,

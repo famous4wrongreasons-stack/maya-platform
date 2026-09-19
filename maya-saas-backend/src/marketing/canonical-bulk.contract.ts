@@ -1,10 +1,17 @@
+export {
+  BULK_ROOT_CAPABILITY,
+  BULK_SLOT_CAPABILITY,
+  bulkObject,
+  bulkCode,
+  bulkHash,
+  normalizeBulkAdmission,
+  normalizeBulkSlotAdmission,
+} from '../action-engine/bulk-admission.contract';
 import { BadRequestException } from '@nestjs/common';
 import { stableActionJson } from '../action-engine/action-engine.identity';
 
 export const BULK_INTENT = 'maya.marketing-bulk-intent/1';
 export const BULK_AUDIENCE = 'maya.bulk-client-audience/1';
-export const BULK_ROOT_CAPABILITY = 'communication.bulk-campaign.admit.v2';
-export const BULK_SLOT_CAPABILITY = 'communication.bulk-slot.admit.v2';
 export const BULK_TERMINAL = new Set([
   'COMPLETED',
   'PARTIAL',
@@ -31,32 +38,6 @@ export type BulkRoute = {
   apnsDevices: { id: string; tokenHash: string }[];
   policyVersion: 1;
 };
-export function bulkObject(
-  raw: unknown,
-  keys: readonly string[],
-): Record<string, unknown> {
-  if (
-    !raw ||
-    typeof raw !== 'object' ||
-    Array.isArray(raw) ||
-    Object.keys(raw).some((k) => !keys.includes(k))
-  )
-    throw new BadRequestException('B35_INVALID_REQUEST');
-  return raw as Record<string, unknown>;
-}
-export function bulkCode(raw: unknown): string {
-  if (
-    typeof raw !== 'string' ||
-    !/^[A-Za-z0-9][A-Za-z0-9._:/-]{0,159}$/.test(raw)
-  )
-    throw new BadRequestException('B35_INVALID_IDENTITY');
-  return raw;
-}
-export function bulkHash(raw: unknown): string {
-  if (typeof raw !== 'string' || !/^[a-f0-9]{64}$/.test(raw))
-    throw new BadRequestException('B35_INVALID_HASH');
-  return raw;
-}
 export function bulkContent(raw: unknown) {
   if (typeof raw !== 'string')
     throw new BadRequestException('B35_CONTENT_REQUIRED');
@@ -78,29 +59,6 @@ export function bulkContent(raw: unknown) {
     format: 'plain',
     personalization: 'first_word_or_friend/1',
     category: 'marketing',
-  };
-}
-export function normalizeBulkAdmission(raw: unknown) {
-  const v = bulkObject(raw, ['campaignId', 'intentHash']);
-  return {
-    campaignId: bulkCode(v.campaignId),
-    intentHash: bulkHash(v.intentHash),
-  };
-}
-export function normalizeBulkSlotAdmission(raw: unknown) {
-  const v = bulkObject(raw, [
-    'campaignId',
-    'recipientId',
-    'slotKey',
-    'intentHash',
-    'contentHash',
-  ]);
-  return {
-    campaignId: bulkCode(v.campaignId),
-    recipientId: bulkCode(v.recipientId),
-    slotKey: bulkCode(v.slotKey),
-    intentHash: bulkHash(v.intentHash),
-    contentHash: bulkHash(v.contentHash),
   };
 }
 export function bulkSlots(route: BulkRoute) {
