@@ -1,0 +1,29 @@
+[
+  {
+    "id": "PH-M1",
+    "description": "move noun handles into a different HMAC namespace",
+    "file": "src/widgets/noun-resolution/noun-handle.codec.ts",
+    "find": "export const NOUN_HANDLE_NAMESPACE = 'maya.widget-frozen-noun-handle/1';",
+    "replace": "export const NOUN_HANDLE_NAMESPACE = 'maya.widget-frozen-noun-handle/2';",
+    "killers": ["PH-1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PH-M2",
+    "description": "allow a Client identity to become a frozen noun",
+    "file": "src/widgets/noun-resolution/noun-handle.codec.ts",
+    "find": "  if (noun === 'client')\n    throw new InvalidOwnerNounIdentityError(\n      'client is deliberately not a frozen noun',\n    );\n",
+    "replace": "",
+    "killers": ["PH-4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PH-M3",
+    "description": "accept a handle without checking its integrity tag",
+    "file": "src/widgets/noun-resolution/noun-handle.codec.ts",
+    "find": "    if (!equalTag(expected, pieces[1])) return null;\n",
+    "replace": "",
+    "killers": ["PH-3"],
+    "expect": "build-killed"
+  }
+]
