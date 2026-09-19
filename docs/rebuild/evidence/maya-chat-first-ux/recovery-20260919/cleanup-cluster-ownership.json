@@ -1,0 +1,8 @@
+{
+  "pid": 63151,
+  "pidFileDirectory": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/pgdata-recovery",
+  "port": "55619",
+  "command": "/opt/homebrew/Cellar/postgresql@16/16.14/bin/postgres -p 55619 -h 127.0.0.1 -k /tmp/maya-recovery-pg-20260919 -c max_connections=800",
+  "lsofCwd": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/claude-recovery-20260919/pgdata-recovery",
+  "checks": "exact pid-file directory, process binary/port/socket, and process cwd"
+}

@@ -1,0 +1,35 @@
+{
+  "checkedAt": "2026-09-19T12:59:27.760062+00:00",
+  "sourceHead": "df6c3a5a56819194c9df9d39b902f26dc6ea33c5",
+  "codeRecovered": true,
+  "claudeCommitsRecovered": 33,
+  "identifiedCommitsMissing": 0,
+  "wave1Certified": false,
+  "wave2Started": false,
+  "batteriesExecuted": 19,
+  "mutants": 203,
+  "statuses": {
+    "live-killed": 87,
+    "build-killed": 113,
+    "pending": 3
+  },
+  "declaredPending": [
+    {
+      "gate": "6",
+      "mutant": "M17b"
+    },
+    {
+      "gate": "6",
+      "mutant": "M18b"
+    },
+    {
+      "gate": "P-principal",
+      "mutant": "P-M11"
+    }
+  ],
+  "infrastructureDiagnosticsInFinalBatteries": 0,
+  "vacuousKills": 0,
+  "runtimeOrSchemaOrExpectationsChanged": false,
+  "productionEffects": 0,
+  "processHygiene": 0
+}

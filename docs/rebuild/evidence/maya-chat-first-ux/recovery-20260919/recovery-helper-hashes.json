@@ -1,0 +1,37 @@
+[
+  {
+    "file": "run-verification.py",
+    "sha256": "3e947a24d23feb238daae5637a7d84c7965723749b2f220ed314ba7119ec6ff3",
+    "bytes": 4517
+  },
+  {
+    "file": "run-mutation-shards.py",
+    "sha256": "2ba5aa6df194816df840bc97ad94ca2c9ad6ceb19100c1c1b51d0043cd149815",
+    "bytes": 3216
+  },
+  {
+    "file": "assemble-verification-evidence.py",
+    "sha256": "5eeaf15eb5110332684b78905f4071510db8155bb4c9d3ac03854f5d2d654318",
+    "bytes": 3275
+  },
+  {
+    "file": "cleanup-owned-proof-cluster.py",
+    "sha256": "446fbba14f5b2b37085507aa8072f087f3dc353f027519bf958df282f46c5093",
+    "bytes": 2788
+  },
+  {
+    "file": "final-hygiene-readonly.py",
+    "sha256": "c5080f7efa9032bdbcca4fccdfaf086c039cb4ce209bd432824b5a52b1e04e4a",
+    "bytes": 2276
+  },
+  {
+    "file": "observe-mutation-steps.py",
+    "sha256": "3e62bcffc1a08cb36f0e88afd315aaaad88ab0def86b28b33d2dc2753d8aef96",
+    "bytes": 1804
+  },
+  {
+    "file": "finalize-recovery-report.py",
+    "sha256": "72ac4f2f8feffd88e0474753d7b3b0467baff9b4ede8dc2c5dd20e161f414135",
+    "bytes": 8776
+  }
+]

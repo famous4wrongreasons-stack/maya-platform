@@ -1,0 +1,327 @@
+{
+  "codeHead": "df6c3a5a56819194c9df9d39b902f26dc6ea33c5",
+  "declaredBatteries": 19,
+  "attemptedBatteries": 19,
+  "completedBatteries": 19,
+  "runnerAsDeclaredBatteries": 19,
+  "declaredMutants": 203,
+  "reportedMutants": 203,
+  "batteries": [
+    {
+      "gate": "10a",
+      "exit": 0,
+      "seconds": 2830.49,
+      "status": "AS-DECLARED",
+      "mutants": 5,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "8a542c6ac34f9016b18d40626ad78e251e92bc25c0409b870fa608f19fff612f",
+      "statuses": {
+        "build-killed": 5
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "11",
+      "exit": 0,
+      "seconds": 3924.87,
+      "status": "AS-DECLARED",
+      "mutants": 7,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "b827abafb5c694503040dc773f8b551fdcaf0bb98a797fd4ba3890211e6e038d",
+      "statuses": {
+        "build-killed": 7
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "12",
+      "exit": 0,
+      "seconds": 2829.24,
+      "status": "AS-DECLARED",
+      "mutants": 5,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "5d817f1275651a6d4efa3cbfecda38cf5d5931b83e0eaf1ff890c8c635bb105d",
+      "statuses": {
+        "build-killed": 5
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "12k",
+      "exit": 0,
+      "seconds": 1742.36,
+      "status": "AS-DECLARED",
+      "mutants": 3,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "2ce74b7b073417f35ffac9294946df4826f143ca33a35620926da54321a93a79",
+      "statuses": {
+        "build-killed": 3
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "4",
+      "exit": 0,
+      "seconds": 1411.83,
+      "status": "AS-DECLARED",
+      "mutants": 4,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "774566323ca705f7372b0ae57b61000e6720df2cba88c2bb02cbc72d7636c97a",
+      "statuses": {
+        "build-killed": 2,
+        "live-killed": 2
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "6",
+      "exit": 0,
+      "seconds": 4375.49,
+      "status": "AS-DECLARED",
+      "mutants": 21,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "7f7600b9ea5f8f657473bf912fa86ba8201e3ffdb93b50c85c4f802b5c1801ce",
+      "statuses": {
+        "build-killed": 7,
+        "live-killed": 12,
+        "pending": 2
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "7",
+      "exit": 0,
+      "seconds": 12824.21,
+      "status": "AS-DECLARED",
+      "mutants": 35,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "9074f02e0335ffe4634dad6ab643d607b935a8cf1c43cd228252cad06dea3124",
+      "statuses": {
+        "live-killed": 8,
+        "build-killed": 27
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "8",
+      "exit": 0,
+      "seconds": 180.97,
+      "status": "AS-DECLARED",
+      "mutants": 5,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "f16b1adfbec06576a06fff0d1347afb7a3146cab275bd264c6c00f07be7d41bd",
+      "statuses": {
+        "live-killed": 5
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "8c",
+      "exit": 0,
+      "seconds": 4313.69,
+      "status": "AS-DECLARED",
+      "mutants": 8,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "8855b376b37cd6bcb2cfa2ab808a027564146b84811e26e7bf33692ed904ce72",
+      "statuses": {
+        "build-killed": 8
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "8r",
+      "exit": 0,
+      "seconds": 3280.12,
+      "status": "AS-DECLARED",
+      "mutants": 29,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "9ee41c1f8453e5c7cee460312d29a11e9fcaf0c6fa5ed1d1551ddc33c5235942",
+      "statuses": {
+        "live-killed": 25,
+        "build-killed": 4
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "9a",
+      "exit": 0,
+      "seconds": 1592.81,
+      "status": "AS-DECLARED",
+      "mutants": 2,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "f3c1e5350d64e96c2e8ba28c8c1e66673d2d76db3b97999e36d0d7443d8b4551",
+      "statuses": {
+        "build-killed": 2
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "H-harness",
+      "exit": 0,
+      "seconds": 633.77,
+      "status": "AS-DECLARED",
+      "mutants": 19,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "dd6951662350101998763f87c6cc6fd64529bef3a6bb8dec21c80c1eb85b078a",
+      "statuses": {
+        "live-killed": 19
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "P-f88",
+      "exit": 0,
+      "seconds": 3865.12,
+      "status": "AS-DECLARED",
+      "mutants": 14,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "aebc396fd4e4e749d4373f1263cf44a02a4acc423a85d51b051555a981f63d54",
+      "statuses": {
+        "live-killed": 8,
+        "build-killed": 6
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "P-ledger",
+      "exit": 0,
+      "seconds": 3969.78,
+      "status": "AS-DECLARED",
+      "mutants": 7,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "f3def713b891a77cc222a0fc7e95dbde5f517729b1263bf4bf1183634436c46e",
+      "statuses": {
+        "build-killed": 7
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "P-pairing",
+      "exit": 0,
+      "seconds": 3577.74,
+      "status": "AS-DECLARED",
+      "mutants": 6,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "8dfaedb988f86c5bae04c066c795fa13b45e6905ba7f34562e7b516352b8fb41",
+      "statuses": {
+        "build-killed": 6
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "P-principal",
+      "exit": 0,
+      "seconds": 2334.67,
+      "status": "AS-DECLARED",
+      "mutants": 12,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "6b5a89820e8dca8e0626ad88c065e839a5a00b3cf79224d163df51c535cc6e1b",
+      "statuses": {
+        "live-killed": 8,
+        "build-killed": 3,
+        "pending": 1
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "P-render",
+      "exit": 0,
+      "seconds": 4141.06,
+      "status": "AS-DECLARED",
+      "mutants": 8,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "db1ec7e7ed12b3434b59dfd637eec7f50c7b20acb90b77ab5f6e8b8eef8b5b11",
+      "statuses": {
+        "build-killed": 8
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "P-seal",
+      "exit": 0,
+      "seconds": 3363.16,
+      "status": "AS-DECLARED",
+      "mutants": 6,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "6fab7ff7362b482cd546bee6fb77c71b9b6c2079a8aa599f9b769045c79021fd",
+      "statuses": {
+        "build-killed": 6
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    },
+    {
+      "gate": "T-tables",
+      "exit": 0,
+      "seconds": 3800.58,
+      "status": "AS-DECLARED",
+      "mutants": 7,
+      "mismatches": 0,
+      "problems": 0,
+      "reportSha256": "f3bb05559849b7388e2f0bd04e48a69193b8f2cca5dab8930147ca6a0bb091f0",
+      "statuses": {
+        "build-killed": 7
+      },
+      "failures": [],
+      "diagnosticsRequiringReview": [],
+      "nullProcessExits": []
+    }
+  ],
+  "sourceAndExpectationsChanged": false,
+  "CIStyleShards": true,
+  "maximumConcurrentRunners": 8,
+  "distinctDatabasePerBattery": true
+}

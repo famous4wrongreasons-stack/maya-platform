@@ -494,4 +494,3 @@ status, no closing regression on the final HEAD). Treat every "green" in the car
 | `5eb14456`, `df6c3a5a` | the D-1 transaction-scope source specs: D-1-TX-b «could not have caught the read it was written for»; D-1-TX-a «pinned the slot range it was supposed to derive» | `gate-context.source.spec.ts` |
 
 ---
-

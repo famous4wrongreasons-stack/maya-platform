@@ -1,0 +1,77 @@
+[
+  {
+    "label": "maya_gates_smoke_recovery_base_20260919-migrate",
+    "exit": 0,
+    "args": [
+      "npx",
+      "prisma",
+      "migrate",
+      "deploy"
+    ]
+  },
+  {
+    "label": "build",
+    "exit": 0,
+    "args": [
+      "npm",
+      "run",
+      "build"
+    ]
+  },
+  {
+    "label": "maya_gates_smoke_recovery_base_20260919-seed",
+    "exit": 0,
+    "args": [
+      "npm",
+      "run",
+      "prisma:seed"
+    ]
+  },
+  {
+    "label": "maya_gates_smoke_recovery_base_20260919-proof",
+    "exit": 1,
+    "args": [
+      "npm",
+      "run",
+      "test:http"
+    ]
+  },
+  {
+    "label": "maya_c06_appointment_recovery_base_20260919-migrate",
+    "exit": 0,
+    "args": [
+      "npx",
+      "prisma",
+      "migrate",
+      "deploy"
+    ]
+  },
+  {
+    "label": "maya_c06_appointment_recovery_base_20260919-proof",
+    "exit": 1,
+    "args": [
+      "npm",
+      "run",
+      "action-engine:appointment-proof:ts"
+    ]
+  },
+  {
+    "label": "maya_c06_recovery_base_20260919-migrate",
+    "exit": 0,
+    "args": [
+      "npx",
+      "prisma",
+      "migrate",
+      "deploy"
+    ]
+  },
+  {
+    "label": "maya_c06_recovery_base_20260919-proof",
+    "exit": 1,
+    "args": [
+      "npm",
+      "run",
+      "action-engine:proof:ts"
+    ]
+  }
+]

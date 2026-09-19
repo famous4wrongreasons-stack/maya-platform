@@ -1,12 +1,12 @@
 # Gate-programme Wave 1 — Claude → Codex forensic recovery
 
-**Intermediate preservation checkpoint: verification remains in progress.**
+**Final forensic recovery verdict: code recovered; Wave 1 NOT CERTIFIED.**
 
 Recovery date: 2026-09-19. Canonical branch: `codex/maya-identity-consent-20260913`.
 
 **WAVE 1 CODE RECOVERED: YES. WAVE 1 CERTIFIED: NO. WAVE 2 STARTED: NO.**
 
-This is recovery and verification, not new implementation or production activation. Final executable results and hygiene evidence are linked below when collected. No historical green claim is inherited as a current test result.
+This is recovery and verification, not new implementation or production activation. Final executable results and hygiene evidence are linked below. No historical green claim is inherited as a current test result.
 
 ## Preserved history
 
@@ -61,7 +61,7 @@ Independent clean-export comparison also reproduces all three owner/HTTP failure
 
 Legacy Python CI independently reports the same 64 failing/error test identifiers on both checkpoints (34 failures, 30 errors). [CI comparison](evidence/maya-chat-first-ux/recovery-20260919/ci-baseline-comparison.json) distinguishes these from Wave 1 changes.
 
-Further executable results and final publication/hygiene checks are recorded below. This report is not a waiver of any failing exit requirement. Gate Wave 2 is not started.
+Executable results and publication/hygiene evidence are recorded below. This report is not a waiver of any failing exit requirement. Gate Wave 2 is not started.
 
 ## Executed checks on recovered code
 
@@ -92,3 +92,63 @@ Further executable results and final publication/hygiene checks are recorded bel
 [Regression summaries](evidence/maya-chat-first-ux/recovery-20260919/regression-results.json), [live/BIN evidence](evidence/maya-chat-first-ux/recovery-20260919/live-and-binary-results.json), [counterfactual report](evidence/maya-chat-first-ux/recovery-20260919/independent-tx-negative.json), and [completed pre-mutation commands](evidence/maya-chat-first-ux/recovery-20260919/pre-mutation-gate-results.json) preserve the distinction between these checks.
 
 CI on the recovered code: Widgets Live run `35433039510` PASS; Widget Contract run `35433039583` PASS; Platform CI run `35433039533` FAIL. Baseline comparison is run `35269541157`. No Widgets Mutation CI run was created: the workflow is absent from the remote workflow registry and dispatch returns 404. No CI failure is waived by this recovery.
+
+Intermediate preservation checkpoint `31c74663` publishes recovery documentation only; it does not certify Wave 1. Its independent CI receipts are Widgets Live `35438957495` PASS, Widget Contract `35438957518` PASS, MAYA Chat Shell `35438957531` PASS, and Platform CI `35438957498` FAIL. The failed log again reports exactly 12 dependency vulnerabilities (1 moderate / 11 high), the isolated SaaS chat-storage assertion, and legacy Python 613 tests with 34 failures / 30 errors. See [checkpoint CI runs](evidence/maya-chat-first-ux/recovery-20260919/ci-recovery-checkpoint-runs.json).
+
+
+## Final complete mutation verification
+
+All **19/19 declared batteries completed** on the recovered final code. All **203/203 declarations matched**: **113 build-killed + 87 live-killed = 200 killed**, and **3 explicitly declared pending**. There are **0 survivors, 0 unexpected classifications, 0 vacuous kills, 0 control/mutant diagnostics and 0 null process exits** in the final reports. Pending is not called killed or live-conformant.
+
+| Battery | Build killed | Live killed | Declared pending | Total | Result |
+|---|---:|---:|---:|---:|---|
+| 10a | 5 | 0 | 0 | 5 | AS-DECLARED |
+| 11 | 7 | 0 | 0 | 7 | AS-DECLARED |
+| 12 | 5 | 0 | 0 | 5 | AS-DECLARED |
+| 12k | 3 | 0 | 0 | 3 | AS-DECLARED |
+| 4 | 2 | 2 | 0 | 4 | AS-DECLARED |
+| 6 | 7 | 12 | 2 | 21 | AS-DECLARED |
+| 7 | 27 | 8 | 0 | 35 | AS-DECLARED |
+| 8 | 0 | 5 | 0 | 5 | AS-DECLARED |
+| 8c | 8 | 0 | 0 | 8 | AS-DECLARED |
+| 8r | 4 | 25 | 0 | 29 | AS-DECLARED |
+| 9a | 2 | 0 | 0 | 2 | AS-DECLARED |
+| H-harness | 0 | 19 | 0 | 19 | AS-DECLARED |
+| P-f88 | 6 | 8 | 0 | 14 | AS-DECLARED |
+| P-ledger | 7 | 0 | 0 | 7 | AS-DECLARED |
+| P-pairing | 6 | 0 | 0 | 6 | AS-DECLARED |
+| P-principal | 3 | 8 | 1 | 12 | AS-DECLARED |
+| P-render | 8 | 0 | 0 | 8 | AS-DECLARED |
+| P-seal | 6 | 0 | 0 | 6 | AS-DECLARED |
+| T-tables | 7 | 0 | 0 | 7 | AS-DECLARED |
+
+Pending items are Gate 6 `M17b` / `M18b` (held clauses 6(d)/6(e), pending U6-L3) and P-principal `P-M11`. Their existing later-wave boundaries are preserved. These are distinct from the unimplemented Gate 7 counterfactual recorded in original DEV-W1-6 / review §4.1.
+
+[Final battery summary](evidence/maya-chat-first-ux/recovery-20260919/mutation-results.json) and [complete compressed runner reports](evidence/maya-chat-first-ux/recovery-20260919/mutation-reports.json.gz) preserve every mutant and control result. These supersede the explicitly intermediate `mutation-checkpoint.json`; that checkpoint is retained as history. [Complete command results](evidence/maya-chat-first-ux/recovery-20260919/verification-results.json) include all 19, not just the earlier partial run. [Actual runner executable](evidence/maya-chat-first-ux/recovery-20260919/mutation-runner-executable.json) verifies Node 22.23.2 at runtime.
+
+The longest local shard was Gate 7: 12824.21 seconds. This is local evidence, not proof that the unchanged GitHub job timeout will accommodate the run. The repository's 180-minute mutation job limit was not increased, and no mutation CI receipt is invented. No failed assertion, crashed control or unreadable report was retried into a claimed green result.
+
+## Exact unresolved Wave 1 exit requirements
+
+1. **Seeded HTTP smoke:** `npm run test:http` returns `validation` where its assertion requires `trial_activation_token_required`.
+2. **Appointment owner PostgreSQL proof:** `npm run action-engine:appointment-proof:ts` terminates with `ActionExecutionTerminalError: Action policy or approval did not allow execution` on create.
+3. **Kernel PostgreSQL proof:** `npm run action-engine:proof:ts` fails the `architecture_barrier` assertion for `/crm/` (actual true, expected false).
+4. **Platform CI is red:** dependency audit has 12 vulnerabilities (1 moderate, 11 high); frontend app fails `missing isolated SaaS chat storage`; legacy Python has 34 failures / 30 errors in 613 tests. All three reproduce at the original remote baseline; pre-existence is not a waiver. [Exact Python failure/error identifiers](evidence/maya-chat-first-ux/recovery-20260919/ci-python-failure-identifiers.json) preserve the identical set across baseline, recovered code and intermediate documentation checkpoint.
+5. **Required mutation CI receipt is missing:** the branch workflow cannot be dispatched through the current registry (HTTP 404). Local 19/19 execution does not replace the required CI receipt.
+6. **Disclosed review coverage debt:** original DEV-W1-6 / review §4.1 calls for the Gate 7 `T-SRC-INV30` counterfactual; it is absent from the recovered Gate 7 declarations. Its Gate 8R counterpart exists, but is not silently treated as completion of the separate review duty.
+
+The native Node 24 SIGSEGV remains reproducible and unresolved at root-cause level. The verified CI-matching Node 22 mitigation produced three full passing regressions, including the final whole-commit export. Node 24 crash runs remain FAIL in the evidence. No production mutation or production test was performed.
+
+## Preservation, cleanup and publication
+
+Runtime/source/schema/test expectations remain exactly those of recovered `df6c3a5a`. Recovery adds only documentation and evidence. The independent blind-test check verifies Claude's existing correction; it does not claim Codex wrote a replacement that was already present.
+
+All 26 owned temporary proof databases were dumped before being dropped; the separate owned cluster on port 55619 was stopped. Dumps remain private recovery evidence, with [dump hashes](evidence/maya-chat-first-ux/recovery-20260919/owned-proof-dump-hashes.json) in the repository. No pre-existing database or cluster was accessed. The user's protected main worktree retains its exact original status bytes and all 23 recorded file hashes, including the observed 25 default dirty entries.
+
+[Database hygiene](evidence/maya-chat-first-ux/recovery-20260919/database-hygiene.json) and [final process/main-worktree check](evidence/maya-chat-first-ux/recovery-20260919/final-hygiene.json) record: main worktree touched **NO**; pre-existing databases touched **0**; owned processes/watchers/browsers/databases **0**. The active worktree for this report is the isolated `work/maya-identity-consent` worktree. Existing unrelated worktrees and their dirt were never reset, cleaned or deleted.
+
+The 33 source commits were already fast-forward published, followed by documentation preservation checkpoint `31c74663`. The final documentation/evidence update is published by another normal fast-forward push, with post-push SHA equality and clean-worktree verification recorded in the final recovery response and private `final-publication.json`. No force push is used; no dirty main worktree is made clean.
+
+**WAVE 1 CODE MERGED: YES. WAVE 1 CERTIFIED: NO. WAVE 2 STARTED: NO.**
+
+**Exact next step:** remain in Wave 1 and resolve the six explicit exit/review gaps above through the appropriate owned remediation/release process, then rerun affected proofs and obtain the required CI receipts. This recovery does not implement those fixes, alter the contract, or begin Wave 2.

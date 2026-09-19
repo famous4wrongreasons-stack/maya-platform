@@ -1,0 +1,7 @@
+{
+  "observedAt": "2026-09-19T11:02:40.809856+00:00",
+  "pid": 64884,
+  "method": "read-only lsof txt mapping",
+  "output": "p64884\nftxt\nn/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-p01-option-a-940ddd51/node-v22.23.2-darwin-arm64/bin/node\nftxt\nn/usr/lib/dyld\n",
+  "nodeVersionFromPath": "22.23.2"
+}
