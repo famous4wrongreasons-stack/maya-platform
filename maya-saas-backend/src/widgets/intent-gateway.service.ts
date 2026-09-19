@@ -206,7 +206,14 @@ export class IntentGatewayService {
       name: 'Token integrity',
       host: 'IntentGateway',
       // Seam: `gates/gate1.ts` (P-G15a).
-      run: (ctx) => gate1(ctx, this.sealVerifier),
+      run: (ctx, tx) => {
+        if (tx === null)
+          throw new Error('Gate 1 requires the request transaction');
+        return gate1(ctx, {
+          verify: (recordHash, scope) =>
+            this.sealVerifier.verify(recordHash, scope, tx),
+        });
+      },
     },
     {
       n: '2',

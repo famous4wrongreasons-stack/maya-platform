@@ -13,8 +13,8 @@
 // same day. Comments are stripped first, so a fence that must NAME what it forbids is not itself a
 // violation (the mistake R8R-7 records against F88-7).
 //
-// EXCEPTIONS are enumerated, never patterned, and each says why it is not a read. There are three,
-// and a fourth would have to be argued in this file.
+// EXCEPTIONS are enumerated, never patterned, and each says why it is not a caller-controlled read.
+// A new exception has to be argued in this file.
 //
 // Class BUILD. It proves a shape, not a run; the runtime half is each gate's own live spec.
 
@@ -46,6 +46,10 @@ const DECLARED_NOT_READ: Readonly<Record<string, string>> = {
     '`SubmissionShape` is the wire shape the DTO is typed against; declaring the member is what keeps the two from drifting. No gate reads it — F88-7 holds that over every file.',
   'carriers/channel-profile.ts':
     "K6's CHANNEL profile registry: `profileId` there is the SERVER's own profile row id (F53), not the caller's claimed render profile. A name collision, not an authority input.",
+  'emission/seal.service.ts':
+    "H4's seal term declaration: `profileId` is the SERVER-STORED render receipt term covered by the keyed seal, never the submission's claimed profile.",
+  'emission/seal-verifier.service.ts':
+    "H4 verification reads `profileId` from the SERVER-STORED WidgetRenderReceipt inside T; it never reads submission.profile_id and treats the value only as a sealed term.",
 };
 
 const walk = (dir: string): string[] =>
