@@ -52,6 +52,7 @@ import {
   type K3EmittableKind,
   type SealedEmission,
 } from '../../../src/widgets/emission/emitter.service';
+import { SealService } from '../../../src/widgets/emission/seal.service';
 import { recomputeFloor } from '../../../src/widgets/gates/gate5';
 import { C9Authority } from '../../../src/orchestration/c9.authority';
 import type { ClientChannelRuntimeService } from '../../../src/crm/client-channel-runtime.service';
@@ -400,13 +401,50 @@ export class Fixtures {
       },
       now,
     );
+    // P-G15a verifies the V1.1 keyed H4 seal before P-MINT-CORE replaces K3's legacy unkeyed
+    // emitter. These harness-minted records are explicitly G-SYNTH (never evidence), so bridge that
+    // ordered Wave-2 interval here rather than weakening Gate 1 or pretending the old emitter is the
+    // canonical minter. P-MINT-CORE removes the need for this compatibility re-seal.
+    const envelopeSeal = await this.resealLegacyEmission(
+      sealed,
+      input.tenant.id,
+      proof,
+    );
     return {
       ...sealed,
+      envelopeSeal,
       tenantId: input.tenant.id,
       kind: input.kind,
       conversationId,
       turnId: turn.id,
     };
+  }
+
+  /** Wave-2 bridge for a harness that calls K3's pre-P-MINT-CORE emitter directly. */
+  async resealLegacyEmission(
+    sealed: SealedEmission,
+    tenantId: string,
+    principalProofHash: string,
+  ): Promise<string> {
+    const envelopeSeal = new SealService().seal({
+      bodyHash: sealed.bodyHash,
+      widgetId: sealed.widgetId,
+      tenantId,
+      principalProofHash,
+      issuedAt: sealed.issuedAt,
+      expiresAt: sealed.expiresAt,
+      profileId: null,
+    });
+    await this.ctx.prisma.widgetEmission.update({
+      where: {
+        widgetId_tenantId: {
+          widgetId: sealed.widgetId,
+          tenantId,
+        },
+      },
+      data: { envelopeSeal },
+    });
+    return envelopeSeal;
   }
 
   /**
