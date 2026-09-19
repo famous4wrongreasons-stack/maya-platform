@@ -221,6 +221,7 @@ describe('Gate 11 — the witness lane refuses while it is unbound, and its twin
         records: [
           'WidgetIntentRecord.findFirst',
           'WidgetIntentRecord.findFirst',
+          'WidgetIntentRecord.findFirst',
         ],
       });
       expect({

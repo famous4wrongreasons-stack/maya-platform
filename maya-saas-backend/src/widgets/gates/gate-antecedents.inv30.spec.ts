@@ -49,7 +49,7 @@ const DECLARED_NOT_READ: Readonly<Record<string, string>> = {
   'emission/seal.service.ts':
     "H4's seal term declaration: `profileId` is the SERVER-STORED render receipt term covered by the keyed seal, never the submission's claimed profile.",
   'emission/seal-verifier.service.ts':
-    "H4 verification reads `profileId` from the SERVER-STORED WidgetRenderReceipt inside T; it never reads submission.profile_id and treats the value only as a sealed term.",
+    'H4 verification reads `profileId` from the SERVER-STORED WidgetRenderReceipt inside T; it never reads submission.profile_id and treats the value only as a sealed term.',
 };
 
 const walk = (dir: string): string[] =>

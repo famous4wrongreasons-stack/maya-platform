@@ -174,7 +174,7 @@ const installProjectorSpies = (): ProjectorSpies => {
  *
  * MERGE FIX (U12a's merge): the own-token stop was slot 8 while slot 8 was the I-CTX stub. U8a built
  * its null-schema lane earlier in this batch and these bodies carry `inputs: null`, which is that
- * lane's PASS, so the first slot with no mechanism is 9. The claim the guard makes is unchanged and
+ * lane's PASS, so U9b applies DS-03 A to the absent template at slot 9. The claim the guard makes is unchanged and
  * is not about WHICH slot stops: it is that no owner is read, no `AiToolExecution` row appears, no
  * owner byte comes back and nothing is written, wherever the pipeline stops.
  */
@@ -308,7 +308,8 @@ async function runL00<C>(
         // `FOR SHARE` raw reads, `Staff.findMany`) and U8a's slot 8 performs ONE lowering-source read
         // after its pass. So the RECORD-table reads are counted on their own — one for a refusal at
         // Gate 3, two once slot 8 passes — and the rest by the property that matters: no owner model
-        // is touched at all, which is this guard's whole subject.
+        // is touched at all, which is this guard's whole subject. P-G15a adds the first read: Gate 1
+        // derives the seal from transaction-scoped stored terms before the gateway's union record read.
         const ops = level.operations(scope);
         expect({
           scope,
@@ -317,8 +318,15 @@ async function runL00<C>(
           scope,
           records:
             submitter === owner
-              ? ['WidgetIntentRecord.findFirst', 'WidgetIntentRecord.findFirst']
-              : ['WidgetIntentRecord.findFirst'],
+              ? [
+                  'WidgetIntentRecord.findFirst',
+                  'WidgetIntentRecord.findFirst',
+                  'WidgetIntentRecord.findFirst',
+                ]
+              : [
+                  'WidgetIntentRecord.findFirst',
+                  'WidgetIntentRecord.findFirst',
+                ],
         });
         // No OWNER model is read at any point: only the widget layer's own record table, the
         // principal's tenancy/staff reads inside `T`, and the raw `FOR SHARE` statements.
@@ -330,6 +338,8 @@ async function runL00<C>(
               ![
                 'Tenant.findUnique',
                 'Staff.findMany',
+                'WidgetEmission.findFirst',
+                'WidgetRenderReceipt.findFirst',
                 'null.$queryRaw',
               ].includes(op),
           ),

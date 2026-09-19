@@ -213,9 +213,10 @@ describe('Gate 8 — input validation, the null-schema lane [U8a]', () => {
         stoppedAt: PAST_8.stop,
         ran: PAST_8.ran,
       });
-      // Two reads and no more: `findRecord`, then the one lowering-source read slot 8 performs after
-      // its decision (D-2). Nothing else on the path touched the store.
+      // Three reads and no more: Gate 1's transaction-scoped seal-term read, `findRecord`, then the
+      // one lowering-source read slot 8 performs after its decision (D-2). Nothing else touched the store.
       expect(operations(scope)).toEqual([
+        'WidgetIntentRecord.findFirst',
         'WidgetIntentRecord.findFirst',
         'WidgetIntentRecord.findFirst',
       ]);
@@ -269,8 +270,12 @@ describe('Gate 8 — input validation, the null-schema lane [U8a]', () => {
           stoppedAt: AT_8.stop,
           ran: AT_8.ran,
         });
-        // T-READ-ONCE's negative half: the refusal read the record and nothing else.
-        expect(operations(scope)).toEqual(['WidgetIntentRecord.findFirst']);
+        // T-READ-ONCE's negative half: Gate 1 verifies the stored seal, the gateway loads the
+        // record once, and the refusal performs no lowering-source read.
+        expect(operations(scope)).toEqual([
+          'WidgetIntentRecord.findFirst',
+          'WidgetIntentRecord.findFirst',
+        ]);
         // T-INV24 (C11:5356): a submission refused at 1–8-R produces zero conversation writes.
         expect(
           await noWriteViolations(
@@ -316,7 +321,10 @@ describe('Gate 8 — input validation, the null-schema lane [U8a]', () => {
         // The held lane is DARK: it decides from the record's `inputSchemaHash` alone and reads nothing.
         expect({ scope, operations: operations(scope) }).toEqual({
           scope,
-          operations: ['WidgetIntentRecord.findFirst'],
+          operations: [
+            'WidgetIntentRecord.findFirst',
+            'WidgetIntentRecord.findFirst',
+          ],
         });
         expect({
           scope,

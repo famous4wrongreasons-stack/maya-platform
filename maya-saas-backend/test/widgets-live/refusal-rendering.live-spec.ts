@@ -86,7 +86,7 @@ describe('R3.9.3 — the refusal the route returns is rendered from the table [H
     const body = res.body as IntentResponse;
     expect(res.status).toBe(200);
     expect(body.stopped_at_gate).toBe('1');
-    expect(body.code).toBe('EXPIRED');
+    expect(body.code).toBeNull();
     expect(body.reason_text?.phrase_key).toBe(
       LIMITATION_REASON_TABLE.EXPIRED.text_key,
     );
