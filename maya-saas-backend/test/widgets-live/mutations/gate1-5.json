@@ -1,0 +1,38 @@
+[
+  {
+    "id": "G15-M1",
+    "description": "skip the keyed seal verification at Gate 1",
+    "file": "src/widgets/gates/gate1.ts",
+    "find": "  if (!seal.ok) return expired();\n",
+    "replace": "  if (false && !seal.ok) return expired();\n",
+    "killers": ["G15-1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "G15-M2",
+    "description": "replace the constant-time widget identity comparison with ordinary equality",
+    "file": "src/widgets/gates/gate1.ts",
+    "find": "    !digestEquals(sha256Hex(r.widgetId), sha256Hex(submittedWidgetId))\n",
+    "replace": "    r.widgetId !== submittedWidgetId\n",
+    "killers": ["G15-1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "G15-M3",
+    "description": "collapse policy-floor divergence into an ordinary refusal instead of SUPERSEDED",
+    "file": "src/widgets/gates/gate5.ts",
+    "find": "    return superseded(\n      'policy_floor_changed',\n",
+    "replace": "    return refuse(\n      'policy_floor_changed',\n",
+    "killers": ["G15-4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "G15-M4",
+    "description": "make the process metric look like a durable persistence surface",
+    "file": "src/widgets/gates/gate5.ts",
+    "find": "    widgetFloorDivergence.count += 1;\n",
+    "replace": "    widgetFloorDivergence.count += 1;\n    void 'writeFile';\n",
+    "killers": ["G15-6"],
+    "expect": "build-killed"
+  }
+]
