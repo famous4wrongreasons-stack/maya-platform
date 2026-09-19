@@ -228,6 +228,7 @@ const EXECUTE_ADMISSION = [
   'AE_WIDGET_COMMIT_ALLOWLIST',
   'MAYA_AI_TOOL_CATALOG_BY_NAME',
   'grantsRequiredFeatures',
+  'actionPolicy',
   'policyDecision',
   'allowedSourceTypes',
   'isAllowlisted',

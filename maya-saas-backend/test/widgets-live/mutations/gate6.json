@@ -226,8 +226,8 @@
     "id": "M25",
     "description": "slot 6 reads a role from the JWT-validated actor instead of the live principal (D-9, B-02, K5). Two answers to 'what is this principal's role' can disagree while nothing goes red, and the owner's is the one the rest of the application acts on. Build-killed by S-TX, which is where the property is visible.",
     "file": "src/widgets/gates/gate6.ts",
-    "find": "      ctx.principal.role,\n      def,\n",
-    "replace": "      ctx.actor.role,\n      def,\n",
+    "find": "      principal.authority.userId,\n      principal.role,\n      def,\n",
+    "replace": "      principal.authority.userId,\n      ctx.actor.role,\n      def,\n",
     "killers": [
       "S-TX"
     ],
@@ -249,8 +249,8 @@
     "id": "M6",
     "description": "delete canonical allowedActorRoles admission at Gate 6(d)",
     "file": "src/widgets/gates/gate6.ts",
-    "find": "  if (!policy.allowedActorRoles.includes(ctx.principal.role as UserRole))\n    return refuse(\n      'insufficient_authority',\n      `(d) role ${ctx.principal.role} is not admitted`,\n    );\n",
-    "replace": "",
+    "find": "  if (!policy.allowedActorRoles.includes(principal.role))\n    return refuse(\n      'insufficient_authority',\n      `(d) role ${principal.role} is not admitted`,\n    );\n",
+    "replace": "  if (false && !policy.allowedActorRoles.includes(principal.role))\n    return refuse(\n      'insufficient_authority',\n      `(d) role ${principal.role} is not admitted`,\n    );\n",
     "killers": [
       "N-D1"
     ],
@@ -260,8 +260,8 @@
     "id": "M7",
     "description": "treat a missing live principal role as admitted at Gate 6(d)",
     "file": "src/widgets/gates/gate6.ts",
-    "find": "  if (ctx.principal?.role === null || ctx.principal === null)\n    return refuse('insufficient_authority', '(d) no live principal role');\n",
-    "replace": "",
+    "find": "  if (principal === null || principal.role === null)\n    return refuse('insufficient_authority', '(d) no live principal role');\n",
+    "replace": "  if (false && (principal === null || principal.role === null))\n    return refuse('insufficient_authority', '(d) no live principal role');\n",
     "killers": [
       "N-AE-NOPRINCIPAL"
     ],
@@ -293,7 +293,7 @@
     "id": "M12",
     "description": "skip the C20 owner admission for a catalogue capability",
     "file": "src/widgets/gates/gate6.ts",
-    "find": "    await owners.assertCanExecute(\n      ctx.tenantId,\n      ctx.principal.authority.userId,\n      ctx.principal.role,\n      def,\n    );\n",
+    "find": "    await owners.assertCanExecute(\n      ctx.tenantId,\n      principal.authority.userId,\n      principal.role,\n      def,\n    );\n",
     "replace": "",
     "killers": [
       "G6-14"
@@ -304,8 +304,8 @@
     "id": "M14",
     "description": "swallow the catalogue owner's denial and pass",
     "file": "src/widgets/gates/gate6.ts",
-    "find": "    await owners.assertCanExecute(\n      ctx.tenantId,\n      ctx.principal.authority.userId,\n      ctx.principal.role,\n      def,\n    );\n    return pass;\n",
-    "replace": "    try {\n      await owners.assertCanExecute(\n        ctx.tenantId,\n        ctx.principal.authority.userId,\n        ctx.principal.role,\n        def,\n      );\n    } catch {\n      return pass;\n    }\n    return pass;\n",
+    "find": "    await owners.assertCanExecute(\n      ctx.tenantId,\n      principal.authority.userId,\n      principal.role,\n      def,\n    );\n    return pass;\n",
+    "replace": "    try {\n      await owners.assertCanExecute(\n        ctx.tenantId,\n        principal.authority.userId,\n        principal.role,\n        def,\n      );\n    } catch {\n      return pass;\n    }\n    return pass;\n",
     "killers": [
       "N-OWNER-THROW-E"
     ],
