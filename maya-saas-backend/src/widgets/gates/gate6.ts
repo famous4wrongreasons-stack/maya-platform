@@ -46,6 +46,8 @@
 // nothing here a genuine transport fault could be confused with (NW, D-12).
 
 import { c9Capability } from '../../orchestration/c9.registry';
+import { canonicalProductionPolicyDefinitions } from '../../action-engine/action-engine.policy-registry';
+import type { UserRole } from '../../common/domain.enums';
 import type { CapabilityRef } from '../../widget-contract/capability-ref';
 import type { GateContext, GateVerdict, IntentRecordRow } from '../gate.types';
 import {
@@ -102,6 +104,10 @@ const targetClass = (r: IntentRecordRow): string | null => {
   return typeof t?.class === 'string' ? t.class : null;
 };
 
+const ACTION_POLICY_BY_CAPABILITY = new Map(
+  canonicalProductionPolicyDefinitions().map((row) => [row.capability, row]),
+);
+
 /**
  * The HANDOFF destination fences, and ONLY those (G6-6, G6-7; C11:4743-4747).
  *
@@ -143,7 +149,11 @@ const handoffDestination = (
  *
  * (d) and (e) are the HELD LANE: both read the live principal, which is U6-L3's.
  */
-const aeSubject = (ctx: GateContext, ref: CapabilityRef): GateVerdict => {
+const aeSubject = async (
+  ctx: GateContext,
+  ref: CapabilityRef,
+  owners: Gate6Owners,
+): Promise<GateVerdict> => {
   if (!resolves(ref))
     return refuse('insufficient_authority', 'unregistered AE key');
   // `get`, as the row spells it (C11:4751). It raises on an unregistered key; the raise is the
@@ -181,12 +191,29 @@ const aeSubject = (ctx: GateContext, ref: CapabilityRef): GateVerdict => {
       "(c) allowedSourceTypes does not include 'authenticated_request'",
     );
 
-  // (d) the live principal's role is a member of canonicalProductionPolicyDefinitions()'s
-  // allowedActorRoles, and (e) EntitlementsService grants every requiredFeatures entry. HELD
-  // (AMB-01a) until U6-L3 binds `ctx.principal` and the owner port. Both halves REFUSE.
-  return ctx.principal === null
-    ? refuse('insufficient_authority', '(d)/(e) no live principal')
-    : refuse('insufficient_authority', '(d)/(e) pending U6-L3');
+  // (d) reads the role already resolved inside T. A second membership read here could disagree with
+  // the principal Gate 3 bound, and the JWT role is not the canonical membership role (D-2).
+  if (ctx.principal?.role === null || ctx.principal === null)
+    return refuse('insufficient_authority', '(d) no live principal role');
+  const policy = ACTION_POLICY_BY_CAPABILITY.get(ref.key);
+  if (policy === undefined)
+    return refuse('insufficient_authority', '(d) no canonical action policy');
+  if (!policy.allowedActorRoles.includes(ctx.principal.role as UserRole))
+    return refuse(
+      'insufficient_authority',
+      `(d) role ${ctx.principal.role} is not admitted`,
+    );
+
+  // (e) asks the entitlement owner for the conjunction. No feature list supplied by the caller is
+  // consulted; the list is the canonical action policy's.
+  if (
+    !(await owners.grantsRequiredFeatures(
+      ctx.tenantId,
+      policy.requiredFeatures,
+    ))
+  )
+    return refuse('insufficient_authority', '(e) required feature is absent');
+  return pass;
 };
 
 /**
@@ -206,21 +233,32 @@ const aeSubject = (ctx: GateContext, ref: CapabilityRef): GateVerdict => {
  * and it does so by raising - which is the refusal. Restating its `BUSINESS_INTELLIGENCE` arm here
  * would be a second copy of one rule, free to disagree with the registry the rule lives in.
  */
-const c9Subject = (
+const c9Subject = async (
   ctx: GateContext,
   r: IntentRecordRow,
   ref: CapabilityRef,
-): GateVerdict => {
+  owners: Gate6Owners,
+): Promise<GateVerdict> => {
   if (!resolves(ref))
     return refuse('insufficient_authority', 'unregistered C9 key');
 
   const def = MAYA_AI_TOOL_CATALOG_BY_NAME.get(ref.key);
-  if (def !== undefined)
-    // C20 - HELD (AMB-01a) until U6-L3. The surface is the literal `'web'` and the principal is
-    // built from `ctx.principal`, both of which land with the live principal.
-    return ctx.principal === null
-      ? refuse('insufficient_authority', 'C20 no live principal')
-      : refuse('insufficient_authority', 'C20 pending U6-L3');
+  if (def !== undefined) {
+    if (ctx.principal?.role === null || ctx.principal === null)
+      return refuse('insufficient_authority', 'C20 no live principal role');
+    if (
+      ctx.principal.authority.kind !== 'USER' ||
+      ctx.principal.authority.userId === null
+    )
+      return refuse('insufficient_authority', 'C20 principal is not a user');
+    await owners.assertCanExecute(
+      ctx.tenantId,
+      ctx.principal.authority.userId,
+      ctx.principal.role,
+      def,
+    );
+    return pass;
+  }
 
   if (WIDGET_CAPABILITY_POLICY[capKey(ref)] === undefined)
     return refuse('insufficient_authority', 'no WIDGET_CAPABILITY_POLICY row');
@@ -232,11 +270,12 @@ const c9Subject = (
 };
 
 /** The block, in its order. Every path returns a verdict; there is no fall-through that passes. */
-const dispatch = (
+const dispatch = async (
   ctx: GateContext,
   r: IntentRecordRow,
   ref: CapabilityRef,
-): GateVerdict => {
+  owners: Gate6Owners,
+): Promise<GateVerdict> => {
   // G6-19, before the effect scope: "no intent OF ANY EFFECT CLASS may carry a TOOL ref" (R3.2.2,
   // C11:4775-4776). F24 makes the 47 catalogue names C9 keys by spelling, so a TOOL-spaced ref is a
   // ref that resolved against the wrong table - including one that arrived as a handoff destination.
@@ -251,9 +290,9 @@ const dispatch = (
 
   switch (ref.space) {
     case 'C9':
-      return c9Subject(ctx, r, ref);
+      return c9Subject(ctx, r, ref, owners);
     case 'AE':
-      return aeSubject(ctx, ref);
+      return aeSubject(ctx, ref, owners);
     case 'CONTROL':
       // G6-18 (C11:4771-4773). `CONTROL_FLOOR[ref.key]` was applied at Gate 5, Gate 3 bound the
       // principal and Gate 4 asserted the tenant; the one registered handler then performs its OWN
@@ -275,13 +314,8 @@ const dispatch = (
 // runner already awaits every gate (`gate.run(ctx)`), so the promise costs nothing today.
 export const gate6 = async (
   ctx: GateContext,
-  // INTERIM default (R6-1): the gateway is an integrator-only file, so until `@Inject(GATE6_OWNERS)`
-  // passes the bound port here slot 6 still calls `gate6(ctx)`. The default reaches no owner and every
-  // member of it raises, so nothing is admitted by an unwired build. U6-L3 removes the default.
-  owners: Gate6Owners = heldGate6Owners,
-  // eslint-disable-next-line @typescript-eslint/require-await -- see the note above: U6-L3 awaits.
+  owners: Gate6Owners,
 ): Promise<GateVerdict> => {
-  void owners; // bound at U6-L3, where (d), (e) and C20 leave the held lane.
   const r = ctx.record;
   if (!r) return refuse('insufficient_authority', 'no record');
 
@@ -295,7 +329,7 @@ export const gate6 = async (
   if (ref === null) return pass;
 
   try {
-    return dispatch(ctx, r, ref);
+    return await dispatch(ctx, r, ref, owners);
   } catch (error) {
     // G6-20: a raise IS the refusal (C11:4779-4781). The message is kept for the log, never widened
     // into a different code.

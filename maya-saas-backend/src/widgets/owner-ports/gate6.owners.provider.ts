@@ -31,10 +31,8 @@
 import { Injectable } from '@nestjs/common';
 
 import { AiToolPolicyService } from '../../ai-tools/ai-tool-policy.service';
-import type {
-  AiToolDefinition,
-  AiToolPrincipal,
-} from '../../ai-tools/ai-tool.types';
+import type { AiToolDefinition } from '../../ai-tools/ai-tool.types';
+import type { UserRole } from '../../common/domain.enums';
 import { EntitlementsService } from '../../entitlements/entitlements.service';
 
 /**
@@ -50,15 +48,17 @@ export interface Gate6Owners {
    * C20, the 47 (G6-14). Resolves nothing for a HANDOFF destination (G6-7): the gate decides that,
    * and this port is simply not called on that branch.
    */
-  assertCanExecute(
-    principal: AiToolPrincipal,
+  readonly assertCanExecute: (
+    tenantId: string,
+    userId: string,
+    role: string,
     definition: AiToolDefinition,
-  ): Promise<void>;
+  ) => Promise<void>;
   /** (e), G6-12: true only when EVERY entry of `requiredFeatures` is granted to `tenantId`. */
-  grantsRequiredFeatures(
+  readonly grantsRequiredFeatures: (
     tenantId: string,
     features: readonly string[],
-  ): Promise<boolean>;
+  ) => Promise<boolean>;
 }
 
 /**
@@ -80,9 +80,17 @@ export class Gate6OwnersAdapter implements Gate6Owners {
   ) {}
 
   assertCanExecute(
-    principal: AiToolPrincipal,
+    tenantId: string,
+    userId: string,
+    role: string,
     definition: AiToolDefinition,
   ): Promise<void> {
+    const principal = this.policy.buildPrincipal(
+      tenantId,
+      userId,
+      role as UserRole,
+      GATE6_SURFACE,
+    );
     return this.policy.assertCanExecute(principal, definition);
   }
 

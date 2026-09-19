@@ -162,6 +162,8 @@ describe('Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736
       gw = await bootGateway();
       fx = new Fixtures(env, gw);
       tenant = await fx.tenant('G6');
+      await fx.grantFeature(tenant, 'ai.admin');
+      await fx.grantFeature(tenant, 'booking');
       user = await fx.user(tenant, UserRole.ADMINISTRATOR);
       actor = await fx.actor(tenant, user);
     }, 120_000);
@@ -486,28 +488,27 @@ describe('Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736
       });
     }, 120_000);
 
-    it('N-C9-47-NOPRINCIPAL [GW]: C20 is the held lane (AMB-01a) — a catalogue key REFUSES while the live principal is unresolved, and is never admitted by omission', async () => {
-      // Fail-closed, not a pass: "not built yet" and "allowed" are different branches (F5). U6-L3
-      // replaces this with `assertCanExecute(principal, def)`.
-      //
-      // MERGE FIX (U6-L1's merge): this asserted the held lane's OTHER arm, `'C20 no live principal'`,
-      // because at the unit's self-check P-PRINCIPAL was unmerged and `ctx.principal` was null on
-      // every request. IR-P-GW is merged now, so a request that reaches slot 6 carries a resolved
-      // principal and the arm under test is `'C20 pending U6-L3'`. Both arms refuse; the null arm is
-      // unreachable from the route now, because slot 3 refuses a null principal before slot 6 runs
-      // (D-16), and `gate6.spec.ts` holds it at [RI] where it can still be constructed.
-      const scope = 'N-C9-47-NOPRINCIPAL';
-      await refuses(
-        scope,
-        {
-          effect: 'REFINE',
-          capabilitySpace: 'C9',
-          capabilityKey: 'catalog.services.read',
-        },
-        'C20 pending U6-L3',
-      );
-      // The held lane refuses BEFORE the owner is asked, which is why the port is not yet evidence.
-      expect(owners.canExecute.mock.calls.length).toBe(0);
+    it('P-C9-47 [GW]: C20 admits through the real policy owner using the in-T principal role', async () => {
+      const scope = 'P-C9-47';
+      await admits(scope, {
+        effect: 'REFINE',
+        capabilitySpace: 'C9',
+        capabilityKey: 'catalog.services.read',
+      });
+      expect(owners.canExecute.mock.calls.length).toBe(1);
+      const calls = owners.canExecute.mock.calls as unknown[][];
+      const principal = calls[0]?.[0] as {
+        tenantId: string;
+        userId: string;
+        role: string;
+        surface: string;
+      };
+      expect(principal).toMatchObject({
+        tenantId: tenant.id,
+        userId: user.id,
+        role: UserRole.ADMINISTRATOR,
+        surface: 'web',
+      });
     }, 60_000);
 
     // S-TOOL and S-REG are ONE property, run as TWO tests. A TOOL ref and an unregistered C9 key both

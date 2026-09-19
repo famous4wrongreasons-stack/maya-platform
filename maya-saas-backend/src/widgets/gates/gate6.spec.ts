@@ -49,6 +49,12 @@ const unreachableOwners = (): Gate6Owners =>
     },
   });
 
+const admittingOwners = (): Gate6Owners =>
+  Object.freeze({
+    assertCanExecute: jest.fn().mockResolvedValue(undefined),
+    grantsRequiredFeatures: jest.fn().mockResolvedValue(true),
+  });
+
 /** A live principal, for the held lane's second arm only. No member of it is read by U6-L1. */
 const PRINCIPAL: PrincipalView = Object.freeze({
   authority: Object.freeze({
@@ -71,6 +77,11 @@ const PRINCIPAL: PrincipalView = Object.freeze({
 const withPrincipal = (c: GateContext): GateContext => ({
   ...c,
   principal: PRINCIPAL,
+});
+
+const withRole = (c: GateContext, role: string): GateContext => ({
+  ...withPrincipal(c),
+  principal: { ...PRINCIPAL, role },
 });
 
 /** One of the nine non-catalogue C9 keys — the branch `WIDGET_CAPABILITY_POLICY` and `c9Capability` own. */
@@ -328,25 +339,37 @@ describe('Gate 6 — the C9 branch (C11:4760-4769)', () => {
     expect(v.outcome).toBe('pass');
   });
 
-  it('G6-14-HELD: C20 is HELD (AMB-01a): a catalogue key refuses, and says which half is held', async () => {
+  it('G6-14: C20 uses the live principal and the canonical owner admission', async () => {
     const base = ctx(rec({ effect: 'REFINE', capabilityKey: CATALOGUE }));
-    // N-C9-47-NOPRINCIPAL [RI]: the live path today, where `ctx.principal` is null.
+    // RI control: slot 3 would reject this on the live path before slot 6.
     expect([code(await gate6(base)), detail(await gate6(base))]).toEqual([
       'insufficient_authority',
-      'C20 no live principal',
+      'C20 no live principal role',
     ]);
-    // The other arm, reachable only by injecting the principal IR-P-GW will supply.
-    expect(detail(await gate6(withPrincipal(base)))).toBe('C20 pending U6-L3');
+    const owners = admittingOwners();
+    expect((await gate6(withPrincipal(base), owners)).outcome).toBe('pass');
+    const assertCanExecute = owners.assertCanExecute as jest.Mock;
+    expect(assertCanExecute).toHaveBeenCalledWith(
+      't1',
+      'u1',
+      'tenant_owner',
+      MAYA_AI_TOOL_CATALOG_BY_NAME.get(CATALOGUE),
+    );
   });
 
-  it('G6-14-ALL: the held lane refuses for EVERY one of the 47, so none of them is admitted by omission', async () => {
+  it('G6-14-ALL: every catalogue key passes only through its owner admission', async () => {
+    const owners = admittingOwners();
+    const assertCanExecute = owners.assertCanExecute as jest.Mock;
     for (const name of MAYA_AI_TOOL_CATALOG_BY_NAME.keys()) {
       const v = await gate6(
-        ctx(rec({ effect: 'REFINE', capabilityKey: name })),
-        unreachableOwners(),
+        withPrincipal(ctx(rec({ effect: 'REFINE', capabilityKey: name }))),
+        owners,
       );
-      expect({ name, outcome: v.outcome }).toEqual({ name, outcome: 'refuse' });
+      expect({ name, outcome: v.outcome }).toEqual({ name, outcome: 'pass' });
     }
+    expect(assertCanExecute).toHaveBeenCalledTimes(
+      MAYA_AI_TOOL_CATALOG_BY_NAME.size,
+    );
   });
 });
 
@@ -402,18 +425,46 @@ describe('Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB 
       const v = await gate6(ae(key));
       expect({ key, detail: detail(v) }).toEqual({
         key,
-        detail: '(d)/(e) no live principal',
+        detail: '(d) no live principal role',
       });
     }
   });
 
-  it('N-AE-NOPRINCIPAL [RI]: the held (d) names the half that is held, on both arms', async () => {
+  it('N-AE-NOPRINCIPAL [RI]: (d) refuses without the in-T role and admits only after (e)', async () => {
     const base = ae(ALLOWLISTED[0]);
     expect(code(await gate6(base))).toBe('insufficient_authority');
-    expect(detail(await gate6(base))).toBe('(d)/(e) no live principal');
-    expect(detail(await gate6(withPrincipal(base)))).toBe(
-      '(d)/(e) pending U6-L3',
+    expect(detail(await gate6(base))).toBe('(d) no live principal role');
+    expect((await gate6(withPrincipal(base), admittingOwners())).outcome).toBe(
+      'pass',
     );
+  });
+
+  it('P-AE / P-F78: an admitted role plus every canonical required feature passes', async () => {
+    const owners = admittingOwners();
+    const grants = owners.grantsRequiredFeatures as jest.Mock;
+    const v = await gate6(withPrincipal(ae(ALLOWLISTED[0])), owners);
+    expect(v.outcome).toBe('pass');
+    expect(grants).toHaveBeenCalledWith('t1', ['crm.integration']);
+  });
+
+  it('N-D1: (d) refuses a role outside the canonical policy before asking entitlements', async () => {
+    const owners = admittingOwners();
+    const grants = owners.grantsRequiredFeatures as jest.Mock;
+    const v = await gate6(
+      withRole(ae(ALLOWLISTED[0]), 'platform_owner'),
+      owners,
+    );
+    expect(detail(v)).toBe('(d) role platform_owner is not admitted');
+    expect(grants).not.toHaveBeenCalled();
+  });
+
+  it('N-E: (e) refuses when the canonical feature conjunction is not granted', async () => {
+    const owners: Gate6Owners = {
+      assertCanExecute: jest.fn().mockResolvedValue(undefined),
+      grantsRequiredFeatures: jest.fn().mockResolvedValue(false),
+    };
+    const v = await gate6(withPrincipal(ae(ALLOWLISTED[0])), owners);
+    expect(detail(v)).toBe('(e) required feature is absent');
   });
 });
 
@@ -463,18 +514,37 @@ describe('Gate 6 — a raise IS the refusal (G6-20, C11:4779-4781)', () => {
     expect(detail(v)).toMatch(/^owner raised: /);
   });
 
+  it('N-OWNER-THROW-E: a catalogue owner raise is the refusal', async () => {
+    const owners: Gate6Owners = {
+      assertCanExecute: jest
+        .fn()
+        .mockRejectedValue(new Error('canonical owner denied')),
+      grantsRequiredFeatures: jest.fn().mockResolvedValue(true),
+    };
+    const v = await gate6(
+      withPrincipal(ctx(rec({ effect: 'REFINE', capabilityKey: CATALOGUE }))),
+      owners,
+    );
+    expect(detail(v)).toBe('owner raised: canonical owner denied');
+  });
+
   it('G6-20-UNBOUND: the unbound port raises rather than admitting, so an unwired build refuses', async () => {
     // `as unknown as`, not a cast to the bottom type: `gate-files.source.spec.ts` forbids that cast
     // anywhere in this directory, because it switches the compiler's own vocabulary check off — and
     // the fence is a TEXT scan, so naming the forbidden spelling here would trip it too.
-    const anyPrincipal = {} as unknown as Parameters<
-      Gate6Owners['assertCanExecute']
-    >[0];
+    const anyTenant = 't1';
+    const anyUser = 'u1';
+    const anyRole = 'tenant_owner';
     const anyDefinition = {} as unknown as Parameters<
       Gate6Owners['assertCanExecute']
-    >[1];
+    >[3];
     await expect(
-      heldGate6Owners.assertCanExecute(anyPrincipal, anyDefinition),
+      heldGate6Owners.assertCanExecute(
+        anyTenant,
+        anyUser,
+        anyRole,
+        anyDefinition,
+      ),
     ).rejects.toThrow(/GATE6_OWNERS is not bound/);
     await expect(
       heldGate6Owners.grantsRequiredFeatures('t1', []),

@@ -3,9 +3,11 @@
     "id": "M1",
     "description": "the subject is bound TWICE: the dispatch gets a fresh `subjectOf(r)` instead of the one binding. G6-1 (C11:4739) says 'bound once; NOT record.capability', and two bindings are how a gate starts authorising one capability and admitting another. Build-killed: both bindings agree on every input a conformant record can carry, which is exactly why the fence is at the source.",
     "file": "src/widgets/gates/gate6.ts",
-    "find": "    return dispatch(ctx, r, ref);\n",
-    "replace": "    return dispatch(ctx, r, subjectOf(r));\n",
-    "killers": ["S-4"],
+    "find": "    return await dispatch(ctx, r, ref, owners);\n",
+    "replace": "    return await dispatch(ctx, r, subjectOf(r), owners);\n",
+    "killers": [
+      "S-4"
+    ],
     "expect": "build-killed"
   },
   {
@@ -14,7 +16,10 @@
     "file": "src/widgets/gates/gate6.ts",
     "find": "  if (r.effect === 'HANDOFF') return handoffDestination(r, ref);\n",
     "replace": "  if (false && r.effect === 'HANDOFF') return handoffDestination(r, ref);\n",
-    "killers": ["P-HANDOFF-A22", "G6-7"],
+    "killers": [
+      "P-HANDOFF-A22",
+      "G6-7"
+    ],
     "expect": "live-killed"
   },
   {
@@ -23,7 +28,10 @@
     "file": "src/widgets/gates/gate6.ts",
     "find": "  if (SENSITIVE_DEST(ref) && targetClass(r) !== 's')\n",
     "replace": "  if (false && SENSITIVE_DEST(ref) && targetClass(r) !== 's')\n",
-    "killers": ["N-HANDOFF-SENS-C9", "F48"],
+    "killers": [
+      "N-HANDOFF-SENS-C9",
+      "F48"
+    ],
     "expect": "live-killed"
   },
   {
@@ -32,7 +40,10 @@
     "file": "src/widgets/gates/gate6.ts",
     "find": "targetClass(r) !== 's'",
     "replace": "false",
-    "killers": ["N-HANDOFF-SENS-C9", "F48"],
+    "killers": [
+      "N-HANDOFF-SENS-C9",
+      "F48"
+    ],
     "expect": "live-killed"
   },
   {
@@ -41,7 +52,9 @@
     "file": "src/widgets/gates/gate6.ts",
     "find": "  return typeof t?.class === 'string' ? t.class : null;\n",
     "replace": "  return t?.class === undefined || t?.class === null ? null : String(t.class);\n",
-    "killers": ["F48"],
+    "killers": [
+      "F48"
+    ],
     "expect": "build-killed"
   },
   {
@@ -50,7 +63,10 @@
     "file": "src/widgets/gates/gate6.ts",
     "find": "SENSITIVE_DEST(ref) &&",
     "replace": "!SENSITIVE_DEST(ref) &&",
-    "killers": ["N-HANDOFF-SENS-C9", "P-HANDOFF-W-NONSENS"],
+    "killers": [
+      "N-HANDOFF-SENS-C9",
+      "P-HANDOFF-W-NONSENS"
+    ],
     "expect": "live-killed"
   },
   {
@@ -59,7 +75,10 @@
     "file": "src/widgets/gates/gate6.ts",
     "find": "  if (!resolves(ref))\n    return refuse(\n      'insufficient_authority',\n      'HANDOFF destination is not registered in its space',\n    );\n",
     "replace": "  if (false)\n    return refuse(\n      'insufficient_authority',\n      'HANDOFF destination is not registered in its space',\n    );\n",
-    "killers": ["N-HANDOFF-UNREG-CONTROL", "G6-6-REG"],
+    "killers": [
+      "N-HANDOFF-UNREG-CONTROL",
+      "G6-6-REG"
+    ],
     "expect": "live-killed"
   },
   {
@@ -68,7 +87,10 @@
     "file": "src/widgets/gates/gate6.ts",
     "find": "  if (r.c9Domain !== null) c9Capability(ref.key, r.c9Domain, C9_REGISTRY_HASH);\n",
     "replace": "  if (r.c9Domain !== null && false)\n    c9Capability(ref.key, r.c9Domain, C9_REGISTRY_HASH);\n",
-    "killers": ["N-C9-DOMAIN", "P-C9-9-RUN"],
+    "killers": [
+      "N-C9-DOMAIN",
+      "P-C9-9-RUN"
+    ],
     "expect": "live-killed"
   },
   {
@@ -77,7 +99,10 @@
     "file": "src/widgets/gates/gate6.ts",
     "find": "c9Capability(ref.key, r.c9Domain, C9_REGISTRY_HASH)",
     "replace": "c9Capability(ref.key, 'ADMIN', C9_REGISTRY_HASH)",
-    "killers": ["N-C9-DOMAIN", "P-C9-9-RUN"],
+    "killers": [
+      "N-C9-DOMAIN",
+      "P-C9-9-RUN"
+    ],
     "expect": "live-killed"
   },
   {
@@ -86,7 +111,10 @@
     "file": "src/widgets/gates/gate6.ts",
     "find": "    return refuse(\n      'insufficient_authority',\n      `owner raised: ${error instanceof Error ? error.message : String(error)}`,\n    );\n",
     "replace": "    void error;\n    return pass;\n",
-    "killers": ["N-C9-DOMAIN", "G6-20"],
+    "killers": [
+      "N-C9-DOMAIN",
+      "G6-20"
+    ],
     "expect": "live-killed"
   },
   {
@@ -95,7 +123,9 @@
     "file": "src/widgets/gates/gate6.ts",
     "find": "  if (r.c9Domain !== null) c9Capability(ref.key, r.c9Domain, C9_REGISTRY_HASH);\n  return pass;\n",
     "replace": "  try {\n    if (r.c9Domain !== null) c9Capability(ref.key, r.c9Domain, C9_REGISTRY_HASH);\n  } catch {\n    /* swallowed */\n  }\n  return pass;\n",
-    "killers": ["N-C9-DOMAIN"],
+    "killers": [
+      "N-C9-DOMAIN"
+    ],
     "expect": "live-killed"
   },
   {
@@ -104,7 +134,9 @@
     "file": "src/widgets/gates/gate6.ts",
     "find": "  if (AE_WIDGET_COMMIT_ALLOWLIST[ref.key] === undefined)\n    return refuse(\n      'insufficient_authority',\n      '(a) no AE_WIDGET_COMMIT_ALLOWLIST row',\n    );\n",
     "replace": "  if (false)\n    return refuse(\n      'insufficient_authority',\n      '(a) no AE_WIDGET_COMMIT_ALLOWLIST row',\n    );\n",
-    "killers": ["S-A"],
+    "killers": [
+      "S-A"
+    ],
     "expect": "build-killed"
   },
   {
@@ -113,7 +145,9 @@
     "file": "src/widgets/gates/gate6.ts",
     "find": "  if (cap.policyDecision !== 'ALLOW')\n",
     "replace": "  if (false)\n",
-    "killers": ["S-B"],
+    "killers": [
+      "S-B"
+    ],
     "expect": "pending"
   },
   {
@@ -122,7 +156,9 @@
     "file": "src/widgets/gates/gate6.ts",
     "find": "  if (!cap.allowedSourceTypes.includes('authenticated_request'))\n",
     "replace": "  if (false)\n",
-    "killers": ["S-B"],
+    "killers": [
+      "S-B"
+    ],
     "expect": "pending"
   },
   {
@@ -159,7 +195,9 @@
     "file": "src/widgets/gates/gate6.ts",
     "find": "    return refuse(\n      'insufficient_authority',\n      'HANDOFF destination is not registered in its space',\n    );\n",
     "replace": "    return ref.space === 'CONTROL'\n      ? refuse(\n          'insufficient_authority',\n          'HANDOFF destination is not registered in its space',\n        )\n      : pass;\n",
-    "killers": ["G6-6-REG"],
+    "killers": [
+      "G6-6-REG"
+    ],
     "expect": "build-killed"
   },
   {
@@ -168,7 +206,9 @@
     "file": "src/widgets/gates/gate6.ts",
     "find": "  if (CONSENT(cap))\n    return refuse(\n      'insufficient_authority',\n      'TRANSITIONAL veto: CONSENT capability - the widget layer cannot confer consent',\n    );\n",
     "replace": "  if (false)\n    return refuse(\n      'insufficient_authority',\n      'TRANSITIONAL veto: CONSENT capability - the widget layer cannot confer consent',\n    );\n",
-    "killers": ["T-TRANSITIONAL-VETO"],
+    "killers": [
+      "T-TRANSITIONAL-VETO"
+    ],
     "expect": "build-killed"
   },
   {
@@ -177,16 +217,20 @@
     "file": "src/widgets/owner-ports/gate6.owners.provider.ts",
     "find": "export const GATE6_SURFACE = 'web' as const;\n",
     "replace": "export const GATE6_SURFACE = 'native' as const;\n",
-    "killers": ["S-SURFACE"],
+    "killers": [
+      "S-SURFACE"
+    ],
     "expect": "build-killed"
   },
   {
     "id": "M25",
     "description": "slot 6 reads a role from the JWT-validated actor instead of the live principal (D-9, B-02, K5). Two answers to 'what is this principal's role' can disagree while nothing goes red, and the owner's is the one the rest of the application acts on. Build-killed by S-TX, which is where the property is visible.",
     "file": "src/widgets/gates/gate6.ts",
-    "find": "  void owners; // bound at U6-L3, where (d), (e) and C20 leave the held lane.\n",
-    "replace": "  void owners;\n  const liveRole = ctx.actor.role;\n  void liveRole;\n",
-    "killers": ["S-TX"],
+    "find": "      ctx.principal.role,\n      def,\n",
+    "replace": "      ctx.actor.role,\n      def,\n",
+    "killers": [
+      "S-TX"
+    ],
     "expect": "build-killed"
   },
   {
@@ -194,8 +238,77 @@
     "description": "A5's detail branch is added and it calls an owner. S6-4 holds A5's check out of the body and NO clause changes (C11:7173): a `detail` NAVIGATE has a null subject and Gate 6 has nothing to check (C11:4740-4741). This mutant is the shape the STOP forbids, and P-NULL-DETAIL is what keeps it dead.",
     "file": "src/widgets/gates/gate6.ts",
     "find": "  if (ref === null) return pass;\n",
-    "replace": "  if (ref === null) {\n    const t = r.targetJson as { class?: unknown } | null;\n    if (t?.class === 'detail')\n      await owners.assertCanExecute(\n        undefined as unknown as Parameters<typeof owners.assertCanExecute>[0],\n        undefined as unknown as Parameters<typeof owners.assertCanExecute>[1],\n      );\n    return pass;\n  }\n",
-    "killers": ["P-NULL", "G6-5"],
+    "replace": "  if (ref === null) {\n    const t = r.targetJson as { class?: unknown } | null;\n    if (t?.class === 'detail')\n      await owners.assertCanExecute(\n        ctx.tenantId,\n        ctx.principal?.authority.userId ?? '',\n        ctx.principal?.role ?? '',\n        undefined as unknown as Parameters<typeof owners.assertCanExecute>[3],\n      );\n    return pass;\n  }\n",
+    "killers": [
+      "P-NULL",
+      "G6-5"
+    ],
     "expect": "live-killed"
+  },
+  {
+    "id": "M6",
+    "description": "delete canonical allowedActorRoles admission at Gate 6(d)",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  if (!policy.allowedActorRoles.includes(ctx.principal.role as UserRole))\n    return refuse(\n      'insufficient_authority',\n      `(d) role ${ctx.principal.role} is not admitted`,\n    );\n",
+    "replace": "",
+    "killers": [
+      "N-D1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M7",
+    "description": "treat a missing live principal role as admitted at Gate 6(d)",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  if (ctx.principal?.role === null || ctx.principal === null)\n    return refuse('insufficient_authority', '(d) no live principal role');\n",
+    "replace": "",
+    "killers": [
+      "N-AE-NOPRINCIPAL"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M8a",
+    "description": "delete the Gate 6(e) negative entitlement result",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "  if (\n    !(await owners.grantsRequiredFeatures(\n      ctx.tenantId,\n      policy.requiredFeatures,\n    ))\n  )\n    return refuse('insufficient_authority', '(e) required feature is absent');\n",
+    "replace": "  await owners.grantsRequiredFeatures(ctx.tenantId, policy.requiredFeatures);\n",
+    "killers": [
+      "N-E"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9",
+    "description": "ask the entitlement owner about an empty list instead of canonical requiredFeatures",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "      policy.requiredFeatures,\n",
+    "replace": "      [],\n",
+    "killers": [
+      "P-F78"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M12",
+    "description": "skip the C20 owner admission for a catalogue capability",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "    await owners.assertCanExecute(\n      ctx.tenantId,\n      ctx.principal.authority.userId,\n      ctx.principal.role,\n      def,\n    );\n",
+    "replace": "",
+    "killers": [
+      "G6-14"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M14",
+    "description": "swallow the catalogue owner's denial and pass",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "    await owners.assertCanExecute(\n      ctx.tenantId,\n      ctx.principal.authority.userId,\n      ctx.principal.role,\n      def,\n    );\n    return pass;\n",
+    "replace": "    try {\n      await owners.assertCanExecute(\n        ctx.tenantId,\n        ctx.principal.authority.userId,\n        ctx.principal.role,\n        def,\n      );\n    } catch {\n      return pass;\n    }\n    return pass;\n",
+    "killers": [
+      "N-OWNER-THROW-E"
+    ],
+    "expect": "build-killed"
   }
 ]
