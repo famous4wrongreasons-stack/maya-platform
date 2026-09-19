@@ -27,6 +27,7 @@ import {
   INPUT_VALIDATION,
   NOUN_RESOLUTION_PORTS,
   PRINCIPAL_RESOLVER,
+  SEAL_VERIFIER,
   TENANT_SCOPE,
 } from './di-tokens';
 import type { PrincipalResolver, RequestTx } from './authority/principal-view';
@@ -35,6 +36,7 @@ import type { TenantScopePort } from './owner-ports/tenant-scope.provider';
 // R6-1: `import type`, never a value import. A value import would put `AiToolPolicyService` and
 // `EntitlementsService` in the gateway's run-time closure through slot 6 and break P-SEAL's SEAL-5.
 import type { Gate6Owners } from './owner-ports/gate6.owners.provider';
+import type { SealVerifier } from './emission/seal-verifier.service';
 import { digestEquals, sha256Hex } from './token.util';
 import { mergeFacts, NO_FACTS } from './gates/facts';
 import { gate1 } from './gates/gate1';
@@ -150,6 +152,8 @@ export class IntentGatewayService {
     private readonly prisma: PrismaService,
     @Inject(PRINCIPAL_RESOLVER)
     private readonly principals: PrincipalResolver,
+    @Inject(SEAL_VERIFIER)
+    private readonly sealVerifier: SealVerifier,
     @Inject(TENANT_SCOPE)
     private readonly tenantScope: TenantScopePort,
     @Inject(GATE6_OWNERS)
@@ -202,7 +206,7 @@ export class IntentGatewayService {
       name: 'Token integrity',
       host: 'IntentGateway',
       // Seam: `gates/gate1.ts` (P-G15a).
-      run: (ctx) => gate1(ctx),
+      run: (ctx) => gate1(ctx, this.sealVerifier),
     },
     {
       n: '2',
@@ -547,7 +551,9 @@ export class IntentGatewayService {
    * fifteen gates has to remember.
    */
   private normalise(v: GateVerdict): GateVerdict {
-    if (v.outcome === 'refuse' || v.outcome === 'superseded')
+    if (v.outcome === 'refuse')
+      return { outcome: v.outcome, code: v.code, detail: v.detail ?? '' };
+    if (v.outcome === 'superseded' && v.code !== undefined)
       return { outcome: v.outcome, code: v.code, detail: v.detail ?? '' };
     return v;
   }

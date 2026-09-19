@@ -13,9 +13,9 @@ import type { CapabilityRef } from '../../widget-contract/capability-ref';
 import type { VerificationLevel } from '../../widget-contract/envelope';
 import type { EffectClass, IntentTarget } from '../../widget-contract/intent';
 import type { WidgetKind } from '../../widget-contract/kinds';
-import { VERIFICATION_RANK } from '../authority/ladder';
+import { meets, VERIFICATION_RANK } from '../authority/ladder';
 import { verificationFloor } from '../authority/verification-floor.runtime';
-import { pass, refuse } from './verdict';
+import { pass, refuse, superseded } from './verdict';
 
 /** The floor, recomputed from the live tables over the record's own terms. */
 export const recomputeFloor = (r: IntentRecordRow): VerificationLevel =>
@@ -39,9 +39,6 @@ export const recomputeFloor = (r: IntentRecordRow): VerificationLevel =>
     r.widgetKind as WidgetKind,
   );
 
-const meets = (level: VerificationLevel, floor: VerificationLevel): boolean =>
-  VERIFICATION_RANK[level] >= VERIFICATION_RANK[floor];
-
 /**
  * The level this request actually has, capped by what the carrier can establish. A session that
  * claims SESSION_VERIFIED over SMS is still arriving over SMS.
@@ -50,12 +47,27 @@ const meets = (level: VerificationLevel, floor: VerificationLevel): boolean =>
  * this one statement rather than restating the cap.
  */
 export const effectiveLevel = (
-  ctx: Pick<GateContext, 'verificationLevel' | 'channelMaxLevel'>,
-): VerificationLevel =>
-  VERIFICATION_RANK[ctx.verificationLevel] <=
-  VERIFICATION_RANK[ctx.channelMaxLevel]
-    ? ctx.verificationLevel
-    : ctx.channelMaxLevel;
+  ctx: Pick<GateContext, 'principal' | 'channelMaxLevel'>,
+): VerificationLevel => {
+  if (ctx.principal === null) return 'ANONYMOUS';
+  const principalLevel = ctx.principal.verificationLevel;
+  const principalRank = VERIFICATION_RANK[principalLevel];
+  const channelRank = VERIFICATION_RANK[ctx.channelMaxLevel];
+  if (principalRank === undefined || channelRank === undefined)
+    return 'ANONYMOUS';
+  return principalRank <= channelRank ? principalLevel : ctx.channelMaxLevel;
+};
+
+/** Process-local and PII-free. A policy-floor divergence is never persisted by Gate 5. */
+export const widgetFloorDivergence = {
+  count: 0,
+  increment: (): void => {
+    widgetFloorDivergence.count += 1;
+  },
+  reset: (): void => {
+    widgetFloorDivergence.count = 0;
+  },
+};
 
 const STEP_UP_EFFECTS = ['CONTROL', 'DRAFT', 'REQUEST_APPROVAL', 'COMMIT'];
 
@@ -64,11 +76,13 @@ export const gate5 = (ctx: GateContext): GateVerdict => {
   if (!r) return refuse('policy_floor_changed', 'no record');
 
   const recomputed = recomputeFloor(r);
-  if (recomputed !== r.verificationFloor)
-    return refuse(
+  if (recomputed !== r.verificationFloor) {
+    widgetFloorDivergence.increment();
+    return superseded(
       'policy_floor_changed',
       `stored ${r.verificationFloor}, recomputed ${recomputed}`,
     );
+  }
 
   const effective = effectiveLevel(ctx);
 

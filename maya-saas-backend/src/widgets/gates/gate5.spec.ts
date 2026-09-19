@@ -8,20 +8,56 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import type { ChannelId } from '../../widget-contract/lifecycle';
+import type { PrincipalView } from '../gate.types';
 import {
   CHANNEL_MAX_LEVEL,
   channelMaxLevel,
   resolveVerificationLevel,
 } from '../authority/authority-resolver';
-import { effectiveLevel, gate5, recomputeFloor } from './gate5';
+import {
+  effectiveLevel,
+  gate5,
+  recomputeFloor,
+  widgetFloorDivergence,
+} from './gate5';
 import {
   code,
-  ctx,
+  ctx as baseCtx,
   guardRegistries,
   rec,
 } from './gate-fixtures.spec-helper.spec';
 
+const ctx = (
+  record: Parameters<typeof baseCtx>[0],
+  over: Parameters<typeof baseCtx>[1] = {},
+): ReturnType<typeof baseCtx> =>
+  baseCtx(record, {
+    ...over,
+    principal:
+      over.principal ?? principal(over.verificationLevel ?? 'SESSION_VERIFIED'),
+  });
+
 beforeAll(guardRegistries);
+
+const principal = (
+  verificationLevel: PrincipalView['verificationLevel'],
+): PrincipalView => ({
+  authority: {
+    kind: 'USER',
+    tenantId: 't1',
+    userId: 'u1',
+    membershipId: 'm1',
+    clientId: null,
+    channelLinkId: null,
+    branchRefs: [],
+    staffRef: null,
+    proofHash: 'a'.repeat(64),
+  },
+  role: 'administrator',
+  presentationMode: 'owner',
+  verificationLevel,
+  proofHash: 'a'.repeat(64),
+});
 
 describe('Gate 5 — the floor is recomputed, not read', () => {
   it('POSITIVE: stored floor equals the recomputed floor, and the level meets it', () => {
@@ -34,8 +70,15 @@ describe('Gate 5 — the floor is recomputed, not read', () => {
     // or lowered, because a policy change must not act retroactively on a token in flight.
     const r = rec({ verificationFloor: 'ANONYMOUS' });
     const v = gate5(ctx(r));
-    expect(v.outcome).toBe('refuse');
+    expect(v.outcome).toBe('superseded');
     expect(code(v)).toBe('policy_floor_changed');
+  });
+
+  it('G15-4 increments only the process-local divergence counter', () => {
+    widgetFloorDivergence.reset();
+    const r = rec({ verificationFloor: 'ANONYMOUS' });
+    expect(gate5(ctx(r)).outcome).toBe('superseded');
+    expect(widgetFloorDivergence.count).toBe(1);
   });
 
   it('REFUSAL: this is exactly the defect that shipped — every record stored ANONYMOUS', () => {
@@ -94,6 +137,32 @@ describe('Gate 5 — the floor is recomputed, not read', () => {
     );
   });
 
+  it('G15-5 a non-rung principal term fails closed into the existing step-up refusal', () => {
+    const r = rec({ verificationFloor: recomputeFloor(rec()) });
+    const malformed = principal('SESSION_VERIFIED');
+    const v = gate5(
+      ctx(r, {
+        principal: {
+          ...malformed,
+          verificationLevel: 'NOT_A_RUNG' as PrincipalView['verificationLevel'],
+        },
+      }),
+    );
+    expect(v.outcome).toBe('refuse');
+    expect(code(v)).toBe('handoff_required');
+  });
+
+  it('G15-6b [U-proof] a shortfall returns only its code; Gate 5 invents no landing handle', () => {
+    const r = rec({ verificationFloor: recomputeFloor(rec()) });
+    const v = gate5(ctx(r, { verificationLevel: 'ANONYMOUS' }));
+    expect(v).toEqual({
+      outcome: 'refuse',
+      code: 'handoff_required',
+      detail: `ANONYMOUS below ${recomputeFloor(r)}`,
+    });
+    expect(Object.keys(v).sort()).toEqual(['code', 'detail', 'outcome']);
+  });
+
   it('the cap is stated once: effectiveLevel is declared in gate5.ts and nowhere else in the widget layer', () => {
     const widgets = path.join(__dirname, '..');
     const walk = (dir: string): string[] =>
@@ -136,13 +205,13 @@ describe('Gate 5 — the floor is recomputed, not read', () => {
     ]);
     expect(
       effectiveLevel({
-        verificationLevel: 'SESSION_VERIFIED',
+        principal: principal('SESSION_VERIFIED'),
         channelMaxLevel: channelMaxLevel('sms'),
       }),
     ).toBe('CHANNEL_IDENTITY');
     expect(
       effectiveLevel({
-        verificationLevel: 'ANONYMOUS',
+        principal: principal('ANONYMOUS'),
         channelMaxLevel: channelMaxLevel('pwa'),
       }),
     ).toBe('ANONYMOUS');

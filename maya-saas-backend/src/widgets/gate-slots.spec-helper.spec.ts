@@ -394,7 +394,11 @@ describe('pipeline slot sources', () => {
     // a DI member rather than a value import (U8a, IR-8a-1) and the derivation follows it, so a fence
     // that reads "the slot and every file it calls" keeps reading the gate. Slots 4 and 6 also carry
     // DI members, but theirs are OWNER PORTS, which the derivation excludes — see `memberFile`.
-    expect(filesOf('1')).toEqual([`${GATEWAY}#slot-1`, 'gates/gate1.ts']);
+    expect(filesOf('1')).toEqual([
+      `${GATEWAY}#slot-1`,
+      'emission/seal-verifier.service.ts',
+      'gates/gate1.ts',
+    ]);
     expect(filesOf('4')).toEqual([`${GATEWAY}#slot-4`, 'gates/gate4.ts']);
     expect(filesOf('6')).toEqual([`${GATEWAY}#slot-6`, 'gates/gate6.ts']);
     expect(filesOf('8')).toEqual([

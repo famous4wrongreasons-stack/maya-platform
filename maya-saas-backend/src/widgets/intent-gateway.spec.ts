@@ -257,6 +257,7 @@ const ACTOR: Readonly<AuthenticatedUser> = Object.freeze({
  */
 const submission = (token: string): SubmissionShape => ({
   intent_token: token,
+  widget_id: WIDGET,
   inputs: {},
 });
 
@@ -349,6 +350,9 @@ const gatewayFor = (
     },
   };
   const inputValidation = new InputValidationGate(loweringSource);
+  const sealVerifier = {
+    verify: () => Promise.resolve({ ok: true, reason: 'verified' as const }),
+  };
   return {
     prisma,
     live,
@@ -356,6 +360,7 @@ const gatewayFor = (
     gateway: new IntentGatewayService(
       prisma as never,
       resolver,
+      sealVerifier,
       tenantScope,
       gate6Owners as never,
       inputValidation,
@@ -415,8 +420,8 @@ describe('K3 CI exit — the four refusals', () => {
     const r = await gateway.submit(
       args({ token: 'forged-token-bbbbbbbbbbbb' }),
     );
-    expect(r.verdict.outcome).toBe('refuse');
-    expect(code(r.verdict)).toBe('EXPIRED');
+    expect(r.verdict.outcome).toBe('expired');
+    expect(code(r.verdict)).toBeNull();
     expect(r.stoppedAt).toBe('1');
   });
 
@@ -425,8 +430,8 @@ describe('K3 CI exit — the four refusals', () => {
       record({ expiresAt: new Date('2020-01-01T00:00:00.000Z') }),
     ]);
     const r = await gateway.submit(args());
-    expect(r.verdict.outcome).toBe('refuse');
-    expect(code(r.verdict)).toBe('EXPIRED');
+    expect(r.verdict.outcome).toBe('expired');
+    expect(code(r.verdict)).toBeNull();
     expect(r.stoppedAt).toBe('1');
   });
 
@@ -435,8 +440,8 @@ describe('K3 CI exit — the four refusals', () => {
       record({ consumedAt: new Date('2026-02-01T00:00:00.000Z') }),
     ]);
     const r = await gateway.submit(args());
-    expect(r.verdict.outcome).toBe('refuse');
-    expect(code(r.verdict)).toBe('EXPIRED');
+    expect(r.verdict.outcome).toBe('expired');
+    expect(code(r.verdict)).toBeNull();
     expect(r.stoppedAt).toBe('1');
   });
 
@@ -459,7 +464,7 @@ describe('K3 CI exit — the four refusals', () => {
     // The distinction matters to a person: "this is out of date, here is the new one" is a
     // different message from "this expired", and the contract gives them different codes.
     expect(r.verdict.outcome).toBe('superseded');
-    expect(code(r.verdict)).toBe('SUPERSEDED');
+    expect(code(r.verdict)).toBeNull();
     expect(r.stoppedAt).toBe('1');
   });
 
@@ -469,7 +474,10 @@ describe('K3 CI exit — the four refusals', () => {
       [emission({ tenantId: OTHER_TENANT })],
     );
     const r = await gateway.submit(args());
-    expect(r.verdict.outcome).toBe('refuse');
+    // P-G15a/L8 deliberately makes every Gate 1 integrity miss code-less EXPIRED. A row hidden by
+    // the tenant-qualified lookup is indistinguishable from an absent/invalid opaque token here.
+    expect(r.verdict.outcome).toBe('expired');
+    expect(code(r.verdict)).toBeNull();
     // The tenant is in the WHERE clause, so the row is not loaded at all. Reading it and then
     // refusing would put another tenant's record in this process's memory.
     expect(prisma.reads).toBe(1);
@@ -571,7 +579,7 @@ describe('K3 CI exit — indistinguishable latency', () => {
     expect(Math.abs(n - f) / Math.max(n, f)).toBeLessThan(0.5);
   });
 
-  it('no refusal reveals which gate it failed through its verdict shape', async () => {
+  it('token-integrity failures have one code-less shape; Gate 3 keeps its canonical coded refusal', async () => {
     const shapes = new Set<string>();
     for (const c of cases()) {
       const { gateway } = gatewayFor(c.rows, [emission()], {
@@ -580,10 +588,11 @@ describe('K3 CI exit — indistinguishable latency', () => {
       const r = await gateway.submit(args({ token: c.token }));
       shapes.add(Object.keys(r.verdict).sort().join(','));
     }
-    // Every refusal is the same SHAPE — outcome, code, detail. The code differs, which is
-    // intentional and is returned to a caller that has already authenticated; the structure does
-    // not, so nothing can be inferred from the response envelope itself.
-    expect(shapes.size).toBe(1);
+    // P-G15a implements L8: forged/expired/replayed tokens answer the same code-less EXPIRED shape.
+    // A live token bound to another authenticated principal reaches Gate 3 and retains the already
+    // certified `widget_principal_mismatch` refusal. The K3 guarantee over these four cases is equal
+    // work/latency, not erasing L8's response outcome or Gate 3's closed reason code.
+    expect([...shapes].sort()).toEqual(['code,detail,outcome', 'outcome']);
   });
 });
 
@@ -616,6 +625,7 @@ describe('the pipeline after U8a — slots 9 and 10 are refusing stubs', () => {
         carrier: 'realtime-voice',
         submission: {
           intent_token: GOOD,
+          widget_id: WIDGET,
           inputs: { choice: 'not-offered', blob: 'x'.repeat(20 * 1024) },
           readback_ack: {
             readback_ref: 'rb',
@@ -697,9 +707,9 @@ describe('the pipeline after U8a — slots 9 and 10 are refusing stubs', () => {
     // `null` on every request; now it sets what the resolver answered, inside `T`.
     const real = gate1Module.gate1;
     const seen: GateContext[] = [];
-    jest.spyOn(gate1Module, 'gate1').mockImplementation((ctx) => {
+    jest.spyOn(gate1Module, 'gate1').mockImplementation((ctx, verifier) => {
       seen.push(ctx);
-      return real(ctx);
+      return real(ctx, verifier);
     });
     const { gateway, live } = gatewayFor(
       [record({ singleUse: false })],

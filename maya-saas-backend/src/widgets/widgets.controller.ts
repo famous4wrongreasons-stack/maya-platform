@@ -76,6 +76,13 @@ export class WidgetsController {
     // `intentSubmitArgs`, the one derivation the live-path harness also uses.
     const result = await this.gateway.submit(intentSubmitArgs(dto, actor));
     const code = 'code' in result.verdict ? result.verdict.code : null;
+    const reasonKey =
+      code ??
+      (result.verdict.outcome === 'expired'
+        ? 'EXPIRED'
+        : result.verdict.outcome === 'superseded'
+          ? 'SUPERSEDED'
+          : null);
 
     return {
       contract: 'maya.widget.intent/1',
@@ -94,7 +101,7 @@ export class WidgetsController {
       // That default belongs to the `c9_*` denial space, and carrying it here told the reader a
       // falsehood about an unbuilt gate on R3.9.3's own surface. The route says nothing instead;
       // REN-3 is the ratchet that keeps "nothing" from covering a second code. See `reason-text.ts`.
-      reason_text: reasonTextOrNull(code),
+      reason_text: reasonTextOrNull(reasonKey),
       stopped_at_gate: result.stoppedAt,
       gates_run: result.ran,
       gates_total: this.gateway.gateCount,

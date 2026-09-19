@@ -38,8 +38,6 @@ export type GateHost =
  * the message is only for a person reading a log.
  */
 export type RefusalCode =
-  | 'EXPIRED'
-  | 'SUPERSEDED'
   | 'unauthenticated'
   | 'widget_principal_mismatch'
   | 'tenant_mismatch'
@@ -149,7 +147,8 @@ export type GateVerdict =
     }
   | {
       readonly outcome: 'superseded';
-      readonly code: RefusalCode;
+      /** Present for a coded supersession such as `handle_stale`; absent for L8 `SUPERSEDED`. */
+      readonly code?: RefusalCode;
       readonly detail?: string;
     }
   /**

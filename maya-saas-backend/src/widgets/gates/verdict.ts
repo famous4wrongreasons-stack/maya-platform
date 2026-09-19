@@ -36,3 +36,9 @@ export const superseded = (code: RefusalCode, detail: string): GateVerdict => ({
   code,
   detail,
 });
+
+/** L8 response outcome: an expired token carries no refusal code. */
+export const expired = (): GateVerdict => ({ outcome: 'expired' });
+
+/** L8 response outcome: a replaced envelope carries no refusal code. */
+export const replaced = (): GateVerdict => ({ outcome: 'superseded' });
