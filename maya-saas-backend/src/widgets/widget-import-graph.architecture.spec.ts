@@ -899,10 +899,15 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
         'emission/emitter.service.ts:$transaction',
         'emission/emitter.service.ts:widgetEmission',
         'stores/timeline.store.ts:widgetTimelineTurn',
+        'stores/timeline.store.ts:$executeRaw',
       ]),
     );
     expect(
-      [...seen].every((x) => /:(?:widget\w+|\$transaction)$/.test(x)),
+      [...seen].every(
+        (x) =>
+          /:(?:widget\w+|\$transaction)$/.test(x) ||
+          x === 'stores/timeline.store.ts:$executeRaw',
+      ),
     ).toBe(true);
   }, 60_000);
 
@@ -1247,12 +1252,10 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       [
         'a store reads a canonical model through the client',
         'FR1-MODEL',
-        () =>
-          replace(
-            'stores/timeline.store.ts',
-            'const row = await this.prisma.widgetTimelineTurn.create({',
-            'await this.prisma.appointment.findMany({ where: { tenantId } });\n    const row = await this.prisma.widgetTimelineTurn.create({',
-          ),
+        () => ({
+          [`${W}/stores/canonical-read.ts`]:
+            "import type { PrismaService } from '../../prisma/prisma.service';\nexport const read = (p: PrismaService) => p.appointment.findMany();\n",
+        }),
       ],
       [
         'a canonical delegate reached by element access on a transaction client',

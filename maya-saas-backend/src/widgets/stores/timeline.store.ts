@@ -5,6 +5,8 @@
 // `widget-stores.service.ts`. Gate 9's `lowerToUserTurn` lands here with U9.
 
 import { PrismaService } from '../../prisma/prisma.service';
+import type { RequestTx } from '../authority/principal-view';
+import type { LoweredUtterance } from '../lowering/lowering';
 import { scoped } from './tenant-scope';
 
 /** Retention windows from §5. Stated once so a store cannot invent its own. */
@@ -27,8 +29,32 @@ export interface TimelineTurnInput {
   spokenTranscript?: string | null;
 }
 
+/** Gate 9's write input. It carries transcript facts and record identity, never capability authority. */
+export interface LowerToUserTurnInput {
+  readonly tenantId: string;
+  readonly intentTokenHash: string;
+  readonly conversationId: string;
+  readonly principalProofHash: string;
+  readonly channel: string;
+  readonly renderedUtterance: LoweredUtterance;
+}
+
+type TimelineClient = Pick<
+  RequestTx,
+  '$executeRaw' | 'widgetIntentRecord' | 'widgetTimelineTurn'
+>;
+
+const USER_TURN_ROLE: TimelineTurnInput['role'] = 'user';
+
+/** One unambiguous advisory-lock identity per exact tenant/conversation tuple. */
+export const timelineLockKey = (
+  tenantId: string,
+  conversationId: string,
+): string =>
+  `${Buffer.byteLength(tenantId, 'utf8')}:${tenantId}${Buffer.byteLength(conversationId, 'utf8')}:${conversationId}`;
+
 export class TimelineStore {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService | TimelineClient) {}
 
   private plusDays(from: Date, days: number): Date {
     return new Date(from.getTime() + days * 24 * 60 * 60 * 1000);
@@ -42,7 +68,65 @@ export class TimelineStore {
     input: TimelineTurnInput,
     now = new Date(),
   ): Promise<{ id: string }> {
-    const row = await this.prisma.widgetTimelineTurn.create({
+    return this.insertTurn(this.prisma, input, now);
+  }
+
+  /**
+   * Gate 9's atomic write, inside the gateway's existing request transaction `T`.
+   *
+   * The advisory lock serialises index allocation with erasure. The conditional record update is the
+   * erasure-race fence: when the source became unavailable after Gate 8 read it, no turn is inserted.
+   */
+  static async lowerToUserTurn(
+    input: LowerToUserTurnInput,
+    tx: TimelineClient,
+    now = new Date(),
+  ): Promise<{ id: string; turnIndex: number } | null> {
+    const key = timelineLockKey(input.tenantId, input.conversationId);
+    // PostgreSQL derives the signed bigint; application code defines only the collision-free tuple.
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`;
+
+    const record = await tx.widgetIntentRecord.updateMany({
+      where: scoped(input.tenantId, {
+        intentTokenHash: input.intentTokenHash,
+        erasedAt: null,
+      }),
+      data: { renderedUtterance: input.renderedUtterance },
+    });
+    if (record.count !== 1) return null;
+
+    const timeline = tx.widgetTimelineTurn;
+    const latest = await timeline.aggregate({
+      where: scoped(input.tenantId, { conversationId: input.conversationId }),
+      _max: { turnIndex: true },
+    });
+    const turnIndex = (latest._max.turnIndex ?? -1) + 1;
+    const row = await tx.widgetTimelineTurn.create({
+      data: {
+        tenantId: input.tenantId,
+        conversationId: input.conversationId,
+        turnIndex,
+        role: USER_TURN_ROLE,
+        principalProofHash: input.principalProofHash,
+        channel: input.channel,
+        createdAt: now,
+        retentionUntil: new Date(
+          now.getTime() + RETENTION.timelineDays * 24 * 60 * 60 * 1000,
+        ),
+        textContent: input.renderedUtterance,
+        spokenTranscript: null,
+      },
+      select: { id: true },
+    });
+    return { id: row.id, turnIndex };
+  }
+
+  private async insertTurn(
+    client: Pick<TimelineClient, 'widgetTimelineTurn'>,
+    input: TimelineTurnInput,
+    now: Date,
+  ): Promise<{ id: string }> {
+    const row = await client.widgetTimelineTurn.create({
       data: {
         tenantId: input.tenantId,
         conversationId: input.conversationId,
