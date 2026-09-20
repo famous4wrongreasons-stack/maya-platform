@@ -161,7 +161,7 @@
     "find": "    if (record.effect === 'NONE' || !isRoutableEffect(record.effect))",
     "replace": "    if (record.effect === 'NONE' && !isRoutableEffect(record.effect))",
     "killers": [
-      "G13-P01"
+      "B28"
     ],
     "expect": "build-killed"
   },
