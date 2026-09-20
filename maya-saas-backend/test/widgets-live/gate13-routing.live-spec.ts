@@ -9,7 +9,10 @@ import { randomUUID } from 'node:crypto';
 import { UserRole } from '../../src/common/domain.enums';
 import { ControlRegistryService } from '../../src/widgets/control/control-registry.service';
 import type { PrincipalView } from '../../src/widgets/gate.types';
-import { ctx as gateContext, rec } from '../../src/widgets/gates/gate-fixtures.spec-helper.spec';
+import {
+  ctx as gateContext,
+  rec,
+} from '../../src/widgets/gates/gate-fixtures.spec-helper.spec';
 import { EffectRouterService } from '../../src/widgets/routing/effect-router.service';
 import { WIDGET_INTENT_SUBMISSION_CONTRACT } from '../../src/widgets/dto/submit-intent.dto';
 import { SealService } from '../../src/widgets/emission/seal.service';
@@ -19,7 +22,7 @@ import {
   type FixtureContext,
   type GatewayHarness,
 } from './support/bootstrap';
-import { Fixtures, type WidgetFixture } from './support/fixtures';
+import { Fixtures } from './support/fixtures';
 
 describe('Gate 13 — PostgreSQL claim, receipt and CONTROL routing (U13a)', () => {
   let db: FixtureContext;

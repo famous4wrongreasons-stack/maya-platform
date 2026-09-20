@@ -92,7 +92,11 @@ export class EffectRouterService {
       resolved_widget: routed.resolvedWidget,
       owner_decision: routed.ownerDecision,
     };
-    return { outcome: 'terminate', why: `effect ${record.effect} routed`, route };
+    return {
+      outcome: 'terminate',
+      why: `effect ${record.effect} routed`,
+      route,
+    };
   }
 
   reconcileAcceptedReceipt(input: {
@@ -104,7 +108,10 @@ export class EffectRouterService {
   }
 
   /** Exactly seven reachable effect literals. `NONE` has no destination and no token. */
-  private destination(ctx: GateContext, effect: RoutableEffect): Destination | null {
+  private destination(
+    ctx: GateContext,
+    effect: RoutableEffect,
+  ): Destination | null {
     switch (effect) {
       case 'NAVIGATE':
         return null;

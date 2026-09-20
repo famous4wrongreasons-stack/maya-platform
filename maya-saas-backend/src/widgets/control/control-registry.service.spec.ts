@@ -6,7 +6,9 @@ describe('U13a — control.widget.dismiss owns only presentation state', () => {
   it('R3.2.4 scopes tenant and principal in the read and writes LIVE → CANCELLED / cancelled', async () => {
     const prisma = {
       widgetEmission: {
-        findFirst: jest.fn().mockResolvedValue({ id: 'e1', lifecycleState: 'LIVE' }),
+        findFirst: jest
+          .fn()
+          .mockResolvedValue({ id: 'e1', lifecycleState: 'LIVE' }),
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
     };

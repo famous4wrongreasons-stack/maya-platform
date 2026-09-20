@@ -33,7 +33,7 @@ const fixture = () => {
   return {
     stores,
     controls,
-    router: new EffectRouterService(stores as never, controls as never),
+    router: new EffectRouterService(stores, controls as never),
   };
 };
 
@@ -51,18 +51,18 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
     expect(ROUTABLE_EFFECTS).not.toContain('NONE');
   });
 
-  it.each([
-    'NONE',
-    'INVENTED',
-  ])('G13-P01/B28 refuses %s without claim, handler or receipt', async (effect) => {
-    const { router, stores, controls } = fixture();
-    await expect(
-      router.route(ctx(rec({ effect }), { principal: PRINCIPAL })),
-    ).resolves.toEqual({ outcome: 'refuse', code: 'effect_not_admissible' });
-    expect(stores.claimIntentRecord).not.toHaveBeenCalled();
-    expect(stores.writeReceipt).not.toHaveBeenCalled();
-    expect(controls.dismiss).not.toHaveBeenCalled();
-  });
+  it.each(['NONE', 'INVENTED'])(
+    'G13-P01/B28 refuses %s without claim, handler or receipt',
+    async (effect) => {
+      const { router, stores, controls } = fixture();
+      await expect(
+        router.route(ctx(rec({ effect }), { principal: PRINCIPAL })),
+      ).resolves.toEqual({ outcome: 'refuse', code: 'effect_not_admissible' });
+      expect(stores.claimIntentRecord).not.toHaveBeenCalled();
+      expect(stores.writeReceipt).not.toHaveBeenCalled();
+      expect(controls.dismiss).not.toHaveBeenCalled();
+    },
+  );
 
   it.each([
     'NAVIGATE',
@@ -71,14 +71,17 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
     'REQUEST_APPROVAL',
     'HANDOFF',
     'COMMIT',
-  ])('N02/N03/N05: %s fails closed before the claim until its edge lands', async (effect) => {
-    const { router, stores } = fixture();
-    await expect(
-      router.route(ctx(rec({ effect }), { principal: PRINCIPAL })),
-    ).resolves.toEqual({ outcome: 'refuse', code: 'mechanism_absent' });
-    expect(stores.claimIntentRecord).not.toHaveBeenCalled();
-    expect(stores.writeReceipt).not.toHaveBeenCalled();
-  });
+  ])(
+    'N02/N03/N05: %s fails closed before the claim until its edge lands',
+    async (effect) => {
+      const { router, stores } = fixture();
+      await expect(
+        router.route(ctx(rec({ effect }), { principal: PRINCIPAL })),
+      ).resolves.toEqual({ outcome: 'refuse', code: 'mechanism_absent' });
+      expect(stores.claimIntentRecord).not.toHaveBeenCalled();
+      expect(stores.writeReceipt).not.toHaveBeenCalled();
+    },
+  );
 
   it('G13-R5 claims once, runs the one registered control, and writes a B-29 receipt with no echo', async () => {
     const { router, stores, controls } = fixture();
@@ -164,7 +167,13 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
 
   it('N-CTRL-FOREIGN-P: a control without a live principal has no destination and is not claimed', async () => {
     const { router, stores, controls } = fixture();
-    const input = ctx(rec({ effect: 'CONTROL', capabilitySpace: 'CONTROL', capabilityKey: 'control.widget.dismiss' }));
+    const input = ctx(
+      rec({
+        effect: 'CONTROL',
+        capabilitySpace: 'CONTROL',
+        capabilityKey: 'control.widget.dismiss',
+      }),
+    );
     await expect(router.route(input)).resolves.toEqual({
       outcome: 'refuse',
       code: 'mechanism_absent',

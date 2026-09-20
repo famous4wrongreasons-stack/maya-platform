@@ -40,7 +40,9 @@ describe('U13a — Gate 13 architecture barriers', () => {
   it('B19 obtains a CONTROL destination only through subjectOf, never direct handoff/capability reads', () => {
     const controlBranch = router.slice(router.indexOf('  private control('));
     expect(controlBranch).toContain('subjectOf(input.record)');
-    expect(controlBranch).not.toMatch(/record\.(?:handoffSpace|handoffKey|capabilitySpace|capabilityKey)/);
+    expect(controlBranch).not.toMatch(
+      /record\.(?:handoffSpace|handoffKey|capabilitySpace|capabilityKey)/,
+    );
   });
 
   it('B14/F15 routing input carries no conversation, body, submission, profile or free-input value', () => {
@@ -65,13 +67,19 @@ describe('U13a — Gate 13 architecture barriers', () => {
   it('B15/R5b router and handler have no canonical owner or Action Engine service import', () => {
     for (const source of [router, control]) {
       expect(source).not.toMatch(/from ['"].*action-engine/);
-      expect(source).not.toMatch(/from ['"].*(appointments|crm|communication-delivery|orchestration)\//);
-      expect(source).not.toMatch(/\b(ActionEngine|AppointmentsService|C9Store|Prisma\.[A-Z])/);
+      expect(source).not.toMatch(
+        /from ['"].*(appointments|crm|communication-delivery|orchestration)\//,
+      );
+      expect(source).not.toMatch(
+        /\b(ActionEngine|AppointmentsService|C9Store|Prisma\.[A-Z])/,
+      );
     }
   });
 
   it('R3.2.4 keeps principal and tenant inside the handler query; dismiss is cancelled-only', () => {
-    expect(control).toMatch(/where:\s*\{[\s\S]*tenantId: args\.tenantId,[\s\S]*intentRecords:[\s\S]*principalProofHash: args\.principalProofHash/);
+    expect(control).toMatch(
+      /where:\s*\{[\s\S]*tenantId: args\.tenantId,[\s\S]*intentRecords:[\s\S]*principalProofHash: args\.principalProofHash/,
+    );
     expect(control).toMatch(/lifecycleState: 'LIVE'/);
     expect(control).toMatch(/lifecycleState: 'CANCELLED'/);
     expect(control).toMatch(/state: 'cancelled'/);
@@ -81,6 +89,8 @@ describe('U13a — Gate 13 architecture barriers', () => {
   it('B-29 writes no utterance echo and reconciles only ACCEPTED without a receipt ref', () => {
     expect(audit).toMatch(/utteranceEcho: null/);
     expect(audit).toMatch(/outcome: 'ACCEPTED',[\s\S]*actionReceiptRef: null/);
-    expect(audit).toMatch(/data: \{ actionReceiptRef: input\.actionReceiptRef \}/);
+    expect(audit).toMatch(
+      /data: \{ actionReceiptRef: input\.actionReceiptRef \}/,
+    );
   });
 });

@@ -37,7 +37,8 @@ export interface EffectRouteAuditPort {
 
 /** Closed result of one resolved Gate 13 destination. */
 export interface EffectRouteOutcome {
-  readonly receiptOutcome: 'ACCEPTED' | 'REFUSED' | 'NEEDS_CONFIRMATION' | 'NEEDS_VERIFICATION';
+  readonly receiptOutcome:
+    'ACCEPTED' | 'REFUSED' | 'NEEDS_CONFIRMATION' | 'NEEDS_VERIFICATION';
   readonly refusalCode: string | null;
   readonly actionReceiptRef: string | null;
   readonly nextEnvelope: unknown;
