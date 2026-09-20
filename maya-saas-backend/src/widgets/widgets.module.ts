@@ -21,6 +21,7 @@ import { IntentGatewayService } from './intent-gateway.service';
 import { WidgetOwnerPortsModule } from './owner-ports/widget-owner-ports.module';
 import { NOUN_RESOLUTION_PORTS_UNBOUND } from './noun-resolution/noun-resolution.ports';
 import { WidgetProjectorService } from './projection/widget-projector.service';
+import { EffectRouterService } from './routing/effect-router.service';
 import { assertRoutingResolves } from './routing/deterministic-router';
 import { LoweringSourceReader } from './stores/lowering-source.read';
 import { WidgetStoresService } from './stores/widget-stores.service';
@@ -76,6 +77,7 @@ import { WidgetsController } from './widgets.controller';
     // `gates/gate13.ts`, and only Gate 13 may CALL it). Its registry is empty and every compose
     // answers `degraded` with zero reads, which is DEV-1 — a plan deviation, not a mechanism.
     WidgetProjectorService,
+    EffectRouterService,
   ],
   exports: [
     IntentGatewayService,

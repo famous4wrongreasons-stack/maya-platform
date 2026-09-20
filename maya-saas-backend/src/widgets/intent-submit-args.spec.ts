@@ -113,7 +113,7 @@ describe('WidgetsController.intent — the arguments it hands the gateway', () =
     expect(calls[0].carrier).toBe('pwa');
   });
 
-  it('the response carries the verdict, the stop, the counts and R3.9.3’s reason_text, and nothing else', async () => {
+  it('the response carries the verdict, the stop, the counts and the closed routing result, and nothing else', async () => {
     const { controller } = recordingGateway();
     const response = await controller.intent(dto(), actor());
     // The premise the `reason_text` below rests on, asserted rather than assumed: this code has no
@@ -137,6 +137,10 @@ describe('WidgetsController.intent — the arguments it hands the gateway', () =
         stopped_at_gate: '8',
         gates_run: 8,
         gates_total: 15,
+        next_envelope: null,
+        resolved_widget: null,
+        owner_decision: null,
+        receipt_outcome: null,
       }),
     );
   });
