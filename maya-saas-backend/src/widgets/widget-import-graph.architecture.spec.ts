@@ -66,6 +66,7 @@ const STORE_CLIENT: Readonly<Record<string, string | null>> = {
 const WIDGETS_MODULE = 'widgets.module.ts';
 const PORTS_MODULE = 'owner-ports/widget-owner-ports.module.ts';
 const BOUNDARY = `${PORTS_MODULE}#WidgetOwnerPortsModule`;
+const EMISSION_MODULE = 'emission/emission.module.ts#WidgetEmissionModule';
 
 interface Allowed {
   /** Why importing it reaches no owner: what it is, and that it needs no DI. */
@@ -806,7 +807,8 @@ const analyse = (program: ts.Program): Analysis => {
             const ok =
               key === WIDGETS_MODULE
                 ? cls === BOUNDARY ||
-                  cls === 'prisma/prisma.module.ts#PrismaModule'
+                  cls === 'prisma/prisma.module.ts#PrismaModule' ||
+                  cls === EMISSION_MODULE
                 : key === PORTS_MODULE
                   ? !widget &&
                     OWNER_MODULES.includes(cls) &&
@@ -845,17 +847,20 @@ const readWidget = (rel: string): string =>
 // ── the tests ────────────────────────────────────────────────────────────────────────────────────
 
 describe('D-6 — the union import-graph test: owners only through the owner-ports boundary', () => {
-  it('reads the widget layer it guards: its files, its two modules, and the gate files the pipeline calls', () => {
+  it('reads the widget layer it guards: its files, its three modules, and the gate files the pipeline calls', () => {
     const a = baseline();
     expect(a.nonWidgetImports.size).toBeGreaterThan(40);
     expect([...a.modules.keys()].sort()).toEqual([
+      EMISSION_MODULE,
       BOUNDARY,
       'widgets.module.ts#WidgetsModule',
     ]);
     expect(a.modules.get('widgets.module.ts#WidgetsModule')).toEqual([
       'prisma/prisma.module.ts#PrismaModule',
       BOUNDARY,
+      EMISSION_MODULE,
     ]);
+    expect(a.modules.get(EMISSION_MODULE)).toEqual([]);
     // P-PRINCIPAL binds the first port through the boundary: the two owner modules it needs, and no
     // more. The list is the same one `OWNER_MODULES` enumerates, read from the module itself.
     expect(a.modules.get(BOUNDARY)).toEqual([...OWNER_MODULES]);

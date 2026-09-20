@@ -3,7 +3,6 @@ import { UserRole } from '../../src/common/domain.enums';
 import type { AuthenticatedUser } from '../../src/common/authenticated-user.interface';
 import { WIDGET_INTENT_SUBMISSION_CONTRACT } from '../../src/widgets/dto/submit-intent.dto';
 import { WidgetEmitterService } from '../../src/widgets/emission/emitter.service';
-import { SealService } from '../../src/widgets/emission/seal.service';
 import { TimelineStore } from '../../src/widgets/stores/timeline.store';
 import { WidgetStoresService } from '../../src/widgets/stores/widget-stores.service';
 import type { LoweredUtterance } from '../../src/widgets/lowering/lowering';
@@ -62,39 +61,6 @@ describe('Gate 9 — canonical lowering and atomic timeline append (U9b)', () =>
       actor,
       kind: 'METRIC',
       body: { value: 1 },
-    });
-    const stored = await ctx.prisma.widgetIntentRecord.findFirstOrThrow({
-      where: {
-        tenantId: minted.tenantId,
-        intentTokenHash: minted.intentTokenHash,
-      },
-      select: { principalProofHash: true },
-    });
-    const emission = await ctx.prisma.widgetEmission.findFirstOrThrow({
-      where: { tenantId: minted.tenantId, widgetId: minted.widgetId },
-      select: {
-        bodyHash: true,
-        widgetId: true,
-        tenantId: true,
-        issuedAt: true,
-        expiresAt: true,
-      },
-    });
-    const seal = gw.moduleRef.get(SealService);
-    await ctx.prisma.widgetEmission.update({
-      where: {
-        widgetId_tenantId: {
-          widgetId: minted.widgetId,
-          tenantId: minted.tenantId,
-        },
-      },
-      data: {
-        envelopeSeal: seal.seal({
-          ...emission,
-          principalProofHash: stored.principalProofHash,
-          profileId: null,
-        }),
-      },
     });
     await ctx.prisma.widgetIntentRecord.update({
       where: {

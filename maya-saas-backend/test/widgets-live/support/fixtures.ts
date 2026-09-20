@@ -19,6 +19,11 @@
 //   synthetic    `[synthetic record]`: the one update that sets columns no writer produces, with
 //                `verificationFloor = recomputeFloor(row)` unless the test is about the floor itself
 //                (G6 §7.2 recipe). A synthetic record is never evidence (D-5).
+//   syntheticDeliveryChannel
+//                `[synthetic record]`: a proof-only emission/receipt channel rewrite for contract
+//                channels which have no physical K6 carrier profile yet. It preserves the sealed
+//                profile and changes no production minter behavior. A synthetic record is never
+//                evidence (D-5).
 //
 // Teardown deletes the tenant's rows children-first (widget FKs are RESTRICT), then the tenant. It deletes
 // only tenants this builder created, by id, and refuses any other slug. A tenant holding a verified link
@@ -36,6 +41,7 @@ import { createHash, randomUUID } from 'node:crypto';
 
 import type { AuthenticatedUser } from '../../../src/common/authenticated-user.interface';
 import type { UserRole } from '../../../src/common/domain.enums';
+import { C9_REGISTRY_HASH } from '../../../src/orchestration/c9.registry';
 import {
   MAYA_FEATURE_REGISTRY,
   type MayaFeatureKey,
@@ -46,13 +52,16 @@ import {
   type VerifiedClientChannelProof,
 } from '../../../src/crm/client-channel-link.service';
 import { clientChannelSubjectHash } from '../../../src/crm/client-channel-subject';
-import type { IntentRecordRow } from '../../../src/widgets/gate.types';
+import type {
+  IntentRecordRow,
+  PrincipalView,
+} from '../../../src/widgets/gate.types';
+import type { WidgetComposerInput } from '../../../src/widget-contract/envelope';
 import {
   WidgetEmitterService,
   type K3EmittableKind,
   type SealedEmission,
 } from '../../../src/widgets/emission/emitter.service';
-import { SealService } from '../../../src/widgets/emission/seal.service';
 import { recomputeFloor } from '../../../src/widgets/gates/gate5';
 import { C9Authority } from '../../../src/orchestration/c9.authority';
 import type { ClientChannelRuntimeService } from '../../../src/crm/client-channel-runtime.service';
@@ -69,6 +78,46 @@ const SLUG_PREFIX = 'widgets-live-';
 
 const sha256 = (value: string) =>
   createHash('sha256').update(value).digest('hex');
+
+const FIXTURE_CAPABILITY: Readonly<Record<K3EmittableKind, string>> =
+  Object.freeze({
+    METRIC: 'c7.measurement.read',
+    SCHEDULE: 'staff.schedule.read',
+    SOURCE_STATUS: 'support.integration-status.read',
+    PROGRESS: 'owner_report.status',
+    LIMITATION: 'c9.no_action',
+  });
+
+/** Closed canonical input for the five pre-trigger fixture kinds; no authority member is accepted. */
+export const closedFixtureComposerInput = (args: {
+  readonly kind: K3EmittableKind;
+  readonly turnId: string;
+  readonly executionId: string;
+}): WidgetComposerInput => ({
+  kind_proposal: args.kind,
+  capability: FIXTURE_CAPABILITY[args.kind],
+  capability_version: C9_REGISTRY_HASH,
+  source: { from: 'action_execution', execution_id: args.executionId },
+  correlation_refs: { turn_id: args.turnId },
+  origin: {
+    trigger: 'system_reply',
+    emitter: 'capability_read',
+    moment_key: null,
+    proactive_provenance: null,
+  },
+  facts: [],
+  facts_origin: [],
+  slots: {},
+  limitation_codes: [],
+  intent_proposals: [
+    {
+      intent_template_key: 'control.dismiss@1',
+      capability: { space: 'CONTROL', key: 'control.widget.dismiss' },
+      role: 'escape',
+    },
+  ],
+  locale: 'en',
+});
 
 /**
  * The JWT widget route carries no channel proof, so `C9Authority.current`'s CLIENT_CHANNEL branch is
@@ -96,7 +145,12 @@ export interface UserFixture {
   readonly role: UserRole;
 }
 
-export interface WidgetFixture extends SealedEmission {
+export interface WidgetFixture extends Omit<
+  SealedEmission,
+  'intentToken' | 'intentTokenHash'
+> {
+  readonly intentToken: string;
+  readonly intentTokenHash: string;
   readonly tenantId: string;
   readonly kind: K3EmittableKind;
   readonly conversationId: string;
@@ -340,9 +394,9 @@ export class Fixtures {
    * user) has no live hash. The record is then minted with an unmatchable digest, which is honest: the
    * submission is refused at slot 3, which is what the live path does for it (D-16).
    */
-  async principalProofHash(
+  private async resolvedPrincipal(
     actor: Readonly<AuthenticatedUser>,
-  ): Promise<string> {
+  ): Promise<PrincipalView | null> {
     const resolver = this.ctx.moduleRef.get(TenantResolverService, {
       strict: false,
     });
@@ -360,10 +414,49 @@ export class Fixtures {
         return this.ctx.prisma.$transaction((tx) => adapter.resolve(tx));
       },
     );
-    return view?.proofHash ?? sha256(`no-live-principal:${randomUUID()}`);
+    return view;
   }
 
-  /** The turn → emission → record chain through the real writers. */
+  async principalView(
+    actor: Readonly<AuthenticatedUser>,
+  ): Promise<PrincipalView> {
+    const resolved = await this.resolvedPrincipal(actor);
+    if (resolved !== null) return resolved;
+    if (actor.tenantId === null)
+      throw new Error('a widget fixture requires a tenant-qualified actor');
+    const proofHash = sha256(`no-live-principal:${randomUUID()}`);
+    return {
+      authority: {
+        kind: 'USER',
+        tenantId: actor.tenantId,
+        userId: actor.userId,
+        membershipId: actor.membershipId,
+        clientId: null,
+        channelLinkId: null,
+        branchRefs: actor.branchId === null ? [] : [actor.branchId],
+        staffRef: null,
+        proofHash,
+      },
+      role: actor.role,
+      presentationMode: 'staff',
+      verificationLevel: 'SESSION_VERIFIED',
+      proofHash,
+    };
+  }
+
+  async principalProofHash(
+    actor: Readonly<AuthenticatedUser>,
+  ): Promise<string> {
+    return (await this.principalView(actor)).proofHash;
+  }
+
+  /**
+   * The turn → emission → record chain through the real writers, normalised to the historical
+   * G-SYNTH passive record used by the pre-E1 gate suites. P-MINT itself correctly gives `NONE` no
+   * token, so the harness first mints a closed CONTROL token and then rewrites only the record's
+   * synthetic gate columns. Production mint proofs call the emitter directly and never use this
+   * compatibility fixture.
+   */
   async widget(input: {
     tenant: TenantFixture;
     actor: Readonly<AuthenticatedUser>;
@@ -374,7 +467,8 @@ export class Fixtures {
   }): Promise<WidgetFixture> {
     const writers = this.requireWriters('widget');
     const conversationId = randomUUID();
-    const proof = await this.principalProofHash(input.actor);
+    const principal = await this.principalView(input.actor);
+    const proof = principal.proofHash;
     const now = input.now ?? new Date();
     const turn = await writers.stores.appendTurn(
       {
@@ -398,53 +492,40 @@ export class Fixtures {
         body: input.body,
         ttlSeconds: input.ttlSeconds ?? 600,
         freshnessClass: 'live',
+        composerInput: closedFixtureComposerInput({
+          kind: input.kind,
+          turnId: turn.id,
+          executionId: conversationId,
+        }),
+        principal,
       },
       now,
     );
-    // P-G15a verifies the V1.1 keyed H4 seal before P-MINT-CORE replaces K3's legacy unkeyed
-    // emitter. These harness-minted records are explicitly G-SYNTH (never evidence), so bridge that
-    // ordered Wave-2 interval here rather than weakening Gate 1 or pretending the old emitter is the
-    // canonical minter. P-MINT-CORE removes the need for this compatibility re-seal.
-    const envelopeSeal = await this.resealLegacyEmission(
-      sealed,
-      input.tenant.id,
-      proof,
-    );
-    return {
+    if (sealed.intentToken === null || sealed.intentTokenHash === null)
+      throw new Error(
+        'widgets-live fixture expected its closed CONTROL template to mint a token',
+      );
+    const fixture: WidgetFixture = {
       ...sealed,
-      envelopeSeal,
+      intentToken: sealed.intentToken,
+      intentTokenHash: sealed.intentTokenHash,
       tenantId: input.tenant.id,
       kind: input.kind,
       conversationId,
       turnId: turn.id,
     };
-  }
-
-  /** Wave-2 bridge for a harness that calls K3's pre-P-MINT-CORE emitter directly. */
-  async resealLegacyEmission(
-    sealed: SealedEmission,
-    tenantId: string,
-    principalProofHash: string,
-  ): Promise<string> {
-    const envelopeSeal = new SealService().seal({
-      bodyHash: sealed.bodyHash,
-      widgetId: sealed.widgetId,
-      tenantId,
-      principalProofHash,
-      issuedAt: sealed.issuedAt,
-      expiresAt: sealed.expiresAt,
-      profileId: null,
+    await this.synthetic(fixture, {
+      effect: 'NONE',
+      capabilitySpace: null,
+      capabilityKey: null,
+      handoffSpace: null,
+      handoffKey: null,
+      targetJson: null,
+      priority: 1,
+      singleUse: false,
+      utteranceTemplate: null,
     });
-    await this.ctx.prisma.widgetEmission.update({
-      where: {
-        widgetId_tenantId: {
-          widgetId: sealed.widgetId,
-          tenantId,
-        },
-      },
-      data: { envelopeSeal },
-    });
-    return envelopeSeal;
+    return fixture;
   }
 
   /**
@@ -462,6 +543,7 @@ export class Fixtures {
       targetJson?: Record<string, unknown> | null;
       priority?: number;
       singleUse?: boolean;
+      utteranceTemplate?: string | null;
     },
     floor?: string,
   ): Promise<void> {
@@ -494,6 +576,44 @@ export class Fixtures {
           floor ?? recomputeFloor(updated as unknown as IntentRecordRow),
       },
     });
+  }
+
+  /**
+   * `[synthetic record]`: move an already sealed proof row to a contract channel for a gate test.
+   *
+   * K6 intentionally has six physical carrier profiles, while Gate 7's contract table also contains
+   * tier-only channels such as `guest-chat` and `web-public`. P-MINT must fail closed rather than
+   * inventing a physical profile for those channels. A Gate 7 synthetic test can still exercise the
+   * persisted-channel rule by moving both selectors together. The receipt keeps the original
+   * `profileId`, which is the term the seal covers, so this neither re-seals nor introduces a second
+   * minter. No production caller has access to this test fixture method.
+   */
+  async syntheticDeliveryChannel(
+    widget: WidgetFixture,
+    deliveryChannel: string,
+  ): Promise<void> {
+    this.requireWriters('syntheticDeliveryChannel');
+    await this.ctx.prisma.$transaction([
+      this.ctx.prisma.widgetEmission.update({
+        where: {
+          widgetId_tenantId: {
+            widgetId: widget.widgetId,
+            tenantId: widget.tenantId,
+          },
+        },
+        data: { deliveryChannel },
+      }),
+      this.ctx.prisma.widgetRenderReceipt.update({
+        where: {
+          tenantId_widgetId_deliveryChannel: {
+            tenantId: widget.tenantId,
+            widgetId: widget.widgetId,
+            deliveryChannel: 'pwa',
+          },
+        },
+        data: { deliveryChannel },
+      }),
+    ]);
   }
 
   /**

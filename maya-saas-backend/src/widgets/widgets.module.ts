@@ -10,11 +10,8 @@ import {
   GATE_8R_OWNERS,
   INPUT_VALIDATION,
   NOUN_RESOLUTION_PORTS,
-  SEAL_VERIFIER,
 } from './di-tokens';
-import { WidgetEmitterService } from './emission/emitter.service';
-import { SealService } from './emission/seal.service';
-import { SealVerifierService } from './emission/seal-verifier.service';
+import { WidgetEmissionModule } from './emission/emission.module';
 import { GATE_8R_OWNERS_UNRULED } from './gates/gate-8r.owners';
 import { InputValidationGate } from './input-validation/input-validation.gate';
 import { IntentGatewayService } from './intent-gateway.service';
@@ -42,22 +39,15 @@ import { WidgetsController } from './widgets.controller';
  * it imports and provides nothing, so no owner is reachable through it.
  */
 @Module({
-  imports: [PrismaModule, WidgetOwnerPortsModule],
+  imports: [PrismaModule, WidgetOwnerPortsModule, WidgetEmissionModule],
   controllers: [WidgetsController],
   providers: [
     IntentGatewayService,
     WidgetStoresService,
     { provide: EFFECT_ROUTE_AUDIT, useExisting: WidgetStoresService },
-    WidgetEmitterService,
     ControlRegistryService,
-    // P-SEAL (IR-SEAL-1), B-22: the seal key is HELD BY THE MINTER's side, never by the gateway. There
-    // is no `emission.module.ts` in Wave 1 and `emission/**` outside `seal*.ts` is P-MINT-CORE's, so the
-    // two providers stand here and move to the emission module in P-MINT-CORE's merge. B-22 holds
-    // either way: the gateway never imports the classes — it will take `SEAL_VERIFIER` as a type-only
-    // token — and SEAL-5 pins that no key is reachable from its closure.
-    SealService,
-    SealVerifierService,
-    { provide: SEAL_VERIFIER, useExisting: SealVerifierService },
+    // P-MINT/B-22: WidgetEmissionModule owns the keyed seal and the single minter pipeline. This
+    // module sees only its exported emitter and SEAL_VERIFIER port; it cannot inject a key holder.
     // U8a (IR-8a-1): slot 8's built gate, and the one store read its pass performs (D-2). Both are
     // widget-internal — no owner module is imported and no owner is reachable through them — so they
     // are bound here rather than at the D-6 boundary, and k3 check 9's owner enumeration is unchanged.
@@ -84,10 +74,8 @@ import { WidgetsController } from './widgets.controller';
   exports: [
     IntentGatewayService,
     WidgetStoresService,
-    WidgetEmitterService,
     ControlRegistryService,
-    SealService,
-    SEAL_VERIFIER,
+    WidgetEmissionModule,
   ],
 })
 export class WidgetsModule implements OnModuleInit {

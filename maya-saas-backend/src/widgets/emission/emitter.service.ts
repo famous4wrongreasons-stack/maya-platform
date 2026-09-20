@@ -1,20 +1,35 @@
-// K3 — mint → compose → fit → seal, for read-only emission.
+// P-MINT — the single compose → type → fit → seal → record pipeline.
 //
-// Four steps, in that order, and the order carries the security property. The seal is computed LAST
-// and over the composed-and-fitted body, so a body altered after sealing no longer matches its own
-// seal; and the intent token is minted against the record that already exists, so a token can never
-// name a widget that was not emitted.
-//
-// Wave 2 emits to nobody. That is not a limitation to be apologised for: it is what lets the whole
-// path — compose, seal, refuse — be exercised before any user can be harmed by a mistake in it.
+// Effect and target semantics come only from `intent-template.registry.ts`. The request carries a
+// WidgetComposerInput and server-resolved principal proof; neither a client nor an LLM can put an
+// effect or target on the wire. There is no token-minting overload without both values.
 
 import { Injectable } from '@nestjs/common';
-import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 
 import { PrismaService } from '../../prisma/prisma.service';
+import type { WidgetComposerInput } from '../../widget-contract/envelope';
+import type { AuthorityEnvelope } from '../../widget-contract/envelope-roots';
+import type { WidgetKind } from '../../widget-contract/kinds';
+import { profileFor } from '../carriers/channel-profile';
+import { fit } from '../carriers/fitter';
+import { stableActionJson } from '../authority/contract-bindings';
+import type { PrincipalView } from '../gate.types';
 import { sha256Hex } from '../token.util';
+import { assertNoForbiddenKeys } from '../validation/f88-walk';
+import { assertComposerInput } from './envelope-validator';
+import {
+  A2_GAP_REF,
+  IntentTemplateRefusal,
+  resolveIntentTemplate,
+} from './intent-template.registry';
+import {
+  intentRecordData,
+  mintIntentMaterial,
+  type MintedIntentMaterial,
+} from './record-writer';
+import { SealService } from './seal.service';
 
-/** The five kinds K3 may emit read-only, per the package's own scope. Later kinds arrive with their packages. */
 export const K3_EMITTABLE_KINDS = [
   'METRIC',
   'SCHEDULE',
@@ -28,14 +43,19 @@ export interface MintRequest {
   tenantId: string;
   conversationId: string;
   turnId: string;
-  kind: K3EmittableKind;
+  kind: WidgetKind;
   principalProofHash: string;
   deliveryChannel: string;
-  /** The body a projector produced. K3 does not author bodies; it seals what it is given. */
+  /** Server-composed body. It carries facts and presentation only; never intent effect semantics. */
   body: Record<string, unknown>;
-  /** Seconds the envelope stays live. */
   ttlSeconds: number;
   freshnessClass: 'live' | 'scenario' | 'proactive_once' | 'static';
+  /** Server-derived body classification. Client-identifying envelopes never persist slotted copy. */
+  piiClass?: AuthorityEnvelope['pii_class'];
+  /** The only projector value the minter accepts. */
+  composerInput: WidgetComposerInput;
+  /** Canonical server-resolved principal. Its proof hash must equal `principalProofHash`. */
+  principal: PrincipalView;
 }
 
 export interface SealedEmission {
@@ -44,202 +64,247 @@ export interface SealedEmission {
   envelopeSeal: string;
   issuedAt: Date;
   expiresAt: Date;
-  /** Returned once, to the caller that will deliver it. Only its hash is stored. */
-  intentToken: string;
-  intentTokenHash: string;
+  /** Compatibility accessor for existing fixtures: the first minted token, if one exists. */
+  intentToken: string | null;
+  intentTokenHash: string | null;
+  intentTokens: readonly string[];
+  intentTokenHashes: readonly string[];
+  kind: WidgetKind;
+  a2Limited: boolean;
 }
 
 @Injectable()
 export class WidgetEmitterService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly seals: SealService,
+  ) {}
 
-  // ── compose ─────────────────────────────────────────────────────────────────────────────────
   /**
-   * Canonical JSON: keys sorted at every depth, no incidental whitespace. Without it the same body
-   * hashes two ways depending on key insertion order, and a hash that depends on how an object was
-   * built is not a hash of the body — it is a hash of the program that made it.
+   * The canonical P-MINT entry. `composerInput` is the only projector value read; `principal` is the
+   * one server-resolved authority view. The rest of `request` is transport/store context already
+   * owned by the emission service, and contains no effect or target member.
    */
-  private canonical(value: unknown): string {
-    const walk = (v: unknown): unknown => {
-      if (v === null || typeof v !== 'object') return v;
-      if (Array.isArray(v)) return v.map(walk);
-      const o = v as Record<string, unknown>;
-      return Object.keys(o)
-        .sort()
-        .reduce<Record<string, unknown>>((acc, k) => {
-          acc[k] = walk(o[k]);
-          return acc;
-        }, {});
-    };
-    return JSON.stringify(walk(value));
-  }
+  async emit(request: MintRequest, now = new Date()): Promise<SealedEmission> {
+    const input = request.composerInput;
+    const principal = request.principal;
+    if (
+      principal.authority.tenantId !== request.tenantId ||
+      principal.proofHash !== request.principalProofHash
+    )
+      throw new IntentTemplateRefusal('principal_mismatch');
+    assertComposerInput(input);
+    if (input.kind_proposal !== request.kind)
+      throw new IntentTemplateRefusal('request_kind_mismatch');
 
-  private bodyHash(body: unknown): string {
-    return sha256Hex(this.canonical(body));
-  }
+    const resolved = input.intent_proposals.map((proposal) => ({
+      proposal,
+      resolved: resolveIntentTemplate({
+        proposal,
+        widgetKind: input.kind_proposal,
+        deliveryChannel: request.deliveryChannel,
+      }),
+    }));
 
-  // ── fit ─────────────────────────────────────────────────────────────────────────────────────
-  /**
-   * K3 fits nothing: the channel profiles and the degradation path are K6, and a fitter that
-   * guessed here would be a second, quieter implementation of the one K6 owns. What K3 does is
-   * record the channel the envelope was composed for, so K6's fitter has something to fit FROM.
-   *
-   * §4.5.5 requires that every withheld intent name a `reachable_via` present in the emitted
-   * envelope, or the fitter throws rather than emitting. Nothing is withheld here because nothing
-   * is fitted, and the render receipt that would record it belongs to K6.
-   */
-  private fit(
-    kind: K3EmittableKind,
-    deliveryChannel: string,
-  ): { tier: null; withheld: [] } {
-    void kind;
-    void deliveryChannel;
-    return { tier: null, withheld: [] };
-  }
-
-  // ── seal ────────────────────────────────────────────────────────────────────────────────────
-  /**
-   * The seal covers the identity of the envelope AND its body. Covering the body is what makes a
-   * post-seal edit detectable; covering the identity is what stops a body being moved from one
-   * envelope to another.
-   */
-  private seal(parts: {
-    widgetId: string;
-    tenantId: string;
-    kind: string;
-    bodyHash: string;
-    issuedAt: Date;
-    expiresAt: Date;
-  }): string {
-    const h = createHash('sha256');
-    h.update(
-      [
-        parts.widgetId,
-        parts.tenantId,
-        parts.kind,
-        parts.bodyHash,
-        parts.issuedAt.toISOString(),
-        parts.expiresAt.toISOString(),
-      ].join('|'),
-      'utf8',
+    const a2Limited = resolved.some(
+      (entry) => entry.resolved.kind === 'a2_limitation',
     );
-    return h.digest('hex');
-  }
-
-  // ── mint ────────────────────────────────────────────────────────────────────────────────────
-  /**
-   * One transaction: the emission row and its intent record are written together or not at all.
-   * A token whose record is missing would refuse at Gate 1 anyway — but it would refuse as
-   * `EXPIRED`, which would be a lie about why. Writing both together keeps the refusal honest.
-   */
-  async emit(req: MintRequest, now = new Date()): Promise<SealedEmission> {
-    const widgetId = randomUUID();
+    const kind: WidgetKind = a2Limited ? 'LIMITATION' : input.kind_proposal;
+    const body = a2Limited
+      ? {
+          limitation_codes: [
+            ...new Set([...input.limitation_codes, A2_GAP_REF]),
+          ],
+          capability_gap_ref: A2_GAP_REF,
+        }
+      : request.body;
     const issuedAt = now;
-    const expiresAt = new Date(now.getTime() + req.ttlSeconds * 1000);
+    const expiresAt = new Date(now.getTime() + request.ttlSeconds * 1000);
+    const widgetId = randomUUID();
+    const bodyHash = sha256Hex(stableActionJson(body));
 
-    const bodyHash = this.bodyHash(req.body);
-    this.fit(req.kind, req.deliveryChannel);
-    const envelopeSeal = this.seal({
-      widgetId,
-      tenantId: req.tenantId,
-      kind: req.kind,
+    const materials: MintedIntentMaterial[] = a2Limited
+      ? []
+      : resolved.map((entry, index) => {
+          if (entry.resolved.kind !== 'intent')
+            throw new IntentTemplateRefusal('mixed_a2_resolution');
+          return mintIntentMaterial({
+            input,
+            proposal: entry.proposal,
+            resolved: entry.resolved,
+            intentIndex: index,
+            issuedAt,
+            envelopeExpiresAt: expiresAt,
+            slotless: request.piiClass === 'client_identified',
+          });
+        });
+
+    const tokened = materials.filter(
+      (m): m is MintedIntentMaterial & { token: string; tokenHash: string } =>
+        m.token !== null && m.tokenHash !== null,
+    );
+    const fitting = fit({
+      carrier: request.deliveryChannel,
+      intents: tokened.map((m) => ({
+        token: m.token,
+        label: m.intent.label,
+        role: m.intent.role,
+        isEscape: m.intent.role === 'escape',
+      })),
+      bodyText: stableActionJson(body),
+      reachableVia:
+        tokened.find((m) => m.intent.role === 'escape')?.token ?? 'shell.root',
+    });
+    const emittedTokens = new Set(fitting.emitted.map((i) => i.token));
+    const emittedIntents = materials.filter(
+      (m) => m.token === null || emittedTokens.has(m.token),
+    );
+    const envelopeForSeal = {
+      contract: 'maya.widget.envelope/1',
+      widget_id: widgetId,
+      tenant_id: request.tenantId,
+      kind,
+      body,
+      intents: emittedIntents.map((m) => m.intent),
+      limitations: a2Limited
+        ? [{ reason_code: A2_GAP_REF, capability_gap_ref: A2_GAP_REF }]
+        : [],
+    };
+    assertNoForbiddenKeys('WidgetEnvelope', envelopeForSeal, [
+      { at: 'intents', shape: 'WidgetIntent' },
+      { at: 'enabled', shape: 'Cell' },
+    ]);
+    if (Buffer.byteLength(stableActionJson(envelopeForSeal), 'utf8') > 32_768)
+      throw new IntentTemplateRefusal('envelope_oversize');
+
+    const profile = profileFor(request.deliveryChannel);
+    if (!profile) throw new IntentTemplateRefusal('carrier_unknown');
+    const envelopeSeal = this.seals.seal({
       bodyHash,
+      widgetId,
+      tenantId: request.tenantId,
+      principalProofHash: principal.proofHash,
       issuedAt,
       expiresAt,
+      profileId: profile.profileId,
     });
 
-    // The token is high-entropy and opaque. The client never authors it and cannot derive it: that
-    // is the half of BUTTON -> ENDPOINT the wire format does not cover by itself.
-    const intentToken = randomBytes(32).toString('base64url');
-    const intentTokenHash = sha256Hex(intentToken);
-
+    const emittedTokened = emittedIntents.filter(
+      (
+        material,
+      ): material is MintedIntentMaterial & {
+        token: string;
+        tokenHash: string;
+      } => material.token !== null && material.tokenHash !== null,
+    );
+    const recordWrites = emittedTokened.map((material) =>
+      this.prisma.widgetIntentRecord.create({
+        data: intentRecordData({
+          material,
+          input,
+          tenantId: request.tenantId,
+          widgetId,
+          principalProofHash: principal.proofHash,
+          bodyHash,
+          issuedAt,
+        }) as never,
+      }),
+    );
     await this.prisma.$transaction([
       this.prisma.widgetEmission.create({
         data: {
-          tenantId: req.tenantId,
+          tenantId: request.tenantId,
           widgetId,
-          turnId: req.turnId,
-          kind: req.kind,
+          turnId: request.turnId,
+          kind,
           bodyVersion: 1,
           envelopeSeal,
           bodyHash,
           lifecycleState: 'MINTED',
-          freshnessClass: req.freshnessClass,
+          freshnessClass: request.freshnessClass,
           issuedAt,
           expiresAt,
-          retentionSec: req.ttlSeconds,
+          retentionSec: request.ttlSeconds,
           retentionUntil: expiresAt,
-          dedupeKey: `${req.kind}:${req.conversationId}:${bodyHash.slice(0, 16)}`,
-          deliveryChannel: req.deliveryChannel,
+          dedupeKey: `${kind}:${request.conversationId}:${bodyHash.slice(0, 16)}`,
+          deliveryChannel: request.deliveryChannel,
           deliveryStateJson: { state: 'composed', delivered: false } as never,
-          bodyJson: req.body as never,
+          bodyJson: body as never,
         },
       }),
-      this.prisma.widgetIntentRecord.create({
+      ...recordWrites,
+      this.prisma.widgetRenderReceipt.create({
         data: {
-          tenantId: req.tenantId,
-          intentTokenHash,
+          tenantId: request.tenantId,
           widgetId,
-          principalProofHash: req.principalProofHash,
-          widgetKind: req.kind,
-          // Read-only emission: the only effect K3 may mint. A DRAFT, REQUEST_APPROVAL or COMMIT
-          // token does not exist in wave 2, and that is guaranteed by absence here rather than by
-          // a check somewhere downstream.
-          effect: 'NONE',
-          priority: 0,
-          verificationFloor: 'ANONYMOUS',
-          requestedScopeHash: sha256Hex(`${req.kind}|read-only`),
-          bodyHash,
-          selectionDomain: 'none',
-          issuedAt,
-          expiresAt,
-          singleUse: false,
+          profileId: profile.profileId,
+          profileVersion: 1,
+          renderTier: fitting.tier,
+          intentsMinted: materials.length,
+          intentsEmitted: emittedIntents.length,
+          intentsWithheldJson: fitting.intentsWithheld as never,
+          bodyReductionsJson: fitting.bodyReductions as never,
+          textEquivalentIsCanonical: fitting.textEquivalentIsCanonical,
+          degradedAt: issuedAt,
+          deliveryChannel: request.deliveryChannel,
+          composedEnvelopeJson: envelopeForSeal as never,
+          emittedEnvelopeJson: envelopeForSeal as never,
         },
       }),
     ]);
 
-    return {
+    return Object.freeze({
       widgetId,
       bodyHash,
       envelopeSeal,
       issuedAt,
       expiresAt,
-      intentToken,
-      intentTokenHash,
-    };
+      intentToken: emittedTokened[0]?.token ?? null,
+      intentTokenHash: emittedTokened[0]?.tokenHash ?? null,
+      intentTokens: Object.freeze(emittedTokened.map((m) => m.token)),
+      intentTokenHashes: Object.freeze(emittedTokened.map((m) => m.tokenHash)),
+      kind,
+      a2Limited,
+    });
   }
 
-  /**
-   * Re-derive a stored envelope's seal and compare. This is the check that makes the seal worth
-   * computing: without it a seal is a column, not a fence.
-   */
   async verifySeal(tenantId: string, widgetId: string): Promise<boolean> {
     const row = await this.prisma.widgetEmission.findFirst({
       where: { tenantId, widgetId },
       select: {
         widgetId: true,
         tenantId: true,
-        kind: true,
         bodyHash: true,
         issuedAt: true,
         expiresAt: true,
         envelopeSeal: true,
         bodyJson: true,
+        deliveryChannel: true,
       },
     });
     if (!row) return false;
-    // Both halves are checked: the body still hashes to bodyHash, and the seal still covers it.
+    const receipt = await this.prisma.widgetRenderReceipt.findFirst({
+      where: { tenantId, widgetId, deliveryChannel: row.deliveryChannel },
+      select: { profileId: true },
+    });
+    if (!receipt) return false;
+    const record = await this.prisma.widgetIntentRecord.findFirst({
+      where: { tenantId, widgetId },
+      select: { principalProofHash: true },
+    });
+    if (!record) return false;
     const bodyStillMatches =
-      row.bodyJson === null || this.bodyHash(row.bodyJson) === row.bodyHash;
-    const sealStillMatches =
-      this.seal({
-        widgetId: row.widgetId,
-        tenantId: row.tenantId,
-        kind: row.kind,
-        bodyHash: row.bodyHash,
-        issuedAt: row.issuedAt,
-        expiresAt: row.expiresAt,
-      }) === row.envelopeSeal;
-    return bodyStillMatches && sealStillMatches;
+      row.bodyJson === null ||
+      sha256Hex(stableActionJson(row.bodyJson)) === row.bodyHash;
+    const expected = this.seals.seal({
+      bodyHash: row.bodyHash,
+      widgetId: row.widgetId,
+      tenantId: row.tenantId,
+      principalProofHash: record.principalProofHash,
+      issuedAt: row.issuedAt,
+      expiresAt: row.expiresAt,
+      profileId: receipt.profileId,
+    });
+    return bodyStillMatches && expected === row.envelopeSeal;
   }
 }

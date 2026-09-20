@@ -2,11 +2,25 @@
 
 ## Status
 
-`OWNER DECISION REQUIRED: YES`
+`OWNER DECISION REQUIRED: NO`
+
+`OWNER DECISION: OPTION A APPROVED`
+
+`IMPLEMENTATION AUTHORIZED: YES`
 
 `WAVE 2 CODE BEFORE P-MINT: PRESERVED`
 
-`P-MINT IMPLEMENTATION STARTED: NO`
+`P-MINT IMPLEMENTATION STARTED: YES`
+
+Approval preserves the permanent boundary:
+
+`LLM INTERPRETATION != EFFECT SEMANTICS`
+
+`CLIENT INPUT != TARGET AUTHORITY`
+
+`INTENT_TEMPLATE_KEY -> SERVER REGISTRY -> TYPED SEMANTICS`
+
+`UNKNOWN TEMPLATE -> REFUSE`
 
 This sheet is intentionally narrow. It does not reopen Gates 1–13, the Wave 1 certification,
 Decision Sheets 05–07, or the A2.2 backstop. It closes one missing input-to-intent rule that the

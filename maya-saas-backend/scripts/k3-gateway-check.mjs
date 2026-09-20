@@ -651,8 +651,9 @@ chk(
 // whose job is to import owners. Integrator decision D-6 replaces it with an enumerated rule, read with
 // the compiler over every non-spec file under src/widgets (the type checker resolves aliases, re-exports
 // and `export *`):
-// - widget @Module imports: `WidgetsModule` imports `PrismaModule` and the owner-ports boundary
-//   `WidgetOwnerPortsModule`, nothing else; `WidgetOwnerPortsModule` imports only the owner modules
+// - widget @Module imports: `WidgetsModule` imports `PrismaModule`, the owner-ports boundary
+//   `WidgetOwnerPortsModule`, and the closed widget-internal emission module;
+//   `WidgetOwnerPortsModule` imports only the owner modules
 //   ENUMERATED below (none in U0; `ActionEngineModule` never); no other widget module imports a
 //   non-widget module. Every array is a literal and every element resolves to a class.
 // - widget @Module members are closed: `WidgetsModule` has `imports`, `controllers`, `providers` and
@@ -676,6 +677,7 @@ chk(
 // empty boundary itself stays pinned by `src/widgets/owner-ports/widget-owner-ports.module.spec.ts`.
 const PORTS = 'owner-ports/widget-owner-ports.module.ts';
 const WIDGETS_MODULE = 'widgets.module.ts';
+const EMISSION_MODULE = 'emission/emission.module.ts#WidgetEmissionModule';
 /**
  * Owner modules `WidgetOwnerPortsModule` may import, as `<path under src>#<class>` (plan §1.3). Each is
  * added by the unit that binds a port through it, in the same commit as the test that pins the binding
@@ -873,7 +875,7 @@ for (const { rel, s, cls, arg } of widgetModules) {
     const widget = under(decl.getSourceFile().fileName, W);
     const ok =
       rel === WIDGETS_MODULE
-        ? key === BOUNDARY || key === 'prisma/prisma.module.ts#PrismaModule'
+        ? key === BOUNDARY || key === EMISSION_MODULE || key === 'prisma/prisma.module.ts#PrismaModule'
         : rel === PORTS
           ? !widget && OWNER_MODULES.includes(key) && !NEVER_IMPORTED.includes(key)
           : widget;
@@ -881,7 +883,7 @@ for (const { rel, s, cls, arg } of widgetModules) {
       boundaryBreaks.push(
         `${at(el)}: ${name} imports ${key}` +
           (rel === WIDGETS_MODULE
-            ? ' (WidgetsModule imports PrismaModule and the owner-ports boundary only)'
+            ? ' (WidgetsModule imports PrismaModule, the owner-ports boundary and the internal emission module only)'
             : rel === PORTS
               ? ' (not an enumerated owner module)'
               : ' (only the owner-ports module may import a non-widget module)'),

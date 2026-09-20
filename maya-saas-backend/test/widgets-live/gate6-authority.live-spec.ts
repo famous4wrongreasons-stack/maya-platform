@@ -298,13 +298,14 @@ describe('Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736
       );
     }, 60_000);
 
-    it('P-HANDOFF-A22 / P-HANDOFF-BI / P-HANDOFF-AE / P-HANDOFF-NOEXEC / P-HANDOFF-SCHEDULE-UPDATE [GW]: a HANDOFF resolves the destination fences ONLY (G6-6, G6-7)', async () => {
+    it('P-HANDOFF-A22 / P-HANDOFF-BI / P-HANDOFF-NOEXEC / P-HANDOFF-SCHEDULE-UPDATE [GW]: a reachable HANDOFF resolves the destination fences ONLY (G6-6, G6-7)', async () => {
       // Each of these would be refused by an execute-admission test, and each must pass:
       //   a22.configuration under a BUSINESS_INTELLIGENCE run — `c9Capability` would refuse it, as
       //     the certified note says it must not (C11:4790-4798);
-      //   an AE destination — it carries no `AE_WIDGET_COMMIT_ALLOWLIST` row;
       //   a catalogue key — `assertCanExecute` would be the test, and is not applied;
       //   `staff.schedule.update` — B-03's case, admitted as a destination.
+      // An AE destination is not in this P set: its fail-closed floor is STEP_UP_VERIFIED, which is
+      // deliberately unreachable today, so Gate 5 shadows it before this branch (the S-* rule above).
       const cases: readonly [string, Subject][] = [
         [
           'P-HANDOFF-A22',
@@ -327,17 +328,6 @@ describe('Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736
             capabilitySpace: null,
             capabilityKey: null,
             c9Domain: 'BUSINESS_INTELLIGENCE',
-          },
-        ],
-        [
-          'P-HANDOFF-AE',
-          {
-            effect: 'HANDOFF',
-            handoffSpace: 'AE',
-            handoffKey: 'crm.visit.payment.v1',
-            targetJson: { class: 's' },
-            capabilitySpace: null,
-            capabilityKey: null,
           },
         ],
         [

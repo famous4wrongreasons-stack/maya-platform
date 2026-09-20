@@ -1,0 +1,137 @@
+[
+  {
+    "id": "MINT-M1",
+    "description": "change the server-owned measurement recipe from REFINE to NAVIGATE",
+    "file": "src/widgets/emission/intent-template.registry.ts",
+    "find": "  'refine.measurement@1': row({\n    key: 'refine.measurement@1',\n    version: 1,\n    effect: 'REFINE',",
+    "replace": "  'refine.measurement@1': row({\n    key: 'refine.measurement@1',\n    version: 1,\n    effect: 'NAVIGATE',",
+    "killers": ["MINT-1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M2",
+    "description": "change the closed NAVIGATE target route",
+    "file": "src/widgets/emission/intent-template.registry.ts",
+    "find": "  'navigate.account@1': row({\n    key: 'navigate.account@1',\n    version: 1,\n    effect: 'NAVIGATE',\n    kinds: ['LIMITATION', 'SOURCE_STATUS', 'SETTINGS_DRAFT'],\n    roles: ['handoff', 'remedy'],\n    subject: null,\n    target: { class: 's', ref: { route: 'shell.account', param: null } },",
+    "replace": "  'navigate.account@1': row({\n    key: 'navigate.account@1',\n    version: 1,\n    effect: 'NAVIGATE',\n    kinds: ['LIMITATION', 'SOURCE_STATUS', 'SETTINGS_DRAFT'],\n    roles: ['handoff', 'remedy'],\n    subject: null,\n    target: { class: 's', ref: { route: 'shell.pay', param: null } },",
+    "killers": ["MINT-1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M3",
+    "description": "raise the CONTROL escape priority so it is no longer the permanent priority-zero exit",
+    "file": "src/widgets/emission/intent-template.registry.ts",
+    "find": "    priority: 0,\n    singleUse: true,",
+    "replace": "    priority: 1,\n    singleUse: true,",
+    "killers": ["MINT-1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M4",
+    "description": "make the CONTROL escape reusable",
+    "file": "src/widgets/emission/intent-template.registry.ts",
+    "find": "    priority: 0,\n    singleUse: true,\n    ttlSeconds: 600,",
+    "replace": "    priority: 0,\n    singleUse: false,\n    ttlSeconds: 600,",
+    "killers": ["MINT-1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M5",
+    "description": "make the registered selection schema multi-select and able to loop on refresh",
+    "file": "src/widgets/emission/intent-template.registry.ts",
+    "find": "      selection_min: 1,\n      selection_max: 1,",
+    "replace": "      selection_min: 1,\n      selection_max: 2,",
+    "killers": ["MINT-11"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M6",
+    "description": "accept proposal members outside the closed IntentProposal shape",
+    "file": "src/widgets/emission/intent-template.registry.ts",
+    "find": "    !exactKeys(proposal, [",
+    "replace": "    false && !exactKeys(proposal, [",
+    "killers": ["MINT-7", "MINT-9"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M7",
+    "description": "skip the proposal-to-registry capability equality check",
+    "file": "src/widgets/emission/intent-template.registry.ts",
+    "find": "  if (!sameRef(proposal.capability, expectedCapability ?? null))",
+    "replace": "  if (false && !sameRef(proposal.capability, expectedCapability ?? null))",
+    "killers": ["MINT-9"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M8",
+    "description": "disable the carrier admission fence",
+    "file": "src/widgets/emission/intent-template.registry.ts",
+    "find": "  if (\n    !carrierAdmits(",
+    "replace": "  if (\n    false && !carrierAdmits(",
+    "killers": ["MINT-9"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M9",
+    "description": "mint a token for NONE",
+    "file": "src/widgets/emission/record-writer.ts",
+    "find": "  const token =\n    row.effect === 'NONE' ? null : randomBytes(24).toString('base64url');",
+    "replace": "  const token = randomBytes(24).toString('base64url');",
+    "killers": ["MINT-2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M10",
+    "description": "remove COMMIT from the A2.2 capability-gap backstop",
+    "file": "src/widgets/emission/intent-template.registry.ts",
+    "find": "    'commit.blocked@1': 'COMMIT',",
+    "replace": "    'commit.disabled@1': 'COMMIT',",
+    "killers": ["MINT-3"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M11",
+    "description": "persist an invented readback text on every record",
+    "file": "src/widgets/emission/record-writer.ts",
+    "find": "    confirmationJson: null,",
+    "replace": "    confirmationJson: { readback_text: 'invented' },",
+    "killers": ["MINT-5"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M12",
+    "description": "keep a slotted utterance template for client-identified content",
+    "file": "src/widgets/emission/emitter.service.ts",
+    "find": "            slotless: request.piiClass === 'client_identified',",
+    "replace": "            slotless: false,",
+    "killers": ["MINT-6"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M13",
+    "description": "drop the deterministic input-schema hash from the audit record",
+    "file": "src/widgets/emission/record-writer.ts",
+    "find": "    inputSchemaHash: args.material.inputSchemaHash,",
+    "replace": "    inputSchemaHash: null,",
+    "killers": ["MINT-1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M14",
+    "description": "skip the nested closed-shape check so a projector can smuggle an effect through WidgetSource",
+    "file": "src/widgets/emission/envelope-validator.ts",
+    "find": "  assertSourceClosed(input.source);",
+    "replace": "  void input.source;",
+    "killers": ["MINT-9"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M15",
+    "description": "allow successor minting from a non-LIVE predecessor",
+    "file": "src/widgets/emission/successor-minter.service.ts",
+    "find": "      predecessor.lifecycleState !== 'LIVE' ||",
+    "replace": "      predecessor.lifecycleState !== 'MINTED' ||",
+    "killers": ["MINT-8"],
+    "expect": "live-killed"
+  }
+]

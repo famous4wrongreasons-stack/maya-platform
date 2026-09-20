@@ -46,6 +46,7 @@ import {
   type GatewayHarness,
 } from './support/bootstrap';
 import {
+  closedFixtureComposerInput,
   Fixtures,
   type TenantFixture,
   type UserFixture,
@@ -53,6 +54,7 @@ import {
 } from './support/fixtures';
 import { WidgetEmitterService } from '../../src/widgets/emission/emitter.service';
 import { WidgetStoresService } from '../../src/widgets/stores/widget-stores.service';
+import { profileFor } from '../../src/widgets/carriers/channel-profile';
 import {
   bootHttp,
   GATEWAY_SCOPE,
@@ -93,7 +95,21 @@ interface SyntheticColumns {
   handoffKey?: string | null;
   targetJson?: Record<string, unknown> | null;
   priority?: number;
+  singleUse?: boolean;
+  utteranceTemplate?: string | null;
 }
+
+const GATE7_SYNTHETIC_BASE: Readonly<SyntheticColumns> = Object.freeze({
+  effect: 'NONE',
+  capabilitySpace: null,
+  capabilityKey: null,
+  handoffSpace: null,
+  handoffKey: null,
+  targetJson: null,
+  priority: 1,
+  singleUse: false,
+  utteranceTemplate: null,
+});
 
 describe('Gate 7 — effect admissibility runs on the live path and refuses (C11:4726)', () => {
   let ctx: FixtureContext;
@@ -123,11 +139,12 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
   });
 
   /**
-   * One record, minted through the harness's real writers, on the channel the case names.
+   * One record, minted through the harness's real writers, then explicitly marked synthetic for the
+   * Gate 7 columns no production P-MINT template is allowed to produce.
    *
-   * `Fixtures.widget` is used unchanged for `pwa`. For any other channel the same two writers are
-   * called directly with that `delivery_channel` — the tier clause is keyed on the EMISSION's minted
-   * channel (CH2, C11:5899), so a fixture that could only mint `pwa` could not exercise it at all.
+   * Physical K6 channels are minted directly. Contract-only tier channels are minted on `pwa`, then
+   * the proof-only emission/receipt selector is moved by `syntheticDeliveryChannel`; P-MINT itself
+   * remains fail-closed and does not invent a carrier profile. These G-SYNTH rows are never evidence.
    */
   const mint = async (
     kind: 'METRIC' | 'SCHEDULE' | 'SOURCE_STATUS' | 'PROGRESS' | 'LIMITATION',
@@ -135,11 +152,13 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
     columns?: SyntheticColumns,
   ): Promise<WidgetFixture> => {
     let widget: WidgetFixture;
-    if (deliveryChannel === 'pwa') {
+    const mintChannel = profileFor(deliveryChannel) ? deliveryChannel : 'pwa';
+    if (mintChannel === 'pwa') {
       widget = await fx.widget({ tenant, actor, kind, body: { value: 1 } });
     } else {
       const conversationId = randomUUID();
-      const proof = await fx.principalProofHash(actor);
+      const principal = await fx.principalView(actor);
+      const proof = principal.proofHash;
       const turn = await gw.stores.appendTurn({
         tenantId: tenant.id,
         conversationId,
@@ -154,26 +173,32 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
         turnId: turn.id,
         kind,
         principalProofHash: proof,
-        deliveryChannel,
+        deliveryChannel: mintChannel,
         body: { value: 1 },
         ttlSeconds: 600,
         freshnessClass: 'live',
+        composerInput: closedFixtureComposerInput({
+          kind,
+          turnId: turn.id,
+          executionId: conversationId,
+        }),
+        principal,
       });
-      const envelopeSeal = await fx.resealLegacyEmission(
-        sealed,
-        tenant.id,
-        proof,
-      );
+      if (sealed.intentToken === null || sealed.intentTokenHash === null)
+        throw new Error('closed CONTROL fixture did not mint a token');
       widget = {
         ...sealed,
-        envelopeSeal,
+        intentToken: sealed.intentToken,
+        intentTokenHash: sealed.intentTokenHash,
         tenantId: tenant.id,
         kind,
         conversationId,
         turnId: turn.id,
       };
     }
-    if (columns) await fx.synthetic(widget, columns);
+    if (mintChannel !== deliveryChannel)
+      await fx.syntheticDeliveryChannel(widget, deliveryChannel);
+    await fx.synthetic(widget, { ...GATE7_SYNTHETIC_BASE, ...columns });
     return widget;
   };
 
@@ -250,7 +275,7 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
 
   // ── positives: slot 7 admits what the row admits ──────────────────────────────────────────────
 
-  it('T7-POS-NONE [GW]: the record the emitter mints — `NONE` on `METRIC`, delivered to `pwa` — passes slot 7 on all four of C1, C2, C3 and C7', async () => {
+  it('T7-POS-NONE [GW]: a synthetic `NONE` on `METRIC`, delivered to `pwa`, passes slot 7 on all four of C1, C2, C3 and C7', async () => {
     const scope = 'T7-POS-NONE';
     const a = await submit(scope, await mint('METRIC', 'pwa'));
     // Not "stops at 8": the slot after 7 moves as Wave 1 lands. The claim is that slot 7 admitted it.
@@ -478,7 +503,8 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
       columns?: SyntheticColumns,
     ): Promise<WidgetFixture> => {
       const conversationId = randomUUID();
-      const proof = await hfx.principalProofHash(hactor);
+      const principal = await hfx.principalView(hactor);
+      const proof = principal.proofHash;
       const turn = await http.app.get(WidgetStoresService).appendTurn({
         tenantId: htenant.id,
         conversationId,
@@ -487,31 +513,38 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
         principalProofHash: proof,
         channel: 'pwa',
       });
+      const mintChannel = profileFor(deliveryChannel) ? deliveryChannel : 'pwa';
       const sealed = await http.app.get(WidgetEmitterService).emit({
         tenantId: htenant.id,
         conversationId,
         turnId: turn.id,
         kind,
         principalProofHash: proof,
-        deliveryChannel,
+        deliveryChannel: mintChannel,
         body: { value: 1 },
         ttlSeconds: 600,
         freshnessClass: 'live',
+        composerInput: closedFixtureComposerInput({
+          kind,
+          turnId: turn.id,
+          executionId: conversationId,
+        }),
+        principal,
       });
-      const envelopeSeal = await hfx.resealLegacyEmission(
-        sealed,
-        htenant.id,
-        proof,
-      );
+      if (sealed.intentToken === null || sealed.intentTokenHash === null)
+        throw new Error('closed CONTROL fixture did not mint a token');
       const widget: WidgetFixture = {
         ...sealed,
-        envelopeSeal,
+        intentToken: sealed.intentToken,
+        intentTokenHash: sealed.intentTokenHash,
         tenantId: htenant.id,
         kind,
         conversationId,
         turnId: turn.id,
       };
-      if (columns) await hfx.synthetic(widget, columns);
+      if (mintChannel !== deliveryChannel)
+        await hfx.syntheticDeliveryChannel(widget, deliveryChannel);
+      await hfx.synthetic(widget, { ...GATE7_SYNTHETIC_BASE, ...columns });
       return widget;
     };
 

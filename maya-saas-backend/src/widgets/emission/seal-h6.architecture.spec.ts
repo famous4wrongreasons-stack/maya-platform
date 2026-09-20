@@ -34,14 +34,13 @@ const EXEMPT: Readonly<Record<string, string>> = Object.freeze({
   'token.util.ts': 'integrator — the intent-token digest (R8-5)',
   'authority/contract-bindings.ts':
     'integrator — retired in the U8b merge (R8-5)',
-  'emission/emitter.service.ts': 'P-MINT-CORE — replaced by SealService',
   'consent/erasure.ts': 'P-RT6',
   'proactive/provenance.ts': 'P-MT3',
   'analytics/projection.ts': 'U12b',
 });
 
 /** The size of the list when P-SEAL merged. Each owner's merge lowers it; nothing raises it. */
-const RATCHET_CEILING = 6;
+const RATCHET_CEILING = 5;
 
 /** The gateway file whose run-time import closure must hold no key. */
 const GATEWAY = 'intent-gateway.service.ts';
@@ -283,19 +282,13 @@ describe('P-SEAL — SEAL-5: no seal key under the gateway', () => {
 
   // ── SEAL-5c ────────────────────────────────────────────────────────────────────────────────────
   //
-  // CKPT-W1 review fix, and a DEVIATION made visible rather than argued away. P-SEAL's scope states
+  // CKPT-W1 review fix. P-SEAL's scope states
   // B-22 as "the gateway module never holds the key; `SEAL_VERIFIER` is provided by the emission
-  // module". There is no emission module in Wave 1 — `emission/**` outside `seal*.ts` is
-  // P-MINT-CORE's (Wave 2) — so `SealService`, `SealVerifierService` and the `SEAL_VERIFIER` token
-  // stand in `WidgetsModule`, which also declares `IntentGatewayService`. The tests above hold the
-  // property at the IMPORT GRAPH: the gateway's run-time closure reaches neither class. They cannot
-  // hold it at the DI CONTAINER, where any provider of a module may inject any other by class — so
-  // for as long as the two live in the gateway's own module, "the gateway cannot obtain the key" is
-  // a fact about the gateway's CONSTRUCTOR, and a fact has to be asserted.
+  // module". P-MINT-CORE supplies that module and moves `SealService`, `SealVerifierService` and the
+  // `SEAL_VERIFIER` binding into it. The constructor assertion remains as a direct ratchet against a
+  // future gateway injection, while the provider-location assertion proves custody is now structural.
   //
-  // This is that assertion. It retires when P-MINT-CORE lands `emission.module.ts` and moves the two
-  // providers there; until then it is what stops the deviation from becoming a habit.
-  describe('SEAL-5c [BUILD] the gateway cannot inject a key holder, while the two share its module', () => {
+  describe('SEAL-5c [BUILD] the gateway cannot inject a key holder and custody stays in emission', () => {
     const KEY_HOLDERS = ['SealService', 'SealVerifierService'];
     const gatewaySource = (): string =>
       fs.readFileSync(path.join(WIDGETS, GATEWAY), 'utf8');
@@ -368,7 +361,7 @@ describe('P-SEAL — SEAL-5: no seal key under the gateway', () => {
           KEY_HOLDERS.every((n) => new RegExp(`\\b${n}\\b`).test(text))
         );
       });
-      expect(providers.map(key)).toEqual(['widgets.module.ts']);
+      expect(providers.map(key)).toEqual(['emission/emission.module.ts']);
     });
   });
 });

@@ -2,7 +2,6 @@ import { randomUUID } from 'node:crypto';
 
 import { UserRole } from '../../src/common/domain.enums';
 import type { AuthenticatedUser } from '../../src/common/authenticated-user.interface';
-import { SealService } from '../../src/widgets/emission/seal.service';
 import { WidgetEmitterService } from '../../src/widgets/emission/emitter.service';
 import { widgetFloorDivergence } from '../../src/widgets/gates/gate5';
 import { WidgetStoresService } from '../../src/widgets/stores/widget-stores.service';
@@ -29,45 +28,6 @@ const body = (record: WidgetFixture, widgetId = record.widgetId) => ({
   intent_token: record.intentToken,
 });
 
-const reseal = async (
-  ctx: FixtureContext,
-  seal: SealService,
-  record: WidgetFixture,
-): Promise<void> => {
-  const stored = await ctx.prisma.widgetIntentRecord.findFirstOrThrow({
-    where: {
-      tenantId: record.tenantId,
-      intentTokenHash: record.intentTokenHash,
-    },
-    select: { principalProofHash: true },
-  });
-  const emission = await ctx.prisma.widgetEmission.findFirstOrThrow({
-    where: { tenantId: record.tenantId, widgetId: record.widgetId },
-    select: {
-      bodyHash: true,
-      widgetId: true,
-      tenantId: true,
-      issuedAt: true,
-      expiresAt: true,
-    },
-  });
-  await ctx.prisma.widgetEmission.update({
-    where: {
-      widgetId_tenantId: {
-        widgetId: record.widgetId,
-        tenantId: record.tenantId,
-      },
-    },
-    data: {
-      envelopeSeal: seal.seal({
-        ...emission,
-        principalProofHash: stored.principalProofHash,
-        profileId: null,
-      }),
-    },
-  });
-};
-
 interface Level<C> {
   principal(
     fx: Fixtures,
@@ -83,7 +43,6 @@ interface Level<C> {
     scope: string,
   ): Promise<Record<string, unknown>>;
   writes(scope: string): readonly unknown[];
-  seal: SealService;
 }
 
 const runCases = <C>(
@@ -104,7 +63,6 @@ const runCases = <C>(
       kind: 'METRIC',
       body: { value: 1 },
     });
-    await reseal(fixtureContext(), l.seal, record);
     return { fx, l, tenant, record, ...principal };
   };
 
@@ -206,7 +164,6 @@ describe('P-G15a — Gates 1 and 5 on the live PostgreSQL path', () => {
       () => ctx,
       () => fx,
       () => ({
-        seal: gw.moduleRef.get(SealService),
         principal: async (builder, tenant, user) => {
           const actor = await builder.actor(tenant, user);
           return { actor, credential: actor };
@@ -240,7 +197,6 @@ describe('P-G15a — Gates 1 and 5 on the live PostgreSQL path', () => {
       () => ctx,
       () => fx,
       () => ({
-        seal: http.app.get(SealService),
         principal: async (builder, tenant, user) => {
           await builder.grantFeature(tenant, 'widgets.runtime');
           const credential = await http.login(

@@ -31,6 +31,7 @@ import { IntentGatewayService } from '../intent-gateway.service';
 import { WidgetStoresService } from '../stores/widget-stores.service';
 import { WidgetsController } from '../widgets.controller';
 import { WidgetsModule } from '../widgets.module';
+import { WidgetEmissionModule } from '../emission/emission.module';
 import { WidgetOwnerPortsModule } from './widget-owner-ports.module';
 
 const meta = (key: string, target: object): unknown =>
@@ -84,10 +85,11 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
     ]);
   });
 
-  it('WidgetsModule imports Prisma and the owner-ports boundary, and no other module', () => {
+  it('WidgetsModule imports Prisma, the owner-ports boundary and the internal emission module only', () => {
     expect(meta(MODULE_METADATA.IMPORTS, WidgetsModule)).toEqual([
       PrismaModule,
       WidgetOwnerPortsModule,
+      WidgetEmissionModule,
     ]);
   });
 
@@ -119,6 +121,9 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       // P-SEAL binds this one in `widgets.module.ts`, not at the boundary (B-22): the seal key is the
       // minter's, and it moves to the emission module in P-MINT-CORE's merge.
       DI_TOKENS.SEAL_VERIFIER,
+      // P-MINT-CORE binds the widget-store-only successor beside the seal holder. It reaches no
+      // canonical owner and is deliberately outside the owner-ports boundary.
+      DI_TOKENS.SUCCESSOR_MINTER,
       // U8a (IR-8a-1) binds slot 8's gate in `widgets.module.ts` too, and for the same kind of
       // reason: `InputValidationGate` is widget-internal and reaches no owner, so the D-6 boundary
       // has nothing to say about it and k3 check 9's owner enumeration is unchanged.

@@ -84,8 +84,8 @@ export interface CorrelationRefs {
 /**
  * `IntentProposal` - what a projector may PROPOSE before the minter types it.
  *
- * Fixed by: section 1.1.2's member comment, which enumerates it outright -
- *   "capability (or handoff_capability_ref), argument handles, role. No token. No floor."
+ * Fixed by: section 1.1.2 and E5a - a closed, versioned template discriminator plus
+ *   capability (or handoff_capability_ref), argument handles and role. No effect, target, token or floor.
  * Every exclusion in that sentence is load-bearing and is expressed in the type rather than in a
  * comment: there is no member able to carry an `intent_token`, a `verification_floor`, an
  * `effect` or a `target`, so a projector cannot propose one. Section 1.1.2 E5 is the rule this
@@ -93,6 +93,7 @@ export interface CorrelationRefs {
  * Built by: K3.
  */
 export interface IntentProposal {
+  readonly intent_template_key: string;
   readonly capability?: CapabilityRef;
   readonly handoff_capability_ref?: CapabilityRef;
   readonly argument_handles?: Readonly<Record<string, string>>;

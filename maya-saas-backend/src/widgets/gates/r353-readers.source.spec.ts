@@ -76,9 +76,14 @@ const READERS: readonly Reader[] = [
     declaration: 'FLOOR_EXEMPT',
   },
   {
-    reader: 'the mint validator (R3.5.1 at EP-MINT)',
+    reader: 'the legacy data-subject mint validator (R3.5.1 at EP-MINT)',
     file: 'widgets/consent/data-subject-acts.ts',
     declaration: 'assertSensitiveSubjectAdmissible',
+  },
+  {
+    reader: 'the closed intent-template mint validator (R3.5.1 at EP-MINT)',
+    file: 'widgets/emission/intent-template.registry.ts',
+    declaration: 'resolveIntentTemplate',
   },
 ];
 

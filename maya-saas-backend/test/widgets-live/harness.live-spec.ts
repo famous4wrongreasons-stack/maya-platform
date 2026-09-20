@@ -737,7 +737,7 @@ describe('widgets-live harness', () => {
         await gw.moduleRef.get(PrismaService).$executeRaw`SELECT 1`;
         await gw.moduleRef.get(PrismaService).$queryRaw`SELECT 1`;
       });
-      await fx.synthetic(widget, { priority: 1 });
+      await fx.synthetic(widget, { priority: 2 });
 
       const nw = await noWriteViolations(
         gw.recorder,

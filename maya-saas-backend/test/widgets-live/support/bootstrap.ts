@@ -41,6 +41,7 @@ import {
   WIDGET_INTENT_SUBMISSION_CONTRACT,
 } from '../../../src/widgets/dto/submit-intent.dto';
 import { WidgetEmitterService } from '../../../src/widgets/emission/emitter.service';
+import { SuccessorMinterService } from '../../../src/widgets/emission/successor-minter.service';
 import { IntentGatewayService } from '../../../src/widgets/intent-gateway.service';
 import { intentSubmitArgs } from '../../../src/widgets/intent-submit-args';
 import { WidgetStoresService } from '../../../src/widgets/stores/widget-stores.service';
@@ -111,6 +112,7 @@ export interface GatewayHarness {
   readonly controller: WidgetsController;
   readonly stores: WidgetStoresService;
   readonly emitter: WidgetEmitterService;
+  readonly successor: SuccessorMinterService;
   readonly recorder: WriteRecorder;
   /** `IntentGatewayService.submit(intentSubmitArgs(dto, actor))` in the request CLS, inside `scope`. */
   submit(
@@ -163,6 +165,7 @@ export async function bootGateway(): Promise<GatewayHarness> {
     controller,
     stores: moduleRef.get(WidgetStoresService),
     emitter: moduleRef.get(WidgetEmitterService),
+    successor: moduleRef.get(SuccessorMinterService),
     recorder,
     submit: async (actor, body, scope) => {
       const dto = await toSubmitIntentDto(body);
