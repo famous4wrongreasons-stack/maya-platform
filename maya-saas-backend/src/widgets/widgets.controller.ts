@@ -83,6 +83,8 @@ export class WidgetsController {
         : result.verdict.outcome === 'superseded'
           ? 'SUPERSEDED'
           : null);
+    const route =
+      result.verdict.outcome === 'terminate' ? result.verdict.route : undefined;
 
     return {
       contract: 'maya.widget.intent/1',
@@ -105,6 +107,10 @@ export class WidgetsController {
       stopped_at_gate: result.stoppedAt,
       gates_run: result.ran,
       gates_total: this.gateway.gateCount,
+      next_envelope: route?.next_envelope ?? null,
+      resolved_widget: route?.resolved_widget ?? null,
+      owner_decision: route?.owner_decision ?? null,
+      receipt_outcome: route?.receipt_outcome ?? null,
     };
   }
 }

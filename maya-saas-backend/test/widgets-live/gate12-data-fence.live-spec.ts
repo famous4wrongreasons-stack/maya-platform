@@ -81,13 +81,17 @@ import {
   type OwnerSpies,
 } from './support/owner-spies';
 
-/** `widgets.controller.ts`'s response: these seven keys and no other. */
+/** `widgets.controller.ts`'s response: these eleven keys and no other. */
 const CONTROLLER_KEYS = [
   'code',
   'contract',
   'gates_run',
   'gates_total',
   'outcome',
+  'next_envelope',
+  'owner_decision',
+  'receipt_outcome',
+  'resolved_widget',
   // P-RENDER (IR-REN-1): R3.9.3's `reason_text`, the one member SH-22 admits on this response.
   'reason_text',
   'stopped_at_gate',
@@ -170,7 +174,7 @@ const installProjectorSpies = (): ProjectorSpies => {
 };
 
 /**
- * Each principal's own tokens stop at slot 9; the other principal's are refused at Gate 3.
+ * Each principal's own pre-U13 tokens stop stale at slot 9; the other principal's are refused at Gate 3.
  *
  * MERGE FIX (U12a's merge): the own-token stop was slot 8 while slot 8 was the I-CTX stub. U8a built
  * its null-schema lane earlier in this batch and these bodies carry `inputs: null`, which is that
@@ -180,7 +184,7 @@ const installProjectorSpies = (): ProjectorSpies => {
  */
 const expectedStop = (own: boolean) =>
   own
-    ? { stopped_at_gate: '9', gates_run: 10, code: 'mechanism_absent' }
+    ? { stopped_at_gate: '9', gates_run: 10, code: 'handle_stale' }
     : { stopped_at_gate: '3', gates_run: 3, code: 'widget_principal_mismatch' };
 
 /** Every tenant-scoped `Widget*` row of the tenant, serialised, read through the unrecorded client. */
@@ -281,7 +285,7 @@ async function runL00<C>(
         expect(Object.keys(body).sort()).toEqual(CONTROLLER_KEYS);
         expect(body).toMatchObject({
           contract: 'maya.widget.intent/1',
-          outcome: 'refuse',
+          outcome: submitter === owner ? 'superseded' : 'refuse',
           gates_total: 15,
           ...expectedStop(submitter === owner),
         });

@@ -56,19 +56,23 @@ import {
   noWriteViolations,
 } from './support/no-write-recorder';
 
-/** `widgets.controller.ts`'s response: these seven keys and no other. */
+/** `widgets.controller.ts`'s response: these eleven keys and no other. */
 const CONTROLLER_KEYS = [
   'code',
   'contract',
   'gates_run',
   'gates_total',
   'outcome',
+  'next_envelope',
+  'owner_decision',
+  'receipt_outcome',
+  'resolved_widget',
   // P-RENDER (IR-REN-1): R3.9.3's `reason_text`, the one member SH-22 admits on this response.
   'reason_text',
   'stopped_at_gate',
 ];
 
-/** Where the pipeline stops when slot 8 PASSES: Gate 9 is the next unbuilt slot (the 10th run). */
+/** Where the pipeline stops when slot 8 passes but the pre-U13 fixture has no utterance template. */
 const PAST_8 = { stop: '9', ran: 10 } as const;
 /** Where it stops when slot 8 refuses: at 8, the 8th run. */
 const AT_8 = { stop: '8', ran: 8 } as const;
@@ -190,7 +194,7 @@ describe('Gate 8 — input validation, the null-schema lane [U8a]', () => {
       };
     };
 
-    it('T-NULL-NULL [GW]: `inputs: null` on a null-schema record passes slot 8, reads the lowering source once, and the pipeline stops at 9', async () => {
+    it('T-NULL-NULL [GW]: `inputs: null` passes slot 8 and Gate 9 fails stale without a template', async () => {
       const { tenant, actor, record } = await tenantWithRecord('T-NULL-NULL');
       const scope = 'T-NULL-NULL';
       const before = await noWriteBaseline(
@@ -208,8 +212,8 @@ describe('Gate 8 — input validation, the null-schema lane [U8a]', () => {
         stoppedAt: result.stoppedAt,
         ran: result.ran,
       }).toEqual({
-        outcome: 'refuse',
-        code: 'mechanism_absent',
+        outcome: 'superseded',
+        code: 'handle_stale',
         stoppedAt: PAST_8.stop,
         ran: PAST_8.ran,
       });
@@ -517,8 +521,8 @@ describe('Gate 8 — input validation, the null-schema lane [U8a]', () => {
       const passed = await http.postIntent(bearer, body(record, null));
       expect(passed.status).toBe(200);
       expect(passed.body).toMatchObject({
-        outcome: 'refuse',
-        code: 'mechanism_absent',
+        outcome: 'superseded',
+        code: 'handle_stale',
         stopped_at_gate: PAST_8.stop,
         gates_run: PAST_8.ran,
       });
