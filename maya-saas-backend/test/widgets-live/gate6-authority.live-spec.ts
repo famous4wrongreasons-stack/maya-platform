@@ -66,13 +66,13 @@ const CONTROLLER_KEYS = [
   'contract',
   'gates_run',
   'gates_total',
-  'outcome',
   'next_envelope',
+  'outcome',
   'owner_decision',
-  'receipt_outcome',
-  'resolved_widget',
   // P-RENDER (IR-REN-1): R3.9.3's `reason_text`, the one member SH-22 admits on this response.
   'reason_text',
+  'receipt_outcome',
+  'resolved_widget',
   'stopped_at_gate',
 ];
 
@@ -682,6 +682,10 @@ describe('Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736
           stopped_at_gate: '6',
           gates_run: 6,
           gates_total: 15,
+          next_envelope: null,
+          owner_decision: null,
+          receipt_outcome: null,
+          resolved_widget: null,
         },
       });
       expect((reason as { phrase_key?: unknown } | undefined)?.phrase_key).toBe(

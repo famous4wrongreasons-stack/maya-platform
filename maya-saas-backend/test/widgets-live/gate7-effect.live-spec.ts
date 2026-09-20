@@ -65,13 +65,13 @@ const CONTROLLER_KEYS = [
   'contract',
   'gates_run',
   'gates_total',
-  'outcome',
   'next_envelope',
+  'outcome',
   'owner_decision',
-  'receipt_outcome',
-  'resolved_widget',
   // P-RENDER (IR-REN-1): R3.9.3's `reason_text`, the one member SH-22 admits on this response.
   'reason_text',
+  'receipt_outcome',
+  'resolved_widget',
   'stopped_at_gate',
 ];
 
@@ -554,6 +554,10 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
           stopped_at_gate: '7',
           gates_run: 7,
           gates_total: 15,
+          next_envelope: null,
+          owner_decision: null,
+          receipt_outcome: null,
+          resolved_widget: null,
         },
       });
       expect(a.phraseKey).toBe(`widget.refusal.${code}`);
