@@ -25,9 +25,9 @@ on:
   workflow_dispatch:
     inputs:
       gates:
-        description: "Battery ids to run, comma separated (gate<id>.json, e.g. H-harness,T-tables). Empty: every declared battery."
+        description: 'Battery ids to run, comma separated (gate<id>.json, e.g. H-harness,T-tables). Empty: every declared battery.'
         required: false
-        default: ""
+        default: ''
         type: string
   pull_request:
     paths:
