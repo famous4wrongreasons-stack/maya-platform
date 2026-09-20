@@ -12,7 +12,7 @@
 //
 // What it IS: the control those cases will need, on the binary the production build produces.
 //   (1) For a tenant that holds `widgets.runtime`, the route answers a §3.8-conformant submission of an
-//       unminted token with a SLOT-1 refusal and the controller's seven keys — so a later "it stopped at
+//       unminted token with a SLOT-1 refusal and the controller's eleven keys — so a later "it stopped at
 //       12" is a statement about the record, and a later "the body carried no owner byte" is a statement
 //       about a body that was composed rather than about a route that refuses everything.
 //   (2) For a tenant without the entitlement the route is dark before any gate runs (403
@@ -42,13 +42,13 @@ const CONTROLLER_KEYS = [
   'contract',
   'gates_run',
   'gates_total',
-  'outcome',
   'next_envelope',
+  'outcome',
   'owner_decision',
-  'receipt_outcome',
-  'resolved_widget',
   // P-RENDER (IR-REN-1): R3.9.3's `reason_text`, the one member SH-22 admits on this response.
   'reason_text',
+  'receipt_outcome',
+  'resolved_widget',
   'stopped_at_gate',
 ];
 
@@ -130,7 +130,7 @@ export const cases: WidgetsHttpProofCase[] = [
       check(
         JSON.stringify(Object.keys(bodyA ?? {}).sort()) ===
           JSON.stringify(CONTROLLER_KEYS),
-        `the response carried ${JSON.stringify(Object.keys(bodyA ?? {}).sort())}, not the controller's seven keys`,
+        `the response carried ${JSON.stringify(Object.keys(bodyA ?? {}).sort())}, not the controller's eleven keys`,
       );
 
       // Same token, another tenant, identical answer — code and stop included.

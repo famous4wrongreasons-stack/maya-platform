@@ -19,7 +19,7 @@
 //   (2) The pipeline the binary runs is the contract's fifteen, so slot 11 is IN it — `gates_total`
 //       comes from the array, and a Gate 11 claim against a fourteen-gate pipeline would be a claim
 //       about a different pipeline.
-//   (3) R3.7.3 — "frozen nouns never travel to the client". The response has seven keys and no more, on
+//   (3) R3.7.3 — "frozen nouns never travel to the client". The response has eleven keys and no more, on
 //       every answer the route gives, so there is no member a handle, a witness or a noun could ride
 //       out on. That is the same property the submission shape has on the way in (§3.8), checked here
 //       on the way out.
@@ -45,13 +45,13 @@ const CONTROLLER_KEYS = [
   'contract',
   'gates_run',
   'gates_total',
-  'outcome',
   'next_envelope',
+  'outcome',
   'owner_decision',
-  'receipt_outcome',
-  'resolved_widget',
   // P-RENDER (IR-REN-1): R3.9.3's `reason_text`, the one member SH-22 admits on this response.
   'reason_text',
+  'receipt_outcome',
+  'resolved_widget',
   'stopped_at_gate',
 ];
 
@@ -124,13 +124,13 @@ export const cases: WidgetsHttpProofCase[] = [
         `the binary's pipeline reports ${String(body?.gates_total)} gates, not the contract's fifteen; a Gate 11 claim would be about another pipeline`,
       );
 
-      // (3) R3.7.3 on the way out: seven keys, and no member a noun could ride on. Checked on this
+      // (3) R3.7.3 on the way out: eleven keys, and no member a noun could ride on. Checked on this
       // answer and on a second, differently shaped one (a body the shape stage refuses), so the claim
       // is about the ROUTE and not about one branch of it.
       check(
         JSON.stringify(Object.keys(body ?? {}).sort()) ===
           JSON.stringify(CONTROLLER_KEYS),
-        `the route answered with keys ${JSON.stringify(Object.keys(body ?? {}))}, not the seven of the controller's response`,
+        `the route answered with keys ${JSON.stringify(Object.keys(body ?? {}))}, not the eleven of the controller's response`,
       );
       const serialized = JSON.stringify(body);
       for (const forbidden of [
