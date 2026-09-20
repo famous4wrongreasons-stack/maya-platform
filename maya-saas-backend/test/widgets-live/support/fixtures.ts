@@ -461,6 +461,7 @@ export class Fixtures {
       handoffKey?: string | null;
       targetJson?: Record<string, unknown> | null;
       priority?: number;
+      singleUse?: boolean;
     },
     floor?: string,
   ): Promise<void> {

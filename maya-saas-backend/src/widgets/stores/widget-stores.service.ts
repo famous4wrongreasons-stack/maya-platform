@@ -206,4 +206,22 @@ export class WidgetStoresService {
       where: scoped(tenantId, {}),
     });
   }
+
+  // U13a — Gate 13's audit/claim edge. The facade stays the only store surface the router sees.
+  claimIntentRecord(input: {
+    tenantId: string;
+    intentTokenHash: string;
+    singleUse: boolean;
+    now: Date;
+  }): Promise<boolean> {
+    return this.intentAudit.claimRecord(input);
+  }
+
+  reconcileAcceptedReceipt(input: {
+    tenantId: string;
+    intentTokenHash: string;
+    actionReceiptRef: string;
+  }): Promise<boolean> {
+    return this.intentAudit.reconcileAcceptedReceipt(input);
+  }
 }

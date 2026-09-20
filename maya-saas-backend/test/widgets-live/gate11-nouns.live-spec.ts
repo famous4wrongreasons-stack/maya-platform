@@ -37,13 +37,17 @@ import {
 } from './support/bootstrap';
 import { Fixtures, type WidgetFixture } from './support/fixtures';
 
-/** `widgets.controller.ts`'s response: these seven keys and no other. */
+/** `widgets.controller.ts`'s response: these eleven keys and no other. */
 const CONTROLLER_KEYS = [
   'code',
   'contract',
   'gates_run',
   'gates_total',
   'outcome',
+  'next_envelope',
+  'owner_decision',
+  'receipt_outcome',
+  'resolved_widget',
   // P-RENDER (IR-REN-1): R3.9.3's `reason_text`, the one member SH-22 admits on this response.
   'reason_text',
   'stopped_at_gate',
