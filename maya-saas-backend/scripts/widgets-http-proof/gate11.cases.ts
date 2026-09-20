@@ -107,10 +107,11 @@ export const cases: WidgetsHttpProofCase[] = [
       const body = res.body as Record<string, unknown> | null;
       check(
         res.status === 200 &&
-          body?.outcome === 'refuse' &&
+          body?.outcome === 'expired' &&
+          body?.code === null &&
           body?.stopped_at_gate === '1' &&
           body?.gates_run === 1,
-        `a conformant body with an unminted token answered HTTP ${res.status} ${JSON.stringify(body)}, not a slot-1 refusal`,
+        `a conformant body with an unminted token answered HTTP ${res.status} ${JSON.stringify(body)}, not the canonical slot-1 expired outcome`,
       );
 
       // (2) the pipeline the binary runs is §3.9's fifteen, so slot 11 is one of them.

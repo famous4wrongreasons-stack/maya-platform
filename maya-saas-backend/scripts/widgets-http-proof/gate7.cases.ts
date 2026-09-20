@@ -100,10 +100,11 @@ export const cases: WidgetsHttpProofCase[] = [
       const body = first.body as Record<string, unknown> | null;
       check(
         first.status === 200 &&
-          body?.outcome === 'refuse' &&
+          body?.outcome === 'expired' &&
+          body?.code === null &&
           body?.stopped_at_gate === '1' &&
           body?.gates_run === 1,
-        `a conformant body with an unminted token answered HTTP ${first.status} ${JSON.stringify(body)}, not a slot-1 refusal`,
+        `a conformant body with an unminted token answered HTTP ${first.status} ${JSON.stringify(body)}, not the canonical slot-1 expired outcome`,
       );
       check(
         body?.gates_total === 15,

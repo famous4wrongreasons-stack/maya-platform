@@ -108,10 +108,11 @@ export const cases: WidgetsHttpProofCase[] = [
         const body = res.body as Record<string, unknown> | null;
         check(
           res.status === 200 &&
-            body?.outcome === 'refuse' &&
+            body?.outcome === 'expired' &&
+            body?.code === null &&
             body?.stopped_at_gate === '1' &&
             body?.gates_run === 1,
-          `a conformant body with inputs ${JSON.stringify(inputs)} answered HTTP ${res.status} ${JSON.stringify(body)}, not a slot-1 refusal — the shape stage, not Gate 8, decided it`,
+          `a conformant body with inputs ${JSON.stringify(inputs)} answered HTTP ${res.status} ${JSON.stringify(body)}, not the canonical slot-1 expired outcome — the shape stage, not Gate 8, decided it`,
         );
         answers.push(JSON.stringify(body));
       }

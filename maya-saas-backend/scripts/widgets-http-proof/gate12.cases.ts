@@ -117,10 +117,11 @@ export const cases: WidgetsHttpProofCase[] = [
       const bodyA = fromA.body as Record<string, unknown> | null;
       check(
         fromA.status === 200 &&
-          bodyA?.outcome === 'refuse' &&
+          bodyA?.outcome === 'expired' &&
+          bodyA?.code === null &&
           bodyA?.stopped_at_gate === '1' &&
           bodyA?.gates_run === 1,
-        `a conformant body with an unminted token answered HTTP ${fromA.status} ${JSON.stringify(bodyA)}, not a slot-1 refusal`,
+        `a conformant body with an unminted token answered HTTP ${fromA.status} ${JSON.stringify(bodyA)}, not the canonical slot-1 expired outcome`,
       );
       check(
         JSON.stringify(Object.keys(bodyA ?? {}).sort()) ===

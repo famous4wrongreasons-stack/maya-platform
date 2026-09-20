@@ -91,10 +91,11 @@ export const cases: WidgetsHttpProofCase[] = [
       const controlBody = control.body as Record<string, unknown> | null;
       check(
         control.status === 200 &&
-          controlBody?.outcome === 'refuse' &&
+          controlBody?.outcome === 'expired' &&
+          controlBody?.code === null &&
           controlBody?.stopped_at_gate === '1' &&
           controlBody?.gates_run === 1,
-        `a conformant §3.8 body answered HTTP ${control.status} ${JSON.stringify(controlBody)}, not a slot-1 refusal`,
+        `a conformant §3.8 body answered HTTP ${control.status} ${JSON.stringify(controlBody)}, not the canonical slot-1 expired outcome`,
       );
 
       // F88-1 — every one of the 28 keys, at depth 0 and at depth 3.

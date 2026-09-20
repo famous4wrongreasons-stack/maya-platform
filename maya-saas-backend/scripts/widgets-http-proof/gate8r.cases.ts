@@ -135,10 +135,11 @@ export const cases: WidgetsHttpProofCase[] = [
       const withAckBody = withAck.body as Record<string, unknown> | null;
       check(
         withAck.status === 200 &&
-          withAckBody?.outcome === 'refuse' &&
+          withAckBody?.outcome === 'expired' &&
+          withAckBody?.code === null &&
           withAckBody?.stopped_at_gate === '1' &&
           withAckBody?.gates_run === 1,
-        `a conformant body carrying an object readback_ack answered HTTP ${withAck.status} ${JSON.stringify(withAckBody)}, not a slot-1 refusal`,
+        `a conformant body carrying an object readback_ack answered HTTP ${withAck.status} ${JSON.stringify(withAckBody)}, not the canonical slot-1 expired outcome`,
       );
 
       // 2. At slot 1 the ack changes nothing: the readback is not yet anybody's business.
