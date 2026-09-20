@@ -47,7 +47,7 @@ import { gate7 } from './gates/gate7';
 import type { InputValidationGate } from './input-validation/input-validation.gate';
 import { gate8R } from './gates/gate8r';
 import type { Gate8ROwners } from './gates/gate-8r.owners';
-import { LOWERING_PENDING_ON, lower } from './lowering/lowering.gate';
+import { lower } from './lowering/lowering.gate';
 import { GATE10_PENDING_ON, gate10 } from './gates/gate10';
 import { gate11 } from './gates/gate11';
 import {
@@ -331,17 +331,12 @@ export class IntentGatewayService {
       // the mechanism being complete against its interface, not the mechanism being absent.
       run: (ctx) => gate8R(ctx, this.gate8ROwners),
     },
-    // NOT BUILT. §3.9: rendered_utterance = render(utterance_template, server-resolved canonical
-    // labels) is appended as a USER turn with authority NONE — the first durable write. Nothing
-    // performs that append, and §3.9 defines no refusal for a lowering that cannot render (an erased
-    // or absent template), so building it needs a ruling rather than an invented refusal code.
     {
       n: '9',
       name: 'Lowering',
       host: 'chat ingress',
-      pendingOn: LOWERING_PENDING_ON,
       // Seam: `lowering/lowering.gate.ts` (U9b).
-      run: (ctx) => lower(ctx),
+      run: (ctx, tx) => lower(ctx, tx),
     },
     // NOT BUILT. The router runs over THIS request's lowering (Gate 9's fact), and a divergence is
     // written to a durable audit record. What the router resolves against, what "canonical owner"

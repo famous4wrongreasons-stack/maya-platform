@@ -639,7 +639,7 @@ describe('the pipeline after U8a — slots 9 and 10 are refusing stubs', () => {
     expect(r.stoppedAt).toBe('8');
   });
 
-  it('exactly two slots are pending() stubs: 9 and 10; thirteen run their own logic', () => {
+  it('only slot 10 remains a pending() stub after U9b', () => {
     const { gateway } = gatewayFor([record()]);
     // GATE MODULE EXISTS != GATE ENFORCED. A slot that refuses because it is not built is counted
     // as not built, never as a gate that runs.
@@ -647,13 +647,13 @@ describe('the pipeline after U8a — slots 9 and 10 are refusing stubs', () => {
       slotsOf(gateway)
         .filter((g) => g.pendingOn !== undefined)
         .map((g) => g.n),
-    ).toEqual(['9', '10']);
+    ).toEqual(['10']);
     expect(gateway.gateCount).toBe(15);
     // IR-K4K8-1 (g) / IR-12a-2, U12a's merge: slot 12 is the D-7 POINTER — it reads nothing, routes
     // nothing and refuses nothing, because the data fence runs in `WidgetProjectorService`, which
     // Gate 13 calls on its edges. It carries no `pendingOn` (nothing is "not built yet" about it) and
     // `liveGateCount` excludes it BY NAME, so a pointer is never counted as a gate that runs.
-    expect(gateway.liveGateCount).toBe(12);
+    expect(gateway.liveGateCount).toBe(13);
   });
 
   it('every pending slot refuses mechanism_absent, naming itself', async () => {

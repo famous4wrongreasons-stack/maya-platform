@@ -446,7 +446,7 @@ describe('D-10-PIPE — the refusal fence covers every file a SLOT calls, not on
       'lowering/lowering.gate.ts',
     ]) {
       const written = [
-        ...readWidget(f).matchAll(/\brefuse\(\s*'([a-z_]+)'/g),
+        ...readWidget(f).matchAll(/\b(?:refuse|superseded)\(\s*'([a-z_]+)'/g),
       ].map((m) => m[1]);
       expect({ f, written: written.length > 0 }).toEqual({ f, written: true });
       for (const code of written)

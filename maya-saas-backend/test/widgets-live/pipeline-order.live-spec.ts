@@ -207,14 +207,14 @@ describe('T-F11/B-1 — the pipeline order on the live code path [GW]', () => {
         // IR-8a-3 (U8a's merge). This stopped at 8 while slot 8 was the I-CTX stub. Slot 8 is the
         // built null-schema lane now, and the harness body carries `inputs: null` (IR-F88-3's fill of
         // §3.8's required member), which is the lane's PASS — so the first slot that still has no
-        // mechanism is 9. The claim the row makes is unchanged: `ran` equals the stopping slot's
-        // position in §3.9, and the wall moved by exactly one built gate.
+        // template is absent until the mint core lands, so U9b applies DS-03 A at slot 9. The claim
+        // remains that `ran` equals the stopping slot's position in §3.9.
         label: 'valid',
         actor: a,
         token: valid.intentToken,
         widgetId: valid.widgetId,
         stop: '9',
-        code: 'mechanism_absent',
+        code: 'handle_stale',
       },
     ];
 

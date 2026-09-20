@@ -478,18 +478,15 @@ describe('T-ARCH-AUTH — the turn carries no authority (9.4, E10)', () => {
     expect(members).not.toContain('roles');
   });
 
-  it.failing(
-    "T-ARCH-AUTH-2 [XF→U9b] lowerToUserTurn's input declares no authority-bearing member",
-    () => {
-      const sf = parseSrc(STORE);
-      const writer = declarationOf(sf, 'lowerToUserTurn');
-      expect(writer).not.toBeNull();
-      const input = (writer as ts.SignatureDeclaration).parameters[0];
-      const text = input.type?.getText(sf) ?? '';
-      for (const banned of [...AUTHORITY_MEMBERS, ...AUTHORITY_PREFIXES])
-        expect(text).not.toContain(banned);
-    },
-  );
+  it("T-ARCH-AUTH-2 [XF→U9b] lowerToUserTurn's input declares no authority-bearing member", () => {
+    const sf = parseSrc(STORE);
+    const writer = declarationOf(sf, 'lowerToUserTurn');
+    expect(writer).not.toBeNull();
+    const input = (writer as ts.SignatureDeclaration).parameters[0];
+    const text = input.type?.getText(sf) ?? '';
+    for (const banned of [...AUTHORITY_MEMBERS, ...AUTHORITY_PREFIXES])
+      expect(text).not.toContain(banned);
+  });
 });
 
 describe('T-BYTE-2 — the turn table has no authority column (9.4, D12)', () => {
@@ -570,26 +567,22 @@ describe('T-ARCH-WRITER — who may write a conversation turn (9.5, 9.13)', () =
     expect(branders).toEqual(['widgets/lowering/lowering.ts']);
   });
 
-  it.failing(
-    'T-ARCH-WRITER-6 [XF→U9b] lowerToUserTurn is called from slot 9 and from nowhere else',
-    () => {
-      const inSlot9 = slotUnits('9').reduce(
-        (n, u) => n + callsOf(parseSource(u.file, u.source), 'lowerToUserTurn'),
-        0,
-      );
-      expect(inSlot9).toBe(1);
-      const slot9Files = new Set<SrcPath>([
-        ...slotFiles('9'),
-        TIMELINE_FACADE,
-        ...TIMELINE_TABLE_FILES,
-      ]);
-      const elsewhere = productionSources().filter(
-        (f) =>
-          !slot9Files.has(f) && callsOf(parseSrc(f), 'lowerToUserTurn') > 0,
-      );
-      expect(elsewhere).toEqual([]);
-    },
-  );
+  it('T-ARCH-WRITER-6 [XF→U9b] lowerToUserTurn is called from slot 9 and from nowhere else', () => {
+    const inSlot9 = slotUnits('9').reduce(
+      (n, u) => n + callsOf(parseSource(u.file, u.source), 'lowerToUserTurn'),
+      0,
+    );
+    expect(inSlot9).toBe(1);
+    const slot9Files = new Set<SrcPath>([
+      ...slotFiles('9'),
+      TIMELINE_FACADE,
+      ...TIMELINE_TABLE_FILES,
+    ]);
+    const elsewhere = productionSources().filter(
+      (f) => !slot9Files.has(f) && callsOf(parseSrc(f), 'lowerToUserTurn') > 0,
+    );
+    expect(elsewhere).toEqual([]);
+  });
 });
 
 // ── T-ARCH-STORE-METHODS — 9.11: the bypass a name-based fence cannot see ───────────────────────
@@ -627,16 +620,13 @@ describe('T-ARCH-STORE-METHODS — no second method reaches the turn table (9.11
         ]);
   });
 
-  it.failing(
-    'T-ARCH-STORE-METHODS-2 [XF→U9b] the writer and its private insert exist, and both are allowlisted',
-    () => {
-      const sf = parseSrc('widgets/stores/timeline.store.ts');
-      for (const name of ['lowerToUserTurn', 'insertTurn']) {
-        expect([name, declarationOf(sf, name) !== null]).toEqual([name, true]);
-        expect(STORE_METHOD_ALLOWLIST.has(name)).toBe(true);
-      }
-    },
-  );
+  it('T-ARCH-STORE-METHODS-2 [XF→U9b] the writer and its private insert exist, and both are allowlisted', () => {
+    const sf = parseSrc('widgets/stores/timeline.store.ts');
+    for (const name of ['lowerToUserTurn', 'insertTurn']) {
+      expect([name, declarationOf(sf, name) !== null]).toEqual([name, true]);
+      expect(STORE_METHOD_ALLOWLIST.has(name)).toBe(true);
+    }
+  });
 });
 
 // ── T-ARCH-READERS — E10 / 9.11: the transcript feeds nothing yet ───────────────────────────────
@@ -795,28 +785,22 @@ describe('T-ARCH-MODELS — what the lowering may reach (G9-20, G9-21)', () => {
       expect([file, prismaOps(parseSrc(file))]).toEqual([file, []]);
   });
 
-  it.failing(
-    'T-ARCH-MODELS-3 [XF→U9b] the writer touches exactly the record and the turn, no receipt or audit',
-    () => {
-      const sf = parseSrc('widgets/stores/timeline.store.ts');
-      const writer = declarationOf(sf, 'lowerToUserTurn');
-      expect(writer).not.toBeNull();
-      const body = (writer as ts.MethodDeclaration).body?.getText(sf) ?? '';
-      const models = [...delegates()].filter((d) =>
-        new RegExp(`\\b${d}\\b`).test(body),
-      );
-      expect(models.sort()).toEqual([
-        'widgetIntentRecord',
-        'widgetTimelineTurn',
-      ]);
-      for (const banned of [
-        'WidgetIntentReceipt',
-        'WidgetIntentSubmissionAudit',
-        'WidgetErasureTombstone',
-      ])
-        expect(body).not.toContain(banned);
-    },
-  );
+  it('T-ARCH-MODELS-3 [XF→U9b] the writer touches exactly the record and the turn, no receipt or audit', () => {
+    const sf = parseSrc('widgets/stores/timeline.store.ts');
+    const writer = declarationOf(sf, 'lowerToUserTurn');
+    expect(writer).not.toBeNull();
+    const body = (writer as ts.MethodDeclaration).body?.getText(sf) ?? '';
+    const models = [...delegates()].filter((d) =>
+      new RegExp(`\\b${d}\\b`).test(body),
+    );
+    expect(models.sort()).toEqual(['widgetIntentRecord', 'widgetTimelineTurn']);
+    for (const banned of [
+      'WidgetIntentReceipt',
+      'WidgetIntentSubmissionAudit',
+      'WidgetErasureTombstone',
+    ])
+      expect(body).not.toContain(banned);
+  });
 });
 
 // ── T-ARCH-NOWRITE — 9.5: nothing before Gate 9 writes ──────────────────────────────────────────
@@ -859,36 +843,48 @@ describe('T-ARCH-NOWRITE — Gate 9 is the FIRST durable write of the sequence (
 // ── T-ARCH-TX — REQ-TX / D-1: the writer runs in the one request transaction ────────────────────
 
 describe('T-ARCH-TX — Gate 9 writes through the request transaction T (D-1, C11:4861)', () => {
-  it.failing(
-    'T-ARCH-TX [XF→U9b] lowerToUserTurn takes the transaction and opens none of its own',
-    () => {
-      const sf = parseSrc('widgets/stores/timeline.store.ts');
-      const writer = declarationOf(sf, 'lowerToUserTurn');
-      expect(writer).not.toBeNull();
-      const parameters = (writer as ts.SignatureDeclaration).parameters.map(
-        (p) => p.name.getText(sf),
-      );
-      expect(parameters).toContain('tx');
-      const body = (writer as ts.MethodDeclaration).body?.getText(sf) ?? '';
-      // G9S's T-ARCH-NOTX said the opposite. V1.1 (C11:4861) and D-1 replaced it: one transaction,
-      // opened by `submit()`, committed after slot 10 — so a writer that opened its own would put
-      // the turn outside the transaction Gate 10's audit row is written in.
-      expect(body).not.toContain('$transaction');
-    },
-  );
+  it('T-ARCH-TX [XF→U9b] lowerToUserTurn takes the transaction and opens none of its own', () => {
+    const sf = parseSrc('widgets/stores/timeline.store.ts');
+    const writer = declarationOf(sf, 'lowerToUserTurn');
+    expect(writer).not.toBeNull();
+    const parameters = (writer as ts.SignatureDeclaration).parameters.map((p) =>
+      p.name.getText(sf),
+    );
+    expect(parameters).toContain('tx');
+    const body = (writer as ts.MethodDeclaration).body?.getText(sf) ?? '';
+    // G9S's T-ARCH-NOTX said the opposite. V1.1 (C11:4861) and D-1 replaced it: one transaction,
+    // opened by `submit()`, committed after slot 10 — so a writer that opened its own would put
+    // the turn outside the transaction Gate 10's audit row is written in.
+    expect(body).not.toContain('$transaction');
+  });
 
-  it.failing(
-    'T-ARCH-TX-2 [XF→U9b] slot 9 hands the writer the transaction it was given',
-    () => {
-      const lower = declarationOf(
-        parseSrc('widgets/lowering/lowering.gate.ts'),
-        'lower',
-      );
-      expect(lower).not.toBeNull();
-      const parameters = (lower as ts.SignatureDeclaration).parameters.map(
-        (p) => p.name.getText(parseSrc('widgets/lowering/lowering.gate.ts')),
-      );
-      expect(parameters.length).toBe(2);
-    },
-  );
+  it('T-ARCH-TX-2 [XF→U9b] slot 9 hands the writer the transaction it was given', () => {
+    const lower = declarationOf(
+      parseSrc('widgets/lowering/lowering.gate.ts'),
+      'lower',
+    );
+    expect(lower).not.toBeNull();
+    const parameters = (lower as ts.SignatureDeclaration).parameters.map((p) =>
+      p.name.getText(parseSrc('widgets/lowering/lowering.gate.ts')),
+    );
+    expect(parameters.length).toBe(2);
+  });
+});
+
+describe('T9-LOG-1 — stale/render-impossible content never reaches a logger', () => {
+  it('the lowering, slot and timeline writer contain no logging capability', () => {
+    for (const file of [
+      'widgets/lowering/lowering.ts',
+      'widgets/lowering/lowering.gate.ts',
+      'widgets/stores/timeline.store.ts',
+    ]) {
+      const names = referenced(parseSrc(file));
+      expect({
+        file,
+        forbidden: ['console', 'logger', 'Logger', 'log', 'warn'].filter(
+          (name) => names.has(name),
+        ),
+      }).toEqual({ file, forbidden: [] });
+    }
+  });
 });

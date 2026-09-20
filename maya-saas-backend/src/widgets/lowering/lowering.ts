@@ -22,9 +22,10 @@
 // them). AREA-B's "shape defects throw" is NOT carried: a throw would be a 500, and a 500 is the
 // pipeline claiming a fault it does not have.
 //
-// The one thing that IS a defect is `LoweringConstructionDefect`: a Gate 8 fact missing after Gate 8
-// passed. That is a J-1 invariant of the pipeline's own construction (a producer slot that passed
-// without producing), never a property of the widget, so it throws — no verdict, no write.
+// The one thing that IS a defect is `LoweringConstructionDefect`: a required earlier-gate fact or
+// the request transaction missing after the pipeline claimed to reach Gate 9. That is an invariant
+// of the pipeline's own construction, never a property of the widget, so it throws — no verdict,
+// no write.
 //
 // Class: pure. Its unit matrix is a regression aid, not live proof (§0.5).
 
@@ -81,16 +82,22 @@ export const isRenderImpossibility = (
 
 /**
  * The pipeline's own construction is broken: a fact Gate 8 declares itself the producer of is
- * missing after Gate 8 passed (J-1). It is not a verdict and not a refusal — it propagates out of
- * `submit()`, so nothing is written and no outcome is returned.
+ * missing after Gate 8 passed (J-1), or the transactional slot was invoked without T. It is not a
+ * verdict and not a refusal — it propagates out of `submit()`, so nothing is written and no outcome
+ * is returned.
  *
  * The message names the missing fact and nothing else: no template, no label, no transcript byte
  * ever reaches a log through this class.
  */
 export class LoweringConstructionDefect extends Error {
-  constructor(readonly missing: 'loweringSource' | 'selectedLabels') {
+  constructor(
+    readonly missing:
+      'loweringSource' | 'selectedLabels' | 'requestTransaction',
+  ) {
     super(
-      `lowering construction defect: gate 8 passed without ${missing} (J-1)`,
+      missing === 'requestTransaction'
+        ? 'lowering construction defect: missing requestTransaction'
+        : `lowering construction defect: gate 8 passed without ${missing} (J-1)`,
     );
     this.name = 'LoweringConstructionDefect';
   }
