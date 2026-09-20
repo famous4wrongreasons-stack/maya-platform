@@ -66,7 +66,11 @@ describe('Gate 9 lowering (U9b)', () => {
   it.each([
     ['T9-NEG-1', { ...source, utteranceTemplate: null }, ['расписание']],
     ['T9-NEG-2', { ...source, erasedAt: new Date() }, ['расписание']],
-    ['T9-NEG-3', source, null],
+    [
+      'T9-NEG-3',
+      { ...source, utteranceTemplate: 'Покажи показатели' },
+      null,
+    ],
     ['T9-NEG-SHAPE', { ...source, utteranceTemplate: '{{unknown}}' }, []],
   ])(
     '%s returns superseded/handle_stale with no turn',
@@ -89,7 +93,7 @@ describe('Gate 9 lowering (U9b)', () => {
     ['T9-INV24-7', 'Открыть {{selection}}', [], null],
     ['T9-INV24-8', 'Открыть {{selection}}', ['один', 'два'], null],
     ['T9-INV24-9', 'Открыть {{selection}}', ['расписание'], new Date()],
-    ['T9-INV24-10', 'Открыть {{selection}}', null, null],
+    ['T9-INV24-10', 'Покажи показатели', null, null],
   ])(
     '%s maps every render/source impossibility to stale with zero durable writes',
     async (_id, utteranceTemplate, selectedLabels, erasedAt) => {

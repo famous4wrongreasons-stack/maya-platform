@@ -152,7 +152,7 @@ describe('Gate 9 — canonical lowering and atomic timeline append (U9b)', () =>
           tenantId: built.record.tenantId,
         },
       },
-      data: { erasedAt: new Date(), utteranceTemplate: null },
+      data: { erasedAt: new Date() },
     });
 
     const result = await gw.submit(built.actor, body(built.record), 'T9-NEG-8');
@@ -172,9 +172,9 @@ describe('Gate 9 — canonical lowering and atomic timeline append (U9b)', () =>
   }, 60_000);
 
   it.each([
-    ['T9-NEG-1', null],
+    ['T9-INV24-1', null],
     ['T9-NEG-2', '   '],
-    ['T9-NEG-3', '{{unknown}}'],
+    ['T9-INV24-4', '{{name}}'],
   ])(
     '%s [GW] an unrenderable template returns stale and appends no turn',
     async (_id, utteranceTemplate) => {
@@ -336,7 +336,7 @@ describe('Gate 9 — canonical lowering and atomic timeline append (U9b)', () =>
             tenantId: built.record.tenantId,
           },
         },
-        data: { erasedAt: new Date(), utteranceTemplate: null },
+        data: { erasedAt: new Date() },
       });
       http.recorder.clear();
       const result = await http.postIntent(built.bearer, body(built.record));

@@ -39,8 +39,8 @@
     "find": "  if (source.erasedAt !== null || selectedLabels === null)\n    return superseded('handle_stale', 'lowering source unavailable');",
     "replace": "  if (selectedLabels === null)\n    return superseded('handle_stale', 'lowering source unavailable');",
     "killers": [
-      "T9-NEG-2",
-      "T9-INV24-9"
+      "T9-NEG-8",
+      "T9-HTTP-3"
     ],
     "expect": "live-killed"
   },
