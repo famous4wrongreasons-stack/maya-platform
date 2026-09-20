@@ -28,7 +28,12 @@ import { DivergenceStore } from './divergence.store';
 import { IntentAuditStore } from './intent-audit.store';
 import { LoweringSourceReader } from './lowering-source.read';
 import { scoped } from './tenant-scope';
-import { TimelineStore, type TimelineTurnInput } from './timeline.store';
+import {
+  TimelineStore,
+  type LowerToUserTurnInput,
+  type TimelineTurnInput,
+} from './timeline.store';
+import type { RequestTx } from '../authority/principal-view';
 
 export { RETENTION, type TimelineTurnInput } from './timeline.store';
 
@@ -57,6 +62,14 @@ export class WidgetStoresService {
     now = new Date(),
   ): Promise<{ id: string }> {
     return this.timeline.appendTurn(input, now);
+  }
+
+  async lowerToUserTurn(
+    input: LowerToUserTurnInput,
+    tx: RequestTx,
+    now = new Date(),
+  ): Promise<{ id: string; turnIndex: number } | null> {
+    return TimelineStore.lowerToUserTurn(input, tx, now);
   }
 
   async readTimeline(tenantId: string, conversationId: string, limit = 50) {

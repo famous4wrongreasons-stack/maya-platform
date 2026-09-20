@@ -128,7 +128,7 @@ describe('Gate 11 — the witness lane refuses while it is unbound, and its twin
       scope,
     )) as unknown as Record<string, unknown>;
 
-  it('G11-N4d-CONTROL [GW]: today BOTH twins stop at slot 9 — the seam that refuses before Gate 11 is reached', async () => {
+  it('G11-N4d-CONTROL [GW]: today BOTH twins stop stale at slot 9 before Gate 11 is reached', async () => {
     const { actor, witnessed, plain } = await twins();
     for (const [label, record] of [
       ['witnessed', witnessed],
@@ -142,12 +142,12 @@ describe('Gate 11 — the witness lane refuses while it is unbound, and its twin
       //
       // MERGE FIX (U11a's merge): the wall was slot 8 when the unit measured it. U8a built slot 8's
       // null-schema lane in this same batch, and these bodies carry `inputs: null`, which is that
-      // lane's PASS — so the first slot with no mechanism is 9 now. U9b and U10b move it the rest of
-      // the way, and `G11-N4d` below is still `[XF→U10b]`.
+      // lane's PASS. U9b now applies DS-03 A to the pre-U13 fixture's absent template; U10b and the
+      // mint core move the control the rest of the way, and `G11-N4d` remains `[XF→U10b]`.
       expect({ label, stop: body.stopped_at_gate, code: body.code }).toEqual({
         label,
         stop: '9',
-        code: 'mechanism_absent',
+        code: 'handle_stale',
       });
     }
   }, 60_000);

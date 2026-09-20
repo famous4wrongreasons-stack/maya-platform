@@ -1,0 +1,405 @@
+[
+  {
+    "id": "M9-1",
+    "description": "missing loweringSource becomes stale instead of a construction defect",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "  if (source === undefined)\n    throw new LoweringConstructionDefect('loweringSource');",
+    "replace": "  if (source === undefined)\n    return superseded('handle_stale', 'missing lowering source');",
+    "killers": [
+      "T9-DEF-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-2",
+    "description": "missing selectedLabels becomes stale instead of a construction defect",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "  if (selectedLabels === undefined)\n    throw new LoweringConstructionDefect('selectedLabels');",
+    "replace": "  if (selectedLabels === undefined)\n    return superseded('handle_stale', 'missing selected labels');",
+    "killers": [
+      "T9-DEF-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-3",
+    "description": "missing request transaction becomes stale instead of a construction defect",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "  if (tx === null) throw new LoweringConstructionDefect('requestTransaction');",
+    "replace": "  if (tx === null) return superseded('handle_stale', 'missing transaction');",
+    "killers": [
+      "T9-DEF-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-4",
+    "description": "erased source is treated as renderable",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "  if (source.erasedAt !== null || selectedLabels === null)\n    return superseded('handle_stale', 'lowering source unavailable');",
+    "replace": "  if (selectedLabels === null)\n    return superseded('handle_stale', 'lowering source unavailable');",
+    "killers": [
+      "T9-NEG-2",
+      "T9-INV24-9"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M9-5",
+    "description": "unresolvable labels are treated as an empty selection",
+    "killers": [
+      "T9-NEG-3"
+    ],
+    "expect": "build-killed",
+    "edits": [
+      {
+        "file": "src/widgets/lowering/lowering.gate.ts",
+        "find": "  if (source.erasedAt !== null || selectedLabels === null)\n    return superseded('handle_stale', 'lowering source unavailable');",
+        "replace": "  if (source.erasedAt !== null)\n    return superseded('handle_stale', 'lowering source unavailable');\n  const safeLabels = selectedLabels ?? [];"
+      },
+      {
+        "file": "src/widgets/lowering/lowering.gate.ts",
+        "find": "  const rendered = renderUtterance(source.utteranceTemplate, selectedLabels);",
+        "replace": "  const rendered = renderUtterance(source.utteranceTemplate, safeLabels);"
+      }
+    ]
+  },
+  {
+    "id": "M9-6",
+    "description": "render reads a fabricated empty label set",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "  const rendered = renderUtterance(source.utteranceTemplate, selectedLabels);",
+    "replace": "  const rendered = renderUtterance(source.utteranceTemplate, []);",
+    "killers": [
+      "T9-POS-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-7",
+    "description": "render impossibility is ignored",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "  if (isRenderImpossibility(rendered))\n    return superseded('handle_stale', rendered.rule);",
+    "replace": "  if (isRenderImpossibility(rendered))\n    return { outcome: 'pass', facts: {} };",
+    "killers": [
+      "T9-INV24-1",
+      "T9-INV24-4"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M9-8",
+    "description": "rendered bytes are replaced by a constant",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "      renderedUtterance: rendered.utterance,",
+    "replace": "      renderedUtterance: 'mutated' as typeof rendered.utterance,",
+    "killers": [
+      "T9-POS-1",
+      "T9-BYTE-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-9",
+    "description": "the writer is skipped and a synthetic pass is returned",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "  const written = await TimelineStore.lowerToUserTurn(\n    {\n      tenantId: ctx.tenantId,\n      intentTokenHash: ctx.intentTokenHash,\n      conversationId: source.conversationId,\n      principalProofHash: ctx.principalProofHash,\n      channel: ctx.carrier,\n      renderedUtterance: rendered.utterance,\n    },\n    tx,\n    ctx.now,\n  );",
+    "replace": "  const written = { id: 'mutant-turn', turnIndex: 0 };",
+    "killers": [
+      "T9-POS-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-10",
+    "description": "a stale conditional-write result is admitted",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "  if (written === null)\n    return superseded('handle_stale', 'lowering source changed before append');",
+    "replace": "  if (written === undefined)\n    return superseded('handle_stale', 'lowering source changed before append');",
+    "killers": [
+      "T9-NEG-8"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-11",
+    "description": "writer tenant is replaced with conversation identity",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "      tenantId: ctx.tenantId,",
+    "replace": "      tenantId: source.conversationId,",
+    "killers": [
+      "T9-POS-5"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M9-12",
+    "description": "writer token identity is replaced",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "      intentTokenHash: ctx.intentTokenHash,",
+    "replace": "      intentTokenHash: '0'.repeat(64),",
+    "killers": [
+      "T9-POS-5"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M9-13",
+    "description": "writer conversation identity is replaced",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "      intentTokenHash: ctx.intentTokenHash,\n      conversationId: source.conversationId,\n      principalProofHash: ctx.principalProofHash,",
+    "replace": "      intentTokenHash: ctx.intentTokenHash,\n      conversationId: ctx.tenantId,\n      principalProofHash: ctx.principalProofHash,",
+    "killers": [
+      "T9-POS-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-14",
+    "description": "writer principal proof is replaced",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "      principalProofHash: ctx.principalProofHash,",
+    "replace": "      principalProofHash: '0'.repeat(64),",
+    "killers": [
+      "T9-POS-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-15",
+    "description": "writer channel is replaced",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "      channel: ctx.carrier,",
+    "replace": "      channel: 'mutated',",
+    "killers": [
+      "T9-POS-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-16",
+    "description": "writer runs without canonical request time",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "    ctx.now,",
+    "replace": "    new Date(0),",
+    "killers": [
+      "T9-POS-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-17",
+    "description": "lowered turn fact carries the record id instead of the inserted turn",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "        turnId: written.id,",
+    "replace": "        turnId: ctx.record.id,",
+    "killers": [
+      "T9-POS-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-18",
+    "description": "lowered turn fact carries the wrong conversation",
+    "file": "src/widgets/lowering/lowering.gate.ts",
+    "find": "        turnId: written.id,\n        conversationId: source.conversationId,",
+    "replace": "        turnId: written.id,\n        conversationId: ctx.tenantId,",
+    "killers": [
+      "T9-POS-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-19",
+    "description": "per-conversation advisory lock is removed",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`;",
+    "replace": "    void key;",
+    "killers": [
+      "T9-WRITE-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-20",
+    "description": "lock key omits tenant identity",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "  `${Buffer.byteLength(tenantId, 'utf8')}:${tenantId}${Buffer.byteLength(conversationId, 'utf8')}:${conversationId}`;",
+    "replace": "  `${Buffer.byteLength(conversationId, 'utf8')}:${conversationId}`;",
+    "killers": [
+      "T9-CONC-2",
+      "T9-CONC-3"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-21",
+    "description": "lock key omits conversation identity",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "  `${Buffer.byteLength(tenantId, 'utf8')}:${tenantId}${Buffer.byteLength(conversationId, 'utf8')}:${conversationId}`;",
+    "replace": "  `${Buffer.byteLength(tenantId, 'utf8')}:${tenantId}`;",
+    "killers": [
+      "T9-CONC-2",
+      "T9-CONC-3"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-22",
+    "description": "record conditional update is bypassed",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "    const record = await tx.widgetIntentRecord.updateMany({\n      where: scoped(input.tenantId, {\n        intentTokenHash: input.intentTokenHash,\n        erasedAt: null,\n      }),\n      data: { renderedUtterance: input.renderedUtterance },\n    });",
+    "replace": "    const record = { count: 1 };",
+    "killers": [
+      "T9-WRITE-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-23",
+    "description": "record update loses tenant qualification",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "      where: scoped(input.tenantId, {\n        intentTokenHash: input.intentTokenHash,\n        erasedAt: null,\n      }),",
+    "replace": "      where: {\n        intentTokenHash: input.intentTokenHash,\n        erasedAt: null,\n      },",
+    "killers": [
+      "T9-WRITE-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-24",
+    "description": "record update loses token qualification",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "        intentTokenHash: input.intentTokenHash,\n        erasedAt: null,",
+    "replace": "        erasedAt: null,",
+    "killers": [
+      "T9-WRITE-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-25",
+    "description": "record update loses erasure fence",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "        intentTokenHash: input.intentTokenHash,\n        erasedAt: null,",
+    "replace": "        intentTokenHash: input.intentTokenHash,",
+    "killers": [
+      "T9-WRITE-1",
+      "T9-NEG-8"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-26",
+    "description": "conditional update count is ignored",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "    if (record.count !== 1) return null;",
+    "replace": "    if (record.count < 0) return null;",
+    "killers": [
+      "T9-WRITE-STALE"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-27",
+    "description": "turn index lookup loses tenant qualification",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "      where: scoped(input.tenantId, { conversationId: input.conversationId }),",
+    "replace": "      where: { conversationId: input.conversationId },",
+    "killers": [
+      "T9-WRITE-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-28",
+    "description": "turn index lookup loses conversation qualification",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "      where: scoped(input.tenantId, { conversationId: input.conversationId }),",
+    "replace": "      where: scoped(input.tenantId, {}),",
+    "killers": [
+      "T9-WRITE-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-29",
+    "description": "turn index is always zero",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "    const turnIndex = (latest._max.turnIndex ?? -1) + 1;",
+    "replace": "    const turnIndex = 0;",
+    "killers": [
+      "T9-WRITE-1",
+      "T9-WRITE-INDEX"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-30",
+    "description": "lowered turn is written as assistant authority",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "        role: USER_TURN_ROLE,",
+    "replace": "        role: 'assistant',",
+    "killers": [
+      "T9-WRITE-1",
+      "T9-POS-5"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M9-31",
+    "description": "turn tenant is replaced",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "        tenantId: input.tenantId,\n        conversationId: input.conversationId,\n        turnIndex,",
+    "replace": "        tenantId: input.conversationId,\n        conversationId: input.conversationId,\n        turnIndex,",
+    "killers": [
+      "T9-WRITE-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-32",
+    "description": "turn conversation is replaced",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "        tenantId: input.tenantId,\n        conversationId: input.conversationId,\n        turnIndex,",
+    "replace": "        tenantId: input.tenantId,\n        conversationId: input.tenantId,\n        turnIndex,",
+    "killers": [
+      "T9-WRITE-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-33",
+    "description": "turn principal proof is replaced",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "        role: USER_TURN_ROLE,\n        principalProofHash: input.principalProofHash,\n        channel: input.channel,",
+    "replace": "        role: USER_TURN_ROLE,\n        principalProofHash: '0'.repeat(64),\n        channel: input.channel,",
+    "killers": [
+      "T9-WRITE-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M9-34",
+    "description": "turn text is not the lowered bytes",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "        textContent: input.renderedUtterance,",
+    "replace": "        textContent: 'mutated',",
+    "killers": [
+      "T9-BYTE-1",
+      "T9-POS-5"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M9-35",
+    "description": "writer reaches for its own transaction capability instead of remaining transaction-bound",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "    const key = timelineLockKey(input.tenantId, input.conversationId);",
+    "replace": "    const ownTransaction = (tx as unknown as { $transaction?: unknown }).$transaction;\n    if (ownTransaction) throw new Error('own transaction forbidden');\n    const key = timelineLockKey(input.tenantId, input.conversationId);",
+    "killers": [
+      "T-ARCH-TX"
+    ],
+    "expect": "build-killed"
+  }
+]
