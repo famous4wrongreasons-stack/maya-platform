@@ -10,8 +10,13 @@
     ]
   },
   "N4": {
-    "description": "U4: the two mechanisms that shadow slot 4 — `findRecord`'s tenant filter, and slot 3's principal compare. Re-quoted against the gateway AS MERGED (P-PRINCIPAL rewrote slot 3, D-16); slot 3's new null-principal branch needs no neutraliser, because the request under test carries a principal that resolves — it is the RECORD that belongs to another tenant. Re-anchored in U7a's merge: R7-1 adds `findProducingRecord`, whose `where` is spelled the same way, so the anchor now carries the `tx.widgetIntentRecord.findFirst({` line above it and matches the SUBMITTED record's read alone.",
+    "description": "U4: the three mechanisms that now shadow slot 4 — Gate 1's request-scoped seal verification, `findRecord`'s tenant filter, and slot 3's principal compare. P-SEAL made the first mechanism independently stop a foreign-tenant record at slot 1, so E-INDEP must neutralise it too or T4-INDEP can pass without ever exercising Gate 4. The filter anchor carries the submitted-record read so it cannot match `findProducingRecord`; the principal edit remains quoted against the P-PRINCIPAL/D-16 gateway.",
     "edits": [
+      {
+        "file": "src/widgets/intent-gateway.service.ts",
+        "find": "        return gate1(ctx, {\n          verify: (recordHash, scope) =>\n            this.sealVerifier.verify(recordHash, scope, tx),\n        });\n",
+        "replace": "        return PASS;\n"
+      },
       {
         "file": "src/widgets/intent-gateway.service.ts",
         "find": "    const row = await tx.widgetIntentRecord.findFirst({\n      where: { intentTokenHash, tenantId },\n",

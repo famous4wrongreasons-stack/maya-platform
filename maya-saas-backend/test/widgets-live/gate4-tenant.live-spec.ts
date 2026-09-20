@@ -9,16 +9,16 @@
 //         RECORD's tenant. That is `T4-POS`, and it is an ordinary live positive: it needs no
 //         neutraliser, only the wiring.
 //   G4-b  the REFUSAL — `REFUSED/tenant_mismatch`. No conformant input produces it, so it is
-//         defence in depth (L-T). `T4-INDEP` observes it on the build where the two mechanisms that
-//         shadow slot 4 are neutralised (the runner's set `N4`: `findRecord`'s tenant filter, and
-//         slot 3's compare). §0.5's E-INDEP.
+//         defence in depth (L-T). `T4-INDEP` observes it on the build where the three mechanisms that
+//         shadow slot 4 are neutralised (the runner's set `N4`: Gate 1's request-scoped seal,
+//         `findRecord`'s tenant filter, and slot 3's compare). §0.5's E-INDEP.
 //
 // `T4-INDEP` is written to be TRUE ON EVERY BUILD the runner constructs, and that is the point of
 // it. One foreign-tenant submission has exactly three admissible answers, one per world:
 //   world      what is neutralised                stop  code
 //   conformant nothing                            1     EXPIRED                    (the row is never read)
 //   N4-FILTER  the tenant filter alone            3     widget_principal_mismatch  (the hash covers the tenant)
-//   N4         the filter and slot 3's compare    4     tenant_mismatch            (slot 4 is the last one left)
+//   N4         Gate 1, filter and slot 3 compare  4     tenant_mismatch            (slot 4 is the last one left)
 // Anything else — a stop at 5, 7 or 8, or a pass — means a foreign tenant's record got PAST slot 4,
 // and the test is red. So the mutants that make slot 4 useless (`M4-2`, `M4-3`) are killed by it,
 // while the unmutated tree stays green and every other unit in this shared working tree can run.
@@ -246,10 +246,10 @@ async function foreignRecord<C>(fx: Fixtures, level: Level<C>): Promise<void> {
     code: world.code,
     ran: world.ran,
   });
-  // NW at every one of the three stops (D-12): nothing durable is written, and the ONE record read is
-  // the gateway's. P-PRINCIPAL (D-1) added the principal's own reads inside the same transaction — the
-  // K3 exit wording is now "one principal read + one record read" (IR-P-K3) — so the record read is
-  // counted on its own rather than as the only operation.
+  // NW at every one of the three stops (D-12): nothing durable is written. Before P-SEAL, N4 left
+  // Gate 1 active, so the request performed the submitted-record read plus the seal verifier's read.
+  // N4 now neutralises Gate 1 as the third shadowing mechanism; the slot-4 world consequently has
+  // only the submitted-record read. The conformant and filter-only worlds retain both reads.
   expect({ scope, writes: level.writes(scope) }).toEqual({ scope, writes: [] });
   expect({
     scope,
@@ -258,7 +258,10 @@ async function foreignRecord<C>(fx: Fixtures, level: Level<C>): Promise<void> {
       .filter((op) => op.startsWith('WidgetIntentRecord')),
   }).toEqual({
     scope,
-    records: ['WidgetIntentRecord.findFirst', 'WidgetIntentRecord.findFirst'],
+    records:
+      stop === '4'
+        ? ['WidgetIntentRecord.findFirst']
+        : ['WidgetIntentRecord.findFirst', 'WidgetIntentRecord.findFirst'],
   });
 }
 
