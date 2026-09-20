@@ -60,13 +60,17 @@ import {
 /** The slots at or before 6. A stop outside this set is a stop AFTER slot 6 (`'8-R'` is a slot id). */
 const AT_OR_BEFORE_SIX = ['0', '1', '2', '3', '4', '5', '6'];
 
-/** `widgets.controller.ts`'s response: these seven keys and no other. */
+/** `widgets.controller.ts`'s response: these eleven keys and no other. */
 const CONTROLLER_KEYS = [
   'code',
   'contract',
   'gates_run',
   'gates_total',
   'outcome',
+  'next_envelope',
+  'owner_decision',
+  'receipt_outcome',
+  'resolved_widget',
   // P-RENDER (IR-REN-1): R3.9.3's `reason_text`, the one member SH-22 admits on this response.
   'reason_text',
   'stopped_at_gate',

@@ -72,19 +72,23 @@ export class ControlRegistryService {
     // widget belonging to another principal is not found rather than found-and-refused, so a probe
     // cannot use the difference to learn that it exists.
     const target = await this.prisma.widgetEmission.findFirst({
-      where: { tenantId: args.tenantId, widgetId: args.widgetId },
+      where: {
+        tenantId: args.tenantId,
+        widgetId: args.widgetId,
+        // R3.2.4: handler authority is in the query, not a row read followed by a comparison.
+        intentRecords: {
+          some: {
+            tenantId: args.tenantId,
+            principalProofHash: args.principalProofHash,
+          },
+        },
+      },
       select: {
         id: true,
         lifecycleState: true,
-        intentRecords: { select: { principalProofHash: true } },
       },
     });
     if (!target) return { handled: false, code: 'not_found' };
-
-    const owned = target.intentRecords.some(
-      (r) => r.principalProofHash === args.principalProofHash,
-    );
-    if (!owned) return { handled: false, code: 'not_found' };
 
     // Already-terminal states are left alone: dismissing a consumed or superseded widget is a
     // no-op rather than a state change, so a double tap cannot rewrite history.
@@ -95,12 +99,12 @@ export class ControlRegistryService {
     )
       return { handled: true, code: 'dismissed' };
 
-    await this.prisma.widgetEmission.update({
-      where: { id: target.id },
+    await this.prisma.widgetEmission.updateMany({
+      where: { id: target.id, tenantId: args.tenantId, lifecycleState: 'LIVE' },
       data: {
         lifecycleState: 'CANCELLED',
         deliveryStateJson: {
-          state: 'dismissed',
+          state: 'cancelled',
           at: now.toISOString(),
         } as never,
       },

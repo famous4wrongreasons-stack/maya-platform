@@ -245,7 +245,7 @@ describe('WidgetStoresService — every existing method sends what it sent befor
   });
 
   describe('3. receipt store (shell)', () => {
-    it('writeReceipt writes one receipt with actionReceiptRef null, whatever it is given', async () => {
+    it('writeReceipt is idempotent by tenant/token and never retains an utterance echo', async () => {
       const { stores, calls } = storesOver();
       await stores.writeReceipt(
         {
@@ -265,33 +265,92 @@ describe('WidgetStoresService — every existing method sends what it sent befor
           outcome: 'REFUSED',
           refusalCode: 'mechanism_absent',
           answeringChannel: 'pwa',
-          utteranceEcho: 'echo',
+          actionReceiptRef: 'ae-1',
         },
         NOW,
       );
-      const expected = (hash: string, code: unknown, echo: unknown) =>
+      const expected = (
+        hash: string,
+        code: unknown,
+        actionReceiptRef: unknown,
+      ) =>
         exactly({
-          data: {
+          where: {
+            tenantId_intentTokenHash: {
+              tenantId: 't-1',
+              intentTokenHash: hash,
+            },
+            tenantId: 't-1',
+          },
+          create: {
             tenantId: 't-1',
             widgetId: 'w-1',
             intentTokenHash: hash,
             submittedAt: NOW,
             outcome: 'REFUSED',
             refusalCode: code,
-            actionReceiptRef: null,
+            actionReceiptRef,
             answeringChannel: 'pwa',
-            utteranceEcho: echo,
+            utteranceEcho: null,
           },
+          update: {},
           select: { id: true },
         });
       expect(calls.map((c) => `${c.model}.${c.op}`)).toEqual([
-        'widgetIntentReceipt.create',
-        'widgetIntentReceipt.create',
+        'widgetIntentReceipt.upsert',
+        'widgetIntentReceipt.upsert',
       ]);
       expect(exactly(calls[0].args)).toBe(expected('h-1', null, null));
       expect(exactly(calls[1].args)).toBe(
-        expected('h-2', 'mechanism_absent', 'echo'),
+        expected('h-2', 'mechanism_absent', 'ae-1'),
       );
+    });
+
+    it('claim and reconciliation are tenant-scoped compare-and-set writes', async () => {
+      const { stores, calls } = storesOver({ count: 1 });
+      await expect(
+        stores.claimIntentRecord({
+          tenantId: 't-1',
+          intentTokenHash: 'h-1',
+          singleUse: true,
+          now: NOW,
+        }),
+      ).resolves.toBe(true);
+      await expect(
+        stores.reconcileAcceptedReceipt({
+          tenantId: 't-1',
+          intentTokenHash: 'h-1',
+          actionReceiptRef: 'ae-1',
+        }),
+      ).resolves.toBe(true);
+      expect(calls).toEqual([
+        {
+          model: 'widgetIntentRecord',
+          op: 'updateMany',
+          args: {
+            where: {
+              tenantId: 't-1',
+              intentTokenHash: 'h-1',
+              singleUse: true,
+              consumedAt: null,
+            },
+            data: { consumedAt: NOW },
+          },
+        },
+        {
+          model: 'widgetIntentReceipt',
+          op: 'updateMany',
+          args: {
+            where: {
+              tenantId: 't-1',
+              intentTokenHash: 'h-1',
+              outcome: 'ACCEPTED',
+              actionReceiptRef: null,
+            },
+            data: { actionReceiptRef: 'ae-1' },
+          },
+        },
+      ]);
     });
   });
 
@@ -479,7 +538,7 @@ describe('the stores split (U0, D-6): four sub-stores behind one facade, one ten
     return decl;
   };
 
-  it('the facade keeps exactly the pre-split public methods', () => {
+  it('the facade keeps the pre-split surface plus U13a claim and reconciliation', () => {
     expect(
       Object.getOwnPropertyNames(WidgetStoresService.prototype)
         .filter((m) => m !== 'constructor')
@@ -487,11 +546,13 @@ describe('the stores split (U0, D-6): four sub-stores behind one facade, one ten
     ).toEqual(
       [
         'appendTurn',
+        'claimIntentRecord',
         'countFreeInputFields',
         'lowerToUserTurn',
         'putDraft',
         'readDraft',
         'readTimeline',
+        'reconcileAcceptedReceipt',
         'recordFreeInput',
         'recordSubmission',
         'writeReceipt',
