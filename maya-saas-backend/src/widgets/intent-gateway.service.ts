@@ -58,6 +58,7 @@ import {
 import type { NounResolutionPorts } from './noun-resolution/noun-resolution.ports';
 import { pass } from './gates/verdict';
 import { gate13 } from './gates/gate13';
+import { EffectRouterService } from './routing/effect-router.service';
 import { channelMaxLevel } from './authority/authority-resolver';
 
 // Slot seams (GATES-PLAN-V11 D-18, I-CTX). Slots 1, 4, 8, 9 and 10 each call one file, and that file's
@@ -164,6 +165,7 @@ export class IntentGatewayService {
     private readonly gate8ROwners: Gate8ROwners,
     @Inject(NOUN_RESOLUTION_PORTS)
     private readonly nounPorts: NounResolutionPorts,
+    private readonly effectRouter: EffectRouterService,
   ) {}
 
   /**
@@ -378,7 +380,7 @@ export class IntentGatewayService {
       n: '13',
       name: 'Effect routing',
       host: 'effect router',
-      run: (ctx) => gate13(ctx),
+      run: (ctx) => gate13(ctx, this.effectRouter),
     },
     // Gate 14 stays with the Action Engine, which enforces it on its own ingress — on-path and
     // correct. Moving it here for a tidier count would move a fence away from its owner.

@@ -6,6 +6,7 @@
 // `widget-stores.service.ts`. Gate 13's receipt reference and claim land here with U13a.
 
 import { PrismaService } from '../../prisma/prisma.service';
+import { scoped } from './tenant-scope';
 
 export class IntentAuditStore {
   constructor(private readonly prisma: PrismaService) {}
@@ -62,23 +63,78 @@ export class IntentAuditStore {
       outcome: string;
       refusalCode?: string | null;
       answeringChannel: string;
-      utteranceEcho?: string | null;
+      actionReceiptRef?: string | null;
     },
     now = new Date(),
   ): Promise<{ id: string }> {
-    return this.prisma.widgetIntentReceipt.create({
-      data: {
+    return this.prisma.widgetIntentReceipt.upsert({
+      where: scoped(input.tenantId, {
+        tenantId_intentTokenHash: {
+          tenantId: input.tenantId,
+          intentTokenHash: input.intentTokenHash,
+        },
+      }),
+      create: {
         tenantId: input.tenantId,
         widgetId: input.widgetId,
         intentTokenHash: input.intentTokenHash,
         submittedAt: now,
         outcome: input.outcome,
         refusalCode: input.refusalCode ?? null,
-        actionReceiptRef: null,
+        actionReceiptRef: input.actionReceiptRef ?? null,
         answeringChannel: input.answeringChannel,
-        utteranceEcho: input.utteranceEcho ?? null,
+        // B-29: adjudication receipts never retain a copy of the utterance. The conversation owns
+        // that content; the receipt owns only the closed outcome and the canonical receipt pointer.
+        utteranceEcho: null,
       },
+      // A retry observes the same adjudication. It must not rewrite its time, outcome or evidence.
+      update: {},
       select: { id: true },
     });
+  }
+
+  /**
+   * AMB-54: claim a single-use record immediately before its resolved destination runs.
+   *
+   * Gate 1's earlier read cannot serialize two concurrent submissions because its request
+   * transaction has committed before owner routing begins. This compare-and-set is the decisive
+   * claim. A reusable record needs no claim and is reported as claimed without a write.
+   */
+  async claimRecord(input: {
+    tenantId: string;
+    intentTokenHash: string;
+    singleUse: boolean;
+    now: Date;
+  }): Promise<boolean> {
+    if (!input.singleUse) return true;
+    const claimed = await this.prisma.widgetIntentRecord.updateMany({
+      where: scoped(input.tenantId, {
+        intentTokenHash: input.intentTokenHash,
+        singleUse: true,
+        consumedAt: null,
+      }),
+      data: { consumedAt: input.now },
+    });
+    return claimed.count === 1;
+  }
+
+  /**
+   * B-29 / AMB-56: UNKNOWN is admitted as ACCEPTED. Reconciliation fills the canonical receipt
+   * reference on that SAME adjudication; it never creates a second receipt or rewrites the outcome.
+   */
+  async reconcileAcceptedReceipt(input: {
+    tenantId: string;
+    intentTokenHash: string;
+    actionReceiptRef: string;
+  }): Promise<boolean> {
+    const updated = await this.prisma.widgetIntentReceipt.updateMany({
+      where: scoped(input.tenantId, {
+        intentTokenHash: input.intentTokenHash,
+        outcome: 'ACCEPTED',
+        actionReceiptRef: null,
+      }),
+      data: { actionReceiptRef: input.actionReceiptRef },
+    });
+    return updated.count === 1;
   }
 }

@@ -1,0 +1,201 @@
+[
+  {
+    "id": "M13-1",
+    "description": "a missing record passes Gate 13",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "    if (record === null)\n      return { outcome: 'refuse', code: 'effect_not_admissible' };",
+    "replace": "    if (record === null) return { outcome: 'pass' };",
+    "killers": [
+      "G13-P01"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-2",
+    "description": "NONE enters the routable effect vocabulary",
+    "killers": [
+      "G13-R10"
+    ],
+    "expect": "build-killed",
+    "edits": [
+      {
+        "file": "src/widgets/routing/effect-router.service.ts",
+        "find": "type RoutableEffect = Exclude<EffectClass, 'NONE'>;",
+        "replace": "type RoutableEffect = EffectClass;"
+      },
+      {
+        "file": "src/widgets/routing/effect-router.service.ts",
+        "find": "export const ROUTABLE_EFFECTS: readonly RoutableEffect[] = Object.freeze([\n  'NAVIGATE',",
+        "replace": "export const ROUTABLE_EFFECTS: readonly RoutableEffect[] = Object.freeze([\n  'NONE',\n  'NAVIGATE',"
+      }
+    ]
+  },
+  {
+    "id": "M13-2b",
+    "description": "the closed switch gains a default edge",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "      case 'COMMIT':\n        return null;\n    }",
+    "replace": "      case 'COMMIT':\n        return null;\n      default:\n        return null;\n    }",
+    "killers": [
+      "B15/B28"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-3",
+    "description": "an absent destination is executed instead of refusing before claim",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "    if (destination === null)\n      return { outcome: 'refuse', code: 'mechanism_absent' };",
+    "replace": "    if (false && destination === null)\n      return { outcome: 'refuse', code: 'mechanism_absent' };",
+    "killers": [
+      "N02/N03/N05"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-3b",
+    "description": "the compare-and-set result is ignored",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "    if (!claimed) return { outcome: 'expired' };",
+    "replace": "    if (false && !claimed) return { outcome: 'expired' };",
+    "killers": [
+      "AMB-54"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-4",
+    "description": "every record is claimed as single use",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "      singleUse: record.singleUse,",
+    "replace": "      singleUse: true,",
+    "killers": [
+      "G13-I5"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-10",
+    "description": "the adjudication receipt write is removed",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "    await this.stores.writeReceipt(\n      {",
+    "replace": "    if (false) await this.stores.writeReceipt(\n      {",
+    "killers": [
+      "G13-R5"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-12",
+    "description": "the receipt stores a fabricated refusal outcome",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "        outcome: routed.receiptOutcome,",
+    "replace": "        outcome: 'REFUSED',",
+    "killers": [
+      "G13-R5"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-14",
+    "description": "receipt audit retains fabricated utterance content",
+    "file": "src/widgets/stores/intent-audit.store.ts",
+    "find": "        utteranceEcho: null,",
+    "replace": "        utteranceEcho: 'mutated',",
+    "killers": [
+      "writeReceipt is idempotent by tenant/token and never retains an utterance echo"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-15",
+    "description": "receipt idempotency is replaced by a non-upsert writer",
+    "killers": [
+      "writeReceipt is idempotent by tenant/token and never retains an utterance echo"
+    ],
+    "expect": "build-killed",
+    "edits": [
+      {
+        "file": "src/widgets/stores/intent-audit.store.ts",
+        "find": "    return this.prisma.widgetIntentReceipt.upsert({",
+        "replace": "    return this.prisma.widgetIntentReceipt.create({"
+      },
+      {
+        "file": "src/widgets/stores/intent-audit.store.ts",
+        "find": "      where: scoped(input.tenantId, {\n        tenantId_intentTokenHash: {\n          tenantId: input.tenantId,\n          intentTokenHash: input.intentTokenHash,\n        },\n      }),\n",
+        "replace": ""
+      },
+      {
+        "file": "src/widgets/stores/intent-audit.store.ts",
+        "find": "      // A retry observes the same adjudication. It must not rewrite its time, outcome or evidence.\n      update: {},\n",
+        "replace": ""
+      }
+    ]
+  },
+  {
+    "id": "M13-18",
+    "description": "reconciliation may overwrite a non-accepted adjudication",
+    "file": "src/widgets/stores/intent-audit.store.ts",
+    "find": "        outcome: 'ACCEPTED',\n        actionReceiptRef: null,",
+    "replace": "        actionReceiptRef: null,",
+    "killers": [
+      "claim and reconciliation are tenant-scoped compare-and-set writes"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-20",
+    "description": "COMMIT gains a pretend successful destination before its owner lands",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "      case 'COMMIT':\n        return null;",
+    "replace": "      case 'COMMIT':\n        return async () => admitted();",
+    "killers": [
+      "N02/N03/N05"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-22",
+    "description": "the router silently admits an unknown effect",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "    if (record.effect === 'NONE' || !isRoutableEffect(record.effect))",
+    "replace": "    if (record.effect === 'NONE' && !isRoutableEffect(record.effect))",
+    "killers": [
+      "G13-P01"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-23",
+    "description": "the route response hides the owner adjudication",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "      receipt_outcome: routed.receiptOutcome,",
+    "replace": "      receipt_outcome: null,",
+    "killers": [
+      "G13-R5"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-25",
+    "description": "a CONTROL token without a principal proof reaches the handler",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "      input.principalProofHash.length === 0 ||\n      subject?.space !== 'CONTROL'",
+    "replace": "      subject?.space !== 'CONTROL'",
+    "killers": [
+      "N-CTRL-FOREIGN-P"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M-R324",
+    "description": "the control handler reads by tenant/widget without a principal predicate",
+    "file": "src/widgets/control/control-registry.service.ts",
+    "find": "        intentRecords: {\n          some: {\n            tenantId: args.tenantId,\n            principalProofHash: args.principalProofHash,\n          },\n        },",
+    "replace": "",
+    "killers": [
+      "R3.2.4"
+    ],
+    "expect": "build-killed"
+  }
+]
