@@ -65,8 +65,11 @@ The mutation runner also gained a mirror-only `--forceExit` fence. A mutant can 
 its declared assertion has already failed and after Jest has written the complete JSON report; the
 runner must classify that report instead of waiting forever on the mutant's leaked handle. Ordinary
 CKPT regressions do not use this option and continue to own clean-shutdown coverage. The mandatory CI
-planner cardinality is pinned at 25 batteries, 31 jobs and 288 declared mutants after adding the
-P-RENDER and P-MINT batteries.
+planner cardinality is pinned at 25 batteries, 35 jobs and 288 declared mutants after adding the
+P-RENDER and P-MINT batteries. Mutants from Gates 6, 7 and 9 run in four complete-test partitions;
+P-MINT runs in two. Gate 6 reached the unchanged 180-minute CI limit and P-MINT completed at 178
+minutes on the final-head run, so keeping either as one job would make the mandatory receipt depend
+on runner speed. Partition assembly remains fail-closed over the complete declaration set.
 
 ## Scope and release state
 

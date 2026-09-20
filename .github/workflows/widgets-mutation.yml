@@ -2,10 +2,11 @@ name: Widgets Mutation
 
 # The widget gates' mutation battery (integration plan §4.5; GATES-PLAN-V11 I-HAR): every mutant a gate unit
 # declares in `maya-saas-backend/test/widgets-live/mutations/gate<id>.json` is applied to a temporary copy of the
-# backend, never to the checkout, and must turn its declared killer red. Gate 7's measured full run exceeds
-# the unchanged 180-minute job budget, so its mutants run in four partitions with UNFILTERED tests and
-# independent controls. Other batteries run whole. Mandatory aggregation refuses missing/duplicate/stale
-# parts, restricted tests, crashes and vacuous kills before publishing 19 complete battery receipts.
+# backend, never to the checkout, and must turn its declared killer red. Measured full runs of Gates 6, 7
+# and 9 exceed the unchanged 180-minute job budget, while P-mint completed with only two minutes of margin.
+# Those batteries partition mutants while retaining UNFILTERED tests and independent controls in every job.
+# Other batteries run whole. Mandatory aggregation refuses missing/duplicate/stale
+# parts, restricted tests, crashes and vacuous kills before publishing 25 complete battery receipts.
 # CKPT-W step 7 dispatches this workflow for the flipping commit with
 # `gates=<every battery touched in the wave>` (pushes to the canonical closure branch also run every battery) and records every shard's run and artifact
 # id. Only `[HTTP]` kills in a shard report count toward L/L-T (§3.2). While no battery is declared the one shard
@@ -24,9 +25,9 @@ on:
   workflow_dispatch:
     inputs:
       gates:
-        description: 'Battery ids to run, comma separated (gate<id>.json, e.g. H-harness,T-tables). Empty: every declared battery.'
+        description: "Battery ids to run, comma separated (gate<id>.json, e.g. H-harness,T-tables). Empty: every declared battery."
         required: false
-        default: ''
+        default: ""
         type: string
   pull_request:
     paths:
