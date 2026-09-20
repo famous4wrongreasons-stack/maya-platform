@@ -66,11 +66,7 @@ describe('Gate 9 lowering (U9b)', () => {
   it.each([
     ['T9-NEG-1', { ...source, utteranceTemplate: null }, ['расписание']],
     ['T9-NEG-2', { ...source, erasedAt: new Date() }, ['расписание']],
-    [
-      'T9-NEG-3',
-      { ...source, utteranceTemplate: 'Покажи показатели' },
-      null,
-    ],
+    ['T9-NEG-3', { ...source, utteranceTemplate: 'Покажи показатели' }, null],
     ['T9-NEG-SHAPE', { ...source, utteranceTemplate: '{{unknown}}' }, []],
   ])(
     '%s returns superseded/handle_stale with no turn',
