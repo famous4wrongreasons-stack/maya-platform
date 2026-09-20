@@ -559,17 +559,21 @@ describe('K3 CI exit — indistinguishable latency', () => {
       for (let i = 0; i < n; i += 1) await gateway.submit(args());
       return Number(process.hrtime.bigint() - t0) / n;
     };
-    await round(nearMiss, 50);
-    await round(farMiss, 50);
+    // A 40-call batch completed inside one scheduler-noise window when this
+    // suite ran beside the full Jest pool (observed spread: 0.625 on Node 22).
+    // Keep the same security bound, but average each sample over enough real
+    // gateway submissions that a single scheduling preemption cannot decide it.
+    await round(nearMiss, 200);
+    await round(farMiss, 200);
     const near: number[] = [];
     const far: number[] = [];
     for (let r = 0; r < 10; r += 1) {
       if (r % 2 === 0) {
-        near.push(await round(nearMiss, 40));
-        far.push(await round(farMiss, 40));
+        near.push(await round(nearMiss, 400));
+        far.push(await round(farMiss, 400));
       } else {
-        far.push(await round(farMiss, 40));
-        near.push(await round(nearMiss, 40));
+        far.push(await round(farMiss, 400));
+        near.push(await round(nearMiss, 400));
       }
     }
     const median = (xs: number[]) =>
