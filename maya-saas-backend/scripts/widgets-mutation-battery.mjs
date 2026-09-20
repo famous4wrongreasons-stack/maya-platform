@@ -521,9 +521,16 @@ const runSteps = (edits, steps) => {
   // Never read a previous run's report: if this run's jest dies before writing, the file must be absent.
   for (const stale of [unitJson, liveJson]) fs.rmSync(stale, { force: true });
   const cache = `--cacheDirectory=${JEST_CACHE}`;
+  // A mutant may break teardown after its declared killer has already failed. Jest has written the
+  // complete JSON assertion report at that point but otherwise waits forever on the mutant's leaked
+  // handle, preventing the runner from classifying the kill and advancing. `--forceExit` is confined
+  // to disposable mutant/control mirrors; the ordinary CKPT regression still owns clean-shutdown
+  // coverage. We continue to require the JSON report, parse every failed assertion and reject a dead
+  // Jest process that writes no report.
+  const forceExit = '--forceExit';
   const outcome = {};
   if (steps.includes('unit'))
-    outcome.unit = run(backend, 'npx', ['jest', '--runInBand', cache, '--json', `--outputFile=${unitJson}`, ...(unitTests ? [unitTests] : [])]);
+    outcome.unit = run(backend, 'npx', ['jest', '--runInBand', forceExit, cache, '--json', `--outputFile=${unitJson}`, ...(unitTests ? [unitTests] : [])]);
   if (steps.includes('typecheck')) outcome.typecheck = run(backend, 'npm', ['run', '-s', 'typecheck:widgets-live']);
   if (steps.includes('k3')) outcome.k3 = run(backend, process.execPath, ['scripts/k3-gateway-check.mjs']);
   if (steps.includes('live'))
@@ -532,6 +539,7 @@ const runSteps = (edits, steps) => {
       '--config',
       './test/jest-widgets-live.json',
       '--runInBand',
+      forceExit,
       cache,
       '--json',
       `--outputFile=${liveJson}`,

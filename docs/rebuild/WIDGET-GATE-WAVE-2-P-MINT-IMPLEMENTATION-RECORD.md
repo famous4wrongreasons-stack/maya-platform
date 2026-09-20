@@ -61,6 +61,13 @@ The P-MINT proof covers:
 - concurrent successor claims and restart-safe terminal outcomes;
 - one mutation per registry/typing/backstop branch in `gateP-mint.json`.
 
+The mutation runner also gained a mirror-only `--forceExit` fence. A mutant can break teardown after
+its declared assertion has already failed and after Jest has written the complete JSON report; the
+runner must classify that report instead of waiting forever on the mutant's leaked handle. Ordinary
+CKPT regressions do not use this option and continue to own clean-shutdown coverage. The mandatory CI
+planner cardinality is pinned at 25 batteries, 31 jobs and 288 declared mutants after adding the
+P-RENDER and P-MINT batteries.
+
 ## Scope and release state
 
 `PRODUCTION DEPLOYMENT: NO`
