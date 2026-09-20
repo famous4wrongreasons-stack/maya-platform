@@ -1,12 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import type { EffectClass } from '../../widget-contract/intent';
 import type { GateContext, GateVerdict, RouteResult } from '../gate.types';
 import { ControlRegistryService } from '../control/control-registry.service';
-import { WidgetStoresService } from '../stores/widget-stores.service';
 import { subjectOf } from '../gates/subject';
 import { routingInputOf } from './routing-input';
-import type { EffectRouteOutcome } from './effect-router.ports';
+import {
+  EFFECT_ROUTE_AUDIT,
+  type EffectRouteAuditPort,
+  type EffectRouteOutcome,
+} from './effect-router.ports';
 
 type Destination = () => Promise<EffectRouteOutcome>;
 type RoutableEffect = Exclude<EffectClass, 'NONE'>;
@@ -43,7 +46,8 @@ const admitted = (
 @Injectable()
 export class EffectRouterService {
   constructor(
-    private readonly stores: WidgetStoresService,
+    @Inject(EFFECT_ROUTE_AUDIT)
+    private readonly stores: EffectRouteAuditPort,
     private readonly controls: ControlRegistryService,
   ) {}
 

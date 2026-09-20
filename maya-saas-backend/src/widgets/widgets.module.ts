@@ -22,6 +22,7 @@ import { WidgetOwnerPortsModule } from './owner-ports/widget-owner-ports.module'
 import { NOUN_RESOLUTION_PORTS_UNBOUND } from './noun-resolution/noun-resolution.ports';
 import { WidgetProjectorService } from './projection/widget-projector.service';
 import { EffectRouterService } from './routing/effect-router.service';
+import { EFFECT_ROUTE_AUDIT } from './routing/effect-router.ports';
 import { assertRoutingResolves } from './routing/deterministic-router';
 import { LoweringSourceReader } from './stores/lowering-source.read';
 import { WidgetStoresService } from './stores/widget-stores.service';
@@ -46,6 +47,7 @@ import { WidgetsController } from './widgets.controller';
   providers: [
     IntentGatewayService,
     WidgetStoresService,
+    { provide: EFFECT_ROUTE_AUDIT, useExisting: WidgetStoresService },
     WidgetEmitterService,
     ControlRegistryService,
     // P-SEAL (IR-SEAL-1), B-22: the seal key is HELD BY THE MINTER's side, never by the gateway. There
