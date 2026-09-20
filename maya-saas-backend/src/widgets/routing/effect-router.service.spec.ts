@@ -52,7 +52,7 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
   });
 
   it.each(['NONE', 'INVENTED'])(
-    'G13-P01/B28 refuses %s without claim, handler or receipt',
+    'B28 refuses %s without claim, handler or receipt',
     async (effect) => {
       const { router, stores, controls } = fixture();
       await expect(
@@ -63,6 +63,18 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
       expect(controls.dismiss).not.toHaveBeenCalled();
     },
   );
+
+  it('G13-P01 refuses a missing record without claim, handler or receipt', async () => {
+    const { router, stores, controls } = fixture();
+    const input = { ...ctx(rec(), { principal: PRINCIPAL }), record: null };
+    await expect(router.route(input)).resolves.toEqual({
+      outcome: 'refuse',
+      code: 'effect_not_admissible',
+    });
+    expect(stores.claimIntentRecord).not.toHaveBeenCalled();
+    expect(stores.writeReceipt).not.toHaveBeenCalled();
+    expect(controls.dismiss).not.toHaveBeenCalled();
+  });
 
   it.each([
     'NAVIGATE',
