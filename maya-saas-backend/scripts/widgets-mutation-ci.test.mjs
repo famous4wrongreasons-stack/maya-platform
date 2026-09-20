@@ -44,11 +44,11 @@ function fixture() {
   });
 }
 
-test('19 batteries, 22 jobs: disjoint Gate 7 partitions cover the same 204 declarations', () => {
+test('23 batteries, 29 jobs: disjoint Gate 7/9 partitions cover the same 257 declarations', () => {
   const p = plan(declared);
-  assert.equal(p.gates.length, 19); assert.equal(p.matrix.include.length, 22);
+  assert.equal(p.gates.length, 23); assert.equal(p.matrix.include.length, 29);
   const r = assemble(declared, fixture(), head);
-  assert.equal(r.length, 19); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 204);
+  assert.equal(r.length, 23); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 257);
   for (const report of r) {
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
@@ -56,19 +56,21 @@ test('19 batteries, 22 jobs: disjoint Gate 7 partitions cover the same 204 decla
 });
 
 test('runner dry-run independently executes the same disjoint partition selection', () => {
-  const seen = [];
-  for (let index = 1; index <= 4; index++) {
-    const child = spawnSync(process.execPath, ['scripts/widgets-mutation-battery.mjs', '--gate', '7', '--partition', `${index}/4`, '--dry-run'], { cwd: backend, encoding: 'utf8' });
-    assert.equal(child.status, 0, child.stderr);
-    const r = JSON.parse(child.stdout);
-    assert.equal(r.status, 'DRY-RUN');
-    assert.deepEqual(r.partition, selectPartition(declared['7'].mutants, `${index}/4`).metadata);
-    assert.equal(r.battery_hashes['gate7.json'], declared['7'].hash);
-    assert.deepEqual(r.mutants.map((m) => m.id), r.partition.mutant_ids);
-    for (const m of r.mutants) assert.deepEqual(m.steps, m.expect === 'build-killed' ? ['unit', 'typecheck', 'k3'] : ['live']);
-    seen.push(...r.mutants.map((m) => m.id));
+  for (const gate of ['7', '9']) {
+    const seen = [];
+    for (let index = 1; index <= 4; index++) {
+      const child = spawnSync(process.execPath, ['scripts/widgets-mutation-battery.mjs', '--gate', gate, '--partition', `${index}/4`, '--dry-run'], { cwd: backend, encoding: 'utf8' });
+      assert.equal(child.status, 0, child.stderr);
+      const r = JSON.parse(child.stdout);
+      assert.equal(r.status, 'DRY-RUN');
+      assert.deepEqual(r.partition, selectPartition(declared[gate].mutants, `${index}/4`).metadata);
+      assert.equal(r.battery_hashes[`gate${gate}.json`], declared[gate].hash);
+      assert.deepEqual(r.mutants.map((m) => m.id), r.partition.mutant_ids);
+      for (const m of r.mutants) assert.deepEqual(m.steps, m.expect === 'build-killed' ? ['unit', 'typecheck', 'k3'] : ['live']);
+      seen.push(...r.mutants.map((m) => m.id));
+    }
+    assert.equal(new Set(seen).size, declared[gate].mutants.length);
   }
-  assert.equal(new Set(seen).size, declared['7'].mutants.length);
 });
 
 test('invalid partition/gate requests fail before execution', () => {

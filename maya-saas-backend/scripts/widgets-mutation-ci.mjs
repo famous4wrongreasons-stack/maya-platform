@@ -34,8 +34,11 @@ export function plan(declared, requested = '') {
   assert(gates.length > 0 && new Set(gates).size === gates.length, 'empty or duplicate requested batteries');
   for (const gate of gates) assert(Object.hasOwn(declared, gate), `undeclared battery ${gate}`);
   const include = gates.flatMap((gate) => {
-    // The previous unfiltered Gate 7 run took 214 minutes; the unchanged job budget is 180.
-    const count = gate === '7' ? 4 : 1;
+    // The previous unfiltered Gate 7 run took 214 minutes, and the first complete
+    // Gate 9 run exceeded three hours; the unchanged job budget is 180. Partition
+    // mutants only: every job retains its full tests and controls, and assemble()
+    // refuses incomplete or overlapping coverage.
+    const count = gate === '7' || gate === '9' ? 4 : 1;
     return Array.from({ length: count }, (_, i) => ({ gate, partition: count === 1 ? '' : `${i + 1}/${count}`, slot: count === 1 ? gate : `${gate}-part-${i + 1}-of-${count}` }));
   });
   return { gates, matrix: { include } };
