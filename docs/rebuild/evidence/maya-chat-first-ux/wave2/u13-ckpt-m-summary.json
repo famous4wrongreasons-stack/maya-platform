@@ -1,0 +1,51 @@
+{
+  "contract": "maya.widget-gates.wave2.ckpt-m/1",
+  "unit": "U13a",
+  "source_head": "f29002dd33de88e8e7a50e6dd8796e2deb47ce8c",
+  "node_runtime": "22.23.2",
+  "checks": {
+    "unit_regression": {
+      "status": "PASS",
+      "suites": "541/541",
+      "tests": "5128/5128",
+      "log_sha256": "5e91868b7a71c435c62a6fb2b293fb47c9f686fe6221a8ddaf3ea474cc42750e"
+    },
+    "application_typecheck": "PASS",
+    "scripts_typecheck": "PASS",
+    "lint": {
+      "status": "PASS",
+      "errors": 0,
+      "pre_existing_warnings": 9
+    },
+    "build": "PASS",
+    "k3_structural": "10/10 PASS",
+    "widgets_live_typecheck": "PASS",
+    "live_postgresql": {
+      "status": "PASS",
+      "suites": "15/15",
+      "tests": "270/270",
+      "log_sha256": "db307e757f2cf9d7e922297773b842e7b963b2edbbea5a3c6527e9d59cd023fc"
+    },
+    "production_binary_http": {
+      "status": "PASS",
+      "cases": "13/13",
+      "health": 200,
+      "log_sha256": "8eb5e7b94084c8dda23af4960a62c692efae9ebc825fc329c651e80af4745990"
+    },
+    "gate13_mutation": {
+      "status": "AS-DECLARED",
+      "mutants": "16/16",
+      "unexpected": 0,
+      "receipt": "u13-mutation-report.json",
+      "receipt_sha256": "c6a040e602aa3a44c8d480f020f690a2a63845ecd2ff190818f1dae51b7f7275"
+    }
+  },
+  "infrastructure_observation": {
+    "first_live_attempt": "269/270 with one socket hang up in F88-1",
+    "classification": "non-reproduced transport interruption, not an assertion mismatch",
+    "targeted_reproduction": "F88 7/7 PASS on a fresh proof database",
+    "independent_full_rerun": "15/15 suites, 270/270 tests PASS on a second fresh proof database",
+    "code_change_between_attempts": false
+  },
+  "production_effects": 0
+}

@@ -1,0 +1,1610 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "a697bd066634d7817169c6ddb503e84326c64959",
+  "battery_hashes": {
+    "gate9.json": "ad3d828b53af1b3a442a3ce099107b6e605296f3d3d911b75e4c03b6b4feefff"
+  },
+  "partition": null,
+  "startedAt": "2026-09-20T05:16:24.767Z",
+  "batteries": [
+    "gate9.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-1be746abbe",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-1be746abbe",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "9-part-1-of-4:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "9-part-2-of-4:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "9-part-2-of-4:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "9-part-3-of-4:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "9-part-3-of-4:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "9-part-4-of-4:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "9-part-4-of-4:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "mutants": [
+    {
+      "battery": "gate9.json",
+      "id": "M9-1",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-DEF-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-DEF-1",
+          "test": "Gate 9 lowering (U9b) T9-DEF-1 throws only for missing Gate 8 fact loweringSource",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-2",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-DEF-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-DEF-1",
+          "test": "Gate 9 lowering (U9b) T9-DEF-1 throws only for missing Gate 8 fact selectedLabels",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-3",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-DEF-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-DEF-1",
+          "test": "Gate 9 lowering (U9b) T9-DEF-1 treats a missing request transaction as a construction defect",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-4",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T9-NEG-8",
+        "T9-HTTP-3"
+      ],
+      "kills": [
+        {
+          "killer": "T9-NEG-8",
+          "test": "Gate 9 — canonical lowering and atomic timeline append (U9b) T9-NEG-8 [GW] an erased source returns handle_stale and writes no turn",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T9-HTTP-3",
+          "test": "Gate 9 — canonical lowering and atomic timeline append (U9b) [HTTP] AppModule behind all six guards T9-HTTP-3 an erased source fails stale and appends no turn",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "GW": 1,
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-5",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 2,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-NEG-3"
+      ],
+      "kills": [
+        {
+          "killer": "T9-NEG-3",
+          "test": "Gate 9 lowering (U9b) T9-NEG-3 returns superseded/handle_stale with no turn",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-6",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-POS-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-POS-1",
+          "test": "Gate 9 lowering (U9b) T9-POS-1 renders canonical labels, writes once through T, and produces both Gate 9 facts",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-7",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T9-INV24-1",
+        "T9-INV24-4"
+      ],
+      "kills": [
+        {
+          "killer": "T9-INV24-1",
+          "test": "Gate 9 — canonical lowering and atomic timeline append (U9b) T9-INV24-1 [GW] an unrenderable template returns stale and appends no turn",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T9-INV24-4",
+          "test": "Gate 9 — canonical lowering and atomic timeline append (U9b) T9-INV24-4 [GW] an unrenderable template returns stale and appends no turn",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 2
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-8",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-POS-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-POS-1",
+          "test": "Gate 9 lowering (U9b) T9-POS-1 renders canonical labels, writes once through T, and produces both Gate 9 facts",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-9",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-POS-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-POS-1",
+          "test": "Gate 9 lowering (U9b) T9-POS-1 renders canonical labels, writes once through T, and produces both Gate 9 facts",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-10",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-NEG-8"
+      ],
+      "kills": [
+        {
+          "killer": "T9-NEG-8",
+          "test": "Gate 9 lowering (U9b) T9-NEG-8 maps an erasure race in the conditional writer to handle_stale",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-11",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T9-POS-5"
+      ],
+      "kills": [
+        {
+          "killer": "T9-POS-5",
+          "test": "Gate 9 — canonical lowering and atomic timeline append (U9b) T9-POS-5 [GW] appends the lowered USER turn and hands Gate 10 byte-identical content",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-12",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T9-POS-5"
+      ],
+      "kills": [
+        {
+          "killer": "T9-POS-5",
+          "test": "Gate 9 — canonical lowering and atomic timeline append (U9b) T9-POS-5 [GW] appends the lowered USER turn and hands Gate 10 byte-identical content",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-13",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-POS-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-POS-1",
+          "test": "Gate 9 lowering (U9b) T9-POS-1 renders canonical labels, writes once through T, and produces both Gate 9 facts",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-14",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-POS-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-POS-1",
+          "test": "Gate 9 lowering (U9b) T9-POS-1 renders canonical labels, writes once through T, and produces both Gate 9 facts",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-15",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-POS-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-POS-1",
+          "test": "Gate 9 lowering (U9b) T9-POS-1 renders canonical labels, writes once through T, and produces both Gate 9 facts",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-16",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-POS-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-POS-1",
+          "test": "Gate 9 lowering (U9b) T9-POS-1 renders canonical labels, writes once through T, and produces both Gate 9 facts",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-17",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-POS-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-POS-1",
+          "test": "Gate 9 lowering (U9b) T9-POS-1 renders canonical labels, writes once through T, and produces both Gate 9 facts",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-18",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-POS-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-POS-1",
+          "test": "Gate 9 lowering (U9b) T9-POS-1 renders canonical labels, writes once through T, and produces both Gate 9 facts",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-19",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-20",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-CONC-2"
+      ],
+      "kills": [
+        {
+          "killer": "T9-CONC-2",
+          "test": "Gate 9 lowering (U9b) T9-CONC-2 derives one deterministic signed lock key per exact tenant/conversation tuple",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-21",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-CONC-2"
+      ],
+      "kills": [
+        {
+          "killer": "T9-CONC-2",
+          "test": "Gate 9 lowering (U9b) T9-CONC-2 derives one deterministic signed lock key per exact tenant/conversation tuple",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-22",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-23",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-24",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-25",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-26",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-STALE"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-STALE",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-STALE returns null before allocation when the exact source fence loses",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-27",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-28",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-29",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-30",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T9-POS-5"
+      ],
+      "kills": [
+        {
+          "killer": "T9-POS-5",
+          "test": "Gate 9 — canonical lowering and atomic timeline append (U9b) T9-POS-5 [GW] appends the lowered USER turn and hands Gate 10 byte-identical content",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-31",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-32",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-33",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-34",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T9-POS-5"
+      ],
+      "kills": [
+        {
+          "killer": "T9-POS-5",
+          "test": "Gate 9 — canonical lowering and atomic timeline append (U9b) T9-POS-5 [GW] appends the lowered USER turn and hands Gate 10 byte-identical content",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-35",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T-ARCH-TX"
+      ],
+      "kills": [
+        {
+          "killer": "T-ARCH-TX",
+          "test": "T-ARCH-TX — Gate 9 writes through the request transaction T (D-1, C11:4861) T-ARCH-TX [XF→U9b] lowerToUserTurn takes the transaction and opens none of its own",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [
+    "gate9.json#M9-4"
+  ],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-09-20T06:18:11.779Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 4,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}
