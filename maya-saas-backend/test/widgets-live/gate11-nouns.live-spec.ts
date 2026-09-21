@@ -3,7 +3,7 @@
 // WHAT THIS FILE CAN AND CANNOT SHOW TODAY, first, because the gap is the point.
 //
 // Slot 11 is UNREACHABLE on the live path at this commit: slots 8, 9 and 10 are `pending()` seams that
-// refuse `mechanism_absent`, so every submission stops at 8. The card therefore declares this unit's
+// refuse the interim slot-8 refusal, so every submission stops at 8. The card therefore declares this unit's
 // live exit as `[GW G-SYNTH] G11-N4d [XF→U10b]` — `it.failing` until U8a, U9b and U10b land, red today
 // BY CONSTRUCTION and stated rather than hidden. `G11-N4d-CONTROL` below measures exactly where a
 // submission does stop, so the `it.failing` is red for that reason and not for another.

@@ -151,7 +151,7 @@ const principals = {
 };
 
 const NON_PASS: readonly GateVerdict[] = [
-  { outcome: 'refuse', code: 'mechanism_absent', detail: 'recorder' },
+  { outcome: 'refuse', code: 'effect_not_admissible', detail: 'recorder' },
   { outcome: 'superseded', code: 'handle_stale', detail: 'recorder' },
   { outcome: 'terminate', why: 'recorder' },
 ];

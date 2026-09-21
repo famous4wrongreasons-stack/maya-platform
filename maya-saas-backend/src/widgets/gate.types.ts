@@ -54,11 +54,7 @@ export type RefusalCode =
   | 'readback_missing'
   | 'readback_mismatch'
   | 'intent_divergence'
-  | 'handle_stale'
-  // Not a gate's own refusal: the fail-closed default a NORMATIVE-PENDING mechanism compels
-  // (§0.1 F5). A gate whose mechanism a later package builds refuses with this rather than
-  // passing, because "not built yet" and "allowed" must never be the same branch.
-  | 'mechanism_absent';
+  | 'handle_stale';
 
 /**
  * `LoweredUtterance` is Gate 9's product: a string only `renderUtterance` may brand (G9 §3.0).
@@ -340,9 +336,8 @@ export interface Gate {
   readonly name: string;
   readonly host: GateHost;
   /**
-   * True when a later package owns this gate's mechanism. Such a gate still RUNS and still refuses
-   * — see `mechanism_absent`. Marking it lets the pipeline report honestly how much of itself is
-   * real, instead of counting an unbuilt gate as a passing one.
+   * True when a later package owns this gate's mechanism. Marking it lets the pipeline report
+   * honestly how much of itself is real, instead of counting an unbuilt gate as a passing one.
    */
   readonly pendingOn?: string;
   run(ctx: GateContext): Promise<GateVerdict> | GateVerdict;

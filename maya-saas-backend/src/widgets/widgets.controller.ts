@@ -97,11 +97,8 @@ export class WidgetsController {
       // P-G15a: when EXPIRED/SUPERSEDED become response OUTCOMES with no code (L8, D-10), this
       // expression widens by one line to mint from `result.verdict.outcome`. The table already
       // carries those keys.
-      // CKPT-W1 review fix: `reasonTextOrNull`, not `reasonText`. A §3.9 code with no row — today
-      // exactly `mechanism_absent`, the not-built marker every conformant submission now meets at
-      // slot 9 — rendered through `reasonText`'s P10(b) fallback, which says the SOURCE is silent.
-      // That default belongs to the `c9_*` denial space, and carrying it here told the reader a
-      // falsehood about an unbuilt gate on R3.9.3's own surface. The route says nothing instead;
+      // CKPT-W1 review fix: `reasonTextOrNull`, not `reasonText`. Null outcomes carry no invented
+      // reason. REN-1/REN-3 independently require every non-null refusal code to have a canonical row;
       // REN-3 is the ratchet that keeps "nothing" from covering a second code. See `reason-text.ts`.
       reason_text: reasonTextOrNull(reasonKey),
       stopped_at_gate: result.stoppedAt,

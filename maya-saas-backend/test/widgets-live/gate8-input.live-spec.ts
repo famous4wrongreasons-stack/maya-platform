@@ -17,7 +17,7 @@
 //                  branch for it is `input-validation.gate.spec.ts` G8a-G2
 //   T-NULL-OBJ     `inputs: {a:1}`  → REFUSED / selection_out_of_domain at 8 (K12)
 //   T-NULL-EMPTY   `inputs: {}`     → the same refusal, for the same reason: the member was carried
-//   T-HELD         a schema-bearing record → REFUSED / mechanism_absent, and the lowering source is NOT read
+//   T-SCHEMA       exact emitted schema → validate per-field selection, then continue
 //   T-READ-ONCE    exactly one lowering-source read, on the pass, and none on any refusal (D-2)
 //   T-INV24        zero durable writes on every refusal, and on the pass too (nothing writes before 9)
 //   T-F11          the stop MOVES from 8 to 9 when the lane passes — slot 8 stopped being the wall
@@ -32,6 +32,8 @@ import { UserRole } from '../../src/common/domain.enums';
 import type { AuthenticatedUser } from '../../src/common/authenticated-user.interface';
 import { WIDGET_INTENT_SUBMISSION_CONTRACT } from '../../src/widgets/dto/submit-intent.dto';
 import { WidgetEmitterService } from '../../src/widgets/emission/emitter.service';
+import { INTENT_TEMPLATE_REGISTRY } from '../../src/widgets/emission/intent-template.registry';
+import { inputSchemaHash } from '../../src/widgets/input-schema/input-schema-hash';
 import { WidgetStoresService } from '../../src/widgets/stores/widget-stores.service';
 import { LoweringSourceReader } from '../../src/widgets/stores/lowering-source.read';
 import { PrismaService } from '../../src/prisma/prisma.service';
@@ -118,9 +120,11 @@ describe('Gate 8 — input validation, the null-schema lane [U8a]', () => {
     await ctx?.close();
   });
 
-  /** `[G-SYNTH]`: the one column no writer produces yet. Never evidence (§0.5). */
+  /** `[G-SYNTH]`: re-pin the compatibility fixture to the production registry's schema row. */
   const giveSchema = async (record: WidgetFixture): Promise<string> => {
-    const inputSchemaHash = 'a1'.repeat(32);
+    const row = INTENT_TEMPLATE_REGISTRY['refine.measurement.period@1'];
+    if (row.inputSchema === null) throw new Error('period schema absent');
+    const hash = inputSchemaHash(row.inputSchema);
     await ctx.prisma.widgetIntentRecord.update({
       where: {
         intentTokenHash_tenantId: {
@@ -128,9 +132,33 @@ describe('Gate 8 — input validation, the null-schema lane [U8a]', () => {
           tenantId: record.tenantId,
         },
       },
-      data: { inputSchemaHash },
+      data: {
+        inputSchemaHash: hash,
+        selectionDomain: '{"period":["current","previous"]}',
+        selectionDomainLabelsJson: row.selectionDomainLabels,
+        utteranceTemplate: row.utteranceTemplate,
+      },
     });
-    return inputSchemaHash;
+    await ctx.prisma.widgetRenderReceipt.update({
+      where: {
+        tenantId_widgetId_deliveryChannel: {
+          tenantId: record.tenantId,
+          widgetId: record.widgetId,
+          deliveryChannel: 'pwa',
+        },
+      },
+      data: {
+        emittedEnvelopeJson: {
+          intents: [
+            {
+              intent_token: record.intentToken,
+              input_schema: row.inputSchema,
+            },
+          ],
+        },
+      },
+    });
+    return hash;
   };
 
   describe('[GW] the real WidgetsModule over the proof database', () => {
@@ -294,57 +322,100 @@ describe('Gate 8 — input validation, the null-schema lane [U8a]', () => {
       },
     );
 
-    it('T-HELD [GW, G-SYNTH]: a schema-bearing record refuses `mechanism_absent` at 8, whatever it carries, and reads no lowering source', async () => {
-      const { tenant, actor, record } = await tenantWithRecord('T-HELD');
-      const inputSchemaHash = await giveSchema(record);
-      expect(inputSchemaHash).toHaveLength(64);
+    it('T-SCHEMA [GW, G-SYNTH]: exact emitted schema admits its field-keyed option and rejects undeclared input', async () => {
+      const { actor, record } = await tenantWithRecord('T-SCHEMA');
+      expect(await giveSchema(record)).toHaveLength(64);
 
-      for (const [i, inputs] of [null, {}, { choice: 'a' }].entries()) {
-        const scope = `T-HELD#${i}`;
-        const before = await noWriteBaseline(
-          gw.recorder,
-          ctx.prisma,
-          tenant.id,
-          record.intentTokenHash,
-        );
-        const result = await gw.submit(actor, body(record, inputs), scope);
+      const refused = await gw.submit(
+        actor,
+        body(record, { period: 'current', injected: true }),
+        'T-SCHEMA/refuse',
+      );
+      expect(refused).toMatchObject({
+        verdict: { outcome: 'refuse', code: 'selection_out_of_domain' },
+        stoppedAt: AT_8.stop,
+        ran: AT_8.ran,
+      });
 
-        expect({
-          scope,
-          outcome: result.verdict.outcome,
-          code: 'code' in result.verdict ? result.verdict.code : null,
-          stoppedAt: result.stoppedAt,
-          ran: result.ran,
-        }).toEqual({
-          scope,
-          outcome: 'refuse',
-          code: 'mechanism_absent',
-          stoppedAt: AT_8.stop,
-          ran: AT_8.ran,
-        });
-        // The held lane is DARK: it decides from the record's `inputSchemaHash` alone and reads nothing.
-        expect({ scope, operations: operations(scope) }).toEqual({
-          scope,
-          operations: [
-            'WidgetIntentRecord.findFirst',
-            'WidgetIntentRecord.findFirst',
-          ],
-        });
-        expect({
-          scope,
-          nw: await noWriteViolations(
-            gw.recorder,
-            scope,
-            ctx.prisma,
-            tenant.id,
-            record.intentTokenHash,
-            before,
-          ),
-        }).toEqual({
-          scope,
-          nw: { writes: [], rowDelta: {}, recordChanged: false },
-        });
-      }
+      const admitted = await gw.submit(
+        actor,
+        body(record, { period: 'current' }),
+        'T-SCHEMA/pass',
+      );
+      expect(Number(admitted.stoppedAt)).toBeGreaterThan(8);
+      expect(admitted.ran).toBeGreaterThan(AT_8.ran);
+    });
+
+    it('T-SCHEMA-OUTSIDE [GW, G-SYNTH]: an option outside this field domain refuses at Gate 8', async () => {
+      const { actor, record } = await tenantWithRecord('T-SCHEMA-OUTSIDE');
+      await giveSchema(record);
+      await expect(
+        gw.submit(
+          actor,
+          body(record, { period: 'invented' }),
+          'T-SCHEMA-OUTSIDE',
+        ),
+      ).resolves.toMatchObject({
+        verdict: { outcome: 'refuse', code: 'selection_out_of_domain' },
+        stoppedAt: AT_8.stop,
+      });
+    });
+
+    it('T-SCHEMA-BYTE [GW, G-SYNTH]: canonical UTF-8 bytes over the schema cap refuse before membership', async () => {
+      const { actor, record } = await tenantWithRecord('T-SCHEMA-BYTE');
+      await giveSchema(record);
+      await expect(
+        gw.submit(
+          actor,
+          body(record, { period: 'я'.repeat(100) }),
+          'T-SCHEMA-BYTE',
+        ),
+      ).resolves.toMatchObject({
+        verdict: { outcome: 'refuse', code: 'oversize_submission' },
+        stoppedAt: AT_8.stop,
+      });
+    });
+
+    it('T-SCHEMA-ERASED [GW, G-SYNTH]: an erased emitted schema supersedes handle_stale', async () => {
+      const { actor, record } = await tenantWithRecord('T-SCHEMA-ERASED');
+      await giveSchema(record);
+      await ctx.prisma.widgetRenderReceipt.update({
+        where: {
+          tenantId_widgetId_deliveryChannel: {
+            tenantId: record.tenantId,
+            widgetId: record.widgetId,
+            deliveryChannel: 'pwa',
+          },
+        },
+        data: { erasedAt: new Date() },
+      });
+      await expect(
+        gw.submit(
+          actor,
+          body(record, { period: 'current' }),
+          'T-SCHEMA-ERASED',
+        ),
+      ).resolves.toMatchObject({
+        verdict: { outcome: 'superseded', code: 'handle_stale' },
+        stoppedAt: AT_8.stop,
+      });
+    });
+
+    it('T-SCHEMA-HASH [GW, G-SYNTH]: emitted schema hash drift is a transaction fault', async () => {
+      const { actor, record } = await tenantWithRecord('T-SCHEMA-HASH');
+      await giveSchema(record);
+      await ctx.prisma.widgetIntentRecord.update({
+        where: {
+          intentTokenHash_tenantId: {
+            tenantId: record.tenantId,
+            intentTokenHash: record.intentTokenHash,
+          },
+        },
+        data: { inputSchemaHash: 'f'.repeat(64) },
+      });
+      await expect(
+        gw.submit(actor, body(record, { period: 'current' }), 'T-SCHEMA-HASH'),
+      ).rejects.toThrow(/hash differs/);
     });
 
     it('T-READ-ONCE [GW]: over a pass and a refusal on the SAME record, the lowering source is read exactly once — on the pass, after the decision', async () => {

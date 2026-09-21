@@ -76,13 +76,8 @@ interface TransactionalGate10Store {
 }
 
 // Slot seams (GATES-PLAN-V11 D-18, I-CTX). Slots 1, 4, 8, 9 and 10 each call one file, and that file's
-// body is what the slot ran before: the inline checks of Gates 1 and 4, and the refusing `pending()`
-// stub of Gates 8, 9 and 10. A unit that builds one of those gates changes its seam file, not this array.
-//
-// An unbuilt gate still RUNS and REFUSES `mechanism_absent`, because "not built yet" and "allowed" must
-// never be the same branch (F5's fail-closed default). Its slot carries `pendingOn`, so `liveGateCount`
-// counts it as not built. A stub that refuses is honest; a function that passed would be counted as a
-// gate. What stood in each of those slots before U0, and why it was worse, is kept in its seam file.
+// body is what the slot ran before: the inline checks of Gates 1 and 4 and the former fail-closed
+// seams of Gates 8, 9 and 10. A unit builds a gate in its seam file rather than changing the runner.
 
 /**
  * The pass verdict, as one value rather than a literal per slot.
@@ -323,12 +318,11 @@ export class IntentGatewayService {
       run: (ctx, tx) =>
         gate7(ctx, (hash) => this.findProducingRecord(hash, ctx.tenantId, tx)),
     },
-    // BUILT, in one lane of two (U8a, B-01 C11:7188). The NULL-SCHEMA lane is row 8's: a record whose
+    // BUILT in both lanes after U8b. The NULL-SCHEMA lane is row 8's: a record whose
     // `input_schema_hash` is null passes with the submission's `inputs` absent or `null`, and refuses
     // `selection_out_of_domain` on anything else — `{}` included, because "an empty object" is not
-    // "nothing was submitted". A SCHEMA-BEARING record refuses `mechanism_absent` and the path stays
-    // dark until U8b builds the codec lane: "not built yet" and "allowed" are different branches (F5).
-    // The slot no longer carries `pendingOn`, because the gate it calls decides rather than stubs.
+    // "nothing was submitted". The SCHEMA lane verifies the exact emitted schema and validates its
+    // closed domains and bounds before the first lowering-source read.
     {
       n: '8',
       name: 'Input validation',

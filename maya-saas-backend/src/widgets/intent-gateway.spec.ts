@@ -693,7 +693,7 @@ describe('the pipeline after U8a — slots 9 and 10 are refusing stubs', () => {
     expect(gateway.liveGateCount).toBe(14);
   });
 
-  it('there is no mechanism_absent pending slot left after U10b', () => {
+  it('there is no pending slot left after U10b', () => {
     const { gateway } = gatewayFor([record()]);
     expect(slotsOf(gateway).filter((s) => s.pendingOn)).toEqual([]);
   });
@@ -977,7 +977,7 @@ describe('J-1 — facts reach later slots only through mergeFacts (runner)', () 
     };
     const stop: GateVerdict = {
       outcome: 'refuse',
-      code: 'mechanism_absent',
+      code: 'effect_not_admissible',
       detail: 'synthetic stop',
     };
 

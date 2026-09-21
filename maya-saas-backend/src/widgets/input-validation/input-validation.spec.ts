@@ -1,15 +1,17 @@
-// U8a — the null-schema lane's decision, at function level.
-//
-// [U] never counts as evidence (§0.5). What it holds is the decision table itself: which lane a record
-// puts a submission in, and what that lane answers. The live half is `test/widgets-live/gate8-input.
-// live-spec.ts`.
-
+import type { InputSchema } from '../../widget-contract/intent';
 import { rec } from '../gates/gate-fixtures.spec-helper.spec';
+import { decodeSelectionDomain } from '../input-schema/codec';
+import { inputSchemaHash } from '../input-schema/input-schema-hash';
+import { parseInputSchema } from '../input-schema/parse-input-schema';
 import type { SubmissionShape } from '../gate.types';
+import type { InputBoundsRegistry } from './input-bounds.registry';
+import type { InputNormalizerRegistry } from './input-normalizers.registry';
 import {
+  InputValidationIntegrityError,
   decideInputValidation,
-  INPUT_VALIDATION_HELD_ON,
   inputsPresence,
+  parseAndVerifySchema,
+  validateSchemaInputs,
 } from './input-validation';
 
 const sub = (over: Partial<SubmissionShape> = {}): SubmissionShape => ({
@@ -17,126 +19,309 @@ const sub = (over: Partial<SubmissionShape> = {}): SubmissionShape => ({
   ...over,
 });
 
-describe('U8a — Gate 8, the null-schema lane [U]', () => {
-  describe('G8a-U1 — `inputs` has three cases, not two', () => {
-    it('G8a-U1a: an absent member is `absent`, and a null one is `null`', () => {
-      expect(inputsPresence(sub())).toBe('absent');
-      expect(inputsPresence(sub({ inputs: null }))).toBe('null');
-    });
+const schema = (fields: readonly unknown[], max = 512): InputSchema => {
+  const parsed = parseInputSchema({
+    fields,
+    max_total_bytes: max,
+    free_input_justification: fields.some(
+      (f) =>
+        typeof f === 'object' &&
+        f !== null &&
+        'kind' in f &&
+        !['enum', 'ref', 'boolean'].includes(String(f.kind)),
+    )
+      ? 'AUDIT_EXACT_INPUT'
+      : null,
+  });
+  if (!parsed.ok) throw new Error(JSON.stringify(parsed.defects));
+  return parsed.schema;
+};
 
-    it('G8a-U1b: every other value is `values` — `{}` included, and a non-object too', () => {
-      expect(inputsPresence(sub({ inputs: {} }))).toBe('values');
-      expect(inputsPresence(sub({ inputs: { a: 1 } }))).toBe('values');
-      expect(
-        inputsPresence({
-          intent_token: 'tok',
-          inputs: 'a string' as unknown as Record<string, unknown>,
-        }),
-      ).toBe('values');
-      expect(
-        inputsPresence({
-          intent_token: 'tok',
-          inputs: [] as unknown as Record<string, unknown>,
-        }),
-      ).toBe('values');
-    });
+const closedSchema = schema([
+  {
+    name: 'slot',
+    required: true,
+    kind: 'enum',
+    domain_ref: 'schedule/slots/v1',
+    selection_min: 1,
+    selection_max: 2,
+  },
+  { name: 'notify', required: false, kind: 'boolean' },
+]);
+
+const domain = (wire = '{"slot":["a","b"]}') => {
+  const decoded = decodeSelectionDomain(wire);
+  if (!decoded.ok) throw new Error(JSON.stringify(decoded.defects));
+  return decoded.value;
+};
+
+const EMPTY_BOUNDS: InputBoundsRegistry = new Map();
+const EMPTY_NORMALIZERS: InputNormalizerRegistry = new Map();
+
+const validate = (
+  inputSchema: InputSchema,
+  inputs: Readonly<Record<string, unknown>> | null | undefined,
+  over: {
+    bounds?: InputBoundsRegistry;
+    normalizers?: InputNormalizerRegistry;
+  } = {},
+) =>
+  validateSchemaInputs({
+    tenantId: 't1',
+    schema: inputSchema,
+    selectionDomain: domain(),
+    inputs,
+    bounds: over.bounds ?? EMPTY_BOUNDS,
+    normalizers: over.normalizers ?? EMPTY_NORMALIZERS,
   });
 
-  describe('G8a-U2 — a null schema with nothing submitted passes', () => {
-    it.each([
-      ['absent', sub()],
-      ['null', sub({ inputs: null })],
-    ])('G8a-U2 (%s): passes, and says which case it was', (presence, s) => {
-      expect(decideInputValidation(rec({ inputSchemaHash: null }), s)).toEqual({
-        lane: 'null-schema',
-        verdict: 'pass',
-        presence,
-      });
+describe('U8b — Gate 8 input validation', () => {
+  it('T1/T2 keeps absent, null and values distinct and preserves the null-schema lane', () => {
+    expect(inputsPresence(sub())).toBe('absent');
+    expect(inputsPresence(sub({ inputs: null }))).toBe('null');
+    expect(inputsPresence(sub({ inputs: {} }))).toBe('values');
+    expect(
+      decideInputValidation(rec({ inputSchemaHash: null }), sub()),
+    ).toEqual({
+      lane: 'null-schema',
+      verdict: 'pass',
+      presence: 'absent',
     });
-  });
-
-  describe('G8a-U3 — a null schema carrying `inputs` is refused (K12, C11:2902)', () => {
-    it.each([
-      ['{a:1}', { a: 1 }],
-      ['{}', {}],
-      ['a nested object', { a: { b: 1 } }],
-    ])(
-      'G8a-U3 (%s): selection_out_of_domain, never a repair',
-      (_label, inputs) => {
-        const decision = decideInputValidation(
-          rec({ inputSchemaHash: null }),
-          sub({ inputs }),
-        );
-        expect(decision).toEqual({
-          lane: 'null-schema',
-          verdict: 'refuse',
-          code: 'selection_out_of_domain',
-          detail: expect.stringContaining('K12') as unknown,
-          presence: 'values',
-        });
-      },
-    );
-
-    it('G8a-U3-EMPTY: `{}` is refused for the same reason `{a:1}` is — the member was carried', () => {
-      const empty = decideInputValidation(
+    expect(
+      decideInputValidation(
         rec({ inputSchemaHash: null }),
         sub({ inputs: {} }),
-      );
-      const valued = decideInputValidation(
-        rec({ inputSchemaHash: null }),
-        sub({ inputs: { a: 1 } }),
-      );
-      expect(empty).toEqual(valued);
-    });
+      ),
+    ).toMatchObject({ verdict: 'refuse', code: 'selection_out_of_domain' });
   });
 
-  describe('G8a-U4 — the schema lane is held, fail closed (B-01, C11:7188)', () => {
-    it('G8a-U4a: a record with an `inputSchemaHash` refuses `mechanism_absent`, whatever it carries', () => {
-      for (const s of [sub(), sub({ inputs: null }), sub({ inputs: { a: 1 } })])
-        expect(
-          decideInputValidation(rec({ inputSchemaHash: 'f'.repeat(64) }), s),
-        ).toMatchObject({
-          lane: 'schema',
-          verdict: 'refuse',
-          code: 'mechanism_absent',
-          detail: `gate 8 (Input validation) is NORMATIVE-PENDING on ${INPUT_VALIDATION_HELD_ON}`,
-        });
-    });
-
-    it('G8a-U4b: the held lane names the mechanism it waits on, not a ruling', () => {
-      expect(INPUT_VALIDATION_HELD_ON).toContain('codec');
-      expect(INPUT_VALIDATION_HELD_ON).toContain('bounds');
-      expect(INPUT_VALIDATION_HELD_ON).toContain('normalizer');
-      expect(INPUT_VALIDATION_HELD_ON).toContain('U8b');
-    });
-  });
-
-  it('G8a-U5: no record — the lane cannot be determined, so the gate fails closed on the held lane', () => {
+  it('T3 schema-bearing records enter the built schema lane; no record fails closed into it', () => {
     expect(
-      decideInputValidation(null, sub({ inputs: { a: 1 } })),
-    ).toMatchObject({
+      decideInputValidation(
+        rec({ inputSchemaHash: inputSchemaHash(closedSchema) }),
+        sub({ inputs: { slot: 'a' } }),
+      ),
+    ).toMatchObject({ lane: 'schema', verdict: 'evaluate' });
+    expect(decideInputValidation(null, sub())).toMatchObject({
       lane: 'schema',
-      verdict: 'refuse',
-      code: 'mechanism_absent',
-      detail: expect.stringContaining('no record') as unknown,
+      verdict: 'evaluate',
     });
   });
 
-  it('G8a-U6: the decision reads the record and the submission, and nothing else', () => {
-    // A record that differs only in the columns other gates read decides identically: slot 8 has no
-    // opinion about the effect, the kind, the floor, the channel or the clock.
-    const base = rec({ inputSchemaHash: null });
-    const other = rec({
-      inputSchemaHash: null,
-      effect: 'COMMIT',
-      widgetKind: 'BOOKING_CONFIRMATION',
-      verificationFloor: 'ANONYMOUS',
-      deliveryChannel: 'sms',
-      expiresAt: new Date('2000-01-01T00:00:00.000Z'),
+  it('T4/T5 accepts exact closed selections and produces only validated option ids', async () => {
+    await expect(
+      validate(closedSchema, { slot: ['b', 'a'], notify: true }),
+    ).resolves.toEqual({
+      verdict: 'pass',
+      validatedInputs: { closed: new Map([['slot', ['b', 'a']]]) },
     });
-    for (const s of [sub(), sub({ inputs: {} })])
-      expect(decideInputValidation(base, s)).toEqual(
-        decideInputValidation(other, s),
-      );
+  });
+
+  it.each([
+    ['undeclared key', { slot: 'a', injected: 1 }],
+    ['missing required field', { notify: true }],
+    ['wrong enum shape', { slot: 3 }],
+    ['outside domain', { slot: 'z' }],
+    ['duplicate set member', { slot: ['a', 'a'] }],
+    ['too few selections', { slot: [] }],
+    ['too many selections', { slot: ['a', 'b', 'z'] }],
+    ['wrong boolean shape', { slot: 'a', notify: 'yes' }],
+  ])('T6–T13 refuses %s', async (_name, inputs) => {
+    await expect(validate(closedSchema, inputs)).resolves.toMatchObject({
+      verdict: 'refuse',
+      code: 'selection_out_of_domain',
+    });
+  });
+
+  it('T-DUP/T-CROSS-FIELD checks set membership per field', async () => {
+    const multi = schema([
+      {
+        name: 'slot',
+        required: true,
+        kind: 'enum',
+        domain_ref: 'slot/v1',
+        selection_min: 1,
+        selection_max: 1,
+      },
+      {
+        name: 'staff',
+        required: true,
+        kind: 'ref',
+        domain_ref: 'staff/v1',
+        selection_min: 1,
+        selection_max: 1,
+      },
+    ]);
+    const decoded = decodeSelectionDomain(
+      '{"slot":["same"],"staff":["staff-1"]}',
+    );
+    if (!decoded.ok) throw new Error('domain');
+    await expect(
+      validateSchemaInputs({
+        tenantId: 't1',
+        schema: multi,
+        selectionDomain: decoded.value,
+        inputs: { slot: 'same', staff: 'same' },
+        bounds: EMPTY_BOUNDS,
+        normalizers: EMPTY_NORMALIZERS,
+      }),
+    ).resolves.toMatchObject({
+      verdict: 'refuse',
+      code: 'selection_out_of_domain',
+    });
+  });
+
+  it('T14 enforces the canonical UTF-8 byte cap', async () => {
+    const tiny = schema(
+      [{ name: 'notify', required: false, kind: 'boolean' }],
+      2,
+    );
+    await expect(validate(tiny, { notify: true })).resolves.toMatchObject({
+      verdict: 'refuse',
+      code: 'oversize_submission',
+    });
+  });
+
+  it('T15/T-REG-EMPTY refuses unregistered numeric and temporal bounds sources', async () => {
+    const integer = schema([
+      {
+        name: 'amount',
+        required: true,
+        kind: 'integer',
+        bounds: {
+          min: 1,
+          max: 9,
+          step: 1,
+          unit_ref: 'unit',
+          bounds_source: 'amount.live',
+        },
+      },
+    ]);
+    await expect(validate(integer, { amount: 2 })).resolves.toMatchObject({
+      verdict: 'refuse',
+      code: 'bound_violation',
+    });
+  });
+
+  it('T16/T-BOUND-ECHO uses the fresh registered bound, not echoed static numbers', async () => {
+    const integer = schema([
+      {
+        name: 'amount',
+        required: true,
+        kind: 'integer',
+        bounds: {
+          min: -999,
+          max: 999,
+          step: 1,
+          unit_ref: 'unit',
+          bounds_source: 'amount.live',
+        },
+      },
+    ]);
+    const bounds: InputBoundsRegistry = new Map([
+      ['amount.live', ({ value }) => typeof value === 'number' && value <= 5],
+    ]);
+    await expect(
+      validate(integer, { amount: 6 }, { bounds }),
+    ).resolves.toMatchObject({
+      verdict: 'refuse',
+      code: 'bound_violation',
+    });
+    await expect(
+      validate(integer, { amount: 5 }, { bounds }),
+    ).resolves.toMatchObject({ verdict: 'pass' });
+  });
+
+  it('T17/T-MAXLEN applies max_len before the registered text normalizer', async () => {
+    const text = schema([
+      {
+        name: 'note',
+        required: true,
+        kind: 'text',
+        max_len: 3,
+        normalizer_ref: 'trim',
+      },
+    ]);
+    const normalizer = jest.fn((value: string) => value.trim());
+    await expect(
+      validate(
+        text,
+        { note: 'abcd' },
+        { normalizers: new Map([['trim', normalizer]]) },
+      ),
+    ).resolves.toMatchObject({ verdict: 'refuse', code: 'bound_violation' });
+    expect(normalizer).not.toHaveBeenCalled();
+  });
+
+  it('T18 text and phone fail closed when their normalizer is not registered', async () => {
+    const fields = [
+      {
+        name: 'note',
+        required: true,
+        kind: 'text',
+        max_len: 20,
+        normalizer_ref: 'missing',
+      },
+    ];
+    await expect(
+      validate(schema(fields), { note: 'hello' }),
+    ).resolves.toMatchObject({
+      verdict: 'refuse',
+      code: 'use_secure_surface',
+    });
+    const phoneOnly = schema([
+      {
+        name: 'phone',
+        required: true,
+        kind: 'phone',
+        normalizer_ref: 'canonical_msisdn',
+      },
+    ]);
+    await expect(
+      validate(phoneOnly, { phone: '+79990000000' }),
+    ).resolves.toMatchObject({
+      verdict: 'refuse',
+      code: 'use_secure_surface',
+    });
+  });
+
+  it('T19 registered text/phone normalizers remain RI-only positive mechanisms', async () => {
+    const normalizers: InputNormalizerRegistry = new Map([
+      ['trim', (value) => value.trim()],
+      ['canonical_msisdn', () => 'redacted'],
+    ]);
+    const open = schema([
+      {
+        name: 'note',
+        required: true,
+        kind: 'text',
+        max_len: 20,
+        normalizer_ref: 'trim',
+      },
+      {
+        name: 'phone',
+        required: true,
+        kind: 'phone',
+        normalizer_ref: 'canonical_msisdn',
+      },
+    ]);
+    await expect(
+      validate(
+        open,
+        { note: ' hello ', phone: 'secure-alias' },
+        { normalizers },
+      ),
+    ).resolves.toMatchObject({ verdict: 'pass' });
+  });
+
+  it('T-HASH accepts the exact parsed schema and faults on parse/hash drift', () => {
+    const hash = inputSchemaHash(closedSchema);
+    expect(parseAndVerifySchema(closedSchema, hash)).toEqual(closedSchema);
+    expect(() => parseAndVerifySchema(closedSchema, 'f'.repeat(64))).toThrow(
+      InputValidationIntegrityError,
+    );
+    expect(() => parseAndVerifySchema({ fields: [] }, hash)).toThrow(
+      InputValidationIntegrityError,
+    );
   });
 });

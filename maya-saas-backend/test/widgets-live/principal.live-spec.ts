@@ -596,7 +596,7 @@ describe('P-PRINCIPAL — the wired pipeline [merge-step exits, D-18]', () => {
     // the wired gateway exposes (D-1).
     const before = { ...gw.gateway.transactions };
 
-    // (a) a refusal at or before slot 10 — slot 8 refuses `mechanism_absent` today — commits `T`.
+    // (a) a refusal at or before slot 10 — slot 8 refuses the interim slot-8 refusal today — commits `T`.
     const refused = await gw.submit(
       actor,
       submission(widget.widgetId, widget.intentToken),

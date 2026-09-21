@@ -6,12 +6,8 @@
 // `src/widgets/rendering/**` and its BUILD ratchets; this file is the one place the rendered answer is
 // read back over HTTP.
 //
-// REN-5 is `[XF→U8b]` by the card, and the reason is worth stating: while slots 8, 9 and 10 are
-// `pending()`, a conformant submission refuses `mechanism_absent`, which has NO row in the table
-// (D-10 keeps the code out until U8b removes it), so the phrase it mints is P10(b)'s honest-unknown
-// fallback rather than the code's own. The control below is what makes the failing test meaningful:
-// a refusal whose code DOES carry a row already mints from that row today, so REN-5's red is about
-// `mechanism_absent` alone and not about the mechanism being absent.
+// U8b removes the final interim refusal vocabulary member. REN-5 now asserts directly that the next
+// live refusal carries the phrase from its own closed reason-table row.
 //
 // Class: [HTTP]. Not evidence by itself — §0.5's L needs a BIN entry and a production-minted record,
 // which E1 supplies. What is proved here is that the member exists on the wire and is table-derived.
@@ -100,43 +96,34 @@ describe('R3.9.3 — the refusal the route returns is rendered from the table [H
     );
   });
 
-  it.failing(
-    'REN-5 [HTTP][XF→U8b] every refusal carries a reason_text minted from its OWN row, and no error token',
-    async () => {
-      // A record that gets past Gates 1-7 reaches slot 8, which refuses `mechanism_absent` — a code
-      // with NO row until U8b removes it from `RefusalCode` (D-10). The phrase it mints is therefore
-      // P10(b)'s honest-unknown fallback, and the equality below is exactly what says so. It turns
-      // green in U8b's merge, when the code leaves and REN-3 turns green with it.
-      const user = await fx.user(tenant, UserRole.ADMINISTRATOR, 'ren5');
-      const actor = await fx.actorFromAccessToken(
-        await http.login(tenant.slug, user.email, user.password),
-      );
-      const widget = await writerFixtures.widget({
-        tenant,
-        actor,
-        kind: 'METRIC',
-        body: { value: 1 },
-      });
-      const res = await post(
-        conformant({
-          widget_id: widget.widgetId,
-          intent_token: widget.intentToken,
-        }),
-      );
-      const body = res.body as IntentResponse;
-      expect(res.status).toBe(200);
-      expect(body.stopped_at_gate).toBe('8');
-      expect(body.code).toBe('mechanism_absent');
-      expect(body.reason_text).not.toBeNull();
-      expect(
-        Object.prototype.hasOwnProperty.call(
-          LIMITATION_REASON_TABLE,
-          body.code as string,
-        ),
-      ).toBe(true);
-      expect(body.reason_text?.phrase_key).toBe(
-        LIMITATION_REASON_TABLE[body.code as string].text_key,
-      );
-    },
-  );
+  it('REN-5 [HTTP] every refusal carries a reason_text minted from its OWN row, and no error token', async () => {
+    // A null-schema record passes Gate 8 and the missing lowering template is superseded at Gate 9.
+    const actor = await fx.actorFromAccessToken(token);
+    const widget = await writerFixtures.widget({
+      tenant,
+      actor,
+      kind: 'METRIC',
+      body: { value: 1 },
+    });
+    const res = await post(
+      conformant({
+        widget_id: widget.widgetId,
+        intent_token: widget.intentToken,
+      }),
+    );
+    const body = res.body as IntentResponse;
+    expect(res.status).toBe(200);
+    expect(body.stopped_at_gate).toBe('9');
+    expect(body.code).toBe('handle_stale');
+    expect(body.reason_text).not.toBeNull();
+    expect(
+      Object.prototype.hasOwnProperty.call(
+        LIMITATION_REASON_TABLE,
+        body.code as string,
+      ),
+    ).toBe(true);
+    expect(body.reason_text?.phrase_key).toBe(
+      LIMITATION_REASON_TABLE[body.code as string].text_key,
+    );
+  });
 });

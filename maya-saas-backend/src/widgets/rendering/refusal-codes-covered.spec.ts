@@ -3,11 +3,8 @@
 //
 //   REN-1  the reason table covers every §3.9 refusal code, every response outcome §4.5.2 L8 names,
 //          and every §1.3 `ReasonCode`, and carries no row that is none of those.
-//   REN-3  `RefusalCode ⊆ table`. RED TODAY, on purpose, and declared `it.failing`: the union still
-//          carries `mechanism_absent`, which is not contract vocabulary and has no R3.9.3 rendering
-//          (AMB-02a; `mechanism_absent` occurs 0 times in V1.1). It leaves the union with the last
-//          `pending()` slot at U8b, and this test turns green there. An interlock that were green
-//          today would be an interlock that measures nothing.
+//   REN-3  `RefusalCode ⊆ table`. U8b removes the final interim-only refusal member, so this is a
+//          normal passing interlock: adding any future refusal without a rendering row fails build.
 //   REN-6  `widgets.runtime` is granted by exactly one path. Stated here as a spec AND requested as
 //          an extension of k3 check 8 (IR-REN-2), because the two catch different things: k3 reads
 //          the plan and trial rules, this reads the migrations, seeds and scripts. The scanner is
@@ -193,57 +190,14 @@ describe('P-RENDER — R3.9.3 rendering: the map is total and the grant path is 
     return members;
   };
 
-  it('REN-3 the union still carries exactly the member with no rendering, and nothing else new', () => {
-    // The complement of the interlock, and the reason `it.failing` below is honest rather than
-    // forgotten: today the ONLY uncovered member is `mechanism_absent`. If a second one appeared,
-    // this test goes red immediately instead of hiding inside the expected failure.
+  it('REN-3 every RefusalCode has a canonical rendering row after U8b', () => {
     const uncovered = refusalCodeMembers().filter(
       (code) =>
         !Object.prototype.hasOwnProperty.call(LIMITATION_REASON_TABLE, code),
     );
-    expect(uncovered).toEqual(['mechanism_absent']);
-  });
-
-  it.failing(
-    'REN-3 RefusalCode ⊆ LIMITATION_REASON_TABLE [XF→U8b: green when mechanism_absent leaves the union]',
-    () => {
-      const uncovered = refusalCodeMembers().filter(
-        (code) =>
-          !Object.prototype.hasOwnProperty.call(LIMITATION_REASON_TABLE, code),
-      );
-      expect(uncovered).toEqual([]);
-    },
-  );
-
-  it('REN-3b the interim is honest: an uncovered §3.9 code renders NOTHING, never P10(b)’s silent-source phrase', () => {
-    // CKPT-W1 review fix, and the reason REN-3 above may stay `it.failing` without leaving the live
-    // path unguarded. While REN-3 is red there IS a member of the union with no row, and the route
-    // must still answer something for it. `reasonText` is total and falls back to
-    // `widget.limitation.provider_silent` — P10(b)'s default, which is declared for the `c9_*` DENIAL
-    // space (`denial-projection.ts` cites it there), where "the source pays no answer" is true of an
-    // upstream that really went quiet. `mechanism_absent` is not that: it marks a gate NOBODY BUILT,
-    // and since U8a moved the wall from slot 8 to slot 9 it is the answer to every conformant
-    // submission. Rendering it as «Источник пока не отвечает.» put a falsehood on R3.9.3's own
-    // surface — the clause that exists to separate a policy fence from a fault — on every tap.
-    // `reasonTextOrNull` is what the controller calls now; this is its ratchet.
-    const uncovered = refusalCodeMembers().filter(
-      (code) =>
-        !Object.prototype.hasOwnProperty.call(LIMITATION_REASON_TABLE, code),
-    );
-    expect(uncovered.length).toBeGreaterThan(0);
-    for (const code of uncovered) {
-      expect({ code, rendered: reasonTextOrNull(code) }).toEqual({
-        code,
-        rendered: null,
-      });
-      // And the phrase it would otherwise have borrowed really is P10(b)'s, so this test is about a
-      // fallback that was reached and not about one nobody used.
-      expect({ code, key: reasonText(code).phrase_key }).toEqual({
-        code,
-        key: 'widget.limitation.provider_silent',
-      });
-    }
-    // A covered code is untouched: the fix narrows nothing that had an honest row of its own.
+    expect(uncovered).toEqual([]);
+    for (const code of refusalCodeMembers())
+      expect(reasonTextOrNull(code)).toEqual(reasonText(code));
     expect(reasonTextOrNull('EXPIRED')).toEqual(reasonText('EXPIRED'));
     expect(reasonTextOrNull(null)).toBeNull();
   });

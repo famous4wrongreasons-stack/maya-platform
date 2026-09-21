@@ -24,24 +24,24 @@
       {
         "file": "src/widgets/input-validation/input-validation.gate.ts",
         "find": "  const decision = decideForContext(ctx);",
-        "replace": "  const early = await reader.read(ctx.tenantId, ctx.intentTokenHash);\n  const decision = decideForContext(ctx);"
+        "replace": "  const early = await ports.loweringSource.read(ctx.tenantId, ctx.intentTokenHash);\n  const decision = decideForContext(ctx);"
       },
       {
         "file": "src/widgets/input-validation/input-validation.gate.ts",
-        "find": "  const loweringSource: LoweringSourceRow = await reader.read(\n    ctx.tenantId,\n    ctx.intentTokenHash,\n  );",
+        "find": "  const loweringSource: LoweringSourceRow = await ports.loweringSource.read(\n    ctx.tenantId,\n    ctx.intentTokenHash,\n  );",
         "replace": "  const loweringSource: LoweringSourceRow = early;"
       }
     ],
-    "killers": ["T-HELD", "T-READ-ONCE", "T-NULL-OBJ"],
+    "killers": ["T-READ-ONCE", "T-NULL-OBJ"],
     "expect": "live-killed"
   },
   {
     "id": "M-FACT-SLOT",
-    "description": "slot 8's pass carries a fact slot 8 does not produce (`loweredTurn`, whose producer is slot 9). J-1's `mergeFacts` throws on it — a fact has exactly one producer slot — so the submission raises instead of returning a verdict. This is the mutant the producer map is FOR: without `mergeFacts` the gate could hand Gate 13 a turn nobody appended. Killed live by T-NULL-NULL (the pass path), and at [U] by G8a-G3.",
+    "description": "slot 8's pass carries a fact slot 8 does not produce (`loweredTurn`, whose producer is slot 9). J-1's `mergeFacts` throws on it — a fact has exactly one producer slot — so the submission raises instead of returning a verdict. This is the mutant the producer map is FOR: without `mergeFacts` the gate could hand Gate 13 a turn nobody appended. Killed live by T-NULL-NULL (the pass path), and at [U] by T-NULL-NULL.",
     "file": "src/widgets/input-validation/input-validation.gate.ts",
     "find": "  return {\n    outcome: 'pass',\n    facts: { validatedInputs, selectedLabels, loweringSource },\n  };",
     "replace": "  return {\n    outcome: 'pass',\n    facts: {\n      validatedInputs,\n      selectedLabels,\n      loweringSource,\n      loweredTurn: {\n        turnId: 'slot-8',\n        conversationId: loweringSource.conversationId,\n      },\n    },\n  };",
-    "killers": ["T-NULL-NULL", "G8a-G3"],
+    "killers": ["T-NULL-NULL"],
     "expect": "live-killed"
   },
   {
@@ -51,6 +51,51 @@
     "find": "  const decision = decideForContext(ctx);",
     "replace": "  const decision = decideForContext({\n    ...ctx,\n    submission: { ...ctx.submission, inputs: null },\n  });",
     "killers": ["T-NULL-OBJ", "T-NULL-EMPTY"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M-UNDECLARED",
+    "description": "undeclared input keys are silently ignored",
+    "file": "src/widgets/input-validation/input-validation.ts",
+    "find": "  for (const key of Object.keys(values))\n    if (!fields.has(key))\n      return refusal(\n        'selection_out_of_domain',\n        `the submission contains undeclared field ${key}`,\n      );",
+    "replace": "  for (const key of Object.keys(values)) void key;",
+    "killers": ["T-SCHEMA"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M-PER-TOKEN-DOMAIN",
+    "description": "per-field closed-domain membership is bypassed",
+    "file": "src/widgets/input-validation/input-validation.ts",
+    "find": "        if (!domain || selected.some((id) => !domain.has(id)))",
+    "replace": "        if (!domain || false)",
+    "killers": ["T-SCHEMA-OUTSIDE"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M-BYTE-CAP",
+    "description": "the canonical UTF-8 byte cap is ignored",
+    "file": "src/widgets/input-validation/input-validation.ts",
+    "find": "    if (inputsByteLength(args.inputs) > args.schema.max_total_bytes)",
+    "replace": "    if (false && inputsByteLength(args.inputs) > args.schema.max_total_bytes)",
+    "killers": ["T-SCHEMA-BYTE"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M-HASH-SUPERSEDED",
+    "description": "a hash-mismatching emitted schema is accepted",
+    "file": "src/widgets/input-validation/input-validation.ts",
+    "find": "  if (inputSchemaHash(parsed.schema) !== expectedHash)",
+    "replace": "  if (false && inputSchemaHash(parsed.schema) !== expectedHash)",
+    "killers": ["T-SCHEMA-HASH"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M-ERASED-REFUSE",
+    "description": "an erased render receipt remains a schema authority",
+    "file": "src/widgets/input-validation/input-schema-source.ts",
+    "find": "      receipt.erasedAt !== null ||",
+    "replace": "      false ||",
+    "killers": ["T-SCHEMA-ERASED"],
     "expect": "live-killed"
   }
 ]

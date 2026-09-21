@@ -14,7 +14,7 @@ import type { AuthenticatedUser } from '../common/authenticated-user.interface';
 import type { SubmitIntentDto } from './dto/submit-intent.dto';
 import type { IntentGatewayService } from './intent-gateway.service';
 import { intentSubmitArgs } from './intent-submit-args';
-import { hasReasonRow } from './rendering/reason-text';
+import { hasReasonRow, reasonText } from './rendering/reason-text';
 import { WidgetsController } from './widgets.controller';
 
 type SubmitArgs = Parameters<IntentGatewayService['submit']>[0];
@@ -46,8 +46,8 @@ const recordingGateway = () => {
       return Promise.resolve({
         verdict: {
           outcome: 'refuse' as const,
-          code: 'mechanism_absent' as const,
-          detail: 'gate 8 is pending',
+          code: 'effect_not_admissible' as const,
+          detail: 'synthetic contract refusal',
         },
         stoppedAt: '8',
         ran: 8,
@@ -116,24 +116,15 @@ describe('WidgetsController.intent — the arguments it hands the gateway', () =
   it('the response carries the verdict, the stop, the counts and the closed routing result, and nothing else', async () => {
     const { controller } = recordingGateway();
     const response = await controller.intent(dto(), actor());
-    // The premise the `reason_text` below rests on, asserted rather than assumed: this code has no
-    // row of its own, so there is no honest phrase to mint for it.
-    expect(hasReasonRow('mechanism_absent')).toBe(false);
+    expect(hasReasonRow('effect_not_admissible')).toBe(true);
     // P-RENDER (IR-REN-1) adds exactly one member, which SH-22 admits on R3.9.3. The literal is
     // written out in full, so a second member added here fails this test rather than passing unseen.
     expect(JSON.stringify(response)).toBe(
       JSON.stringify({
         contract: 'maya.widget.intent/1',
         outcome: 'refuse',
-        code: 'mechanism_absent',
-        // CKPT-W1 review fix: `mechanism_absent` is the not-built marker, not a §3.9 refusal, and it
-        // carries no `LIMITATION_REASON_TABLE` row. It used to render through `reasonText`'s P10(b)
-        // fallback — «Источник пока не отвечает.», "the source is not responding yet" — which is a
-        // statement about a silent upstream, not about a gate nobody has written, and since U8a moved
-        // the wall to slot 9 it was the answer to EVERY conformant submission. The route renders
-        // nothing for it now. When U8b takes the code out of `RefusalCode` (D-10), no member of the
-        // union lacks a row and this expectation becomes a `Phrase` again, for a real code.
-        reason_text: null,
+        code: 'effect_not_admissible',
+        reason_text: reasonText('effect_not_admissible'),
         stopped_at_gate: '8',
         gates_run: 8,
         gates_total: 15,

@@ -5,17 +5,13 @@
     "file": "src/widgets/routing/effect-router.service.ts",
     "find": "    if (record === null)\n      return { outcome: 'refuse', code: 'effect_not_admissible' };",
     "replace": "    if (record === null) return { outcome: 'pass' };",
-    "killers": [
-      "G13-P01"
-    ],
+    "killers": ["G13-P01"],
     "expect": "build-killed"
   },
   {
     "id": "M13-2",
     "description": "NONE enters the routable effect vocabulary",
-    "killers": [
-      "G13-R10"
-    ],
+    "killers": ["G13-R10"],
     "expect": "build-killed",
     "edits": [
       {
@@ -36,20 +32,16 @@
     "file": "src/widgets/routing/effect-router.service.ts",
     "find": "      case 'COMMIT':\n        return null;\n    }",
     "replace": "      case 'COMMIT':\n        return null;\n      default:\n        return null;\n    }",
-    "killers": [
-      "B15/B28"
-    ],
+    "killers": ["B15/B28"],
     "expect": "build-killed"
   },
   {
     "id": "M13-3",
     "description": "an absent destination is executed instead of refusing before claim",
     "file": "src/widgets/routing/effect-router.service.ts",
-    "find": "    if (destination === null)\n      return { outcome: 'refuse', code: 'mechanism_absent' };",
-    "replace": "    if (false && destination === null)\n      return { outcome: 'refuse', code: 'mechanism_absent' };",
-    "killers": [
-      "N02/N03/N05"
-    ],
+    "find": "    if (destination === null)\n      return { outcome: 'refuse', code: 'effect_not_admissible' };",
+    "replace": "    if (false && destination === null)\n      return { outcome: 'refuse', code: 'effect_not_admissible' };",
+    "killers": ["N02/N03/N05"],
     "expect": "build-killed"
   },
   {
@@ -58,9 +50,7 @@
     "file": "src/widgets/routing/effect-router.service.ts",
     "find": "    if (!claimed) return { outcome: 'expired' };",
     "replace": "    if (false && !claimed) return { outcome: 'expired' };",
-    "killers": [
-      "AMB-54"
-    ],
+    "killers": ["AMB-54"],
     "expect": "build-killed"
   },
   {
@@ -69,9 +59,7 @@
     "file": "src/widgets/routing/effect-router.service.ts",
     "find": "      singleUse: record.singleUse,",
     "replace": "      singleUse: true,",
-    "killers": [
-      "G13-I5"
-    ],
+    "killers": ["G13-I5"],
     "expect": "build-killed"
   },
   {
@@ -80,9 +68,7 @@
     "file": "src/widgets/routing/effect-router.service.ts",
     "find": "    await this.stores.writeReceipt(\n      {",
     "replace": "    if (false) await this.stores.writeReceipt(\n      {",
-    "killers": [
-      "G13-R5"
-    ],
+    "killers": ["G13-R5"],
     "expect": "build-killed"
   },
   {
@@ -91,9 +77,7 @@
     "file": "src/widgets/routing/effect-router.service.ts",
     "find": "        outcome: routed.receiptOutcome,",
     "replace": "        outcome: 'REFUSED',",
-    "killers": [
-      "G13-R5"
-    ],
+    "killers": ["G13-R5"],
     "expect": "build-killed"
   },
   {
@@ -149,9 +133,7 @@
     "file": "src/widgets/routing/effect-router.service.ts",
     "find": "      case 'COMMIT':\n        return null;",
     "replace": "      case 'COMMIT':\n        return async () => admitted();",
-    "killers": [
-      "N02/N03/N05"
-    ],
+    "killers": ["N02/N03/N05"],
     "expect": "build-killed"
   },
   {
@@ -160,9 +142,7 @@
     "file": "src/widgets/routing/effect-router.service.ts",
     "find": "    if (record.effect === 'NONE' || !isRoutableEffect(record.effect))",
     "replace": "    if (record.effect === 'NONE' && !isRoutableEffect(record.effect))",
-    "killers": [
-      "B28"
-    ],
+    "killers": ["B28"],
     "expect": "build-killed"
   },
   {
@@ -171,9 +151,7 @@
     "file": "src/widgets/routing/effect-router.service.ts",
     "find": "      receipt_outcome: routed.receiptOutcome,",
     "replace": "      receipt_outcome: null,",
-    "killers": [
-      "G13-R5"
-    ],
+    "killers": ["G13-R5"],
     "expect": "build-killed"
   },
   {
@@ -182,9 +160,7 @@
     "file": "src/widgets/routing/effect-router.service.ts",
     "find": "      input.principalProofHash.length === 0 ||\n      subject?.space !== 'CONTROL'",
     "replace": "      subject?.space !== 'CONTROL'",
-    "killers": [
-      "N-CTRL-FOREIGN-P"
-    ],
+    "killers": ["N-CTRL-FOREIGN-P"],
     "expect": "build-killed"
   },
   {
@@ -193,9 +169,7 @@
     "file": "src/widgets/control/control-registry.service.ts",
     "find": "        intentRecords: {\n          some: {\n            tenantId: args.tenantId,\n            principalProofHash: args.principalProofHash,\n          },\n        },",
     "replace": "",
-    "killers": [
-      "R3.2.4"
-    ],
+    "killers": ["R3.2.4"],
     "expect": "build-killed"
   }
 ]

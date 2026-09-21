@@ -62,7 +62,7 @@ export class EffectRouterService {
     // AMB-54: resolve the destination first. A missing owner must not consume the token.
     const destination = this.destination(ctx, record.effect);
     if (destination === null)
-      return { outcome: 'refuse', code: 'mechanism_absent' };
+      return { outcome: 'refuse', code: 'effect_not_admissible' };
 
     const claimed = await this.stores.claimIntentRecord({
       tenantId: ctx.tenantId,

@@ -89,7 +89,7 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
       const { router, stores } = fixture();
       await expect(
         router.route(ctx(rec({ effect }), { principal: PRINCIPAL })),
-      ).resolves.toEqual({ outcome: 'refuse', code: 'mechanism_absent' });
+      ).resolves.toEqual({ outcome: 'refuse', code: 'effect_not_admissible' });
       expect(stores.claimIntentRecord).not.toHaveBeenCalled();
       expect(stores.writeReceipt).not.toHaveBeenCalled();
     },
@@ -188,7 +188,7 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
     );
     await expect(router.route(input)).resolves.toEqual({
       outcome: 'refuse',
-      code: 'mechanism_absent',
+      code: 'effect_not_admissible',
     });
     expect(stores.claimIntentRecord).not.toHaveBeenCalled();
     expect(controls.dismiss).not.toHaveBeenCalled();

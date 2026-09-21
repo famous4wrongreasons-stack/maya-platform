@@ -1,47 +1,28 @@
-// ── Gate 8 — input validation: the decision, as a pure function (U8a, GATES-PLAN-V11) ──────────────
+// Gate 8 — deterministic validation over the exact server-emitted schema.
 //
-// Row 8 (C11:4727) is one gate with two lanes, and this file decides which lane a submission is in
-// before anything is read from a store. B-01 (AMB-01a, C11:7188) is why it is a LANE and not a gate:
-// "an unbuilt clause refuses only the cases it governs, and built clauses evaluate". The schema lane
-// needs the schema source, the codec and the two registries (U8b); the null-schema lane needs none of
-// them, so it is built here and the other one is held, fail closed.
-//
-//   record.inputSchemaHash === null      the NULL-SCHEMA lane, built
-//     submission.inputs absent or null     pass. Nothing was submitted, so nothing can be out of a
-//                                          domain, and `validatedInputs` is null rather than empty.
-//     anything else, `{}` included         REFUSED / selection_out_of_domain (K12, C11:2902)
-//   record.inputSchemaHash !== null      the SCHEMA lane, HELD: `mechanism_absent` until U8b
-//
-// `{}` refuses, and that is deliberate. K12's sentence is about CARRYING `inputs`, not about carrying
-// values: "refuses a submission carrying `inputs` for a null schema". An empty object is a submission
-// that carried the member. Treating it as "nothing was sent" would make the one form a hostile client
-// can always produce the one form that is never refused — and §3.8 already distinguishes the two, since
-// `inputs` is REQUIRED and NULLABLE there (P-F88): "omitted" and "null" are different answers, and `{}`
-// is a third. The gate does not repair, normalise or truncate any of them (row 8: "enforced by refusal,
-// never truncation").
-//
-// Nothing here reads a store, a clock, a registry or the principal. The gate file calls it, and the one
-// read the lane performs happens THERE, after the decision (D-2).
+// The null-schema lane is decided without a read. The schema lane reads the exact render receipt
+// inside the request transaction, verifies its hash against the audit-retained record and validates
+// every submitted member. No submitted value can select a schema, domain, bound or normalizer.
 
+import { c9SafeText } from '../../orchestration/c9.contract';
+import type { InputField, InputSchema } from '../../widget-contract/intent';
 import type {
   GateContext,
   IntentRecordRow,
   SubmissionShape,
 } from '../gate.types';
+import {
+  decodeSelectionDomain,
+  type SelectionDomain,
+} from '../input-schema/codec';
+import { inputSchemaHash } from '../input-schema/input-schema-hash';
+import { inputsByteLength } from '../input-schema/inputs-bytes';
+import { parseInputSchema } from '../input-schema/parse-input-schema';
+import type { InputBoundsRegistry } from './input-bounds.registry';
+import type { InputNormalizerRegistry } from './input-normalizers.registry';
 
-/** What the submission said about `inputs`, as three cases rather than a truthiness test. */
 export type InputsPresence = 'absent' | 'null' | 'values';
 
-/**
- * `absent` and `null` are kept apart even though this lane answers both with a pass: they are different
- * submissions (§3.8 makes `inputs` required and nullable), the reason each passes is different, and the
- * schema lane U8b builds will answer them differently.
- *
- * Every value that is neither `undefined` nor `null` is `values` — a string, an array or a number as
- * much as an object. A shape that is not a map of scalars is refused by the §3.8 stage before a gate
- * runs (P-F88's `ClosedInputsConstraint`), and a gate that assumed that had held would be trusting a
- * pipe: here it simply cannot be out of a null domain and pass.
- */
 export const inputsPresence = (submission: SubmissionShape): InputsPresence => {
   const inputs: unknown = submission?.inputs;
   if (inputs === undefined) return 'absent';
@@ -49,8 +30,7 @@ export const inputsPresence = (submission: SubmissionShape): InputsPresence => {
   return 'values';
 };
 
-/** Which lane the record put the submission in, and what the lane answers. */
-export type InputValidationDecision =
+export type NullSchemaDecision =
   | {
       readonly lane: 'null-schema';
       readonly verdict: 'pass';
@@ -65,51 +45,18 @@ export type InputValidationDecision =
     }
   | {
       readonly lane: 'schema';
-      readonly verdict: 'refuse';
-      readonly code: 'mechanism_absent';
-      readonly detail: string;
+      readonly verdict: 'evaluate';
       readonly presence: InputsPresence;
     };
 
-/**
- * What the schema lane waits on. It is the HELD half of row 8, and it names the mechanism rather than a
- * ruling: the codec is U8b-c's, the schema source, the bounds registry and the normalizer registry are
- * U8b's. A record that carries a schema hash therefore refuses — "not built yet" and "allowed" are never
- * the same branch (F5).
- */
-export const INPUT_VALIDATION_HELD_ON =
-  'the schema lane: the server-held input schema (hash-bound), the closed-domain codec, and the bounds and normalizer registries (U8b)';
-
-/**
- * The decision, from the record and the submission alone.
- *
- * A null record fails closed on the HELD lane rather than on the built one: with no record there is no
- * `inputSchemaHash`, so the gate cannot tell which lane it is in, and a gate that cannot tell refuses.
- * Slot 8 never sees one on a conformant build — Gate 1 refuses first — which is exactly why the branch
- * is written down instead of assumed away.
- */
+/** The lane decision itself reads no store. */
 export const decideInputValidation = (
   record: IntentRecordRow | null,
   submission: SubmissionShape,
-): InputValidationDecision => {
+): NullSchemaDecision => {
   const presence = inputsPresence(submission);
-  if (!record)
-    return {
-      lane: 'schema',
-      verdict: 'refuse',
-      code: 'mechanism_absent',
-      detail:
-        'no record: the lane cannot be determined without inputSchemaHash',
-      presence,
-    };
-  if (record.inputSchemaHash !== null)
-    return {
-      lane: 'schema',
-      verdict: 'refuse',
-      code: 'mechanism_absent',
-      detail: `gate 8 (Input validation) is NORMATIVE-PENDING on ${INPUT_VALIDATION_HELD_ON}`,
-      presence,
-    };
+  if (!record || record.inputSchemaHash !== null)
+    return { lane: 'schema', verdict: 'evaluate', presence };
   if (presence === 'values')
     return {
       lane: 'null-schema',
@@ -122,6 +69,252 @@ export const decideInputValidation = (
   return { lane: 'null-schema', verdict: 'pass', presence };
 };
 
-/** The same decision over a gate context, so the gate file states the read once. */
-export const decideForContext = (ctx: GateContext): InputValidationDecision =>
+export const decideForContext = (ctx: GateContext): NullSchemaDecision =>
   decideInputValidation(ctx.record, ctx.submission);
+
+export class InputValidationIntegrityError extends Error {
+  constructor(reason: string) {
+    super(`gate 8 input integrity fault: ${reason}`);
+    this.name = 'InputValidationIntegrityError';
+  }
+}
+
+export type SchemaValidationResult =
+  | {
+      readonly verdict: 'pass';
+      readonly validatedInputs: {
+        readonly closed: ReadonlyMap<string, readonly string[]>;
+      };
+    }
+  | {
+      readonly verdict: 'refuse';
+      readonly code:
+        | 'selection_out_of_domain'
+        | 'bound_violation'
+        | 'use_secure_surface'
+        | 'oversize_submission';
+      readonly detail: string;
+    };
+
+const refusal = (
+  code: Extract<SchemaValidationResult, { verdict: 'refuse' }>['code'],
+  detail: string,
+): SchemaValidationResult => ({ verdict: 'refuse', code, detail });
+
+const asSelections = (value: unknown): readonly string[] | null => {
+  if (typeof value === 'string') return [value];
+  if (Array.isArray(value) && value.every((v) => typeof v === 'string'))
+    return value;
+  return null;
+};
+
+const safeText = (value: unknown, max?: number): string | null => {
+  try {
+    return c9SafeText(value, max);
+  } catch {
+    return null;
+  }
+};
+
+const boundSourceOf = (
+  field: Extract<
+    InputField,
+    { kind: 'integer' | 'decimal' | 'date' | 'time' | 'datetime' }
+  >,
+): string =>
+  'bounds' in field ? field.bounds.bounds_source : field.window.bounds_source;
+
+/**
+ * Validates one schema-bearing submission. The schema and domain are server-held inputs already
+ * integrity-checked by the caller; this function never reads a record or a provider directly.
+ */
+export const validateSchemaInputs = async (args: {
+  readonly tenantId: string;
+  readonly schema: InputSchema;
+  readonly selectionDomain: SelectionDomain;
+  readonly inputs: Readonly<Record<string, unknown>> | null | undefined;
+  readonly bounds: InputBoundsRegistry;
+  readonly normalizers: InputNormalizerRegistry;
+}): Promise<SchemaValidationResult> => {
+  const values = args.inputs ?? {};
+  if (args.inputs !== null && args.inputs !== undefined) {
+    if (inputsByteLength(args.inputs) > args.schema.max_total_bytes)
+      return refusal(
+        'oversize_submission',
+        'the canonical UTF-8 input encoding exceeds max_total_bytes',
+      );
+  }
+
+  const fields = new Map(
+    args.schema.fields.map((field) => [field.name, field]),
+  );
+  for (const key of Object.keys(values))
+    if (!fields.has(key))
+      return refusal(
+        'selection_out_of_domain',
+        `the submission contains undeclared field ${key}`,
+      );
+
+  const closed = new Map<string, readonly string[]>();
+  for (const field of args.schema.fields) {
+    const present = Object.prototype.hasOwnProperty.call(values, field.name);
+    if (!present) {
+      if (field.required)
+        return refusal(
+          'selection_out_of_domain',
+          `required field ${field.name} is absent`,
+        );
+      continue;
+    }
+    const value = values[field.name];
+    switch (field.kind) {
+      case 'enum':
+      case 'ref': {
+        const selected = asSelections(value);
+        if (selected === null)
+          return refusal(
+            'selection_out_of_domain',
+            `field ${field.name} is not a closed selection`,
+          );
+        if (new Set(selected).size !== selected.length)
+          return refusal(
+            'selection_out_of_domain',
+            `field ${field.name} repeats an option in a set`,
+          );
+        if (
+          selected.length < field.selection_min ||
+          selected.length > field.selection_max
+        )
+          return refusal(
+            'selection_out_of_domain',
+            `field ${field.name} violates its selection cardinality`,
+          );
+        const domain = args.selectionDomain.get(field.name);
+        if (!domain || selected.some((id) => !domain.has(id)))
+          return refusal(
+            'selection_out_of_domain',
+            `field ${field.name} contains an option outside its token domain`,
+          );
+        closed.set(field.name, Object.freeze([...selected]));
+        break;
+      }
+      case 'boolean':
+        if (typeof value !== 'boolean')
+          return refusal(
+            'selection_out_of_domain',
+            `field ${field.name} is not boolean`,
+          );
+        break;
+      case 'integer':
+      case 'decimal':
+      case 'date':
+      case 'time':
+      case 'datetime': {
+        const correctType =
+          field.kind === 'integer'
+            ? typeof value === 'number' && Number.isSafeInteger(value)
+            : field.kind === 'decimal'
+              ? typeof value === 'number' && Number.isFinite(value)
+              : typeof value === 'string';
+        if (!correctType)
+          return refusal(
+            'bound_violation',
+            `field ${field.name} does not conform to kind ${field.kind}`,
+          );
+        const source = args.bounds.get(boundSourceOf(field));
+        if (!source)
+          return refusal(
+            'bound_violation',
+            `field ${field.name} names an unregistered bounds source`,
+          );
+        if (
+          !(await source({
+            tenantId: args.tenantId,
+            field,
+            value: value as number | string,
+          }))
+        )
+          return refusal(
+            'bound_violation',
+            `field ${field.name} is outside the fresh canonical bound`,
+          );
+        break;
+      }
+      case 'text': {
+        if (typeof value !== 'string' || value.length > field.max_len)
+          return refusal(
+            'bound_violation',
+            `field ${field.name} exceeds max_len or is not text`,
+          );
+        const first = safeText(value);
+        if (first === null)
+          return refusal(
+            'use_secure_surface',
+            `field ${field.name} contains secure-surface content`,
+          );
+        const normalizer = args.normalizers.get(field.normalizer_ref);
+        if (!normalizer)
+          return refusal(
+            'use_secure_surface',
+            `field ${field.name} names an unregistered normalizer`,
+          );
+        const normalized = safeText(normalizer(first));
+        if (normalized === null)
+          return refusal(
+            'use_secure_surface',
+            `field ${field.name} is unsafe after normalization`,
+          );
+        break;
+      }
+      case 'phone': {
+        const first = safeText(value);
+        if (first === null)
+          return refusal(
+            'use_secure_surface',
+            `field ${field.name} is not safe text`,
+          );
+        const normalizer = args.normalizers.get(field.normalizer_ref);
+        if (!normalizer)
+          return refusal(
+            'use_secure_surface',
+            `field ${field.name} requires a secure registered normalizer`,
+          );
+        if (safeText(normalizer(first)) === null)
+          return refusal(
+            'use_secure_surface',
+            `field ${field.name} is unsafe after normalization`,
+          );
+        break;
+      }
+    }
+  }
+  return {
+    verdict: 'pass',
+    validatedInputs: { closed },
+  };
+};
+
+export const parseAndVerifySchema = (
+  value: unknown,
+  expectedHash: string,
+): InputSchema => {
+  const parsed = parseInputSchema(value);
+  if (!parsed.ok)
+    throw new InputValidationIntegrityError('the stored schema does not parse');
+  if (inputSchemaHash(parsed.schema) !== expectedHash)
+    throw new InputValidationIntegrityError(
+      'the emitted schema hash differs from the intent record',
+    );
+  return parsed.schema;
+};
+
+export const decodeRecordDomain = (
+  record: IntentRecordRow,
+): SelectionDomain => {
+  const decoded = decodeSelectionDomain(record.selectionDomain);
+  if (!decoded.ok)
+    throw new InputValidationIntegrityError(
+      'the intent record selection domain is invalid',
+    );
+  return decoded.value;
+};

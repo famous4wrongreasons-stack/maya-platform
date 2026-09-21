@@ -1,8 +1,8 @@
 // Gate 5, as a function: a positive proof, the refusal proofs, and the carrier ceiling.
 //
 // Every test here would have passed vacuously before the gates were wired, because the gate it
-// exercises was a stub that refused everything. That is the point: `mechanism_absent` is not a
-// fence, and a suite that could not tell a fence from a blanket refusal is not a suite.
+// exercises was a stub that refused everything. A suite must distinguish the actual authority fence
+// from a blanket fail-closed seam.
 
 import fs from 'node:fs';
 import path from 'node:path';

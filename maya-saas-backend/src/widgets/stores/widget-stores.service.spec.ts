@@ -263,7 +263,7 @@ describe('WidgetStoresService — every existing method sends what it sent befor
           widgetId: 'w-1',
           intentTokenHash: 'h-2',
           outcome: 'REFUSED',
-          refusalCode: 'mechanism_absent',
+          refusalCode: 'effect_not_admissible',
           answeringChannel: 'pwa',
           actionReceiptRef: 'ae-1',
         },
@@ -302,7 +302,7 @@ describe('WidgetStoresService — every existing method sends what it sent befor
       ]);
       expect(exactly(calls[0].args)).toBe(expected('h-1', null, null));
       expect(exactly(calls[1].args)).toBe(
-        expected('h-2', 'mechanism_absent', 'ae-1'),
+        expected('h-2', 'effect_not_admissible', 'ae-1'),
       );
     });
 

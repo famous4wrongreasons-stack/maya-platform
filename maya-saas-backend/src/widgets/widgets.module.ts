@@ -9,12 +9,17 @@ import { ControlRegistryService } from './control/control-registry.service';
 import {
   GATE10_STORE,
   GATE_8R_OWNERS,
+  INPUT_BOUNDS_REGISTRY,
+  INPUT_NORMALIZER_REGISTRY,
   INPUT_VALIDATION,
   NOUN_RESOLUTION_PORTS,
 } from './di-tokens';
 import { WidgetEmissionModule } from './emission/emission.module';
 import { GATE_8R_OWNERS_UNRULED } from './gates/gate-8r.owners';
 import { InputValidationGate } from './input-validation/input-validation.gate';
+import { EMPTY_INPUT_BOUNDS_REGISTRY } from './input-validation/input-bounds.registry';
+import { EMPTY_INPUT_NORMALIZER_REGISTRY } from './input-validation/input-normalizers.registry';
+import { InputSchemaSourceReader } from './input-validation/input-schema-source';
 import { IntentGatewayService } from './intent-gateway.service';
 import { WidgetOwnerPortsModule } from './owner-ports/widget-owner-ports.module';
 import { NOUN_RESOLUTION_PORTS_UNBOUND } from './noun-resolution/noun-resolution.ports';
@@ -54,6 +59,12 @@ import { WidgetsController } from './widgets.controller';
     // widget-internal — no owner module is imported and no owner is reachable through them — so they
     // are bound here rather than at the D-6 boundary, and k3 check 9's owner enumeration is unchanged.
     LoweringSourceReader,
+    InputSchemaSourceReader,
+    { provide: INPUT_BOUNDS_REGISTRY, useValue: EMPTY_INPUT_BOUNDS_REGISTRY },
+    {
+      provide: INPUT_NORMALIZER_REGISTRY,
+      useValue: EMPTY_INPUT_NORMALIZER_REGISTRY,
+    },
     { provide: INPUT_VALIDATION, useClass: InputValidationGate },
     // U8R (R8R-1): slot 8-R's owner set, as a VALUE. `GATE_8R_OWNERS_UNRULED`'s vocabulary owner is
     // `null` (A1/A2 unruled, PKT:471), so a required readback refuses; the token exists so the day an

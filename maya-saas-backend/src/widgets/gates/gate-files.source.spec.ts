@@ -233,8 +233,8 @@ describe('D-10 — gate files refuse through the typed helper, with no cast', ()
 
   it('the vocabulary the fence checks against is read from RefusalCode, not copied', () => {
     const vocabulary = refusalVocabulary();
-    // The interim fail-closed code and one gate code, so a parse that found nothing cannot pass.
-    expect(vocabulary.has('mechanism_absent')).toBe(true);
+    // Two gate codes, so a parse that found nothing cannot pass.
+    expect(vocabulary.has('selection_out_of_domain')).toBe(true);
     expect(vocabulary.has('effect_not_admissible')).toBe(true);
     expect(vocabulary.has('invented')).toBe(false);
   });

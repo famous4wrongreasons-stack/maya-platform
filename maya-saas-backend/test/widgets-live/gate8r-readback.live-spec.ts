@@ -15,12 +15,12 @@
 //          An [RI] test is never evidence for anything — §0.5 says so in those words — but it is what
 //          keeps the required branch from being code nobody has ever run.
 //
-// THE TWO WORLDS. Slot 8 is still `mechanism_absent` until U8a lands the null-schema lane, so in this
+// THE TWO WORLDS. Slot 8 is still the interim slot-8 refusal until U8a lands the null-schema lane, so in this
 // tree a submission stops at 8 and slot 8-R never runs. The [GW] and [HTTP] tests are written to be
 // TRUE IN EITHER WORLD and to say which one they are in:
 //
 //   world           slot 8            what a Gate 8-R case asserts
-//   slot-8-pending  mechanism_absent  the answer is EXACTLY the control's — carrying a readback ack
+//   slot-8-pending  interim refusal  the answer is EXACTLY the control's — carrying a readback ack
 //                                     changes nothing at slots 1…8 — and the 8-R claim is not proven
 //   slot-8-built    passes            the ruled 8-R outcome, code, stop and `gates_run`
 //
