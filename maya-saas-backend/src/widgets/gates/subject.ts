@@ -5,8 +5,18 @@ import type { CapabilityRef } from '../../widget-contract/capability-ref';
 import type { IntentTarget } from '../../widget-contract/intent';
 import { subjectCapability } from '../authority/contract-bindings';
 
+/** The five stored members §3.5's one body needs. */
+export type SubjectRecord = Pick<
+  IntentRecordRow,
+  | 'capabilitySpace'
+  | 'capabilityKey'
+  | 'handoffSpace'
+  | 'handoffKey'
+  | 'targetJson'
+>;
+
 /** The record's subject, in the shape §3.5's one body reads. */
-export const subjectOf = (r: IntentRecordRow): CapabilityRef | null =>
+export const subjectOf = (r: SubjectRecord): CapabilityRef | null =>
   subjectCapability({
     capability:
       r.capabilitySpace && r.capabilityKey

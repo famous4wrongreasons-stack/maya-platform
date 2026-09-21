@@ -7,6 +7,7 @@ import { assertOwnerClassesResolve } from './authority/contract-bindings';
 import { assertLedgersBindAtRegistryLoad } from './authority/ledger-startup.assert';
 import { ControlRegistryService } from './control/control-registry.service';
 import {
+  GATE10_STORE,
   GATE_8R_OWNERS,
   INPUT_VALIDATION,
   NOUN_RESOLUTION_PORTS,
@@ -44,6 +45,7 @@ import { WidgetsController } from './widgets.controller';
   providers: [
     IntentGatewayService,
     WidgetStoresService,
+    { provide: GATE10_STORE, useExisting: WidgetStoresService },
     { provide: EFFECT_ROUTE_AUDIT, useExisting: WidgetStoresService },
     ControlRegistryService,
     // P-MINT/B-22: WidgetEmissionModule owns the keyed seal and the single minter pipeline. This

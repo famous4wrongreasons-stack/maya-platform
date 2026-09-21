@@ -22,6 +22,7 @@ import type {
 } from './gate.types';
 import type { ChannelId } from '../widget-contract/lifecycle';
 import {
+  GATE10_STORE,
   GATE6_OWNERS,
   GATE_8R_OWNERS,
   INPUT_VALIDATION,
@@ -48,7 +49,7 @@ import type { InputValidationGate } from './input-validation/input-validation.ga
 import { gate8R } from './gates/gate8r';
 import type { Gate8ROwners } from './gates/gate-8r.owners';
 import { lower } from './lowering/lowering.gate';
-import { GATE10_PENDING_ON, gate10 } from './gates/gate10';
+import { gate10, type Gate10Store } from './gates/gate10';
 import { gate11 } from './gates/gate11';
 import {
   gate11ApplicabilityOf,
@@ -60,6 +61,19 @@ import { pass } from './gates/verdict';
 import { gate13 } from './gates/gate13';
 import { EffectRouterService } from './routing/effect-router.service';
 import { channelMaxLevel } from './authority/authority-resolver';
+
+/** Request-transaction binding of Gate 10's store seam, implemented by WidgetStoresService. */
+interface TransactionalGate10Store {
+  liveCandidates(
+    record: IntentRecordRow,
+    now: Date,
+    tx: RequestTx,
+  ): ReturnType<Gate10Store['liveCandidates']>;
+  recordDivergence(
+    input: Parameters<Gate10Store['recordDivergence']>[0],
+    tx: RequestTx,
+  ): ReturnType<Gate10Store['recordDivergence']>;
+}
 
 // Slot seams (GATES-PLAN-V11 D-18, I-CTX). Slots 1, 4, 8, 9 and 10 each call one file, and that file's
 // body is what the slot ran before: the inline checks of Gates 1 and 4, and the refusing `pending()`
@@ -166,6 +180,8 @@ export class IntentGatewayService {
     @Inject(NOUN_RESOLUTION_PORTS)
     private readonly nounPorts: NounResolutionPorts,
     private readonly effectRouter: EffectRouterService,
+    @Inject(GATE10_STORE)
+    private readonly gate10Store: TransactionalGate10Store,
   ) {}
 
   /**
@@ -340,16 +356,20 @@ export class IntentGatewayService {
       // Seam: `lowering/lowering.gate.ts` (U9b).
       run: (ctx, tx) => lower(ctx, tx),
     },
-    // NOT BUILT. The router runs over THIS request's lowering (Gate 9's fact), and a divergence is
-    // written to a durable audit record. What the router resolves against, what "canonical owner"
-    // means, a null result and the audit record's store are owner rulings (AMB-29 … AMB-32, AMB-09).
     {
       n: '10',
       name: 'Divergence audit',
       host: 'intent router',
-      pendingOn: GATE10_PENDING_ON,
-      // Seam: `gates/gate10.ts` (U10b).
-      run: (ctx) => gate10(ctx),
+      run: (ctx, tx) => {
+        if (tx === null)
+          throw new Error('Gate 10 requires the request transaction');
+        return gate10(ctx, {
+          liveCandidates: (record, now) =>
+            this.gate10Store.liveCandidates(record, now, tx),
+          recordDivergence: (input) =>
+            this.gate10Store.recordDivergence(input, tx),
+        });
+      },
     },
     {
       n: '11',
