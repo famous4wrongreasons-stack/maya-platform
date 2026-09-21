@@ -81,7 +81,7 @@ describe('Gate 9 — canonical lowering and atomic timeline append (U9b)', () =>
     expect({ outcome: result.verdict.outcome, stop: result.stoppedAt }).toEqual(
       {
         outcome: 'refuse',
-        stop: '10',
+        stop: '13',
       },
     );
     const turns = await ctx.prisma.widgetTimelineTurn.findMany({
@@ -179,7 +179,7 @@ describe('Gate 9 — canonical lowering and atomic timeline append (U9b)', () =>
       gw.submit(built.actor, body(built.record), 'T9-CONC-1:a'),
       gw.submit(built.actor, body(built.record), 'T9-CONC-1:b'),
     ]);
-    expect([first.stoppedAt, second.stoppedAt]).toEqual(['10', '10']);
+    expect([first.stoppedAt, second.stoppedAt]).toEqual(['13', '13']);
     const turns = await ctx.prisma.widgetTimelineTurn.findMany({
       where: {
         tenantId: built.record.tenantId,
@@ -250,7 +250,7 @@ describe('Gate 9 — canonical lowering and atomic timeline append (U9b)', () =>
       const result = await http.postIntent(built.bearer, body(built.record));
       expect(result).toMatchObject({
         status: 200,
-        body: { stopped_at_gate: '10', gates_run: 11 },
+        body: { stopped_at_gate: '13', gates_run: 14 },
       });
       expect(await timeline(built.record)).toEqual([
         { turnIndex: 0, role: 'assistant', textContent: null },

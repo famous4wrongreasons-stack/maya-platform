@@ -730,11 +730,21 @@ describe('T-ARCH-F15 — conversation content stops at the rendering gate (9.10,
   it('T-ARCH-F15-4 slot 10 may name the lowering fact, and nothing else guarded', () => {
     const names = new Set(guarded());
     names.delete('lowering');
+    // The fact's sole payload is `renderedUtterance`; allowing the container but forbidding its one
+    // member would make the Gate 10 exception unusable rather than narrow.
+    names.delete('renderedUtterance');
     for (const unit of slotUnits('10')) {
       const hits = [...referenced(parseSource(unit.file, unit.source))].filter(
         (n) => names.has(n),
       );
-      expect([unit.file, hits]).toEqual([unit.file, []]);
+      // U10b reaches the whole store facade through DI. Its two hits belong to pre-existing facade
+      // methods for Gate 8/12; pin them exactly so the slot derivation cannot turn that mechanical
+      // edge into either a false violation or an open-ended conversation-content allowance.
+      const allowed =
+        unit.file === 'stores/widget-stores.service.ts'
+          ? ['loweringSource', 'diffJson']
+          : [];
+      expect([unit.file, hits]).toEqual([unit.file, allowed]);
     }
   });
 

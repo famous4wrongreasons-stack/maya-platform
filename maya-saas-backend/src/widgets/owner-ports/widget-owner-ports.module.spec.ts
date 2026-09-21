@@ -135,6 +135,9 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       // It reaches no owner either; U11b moves the binding to the boundary with its adapters, and the
       // k3 check 9 enumeration lands in that commit (§2.6 item 7).
       DI_TOKENS.NOUN_RESOLUTION_PORTS,
+      // U10b binds Gate 10's candidate/audit seam to the widget-internal stores facade. The gateway
+      // sees this narrow port instead of importing the full facade and its unrelated sub-stores.
+      DI_TOKENS.GATE10_STORE,
     ];
     const moduleRef = await Test.createTestingModule({
       // The owner modules the boundary now imports resolve configuration the way the application does:

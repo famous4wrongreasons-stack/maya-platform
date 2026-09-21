@@ -27,6 +27,9 @@ export const INPUT_BOUNDS_REGISTRY = 'INPUT_BOUNDS_REGISTRY';
 /** Gate 8's normalizer registry; an empty frozen map until AMB-21. */
 export const INPUT_NORMALIZER_REGISTRY = 'INPUT_NORMALIZER_REGISTRY';
 
+/** Gate 10's widget-internal candidate/audit port; bound to the stores facade by WidgetsModule. */
+export const GATE10_STORE = 'GATE10_STORE';
+
 // U10a (IR-U10A-3): `DETERMINISTIC_ROUTER` and `CAPABILITY_FACTS` are DELETED. Under V1.1 the router
 // and `ownerSet` are pure value imports over the frozen registries, not DI providers (AREA-B §3.2), so
 // a token for each would be a port that will never be bound — and an unbound token that no unit will

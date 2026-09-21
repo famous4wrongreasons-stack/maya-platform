@@ -503,6 +503,96 @@ describe('WidgetStoresService — every existing method sends what it sent befor
   });
 });
 
+describe('U10b Gate 10 divergence store', () => {
+  it('liveCandidates reads only the same tenant/proof live unused records in deterministic order', async () => {
+    const { prisma, calls } = recordingPrisma([]);
+    const stores = new WidgetStoresService({} as never);
+    await stores.liveCandidates(
+      { tenantId: 't-1', principalProofHash: 'p-1' },
+      NOW,
+      prisma as never,
+    );
+    expect(calls).toHaveLength(1);
+    expect(`${calls[0].model}.${calls[0].op}`).toBe(
+      'widgetIntentRecord.findMany',
+    );
+    expect(calls[0].args).toEqual({
+      where: {
+        principalProofHash: 'p-1',
+        expiresAt: { gt: NOW },
+        consumedAt: null,
+        tenantId: 't-1',
+      },
+      orderBy: [{ issuedAt: 'desc' }, { intentTokenHash: 'asc' }],
+      select: {
+        intentTokenHash: true,
+        effect: true,
+        priority: true,
+        capabilitySpace: true,
+        capabilityKey: true,
+        handoffSpace: true,
+        handoffKey: true,
+        targetJson: true,
+        issuedAt: true,
+        erasedAt: true,
+        utteranceTemplate: true,
+        selectionDomainLabelsJson: true,
+      },
+    });
+  });
+
+  it('recordDivergence writes exactly the durable Gate 10 audit in request T', async () => {
+    const { prisma, calls } = recordingPrisma({ id: 'audit-1' });
+    const stores = new WidgetStoresService({} as never);
+    await stores.recordDivergence(
+      {
+        tenantId: 't-1',
+        widgetId: 'w-1',
+        tappedIntentTokenHash: 'tapped',
+        resolvedIntentTokenHash: 'resolved',
+        resolvedEffect: 'REFINE',
+        refusalCode: 'intent_divergence',
+        observedAt: NOW,
+      },
+      prisma as never,
+    );
+    expect(calls).toEqual([
+      {
+        model: 'widgetIntentDivergenceAudit',
+        op: 'create',
+        args: {
+          data: {
+            tenantId: 't-1',
+            widgetId: 'w-1',
+            tappedIntentTokenHash: 'tapped',
+            resolvedIntentTokenHash: 'resolved',
+            resolvedEffect: 'REFINE',
+            refusalCode: 'intent_divergence',
+            observedAt: NOW,
+          },
+          select: { id: true },
+        },
+      },
+    ]);
+  });
+
+  it('countDivergences is tenant-scoped and refuses an empty tenant', async () => {
+    const { stores, calls } = storesOver(4);
+    await expect(stores.countDivergences('t-1')).resolves.toBe(4);
+    expect(calls).toEqual([
+      {
+        model: 'widgetIntentDivergenceAudit',
+        op: 'count',
+        args: { where: { tenantId: 't-1' } },
+      },
+    ]);
+    expect(() => stores.countDivergences('')).toThrow(
+      'widget store: refusing an unscoped query',
+    );
+    expect(calls).toHaveLength(1);
+  });
+});
+
 describe('the stores split (U0, D-6): four sub-stores behind one facade, one tenant fence', () => {
   const STORES = __dirname;
   const SRC = path.resolve(__dirname, '../..');
@@ -547,13 +637,16 @@ describe('the stores split (U0, D-6): four sub-stores behind one facade, one ten
       [
         'appendTurn',
         'claimIntentRecord',
+        'countDivergences',
         'countFreeInputFields',
+        'liveCandidates',
         'lowerToUserTurn',
         'putDraft',
         'readDraft',
         'readTimeline',
         'reconcileAcceptedReceipt',
         'recordFreeInput',
+        'recordDivergence',
         'recordSubmission',
         'writeReceipt',
       ].sort(),
@@ -605,18 +698,18 @@ describe('the stores split (U0, D-6): four sub-stores behind one facade, one ten
     for (const w of wheres) expect(w).toMatch(/: where: scoped\(/);
   });
 
-  it('the divergence store is a skeleton, and the lowering-source reader has exactly the one read U8a builds', () => {
-    // IR-8a-4, converted in U8a's merge commit — the one the comment already named. The divergence
-    // store stays a skeleton until U10b builds it (AMB-32); the lowering-source reader now has D-2's
-    // ONE lazy read and nothing else, so "no second read crept in" is a property this line holds
-    // rather than a sentence in a header.
+  it("the divergence store has exactly U10b's three methods, and the lowering-source reader has U8a's one read", () => {
     const membersOf = (i: number): string[] => {
       const [file, name] = SUB_STORES[i];
       return classOf(file, name)
         .members.filter((m) => !ts.isConstructorDeclaration(m))
         .map((m) => m.name?.getText() ?? '?');
     };
-    expect(membersOf(2)).toEqual([]);
+    expect(membersOf(2)).toEqual([
+      'liveCandidates',
+      'recordDivergence',
+      'countDivergences',
+    ]);
     expect(membersOf(3)).toEqual(['read']);
   });
 });

@@ -32,6 +32,7 @@ import * as gate1Module from './gates/gate1';
 import * as gate5Module from './gates/gate5';
 import * as gate6Module from './gates/gate6';
 import { InputValidationGate } from './input-validation/input-validation.gate';
+import { NOUN_RESOLUTION_PORTS_UNBOUND } from './noun-resolution/noun-resolution.ports';
 import type { LoweringSourceRow } from './stores/lowering-source.read';
 import { IntentGatewayService } from './intent-gateway.service';
 import { sha256Hex } from './token.util';
@@ -353,10 +354,38 @@ const gatewayFor = (
   const sealVerifier = {
     verify: () => Promise.resolve({ ok: true, reason: 'verified' as const }),
   };
+  const divergences: unknown[] = [];
+  const stores = {
+    liveCandidates: () =>
+      Promise.resolve(
+        records
+          .filter(
+            (row) =>
+              row.tenantId === TENANT &&
+              row.principalProofHash === PRINCIPAL &&
+              row.expiresAt > new Date('2026-06-01T00:00:00.000Z') &&
+              row.consumedAt === null,
+          )
+          .sort(
+            (a, b) =>
+              b.issuedAt.getTime() - a.issuedAt.getTime() ||
+              a.intentTokenHash.localeCompare(b.intentTokenHash),
+          ),
+      ),
+    recordDivergence: (input: unknown) => {
+      divergences.push(input);
+      return Promise.resolve();
+    },
+  };
+  const effectRouter = {
+    route: () =>
+      Promise.resolve({ outcome: 'terminate', why: 'test effect router' }),
+  };
   return {
     prisma,
     live,
     loweringSource,
+    divergences,
     gateway: new IntentGatewayService(
       prisma as never,
       resolver,
@@ -364,6 +393,10 @@ const gatewayFor = (
       tenantScope,
       gate6Owners as never,
       inputValidation,
+      undefined as never,
+      NOUN_RESOLUTION_PORTS_UNBOUND,
+      effectRouter as never,
+      stores,
     ),
   };
 };
@@ -643,7 +676,7 @@ describe('the pipeline after U8a — slots 9 and 10 are refusing stubs', () => {
     expect(r.stoppedAt).toBe('8');
   });
 
-  it('only slot 10 remains a pending() stub after U9b', () => {
+  it('U10b leaves no pending slot in the fifteen-slot pipeline', () => {
     const { gateway } = gatewayFor([record()]);
     // GATE MODULE EXISTS != GATE ENFORCED. A slot that refuses because it is not built is counted
     // as not built, never as a gate that runs.
@@ -651,31 +684,25 @@ describe('the pipeline after U8a — slots 9 and 10 are refusing stubs', () => {
       slotsOf(gateway)
         .filter((g) => g.pendingOn !== undefined)
         .map((g) => g.n),
-    ).toEqual(['10']);
+    ).toEqual([]);
     expect(gateway.gateCount).toBe(15);
     // IR-K4K8-1 (g) / IR-12a-2, U12a's merge: slot 12 is the D-7 POINTER — it reads nothing, routes
     // nothing and refuses nothing, because the data fence runs in `WidgetProjectorService`, which
     // Gate 13 calls on its edges. It carries no `pendingOn` (nothing is "not built yet" about it) and
     // `liveGateCount` excludes it BY NAME, so a pointer is never counted as a gate that runs.
-    expect(gateway.liveGateCount).toBe(13);
+    expect(gateway.liveGateCount).toBe(14);
   });
 
-  it('every pending slot refuses mechanism_absent, naming itself', async () => {
+  it('there is no mechanism_absent pending slot left after U10b', () => {
     const { gateway } = gatewayFor([record()]);
-    for (const g of slotsOf(gateway).filter((s) => s.pendingOn)) {
-      const v = await g.run({} as GateContext);
-      expect(v.outcome).toBe('refuse');
-      expect(code(v)).toBe('mechanism_absent');
-      expect('detail' in v && v.detail).toContain(`gate ${g.n} (${g.name})`);
-    }
+    expect(slotsOf(gateway).filter((s) => s.pendingOn)).toEqual([]);
   });
 
   it('T-PENDING8 / D-12, source half: the legacy Gate 8 and Gate 10 code is gone, not bypassed', () => {
     const gates = path.join(__dirname, 'gates');
     expect(fs.existsSync(path.join(gates, 'gate8.ts'))).toBe(false);
-    // GATES-PLAN-V11 D-18 (I-CTX): `gates/gate10.ts` exists again, as slot 10's seam. Its body is the
-    // refusing stub (the test above runs it), and the one name it declares from the list below is the
-    // seam function `gate10` itself; none of the legacy code came back with it.
+    // GATES-PLAN-V11 D-18 (I-CTX): `gates/gate10.ts` is the one slot-10 seam. U10b replaces the
+    // refusing stub in that file; none of the legacy inline/process-local implementation returns.
     const walk = (dir: string): string[] =>
       fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
         const full = path.join(dir, e.name);

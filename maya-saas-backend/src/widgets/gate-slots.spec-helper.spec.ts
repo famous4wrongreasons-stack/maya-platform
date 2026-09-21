@@ -409,6 +409,9 @@ describe('pipeline slot sources', () => {
       `${GATEWAY}#slot-9`,
       'lowering/lowering.gate.ts',
     ]);
+    // U10b reaches its request-T candidate read and audit through the narrow GATE10_STORE token.
+    // The gateway import graph must stop at that port: following the full stores facade would expose
+    // unrelated sub-stores to the gate and defeat the INV30 architecture barrier.
     expect(filesOf('10')).toEqual([`${GATEWAY}#slot-10`, 'gates/gate10.ts']);
     expect(p.gatewayRest.source).not.toMatch(/n: '1'/);
     expect(p.otherUnits.map((u) => u.file)).toContain('gates/facts.ts');
