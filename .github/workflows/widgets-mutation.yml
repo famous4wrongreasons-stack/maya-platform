@@ -3,7 +3,7 @@ name: Widgets Mutation
 # The widget gates' mutation battery (integration plan §4.5; GATES-PLAN-V11 I-HAR): every mutant a gate unit
 # declares in `maya-saas-backend/test/widgets-live/mutations/gate<id>.json` is applied to a temporary copy of the
 # backend, never to the checkout, and must turn its declared killer red. Measured full runs of Gates 6, 7
-# and 9 exceed the unchanged 180-minute job budget, while P-mint completed with only two minutes of margin.
+# 9 and 13 exceed the unchanged 180-minute job budget, while P-mint completed with only two minutes of margin.
 # Those batteries partition mutants while retaining UNFILTERED tests and independent controls in every job.
 # Other batteries run whole. Mandatory aggregation refuses missing/duplicate/stale
 # parts, restricted tests, crashes and vacuous kills before publishing 25 complete battery receipts.

@@ -44,9 +44,9 @@ function fixture() {
   });
 }
 
-test('25 batteries, 35 jobs: disjoint Gate 6/7/9 and P-mint partitions cover the same 288 declarations', () => {
+test('25 batteries, 38 jobs: disjoint Gate 6/7/9/13 and P-mint partitions cover the same 288 declarations', () => {
   const p = plan(declared);
-  assert.equal(p.gates.length, 25); assert.equal(p.matrix.include.length, 35);
+  assert.equal(p.gates.length, 25); assert.equal(p.matrix.include.length, 38);
   const r = assemble(declared, fixture(), head);
   assert.equal(r.length, 25); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 288);
   for (const report of r) {
@@ -56,7 +56,7 @@ test('25 batteries, 35 jobs: disjoint Gate 6/7/9 and P-mint partitions cover the
 });
 
 test('runner dry-run independently executes the same disjoint partition selection', () => {
-  for (const [gate, count] of [['6', 4], ['7', 4], ['9', 4], ['P-mint', 2]]) {
+  for (const [gate, count] of [['6', 4], ['7', 4], ['9', 4], ['13', 4], ['P-mint', 2]]) {
     const seen = [];
     for (let index = 1; index <= count; index++) {
       const child = spawnSync(process.execPath, ['scripts/widgets-mutation-battery.mjs', '--gate', gate, '--partition', `${index}/${count}`, '--dry-run'], { cwd: backend, encoding: 'utf8' });
