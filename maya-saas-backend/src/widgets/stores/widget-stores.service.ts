@@ -5,7 +5,7 @@
 //   - `timeline.store.ts`        TimelineStore         (store 1)
 //   - `intent-audit.store.ts`    IntentAuditStore      (stores 2 and 3: the receipt is in the
 //                                                       intent-audit store, MAP:606-611)
-//   - `divergence.store.ts`      DivergenceStore       (skeleton: no table until AMB-32)
+//   - `divergence.store.ts`      DivergenceStore       (Gate 10 candidates and audit rows)
 //   - `lowering-source.read.ts`  LoweringSourceReader  (skeleton: its read lands with U8a)
 // Each existing method was moved unchanged and is delegated below with the same signature. The draft
 // store (4) and the free-input ledger (5) are not split: no unit of the plan owns them, so they stay
@@ -34,6 +34,8 @@ import {
   type TimelineTurnInput,
 } from './timeline.store';
 import type { RequestTx } from '../authority/principal-view';
+import type { IntentRecordRow } from '../gate.types';
+import type { DivergenceAuditInput, Gate10Candidate } from './divergence.store';
 
 export { RETENTION, type TimelineTurnInput } from './timeline.store';
 
@@ -41,8 +43,6 @@ export { RETENTION, type TimelineTurnInput } from './timeline.store';
 export class WidgetStoresService {
   private readonly timeline: TimelineStore;
   private readonly intentAudit: IntentAuditStore;
-  // Held so the facade's composition is the plan's (§1.3) before either has a method; no method
-  // delegates to them yet.
   private readonly divergence: DivergenceStore;
   private readonly loweringSource: LoweringSourceReader;
 
@@ -74,6 +74,24 @@ export class WidgetStoresService {
 
   async readTimeline(tenantId: string, conversationId: string, limit = 50) {
     return this.timeline.readTimeline(tenantId, conversationId, limit);
+  }
+
+  // ── GATE 10 DIVERGENCE STORE ────────────────────────────────────────────────────────────────
+
+  liveCandidates(
+    record: Pick<IntentRecordRow, 'tenantId' | 'principalProofHash'>,
+    now: Date,
+    tx: RequestTx,
+  ): Promise<readonly Gate10Candidate[]> {
+    return DivergenceStore.liveCandidates(tx, record, now);
+  }
+
+  recordDivergence(input: DivergenceAuditInput, tx: RequestTx): Promise<void> {
+    return DivergenceStore.recordDivergence(tx, input);
+  }
+
+  countDivergences(tenantId: string): Promise<number> {
+    return this.divergence.countDivergences(tenantId);
   }
 
   // ── 2. INTENT-AUDIT STORE ───────────────────────────────────────────────────────────────────

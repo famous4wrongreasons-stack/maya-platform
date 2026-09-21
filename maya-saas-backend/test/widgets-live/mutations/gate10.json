@@ -1,0 +1,196 @@
+[
+  {
+    "id": "M10-1",
+    "description": "exact subject agreement no longer short-circuits to AGREE",
+    "file": "src/widgets/gates/gate10.ts",
+    "find": "  if (agrees) return pass;",
+    "replace": "  if (false && agrees) return pass;",
+    "killers": ["T10-R1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-2",
+    "description": "CONTROL is removed from the null-route actuating set",
+    "file": "src/widgets/gates/gate10.ts",
+    "find": "  'CONTROL',\n  'DRAFT',",
+    "replace": "  'DRAFT',",
+    "killers": ["T10-R2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-3",
+    "description": "DRAFT is removed from the null-route actuating set",
+    "file": "src/widgets/gates/gate10.ts",
+    "find": "  'DRAFT',\n  'REQUEST_APPROVAL',",
+    "replace": "  'REQUEST_APPROVAL',",
+    "killers": ["T10-R2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-4",
+    "description": "REQUEST_APPROVAL is removed from the null-route actuating set",
+    "file": "src/widgets/gates/gate10.ts",
+    "find": "  'REQUEST_APPROVAL',\n  'COMMIT',",
+    "replace": "  'COMMIT',",
+    "killers": ["T10-R2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-5",
+    "equivalent": "RI-killed / equivalent on conformant input: row 1 exact subject agreement precedes effect comparison, so changing a matched record's effect while retaining the exact subject cannot alter the outcome table"
+  },
+  {
+    "id": "M10-6",
+    "description": "COMMIT is removed from the null-route actuating set",
+    "file": "src/widgets/gates/gate10.ts",
+    "find": "  'COMMIT',\n]);",
+    "replace": "]);",
+    "killers": ["T10-R2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-9",
+    "description": "effect-class divergence passes",
+    "file": "src/widgets/gates/gate10.ts",
+    "find": "  else if (matched.effect !== record.effect) refuses = true;",
+    "replace": "  else if (matched.effect !== record.effect) refuses = false;",
+    "killers": ["T10-R4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-10",
+    "description": "a null tapped subject refuses instead of taking the NULL pass row",
+    "file": "src/widgets/gates/gate10.ts",
+    "find": "  else if (tappedSubject !== null && !sameOwner(tappedSubject, resolvedSubject))\n    refuses = true;",
+    "replace": "  else if (tappedSubject === null || !sameOwner(tappedSubject, resolvedSubject))\n    refuses = true;",
+    "killers": ["T10-R5"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-11",
+    "description": "different owners are audited but admitted",
+    "file": "src/widgets/gates/gate10.ts",
+    "find": "  else if (tappedSubject !== null && !sameOwner(tappedSubject, resolvedSubject))\n    refuses = true;",
+    "replace": "  else if (tappedSubject !== null && !sameOwner(tappedSubject, resolvedSubject))\n    refuses = false;",
+    "killers": ["T10-R6"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-12",
+    "description": "refusal audit loses its refusal code",
+    "file": "src/widgets/gates/gate10.ts",
+    "find": "    refusalCode: refuses ? 'intent_divergence' : null,",
+    "replace": "    refusalCode: null,",
+    "killers": ["T10-R2", "T10-R4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-13",
+    "description": "the null-route pass omits its required durable audit",
+    "file": "src/widgets/gates/gate10.ts",
+    "find": "  await store.recordDivergence({",
+    "replace": "  if (matched !== null) await store.recordDivergence({",
+    "killers": ["T10-R3"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-16",
+    "description": "candidate lookup loses tenant qualification",
+    "file": "src/widgets/stores/divergence.store.ts",
+    "find": "      where: scoped(record.tenantId, {",
+    "replace": "      where: scoped('', {",
+    "killers": [
+      "liveCandidates reads only the same tenant/proof live unused records in deterministic order"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-17",
+    "description": "candidate lookup loses principal-proof qualification",
+    "file": "src/widgets/stores/divergence.store.ts",
+    "find": "        principalProofHash: record.principalProofHash,",
+    "replace": "        principalProofHash: undefined,",
+    "killers": [
+      "liveCandidates reads only the same tenant/proof live unused records in deterministic order"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-18",
+    "description": "expired candidates become live",
+    "file": "src/widgets/stores/divergence.store.ts",
+    "find": "        expiresAt: { gt: now },",
+    "replace": "        expiresAt: { lt: now },",
+    "killers": [
+      "liveCandidates reads only the same tenant/proof live unused records in deterministic order"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-19",
+    "description": "consumed candidates become eligible",
+    "file": "src/widgets/stores/divergence.store.ts",
+    "find": "        consumedAt: null,",
+    "replace": "        consumedAt: { not: null },",
+    "killers": [
+      "liveCandidates reads only the same tenant/proof live unused records in deterministic order"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-20",
+    "description": "candidate ordering becomes oldest-first",
+    "file": "src/widgets/stores/divergence.store.ts",
+    "find": "      orderBy: [{ issuedAt: 'desc' }, { intentTokenHash: 'asc' }],",
+    "replace": "      orderBy: [{ issuedAt: 'asc' }, { intentTokenHash: 'asc' }],",
+    "killers": [
+      "liveCandidates reads only the same tenant/proof live unused records in deterministic order"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-21",
+    "description": "slot 10 permits execution without request T",
+    "file": "src/widgets/intent-gateway.service.ts",
+    "find": "        if (tx === null)\n          throw new Error('Gate 10 requires the request transaction');",
+    "replace": "        if (false && tx === null)\n          throw new Error('Gate 10 requires the request transaction');",
+    "killers": ["T10-TX slot 10 requires request T"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-22",
+    "description": "audit records the resolved token as the tapped token",
+    "file": "src/widgets/gates/gate10.ts",
+    "find": "    resolvedIntentTokenHash: matched?.intentTokenHash ?? null,",
+    "replace": "    resolvedIntentTokenHash: record.intentTokenHash,",
+    "killers": ["T10-R4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-23",
+    "description": "audit records the tapped effect instead of the router's resolved effect",
+    "file": "src/widgets/gates/gate10.ts",
+    "find": "    resolvedEffect: effectOf(matched),",
+    "replace": "    resolvedEffect: record.effect as EffectClass,",
+    "killers": ["T10-R4"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-25",
+    "description": "AGREE writes a divergence audit",
+    "file": "src/widgets/gates/gate10.ts",
+    "find": "  if (agrees) return pass;",
+    "replace": "  if (agrees) await store.recordDivergence({ tenantId: record.tenantId, widgetId: record.widgetId, tappedIntentTokenHash: record.intentTokenHash, resolvedIntentTokenHash: matched?.intentTokenHash ?? null, resolvedEffect: effectOf(matched), refusalCode: null, observedAt: ctx.now });\n  if (agrees) return pass;",
+    "killers": ["T10-R1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M10-26",
+    "description": "audit loses the tapped widget identity",
+    "file": "src/widgets/gates/gate10.ts",
+    "find": "    widgetId: record.widgetId,",
+    "replace": "    widgetId: record.tenantId,",
+    "killers": ["T10-R2"],
+    "expect": "build-killed"
+  }
+]

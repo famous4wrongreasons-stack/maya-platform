@@ -409,7 +409,13 @@ describe('pipeline slot sources', () => {
       `${GATEWAY}#slot-9`,
       'lowering/lowering.gate.ts',
     ]);
-    expect(filesOf('10')).toEqual([`${GATEWAY}#slot-10`, 'gates/gate10.ts']);
+    // U10b's slot also reaches the widget-store facade for its request-T candidate read and audit;
+    // the facade is mechanism, not a canonical-owner port, so it remains in the derived slot set.
+    expect(filesOf('10')).toEqual([
+      `${GATEWAY}#slot-10`,
+      'gates/gate10.ts',
+      'stores/widget-stores.service.ts',
+    ]);
     expect(p.gatewayRest.source).not.toMatch(/n: '1'/);
     expect(p.otherUnits.map((u) => u.file)).toContain('gates/facts.ts');
     expect(p.otherUnits.map((u) => u.file)).not.toContain('gates/gate5.ts');
