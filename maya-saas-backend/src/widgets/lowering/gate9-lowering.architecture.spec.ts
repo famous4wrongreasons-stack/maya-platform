@@ -339,6 +339,7 @@ const GATEWAY_SRC: SrcPath = `widgets/${GATEWAY}`;
 const TIMELINE_TABLE_FILES: readonly SrcPath[] = [
   'widgets/stores/timeline.store.ts',
 ];
+const ERASURE_JOB: SrcPath = 'widgets/consent/erasure.job.ts';
 const TIMELINE_FACADE: SrcPath = 'widgets/stores/widget-stores.service.ts';
 
 /**
@@ -550,7 +551,7 @@ describe('T-ARCH-WRITER — who may write a conversation turn (9.5, 9.13)', () =
 
   it('T-ARCH-WRITER-4 no file outside the store writes the turn table through raw SQL', () => {
     for (const file of productionSources()) {
-      if (TIMELINE_TABLE_FILES.includes(file)) continue;
+      if (TIMELINE_TABLE_FILES.includes(file) || file === ERASURE_JOB) continue;
       const sf = parseSrc(file);
       if (!namesTimelineTable(sf)) continue;
       expect([

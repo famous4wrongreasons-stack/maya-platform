@@ -6,6 +6,7 @@ import { assertAllowlistAtRegistryLoad } from './authority/allowlist-startup.ass
 import { assertOwnerClassesResolve } from './authority/contract-bindings';
 import { assertLedgersBindAtRegistryLoad } from './authority/ledger-startup.assert';
 import { ControlRegistryService } from './control/control-registry.service';
+import { WidgetConversationErasureJob } from './consent/erasure.job';
 import {
   GATE10_STORE,
   GATE_8R_OWNERS,
@@ -53,6 +54,9 @@ import { WidgetsController } from './widgets.controller';
     { provide: GATE10_STORE, useExisting: WidgetStoresService },
     { provide: EFFECT_ROUTE_AUDIT, useExisting: WidgetStoresService },
     ControlRegistryService,
+    // P-RT6: dark until K12 schedules it. Registering the provider establishes the one atomic
+    // erasure mechanism without adding a route, trigger or production effect.
+    WidgetConversationErasureJob,
     // P-MINT/B-22: WidgetEmissionModule owns the keyed seal and the single minter pipeline. This
     // module sees only its exported emitter and SEAL_VERIFIER port; it cannot inject a key holder.
     // U8a (IR-8a-1): slot 8's built gate, and the one store read its pass performs (D-2). Both are
@@ -88,6 +92,7 @@ import { WidgetsController } from './widgets.controller';
     IntentGatewayService,
     WidgetStoresService,
     ControlRegistryService,
+    WidgetConversationErasureJob,
     WidgetEmissionModule,
   ],
 })

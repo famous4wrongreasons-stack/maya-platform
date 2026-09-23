@@ -905,13 +905,16 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
         'emission/emitter.service.ts:widgetEmission',
         'stores/timeline.store.ts:widgetTimelineTurn',
         'stores/timeline.store.ts:$executeRaw',
+        'consent/erasure.job.ts:$transaction',
+        'consent/erasure.job.ts:$executeRaw',
       ]),
     );
     expect(
       [...seen].every(
         (x) =>
           /:(?:widget\w+|\$transaction)$/.test(x) ||
-          x === 'stores/timeline.store.ts:$executeRaw',
+          x === 'stores/timeline.store.ts:$executeRaw' ||
+          x === 'consent/erasure.job.ts:$executeRaw',
       ),
     ).toBe(true);
   }, 60_000);

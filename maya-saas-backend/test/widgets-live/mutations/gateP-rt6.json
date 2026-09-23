@@ -1,0 +1,65 @@
+[
+  {
+    "id": "RT6-M1",
+    "description": "the executable ErasureClass map downgrades the PII copy from CANONICAL_ELSEWHERE",
+    "file": "src/widgets/consent/erasure.job.ts",
+    "find": "    inputsPiiJson: 'CANONICAL_ELSEWHERE',",
+    "replace": "    inputsPiiJson: 'CONVERSATION_CONTENT',",
+    "killers": ["RT6-MAP-1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "RT6-M2",
+    "description": "the erasure statement no longer takes Gate 9's transaction advisory lock",
+    "file": "src/widgets/consent/erasure.job.ts",
+    "find": "SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))",
+    "replace": "SELECT hashtextextended(${lockKey}, 0)",
+    "killers": ["RT6-ATOMIC-1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "RT6-M3",
+    "description": "speech content survives an emission erasure",
+    "file": "src/widgets/consent/erasure.job.ts",
+    "find": "              \"speechJson\" = NULL,",
+    "replace": "              \"speechJson\" = \"speechJson\",",
+    "killers": ["RT6-ATOMIC-2"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "RT6-M4",
+    "description": "already-erased drafts remain eligible and can produce duplicate tombstones",
+    "file": "src/widgets/consent/erasure.job.ts",
+    "find": "            AND d.\"erasedAt\" IS NULL\n        ),",
+    "replace": "        ),",
+    "killers": ["RT6-RETRY-1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "RT6-M5",
+    "description": "the tombstone insertion is detached from the rows changed by the atomic statement",
+    "file": "src/widgets/consent/erasure.job.ts",
+    "find": "        FROM changed\n      `,",
+    "replace": "        FROM changed WHERE false\n      `,",
+    "killers": ["RT6-ATOMIC-1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "RT6-M6",
+    "description": "the timeline target loses the exact subject fence",
+    "file": "src/widgets/consent/erasure.job.ts",
+    "find": "            AND t.\"principalProofHash\" = ${request.subjectPrincipalProofHash}\n            AND t.\"erasedAt\" IS NULL",
+    "replace": "            AND t.\"erasedAt\" IS NULL",
+    "killers": ["RT6-SCOPE-1"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "RT6-M7",
+    "description": "the exact conversation qualifier is removed from the timeline target",
+    "file": "src/widgets/consent/erasure.job.ts",
+    "find": "            AND t.\"conversationId\" = ${request.conversationId}::uuid\n            AND t.\"principalProofHash\"",
+    "replace": "            AND t.\"principalProofHash\"",
+    "killers": ["RT6-SCOPE-1"],
+    "expect": "build-killed"
+  }
+]
