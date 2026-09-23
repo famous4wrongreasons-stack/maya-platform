@@ -21,11 +21,23 @@
 // `reason: "not built (DEV-1; OD-1)"`, and the owner is asked to accept DEV-1 or direct otherwise
 // (OD-1 (ii)). NOTHING HERE DECIDES THAT QUESTION, and no test in this unit flips those clauses.
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { C9_REGISTRY_HASH } from '../../orchestration/c9.registry';
 import type { WidgetComposerInput } from '../../widget-contract/envelope';
-import type { ProjectionPlan } from './canonical-read.port';
-import { projectorRowFor, ROWS_BLOCKED_BY } from './projector.registry';
+import { CANONICAL_READ } from '../di-tokens';
+import type {
+  CanonicalOwnerResponse,
+  CanonicalReadPort,
+  ProjectionPlan,
+} from './canonical-read.port';
+import {
+  projectorRowFor,
+  ROWS_BLOCKED_BY,
+  type ProjectorArgumentSource,
+  type ProjectorRow,
+} from './projector.registry';
+import { projectC9Denial } from '../rendering/denial-projection';
 
 /**
  * Why a composition produced no body. A CLOSED set of literals, authored here and derived from nothing
@@ -45,7 +57,11 @@ export type DegradedReason =
    * ARCH-12-13 holds; it exists so that a row landing without its port is a degrade rather than a
    * composition made up from somewhere else.
    */
-  | 'port_unbound';
+  | 'port_unbound'
+  /** The live actor and the resolved C9 principal do not describe the same tenant/user. */
+  | 'authority_mismatch'
+  /** The canonical owner omitted a field this registered row needs; B-16 renders a text turn. */
+  | 'missing_source_field';
 
 /**
  * What Gate 13's edges consume (PLAN G12 §5.2). `composer_input` is the ONLY type a projector may hand
@@ -67,17 +83,40 @@ export type ProjectionOutcome =
 
 @Injectable()
 export class WidgetProjectorService {
+  constructor(
+    @Inject(CANONICAL_READ)
+    private readonly canonicalRead: CanonicalReadPort,
+  ) {}
+
   /**
    * `REFINE` whose C9 subject is a `READ` (including `c9.no_action`). One registry lookup, then — in
    * U12b — exactly one port call. In U12a the lookup finds nothing and the answer degrades.
    */
-  compose(plan: ProjectionPlan): ProjectionOutcome {
+  async compose(plan: ProjectionPlan): Promise<ProjectionOutcome> {
     if (!this.hasPrincipal(plan)) return degraded('no_principal');
+    if (!this.sameAuthority(plan)) return degraded('authority_mismatch');
     const row = projectorRowFor(plan.widgetKind, subjectKeyOf(plan));
     if (row === null) return degraded('no_registered_row');
-    // Unreachable while `PROJECTOR_REGISTRY` is empty (ARCH-12-13). It stays honest rather than
-    // becoming a stub that answers: a registered row with no bound port has no answer to give.
-    return degraded('port_unbound');
+    if (row.composition !== 'canonical_read')
+      return degraded('no_registered_row');
+    const result = await this.canonicalRead.read({
+      plan,
+      row,
+      ownerArguments: this.ownerArguments(plan, row),
+    });
+    if (result.kind === 'value' && !hasRequiredFields(result.value, row))
+      return degraded('missing_source_field');
+    const limitationCodes =
+      result.kind === 'owner_exception'
+        ? [projectC9Denial(result.denial_code).reason_code]
+        : [];
+    return this.outcome(
+      plan,
+      row,
+      result.kind === 'value' ? result.value : null,
+      result.fact,
+      limitationCodes,
+    );
   }
 
   /**
@@ -92,9 +131,22 @@ export class WidgetProjectorService {
     plan: ProjectionPlan,
     ownerResponse: unknown,
   ): ProjectionOutcome {
-    void ownerResponse;
     if (!this.hasPrincipal(plan)) return degraded('no_principal');
-    return degraded('no_registered_row');
+    if (!this.sameAuthority(plan)) return degraded('authority_mismatch');
+    const row = projectorRowFor(plan.widgetKind, subjectKeyOf(plan));
+    if (row === null || row.composition !== 'owner_response')
+      return degraded('no_registered_row');
+    if (!isCanonicalOwnerResponse(ownerResponse))
+      return degraded('missing_source_field');
+    if (!hasRequiredFields(ownerResponse.value, row))
+      return degraded('missing_source_field');
+    return this.outcome(
+      plan,
+      row,
+      ownerResponse.value,
+      ownerResponse.fact,
+      ownerResponse.limitation_codes ?? [],
+    );
   }
 
   /**
@@ -119,6 +171,77 @@ export class WidgetProjectorService {
   private hasPrincipal(plan: ProjectionPlan): boolean {
     return plan.authority !== null && plan.actor !== null;
   }
+
+  private sameAuthority(plan: ProjectionPlan): boolean {
+    if (plan.authority === null || plan.actor === null) return false;
+    if (plan.actor.tenantId !== plan.authority.tenantId) return false;
+    return (
+      plan.authority.userId === null ||
+      plan.actor.userId === plan.authority.userId
+    );
+  }
+
+  private ownerArguments(
+    plan: ProjectionPlan,
+    row: ProjectorRow,
+  ): Readonly<Record<string, unknown>> {
+    const out: Record<string, unknown> = {};
+    for (const [name, source] of Object.entries(row.arguments))
+      out[name] = argumentValue(plan, source);
+    return Object.freeze(out);
+  }
+
+  private outcome(
+    plan: ProjectionPlan,
+    row: ProjectorRow,
+    source: unknown,
+    fact: CanonicalOwnerResponse['fact'],
+    limitationCodes: readonly string[],
+  ): ProjectionOutcome {
+    // `AdmissionFacts` also has a member named `facts`. Keep the composer boundary explicit so the
+    // gate source fence does not mistake this unrelated provenance array for a slot fact write.
+    const composerFactsKey: keyof WidgetComposerInput = 'facts';
+    const input: WidgetComposerInput = {
+      kind_proposal: row.result_kind,
+      capability: row.subject_key.slice(3),
+      capability_version: C9_REGISTRY_HASH,
+      source:
+        row.source_kind === 'orchestrator_state'
+          ? {
+              from: 'orchestrator_state',
+              run_id: plan.runId as string,
+              field: 'runStatus',
+            }
+          : {
+              from: 'capability_envelope',
+              capability: row.subject_key.slice(3),
+              capability_version: C9_REGISTRY_HASH,
+              fact_index: 0,
+            },
+      correlation_refs: {
+        ...(plan.runId === null ? {} : { run_id: plan.runId }),
+        parent_id: plan.widgetId,
+      },
+      origin: {
+        trigger: 'system_reply',
+        emitter:
+          row.source_kind === 'orchestrator_state'
+            ? 'orchestrator'
+            : 'capability_read',
+        moment_key: null,
+        proactive_provenance: null,
+      },
+      [composerFactsKey]: [fact],
+      facts_origin: [
+        row.composition === 'owner_response' ? 'copied' : 'synthesised',
+      ],
+      slots: { ...row.slots },
+      limitation_codes: [...limitationCodes],
+      intent_proposals: [...row.intent_proposals],
+      locale: 'ru-RU',
+    };
+    return { kind: 'composer_input', input, source };
+  }
 }
 
 /** `(space, key)` as the C9 canon spells it. `null` when the record names no subject. */
@@ -134,3 +257,30 @@ const degraded = (why: DegradedReason): ProjectionOutcome => ({
 
 /** Read by ARCH-12-13's live half: the skeleton shipped dark, and it says why. */
 export const projectorRowsBlockedBy = (): readonly string[] => ROWS_BLOCKED_BY;
+
+const argumentValue = (
+  plan: ProjectionPlan,
+  source: ProjectorArgumentSource,
+): unknown => {
+  if (source.from === 'closed_input')
+    return plan.closedInputs?.get(source.name) ?? null;
+  if (plan.resolvedNouns !== null)
+    return plan.resolvedNouns.values.get(source.handle) ?? null;
+  return null;
+};
+
+const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const hasRequiredFields = (value: unknown, row: ProjectorRow): boolean =>
+  isRecord(value) &&
+  row.required_fields.every((field) =>
+    Object.prototype.hasOwnProperty.call(value, field),
+  );
+
+const isCanonicalOwnerResponse = (
+  value: unknown,
+): value is CanonicalOwnerResponse =>
+  isRecord(value) &&
+  Object.prototype.hasOwnProperty.call(value, 'value') &&
+  Object.prototype.hasOwnProperty.call(value, 'fact');

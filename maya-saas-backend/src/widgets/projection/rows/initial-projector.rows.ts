@@ -1,0 +1,103 @@
+import type { ProjectorRow } from '../projector.registry';
+
+/**
+ * U12b's complete first row set.  These rows are deliberately data: adding a
+ * capability here never adds an owner call site.  The sole call site remains
+ * CanonicalReadPort.read, and every key below is also checked against the C9
+ * registry and the result kind's owner class by ARCH-12-7.
+ */
+export const INITIAL_PROJECTOR_ROWS: readonly ProjectorRow[] = Object.freeze([
+  Object.freeze({
+    projector_id: 'catalog.services.read@1',
+    tapped_kind: 'SERVICE_SELECTOR',
+    subject_key: 'C9:catalog.services.read',
+    result_kind: 'SERVICE_SELECTOR',
+    source_kind: 'capability_read',
+    composition: 'canonical_read',
+    required_fields: Object.freeze(['services']),
+    slots: Object.freeze({}),
+    arguments: Object.freeze({}),
+    completeness: Object.freeze({ total_field: null, exhausted_field: null }),
+    intent_proposals: Object.freeze([]),
+    unblocked_by: 'U12b / G12-R1a / G12-R3',
+  }),
+  Object.freeze({
+    projector_id: 'catalog.staff.read@1',
+    tapped_kind: 'STAFF_SELECTOR',
+    subject_key: 'C9:catalog.staff.read',
+    result_kind: 'STAFF_SELECTOR',
+    source_kind: 'capability_read',
+    composition: 'canonical_read',
+    required_fields: Object.freeze(['staff']),
+    slots: Object.freeze({}),
+    arguments: Object.freeze({}),
+    completeness: Object.freeze({ total_field: null, exhausted_field: null }),
+    intent_proposals: Object.freeze([]),
+    unblocked_by: 'U12b / G12-R1a / S6-3 output v1',
+  }),
+  Object.freeze({
+    projector_id: 'booking.availability.read@1',
+    tapped_kind: 'TIME_SLOT_SELECTOR',
+    subject_key: 'C9:booking.availability.read',
+    result_kind: 'TIME_SLOT_SELECTOR',
+    source_kind: 'capability_read',
+    composition: 'canonical_read',
+    required_fields: Object.freeze(['slots']),
+    slots: Object.freeze({}),
+    arguments: Object.freeze({}),
+    completeness: Object.freeze({ total_field: null, exhausted_field: null }),
+    intent_proposals: Object.freeze([]),
+    unblocked_by: 'U12b / G12-R1a / G12-R3',
+  }),
+  Object.freeze({
+    projector_id: 'company.business-hours.read@1',
+    tapped_kind: 'SCHEDULE',
+    subject_key: 'C9:company.business-hours.read',
+    result_kind: 'SCHEDULE',
+    source_kind: 'capability_read',
+    composition: 'canonical_read',
+    required_fields: Object.freeze(['schedule']),
+    slots: Object.freeze({}),
+    arguments: Object.freeze({}),
+    completeness: Object.freeze({ total_field: null, exhausted_field: null }),
+    intent_proposals: Object.freeze([]),
+    unblocked_by: 'U12b / G12-R1a / G12-R3',
+  }),
+  Object.freeze({
+    projector_id: 'c9.no_action@1',
+    tapped_kind: 'STRATEGY_OPTIONS',
+    subject_key: 'C9:c9.no_action',
+    result_kind: 'STRATEGY_OPTIONS',
+    source_kind: 'orchestrator_state',
+    composition: 'canonical_read',
+    required_fields: Object.freeze(['run']),
+    slots: Object.freeze({}),
+    arguments: Object.freeze({}),
+    completeness: Object.freeze({ total_field: null, exhausted_field: null }),
+    intent_proposals: Object.freeze([]),
+    unblocked_by: 'U12b / G12-R1a / G12-R3',
+  }),
+  Object.freeze({
+    projector_id: 'appointments.own.reschedule.propose@1',
+    tapped_kind: 'SCHEDULE',
+    subject_key: 'C9:appointments.own.reschedule',
+    result_kind: 'BOOKING_CONFIRMATION',
+    source_kind: 'capability_read',
+    composition: 'owner_response',
+    required_fields: Object.freeze(['confirmation_subject']),
+    slots: Object.freeze({}),
+    arguments: Object.freeze({}),
+    completeness: Object.freeze({ total_field: null, exhausted_field: null }),
+    intent_proposals: Object.freeze([
+      Object.freeze({
+        intent_template_key: 'commit.blocked@1',
+        capability: Object.freeze({
+          space: 'AE',
+          key: 'crm.appointment.reschedule.v1',
+        }),
+        role: 'primary',
+      }),
+    ]),
+    unblocked_by: 'U12b / SCHED.2 / A2.2 backstop',
+  }),
+]);

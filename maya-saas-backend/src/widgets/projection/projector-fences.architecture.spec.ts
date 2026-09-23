@@ -45,6 +45,7 @@ import type { PrismaService } from '../../prisma/prisma.service';
 import {
   PROJECTOR_REGISTRY,
   ROWS_BLOCKED_BY,
+  ROWS_DEFERRED_BY,
   projectorRowFor,
   type ProjectorRow,
 } from './projector.registry';
@@ -196,13 +197,17 @@ const PROJECTION_MAY_IMPORT: Readonly<Record<string, string>> = {
   '@nestjs/common': 'Nest decorators',
   '../../common/authenticated-user.interface': 'the JWT-validated actor (K5)',
   '../../orchestration/c9.contract': 'C9 contract types — the principal',
+  '../../orchestration/c9.registry': 'the frozen C9 registry digest',
   '../../ai-tools/ai-tool.types': 'AI tool definition types (the surface)',
   '../../widget-contract/envelope': 'generated contract types',
   '../../widget-contract/kinds': 'generated contract types',
   '../../widget-contract/lifecycle': 'generated contract types',
   '../../widget-contract/ambient': 'generated contract types',
   '../../widget-contract/capability-ref': 'generated contract types',
+  '../../widget-contract/derived-shapes': 'generated contract types',
   '../gate.types': "the gate contract's types",
+  '../di-tokens': 'the named canonical-read DI edge',
+  '../rendering/denial-projection': 'the pure P10 denial projection',
 };
 
 /** The one call site each permitted owner has (PLAN G12 §5.3). Nothing else may be referenced. */
@@ -242,7 +247,17 @@ const arch1Violations = (files: readonly Source[]): string[] => {
   const out: string[] = [];
   for (const s of files) {
     for (const { spec, node } of moduleEdges(s)) {
-      if (spec.startsWith('./')) continue; // inside the projection directory
+      if (spec.startsWith('.')) {
+        const resolved = path.resolve(
+          path.dirname(path.join(SRC, s.key)),
+          spec,
+        );
+        if (
+          resolved === PROJECTION ||
+          resolved.startsWith(`${PROJECTION}${path.sep}`)
+        )
+          continue;
+      }
       if (!(spec in PROJECTION_MAY_IMPORT))
         out.push(
           `${at(s, node)}: ${spec} is not enumerated for the projection`,
@@ -595,8 +610,10 @@ const projectorReferenceViolations = (files: readonly Source[]): string[] => {
     if (s.key.startsWith('widgets/projection/')) continue;
     const names = importedNames(s);
     const { identifiers } = codeTokens(s);
-    const importsProjection = [...names.values()].some((spec) =>
-      spec.includes('projection/'),
+    const importsProjection = [...names.values()].some(
+      (spec) =>
+        spec.includes('projection/widget-projector.service') ||
+        spec.includes('projection/projector.registry'),
     );
     if (
       (identifiers.has('WidgetProjectorService') || importsProjection) &&
@@ -780,11 +797,12 @@ const gatewaySource = (): Source =>
     fs.readFileSync(path.join(WIDGETS, 'intent-gateway.service.ts'), 'utf8'),
   );
 
-describe('U12a — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
+describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
   it('reads the files it guards, down to their leaves', () => {
     expect(projectionSources().map((s) => s.key)).toEqual([
       'widgets/projection/canonical-read.port.ts',
       'widgets/projection/projector.registry.ts',
+      'widgets/projection/rows/initial-projector.rows.ts',
       'widgets/projection/widget-projector.service.ts',
     ]);
     // The widget scan reaches nested directories, so a path planted three levels down is seen.
@@ -1005,7 +1023,7 @@ describe('U12a — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
       seen.add(pair);
       const [space, ...rest] = row.subject_key.split(':');
       const key = rest.join(':');
-      if (row.source_kind === 'capability_read' && space === 'C9')
+      if (row.composition === 'canonical_read' && space === 'C9')
         expect({ key, mode: C9_CAP_BY_KEY.get(key)?.mode }).toEqual({
           key,
           mode: 'READ',
@@ -1034,9 +1052,12 @@ describe('U12a — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
       subject_key: 'C9:not.a.registered.key',
       result_kind: 'METRIC' as WidgetKind,
       source_kind: 'capability_read',
+      composition: 'canonical_read',
+      required_fields: [],
       slots: {},
       arguments: {},
       completeness: { total_field: null, exhausted_field: null },
+      intent_proposals: [],
       unblocked_by: '',
     } as unknown as ProjectorRow;
     expect(C9_CAP_BY_KEY.get('not.a.registered.key')).toBeUndefined();
@@ -1075,7 +1096,7 @@ describe('U12a — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
       /private hasPrincipal\(plan: ProjectionPlan\): boolean \{\s*return plan\.authority !== null && plan\.actor !== null;/,
     );
     const entryPoints = [
-      'compose(',
+      'async compose(',
       'composeFromOwnerResponse(',
       'composeNavigate(',
     ];
@@ -1089,14 +1110,8 @@ describe('U12a — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
         guarded: true,
       });
     }
-    // U12a makes ZERO port calls, so "dominated by the precondition" is proved by there being none.
-    expect(
-      projectionSources().flatMap((s) =>
-        accesses(s)
-          .filter(({ path: p }) => p.endsWith('.read'))
-          .map(({ path: p }) => `${s.key}: ${p}`),
-      ),
-    ).toEqual([]);
+    // U12b adds exactly one call site; every compose read flows through it after the precondition.
+    expect(service.text.match(/this\.canonicalRead\.read\(/g)).toHaveLength(1);
   });
 
   it('ARCH-12-9 [BUILD] the projector is referenced only by the module that provides it and Gate 13, and called only by Gate 13', () => {
@@ -1286,12 +1301,20 @@ describe('U12a — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
     expect(projectorRowFor('any-kind', 'C9:any.key')).toBeNull();
   });
 
-  it('ARCH-12-13 [BUILD] PROJECTOR_REGISTRY is empty while anything in ROWS_BLOCKED_BY stands', () => {
-    expect(ROWS_BLOCKED_BY.length).toBeGreaterThan(0);
-    expect(ROWS_BLOCKED_BY).toEqual(
+  it('ARCH-12-13 [BUILD] the finite first row set has no blocker; deferred categories remain unregistered', () => {
+    expect(ROWS_BLOCKED_BY).toEqual([]);
+    expect(ROWS_DEFERRED_BY).toEqual(
       expect.arrayContaining([expect.stringContaining('OD-5')]),
     );
-    if (ROWS_BLOCKED_BY.length > 0) expect(PROJECTOR_REGISTRY).toEqual([]);
+    expect(PROJECTOR_REGISTRY).toHaveLength(6);
+    expect(PROJECTOR_REGISTRY.map((row) => row.subject_key)).toEqual([
+      'C9:catalog.services.read',
+      'C9:catalog.staff.read',
+      'C9:booking.availability.read',
+      'C9:company.business-hours.read',
+      'C9:c9.no_action',
+      'C9:appointments.own.reschedule',
+    ]);
     // A row may not be registered without naming what unblocked it, even once the list is empty.
     for (const row of PROJECTOR_REGISTRY)
       expect(row.unblocked_by).not.toEqual('');
@@ -1363,7 +1386,7 @@ const planFor = (over: Partial<ProjectionPlan> = {}): ProjectionPlan =>
     frozenNounsJson: null,
     requestedScopeHash: 'scope',
     authority: { tenantId: 't', userId: 'u' },
-    actor: { id: 'u' },
+    actor: { userId: 'u', tenantId: 't' },
     aiToolSurface: 'web',
     answeringChannel: 'pwa',
     resolvedNouns: null,
@@ -1371,12 +1394,33 @@ const planFor = (over: Partial<ProjectionPlan> = {}): ProjectionPlan =>
     ...over,
   }) as unknown as ProjectionPlan;
 
-describe('U12a [U] the projector skeleton answers degraded and reads nothing', () => {
-  const projector = new WidgetProjectorService();
+describe('U12b [U] the projector reads only registered rows', () => {
+  const fact = {
+    capability: 'catalog.services.read',
+    status: 'measured' as const,
+    as_of: '2026-09-23T00:00:00.000Z',
+    evidence_refs: [],
+    completeness: {
+      status: 'PARTIAL' as const,
+      requestedScopeHash: '0'.repeat(64),
+      returnedCount: 1,
+      totalCount: null,
+      hasMore: true,
+      cursorRef: null,
+      truncated: false,
+      reasonCodes: ['NOT_COLLECTED'],
+    },
+  };
+  const read = jest.fn().mockResolvedValue({
+    kind: 'value',
+    value: { services: [] },
+    fact,
+  });
+  const projector = new WidgetProjectorService({ read });
   const degradedWith = (why: string) => ({ kind: 'degraded', why });
 
-  it('[U] compose on a subject with no registered row degrades', () => {
-    expect(projector.compose(planFor())).toEqual(
+  it('[U] compose on a subject with no registered row degrades', async () => {
+    await expect(projector.compose(planFor())).resolves.toEqual(
       degradedWith('no_registered_row'),
     );
   });
@@ -1405,16 +1449,29 @@ describe('U12a [U] the projector skeleton answers degraded and reads nothing', (
       ).toEqual(degradedWith('navigate_interim'));
   });
 
-  it('[U] no principal, no read (I47)', () => {
-    expect(projector.compose(planFor({ authority: null }))).toEqual(
-      degradedWith('no_principal'),
-    );
-    expect(projector.compose(planFor({ actor: null }))).toEqual(
+  it('[U] no principal, no read (I47)', async () => {
+    await expect(
+      projector.compose(planFor({ authority: null })),
+    ).resolves.toEqual(degradedWith('no_principal'));
+    await expect(projector.compose(planFor({ actor: null }))).resolves.toEqual(
       degradedWith('no_principal'),
     );
     expect(projector.composeNavigate(planFor({ authority: null }))).toEqual(
       degradedWith('no_principal'),
     );
+  });
+
+  it('[U] one registered capability row makes exactly one canonical read', async () => {
+    read.mockClear();
+    const outcome = await projector.compose(
+      planFor({
+        widgetKind: 'SERVICE_SELECTOR',
+        capabilityKey: 'catalog.services.read',
+        requestedScopeHash: '0'.repeat(64),
+      }),
+    );
+    expect(outcome.kind).toBe('composer_input');
+    expect(read).toHaveBeenCalledTimes(1);
   });
 
   it('[U] the subject key is the record’s space and key, and a record naming none selects nothing', () => {

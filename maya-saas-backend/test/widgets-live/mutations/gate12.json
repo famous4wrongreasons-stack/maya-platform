@@ -10,10 +10,10 @@
   },
   {
     "id": "MUT-12-O",
-    "description": "A projector row is registered while its blockers still stand: no port binding, no B-16 degrade-to-text carrier, and OD-5 (AMB-48(vi)) still an open owner decision. §2.6 item 6 requires a row to land in one commit with the ruling reference and the test pinning it; ARCH-12-13 is that test, and it must go red. The row also names a subject key the C9 canon does not carry and a `result_kind` whose owner class does not contain it, so ARCH-12-7 catches it independently.",
-    "file": "src/widgets/projection/projector.registry.ts",
-    "find": "export const PROJECTOR_REGISTRY: readonly ProjectorRow[] = Object.freeze([]);\n",
-    "replace": "export const PROJECTOR_REGISTRY: readonly ProjectorRow[] = Object.freeze([\n  {\n    projector_id: 'mutant.metric.read',\n    tapped_kind: 'METRIC',\n    subject_key: 'C9:c7.measurement.read',\n    result_kind: 'METRIC',\n    source_kind: 'capability_read',\n    slots: {},\n    arguments: {},\n    completeness: { total_field: null, exhausted_field: null },\n    unblocked_by: '',\n  },\n]);\n",
+    "description": "An extra projector row is registered outside U12b's finite six-row set. The row also names a subject key the C9 canon does not carry and a result kind whose owner class does not contain it. ARCH-12-13 must reject the registry expansion and ARCH-12-7 must reject the false owner mapping.",
+    "file": "src/widgets/projection/rows/initial-projector.rows.ts",
+    "find": "export const INITIAL_PROJECTOR_ROWS: readonly ProjectorRow[] = Object.freeze([\n",
+    "replace": "export const INITIAL_PROJECTOR_ROWS: readonly ProjectorRow[] = Object.freeze([\n  Object.freeze({\n    projector_id: 'mutant.metric.read',\n    tapped_kind: 'METRIC',\n    subject_key: 'C9:c7.measurement.read',\n    result_kind: 'METRIC',\n    source_kind: 'capability_read',\n    composition: 'canonical_read',\n    required_fields: Object.freeze([]),\n    slots: Object.freeze({}),\n    arguments: Object.freeze({}),\n    completeness: Object.freeze({ total_field: null, exhausted_field: null }),\n    intent_proposals: Object.freeze([]),\n    unblocked_by: '',\n  }),\n",
     "killers": ["ARCH-12-13", "ARCH-12-7"],
     "expect": "build-killed"
   },

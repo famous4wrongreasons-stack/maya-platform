@@ -58,3 +58,6 @@ export const GATE_8R_OWNERS = 'GATE_8R_OWNERS';
 
 /** Gate 4: `TenantContextService.assertTenantId` through the tenancy port (U4, IR4-1 and IR4-2). */
 export const TENANT_SCOPE = 'TENANT_SCOPE';
+
+/** U12b: the projector's single read-only edge to canonical owners. */
+export const CANONICAL_READ = 'CANONICAL_READ';

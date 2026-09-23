@@ -1,0 +1,145 @@
+[
+  {
+    "id": "MUT-12-A",
+    "description": "principal guard removed from canonical composition",
+    "file": "src/widgets/projection/widget-projector.service.ts",
+    "find": "  async compose(plan: ProjectionPlan): Promise<ProjectionOutcome> {\n    if (!this.hasPrincipal(plan)) return degraded('no_principal');\n",
+    "replace": "  async compose(plan: ProjectionPlan): Promise<ProjectionOutcome> {\n    if (false && !this.hasPrincipal(plan)) return degraded('no_principal');\n",
+    "killers": [
+      "G12-L07"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "MUT-12-D",
+    "description": "row selection ignores the tapped kind",
+    "file": "src/widgets/projection/projector.registry.ts",
+    "find": "      (row) => row.tapped_kind === tappedKind && row.subject_key === subjectKey,\n",
+    "replace": "      (row) => row.subject_key === subjectKey,\n",
+    "killers": [
+      "G12-L15"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "MUT-12-E",
+    "description": "projection imports the AI tool handler directly",
+    "file": "src/widgets/projection/widget-projector.service.ts",
+    "find": "import { Inject, Injectable } from '@nestjs/common';\n",
+    "replace": "import { Inject, Injectable } from '@nestjs/common';\nimport type { AiToolHandlerService } from '../../ai-tools/ai-tool-handler.service';\nexport type MutantDirectOwner = AiToolHandlerService;\n",
+    "killers": [
+      "ARCH-12-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MUT-12-F",
+    "description": "authority mismatch is permitted to read",
+    "file": "src/widgets/projection/widget-projector.service.ts",
+    "find": "  async compose(plan: ProjectionPlan): Promise<ProjectionOutcome> {\n    if (!this.hasPrincipal(plan)) return degraded('no_principal');\n    if (!this.sameAuthority(plan)) return degraded('authority_mismatch');\n    const row = projectorRowFor(plan.widgetKind, subjectKeyOf(plan));\n",
+    "replace": "  async compose(plan: ProjectionPlan): Promise<ProjectionOutcome> {\n    if (!this.hasPrincipal(plan)) return degraded('no_principal');\n    if (false && !this.sameAuthority(plan)) return degraded('authority_mismatch');\n    const row = projectorRowFor(plan.widgetKind, subjectKeyOf(plan));\n",
+    "killers": [
+      "G12-L07"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "MUT-12-G",
+    "description": "one composition performs two canonical reads",
+    "file": "src/widgets/projection/widget-projector.service.ts",
+    "find": "    const result = await this.canonicalRead.read({\n      plan,\n      row,\n      ownerArguments: this.ownerArguments(plan, row),\n    });\n",
+    "replace": "    await this.canonicalRead.read({ plan, row, ownerArguments: this.ownerArguments(plan, row) });\n    const result = await this.canonicalRead.read({\n      plan,\n      row,\n      ownerArguments: this.ownerArguments(plan, row),\n    });\n",
+    "killers": [
+      "G12-L19"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "MUT-12-H",
+    "description": "client target is smuggled into owner arguments",
+    "file": "src/widgets/projection/widget-projector.service.ts",
+    "find": "      ownerArguments: this.ownerArguments(plan, row),\n",
+    "replace": "      ownerArguments: { ...this.ownerArguments(plan, row), submission: plan.targetJson },\n",
+    "killers": [
+      "G12-L17/L18"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "MUT-12-I",
+    "description": "missing L2 owner field is composed as a partial widget",
+    "file": "src/widgets/projection/widget-projector.service.ts",
+    "find": "    if (result.kind === 'value' && !hasRequiredFields(result.value, row))\n",
+    "replace": "    if (false && result.kind === 'value' && !hasRequiredFields(result.value, row))\n",
+    "killers": [
+      "G12-L16"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "MUT-12-L",
+    "description": "raw owner exception becomes the composition source",
+    "file": "src/widgets/projection/widget-projector.service.ts",
+    "find": "      result.kind === 'value' ? result.value : null,\n",
+    "replace": "      result.kind === 'value' ? result.value : result.exception,\n",
+    "killers": [
+      "G12-L09"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "MUT-12-N",
+    "description": "NAVIGATE enters the projector path during DEV-1",
+    "file": "src/widgets/projection/widget-projector.service.ts",
+    "find": "    return degraded('navigate_interim');\n",
+    "replace": "    return this.compose(plan) as unknown as ProjectionOutcome;\n",
+    "killers": [
+      "G12-L20"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "MUT-12-P",
+    "description": "SCHED.2 proposes an unregistered COMMIT template instead of the A2 backstop",
+    "file": "src/widgets/projection/rows/initial-projector.rows.ts",
+    "find": "        intent_template_key: 'commit.blocked@1',\n",
+    "replace": "        intent_template_key: 'commit.unblocked@1',\n",
+    "killers": [
+      "G12-L13"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "MUT-12-Q",
+    "description": "owner-composed response no longer requires canonical fact shape",
+    "file": "src/widgets/projection/widget-projector.service.ts",
+    "find": "    if (!isCanonicalOwnerResponse(ownerResponse))\n      return degraded('missing_source_field');\n",
+    "replace": "    if (false && !isCanonicalOwnerResponse(ownerResponse))\n      return degraded('missing_source_field');\n",
+    "killers": [
+      "G12-L13"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "MUT-12-R",
+    "description": "canonical adapter becomes an arbitrary AI tool dispatcher",
+    "file": "src/widgets/owner-ports/canonical-read.provider.ts",
+    "find": "    if (!TOOL_READS.has(capability))\n      throw new HttpException('c9_owner_not_registered', 400);\n",
+    "replace": "    if (false && !TOOL_READS.has(capability))\n      throw new HttpException('c9_owner_not_registered', 400);\n",
+    "killers": [
+      "G12-L18-PORT"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "MUT-12-S",
+    "description": "transport faults are converted into owner denials",
+    "file": "src/widgets/owner-ports/canonical-read.provider.ts",
+    "find": "      if (!(error instanceof HttpException)) throw error;\n",
+    "replace": "      if (false && !(error instanceof HttpException)) throw error;\n",
+    "killers": [
+      "G12-L09-PORT"
+    ],
+    "expect": "live-killed"
+  }
+]

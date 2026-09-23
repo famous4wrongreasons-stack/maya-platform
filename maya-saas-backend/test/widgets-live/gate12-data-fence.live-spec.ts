@@ -4,14 +4,15 @@
 // a pending stub, so no slot that could compose an answer runs; the guard pins that nothing reaches an
 // owner meanwhile. It counts toward no Gate 12 clause in `gate-conformance-audit.json`.
 //
-// U12a owns this file from its landing and adds two things to G12-L00, both of them absences:
+// U12a owns this file from its landing and adds the projector spies. U12b keeps the route-level
+// absence guard while registering the finite first row set:
 //   - the PROJECTOR SPIES. `WidgetProjectorService` now exists, and every submission is asserted to
 //     reach none of its three entry points. That is what makes "no canonical read" a statement about
 //     the projector rather than about a directory that did not exist yet: before U12a the absence was
 //     trivial, and a later unit wiring Gate 13's edge would not have been caught here.
-//   - the REGISTRY, read live: `PROJECTOR_REGISTRY` is empty and `ROWS_BLOCKED_BY` is not, in the same
-//     process that served the requests (ARCH-12-13's live half). The skeleton shipped DARK.
-// G12-L14 and the positive compositions are U12b's, on rows that do not exist yet.
+//   - the REGISTRY is read live: it contains exactly U12b's six approved rows, has no active blocker,
+//     and keeps OD-5/scalar/F36a categories explicitly deferred (ARCH-12-13's live half).
+// G12-L01…L20 positive/negative compositions are covered by U12b's dedicated live spec.
 //
 // §3.8 (P-F88): the bodies below are FULL SUBMISSIONS — `contract`, `widget_id`, `intent_token`,
 // `inputs`, `client_nonce` and `profile_id` — and `widget_id` is the record's own, as a conformant
@@ -53,6 +54,7 @@ import {
 import {
   PROJECTOR_REGISTRY,
   ROWS_BLOCKED_BY,
+  ROWS_DEFERRED_BY,
 } from '../../src/widgets/projection/projector.registry';
 import { WidgetProjectorService } from '../../src/widgets/projection/widget-projector.service';
 import { WidgetStoresService } from '../../src/widgets/stores/widget-stores.service';
@@ -354,10 +356,20 @@ async function runL00<C>(
       }
 
   expect(requests).toBe(20);
-  // ARCH-12-13's live half, on the process that just served twenty submissions: the skeleton is dark,
-  // and it says why. A row registered before its blocker was lifted would be visible right here.
-  expect(PROJECTOR_REGISTRY).toEqual([]);
-  expect(ROWS_BLOCKED_BY.length).toBeGreaterThan(0);
+  // ARCH-12-13's live half, on the process that just served twenty submissions: only the finite U12b
+  // row set is registered, while the still-unruled categories remain explicitly deferred.
+  expect(PROJECTOR_REGISTRY.map((row) => row.subject_key)).toEqual([
+    'C9:catalog.services.read',
+    'C9:catalog.staff.read',
+    'C9:booking.availability.read',
+    'C9:company.business-hours.read',
+    'C9:c9.no_action',
+    'C9:appointments.own.reschedule',
+  ]);
+  expect(ROWS_BLOCKED_BY).toEqual([]);
+  expect(ROWS_DEFERRED_BY).toEqual(
+    expect.arrayContaining([expect.stringContaining('OD-5')]),
+  );
   expect(
     await ctx.prisma.aiToolExecution.count({ where: { tenantId: tenant.id } }),
   ).toBe(aiToolExecutionsBefore);

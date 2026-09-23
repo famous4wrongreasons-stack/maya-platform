@@ -35,6 +35,7 @@ import type { AiToolSurface } from '../../ai-tools/ai-tool.types';
 import type { AuthenticatedUser } from '../../common/authenticated-user.interface';
 import type { C9Principal } from '../../orchestration/c9.contract';
 import type { C9Domain } from '../../widget-contract/ambient';
+import type { FactUsed } from '../../widget-contract/envelope';
 import type { ChannelId } from '../../widget-contract/lifecycle';
 import type { ResolvedNouns } from '../gate.types';
 import type { ProjectorRow } from './projector.registry';
@@ -100,8 +101,24 @@ export interface ProjectionPlan {
  * owner's words.
  */
 export type CanonicalReadResult =
-  | { readonly kind: 'value'; readonly value: unknown }
-  | { readonly kind: 'owner_exception'; readonly exception: unknown };
+  | {
+      readonly kind: 'value';
+      readonly value: unknown;
+      readonly fact: FactUsed;
+    }
+  | {
+      readonly kind: 'owner_exception';
+      readonly exception: unknown;
+      readonly denial_code: string;
+      readonly fact: FactUsed;
+    };
+
+/** Exact shape Gate 13 may hand back after calling a canonical propose owner. */
+export interface CanonicalOwnerResponse {
+  readonly value: unknown;
+  readonly fact: FactUsed;
+  readonly limitation_codes?: readonly string[];
+}
 
 /** One read, named by the row that permits it. There is no free-form read on this edge. */
 export interface CanonicalReadRequest {

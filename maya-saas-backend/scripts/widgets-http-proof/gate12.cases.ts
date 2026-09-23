@@ -1,4 +1,4 @@
-// U12a — Gate 12 on the PRODUCTION BINARY [BIN]. GATES-PLAN-V11, Wave 1.
+// U12b — Gate 12 on the PRODUCTION BINARY [BIN]. GATES-PLAN-V11, Wave 3.
 //
 // WHAT THIS FILE IS NOT, first, because the gap is the point. G12-L00's whole content is OWNER SPIES AT
 // ZERO, and a spy needs the process the test runs in. Here the server is a separate process
@@ -18,7 +18,7 @@
 //   (2) For a tenant without the entitlement the route is dark before any gate runs (403
 //       `feature_locked`, k3 check 8): `widgets.runtime` stays dark in production.
 //   (3) The binary printed ZERO `WidgetMintProvenance` lines (D-17 (2)). No composition, no mint, no
-//       successor: the projector skeleton U12a lands is dark on the production binary too.
+//       successor: the projector is never reached for an unminted token.
 //   (4) Two tenants asking about the same unknown token get byte-identical answers, so the response is
 //       no channel for another tenant's existence.
 
@@ -33,7 +33,7 @@ import type {
 } from '../widgets-intent-http-proof';
 
 const check = (condition: boolean, message: string): void => {
-  if (!condition) throw new Error(`U12a [BIN]: ${message}`);
+  if (!condition) throw new Error(`U12b [BIN]: ${message}`);
 };
 
 /** `widgets.controller.ts`'s response: these eleven keys and no other. */
@@ -97,11 +97,22 @@ export const cases: WidgetsHttpProofCase[] = [
     gate: '12',
     proofClass: 'CONTROL',
     async run(ctx) {
-      // The skeleton this unit lands is dark in the binary's own module graph too: the registry it
-      // would read from is empty, and this is the same module the server loaded.
+      // U12b registers exactly the six contract-approved first rows in the production module graph.
+      // A registry expansion is a contract change and must make this binary control fail closed.
+      const registeredPairs = PROJECTOR_REGISTRY.map(
+        (row) => `${row.tapped_kind}|${row.subject_key}`,
+      );
       check(
-        PROJECTOR_REGISTRY.length === 0,
-        `PROJECTOR_REGISTRY carries ${PROJECTOR_REGISTRY.length} rows; U12a registers none (ARCH-12-13)`,
+        JSON.stringify(registeredPairs) ===
+          JSON.stringify([
+            'SERVICE_SELECTOR|C9:catalog.services.read',
+            'STAFF_SELECTOR|C9:catalog.staff.read',
+            'TIME_SLOT_SELECTOR|C9:booking.availability.read',
+            'SCHEDULE|C9:company.business-hours.read',
+            'STRATEGY_OPTIONS|C9:c9.no_action',
+            'SCHEDULE|C9:appointments.own.reschedule',
+          ]),
+        `PROJECTOR_REGISTRY carries ${JSON.stringify(registeredPairs)}, not U12b's finite six-row set (ARCH-12-13)`,
       );
 
       const build = async (label: string, granted: boolean) => {
@@ -112,9 +123,9 @@ export const cases: WidgetsHttpProofCase[] = [
         return { tenant, bearer };
       };
 
-      const a = await build('U12a tenant A', true);
-      const b = await build('U12a tenant B', true);
-      const dark = await build('U12a tenant without the entitlement', false);
+      const a = await build('U12b tenant A', true);
+      const b = await build('U12b tenant B', true);
+      const dark = await build('U12b tenant without the entitlement', false);
 
       const unknownToken = `g12-bin-${randomUUID()}${randomUUID()}`;
       const fromA = await post(ctx, a.bearer, submission(unknownToken));

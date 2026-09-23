@@ -30,6 +30,9 @@ import { GATE_8R_OWNERS_UNRULED } from './gate-8r.owners';
 /** What the real module answers for the token: the bound value, or the fact that nothing is bound. */
 const OWNER_MODULE_CONFIG: Readonly<Record<string, string>> = {
   CRM_ENCRYPTION_KEY: 'gate-8r-binding-spec-crm-encryption-key-0123456789',
+  MAYA_LOYALTY_REDEMPTION_CODE_PEPPER:
+    'gate-8r-binding-spec-redemption-pepper-0123456789',
+  JWT_SECRET: 'gate-8r-binding-spec-jwt-secret-0123456789',
 };
 
 const resolveOwners = async (): Promise<

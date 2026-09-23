@@ -1,10 +1,19 @@
 import { Module } from '@nestjs/common';
 
 import { AiToolPolicyModule } from '../../ai-tools/ai-tool-policy.module';
+import { AiToolsModule } from '../../ai-tools/ai-tools.module';
 import { EntitlementsModule } from '../../entitlements/entitlements.module';
+import { MeasurementModule } from '../../measurement/measurement.module';
 import { C9Module } from '../../orchestration/c9.module';
 import { TenancyModule } from '../../tenancy/tenancy.module';
-import { GATE6_OWNERS, PRINCIPAL_RESOLVER, TENANT_SCOPE } from '../di-tokens';
+import { C8Module } from '../../valuation/c8.module';
+import {
+  CANONICAL_READ,
+  GATE6_OWNERS,
+  PRINCIPAL_RESOLVER,
+  TENANT_SCOPE,
+} from '../di-tokens';
+import { CanonicalReadAdapter } from './canonical-read.provider';
 import { Gate6OwnersAdapter } from './gate6.owners.provider';
 import { PrincipalAdapter } from './principal.adapter';
 import { TenantScopeAdapter } from './tenant-scope.provider';
@@ -30,13 +39,23 @@ import { TenantScopeAdapter } from './tenant-scope.provider';
  * enforced gate.
  */
 @Module({
-  imports: [AiToolPolicyModule, C9Module, EntitlementsModule, TenancyModule],
+  imports: [
+    AiToolPolicyModule,
+    AiToolsModule,
+    MeasurementModule,
+    C8Module,
+    C9Module,
+    EntitlementsModule,
+    TenancyModule,
+  ],
   providers: [
+    CanonicalReadAdapter,
     Gate6OwnersAdapter,
     { provide: PRINCIPAL_RESOLVER, useClass: PrincipalAdapter },
     { provide: TENANT_SCOPE, useClass: TenantScopeAdapter },
     { provide: GATE6_OWNERS, useExisting: Gate6OwnersAdapter },
+    { provide: CANONICAL_READ, useExisting: CanonicalReadAdapter },
   ],
-  exports: [GATE6_OWNERS, PRINCIPAL_RESOLVER, TENANT_SCOPE],
+  exports: [CANONICAL_READ, GATE6_OWNERS, PRINCIPAL_RESOLVER, TENANT_SCOPE],
 })
 export class WidgetOwnerPortsModule {}
