@@ -51,8 +51,6 @@ import type { GateContext, GateVerdict, IntentRecordRow } from '../gate.types';
 import {
   AE_WIDGET_COMMIT_ALLOWLIST,
   C9_REGISTRY_HASH,
-  CONSENT,
-  IDENTITY,
   MAYA_AI_TOOL_CATALOG_BY_NAME,
   WIDGET_CAPABILITY_POLICY,
   actionCapabilityRegistry,
@@ -138,12 +136,6 @@ const handoffDestination = (
 /**
  * The AE branch: (a)...(e) direct, in the block's order (C11:4749-4758).
  *
- * The TRANSITIONAL `CONSENT`/`IDENTITY` veto runs FIRST and is not one of the five. It is a check the
- * row does not state, kept until P-23 lands F31's start-up vetoes and U6-L2 deletes it (AREA-A §2.1
- * L2; §2.6 constraint 6). Running it first is what makes it observable: a consent key has no
- * allowlist row either, so behind (a) the veto would be invisible and its deletion untestable. Any
- * Gate 6 flip before U6-L2 records it as a deviation (AREA-A's audit note).
- *
  * (d) and (e) are the HELD LANE: both read the live principal, which is U6-L3's.
  */
 const aeSubject = async (
@@ -156,17 +148,6 @@ const aeSubject = async (
   // `get`, as the row spells it (C11:4751). It raises on an unregistered key; the raise is the
   // refusal, and `resolves` above has already given that case its own detail.
   const cap = actionCapabilityRegistry.get(ref.key);
-
-  if (CONSENT(cap))
-    return refuse(
-      'insufficient_authority',
-      'TRANSITIONAL veto: CONSENT capability - the widget layer cannot confer consent',
-    );
-  if (IDENTITY(cap))
-    return refuse(
-      'insufficient_authority',
-      'TRANSITIONAL veto: IDENTITY capability - not actuable from a widget',
-    );
 
   // (a) the AE key has a row in AE_WIDGET_COMMIT_ALLOWLIST. This subsumes the MONEY gap-key check
   // the previous version carried beside it: a MONEY key with no row is refused right here.

@@ -201,17 +201,6 @@
     "expect": "build-killed"
   },
   {
-    "id": "M22",
-    "description": "the TRANSITIONAL CONSENT veto is deleted. It is not one of (a)-(e) and U6-L2 retires it in P-23's commit — until then its deletion must be visible, which is what the named detail and this mutant are for. RETIRE WITH U6-L2.",
-    "file": "src/widgets/gates/gate6.ts",
-    "find": "  if (CONSENT(cap))\n    return refuse(\n      'insufficient_authority',\n      'TRANSITIONAL veto: CONSENT capability - the widget layer cannot confer consent',\n    );\n",
-    "replace": "  if (false)\n    return refuse(\n      'insufficient_authority',\n      'TRANSITIONAL veto: CONSENT capability - the widget layer cannot confer consent',\n    );\n",
-    "killers": [
-      "T-TRANSITIONAL-VETO"
-    ],
-    "expect": "build-killed"
-  },
-  {
     "id": "M23",
     "description": "the catalogue surface stops being the literal `'web'` (C11:4762). A surface that is not `web` admits a different set of the 47 — and a surface the CALLER could choose would be caller-supplied authority (FR-3). Build-killed by S-SURFACE; N-C9-SURFACE live-kills it once U6-L3 calls the port.",
     "file": "src/widgets/owner-ports/gate6.owners.provider.ts",

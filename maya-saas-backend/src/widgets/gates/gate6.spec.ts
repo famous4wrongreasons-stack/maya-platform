@@ -7,7 +7,8 @@
 //
 //   - the AE branch. D-4 forbids minting any DRAFT, REQUEST_APPROVAL or COMMIT on the proof database
 //     until P-DISCHARGE, and an AE subject is only ever one of those. So (a), (b), (c), the
-//     TRANSITIONAL veto and the held (d) are [RI] here and BLOCKED-DISCHARGE in the audit.
+//     held (d) and (e) are [RI] here and BLOCKED-DISCHARGE in the audit. Consent and identity
+//     capabilities are excluded from the commit allowlist at registry startup by P-23's AL-2.
 //   - the HELD LANE with a live principal present. `ctx.principal` is null on every request until the
 //     integrator's IR-P-GW lands P-PRINCIPAL's principal step, so "pending U6-L3" is reachable only by
 //     injecting a principal.
@@ -390,19 +391,14 @@ describe('Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB 
     );
   });
 
-  it('T-TRANSITIONAL-VETO: a CONSENT capability is refused, and the veto names itself', async () => {
-    // This check is NOT one of (a)-(e). It is carried until P-23 lands F31's start-up vetoes and
-    // U6-L2 deletes it; the detail is what makes that deletion a visible change rather than a silent
-    // one, because behind (a) the same key would refuse anyway and nothing would look different.
-    const v = await gate6(
-      ae('package5.wave3.record-client-consent.execute.v1'),
-    );
-    expect(detail(v)).toMatch(/^TRANSITIONAL veto: CONSENT capability/);
-  });
-
-  it('T-TRANSITIONAL-VETO: an IDENTITY capability likewise', async () => {
-    const v = await gate6(ae('package5.wave2.revoke-all-sessions.execute.v1'));
-    expect(detail(v)).toMatch(/^TRANSITIONAL veto: IDENTITY capability/);
+  it('U6-L2: consent and identity keys reach ordinary condition (a); AL-2 owns their classification veto', async () => {
+    for (const key of [
+      'package5.wave3.record-client-consent.execute.v1',
+      'package5.wave2.revoke-all-sessions.execute.v1',
+    ])
+      expect(detail(await gate6(ae(key)))).toBe(
+        '(a) no AE_WIDGET_COMMIT_ALLOWLIST row',
+      );
   });
 
   it('S-A: (a) a registered key with no `AE_WIDGET_COMMIT_ALLOWLIST` row refuses — MONEY included, which is why the `MONEY && !isAllowlisted` check could go', async () => {
