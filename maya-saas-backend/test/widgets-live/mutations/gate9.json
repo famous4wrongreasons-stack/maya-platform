@@ -395,8 +395,8 @@
     "id": "M9-35",
     "description": "writer reaches for its own transaction capability instead of remaining transaction-bound",
     "file": "src/widgets/stores/timeline.store.ts",
-    "find": "    const key = timelineLockKey(input.tenantId, input.conversationId);",
-    "replace": "    const ownTransaction = (tx as unknown as { $transaction?: unknown }).$transaction;\n    if (ownTransaction) throw new Error('own transaction forbidden');\n    const key = timelineLockKey(input.tenantId, input.conversationId);",
+    "find": "    await TimelineStore.lockConversation(\n      tx,\n      input.tenantId,\n      input.conversationId,\n    );",
+    "replace": "    const ownTransaction = (tx as unknown as { $transaction?: unknown }).$transaction;\n    if (ownTransaction) throw new Error('own transaction forbidden');\n    await TimelineStore.lockConversation(\n      tx,\n      input.tenantId,\n      input.conversationId,\n    );",
     "killers": [
       "T-ARCH-TX"
     ],

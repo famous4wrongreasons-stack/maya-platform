@@ -16,6 +16,9 @@ function fixture() {
     const p = job.partition ? selectPartition(b.mutants, job.partition) : null;
     const baseline = {}; const neutralisers = {};
     const mutants = (p?.selected ?? b.mutants).map((m) => {
+      if (typeof m.equivalent === 'string') {
+        return { battery: b.file, id: m.id, status: 'equivalent', reason: m.equivalent };
+      }
       const status = m.expect ?? 'live-killed';
       const steps = status === 'build-killed' ? ['unit', 'typecheck', 'k3'] : ['live'];
       const killers = m.killers.map((k) => typeof k === 'string' ? { test: k, neutralisers: null } : k);
@@ -44,11 +47,11 @@ function fixture() {
   });
 }
 
-test('25 batteries, 38 jobs: disjoint Gate 6/7/9/13 and P-mint partitions cover the same 288 declarations', () => {
+test('29 batteries, 42 jobs: disjoint Gate 6/7/9/13 and P-mint partitions cover the same 341 declarations', () => {
   const p = plan(declared);
-  assert.equal(p.gates.length, 25); assert.equal(p.matrix.include.length, 38);
+  assert.equal(p.gates.length, 29); assert.equal(p.matrix.include.length, 42);
   const r = assemble(declared, fixture(), head);
-  assert.equal(r.length, 25); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 288);
+  assert.equal(r.length, 29); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 341);
   for (const report of r) {
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
