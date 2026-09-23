@@ -56,6 +56,20 @@ export const timelineLockKey = (
 export class TimelineStore {
   constructor(private readonly prisma: PrismaService | TimelineClient) {}
 
+  /**
+   * Serialise widget-store changes for one exact conversation without giving callers raw-SQL
+   * authority. This remains a storage primitive: it reads no capability owner and decides no
+   * business outcome.
+   */
+  static async lockConversation(
+    tx: Pick<TimelineClient, '$executeRaw'>,
+    tenantId: string,
+    conversationId: string,
+  ): Promise<void> {
+    const key = timelineLockKey(tenantId, conversationId);
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`;
+  }
+
   private plusDays(from: Date, days: number): Date {
     return new Date(from.getTime() + days * 24 * 60 * 60 * 1000);
   }
@@ -82,9 +96,12 @@ export class TimelineStore {
     tx: TimelineClient,
     now = new Date(),
   ): Promise<{ id: string; turnIndex: number } | null> {
-    const key = timelineLockKey(input.tenantId, input.conversationId);
     // PostgreSQL derives the signed bigint; application code defines only the collision-free tuple.
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`;
+    await TimelineStore.lockConversation(
+      tx,
+      input.tenantId,
+      input.conversationId,
+    );
 
     const record = await tx.widgetIntentRecord.updateMany({
       where: scoped(input.tenantId, {

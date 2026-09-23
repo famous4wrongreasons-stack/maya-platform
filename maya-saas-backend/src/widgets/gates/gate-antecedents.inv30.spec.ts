@@ -46,6 +46,10 @@ const DECLARED_NOT_READ: Readonly<Record<string, string>> = {
     '`SubmissionShape` is the wire shape the DTO is typed against; declaring the member is what keeps the two from drifting. No gate reads it — F88-7 holds that over every file.',
   'carriers/channel-profile.ts':
     "K6's CHANNEL profile registry: `profileId` there is the SERVER's own profile row id (F53), not the caller's claimed render profile. A name collision, not an authority input.",
+  'carriers/fitter.ts':
+    "K6's fitter returns the `profileId` selected from the SERVER-OWNED channel-profile registry. It has no submission or header input and cannot accept a caller claim.",
+  'emission/emitter.service.ts':
+    'The minter reads `profileId` only from the SERVER-OWNED channel registry and the SERVER-STORED render receipt in order to seal or verify an emission; it never reads submission.profile_id.',
   'emission/seal.service.ts':
     "H4's seal term declaration: `profileId` is the SERVER-STORED render receipt term covered by the keyed seal, never the submission's claimed profile.",
   'emission/seal-verifier.service.ts':
@@ -160,7 +164,7 @@ describe('T-SRC-INV30 — no gate antecedent names a claimed render profile, a l
       ),
     ).toEqual([]);
     // An exception is per FILE, not per spelling: a planted read in an enumerated file is still not
-    // seen, which is why the list has three entries and each carries a reason.
+    // seen, which is why the list is closed and every entry carries a reason.
     expect(
       violations(
         new Map([['gate.types.ts', 'const x = ctx.submission.profile_id;\n']]),

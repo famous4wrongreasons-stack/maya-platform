@@ -212,14 +212,13 @@ describe('P-MINT — closed intent template registry', () => {
         key: 'c7.measurement.read',
       },
     });
-    expect(resolved).toEqual(
+    expect(resolved.kind).toBe('intent');
+    if (resolved.kind !== 'intent') throw new Error('expected intent recipe');
+    expect(resolved.row).toEqual(
       expect.objectContaining({
-        kind: 'intent',
-        row: expect.objectContaining({
-          effect: 'REFINE',
-          roles: ['remedy'],
-          subject: { space: 'C9', key: 'c7.measurement.read' },
-        }),
+        effect: 'REFINE',
+        roles: ['remedy'],
+        subject: { space: 'C9', key: 'c7.measurement.read' },
       }),
     );
     expect(() =>

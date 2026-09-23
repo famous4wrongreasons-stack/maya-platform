@@ -544,10 +544,7 @@ export class IntentGatewayService {
   }
 
   /** R3.9.4: after `T` commits, issue a widget-store-only remedy for the two named refusal edges. */
-  private async successorFor(
-    run: SlotRun,
-    tenantId: string,
-  ): Promise<unknown | undefined> {
+  private async successorFor(run: SlotRun, tenantId: string): Promise<unknown> {
     const verdict = run.verdict;
     const record = run.ctx.record;
     const gate1Outcome =

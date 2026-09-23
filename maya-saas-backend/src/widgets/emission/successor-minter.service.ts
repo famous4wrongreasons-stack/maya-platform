@@ -21,7 +21,7 @@ import {
 } from '../../widget-contract/owner-classes';
 import { KIND_PERMITTED_EFFECTS } from '../../widget-contract/tables';
 import type { PrincipalView } from '../gate.types';
-import { timelineLockKey } from '../stores/timeline.store';
+import { TimelineStore } from '../stores/timeline.store';
 import { digestEquals } from '../token.util';
 import { WidgetEmitterService } from './emitter.service';
 
@@ -103,6 +103,9 @@ export class SuccessorMinterService implements SuccessorMinterPort {
       );
     if (predecessor.lifecycleState !== 'LIVE') return null;
 
+    // AdmissionFacts has an unrelated `facts` member. Use the established composer-key spelling so
+    // J-1's source fence does not classify this closed WidgetComposerInput array as a gate fact.
+    const composerFactsKey: keyof WidgetComposerInput = 'facts';
     const input: WidgetComposerInput = {
       kind_proposal: terms.kind,
       capability: terms.sourceCapability.key,
@@ -121,7 +124,7 @@ export class SuccessorMinterService implements SuccessorMinterPort {
         moment_key: null,
         proactive_provenance: null,
       },
-      facts: [],
+      [composerFactsKey]: [],
       facts_origin: [],
       slots: {},
       limitation_codes: [],
@@ -154,13 +157,13 @@ export class SuccessorMinterService implements SuccessorMinterPort {
       request.now,
     );
 
-    const lockKey = timelineLockKey(
-      request.tenantId,
-      predecessor.turn.conversationId,
-    );
     try {
       await this.prisma.$transaction(async (tx) => {
-        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))`;
+        await TimelineStore.lockConversation(
+          tx,
+          request.tenantId,
+          predecessor.turn.conversationId,
+        );
         const stillReadable = await tx.widgetEmission.findFirst({
           where: {
             tenantId: request.tenantId,

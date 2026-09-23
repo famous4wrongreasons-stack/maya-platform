@@ -264,7 +264,7 @@ const runSuccessorCases = <C>(
   level: () => SuccessorLevel<C>,
 ): void => {
   const setup = async (options?: {
-    readonly kind?: 'METRIC' | 'SOURCE_STATUS' | 'CHOICE';
+    readonly kind?: 'METRIC' | 'SOURCE_STATUS';
     readonly expired?: boolean;
   }) => {
     const fx = fixtures();
@@ -328,7 +328,7 @@ const runSuccessorCases = <C>(
       x.credential,
       {
         widget_id: envelope.widget_id,
-        intent_token: envelope.intents[0]!.intent_token,
+        intent_token: envelope.intents[0].intent_token,
       },
       `${scope}:tap`,
     );
@@ -444,11 +444,21 @@ const runSuccessorCases = <C>(
   }, 120_000);
 
   it(`G15-11b [${label}] unregistered and wrong-owner source capabilities return code alone`, async () => {
-    for (const [caseName, sourceCapability, kind] of [
-      ['unregistered', 'not.registered', 'CHOICE'],
-      ['wrong-owner', 'catalog.services.read', 'METRIC'],
+    for (const [caseName, sourceCapability, inheritedKind] of [
+      ['unregistered', 'not.registered', true],
+      ['wrong-owner', 'catalog.services.read', false],
     ] as const) {
-      const x = await setup({ expired: true, kind });
+      const x = await setup({ expired: true });
+      if (inheritedKind)
+        await fixtureContext().prisma.widgetEmission.update({
+          where: {
+            widgetId_tenantId: {
+              widgetId: x.record.widgetId,
+              tenantId: x.tenant.id,
+            },
+          },
+          data: { kind: 'CHOICE' },
+        });
       await fixtureContext().prisma.widgetRenderReceipt.updateMany({
         where: { tenantId: x.tenant.id, widgetId: x.record.widgetId },
         data: {
