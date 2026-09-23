@@ -199,11 +199,11 @@
   },
   {
     "id": "M7-22",
-    "description": "C11 is deleted, so a `BOOKING_CONFIRMATION` COMMIT passes Gate 7 with no `confirmation_subject` at all. BOOK.1 (C11:3109) states the interim itself: \"until `confirmation_subject` is stored, Gate 7 refuses every `BOOKING_CONFIRMATION` `COMMIT`.\"",
+    "description": "C11 is deleted, so a `BOOKING_CONFIRMATION` COMMIT passes Gate 7 with a missing or mismatched audit-retained confirmation subject.",
     "file": "src/widgets/gates/gate7.ts",
-    "find": "    if (r.widgetKind === 'BOOKING_CONFIRMATION') {\n      const stored = confirmationSubject(r);",
-    "replace": "    const c11: boolean = false;\n    if (c11 && r.widgetKind === 'BOOKING_CONFIRMATION') {\n      const stored = confirmationSubject(r);",
-    "killers": ["G7-FC1", "G7-FC2"],
+    "find": "    if (r.widgetKind === 'BOOKING_CONFIRMATION') {\n      const derived = bookingConfirmationSubjectFor(subjectOf(r));",
+    "replace": "    const c11: boolean = false;\n    if (c11 && r.widgetKind === 'BOOKING_CONFIRMATION') {\n      const derived = bookingConfirmationSubjectFor(subjectOf(r));",
+    "killers": ["G7-N-C11-NULL", "G7-N-C11-MISMATCH"],
     "expect": "build-killed"
   },
   {
@@ -253,10 +253,10 @@
   },
   {
     "id": "M7-35",
-    "description": "C11 reads `confirmation_subject` out of `WidgetEmission.bodyJson`, the only place it is persisted today. That is the reading BOOK.1 rules out — the member it names is `IntentRecord.confirmation_subject`, AUDIT_RETAINED, \"so the check reads no body field (§0.4 F15)\".",
+    "description": "C11 derives the expected subject from an erasable envelope body instead of the record subject through the canonical booking rows. BOOK.1 requires the audit-retained member and F15 forbids the body read.",
     "file": "src/widgets/gates/gate7.ts",
-    "find": "      const stored = confirmationSubject(r);",
-    "replace": "      const stored = (r as unknown as { bodyJson?: { confirmation_subject?: unknown } })\n        .bodyJson?.confirmation_subject;",
+    "find": "      const derived = bookingConfirmationSubjectFor(subjectOf(r));",
+    "replace": "      const derived = (r as unknown as { bodyJson?: { confirmation_subject?: unknown } })\n        .bodyJson?.confirmation_subject;",
     "killers": ["S-G7-F15"],
     "expect": "build-killed"
   },
@@ -320,9 +320,7 @@
     "file": "src/widgets/gates/gate7.ts",
     "find": "  const r = ctx.record;\n  if (!r) return no('C1', 'no record');\n",
     "replace": "  const r = ctx.record;\n  if (!r) return no('C1', 'no record');\n  const claimed = ctx.submission as unknown as { profileId?: string };\n  if (claimed.profileId === 'rich_interactive') return pass;\n",
-    "killers": [
-      "T-SRC-INV30-b"
-    ],
+    "killers": ["T-SRC-INV30-b"],
     "expect": "build-killed"
   },
   {

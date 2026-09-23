@@ -660,21 +660,17 @@ const commitRecord = (over: Partial<IntentRecordRow> = {}): IntentRecordRow =>
     ...AE('crm.appointment.create.v1'),
     confirmationOfKind: 'draft',
     confirmationOfRef: 'draft-1',
+    confirmationSubject: 'create',
     ...over,
   });
 
 describe('the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b', () => {
-  it('G7-FC1: the canonical `create` COMMIT reaches C11 and stops there — BOOK.1’s own interim, “until `confirmation_subject` is stored, Gate 7 refuses every BOOKING_CONFIRMATION COMMIT”', async () => {
+  it('G7-P-C11-CREATE: the canonical create subject matches the live booking row', async () => {
     const v = await gate7(ctx(commitRecord()), NEVER_ASKED.load);
-    expect([code(v), clause(v)]).toEqual([
-      'booking_confirmation_required',
-      'C11',
-    ]);
-    expect(detail(v)).toContain('no confirmation_subject');
-    // Reaching C11 means C9a, C6, C8a, C4, C8b and C6a all ran: the branch is evaluated, not skipped.
+    expect(v.outcome).toBe('pass');
   });
 
-  it('G7-FC2: a `reschedule` COMMIT whose producing REFINE was consumed on the pairing’s propose key passes C5a and C5b, and stops at C11', async () => {
+  it('G7-FC2 / G7-P-C11-RESCHEDULE: a consumed canonical reschedule proposal and matching subject pass', async () => {
     const p = producing({
       'produced-1': {
         effect: 'REFINE',
@@ -690,14 +686,12 @@ describe('the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8
           confirmationOfKind: 'record',
           confirmationOfRef: 'appointment-1',
           producedByIntentTokenHash: 'produced-1',
+          confirmationSubject: 'reschedule',
         }),
       ),
       p.load,
     );
-    expect([code(v), clause(v)]).toEqual([
-      'booking_confirmation_required',
-      'C11',
-    ]);
+    expect(v.outcome).toBe('pass');
     expect(p.asked).toEqual(['produced-1']);
   });
 
@@ -1036,17 +1030,51 @@ describe('the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8
     expect([code(v), clause(v)]).toEqual(['effect_not_admissible', 'C9b']);
   });
 
-  it('G7-N-C11-NULL: C11 is a HELD LANE — a stored `confirmation_subject` does not lift it either, because the comparison is U7c’s', async () => {
-    const withMember = {
-      ...commitRecord(),
-      confirmationSubject: 'create',
-    } as unknown as IntentRecordRow;
-    const v = await gate7(ctx(withMember), NEVER_ASKED.load);
+  it('G7-N-C11-NULL: a missing stored confirmation subject refuses', async () => {
+    const v = await gate7(
+      ctx(commitRecord({ confirmationSubject: null })),
+      NEVER_ASKED.load,
+    );
     expect([code(v), clause(v)]).toEqual([
       'booking_confirmation_required',
       'C11',
     ]);
-    expect(detail(v)).toContain('pending U7c');
+  });
+
+  it('G7-N-C11-MISMATCH: a subject from another canonical booking row refuses', async () => {
+    const v = await gate7(
+      ctx(commitRecord({ confirmationSubject: 'cancel' })),
+      NEVER_ASKED.load,
+    );
+    expect([code(v), clause(v)]).toEqual([
+      'booking_confirmation_required',
+      'C11',
+    ]);
+    expect(detail(v)).toContain('does not equal create');
+  });
+
+  it('G7-P-C11-CANCEL: cancel is re-derived from the canonical booking row', async () => {
+    const p = producing({
+      'produced-1': {
+        effect: 'REFINE',
+        capabilitySpace: 'C9',
+        capabilityKey: 'appointments.own.cancel',
+        consumedAt: new Date('2026-05-01T00:00:00.000Z'),
+      },
+    });
+    const v = await gate7(
+      ctx(
+        commitRecord({
+          ...AE('crm.appointment.cancel.v1'),
+          confirmationOfKind: 'record',
+          confirmationOfRef: 'appointment-1',
+          producedByIntentTokenHash: 'produced-1',
+          confirmationSubject: 'cancel',
+        }),
+      ),
+      p.load,
+    );
+    expect(v.outcome).toBe('pass');
   });
 
   it('T7-ONE-READ: the producing-record loader is asked ONLY for a non-draft COMMIT — every other refusal keeps the pipeline at one store read', async () => {

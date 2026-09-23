@@ -6,6 +6,10 @@ import { subjectCapability } from '../../widget-contract/intent';
 import type { WidgetIntent } from '../../widget-contract/intent';
 import { stableActionJson } from '../authority/contract-bindings';
 import { verificationFloor } from '../authority/verification-floor.runtime';
+import {
+  bookingConfirmationSubjectFor,
+  type BookingConfirmationSubject,
+} from '../authority/ae-commit-allowlist.runtime';
 import { encodeSelectionDomain } from '../input-schema/codec';
 import { inputSchemaHash } from '../input-schema/input-schema-hash';
 import { parseInputSchema } from '../input-schema/parse-input-schema';
@@ -151,6 +155,7 @@ export const intentRecordData = (args: {
   readonly widgetId: string;
   readonly principalProofHash: string;
   readonly bodyHash: string;
+  readonly body: unknown;
   readonly issuedAt: Date;
 }): Record<string, unknown> => {
   const { intent } = args.material;
@@ -160,6 +165,11 @@ export const intentRecordData = (args: {
   const cap = intent.effect === 'HANDOFF' ? null : subject;
   const handoff = intent.effect === 'HANDOFF' ? subject : null;
   const runId = args.input.correlation_refs.run_id ?? null;
+  const confirmationSubject = confirmationSubjectAtMint({
+    kind: args.input.kind_proposal,
+    body: args.body,
+    intent,
+  });
   return {
     tenantId: args.tenantId,
     intentTokenHash: args.material.tokenHash,
@@ -175,7 +185,7 @@ export const intentRecordData = (args: {
     targetJson: intent.target,
     verificationFloor: intent.verification_floor,
     confirmationJson: null,
-    confirmationSubject: null,
+    confirmationSubject,
     approvalDecision: null,
     inputSchemaHash: args.material.inputSchemaHash,
     requestedScopeHash: requestedScopeHash({
@@ -202,4 +212,26 @@ export const intentRecordData = (args: {
     selectionDomainLabelsJson: args.material.selectionDomainLabels,
     spokenTranscript: null,
   };
+};
+
+const confirmationSubjectAtMint = (args: {
+  readonly kind: WidgetComposerInput['kind_proposal'];
+  readonly body: unknown;
+  readonly intent: WidgetIntent;
+}): BookingConfirmationSubject | null => {
+  if (args.kind !== 'BOOKING_CONFIRMATION') return null;
+  if (typeof args.body !== 'object' || args.body === null)
+    throw new IntentTemplateRefusal('booking_confirmation_subject_invalid');
+  const value = (args.body as { readonly confirmation_subject?: unknown })
+    .confirmation_subject;
+  if (value !== 'create' && value !== 'reschedule' && value !== 'cancel')
+    throw new IntentTemplateRefusal('booking_confirmation_subject_invalid');
+  if (args.intent.effect === 'COMMIT') {
+    const derived = bookingConfirmationSubjectFor(
+      subjectCapability(args.intent),
+    );
+    if (derived !== value)
+      throw new IntentTemplateRefusal('booking_confirmation_subject_mismatch');
+  }
+  return value;
 };

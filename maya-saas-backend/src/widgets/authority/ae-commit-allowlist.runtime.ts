@@ -26,6 +26,11 @@ export interface AeCommitRuntimeRow {
   readonly propose: CapabilityRef;
 }
 
+export type BookingConfirmationSubject = 'create' | 'reschedule' | 'cancel';
+
+const BOOKING_CONFIRMATION_SUBJECTS: readonly BookingConfirmationSubject[] =
+  Object.freeze(['create', 'reschedule', 'cancel']);
+
 export const BOOKING = (cap: RegisteredActionCapabilityV1): boolean =>
   cap.targetKind === 'appointment';
 
@@ -130,3 +135,25 @@ const admittedPairingRows = AE_PROPOSE_PAIRING.flatMap((pair) => {
 export const AE_WIDGET_COMMIT_ALLOWLIST: Readonly<
   Record<string, AeCommitRuntimeRow>
 > = Object.freeze(Object.fromEntries(admittedPairingRows));
+
+/**
+ * BOOK.1's subject mapping is the allowlist's own three booking rows. The candidate key shape is
+ * specified by the contract; the live row still has to exist and identify the booking family, so
+ * this cannot infer authority from a similarly named capability outside the canonical allowlist.
+ */
+export const bookingConfirmationSubjectFor = (
+  ref: CapabilityRef | null,
+): BookingConfirmationSubject | null => {
+  if (ref?.space !== 'AE') return null;
+  for (const subject of BOOKING_CONFIRMATION_SUBJECTS) {
+    const key = `crm.appointment.${subject}.v1`;
+    const row = AE_WIDGET_COMMIT_ALLOWLIST[key];
+    if (
+      ref.key === key &&
+      row?.family === 'booking' &&
+      row.confirmation_kind === 'BOOKING_CONFIRMATION'
+    )
+      return subject;
+  }
+  return null;
+};

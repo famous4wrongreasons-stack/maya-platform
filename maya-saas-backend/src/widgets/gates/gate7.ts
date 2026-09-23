@@ -70,6 +70,7 @@ import {
   WIDGET_CAPABILITY_POLICY,
   actionCapabilityRegistry,
   capKey,
+  bookingConfirmationSubjectFor,
 } from '../authority/contract-bindings';
 import {
   hasExactlyOnePairing,
@@ -146,10 +147,6 @@ const has = (table: object, key: string): boolean =>
  */
 export const UNWIRED_PRODUCING_RECORDS: ProducingRecordLoader = () =>
   Promise.resolve(null);
-
-/** `IntentRecord.confirmation_subject` (§3.7), which `IntentRecordRow` does not carry until I-MIG2. */
-const confirmationSubject = (r: IntentRecordRow): unknown =>
-  (r as { readonly confirmationSubject?: unknown }).confirmationSubject;
 
 /**
  * C2 and C3 — R3.2.2 / F69 (C11:3825-3842, C11:1358-1367), plus F21's wholeness.
@@ -324,26 +321,17 @@ export const gate7 = async (
         );
     }
 
-    // C11 — BOOK.1 (C11:3109), a HELD LANE (AMB-01a, Block B B-01).
-    //
-    // BOOK.1 fixes both halves: Gate 7 "re-derives the subject from `subjectCapability(record)`
-    // through the same three allowlist rows and refuses unless it equals
-    // `IntentRecord.confirmation_subject` (§3.7) — an AUDIT_RETAINED member, so the check reads no
-    // body field". It then states the interim in the contract's own words: "until
-    // `confirmation_subject` is stored, Gate 7 refuses every `BOOKING_CONFIRMATION` `COMMIT`."
-    //
-    // The column arrives with the migration-2 fold (I-MIG2, D-8) and the subject comparison is U7c's.
-    // The read below is written against the member so that U7c adds the comparison and nothing else.
-    // The only persisted copy today is inside `WidgetEmission.bodyJson`, a class-C column F15 forbids
-    // this path to read — which is why the lane is held rather than closed with a body read.
+    // C11 — BOOK.1. Re-derive from `subjectCapability(record)` through the canonical booking rows
+    // and compare with the audit-retained record member. This path never reads the emission body.
     if (r.widgetKind === 'BOOKING_CONFIRMATION') {
-      const stored = confirmationSubject(r);
-      return unconfirmed(
-        'C11',
-        stored === undefined || stored === null
-          ? 'no confirmation_subject is stored (BOOK.1; I-MIG2)'
-          : 'the confirmation_subject comparison is pending U7c (BOOK.1)',
-      );
+      const derived = bookingConfirmationSubjectFor(subjectOf(r));
+      if (derived === null || r.confirmationSubject !== derived)
+        return unconfirmed(
+          'C11',
+          derived === null
+            ? 'the canonical booking subject cannot be re-derived (BOOK.1)'
+            : `confirmation_subject ${String(r.confirmationSubject)} does not equal ${derived} (BOOK.1)`,
+        );
     }
 
     // C9b — FR-6d's other half (C11:1788): `PAYMENT_HANDOFF` is gap-blocked with a null

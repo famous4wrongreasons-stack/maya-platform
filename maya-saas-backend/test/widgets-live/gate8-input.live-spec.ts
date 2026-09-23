@@ -28,6 +28,8 @@
 
 import { randomUUID } from 'node:crypto';
 
+import type { Prisma } from '@prisma/client';
+
 import { UserRole } from '../../src/common/domain.enums';
 import type { AuthenticatedUser } from '../../src/common/authenticated-user.interface';
 import { WIDGET_INTENT_SUBMISSION_CONTRACT } from '../../src/widgets/dto/submit-intent.dto';
@@ -155,7 +157,7 @@ describe('Gate 8 — input validation, the null-schema lane [U8a]', () => {
               input_schema: row.inputSchema,
             },
           ],
-        },
+        } as unknown as Prisma.InputJsonValue,
       },
     });
     return hash;

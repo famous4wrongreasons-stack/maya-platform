@@ -206,6 +206,7 @@ export class WidgetEmitterService {
           widgetId,
           principalProofHash: principal.proofHash,
           bodyHash,
+          body,
           issuedAt,
         }) as never,
       }),

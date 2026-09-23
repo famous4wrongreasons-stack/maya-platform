@@ -128,6 +128,7 @@ export { WIDGET_CAPABILITY_POLICY } from './capability-policy';
 // on the completed table without creating a second predicate or three-row booking-only shadow.
 export {
   AE_WIDGET_COMMIT_ALLOWLIST,
+  bookingConfirmationSubjectFor,
   BOOKING,
   CONSENT,
   IDENTITY,
