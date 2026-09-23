@@ -193,4 +193,48 @@ describe('P-MINT — closed intent template registry', () => {
       free_input_justification: null,
     });
   });
+
+  it('G15-7/G15-11 keeps the successor template server-only and derives its subject from an owner-class C9 source', () => {
+    const proposal: IntentProposal = {
+      intent_template_key: 'refine.successor@1',
+      capability: { space: 'C9', key: 'c7.measurement.read' },
+      role: 'remedy',
+    };
+    expect(() => resolve(proposal, 'METRIC')).toThrow(
+      new IntentTemplateRefusal('successor_template_requires_server_source'),
+    );
+    const resolved = resolveIntentTemplate({
+      proposal,
+      widgetKind: 'METRIC',
+      deliveryChannel: 'pwa',
+      successorSourceCapability: {
+        space: 'C9',
+        key: 'c7.measurement.read',
+      },
+    });
+    expect(resolved).toEqual(
+      expect.objectContaining({
+        kind: 'intent',
+        row: expect.objectContaining({
+          effect: 'REFINE',
+          roles: ['remedy'],
+          subject: { space: 'C9', key: 'c7.measurement.read' },
+        }),
+      }),
+    );
+    expect(() =>
+      resolveIntentTemplate({
+        proposal: {
+          ...proposal,
+          capability: { space: 'C9', key: 'catalog.services.read' },
+        },
+        widgetKind: 'METRIC',
+        deliveryChannel: 'pwa',
+        successorSourceCapability: {
+          space: 'C9',
+          key: 'catalog.services.read',
+        },
+      }),
+    ).toThrow(new IntentTemplateRefusal('subject_not_kind_owner'));
+  });
 });

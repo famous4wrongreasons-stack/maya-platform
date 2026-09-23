@@ -65,6 +65,8 @@ export const fit = (args: {
   bodyText: string;
   /** A route key the whole widget remains reachable through — the fallback every withholding uses. */
   reachableVia: string;
+  /** R3.9.4's exact one-remedy successor is itself the escape from a stale widget. */
+  remedyOnlySuccessor?: boolean;
 }): FitResult => {
   const profile = profileFor(args.carrier);
   if (!profile)
@@ -123,7 +125,17 @@ export const fit = (args: {
         `reduction at ${r.path} names restored_by ${r.restoredBy}, which is not emitted`,
       );
 
-  if (profile.escapeRequired && escapes.length === 0 && emitted.length > 0)
+  const exactRemedyOnlySuccessor =
+    args.remedyOnlySuccessor === true &&
+    args.intents.length === 1 &&
+    args.intents[0]?.role === 'remedy' &&
+    args.intents[0]?.isEscape === false;
+  if (
+    profile.escapeRequired &&
+    escapes.length === 0 &&
+    emitted.length > 0 &&
+    !exactRemedyOnlySuccessor
+  )
     throw new FitterRefusal(
       `${profile.carrier} requires an escape verb and none was supplied`,
     );

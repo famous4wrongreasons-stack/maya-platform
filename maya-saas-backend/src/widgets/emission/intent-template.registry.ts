@@ -30,6 +30,7 @@ export type IntentTemplateKey =
   | 'navigate.account@1'
   | 'refine.measurement@1'
   | 'refine.measurement.period@1'
+  | 'refine.successor@1'
   | 'control.dismiss@1'
   | 'handoff.settings@1';
 
@@ -43,7 +44,7 @@ export class IntentTemplateRefusal extends Error {
   }
 }
 
-interface IntentTemplateRow {
+export interface IntentTemplateRow {
   readonly key: IntentTemplateKey;
   readonly version: typeof INTENT_TEMPLATE_REGISTRY_VERSION;
   readonly effect: Extract<
@@ -66,6 +67,8 @@ interface IntentTemplateRow {
   readonly utteranceTemplate: string;
   readonly speechAliases: readonly string[];
   readonly allowedArgumentHandles: readonly string[];
+  /** Only R3.9.4's server-owned successor minter may resolve the subject from stored provenance. */
+  readonly sourceSubject: boolean;
 }
 
 const C9_MEASUREMENT: CapabilityRef = Object.freeze({
@@ -101,6 +104,9 @@ const ALL_KINDS = Object.freeze(
 );
 const CONTROL_KINDS = Object.freeze(
   ALL_KINDS.filter((kind) => KIND_PERMITTED_EFFECTS[kind].includes('CONTROL')),
+);
+const REFINE_KINDS = Object.freeze(
+  ALL_KINDS.filter((kind) => KIND_PERMITTED_EFFECTS[kind].includes('REFINE')),
 );
 
 const row = (value: IntentTemplateRow): IntentTemplateRow =>
@@ -149,6 +155,7 @@ export const INTENT_TEMPLATE_REGISTRY: Readonly<
     utteranceTemplate: 'Close',
     speechAliases: ['close'],
     allowedArgumentHandles: [],
+    sourceSubject: false,
   }),
   'navigate.account@1': row({
     key: 'navigate.account@1',
@@ -168,6 +175,7 @@ export const INTENT_TEMPLATE_REGISTRY: Readonly<
     utteranceTemplate: 'Open account',
     speechAliases: ['open account'],
     allowedArgumentHandles: [],
+    sourceSubject: false,
   }),
   'refine.measurement@1': row({
     key: 'refine.measurement@1',
@@ -187,6 +195,7 @@ export const INTENT_TEMPLATE_REGISTRY: Readonly<
     utteranceTemplate: 'Refresh measurement',
     speechAliases: ['refresh measurement'],
     allowedArgumentHandles: [],
+    sourceSubject: false,
   }),
   'refine.measurement.period@1': row({
     key: 'refine.measurement.period@1',
@@ -208,6 +217,27 @@ export const INTENT_TEMPLATE_REGISTRY: Readonly<
     utteranceTemplate: 'Show {{selection}} period',
     speechAliases: ['change period'],
     allowedArgumentHandles: [],
+    sourceSubject: false,
+  }),
+  'refine.successor@1': row({
+    key: 'refine.successor@1',
+    version: 1,
+    effect: 'REFINE',
+    kinds: REFINE_KINDS,
+    roles: ['remedy'],
+    subject: null,
+    target: null,
+    inputSchema: null,
+    selectionDomain: {},
+    selectionDomainLabels: {},
+    priority: 1,
+    singleUse: false,
+    ttlSeconds: 600,
+    label: 'Refresh',
+    utteranceTemplate: 'Refresh',
+    speechAliases: ['refresh'],
+    allowedArgumentHandles: [],
+    sourceSubject: true,
   }),
   'control.dismiss@1': row({
     key: 'control.dismiss@1',
@@ -227,6 +257,7 @@ export const INTENT_TEMPLATE_REGISTRY: Readonly<
     utteranceTemplate: 'Dismiss',
     speechAliases: ['dismiss', 'close'],
     allowedArgumentHandles: [],
+    sourceSubject: false,
   }),
   'handoff.settings@1': row({
     key: 'handoff.settings@1',
@@ -246,6 +277,7 @@ export const INTENT_TEMPLATE_REGISTRY: Readonly<
     utteranceTemplate: 'Open settings',
     speechAliases: ['open settings'],
     allowedArgumentHandles: [],
+    sourceSubject: false,
   }),
 });
 
@@ -286,6 +318,8 @@ export const resolveIntentTemplate = (args: {
   readonly proposal: IntentProposal;
   readonly widgetKind: WidgetKind;
   readonly deliveryChannel: string;
+  /** Present only on the R3.9.4 server-owned successor path. */
+  readonly successorSourceCapability?: CapabilityRef;
 }): ResolvedIntentTemplate => {
   const { proposal, widgetKind, deliveryChannel } = args;
   if (
@@ -325,21 +359,40 @@ export const resolveIntentTemplate = (args: {
   if (!KIND_PERMITTED_EFFECTS[widgetKind].includes(template.effect))
     throw new IntentTemplateRefusal('effect_not_permitted_on_kind');
 
+  if (template.sourceSubject && args.successorSourceCapability === undefined)
+    throw new IntentTemplateRefusal(
+      'successor_template_requires_server_source',
+    );
+  if (!template.sourceSubject && args.successorSourceCapability !== undefined)
+    throw new IntentTemplateRefusal('server_source_on_non_successor_template');
+
+  const resolvedTemplate: IntentTemplateRow = template.sourceSubject
+    ? Object.freeze({
+        ...template,
+        subject: args.successorSourceCapability ?? null,
+      })
+    : template;
+
   const expectedCapability =
-    template.effect === 'HANDOFF' ? undefined : (template.subject ?? undefined);
+    resolvedTemplate.effect === 'HANDOFF'
+      ? undefined
+      : (resolvedTemplate.subject ?? undefined);
   const expectedHandoff =
-    template.effect === 'HANDOFF' ? template.subject : null;
+    resolvedTemplate.effect === 'HANDOFF' ? resolvedTemplate.subject : null;
   if (!sameRef(proposal.capability, expectedCapability ?? null))
     throw new IntentTemplateRefusal('capability_mismatch');
   if (!sameRef(proposal.handoff_capability_ref, expectedHandoff))
     throw new IntentTemplateRefusal('handoff_capability_mismatch');
 
   if (
-    template.subject?.space === 'C9' &&
+    resolvedTemplate.subject?.space === 'C9' &&
     !isInheritedOwner(widgetKind) &&
-    !isOwnerClassKey(widgetKind, template.subject)
+    !isOwnerClassKey(widgetKind, resolvedTemplate.subject)
   )
     throw new IntentTemplateRefusal('subject_not_kind_owner');
+
+  if (template.sourceSubject && resolvedTemplate.subject?.space !== 'C9')
+    throw new IntentTemplateRefusal('successor_source_not_c9');
 
   const handles = proposal.argument_handles ?? {};
   if (!exactKeys(handles, template.allowedArgumentHandles))
@@ -355,7 +408,7 @@ export const resolveIntentTemplate = (args: {
   )
     throw new IntentTemplateRefusal('carrier_inadmissible');
 
-  return Object.freeze({ kind: 'intent' as const, row: template });
+  return Object.freeze({ kind: 'intent' as const, row: resolvedTemplate });
 };
 
 /** Registry-load assertion: no actuating recipe may exist while A2.2/MG-P01 is present. */

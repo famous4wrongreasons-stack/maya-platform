@@ -45,4 +45,23 @@ describe('P-G15a — Gates 1 and 5 are pure ingress checks', () => {
       source.indexOf("return superseded(\n      'policy_floor_changed'"),
     );
   });
+
+  it('G15-13 [BUILD] the successor minter reaches neither a projector nor a canonical owner', () => {
+    const source = read('../emission/successor-minter.service.ts');
+    for (const forbidden of [
+      'WidgetProjectorService',
+      'canonical-read.provider',
+      'owner-ports',
+      'ActionEngine',
+      'AiToolRuntimeService',
+      'MeasurementReadService',
+    ])
+      expect({ forbidden, present: source.includes(forbidden) }).toEqual({
+        forbidden,
+        present: false,
+      });
+    expect(source).toContain('digestEquals(');
+    expect(source).toContain('KIND_PERMITTED_EFFECTS');
+    expect(source).toContain('isOwnerClassKey');
+  });
 });

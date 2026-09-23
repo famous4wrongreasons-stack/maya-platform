@@ -29,6 +29,7 @@ import {
   NOUN_RESOLUTION_PORTS,
   PRINCIPAL_RESOLVER,
   SEAL_VERIFIER,
+  SUCCESSOR_MINTER,
   TENANT_SCOPE,
 } from './di-tokens';
 import type { PrincipalResolver, RequestTx } from './authority/principal-view';
@@ -61,6 +62,7 @@ import { pass } from './gates/verdict';
 import { gate13 } from './gates/gate13';
 import { EffectRouterService } from './routing/effect-router.service';
 import { channelMaxLevel } from './authority/authority-resolver';
+import type { SuccessorMinterPort } from './emission/successor-minter.service';
 
 /** Request-transaction binding of Gate 10's store seam, implemented by WidgetStoresService. */
 interface TransactionalGate10Store {
@@ -177,6 +179,8 @@ export class IntentGatewayService {
     private readonly effectRouter: EffectRouterService,
     @Inject(GATE10_STORE)
     private readonly gate10Store: TransactionalGate10Store,
+    @Inject(SUCCESSOR_MINTER)
+    private readonly successorMinter: SuccessorMinterPort,
   ) {}
 
   /**
@@ -437,7 +441,12 @@ export class IntentGatewayService {
     submission: SubmissionShape;
     now?: Date;
     carrier: ChannelId;
-  }): Promise<{ verdict: GateVerdict; stoppedAt: string | null; ran: number }> {
+  }): Promise<{
+    verdict: GateVerdict;
+    stoppedAt: string | null;
+    ran: number;
+    nextEnvelope?: unknown;
+  }> {
     const token = this.step0(args.submission);
     if (!token)
       return {
@@ -506,12 +515,18 @@ export class IntentGatewayService {
     }
     this.transactions.committed += 1;
 
-    if (inTransaction.stoppedAt !== null)
+    if (inTransaction.stoppedAt !== null) {
+      const nextEnvelope = await this.successorFor(
+        inTransaction,
+        args.tenantId,
+      );
       return {
         verdict: this.normalise(inTransaction.verdict),
         stoppedAt: inTransaction.stoppedAt,
         ran: inTransaction.ran,
+        ...(nextEnvelope === undefined ? {} : { nextEnvelope }),
       };
+    }
 
     const afterCommit = await this.runSlots(
       inTransaction.ctx,
@@ -526,6 +541,48 @@ export class IntentGatewayService {
       stoppedAt: afterCommit.stoppedAt,
       ran: afterCommit.ran,
     };
+  }
+
+  /** R3.9.4: after `T` commits, issue a widget-store-only remedy for the two named refusal edges. */
+  private async successorFor(
+    run: SlotRun,
+    tenantId: string,
+  ): Promise<unknown | undefined> {
+    const verdict = run.verdict;
+    const record = run.ctx.record;
+    const gate1Outcome =
+      run.stoppedAt === '1' &&
+      (verdict.outcome === 'expired' || verdict.outcome === 'superseded');
+    const gate5Outcome =
+      run.stoppedAt === '5' &&
+      verdict.outcome === 'superseded' &&
+      verdict.code === 'policy_floor_changed';
+    if (!gate1Outcome && !gate5Outcome) return undefined;
+    const gate1LifecycleRefusal =
+      record !== null &&
+      ((record.expiresAt instanceof Date &&
+        record.expiresAt.getTime() <= run.ctx.now.getTime()) ||
+        (record.singleUse === true && record.consumedAt !== null) ||
+        record.supersededByWidgetId !== null);
+    const eligible = (gate1Outcome && gate1LifecycleRefusal) || gate5Outcome;
+    const principal = run.ctx.principal;
+    if (!eligible) return undefined;
+    if (record === null || principal === null) return null;
+    if (!digestEquals(record.principalProofHash, principal.proofHash))
+      return null;
+    try {
+      this.tenantScope.assert(record.tenantId);
+    } catch {
+      return null;
+    }
+    const successor = await this.successorMinter.mint({
+      tenantId,
+      predecessorWidgetId: record.widgetId,
+      predecessorIntentTokenHash: record.intentTokenHash,
+      principal,
+      now: run.ctx.now,
+    });
+    return successor?.envelope ?? null;
   }
 
   /**

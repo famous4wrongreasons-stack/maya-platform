@@ -397,6 +397,7 @@ const gatewayFor = (
       NOUN_RESOLUTION_PORTS_UNBOUND,
       effectRouter as never,
       stores,
+      { mint: () => Promise.resolve(null) },
     ),
   };
 };

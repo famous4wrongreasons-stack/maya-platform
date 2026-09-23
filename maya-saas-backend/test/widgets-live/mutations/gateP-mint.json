@@ -129,8 +129,8 @@
     "id": "MINT-M15",
     "description": "allow successor minting from a non-LIVE predecessor",
     "file": "src/widgets/emission/successor-minter.service.ts",
-    "find": "      predecessor.lifecycleState !== 'LIVE' ||",
-    "replace": "      predecessor.lifecycleState !== 'MINTED' ||",
+    "find": "    if (predecessor.lifecycleState !== 'LIVE') return null;",
+    "replace": "    if (predecessor.lifecycleState !== 'MINTED') return null;",
     "killers": ["MINT-8"],
     "expect": "live-killed"
   }

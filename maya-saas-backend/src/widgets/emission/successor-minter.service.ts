@@ -1,39 +1,62 @@
-// P-MINT / R3.9.4 — the widget-store-only successor minter.
+// P-G15b / R3.9.4 — the widget-store-only successor minter.
 //
-// It never invokes a projector or canonical owner. The only values it may reuse are the frozen
-// predecessor text, turn, channel and already-sealed C9 subject in WidgetIntentRecord. A stale or
-// unsupported predecessor produces no successor.
+// It reads two content members of the refused predecessor: its frozen text equivalent and the
+// source capability stored in envelope provenance. It reaches no projector and no canonical owner.
+// The gateway has already established the live principal; this service re-checks the exact stored
+// record and refuses closed when erasure, ownership or registry state no longer supports a remedy.
 
 import { Injectable } from '@nestjs/common';
 
-import { C9_REGISTRY_HASH } from '../../orchestration/c9.registry';
+import {
+  C9_CAPABILITIES,
+  C9_REGISTRY_HASH,
+} from '../../orchestration/c9.registry';
 import { PrismaService } from '../../prisma/prisma.service';
+import type { CapabilityRef } from '../../widget-contract/capability-ref';
 import type { WidgetComposerInput } from '../../widget-contract/envelope';
+import type { WidgetKind } from '../../widget-contract/kinds';
+import {
+  isInheritedOwner,
+  isOwnerClassKey,
+} from '../../widget-contract/owner-classes';
+import { KIND_PERMITTED_EFFECTS } from '../../widget-contract/tables';
 import type { PrincipalView } from '../gate.types';
-import { type SealedEmission, WidgetEmitterService } from './emitter.service';
+import { timelineLockKey } from '../stores/timeline.store';
+import { digestEquals } from '../token.util';
+import { WidgetEmitterService } from './emitter.service';
 
 export interface SuccessorMintRequest {
   readonly tenantId: string;
   readonly predecessorWidgetId: string;
+  readonly predecessorIntentTokenHash: string;
   readonly principal: PrincipalView;
   readonly now?: Date;
 }
 
+export interface SuccessorMinterPort {
+  mint(request: SuccessorMintRequest): Promise<SuccessorMintResult | null>;
+}
+
+export interface SuccessorMintResult {
+  readonly widgetId: string;
+  readonly envelope: Readonly<Record<string, unknown>>;
+}
+
 class SuccessorLinkConflict extends Error {}
 
+const C9_KEYS = new Set(C9_CAPABILITIES.map((row) => row.capabilityKey));
+
 @Injectable()
-export class SuccessorMinterService {
+export class SuccessorMinterService implements SuccessorMinterPort {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emitter: WidgetEmitterService,
   ) {}
 
-  async mint(request: SuccessorMintRequest): Promise<SealedEmission | null> {
-    if (
-      request.principal.authority.tenantId !== request.tenantId ||
-      request.principal.proofHash !== request.principal.authority.proofHash
-    )
-      return null;
+  async mint(
+    request: SuccessorMintRequest,
+  ): Promise<SuccessorMintResult | null> {
+    if (request.principal.authority.tenantId !== request.tenantId) return null;
 
     const predecessor = await this.prisma.widgetEmission.findFirst({
       where: {
@@ -45,33 +68,44 @@ export class SuccessorMinterService {
         turnId: true,
         kind: true,
         lifecycleState: true,
+        supersededByWidgetId: true,
         deliveryChannel: true,
         textEquivalentJson: true,
-        turn: { select: { conversationId: true } },
+        erasedAt: true,
+        turn: { select: { conversationId: true, erasedAt: true } },
         intentRecords: {
-          where: {
-            principalProofHash: request.principal.proofHash,
-            capabilitySpace: 'C9',
-            capabilityKey: 'c7.measurement.read',
-          },
-          select: { capabilityKey: true },
+          where: { intentTokenHash: request.predecessorIntentTokenHash },
+          select: { principalProofHash: true, erasedAt: true },
           take: 1,
+        },
+        renderReceipts: {
+          select: {
+            deliveryChannel: true,
+            composedEnvelopeJson: true,
+            erasedAt: true,
+          },
         },
       },
     });
+    if (predecessor === null) return null;
+    const terms = successorTerms(predecessor, request);
+    if (terms === null) return null;
     if (
-      predecessor === null ||
-      predecessor.lifecycleState !== 'LIVE' ||
-      predecessor.kind !== 'METRIC' ||
-      predecessor.textEquivalentJson === null ||
-      predecessor.intentRecords[0]?.capabilityKey !== 'c7.measurement.read'
+      predecessor.lifecycleState === 'SUPERSEDED' &&
+      predecessor.supersededByWidgetId !== null
     )
-      return null;
+      return this.readLinkedSuccessor(
+        request.tenantId,
+        predecessor.widgetId,
+        predecessor.supersededByWidgetId,
+        predecessor.turnId,
+        predecessor.deliveryChannel,
+      );
+    if (predecessor.lifecycleState !== 'LIVE') return null;
 
-    const composerFactsKey = 'facts' as const;
     const input: WidgetComposerInput = {
-      kind_proposal: 'METRIC',
-      capability: 'c7.measurement.read',
+      kind_proposal: terms.kind,
+      capability: terms.sourceCapability.key,
       capability_version: C9_REGISTRY_HASH,
       source: {
         from: 'action_execution',
@@ -87,52 +121,79 @@ export class SuccessorMinterService {
         moment_key: null,
         proactive_provenance: null,
       },
-      [composerFactsKey]: [],
+      facts: [],
       facts_origin: [],
       slots: {},
       limitation_codes: [],
       intent_proposals: [
         {
-          intent_template_key: 'refine.measurement@1',
-          capability: { space: 'C9', key: 'c7.measurement.read' },
+          intent_template_key: 'refine.successor@1',
+          capability: terms.sourceCapability,
           role: 'remedy',
-        },
-        {
-          intent_template_key: 'control.dismiss@1',
-          capability: { space: 'CONTROL', key: 'control.widget.dismiss' },
-          role: 'escape',
         },
       ],
       locale: 'en',
     };
-    const body = asFrozenBody(predecessor.textEquivalentJson);
-    if (body === null) return null;
-    const successor = await this.emitter.emit(
+    const successor = await this.emitter.emitSuccessor(
       {
         tenantId: request.tenantId,
         conversationId: predecessor.turn.conversationId,
         turnId: predecessor.turnId,
-        kind: 'METRIC',
+        kind: terms.kind,
         principalProofHash: request.principal.proofHash,
         deliveryChannel: predecessor.deliveryChannel,
-        body,
+        body: terms.textEquivalent,
         ttlSeconds: 600,
         freshnessClass: 'live',
         piiClass: 'client_identified',
         composerInput: input,
         principal: request.principal,
       },
+      terms.sourceCapability,
+      terms.textEquivalent,
       request.now,
     );
 
+    const lockKey = timelineLockKey(
+      request.tenantId,
+      predecessor.turn.conversationId,
+    );
     try {
       await this.prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))`;
+        const stillReadable = await tx.widgetEmission.findFirst({
+          where: {
+            tenantId: request.tenantId,
+            widgetId: predecessor.widgetId,
+            lifecycleState: 'LIVE',
+            supersededByWidgetId: null,
+            erasedAt: null,
+            turn: { erasedAt: null },
+            intentRecords: {
+              some: {
+                intentTokenHash: request.predecessorIntentTokenHash,
+                principalProofHash: request.principal.proofHash,
+                erasedAt: null,
+              },
+            },
+            renderReceipts: {
+              some: {
+                deliveryChannel: predecessor.deliveryChannel,
+                erasedAt: null,
+              },
+            },
+          },
+          select: { widgetId: true },
+        });
+        if (stillReadable === null) throw new SuccessorLinkConflict();
+
         const closed = await tx.widgetEmission.updateMany({
           where: {
             tenantId: request.tenantId,
             widgetId: predecessor.widgetId,
             lifecycleState: 'LIVE',
             supersededByWidgetId: null,
+            erasedAt: null,
           },
           data: {
             lifecycleState: 'SUPERSEDED',
@@ -147,6 +208,7 @@ export class SuccessorMinterService {
             turnId: predecessor.turnId,
             deliveryChannel: predecessor.deliveryChannel,
             lifecycleState: 'MINTED',
+            erasedAt: null,
           },
           data: { supersedesWidgetId: predecessor.widgetId },
         });
@@ -161,14 +223,135 @@ export class SuccessorMinterService {
         },
         data: { lifecycleState: 'CANCELLED' },
       });
-      if (error instanceof SuccessorLinkConflict) return null;
+      if (error instanceof SuccessorLinkConflict)
+        return this.readLinkedSuccessor(
+          request.tenantId,
+          predecessor.widgetId,
+          predecessor.widgetId,
+          predecessor.turnId,
+          predecessor.deliveryChannel,
+          true,
+        );
       throw error;
     }
     return successor;
   }
+
+  private async readLinkedSuccessor(
+    tenantId: string,
+    predecessorWidgetId: string,
+    successorWidgetId: string,
+    turnId: string,
+    deliveryChannel: string,
+    resolveFromPredecessor = false,
+  ): Promise<SuccessorMintResult | null> {
+    const linked = await this.prisma.widgetEmission.findFirst({
+      where: {
+        tenantId,
+        ...(resolveFromPredecessor
+          ? { supersedesWidgetId: predecessorWidgetId }
+          : { widgetId: successorWidgetId }),
+        turnId,
+        supersedesWidgetId: predecessorWidgetId,
+        lifecycleState: { in: ['MINTED', 'LIVE'] },
+        erasedAt: null,
+        turn: { erasedAt: null },
+        renderReceipts: {
+          some: { deliveryChannel, erasedAt: null },
+        },
+      },
+      select: {
+        widgetId: true,
+        renderReceipts: {
+          where: { deliveryChannel, erasedAt: null },
+          select: { emittedEnvelopeJson: true },
+          take: 1,
+        },
+      },
+    });
+    const envelope = asObject(
+      linked?.renderReceipts[0]?.emittedEnvelopeJson ?? null,
+    );
+    return linked === null || envelope === null
+      ? null
+      : Object.freeze({ widgetId: linked.widgetId, envelope });
+  }
 }
 
-const asFrozenBody = (value: unknown): Record<string, unknown> | null =>
+interface PredecessorTerms {
+  readonly kind: WidgetKind;
+  readonly sourceCapability: CapabilityRef;
+  readonly textEquivalent: Readonly<Record<string, unknown>>;
+}
+
+const successorTerms = (
+  predecessor: {
+    kind: string;
+    lifecycleState: string;
+    supersededByWidgetId: string | null;
+    deliveryChannel: string;
+    textEquivalentJson: unknown;
+    erasedAt: Date | null;
+    turn: { erasedAt: Date | null };
+    intentRecords: Array<{
+      principalProofHash: string;
+      erasedAt: Date | null;
+    }>;
+    renderReceipts: Array<{
+      deliveryChannel: string;
+      composedEnvelopeJson: unknown;
+      erasedAt: Date | null;
+    }>;
+  } | null,
+  request: SuccessorMintRequest,
+): PredecessorTerms | null => {
+  if (
+    predecessor === null ||
+    !['LIVE', 'SUPERSEDED'].includes(predecessor.lifecycleState) ||
+    predecessor.erasedAt !== null ||
+    predecessor.turn.erasedAt !== null ||
+    predecessor.intentRecords[0]?.erasedAt !== null ||
+    !digestEquals(
+      predecessor.intentRecords[0]?.principalProofHash ?? '',
+      request.principal.proofHash,
+    ) ||
+    predecessor.renderReceipts.find(
+      (receipt) => receipt.deliveryChannel === predecessor.deliveryChannel,
+    )?.erasedAt !== null
+  )
+    return null;
+  const renderReceipt = predecessor.renderReceipts.find(
+    (receipt) => receipt.deliveryChannel === predecessor.deliveryChannel,
+  );
+  const textEquivalent = asObject(predecessor.textEquivalentJson);
+  const envelope = asObject(renderReceipt?.composedEnvelopeJson ?? null);
+  const provenance = asObject(envelope?.provenance ?? null);
+  const sourceCapability = provenance?.source_capability;
+  if (
+    textEquivalent === null ||
+    typeof sourceCapability !== 'string' ||
+    !C9_KEYS.has(sourceCapability) ||
+    !isWidgetKind(predecessor.kind) ||
+    !KIND_PERMITTED_EFFECTS[predecessor.kind].includes('REFINE')
+  )
+    return null;
+  const ref: CapabilityRef = { space: 'C9', key: sourceCapability };
+  if (
+    !isInheritedOwner(predecessor.kind) &&
+    !isOwnerClassKey(predecessor.kind, ref)
+  )
+    return null;
+  return {
+    kind: predecessor.kind,
+    sourceCapability: ref,
+    textEquivalent,
+  };
+};
+
+const isWidgetKind = (value: string): value is WidgetKind =>
+  Object.prototype.hasOwnProperty.call(KIND_PERMITTED_EFFECTS, value);
+
+const asObject = (value: unknown): Readonly<Record<string, unknown>> | null =>
   value !== null && typeof value === 'object' && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
+    ? (value as Readonly<Record<string, unknown>>)
     : null;

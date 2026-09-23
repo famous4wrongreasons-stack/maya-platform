@@ -88,6 +88,41 @@ describe('K6 — channel profiles', () => {
 });
 
 describe('K6 — the fitter leaves a way back, or refuses', () => {
+  it('permits the dedicated successor lane to emit exactly one remedy without inventing an escape', () => {
+    const remedy: FitIntent = {
+      token: 'tok-remedy',
+      label: 'Обновить',
+      role: 'remedy',
+      isEscape: false,
+    };
+    const r = fit({
+      carrier: 'pwa',
+      intents: [remedy],
+      bodyText: 'Обновлённое состояние',
+      reachableVia: 'fs.report',
+      remedyOnlySuccessor: true,
+    });
+    expect(r.emitted).toEqual([remedy]);
+    expect(r.intentsMinted).toBe(1);
+  });
+
+  it('does not let an ordinary envelope use the successor exception', () => {
+    const remedy: FitIntent = {
+      token: 'tok-remedy',
+      label: 'Обновить',
+      role: 'remedy',
+      isEscape: false,
+    };
+    expect(() =>
+      fit({
+        carrier: 'pwa',
+        intents: [remedy],
+        bodyText: 'Обновлённое состояние',
+        reachableVia: 'fs.report',
+      }),
+    ).toThrow(/requires an escape verb/);
+  });
+
   it('withholds beyond capacity and names a reachable_via that IS emitted', () => {
     const intents = [
       ESCAPE,

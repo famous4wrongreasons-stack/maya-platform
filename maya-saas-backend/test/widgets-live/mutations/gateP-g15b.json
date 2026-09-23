@@ -1,0 +1,83 @@
+[
+  {
+    "id": "G15B-M1",
+    "description": "foreign principal proof is no longer compared initially or under the successor-link lock",
+    "edits": [
+      {
+        "file": "src/widgets/emission/successor-minter.service.ts",
+        "find": "    !digestEquals(\n      predecessor.intentRecords[0]?.principalProofHash ?? '',\n      request.principal.proofHash,\n    ) ||",
+        "replace": "    false ||"
+      },
+      {
+        "file": "src/widgets/emission/successor-minter.service.ts",
+        "find": "                intentTokenHash: request.predecessorIntentTokenHash,\n                principalProofHash: request.principal.proofHash,\n                erasedAt: null,",
+        "replace": "                intentTokenHash: request.predecessorIntentTokenHash,\n                erasedAt: null,"
+      }
+    ],
+    "killers": ["G15-9"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "G15B-M2",
+    "description": "an erased or absent stored text equivalent is treated as readable",
+    "file": "src/widgets/emission/successor-minter.service.ts",
+    "find": "    textEquivalent === null ||",
+    "replace": "    false ||",
+    "killers": ["G15-10/G15-11"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "G15B-M3",
+    "description": "an unregistered provenance capability can mint a successor",
+    "file": "src/widgets/emission/successor-minter.service.ts",
+    "find": "    !C9_KEYS.has(sourceCapability) ||",
+    "replace": "    false ||",
+    "killers": ["G15-11b"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "G15B-M4",
+    "description": "a kind without REFINE permission can mint a remedy",
+    "file": "src/widgets/emission/successor-minter.service.ts",
+    "find": "    !KIND_PERMITTED_EFFECTS[predecessor.kind].includes('REFINE')",
+    "replace": "    false",
+    "killers": ["G15-10/G15-11"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "G15B-M5",
+    "description": "the source capability no longer has to own the predecessor kind",
+    "file": "src/widgets/emission/successor-minter.service.ts",
+    "find": "    !isInheritedOwner(predecessor.kind) &&\n    !isOwnerClassKey(predecessor.kind, ref)",
+    "replace": "    false",
+    "killers": ["G15-11b"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "G15B-M6",
+    "description": "the successor recipe becomes callable without the server-owned source",
+    "file": "src/widgets/emission/intent-template.registry.ts",
+    "find": "  if (template.sourceSubject && args.successorSourceCapability === undefined)",
+    "replace": "  if (false && template.sourceSubject && args.successorSourceCapability === undefined)",
+    "killers": ["G15-7/G15-11"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "G15B-M7",
+    "description": "the persisted envelope drops the exact source capability provenance",
+    "file": "src/widgets/emission/emitter.service.ts",
+    "find": "        source_capability: input.capability,",
+    "replace": "        source_capability: 'c9.no_action',",
+    "killers": ["G15-7"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "G15B-M8",
+    "description": "the public HTTP response discards a successor produced by the canonical gateway",
+    "file": "src/widgets/widgets.controller.ts",
+    "find": "      next_envelope: result.nextEnvelope ?? route?.next_envelope ?? null,",
+    "replace": "      next_envelope: route?.next_envelope ?? null,",
+    "killers": ["G15-7"],
+    "expect": "live-killed"
+  }
+]

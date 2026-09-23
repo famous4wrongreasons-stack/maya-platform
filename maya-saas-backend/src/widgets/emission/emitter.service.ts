@@ -8,6 +8,7 @@ import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 
 import { PrismaService } from '../../prisma/prisma.service';
+import type { CapabilityRef } from '../../widget-contract/capability-ref';
 import type { WidgetComposerInput } from '../../widget-contract/envelope';
 import type { AuthorityEnvelope } from '../../widget-contract/envelope-roots';
 import type { WidgetKind } from '../../widget-contract/kinds';
@@ -71,6 +72,13 @@ export interface SealedEmission {
   intentTokenHashes: readonly string[];
   kind: WidgetKind;
   a2Limited: boolean;
+  /** The exact stored envelope returned by a widget-layer successor edge. */
+  envelope: Readonly<Record<string, unknown>>;
+}
+
+interface SuccessorEmissionContext {
+  readonly sourceCapability: CapabilityRef;
+  readonly textEquivalent: Readonly<Record<string, unknown>>;
 }
 
 @Injectable()
@@ -86,6 +94,34 @@ export class WidgetEmitterService {
    * owned by the emission service, and contains no effect or target member.
    */
   async emit(request: MintRequest, now = new Date()): Promise<SealedEmission> {
+    return this.emitInternal(request, now, null);
+  }
+
+  /** R3.9.4's dedicated server-owned lane. Generic composer calls cannot resolve this template. */
+  async emitSuccessor(
+    request: MintRequest,
+    sourceCapability: CapabilityRef,
+    textEquivalent: Readonly<Record<string, unknown>>,
+    now = new Date(),
+  ): Promise<SealedEmission> {
+    if (
+      request.composerInput.intent_proposals.length !== 1 ||
+      request.composerInput.intent_proposals[0]?.intent_template_key !==
+        'refine.successor@1' ||
+      request.composerInput.intent_proposals[0]?.role !== 'remedy'
+    )
+      throw new IntentTemplateRefusal('successor_shape_invalid');
+    return this.emitInternal(request, now, {
+      sourceCapability,
+      textEquivalent,
+    });
+  }
+
+  private async emitInternal(
+    request: MintRequest,
+    now: Date,
+    successor: SuccessorEmissionContext | null,
+  ): Promise<SealedEmission> {
     const input = request.composerInput;
     const principal = request.principal;
     if (
@@ -103,6 +139,9 @@ export class WidgetEmitterService {
         proposal,
         widgetKind: input.kind_proposal,
         deliveryChannel: request.deliveryChannel,
+        ...(successor === null
+          ? {}
+          : { successorSourceCapability: successor.sourceCapability }),
       }),
     }));
 
@@ -154,6 +193,7 @@ export class WidgetEmitterService {
       bodyText: stableActionJson(body),
       reachableVia:
         tokened.find((m) => m.intent.role === 'escape')?.token ?? 'shell.root',
+      remedyOnlySuccessor: successor !== null,
     });
     const emittedTokens = new Set(fitting.emitted.map((i) => i.token));
     const emittedIntents = materials.filter(
@@ -166,6 +206,17 @@ export class WidgetEmitterService {
       kind,
       body,
       intents: emittedIntents.map((m) => m.intent),
+      provenance: {
+        // P-G15b reads this one stored value. It never infers it from an intent, a body or a client.
+        source_capability: input.capability,
+      },
+      ...(successor === null
+        ? {}
+        : {
+            presentation: {
+              text_equivalent: successor.textEquivalent,
+            },
+          }),
       limitations: a2Limited
         ? [{ reason_code: A2_GAP_REF, capability_gap_ref: A2_GAP_REF }]
         : [],
@@ -231,6 +282,9 @@ export class WidgetEmitterService {
           deliveryChannel: request.deliveryChannel,
           deliveryStateJson: { state: 'composed', delivered: false } as never,
           bodyJson: body as never,
+          ...(successor === null
+            ? {}
+            : { textEquivalentJson: successor.textEquivalent as never }),
         },
       }),
       ...recordWrites,
@@ -266,6 +320,7 @@ export class WidgetEmitterService {
       intentTokenHashes: Object.freeze(emittedTokened.map((m) => m.tokenHash)),
       kind,
       a2Limited,
+      envelope: Object.freeze(envelopeForSeal),
     });
   }
 

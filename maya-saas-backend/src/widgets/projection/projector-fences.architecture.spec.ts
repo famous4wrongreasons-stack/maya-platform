@@ -1140,6 +1140,14 @@ describe('U12a — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
       // run through `submit`, so neither is called here.
       { resolve: () => Promise.resolve(null) },
       { assert: () => undefined },
+      undefined as never,
+      undefined as never,
+      undefined as never,
+      undefined as never,
+      undefined as never,
+      undefined as never,
+      undefined as never,
+      { mint: () => Promise.resolve(null) },
     );
     const gates = (gateway as unknown as { gates: readonly Gate[] }).gates;
     const slot = gates.find((g) => g.n === '12')!;

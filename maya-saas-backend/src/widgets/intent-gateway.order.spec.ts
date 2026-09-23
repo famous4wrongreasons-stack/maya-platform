@@ -218,7 +218,20 @@ const orderBreaks = async (
   return breaks;
 };
 
-const real = () => new IntentGatewayService(store() as never, principals);
+const real = () =>
+  new IntentGatewayService(
+    store() as never,
+    principals,
+    undefined as never,
+    undefined as never,
+    undefined as never,
+    undefined as never,
+    undefined as never,
+    undefined as never,
+    undefined as never,
+    undefined as never,
+    { mint: () => Promise.resolve(null) },
+  );
 
 // The runner logs each stop at debug level; the recorders stop it on purpose, 240 times.
 beforeEach(() => {

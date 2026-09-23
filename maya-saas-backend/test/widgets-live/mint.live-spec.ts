@@ -286,6 +286,7 @@ describe('P-MINT — canonical writer [GW, PostgreSQL]', () => {
     const successor = await gw.successor.mint({
       tenantId: s.tenant.id,
       predecessorWidgetId: predecessor.widgetId,
+      predecessorIntentTokenHash: predecessor.intentTokenHash!,
       principal: s.principal,
     });
     expect(successor).not.toBeNull();
@@ -319,9 +320,12 @@ describe('P-MINT — canonical writer [GW, PostgreSQL]', () => {
       gw.successor.mint({
         tenantId: s.tenant.id,
         predecessorWidgetId: predecessor.widgetId,
+        predecessorIntentTokenHash: predecessor.intentTokenHash!,
         principal: s.principal,
       }),
-    ).resolves.toBeNull();
+    ).resolves.toEqual(
+      expect.objectContaining({ widgetId: successor!.widgetId }),
+    );
     expect(
       await ctx.prisma.widgetEmission.count({
         where: { tenantId: s.tenant.id },
