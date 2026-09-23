@@ -47,9 +47,9 @@ function fixture() {
   });
 }
 
-test('29 batteries, 42 jobs: disjoint Gate 6/7/9/13 and P-mint partitions cover the same 341 declarations', () => {
+test('29 batteries, 45 jobs: disjoint Gate 6/7/9/10/13 and P-mint partitions cover the same 341 declarations', () => {
   const p = plan(declared);
-  assert.equal(p.gates.length, 29); assert.equal(p.matrix.include.length, 42);
+  assert.equal(p.gates.length, 29); assert.equal(p.matrix.include.length, 45);
   const r = assemble(declared, fixture(), head);
   assert.equal(r.length, 29); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 341);
   for (const report of r) {
@@ -59,7 +59,7 @@ test('29 batteries, 42 jobs: disjoint Gate 6/7/9/13 and P-mint partitions cover 
 });
 
 test('runner dry-run independently executes the same disjoint partition selection', () => {
-  for (const [gate, count] of [['6', 4], ['7', 4], ['9', 4], ['13', 4], ['P-mint', 2]]) {
+  for (const [gate, count] of [['6', 4], ['7', 4], ['9', 4], ['10', 4], ['13', 4], ['P-mint', 2]]) {
     const seen = [];
     for (let index = 1; index <= count; index++) {
       const child = spawnSync(process.execPath, ['scripts/widgets-mutation-battery.mjs', '--gate', gate, '--partition', `${index}/${count}`, '--dry-run'], { cwd: backend, encoding: 'utf8' });
@@ -69,7 +69,13 @@ test('runner dry-run independently executes the same disjoint partition selectio
       assert.deepEqual(r.partition, selectPartition(declared[gate].mutants, `${index}/${count}`).metadata);
       assert.equal(r.battery_hashes[`gate${gate}.json`], declared[gate].hash);
       assert.deepEqual(r.mutants.map((m) => m.id), r.partition.mutant_ids);
-      for (const m of r.mutants) assert.deepEqual(m.steps, m.expect === 'build-killed' ? ['unit', 'typecheck', 'k3'] : ['live']);
+      for (const m of r.mutants) {
+        if (typeof m.equivalent === 'string') {
+          assert.equal(m.steps, undefined);
+        } else {
+          assert.deepEqual(m.steps, m.expect === 'build-killed' ? ['unit', 'typecheck', 'k3'] : ['live']);
+        }
+      }
       seen.push(...r.mutants.map((m) => m.id));
     }
     assert.equal(new Set(seen).size, declared[gate].mutants.length);
