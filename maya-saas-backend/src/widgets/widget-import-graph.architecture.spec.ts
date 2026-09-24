@@ -105,6 +105,10 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
   'common/authenticated-user.interface.ts': {
     why: 'the type of the JWT-validated actor (D-9)',
   },
+  'common/postgres-transaction-conflict.ts': {
+    why: 'the shared pure PostgreSQL serialization/deadlock classifier; it has no owner, store or DI dependency',
+    only: ['stores/intent-audit.store.ts'],
+  },
   'orchestration/c9.registry.ts': {
     why: 'the frozen C9 capability registry and its hash (values)',
   },

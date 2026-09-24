@@ -94,6 +94,9 @@ describe('AiToolRuntimeService', () => {
       expect.objectContaining({
         toolName: 'catalog.services.read',
         executionId: 'execution-a',
+        conversationId: expect.stringMatching(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-8[0-9a-f]{3}-[0-9a-f]{12}$/,
+        ),
         trigger: 'T-2b',
         requestId: 'system:tenant-a',
       }),

@@ -1401,8 +1401,11 @@ describe('widgets-live harness', () => {
           T15: true,
           T16: false,
         });
-        // The skeleton refuses every L-T claim it cannot verify; the tamper rule is on top of that.
-        expect(verified.rulesOf('T6')).toContain('V-UNVERIFIED');
+        // G1-a is the one seal-read exception. The intentionally incomplete harness row is still
+        // rejected by the independent source/provenance rules, rather than by a retired catch-all.
+        expect(verified.rulesOf('T6')).toEqual(
+          expect.arrayContaining(['V-ENTRY-SOURCE', 'V-PROV-RECORD']),
+        );
         expect(verified.rulesOf('T6')).not.toContain('V-TAMPER-SEALED');
       } finally {
         fs.rmSync(dir, { recursive: true, force: true });
@@ -1723,8 +1726,8 @@ describe('widgets-live harness', () => {
           'P-1',
         ],
         [
-          'V-UNVERIFIED',
-          'a U claim',
+          'V-U-PROOF',
+          'a live-shaped U claim without the frozen proof duties',
           (sc) => void (http(sc).claim = 'U'),
           'P-1',
         ],

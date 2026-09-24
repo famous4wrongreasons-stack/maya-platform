@@ -17,6 +17,7 @@ export interface AiReadWidgetTriggerPort {
     readonly arguments: ValidatedAiToolArguments;
     readonly inputHash: string;
     readonly executionId: string;
+    readonly conversationId: string;
     readonly result: unknown;
     readonly replayed: boolean;
     readonly trigger: 'T-2a' | 'T-2b';

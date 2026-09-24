@@ -217,6 +217,9 @@ export class AiToolRuntimeService {
       arguments: args,
       inputHash,
       executionId: value.execution_id as string,
+      conversationId: this.readWidgetConversationId(
+        value.execution_id as string,
+      ),
       result: value.result,
       replayed: value.replayed === true,
       trigger: triggerKind,
@@ -1313,6 +1316,18 @@ export class AiToolRuntimeService {
       });
     }
     return createHash('sha256').update(canonical).digest('hex');
+  }
+
+  /**
+   * The AI execution owner supplies the stable UUID used by the widget timeline.
+   * The widget projection therefore does not invent a second hashing discipline.
+   */
+  private readWidgetConversationId(executionId: string): string {
+    const hex = createHash('sha256')
+      .update('maya.widget.read-execution.v1\0')
+      .update(executionId)
+      .digest('hex');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-8${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
   }
 
   private canonicalJson(value: unknown): string {

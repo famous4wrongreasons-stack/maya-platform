@@ -1,4 +1,4 @@
-import type { GateContext } from '../../gate.types';
+import type { GateContext, ResolvedNouns } from '../../gate.types';
 import type {
   CommitBookingOwnerPort,
   EffectRouteOutcome,
@@ -7,8 +7,9 @@ import { actuatingInputOf } from './actuating-input';
 
 export const bookingCommitDestination = (
   ctx: GateContext,
+  nouns: ResolvedNouns | undefined,
   owner: CommitBookingOwnerPort,
 ): (() => Promise<EffectRouteOutcome>) | null => {
-  const input = actuatingInputOf(ctx);
+  const input = actuatingInputOf(ctx, nouns);
   return input === null ? null : () => owner.commit(input);
 };

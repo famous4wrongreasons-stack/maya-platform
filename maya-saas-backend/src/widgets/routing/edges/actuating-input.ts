@@ -1,12 +1,12 @@
-import type { GateContext } from '../../gate.types';
+import type { GateContext, ResolvedNouns } from '../../gate.types';
 import type { ActuatingRoutingInput } from '../effect-router.ports';
 import { routingInputOf } from '../routing-input';
 
 export const actuatingInputOf = (
   ctx: GateContext,
+  nouns: ResolvedNouns | undefined,
 ): ActuatingRoutingInput | null => {
   const routing = routingInputOf(ctx);
-  const nouns = ctx.facts.resolvedNouns;
   const authority = ctx.principal?.authority;
   if (
     routing === null ||

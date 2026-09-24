@@ -16,6 +16,6 @@ describe('Gate 13 — no default admission', () => {
       code: 'effect_not_admissible',
     });
     expect(route).toHaveBeenCalledTimes(1);
-    expect(route).toHaveBeenCalledWith(input);
+    expect(route).toHaveBeenCalledWith(input, input.facts.resolvedNouns);
   });
 });

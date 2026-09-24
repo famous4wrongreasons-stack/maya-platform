@@ -5,8 +5,7 @@
 // the intent-audit store (MAP:606-611). Both methods were moved here unchanged from
 // `widget-stores.service.ts`. Gate 13's receipt reference and claim land here with U13a.
 
-import { Prisma } from '@prisma/client';
-
+import { isPostgresSerializationConflict } from '../../common/postgres-transaction-conflict';
 import { PrismaService } from '../../prisma/prisma.service';
 import { scoped } from './tenant-scope';
 
@@ -177,11 +176,7 @@ export class IntentAuditStore {
       // Concurrent sibling claims serialize to one winner. PostgreSQL reports
       // the loser as a serialization conflict; it is an expired tap, not a
       // transport fault and never a second owner execution.
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2034'
-      )
-        return false;
+      if (isPostgresSerializationConflict(error)) return false;
       throw error;
     }
   }

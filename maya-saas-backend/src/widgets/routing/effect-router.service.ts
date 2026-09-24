@@ -1,7 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import type { EffectClass } from '../../widget-contract/intent';
-import type { GateContext, GateVerdict, RouteResult } from '../gate.types';
+import type {
+  GateContext,
+  GateVerdict,
+  ResolvedNouns,
+  RouteResult,
+} from '../gate.types';
 import { ControlRegistryService } from '../control/control-registry.service';
 import {
   APPROVAL_REQUEST_OWNER,
@@ -86,7 +91,10 @@ export class EffectRouterService {
     private readonly gate14Disagreements: Gate14DisagreementMetric,
   ) {}
 
-  async route(ctx: GateContext): Promise<GateVerdict> {
+  async route(
+    ctx: GateContext,
+    resolvedNouns: ResolvedNouns | undefined,
+  ): Promise<GateVerdict> {
     const record = ctx.record;
     if (record === null)
       return { outcome: 'refuse', code: 'effect_not_admissible' };
@@ -95,7 +103,7 @@ export class EffectRouterService {
       return { outcome: 'refuse', code: 'effect_not_admissible' };
 
     // AMB-54: resolve the destination first. A missing owner must not consume the token.
-    const destination = this.destination(ctx, record.effect);
+    const destination = this.destination(ctx, record.effect, resolvedNouns);
     if (destination === null)
       return { outcome: 'refuse', code: 'effect_not_admissible' };
 
@@ -151,6 +159,7 @@ export class EffectRouterService {
   private destination(
     ctx: GateContext,
     effect: RoutableEffect,
+    resolvedNouns: ResolvedNouns | undefined,
   ): Destination | null {
     switch (effect) {
       case 'NAVIGATE':
@@ -163,15 +172,15 @@ export class EffectRouterService {
       case 'CONTROL':
         return this.control(ctx);
       case 'DRAFT':
-        return draftDestination(ctx, this.drafts);
+        return draftDestination(ctx, resolvedNouns, this.drafts);
       case 'REQUEST_APPROVAL':
-        return approvalRequestDestination(ctx, this.approvals);
+        return approvalRequestDestination(ctx, resolvedNouns, this.approvals);
       case 'HANDOFF':
         return this.signedDestination(ctx);
       case 'COMMIT':
         return ctx.record?.widgetKind === 'APPROVAL'
-          ? approvalDecisionDestination(ctx, this.approvals)
-          : bookingCommitDestination(ctx, this.bookingCommit);
+          ? approvalDecisionDestination(ctx, resolvedNouns, this.approvals)
+          : bookingCommitDestination(ctx, resolvedNouns, this.bookingCommit);
     }
   }
 

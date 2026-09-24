@@ -11,4 +11,4 @@ import type { EffectRouterService } from '../routing/effect-router.service';
 export const gate13 = (
   ctx: GateContext,
   router: Pick<EffectRouterService, 'route'>,
-): Promise<GateVerdict> => router.route(ctx);
+): Promise<GateVerdict> => router.route(ctx, ctx.facts.resolvedNouns);

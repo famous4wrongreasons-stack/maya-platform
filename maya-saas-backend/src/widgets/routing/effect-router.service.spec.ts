@@ -1,4 +1,4 @@
-import type { PrincipalView } from '../gate.types';
+import type { GateContext, PrincipalView } from '../gate.types';
 import { ctx, rec } from '../gates/gate-fixtures.spec-helper.spec';
 import { EffectRouterService, ROUTABLE_EFFECTS } from './effect-router.service';
 
@@ -104,6 +104,9 @@ const RESOLVED = {
   values: new Map<string, string>(),
 };
 
+const routeEffect = (router: EffectRouterService, input: GateContext) =>
+  router.route(input, input.facts.resolvedNouns);
+
 describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
   it('G13-R10 exposes exactly the seven routable effects, with no NONE', () => {
     expect(ROUTABLE_EFFECTS).toEqual([
@@ -123,7 +126,7 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
     async (effect) => {
       const { router, stores, controls } = fixture();
       await expect(
-        router.route(ctx(rec({ effect }), { principal: PRINCIPAL })),
+        routeEffect(router, ctx(rec({ effect }), { principal: PRINCIPAL })),
       ).resolves.toEqual({ outcome: 'refuse', code: 'effect_not_admissible' });
       expect(stores.claimIntentRecord).not.toHaveBeenCalled();
       expect(stores.writeReceipt).not.toHaveBeenCalled();
@@ -134,7 +137,7 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
   it('G13-P01 refuses a missing record without claim, handler or receipt', async () => {
     const { router, stores, controls } = fixture();
     const input = { ...ctx(rec(), { principal: PRINCIPAL }), record: null };
-    await expect(router.route(input)).resolves.toEqual({
+    await expect(routeEffect(router, input)).resolves.toEqual({
       outcome: 'refuse',
       code: 'effect_not_admissible',
     });
@@ -146,7 +149,8 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
   it('N08: DRAFT fails closed before the claim while its canonical registry has no owner', async () => {
     const { router, stores } = fixture();
     await expect(
-      router.route(
+      routeEffect(
+        router,
         ctx(rec({ effect: 'DRAFT' }), {
           principal: PRINCIPAL,
           facts: { resolvedNouns: RESOLVED },
@@ -160,7 +164,8 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
   it('G13-P06 routes REQUEST_APPROVAL through the canonical owner after claim', async () => {
     const { router, stores, approvals } = fixture();
     await expect(
-      router.route(
+      routeEffect(
+        router,
         ctx(
           rec({
             effect: 'REQUEST_APPROVAL',
@@ -185,7 +190,8 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
   it('G13-P07 routes booking COMMIT through the canonical owner with no router-side business facts', async () => {
     const { router, commits } = fixture();
     await expect(
-      router.route(
+      routeEffect(
+        router,
         ctx(
           rec({
             effect: 'COMMIT',
@@ -210,7 +216,8 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
   it('G13-P08 routes APPROVAL COMMIT by the server-owned approvalDecision', async () => {
     const { router, approvals } = fixture();
     await expect(
-      router.route(
+      routeEffect(
+        router,
         ctx(
           rec({
             effect: 'COMMIT',
@@ -246,7 +253,8 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
       gate14RefusalReason: 'entitlement_denied',
     });
     await expect(
-      router.route(
+      routeEffect(
+        router,
         ctx(
           rec({
             effect: 'REQUEST_APPROVAL',
@@ -269,7 +277,10 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
   it('G13-P02 NAVIGATE terminates as the zero-read DEV-1 degraded result', async () => {
     const { router, stores, successors } = fixture();
     await expect(
-      router.route(ctx(rec({ effect: 'NAVIGATE' }), { principal: PRINCIPAL })),
+      routeEffect(
+        router,
+        ctx(rec({ effect: 'NAVIGATE' }), { principal: PRINCIPAL }),
+      ),
     ).resolves.toMatchObject({
       outcome: 'terminate',
       route: { resolved_widget: { degraded: 'navigate_interim' } },
@@ -281,7 +292,10 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
   it('G13-P03 REFINE mints one successor for the same live principal', async () => {
     const { router, successors } = fixture();
     await expect(
-      router.route(ctx(rec({ effect: 'REFINE' }), { principal: PRINCIPAL })),
+      routeEffect(
+        router,
+        ctx(rec({ effect: 'REFINE' }), { principal: PRINCIPAL }),
+      ),
     ).resolves.toMatchObject({
       outcome: 'terminate',
       route: {
@@ -315,7 +329,7 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
       },
     });
     await expect(
-      router.route(ctx(record, { principal: PRINCIPAL })),
+      routeEffect(router, ctx(record, { principal: PRINCIPAL })),
     ).resolves.toMatchObject({
       outcome: 'terminate',
       route: {
@@ -337,7 +351,10 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
     const { router, stores, handoffs } = fixture();
     handoffs.sign.mockReturnValue(null);
     await expect(
-      router.route(ctx(rec({ effect: 'HANDOFF' }), { principal: PRINCIPAL })),
+      routeEffect(
+        router,
+        ctx(rec({ effect: 'HANDOFF' }), { principal: PRINCIPAL }),
+      ),
     ).resolves.toEqual({ outcome: 'refuse', code: 'effect_not_admissible' });
     expect(stores.claimIntentRecord).not.toHaveBeenCalled();
   });
@@ -352,7 +369,7 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
       }),
       { principal: PRINCIPAL },
     );
-    await expect(router.route(input)).resolves.toMatchObject({
+    await expect(routeEffect(router, input)).resolves.toMatchObject({
       outcome: 'terminate',
       route: {
         receipt_outcome: 'ACCEPTED',
@@ -398,7 +415,9 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
       }),
       { principal: PRINCIPAL },
     );
-    await expect(router.route(input)).resolves.toEqual({ outcome: 'expired' });
+    await expect(routeEffect(router, input)).resolves.toEqual({
+      outcome: 'expired',
+    });
     expect(controls.dismiss).not.toHaveBeenCalled();
     expect(stores.writeReceipt).not.toHaveBeenCalled();
   });
@@ -414,7 +433,7 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
       }),
       { principal: PRINCIPAL },
     );
-    await expect(router.route(input)).resolves.toMatchObject({
+    await expect(routeEffect(router, input)).resolves.toMatchObject({
       outcome: 'terminate',
       route: { receipt_outcome: 'ACCEPTED' },
     });
@@ -433,7 +452,7 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
         capabilityKey: 'control.widget.dismiss',
       }),
     );
-    await expect(router.route(input)).resolves.toEqual({
+    await expect(routeEffect(router, input)).resolves.toEqual({
       outcome: 'refuse',
       code: 'effect_not_admissible',
     });
@@ -454,7 +473,7 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
       }),
       { principal: PRINCIPAL },
     );
-    await expect(router.route(input)).resolves.toMatchObject({
+    await expect(routeEffect(router, input)).resolves.toMatchObject({
       outcome: 'terminate',
       route: { receipt_outcome: 'REFUSED' },
     });

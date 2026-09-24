@@ -8,7 +8,7 @@ import { randomUUID } from 'node:crypto';
 
 import { UserRole } from '../../src/common/domain.enums';
 import { ControlRegistryService } from '../../src/widgets/control/control-registry.service';
-import type { PrincipalView } from '../../src/widgets/gate.types';
+import type { GateContext, PrincipalView } from '../../src/widgets/gate.types';
 import {
   ctx as gateContext,
   rec,
@@ -29,6 +29,9 @@ describe('Gate 13 — PostgreSQL claim, receipt and CONTROL routing (U13a)', () 
   let gw: GatewayHarness;
   let fx: Fixtures;
   let router: EffectRouterService;
+
+  const routeEffect = (input: GateContext) =>
+    router.route(input, input.facts.resolvedNouns);
 
   beforeAll(async () => {
     db = await bootFixtureContext();
@@ -124,7 +127,7 @@ describe('Gate 13 — PostgreSQL claim, receipt and CONTROL routing (U13a)', () 
 
   it('G13-R5/N06/N10 [U] claims the exact record, cancels the live widget and writes one echo-free B-29 receipt', async () => {
     const built = await control('G13-R5');
-    await expect(router.route(built.context)).resolves.toMatchObject({
+    await expect(routeEffect(built.context)).resolves.toMatchObject({
       outcome: 'terminate',
       route: {
         receipt_outcome: 'ACCEPTED',
@@ -178,8 +181,8 @@ describe('Gate 13 — PostgreSQL claim, receipt and CONTROL routing (U13a)', () 
   it('G1-d/AMB-54 [U] concurrent single-use routing has one winner, one expired result and one receipt', async () => {
     const built = await control('AMB-54');
     const outcomes = await Promise.all([
-      router.route(built.context),
-      router.route(built.context),
+      routeEffect(built.context),
+      routeEffect(built.context),
     ]);
     expect(outcomes.map((v) => v.outcome).sort()).toEqual([
       'expired',
@@ -207,7 +210,7 @@ describe('Gate 13 — PostgreSQL claim, receipt and CONTROL routing (U13a)', () 
       },
       principalProofHash: 'f'.repeat(64),
     });
-    await expect(router.route(foreignByPrincipal)).resolves.toMatchObject({
+    await expect(routeEffect(foreignByPrincipal)).resolves.toMatchObject({
       outcome: 'terminate',
       route: {
         receipt_outcome: 'REFUSED',
@@ -237,7 +240,7 @@ describe('Gate 13 — PostgreSQL claim, receipt and CONTROL routing (U13a)', () 
 
   it('B-29 [U] reconciles the same ACCEPTED receipt once instead of creating a second adjudication', async () => {
     const built = await control('B-29');
-    await router.route(built.context);
+    await routeEffect(built.context);
     await expect(
       router.reconcileAcceptedReceipt({
         tenantId: built.tenant.id,

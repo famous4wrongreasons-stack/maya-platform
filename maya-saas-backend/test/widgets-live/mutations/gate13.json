@@ -30,8 +30,8 @@
     "id": "M13-2b",
     "description": "the closed switch gains a default edge",
     "file": "src/widgets/routing/effect-router.service.ts",
-    "find": "      case 'COMMIT':\n        return ctx.record?.widgetKind === 'APPROVAL'\n          ? approvalDecisionDestination(ctx, this.approvals)\n          : bookingCommitDestination(ctx, this.bookingCommit);\n    }",
-    "replace": "      case 'COMMIT':\n        return ctx.record?.widgetKind === 'APPROVAL'\n          ? approvalDecisionDestination(ctx, this.approvals)\n          : bookingCommitDestination(ctx, this.bookingCommit);\n      default:\n        return null;\n    }",
+    "find": "      case 'COMMIT':\n        return ctx.record?.widgetKind === 'APPROVAL'\n          ? approvalDecisionDestination(ctx, resolvedNouns, this.approvals)\n          : bookingCommitDestination(ctx, resolvedNouns, this.bookingCommit);\n    }",
+    "replace": "      case 'COMMIT':\n        return ctx.record?.widgetKind === 'APPROVAL'\n          ? approvalDecisionDestination(ctx, resolvedNouns, this.approvals)\n          : bookingCommitDestination(ctx, resolvedNouns, this.bookingCommit);\n      default:\n        return null;\n    }",
     "killers": ["B15/B28"],
     "expect": "build-killed"
   },
@@ -131,7 +131,7 @@
     "id": "M13-20",
     "description": "COMMIT bypasses its canonical owner with a pretend accepted destination",
     "file": "src/widgets/routing/effect-router.service.ts",
-    "find": "      case 'COMMIT':\n        return ctx.record?.widgetKind === 'APPROVAL'\n          ? approvalDecisionDestination(ctx, this.approvals)\n          : bookingCommitDestination(ctx, this.bookingCommit);",
+    "find": "      case 'COMMIT':\n        return ctx.record?.widgetKind === 'APPROVAL'\n          ? approvalDecisionDestination(ctx, resolvedNouns, this.approvals)\n          : bookingCommitDestination(ctx, resolvedNouns, this.bookingCommit);",
     "replace": "      case 'COMMIT':\n        return async () => admitted();",
     "killers": ["G13-P07"],
     "expect": "build-killed"
