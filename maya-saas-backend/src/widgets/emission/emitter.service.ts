@@ -32,6 +32,11 @@ import {
 } from './record-writer';
 import { SealService } from './seal.service';
 import {
+  buildEnvelopeWithoutSeal,
+  envelopeBodyHash,
+  f88NestedShapesForEnvelope,
+} from './envelope.factory';
+import {
   type RetainedLocalBusinessDate,
   validateRetainedLocalBusinessDate,
 } from '../query-scalars/local-business-date';
@@ -174,8 +179,6 @@ export class WidgetEmitterService {
     const issuedAt = now;
     const expiresAt = new Date(now.getTime() + request.ttlSeconds * 1000);
     const widgetId = randomUUID();
-    const bodyHash = sha256Hex(stableActionJson(body));
-
     const materials: MintedIntentMaterial[] = a2Limited
       ? []
       : resolved.map((entry, index) => {
@@ -213,37 +216,28 @@ export class WidgetEmitterService {
     const emittedIntents = materials.filter(
       (m) => m.token === null || emittedTokens.has(m.token),
     );
-    const envelopeForSeal = {
-      contract: 'maya.widget.envelope/1',
-      widget_id: widgetId,
-      tenant_id: request.tenantId,
-      kind,
-      body,
-      intents: emittedIntents.map((m) => m.intent),
-      provenance: {
-        // P-G15b reads this one stored value. It never infers it from an intent, a body or a client.
-        source_capability: input.capability,
-      },
-      ...(successor === null
-        ? {}
-        : {
-            presentation: {
-              text_equivalent: successor.textEquivalent,
-            },
-          }),
-      limitations: a2Limited
-        ? [{ reason_code: A2_GAP_REF, capability_gap_ref: A2_GAP_REF }]
-        : [],
-    };
-    assertNoForbiddenKeys('WidgetEnvelope', envelopeForSeal, [
-      { at: 'intents', shape: 'WidgetIntent' },
-      { at: 'enabled', shape: 'Cell' },
-    ]);
-    if (Buffer.byteLength(stableActionJson(envelopeForSeal), 'utf8') > 32_768)
-      throw new IntentTemplateRefusal('envelope_oversize');
-
     const profile = profileFor(request.deliveryChannel);
     if (!profile) throw new IntentTemplateRefusal('carrier_unknown');
+    const unsignedEnvelope = buildEnvelopeWithoutSeal({
+      widgetId,
+      tenantId: request.tenantId,
+      turnId: request.turnId,
+      kind,
+      body,
+      intents: emittedIntents.map((material) => material.intent),
+      input,
+      principal,
+      fitting,
+      deliveryChannel: request.deliveryChannel,
+      freshnessClass: request.freshnessClass,
+      piiClass: request.piiClass ?? 'none',
+      issuedAt,
+      expiresAt,
+      ttlSeconds: request.ttlSeconds,
+      limitations: a2Limited ? [A2_GAP_REF] : input.limitation_codes,
+      textEquivalentOverride: successor?.textEquivalent ?? null,
+    });
+    const bodyHash = envelopeBodyHash(unsignedEnvelope);
     const envelopeSeal = this.seals.seal({
       bodyHash,
       widgetId,
@@ -253,6 +247,21 @@ export class WidgetEmitterService {
       expiresAt,
       profileId: profile.profileId,
     });
+    const envelopeForSeal = Object.freeze({
+      ...unsignedEnvelope,
+      integrity: Object.freeze({
+        ...(unsignedEnvelope.integrity as unknown as Record<string, unknown>),
+        body_hash: bodyHash,
+        envelope_seal: envelopeSeal,
+      }),
+    });
+    assertNoForbiddenKeys(
+      'WidgetEnvelope',
+      envelopeForSeal,
+      f88NestedShapesForEnvelope(kind),
+    );
+    if (Buffer.byteLength(stableActionJson(envelopeForSeal), 'utf8') > 32_768)
+      throw new IntentTemplateRefusal('envelope_oversize');
 
     const emittedTokened = emittedIntents.filter(
       (
@@ -372,7 +381,7 @@ export class WidgetEmitterService {
     if (!row) return false;
     const receipt = await this.prisma.widgetRenderReceipt.findFirst({
       where: { tenantId, widgetId, deliveryChannel: row.deliveryChannel },
-      select: { profileId: true },
+      select: { profileId: true, emittedEnvelopeJson: true },
     });
     if (!receipt) return false;
     const record = await this.prisma.widgetIntentRecord.findFirst({
@@ -380,9 +389,11 @@ export class WidgetEmitterService {
       select: { principalProofHash: true },
     });
     if (!record) return false;
+    const emittedEnvelope = receipt.emittedEnvelopeJson;
     const bodyStillMatches =
-      row.bodyJson === null ||
-      sha256Hex(stableActionJson(row.bodyJson)) === row.bodyHash;
+      isRecord(emittedEnvelope) &&
+      stableActionJson(emittedEnvelope.body) === stableActionJson(row.bodyJson) &&
+      envelopeBodyHash(emittedEnvelope) === row.bodyHash;
     const expected = this.seals.seal({
       bodyHash: row.bodyHash,
       widgetId: row.widgetId,
@@ -395,3 +406,6 @@ export class WidgetEmitterService {
     return bodyStillMatches && expected === row.envelopeSeal;
   }
 }
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);

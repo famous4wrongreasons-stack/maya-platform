@@ -10,6 +10,7 @@ import { C9_REGISTRY_HASH } from '../../orchestration/c9.registry';
 import type { WidgetComposerInput } from '../../widget-contract/envelope';
 import type { WidgetKind } from '../../widget-contract/kinds';
 import type { PrincipalView } from '../gate.types';
+import { envelopeBodyHash } from './envelope.factory';
 
 class FakePrisma {
   public emissions: Record<string, unknown>[] = [];
@@ -198,6 +199,32 @@ describe('K3 emission — mint, compose, fit, seal', () => {
     // Both or neither: a record without its emission would refuse at Gate 1 as EXPIRED, which
     // would be a lie about why.
     expect(prisma.records[0].widgetId).toBe(prisma.emissions[0].widgetId);
+  });
+
+  it('returns and stores the complete authorized envelope required by the shell B4 ingest path', async () => {
+    const { prisma, emitter } = make();
+    const minted = await emitter.emit(req());
+    expect(minted.envelope).toEqual(
+      expect.objectContaining({
+        contract: 'maya.widget.envelope/1',
+        widget_id: minted.widgetId,
+        body_version: 1,
+        tenant_id: 't1',
+        correlation: expect.any(Object),
+        source: expect.any(Object),
+        authority: expect.any(Object),
+        provenance: expect.any(Object),
+        lifecycle: expect.objectContaining({ delivery_channel: 'pwa' }),
+        presentation: expect.any(Object),
+        render: expect.any(Object),
+        integrity: expect.objectContaining({
+          body_hash: minted.bodyHash,
+          envelope_seal: minted.envelopeSeal,
+        }),
+      }),
+    );
+    expect(envelopeBodyHash(minted.envelope)).toBe(minted.bodyHash);
+    expect(prisma.receipts[0].emittedEnvelopeJson).toEqual(minted.envelope);
   });
 
   it('stores only the token HASH, never the token', async () => {
