@@ -14,6 +14,7 @@ const TOOL_READS = new Set([
   'catalog.staff.read',
   'booking.availability.read',
   'company.business-hours.read',
+  'operations.journal.read',
 ]);
 
 /**

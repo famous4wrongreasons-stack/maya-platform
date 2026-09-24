@@ -208,7 +208,8 @@ const PROJECTION_MAY_IMPORT: Readonly<Record<string, string>> = {
   '../gate.types': "the gate contract's types",
   '../di-tokens': 'the named canonical-read DI edge',
   '../rendering/denial-projection': 'the pure P10 denial projection',
-  '../query-scalars/local-business-date': 'the pure owner-approved journal date validator',
+  '../query-scalars/local-business-date':
+    'the pure owner-approved journal date validator',
 };
 
 /** The one call site each permitted owner has (PLAN G12 §5.3). Nothing else may be referenced. */
@@ -1308,12 +1309,13 @@ describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
     expect(ROWS_DEFERRED_BY).toEqual(
       expect.arrayContaining([expect.stringContaining('OD-5')]),
     );
-    expect(PROJECTOR_REGISTRY).toHaveLength(6);
+    expect(PROJECTOR_REGISTRY).toHaveLength(7);
     expect(PROJECTOR_REGISTRY.map((row) => row.subject_key)).toEqual([
       'C9:catalog.services.read',
       'C9:catalog.staff.read',
       'C9:booking.availability.read',
       'C9:company.business-hours.read',
+      'C9:operations.journal.read',
       'C9:c9.no_action',
       'C9:appointments.own.reschedule',
     ]);
@@ -1475,6 +1477,69 @@ describe('U12b [U] the projector reads only registered rows', () => {
     );
     expect(outcome.kind).toBe('composer_input');
     expect(read).toHaveBeenCalledTimes(1);
+  });
+
+  it('[JOURNAL-DATE] passes the exact validated date to the canonical owner without reinterpretation', async () => {
+    const journalRead = jest.fn().mockResolvedValue({
+      kind: 'value',
+      value: {
+        date: '2026-09-24',
+        timezone: 'Europe/Moscow',
+        summary: {},
+        appointments: [],
+      },
+      fact: { ...fact, capability: 'operations.journal.read' },
+    });
+    const journal = new WidgetProjectorService({ read: journalRead });
+    await expect(
+      journal.compose(
+        planFor({
+          widgetKind: 'SCHEDULE',
+          capabilityKey: 'operations.journal.read',
+          retainedLocalBusinessDate: '2026-09-24',
+        }),
+      ),
+    ).resolves.toEqual(expect.objectContaining({ kind: 'composer_input' }));
+    expect(journalRead).toHaveBeenCalledWith(
+      expect.objectContaining({ ownerArguments: { date: '2026-09-24' } }),
+    );
+  });
+
+  it('[JOURNAL-DATE] revoked/foreign authority refuses before the canonical read', async () => {
+    const journalRead = jest.fn();
+    const journal = new WidgetProjectorService({ read: journalRead });
+    const base = {
+      widgetKind: 'SCHEDULE' as const,
+      capabilityKey: 'operations.journal.read',
+      retainedLocalBusinessDate: '2026-09-24',
+    };
+    await expect(
+      journal.compose(planFor({ ...base, authority: null })),
+    ).resolves.toEqual(degradedWith('no_principal'));
+    await expect(
+      journal.compose(
+        planFor({
+          ...base,
+          actor: { userId: 'u', tenantId: 'foreign' } as never,
+        }),
+      ),
+    ).resolves.toEqual(degradedWith('authority_mismatch'));
+    expect(journalRead).not.toHaveBeenCalled();
+  });
+
+  it('[JOURNAL-DATE] refuses an unparseable retained date and never substitutes a noun handle', async () => {
+    const journalRead = jest.fn();
+    const journal = new WidgetProjectorService({ read: journalRead });
+    await expect(
+      journal.compose(
+        planFor({
+          widgetKind: 'SCHEDULE',
+          capabilityKey: 'operations.journal.read',
+          retainedLocalBusinessDate: '2026-02-30',
+        }),
+      ),
+    ).rejects.toThrow('local_business_date_invalid');
+    expect(journalRead).not.toHaveBeenCalled();
   });
 
   it('[U] the subject key is the record’s space and key, and a record naming none selects nothing', () => {

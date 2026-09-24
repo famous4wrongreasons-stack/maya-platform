@@ -64,6 +64,44 @@ export const INITIAL_PROJECTOR_ROWS: readonly ProjectorRow[] = Object.freeze([
     unblocked_by: 'U12b / G12-R1a / G12-R3',
   }),
   Object.freeze({
+    projector_id: 'operations.journal.read@1',
+    tapped_kind: 'SCHEDULE',
+    subject_key: 'C9:operations.journal.read',
+    result_kind: 'SCHEDULE',
+    source_kind: 'capability_read',
+    composition: 'canonical_read',
+    required_fields: Object.freeze([
+      'date',
+      'timezone',
+      'summary',
+      'appointments',
+    ]),
+    slots: Object.freeze({}),
+    arguments: Object.freeze({
+      date: Object.freeze({ from: 'retained_local_business_date' }),
+    }),
+    completeness: Object.freeze({ total_field: null, exhausted_field: null }),
+    intent_proposals: Object.freeze([
+      Object.freeze({
+        intent_template_key: 'refine.journal.date@1',
+        capability: Object.freeze({
+          space: 'C9',
+          key: 'operations.journal.read',
+        }),
+        role: 'primary',
+      }),
+      Object.freeze({
+        intent_template_key: 'control.dismiss@1',
+        capability: Object.freeze({
+          space: 'CONTROL',
+          key: 'control.widget.dismiss',
+        }),
+        role: 'escape',
+      }),
+    ]),
+    unblocked_by: 'Owner Decision — Journal Date Scalar / P-JOURNAL-PROJECTION',
+  }),
+  Object.freeze({
     projector_id: 'c9.no_action@1',
     tapped_kind: 'STRATEGY_OPTIONS',
     subject_key: 'C9:c9.no_action',
