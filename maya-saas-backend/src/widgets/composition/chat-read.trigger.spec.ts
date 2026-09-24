@@ -129,22 +129,19 @@ describe('P-MT2a ChatReadTriggerService', () => {
       dismiss_widget_id: null,
     });
     expect(h.composeCompletedRead).toHaveBeenCalledTimes(1);
-    expect(h.emit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        kind: 'SCHEDULE',
-        body: expect.objectContaining({
-          timezone: 'Europe/Moscow',
-          lanes: expect.any(Array),
-          entries: expect.any(Array),
-          detail_intent: 'i1',
-        }),
-        retainedQueryScalar: {
-          type: 'local_business_date',
-          value: '2026-09-24',
-          provenance: 'server_validated',
-        },
-      }),
-    );
+    type EmitRequest = Parameters<WidgetEmitterService['emit']>[0];
+    const calls = h.emit.mock.calls as unknown as Array<[EmitRequest]>;
+    const request = calls[0]?.[0];
+    expect(request?.kind).toBe('SCHEDULE');
+    expect(request?.body.timezone).toBe('Europe/Moscow');
+    expect(Array.isArray(request?.body.lanes)).toBe(true);
+    expect(Array.isArray(request?.body.entries)).toBe(true);
+    expect(request?.body.detail_intent).toBe('i1');
+    expect(request?.retainedQueryScalar).toEqual({
+      type: 'local_business_date',
+      value: '2026-09-24',
+      provenance: 'server_validated',
+    });
   });
 
   it('writes nothing and leaves the canonical response unchanged when widgets.runtime is absent', async () => {

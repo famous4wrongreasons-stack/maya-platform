@@ -38,22 +38,18 @@ const ownerResult = () => ({
 describe('P-JOURNAL-PROJECTION journal schedule presenter', () => {
   it('copies the authorized owner date, timezone and schedule facts into the certified body without PII', () => {
     const body = presentJournalSchedule(ownerResult(), fact, '2026-09-24');
-    expect(body).toEqual(
-      expect.objectContaining({
-        timezone: 'Europe/Moscow',
-        range: {
-          from: '2026-09-24T10:00:00',
-          to: '2026-09-24T11:00:00',
-        },
-        detail_intent: 'i1',
-      }),
-    );
-    expect(body?.entries[0]).toEqual(
-      expect.objectContaining({
-        title: expect.objectContaining({ value: 'Стрижка', fact_ref: 0 }),
-        state: expect.objectContaining({ value: 'BOOKED', fact_ref: 0 }),
-      }),
-    );
+    expect(body).not.toBeNull();
+    if (body === null) throw new Error('expected a schedule body');
+    expect(body.timezone).toBe('Europe/Moscow');
+    expect(body.range).toEqual({
+      from: '2026-09-24T10:00:00',
+      to: '2026-09-24T11:00:00',
+    });
+    expect(body.detail_intent).toBe('i1');
+    expect(body.entries[0]?.title.value).toBe('Стрижка');
+    expect(body.entries[0]?.title.fact_ref).toBe(0);
+    expect(body.entries[0]?.state.value).toBe('BOOKED');
+    expect(body.entries[0]?.state.fact_ref).toBe(0);
     expect(JSON.stringify(body)).not.toContain('must-not-cross');
     expect(JSON.stringify(body)).not.toContain('+70000000000');
   });

@@ -43,7 +43,10 @@ export const presentJournalSchedule = (
     return null;
 
   const sourceStaff = Array.isArray(value.staff)
-    ? value.staff.filter(record).map((staff) => text(staff.name)).filter(isText)
+    ? value.staff
+        .filter(record)
+        .map((staff) => text(staff.name))
+        .filter(isText)
     : [];
   const appointmentStaff = appointments
     .map((appointment) => text(appointment.staff_name))

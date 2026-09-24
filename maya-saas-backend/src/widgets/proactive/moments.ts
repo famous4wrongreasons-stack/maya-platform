@@ -69,7 +69,7 @@ export interface MomentCompositionInput {
     | 'shift'
     | 'consent_record';
   readonly artefact_created_at: string;
-  readonly facts: Readonly<Record<string, Cell<unknown> | Measure>>;
+  readonly inputs: Readonly<Record<string, Cell<unknown> | Measure>>;
 }
 
 /**
@@ -510,7 +510,17 @@ const isCell = (value: unknown): boolean => {
     (value.fact_ref !== null && !Number.isInteger(value.fact_ref)) ||
     (value.as_of !== null && typeof value.as_of !== 'string') ||
     !Array.isArray(value.evidence_refs) ||
-    value.evidence_refs.some((ref) => typeof ref !== 'string') ||
+    value.evidence_refs.some(
+      (ref) =>
+        !isRecord(ref) ||
+        !hasExactKeys(ref, ['ref', 'class', 'dereferenceable_until']) ||
+        typeof ref.ref !== 'string' ||
+        !['c9_invocation_handle', 'source_receipt'].includes(
+          String(ref.class),
+        ) ||
+        (ref.dereferenceable_until !== null &&
+          typeof ref.dereferenceable_until !== 'string'),
+    ) ||
     (value.next_intent_ref !== null &&
       typeof value.next_intent_ref !== 'string')
   )
@@ -550,7 +560,7 @@ export function assertMomentCompositionInput(
       'artefact_ref',
       'artefact_kind',
       'artefact_created_at',
-      'facts',
+      'inputs',
     ]) ||
     value.contract !== 'maya.moment-composition-input/1' ||
     value.producer !== 'canonical_owner' ||
@@ -562,7 +572,7 @@ export function assertMomentCompositionInput(
     typeof value.artefact_ref !== 'string' ||
     !ARTEFACT_KINDS.has(String(value.artefact_kind)) ||
     typeof value.artefact_created_at !== 'string' ||
-    !isRecord(value.facts)
+    !isRecord(value.inputs)
   )
     throw new RegistryLoadFailure('moment composition input is not closed');
   const row = MOMENT_REGISTRY[value.moment_key as MomentKey];
@@ -577,12 +587,12 @@ export function assertMomentCompositionInput(
   const expectedFields = Object.keys(schema.fields).map((pointer) =>
     pointer.slice(1),
   );
-  if (!hasExactKeys(value.facts, expectedFields))
+  if (!hasExactKeys(value.inputs, expectedFields))
     throw new RegistryLoadFailure(
       'moment composition facts do not match schema',
     );
   for (const [pointer, leafType] of Object.entries(schema.fields)) {
-    const leaf = value.facts[pointer.slice(1)];
+    const leaf = value.inputs[pointer.slice(1)];
     if (leafType === 'Cell' ? !isCell(leaf) : !isMeasure(leaf))
       throw new RegistryLoadFailure(
         `moment composition input '${pointer}' has the wrong type`,

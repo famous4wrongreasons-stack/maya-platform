@@ -426,6 +426,12 @@ const PRESENTATION_READERS_ALLOWED: readonly string[] = [
   'widgets/gate.types.ts',
   'widgets/validation/f88-walk.ts', // the walk names keys in order to refuse them
   'widgets/f88.generated.ts',
+  // P-TYPED writes a fixed server-owned profile into an internal submission. It never reads a
+  // caller claim, and the global F88-7 source fence still rejects any submission.profile_id read.
+  'widgets/composition/typed-step0.ts',
+  // K6's fitter has already selected this profile; the factory only seals it into the render
+  // receipt. This is presentation output, never an authority antecedent.
+  'widgets/emission/envelope.factory.ts',
 ];
 
 const presentationAntecedentViolations = (

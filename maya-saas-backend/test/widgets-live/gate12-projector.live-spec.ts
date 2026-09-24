@@ -240,7 +240,7 @@ describe('U12b [GW G-SYNTH] registered projector rows', () => {
     });
   });
 
-  it('G12-L17/L18 rows bind no scalar input and send the exact live actor/authority plan', async () => {
+  it('G12-L17/L18 only the approved journal row binds its typed date scalar', async () => {
     const port = successPort({ services: [] }, 'catalog.services.read');
     const p = plan();
     await new WidgetProjectorService(port).compose(p);
@@ -250,10 +250,19 @@ describe('U12b [GW G-SYNTH] registered projector rows', () => {
       ownerArguments: {},
     });
     expect(
-      PROJECTOR_REGISTRY.every(
-        (row) => Object.keys(row.arguments).length === 0,
-      ),
-    ).toBe(true);
+      PROJECTOR_REGISTRY.map((row) => [row.subject_key, row.arguments]),
+    ).toEqual([
+      ['C9:catalog.services.read', {}],
+      ['C9:catalog.staff.read', {}],
+      ['C9:booking.availability.read', {}],
+      ['C9:company.business-hours.read', {}],
+      [
+        'C9:operations.journal.read',
+        { date: { from: 'retained_local_business_date' } },
+      ],
+      ['C9:c9.no_action', {}],
+      ['C9:appointments.own.reschedule', {}],
+    ]);
   });
 
   it('G12-L19 one composition cannot issue a second read', async () => {
@@ -295,6 +304,7 @@ describe('U12b [GW] canonical read adapter', () => {
       plan().actor,
       'catalog.services.read',
       { arguments: {}, surface: 'web' },
+      { suppressWidgetTrigger: true },
     );
     const executeCalls = execute.mock
       .calls as unknown as readonly (readonly unknown[])[];

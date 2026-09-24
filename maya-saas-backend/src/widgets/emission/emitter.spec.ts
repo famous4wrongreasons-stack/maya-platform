@@ -204,25 +204,19 @@ describe('K3 emission — mint, compose, fit, seal', () => {
   it('returns and stores the complete authorized envelope required by the shell B4 ingest path', async () => {
     const { prisma, emitter } = make();
     const minted = await emitter.emit(req());
-    expect(minted.envelope).toEqual(
-      expect.objectContaining({
-        contract: 'maya.widget.envelope/1',
-        widget_id: minted.widgetId,
-        body_version: 1,
-        tenant_id: 't1',
-        correlation: expect.any(Object),
-        source: expect.any(Object),
-        authority: expect.any(Object),
-        provenance: expect.any(Object),
-        lifecycle: expect.objectContaining({ delivery_channel: 'pwa' }),
-        presentation: expect.any(Object),
-        render: expect.any(Object),
-        integrity: expect.objectContaining({
-          body_hash: minted.bodyHash,
-          envelope_seal: minted.envelopeSeal,
-        }),
-      }),
-    );
+    expect(minted.envelope.contract).toBe('maya.widget.envelope/1');
+    expect(minted.envelope.widget_id).toBe(minted.widgetId);
+    expect(minted.envelope.body_version).toBe(1);
+    expect(minted.envelope.tenant_id).toBe('t1');
+    expect(minted.envelope.correlation).toBeDefined();
+    expect(minted.envelope.source).toBeDefined();
+    expect(minted.envelope.authority).toBeDefined();
+    expect(minted.envelope.provenance).toBeDefined();
+    expect(minted.envelope.lifecycle.delivery_channel).toBe('pwa');
+    expect(minted.envelope.presentation).toBeDefined();
+    expect(minted.envelope.render).toBeDefined();
+    expect(minted.envelope.integrity.body_hash).toBe(minted.bodyHash);
+    expect(minted.envelope.integrity.envelope_seal).toBe(minted.envelopeSeal);
     expect(envelopeBodyHash(minted.envelope)).toBe(minted.bodyHash);
     expect(prisma.receipts[0].emittedEnvelopeJson).toEqual(minted.envelope);
   });

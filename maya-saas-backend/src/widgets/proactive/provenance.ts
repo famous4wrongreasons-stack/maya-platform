@@ -7,12 +7,11 @@
 // emission, and the words must be either a frozen template render or a verbatim copy of a stored
 // field. There is no third source, so newly-composed strategy is not expressible.
 
-import { createHash } from 'node:crypto';
-
 import { C9_CAPABILITIES } from '../../orchestration/c9.registry';
 import type { ProactiveProvenance } from '../../widget-contract/lifecycle';
 import type { CapabilityRefLike } from '../authority/registry-binding';
 import { MOMENT_REGISTRY, momentTemplateFor } from './moments';
+import { sha256Hex } from '../token.util';
 
 export class ProactiveRefusal extends Error {}
 
@@ -101,8 +100,7 @@ export const assertNoRunRef = (
 
 // ── PR3 — provenance ─────────────────────────────────────────────────────────────────────────────
 
-export const sha256 = (s: string): string =>
-  createHash('sha256').update(s, 'utf8').digest('hex');
+export const sha256 = (s: string): string => sha256Hex(s);
 
 export interface CanonicalArtefact {
   readonly artefact_ref: string;

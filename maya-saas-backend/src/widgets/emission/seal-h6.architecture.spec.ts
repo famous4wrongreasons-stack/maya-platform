@@ -35,7 +35,6 @@ const EXEMPT: Readonly<Record<string, string>> = Object.freeze({
   'authority/contract-bindings.ts':
     'integrator — retired in the U8b merge (R8-5)',
   'consent/erasure.ts': 'P-RT6',
-  'proactive/provenance.ts': 'P-MT3',
   'analytics/projection.ts': 'U12b',
 });
 

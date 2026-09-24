@@ -6,8 +6,8 @@
   "against": {
     "document": "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md",
     "version": "1.1",
-    "sha256": "606d7f99da5fe1977d5efe737dca91a04f2b11faecddbd666120d34a03e94a8a",
-    "lines": 7415,
+    "sha256": "4629f8762bd47245cfd90078c329439ddd8bbb7fa15439ad76adee49d5105d09",
+    "lines": 7433,
     "gateTable": "C11:4718-4734",
     "gate6InFull": "C11:4736-4798",
     "gate10InFull": "C11:4800-4876",
@@ -2308,7 +2308,7 @@
         "blocks": "projector rows whose owner narrows by principal, and G12-R5 if read as requiring a principal-narrowed projection; meanwhile Gate 12 is evidenced on unnarrowed rows and the reading is disclosed"
       }
     },
-    "contractStatus": "Contract V1.1 (SHA 606d7f99…). P-01, P-23, P-26 and P-30 are NORMATIVE-PENDING until P-DISCHARGE; no audit figure discharges a row.",
+    "contractStatus": "Contract V1.1 (SHA 4629f876…). P-01, P-23, P-26 and P-30 are NORMATIVE-PENDING until P-DISCHARGE; no audit figure discharges a row.",
     "expected": {
       "A-W5": "strict 3/15 (1, 2, 4); with U 6/15 (+3, 5, 10)",
       "FINAL": "strict up to 7/15; with U up to 12/15 (13/15 only with P-17 and LANDING-VERIFY); strict 15/15 not reachable this cycle"

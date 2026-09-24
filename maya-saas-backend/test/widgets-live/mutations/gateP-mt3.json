@@ -1,0 +1,65 @@
+[
+  {
+    "id": "MT3-M1",
+    "description": "allow a moment producer to write without the widgets.runtime entitlement",
+    "file": "src/widgets/composition/moment.trigger.ts",
+    "find": "    if (\n      !(await this.gate6.grantsRequiredFeatures(input.tenantId, [\n        'widgets.runtime',\n      ]))\n    )\n      return null;",
+    "replace": "    if (\n      false && !(await this.gate6.grantsRequiredFeatures(input.tenantId, [\n        'widgets.runtime',\n      ]))\n    )\n      return null;",
+    "killers": ["MT3-2"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "MT3-M2",
+    "description": "send the restricted-tier moment through the rich PWA carrier",
+    "file": "src/widgets/composition/moment.trigger.ts",
+    "find": "        kind: 'SCHEDULE',\n        principalProofHash: principal.proofHash,\n        deliveryChannel: 'web-push',",
+    "replace": "        kind: 'SCHEDULE',\n        principalProofHash: principal.proofHash,\n        deliveryChannel: 'pwa',",
+    "killers": ["MT3-1"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "MT3-M3",
+    "description": "drop the exact final-body member fence",
+    "file": "src/widgets/composition/moment.trigger.ts",
+    "find": "    !exact(body, [\n      'range',",
+    "replace": "    false && !exact(body, [\n      'range',",
+    "killers": ["rejects a final body with any hidden projector payload"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MT3-M4",
+    "description": "mislabel the canonical schedule fact as an LLM-owned composition fact",
+    "file": "src/widgets/composition/moment.trigger.ts",
+    "find": "      producer: 'canonical_owner',",
+    "replace": "      producer: 'llm',",
+    "killers": ["MT3-1 emits one strict web-push SCHEDULE from canonical typed facts"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MT3-M5",
+    "description": "allow an expired canonical artefact to emit a fresh widget",
+    "file": "src/widgets/composition/moment.trigger.ts",
+    "find": "    if (now.getTime() >= Date.parse(input.expiresAt)) return null;",
+    "replace": "    if (false && now.getTime() >= Date.parse(input.expiresAt)) return null;",
+    "killers": ["refuses an expired artefact and a stale retained turn without emission"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MT3-M6",
+    "description": "let a foreign authenticated principal acquire another recipient's moment",
+    "file": "src/widgets/composition/moment.trigger.ts",
+    "find": "    if (\n      principal === null ||\n      principal.authority.tenantId !== input.tenantId ||\n      principal.authority.userId !== input.recipient.userId\n    )\n      return null;",
+    "replace": "    if (principal === null) return null;\n    if (principal.authority.tenantId !== input.tenantId) return null;",
+    "killers": ["MT3-3 same-tenant foreign principal"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "MT3-M7",
+    "description": "change the closed server-owned schedule navigation target",
+    "file": "src/widgets/emission/intent-template.registry.ts",
+    "find": "    target: { class: 's', ref: { route: 'shell.root', param: null } },\n    inputSchema: null,\n    selectionDomain: {},\n    selectionDomainLabels: {},\n    priority: 1,\n    singleUse: false,\n    ttlSeconds: 600,\n    label: 'Open schedule',",
+    "replace": "    target: { class: 's', ref: { route: 'shell.account', param: null } },\n    inputSchema: null,\n    selectionDomain: {},\n    selectionDomainLabels: {},\n    priority: 1,\n    singleUse: false,\n    ttlSeconds: 600,\n    label: 'Open schedule',",
+    "killers": ["MT3-1"],
+    "expect": "live-killed"
+  }
+]

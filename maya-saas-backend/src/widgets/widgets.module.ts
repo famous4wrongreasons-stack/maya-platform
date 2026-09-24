@@ -37,6 +37,8 @@ import { TypedStep0Service } from './composition/typed-step0';
 import { C9_WIDGET_TRIGGER } from '../orchestration/c9-widget-trigger.port';
 import { C9ComposeTriggerService } from './composition/c9-compose.trigger';
 import { assertMomentRegistryLoads } from './proactive/moments';
+import { MomentTriggerService } from './composition/moment.trigger';
+import { OPERATIONAL_ALERT_WIDGET_TRIGGER } from '../operational-alerts/operational-alert-widget-trigger.port';
 
 /**
  * K3 — the widget runtime.
@@ -96,6 +98,11 @@ import { assertMomentRegistryLoads } from './proactive/moments';
     { provide: AI_TYPED_WIDGET_TRIGGER, useExisting: TypedStep0Service },
     C9ComposeTriggerService,
     { provide: C9_WIDGET_TRIGGER, useExisting: C9ComposeTriggerService },
+    MomentTriggerService,
+    {
+      provide: OPERATIONAL_ALERT_WIDGET_TRIGGER,
+      useExisting: MomentTriggerService,
+    },
     EffectRouterService,
   ],
   exports: [

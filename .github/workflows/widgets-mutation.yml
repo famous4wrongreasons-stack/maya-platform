@@ -6,7 +6,7 @@ name: Widgets Mutation
 # 9, 10 and 13 exceed the unchanged 180-minute job budget, while P-mint completed with only two minutes of margin.
 # Those batteries partition mutants while retaining UNFILTERED tests and independent controls in every job.
 # Other batteries run whole. Mandatory aggregation refuses missing/duplicate/stale
-# parts, restricted tests, crashes and vacuous kills before publishing 29 complete battery receipts.
+# parts, restricted tests, crashes and vacuous kills before publishing 30 complete battery receipts.
 # CKPT-W step 7 dispatches this workflow for the flipping commit with
 # `gates=<every battery touched in the wave>` (pushes to the canonical closure branch also run every battery) and records every shard's run and artifact
 # id. Only `[HTTP]` kills in a shard report count toward L/L-T (§3.2). While no battery is declared the one shard

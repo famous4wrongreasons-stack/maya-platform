@@ -149,8 +149,24 @@ const declaredFacts = (): string[] => {
 const isFactName = (k: string): k is FactName =>
   Object.prototype.hasOwnProperty.call(FACT_SLOTS, k);
 
+/**
+ * Closed non-gate containers whose member is also named `facts` by its own certified contract.
+ * They are presentation inputs, never AdmissionFacts. The exemption applies only while the file is
+ * outside every gate slot; if a future gateway slot reaches one, the same source is scanned again.
+ */
+const OTHER_TYPED_FACT_CONTAINERS: Readonly<Record<string, string>> =
+  Object.freeze({
+    'composition/c9-compose.trigger.ts':
+      'WidgetComposerInput facts copied from an authorized C9 run result',
+    'composition/moment.trigger.ts':
+      'WidgetComposerInput facts copied from the typed K13 composition input',
+    'emission/envelope.factory.ts':
+      'WidgetEnvelope facts and facts_origin written after projection',
+  });
+
 /** Every way `unit` reads or produces a fact its slot may not. */
 const factViolations = (unit: SourceUnit): string[] => {
+  if (unit.slot === null && unit.file in OTHER_TYPED_FACT_CONTAINERS) return [];
   const out: string[] = [];
   const sf = parseSource(unit.file, unit.source);
   const at = (n: ts.Node): string =>
@@ -263,6 +279,18 @@ describe('T-ARCH-FACTS — who may produce and who may read each fact', () => {
 
   it('FACT_SLOTS has exactly one row per member of AdmissionFacts', () => {
     expect(Object.keys(FACT_SLOTS).sort()).toEqual(declaredFacts());
+  });
+
+  it('each exact non-gate typed-facts exception exists and remains outside every slot', () => {
+    const slotFiles = new Set(pipeline.slotUnits.map((unit) => unit.file));
+    for (const [file, why] of Object.entries(OTHER_TYPED_FACT_CONTAINERS)) {
+      expect(fs.existsSync(path.join(__dirname, '..', file))).toBe(true);
+      expect(slotFiles.has(file)).toBe(false);
+      expect(fs.readFileSync(path.join(__dirname, '..', file), 'utf8')).toMatch(
+        /\bfacts\b/,
+      );
+      expect(why.length).toBeGreaterThan(40);
+    }
   });
 
   it('the map is §2.2, row for row', () => {

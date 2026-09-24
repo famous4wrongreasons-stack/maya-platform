@@ -83,6 +83,7 @@ interface RecordRow {
   confirmationOfRef: string | null;
   producedByIntentTokenHash: string | null;
   actionReceiptRef: string | null;
+  retainedLocalBusinessDate: string | null;
   frozenNounsJson: unknown;
   // class C
   utteranceTemplate: string | null;
@@ -213,6 +214,7 @@ const record = (over: Partial<RecordRow> = {}): RecordRow => ({
   confirmationOfRef: null,
   producedByIntentTokenHash: null,
   actionReceiptRef: null,
+  retainedLocalBusinessDate: null,
   frozenNounsJson: null,
   utteranceTemplate: `${C_SENTINEL} template`,
   renderedUtterance: `${C_SENTINEL} utterance`,

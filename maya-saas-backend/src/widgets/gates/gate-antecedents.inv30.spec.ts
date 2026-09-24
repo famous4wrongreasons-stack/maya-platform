@@ -54,6 +54,10 @@ const DECLARED_NOT_READ: Readonly<Record<string, string>> = {
     "H4's seal term declaration: `profileId` is the SERVER-STORED render receipt term covered by the keyed seal, never the submission's claimed profile.",
   'emission/seal-verifier.service.ts':
     'H4 verification reads `profileId` from the SERVER-STORED WidgetRenderReceipt inside T; it never reads submission.profile_id and treats the value only as a sealed term.',
+  'composition/typed-step0.ts':
+    'P-TYPED writes the fixed server-selected pwa.v1 profile into a submission after routing; it never reads or copies a caller-provided profile claim.',
+  'emission/envelope.factory.ts':
+    'The envelope factory writes the SERVER-RESOLVED fitting profile into the render receipt; it never reads submission.profile_id or a request header.',
 };
 
 const walk = (dir: string): string[] =>

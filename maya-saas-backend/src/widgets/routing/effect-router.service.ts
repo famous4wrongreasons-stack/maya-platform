@@ -62,7 +62,7 @@ export class EffectRouterService {
     @Inject(C9_CANCEL_OWNER)
     private readonly c9Cancel: C9CancelOwnerPort,
     @Inject(HANDOFF_SIGNER)
-    private readonly handoffs: HandoffSignerPort,
+    private readonly destinationSigner: HandoffSignerPort,
   ) {}
 
   async route(ctx: GateContext): Promise<GateVerdict> {
@@ -128,7 +128,10 @@ export class EffectRouterService {
   ): Destination | null {
     switch (effect) {
       case 'NAVIGATE':
-        return async () => admitted({ resolvedWidget: { degraded: 'navigate_interim' } });
+        return () =>
+          Promise.resolve(
+            admitted({ resolvedWidget: { degraded: 'navigate_interim' } }),
+          );
       case 'REFINE':
         return this.refine(ctx);
       case 'CONTROL':
@@ -138,7 +141,7 @@ export class EffectRouterService {
       case 'REQUEST_APPROVAL':
         return null;
       case 'HANDOFF':
-        return this.handoff(ctx);
+        return this.signedDestination(ctx);
       case 'COMMIT':
         return null;
     }
@@ -204,10 +207,10 @@ export class EffectRouterService {
     };
   }
 
-  private handoff(ctx: GateContext): Destination | null {
+  private signedDestination(ctx: GateContext): Destination | null {
     const input = routingInputOf(ctx);
     if (input === null || input.principalProofHash.length === 0) return null;
-    const target = this.handoffs.sign({
+    const target = this.destinationSigner.sign({
       tenantId: input.tenantId,
       principalProofHash: input.principalProofHash,
       widgetId: input.record.widgetId,
@@ -218,7 +221,7 @@ export class EffectRouterService {
     });
     return target === null
       ? null
-      : async () => admitted({ resolvedWidget: target });
+      : () => Promise.resolve(admitted({ resolvedWidget: target }));
   }
 }
 

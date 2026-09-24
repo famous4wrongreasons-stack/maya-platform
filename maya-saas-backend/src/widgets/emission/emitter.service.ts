@@ -17,7 +17,6 @@ import { profileFor } from '../carriers/channel-profile';
 import { fit } from '../carriers/fitter';
 import { stableActionJson } from '../authority/contract-bindings';
 import type { PrincipalView } from '../gate.types';
-import { sha256Hex } from '../token.util';
 import { assertNoForbiddenKeys } from '../validation/f88-walk';
 import { assertComposerInput } from './envelope-validator';
 import {
@@ -392,7 +391,8 @@ export class WidgetEmitterService {
     const emittedEnvelope = receipt.emittedEnvelopeJson;
     const bodyStillMatches =
       isRecord(emittedEnvelope) &&
-      stableActionJson(emittedEnvelope.body) === stableActionJson(row.bodyJson) &&
+      stableActionJson(emittedEnvelope.body) ===
+        stableActionJson(row.bodyJson) &&
       envelopeBodyHash(emittedEnvelope) === row.bodyHash;
     const expected = this.seals.seal({
       bodyHash: row.bodyHash,

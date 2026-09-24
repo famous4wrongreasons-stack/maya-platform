@@ -82,6 +82,10 @@ const KEY = crypto.createHash('sha1').update(BACKEND).digest('hex').slice(0, 10)
 const MIRROR_ROOT = path.join(os.tmpdir(), `widgets-mutation-mirror-${KEY}`);
 const LOCK = `${MIRROR_ROOT}.lock`;
 const JEST_CACHE = path.join(os.tmpdir(), `widgets-mutation-jest-cache-${KEY}`);
+// Reports live outside `buildMirror()`'s disposable tree. Jest may normalise its `rootDir` while it
+// resolves an absolute output path, and no report may share the tree that the harness recreates.
+const UNIT_REPORT = path.join(os.tmpdir(), `widgets-mutation-unit-${KEY}.json`);
+const LIVE_REPORT = path.join(os.tmpdir(), `widgets-mutation-live-${KEY}.json`);
 
 const usage = (message) => {
   process.stderr.write(`widgets-mutation-battery: ${message}\n`);
@@ -516,8 +520,8 @@ const evidenceBasis = (step, entry) =>
 
 const runSteps = (edits, steps) => {
   const backend = buildMirror(edits);
-  const unitJson = path.join(MIRROR_ROOT, 'unit.json');
-  const liveJson = path.join(MIRROR_ROOT, 'live.json');
+  const unitJson = UNIT_REPORT;
+  const liveJson = LIVE_REPORT;
   // Never read a previous run's report: if this run's jest dies before writing, the file must be absent.
   for (const stale of [unitJson, liveJson]) fs.rmSync(stale, { force: true });
   const cache = `--cacheDirectory=${JEST_CACHE}`;

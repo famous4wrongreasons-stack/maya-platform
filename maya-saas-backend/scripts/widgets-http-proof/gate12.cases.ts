@@ -97,7 +97,7 @@ export const cases: WidgetsHttpProofCase[] = [
     gate: '12',
     proofClass: 'CONTROL',
     async run(ctx) {
-      // U12b registers exactly the six contract-approved first rows in the production module graph.
+      // The runtime registers exactly the seven contract-approved rows in the production module graph.
       // A registry expansion is a contract change and must make this binary control fail closed.
       const registeredPairs = PROJECTOR_REGISTRY.map(
         (row) => `${row.tapped_kind}|${row.subject_key}`,
@@ -109,10 +109,11 @@ export const cases: WidgetsHttpProofCase[] = [
             'STAFF_SELECTOR|C9:catalog.staff.read',
             'TIME_SLOT_SELECTOR|C9:booking.availability.read',
             'SCHEDULE|C9:company.business-hours.read',
+            'SCHEDULE|C9:operations.journal.read',
             'STRATEGY_OPTIONS|C9:c9.no_action',
             'SCHEDULE|C9:appointments.own.reschedule',
           ]),
-        `PROJECTOR_REGISTRY carries ${JSON.stringify(registeredPairs)}, not U12b's finite six-row set (ARCH-12-13)`,
+        `PROJECTOR_REGISTRY carries ${JSON.stringify(registeredPairs)}, not the finite seven-row set (ARCH-12-13)`,
       );
 
       const build = async (label: string, granted: boolean) => {
