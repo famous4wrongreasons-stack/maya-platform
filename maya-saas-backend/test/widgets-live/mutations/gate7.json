@@ -136,9 +136,9 @@
   },
   {
     "id": "M7-10",
-    "description": "C5b's identity is taken against the ALLOWLIST's `propose` column instead of `AE_PROPOSE_PAIRING`. F70 (C11:1236-1238) forbids computing the pairing, and K7's column names `c9.booking.*` keys that resolve in no registry — so the identity would hold against a key nothing owns.",
+    "description": "C5b's identity is taken against an invented C9 key instead of `AE_PROPOSE_PAIRING`. F70 (C11:1236-1238) forbids computing the pairing. RE-ANCHORED at E1 after U13c replaced the legacy booking-row lookup with the canonical AE allowlist while preserving this exact identity comparison.",
     "file": "src/widgets/authority/commit-guard.ts",
-    "find": "    row.confirmationOfKind === 'approval' ? pairing.ae : pairing.propose;",
+    "find": "    confirmationOfKind === 'approval' ? pairing.ae : pairing.propose;",
     "replace": "    row.confirmationOfKind === 'approval'\n      ? pairing.ae\n      : ({ space: 'C9', key: row.proposeKey } as CapabilityRef);",
     "killers": ["S-G7-PAIR", "G7-FC2"],
     "expect": "build-killed"
@@ -208,9 +208,9 @@
   },
   {
     "id": "M7-23",
-    "description": "C5b's `approval` identity is taken against the pairing's PROPOSE side. F74 is explicit that it cannot be: \"the two spaces share no spelling, so 'equal to the propose key' can never hold for the approval case\" (C11:1438-1441) — it would refuse every APPROVAL decision unconditionally.",
+    "description": "C5b's `approval` identity is taken against the pairing's PROPOSE side. F74 is explicit that it cannot be: \"the two spaces share no spelling, so 'equal to the propose key' can never hold for the approval case\" (C11:1438-1441) — it would refuse every APPROVAL decision unconditionally. RE-ANCHORED at E1 after U13c replaced the legacy booking-row lookup with the canonical AE allowlist.",
     "file": "src/widgets/authority/commit-guard.ts",
-    "find": "    row.confirmationOfKind === 'approval' ? pairing.ae : pairing.propose;",
+    "find": "    confirmationOfKind === 'approval' ? pairing.ae : pairing.propose;",
     "replace": "    pairing.propose;",
     "killers": ["G7-FC3"],
     "expect": "build-killed"
