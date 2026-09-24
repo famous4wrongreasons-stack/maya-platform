@@ -64,10 +64,10 @@
   },
   {
     "id": "G15B-M7",
-    "description": "the persisted envelope drops the exact source capability provenance",
+    "description": "the emitted and persisted successor substitutes the exact server-owned source capability provenance",
     "file": "src/widgets/emission/emitter.service.ts",
-    "find": "        source_capability: input.capability,",
-    "replace": "        source_capability: 'c9.no_action',",
+    "find": "          : { successorSourceCapability: successor.sourceCapability }),",
+    "replace": "          : { successorSourceCapability: { space: 'C9', key: 'c9.no_action' } }),",
     "killers": ["G15-7"],
     "expect": "live-killed"
   },
