@@ -363,6 +363,7 @@ const READ_TIMELINE_CALLERS: readonly SrcPath[] = [TIMELINE_FACADE];
  */
 const STORE_METHOD_ALLOWLIST = new Set([
   'appendTurn',
+  'ensureAssistantTurn',
   'lowerToUserTurn',
   'insertTurn',
   'readTimeline',
@@ -675,7 +676,12 @@ describe('T-ARCH-F15 — conversation content stops at the rendering gate (9.10,
       .filter(
         (f) =>
           f.model.startsWith('Widget') &&
-          (f.erasureClass === 'C' || f.erasureClass === 'X'),
+          (f.erasureClass === 'C' || f.erasureClass === 'X') &&
+          // Owner ruling, Wave 4: this one server-validated local-business
+          // date is retained precisely so the registered journal projector
+          // can replay the current read. Dedicated scalar ratchets prove it
+          // cannot satisfy noun/identity/authority or be reinterpreted.
+          f.name !== 'retainedLocalBusinessDate',
       )
       .map((f) => f.name);
     return new Set([

@@ -50,11 +50,7 @@ const make = (
     }),
   };
   return {
-    service: new WidgetThreadPageService(
-      prisma as never,
-      principals as never,
-      seals as never,
-    ),
+    service: new WidgetThreadPageService(prisma, principals, seals),
     tx,
     findMany,
     seals,
@@ -70,6 +66,7 @@ describe('P-RESOLVE principal thread page', () => {
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         take: 20,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         where: expect.objectContaining({
           tenantId: 'tenant-1',
           intentRecords: {

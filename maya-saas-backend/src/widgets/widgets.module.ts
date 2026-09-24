@@ -32,6 +32,8 @@ import { LoweringSourceReader } from './stores/lowering-source.read';
 import { WidgetStoresService } from './stores/widget-stores.service';
 import { WidgetsController } from './widgets.controller';
 import { WidgetThreadPageService } from './resolve/thread-page.service';
+import { ChatReadTriggerService } from './composition/chat-read.trigger';
+import { AI_READ_WIDGET_TRIGGER } from '../ai-tools/ai-read-widget-trigger.port';
 
 /**
  * K3 — the widget runtime.
@@ -86,6 +88,8 @@ import { WidgetThreadPageService } from './resolve/thread-page.service';
     // edge is reachable. Gate 13 remains the sole caller when its routing edges land.
     WidgetProjectorService,
     WidgetThreadPageService,
+    ChatReadTriggerService,
+    { provide: AI_READ_WIDGET_TRIGGER, useExisting: ChatReadTriggerService },
     EffectRouterService,
   ],
   exports: [

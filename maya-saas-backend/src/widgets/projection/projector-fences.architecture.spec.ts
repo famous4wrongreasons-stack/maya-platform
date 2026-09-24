@@ -598,10 +598,17 @@ const declaredMembers = (s: Source, typeName: string): string[] => {
 const MAY_REFERENCE_PROJECTOR: readonly string[] = [
   'widgets/widgets.module.ts',
   'widgets/gates/gate13.ts',
+  // P-MT2a projects the canonical READ result that has just completed. It
+  // cannot invoke the owner and can call only composeCompletedRead.
+  'widgets/composition/chat-read.trigger.ts',
 ];
-const MAY_CALL_PROJECTOR: readonly string[] = ['widgets/gates/gate13.ts'];
+const MAY_CALL_PROJECTOR: readonly string[] = [
+  'widgets/gates/gate13.ts',
+  'widgets/composition/chat-read.trigger.ts',
+];
 const COMPOSE_METHODS: readonly string[] = [
   'compose',
+  'composeCompletedRead',
   'composeFromOwnerResponse',
   'composeNavigate',
 ];
@@ -1100,6 +1107,7 @@ describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
     );
     const entryPoints = [
       'async compose(',
+      'composeCompletedRead(',
       'composeFromOwnerResponse(',
       'composeNavigate(',
     ];

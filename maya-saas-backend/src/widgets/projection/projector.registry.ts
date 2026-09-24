@@ -108,3 +108,20 @@ export const projectorRowFor = (
     ) ?? null
   );
 };
+
+/**
+ * P-MT2a's closed lookup. A completed AI-tool READ already crossed the
+ * canonical owner; this selector only answers for a registered READ row and
+ * never guesses a widget kind from the tool name.
+ */
+export const projectorRowForCompletedRead = (
+  subjectKey: CapabilityRefKey,
+): ProjectorRow | null => {
+  const rows = PROJECTOR_REGISTRY.filter(
+    (row) =>
+      row.subject_key === subjectKey &&
+      row.source_kind === 'capability_read' &&
+      row.composition === 'canonical_read',
+  );
+  return rows.length === 1 ? rows[0] : null;
+};

@@ -145,6 +145,8 @@ type ToolUsage = {
   name: string;
   status: string;
   execution_id: string | null;
+  /** Internal SH-19 carrier; stripped from tools_used at the HTTP boundary. */
+  resolution?: Readonly<Record<string, unknown>>;
 };
 
 /**
@@ -653,17 +655,22 @@ export class AiCoreService {
           businessTimezone,
         );
         const execution = this.record(
-          await this.runtime.execute(toolUser, toolName, {
-            surface: dto.surface,
-            arguments: argumentsForTool,
-            idempotencyKey: this.toolIdempotencyKey(
-              tenantId,
-              user.userId,
-              dto.requestId,
-              -2,
-              toolName,
-            ),
-          }),
+          await this.runtime.execute(
+            toolUser,
+            toolName,
+            {
+              surface: dto.surface,
+              arguments: argumentsForTool,
+              idempotencyKey: this.toolIdempotencyKey(
+                tenantId,
+                user.userId,
+                dto.requestId,
+                -2,
+                toolName,
+              ),
+            },
+            { widgetTrigger: 'T-2a', requestId: dto.requestId },
+          ),
         );
         const status =
           typeof execution.status === 'string' ? execution.status : 'unknown';
@@ -674,6 +681,7 @@ export class AiCoreService {
             typeof execution.execution_id === 'string'
               ? execution.execution_id
               : null,
+          ...this.widgetResolution(execution),
         });
         if (status !== 'completed' || !('result' in execution)) {
           this.modelFailure('ai_tool_result_unavailable');
@@ -756,23 +764,28 @@ export class AiCoreService {
       if (requirement?.presetToolCall) {
         const preset = requirement.presetToolCall;
         const execution = this.record(
-          await this.runtime.execute(toolUser, preset.name, {
-            surface: dto.surface,
-            arguments: preset.arguments,
-            idempotencyKey: this.toolIdempotencyKey(
-              tenantId,
-              user.userId,
-              dto.requestId,
-              // 🔴 НЕ 0: нулевой шаг занимает первая итерация цикла. Ключ
-              // считается по паре «шаг + инструмент», поэтому чужой инструмент
-              // на шаге 0 конфликта не даёт, а вот тот же самый — дал бы:
-              // рантайм сверяет аргументы и на расхождении бросает конфликт
-              // идемпотентности. Вопрос вида «а за прошлый месяц целиком?»
-              // падал бы вместо ответа.
-              -1,
-              preset.name,
-            ),
-          }),
+          await this.runtime.execute(
+            toolUser,
+            preset.name,
+            {
+              surface: dto.surface,
+              arguments: preset.arguments,
+              idempotencyKey: this.toolIdempotencyKey(
+                tenantId,
+                user.userId,
+                dto.requestId,
+                // 🔴 НЕ 0: нулевой шаг занимает первая итерация цикла. Ключ
+                // считается по паре «шаг + инструмент», поэтому чужой инструмент
+                // на шаге 0 конфликта не даёт, а вот тот же самый — дал бы:
+                // рантайм сверяет аргументы и на расхождении бросает конфликт
+                // идемпотентности. Вопрос вида «а за прошлый месяц целиком?»
+                // падал бы вместо ответа.
+                -1,
+                preset.name,
+              ),
+            },
+            { widgetTrigger: 'T-2a', requestId: dto.requestId },
+          ),
         );
         const status =
           typeof execution.status === 'string' ? execution.status : 'unknown';
@@ -783,6 +796,7 @@ export class AiCoreService {
             typeof execution.execution_id === 'string'
               ? execution.execution_id
               : null,
+          ...this.widgetResolution(execution),
         });
         if (status !== 'completed' || !('result' in execution)) {
           this.modelFailure('ai_tool_result_unavailable');
@@ -1135,17 +1149,22 @@ export class AiCoreService {
         let execution: Record<string, unknown>;
         try {
           execution = this.record(
-            await this.runtime.execute(toolUser, decision.toolCall.name, {
-              surface: dto.surface,
-              arguments: hardenedArguments,
-              idempotencyKey: this.toolIdempotencyKey(
-                tenantId,
-                user.userId,
-                dto.requestId,
-                step,
-                decision.toolCall.name,
-              ),
-            }),
+            await this.runtime.execute(
+              toolUser,
+              decision.toolCall.name,
+              {
+                surface: dto.surface,
+                arguments: hardenedArguments,
+                idempotencyKey: this.toolIdempotencyKey(
+                  tenantId,
+                  user.userId,
+                  dto.requestId,
+                  step,
+                  decision.toolCall.name,
+                ),
+              },
+              { widgetTrigger: 'T-2a', requestId: dto.requestId },
+            ),
           );
         } catch (error) {
           if (error instanceof BadRequestException) {
@@ -1163,6 +1182,7 @@ export class AiCoreService {
           name: decision.toolCall.name,
           status,
           execution_id: executionId,
+          ...this.widgetResolution(execution),
         });
         if (status === 'approval_required') {
           return this.complete(
@@ -1690,13 +1710,21 @@ export class AiCoreService {
         ...usage,
       },
     });
+    const resolution = [...toolsUsed]
+      .reverse()
+      .find((tool) => tool.resolution !== undefined)?.resolution;
     return {
       request_id: dto.requestId,
       reply: completedResponse.reply,
       source: completedResponse.source,
       redacted_input: redacted,
       action: completedResponse.action,
-      tools_used: toolsUsed,
+      tools_used: toolsUsed.map((tool) => ({
+        name: tool.name,
+        status: tool.status,
+        execution_id: tool.execution_id,
+      })),
+      ...(resolution === undefined ? {} : { resolution }),
       grounding,
       brain: {
         persona: brain.persona,
@@ -1709,6 +1737,15 @@ export class AiCoreService {
           }
         : {}),
     };
+  }
+
+  private widgetResolution(execution: Readonly<Record<string, unknown>>): {
+    resolution?: Readonly<Record<string, unknown>>;
+  } {
+    const value = execution.resolution;
+    return value !== null && typeof value === 'object' && !Array.isArray(value)
+      ? { resolution: value as Readonly<Record<string, unknown>> }
+      : {};
   }
 
   private conversationLayer(): ConversationIntelligenceService {

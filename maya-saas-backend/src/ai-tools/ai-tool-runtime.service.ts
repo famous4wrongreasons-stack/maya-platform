@@ -4,7 +4,9 @@ import {
   HttpException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { Prisma } from '@prisma/client';
 import { createHash, randomUUID } from 'crypto';
 
@@ -30,6 +32,10 @@ import type {
 } from './ai-tool.types';
 import type { ApprovalDecisionDto } from './dto/approval-decision.dto';
 import type { ExecuteAiToolDto } from './dto/execute-ai-tool.dto';
+import {
+  AI_READ_WIDGET_TRIGGER,
+  type AiReadWidgetTriggerPort,
+} from './ai-read-widget-trigger.port';
 
 const APPROVAL_TTL_MS = 10 * 60 * 1000;
 const MAX_CANONICAL_INPUT_BYTES = 8 * 1024;
@@ -85,6 +91,7 @@ export class AiToolRuntimeService {
       prisma,
       encryption,
     ),
+    @Optional() private readonly moduleRef?: ModuleRef,
   ) {}
 
   async listTools(user: AuthenticatedUser, surface: AiToolSurface) {
@@ -113,6 +120,11 @@ export class AiToolRuntimeService {
     user: AuthenticatedUser,
     toolName: string,
     dto: ExecuteAiToolDto,
+    internal: {
+      readonly suppressWidgetTrigger?: boolean;
+      readonly widgetTrigger?: 'T-2a' | 'T-2b';
+      readonly requestId?: string | null;
+    } = {},
   ) {
     const principal = this.principal(user, dto.surface);
     const definition = this.registry.get(toolName);
@@ -140,7 +152,7 @@ export class AiToolRuntimeService {
       );
     }
 
-    return this.executeNow({
+    const completed = await this.executeNow({
       principal,
       definition,
       args,
@@ -151,6 +163,66 @@ export class AiToolRuntimeService {
           : (dto.idempotencyKey ?? randomUUID()),
       approval: null,
     });
+    if (internal.suppressWidgetTrigger === true) return completed;
+    return this.attachReadWidget(
+      user,
+      definition,
+      args,
+      dto.surface,
+      inputHash,
+      completed,
+      internal.widgetTrigger ?? 'T-2b',
+      internal.requestId ?? null,
+    );
+  }
+
+  private async attachReadWidget(
+    actor: Readonly<AuthenticatedUser>,
+    definition: AiToolDefinition,
+    args: ValidatedAiToolArguments,
+    surface: AiToolSurface,
+    inputHash: string,
+    completed: unknown,
+    triggerKind: 'T-2a' | 'T-2b',
+    requestId: string | null,
+  ): Promise<unknown> {
+    if (
+      definition.riskTier !== 'read' ||
+      typeof completed !== 'object' ||
+      completed === null ||
+      (completed as { status?: unknown }).status !==
+        EXECUTION_STATUS.COMPLETED ||
+      typeof (completed as { execution_id?: unknown }).execution_id !==
+        'string' ||
+      !Object.prototype.hasOwnProperty.call(completed, 'result')
+    )
+      return completed;
+    let widgetTrigger: AiReadWidgetTriggerPort | undefined;
+    try {
+      widgetTrigger = this.moduleRef?.get<AiReadWidgetTriggerPort>(
+        AI_READ_WIDGET_TRIGGER,
+        { strict: false },
+      );
+    } catch {
+      // The AI tool runtime also runs in deployments/tests that have no widget
+      // composition provider. The read result remains canonical and unchanged.
+      widgetTrigger = undefined;
+    }
+    if (widgetTrigger === undefined) return completed;
+    const value = completed as Readonly<Record<string, unknown>>;
+    const resolution = await widgetTrigger.afterCompletedRead({
+      actor,
+      toolName: definition.name,
+      surface,
+      arguments: args,
+      inputHash,
+      executionId: value.execution_id as string,
+      result: value.result,
+      replayed: value.replayed === true,
+      trigger: triggerKind,
+      requestId,
+    });
+    return resolution === null ? completed : { ...value, resolution };
   }
 
   async listApprovals(user: AuthenticatedUser, surface: AiToolSurface) {

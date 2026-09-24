@@ -110,6 +110,10 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
   },
   'ai-tools/ai-tool.catalog.ts': { why: 'the frozen AI tool catalogue' },
   'ai-tools/ai-tool.types.ts': { why: 'AI tool definition types' },
+  'ai-tools/ai-read-widget-trigger.port.ts': {
+    why: 'P-MT2a narrow completion-hook token and transport-neutral port types',
+    only: ['composition/chat-read.trigger.ts', 'widgets.module.ts'],
+  },
   'action-engine/action-engine.registry.ts': {
     why: 'the Action Engine capability registry: a plain class over static rows, constructed as a value (D-6 registries)',
   },

@@ -33,6 +33,7 @@ import type {
 } from './canonical-read.port';
 import {
   projectorRowFor,
+  projectorRowForCompletedRead,
   ROWS_BLOCKED_BY,
   type ProjectorArgumentSource,
   type ProjectorRow,
@@ -117,6 +118,34 @@ export class WidgetProjectorService {
       result.kind === 'value' ? result.value : null,
       result.fact,
       limitationCodes,
+    );
+  }
+
+  /**
+   * P-MT2a: project the result of the canonical READ that just completed.
+   * This method never invokes the owner again. It applies the same principal,
+   * row and required-field fences before allowing that already-authorized
+   * result to enter the composer.
+   */
+  composeCompletedRead(
+    plan: ProjectionPlan,
+    ownerResponse: CanonicalOwnerResponse,
+  ): ProjectionOutcome {
+    if (!this.hasPrincipal(plan)) return degraded('no_principal');
+    if (!this.sameAuthority(plan)) return degraded('authority_mismatch');
+    const subject = subjectKeyOf(plan);
+    if (subject === null) return degraded('no_registered_row');
+    const row = projectorRowForCompletedRead(subject as `C9:${string}`);
+    if (row === null || row.result_kind !== plan.widgetKind)
+      return degraded('no_registered_row');
+    if (!hasRequiredFields(ownerResponse.value, row))
+      return degraded('missing_source_field');
+    return this.outcome(
+      plan,
+      row,
+      ownerResponse.value,
+      ownerResponse.fact,
+      ownerResponse.limitation_codes ?? [],
     );
   }
 

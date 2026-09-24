@@ -63,10 +63,15 @@ export class CanonicalReadAdapter implements CanonicalReadPort {
     const { plan, ownerArguments } = request;
     if (plan.actor === null || plan.aiToolSurface === null)
       throw new HttpException('c9_use_secure_surface', 403);
-    const execution = await this.runtime.execute(plan.actor, capability, {
-      arguments: { ...ownerArguments },
-      surface: plan.aiToolSurface,
-    });
+    const execution = await this.runtime.execute(
+      plan.actor,
+      capability,
+      {
+        arguments: { ...ownerArguments },
+        surface: plan.aiToolSurface,
+      },
+      { suppressWidgetTrigger: true },
+    );
     const envelope: unknown = execution;
     if (
       !isRecord(envelope) ||

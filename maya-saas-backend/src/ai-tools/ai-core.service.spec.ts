@@ -630,10 +630,12 @@ describe('AiCoreService', () => {
       user,
       'staff.schedule.read',
       expect.objectContaining({ arguments: { date: '2026-08-15' } }),
+      expect.objectContaining({ widgetTrigger: 'T-2a' }),
     );
     expect(mocks.runtime.execute).not.toHaveBeenCalledWith(
       user,
       'analytics.business.query',
+      expect.anything(),
       expect.anything(),
     );
     expect(result).toMatchObject({
@@ -743,10 +745,12 @@ describe('AiCoreService', () => {
       expect.objectContaining({
         arguments: {},
       }),
+      expect.objectContaining({ widgetTrigger: 'T-2a' }),
     );
     expect(mocks.runtime.execute).not.toHaveBeenCalledWith(
       user,
       'analytics.business.query',
+      expect.anything(),
       expect.anything(),
     );
     expect(result.brain).toMatchObject({ persona: 'admin' });
@@ -1146,6 +1150,7 @@ describe('AiCoreService', () => {
       expect.objectContaining({
         arguments: { period: 'month_to_date', comparison: 'none' },
       }),
+      expect.objectContaining({ widgetTrigger: 'T-2a' }),
     );
     expect(result).toMatchObject({
       grounding: {
@@ -1276,6 +1281,7 @@ describe('AiCoreService', () => {
       client,
       'catalog.services.read',
       expect.any(Object),
+      expect.objectContaining({ widgetTrigger: 'T-2a' }),
     );
   });
 
@@ -1340,6 +1346,7 @@ describe('AiCoreService', () => {
           comparison: 'previous_period',
         },
       }),
+      expect.objectContaining({ widgetTrigger: 'T-2a' }),
     );
     expect(mocks.model.decide).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -1539,6 +1546,7 @@ describe('AiCoreService', () => {
           comparison: 'previous_year_same_period',
         },
       }),
+      expect.objectContaining({ widgetTrigger: 'T-2a' }),
     );
     expect(result).toMatchObject({
       source: 'safe_fallback',
@@ -1747,6 +1755,7 @@ describe('AiCoreService', () => {
       expect.objectContaining({
         arguments: { period: 'month_to_date', comparison: 'previous_period' },
       }),
+      expect.objectContaining({ widgetTrigger: 'T-2a' }),
     );
     expect(result.grounding).toMatchObject({
       status: 'verified',

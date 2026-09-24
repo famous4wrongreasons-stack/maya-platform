@@ -86,6 +86,55 @@ export class TimelineStore {
   }
 
   /**
+   * A completed tool execution has one assistant turn. Replay returns the same
+   * row; it never allocates another timeline index or extends retention.
+   */
+  async ensureAssistantTurn(
+    input: Omit<TimelineTurnInput, 'role'>,
+    now = new Date(),
+  ): Promise<{ id: string; principalProofHash: string }> {
+    const existing = await this.prisma.widgetTimelineTurn.findFirst({
+      where: scoped(input.tenantId, {
+        conversationId: input.conversationId,
+        turnIndex: input.turnIndex,
+      }),
+      select: { id: true, principalProofHash: true },
+    });
+    if (existing !== null) return existing;
+    try {
+      return await this.prisma.widgetTimelineTurn.create({
+        data: {
+          tenantId: input.tenantId,
+          conversationId: input.conversationId,
+          turnIndex: input.turnIndex,
+          role: 'assistant',
+          principalProofHash: input.principalProofHash,
+          channel: input.channel,
+          createdAt: now,
+          retentionUntil: this.plusDays(now, RETENTION.timelineDays),
+          textContent: input.textContent ?? null,
+          spokenTranscript: input.spokenTranscript ?? null,
+        },
+        select: { id: true, principalProofHash: true },
+      });
+    } catch (error) {
+      // A concurrent producer may win the unique tenant/conversation/index
+      // constraint. Read that exact tenant-fenced winner; every other failure
+      // remains a real store fault.
+      if (!isUniqueConstraint(error)) throw error;
+      const winner = await this.prisma.widgetTimelineTurn.findFirst({
+        where: scoped(input.tenantId, {
+          conversationId: input.conversationId,
+          turnIndex: input.turnIndex,
+        }),
+        select: { id: true, principalProofHash: true },
+      });
+      if (winner === null) throw error;
+      return winner;
+    }
+  }
+
+  /**
    * Gate 9's atomic write, inside the gateway's existing request transaction `T`.
    *
    * The advisory lock serialises index allocation with erasure. The conditional record update is the
@@ -183,3 +232,8 @@ export class TimelineStore {
     });
   }
 }
+
+const isUniqueConstraint = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  (error as { code?: unknown }).code === 'P2002';

@@ -11,6 +11,7 @@ import { AiToolHandlerService } from './ai-tool-handler.service';
 import { AiToolPolicyService } from './ai-tool-policy.service';
 import { AiToolRegistryService } from './ai-tool-registry.service';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
+import type { AiReadWidgetTriggerPort } from './ai-read-widget-trigger.port';
 
 const IDEMPOTENCY_KEY = '59f04d18-c04a-4f1d-a529-345fe6f2a65d';
 
@@ -56,6 +57,47 @@ describe('AiToolRuntimeService', () => {
       expect.stringMatching(/^encrypted:/),
     );
     expect(JSON.stringify(executionUpdateData)).not.toContain('customer_count');
+  });
+
+  it('SH-19 attaches the authorized widget resolution to a completed model-free read', async () => {
+    const afterCompletedRead = jest.fn().mockResolvedValue({
+      matched: true,
+      receipt: { widget_id: 'widget-a' },
+      dismiss_widget_id: null,
+    });
+    const trigger = {
+      afterCompletedRead,
+    } as unknown as AiReadWidgetTriggerPort;
+    const harness = createHarness(trigger);
+    harness.handlerExecute.mockResolvedValue({ services: [] });
+    harness.executionFindUnique.mockResolvedValue(null);
+    harness.executionCreate.mockResolvedValue({ id: 'execution-a' });
+
+    const result = await harness.tenantContext.runAsSystemTenant(
+      'tenant-a',
+      () =>
+        harness.runtime.execute(
+          { ...customer, role: UserRole.TENANT_OWNER },
+          'catalog.services.read',
+          { arguments: {}, surface: 'web' },
+        ),
+    );
+
+    expect(result).toMatchObject({
+      status: 'completed',
+      resolution: {
+        matched: true,
+        receipt: { widget_id: 'widget-a' },
+      },
+    });
+    expect(afterCompletedRead).toHaveBeenCalledWith(
+      expect.objectContaining({
+        toolName: 'catalog.services.read',
+        executionId: 'execution-a',
+        trigger: 'T-2b',
+        requestId: null,
+      }),
+    );
   });
 
   it('returns the latest verified analytics snapshot when the CRM read fails', async () => {
@@ -314,7 +356,7 @@ describe('AiToolRuntimeService', () => {
   });
 });
 
-function createHarness() {
+function createHarness(widgetTrigger?: AiReadWidgetTriggerPort) {
   const approvalFindUnique = jest.fn();
   const approvalCreate =
     jest.fn<(input: unknown) => Promise<Record<string, unknown>>>();
@@ -423,6 +465,9 @@ function createHarness() {
       encryption,
       auditLog,
       canonicalReceiptFixture(prisma, encryption),
+      widgetTrigger === undefined
+        ? undefined
+        : ({ get: jest.fn().mockReturnValue(widgetTrigger) } as never),
     ),
     tenantContext,
     approvalFindUnique,

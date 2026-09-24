@@ -64,6 +64,13 @@ export class WidgetStoresService {
     return this.timeline.appendTurn(input, now);
   }
 
+  async ensureAssistantTurn(
+    input: Omit<TimelineTurnInput, 'role'>,
+    now = new Date(),
+  ): Promise<{ id: string; principalProofHash: string }> {
+    return this.timeline.ensureAssistantTurn(input, now);
+  }
+
   async lowerToUserTurn(
     input: LowerToUserTurnInput,
     tx: RequestTx,
