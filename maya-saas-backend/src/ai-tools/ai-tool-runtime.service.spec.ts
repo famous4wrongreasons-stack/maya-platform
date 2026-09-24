@@ -60,7 +60,9 @@ describe('AiToolRuntimeService', () => {
   });
 
   it('SH-19 attaches the authorized widget resolution to a completed model-free read', async () => {
-    const afterCompletedRead = jest.fn().mockResolvedValue({
+    const afterCompletedRead: jest.MockedFunction<
+      AiReadWidgetTriggerPort['afterCompletedRead']
+    > = jest.fn().mockResolvedValue({
       matched: true,
       receipt: { widget_id: 'widget-a' },
       dismiss_widget_id: null,
@@ -94,12 +96,18 @@ describe('AiToolRuntimeService', () => {
       expect.objectContaining({
         toolName: 'catalog.services.read',
         executionId: 'execution-a',
-        conversationId: expect.stringMatching(
-          /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-8[0-9a-f]{3}-[0-9a-f]{12}$/,
-        ),
         trigger: 'T-2b',
         requestId: 'system:tenant-a',
       }),
+    );
+    const completedReadCall = afterCompletedRead.mock.calls[0]?.[0];
+    expect(completedReadCall).toEqual(expect.any(Object));
+    const conversationId = (completedReadCall as Record<string, unknown>)[
+      'conversationId'
+    ];
+    expect(typeof conversationId).toBe('string');
+    expect(conversationId).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-8[0-9a-f]{3}-[0-9a-f]{12}$/,
     );
   });
 
