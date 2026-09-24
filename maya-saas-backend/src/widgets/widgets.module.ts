@@ -13,7 +13,6 @@ import {
   INPUT_BOUNDS_REGISTRY,
   INPUT_NORMALIZER_REGISTRY,
   INPUT_VALIDATION,
-  NOUN_RESOLUTION_PORTS,
 } from './di-tokens';
 import { WidgetEmissionModule } from './emission/emission.module';
 import { GATE_8R_OWNERS_UNRULED } from './gates/gate-8r.owners';
@@ -23,7 +22,6 @@ import { EMPTY_INPUT_NORMALIZER_REGISTRY } from './input-validation/input-normal
 import { InputSchemaSourceReader } from './input-validation/input-schema-source';
 import { IntentGatewayService } from './intent-gateway.service';
 import { WidgetOwnerPortsModule } from './owner-ports/widget-owner-ports.module';
-import { NOUN_RESOLUTION_PORTS_UNBOUND } from './noun-resolution/noun-resolution.ports';
 import { WidgetProjectorService } from './projection/widget-projector.service';
 import { EffectRouterService } from './routing/effect-router.service';
 import { EFFECT_ROUTE_AUDIT } from './routing/effect-router.ports';
@@ -86,7 +84,6 @@ import { C9ComposeTriggerService } from './composition/c9-compose.trigger';
     // U11b replaces the `useValue` with its adapters and moves the binding to the boundary, with the
     // enumeration in that commit (§2.6 item 7). Row W refuses `superseded/handle_stale` with 0 calls
     // while it stands — an unbound port that REFUSES is the fail-closed half of AMB-01a.
-    { provide: NOUN_RESOLUTION_PORTS, useValue: NOUN_RESOLUTION_PORTS_UNBOUND },
     // U12b: the projector is deliberately NOT exported. Its only owner edge is the named
     // CANONICAL_READ port from WidgetOwnerPortsModule; the finite registry controls whether that
     // edge is reachable. Gate 13 remains the sole caller when its routing edges land.

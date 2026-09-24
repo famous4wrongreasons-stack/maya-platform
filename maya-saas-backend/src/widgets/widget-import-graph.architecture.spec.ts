@@ -54,6 +54,7 @@ const OWNER_MODULES: readonly string[] = [
   'valuation/c8.module.ts#C8Module',
   // P-PRINCIPAL (D-1, D-2): K1's resolver (C11:2536-2539) and B-02's in-transaction Membership read.
   'orchestration/c9.module.ts#C9Module',
+  'crm/crm.module.ts#CrmModule',
   // U6-L1 (R6-2): (e)'s owner, `EntitlementsService` grants every `requiredFeatures` entry (C11:4755).
   'entitlements/entitlements.module.ts#EntitlementsModule',
   'tenancy/tenancy.module.ts#TenancyModule',
@@ -90,6 +91,7 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
       'input-schema/codec.ts',
       'input-schema/input-schema-hash.ts',
       'input-schema/inputs-bytes.ts',
+      'owner-ports/noun-resolution.owners.provider.ts',
     ],
   },
   'prisma/prisma.service.ts': {
@@ -186,7 +188,10 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
   },
   'orchestration/c9.store.ts': {
     why: 'U12b canonical orchestrator-state read call site',
-    only: ['owner-ports/canonical-read.provider.ts'],
+    only: [
+      'owner-ports/canonical-read.provider.ts',
+      'owner-ports/witness-c9-revision.adapter.ts',
+    ],
   },
   'orchestration/c9.authority.ts': {
     why: "K1's principal resolver; the one call of `C9Authority.current` in the widget layer (P-PRINCIPAL)",
@@ -227,6 +232,26 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
   'entitlements/entitlements.module.ts': {
     why: "(e)'s owner module, so the boundary can resolve GATE6_OWNERS (R6-2)",
     only: ['owner-ports/widget-owner-ports.module.ts'],
+  },
+  'crm/crm.module.ts': {
+    why: 'U11b canonical appointment noun owner module',
+    only: ['owner-ports/widget-owner-ports.module.ts'],
+  },
+  'appointments/client-appointment-create.service.ts': {
+    why: 'U11b canonical read-only create quote owner',
+    only: ['owner-ports/noun-booking-create.adapter.ts'],
+  },
+  'crm/client-appointment-cancel.service.ts': {
+    why: 'U11b canonical read-only cancel target owner',
+    only: ['owner-ports/noun-booking-cancel.adapter.ts'],
+  },
+  'crm/client-appointment-reschedule.service.ts': {
+    why: 'U11b canonical read-only reschedule quote owner',
+    only: ['owner-ports/noun-booking-reschedule.adapter.ts'],
+  },
+  'crm/client-appointment-read.service.ts': {
+    why: 'U11b canonical Client appointment read owner',
+    only: ['owner-ports/noun-client-appointment-read.adapter.ts'],
   },
 };
 
@@ -982,6 +1007,11 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       'entitlements/entitlements.service.ts',
       'ai-tools/ai-tool-policy.module.ts',
       'entitlements/entitlements.module.ts',
+      'crm/crm.module.ts',
+      'appointments/client-appointment-create.service.ts',
+      'crm/client-appointment-cancel.service.ts',
+      'crm/client-appointment-reschedule.service.ts',
+      'crm/client-appointment-read.service.ts',
     ]);
   }, 60_000);
 
@@ -1106,6 +1136,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       'GATE6_OWNERS',
       'PRINCIPAL_RESOLVER',
       'TENANT_SCOPE',
+      'NOUN_RESOLUTION_PORTS',
     ]);
   });
 
@@ -1207,7 +1238,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
           replace(
             'owner-ports/widget-owner-ports.module.ts',
             `${PORTS_IMPORT}\n`,
-            `${PORTS_IMPORT}\nimport { CrmModule } from '../../crm/crm.module';\n`,
+            `${PORTS_IMPORT}\nimport { AppModule } from '../../app.module';\n`,
           ),
       ],
       [

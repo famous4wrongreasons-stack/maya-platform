@@ -693,6 +693,7 @@ const OWNER_MODULES = [
   'valuation/c8.module.ts#C8Module',
   // P-PRINCIPAL (D-1, D-2): K1's resolver (C11:2536-2539) and B-02's in-transaction Membership read.
   'orchestration/c9.module.ts#C9Module',
+  'crm/crm.module.ts#CrmModule',
   // U6-L1 (R6-2): (e)'s owner, `EntitlementsService` grants every `requiredFeatures` entry (C11:4755).
   'entitlements/entitlements.module.ts#EntitlementsModule',
   'tenancy/tenancy.module.ts#TenancyModule',
@@ -703,6 +704,7 @@ const BOUND_PORT_TOKENS = [
   'GATE6_OWNERS',
   'PRINCIPAL_RESOLVER',
   'TENANT_SCOPE',
+  'NOUN_RESOLUTION_PORTS',
 ];
 const NEVER_IMPORTED = ['action-engine/action-engine.module.ts#ActionEngineModule'];
 /** The widget layer's own store client, and where it may be imported (`null`: any widget file). */

@@ -26,6 +26,7 @@ import { PrismaModule } from '../../prisma/prisma.module';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TenancyModule } from '../../tenancy/tenancy.module';
 import { C8Module } from '../../valuation/c8.module';
+import { CrmModule } from '../../crm/crm.module';
 import * as DI_TOKENS from '../di-tokens';
 import { Gate6OwnersAdapter } from './gate6.owners.provider';
 import { CanonicalReadAdapter } from './canonical-read.provider';
@@ -37,6 +38,12 @@ import { WidgetsController } from '../widgets.controller';
 import { WidgetsModule } from '../widgets.module';
 import { WidgetEmissionModule } from '../emission/emission.module';
 import { WidgetOwnerPortsModule } from './widget-owner-ports.module';
+import { BookingCreateNounAdapter } from './noun-booking-create.adapter';
+import { BookingCancelNounAdapter } from './noun-booking-cancel.adapter';
+import { BookingRescheduleNounAdapter } from './noun-booking-reschedule.adapter';
+import { ClientAppointmentReadNounAdapter } from './noun-client-appointment-read.adapter';
+import { NounResolutionOwnersProvider } from './noun-resolution.owners.provider';
+import { WitnessC9RevisionAdapter } from './witness-c9-revision.adapter';
 
 const meta = (key: string, target: object): unknown =>
   Reflect.getMetadata(key, target);
@@ -79,6 +86,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       MeasurementModule,
       C8Module,
       C9Module,
+      CrmModule,
       EntitlementsModule,
       TenancyModule,
     ]);
@@ -92,12 +100,20 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
         provide: DI_TOKENS.CANONICAL_READ,
         useExisting: CanonicalReadAdapter,
       },
+      BookingCreateNounAdapter,
+      BookingCancelNounAdapter,
+      BookingRescheduleNounAdapter,
+      ClientAppointmentReadNounAdapter,
+      NounResolutionOwnersProvider,
+      WitnessC9RevisionAdapter,
+      expect.objectContaining({ provide: DI_TOKENS.NOUN_RESOLUTION_PORTS }),
     ]);
     expect(meta(MODULE_METADATA.EXPORTS, WidgetOwnerPortsModule)).toEqual([
       DI_TOKENS.CANONICAL_READ,
       DI_TOKENS.GATE6_OWNERS,
       DI_TOKENS.PRINCIPAL_RESOLVER,
       DI_TOKENS.TENANT_SCOPE,
+      DI_TOKENS.NOUN_RESOLUTION_PORTS,
     ]);
   });
 

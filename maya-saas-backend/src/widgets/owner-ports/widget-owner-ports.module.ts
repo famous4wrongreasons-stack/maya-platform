@@ -7,16 +7,24 @@ import { MeasurementModule } from '../../measurement/measurement.module';
 import { C9Module } from '../../orchestration/c9.module';
 import { TenancyModule } from '../../tenancy/tenancy.module';
 import { C8Module } from '../../valuation/c8.module';
+import { CrmModule } from '../../crm/crm.module';
 import {
   CANONICAL_READ,
   GATE6_OWNERS,
   PRINCIPAL_RESOLVER,
   TENANT_SCOPE,
+  NOUN_RESOLUTION_PORTS,
 } from '../di-tokens';
 import { CanonicalReadAdapter } from './canonical-read.provider';
 import { Gate6OwnersAdapter } from './gate6.owners.provider';
 import { PrincipalAdapter } from './principal.adapter';
 import { TenantScopeAdapter } from './tenant-scope.provider';
+import { NounResolutionOwnersProvider } from './noun-resolution.owners.provider';
+import { WitnessC9RevisionAdapter } from './witness-c9-revision.adapter';
+import { BookingCreateNounAdapter } from './noun-booking-create.adapter';
+import { BookingCancelNounAdapter } from './noun-booking-cancel.adapter';
+import { BookingRescheduleNounAdapter } from './noun-booking-reschedule.adapter';
+import { ClientAppointmentReadNounAdapter } from './noun-client-appointment-read.adapter';
 
 /**
  * The widget layer's one boundary to non-widget owners (integrator decision D-6).
@@ -45,6 +53,7 @@ import { TenantScopeAdapter } from './tenant-scope.provider';
     MeasurementModule,
     C8Module,
     C9Module,
+    CrmModule,
     EntitlementsModule,
     TenancyModule,
   ],
@@ -55,7 +64,27 @@ import { TenantScopeAdapter } from './tenant-scope.provider';
     { provide: TENANT_SCOPE, useClass: TenantScopeAdapter },
     { provide: GATE6_OWNERS, useExisting: Gate6OwnersAdapter },
     { provide: CANONICAL_READ, useExisting: CanonicalReadAdapter },
+    BookingCreateNounAdapter,
+    BookingCancelNounAdapter,
+    BookingRescheduleNounAdapter,
+    ClientAppointmentReadNounAdapter,
+    NounResolutionOwnersProvider,
+    WitnessC9RevisionAdapter,
+    {
+      provide: NOUN_RESOLUTION_PORTS,
+      useFactory: (
+        nouns: NounResolutionOwnersProvider,
+        witness: WitnessC9RevisionAdapter,
+      ) => ({ nouns, witness }),
+      inject: [NounResolutionOwnersProvider, WitnessC9RevisionAdapter],
+    },
   ],
-  exports: [CANONICAL_READ, GATE6_OWNERS, PRINCIPAL_RESOLVER, TENANT_SCOPE],
+  exports: [
+    CANONICAL_READ,
+    GATE6_OWNERS,
+    PRINCIPAL_RESOLVER,
+    TENANT_SCOPE,
+    NOUN_RESOLUTION_PORTS,
+  ],
 })
 export class WidgetOwnerPortsModule {}
