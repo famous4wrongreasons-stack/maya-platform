@@ -9,7 +9,11 @@
 // like a scheduler with nothing to say.
 
 import type { CellState } from '../../widget-contract/envelope';
-import { momentTemplateFor } from './moments';
+import {
+  assertMomentCompositionInput,
+  momentTemplateFor,
+  type MomentCompositionInput,
+} from './moments';
 
 export interface SuppressedEmission {
   readonly moment: string;
@@ -25,7 +29,7 @@ export type ComposeOutcome =
   | { readonly emit: true; readonly moment: string }
   | { readonly emit: false; readonly row: SuppressedEmission };
 
-/** Read a JSON Pointer out of a composed body. A pointer that resolves to nothing is unresolved. */
+/** Read a JSON Pointer out of the closed server-owned composition input. */
 const at = (body: unknown, pointer: string): unknown => {
   let cur: unknown = body;
   for (const seg of pointer.split('/').slice(1)) {
@@ -50,14 +54,17 @@ const isKnown = (leaf: unknown): boolean =>
  */
 export const composeOrSuppress = (args: {
   momentKey: string;
-  body: unknown;
+  compositionInput: MomentCompositionInput;
   dedupeKey: string;
   subjectPrincipalProofHash: string | null;
   now: Date;
 }): ComposeOutcome => {
+  assertMomentCompositionInput(args.compositionInput);
+  if (args.compositionInput.moment_key !== args.momentKey)
+    throw new Error('moment composition key mismatch');
   const template = momentTemplateFor(args.momentKey);
   const unresolved = template.required_cells.filter(
-    (p) => !isKnown(at(args.body, p)),
+    (p) => !isKnown(at(args.compositionInput.facts, p)),
   );
 
   if (!unresolved.length) return { emit: true, moment: args.momentKey };

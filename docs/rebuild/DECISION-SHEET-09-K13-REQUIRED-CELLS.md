@@ -2,6 +2,7 @@
 
 **Checkpoint:** Wave 4 implementation after `U13b`, before `P-MT3` and `CKPT-W4`  
 **Classification:** existing Contract V1.1 contradiction exposed by the first live P-MT3 producer  
+**Decision:** Option A approved at checkpoint `e20220df`
 **Decision scope:** the source against which K13 `required_cells` are validated and resolved  
 **Chapter / product scope:** unchanged; no production deployment or business effect
 
@@ -118,7 +119,7 @@ P-TYPED: IMPLEMENTED
 P-MT1: IMPLEMENTED
 U11b: IMPLEMENTED
 U13b: IMPLEMENTED
-P-MT3: BLOCKED ON THIS DECISION
+P-MT3: IN IMPLEMENTATION
 WAVE 4 CERTIFIED: NO
 PRODUCTION DEPLOYMENT: NO
 REAL BUSINESS EFFECTS: 0

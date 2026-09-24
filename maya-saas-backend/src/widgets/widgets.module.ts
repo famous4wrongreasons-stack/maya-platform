@@ -36,6 +36,7 @@ import { AI_TYPED_WIDGET_TRIGGER } from '../ai-tools/ai-typed-widget-trigger.por
 import { TypedStep0Service } from './composition/typed-step0';
 import { C9_WIDGET_TRIGGER } from '../orchestration/c9-widget-trigger.port';
 import { C9ComposeTriggerService } from './composition/c9-compose.trigger';
+import { assertMomentRegistryLoads } from './proactive/moments';
 
 /**
  * K3 — the widget runtime.
@@ -118,6 +119,9 @@ export class WidgetsModule implements OnModuleInit {
     assertLedgersBindAtRegistryLoad();
     assertAllowlistAtRegistryLoad();
     assertOwnerClassesResolve();
+    // Decision Sheet 09 Option A: every K13 required fact resolves against a closed,
+    // server-owned typed composition input before any proactive projector can run.
+    assertMomentRegistryLoads();
     // U10a (IR-U10A-1): §3.12's router and `ownerSet` resolve against the live registries, or the
     // process does not start. A router that cannot answer Gate 10 is a divergence audit that silently
     // has nothing to compare, which is the one failure mode row 10 exists to prevent.

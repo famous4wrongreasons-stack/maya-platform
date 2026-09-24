@@ -6505,8 +6505,7 @@ interface ProactiveProvenance {        // REQUIRED when trigger === 'proactive'
 ```ts
 interface Moment {
   moment_key: string;
-  kind: WidgetKind;                  // the kind this moment composes — PR5b's required_cells
-                                     //   pointers are checked against this kind's leaf schema
+  kind: WidgetKind;                  // the final projected kind; its strict body schema remains final
   moment_template_id: string;        // with the version below, composes the MOMENT_TEMPLATES key
   moment_template_version: number;
   notify_pref_key: string;
@@ -6529,15 +6528,25 @@ interface MomentTemplate {
   version: number;
   narrative_template_id: string;
   narrative_template_version: number;
-  required_cells: string[];          // JSON Pointers into the body this moment composes
+  required_cells: string[];          // JSON Pointers into its typed composition input
 }
 declare const MOMENT_TEMPLATES: Readonly<Record<`${string}@${number}`, MomentTemplate>>;
+
+type MomentCompositionLeafType = 'Cell' | 'Measure';
+interface MomentCompositionInputSchema {
+  moment_template_key: `${string}@${number}`;
+  source_owner: CapabilityRef;       // a closed canonical READ/source owner
+  fields: Readonly<Record<`/${string}`, MomentCompositionLeafType>>;
+}
+declare const MOMENT_COMPOSITION_INPUT_REGISTRY: Readonly<
+  Record<`${string}@${number}`, MomentCompositionInputSchema>
+>;
 
 // NarrativeTemplate and NARRATIVE_TEMPLATES are declared in §1.6.5 and are NOT re-declared
 // here. §4.9 references them; it does not own them. Both are keyed `${id}@${version}`.
 ```
 
-At `EP-REGISTRY-LOAD`, or the process does not start: `MOMENT_REGISTRY` carries exactly **twelve** rows; every row's `notify_pref_key` resolves in `NOTIFICATION_CONSENT_REGISTRY`; every row resolves in `MOMENT_TEMPLATES` under the composed key `` `${row.moment_template_id}@${row.moment_template_version}` ``; every `MomentTemplate` resolves in `NARRATIVE_TEMPLATES` under `` `${t.narrative_template_id}@${t.narrative_template_version}` ``; and every `required_cells` entry is a pointer that `KIND_REGISTRY[row.kind]`'s leaf schema admits.
+At `EP-REGISTRY-LOAD`, or the process does not start: `MOMENT_REGISTRY` carries exactly **twelve** rows; every row's `notify_pref_key` resolves in `NOTIFICATION_CONSENT_REGISTRY`; every row resolves in `MOMENT_TEMPLATES` under the composed key `` `${row.moment_template_id}@${row.moment_template_version}` ``; every `MomentTemplate` resolves in `NARRATIVE_TEMPLATES` under `` `${t.narrative_template_id}@${t.narrative_template_version}` ``; the same versioned key resolves in `MOMENT_COMPOSITION_INPUT_REGISTRY`; its `source_owner` is a registered canonical READ/source owner; and every `required_cells` entry resolves to a declared `Cell` or `Measure` in that closed server-owned input schema. Client, LLM, shell and renderer cannot construct or override that input.
 *Status:* `NORMATIVE-PENDING` on **P-17** (the `dedupe_key` resolver PR3c's third condition needs) and **P-32** (the three registries and the templates).
 
 **PR3a — the referenced artefact must predate the emission.** `artefact_created_at < lifecycle.issued_at`, and every Cell in the body must carry `as_of ≤ artefact_created_at` or evidence from the referenced artefact.
@@ -6562,8 +6571,8 @@ At `EP-REGISTRY-LOAD`, or the process does not start: `MOMENT_REGISTRY` carries 
 *Mechanism:* the type — there is no pinned member to write. This is enforced by non-existence in the strict sense: the value cannot be constructed.
 *Evaluated at:* compile time; the emission validator additionally rejects an unknown literal.
 
-**PR5b — a proactive emission may render nothing, and silence is the correct output.** Each `MomentTemplate` declares `required_cells: string[]`, JSON Pointers into the body its moment composes. If any required Cell resolves to a non-`KNOWN` state at compose time, the emission is **suppressed**: no envelope, no empty card, no placeholder, no failure message. A `SuppressedEmission { moment, dedupe_key, suppressed_at, unresolved_cells[] }` row is written to the intent-audit store.
-*Mechanism:* the composer's suppression branch, driven by the resolved template's `required_cells`; the audit row is the evidence that silence was chosen rather than lost.
+**PR5b — a proactive emission may render nothing, and silence is the correct output.** Each `MomentTemplate` declares `required_cells: string[]`, JSON Pointers into its closed server-owned typed composition input. The canonical source owner builds that input from re-read source facts; it is neither a widget body nor client/LLM input and grants no authority. If any required `Cell` or `Measure` resolves to a non-`KNOWN` state at compose time, the emission is **suppressed** before projection: no envelope, no empty card, no placeholder, no failure message. A `SuppressedEmission { moment, dedupe_key, suppressed_at, unresolved_cells[] }` row is written to the intent-audit store. A successful projection must still pass the existing strict final `WidgetKind` body schema.
+*Mechanism:* registry-load validation of the complete moment/template/input-schema chain, then the composer's suppression branch over a canonical-owner input before the projector; the audit row is the evidence that silence was chosen rather than lost.
 *Evaluated at:* `EP-COMPOSE`, before sealing.
 
 `[NON-NORMATIVE]` A greeting that says «не удалось загрузить» every morning would do more damage than no greeting at all. Suppression is also consistent with the rule that UNKNOWN is never rendered as failure: not rendering is not the same as rendering a failure, and the audit row means the difference is observable.

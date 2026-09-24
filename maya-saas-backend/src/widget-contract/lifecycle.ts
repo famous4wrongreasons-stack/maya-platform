@@ -106,7 +106,7 @@ export type ErasureClass =
   | 'CONVERSATION_CONTENT' // erased with conversation content
   | 'CANONICAL_ELSEWHERE'; // a copy of a value a canonical owner holds; erased HERE, retained THERE
 
-// --- section 4.5.2 (contract line 5812) ---
+// --- section 4.5.2 (contract line 5821) ---
 export interface ChannelProfile {
   contract: 'maya.channel.profile/1';
   profile_id: string; // 'pwa.v1', 'tg.bot.v3', 'push.v1', …
@@ -187,7 +187,7 @@ export type TokenCarrier =
   | 'spoken_alias'
   | 'signed_path_segment';
 
-// --- section 4.5.5 (contract line 5941) ---
+// --- section 4.5.5 (contract line 5950) ---
 export interface RenderReceipt {
   contract: 'maya.render.receipt/1';
   profile_id: string;
@@ -216,7 +216,7 @@ export interface RenderReceipt {
   degraded_at: string;
 }
 
-// --- section 4.6 (contract line 6041) ---
+// --- section 4.6 (contract line 6050) ---
 export interface BundleBridgeRequirements {
   required: []; // NORMATIVE: the empty tuple. The illegal state cannot be written.
   optional: BridgeKey[];
@@ -231,7 +231,7 @@ export interface BundleBridgeRequirements {
   >;
 }
 
-// --- section 4.8 (contract line 6146) ---
+// --- section 4.8 (contract line 6155) ---
 export interface A11yEnvironment {
   // reported by the renderer; PRESENTATION ONLY
   reduced_motion: boolean;
@@ -272,7 +272,7 @@ export declare function refKey(ref: InteractiveRef): InteractiveRefKey; // `${re
 // because `k` is one of seven fixed tokens and ':' is the
 // only separator, so no two refs collide.
 
-// --- section 4.8 (contract line 6192) ---
+// --- section 4.8 (contract line 6201) ---
 export declare function refSet(
   paths: readonly string[],
   body: WidgetBody,
@@ -306,7 +306,7 @@ export declare function refSet(
 // four kinds declare a `more_intent` path. This form subsumes escape, remedy, `more`
 // and any future server-minted role by construction.
 
-// --- section 4.8.1 (contract line 6264) ---
+// --- section 4.8.1 (contract line 6273) ---
 // The SEVEN body shapes a ref can denote, each named as this contract names it. A 'row' ref
 // resolves to its row AND its owning table, because one envelope may hold many tables —
 // REPORT declares `sections[].table: TableSpec | null` — so a row key alone does not determine
@@ -445,7 +445,7 @@ export function nameSourceOf(
 // A-2, in one line: the accessible name begins with the label of whatever the ref denotes.
 // [SPEC, not code] ∀ ref ∈ reading_order : accessible_names[refKey(ref)].startsWith(nameSourceOf(ref, env).label)
 
-// --- section 4.8.2 (contract line 6410) ---
+// --- section 4.8.2 (contract line 6419) ---
 // [MEMBER FRAGMENT] accessible_name_suffix: Partial<Record<
 // [MEMBER FRAGMENT]     `${InteractiveRef['k']}:${WidgetIntent['role'] | '*'}`,
 // [MEMBER FRAGMENT]     { base: 'element' | 'body'; pointers: readonly string[] }
@@ -463,7 +463,7 @@ export function nameSourceOf(
 // other ref kind, which denotes an element carrying no role at all. A more specific
 // entry wins over '*'.
 
-// --- section 4.9.3 (contract line 6475) ---
+// --- section 4.9.3 (contract line 6484) ---
 export interface ProactiveProvenance {
   // REQUIRED when trigger === 'proactive'
   artefact_ref: string; // a canonical row: Opportunity, approval object,
@@ -485,11 +485,10 @@ export interface ProactiveProvenance {
   //   resolved in NOTIFICATION_CONSENT_REGISTRY at delivery
 }
 
-// --- section 4.9.3 (contract line 6496) ---
+// --- section 4.9.3 (contract line 6505) ---
 export interface Moment {
   moment_key: string;
-  kind: WidgetKind; // the kind this moment composes — PR5b's required_cells
-  //   pointers are checked against this kind's leaf schema
+  kind: WidgetKind; // the final projected kind; its strict body schema remains final
   moment_template_id: string; // with the version below, composes the MOMENT_TEMPLATES key
   moment_template_version: number;
   notify_pref_key: string;
@@ -514,10 +513,20 @@ export interface MomentTemplate {
   version: number;
   narrative_template_id: string;
   narrative_template_version: number;
-  required_cells: string[]; // JSON Pointers into the body this moment composes
+  required_cells: string[]; // JSON Pointers into its typed composition input
 }
 export declare const MOMENT_TEMPLATES: Readonly<
   Record<`${string}@${number}`, MomentTemplate>
+>;
+
+export type MomentCompositionLeafType = 'Cell' | 'Measure';
+export interface MomentCompositionInputSchema {
+  moment_template_key: `${string}@${number}`;
+  source_owner: CapabilityRef; // a closed canonical READ/source owner
+  fields: Readonly<Record<`/${string}`, MomentCompositionLeafType>>;
+}
+export declare const MOMENT_COMPOSITION_INPUT_REGISTRY: Readonly<
+  Record<`${string}@${number}`, MomentCompositionInputSchema>
 >;
 
 // NarrativeTemplate and NARRATIVE_TEMPLATES are declared in §1.6.5 and are NOT re-declared

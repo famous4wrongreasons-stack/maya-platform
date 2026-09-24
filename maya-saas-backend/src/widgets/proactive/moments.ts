@@ -17,6 +17,8 @@
 // It also independently reproduces the three moments §triage-135 names by hand. The spec re-runs
 // the derivation and compares it to this file, so the two cannot drift.
 
+import { C9_CAPABILITIES } from '../../orchestration/c9.registry';
+import type { Cell, Measure } from '../../widget-contract/envelope';
 import type { WidgetKind } from '../../widget-contract/kinds';
 import type {
   Moment,
@@ -43,6 +45,32 @@ export const CANONICAL_MOMENT_KEYS = [
 ] as const;
 
 export type MomentKey = (typeof CANONICAL_MOMENT_KEYS)[number];
+
+export type MomentCompositionLeafType = 'Cell' | 'Measure';
+
+export interface MomentCompositionInputSchema {
+  readonly moment_template_key: `${string}@${number}`;
+  readonly source_owner: Readonly<{ space: 'C9'; key: string }>;
+  readonly fields: Readonly<Record<`/${string}`, MomentCompositionLeafType>>;
+}
+
+export interface MomentCompositionInput {
+  readonly contract: 'maya.moment-composition-input/1';
+  readonly moment_key: MomentKey;
+  readonly moment_template_key: `${string}@${number}`;
+  readonly producer: 'canonical_owner';
+  readonly source_owner: Readonly<{ space: 'C9'; key: string }>;
+  readonly artefact_ref: string;
+  readonly artefact_kind:
+    | 'opportunity'
+    | 'approval'
+    | 'closed_report'
+    | 'appointment'
+    | 'shift'
+    | 'consent_record';
+  readonly artefact_created_at: string;
+  readonly facts: Readonly<Record<string, Cell<unknown> | Measure>>;
+}
 
 /**
  * The notification-consent keys.
@@ -179,6 +207,88 @@ export const MOMENT_TEMPLATES: Readonly<
   ),
 });
 
+const compositionSchema = (
+  momentTemplateKey: `${string}@${number}`,
+  sourceOwnerKey: string,
+  fields: Readonly<Record<`/${string}`, MomentCompositionLeafType>>,
+): MomentCompositionInputSchema =>
+  Object.freeze({
+    moment_template_key: momentTemplateKey,
+    source_owner: Object.freeze({ space: 'C9' as const, key: sourceOwnerKey }),
+    fields: Object.freeze({ ...fields }),
+  });
+
+/**
+ * Decision Sheet 09 Option A — closed server-owned inputs used before body projection.
+ *
+ * These are source facts, not hidden widget-body members. The client, an LLM and the renderer never
+ * author this object; the named canonical READ/owner does. The final body remains governed by its
+ * existing strict WidgetKind schema.
+ */
+export const MOMENT_COMPOSITION_INPUT_REGISTRY: Readonly<
+  Record<`${string}@${number}`, MomentCompositionInputSchema>
+> = Object.freeze({
+  'mt.appointment_reminder@1': compositionSchema(
+    'mt.appointment_reminder@1',
+    'operations.journal.read',
+    { '/when': 'Measure', '/service': 'Cell' },
+  ),
+  'mt.birthday_alert@1': compositionSchema(
+    'mt.birthday_alert@1',
+    'clients.dossier.read',
+    { '/client_label': 'Cell' },
+  ),
+  'mt.daily_report@1': compositionSchema(
+    'mt.daily_report@1',
+    'owner_report.status',
+    { '/period': 'Cell', '/revenue': 'Measure' },
+  ),
+  'mt.growth_plan@1': compositionSchema('mt.growth_plan@1', 'c8.result.read', {
+    '/period': 'Cell',
+    '/headline': 'Cell',
+  }),
+  'mt.hanging_lead@1': compositionSchema(
+    'mt.hanging_lead@1',
+    'clients.retention.scan',
+    { '/client_label': 'Cell', '/waiting_since': 'Measure' },
+  ),
+  'mt.morning_brief@1': compositionSchema(
+    'mt.morning_brief@1',
+    'owner_report.status',
+    { '/period': 'Cell', '/appointments': 'Measure' },
+  ),
+  'mt.native_feedback_invitation@1': compositionSchema(
+    'mt.native_feedback_invitation@1',
+    'operations.journal.read',
+    { '/visit_at': 'Measure' },
+  ),
+  'mt.owner_alert@1': compositionSchema(
+    'mt.owner_alert@1',
+    'analytics.business.query',
+    { '/headline': 'Cell' },
+  ),
+  'mt.review_alert@1': compositionSchema(
+    'mt.review_alert@1',
+    'reviews.list.read',
+    { '/rating': 'Measure' },
+  ),
+  'mt.shift_reminder@1': compositionSchema(
+    'mt.shift_reminder@1',
+    'staff.schedule.read',
+    { '/starts_at': 'Measure' },
+  ),
+  'mt.wanted_slot_available@1': compositionSchema(
+    'mt.wanted_slot_available@1',
+    'booking.availability.read',
+    { '/when': 'Measure', '/service': 'Cell' },
+  ),
+  'mt.weekly_expense_reminder@1': compositionSchema(
+    'mt.weekly_expense_reminder@1',
+    'expenses.read',
+    { '/period': 'Cell' },
+  ),
+});
+
 const m = (
   moment_key: MomentKey,
   kind: WidgetKind,
@@ -271,6 +381,9 @@ export const assertMomentRegistryLoads = (
   templates: Readonly<
     Record<`${string}@${number}`, MomentTemplate>
   > = MOMENT_TEMPLATES,
+  compositionInputs: Readonly<
+    Record<`${string}@${number}`, MomentCompositionInputSchema>
+  > = MOMENT_COMPOSITION_INPUT_REGISTRY,
 ): void => {
   const rows = Object.values(registry);
 
@@ -300,11 +413,33 @@ export const assertMomentRegistryLoads = (
       throw new RegistryLoadFailure(
         `${composed}: required_cells is empty, so PR5b could never suppress and silence would never be chosen`,
       );
-    for (const p of template.required_cells)
+    const inputSchema = compositionInputs[composed];
+    if (!inputSchema)
+      throw new RegistryLoadFailure(
+        `${composed}: server-owned composition input schema does not resolve`,
+      );
+    if (inputSchema.moment_template_key !== composed)
+      throw new RegistryLoadFailure(
+        `${composed}: composition input schema key does not match`,
+      );
+    const sourceOwner = C9_CAPABILITIES.find(
+      (row) => row.capabilityKey === inputSchema.source_owner.key,
+    );
+    if (!sourceOwner || sourceOwner.mode !== 'READ')
+      throw new RegistryLoadFailure(
+        `${composed}: composition source owner is not a canonical READ`,
+      );
+    for (const p of template.required_cells) {
       if (!p.startsWith('/'))
         throw new RegistryLoadFailure(
           `${composed}: required_cells entry '${p}' is not a JSON Pointer`,
         );
+      const leafType = inputSchema.fields[p as `/${string}`];
+      if (leafType !== 'Cell' && leafType !== 'Measure')
+        throw new RegistryLoadFailure(
+          `${composed}: required composition input '${p}' has no declared Cell/Measure type`,
+        );
+    }
   }
 
   for (const pref of Object.values(prefs))
@@ -313,6 +448,147 @@ export const assertMomentRegistryLoads = (
         `${pref.notify_pref_key}: a delivery permission is always a communication consent`,
       );
 };
+
+const CELL_KEYS = [
+  'state',
+  'value',
+  'label',
+  'reason_code',
+  'fact_ref',
+  'as_of',
+  'evidence_refs',
+  'next_intent_ref',
+] as const;
+const MEASURE_KEYS = [
+  ...CELL_KEYS,
+  'key',
+  'unit',
+  'basis_key',
+  'basis',
+  'currency',
+  'formatted',
+  'comparison',
+] as const;
+const CELL_STATES = new Set([
+  'KNOWN',
+  'PARTIAL',
+  'NOT_MEASURED',
+  'UNAVAILABLE',
+  'PENDING',
+]);
+const MEASURE_UNITS = new Set([
+  'RUB',
+  'minutes',
+  'count',
+  'percent',
+  'ratio',
+  'datetime',
+  'none',
+]);
+const ARTEFACT_KINDS = new Set([
+  'opportunity',
+  'approval',
+  'closed_report',
+  'appointment',
+  'shift',
+  'consent_record',
+]);
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+const hasExactKeys = (
+  value: Record<string, unknown>,
+  keys: readonly string[],
+) => Object.keys(value).sort().join('|') === [...keys].sort().join('|');
+
+const isCell = (value: unknown): boolean => {
+  if (!isRecord(value) || !hasExactKeys(value, CELL_KEYS)) return false;
+  if (!CELL_STATES.has(String(value.state))) return false;
+  if (
+    typeof value.label !== 'string' ||
+    (value.reason_code !== null && typeof value.reason_code !== 'string') ||
+    (value.fact_ref !== null && !Number.isInteger(value.fact_ref)) ||
+    (value.as_of !== null && typeof value.as_of !== 'string') ||
+    !Array.isArray(value.evidence_refs) ||
+    value.evidence_refs.some((ref) => typeof ref !== 'string') ||
+    (value.next_intent_ref !== null &&
+      typeof value.next_intent_ref !== 'string')
+  )
+    return false;
+  return value.state === 'KNOWN' ? value.value !== null : value.value === null;
+};
+
+const isMeasure = (value: unknown): boolean => {
+  if (!isRecord(value) || !hasExactKeys(value, MEASURE_KEYS)) return false;
+  const cellPart = Object.fromEntries(
+    CELL_KEYS.map((key) => [key, value[key]]),
+  );
+  return (
+    isCell(cellPart) &&
+    typeof value.key === 'string' &&
+    MEASURE_UNITS.has(String(value.unit)) &&
+    (value.basis_key === null || typeof value.basis_key === 'string') &&
+    typeof value.basis === 'string' &&
+    (value.currency === null || typeof value.currency === 'string') &&
+    typeof value.formatted === 'string' &&
+    value.comparison === null
+  );
+};
+
+/** Runtime half of Option A: only a closed canonical-owner input can reach suppression/projector. */
+export function assertMomentCompositionInput(
+  value: unknown,
+): asserts value is MomentCompositionInput {
+  if (
+    !isRecord(value) ||
+    !hasExactKeys(value, [
+      'contract',
+      'moment_key',
+      'moment_template_key',
+      'producer',
+      'source_owner',
+      'artefact_ref',
+      'artefact_kind',
+      'artefact_created_at',
+      'facts',
+    ]) ||
+    value.contract !== 'maya.moment-composition-input/1' ||
+    value.producer !== 'canonical_owner' ||
+    !CANONICAL_MOMENT_KEYS.includes(value.moment_key as MomentKey) ||
+    !isRecord(value.source_owner) ||
+    !hasExactKeys(value.source_owner, ['space', 'key']) ||
+    value.source_owner.space !== 'C9' ||
+    typeof value.source_owner.key !== 'string' ||
+    typeof value.artefact_ref !== 'string' ||
+    !ARTEFACT_KINDS.has(String(value.artefact_kind)) ||
+    typeof value.artefact_created_at !== 'string' ||
+    !isRecord(value.facts)
+  )
+    throw new RegistryLoadFailure('moment composition input is not closed');
+  const row = MOMENT_REGISTRY[value.moment_key as MomentKey];
+  const key =
+    `${row.moment_template_id}@${row.moment_template_version}` as const;
+  const schema = MOMENT_COMPOSITION_INPUT_REGISTRY[key];
+  if (
+    value.moment_template_key !== key ||
+    value.source_owner.key !== schema.source_owner.key
+  )
+    throw new RegistryLoadFailure('moment composition source is not canonical');
+  const expectedFields = Object.keys(schema.fields).map((pointer) =>
+    pointer.slice(1),
+  );
+  if (!hasExactKeys(value.facts, expectedFields))
+    throw new RegistryLoadFailure(
+      'moment composition facts do not match schema',
+    );
+  for (const [pointer, leafType] of Object.entries(schema.fields)) {
+    const leaf = value.facts[pointer.slice(1)];
+    if (leafType === 'Cell' ? !isCell(leaf) : !isMeasure(leaf))
+      throw new RegistryLoadFailure(
+        `moment composition input '${pointer}' has the wrong type`,
+      );
+  }
+}
 
 export const momentTemplateFor = (key: string): MomentTemplate => {
   const row = MOMENT_REGISTRY[key];

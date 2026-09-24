@@ -16,11 +16,14 @@ import {
 import {
   CANONICAL_MOMENT_KEYS,
   GAP_BLOCKED_MOMENTS,
+  MOMENT_COMPOSITION_INPUT_REGISTRY,
   MOMENT_REGISTRY,
   MOMENT_TEMPLATES,
   NOTIFICATION_CONSENT_REGISTRY,
   RegistryLoadFailure,
+  assertMomentCompositionInput,
   assertMomentRegistryLoads,
+  type MomentCompositionInput,
   momentTemplateFor,
 } from './moments';
 import {
@@ -48,7 +51,43 @@ import {
 } from './delivery';
 import { composeOrSuppress, suppressionRowIsContentFree } from './suppression';
 
-const known = (v: unknown) => ({ state: 'KNOWN', value: v });
+const cell = (value: unknown, state = 'KNOWN') => ({
+  state,
+  value: state === 'KNOWN' ? value : null,
+  label: String(value),
+  reason_code: state === 'KNOWN' ? null : 'NOT_COLLECTED',
+  fact_ref: 0,
+  as_of: '2026-09-16T08:00:00.000Z',
+  evidence_refs: ['h_' + 'a'.repeat(32)],
+  next_intent_ref: null,
+});
+const measure = (value: unknown, state = 'KNOWN') => ({
+  ...cell(value, state),
+  key: 'appointment.start',
+  unit: 'datetime',
+  basis_key: 'operations.journal.read',
+  basis: 'Canonical appointment',
+  currency: null,
+  formatted: String(value),
+  comparison: null,
+});
+const appointmentComposition = (
+  facts: Record<string, unknown> = {
+    when: measure('2026-09-17T12:00:00.000Z'),
+    service: cell('Стрижка'),
+  },
+): MomentCompositionInput =>
+  ({
+    contract: 'maya.moment-composition-input/1',
+    moment_key: 'appointment_reminder',
+    moment_template_key: 'mt.appointment_reminder@1',
+    producer: 'canonical_owner',
+    source_owner: { space: 'C9', key: 'operations.journal.read' },
+    artefact_ref: 'appointment-a',
+    artefact_kind: 'appointment',
+    artefact_created_at: '2026-09-16T08:00:00.000Z',
+    facts,
+  }) as MomentCompositionInput;
 
 const perm = (over: Partial<LivePermission> = {}): LivePermission => ({
   notifyPrefKey: 'notify.client.appointments',
@@ -159,6 +198,33 @@ describe('K13 — the twelve canonical moments are DERIVED, not typed', () => {
         badPointer,
       ),
     ).toThrow(/not a JSON Pointer/);
+
+    const missingInputSchema = { ...MOMENT_COMPOSITION_INPUT_REGISTRY };
+    delete (missingInputSchema as Record<string, unknown>)['mt.owner_alert@1'];
+    expect(() =>
+      assertMomentRegistryLoads(
+        MOMENT_REGISTRY,
+        NOTIFICATION_CONSENT_REGISTRY,
+        MOMENT_TEMPLATES,
+        missingInputSchema,
+      ),
+    ).toThrow(/composition input schema does not resolve/);
+
+    const unknownRequiredFact = {
+      ...MOMENT_TEMPLATES,
+      'mt.owner_alert@1': {
+        ...MOMENT_TEMPLATES['mt.owner_alert@1'],
+        required_cells: ['/client_authored_replacement'],
+      },
+    };
+    expect(() =>
+      assertMomentRegistryLoads(
+        MOMENT_REGISTRY,
+        NOTIFICATION_CONSENT_REGISTRY,
+        unknownRequiredFact,
+        MOMENT_COMPOSITION_INPUT_REGISTRY,
+      ),
+    ).toThrow(/has no declared Cell\/Measure type/);
 
     const wrongClass = {
       ...NOTIFICATION_CONSENT_REGISTRY,
@@ -532,15 +598,12 @@ describe('K13 — PR3: the content existed before the emission', () => {
 });
 
 describe('K13 — PR5b: silence is chosen, and it leaves a row', () => {
-  const body = {
-    when: known('2026-09-17T12:00:00.000Z'),
-    service: known('Стрижка'),
-  };
+  const compositionInput = appointmentComposition();
 
   it('emits when every required cell is KNOWN', () => {
     const out = composeOrSuppress({
       momentKey: 'appointment_reminder',
-      body,
+      compositionInput,
       dedupeKey: 'd'.repeat(64),
       subjectPrincipalProofHash: 'e'.repeat(64),
       now: new Date('2026-09-16T09:00:00.000Z'),
@@ -552,7 +615,10 @@ describe('K13 — PR5b: silence is chosen, and it leaves a row', () => {
     for (const state of ['PARTIAL', 'NOT_MEASURED', 'UNAVAILABLE', 'PENDING']) {
       const out = composeOrSuppress({
         momentKey: 'appointment_reminder',
-        body: { ...body, service: { state, value: null } },
+        compositionInput: appointmentComposition({
+          ...compositionInput.facts,
+          service: cell('Стрижка', state),
+        }),
         dedupeKey: 'd'.repeat(64),
         subjectPrincipalProofHash: null,
         now: new Date('2026-09-16T09:00:00.000Z'),
@@ -566,25 +632,27 @@ describe('K13 — PR5b: silence is chosen, and it leaves a row', () => {
     }
   });
 
-  it('a missing pointer is unresolved, not an exception', () => {
-    const out = composeOrSuppress({
-      momentKey: 'appointment_reminder',
-      body: { when: known('x') },
-      dedupeKey: 'd'.repeat(64),
-      subjectPrincipalProofHash: null,
-      now: new Date('2026-09-16T09:00:00.000Z'),
-    });
-    expect(out.emit).toBe(false);
-    if (!out.emit) expect(out.row.unresolvedCells).toEqual(['/service']);
+  it('a missing required composition fact refuses before projection', () => {
+    expect(() =>
+      composeOrSuppress({
+        momentKey: 'appointment_reminder',
+        compositionInput: appointmentComposition({
+          when: measure('2026-09-17T12:00:00.000Z'),
+        }) as never,
+        dedupeKey: 'd'.repeat(64),
+        subjectPrincipalProofHash: null,
+        now: new Date('2026-09-16T09:00:00.000Z'),
+      }),
+    ).toThrow(/facts do not match schema/);
   });
 
   it('the suppression row carries pointers and never values', () => {
     const out = composeOrSuppress({
       momentKey: 'appointment_reminder',
-      body: {
-        when: known('x'),
-        service: { state: 'UNAVAILABLE', value: 'Стрижка бороды' },
-      },
+      compositionInput: appointmentComposition({
+        when: measure('2026-09-17T12:00:00.000Z'),
+        service: cell('Стрижка бороды', 'UNAVAILABLE'),
+      }),
       dedupeKey: 'd'.repeat(64),
       subjectPrincipalProofHash: null,
       now: new Date('2026-09-16T09:00:00.000Z'),
@@ -594,6 +662,31 @@ describe('K13 — PR5b: silence is chosen, and it leaves a row', () => {
       expect(suppressionRowIsContentFree(out.row)).toBe(true);
       expect(JSON.stringify(out.row)).not.toContain('Стрижка');
     }
+  });
+
+  it('refuses missing, wrongly typed, client-supplied and LLM-supplied composition facts', () => {
+    expect(() =>
+      assertMomentCompositionInput(
+        appointmentComposition({
+          when: measure('2026-09-17T12:00:00.000Z'),
+        }),
+      ),
+    ).toThrow(/facts do not match schema/);
+    expect(() =>
+      assertMomentCompositionInput(
+        appointmentComposition({
+          when: cell('not a Measure'),
+          service: cell('Стрижка'),
+        }),
+      ),
+    ).toThrow(/wrong type/);
+    for (const producer of ['client', 'llm'])
+      expect(() =>
+        assertMomentCompositionInput({
+          ...appointmentComposition(),
+          producer,
+        }),
+      ).toThrow(/not closed/);
   });
 });
 
