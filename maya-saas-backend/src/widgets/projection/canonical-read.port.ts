@@ -46,8 +46,8 @@ import type { ProjectorRow } from './projector.registry';
  *
  * ARCH-12-5 / I49: a `string`, `phone` or scalar input NEVER reaches an owner argument. The type is the
  * fence — there is no member here that could carry one, so binding one is not a rule to remember but a
- * compile error. §4.4.3 classifies only `enum`/`ref` inputs as AUDIT_RETAINED (C11:5752-5762); booleans
- * and scalars stay unclassified until an owner or privacy decision (C11:7413), so they stay out.
+ * compile error. The sole exception is the separately typed, server-validated journal business date
+ * carried below; it is not part of this map and cannot satisfy a closed input.
  */
 export type ClosedInputBindings = ReadonlyMap<string, readonly string[]>;
 
@@ -78,6 +78,8 @@ export interface ProjectionPlan {
   readonly c9Domain: C9Domain | null;
   readonly frozenNounsJson: unknown;
   readonly requestedScopeHash: string;
+  /** X-class, operations.journal.read only. It is never a noun, identity or authority proof. */
+  readonly retainedLocalBusinessDate: string | null;
 
   // ── context slots, each written by its one producer inside the one ordered pipeline ────────────
   /** D-2: `ctx.principal.authority`, resolved by `C9Authority.current(T)` in the request transaction. */

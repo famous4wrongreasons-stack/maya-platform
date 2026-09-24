@@ -132,6 +132,64 @@ const composer = (
   composerFor('METRIC', 'c7.measurement.read', intentProposals);
 
 describe('K3 emission — mint, compose, fit, seal', () => {
+  it('retains only a server-validated journal business date on the exact journal REFINE record', async () => {
+    const { prisma, emitter } = make();
+    const input = composerFor('SCHEDULE', 'operations.journal.read', [
+      {
+        intent_template_key: 'refine.journal.date@1',
+        capability: { space: 'C9', key: 'operations.journal.read' },
+        role: 'primary',
+      },
+      {
+        intent_template_key: 'control.dismiss@1',
+        capability: { space: 'CONTROL', key: 'control.widget.dismiss' },
+        role: 'escape',
+      },
+    ]);
+    await emitter.emit({
+      ...req(),
+      kind: 'SCHEDULE',
+      composerInput: input,
+      retainedQueryScalar: {
+        type: 'local_business_date',
+        value: '2026-09-24',
+        provenance: 'server_validated',
+      },
+    });
+    const refine = prisma.records.find((record) => record.effect === 'REFINE');
+    const dismiss = prisma.records.find(
+      (record) => record.effect === 'CONTROL',
+    );
+    expect(refine?.retainedLocalBusinessDate).toBe('2026-09-24');
+    expect(dismiss?.retainedLocalBusinessDate).toBeNull();
+  });
+
+  it('refuses invalid, unscoped and client-asserted retained scalars before any write', async () => {
+    for (const request of [
+      {
+        ...req(),
+        retainedQueryScalar: {
+          type: 'local_business_date',
+          value: '2026-02-30',
+          provenance: 'server_validated',
+        },
+      },
+      {
+        ...req(),
+        retainedQueryScalar: {
+          type: 'local_business_date',
+          value: '2026-09-24',
+          provenance: 'client_asserted',
+        },
+      },
+    ] as unknown as Parameters<WidgetEmitterService['emit']>[0][]) {
+      const { prisma, emitter } = make();
+      await expect(emitter.emit(request)).rejects.toThrow();
+      expect(prisma.emissions).toEqual([]);
+      expect(prisma.records).toEqual([]);
+    }
+  });
+
   it('writes the emission and its intent record in one transaction', async () => {
     const { prisma, emitter } = make();
     await emitter.emit(req());

@@ -30,7 +30,8 @@ export type ProjectorSourceKind = Extract<
  */
 export type ProjectorArgumentSource =
   | { readonly from: 'frozen_noun'; readonly handle: string }
-  | { readonly from: 'closed_input'; readonly name: string };
+  | { readonly from: 'closed_input'; readonly name: string }
+  | { readonly from: 'retained_local_business_date' };
 
 /**
  * The owner's OWN completeness signal, by field path. P5 and ARCH-12-4: the projector copies what the
@@ -82,7 +83,6 @@ export const ROWS_BLOCKED_BY: readonly string[] = Object.freeze([]);
 /** Categories intentionally left unregistered by U12b; they do not block the safe first row set. */
 export const ROWS_DEFERRED_BY: readonly string[] = Object.freeze([
   'OD-5 / AMB-48(vi): principal-dependent narrowing to `data_scope.masked_fields` is an OPEN OWNER DECISION (GATES-PLAN-V11 §0.3)',
-  'C11:7413: scalar submission inputs are unclassified, so a row needing a scalar argument cannot bind one',
   'S6-2 / S6-6: F36a keys are in no owner class, so ARCH-12-7 `subject_key ∈ ownerClassKeys(result_kind)` cannot be met for them',
 ]);
 

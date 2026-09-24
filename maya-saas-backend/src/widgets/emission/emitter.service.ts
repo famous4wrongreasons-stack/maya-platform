@@ -30,6 +30,10 @@ import {
   type MintedIntentMaterial,
 } from './record-writer';
 import { SealService } from './seal.service';
+import {
+  type RetainedLocalBusinessDate,
+  validateRetainedLocalBusinessDate,
+} from '../query-scalars/local-business-date';
 
 export const K3_EMITTABLE_KINDS = [
   'METRIC',
@@ -57,6 +61,8 @@ export interface MintRequest {
   composerInput: WidgetComposerInput;
   /** Canonical server-resolved principal. Its proof hash must equal `principalProofHash`. */
   principal: PrincipalView;
+  /** The only retained scalar. Server-validated and scoped to operations.journal.read. */
+  retainedQueryScalar?: RetainedLocalBusinessDate;
 }
 
 export interface SealedEmission {
@@ -132,6 +138,8 @@ export class WidgetEmitterService {
     assertComposerInput(input);
     if (input.kind_proposal !== request.kind)
       throw new IntentTemplateRefusal('request_kind_mismatch');
+
+    const retainedLocalBusinessDate = this.retainedJournalDate(request);
 
     const resolved = input.intent_proposals.map((proposal) => ({
       proposal,
@@ -259,6 +267,7 @@ export class WidgetEmitterService {
           bodyHash,
           body,
           issuedAt,
+          retainedLocalBusinessDate,
         }) as never,
       }),
     );
@@ -322,6 +331,20 @@ export class WidgetEmitterService {
       a2Limited,
       envelope: Object.freeze(envelopeForSeal),
     });
+  }
+
+  private retainedJournalDate(request: MintRequest): string | null {
+    const scalar = request.retainedQueryScalar;
+    if (scalar === undefined) return null;
+    if (
+      request.kind !== 'SCHEDULE' ||
+      request.composerInput.capability !== 'operations.journal.read' ||
+      !request.composerInput.intent_proposals.some(
+        (proposal) => proposal.intent_template_key === 'refine.journal.date@1',
+      )
+    )
+      throw new IntentTemplateRefusal('retained_query_scalar_not_permitted');
+    return validateRetainedLocalBusinessDate(scalar);
   }
 
   async verifySeal(tenantId: string, widgetId: string): Promise<boolean> {

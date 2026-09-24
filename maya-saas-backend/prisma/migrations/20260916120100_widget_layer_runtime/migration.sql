@@ -94,6 +94,7 @@ CREATE TABLE "WidgetIntentRecord" (
     "renderedUtterance" TEXT,
     "selectedLabels" TEXT[],
     "selectionDomainLabelsJson" JSONB,
+    "retainedLocalBusinessDate" TEXT,
     "spokenTranscript" TEXT,
     "erasedAt" TIMESTAMPTZ(3),
 
@@ -511,6 +512,18 @@ ALTER TABLE "WidgetEmission" ADD CONSTRAINT "WidgetEmission_retention_after_issu
 
 -- Gate 1 reads expiry; an inverted window is never valid
 ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_expiry_after_issue_check" CHECK ("expiresAt" > "issuedAt");
+
+-- Owner decision (Wave 4): the sole retained scalar is a canonical local business date for the
+-- journal REFINE intent.  It is not a generic scalar slot and cannot name identity or authority.
+ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_journal_date_scope_check" CHECK (
+  "retainedLocalBusinessDate" IS NULL OR (
+    "effect" = 'REFINE' AND
+    "capabilitySpace" = 'C9' AND
+    "capabilityKey" = 'operations.journal.read' AND
+    "retainedLocalBusinessDate" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' AND
+    to_char(to_date("retainedLocalBusinessDate", 'YYYY-MM-DD'), 'YYYY-MM-DD') = "retainedLocalBusinessDate"
+  )
+);
 
 -- §4.5.5 — the fitter withholds, it cannot mint
 ALTER TABLE "WidgetRenderReceipt" ADD CONSTRAINT "WidgetRenderReceipt_emitted_within_minted_check" CHECK ("intentsEmitted" <= "intentsMinted");

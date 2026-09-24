@@ -643,6 +643,28 @@ the body; each stays implementable only where the body already permits it.
 | K14-04, K14-14, K14-16 | K14 bot engineering | K14 plan |
 | K14-17 | the variable name, «env-only» and the :8080 bind check; R3.12.7 (a) states the route's own credential and (b) the committed-edge test without them | engineering after R-03; the live bind check needs production permission |
 | The ingress path (K14 plan K-g) | a path choice; R3.12.7 fences the route without naming it | K14 plan; the path must satisfy R3.12.7 (b) and (f) |
-| AMB-21h, the boolean half | a retention class for a boolean answer: Block B AMB-21e concerns Gate 8's check only, and §0.4 F16 classifies a data subject's affirmation as `CONVERSATION_CONTENT` | not stated; booleans and scalars stay unclassified until an owner or privacy decision |
+| AMB-21h, the boolean half | a retention class for a boolean answer: Block B AMB-21e concerns Gate 8's check only, and §0.4 F16 classifies a data subject's affirmation as `CONVERSATION_CONTENT` | not stated; booleans and scalars stay unclassified until an owner or privacy decision. The Wave-4 journal-date ruling below is the sole typed scalar exception and does not classify generic scalars. |
+
+### Wave 4 owner ruling — retained journal local-business date
+
+`operations.journal.read` may retain exactly one replayable query scalar:
+
+```yaml
+type: local_business_date
+value: YYYY-MM-DD
+provenance: server_validated
+```
+
+The value is parsed, calendar-validated and canonicalised by the server before mint. It is stored on
+the exact journal `REFINE` intent record, erased with conversation/canonical-copy content, and is
+usable only while that intent is live. It is not a noun, identity, authority, consent or business
+fact. It cannot satisfy any such input. Every replay performs a fresh canonical owner read, and the
+owner re-evaluates tenant, principal, current entitlements, capability availability and its own
+business-timezone interpretation. Retaining the date retains no permission.
+
+No generic retained-scalar input is introduced. A row other than
+`C9:operations.journal.read`, or a record whose effect is not `REFINE`, must store `NULL` and is
+rejected by the database if it attempts otherwise. The projector passes the validated value as the
+owner's `date` argument and may neither reinterpret it nor calculate business facts from it.
 | G2-15, G2-17 | pre-auth credential and trial forms | shell and G2 plan |
 | G2-36 (SC-17) | master-scoped client list with a chat key «through R-01»; not in the ruling's set | not registered |

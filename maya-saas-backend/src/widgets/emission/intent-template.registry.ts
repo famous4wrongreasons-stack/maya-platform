@@ -30,6 +30,7 @@ export type IntentTemplateKey =
   | 'navigate.account@1'
   | 'refine.measurement@1'
   | 'refine.measurement.period@1'
+  | 'refine.journal.date@1'
   | 'refine.successor@1'
   | 'control.dismiss@1'
   | 'handoff.settings@1';
@@ -78,6 +79,10 @@ const C9_MEASUREMENT: CapabilityRef = Object.freeze({
 const C9_SETTINGS: CapabilityRef = Object.freeze({
   space: 'C9',
   key: 'settings.read',
+});
+const C9_JOURNAL: CapabilityRef = Object.freeze({
+  space: 'C9',
+  key: 'operations.journal.read',
 });
 const DISMISS: CapabilityRef = Object.freeze({
   space: 'CONTROL',
@@ -216,6 +221,26 @@ export const INTENT_TEMPLATE_REGISTRY: Readonly<
     label: 'Change period',
     utteranceTemplate: 'Show {{selection}} period',
     speechAliases: ['change period'],
+    allowedArgumentHandles: [],
+    sourceSubject: false,
+  }),
+  'refine.journal.date@1': row({
+    key: 'refine.journal.date@1',
+    version: 1,
+    effect: 'REFINE',
+    kinds: ['SCHEDULE'],
+    roles: ['primary', 'secondary', 'remedy'],
+    subject: C9_JOURNAL,
+    target: null,
+    inputSchema: null,
+    selectionDomain: {},
+    selectionDomainLabels: {},
+    priority: 1,
+    singleUse: false,
+    ttlSeconds: 600,
+    label: 'Refresh journal',
+    utteranceTemplate: 'Refresh journal',
+    speechAliases: ['refresh journal'],
     allowedArgumentHandles: [],
     sourceSubject: false,
   }),

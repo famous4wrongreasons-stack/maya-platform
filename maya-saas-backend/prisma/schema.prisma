@@ -4223,6 +4223,7 @@ model WidgetIntentRecord {
   renderedUtterance         String?                             // C
   selectedLabels            String[]                            // C
   selectionDomainLabelsJson Json?     @db.JsonB                 // C
+  retainedLocalBusinessDate String?                             // X  operations.journal.read only; erased with widget lifecycle/content
   spokenTranscript          String?                             // C
   erasedAt                  DateTime? @db.Timestamptz(3)        // A
 

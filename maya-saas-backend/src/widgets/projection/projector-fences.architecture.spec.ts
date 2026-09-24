@@ -208,6 +208,7 @@ const PROJECTION_MAY_IMPORT: Readonly<Record<string, string>> = {
   '../gate.types': "the gate contract's types",
   '../di-tokens': 'the named canonical-read DI edge',
   '../rendering/denial-projection': 'the pure P10 denial projection',
+  '../query-scalars/local-business-date': 'the pure owner-approved journal date validator',
 };
 
 /** The one call site each permitted owner has (PLAN G12 §5.3). Nothing else may be referenced. */
@@ -960,7 +961,7 @@ describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
     ).toBeGreaterThan(0);
   });
 
-  it('ARCH-12-5 [BUILD] ProjectionPlan carries no C-class column and no free-text, phone or scalar input, and a row argument comes only from a frozen noun or a closed input', () => {
+  it('ARCH-12-5 [BUILD] ProjectionPlan carries no C-class column and no free-text/phone input; its sole scalar is the typed journal date', () => {
     const port = projectionSources().find((s) =>
       s.key.endsWith('canonical-read.port.ts'),
     )!;
@@ -980,6 +981,7 @@ describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
     expect([...new Set(argumentSourceLiterals(registry))].sort()).toEqual([
       'closed_input',
       'frozen_noun',
+      'retained_local_business_date',
     ]);
   });
 
@@ -1385,6 +1387,7 @@ const planFor = (over: Partial<ProjectionPlan> = {}): ProjectionPlan =>
     c9Domain: null,
     frozenNounsJson: null,
     requestedScopeHash: 'scope',
+    retainedLocalBusinessDate: null,
     authority: { tenantId: 't', userId: 'u' },
     actor: { userId: 'u', tenantId: 't' },
     aiToolSurface: 'web',

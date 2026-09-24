@@ -157,6 +157,7 @@ export const intentRecordData = (args: {
   readonly bodyHash: string;
   readonly body: unknown;
   readonly issuedAt: Date;
+  readonly retainedLocalBusinessDate?: string | null;
 }): Record<string, unknown> => {
   const { intent } = args.material;
   if (args.material.tokenHash === null)
@@ -210,6 +211,12 @@ export const intentRecordData = (args: {
     renderedUtterance: null,
     selectedLabels: [],
     selectionDomainLabelsJson: args.material.selectionDomainLabels,
+    retainedLocalBusinessDate:
+      intent.effect === 'REFINE' &&
+      cap?.space === 'C9' &&
+      cap.key === 'operations.journal.read'
+        ? (args.retainedLocalBusinessDate ?? null)
+        : null,
     spokenTranscript: null,
   };
 };

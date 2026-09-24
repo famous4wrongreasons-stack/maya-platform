@@ -669,6 +669,7 @@ export class IntentGatewayService {
         targetJson: true,
         bodyHash: true,
         selectionDomain: true,
+        retainedLocalBusinessDate: true,
         inputSchemaHash: true,
         confirmationOfKind: true,
         confirmationOfRef: true,

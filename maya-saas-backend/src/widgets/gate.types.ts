@@ -263,6 +263,8 @@ export interface IntentRecordRow {
   readonly bodyHash: string;
   /** Gate 8's closed domain: the option ids the server declared. Labels are separate by design. */
   readonly selectionDomain: string;
+  /** Owner-approved X-class scalar; only operations.journal.read may carry it. */
+  readonly retainedLocalBusinessDate: string | null;
   readonly inputSchemaHash: string | null;
   /** Gate 7 reads both; F74's pairing check compares them. */
   readonly confirmationOfKind: string | null;

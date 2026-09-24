@@ -20,8 +20,9 @@ describe('I-MIG2 migration-2 fold', () => {
     const widgetFks = migration.match(/FOREIGN KEY/g) ?? [];
 
     expect(widgetModels).toHaveLength(14);
-    // Migration 1 owns five registry checks; this folded runtime migration owns the other 34.
-    expect(widgetChecks).toHaveLength(34);
+    // Migration 1 owns five registry checks; the runtime migration owns 34 base checks plus the
+    // owner-approved, tightly scoped journal-date check.
+    expect(widgetChecks).toHaveLength(35);
     expect(widgetFks).toHaveLength(18);
     expect(migration).toContain(
       "\"confirmationSubject\" IN ('create', 'reschedule', 'cancel')",

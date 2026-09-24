@@ -38,6 +38,7 @@ import {
   type ProjectorRow,
 } from './projector.registry';
 import { projectC9Denial } from '../rendering/denial-projection';
+import { validateLocalBusinessDate } from '../query-scalars/local-business-date';
 
 /**
  * Why a composition produced no body. A CLOSED set of literals, authored here and derived from nothing
@@ -264,6 +265,10 @@ const argumentValue = (
 ): unknown => {
   if (source.from === 'closed_input')
     return plan.closedInputs?.get(source.name) ?? null;
+  if (source.from === 'retained_local_business_date')
+    return plan.retainedLocalBusinessDate === null
+      ? null
+      : validateLocalBusinessDate(plan.retainedLocalBusinessDate);
   if (plan.resolvedNouns !== null)
     return plan.resolvedNouns.values.get(source.handle) ?? null;
   return null;

@@ -33,6 +33,7 @@ export const WIDGET_ERASURE_CLASS_MAP = Object.freeze({
     renderedUtterance: 'CONVERSATION_CONTENT',
     selectedLabels: 'CONVERSATION_CONTENT',
     selectionDomainLabelsJson: 'CONVERSATION_CONTENT',
+    retainedLocalBusinessDate: 'CANONICAL_ELSEWHERE',
     spokenTranscript: 'CONVERSATION_CONTENT',
   }),
   WidgetIntentSubmissionAudit: Object.freeze({
@@ -193,6 +194,7 @@ export class WidgetConversationErasureJob {
               "renderedUtterance" = NULL,
               "selectedLabels" = ARRAY[]::text[],
               "selectionDomainLabelsJson" = NULL,
+              "retainedLocalBusinessDate" = NULL,
               "spokenTranscript" = NULL,
               "erasedAt" = ${now}
           FROM record_targets x

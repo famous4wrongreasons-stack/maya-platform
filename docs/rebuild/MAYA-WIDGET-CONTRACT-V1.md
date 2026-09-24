@@ -5738,6 +5738,15 @@ type ErasureClass =
 | `frozen_nouns` (opaque handles naming canonical rows) | `AUDIT_RETAINED` |
 | `utterance_template`, `rendered_utterance`, `selected_labels`, `spoken_transcript` | `CONVERSATION_CONTENT` |
 | `selection_domain_labels` (the human strings of `selection_domain`'s option ids, keyed by field; column `selectionDomainLabelsJson`) | `CONVERSATION_CONTENT` |
+| `retained_local_business_date` (the server-validated `YYYY-MM-DD` copy for `operations.journal.read` only) | `CANONICAL_ELSEWHERE` |
+
+The journal-date member is the sole retained scalar in this contract version. It is accepted only as
+`{ type: 'local_business_date', value: 'YYYY-MM-DD', provenance: 'server_validated' }`, only on a
+`REFINE` intent for `C9:operations.journal.read`, and only for the intent/widget lifecycle. It is not
+a noun, identity, authority, consent or business fact. Replay re-resolves the current principal and
+current owner policy; a retained date never preserves former access. The projector passes the date
+through without timezone interpretation or fact computation; `operations.journal.read` remains the
+source owner.
 
 The table is total over §3.7's declared members and over no others: RT5's build-time test
 enumerates the columns from the schema and fails on any column with no class or more than one,
