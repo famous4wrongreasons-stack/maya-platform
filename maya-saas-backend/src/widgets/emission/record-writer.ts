@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 
 import type { IntentProposal } from '../../widget-contract/derived-shapes';
 import type { WidgetComposerInput } from '../../widget-contract/envelope';
+import type { C9Domain } from '../../widget-contract/ambient';
 import { subjectCapability } from '../../widget-contract/intent';
 import type { WidgetIntent } from '../../widget-contract/intent';
 import { stableActionJson } from '../authority/contract-bindings';
@@ -158,6 +159,8 @@ export const intentRecordData = (args: {
   readonly body: unknown;
   readonly issuedAt: Date;
   readonly retainedLocalBusinessDate?: string | null;
+  readonly revisionId?: string | null;
+  readonly c9Domain?: C9Domain | null;
 }): Record<string, unknown> => {
   const { intent } = args.material;
   if (args.material.tokenHash === null)
@@ -196,9 +199,9 @@ export const intentRecordData = (args: {
     }),
     bodyHash: args.bodyHash,
     selectionDomain: args.material.selectionDomain,
-    c9Domain: null,
+    c9Domain: args.c9Domain ?? null,
     runId,
-    revisionId: null,
+    revisionId: args.revisionId ?? null,
     approvalOfIntentRef: null,
     confirmationOfKind: null,
     confirmationOfRef: null,

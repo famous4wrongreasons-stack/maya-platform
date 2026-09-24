@@ -36,6 +36,8 @@ import { ChatReadTriggerService } from './composition/chat-read.trigger';
 import { AI_READ_WIDGET_TRIGGER } from '../ai-tools/ai-read-widget-trigger.port';
 import { AI_TYPED_WIDGET_TRIGGER } from '../ai-tools/ai-typed-widget-trigger.port';
 import { TypedStep0Service } from './composition/typed-step0';
+import { C9_WIDGET_TRIGGER } from '../orchestration/c9-widget-trigger.port';
+import { C9ComposeTriggerService } from './composition/c9-compose.trigger';
 
 /**
  * K3 — the widget runtime.
@@ -94,6 +96,8 @@ import { TypedStep0Service } from './composition/typed-step0';
     { provide: AI_READ_WIDGET_TRIGGER, useExisting: ChatReadTriggerService },
     TypedStep0Service,
     { provide: AI_TYPED_WIDGET_TRIGGER, useExisting: TypedStep0Service },
+    C9ComposeTriggerService,
+    { provide: C9_WIDGET_TRIGGER, useExisting: C9ComposeTriggerService },
     EffectRouterService,
   ],
   exports: [

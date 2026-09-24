@@ -108,6 +108,10 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
   'orchestration/c9.contract.ts': {
     why: 'C9 contract types (the principal)',
   },
+  'orchestration/c9-widget-trigger.port.ts': {
+    why: 'P-MT1 narrow post-run projection hook token and DI-free types',
+    only: ['composition/c9-compose.trigger.ts', 'widgets.module.ts'],
+  },
   'ai-tools/ai-tool.catalog.ts': { why: 'the frozen AI tool catalogue' },
   'ai-tools/ai-tool.types.ts': { why: 'AI tool definition types' },
   'ai-tools/ai-read-widget-trigger.port.ts': {

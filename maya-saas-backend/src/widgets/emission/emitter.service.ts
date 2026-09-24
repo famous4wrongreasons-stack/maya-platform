@@ -12,6 +12,7 @@ import type { CapabilityRef } from '../../widget-contract/capability-ref';
 import type { WidgetComposerInput } from '../../widget-contract/envelope';
 import type { AuthorityEnvelope } from '../../widget-contract/envelope-roots';
 import type { WidgetKind } from '../../widget-contract/kinds';
+import type { C9Domain } from '../../widget-contract/ambient';
 import { profileFor } from '../carriers/channel-profile';
 import { fit } from '../carriers/fitter';
 import { stableActionJson } from '../authority/contract-bindings';
@@ -63,6 +64,11 @@ export interface MintRequest {
   principal: PrincipalView;
   /** The only retained scalar. Server-validated and scoped to operations.journal.read. */
   retainedQueryScalar?: RetainedLocalBusinessDate;
+  /** P-MT1: server-derived run witness metadata; never accepted from a client. */
+  runWitness?: Readonly<{
+    revisionId: string;
+    c9Domain: C9Domain;
+  }>;
 }
 
 export interface SealedEmission {
@@ -268,6 +274,8 @@ export class WidgetEmitterService {
           body,
           issuedAt,
           retainedLocalBusinessDate,
+          revisionId: request.runWitness?.revisionId ?? null,
+          c9Domain: request.runWitness?.c9Domain ?? null,
         }) as never,
       }),
     );

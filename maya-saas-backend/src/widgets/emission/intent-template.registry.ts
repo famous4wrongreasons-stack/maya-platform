@@ -32,6 +32,7 @@ export type IntentTemplateKey =
   | 'refine.measurement.period@1'
   | 'refine.journal.date@1'
   | 'refine.successor@1'
+  | 'control.run.cancel@1'
   | 'control.dismiss@1'
   | 'handoff.settings@1';
 
@@ -87,6 +88,10 @@ const C9_JOURNAL: CapabilityRef = Object.freeze({
 const DISMISS: CapabilityRef = Object.freeze({
   space: 'CONTROL',
   key: 'control.widget.dismiss',
+});
+const RUN_CANCEL: CapabilityRef = Object.freeze({
+  space: 'CONTROL',
+  key: 'control.run.cancel',
 });
 
 const PERIOD_SCHEMA: InputSchema = Object.freeze({
@@ -281,6 +286,26 @@ export const INTENT_TEMPLATE_REGISTRY: Readonly<
     label: 'Dismiss',
     utteranceTemplate: 'Dismiss',
     speechAliases: ['dismiss', 'close'],
+    allowedArgumentHandles: [],
+    sourceSubject: false,
+  }),
+  'control.run.cancel@1': row({
+    key: 'control.run.cancel@1',
+    version: 1,
+    effect: 'CONTROL',
+    kinds: ['PROGRESS'],
+    roles: ['control'],
+    subject: RUN_CANCEL,
+    target: null,
+    inputSchema: null,
+    selectionDomain: {},
+    selectionDomainLabels: {},
+    priority: 0,
+    singleUse: true,
+    ttlSeconds: 600,
+    label: 'Cancel run',
+    utteranceTemplate: 'Cancel run',
+    speechAliases: ['cancel run', 'stop run'],
     allowedArgumentHandles: [],
     sourceSubject: false,
   }),

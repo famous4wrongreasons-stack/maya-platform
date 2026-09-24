@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { C9Agents } from './c9.agents';
 import { C9Allowance } from './c9.allowance';
 import { C9ContextService } from './c9.context';
@@ -14,6 +15,10 @@ import {
   c9Hash,
   c9Object,
 } from './c9.contract';
+import {
+  C9_WIDGET_TRIGGER,
+  type C9WidgetTriggerPort,
+} from './c9-widget-trigger.port';
 
 export { C9_ROUTES };
 
@@ -58,6 +63,7 @@ export class C9Orchestrator {
     private readonly work: C9WorkService,
     private readonly agents: C9Agents,
     private readonly allowance: C9Allowance,
+    @Optional() private readonly moduleRef?: ModuleRef,
   ) {}
   requestIdentity(channelProof?: string) {
     return this.store.event(channelProof);
@@ -132,7 +138,7 @@ export class C9Orchestrator {
     const statuses = answers.map(
       (a) => c9Object(a.completeness).status as string,
     );
-    return {
+    const answer: C9Answer = {
       contract: 'maya.c9-response/1',
       runId: root.id,
       objectiveKey,
@@ -164,6 +170,21 @@ export class C9Orchestrator {
         unknownIsFailure: false,
       },
     };
+    const revision = snapshot.revisions.at(-1);
+    const domain = domains[0];
+    if (revision && domain) {
+      const trigger = this.moduleRef?.get<C9WidgetTriggerPort>(
+        C9_WIDGET_TRIGGER,
+        { strict: false },
+      );
+      await trigger?.afterRun({
+        runId: root.id,
+        revisionId: revision.id,
+        domain,
+        state: root.state === 'CANCELLED' ? 'cancelled' : 'done',
+      });
+    }
+    return answer;
   }
   /** One reserved, fenced receipt per delegated read. An exhausted budget stops, never truncates silently. */
   private async delegate(
