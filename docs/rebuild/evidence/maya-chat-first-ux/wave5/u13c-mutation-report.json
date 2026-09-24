@@ -1,0 +1,1039 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "87e28092dfdaae88e748444561495dc1da040264",
+  "battery_hashes": {
+    "gate13.json": "84086be1abbbf11d8729e5f13a934a1af791a6156d04911152429b63e766f4ce"
+  },
+  "partition": null,
+  "startedAt": "2026-09-24T18:51:26.058Z",
+  "batteries": [
+    "gate13.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": "test/widgets-live/gate13-routing.live-spec.ts",
+    "live_filter": null,
+    "unit_tests": "src/widgets/(routing/effect-router|owner-ports/(approval-request|commit-booking|draft-owner)|stores/widget-stores|control/control-registry)"
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-c20f63a08e",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-c20f63a08e",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "mutants": [
+    {
+      "battery": "gate13.json",
+      "id": "M13-1",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G13-P01"
+      ],
+      "kills": [
+        {
+          "killer": "G13-P01",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss G13-P01 refuses a missing record without claim, handler or receipt",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-2",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 2,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G13-R10"
+      ],
+      "kills": [
+        {
+          "killer": "G13-R10",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss G13-R10 exposes exactly the seven routable effects, with no NONE",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-2b",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "B15/B28"
+      ],
+      "kills": [
+        {
+          "killer": "B15/B28",
+          "test": "U13a — Gate 13 architecture barriers B15/B28 has one closed seven-literal effect switch and no NONE/default edge",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-3",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "N05"
+      ],
+      "kills": [
+        {
+          "killer": "N05",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss N05 an invalid HANDOFF target fails before the claim",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-3b",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "AMB-54"
+      ],
+      "kills": [
+        {
+          "killer": "AMB-54",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss AMB-54 one concurrent claimant wins; the loser executes no destination and writes no receipt",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-4",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G13-I5"
+      ],
+      "kills": [
+        {
+          "killer": "G13-I5",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss G13-I5 a reusable record preserves reusable claim semantics while still recording its adjudication",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-10",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G13-R5"
+      ],
+      "kills": [
+        {
+          "killer": "G13-R5",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss G13-R5 claims once, runs the one registered control, and writes a B-29 receipt with no echo",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-12",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G13-R5"
+      ],
+      "kills": [
+        {
+          "killer": "G13-R5",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss G13-R5 claims once, runs the one registered control, and writes a B-29 receipt with no echo",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-14",
+      "files": [
+        "src/widgets/stores/intent-audit.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "writeReceipt is idempotent by tenant/token and never retains an utterance echo"
+      ],
+      "kills": [
+        {
+          "killer": "writeReceipt is idempotent by tenant/token and never retains an utterance echo",
+          "test": "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) writeReceipt is idempotent by tenant/token and never retains an utterance echo",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-15",
+      "files": [
+        "src/widgets/stores/intent-audit.store.ts"
+      ],
+      "edits_applied": 3,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "writeReceipt is idempotent by tenant/token and never retains an utterance echo"
+      ],
+      "kills": [
+        {
+          "killer": "writeReceipt is idempotent by tenant/token and never retains an utterance echo",
+          "test": "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) writeReceipt is idempotent by tenant/token and never retains an utterance echo",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-18",
+      "files": [
+        "src/widgets/stores/intent-audit.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "claim and reconciliation are tenant-scoped compare-and-set writes"
+      ],
+      "kills": [
+        {
+          "killer": "claim and reconciliation are tenant-scoped compare-and-set writes",
+          "test": "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) claim and reconciliation are tenant-scoped compare-and-set writes",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-20",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G13-P07"
+      ],
+      "kills": [
+        {
+          "killer": "G13-P07",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss G13-P07 routes booking COMMIT through the canonical owner with no router-side business facts",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-22",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "B28"
+      ],
+      "kills": [
+        {
+          "killer": "B28",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss B28 refuses INVENTED without claim, handler or receipt",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-23",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G13-R5"
+      ],
+      "kills": [
+        {
+          "killer": "G13-R5",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss G13-R5 claims once, runs the one registered control, and writes a B-29 receipt with no echo",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-25",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "N-CTRL-FOREIGN-P"
+      ],
+      "kills": [
+        {
+          "killer": "N-CTRL-FOREIGN-P",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss N-CTRL-FOREIGN-P: a control without a live principal has no destination and is not claimed",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M-R324",
+      "files": [
+        "src/widgets/control/control-registry.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "R3.2.4"
+      ],
+      "kills": [
+        {
+          "killer": "R3.2.4",
+          "test": "U13a — Gate 13 architecture barriers R3.2.4 keeps principal and tenant inside the handler query; dismiss is cancelled-only",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "R3.2.4",
+          "test": "U13a — control.widget.dismiss owns only presentation state R3.2.4 scopes tenant and principal in the read and writes LIVE → CANCELLED / cancelled",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-U13C-5",
+      "files": [
+        "src/widgets/owner-ports/draft-owner.registry.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "N08"
+      ],
+      "kills": [
+        {
+          "killer": "N08",
+          "test": "B-31 draft owner registry N08 fails closed for an unbound or unknown propose key",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-U13C-9",
+      "files": [
+        "src/widgets/owner-ports/approval-request.adapter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "N09"
+      ],
+      "kills": [
+        {
+          "killer": "N09",
+          "test": "U13c approval request owner port N09 refuses an unknown capability or missing frozen noun before owner invocation",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-U13C-11",
+      "files": [
+        "src/widgets/owner-ports/commit-booking.adapter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "N11"
+      ],
+      "kills": [
+        {
+          "killer": "N11",
+          "test": "U13c booking COMMIT owner port N11 refuses an owner invocation whose Action Engine request does not preserve source and key",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-U13C-13",
+      "files": [
+        "src/widgets/stores/intent-audit.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "N09/F75"
+      ],
+      "kills": [
+        {
+          "killer": "N09/F75",
+          "test": "Gate 13 — PostgreSQL claim, receipt and CONTROL routing (U13a) N09/F75 [U] atomically consumes an exact approve/reject sibling pair with one concurrent winner",
+          "step": "live",
+          "entry": "U",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "U": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-U13C-16",
+      "files": [
+        "src/widgets/owner-ports/commit-booking.adapter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "N12/B-29"
+      ],
+      "kills": [
+        {
+          "killer": "N12/B-29",
+          "test": "U13c booking COMMIT owner port N12/B-29 accepts UNKNOWN without inventing a receipt ref and leaves reconciliation to the canonical path",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-U13C-21",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G6-14C"
+      ],
+      "kills": [
+        {
+          "killer": "G6-14C",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss G6-14C counts a fresh Gate 14 revocation but preserves Gate 14 refusal",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-U13C-G6-REUSE",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 2,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G6-14C"
+      ],
+      "kills": [
+        {
+          "killer": "G6-14C",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss G6-14C counts a fresh Gate 14 revocation but preserves Gate 14 refusal",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-09-24T18:56:22.636Z"
+}

@@ -1,0 +1,48 @@
+{
+  "contract": "maya.widgets-wave5-u13c-checkpoint/1",
+  "head": "87e28092dfdaae88e748444561495dc1da040264",
+  "unit": "U13c",
+  "status": "PASS",
+  "productionDeployment": false,
+  "realBusinessEffects": 0,
+  "checks": {
+    "targetedUnitAndArchitecture": {
+      "status": "PASS",
+      "suites": 8,
+      "tests": 83
+    },
+    "postgresqlGate13": {
+      "status": "PASS",
+      "suites": 1,
+      "tests": 7,
+      "includes": [
+        "F75 exact approve/reject sibling binding",
+        "serializable concurrent single winner",
+        "atomic sibling consumption",
+        "B-29 same-receipt reconciliation"
+      ]
+    },
+    "applicationTypecheck": "PASS",
+    "scriptsTypecheck": "PASS",
+    "widgetsLiveTypecheck": "PASS",
+    "k3StructuralChecks": "10/10 PASS",
+    "build": "PASS",
+    "ownedLint": "PASS",
+    "mutationBattery": {
+      "status": "AS-DECLARED",
+      "mutants": 23,
+      "buildKilled": 22,
+      "liveKilled": 1,
+      "unexpectedSurvivors": 0,
+      "mismatches": 0,
+      "report": "u13c-mutation-report.json",
+      "sha256": "bd86bf536816b57ee4e96af84bd588bc6d613bf0b89e1df10590a4bc35cdd541"
+    }
+  },
+  "invariants": {
+    "actionEngineModuleImportedIntoWidgetLayer": false,
+    "controlledFixtureModeInProductionWidgetPath": false,
+    "gate14GovernsFreshAuthority": true,
+    "a2_2BackstopChanged": false
+  }
+}
