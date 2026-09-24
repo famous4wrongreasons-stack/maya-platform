@@ -241,14 +241,25 @@ describe('K3 emission — mint, compose, fit, seal', () => {
 
   it('hashes the body canonically, so key order cannot change the hash', async () => {
     const { emitter } = make();
-    const a = await emitter.emit({
-      ...req(),
-      body: { alpha: 1, beta: { x: 1, y: 2 } },
-    });
-    const b = await emitter.emit({
-      ...req(),
-      body: { beta: { y: 2, x: 1 }, alpha: 1 },
-    });
+    // The body-hash contract also binds the intent expiry. Hold admission time fixed so this
+    // counterfactual changes exactly one thing: object-key insertion order. Without that control,
+    // two legitimate admissions on adjacent milliseconds can make the test compare different
+    // envelopes and intermittently report a canonical-JSON defect that did not occur.
+    const admittedAt = new Date('2026-09-24T12:00:00.000Z');
+    const a = await emitter.emit(
+      {
+        ...req(),
+        body: { alpha: 1, beta: { x: 1, y: 2 } },
+      },
+      admittedAt,
+    );
+    const b = await emitter.emit(
+      {
+        ...req(),
+        body: { beta: { y: 2, x: 1 }, alpha: 1 },
+      },
+      admittedAt,
+    );
     // Same content, different insertion order. A hash that differed here would be a hash of the
     // program that built the object rather than of the body.
     expect(a.bodyHash).toBe(b.bodyHash);
