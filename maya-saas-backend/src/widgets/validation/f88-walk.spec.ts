@@ -279,6 +279,34 @@ describe('F88 — the one structural validator, at runtime', () => {
           [{ at: 'intents', shape: 'WidgetIntent' }],
         ),
       ).toHaveLength(1);
+
+      const schedule = {
+        body: { entries: [{ state: { state: 'KNOWN', value: 'BOOKED' } }] },
+      };
+      expect(f88Violations('WidgetEnvelope', schedule)).toHaveLength(2);
+      expect(
+        f88Violations('WidgetEnvelope', schedule, [
+          { at: 'body.entries[].state', shape: 'Cell' },
+        ]),
+      ).toEqual([]);
+      expect(
+        f88Violations(
+          'WidgetEnvelope',
+          {
+            body: {
+              entries: [{ state: { state: 'MINTED', value: 'BOOKED' } }],
+            },
+          },
+          [{ at: 'body.entries[].state', shape: 'Cell' }],
+        ),
+      ).toHaveLength(1);
+      expect(
+        f88Violations(
+          'WidgetEnvelope',
+          { body: { unrelated: { state: 'KNOWN' } } },
+          [{ at: 'body.entries[].state', shape: 'Cell' }],
+        ),
+      ).toHaveLength(1);
     });
   });
 

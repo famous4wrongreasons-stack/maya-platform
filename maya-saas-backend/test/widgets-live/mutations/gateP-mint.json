@@ -21,8 +21,8 @@
     "id": "MINT-M3",
     "description": "raise the CONTROL escape priority so it is no longer the permanent priority-zero exit",
     "file": "src/widgets/emission/intent-template.registry.ts",
-    "find": "    priority: 0,\n    singleUse: true,",
-    "replace": "    priority: 1,\n    singleUse: true,",
+    "find": "  'control.dismiss@1': row({\n    key: 'control.dismiss@1',\n    version: 1,\n    effect: 'CONTROL',\n    kinds: CONTROL_KINDS,\n    roles: ['escape'],\n    subject: DISMISS,\n    target: null,\n    inputSchema: null,\n    selectionDomain: {},\n    selectionDomainLabels: {},\n    priority: 0,\n    singleUse: true,",
+    "replace": "  'control.dismiss@1': row({\n    key: 'control.dismiss@1',\n    version: 1,\n    effect: 'CONTROL',\n    kinds: CONTROL_KINDS,\n    roles: ['escape'],\n    subject: DISMISS,\n    target: null,\n    inputSchema: null,\n    selectionDomain: {},\n    selectionDomainLabels: {},\n    priority: 1,\n    singleUse: true,",
     "killers": ["MINT-1"],
     "expect": "build-killed"
   },
@@ -30,8 +30,8 @@
     "id": "MINT-M4",
     "description": "make the CONTROL escape reusable",
     "file": "src/widgets/emission/intent-template.registry.ts",
-    "find": "    priority: 0,\n    singleUse: true,\n    ttlSeconds: 600,",
-    "replace": "    priority: 0,\n    singleUse: false,\n    ttlSeconds: 600,",
+    "find": "  'control.dismiss@1': row({\n    key: 'control.dismiss@1',\n    version: 1,\n    effect: 'CONTROL',\n    kinds: CONTROL_KINDS,\n    roles: ['escape'],\n    subject: DISMISS,\n    target: null,\n    inputSchema: null,\n    selectionDomain: {},\n    selectionDomainLabels: {},\n    priority: 0,\n    singleUse: true,\n    ttlSeconds: 600,",
+    "replace": "  'control.dismiss@1': row({\n    key: 'control.dismiss@1',\n    version: 1,\n    effect: 'CONTROL',\n    kinds: CONTROL_KINDS,\n    roles: ['escape'],\n    subject: DISMISS,\n    target: null,\n    inputSchema: null,\n    selectionDomain: {},\n    selectionDomainLabels: {},\n    priority: 0,\n    singleUse: false,\n    ttlSeconds: 600,",
     "killers": ["MINT-1"],
     "expect": "build-killed"
   },

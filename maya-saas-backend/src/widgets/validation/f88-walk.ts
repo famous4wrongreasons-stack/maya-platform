@@ -119,7 +119,16 @@ export const f88Violations = (
         const here = path === '' ? key : `${path}.${key}`;
         const child = (node as Record<string, unknown>)[key];
         const begins = nested.find((n) => n.at === here);
-        if (FORBIDDEN.has(key) && !admitted(currentShape, here, depth, child))
+        // A certified nested-shape boundary owns the value at this exact path.
+        // The static contract checker already admits the declared member there;
+        // restart the runtime walk at that shape instead of treating the member
+        // name itself as an untyped payload key. Any forbidden key *inside* the
+        // nested value is still checked against that shape's closed F88.2 row.
+        if (
+          FORBIDDEN.has(key) &&
+          begins === undefined &&
+          !admitted(currentShape, here, depth, child)
+        )
           violations.push({ shape: currentShape, key, path: here, depth });
         if (begins) visit(child, begins.shape, '', 0);
         else visit(child, currentShape, here, depth + 1);

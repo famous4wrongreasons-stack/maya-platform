@@ -58,7 +58,13 @@ const cell = (value: unknown, state = 'KNOWN') => ({
   reason_code: state === 'KNOWN' ? null : 'NOT_COLLECTED',
   fact_ref: 0,
   as_of: '2026-09-16T08:00:00.000Z',
-  evidence_refs: ['h_' + 'a'.repeat(32)],
+  evidence_refs: [
+    {
+      ref: 'h_' + 'a'.repeat(32),
+      class: 'c9_invocation_handle',
+      dereferenceable_until: null,
+    },
+  ],
   next_intent_ref: null,
 });
 const measure = (value: unknown, state = 'KNOWN') => ({
@@ -72,7 +78,7 @@ const measure = (value: unknown, state = 'KNOWN') => ({
   comparison: null,
 });
 const appointmentComposition = (
-  facts: Record<string, unknown> = {
+  inputs: Record<string, unknown> = {
     when: measure('2026-09-17T12:00:00.000Z'),
     service: cell('Стрижка'),
   },
@@ -86,7 +92,7 @@ const appointmentComposition = (
     artefact_ref: 'appointment-a',
     artefact_kind: 'appointment',
     artefact_created_at: '2026-09-16T08:00:00.000Z',
-    facts,
+    inputs,
   }) as MomentCompositionInput;
 
 const perm = (over: Partial<LivePermission> = {}): LivePermission => ({
@@ -616,7 +622,7 @@ describe('K13 — PR5b: silence is chosen, and it leaves a row', () => {
       const out = composeOrSuppress({
         momentKey: 'appointment_reminder',
         compositionInput: appointmentComposition({
-          ...compositionInput.facts,
+          ...compositionInput.inputs,
           service: cell('Стрижка', state),
         }),
         dedupeKey: 'd'.repeat(64),
@@ -638,7 +644,7 @@ describe('K13 — PR5b: silence is chosen, and it leaves a row', () => {
         momentKey: 'appointment_reminder',
         compositionInput: appointmentComposition({
           when: measure('2026-09-17T12:00:00.000Z'),
-        }) as never,
+        }),
         dedupeKey: 'd'.repeat(64),
         subjectPrincipalProofHash: null,
         now: new Date('2026-09-16T09:00:00.000Z'),

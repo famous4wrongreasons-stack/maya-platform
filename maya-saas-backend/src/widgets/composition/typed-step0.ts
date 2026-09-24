@@ -172,7 +172,9 @@ export const typedInputsForUtterance = (
   )
     return null;
   const entries: Array<readonly [string, string]> = [];
-  for (const [field, labels] of Object.entries(labelsValue)) {
+  for (const [field, labels] of Object.entries(
+    labelsValue as Record<string, unknown>,
+  )) {
     if (typeof labels !== 'object' || labels === null || Array.isArray(labels))
       continue;
     for (const [id, label] of Object.entries(labels))

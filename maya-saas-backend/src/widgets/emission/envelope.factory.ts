@@ -5,7 +5,6 @@ import type {
 } from '../../widget-contract/envelope';
 import type { WidgetIntent } from '../../widget-contract/intent';
 import type { WidgetKind } from '../../widget-contract/kinds';
-import type { RenderTier } from '../../widget-contract/lifecycle';
 import { stableActionJson } from '../authority/contract-bindings';
 import type { PrincipalView } from '../gate.types';
 import { sha256Hex } from '../token.util';
@@ -59,9 +58,7 @@ export const f88NestedShapesForEnvelope = (
   ]);
 };
 
-const fallbackCompleteness = (
-  requestedScopeHash: string,
-): Completeness => ({
+const fallbackCompleteness = (requestedScopeHash: string): Completeness => ({
   status: 'UNAVAILABLE',
   requestedScopeHash,
   returnedCount: 0,
@@ -196,7 +193,10 @@ const leafPaths = (value: unknown): readonly string[] => {
       if (entries.length === 0) paths.push(path || '/');
       else
         for (const [key, child] of entries)
-          visit(child, `${path}/${key.replaceAll('~', '~0').replaceAll('/', '~1')}`);
+          visit(
+            child,
+            `${path}/${key.replaceAll('~', '~0').replaceAll('/', '~1')}`,
+          );
       return;
     }
     paths.push(path || '/');
@@ -207,6 +207,7 @@ const leafPaths = (value: unknown): readonly string[] => {
 
 const stripToken = (intent: WidgetIntent) => {
   const { intent_token: _token, ...rest } = intent;
+  void _token;
   return rest;
 };
 
@@ -251,7 +252,9 @@ export const buildEnvelopeWithoutSeal = (args: {
 }) => {
   const completeness =
     args.input.facts[0]?.completeness ??
-    fallbackCompleteness(sha256Hex(stableActionJson(args.input.correlation_refs)));
+    fallbackCompleteness(
+      sha256Hex(stableActionJson(args.input.correlation_refs)),
+    );
   const evidence = [
     ...new Set(args.input.facts.flatMap((fact) => fact.evidence_refs)),
   ];
@@ -264,9 +267,7 @@ export const buildEnvelopeWithoutSeal = (args: {
   const bodyText =
     typeof textRecord.body === 'string' ? textRecord.body : headline;
   const interactive = interactiveRefs(args.kind, args.body, args.intents);
-  const cellIndexDigest = sha256Hex(
-    stableActionJson(leafPaths(args.body)),
-  );
+  const cellIndexDigest = sha256Hex(stableActionJson(leafPaths(args.body)));
   const limitations = args.limitations.map((code) => ({
     code,
     text: {
@@ -375,9 +376,7 @@ export const buildEnvelopeWithoutSeal = (args: {
       text_equivalent: {
         headline,
         body: bodyText,
-        itemized: Array.isArray(textRecord.itemized)
-          ? textRecord.itemized
-          : [],
+        itemized: Array.isArray(textRecord.itemized) ? textRecord.itemized : [],
         completeness_sentence:
           typeof textRecord.completeness_sentence === 'string'
             ? textRecord.completeness_sentence
@@ -402,7 +401,7 @@ export const buildEnvelopeWithoutSeal = (args: {
       contract: 'maya.render.receipt/1',
       profile_id: args.fitting.profileId,
       profile_version: 1,
-      render_tier: args.fitting.tier as RenderTier,
+      render_tier: args.fitting.tier,
       intents_minted: args.fitting.intentsMinted,
       intents_emitted: args.intents.length,
       intents_withheld: args.fitting.intentsWithheld.map((entry) => ({
@@ -429,8 +428,6 @@ export const buildEnvelopeWithoutSeal = (args: {
       policy_context_echo: null,
     },
   };
-  return envelope as unknown as Omit<
-    WidgetEnvelope,
-    never
-  > & Readonly<Record<string, unknown>>;
+  return envelope as unknown as Omit<WidgetEnvelope, never> &
+    Readonly<Record<string, unknown>>;
 };

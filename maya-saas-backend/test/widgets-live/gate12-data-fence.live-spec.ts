@@ -356,13 +356,15 @@ async function runL00<C>(
       }
 
   expect(requests).toBe(20);
-  // ARCH-12-13's live half, on the process that just served twenty submissions: only the finite U12b
-  // row set is registered, while the still-unruled categories remain explicitly deferred.
+  // ARCH-12-13's live half, on the process that just served twenty submissions: only the finite
+  // contract-approved row set is registered, while the still-unruled categories remain explicitly
+  // deferred.
   expect(PROJECTOR_REGISTRY.map((row) => row.subject_key)).toEqual([
     'C9:catalog.services.read',
     'C9:catalog.staff.read',
     'C9:booking.availability.read',
     'C9:company.business-hours.read',
+    'C9:operations.journal.read',
     'C9:c9.no_action',
     'C9:appointments.own.reschedule',
   ]);

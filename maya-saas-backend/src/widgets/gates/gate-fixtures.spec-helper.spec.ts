@@ -48,6 +48,7 @@ export const rec = (over: Partial<IntentRecordRow> = {}): IntentRecordRow => ({
   confirmationIdempotencyKey: null,
   confirmationSubject: null,
   approvalDecision: null,
+  retainedLocalBusinessDate: null,
   frozenNounsJson: null,
   requestedScopeHash: 'e'.repeat(64),
   runId: null,

@@ -158,8 +158,8 @@
     "id": "M13-25",
     "description": "a CONTROL token without a principal proof reaches the handler",
     "file": "src/widgets/routing/effect-router.service.ts",
-    "find": "      input.principalProofHash.length === 0 ||\n      subject?.space !== 'CONTROL'",
-    "replace": "      subject?.space !== 'CONTROL'",
+    "find": "    if (input.principalProofHash.length === 0 || subject?.space !== 'CONTROL')\n      return null;",
+    "replace": "    if (subject?.space !== 'CONTROL')\n      return null;",
     "killers": ["N-CTRL-FOREIGN-P"],
     "expect": "build-killed"
   },

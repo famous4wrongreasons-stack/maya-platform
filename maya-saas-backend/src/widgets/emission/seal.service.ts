@@ -103,10 +103,13 @@ export const sealTermTuple = (terms: SealTerms): readonly (string | null)[] => [
   terms.sealKeyVersion ?? CURRENT_SEAL_KEY_VERSION,
 ];
 
-let widgetIdentity: ActionIdentityService | null = null;
+let widgetIdentity: Readonly<{
+  identitySecret: string;
+  payloadSecret: string;
+  service: ActionIdentityService;
+}> | null = null;
 
 const keyedIdentity = (): ActionIdentityService => {
-  if (widgetIdentity) return widgetIdentity;
   const pick = (names: readonly string[]): string => {
     for (const name of names) {
       const value = process.env[name];
@@ -115,17 +118,22 @@ const keyedIdentity = (): ActionIdentityService => {
     throw new SealKeyUnavailableError(`no key: set one of ${names.join(', ')}`);
   };
   try {
-    widgetIdentity = new ActionIdentityService(
-      pick(SEAL_KEY_ENV.identity),
-      pick(SEAL_KEY_ENV.payload),
-    );
+    const identitySecret = pick(SEAL_KEY_ENV.identity);
+    const payloadSecret = pick(SEAL_KEY_ENV.payload);
+    if (
+      widgetIdentity?.identitySecret === identitySecret &&
+      widgetIdentity.payloadSecret === payloadSecret
+    )
+      return widgetIdentity.service;
+    const service = new ActionIdentityService(identitySecret, payloadSecret);
+    widgetIdentity = { identitySecret, payloadSecret, service };
+    return service;
   } catch (error) {
     if (error instanceof SealKeyUnavailableError) throw error;
     throw new SealKeyUnavailableError(
       error instanceof Error ? error.message : 'the key was refused',
     );
   }
-  return widgetIdentity;
 };
 
 /**

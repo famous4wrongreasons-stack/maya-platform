@@ -124,6 +124,10 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
     why: 'P-TYPED narrow pre-LLM carrier token and transport-neutral port types',
     only: ['composition/typed-step0.ts', 'widgets.module.ts'],
   },
+  'operational-alerts/operational-alert-widget-trigger.port.ts': {
+    why: 'P-MT3 narrow post-admission projection hook token and transport-neutral port types',
+    only: ['composition/moment.trigger.ts', 'widgets.module.ts'],
+  },
   'action-engine/action-engine.registry.ts': {
     why: 'the Action Engine capability registry: a plain class over static rows, constructed as a value (D-6 registries)',
   },

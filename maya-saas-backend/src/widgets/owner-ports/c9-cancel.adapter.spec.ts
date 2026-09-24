@@ -24,19 +24,57 @@ describe('U13b C9 cancellation owner adapter', () => {
 
   it('calls the canonical owner once with a deterministic incident identity', async () => {
     await expect(adapter.cancel(input)).resolves.toBe(true);
-    const first = store.cancel.mock.calls[0];
+    const calls = store.cancel.mock.calls as unknown as Array<[string, string]>;
+    const first = calls[0];
+    if (first === undefined) throw new Error('expected one cancel call');
     await expect(adapter.cancel(input)).resolves.toBe(true);
-    expect(store.cancel).toHaveBeenNthCalledWith(1, runId, first[1]);
-    expect(store.cancel).toHaveBeenNthCalledWith(2, runId, first[1]);
+    const finalCalls = store.cancel.mock.calls as unknown as Array<
+      [string, string]
+    >;
+    expect(finalCalls).toEqual([
+      [runId, first[1]],
+      [runId, first[1]],
+    ]);
   });
 
   it.each([
-    { record: rec({ tenantId: 'foreign', principalProofHash, runId, revisionId }) },
-    { record: rec({ tenantId: 't1', principalProofHash: 'x'.repeat(64), runId, revisionId }) },
-    { record: rec({ tenantId: 't1', principalProofHash, runId: null, revisionId }) },
-    { record: rec({ tenantId: 't1', principalProofHash, runId, revisionId: null }) },
-  ])('refuses foreign or incomplete run identity with zero owner calls', async (patch) => {
-    await expect(adapter.cancel({ ...input, ...patch })).resolves.toBe(false);
-    expect(store.cancel).not.toHaveBeenCalled();
-  });
+    {
+      record: rec({
+        tenantId: 'foreign',
+        principalProofHash,
+        runId,
+        revisionId,
+      }),
+    },
+    {
+      record: rec({
+        tenantId: 't1',
+        principalProofHash: 'x'.repeat(64),
+        runId,
+        revisionId,
+      }),
+    },
+    {
+      record: rec({
+        tenantId: 't1',
+        principalProofHash,
+        runId: null,
+        revisionId,
+      }),
+    },
+    {
+      record: rec({
+        tenantId: 't1',
+        principalProofHash,
+        runId,
+        revisionId: null,
+      }),
+    },
+  ])(
+    'refuses foreign or incomplete run identity with zero owner calls',
+    async (patch) => {
+      await expect(adapter.cancel({ ...input, ...patch })).resolves.toBe(false);
+      expect(store.cancel).not.toHaveBeenCalled();
+    },
+  );
 });

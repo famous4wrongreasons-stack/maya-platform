@@ -1,4 +1,10 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  Logger,
+  Optional,
+} from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import type { Prisma, Membership, OperationalAlertRun } from '@prisma/client';
 import { stableActionJson } from '../action-engine/action-engine.identity';
 import { PrismaService } from '../prisma/prisma.service';
@@ -17,15 +23,73 @@ import {
 } from './operational-alert.contract';
 import { OperationalAlertStore } from './operational-alert.store';
 import { OperationalAlertSourceService } from './operational-alert-source.service';
+import {
+  OPERATIONAL_ALERT_WIDGET_TRIGGER,
+  type OperationalAlertWidgetTriggerPort,
+} from './operational-alert-widget-trigger.port';
 @Injectable()
 export class OperationalAlertsService {
+  private readonly logger = new Logger(OperationalAlertsService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly context: TenantContextService,
     private readonly store: OperationalAlertStore,
     private readonly sources: OperationalAlertSourceService,
     private readonly delivery: CommunicationDeliveryService,
+    @Optional() private readonly moduleRef?: ModuleRef,
   ) {}
+
+  /**
+   * Optional presentation edge. The admitted alert remains the only source fact;
+   * a missing/refusing projector cannot alter admission or delivery.
+   */
+  private async projectShiftMoment(
+    root: OperationalAlertRun,
+    plan: AlertPlan,
+  ): Promise<void> {
+    if (plan.alertType !== 'staff_shift_reminder') return;
+    const source = plan.source as ShiftSource;
+    const trigger = this.moduleRef?.get<OperationalAlertWidgetTriggerPort>(
+      OPERATIONAL_ALERT_WIDGET_TRIGGER,
+      { strict: false },
+    );
+    const recipient = plan.recipients[0];
+    if (!trigger || !recipient) return;
+    try {
+      await this.context.runAsAuthPrincipal(
+        {
+          tenantId: plan.tenantId,
+          userId: recipient.userId,
+          role: recipient.role,
+        },
+        () =>
+          trigger.afterShiftAdmitted({
+            tenantId: plan.tenantId,
+            runId: root.id,
+            occurrenceRef: plan.occurrenceRef,
+            occurredAt: plan.occurredAt,
+            admittedAt: root.admittedAt.toISOString(),
+            expiresAt: plan.expiresAt,
+            recipient: {
+              userId: recipient.userId,
+              role: recipient.role,
+              title: recipient.content.title,
+              bodyText: recipient.content.bodyText,
+            },
+            source: {
+              localDate: source.localDate,
+              timezone: source.timezone,
+              scheduledStartAt: source.scheduledStartAt,
+              scheduleEvidenceHash: source.scheduleEvidenceHash,
+            },
+          }),
+      );
+    } catch (error) {
+      this.logger.warn(
+        `R06 shift widget projection refused: ${error instanceof Error ? error.message : 'unknown'}`,
+      );
+    }
+  }
   private system(tenantId: string) {
     const ctx = this.context.get();
     if (ctx?.source !== 'system' || ctx.userId || ctx.tenantId !== tenantId)
@@ -103,7 +167,12 @@ export class OperationalAlertsService {
       'staff_shift_reminder',
       occurrenceRef,
     );
-    if (existing) return this.resume(existing);
+    if (existing) {
+      const plan = this.store.read(existing);
+      if (plan.alertType === 'staff_shift_reminder')
+        await this.projectShiftMoment(existing, plan);
+      return this.resume(existing);
+    }
     const plan: AlertPlan = {
       contract: ALERT_CONTRACT,
       tenantId,
@@ -127,9 +196,9 @@ export class OperationalAlertsService {
         }),
       ],
     };
-    return this.resume(
-      await this.store.admit(plan, () => this.verify(plan), now),
-    );
+    const root = await this.store.admit(plan, () => this.verify(plan), now);
+    await this.projectShiftMoment(root, plan);
+    return this.resume(root);
   }
   async wanted(tenantId: string, interestId: string, now = new Date()) {
     this.system(tenantId);

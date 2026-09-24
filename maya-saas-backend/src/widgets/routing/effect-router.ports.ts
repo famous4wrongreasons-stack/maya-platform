@@ -56,13 +56,15 @@ export interface C9CancelOwnerPort {
 }
 
 export interface HandoffSignerPort {
-  sign(input: Readonly<{
-    tenantId: string;
-    principalProofHash: string;
-    widgetId: string;
-    intentTokenHash: string;
-    target: unknown;
-    issuedAt: Date;
-    expiresAt: Date;
-  }>): Readonly<Record<string, unknown>> | null;
+  sign(
+    input: Readonly<{
+      tenantId: string;
+      principalProofHash: string;
+      widgetId: string;
+      intentTokenHash: string;
+      target: unknown;
+      issuedAt: Date;
+      expiresAt: Date;
+    }>,
+  ): Readonly<Record<string, unknown>> | null;
 }

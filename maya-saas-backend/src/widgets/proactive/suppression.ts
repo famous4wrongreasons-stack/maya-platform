@@ -64,7 +64,7 @@ export const composeOrSuppress = (args: {
     throw new Error('moment composition key mismatch');
   const template = momentTemplateFor(args.momentKey);
   const unresolved = template.required_cells.filter(
-    (p) => !isKnown(at(args.compositionInput.facts, p)),
+    (p) => !isKnown(at(args.compositionInput.inputs, p)),
   );
 
   if (!unresolved.length) return { emit: true, moment: args.momentKey };

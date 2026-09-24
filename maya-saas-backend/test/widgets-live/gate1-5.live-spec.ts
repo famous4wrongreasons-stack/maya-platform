@@ -310,12 +310,13 @@ const runSuccessorCases = <C>(
       }),
     );
     const envelope = successorEnvelope(answer);
-    expect(envelope).toEqual(
-      expect.objectContaining({
-        kind: 'METRIC',
-        presentation: { text_equivalent: x.textEquivalent },
-      }),
-    );
+    expect(envelope.kind).toBe('METRIC');
+    expect(envelope.presentation.text_equivalent).toEqual({
+      ...x.textEquivalent,
+      itemized: [],
+      completeness_sentence: null,
+      unknowns_sentence: null,
+    });
     expect(envelope.intents[0]?.capability).toEqual({
       space: 'C9',
       key: 'c7.measurement.read',
@@ -332,18 +333,22 @@ const runSuccessorCases = <C>(
       },
       `${scope}:tap`,
     );
-    // P-G15b proves the successor can traverse the complete admission path to
-    // the current fail-closed Gate 13 boundary. U12b, the next canonical unit,
-    // owns the projector/route registration that turns this into a terminal
-    // read. Do not smuggle that later owner into the successor minter.
-    expect(tapped).toEqual(
-      expect.objectContaining({
-        outcome: 'refuse',
-        code: 'effect_not_admissible',
-        stopped_at_gate: '13',
-        gates_run: 14,
-      }),
-    );
+    // P-G15b proves the successor can traverse the complete admission path. U12b's canonical
+    // read routing terminates the widget effect at Gate 13; it does not make the successor minter
+    // a business-fact owner.
+    expect(tapped).toEqual({
+      contract: 'maya.widget.intent/1',
+      outcome: 'terminate',
+      code: null,
+      reason_text: null,
+      stopped_at_gate: '13',
+      gates_run: 14,
+      gates_total: 15,
+      receipt_outcome: 'REFUSED',
+      owner_decision: null,
+      resolved_widget: null,
+      next_envelope: null,
+    });
   }, 120_000);
 
   it(`G15-8 [${label}] own superseded returns the already linked successor without minting another`, async () => {
