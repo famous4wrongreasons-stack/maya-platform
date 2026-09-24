@@ -5,6 +5,8 @@
 // the intent-audit store (MAP:606-611). Both methods were moved here unchanged from
 // `widget-stores.service.ts`. Gate 13's receipt reference and claim land here with U13a.
 
+import { Prisma } from '@prisma/client';
+
 import { PrismaService } from '../../prisma/prisma.service';
 import { scoped } from './tenant-scope';
 
@@ -105,17 +107,83 @@ export class IntentAuditStore {
     intentTokenHash: string;
     singleUse: boolean;
     now: Date;
+    approvalPair?: {
+      widgetId: string;
+      capabilityKey: string;
+      confirmationRef: string;
+      decision: 'approve' | 'reject';
+    };
   }): Promise<boolean> {
     if (!input.singleUse) return true;
-    const claimed = await this.prisma.widgetIntentRecord.updateMany({
-      where: scoped(input.tenantId, {
-        intentTokenHash: input.intentTokenHash,
-        singleUse: true,
-        consumedAt: null,
-      }),
-      data: { consumedAt: input.now },
-    });
-    return claimed.count === 1;
+    if (!input.approvalPair) {
+      const claimed = await this.prisma.widgetIntentRecord.updateMany({
+        where: scoped(input.tenantId, {
+          intentTokenHash: input.intentTokenHash,
+          singleUse: true,
+          consumedAt: null,
+        }),
+        data: { consumedAt: input.now },
+      });
+      return claimed.count === 1;
+    }
+    try {
+      return await this.prisma.$transaction(
+        async (tx) => {
+          const pair = input.approvalPair!;
+          const siblings = await tx.widgetIntentRecord.findMany({
+            where: scoped(input.tenantId, {
+              widgetId: pair.widgetId,
+              widgetKind: 'APPROVAL',
+              effect: 'COMMIT',
+              capabilitySpace: 'AE',
+              capabilityKey: pair.capabilityKey,
+              confirmationOfKind: 'approval',
+              confirmationOfRef: pair.confirmationRef,
+              approvalDecision: { in: ['approve', 'reject'] },
+              singleUse: true,
+            }),
+            select: {
+              intentTokenHash: true,
+              approvalDecision: true,
+              consumedAt: true,
+            },
+          });
+          if (
+            siblings.length !== 2 ||
+            new Set(siblings.map((row) => row.approvalDecision)).size !== 2 ||
+            siblings.some((row) => row.consumedAt !== null) ||
+            !siblings.some(
+              (row) =>
+                row.intentTokenHash === input.intentTokenHash &&
+                row.approvalDecision === pair.decision,
+            )
+          )
+            return false;
+
+          const claimed = await tx.widgetIntentRecord.updateMany({
+            where: scoped(input.tenantId, {
+              intentTokenHash: {
+                in: siblings.map((row) => row.intentTokenHash),
+              },
+              consumedAt: null,
+            }),
+            data: { consumedAt: input.now },
+          });
+          return claimed.count === 2;
+        },
+        { isolationLevel: 'Serializable' },
+      );
+    } catch (error) {
+      // Concurrent sibling claims serialize to one winner. PostgreSQL reports
+      // the loser as a serialization conflict; it is an expired tap, not a
+      // transport fault and never a second owner execution.
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2034'
+      )
+        return false;
+      throw error;
+    }
   }
 
   /**

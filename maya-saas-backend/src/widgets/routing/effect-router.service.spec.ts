@@ -43,20 +43,65 @@ const fixture = () => {
       opaque_handle: 'signed-handoff',
     }),
   };
+  const drafts = { route: jest.fn().mockReturnValue(null) };
+  const approvals = {
+    request: jest.fn().mockResolvedValue({
+      receiptOutcome: 'ACCEPTED',
+      refusalCode: null,
+      actionReceiptRef: 'approval-execution',
+      nextEnvelope: null,
+      resolvedWidget: null,
+      ownerDecision: { state: 'PENDING_APPROVAL' },
+    }),
+    decide: jest.fn().mockResolvedValue({
+      receiptOutcome: 'ACCEPTED',
+      refusalCode: null,
+      actionReceiptRef: 'approval-execution',
+      nextEnvelope: null,
+      resolvedWidget: null,
+      ownerDecision: { state: 'READY' },
+    }),
+  };
+  const commits = {
+    commit: jest.fn().mockResolvedValue({
+      receiptOutcome: 'ACCEPTED',
+      refusalCode: null,
+      actionReceiptRef: 'booking-execution',
+      nextEnvelope: null,
+      resolvedWidget: null,
+      ownerDecision: { state: 'SUCCEEDED' },
+    }),
+  };
+  const metric = { increment: jest.fn(), value: jest.fn() };
   return {
     stores,
     controls,
     successors,
     c9Cancel,
     handoffs,
+    drafts,
+    approvals,
+    commits,
+    metric,
     router: new EffectRouterService(
       stores,
       controls as never,
       successors,
       c9Cancel,
       handoffs,
+      drafts,
+      approvals,
+      commits,
+      metric as never,
     ),
   };
+};
+
+const RESOLVED = {
+  row: 'A1' as const,
+  diverged: false,
+  diff: [],
+  values: new Map<string, string>(),
 };
 
 describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
@@ -98,17 +143,128 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
     expect(controls.dismiss).not.toHaveBeenCalled();
   });
 
-  it.each(['DRAFT', 'REQUEST_APPROVAL', 'COMMIT'])(
-    'N02/N03/N05: %s fails closed before the claim until its edge lands',
-    async (effect) => {
-      const { router, stores } = fixture();
-      await expect(
-        router.route(ctx(rec({ effect }), { principal: PRINCIPAL })),
-      ).resolves.toEqual({ outcome: 'refuse', code: 'effect_not_admissible' });
-      expect(stores.claimIntentRecord).not.toHaveBeenCalled();
-      expect(stores.writeReceipt).not.toHaveBeenCalled();
-    },
-  );
+  it('N08: DRAFT fails closed before the claim while its canonical registry has no owner', async () => {
+    const { router, stores } = fixture();
+    await expect(
+      router.route(
+        ctx(rec({ effect: 'DRAFT' }), {
+          principal: PRINCIPAL,
+          facts: { resolvedNouns: RESOLVED },
+        }),
+      ),
+    ).resolves.toEqual({ outcome: 'refuse', code: 'effect_not_admissible' });
+    expect(stores.claimIntentRecord).not.toHaveBeenCalled();
+    expect(stores.writeReceipt).not.toHaveBeenCalled();
+  });
+
+  it('G13-P06 routes REQUEST_APPROVAL through the canonical owner after claim', async () => {
+    const { router, stores, approvals } = fixture();
+    await expect(
+      router.route(
+        ctx(
+          rec({
+            effect: 'REQUEST_APPROVAL',
+            widgetKind: 'APPROVAL',
+            capabilitySpace: 'AE',
+            capabilityKey: 'communication.bulk-campaign.admit.v2',
+          }),
+          {
+            principal: PRINCIPAL,
+            facts: { resolvedNouns: RESOLVED },
+          },
+        ),
+      ),
+    ).resolves.toMatchObject({
+      outcome: 'terminate',
+      route: { receipt_outcome: 'ACCEPTED' },
+    });
+    expect(approvals.request).toHaveBeenCalledTimes(1);
+    expect(stores.claimIntentRecord).toHaveBeenCalledTimes(1);
+  });
+
+  it('G13-P07 routes booking COMMIT through the canonical owner with no router-side business facts', async () => {
+    const { router, commits } = fixture();
+    await expect(
+      router.route(
+        ctx(
+          rec({
+            effect: 'COMMIT',
+            widgetKind: 'BOOKING_CONFIRMATION',
+            capabilitySpace: 'AE',
+            capabilityKey: 'crm.appointment.create.v1',
+            confirmationIdempotencyKey: 'server-key',
+          }),
+          {
+            principal: PRINCIPAL,
+            facts: { resolvedNouns: RESOLVED },
+          },
+        ),
+      ),
+    ).resolves.toMatchObject({
+      outcome: 'terminate',
+      route: { receipt_outcome: 'ACCEPTED' },
+    });
+    expect(commits.commit).toHaveBeenCalledTimes(1);
+  });
+
+  it('G13-P08 routes APPROVAL COMMIT by the server-owned approvalDecision', async () => {
+    const { router, approvals } = fixture();
+    await expect(
+      router.route(
+        ctx(
+          rec({
+            effect: 'COMMIT',
+            widgetKind: 'APPROVAL',
+            capabilitySpace: 'AE',
+            capabilityKey: 'communication.bulk-campaign.admit.v2',
+            confirmationOfKind: 'approval',
+            confirmationOfRef: 'approval-execution',
+            approvalDecision: 'approve',
+          }),
+          {
+            principal: PRINCIPAL,
+            facts: { resolvedNouns: RESOLVED },
+          },
+        ),
+      ),
+    ).resolves.toMatchObject({
+      outcome: 'terminate',
+      route: { receipt_outcome: 'ACCEPTED' },
+    });
+    expect(approvals.decide).toHaveBeenCalledTimes(1);
+  });
+
+  it('G6-14C counts a fresh Gate 14 revocation but preserves Gate 14 refusal', async () => {
+    const { router, approvals, metric } = fixture();
+    approvals.request.mockResolvedValue({
+      receiptOutcome: 'REFUSED',
+      refusalCode: 'insufficient_authority',
+      actionReceiptRef: null,
+      nextEnvelope: null,
+      resolvedWidget: null,
+      ownerDecision: null,
+      gate14RefusalReason: 'entitlement_denied',
+    });
+    await expect(
+      router.route(
+        ctx(
+          rec({
+            effect: 'REQUEST_APPROVAL',
+            widgetKind: 'APPROVAL',
+            capabilitySpace: 'AE',
+            capabilityKey: 'communication.bulk-campaign.admit.v2',
+          }),
+          {
+            principal: PRINCIPAL,
+            facts: { resolvedNouns: RESOLVED },
+          },
+        ),
+      ),
+    ).resolves.toMatchObject({
+      route: { receipt_outcome: 'REFUSED' },
+    });
+    expect(metric.increment).toHaveBeenCalledWith('entitlement_denied');
+  });
 
   it('G13-P02 NAVIGATE terminates as the zero-read DEV-1 degraded result', async () => {
     const { router, stores, successors } = fixture();

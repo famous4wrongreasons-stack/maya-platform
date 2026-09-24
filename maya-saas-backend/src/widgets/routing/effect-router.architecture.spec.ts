@@ -9,6 +9,7 @@ describe('U13a — Gate 13 architecture barriers', () => {
   const input = read('routing-input.ts');
   const control = read('../control/control-registry.service.ts');
   const audit = read('../stores/intent-audit.store.ts');
+  const commitOwner = read('../owner-ports/commit-booking.adapter.ts');
 
   it('B15/B28 has one closed seven-literal effect switch and no NONE/default edge', () => {
     const switchBody = router.slice(
@@ -92,5 +93,28 @@ describe('U13a — Gate 13 architecture barriers', () => {
     expect(audit).toMatch(
       /data: \{ actionReceiptRef: input\.actionReceiptRef \}/,
     );
+  });
+
+  it('P-27/U13c observes the canonical execution without widget authority or controlled fixture mode', () => {
+    expect(commitOwner).toContain('withActionInvocationReceipt');
+    expect(commitOwner).toContain(
+      'key: record.confirmationIdempotencyKey as string',
+    );
+    expect(commitOwner).not.toMatch(/widgetId\s*:/);
+
+    const productionFiles = (directory: string): string[] =>
+      fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+        const full = path.join(directory, entry.name);
+        if (entry.isDirectory()) return productionFiles(full);
+        return entry.name.endsWith('.ts') && !entry.name.endsWith('.spec.ts')
+          ? [full]
+          : [];
+      });
+    const violations = productionFiles(path.resolve(__dirname, '../..'))
+      .filter((file) =>
+        /controlledFixtureMode\s*:\s*true/.test(fs.readFileSync(file, 'utf8')),
+      )
+      .map((file) => path.relative(path.resolve(__dirname, '../..'), file));
+    expect(violations).toEqual([]);
   });
 });

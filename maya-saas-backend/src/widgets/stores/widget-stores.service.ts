@@ -238,6 +238,12 @@ export class WidgetStoresService {
     intentTokenHash: string;
     singleUse: boolean;
     now: Date;
+    approvalPair?: {
+      widgetId: string;
+      capabilityKey: string;
+      confirmationRef: string;
+      decision: 'approve' | 'reject';
+    };
   }): Promise<boolean> {
     return this.intentAudit.claimRecord(input);
   }

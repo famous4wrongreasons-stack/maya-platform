@@ -37,7 +37,10 @@
 // resolve, a producing record that resolves unconsumed — is a problem rather than a pass.
 
 import type { CapabilityRef } from '../../widget-contract/capability-ref';
-import { rowFor } from '../booking/booking-allowlist';
+import {
+  AE_WIDGET_COMMIT_ALLOWLIST,
+  confirmationOfKindForRow,
+} from './ae-commit-allowlist.runtime';
 import { requiredConfirmationKind } from './confirmation-guard.runtime';
 import { pairingForAe } from './propose-pairing';
 
@@ -72,6 +75,9 @@ export interface CommitProblem {
   readonly message: string;
 }
 
+const confirmationOfKindFor = (aeKey: string) =>
+  confirmationOfKindForRow(aeKey, AE_WIDGET_COMMIT_ALLOWLIST[aeKey]);
+
 /**
  * F72's second evaluation point (C11:4726): `requiredConfirmationKind(subjectCapability(record))`
  * must equal `record.widget_kind`, READ FROM THE LIVE ALLOWLIST in the running process.
@@ -98,11 +104,11 @@ export const confirmationKindMismatch = (
  * decision. A `reschedule` COMMIT carrying `kind: 'draft'` would otherwise skip C5 entirely.
  */
 export const confirmationRefProblem = (r: CommitSubject): string | null => {
-  const row = rowFor(r.ae.key);
-  if (!row) return `${r.ae.key} has no allowlist row`;
+  const confirmationOfKind = confirmationOfKindFor(r.ae.key);
+  if (!confirmationOfKind) return `${r.ae.key} has no allowlist row`;
   if (!r.confirmationOfRef) return 'a COMMIT confirms nothing';
-  if (r.confirmationOfKind !== row.confirmationOfKind)
-    return `${r.ae.key} confirms a ${row.confirmationOfKind}, got ${String(r.confirmationOfKind)}`;
+  if (r.confirmationOfKind !== confirmationOfKind)
+    return `${r.ae.key} confirms a ${confirmationOfKind}, got ${String(r.confirmationOfKind)}`;
   return null;
 };
 
@@ -112,9 +118,9 @@ export const confirmationRefProblem = (r: CommitSubject): string | null => {
  * no loader, and as the first step of `producingRecordProblem`, which does.
  */
 export const producingRecordMissing = (r: CommitSubject): string | null => {
-  const row = rowFor(r.ae.key);
-  if (!row) return `${r.ae.key} has no allowlist row`;
-  if (row.confirmationOfKind === 'draft') return null;
+  const confirmationOfKind = confirmationOfKindFor(r.ae.key);
+  if (!confirmationOfKind) return `${r.ae.key} has no allowlist row`;
+  if (confirmationOfKind === 'draft') return null;
   return r.producedByIntentTokenHash
     ? null
     : 'a non-draft COMMIT must name the consumed record that produced it';
@@ -146,10 +152,10 @@ export const producingRecordProblem = async (
   r: CommitSubject,
   load: ProducingRecordLoader,
 ): Promise<CommitProblem | null> => {
-  const row = rowFor(r.ae.key);
-  if (!row)
+  const confirmationOfKind = confirmationOfKindFor(r.ae.key);
+  if (!confirmationOfKind)
     return { clause: 'C4', message: `${r.ae.key} has no allowlist row` };
-  if (row.confirmationOfKind === 'draft') return null;
+  if (confirmationOfKind === 'draft') return null;
 
   const missing = producingRecordMissing(r);
   if (missing) return { clause: 'C5a', message: missing };
@@ -166,11 +172,11 @@ export const producingRecordProblem = async (
       clause: 'C5a',
       message: 'the producing record was never consumed by the gateway',
     };
-  const admitted = PRODUCING_EFFECTS[row.confirmationOfKind] ?? [];
+  const admitted = PRODUCING_EFFECTS[confirmationOfKind] ?? [];
   if (!admitted.includes(producing.effect))
     return {
       clause: 'C5a',
-      message: `a ${row.confirmationOfKind} confirmation is produced by ${admitted.join(' or ')}, not by ${producing.effect}`,
+      message: `a ${confirmationOfKind} confirmation is produced by ${admitted.join(' or ')}, not by ${producing.effect}`,
     };
 
   // C5b — F74's identity. "That same row" presupposes the COMMIT's own pairing row, so a key with no
@@ -188,7 +194,7 @@ export const producingRecordProblem = async (
       message: 'the producing record carries no whole capability ref',
     };
   const expected: CapabilityRef =
-    row.confirmationOfKind === 'approval' ? pairing.ae : pairing.propose;
+    confirmationOfKind === 'approval' ? pairing.ae : pairing.propose;
   if (produced.space !== expected.space || produced.key !== expected.key)
     return {
       clause: 'C5b',

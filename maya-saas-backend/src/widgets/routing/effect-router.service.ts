@@ -4,7 +4,10 @@ import type { EffectClass } from '../../widget-contract/intent';
 import type { GateContext, GateVerdict, RouteResult } from '../gate.types';
 import { ControlRegistryService } from '../control/control-registry.service';
 import {
+  APPROVAL_REQUEST_OWNER,
   C9_CANCEL_OWNER,
+  COMMIT_BOOKING_OWNER,
+  DRAFT_OWNER_REGISTRY,
   HANDOFF_SIGNER,
   SUCCESSOR_MINTER,
 } from '../di-tokens';
@@ -16,8 +19,19 @@ import {
   type EffectRouteAuditPort,
   type EffectRouteOutcome,
   type C9CancelOwnerPort,
+  type ApprovalRequestOwnerPort,
+  type CommitBookingOwnerPort,
+  type DraftOwnerRegistryPort,
   type HandoffSignerPort,
 } from './effect-router.ports';
+import {
+  approvalDecisionDestination,
+  approvalPairClaimOf,
+} from './edges/approval-decision.edge';
+import { bookingCommitDestination } from './edges/commit.edge';
+import { draftDestination } from './edges/draft.edge';
+import { approvalRequestDestination } from './edges/request-approval.edge';
+import { Gate14DisagreementMetric } from './gate14-disagreement.metric';
 
 type Destination = () => Promise<EffectRouteOutcome>;
 type RoutableEffect = Exclude<EffectClass, 'NONE'>;
@@ -63,6 +77,13 @@ export class EffectRouterService {
     private readonly c9Cancel: C9CancelOwnerPort,
     @Inject(HANDOFF_SIGNER)
     private readonly destinationSigner: HandoffSignerPort,
+    @Inject(DRAFT_OWNER_REGISTRY)
+    private readonly drafts: DraftOwnerRegistryPort,
+    @Inject(APPROVAL_REQUEST_OWNER)
+    private readonly approvals: ApprovalRequestOwnerPort,
+    @Inject(COMMIT_BOOKING_OWNER)
+    private readonly bookingCommit: CommitBookingOwnerPort,
+    private readonly gate14Disagreements: Gate14DisagreementMetric,
   ) {}
 
   async route(ctx: GateContext): Promise<GateVerdict> {
@@ -83,10 +104,15 @@ export class EffectRouterService {
       intentTokenHash: record.intentTokenHash,
       singleUse: record.singleUse,
       now: ctx.now,
+      ...(approvalPairClaimOf(record)
+        ? { approvalPair: approvalPairClaimOf(record)! }
+        : {}),
     });
     if (!claimed) return { outcome: 'expired' };
 
     const routed = await destination();
+    if (routed.gate14RefusalReason)
+      this.gate14Disagreements.increment(routed.gate14RefusalReason);
     await this.stores.writeReceipt(
       {
         tenantId: ctx.tenantId,
@@ -137,13 +163,15 @@ export class EffectRouterService {
       case 'CONTROL':
         return this.control(ctx);
       case 'DRAFT':
-        return null;
+        return draftDestination(ctx, this.drafts);
       case 'REQUEST_APPROVAL':
-        return null;
+        return approvalRequestDestination(ctx, this.approvals);
       case 'HANDOFF':
         return this.signedDestination(ctx);
       case 'COMMIT':
-        return null;
+        return ctx.record?.widgetKind === 'APPROVAL'
+          ? approvalDecisionDestination(ctx, this.approvals)
+          : bookingCommitDestination(ctx, this.bookingCommit);
     }
   }
 

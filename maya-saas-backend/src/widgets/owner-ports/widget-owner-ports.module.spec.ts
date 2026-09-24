@@ -27,6 +27,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { TenancyModule } from '../../tenancy/tenancy.module';
 import { C8Module } from '../../valuation/c8.module';
 import { CrmModule } from '../../crm/crm.module';
+import { MarketingModule } from '../../marketing/marketing.module';
 import * as DI_TOKENS from '../di-tokens';
 import { Gate6OwnersAdapter } from './gate6.owners.provider';
 import { CanonicalReadAdapter } from './canonical-read.provider';
@@ -45,6 +46,8 @@ import { ClientAppointmentReadNounAdapter } from './noun-client-appointment-read
 import { NounResolutionOwnersProvider } from './noun-resolution.owners.provider';
 import { WitnessC9RevisionAdapter } from './witness-c9-revision.adapter';
 import { C9CancelAdapter } from './c9-cancel.adapter';
+import { ApprovalRequestAdapter } from './approval-request.adapter';
+import { CommitBookingAdapter } from './commit-booking.adapter';
 
 const meta = (key: string, target: object): unknown =>
   Reflect.getMetadata(key, target);
@@ -88,6 +91,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       C8Module,
       C9Module,
       CrmModule,
+      MarketingModule,
       EntitlementsModule,
       TenancyModule,
     ]);
@@ -107,6 +111,17 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       ClientAppointmentReadNounAdapter,
       C9CancelAdapter,
       { provide: DI_TOKENS.C9_CANCEL_OWNER, useExisting: C9CancelAdapter },
+      ApprovalRequestAdapter,
+      CommitBookingAdapter,
+      expect.objectContaining({ provide: DI_TOKENS.DRAFT_OWNER_REGISTRY }),
+      {
+        provide: DI_TOKENS.APPROVAL_REQUEST_OWNER,
+        useExisting: ApprovalRequestAdapter,
+      },
+      {
+        provide: DI_TOKENS.COMMIT_BOOKING_OWNER,
+        useExisting: CommitBookingAdapter,
+      },
       NounResolutionOwnersProvider,
       WitnessC9RevisionAdapter,
       expect.objectContaining({ provide: DI_TOKENS.NOUN_RESOLUTION_PORTS }),
@@ -118,6 +133,9 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       DI_TOKENS.TENANT_SCOPE,
       DI_TOKENS.NOUN_RESOLUTION_PORTS,
       DI_TOKENS.C9_CANCEL_OWNER,
+      DI_TOKENS.DRAFT_OWNER_REGISTRY,
+      DI_TOKENS.APPROVAL_REQUEST_OWNER,
+      DI_TOKENS.COMMIT_BOOKING_OWNER,
     ]);
   });
 
@@ -181,6 +199,9 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       // sees this narrow port instead of importing the full facade and its unrelated sub-stores.
       DI_TOKENS.GATE10_STORE,
       DI_TOKENS.C9_CANCEL_OWNER,
+      DI_TOKENS.DRAFT_OWNER_REGISTRY,
+      DI_TOKENS.APPROVAL_REQUEST_OWNER,
+      DI_TOKENS.COMMIT_BOOKING_OWNER,
     ];
     const moduleRef = await Test.createTestingModule({
       // The owner modules the boundary now imports resolve configuration the way the application does:

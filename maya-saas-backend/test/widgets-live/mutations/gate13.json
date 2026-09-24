@@ -30,8 +30,8 @@
     "id": "M13-2b",
     "description": "the closed switch gains a default edge",
     "file": "src/widgets/routing/effect-router.service.ts",
-    "find": "      case 'COMMIT':\n        return null;\n    }",
-    "replace": "      case 'COMMIT':\n        return null;\n      default:\n        return null;\n    }",
+    "find": "      case 'COMMIT':\n        return ctx.record?.widgetKind === 'APPROVAL'\n          ? approvalDecisionDestination(ctx, this.approvals)\n          : bookingCommitDestination(ctx, this.bookingCommit);\n    }",
+    "replace": "      case 'COMMIT':\n        return ctx.record?.widgetKind === 'APPROVAL'\n          ? approvalDecisionDestination(ctx, this.approvals)\n          : bookingCommitDestination(ctx, this.bookingCommit);\n      default:\n        return null;\n    }",
     "killers": ["B15/B28"],
     "expect": "build-killed"
   },
@@ -41,7 +41,7 @@
     "file": "src/widgets/routing/effect-router.service.ts",
     "find": "    if (destination === null)\n      return { outcome: 'refuse', code: 'effect_not_admissible' };",
     "replace": "    if (false && destination === null)\n      return { outcome: 'refuse', code: 'effect_not_admissible' };",
-    "killers": ["N02/N03/N05"],
+    "killers": ["N05"],
     "expect": "build-killed"
   },
   {
@@ -129,11 +129,11 @@
   },
   {
     "id": "M13-20",
-    "description": "COMMIT gains a pretend successful destination before its owner lands",
+    "description": "COMMIT bypasses its canonical owner with a pretend accepted destination",
     "file": "src/widgets/routing/effect-router.service.ts",
-    "find": "      case 'COMMIT':\n        return null;",
+    "find": "      case 'COMMIT':\n        return ctx.record?.widgetKind === 'APPROVAL'\n          ? approvalDecisionDestination(ctx, this.approvals)\n          : bookingCommitDestination(ctx, this.bookingCommit);",
     "replace": "      case 'COMMIT':\n        return async () => admitted();",
-    "killers": ["N02/N03/N05"],
+    "killers": ["G13-P07"],
     "expect": "build-killed"
   },
   {
@@ -171,5 +171,77 @@
     "replace": "",
     "killers": ["R3.2.4"],
     "expect": "build-killed"
+  },
+  {
+    "id": "M13-U13C-5",
+    "description": "an unbound DRAFT owner becomes a routable promise instead of a registry miss",
+    "file": "src/widgets/owner-ports/draft-owner.registry.ts",
+    "find": "    return owner ? owner.draft(input) : null;",
+    "replace": "    return owner ? owner.draft(input) : Promise.resolve(null as never);",
+    "killers": ["N08"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-U13C-9",
+    "description": "the approval-request owner accepts an unregistered AE capability",
+    "file": "src/widgets/owner-ports/approval-request.adapter.ts",
+    "find": "      subject !== 'communication.bulk-campaign.admit.v2'",
+    "replace": "      false",
+    "killers": ["N09"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-U13C-11",
+    "description": "the booking receipt seam stops checking source type and server confirmation identity",
+    "file": "src/widgets/owner-ports/commit-booking.adapter.ts",
+    "find": "          request.source.type !== 'authenticated_request' ||\n          request.callerIdempotency?.key !== expectedKey",
+    "replace": "          false",
+    "killers": ["N11"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-U13C-13",
+    "description": "F75 permits an approve token to claim a reject sibling decision",
+    "file": "src/widgets/stores/intent-audit.store.ts",
+    "find": "              (row) =>\n                row.intentTokenHash === input.intentTokenHash &&\n                row.approvalDecision === pair.decision,",
+    "replace": "              (row) => row.intentTokenHash === input.intentTokenHash,",
+    "killers": ["N09/F75"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M13-U13C-16",
+    "description": "UNKNOWN fabricates an Action Engine receipt reference before reconciliation",
+    "file": "src/widgets/owner-ports/commit-booking.adapter.ts",
+    "find": "    if (result.state === 'UNKNOWN')\n      return {\n        receiptOutcome: 'ACCEPTED',\n        refusalCode: null,\n        actionReceiptRef: null,",
+    "replace": "    if (result.state === 'UNKNOWN')\n      return {\n        receiptOutcome: 'ACCEPTED',\n        refusalCode: null,\n        actionReceiptRef: executionId,",
+    "killers": ["N12/B-29"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-U13C-21",
+    "description": "the Gate 6/14 disagreement counter is removed",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "      this.gate14Disagreements.increment(routed.gate14RefusalReason);",
+    "replace": "      void routed.gate14RefusalReason;",
+    "killers": ["G6-14C"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "M13-U13C-G6-REUSE",
+    "description": "the earlier Gate 6 allow is reused to override a fresh Gate 14 refusal",
+    "killers": ["G6-14C"],
+    "expect": "build-killed",
+    "edits": [
+      {
+        "file": "src/widgets/routing/effect-router.service.ts",
+        "find": "    const routed = await destination();",
+        "replace": "    let routed = await destination();"
+      },
+      {
+        "file": "src/widgets/routing/effect-router.service.ts",
+        "find": "    if (routed.gate14RefusalReason)\n      this.gate14Disagreements.increment(routed.gate14RefusalReason);",
+        "replace": "    if (routed.gate14RefusalReason) {\n      this.gate14Disagreements.increment(routed.gate14RefusalReason);\n      routed = admitted();\n    }"
+      }
+    ]
   }
 ]

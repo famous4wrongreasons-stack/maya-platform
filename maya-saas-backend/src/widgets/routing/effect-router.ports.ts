@@ -1,4 +1,5 @@
 import type { RoutingInput } from './routing-input';
+import type { ResolvedNouns } from '../gate.types';
 
 /**
  * Widget-internal audit edge used by Gate 13.
@@ -15,6 +16,12 @@ export interface EffectRouteAuditPort {
     intentTokenHash: string;
     singleUse: boolean;
     now: Date;
+    approvalPair?: {
+      widgetId: string;
+      capabilityKey: string;
+      confirmationRef: string;
+      decision: 'approve' | 'reject';
+    };
   }) => Promise<boolean>;
   readonly writeReceipt: (
     input: {
@@ -44,6 +51,8 @@ export interface EffectRouteOutcome {
   readonly nextEnvelope: unknown;
   readonly resolvedWidget: unknown;
   readonly ownerDecision: unknown;
+  /** Metric-only Gate 14 re-resolution reason. It is never persisted as a widget refusal code. */
+  readonly gate14RefusalReason?: string | null;
 }
 
 /** The only internal destinations U13a can execute before later owner adapters land. */
@@ -67,4 +76,23 @@ export interface HandoffSignerPort {
       expiresAt: Date;
     }>,
   ): Readonly<Record<string, unknown>> | null;
+}
+
+export interface ActuatingRoutingInput {
+  readonly routing: RoutingInput;
+  readonly actorUserId: string;
+  readonly resolvedNouns: ResolvedNouns;
+}
+
+export interface DraftOwnerRegistryPort {
+  route(input: ActuatingRoutingInput): Promise<EffectRouteOutcome> | null;
+}
+
+export interface ApprovalRequestOwnerPort {
+  request(input: ActuatingRoutingInput): Promise<EffectRouteOutcome>;
+  decide(input: ActuatingRoutingInput): Promise<EffectRouteOutcome>;
+}
+
+export interface CommitBookingOwnerPort {
+  commit(input: ActuatingRoutingInput): Promise<EffectRouteOutcome>;
 }

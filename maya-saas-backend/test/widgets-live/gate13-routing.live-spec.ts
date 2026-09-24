@@ -265,6 +265,100 @@ describe('Gate 13 — PostgreSQL claim, receipt and CONTROL routing (U13a)', () 
     ).resolves.toEqual({ actionReceiptRef: 'action-receipt-1' });
   }, 60_000);
 
+  it('N09/F75 [U] atomically consumes an exact approve/reject sibling pair with one concurrent winner', async () => {
+    const built = await control('F75-SIBLINGS');
+    const confirmationRef = randomUUID();
+    const approveHash = built.widget.intentTokenHash;
+    const rejectHash = 'b'.repeat(64);
+    const updated = await db.prisma.widgetIntentRecord.update({
+      where: {
+        intentTokenHash_tenantId: {
+          tenantId: built.tenant.id,
+          intentTokenHash: approveHash,
+        },
+      },
+      data: {
+        widgetKind: 'APPROVAL',
+        effect: 'COMMIT',
+        capabilitySpace: 'AE',
+        capabilityKey: 'communication.bulk-campaign.admit.v2',
+        confirmationOfKind: 'approval',
+        confirmationOfRef: confirmationRef,
+        approvalDecision: 'approve',
+        singleUse: true,
+        consumedAt: null,
+      },
+    });
+    await db.prisma.widgetIntentRecord.create({
+      data: {
+        ...updated,
+        id: randomUUID(),
+        intentTokenHash: rejectHash,
+        approvalDecision: 'reject',
+      } as never,
+    });
+
+    // The decision belongs to the tapped server record. Merely naming its
+    // sibling's decision cannot claim either token.
+    await expect(
+      gw.stores.claimIntentRecord({
+        tenantId: built.tenant.id,
+        intentTokenHash: approveHash,
+        singleUse: true,
+        now: new Date('2026-09-20T01:00:00.000Z'),
+        approvalPair: {
+          widgetId: built.widget.widgetId,
+          capabilityKey: 'communication.bulk-campaign.admit.v2',
+          confirmationRef,
+          decision: 'reject',
+        },
+      }),
+    ).resolves.toBe(false);
+
+    const approveAt = new Date('2026-09-20T01:01:00.000Z');
+    const rejectAt = new Date('2026-09-20T01:02:00.000Z');
+    const outcomes = await Promise.all([
+      gw.stores.claimIntentRecord({
+        tenantId: built.tenant.id,
+        intentTokenHash: approveHash,
+        singleUse: true,
+        now: approveAt,
+        approvalPair: {
+          widgetId: built.widget.widgetId,
+          capabilityKey: 'communication.bulk-campaign.admit.v2',
+          confirmationRef,
+          decision: 'approve',
+        },
+      }),
+      gw.stores.claimIntentRecord({
+        tenantId: built.tenant.id,
+        intentTokenHash: rejectHash,
+        singleUse: true,
+        now: rejectAt,
+        approvalPair: {
+          widgetId: built.widget.widgetId,
+          capabilityKey: 'communication.bulk-campaign.admit.v2',
+          confirmationRef,
+          decision: 'reject',
+        },
+      }),
+    ]);
+    expect(outcomes.sort()).toEqual([false, true]);
+
+    const siblings = await db.prisma.widgetIntentRecord.findMany({
+      where: {
+        tenantId: built.tenant.id,
+        intentTokenHash: { in: [approveHash, rejectHash] },
+      },
+      orderBy: { approvalDecision: 'asc' },
+      select: { approvalDecision: true, consumedAt: true },
+    });
+    expect(siblings).toHaveLength(2);
+    expect(siblings[0].consumedAt).not.toBeNull();
+    expect(siblings[1].consumedAt).toEqual(siblings[0].consumedAt);
+    expect([approveAt, rejectAt]).toContainEqual(siblings[0].consumedAt);
+  }, 60_000);
+
   it.failing(
     'G13-P01/N02/N03/N05 [GW][G-SYNTH][XF→U10b] reaches the closed router only after Gate 10 is built',
     async () => {

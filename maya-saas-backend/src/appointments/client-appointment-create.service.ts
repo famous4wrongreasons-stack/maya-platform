@@ -95,6 +95,11 @@ export class ClientAppointmentCreateService {
     }
   }
 
+  /** U13c narrow read of the canonical execution result; no provider edge. */
+  executionResult(tenantId: string, executionId: string) {
+    return this.crm.getAppointmentActionExecutionResult(tenantId, executionId);
+  }
+
   /** U-OWN·V11: the read-only half of `forAccount`, for a caller that needs the
    * owner's own quote without actuating. Same resolution, same order, same
    * codes, same CLS check; no Action Engine execution and no write. */

@@ -157,3 +157,30 @@ export const bookingConfirmationSubjectFor = (
   }
   return null;
 };
+
+export type ConfirmationOfKind = 'draft' | 'record' | 'approval';
+
+/** F74's reference kind from the one executable P-23 allowlist. */
+export const confirmationOfKindFor = (
+  aeKey: string,
+): ConfirmationOfKind | null => {
+  const row = AE_WIDGET_COMMIT_ALLOWLIST[aeKey];
+  return confirmationOfKindForRow(aeKey, row);
+};
+
+/** Pure form used by the Gate 7 counterfactual registry fixtures. */
+export const confirmationOfKindForRow = (
+  aeKey: string,
+  row: AeCommitRuntimeRow | undefined,
+): ConfirmationOfKind | null => {
+  if (!row) return null;
+  if (row.confirmation_kind === 'APPROVAL') return 'approval';
+  if (row.family !== 'booking') return 'draft';
+  if (aeKey === 'crm.appointment.create.v1') return 'draft';
+  if (
+    aeKey === 'crm.appointment.reschedule.v1' ||
+    aeKey === 'crm.appointment.cancel.v1'
+  )
+    return 'record';
+  return null;
+};

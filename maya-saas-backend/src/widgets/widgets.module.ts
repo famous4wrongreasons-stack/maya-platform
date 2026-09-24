@@ -24,6 +24,7 @@ import { IntentGatewayService } from './intent-gateway.service';
 import { WidgetOwnerPortsModule } from './owner-ports/widget-owner-ports.module';
 import { WidgetProjectorService } from './projection/widget-projector.service';
 import { EffectRouterService } from './routing/effect-router.service';
+import { Gate14DisagreementMetric } from './routing/gate14-disagreement.metric';
 import { EFFECT_ROUTE_AUDIT } from './routing/effect-router.ports';
 import { assertRoutingResolves } from './routing/deterministic-router';
 import { LoweringSourceReader } from './stores/lowering-source.read';
@@ -104,6 +105,7 @@ import { OPERATIONAL_ALERT_WIDGET_TRIGGER } from '../operational-alerts/operatio
       useExisting: MomentTriggerService,
     },
     EffectRouterService,
+    Gate14DisagreementMetric,
   ],
   exports: [
     IntentGatewayService,

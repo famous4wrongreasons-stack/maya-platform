@@ -54,6 +54,15 @@ export const SUCCESSOR_MINTER = 'SUCCESSOR_MINTER';
 export const HANDOFF_SIGNER = 'HANDOFF_SIGNER';
 export const C9_CANCEL_OWNER = 'C9_CANCEL_OWNER';
 
+/** U13c: the server-owned draft registry. P-MINT-BOOK supplies its first owner in Wave 6. */
+export const DRAFT_OWNER_REGISTRY = 'DRAFT_OWNER_REGISTRY';
+
+/** U13c: the marketing owner's narrow REQUEST_APPROVAL / APPROVAL decision edge. */
+export const APPROVAL_REQUEST_OWNER = 'APPROVAL_REQUEST_OWNER';
+
+/** U13c: canonical appointment COMMIT edge, through the existing CRM owners. */
+export const COMMIT_BOOKING_OWNER = 'COMMIT_BOOKING_OWNER';
+
 /** Gate 8-R's owner set; bound to `GATE_8R_OWNERS_UNRULED` in `gates/gate-8r.owners.ts` (U8R, R8R-1). */
 export const GATE_8R_OWNERS = 'GATE_8R_OWNERS';
 

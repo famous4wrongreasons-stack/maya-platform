@@ -55,6 +55,7 @@ const OWNER_MODULES: readonly string[] = [
   // P-PRINCIPAL (D-1, D-2): K1's resolver (C11:2536-2539) and B-02's in-transaction Membership read.
   'orchestration/c9.module.ts#C9Module',
   'crm/crm.module.ts#CrmModule',
+  'marketing/marketing.module.ts#MarketingModule',
   // U6-L1 (R6-2): (e)'s owner, `EntitlementsService` grants every `requiredFeatures` entry (C11:4755).
   'entitlements/entitlements.module.ts#EntitlementsModule',
   'tenancy/tenancy.module.ts#TenancyModule',
@@ -239,24 +240,45 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
     only: ['owner-ports/widget-owner-ports.module.ts'],
   },
   'crm/crm.module.ts': {
-    why: 'U11b canonical appointment noun owner module',
+    why: 'U11b canonical appointment noun owner module and U13c booking commit owners',
+    only: ['owner-ports/widget-owner-ports.module.ts'],
+  },
+  'marketing/marketing.module.ts': {
+    why: 'U13c canonical bulk approval owner module',
     only: ['owner-ports/widget-owner-ports.module.ts'],
   },
   'appointments/client-appointment-create.service.ts': {
-    why: 'U11b canonical read-only create quote owner',
-    only: ['owner-ports/noun-booking-create.adapter.ts'],
+    why: 'U11b canonical read-only create quote and U13c booking commit owner',
+    only: [
+      'owner-ports/noun-booking-create.adapter.ts',
+      'owner-ports/commit-booking.adapter.ts',
+    ],
   },
   'crm/client-appointment-cancel.service.ts': {
     why: 'U11b canonical read-only cancel target owner',
-    only: ['owner-ports/noun-booking-cancel.adapter.ts'],
+    only: [
+      'owner-ports/noun-booking-cancel.adapter.ts',
+      'owner-ports/commit-booking.adapter.ts',
+    ],
   },
   'crm/client-appointment-reschedule.service.ts': {
     why: 'U11b canonical read-only reschedule quote owner',
-    only: ['owner-ports/noun-booking-reschedule.adapter.ts'],
+    only: [
+      'owner-ports/noun-booking-reschedule.adapter.ts',
+      'owner-ports/commit-booking.adapter.ts',
+    ],
   },
   'crm/client-appointment-read.service.ts': {
     why: 'U11b canonical Client appointment read owner',
     only: ['owner-ports/noun-client-appointment-read.adapter.ts'],
+  },
+  'marketing/canonical-bulk.service.ts': {
+    why: 'U13c canonical B35 approval request and decision owner',
+    only: ['owner-ports/approval-request.adapter.ts'],
+  },
+  'action-engine/action-invocation-receipt.context.ts': {
+    why: 'U13c canonical admission receipt seam; it observes owner execution and authors no decision',
+    only: ['owner-ports/commit-booking.adapter.ts'],
   },
 };
 
@@ -1013,10 +1035,13 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       'ai-tools/ai-tool-policy.module.ts',
       'entitlements/entitlements.module.ts',
       'crm/crm.module.ts',
+      'marketing/marketing.module.ts',
       'appointments/client-appointment-create.service.ts',
       'crm/client-appointment-cancel.service.ts',
       'crm/client-appointment-reschedule.service.ts',
       'crm/client-appointment-read.service.ts',
+      'marketing/canonical-bulk.service.ts',
+      'action-engine/action-invocation-receipt.context.ts',
     ]);
   }, 60_000);
 
@@ -1143,6 +1168,9 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       'TENANT_SCOPE',
       'NOUN_RESOLUTION_PORTS',
       'C9_CANCEL_OWNER',
+      'DRAFT_OWNER_REGISTRY',
+      'APPROVAL_REQUEST_OWNER',
+      'COMMIT_BOOKING_OWNER',
     ]);
   });
 

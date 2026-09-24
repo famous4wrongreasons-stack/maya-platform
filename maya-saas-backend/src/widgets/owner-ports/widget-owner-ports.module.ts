@@ -8,8 +8,12 @@ import { C9Module } from '../../orchestration/c9.module';
 import { TenancyModule } from '../../tenancy/tenancy.module';
 import { C8Module } from '../../valuation/c8.module';
 import { CrmModule } from '../../crm/crm.module';
+import { MarketingModule } from '../../marketing/marketing.module';
 import {
+  APPROVAL_REQUEST_OWNER,
   CANONICAL_READ,
+  COMMIT_BOOKING_OWNER,
+  DRAFT_OWNER_REGISTRY,
   GATE6_OWNERS,
   PRINCIPAL_RESOLVER,
   TENANT_SCOPE,
@@ -27,6 +31,9 @@ import { BookingCancelNounAdapter } from './noun-booking-cancel.adapter';
 import { BookingRescheduleNounAdapter } from './noun-booking-reschedule.adapter';
 import { ClientAppointmentReadNounAdapter } from './noun-client-appointment-read.adapter';
 import { C9CancelAdapter } from './c9-cancel.adapter';
+import { ApprovalRequestAdapter } from './approval-request.adapter';
+import { CommitBookingAdapter } from './commit-booking.adapter';
+import { DraftOwnerRegistry } from './draft-owner.registry';
 
 /**
  * The widget layer's one boundary to non-widget owners (integrator decision D-6).
@@ -56,6 +63,7 @@ import { C9CancelAdapter } from './c9-cancel.adapter';
     C8Module,
     C9Module,
     CrmModule,
+    MarketingModule,
     EntitlementsModule,
     TenancyModule,
   ],
@@ -72,6 +80,17 @@ import { C9CancelAdapter } from './c9-cancel.adapter';
     ClientAppointmentReadNounAdapter,
     C9CancelAdapter,
     { provide: C9_CANCEL_OWNER, useExisting: C9CancelAdapter },
+    ApprovalRequestAdapter,
+    CommitBookingAdapter,
+    {
+      provide: DRAFT_OWNER_REGISTRY,
+      useFactory: () => new DraftOwnerRegistry([]),
+    },
+    {
+      provide: APPROVAL_REQUEST_OWNER,
+      useExisting: ApprovalRequestAdapter,
+    },
+    { provide: COMMIT_BOOKING_OWNER, useExisting: CommitBookingAdapter },
     NounResolutionOwnersProvider,
     WitnessC9RevisionAdapter,
     {
@@ -90,6 +109,9 @@ import { C9CancelAdapter } from './c9-cancel.adapter';
     TENANT_SCOPE,
     NOUN_RESOLUTION_PORTS,
     C9_CANCEL_OWNER,
+    DRAFT_OWNER_REGISTRY,
+    APPROVAL_REQUEST_OWNER,
+    COMMIT_BOOKING_OWNER,
   ],
 })
 export class WidgetOwnerPortsModule {}

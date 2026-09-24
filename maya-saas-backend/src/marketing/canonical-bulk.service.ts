@@ -317,6 +317,88 @@ export class CanonicalBulkService {
       callerIdempotency: { scope: 'b35.bulk-root', key: root.idempotencyKey! },
     };
   }
+
+  /**
+   * U13c owner-side REQUEST_APPROVAL surface. The widget layer supplies only
+   * the already frozen campaign and intent identities. This owner rechecks the
+   * live tenant owner, revalidates the immutable manifest, asks the canonical
+   * ingress for its current policy preview, and only then creates the durable
+   * PENDING_APPROVAL execution.
+   */
+  async requestWidgetApproval(input: {
+    tenantId: string;
+    userId: string;
+    campaignId: string;
+    intentHash: string;
+  }) {
+    return this.transaction(async (tx) => {
+      await this.assertWidgetOwner(input.tenantId, input.userId, tx);
+      await tx.$queryRaw`SELECT id FROM "MarketingCampaign" WHERE id=${input.campaignId} AND "tenantId"=${input.tenantId} FOR UPDATE`;
+      const graph = await this.graph(tx, input.tenantId, input.campaignId);
+      if (
+        graph.createdByUserId !== input.userId ||
+        graph.bulkIntentHash !== input.intentHash ||
+        this.manifestHash(graph) !== input.intentHash
+      )
+        throw new ConflictException('IDEMPOTENCY_CONFLICT');
+      if (graph.expiresAt <= new Date())
+        throw new ConflictException('B35_PREVIEW_EXPIRED');
+      const request = this.request(graph);
+      const preview = await this.ingress.preview(request);
+      if (
+        preview.policyDecision !== 'ALLOW' ||
+        preview.approvalRequirement !== 'REQUIRED'
+      )
+        throw new ForbiddenException('B35_ADMISSION_DENIED');
+      const execution = await this.ingress.createExecution(request, tx);
+      if (execution.state !== 'PENDING_APPROVAL')
+        throw new ForbiddenException('B35_ADMISSION_DENIED');
+      return execution;
+    });
+  }
+
+  /** U13c APPROVAL decision; ActionEngineKernel remains the decision owner. */
+  async decideWidgetApproval(input: {
+    tenantId: string;
+    userId: string;
+    executionId: string;
+    decision: 'APPROVED' | 'REJECTED';
+  }) {
+    return this.transaction(async (tx) => {
+      await this.assertWidgetOwner(input.tenantId, input.userId, tx);
+      return this.engine.decideApproval(
+        {
+          tenantId: input.tenantId,
+          executionId: input.executionId,
+          approverUserId: input.userId,
+          decision: input.decision,
+        },
+        tx,
+      );
+    });
+  }
+
+  private async assertWidgetOwner(
+    tenantId: string,
+    userId: string,
+    tx: Tx,
+  ): Promise<void> {
+    this.context.assertTenantId(tenantId);
+    if (!userId || this.context.get()?.userId !== userId)
+      throw new ForbiddenException('B35_CANONICAL_OWNER_SESSION_REQUIRED');
+    const membership = await tx.membership.findFirst({
+      where: {
+        tenantId,
+        userId,
+        status: 'active',
+        role: { in: ['tenant_owner', 'business_owner'] },
+        user: { status: 'active' },
+      },
+      select: { id: true },
+    });
+    if (!membership)
+      throw new ForbiddenException('B35_OWNER_AUTHORITY_REQUIRED');
+  }
   async confirm(proof: string, value: unknown) {
     const v = bulkObject(value, ['campaignId', 'intentHash']);
     const campaignId = bulkCode(v.campaignId),

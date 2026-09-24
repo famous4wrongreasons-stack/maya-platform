@@ -694,6 +694,8 @@ const OWNER_MODULES = [
   // P-PRINCIPAL (D-1, D-2): K1's resolver (C11:2536-2539) and B-02's in-transaction Membership read.
   'orchestration/c9.module.ts#C9Module',
   'crm/crm.module.ts#CrmModule',
+  // U13c: approval requests delegate to the existing B35 marketing owner.
+  'marketing/marketing.module.ts#MarketingModule',
   // U6-L1 (R6-2): (e)'s owner, `EntitlementsService` grants every `requiredFeatures` entry (C11:4755).
   'entitlements/entitlements.module.ts#EntitlementsModule',
   'tenancy/tenancy.module.ts#TenancyModule',
@@ -706,6 +708,9 @@ const BOUND_PORT_TOKENS = [
   'TENANT_SCOPE',
   'NOUN_RESOLUTION_PORTS',
   'C9_CANCEL_OWNER',
+  'DRAFT_OWNER_REGISTRY',
+  'APPROVAL_REQUEST_OWNER',
+  'COMMIT_BOOKING_OWNER',
 ];
 const NEVER_IMPORTED = ['action-engine/action-engine.module.ts#ActionEngineModule'];
 /** The widget layer's own store client, and where it may be imported (`null`: any widget file). */
