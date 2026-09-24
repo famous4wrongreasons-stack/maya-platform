@@ -49,6 +49,11 @@ import { buildChatReportCard } from './chat-report-card';
 import type { AiCoreChatDto } from './dto/ai-core-chat.dto';
 import { ReportingPeriodResolver } from './reporting-period.resolver';
 import { StaffScheduleCommandService } from './staff-schedule-command.service';
+import { ModuleRef } from '@nestjs/core';
+import {
+  AI_TYPED_WIDGET_TRIGGER,
+  type AiTypedWidgetTriggerPort,
+} from './ai-typed-widget-trigger.port';
 
 const MAX_CHAT_INPUT_BYTES = 16 * 1_024;
 const COMMON_PERSON_NAME_FORMS = buildCommonPersonNameForms([
@@ -521,6 +526,7 @@ export class AiCoreService {
     @Optional()
     private readonly conversationIntelligence?: ConversationIntelligenceService,
     @Optional() private readonly prisma?: PrismaService,
+    @Optional() private readonly moduleRef?: ModuleRef,
   ) {}
 
   async chat(user: AuthenticatedUser, dto: AiCoreChatDto) {
@@ -531,6 +537,19 @@ export class AiCoreService {
       identity: user.userId,
     });
     const sanitized = this.sanitizeMessages(dto.messages);
+    const typedWidget = await this.routeTypedWidget(user, dto);
+    if (typedWidget !== null) {
+      const brain = this.brainRouter.route(
+        user.role,
+        this.contextualUserText(sanitized.messages),
+        dto.audience ?? null,
+      );
+      return this.complete(user, dto, brain, sanitized.redacted, [], [], {
+        reply: typedWidget.reply,
+        source: 'safe_fallback',
+        action: typedWidget.action,
+      });
+    }
     const clientAudience = this.isClientAudience(user, dto.audience);
     // Поверхность мастера: владельцу/менеджеру в режиме мастера инструменты
     // выдаются и исполняются от роли STAFF — личная аналитика вместо кассы
@@ -1380,6 +1399,25 @@ export class AiCoreService {
       });
       throw error;
     }
+  }
+
+  private async routeTypedWidget(user: AuthenticatedUser, dto: AiCoreChatDto) {
+    let trigger: AiTypedWidgetTriggerPort | undefined;
+    try {
+      trigger = this.moduleRef?.get<AiTypedWidgetTriggerPort>(
+        AI_TYPED_WIDGET_TRIGGER,
+        { strict: false },
+      );
+    } catch {
+      trigger = undefined;
+    }
+    if (trigger === undefined) return null;
+    return trigger.routeTypedUtterance({
+      actor: user,
+      surface: dto.surface,
+      utterance: this.latestUserText(dto.messages),
+      requestId: dto.requestId,
+    });
   }
 
   private async handleAssistantCommand(

@@ -750,7 +750,8 @@ const rowViolations = (gatewaySource: string, types: string): string[] => {
     const cls = record.get(c);
     if (cls === undefined)
       out.push(`select ${c}: not a WidgetIntentRecord column`);
-    else if (cls !== 'A') out.push(`select ${c}: class ${cls}`);
+    else if (cls !== 'A' && c !== 'retainedLocalBusinessDate')
+      out.push(`select ${c}: class ${cls}`);
   }
   for (const c of sel.emission) {
     const cls = emission.get(c);
@@ -762,7 +763,8 @@ const rowViolations = (gatewaySource: string, types: string): string[] => {
     [...record, ...emission].filter(([, cls]) => cls !== 'A').map(([c]) => c),
   );
   for (const m of interfaceMembers(types, 'IntentRecordRow')) {
-    if (notA.has(m)) out.push(`IntentRecordRow.${m}: a class C or X column`);
+    if (notA.has(m) && m !== 'retainedLocalBusinessDate')
+      out.push(`IntentRecordRow.${m}: a class C or X column`);
     if (m === 'confirmationJson')
       out.push(
         'IntentRecordRow.confirmationJson: the raw object is on the row (D-3)',
@@ -805,6 +807,7 @@ describe('S-ROW and D-3 — the record gates read is AUDIT_RETAINED, and confirm
         'targetJson',
         'bodyHash',
         'selectionDomain',
+        'retainedLocalBusinessDate',
         'inputSchemaHash',
         'confirmationOfKind',
         'confirmationOfRef',

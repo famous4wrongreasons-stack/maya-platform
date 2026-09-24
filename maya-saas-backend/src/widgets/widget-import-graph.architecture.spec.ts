@@ -114,6 +114,10 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
     why: 'P-MT2a narrow completion-hook token and transport-neutral port types',
     only: ['composition/chat-read.trigger.ts', 'widgets.module.ts'],
   },
+  'ai-tools/ai-typed-widget-trigger.port.ts': {
+    why: 'P-TYPED narrow pre-LLM carrier token and transport-neutral port types',
+    only: ['composition/typed-step0.ts', 'widgets.module.ts'],
+  },
   'action-engine/action-engine.registry.ts': {
     why: 'the Action Engine capability registry: a plain class over static rows, constructed as a value (D-6 registries)',
   },

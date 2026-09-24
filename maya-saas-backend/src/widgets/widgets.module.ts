@@ -34,6 +34,8 @@ import { WidgetsController } from './widgets.controller';
 import { WidgetThreadPageService } from './resolve/thread-page.service';
 import { ChatReadTriggerService } from './composition/chat-read.trigger';
 import { AI_READ_WIDGET_TRIGGER } from '../ai-tools/ai-read-widget-trigger.port';
+import { AI_TYPED_WIDGET_TRIGGER } from '../ai-tools/ai-typed-widget-trigger.port';
+import { TypedStep0Service } from './composition/typed-step0';
 
 /**
  * K3 — the widget runtime.
@@ -90,6 +92,8 @@ import { AI_READ_WIDGET_TRIGGER } from '../ai-tools/ai-read-widget-trigger.port'
     WidgetThreadPageService,
     ChatReadTriggerService,
     { provide: AI_READ_WIDGET_TRIGGER, useExisting: ChatReadTriggerService },
+    TypedStep0Service,
+    { provide: AI_TYPED_WIDGET_TRIGGER, useExisting: TypedStep0Service },
     EffectRouterService,
   ],
   exports: [
