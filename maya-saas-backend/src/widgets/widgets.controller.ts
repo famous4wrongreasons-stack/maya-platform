@@ -21,6 +21,7 @@ import { F88SubmissionPipe } from './validation/f88-walk';
 import { ResolveWidgetDto } from './dto/resolve-widget.dto';
 import { intentSubmitArgs } from './intent-submit-args';
 import { reasonTextOrNull } from './rendering/reason-text';
+import { WidgetThreadPageService } from './resolve/thread-page.service';
 
 @ApiTags('widgets')
 @ApiBearerAuth()
@@ -28,7 +29,10 @@ import { reasonTextOrNull } from './rendering/reason-text';
 @TenantScoped()
 @RequiresFeature('widgets.runtime')
 export class WidgetsController {
-  constructor(private readonly gateway: IntentGatewayService) {}
+  constructor(
+    private readonly gateway: IntentGatewayService,
+    private readonly threadPage: WidgetThreadPageService,
+  ) {}
 
   /**
    * Resolve — read a widget's current state. Read-only by construction in wave 2: it reaches no
@@ -37,18 +41,14 @@ export class WidgetsController {
   @Post('resolve')
   @HttpCode(200)
   @ApiOperation({ summary: 'Resolve the current envelope for a widget' })
-  resolve(
+  async resolve(
     @Body() dto: ResolveWidgetDto,
     @CurrentUser() actor: AuthenticatedUser,
   ) {
-    // Deliberately not implemented in this commit rather than stubbed as success: an emitter is
-    // K3's second half, and a route that answered 200 with nothing would be indistinguishable from
-    // one that worked.
+    const widgets = await this.threadPage.read(dto.thread_page);
     return {
       contract: 'maya.widget.resolve/1',
-      widget_id: dto.widget_id,
-      state: 'not_emitted',
-      reason: 'the emitter is not built; wave 2 emits to nobody',
+      widgets,
       tenant_bound: actor.tenantId !== null,
     };
   }

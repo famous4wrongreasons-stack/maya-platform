@@ -57,6 +57,7 @@ const recordingGateway = () => {
   return {
     controller: new WidgetsController(
       gateway as unknown as IntentGatewayService,
+      { read: () => Promise.resolve([]) } as never,
     ),
     calls,
   };

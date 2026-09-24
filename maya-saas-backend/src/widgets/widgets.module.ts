@@ -31,6 +31,7 @@ import { assertRoutingResolves } from './routing/deterministic-router';
 import { LoweringSourceReader } from './stores/lowering-source.read';
 import { WidgetStoresService } from './stores/widget-stores.service';
 import { WidgetsController } from './widgets.controller';
+import { WidgetThreadPageService } from './resolve/thread-page.service';
 
 /**
  * K3 — the widget runtime.
@@ -84,6 +85,7 @@ import { WidgetsController } from './widgets.controller';
     // CANONICAL_READ port from WidgetOwnerPortsModule; the finite registry controls whether that
     // edge is reachable. Gate 13 remains the sole caller when its routing edges land.
     WidgetProjectorService,
+    WidgetThreadPageService,
     EffectRouterService,
   ],
   exports: [
