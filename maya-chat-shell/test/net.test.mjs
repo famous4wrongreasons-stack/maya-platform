@@ -594,7 +594,7 @@ test('/ai/chat request: exactly {surface, requestId, messages}, surface "web", B
     messages: [{ role: 'user', content: 'Когда ближайшее окно?', audience: 'owner', tenant: TENANT_ID }],
   };
   const out = await net.transport.chat(hostile, new AbortController().signal);
-  assert.deepEqual(out, { ok: true, value: { request_id: REQUEST_ID, reply: CHAT_OK(REQUEST_ID).reply, action_status: null } });
+  assert.deepEqual(out, { ok: true, value: { request_id: REQUEST_ID, reply: CHAT_OK(REQUEST_ID).reply, action_status: null, resolution: null } });
   const [req] = calls(U.chat);
   assert.deepEqual(req.body, { surface: 'web', requestId: REQUEST_ID, messages: [{ role: 'user', content: 'Когда ближайшее окно?' }] });
   assert.deepEqual(Object.keys(req.headers).sort(), ['Authorization', 'Content-Type']);
@@ -611,10 +611,47 @@ test('approval_required: action_status copies action.status only — never actio
   const { net } = await signedIn();
   serve({ [U.chat]: (req) => json(201, CHAT_APPROVAL(req.body.requestId)) });
   const out = await net.transport.chat(chatRequest(), new AbortController().signal);
-  assert.deepEqual(out, { ok: true, value: { request_id: REQUEST_ID, reply: 'Действие подготовлено и ждёт вашего подтверждения.', action_status: 'approval_required' } });
+  assert.deepEqual(out, { ok: true, value: { request_id: REQUEST_ID, reply: 'Действие подготовлено и ждёт вашего подтверждения.', action_status: 'approval_required', resolution: null } });
   assert.ok(!keysDeep(out).has('approval'));
   for (const v of [APPROVAL_ID, 'appointments.own.create', 'payload-hash-3e1d']) assert.ok(!JSON.stringify(out).includes(v));
-  assert.deepEqual(Object.keys(out.value).sort(), ['action_status', 'reply', 'request_id']);
+  assert.deepEqual(Object.keys(out.value).sort(), ['action_status', 'reply', 'request_id', 'resolution']);
+});
+
+test('B4: /ai/chat retains one exact SH-19 authorized envelope and rejects an incomplete substitute', async () => {
+  const { net } = await signedIn();
+  const envelope = JSON.parse(read('dev/fixtures/envelopes/h7/invariant/kind-schedule.json'));
+  const resolution = {
+    matched: true,
+    receipt: {
+      widget_id: envelope.widget_id,
+      envelope_seal: envelope.integrity.envelope_seal,
+      envelope,
+    },
+    dismiss_widget_id: null,
+  };
+  serve({ [U.chat]: (req) => json(201, { ...CHAT_OK(req.body.requestId), resolution }) });
+  const accepted = await net.transport.chat(chatRequest(), new AbortController().signal);
+  assert.deepEqual(accepted.ok && accepted.value.resolution, resolution);
+
+  serve({
+    [U.chat]: (req) =>
+      json(201, {
+        ...CHAT_OK(req.body.requestId),
+        resolution: {
+          matched: true,
+          receipt: {
+            widget_id: 'w-incomplete',
+            envelope_seal: 'not-authorized',
+            envelope: { contract: 'maya.widget.envelope/1', widget_id: 'w-incomplete' },
+          },
+          dismiss_widget_id: null,
+        },
+      }),
+  });
+  assert.deepEqual(
+    await net.transport.chat(chatRequest(), new AbortController().signal),
+    { ok: false, failure: { reason: 'unexpected_response', status: 201 } },
+  );
 });
 
 const CHAT_ROWS = [

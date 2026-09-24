@@ -34,8 +34,8 @@
     "src/voice/capture.ts",
     "src/voice/wav.ts"
   ],
-  "bytes": 376955,
-  "digest": "d6cfabf7392deaf75af376bbd39d8f51a7d9d36267e3468786b997f6287837dd",
+  "bytes": 381511,
+  "digest": "9f4dc46f3ce0ae3de748d79a2f07f5a3beb5d9f4da327e920086d56aed8ed07f",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -43,8 +43,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "09cd3140d02a6367dc0ddb91fc8bce67b5b3f0e4ccab939d159ec7fe82f3c720",
-    "modulePath": "m/09cd3140d02a6367/",
+    "digest": "e790e24504c58ebe3c8df893bdde2c7025ca1d2427bf27564b680b69cefbbcde",
+    "modulePath": "m/e790e24504c58ebe/",
     "files": [
       {
         "path": "entry/main.js",
@@ -108,8 +108,8 @@
       },
       {
         "path": "src/net/project.js",
-        "sha256": "c839889bea747e731597eb5ce714f6d3b262b79093583a65794b6402870a549d",
-        "bytes": 3552
+        "sha256": "c6d3b7dfe704314f361606fa6704d4098de2df2e31ea52948aa81ebdcdc2b7c2",
+        "bytes": 6479
       },
       {
         "path": "src/net/session.js",
@@ -153,8 +153,8 @@
       },
       {
         "path": "src/shell/conversation.js",
-        "sha256": "0a42355663c300d6143d1e564d1e3eddccf8bbc3a05f39759fec7223974fcba4",
-        "bytes": 11001
+        "sha256": "245f91912b85be311da9a4a95c12259d5e7e436928933aa140e87acb536c2992",
+        "bytes": 11119
       },
       {
         "path": "src/shell/deeplink.js",
@@ -173,8 +173,8 @@
       },
       {
         "path": "src/shell/shell.js",
-        "sha256": "7f448faf2d43d0343a902fdb9945b6cf8703c105599456e9bc6e34fbf4ec6cb2",
-        "bytes": 6878
+        "sha256": "119b2b2b45206a847d15524c59c7259f8699585c46c7afa6f6c4e99e29dcafb6",
+        "bytes": 7155
       },
       {
         "path": "src/shell/view.js",
@@ -202,7 +202,7 @@
       "bytes": 16238
     },
     "index": {
-      "sha256": "830a832e1aa672f2fd20e36296d3b6249c1114df439d511727c456bf4ef89953",
+      "sha256": "aa39199ab8df0d952ab084eab0be8b0ea63b08b13b51c67dbe1a4fd296ea4d16",
       "bytes": 903
     }
   },

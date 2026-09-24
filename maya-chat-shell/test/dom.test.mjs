@@ -95,7 +95,7 @@ function page({ signedIn = true, voice = true, chat = null, fragment = '' } = {}
       chats.push(request);
       const next = outcomes.shift();
       if (chat) return chat(request, signal);
-      return Promise.resolve(next ?? { ok: true, value: { request_id: request.requestId, reply: `Ответ ${chats.length}`, action_status: null } });
+      return Promise.resolve(next ?? { ok: true, value: { request_id: request.requestId, reply: `Ответ ${chats.length}`, action_status: null, resolution: null } });
     },
     transcribe: () => new Promise(() => undefined),
   };
@@ -513,7 +513,7 @@ test('a session that ends shows the signed-out state with its reason and focus o
 
 test('typed turn: bubble before the reply, one role=status while pending, polite log, focus stays in the composer, text cleared once sent', async () => {
   let resolve;
-  const p = page({ chat: (request) => new Promise((r) => (resolve = () => r({ ok: true, value: { request_id: request.requestId, reply: 'Тестовый ответ', action_status: null } }))) });
+  const p = page({ chat: (request) => new Promise((r) => (resolve = () => r({ ok: true, value: { request_id: request.requestId, reply: 'Тестовый ответ', action_status: null, resolution: null } }))) });
   const composer = p.composer();
   composer.focus();
   p.dom.type(composer, 'Какие окна свободны?');
@@ -546,7 +546,7 @@ test('typed turn: bubble before the reply, one role=status while pending, polite
 
 test('approval_required (SH-06): the reply, then the exact notice — no control, link or route, not role="alert", never history', async () => {
   const p = page();
-  p.outcomes.push({ ok: true, value: { request_id: 'x', reply: 'Действие подготовлено и ждёт вашего подтверждения.', action_status: 'approval_required' } });
+  p.outcomes.push({ ok: true, value: { request_id: 'x', reply: 'Действие подготовлено и ждёт вашего подтверждения.', action_status: 'approval_required', resolution: null } });
   p.chats.length = 0;
   const chat = p.runtime.conversation;
   await p.send('Запиши меня на стрижку');
@@ -676,7 +676,7 @@ test('tenant_required (§1.4 row 11): the named signed-in state with «Выйт�
 test('reply links: only https:, tel: and mailto: become anchors with rel="noopener noreferrer"; javascript: and data: stay text', async () => {
   const p = page();
   const reply = apiFixture('ai/chat.201.reply-links.json').body.reply;
-  p.outcomes.push({ ok: true, value: { request_id: 'x', reply, action_status: null } });
+  p.outcomes.push({ ok: true, value: { request_id: 'x', reply, action_status: null, resolution: null } });
   await p.send('Ссылки');
   const anchors = p.dom.findAll((el) => el.localName === 'a', p.log());
   assert.deepEqual(anchors.map((a) => a.getAttribute('href')), ['https://example.test/booking', 'tel:+70000000000', 'mailto:hello@example.test']);

@@ -11,6 +11,7 @@
 import type {
   BusinessChoice,
   ChatProjection,
+  ChatWidgetResolution,
   EmailStartProjection,
   EmailVerifyProjection,
   PasswordLoginProjection,
@@ -126,7 +127,90 @@ export const projectChat = (body: unknown, requestId: string): ChatProjection | 
   const echoed = text(own(body, 'request_id'));
   const reply = text(own(body, 'reply'));
   if (echoed === null || echoed !== requestId || reply === null) return null;
-  return { request_id: echoed, reply, action_status: text(own(own(body, 'action'), 'status')) };
+  const resolution = projectChatResolution(own(body, 'resolution'));
+  if (resolution === INVALID_RESOLUTION) return null;
+  return {
+    request_id: echoed,
+    reply,
+    action_status: text(own(own(body, 'action'), 'status')),
+    resolution,
+  };
+};
+
+const INVALID_RESOLUTION = Symbol('invalid_chat_widget_resolution');
+
+/**
+ * B4's wire boundary. It does not validate business facts or the HMAC: H7 and the server verifier
+ * retain those duties. It only proves enough of the certified envelope root to make ingestion total,
+ * then keeps the exact server object so the shell cannot manufacture or repair authority bytes.
+ */
+const projectChatResolution = (
+  value: unknown,
+): ChatWidgetResolution | null | typeof INVALID_RESOLUTION => {
+  if (value === undefined || value === null) return null;
+  if (!isRecord(value) || own(value, 'matched') !== true) return INVALID_RESOLUTION;
+  const receipt = own(value, 'receipt');
+  const dismiss = own(value, 'dismiss_widget_id');
+  if (!isRecord(receipt) || (dismiss !== null && typeof dismiss !== 'string'))
+    return INVALID_RESOLUTION;
+  const widgetId = filled(own(receipt, 'widget_id'));
+  const envelopeSeal = filled(own(receipt, 'envelope_seal'));
+  const envelope = own(receipt, 'envelope');
+  if (
+    widgetId === null ||
+    envelopeSeal === null ||
+    !isIngestibleEnvelope(envelope) ||
+    own(envelope, 'widget_id') !== widgetId ||
+    own(own(envelope, 'integrity'), 'envelope_seal') !== envelopeSeal
+  )
+    return INVALID_RESOLUTION;
+  return {
+    matched: true,
+    receipt: {
+      widget_id: widgetId,
+      envelope_seal: envelopeSeal,
+      envelope,
+    },
+    dismiss_widget_id: dismiss,
+  };
+};
+
+const isIngestibleEnvelope = (value: unknown): value is ChatWidgetResolution['receipt']['envelope'] => {
+  if (!isRecord(value) || own(value, 'contract') !== 'maya.widget.envelope/1') return false;
+  if (filled(own(value, 'widget_id')) === null || filled(own(value, 'tenant_id')) === null) return false;
+  if (!Array.isArray(own(value, 'intents')) || !Array.isArray(own(value, 'limitations'))) return false;
+  const requiredRecords = [
+    'correlation',
+    'source',
+    'origin',
+    'authority',
+    'body',
+    'provenance',
+    'lifecycle',
+    'presentation',
+    'render',
+    'integrity',
+  ];
+  if (requiredRecords.some((key) => !isRecord(own(value, key)))) return false;
+  const lifecycle = own(value, 'lifecycle');
+  const presentation = own(value, 'presentation');
+  const render = own(value, 'render');
+  const integrity = own(value, 'integrity');
+  return (
+    typeof own(value, 'kind') === 'string' &&
+    Number.isInteger(own(value, 'body_version')) &&
+    filled(own(lifecycle, 'state')) !== null &&
+    filled(own(lifecycle, 'expires_at')) !== null &&
+    filled(own(lifecycle, 'input_lock')) !== null &&
+    filled(own(lifecycle, 'on_expiry')) !== null &&
+    isRecord(own(presentation, 'a11y')) &&
+    filled(own(presentation, 'density')) !== null &&
+    Array.isArray(own(render, 'intents_withheld')) &&
+    Array.isArray(own(render, 'body_reductions')) &&
+    filled(own(render, 'render_tier')) !== null &&
+    filled(own(integrity, 'body_hash')) !== null &&
+    filled(own(integrity, 'envelope_seal')) !== null
+  );
 };
 
 /** `POST /ai/transcribe` → `{transcript}` (`ai-speech.service.ts:120`). */

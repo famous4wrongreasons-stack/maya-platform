@@ -295,7 +295,7 @@ function referenceConversation(ids, chatReply = 'Готово') {
     chat(request, signal) {
       assert.ok(signal instanceof AbortSignal);
       bodies.push(JSON.stringify(request));
-      return Promise.resolve({ ok: true, value: { request_id: request.requestId, reply: chatReply, action_status: null } });
+      return Promise.resolve({ ok: true, value: { request_id: request.requestId, reply: chatReply, action_status: null, resolution: null } });
     },
   };
   return {
@@ -352,7 +352,7 @@ function realConversation(ids) {
         if (!['user', 'assistant'].includes(m.role)) violations.push('role');
         if (typeof m.content !== 'string' || m.content.length < 1 || m.content.length > 2000) violations.push('content');
       }
-      return Promise.resolve({ ok: true, value: { request_id: body.requestId, reply: 'Готово', action_status: null } });
+      return Promise.resolve({ ok: true, value: { request_id: body.requestId, reply: 'Готово', action_status: null, resolution: null } });
     },
   };
   const conversation = createConversation({

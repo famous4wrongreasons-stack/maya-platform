@@ -20,7 +20,7 @@
 // Memory only (A6). A signed-in → signed-out transition empties the timeline and aborts the turn in
 // flight, so no history crosses to another session or tenant (D7 B).
 
-import type { ChatFailure, ChatMessage, ChatProjection, Outcome } from '../net/types.ts';
+import type { ChatFailure, ChatMessage, ChatProjection, ChatWidgetResolution, Outcome } from '../net/types.ts';
 import type {
   Cancel,
   ComposerState,
@@ -74,6 +74,8 @@ export interface ConversationDeps {
   readonly session: Pick<SessionPort, 'view' | 'subscribe'>;
   readonly scheduler: Pick<Scheduler, 'now'>;
   readonly newAbort: () => AbortHandle;
+  /** B4: pass one server-authorized envelope to the existing widget owner after the turn settles. */
+  readonly ingestResolution?: (resolution: ChatWidgetResolution) => void;
   /** `crypto.randomUUID()` by default: 36 chars of `[0-9a-f-]`, inside the DTO's `^[A-Za-z0-9_-]{8,128}$`. */
   readonly newRequestId?: () => string;
 }
@@ -289,6 +291,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
       item.failure = null;
       item.retry = NO_RETRY;
       append({ kind: 'assistant', id: nextId('a'), text: outcome.value.reply });
+      if (outcome.value.resolution !== null) deps.ingestResolution?.(outcome.value.resolution);
       // V2-5, SH-06: an approval-gated action is drawn as the server's reply plus a neutral notice
       // kept outside history. No control, no link, no route: the shell cannot approve here.
       if (outcome.value.action_status === 'approval_required') append({ kind: 'notice', id: nextId('n'), notice: 'approval_not_here' });

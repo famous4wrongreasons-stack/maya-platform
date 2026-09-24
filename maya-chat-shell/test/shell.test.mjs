@@ -259,3 +259,53 @@ test('the runtime: one widget port for the DOM, a real detail at SHEET density, 
   assert.equal(chats + submits, 0);
   runtime.dispose();
 });
+
+test('P-B4: a successful chat resolution reaches the existing H7/vault/renderer path without a second transport', async () => {
+  const { port } = makeHistory();
+  const env = envelope('kind-schedule');
+  let chats = 0;
+  const runtime = createShellRuntime({
+    transport: {
+      chat: (request) => {
+        chats += 1;
+        return Promise.resolve({
+          ok: true,
+          value: {
+            request_id: request.requestId,
+            reply: 'Вот расписание.',
+            action_status: null,
+            resolution: {
+              matched: true,
+              receipt: {
+                widget_id: env.widget_id,
+                envelope_seal: env.integrity.envelope_seal,
+                envelope: env,
+              },
+              dismiss_widget_id: null,
+            },
+          },
+        });
+      },
+    },
+    session: { view: () => ({ signedIn: true, display: { userName: 'Стас', tenantName: null } }), subscribe: () => () => undefined },
+    render,
+    environment: { a11y: () => A11Y, onA11yChange: () => () => undefined, fragment: () => '' },
+    scheduler: { now: () => Date.parse(INDEX.now), after: () => () => undefined },
+    history: port,
+    newAbort: () => new AbortController(),
+    newId: () => 'request-b4-0001',
+  });
+
+  assert.deepEqual(runtime.conversation.submitUserTurn('Что у меня сегодня?', { modality: 'typed' }), {
+    accepted: true,
+    itemId: 'u1',
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+  const items = runtime.conversation.view().items;
+  assert.equal(chats, 1);
+  assert.deepEqual(items.map((item) => item.kind), ['user', 'assistant', 'widget']);
+  assert.equal(items[2].result.kind, 'SCHEDULE');
+  assert.equal(items[2].result.mode, 'structured');
+  assert.ok(runtime.widgets.heldTokens() > 0, 'the one existing token vault owns the envelope tokens');
+  runtime.dispose();
+});

@@ -6,8 +6,11 @@
 //     names a dropped one;
 //   * the named failure states every non-2xx outcome maps to (D9, D12d, V2-16). Nothing is silent.
 //
-// No contract type is redeclared here (D8): there is no receipt and no resolve shape in P1.
+// No contract type is redeclared here (D8). B4 retains the server-authorized envelope whole and
+// hands it to the existing H7/vault/render owner; the transport never reconstructs business facts.
 // Types only; this module emits no runtime bytes.
+
+import type { WidgetEnvelope } from '../contract.ts';
 
 // ── requests ───────────────────────────────────────────────────────────────────────────────────
 
@@ -108,6 +111,18 @@ export interface ChatProjection {
   readonly request_id: string;
   readonly reply: string;
   readonly action_status: string | null;
+  readonly resolution: ChatWidgetResolution | null;
+}
+
+/** SH-19's additive chat member, projected without re-authoring the certified envelope. */
+export interface ChatWidgetResolution {
+  readonly matched: true;
+  readonly receipt: {
+    readonly widget_id: string;
+    readonly envelope_seal: string;
+    readonly envelope: WidgetEnvelope;
+  };
+  readonly dismiss_widget_id: string | null;
 }
 
 export interface TranscribeProjection {

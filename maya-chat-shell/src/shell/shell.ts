@@ -13,6 +13,7 @@
 // never changes, so there is no address for a detail.
 
 import type { InteractiveRefKey, WidgetEnvelope } from '../contract.ts';
+import type { ChatWidgetResolution } from '../net/types.ts';
 import type { RenderResult } from '../renderer/nodes.ts';
 import { BASE_ROUTES } from '../routes/registry.ts';
 import { createConversation, type AbortHandle, type Conversation } from './conversation.ts';
@@ -284,12 +285,16 @@ const defaultId = (): string => crypto.randomUUID();
 /** Wire the conversation, the widget store and the shell controller together, once. */
 export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
   const newId = deps.newId ?? defaultId;
+  // B4 is transport plumbing only. The late-bound sink exists because the conversation owns the
+  // timeline and the existing widget store consumes it; it never interprets or repairs an envelope.
+  let ingestAuthorizedEnvelope: ((resolution: ChatWidgetResolution) => void) | null = null;
   const conversation = createConversation({
     transport: deps.transport,
     session: deps.session,
     scheduler: deps.scheduler,
     newAbort: deps.newAbort,
     newRequestId: newId,
+    ingestResolution: (resolution) => ingestAuthorizedEnvelope?.(resolution),
   });
   const shell = createShell({ history: deps.history, session: deps.session });
   const widgets = createWidgets({
@@ -302,6 +307,9 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
     newNonce: newId,
     chrome: shell,
   });
+  ingestAuthorizedEnvelope = (resolution) => {
+    widgets.ingest(resolution.receipt.envelope);
+  };
   const disconnect = shell.connect(widgets);
   const widgetPort: WidgetPort = {
     view: shell.view,
@@ -321,6 +329,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
         notice: (kind) => void conversation.timeline.appendNotice(kind),
       }),
     dispose() {
+      ingestAuthorizedEnvelope = null;
       disconnect();
       widgets.dispose();
       shell.dispose();
