@@ -30,10 +30,32 @@ const fixture = () => {
     isRegistered: jest.fn((key: string) => key === 'control.widget.dismiss'),
     dismiss: jest.fn().mockResolvedValue({ handled: true, code: 'dismissed' }),
   };
+  const successors = {
+    mint: jest.fn().mockResolvedValue({
+      widgetId: 'w2',
+      envelope: { contract: 'maya.widget.envelope/1', widget_id: 'w2' },
+    }),
+  };
+  const c9Cancel = { cancel: jest.fn().mockResolvedValue(true) };
+  const handoffs = {
+    sign: jest.fn().mockReturnValue({
+      route_key: 'shell.account',
+      opaque_handle: 'signed-handoff',
+    }),
+  };
   return {
     stores,
     controls,
-    router: new EffectRouterService(stores, controls as never),
+    successors,
+    c9Cancel,
+    handoffs,
+    router: new EffectRouterService(
+      stores,
+      controls as never,
+      successors,
+      c9Cancel,
+      handoffs,
+    ),
   };
 };
 
@@ -76,14 +98,7 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
     expect(controls.dismiss).not.toHaveBeenCalled();
   });
 
-  it.each([
-    'NAVIGATE',
-    'REFINE',
-    'DRAFT',
-    'REQUEST_APPROVAL',
-    'HANDOFF',
-    'COMMIT',
-  ])(
+  it.each(['DRAFT', 'REQUEST_APPROVAL', 'COMMIT'])(
     'N02/N03/N05: %s fails closed before the claim until its edge lands',
     async (effect) => {
       const { router, stores } = fixture();
@@ -94,6 +109,82 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
       expect(stores.writeReceipt).not.toHaveBeenCalled();
     },
   );
+
+  it('G13-P02 NAVIGATE terminates as the zero-read DEV-1 degraded result', async () => {
+    const { router, stores, successors } = fixture();
+    await expect(
+      router.route(ctx(rec({ effect: 'NAVIGATE' }), { principal: PRINCIPAL })),
+    ).resolves.toMatchObject({
+      outcome: 'terminate',
+      route: { resolved_widget: { degraded: 'navigate_interim' } },
+    });
+    expect(stores.claimIntentRecord).toHaveBeenCalledTimes(1);
+    expect(successors.mint).not.toHaveBeenCalled();
+  });
+
+  it('G13-P03 REFINE mints one successor for the same live principal', async () => {
+    const { router, successors } = fixture();
+    await expect(
+      router.route(ctx(rec({ effect: 'REFINE' }), { principal: PRINCIPAL })),
+    ).resolves.toMatchObject({
+      outcome: 'terminate',
+      route: {
+        next_envelope: {
+          contract: 'maya.widget.envelope/1',
+          widget_id: 'w2',
+        },
+      },
+    });
+    expect(successors.mint).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 't1',
+        predecessorWidgetId: 'w1',
+        predecessorIntentTokenHash: 'h'.repeat(64),
+        principal: PRINCIPAL,
+      }),
+    );
+  });
+
+  it('G13-P04 HANDOFF returns exactly one signed principal-bound target', async () => {
+    const { router, handoffs } = fixture();
+    const record = rec({
+      effect: 'HANDOFF',
+      capabilitySpace: null,
+      capabilityKey: null,
+      handoffSpace: 'C9',
+      handoffKey: 'settings.read',
+      targetJson: {
+        class: 's',
+        ref: { route: 'shell.account', param: null },
+      },
+    });
+    await expect(
+      router.route(ctx(record, { principal: PRINCIPAL })),
+    ).resolves.toMatchObject({
+      outcome: 'terminate',
+      route: {
+        resolved_widget: {
+          route_key: 'shell.account',
+          opaque_handle: 'signed-handoff',
+        },
+      },
+    });
+    expect(handoffs.sign).toHaveBeenCalledWith(
+      expect.objectContaining({
+        intentTokenHash: 'h'.repeat(64),
+        principalProofHash: PRINCIPAL.proofHash,
+      }),
+    );
+  });
+
+  it('N05 an invalid HANDOFF target fails before the claim', async () => {
+    const { router, stores, handoffs } = fixture();
+    handoffs.sign.mockReturnValue(null);
+    await expect(
+      router.route(ctx(rec({ effect: 'HANDOFF' }), { principal: PRINCIPAL })),
+    ).resolves.toEqual({ outcome: 'refuse', code: 'effect_not_admissible' });
+    expect(stores.claimIntentRecord).not.toHaveBeenCalled();
+  });
 
   it('G13-R5 claims once, runs the one registered control, and writes a B-29 receipt with no echo', async () => {
     const { router, stores, controls } = fixture();
@@ -192,6 +283,30 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
     });
     expect(stores.claimIntentRecord).not.toHaveBeenCalled();
     expect(controls.dismiss).not.toHaveBeenCalled();
+  });
+
+  it('N-CANCEL-FOREIGN: run.cancel rechecks the exact tenant and principal at its owner adapter', async () => {
+    const { router, stores, c9Cancel } = fixture();
+    c9Cancel.cancel.mockResolvedValue(false);
+    const input = ctx(
+      rec({
+        effect: 'CONTROL',
+        capabilitySpace: 'CONTROL',
+        capabilityKey: 'control.run.cancel',
+        runId: '11111111-1111-4111-8111-111111111111',
+        revisionId: '22222222-2222-4222-8222-222222222222',
+      }),
+      { principal: PRINCIPAL },
+    );
+    await expect(router.route(input)).resolves.toMatchObject({
+      outcome: 'terminate',
+      route: { receipt_outcome: 'REFUSED' },
+    });
+    expect(c9Cancel.cancel).toHaveBeenCalledTimes(1);
+    expect(stores.writeReceipt).toHaveBeenCalledWith(
+      expect.objectContaining({ outcome: 'REFUSED' }),
+      input.now,
+    );
   });
 
   it('B-29 reconciliation fills the accepted receipt ref through the one store edge', async () => {

@@ -91,7 +91,7 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
       'input-schema/codec.ts',
       'input-schema/input-schema-hash.ts',
       'input-schema/inputs-bytes.ts',
-      'owner-ports/noun-resolution.owners.provider.ts',
+      'routing/handoff-target.signer.ts',
     ],
   },
   'prisma/prisma.service.ts': {
@@ -187,10 +187,11 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
     only: ['owner-ports/widget-owner-ports.module.ts'],
   },
   'orchestration/c9.store.ts': {
-    why: 'U12b canonical orchestrator-state read call site',
+    why: 'U12b canonical orchestrator-state read and U13b run-cancel owner call sites',
     only: [
       'owner-ports/canonical-read.provider.ts',
       'owner-ports/witness-c9-revision.adapter.ts',
+      'owner-ports/c9-cancel.adapter.ts',
     ],
   },
   'orchestration/c9.authority.ts': {
@@ -1137,6 +1138,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       'PRINCIPAL_RESOLVER',
       'TENANT_SCOPE',
       'NOUN_RESOLUTION_PORTS',
+      'C9_CANCEL_OWNER',
     ]);
   });
 

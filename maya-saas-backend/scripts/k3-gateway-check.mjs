@@ -705,6 +705,7 @@ const BOUND_PORT_TOKENS = [
   'PRINCIPAL_RESOLVER',
   'TENANT_SCOPE',
   'NOUN_RESOLUTION_PORTS',
+  'C9_CANCEL_OWNER',
 ];
 const NEVER_IMPORTED = ['action-engine/action-engine.module.ts#ActionEngineModule'];
 /** The widget layer's own store client, and where it may be imported (`null`: any widget file). */

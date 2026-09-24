@@ -14,6 +14,7 @@ import {
   PRINCIPAL_RESOLVER,
   TENANT_SCOPE,
   NOUN_RESOLUTION_PORTS,
+  C9_CANCEL_OWNER,
 } from '../di-tokens';
 import { CanonicalReadAdapter } from './canonical-read.provider';
 import { Gate6OwnersAdapter } from './gate6.owners.provider';
@@ -25,6 +26,7 @@ import { BookingCreateNounAdapter } from './noun-booking-create.adapter';
 import { BookingCancelNounAdapter } from './noun-booking-cancel.adapter';
 import { BookingRescheduleNounAdapter } from './noun-booking-reschedule.adapter';
 import { ClientAppointmentReadNounAdapter } from './noun-client-appointment-read.adapter';
+import { C9CancelAdapter } from './c9-cancel.adapter';
 
 /**
  * The widget layer's one boundary to non-widget owners (integrator decision D-6).
@@ -68,6 +70,8 @@ import { ClientAppointmentReadNounAdapter } from './noun-client-appointment-read
     BookingCancelNounAdapter,
     BookingRescheduleNounAdapter,
     ClientAppointmentReadNounAdapter,
+    C9CancelAdapter,
+    { provide: C9_CANCEL_OWNER, useExisting: C9CancelAdapter },
     NounResolutionOwnersProvider,
     WitnessC9RevisionAdapter,
     {
@@ -85,6 +89,7 @@ import { ClientAppointmentReadNounAdapter } from './noun-client-appointment-read
     PRINCIPAL_RESOLVER,
     TENANT_SCOPE,
     NOUN_RESOLUTION_PORTS,
+    C9_CANCEL_OWNER,
   ],
 })
 export class WidgetOwnerPortsModule {}

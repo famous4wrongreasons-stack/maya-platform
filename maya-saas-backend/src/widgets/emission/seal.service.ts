@@ -28,9 +28,15 @@
 import { Injectable } from '@nestjs/common';
 
 import { ActionIdentityService } from '../../action-engine/action-engine.identity';
+import type { Handle } from '../noun-resolution/noun-handles';
+import {
+  openOwnerNounHandle,
+  type OwnerNounIdentity,
+} from '../noun-resolution/noun-handle.codec';
 
 /** H4's key namespace. Its own namespace, so no other hmac of the platform can collide with a seal. */
 export const SEAL_NAMESPACE = 'maya.widget.envelope/1';
+export const HANDOFF_NAMESPACE = 'maya.widget.handoff-target/1';
 
 /** The one version this interim mints and verifies under. */
 export const CURRENT_SEAL_KEY_VERSION = 'widget-seal-1';
@@ -97,11 +103,41 @@ export const sealTermTuple = (terms: SealTerms): readonly (string | null)[] => [
   terms.sealKeyVersion ?? CURRENT_SEAL_KEY_VERSION,
 ];
 
+let widgetIdentity: ActionIdentityService | null = null;
+
+const keyedIdentity = (): ActionIdentityService => {
+  if (widgetIdentity) return widgetIdentity;
+  const pick = (names: readonly string[]): string => {
+    for (const name of names) {
+      const value = process.env[name];
+      if (typeof value === 'string' && value.trim() !== '') return value;
+    }
+    throw new SealKeyUnavailableError(`no key: set one of ${names.join(', ')}`);
+  };
+  try {
+    widgetIdentity = new ActionIdentityService(
+      pick(SEAL_KEY_ENV.identity),
+      pick(SEAL_KEY_ENV.payload),
+    );
+  } catch (error) {
+    if (error instanceof SealKeyUnavailableError) throw error;
+    throw new SealKeyUnavailableError(
+      error instanceof Error ? error.message : 'the key was refused',
+    );
+  }
+  return widgetIdentity;
+};
+
+/**
+ * U11b's narrow noun-handle verifier. Key material and the keyed primitive stay in this one custody
+ * file; the owner adapter receives only the authenticated payload or null.
+ */
+export const openWidgetNounHandle = (
+  handle: Handle,
+): OwnerNounIdentity | null => openOwnerNounHandle(handle, keyedIdentity());
+
 @Injectable()
 export class SealService {
-  /** Constructed on first use, not at boot: a widget-dark deployment must not fail to start on it. */
-  private identity: ActionIdentityService | null = null;
-
   /** The version every new seal is minted under. */
   get keyVersion(): string {
     return CURRENT_SEAL_KEY_VERSION;
@@ -122,28 +158,11 @@ export class SealService {
     );
   }
 
+  signHandoff(value: unknown): string {
+    return this.key().hmac(HANDOFF_NAMESPACE, value);
+  }
+
   private key(): ActionIdentityService {
-    if (this.identity) return this.identity;
-    const pick = (names: readonly string[]): string => {
-      for (const name of names) {
-        const value = process.env[name];
-        if (typeof value === 'string' && value.trim() !== '') return value;
-      }
-      throw new SealKeyUnavailableError(
-        `no key: set one of ${names.join(', ')}`,
-      );
-    };
-    try {
-      this.identity = new ActionIdentityService(
-        pick(SEAL_KEY_ENV.identity),
-        pick(SEAL_KEY_ENV.payload),
-      );
-    } catch (error) {
-      if (error instanceof SealKeyUnavailableError) throw error;
-      throw new SealKeyUnavailableError(
-        error instanceof Error ? error.message : 'the key was refused',
-      );
-    }
-    return this.identity;
+    return keyedIdentity();
   }
 }

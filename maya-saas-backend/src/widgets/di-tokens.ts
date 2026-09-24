@@ -52,6 +52,7 @@ export const SUCCESSOR_MINTER = 'SUCCESSOR_MINTER';
 
 /** Gate 13's HANDOFF edge: the `HandoffTarget` signer (U13b). */
 export const HANDOFF_SIGNER = 'HANDOFF_SIGNER';
+export const C9_CANCEL_OWNER = 'C9_CANCEL_OWNER';
 
 /** Gate 8-R's owner set; bound to `GATE_8R_OWNERS_UNRULED` in `gates/gate-8r.owners.ts` (U8R, R8R-1). */
 export const GATE_8R_OWNERS = 'GATE_8R_OWNERS';

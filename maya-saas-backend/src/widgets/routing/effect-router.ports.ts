@@ -50,3 +50,19 @@ export interface EffectRouteOutcome {
 export interface EffectRouterPorts {
   readonly dismiss: (input: RoutingInput) => Promise<EffectRouteOutcome>;
 }
+
+export interface C9CancelOwnerPort {
+  cancel(input: RoutingInput): Promise<boolean>;
+}
+
+export interface HandoffSignerPort {
+  sign(input: Readonly<{
+    tenantId: string;
+    principalProofHash: string;
+    widgetId: string;
+    intentTokenHash: string;
+    target: unknown;
+    issuedAt: Date;
+    expiresAt: Date;
+  }>): Readonly<Record<string, unknown>> | null;
+}

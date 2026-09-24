@@ -44,6 +44,7 @@ import { BookingRescheduleNounAdapter } from './noun-booking-reschedule.adapter'
 import { ClientAppointmentReadNounAdapter } from './noun-client-appointment-read.adapter';
 import { NounResolutionOwnersProvider } from './noun-resolution.owners.provider';
 import { WitnessC9RevisionAdapter } from './witness-c9-revision.adapter';
+import { C9CancelAdapter } from './c9-cancel.adapter';
 
 const meta = (key: string, target: object): unknown =>
   Reflect.getMetadata(key, target);
@@ -104,6 +105,8 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       BookingCancelNounAdapter,
       BookingRescheduleNounAdapter,
       ClientAppointmentReadNounAdapter,
+      C9CancelAdapter,
+      { provide: DI_TOKENS.C9_CANCEL_OWNER, useExisting: C9CancelAdapter },
       NounResolutionOwnersProvider,
       WitnessC9RevisionAdapter,
       expect.objectContaining({ provide: DI_TOKENS.NOUN_RESOLUTION_PORTS }),
@@ -114,6 +117,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       DI_TOKENS.PRINCIPAL_RESOLVER,
       DI_TOKENS.TENANT_SCOPE,
       DI_TOKENS.NOUN_RESOLUTION_PORTS,
+      DI_TOKENS.C9_CANCEL_OWNER,
     ]);
   });
 
@@ -157,6 +161,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       // P-MINT-CORE binds the widget-store-only successor beside the seal holder. It reaches no
       // canonical owner and is deliberately outside the owner-ports boundary.
       DI_TOKENS.SUCCESSOR_MINTER,
+      DI_TOKENS.HANDOFF_SIGNER,
       // U8a (IR-8a-1) binds slot 8's gate in `widgets.module.ts` too, and for the same kind of
       // reason: `InputValidationGate` is widget-internal and reaches no owner, so the D-6 boundary
       // has nothing to say about it and k3 check 9's owner enumeration is unchanged.
@@ -175,6 +180,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       // U10b binds Gate 10's candidate/audit seam to the widget-internal stores facade. The gateway
       // sees this narrow port instead of importing the full facade and its unrelated sub-stores.
       DI_TOKENS.GATE10_STORE,
+      DI_TOKENS.C9_CANCEL_OWNER,
     ];
     const moduleRef = await Test.createTestingModule({
       // The owner modules the boundary now imports resolve configuration the way the application does:

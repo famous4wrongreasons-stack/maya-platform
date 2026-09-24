@@ -5,8 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ActionIdentityService } from '../../action-engine/action-engine.identity';
-import { openOwnerNounHandle } from '../noun-resolution/noun-handle.codec';
+import { openWidgetNounHandle } from '../emission/seal.service';
 import type {
   NounActor,
   NounResolverInput,
@@ -19,17 +18,6 @@ import { BookingCreateNounAdapter } from './noun-booking-create.adapter';
 import { BookingCancelNounAdapter } from './noun-booking-cancel.adapter';
 import { BookingRescheduleNounAdapter } from './noun-booking-reschedule.adapter';
 import { ClientAppointmentReadNounAdapter } from './noun-client-appointment-read.adapter';
-
-const identity = (): ActionIdentityService => {
-  const primary =
-    process.env.ACTION_ENGINE_IDENTITY_SECRET ?? process.env.CRM_ENCRYPTION_KEY;
-  const payload =
-    process.env.ACTION_ENGINE_PAYLOAD_ENCRYPTION_SECRET ??
-    process.env.CRM_ENCRYPTION_KEY;
-  if (!primary || !payload)
-    throw new Error('noun_handle_identity_key_unavailable');
-  return new ActionIdentityService(primary, payload);
-};
 
 @Injectable()
 export class NounResolutionOwnersProvider implements NounReadPort {
@@ -48,7 +36,7 @@ export class NounResolutionOwnersProvider implements NounReadPort {
       return { kind: 'policy_deferred' };
     const values = new Map<string, string>();
     for (const [noun, handle] of input.frozenNouns) {
-      const opened = openOwnerNounHandle(handle, identity());
+      const opened = openWidgetNounHandle(handle);
       if (
         opened === null ||
         opened.tenantId !== input.tenantId ||

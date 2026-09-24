@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
-import { SEAL_VERIFIER, SUCCESSOR_MINTER } from '../di-tokens';
+import { HANDOFF_SIGNER, SEAL_VERIFIER, SUCCESSOR_MINTER } from '../di-tokens';
+import { HandoffTargetSigner } from '../routing/handoff-target.signer';
 import { WidgetEmitterService } from './emitter.service';
 import { SealService } from './seal.service';
 import { SealVerifierService } from './seal-verifier.service';
@@ -15,6 +16,8 @@ import { SuccessorMinterService } from './successor-minter.service';
     SuccessorMinterService,
     { provide: SEAL_VERIFIER, useExisting: SealVerifierService },
     { provide: SUCCESSOR_MINTER, useExisting: SuccessorMinterService },
+    HandoffTargetSigner,
+    { provide: HANDOFF_SIGNER, useExisting: HandoffTargetSigner },
   ],
   exports: [
     WidgetEmitterService,
@@ -22,6 +25,7 @@ import { SuccessorMinterService } from './successor-minter.service';
     SEAL_VERIFIER,
     SUCCESSOR_MINTER,
     SuccessorMinterService,
+    HANDOFF_SIGNER,
   ],
 })
 export class WidgetEmissionModule {}

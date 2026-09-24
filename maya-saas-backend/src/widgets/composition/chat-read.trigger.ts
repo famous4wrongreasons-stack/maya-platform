@@ -15,7 +15,6 @@ import type { ProjectionPlan } from '../projection/canonical-read.port';
 import { projectorRowForCompletedRead } from '../projection/projector.registry';
 import { WidgetProjectorService } from '../projection/widget-projector.service';
 import { validateLocalBusinessDate } from '../query-scalars/local-business-date';
-import { sha256Hex } from '../token.util';
 
 const provenance = new Logger('WidgetMintProvenance');
 
@@ -103,7 +102,9 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
         capability: input.toolName,
         status: 'measured',
         as_of: new Date().toISOString(),
-        evidence_refs: [`h_${sha256Hex(`ai-tool:${input.executionId}`)}`],
+        // The canonical read already supplies a durable, server-produced 64-hex input identity.
+        // Reuse it as the audit handle rather than introducing a second local hashing site.
+        evidence_refs: [`h_${input.inputHash}`],
         completeness: {
           status: 'PARTIAL',
           requestedScopeHash: input.inputHash,

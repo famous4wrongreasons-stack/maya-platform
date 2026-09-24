@@ -3,12 +3,20 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { EffectClass } from '../../widget-contract/intent';
 import type { GateContext, GateVerdict, RouteResult } from '../gate.types';
 import { ControlRegistryService } from '../control/control-registry.service';
+import {
+  C9_CANCEL_OWNER,
+  HANDOFF_SIGNER,
+  SUCCESSOR_MINTER,
+} from '../di-tokens';
+import type { SuccessorMinterPort } from '../emission/successor-minter.service';
 import { subjectOf } from '../gates/subject';
 import { routingInputOf } from './routing-input';
 import {
   EFFECT_ROUTE_AUDIT,
   type EffectRouteAuditPort,
   type EffectRouteOutcome,
+  type C9CancelOwnerPort,
+  type HandoffSignerPort,
 } from './effect-router.ports';
 
 type Destination = () => Promise<EffectRouteOutcome>;
@@ -49,6 +57,12 @@ export class EffectRouterService {
     @Inject(EFFECT_ROUTE_AUDIT)
     private readonly stores: EffectRouteAuditPort,
     private readonly controls: ControlRegistryService,
+    @Inject(SUCCESSOR_MINTER)
+    private readonly successors: SuccessorMinterPort,
+    @Inject(C9_CANCEL_OWNER)
+    private readonly c9Cancel: C9CancelOwnerPort,
+    @Inject(HANDOFF_SIGNER)
+    private readonly handoffs: HandoffSignerPort,
   ) {}
 
   async route(ctx: GateContext): Promise<GateVerdict> {
@@ -114,9 +128,9 @@ export class EffectRouterService {
   ): Destination | null {
     switch (effect) {
       case 'NAVIGATE':
-        return null;
+        return async () => admitted({ resolvedWidget: { degraded: 'navigate_interim' } });
       case 'REFINE':
-        return null;
+        return this.refine(ctx);
       case 'CONTROL':
         return this.control(ctx);
       case 'DRAFT':
@@ -124,7 +138,7 @@ export class EffectRouterService {
       case 'REQUEST_APPROVAL':
         return null;
       case 'HANDOFF':
-        return null;
+        return this.handoff(ctx);
       case 'COMMIT':
         return null;
     }
@@ -134,9 +148,20 @@ export class EffectRouterService {
     const input = routingInputOf(ctx);
     if (input === null) return null;
     const subject = subjectOf(input.record);
+    if (input.principalProofHash.length === 0 || subject?.space !== 'CONTROL')
+      return null;
+
+    if (subject.key === 'control.run.cancel')
+      return async () =>
+        (await this.c9Cancel.cancel(input))
+          ? admitted({ resolvedWidget: { control: 'run_cancelled' } })
+          : admitted({
+              receiptOutcome: 'REFUSED',
+              refusalCode: 'effect_not_admissible',
+              resolvedWidget: { control: 'forbidden' },
+            });
+
     if (
-      input.principalProofHash.length === 0 ||
-      subject?.space !== 'CONTROL' ||
       subject.key !== 'control.widget.dismiss' ||
       !this.controls.isRegistered(subject.key)
     )
@@ -157,6 +182,43 @@ export class EffectRouterService {
             resolvedWidget: { control: result.code },
           });
     };
+  }
+
+  private refine(ctx: GateContext): Destination | null {
+    const input = routingInputOf(ctx);
+    if (input === null || ctx.principal === null) return null;
+    return async () => {
+      const successor = await this.successors.mint({
+        tenantId: input.tenantId,
+        predecessorWidgetId: input.record.widgetId,
+        predecessorIntentTokenHash: input.record.intentTokenHash,
+        principal: ctx.principal!,
+        now: input.now,
+      });
+      return successor === null
+        ? admitted({
+            receiptOutcome: 'REFUSED',
+            refusalCode: 'effect_not_admissible',
+          })
+        : admitted({ nextEnvelope: successor.envelope });
+    };
+  }
+
+  private handoff(ctx: GateContext): Destination | null {
+    const input = routingInputOf(ctx);
+    if (input === null || input.principalProofHash.length === 0) return null;
+    const target = this.handoffs.sign({
+      tenantId: input.tenantId,
+      principalProofHash: input.principalProofHash,
+      widgetId: input.record.widgetId,
+      intentTokenHash: input.record.intentTokenHash,
+      target: input.record.targetJson,
+      issuedAt: input.now,
+      expiresAt: input.record.expiresAt,
+    });
+    return target === null
+      ? null
+      : async () => admitted({ resolvedWidget: target });
   }
 }
 
