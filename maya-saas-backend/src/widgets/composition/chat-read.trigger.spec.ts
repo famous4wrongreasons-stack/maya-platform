@@ -132,7 +132,12 @@ describe('P-MT2a ChatReadTriggerService', () => {
     expect(h.emit).toHaveBeenCalledWith(
       expect.objectContaining({
         kind: 'SCHEDULE',
-        body: journal(),
+        body: expect.objectContaining({
+          timezone: 'Europe/Moscow',
+          lanes: expect.any(Array),
+          entries: expect.any(Array),
+          detail_intent: 'i1',
+        }),
         retainedQueryScalar: {
           type: 'local_business_date',
           value: '2026-09-24',

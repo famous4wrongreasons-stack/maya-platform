@@ -15,6 +15,7 @@ import type { ProjectionPlan } from '../projection/canonical-read.port';
 import { projectorRowForCompletedRead } from '../projection/projector.registry';
 import { WidgetProjectorService } from '../projection/widget-projector.service';
 import { validateLocalBusinessDate } from '../query-scalars/local-business-date';
+import { presentJournalSchedule } from './journal-schedule.presenter';
 
 const provenance = new Logger('WidgetMintProvenance');
 
@@ -123,6 +124,16 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
       if (projected.kind !== 'composer_input' || !isRecord(input.result))
         return null;
 
+      const body =
+        input.toolName === 'operations.journal.read'
+          ? presentJournalSchedule(
+              input.result,
+              fact,
+              validateLocalBusinessDate(input.arguments.date),
+            )
+          : input.result;
+      if (!isRecord(body)) return null;
+
       const minted = await this.emitter.emit({
         tenantId,
         conversationId: input.executionId,
@@ -130,7 +141,7 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
         kind: row.result_kind,
         principalProofHash: principal.proofHash,
         deliveryChannel: channel,
-        body: input.result,
+        body,
         ttlSeconds: 600,
         freshnessClass: 'live',
         composerInput: projected.input,
