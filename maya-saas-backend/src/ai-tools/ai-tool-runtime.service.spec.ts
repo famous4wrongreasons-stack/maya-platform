@@ -95,7 +95,32 @@ describe('AiToolRuntimeService', () => {
         toolName: 'catalog.services.read',
         executionId: 'execution-a',
         trigger: 'T-2b',
-        requestId: null,
+        requestId: 'system:tenant-a',
+      }),
+    );
+  });
+
+  it('D-17 binds a T-2b mint to the current server request trace when the caller supplies no internal trace', async () => {
+    const afterCompletedRead = jest.fn().mockResolvedValue(null);
+    const harness = createHarness({ afterCompletedRead });
+    harness.handlerExecute.mockResolvedValue({ services: [] });
+    harness.executionFindUnique.mockResolvedValue(null);
+    harness.executionCreate.mockResolvedValue({ id: 'execution-traced' });
+
+    await harness.tenantContext.run('request-d17', () =>
+      harness.tenantContext.runAsSystemTenant('tenant-a', () =>
+        harness.runtime.execute(
+          { ...customer, role: UserRole.TENANT_OWNER },
+          'catalog.services.read',
+          { arguments: {}, surface: 'web' },
+        ),
+      ),
+    );
+
+    expect(afterCompletedRead).toHaveBeenCalledWith(
+      expect.objectContaining({
+        trigger: 'T-2b',
+        requestId: 'request-d17',
       }),
     );
   });

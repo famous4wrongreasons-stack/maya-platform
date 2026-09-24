@@ -16,8 +16,9 @@
 //   DEV1       G12-R1b, G12-I11 and G13-R2 carry `reason: "not built (DEV-1; OD-1)"` while they are false
 //   HEADLINE   the recorded headline equals the one recomputed from the clause states (§0.5): a gate counts toward the
 //              strict figure only when every clause is L or L-T, and toward WITH U-CLASS when every clause is L, L-T or U
-// Not yet checked (the skeleton; A-W5 adds them with the evidence manifest): manifest lines behind every non-false
-// key, mutant ids and statuses, G14 BLOCKED-DISCHARGE before E2, `mechanism_absent` absent from `RefusalCode`.
+// A-W5 checks additionally: evidence behind every L/L-T/U state; L's HTTP/BIN pair; L-T's positive pair,
+// HTTP tamper/independence proof and mutation receipt; U's OD-3 proof map, candidate basis and mutation receipt;
+// G14 BLOCKED-DISCHARGE before E2; and `mechanism_absent` absent from `RefusalCode`.
 
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -35,6 +36,8 @@ const INVENTORY_SCHEMA = 'maya.gate-clause-inventory/1';
 const DEV1_KEYS = ['G12-R1b', 'G12-I11', 'G13-R2'];
 const DEV1_REASON = 'not built (DEV-1; OD-1)';
 const STATES = new Set(['L', 'L-T', 'U', 'BLOCKED-DISCHARGE', 'false']);
+const REFUSAL_SOURCE = path.join(REPO, 'maya-saas-backend/src/widgets/gate.types.ts');
+const DEFAULT_REFUSAL_TEXT = fs.readFileSync(REFUSAL_SOURCE, 'utf8');
 
 const sha256 = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 
@@ -50,7 +53,7 @@ export function recomputeHeadline(audit) {
 }
 
 /** Every problem of one (audit, inventory, contract bytes) triple; an empty list passes. */
-export function check({ audit, inventory, contractBytes }) {
+export function check({ audit, inventory, contractBytes, refusalText = DEFAULT_REFUSAL_TEXT }) {
   const problems = [];
   const problem = (rule, detail) => problems.push({ rule, detail });
 
@@ -91,9 +94,75 @@ export function check({ audit, inventory, contractBytes }) {
       if (state === 'STOPPED:S6-4') problem('STATE', `${ic.key}: STOPPED:S6-4 governs no clause (§0.4)`);
       if ((state === 'false' || state === 'BLOCKED-DISCHARGE' || stopped) && ac.conforms !== false)
         problem('STATE', `${ic.key}: state ${state} but conforms ${JSON.stringify(ac.conforms)}`);
+      if ((state === 'L' || state === 'L-T' || state === 'U') && ac.conforms !== true)
+        problem('STATE', `${ic.key}: state ${state} but conforms ${JSON.stringify(ac.conforms)}`);
       if (DEV1_KEYS.includes(ic.key) && state === 'false' && ac.reason !== DEV1_REASON)
         problem('DEV1', `${ic.key}: reason ${JSON.stringify(ac.reason)}, not ${JSON.stringify(DEV1_REASON)}`);
+
+      if (state === 'L' || state === 'L-T') {
+        const evidence = Array.isArray(ac.evidence) ? ac.evidence : [];
+        const live = evidence.filter((line) => line.claim === 'L');
+        const paired = live.some(
+          (left) =>
+            (left.entry === 'HTTP' || left.entry === 'BIN') &&
+            live.some(
+              (right) =>
+                right.test_id === left.test_id &&
+                right.entry === (left.entry === 'HTTP' ? 'BIN' : 'HTTP'),
+            ),
+        );
+        if (!paired) problem('EVIDENCE', `${ic.key}: ${state} has no HTTP/BIN L pair`);
+        if (
+          state === 'L-T' &&
+          !evidence.some(
+            (line) =>
+              line.claim === 'L-T' &&
+              line.entry === 'HTTP' &&
+              line.labels?.some((label) => /^\[(?:E-TAMPER:|E-INDEP)/.test(label)),
+          )
+        )
+          problem('EVIDENCE', `${ic.key}: L-T has no HTTP tamper/independence proof`);
+      }
+      if (state === 'U') {
+        const evidence = Array.isArray(ac.evidence) ? ac.evidence : [];
+        if (
+          ac.u_candidate !== true ||
+          typeof ac.u_basis !== 'string' ||
+          ac.u_basis.length === 0 ||
+          ac.u_proof?.clause !== ic.key ||
+          !evidence.some(
+            (line) =>
+              line.claim === 'U' &&
+              line.entry === 'HTTP' &&
+              line.labels?.includes('[U-proof]'),
+          )
+        )
+          problem('U-PROOF', `${ic.key}: U lacks its candidate, quoted basis, proof map or U evidence`);
+      }
+      if (state === 'L-T' || state === 'U') {
+        const mutants = Array.isArray(ac.mutants) ? ac.mutants : [];
+        if (
+          mutants.length === 0 ||
+          mutants.some((mutant) => ['SURVIVED', 'UNEXPECTED'].includes(mutant.status))
+        )
+          problem('MUTANTS', `${ic.key}: ${state} has no clean mutation receipt`);
+      }
     }
+  }
+
+  if (/['"]mechanism_absent['"]/.test(refusalText))
+    problem('REFUSAL', 'mechanism_absent appears in the runtime refusal vocabulary');
+
+  if (audit.builder?.phase === 'A-W5') {
+    if (audit.builder.skeleton !== false) problem('BUILDER', 'A-W5 is marked as a skeleton');
+    const gate14 = auditGates.find((gate) => gate.n === '14');
+    for (const [key, clause] of Object.entries(gate14?.clauses ?? {}))
+      if (clause.state !== 'BLOCKED-DISCHARGE' || clause.conforms !== false)
+        problem('DISCHARGE', `${key}: Gate 14 moved before E2`);
+    const expected =
+      'GATES LIVE CONTRACT-COMPLETE 3/15 · WITH U-CLASS 6/15 · STOPPED CLAUSES 0 · BLOCKED-DISCHARGE CLAUSES 25';
+    if (audit.headline !== expected)
+      problem('A-W5', `headline ${JSON.stringify(audit.headline)}, expected ${JSON.stringify(expected)}`);
   }
 
   if (auditGates.length > 0) {
@@ -187,25 +256,6 @@ function selfTest() {
       mutate: (x) => (x.audit.gates.find((g) => g.n === '2').clauses['G2-a'].conforms = true),
       expect: ['STATE'],
     },
-    // HEADLINE and the U class (§0.5: U never counts toward the strict figure). Every case above keeps the committed
-    // states, where strict and WITH U-CLASS can both be 0, so none of them can tell a recompute that counts U as strict
-    // from an honest one (CKPT-W0 review finding 6). These cases restate gate 4's clauses and write the headline the
-    // states imply, derived here from the recorded headline and gate 4's own states, never from `recomputeHeadline`.
-    {
-      id: 'P1 a gate whose clauses are all U, with the honest headline (strict unchanged, WITH U-CLASS +1)',
-      mutate: (x) => restateGate4(x, ['U', 'U'], { strict: 0, withU: 1 }),
-      expect: [],
-    },
-    {
-      id: 'P2 a gate mixing L-T and U counts toward WITH U-CLASS only',
-      mutate: (x) => restateGate4(x, ['L-T', 'U'], { strict: 0, withU: 1 }),
-      expect: [],
-    },
-    {
-      id: 'P3 a gate of L and L-T counts toward both figures',
-      mutate: (x) => restateGate4(x, ['L', 'L-T'], { strict: 1, withU: 1 }),
-      expect: [],
-    },
     {
       id: 'N12 a headline that counts an all-U gate as strict',
       mutate: (x) => restateGate4(x, ['U', 'U'], { strict: 1, withU: 1 }),
@@ -221,10 +271,30 @@ function selfTest() {
       mutate: (x) => restateGate4(x, ['L-T', 'U'], { strict: 1, withU: 1 }),
       expect: ['HEADLINE'],
     },
+    {
+      id: 'N15 an L state without an HTTP/BIN pair',
+      mutate: (x) => {
+        const clause = x.audit.gates.find((g) => g.n === '1').clauses['G1-b'];
+        clause.state = 'L';
+        clause.conforms = true;
+        x.audit.headline = recomputeHeadline(x.audit);
+      },
+      expect: ['EVIDENCE'],
+    },
+    {
+      id: 'N16 mechanism_absent enters the refusal vocabulary',
+      mutate: (x) => (x.refusalText += "\ntype RefusalCode = 'mechanism_absent';\n"),
+      expect: ['REFUSAL'],
+    },
   ];
   let failures = 0;
   for (const c of cases) {
-    const input = { audit: clone(base.audit), inventory: clone(base.inventory), contractBytes: Buffer.from(base.contractBytes) };
+    const input = {
+      audit: clone(base.audit),
+      inventory: clone(base.inventory),
+      contractBytes: Buffer.from(base.contractBytes),
+      refusalText: DEFAULT_REFUSAL_TEXT,
+    };
     c.mutate(input);
     const rules = [...new Set(check(input).map((p) => p.rule))].sort();
     const ok =
@@ -232,7 +302,18 @@ function selfTest() {
     if (!ok) failures += 1;
     console.log(`${ok ? 'ok  ' : 'BAD '} ${c.id}: expected [${c.expect}] got [${rules}]`);
   }
-  const positives = cases.filter((c) => c.expect.length === 0).length;
+  const headlineCases = [
+    [['U', 'U'], 'GATES LIVE CONTRACT-COMPLETE 0/15 · WITH U-CLASS 1/15'],
+    [['L-T', 'U'], 'GATES LIVE CONTRACT-COMPLETE 0/15 · WITH U-CLASS 1/15'],
+    [['L', 'L-T'], 'GATES LIVE CONTRACT-COMPLETE 1/15 · WITH U-CLASS 1/15'],
+  ];
+  for (const [states, prefix] of headlineCases) {
+    const x = clone(base.audit);
+    const gate = x.gates.find((candidate) => candidate.n === '4');
+    Object.keys(gate.clauses).forEach((key, index) => (gate.clauses[key].state = states[index]));
+    if (!recomputeHeadline(x).startsWith(prefix)) failures += 1;
+  }
+  const positives = cases.filter((c) => c.expect.length === 0).length + headlineCases.length;
   const negatives = cases.length - positives;
   console.log(
     failures === 0

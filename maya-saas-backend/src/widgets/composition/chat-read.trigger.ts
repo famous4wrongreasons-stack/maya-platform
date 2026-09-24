@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { createHash } from 'node:crypto';
 
 import type { AiReadWidgetTriggerPort } from '../../ai-tools/ai-read-widget-trigger.port';
 import type { AiToolSurface } from '../../ai-tools/ai-tool.types';
@@ -18,6 +19,20 @@ import { validateLocalBusinessDate } from '../query-scalars/local-business-date'
 import { presentJournalSchedule } from './journal-schedule.presenter';
 
 const provenance = new Logger('WidgetMintProvenance');
+
+/**
+ * Widget timeline conversations are UUID keyed while the canonical AI
+ * execution owner uses an opaque CUID. Derive one stable storage identity;
+ * replay of the same execution therefore reaches the same turn without
+ * changing either owner's public identity.
+ */
+export const conversationIdForReadExecution = (executionId: string): string => {
+  const hex = createHash('sha256')
+    .update('maya.widget.read-execution.v1\0')
+    .update(executionId)
+    .digest('hex');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-8${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+};
 
 /**
  * P-MT2a. The canonical READ has already completed in AiToolRuntimeService.
@@ -59,9 +74,10 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
       return null;
 
     const channel = channelFor(input.surface);
+    const conversationId = conversationIdForReadExecution(input.executionId);
     const turn = await this.stores.ensureAssistantTurn({
       tenantId,
-      conversationId: input.executionId,
+      conversationId,
       turnIndex: 0,
       principalProofHash: principal.proofHash,
       channel,
@@ -72,7 +88,7 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
     if (turn.principalProofHash !== principal.proofHash) return null;
 
     return this.prisma.$transaction(async (tx) => {
-      await TimelineStore.lockConversation(tx, tenantId, input.executionId);
+      await TimelineStore.lockConversation(tx, tenantId, conversationId);
       const previous = await tx.widgetEmission.findFirst({
         where: {
           tenantId,
@@ -136,7 +152,7 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
 
       const minted = await this.emitter.emit({
         tenantId,
-        conversationId: input.executionId,
+        conversationId,
         turnId: turn.id,
         kind: row.result_kind,
         principalProofHash: principal.proofHash,
@@ -156,8 +172,7 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
             }
           : {}),
       });
-      const tokenHash = minted.intentTokenHashes[0];
-      if (tokenHash !== undefined)
+      for (const tokenHash of minted.intentTokenHashes)
         provenance.log(
           JSON.stringify({
             contract: 'maya.widget-mint-provenance/1',

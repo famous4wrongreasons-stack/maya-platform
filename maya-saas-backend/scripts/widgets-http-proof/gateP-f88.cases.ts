@@ -64,6 +64,7 @@ export const cases: WidgetsHttpProofCase[] = [
     // no §3.9 refusal is involved and no record exists.
     proofClass: 'LIVE',
     async run(ctx) {
+      const mintsBefore = ctx.mintProvenance().length;
       const tenant = await ctx.fixtures.tenant('P-F88');
       const user = await ctx.fixtures.user(tenant, UserRole.ADMINISTRATOR);
       await ctx.fixtures.grantFeature(tenant, 'widgets.runtime');
@@ -194,8 +195,8 @@ export const cases: WidgetsHttpProofCase[] = [
 
       // No record was minted by any of this: the binary printed no mint provenance line (D-17 (2)).
       check(
-        ctx.mintProvenance().length === 0,
-        `the binary printed ${ctx.mintProvenance().length} mint provenance lines for a shape-stage case`,
+        ctx.mintProvenance().length === mintsBefore,
+        `the binary printed ${ctx.mintProvenance().length - mintsBefore} mint provenance lines for a shape-stage case`,
       );
 
       ctx.evidence.record({

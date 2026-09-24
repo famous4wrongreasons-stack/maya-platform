@@ -172,7 +172,7 @@ export class AiToolRuntimeService {
       inputHash,
       completed,
       internal.widgetTrigger ?? 'T-2b',
-      internal.requestId ?? null,
+      internal.requestId ?? this.tenantContext.get()?.requestId ?? null,
     );
   }
 

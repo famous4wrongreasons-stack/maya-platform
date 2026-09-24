@@ -324,3 +324,14 @@ export function jestEvidenceSource(): string {
     throw new Error('widgets-live evidence: not inside a jest test');
   return path.relative(BACKEND_ROOT, state.testPath).split(path.sep).join('/');
 }
+
+/** E1 claim writer kept in the harness so a claim source never constructs or reaches the writer itself. */
+export function recordJestEvidence(
+  input: Omit<EvidenceLineInput, 'entry' | 'source'>,
+): boolean {
+  return new EvidenceWriter().record({
+    ...input,
+    entry: 'HTTP',
+    source: jestEvidenceSource(),
+  });
+}

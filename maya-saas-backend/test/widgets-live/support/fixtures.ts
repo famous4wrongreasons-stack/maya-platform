@@ -40,7 +40,10 @@ import * as bcrypt from 'bcrypt';
 import { createHash, randomUUID } from 'node:crypto';
 
 import type { AuthenticatedUser } from '../../../src/common/authenticated-user.interface';
-import type { UserRole } from '../../../src/common/domain.enums';
+import type {
+  CalendarSource,
+  UserRole,
+} from '../../../src/common/domain.enums';
 import { C9_REGISTRY_HASH } from '../../../src/orchestration/c9.registry';
 import {
   MAYA_FEATURE_REGISTRY,
@@ -206,7 +209,10 @@ export class Fixtures {
     return this.writers;
   }
 
-  async tenant(label: string): Promise<TenantFixture> {
+  async tenant(
+    label: string,
+    calendarSource?: CalendarSource,
+  ): Promise<TenantFixture> {
     const slug = `${SLUG_PREFIX}${randomUUID().replaceAll('-', '')}`;
     const row = await this.ctx.prisma.tenant.create({
       data: {
@@ -214,6 +220,7 @@ export class Fixtures {
         slug,
         status: 'active',
         trialFullAccess: false,
+        ...(calendarSource === undefined ? {} : { calendarSource }),
       },
       select: { id: true, slug: true },
     });

@@ -30,13 +30,16 @@ import { AppModule } from '../../../src/app.module';
 import { configureHttpApp } from '../../../src/bootstrap/configure-http-app';
 import { PrismaService } from '../../../src/prisma/prisma.service';
 import { IntentGatewayService } from '../../../src/widgets/intent-gateway.service';
+import { WidgetEmitterService } from '../../../src/widgets/emission/emitter.service';
+import { WidgetStoresService } from '../../../src/widgets/stores/widget-stores.service';
 import { assertNoEnvFiles } from './environment';
 import { EvidenceWriter } from './evidence';
+import { Fixtures } from './fixtures';
 import { resetLoopbackLoginPreflight } from './login-rate-limit';
 import { MintProvenanceSink, type MintProvenanceLine } from './mint-provenance';
 import { recordingStoreClient, WriteRecorder } from './no-write-recorder';
 import { assertProofDatabase } from './proof-db-guard';
-import { submissionDefaults } from './bootstrap';
+import { submissionDefaults, type FixtureContext } from './bootstrap';
 
 export const GATEWAY_SCOPE = 'gateway';
 export const LOGIN_RATE_LIMIT_SCOPE = 'harness:login-rate-limit';
@@ -56,6 +59,17 @@ export interface HttpHarness {
     accessToken: string,
     body: Record<string, unknown>,
   ): Promise<HttpResponse>;
+  /** The same production route without credentials, for the transport-auth refusal proof. */
+  postIntentUnauthenticated(
+    body: Record<string, unknown>,
+  ): Promise<HttpResponse>;
+  /** A canonical AI-tool execution request; used by E1 to reach the T-2b production minter. */
+  executeTool(
+    accessToken: string,
+    toolName: string,
+    body: Record<string, unknown>,
+    requestId: string,
+  ): Promise<HttpResponse>;
   /** The server's `WidgetMintProvenance` lines captured since boot (D-17). */
   mintProvenance(): readonly MintProvenanceLine[];
   /** Calls of that context whose message did not parse; an HTTP evidence test asserts 0 (the BIN runner fails on any). */
@@ -63,6 +77,21 @@ export interface HttpHarness {
   /** Calls of that context from outside the application's `src/`; an HTTP evidence test asserts 0. */
   refusedMintProvenance(): number;
   close(): Promise<void>;
+}
+
+/**
+ * Creates the fixture owner view for an HTTP harness. This remains inside the
+ * audited support boundary: evidence claim sources can use canonical owners
+ * without importing or naming the widget writers themselves.
+ */
+export function fixturesForHttp(
+  ctx: FixtureContext,
+  http: HttpHarness,
+): Fixtures {
+  return new Fixtures(ctx, {
+    stores: http.app.get(WidgetStoresService),
+    emitter: http.app.get(WidgetEmitterService),
+  });
 }
 
 /** Throws — never skips — when the application cannot be constructed; the error names what it needed. */
@@ -138,6 +167,20 @@ export async function bootHttp(
         // P-F88, IR-F88-3: §3.8's required members, filled for a caller that did not name them. A raw
         // shape-stage body never comes through here — those suites call supertest themselves.
         .send({ ...submissionDefaults(), ...body });
+      return { status: res.status, body: res.body as unknown };
+    },
+    postIntentUnauthenticated: async (body) => {
+      const res = await request(server)
+        .post('/api/widgets/intent')
+        .send({ ...submissionDefaults(), ...body });
+      return { status: res.status, body: res.body as unknown };
+    },
+    executeTool: async (accessToken, toolName, body, requestId) => {
+      const res = await request(server)
+        .post(`/api/ai/tools/${encodeURIComponent(toolName)}/execute`)
+        .set('authorization', `Bearer ${accessToken}`)
+        .set('x-request-id', requestId)
+        .send(body);
       return { status: res.status, body: res.body as unknown };
     },
     mintProvenance: () => sink.captured(),

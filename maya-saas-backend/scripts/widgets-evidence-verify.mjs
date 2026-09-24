@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// The evidence verifier (GATES-PLAN-V11 I-HAR skeleton; §3.3 step 4, D-3, D-17). The integrator runs it after an
-// evidence run; A-W5 completes it. It reads the three files `test/widgets-live/support/evidence.ts` appends to and
+// The evidence verifier (GATES-PLAN-V11 I-HAR/A-W5; §3.3 step 4, D-3, D-17). The integrator runs it after an
+// evidence run. It reads the three files `test/widgets-live/support/evidence.ts` appends to and
 // REJECTS every manifest line that cannot stand as evidence. It never flips a clause: `gate-audit-build.mjs` does
 // that from a manifest this verifier has passed.
 //
@@ -56,8 +56,9 @@
 //                     claim's source file and its helpers (§3.2)
 //   V-MODEL-STUB      any of those aimed at the model transport (D-15)
 //   V-CONTROLLED      `controlledFixtureMode` in a harness support file or a claim's source file
-//   V-UNVERIFIED      a U or L-T claim: this skeleton cannot check the four U duties or the `[HTTP]` mutant kills
-//                     from the shard artifacts, so it refuses them until A-W5 completes the verifier (fail closed)
+//   V-U-PROOF         a U claim lacks one of OD-3's four duties in the frozen Wave-5 proof map. Mutation status is
+//                     checked by gate-audit-build from the final mutation report; this verifier checks the candidate,
+//                     quoted basis, absence/refusal/mechanism sources and declared battery.
 //
 // Trust boundary, stated plainly. The capture points refuse what they can: the HTTP sink admits a provenance line only
 // from a call site under `src/`; only the BIN runner, which claims the stdout capture before it loads a case, can
@@ -103,6 +104,12 @@ const inventoryFile = path.resolve(
   option('--inventory') ?? path.join(REPO, 'docs/rebuild/evidence/maya-chat-first-ux/gate-clause-inventory.json'),
 );
 const sourceRoot = path.resolve(option('--source-root') ?? BACKEND);
+const auditFile = path.resolve(
+  option('--audit') ?? path.join(REPO, 'docs/rebuild/evidence/maya-chat-first-ux/gate-conformance-audit.json'),
+);
+const uProofFile = path.resolve(
+  option('--u-proofs') ?? path.join(REPO, 'docs/rebuild/evidence/maya-chat-first-ux/wave5/e1-u-proofs.json'),
+);
 
 // ── the closed allowlists (§3.2) ──────────────────────────────────────────────────────────────────────────────
 /** Columns the H4 `SealVerifier` reads (§0.5 L-T): never an E-TAMPER target, except for key G1-a. */
@@ -160,7 +167,8 @@ const MODEL_TRANSPORT = /\b(AiCoreModelService|AI_CORE_MODEL|ModelTransport|deci
 const PRODUCTION_TRIGGERS = new Set(['T-2b', 'T-2a', 'T-1', 'T-3']);
 const L_LABELS = new Set(['[E-MINT]', '[E-HOSTILE]', '[E-DRIFT]']);
 const LT_LABEL = /^\[(?:E-TAMPER:[^\]]+|E-INDEP(?:\(mint\))?)\]$/;
-const EVIDENCE_LABEL = /^\[(E-MINT|E-HOSTILE|E-DRIFT|E-INDEP(?:\(mint\))?|E-TAMPER:[^\]]+)\]$/;
+const U_LABEL = '[U-proof]';
+const EVIDENCE_LABEL = /^\[(E-MINT|E-HOSTILE|E-DRIFT|E-INDEP(?:\(mint\))?|E-TAMPER:[^\]]+|U-proof)\]$/;
 /** Tamper and independence labels, read without case so a respelling cannot slip past the L-T-only rule. */
 const TAMPER_LABEL = /^\[\s*(?:e-tamper|tamper)\s*:([^\]]*)\]$/i;
 const INDEP_LABEL = /^\[\s*e-indep\b[^\]]*\]$/i;
@@ -186,6 +194,14 @@ const inventory = fs.existsSync(inventoryFile) ? JSON.parse(fs.readFileSync(inve
 const inventoryKeys = inventory
   ? new Set(inventory.gates.flatMap((g) => g.clauses.map((c) => c.key)))
   : null;
+const audit = fs.existsSync(auditFile) ? JSON.parse(fs.readFileSync(auditFile, 'utf8')) : null;
+const auditClauses = new Map(
+  (audit?.gates ?? []).flatMap((gate) =>
+    Object.entries(gate.clauses ?? {}).map(([key, clause]) => [key, clause]),
+  ),
+);
+const uProofMap = fs.existsSync(uProofFile) ? JSON.parse(fs.readFileSync(uProofFile, 'utf8')) : null;
+const uProofs = new Map((uProofMap?.proofs ?? []).map((proof) => [proof.clause, proof]));
 
 const lines = [];
 for (const { text, index } of readJsonl(manifestFile)) {
@@ -549,8 +565,44 @@ for (const line of lines) {
   if (line.claim === 'L-T' && line.clauses.some((key) => /^(9|10)\./.test(key)))
     violation('V-LT-G9-G10', line, 'L-T is never admitted for Gate 9 or Gate 10');
 
-  if (line.claim === 'U' || line.claim === 'L-T')
-    violation('V-UNVERIFIED', line, `${line.claim} claims are not verifiable by the skeleton verifier (A-W5)`);
+  if (line.claim === 'U') {
+    if (
+      line.record_hash !== null ||
+      line.trigger_trace_id !== null ||
+      line.stopped_at_gate !== null ||
+      line.gates_run !== null
+    )
+      violation('V-U-PROOF', line, 'a U claim must not masquerade as a live record traversal');
+    if (!line.labels.includes(U_LABEL) || line.labels.some((label) => label !== U_LABEL))
+      violation('V-LABEL-CLASS', line, 'a U claim carries exactly [U-proof] and no live-evidence label');
+    if (uProofMap?.contract !== 'maya.widgets-u-proof-map/1')
+      violation('V-U-PROOF', line, `the U proof map is missing or has contract ${JSON.stringify(uProofMap?.contract)}`);
+    for (const key of line.clauses) {
+      const clause = auditClauses.get(key);
+      const proof = uProofs.get(key);
+      const basis = clause?.u_basis ?? clause?.u_candidate_scope;
+      if (clause?.u_candidate !== true || typeof basis !== 'string' || basis.length === 0)
+        violation('V-U-PROOF', line, `${key} is not a frozen U candidate with a quoted basis`);
+      if (!proof || typeof proof.basis !== 'string' || !proof.basis.includes(basis ?? '__missing__')) {
+        violation('V-U-PROOF', line, `${key} has no proof-map entry quoting its audit basis`);
+        continue;
+      }
+      for (const duty of ['absence', 'refusal', 'mechanism']) {
+        const item = proof[duty];
+        const text = typeof item?.source === 'string' ? readSource(item.source) : null;
+        if (text === null || typeof item?.marker !== 'string' || !text.includes(item.marker))
+          violation('V-U-PROOF', line, `${key} duty ${duty} has no executable source marker`);
+      }
+      if (proof.refusal?.entry === 'GW-RI' && proof.refusal?.disclosed_no_http_carrier !== true)
+        violation('V-U-PROOF', line, `${key} uses GW-RI without the no-HTTP-carrier disclosure`);
+      const battery = proof.mechanism?.battery;
+      if (
+        typeof battery !== 'string' ||
+        readSource(`test/widgets-live/mutations/${battery}`) === null
+      )
+        violation('V-U-PROOF', line, `${key} names no existing mutation battery`);
+    }
+  }
 
   if (claimed) {
     if (readSource(line.source) === null) violation('V-SCHEMA', line, `source ${line.source} does not exist`);
@@ -601,6 +653,7 @@ const report = {
   refused_mints: refusals,
   records_before_teardown: beforeTeardown.size,
   harness_files_scanned: HARNESS_FILES.filter((f) => readSource(f) !== null).length,
+  u_proof_map: uProofMap?.contract === 'maya.widgets-u-proof-map/1' ? uProofFile : null,
   violations,
 };
 process.stdout.write(`${JSON.stringify(report)}\n`);

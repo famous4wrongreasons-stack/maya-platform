@@ -5,7 +5,10 @@ import type { Gate6Owners } from '../owner-ports/gate6.owners.provider';
 import type { PrincipalResolver } from '../authority/principal-view';
 import type { WidgetProjectorService } from '../projection/widget-projector.service';
 import type { WidgetStoresService } from '../stores/widget-stores.service';
-import { ChatReadTriggerService } from './chat-read.trigger';
+import {
+  ChatReadTriggerService,
+  conversationIdForReadExecution,
+} from './chat-read.trigger';
 
 const actor = {
   userId: 'user-a',
@@ -54,6 +57,15 @@ const input = () => ({
 });
 
 describe('P-MT2a ChatReadTriggerService', () => {
+  it('maps an opaque AI execution id to one deterministic UUID conversation identity', () => {
+    const a = conversationIdForReadExecution('cmufwk22c0006cmc9h1madblf');
+    expect(a).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-8[0-9a-f]{3}-[0-9a-f]{12}$/,
+    );
+    expect(conversationIdForReadExecution('cmufwk22c0006cmc9h1madblf')).toBe(a);
+    expect(conversationIdForReadExecution('another-execution')).not.toBe(a);
+  });
+
   const harness = (entitled = true, previous: unknown = null) => {
     const tx = {
       $executeRaw: jest.fn().mockResolvedValue(undefined),
@@ -129,6 +141,11 @@ describe('P-MT2a ChatReadTriggerService', () => {
       dismiss_widget_id: null,
     });
     expect(h.composeCompletedRead).toHaveBeenCalledTimes(1);
+    expect(h.ensureAssistantTurn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        conversationId: conversationIdForReadExecution(input().executionId),
+      }),
+    );
     type EmitRequest = Parameters<WidgetEmitterService['emit']>[0];
     const calls = h.emit.mock.calls as unknown as Array<[EmitRequest]>;
     const request = calls[0]?.[0];

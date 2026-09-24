@@ -1,0 +1,337 @@
+{
+  "contract": "maya.widgets-u-proof-map/1",
+  "decision": "OD-3 Option A",
+  "duties": {
+    "1": "build or mint proves no production path produces the input",
+    "2": "live HTTP fail-closed proof, or explicitly disclosed GW/RI when no HTTP carrier exists",
+    "3": "mechanism is complete and its declared mutation battery is killed",
+    "4": "audit row quotes the certified or settled basis"
+  },
+  "proofs": [
+    {
+      "clause": "G3-c2",
+      "basis": "K14-10 PKT:485 (Telegram, the only CLIENT_CHANNEL carrier, carries no callback tokens); R-03/P-33 C11:6620. Duty (2) runs at GW over C9Authority.current(T, proof), disclosed",
+      "candidate_scope": null,
+      "absence": {
+        "source": "test/widgets-live/principal.live-spec.ts",
+        "marker": "the JWT route has no channel proof"
+      },
+      "refusal": {
+        "source": "test/widgets-live/principal.live-spec.ts",
+        "marker": "PR-1 [GW RI; U-proof duty (2) for G3-c2]",
+        "entry": "GW-RI",
+        "disclosed_no_http_carrier": true
+      },
+      "mechanism": {
+        "source": "src/widgets/authority/principal-view.spec.ts",
+        "marker": "PR-7U-2 [U]",
+        "battery": "gateP-principal.json"
+      }
+    },
+    {
+      "clause": "G3-f",
+      "basis": "K14-10 PKT:485; R-03/P-33 C11:6620: no Telegram callback-token carrier this cycle",
+      "candidate_scope": null,
+      "absence": {
+        "source": "test/widgets-live/principal.live-spec.ts",
+        "marker": "the JWT route has no channel proof"
+      },
+      "refusal": {
+        "source": "test/widgets-live/principal.live-spec.ts",
+        "marker": "PR-1 [GW RI; U-proof duty (2) for G3-c2]",
+        "entry": "GW-RI",
+        "disclosed_no_http_carrier": true
+      },
+      "mechanism": {
+        "source": "src/widgets/authority/principal-view.spec.ts",
+        "marker": "PR-7U-2 [U]",
+        "battery": "gateP-principal.json"
+      }
+    },
+    {
+      "clause": "G5-f",
+      "basis": "K6 C11:2550; F53 C11:1126: a conformant fitter withholds an intent above the session level, and a level change also changes the proof hash; the step-up landing needs P-12 (no package, C11:6635)",
+      "candidate_scope": null,
+      "absence": {
+        "source": "src/widgets/gates/gate5.spec.ts",
+        "marker": "G15-6b [U-proof]"
+      },
+      "refusal": {
+        "source": "src/widgets/gates/gate5.spec.ts",
+        "marker": "a shortfall returns only its code",
+        "entry": "BUILD/RI"
+      },
+      "mechanism": {
+        "source": "src/widgets/gates/gate5.ts",
+        "marker": "policy_floor_changed",
+        "battery": "gate1-5.json"
+      }
+    },
+    {
+      "clause": "G8-5p",
+      "basis": "PKT:469 \"No phone field is minted this cycle\"",
+      "candidate_scope": null,
+      "absence": {
+        "source": "src/widgets/projection/projector-fences.architecture.spec.ts",
+        "marker": "ProjectionPlan carries no C-class column and no free-text/phone input"
+      },
+      "refusal": {
+        "source": "src/widgets/input-validation/input-validation.ts",
+        "marker": "field ${field.name} is not safe text",
+        "entry": "BUILD/RI"
+      },
+      "mechanism": {
+        "source": "test/widgets-live/gate8-input.live-spec.ts",
+        "marker": "Gate 8",
+        "battery": "gate8.json"
+      }
+    },
+    {
+      "clause": "R-2",
+      "basis": "PKT:471: no SPOKEN carrier fit this cycle",
+      "candidate_scope": null,
+      "absence": {
+        "source": "src/widgets/gates/gate-8r.binding.spec.ts",
+        "marker": "The readback vocabulary waits for a SPOKEN carrier"
+      },
+      "refusal": {
+        "source": "test/widgets-live/gate8r-readback.live-spec.ts",
+        "marker": "T-DEF3 (R-5)",
+        "entry": "HTTP/RI"
+      },
+      "mechanism": {
+        "source": "src/widgets/gates/gate8r.spec.ts",
+        "marker": "readback_mismatch",
+        "battery": "gate8r.json"
+      }
+    },
+    {
+      "clause": "R-3",
+      "basis": "PKT:471",
+      "candidate_scope": null,
+      "absence": {
+        "source": "src/widgets/gates/gate-8r.binding.spec.ts",
+        "marker": "The readback vocabulary waits for a SPOKEN carrier"
+      },
+      "refusal": {
+        "source": "test/widgets-live/gate8r-readback.live-spec.ts",
+        "marker": "T-DEF3 (R-5)",
+        "entry": "HTTP/RI"
+      },
+      "mechanism": {
+        "source": "src/widgets/gates/gate8r.spec.ts",
+        "marker": "readback_mismatch",
+        "battery": "gate8r.json"
+      }
+    },
+    {
+      "clause": "R-4",
+      "basis": "PKT:471",
+      "candidate_scope": null,
+      "absence": {
+        "source": "src/widgets/gates/gate-8r.binding.spec.ts",
+        "marker": "The readback vocabulary waits for a SPOKEN carrier"
+      },
+      "refusal": {
+        "source": "test/widgets-live/gate8r-readback.live-spec.ts",
+        "marker": "T-DEF3 (R-5)",
+        "entry": "HTTP/RI"
+      },
+      "mechanism": {
+        "source": "src/widgets/gates/gate8r.spec.ts",
+        "marker": "readback_mismatch",
+        "battery": "gate8r.json"
+      }
+    },
+    {
+      "clause": "R-5",
+      "basis": "PKT:471 (no vocabulary; waits for a SPOKEN carrier)",
+      "candidate_scope": null,
+      "absence": {
+        "source": "src/widgets/gates/gate-8r.binding.spec.ts",
+        "marker": "The readback vocabulary waits for a SPOKEN carrier"
+      },
+      "refusal": {
+        "source": "test/widgets-live/gate8r-readback.live-spec.ts",
+        "marker": "T-DEF3 (R-5)",
+        "entry": "HTTP/RI"
+      },
+      "mechanism": {
+        "source": "src/widgets/gates/gate8r.spec.ts",
+        "marker": "readback_mismatch",
+        "battery": "gate8r.json"
+      }
+    },
+    {
+      "clause": "R-7",
+      "basis": "PKT:471: no SPOKEN carrier fit this cycle; only the required half (PKT:471); the unrequired half is L-able (marker affirmation never logged)",
+      "candidate_scope": "only the required half (PKT:471); the unrequired half is L-able (marker affirmation never logged)",
+      "absence": {
+        "source": "src/widgets/gates/gate-8r.binding.spec.ts",
+        "marker": "The readback vocabulary waits for a SPOKEN carrier"
+      },
+      "refusal": {
+        "source": "test/widgets-live/gate8r-readback.live-spec.ts",
+        "marker": "T-DEF3 (R-5)",
+        "entry": "HTTP/RI"
+      },
+      "mechanism": {
+        "source": "src/widgets/gates/gate8r.spec.ts",
+        "marker": "readback_mismatch",
+        "battery": "gate8r.json"
+      }
+    },
+    {
+      "clause": "10.R5",
+      "basis": "C11:2801 \"'c' is permitted on no kind in this contract version\", with F69 (C11:1356ff) and subjectCapability (C11:4132-4139)",
+      "candidate_scope": null,
+      "absence": {
+        "source": "src/widgets/emission/intent-template.registry.spec.ts",
+        "marker": "MINT-2c emits no NAVIGATE(c) subject"
+      },
+      "refusal": {
+        "source": "src/widgets/gates/gate10.spec.ts",
+        "marker": "T10-R5",
+        "entry": "BUILD/RI"
+      },
+      "mechanism": {
+        "source": "test/widgets-live/gate10-divergence.live-spec.ts",
+        "marker": "Gate 10",
+        "battery": "gate10.json"
+      }
+    },
+    {
+      "clause": "G11-I4",
+      "basis": "C11:5073; SH-11 PKT:476 (no approval decision this cycle)",
+      "candidate_scope": null,
+      "absence": {
+        "source": "src/widgets/emission/intent-template.registry.spec.ts",
+        "marker": "MINT-3 keeps DRAFT, REQUEST_APPROVAL and COMMIT behind A2.2"
+      },
+      "refusal": {
+        "source": "test/widgets-live/gate11-nouns.live-spec.ts",
+        "marker": "Gate 11",
+        "entry": "HTTP/RI"
+      },
+      "mechanism": {
+        "source": "src/widgets/gates/gate11.spec.ts",
+        "marker": "REQUEST_APPROVAL",
+        "battery": "gate11.json"
+      }
+    },
+    {
+      "clause": "G11-I5",
+      "basis": "C11:5073; SH-11 PKT:476",
+      "candidate_scope": null,
+      "absence": {
+        "source": "src/widgets/emission/intent-template.registry.spec.ts",
+        "marker": "MINT-3 keeps DRAFT, REQUEST_APPROVAL and COMMIT behind A2.2"
+      },
+      "refusal": {
+        "source": "test/widgets-live/gate11-nouns.live-spec.ts",
+        "marker": "Gate 11",
+        "entry": "HTTP/RI"
+      },
+      "mechanism": {
+        "source": "src/widgets/gates/gate11.spec.ts",
+        "marker": "REQUEST_APPROVAL",
+        "battery": "gate11.json"
+      }
+    },
+    {
+      "clause": "G11-I6",
+      "basis": "C11:5073; SH-11 PKT:476",
+      "candidate_scope": null,
+      "absence": {
+        "source": "src/widgets/emission/intent-template.registry.spec.ts",
+        "marker": "MINT-3 keeps DRAFT, REQUEST_APPROVAL and COMMIT behind A2.2"
+      },
+      "refusal": {
+        "source": "test/widgets-live/gate11-nouns.live-spec.ts",
+        "marker": "Gate 11",
+        "entry": "HTTP/RI"
+      },
+      "mechanism": {
+        "source": "src/widgets/gates/gate11.spec.ts",
+        "marker": "REQUEST_APPROVAL",
+        "battery": "gate11.json"
+      }
+    },
+    {
+      "clause": "G11-I10",
+      "basis": "C11:5073; SH-11 PKT:476",
+      "candidate_scope": null,
+      "absence": {
+        "source": "src/widgets/emission/intent-template.registry.spec.ts",
+        "marker": "MINT-3 keeps DRAFT, REQUEST_APPROVAL and COMMIT behind A2.2"
+      },
+      "refusal": {
+        "source": "test/widgets-live/gate11-nouns.live-spec.ts",
+        "marker": "Gate 11",
+        "entry": "HTTP/RI"
+      },
+      "mechanism": {
+        "source": "src/widgets/gates/gate11.spec.ts",
+        "marker": "REQUEST_APPROVAL",
+        "battery": "gate11.json"
+      }
+    },
+    {
+      "clause": "G13-R7",
+      "basis": "C11:5073",
+      "candidate_scope": null,
+      "absence": {
+        "source": "src/widgets/emission/intent-template.registry.spec.ts",
+        "marker": "MINT-3 keeps DRAFT, REQUEST_APPROVAL and COMMIT behind A2.2"
+      },
+      "refusal": {
+        "source": "test/widgets-live/gate13-routing.live-spec.ts",
+        "marker": "approvalDecision",
+        "entry": "HTTP/RI"
+      },
+      "mechanism": {
+        "source": "src/widgets/routing/effect-router.service.spec.ts",
+        "marker": "routes APPROVAL COMMIT by the server-owned approvalDecision",
+        "battery": "gate13.json"
+      }
+    },
+    {
+      "clause": "G13-I1",
+      "basis": "C11:5073",
+      "candidate_scope": null,
+      "absence": {
+        "source": "src/widgets/emission/intent-template.registry.spec.ts",
+        "marker": "MINT-3 keeps DRAFT, REQUEST_APPROVAL and COMMIT behind A2.2"
+      },
+      "refusal": {
+        "source": "test/widgets-live/gate13-routing.live-spec.ts",
+        "marker": "approvalDecision",
+        "entry": "HTTP/RI"
+      },
+      "mechanism": {
+        "source": "src/widgets/routing/effect-router.service.spec.ts",
+        "marker": "routes APPROVAL COMMIT by the server-owned approvalDecision",
+        "battery": "gate13.json"
+      }
+    },
+    {
+      "clause": "G13-I2",
+      "basis": "C11:5073",
+      "candidate_scope": null,
+      "absence": {
+        "source": "src/widgets/emission/intent-template.registry.spec.ts",
+        "marker": "MINT-3 keeps DRAFT, REQUEST_APPROVAL and COMMIT behind A2.2"
+      },
+      "refusal": {
+        "source": "test/widgets-live/gate13-routing.live-spec.ts",
+        "marker": "approvalDecision",
+        "entry": "HTTP/RI"
+      },
+      "mechanism": {
+        "source": "src/widgets/routing/effect-router.service.spec.ts",
+        "marker": "routes APPROVAL COMMIT by the server-owned approvalDecision",
+        "battery": "gate13.json"
+      }
+    }
+  ]
+}

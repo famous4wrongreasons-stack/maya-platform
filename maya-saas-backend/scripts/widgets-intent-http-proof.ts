@@ -56,10 +56,11 @@ import {
   EvidenceWriter,
   type EvidenceLineInput,
 } from '../test/widgets-live/support/evidence';
-import {
-  Fixtures,
-  type BinFixtures,
-} from '../test/widgets-live/support/fixtures';
+import { Fixtures } from '../test/widgets-live/support/fixtures';
+import type {
+  HttpProofContext,
+  WidgetsHttpProofCase,
+} from '../test/widgets-live/support/http-proof-contract';
 import { resetLoopbackLoginPreflight } from '../test/widgets-live/support/login-rate-limit';
 import {
   claimBinStdoutCapture,
@@ -67,35 +68,13 @@ import {
   type MintProvenanceLine,
 } from '../test/widgets-live/support/mint-provenance';
 
-/** What a BIN case may record: the entry is `BIN` and the source is its cases file, both set by the runner. */
-export interface BinEvidence {
-  readonly enabled: boolean;
-  record(line: Omit<EvidenceLineInput, 'entry' | 'source'>): boolean;
-}
-
-export interface HttpProofContext {
-  /** e.g. `http://127.0.0.1:3121/api` */
-  readonly apiBase: string;
-  request(
-    route: string,
-    init?: RequestInit,
-  ): Promise<{ status: number; body: unknown }>;
-  /** The real fixture builders, without a widget writer; torn down by the runner after the case. */
-  readonly fixtures: BinFixtures;
-  readonly evidence: BinEvidence;
-  /** The binary's `WidgetMintProvenance` lines captured so far. */
-  mintProvenance(): readonly MintProvenanceLine[];
-}
-
-export interface WidgetsHttpProofCase {
-  /** The spec's test id, e.g. `SMOKE-G6-HANDOFF-SENS`. */
-  readonly id: string;
-  /** The §3.9 slot the case is about. */
-  readonly gate: string;
-  /** Proof class of plan §4.3 (`LIVE`, `G-SYNTH`, …). A `G-SYNTH` case is never evidence. */
-  readonly proofClass: string;
-  run(ctx: HttpProofContext): Promise<void>;
-}
+// Compatibility export for existing case files. Claim-bearing cases import the
+// inert support contract directly, so their source closure cannot include this
+// executable runner or its database/evidence infrastructure.
+export type {
+  HttpProofContext,
+  WidgetsHttpProofCase,
+} from '../test/widgets-live/support/http-proof-contract';
 
 const BACKEND = path.resolve(__dirname, '..');
 const DEFAULT_CASES_DIR = path.join(__dirname, 'widgets-http-proof');
