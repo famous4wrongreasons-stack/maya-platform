@@ -224,13 +224,13 @@
   },
   {
     "id": "M28",
-    "description": "A5's detail branch is added and it calls an owner. S6-4 holds A5's check out of the body and NO clause changes (C11:7173): a `detail` NAVIGATE has a null subject and Gate 6 has nothing to check (C11:4740-4741). This mutant is the shape the STOP forbids, and P-NULL-DETAIL is what keeps it dead.",
+    "description": "Contract V1.2's sealed source capability is ignored for detail/w NAVIGATE, restoring the pre-OD-1 null-subject pass and skipping the current-authority owner check. P-NAV-SOURCE keeps that bypass dead.",
     "file": "src/widgets/gates/gate6.ts",
-    "find": "  if (ref === null) return pass;\n",
-    "replace": "  if (ref === null) {\n    const t = r.targetJson as { class?: unknown } | null;\n    if (t?.class === 'detail')\n      await owners.assertCanExecute(\n        ctx.tenantId,\n        ctx.principal?.authority.userId ?? '',\n        ctx.principal?.role ?? '',\n        undefined as unknown as Parameters<typeof owners.assertCanExecute>[3],\n      );\n    return pass;\n  }\n",
+    "find": "  const ref = requiresRetainedSource ? navigateSource(r) : subjectOf(r);\n",
+    "replace": "  const ref = subjectOf(r);\n",
     "killers": [
-      "P-NULL",
-      "G6-5"
+      "P-NAV-SOURCE",
+      "G6-V12"
     ],
     "expect": "live-killed"
   },

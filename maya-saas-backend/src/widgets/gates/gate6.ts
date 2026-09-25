@@ -33,9 +33,10 @@
 //   branch refuses either way — but the wave's disclosure standard was breached in the one place it
 //   is read from, so both halves are named in the detail now.
 //
-//   NO DETAIL / i-CLASS BRANCH. A5 is STOPPED (S6-4, C11:7173) and adds no branch: a `detail`, `w`,
-//   `i` or `s` NAVIGATE has a null subject and passes with zero owner calls (C11:4740-4741). The
-//   mutant that adds one (M28) is killed by P-NULL-DETAIL.
+//   NO CLIENT-AUTHORED DETAIL / i-CLASS BRANCH. Contract V1.2 / OD-1 gives `detail` and `w`
+//   NAVIGATE the sealed server-owned source capability and re-runs its current C9 authority check.
+//   `i` and `s` still have a null subject and pass with zero owner calls. M28 now removes the sealed
+//   source selection and is killed by P-NAV-SOURCE/G6-V12.
 //
 // Every refusal is `insufficient_authority` (C11:4725) — Gate 6 invents no code. The DETAIL is what
 // says which fence fired, and the tests name it, because asserting the code alone let a mutant
@@ -330,8 +331,9 @@ export const gate6 = async (
     );
 
   // G6-5: `if (ref === null)` -> no capability is exercised; Gate 6 has nothing to check and the
-  // intent proceeds (C11:4740-4741). NONE, and a `w`/`i`/`s`/`detail` NAVIGATE. Refusing here would
-  // make the mandatory escape unusable, and calling an owner here is M28.
+  // intent proceeds (C11:4740-4741). This is NONE and non-reprojecting `i`/`s` NAVIGATE only;
+  // Contract V1.2 moves `detail`/`w` onto their sealed source capability above. Refusing here would
+  // make the mandatory escape unusable.
   if (ref === null) return pass;
 
   try {
