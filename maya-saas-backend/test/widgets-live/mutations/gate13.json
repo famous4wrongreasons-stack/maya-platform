@@ -2,9 +2,18 @@
   {
     "id": "M13-NAV-1",
     "description": "stored-widget NAVIGATE drops the current principal-proof predicate",
-    "file": "src/widgets/resolve/thread-page.service.ts",
-    "find": "          intentRecords: {\n            some: { principalProofHash: input.principalProofHash },\n          },\n",
-    "replace": "          intentRecords: { some: {} },\n",
+    "edits": [
+      {
+        "file": "src/widgets/resolve/thread-page.service.ts",
+        "find": "          intentRecords: {\n            some: { principalProofHash: input.principalProofHash },\n          },\n",
+        "replace": "          intentRecords: { some: {} },\n"
+      },
+      {
+        "file": "src/widgets/resolve/thread-page.service.ts",
+        "find": "          intentRecords: {\n            where: { principalProofHash: input.principalProofHash },\n",
+        "replace": "          intentRecords: {\n            where: {},\n"
+      }
+    ],
     "killers": ["G13-NAV-FOREIGN"],
     "expect": "live-killed"
   },
