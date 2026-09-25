@@ -45,6 +45,26 @@ describe('P-MINT-BOOK closed booking intent templates', () => {
     ).toBe('COMMIT');
   });
 
+  it('refuses a HANDOFF-only capability member in the booking mint registry', () => {
+    expect(() =>
+      resolveBookingTemplateForSynthesis({
+        proposal: {
+          ...proposal('commit.booking.create@1', {
+            service: 'h1',
+            staff: 'h2',
+            slot: 'h3',
+          }),
+          handoff_capability_ref: {
+            space: 'C9',
+            key: 'appointments.own.create',
+          },
+        },
+        widgetKind: 'BOOKING_CONFIRMATION',
+        deliveryChannel: 'pwa',
+      }),
+    ).toThrow('capability_mismatch');
+  });
+
   it.each([
     ['unknown@1', { service: 'h1', staff: 'h2', slot: 'h3' }],
     ['commit.booking.create@1', { service: 'h1' }],

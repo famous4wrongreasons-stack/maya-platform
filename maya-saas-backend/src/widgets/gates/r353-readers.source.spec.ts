@@ -85,6 +85,12 @@ const READERS: readonly Reader[] = [
     file: 'widgets/emission/intent-template.registry.ts',
     declaration: 'resolveIntentTemplate',
   },
+  {
+    reader:
+      'the closed booking-template mint validator refuses a HANDOFF-only member (R3.5.1 at EP-MINT)',
+    file: 'widgets/booking/booking-intent-template.registry.ts',
+    declaration: 'resolveBookingTemplateForSynthesis',
+  },
 ];
 
 /** One direct member access to the field. */

@@ -160,6 +160,8 @@ const OTHER_TYPED_FACT_CONTAINERS: Readonly<Record<string, string>> =
       'WidgetComposerInput facts copied from an authorized C9 run result',
     'composition/moment.trigger.ts':
       'WidgetComposerInput facts copied from the typed K13 composition input',
+    'emission/booking-confirmation-minter.service.ts':
+      'WidgetComposerInput fact copied from the canonical booking owner preview',
     'emission/envelope.factory.ts':
       'WidgetEnvelope facts and facts_origin written after projection',
   });
