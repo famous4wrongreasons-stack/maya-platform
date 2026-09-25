@@ -93,10 +93,10 @@
     "id": "MINT-M11",
     "description": "persist an invented readback text on every record",
     "file": "src/widgets/emission/record-writer.ts",
-    "find": "    confirmationJson: null,",
-    "replace": "    confirmationJson: { readback_text: 'invented' },",
+    "find": "          idempotency_key: booking.idempotencyKey,\n        }\n      : null,",
+    "replace": "          idempotency_key: booking.idempotencyKey,\n        }\n      : { readback_text: 'invented' },",
     "killers": ["MINT-5"],
-    "expect": "build-killed"
+    "expect": "live-killed"
   },
   {
     "id": "MINT-M12",
