@@ -88,6 +88,8 @@ model WidgetIntentRecord {
   handoffSpace              String?                             // A  CHECK: CapabilitySpace (4)
   handoffKey                String?                             // A
   targetJson                Json?     @db.JsonB                 // A  IntentTarget; targetFloor reads .class
+  sourceCapabilitySpace     String?                             // A  sealed source evidence for NAVIGATE(detail/w)
+  sourceCapabilityKey       String?                             // A  re-authorized on every use; never permission
   verificationFloor         String                              // A  CHECK: VerificationLevel (5) — Gate 5 compares
   confirmationJson          Json?     @db.JsonB                 // A  risk tier, reversible, audience, readback
   confirmationSubject       String?                             // A  CHECK: ConfirmationSubject (3)
@@ -113,6 +115,7 @@ model WidgetIntentRecord {
   renderedUtterance         String?                             // C
   selectedLabels            String[]                            // C
   selectionDomainLabelsJson Json?     @db.JsonB                 // C
+  retainedLocalBusinessDate String?                             // X  operations.journal.read only; erased with widget lifecycle/content
   spokenTranscript          String?                             // C
   erasedAt                  DateTime? @db.Timestamptz(3)        // A
 

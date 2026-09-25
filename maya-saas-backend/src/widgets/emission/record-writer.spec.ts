@@ -111,3 +111,49 @@ describe('U7c mint-side BOOK.1 subject binding', () => {
     );
   });
 });
+
+describe('I-MIG3 server-owned NAVIGATE source-capability evidence', () => {
+  const navigate = (target: WidgetIntent['target']) => {
+    const base = material('crm.appointment.create.v1');
+    return intentRecordData({
+      material: {
+        ...base,
+        intent: {
+          ...base.intent,
+          effect: 'NAVIGATE',
+          capability: null,
+          target,
+        },
+      },
+      input: input('SCHEDULE'),
+      tenantId: 'tenant-1',
+      widgetId: 'widget-1',
+      principalProofHash: 'p'.repeat(64),
+      bodyHash: 'b'.repeat(64),
+      body: {},
+      issuedAt: new Date('2026-09-23T00:00:00.000Z'),
+    });
+  };
+
+  it.each([
+    { class: 'detail', ref: { route: 'shell.account' } },
+    { class: 'w', ref: '01ARZ3NDEKTSV4RRFFQ69G5FAV' },
+  ] as const)('seals the server composer capability for $class', (target) => {
+    const row = navigate(target);
+    expect(row.sourceCapabilitySpace).toBe('C9');
+    expect(row.sourceCapabilityKey).toBe('appointments.own.create');
+  });
+
+  it.each([
+    null,
+    { class: 'i', ref: 'i1' },
+    { class: 's', ref: { route: 'shell.root', param: null } },
+  ] as const)(
+    'stores no retained source evidence outside detail/w',
+    (target) => {
+      const row = navigate(target);
+      expect(row.sourceCapabilitySpace).toBeNull();
+      expect(row.sourceCapabilityKey).toBeNull();
+    },
+  );
+});

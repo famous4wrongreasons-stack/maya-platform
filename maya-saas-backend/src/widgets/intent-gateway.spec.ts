@@ -68,6 +68,8 @@ interface RecordRow {
   handoffSpace: string | null;
   handoffKey: string | null;
   targetJson: unknown;
+  sourceCapabilitySpace: string | null;
+  sourceCapabilityKey: string | null;
   confirmationJson: unknown;
   confirmationSubject: string | null;
   approvalDecision: string | null;
@@ -199,6 +201,8 @@ const record = (over: Partial<RecordRow> = {}): RecordRow => ({
   handoffSpace: null,
   handoffKey: null,
   targetJson: null,
+  sourceCapabilitySpace: null,
+  sourceCapabilityKey: null,
   confirmationJson: null,
   confirmationSubject: null,
   approvalDecision: null,

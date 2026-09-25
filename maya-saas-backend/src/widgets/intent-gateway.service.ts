@@ -667,6 +667,8 @@ export class IntentGatewayService {
         handoffSpace: true,
         handoffKey: true,
         targetJson: true,
+        sourceCapabilitySpace: true,
+        sourceCapabilityKey: true,
         bodyHash: true,
         selectionDomain: true,
         retainedLocalBusinessDate: true,

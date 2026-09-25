@@ -580,18 +580,19 @@ trusting this table.
 | | |
 |---|---:|
 | **NEW WIDGET MODELS** | **14** |
-| **WIDGET-LAYER PHYSICAL FIELDS** | **191** (14 surrogate keys, 177 substantive) |
+| **WIDGET-LAYER PHYSICAL FIELDS** | **194** (14 surrogate keys, 180 substantive) |
 | **ENUMS** (closed value sets, each a `CHECK`) | **20** |
 | **FK** | **18** — 11 → `Tenant`, 7 widget → widget |
-| **CHECK** | **39** — 31 enum-valued, 8 range/ordering |
+| **CHECK** | **43** — 31 enum-valued, 12 range/ordering |
 | **UNIQUE** | **22** |
 | **INDEXES** | **25** |
 | **MIGRATIONS EXPECTED** | **3** |
 | **BUSINESS SCHEMA OWNERS CHANGED** | **0** |
-| erasure classes, every column exactly one | `AUDIT_RETAINED` 150 · `CONVERSATION_CONTENT` 18 · `CANONICAL_ELSEWHERE` 1 · registry (no data subject) 22 = **191** |
+| erasure classes, every column exactly one | `AUDIT_RETAINED` 152 · `CONVERSATION_CONTENT` 18 · `CANONICAL_ELSEWHERE` 2 · registry (no data subject) 22 = **194** |
 
 Per wave: **wave 1** — 3 models, 22 columns, 3 unique, 3 index, 5 check, 0 FK.
-**wave 2** — 11 models, 169 columns, 19 unique, 22 index, 34 check, 18 FK.
+**wave 2** — 11 models, 170 columns, 19 unique, 22 index, 35 check, 18 FK.
+**wave 6 / I-MIG3** — 2 additive columns, 3 checks, 0 index, 0 FK, 0 backfill.
 
 ### 5.1 The three stores, and which packages write them
 
@@ -733,6 +734,8 @@ model WidgetIntentRecord {
   handoffSpace              String?                             // A  CHECK: CapabilitySpace (4)
   handoffKey                String?                             // A
   targetJson                Json?     @db.JsonB                 // A  IntentTarget; targetFloor reads .class
+  sourceCapabilitySpace     String?                             // A  sealed source evidence for NAVIGATE(detail/w)
+  sourceCapabilityKey       String?                             // A  re-authorized on every use; never permission
   verificationFloor         String                              // A  CHECK: VerificationLevel (5) — Gate 5 compares
   confirmationJson          Json?     @db.JsonB                 // A  risk tier, reversible, audience, readback
   confirmationSubject       String?                             // A  CHECK: ConfirmationSubject (3)
@@ -758,6 +761,7 @@ model WidgetIntentRecord {
   renderedUtterance         String?                             // C
   selectedLabels            String[]                            // C
   selectionDomainLabelsJson Json?     @db.JsonB                 // C
+  retainedLocalBusinessDate String?                             // X  operations.journal.read only; erased with widget lifecycle/content
   spokenTranscript          String?                             // C
   erasedAt                  DateTime? @db.Timestamptz(3)        // A
 

@@ -168,6 +168,9 @@ export const intentRecordData = (args: {
   const subject = subjectCapability(intent);
   const cap = intent.effect === 'HANDOFF' ? null : subject;
   const handoff = intent.effect === 'HANDOFF' ? subject : null;
+  const retainsSourceCapability =
+    intent.effect === 'NAVIGATE' &&
+    (intent.target?.class === 'detail' || intent.target?.class === 'w');
   const runId = args.input.correlation_refs.run_id ?? null;
   const confirmationSubject = confirmationSubjectAtMint({
     kind: args.input.kind_proposal,
@@ -187,6 +190,8 @@ export const intentRecordData = (args: {
     handoffSpace: handoff?.space ?? null,
     handoffKey: handoff?.key ?? null,
     targetJson: intent.target,
+    sourceCapabilitySpace: retainsSourceCapability ? 'C9' : null,
+    sourceCapabilityKey: retainsSourceCapability ? args.input.capability : null,
     verificationFloor: intent.verification_floor,
     confirmationJson: null,
     confirmationSubject,

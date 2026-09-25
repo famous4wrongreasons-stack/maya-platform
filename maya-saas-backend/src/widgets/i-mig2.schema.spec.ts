@@ -56,7 +56,7 @@ describe('I-MIG2 migration-2 fold', () => {
     expect(physical.every((line) => /\/\/ A(?:\s|$)/.test(line))).toBe(true);
   });
 
-  it('MIG-4 retains exactly two widget migrations in the 98-migration programme', () => {
+  it('MIG-4 retains exactly three widget migrations in the 99-migration programme', () => {
     const dirs = fs
       .readdirSync(path.join(repo, 'maya-saas-backend/prisma/migrations'), {
         withFileTypes: true,
@@ -64,10 +64,11 @@ describe('I-MIG2 migration-2 fold', () => {
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name);
 
-    expect(dirs).toHaveLength(98);
+    expect(dirs).toHaveLength(99);
     expect(dirs.filter((name) => name.includes('widget_layer'))).toEqual([
       '20260916120000_widget_layer_ledgers',
       '20260916120100_widget_layer_runtime',
+      '20260925150000_widget_layer_source_capability',
     ]);
   });
 

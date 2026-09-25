@@ -67,7 +67,7 @@ accepted in any of them.
 | **WIDGET TYPES** | `METRIC`, `SCHEDULE`, `SOURCE_STATUS`, `PROGRESS`, `LIMITATION` — read-only, behind the entitlement. |
 | **DEPENDENCIES** | K2. |
 | **AUTHORITY/SECURITY BOUNDARY** | **The whole of it.** Holds the envelope seal key; mints intent tokens; is the only component that may consume one. Gate 5 recomputes `verificationFloor` from the stored record and refuses on **any** divergence, raised or lowered. Gate 6 dispatches on `subjectCapability(record).space`, scoped by effect — a `HANDOFF` resolves destination fences only. |
-| **SCHEMA IMPACT** | 11 models, **169 columns**. No business table. |
+| **SCHEMA IMPACT** | 11 models, **170 columns**. No business table. |
 | **MIGRATION** | Migration 2. |
 | **PARITY PROOF** | Three front doors — tap, typed sentence, spoken utterance — resolve through one pipeline; Gate 10 records divergence. |
 | **PRODUCTION CUTOVER CONDITION** | **One CI job green**: a mutated, an expired, a replayed and a foreign-principal token each refused, at **indistinguishable latency**; the wire format has no member able to carry an endpoint, a URL, a capability name, a table, a provider, a tenant or a role; **0 capability calls on the timeline read path**. |
@@ -364,7 +364,7 @@ after the dark window.**
 
 ```
 WIDGET-LAYER MODELS: 14
-PHYSICAL FIELDS:    191
+PHYSICAL FIELDS:    194
 MIGRATIONS:           3
 ```
 
@@ -380,8 +380,8 @@ rounds proving that, and the counters exist so that no figure here is typed by h
 |---|---|
 | **MODEL** | `WidgetIntentRecord` — intent-audit store |
 | **PURPOSE** | The stored intent. Idempotency of a tap, principal binding, and the record Gate 5 recomputes the floor from. |
-| **PHYSICAL FIELDS** | **40** — 35 `AUDIT_RETAINED`, 5 `CONVERSATION_CONTENT` |
-| **IMPORTANT UNIQUE/CHECK/FK** | `@@unique([intentTokenHash, tenantId])` — one row per token, ever, which is what makes a replayed tap find a consumed row instead of a second effect. **The token itself is never stored**, only its `Char(64)` hash. 9 CHECKs: `WidgetKind`, `EffectClass`, `CapabilitySpace` ×2, `VerificationLevel`, `C9Domain`, `ConfirmationOfKind`, `ConfirmationSubject`, `WidgetApprovalDecision`. FK → `Tenant`, → `WidgetEmission`. |
+| **PHYSICAL FIELDS** | **43** — 37 `AUDIT_RETAINED`, 5 `CONVERSATION_CONTENT`, 1 `CANONICAL_ELSEWHERE` |
+| **IMPORTANT UNIQUE/CHECK/FK** | `@@unique([intentTokenHash, tenantId])` — one row per token, ever, which is what makes a replayed tap find a consumed row instead of a second effect. **The token itself is never stored**, only its `Char(64)` hash. 14 CHECKs: `WidgetKind`, `EffectClass`, `CapabilitySpace` ×2, `VerificationLevel`, `C9Domain`, `ConfirmationOfKind`, `ConfirmationSubject`, `WidgetApprovalDecision`. FK → `Tenant`, → `WidgetEmission`. |
 | **RETENTION** | `T_AUDIT` = 1095 d from `issuedAt`. Erasure nulls the 5 content columns and keeps the 35 audit ones. |
 | **BUSINESS OWNER DEPENDENCY** | `actionReceiptRef` is **the only pointer to a business fact**, and it is a one-way reference the widget layer reads and never writes. |
 
@@ -443,8 +443,8 @@ rounds proving that, and the counters exist so that no figure here is typed by h
 | `WidgetMechanismGap` | `MG-P01 … MG-P39`, one per prerequisite | **7**, registry | `@@unique([gapKey])`; CHECK `MechanismGapStatus` | n/a | every build-status count is **printed from here, never transcribed** |
 | `WidgetCapabilityPolicy` | `min_verification`, `consent_class`, `dispatch_is_synchronous` per key | **7**, registry | `@@unique([capabilitySpace, capabilityKey])`; CHECK `CapabilitySpace`, `VerificationLevel`, `ConsentClass` | n/a | **total over C9-CAP's 56 keys (71 once contract §0.7 F36a registers its set) and over those only** — AE-CAP totality is the allowlist's and the gap ledger's job |
 
-**Erasure classes, every column exactly once:** 150 `AUDIT_RETAINED` · 18 `CONVERSATION_CONTENT` ·
-1 `CANONICAL_ELSEWHERE` · 22 registry = **191**.
+**Erasure classes, every column exactly once:** 152 `AUDIT_RETAINED` · 18 `CONVERSATION_CONTENT` ·
+2 `CANONICAL_ELSEWHERE` · 22 registry = **194**.
 
 ### The three confirmations
 
@@ -485,9 +485,9 @@ joins on a conversation id — which is why the replay is the one that governs.)
 `WidgetCapabilityGap`, `WidgetMechanismGap`, `WidgetCapabilityPolicy`.
 
 **`MIGRATION 2` — `<stamp>_widget_layer_runtime` (K3, wave 2)**
-11 models · 169 columns · 19 unique · 22 index · 34 CHECK · 18 FK (11 → `Tenant`, 7 widget → widget).
+11 models · 170 columns · 19 unique · 22 index · 35 CHECK · 18 FK (11 → `Tenant`, 7 widget → widget).
 
-**`MIGRATION 3` — `<stamp>_widget_intent_source_capability` (Wave 6, I-MIG3)**
+**`MIGRATION 3` — `20260925150000_widget_layer_source_capability` (Wave 6, I-MIG3)**
 
 Two nullable, jointly constrained `WidgetIntentRecord` fields store the sealed source-capability reference required
 by Contract V1.2 OD-1. It is additive, has no backfill and changes no business owner.

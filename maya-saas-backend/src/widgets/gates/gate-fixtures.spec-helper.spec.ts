@@ -35,6 +35,8 @@ export const rec = (over: Partial<IntentRecordRow> = {}): IntentRecordRow => ({
   handoffSpace: null,
   handoffKey: null,
   targetJson: null,
+  sourceCapabilitySpace: null,
+  sourceCapabilityKey: null,
   bodyHash: 'c'.repeat(64),
   selectionDomain: '',
   inputSchemaHash: null,

@@ -259,6 +259,9 @@ export interface IntentRecordRow {
   readonly handoffSpace: string | null;
   readonly handoffKey: string | null;
   readonly targetJson: unknown;
+  /** Sealed source evidence for NAVIGATE(detail/w); current authority is always re-evaluated. */
+  readonly sourceCapabilitySpace: string | null;
+  readonly sourceCapabilityKey: string | null;
   /** Gate 8-R compares the affirmation against THIS, and the SUPERSEDED comparison reads it. */
   readonly bodyHash: string;
   /** Gate 8's closed domain: the option ids the server declared. Labels are separate by design. */

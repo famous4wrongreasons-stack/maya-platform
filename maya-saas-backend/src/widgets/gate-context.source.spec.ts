@@ -805,6 +805,8 @@ describe('S-ROW and D-3 — the record gates read is AUDIT_RETAINED, and confirm
         'handoffSpace',
         'handoffKey',
         'targetJson',
+        'sourceCapabilitySpace',
+        'sourceCapabilityKey',
         'bodyHash',
         'selectionDomain',
         'retainedLocalBusinessDate',

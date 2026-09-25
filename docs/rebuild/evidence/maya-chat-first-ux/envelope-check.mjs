@@ -33,21 +33,22 @@ let F=0,cur=null;
 for(const l of sch.split('\n')){ if(/^model\s/.test(l)){cur=1;continue;} if(/^\}/.test(l)){cur=null;continue;}
   if(cur&&/^\s{2}\w+\s+\S/.test(l)&&!/^\s*@@/.test(l)&&!/@relation/.test(l))F++; }
 chk('WIDGET-LAYER MODELS: 14', countModels===14 && /WIDGET-LAYER MODELS: 14/.test(env), `${countModels}`);
-chk('PHYSICAL FIELDS: 191', F===191 && /PHYSICAL FIELDS:\s+191/.test(env), `${F}`);
+chk('PHYSICAL FIELDS: 194', F===194 && /PHYSICAL FIELDS:\s+194/.test(env), `${F}`);
 chk('MIGRATIONS: 3', /MIGRATIONS:\s+3/.test(env) && /\*\*MIGRATIONS EXPECTED\*\* \| \*\*3\*\*/.test(map), '3');
 // per-model field counts quoted in the envelope match the schema
 const perModel={}; cur=null;
 for(const l of sch.split('\n')){ const m=l.match(/^model\s+(\w+)/); if(m){cur=m[1];perModel[cur]=0;continue;}
   if(/^\}/.test(l)){cur=null;continue;}
   if(cur&&/^\s{2}\w+\s+\S/.test(l)&&!/^\s*@@/.test(l)&&!/@relation/.test(l))perModel[cur]++; }
-const quoted={WidgetIntentRecord:40,WidgetIntentDivergenceAudit:8,WidgetRenderReceipt:17,WidgetIntentReceipt:11,WidgetSuppressedEmission:8,WidgetFreeInputLedger:12,
+const quoted={WidgetIntentRecord:43,WidgetIntentDivergenceAudit:8,WidgetRenderReceipt:17,WidgetIntentReceipt:11,WidgetSuppressedEmission:8,WidgetFreeInputLedger:12,
   WidgetTimelineTurn:12,WidgetEmission:26,WidgetIntentSubmissionAudit:16,WidgetDraft:12,WidgetErasureTombstone:7,
   WidgetCapabilityGap:8,WidgetMechanismGap:7,WidgetCapabilityPolicy:7};
 const wrong=Object.entries(quoted).filter(([k,v])=>perModel[k]!==v);
 chk('every per-model field count matches the schema', wrong.length===0, wrong.length?wrong.map(([k,v])=>`${k} quoted ${v} actual ${perModel[k]}`).join(' | '):'14/14');
-chk('per-wave split: 22 + 169 = 191',
+chk('per-wave split: 22 + 170 + 2 = 194',
   /3 models · 22 columns · 3 unique · 3 index · 5 CHECK · \*\*0 FK\*\*/.test(env) &&
-  /11 models · 169 columns · 19 unique · 22 index · 34 CHECK · 18 FK/.test(env), '22+169');
+  /11 models · 170 columns · 19 unique · 22 index · 35 CHECK · 18 FK/.test(env) &&
+  /wave 6 \/ I-MIG3[\s\S]*2 additive columns, 3 checks/.test(map), '22+170+2');
 
 // contract-derived claims
 for(const [n,re] of [
