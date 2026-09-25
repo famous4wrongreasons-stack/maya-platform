@@ -47,11 +47,11 @@ function fixture() {
   });
 }
 
-test('30 batteries, 46 jobs: disjoint Gate 6/7/9/10/13 and P-mint partitions cover the same 355 declarations', () => {
+test('31 batteries, 47 jobs: disjoint Gate 6/7/9/10/13 and P-mint partitions cover the same 368 declarations', () => {
   const p = plan(declared);
-  assert.equal(p.gates.length, 30); assert.equal(p.matrix.include.length, 46);
+  assert.equal(p.gates.length, 31); assert.equal(p.matrix.include.length, 47);
   const r = assemble(declared, fixture(), head);
-  assert.equal(r.length, 30); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 355);
+  assert.equal(r.length, 31); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 368);
   for (const report of r) {
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
