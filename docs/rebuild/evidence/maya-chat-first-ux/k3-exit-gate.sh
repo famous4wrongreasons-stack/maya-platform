@@ -49,12 +49,22 @@ if node scripts/k3-gateway-check.mjs >/dev/null 2>&1; then
 else say "BUTTON -> ENDPOINT UNREPRESENTABLE:" "FAIL"; bad; fi
 
 # ── zero capability calls on the timeline read path ──────────────────────────────────────────
-# Checked structurally: the widget module imports Prisma and nothing else, so there is no
-# capability owner in scope for a timeline read to reach even by accident.
-MODIMPORTS=$(grep -cE "^import .* from '\.\./(?!prisma)" src/widgets/widgets.module.ts 2>/dev/null || true)
-FOREIGN=$(grep -oE "from '\.\./[a-z-]+/" src/widgets/widgets.module.ts | grep -v "prisma" | wc -l | tr -d ' ')
-if [ "$FOREIGN" = "0" ]; then say "ZERO CAPABILITY CALLS ON TIMELINE READ:" "PASS  (no capability module in scope)"
-else say "ZERO CAPABILITY CALLS ON TIMELINE READ:" "FAIL  $FOREIGN foreign imports"; bad; fi
+# D-6 superseded the original text-level "Prisma and nothing else" check once the canonical
+# trigger ports became live.  The current compiler-backed import-graph ratchet is stronger: it
+# resolves every import form, admits only the closed token/type ports at their exact call sites,
+# requires every owner module behind WidgetOwnerPortsModule, refuses ActionEngineModule, and proves
+# that the timeline store is not among the gate files.  Keep the checkpoint wired to that canonical
+# ratchet instead of reviving the obsolete regex allowlist.
+GRAPH_OUT=$(npx jest --silent --runInBand \
+  src/widgets/widget-import-graph.architecture.spec.ts \
+  src/widgets/owner-ports/widget-owner-ports.module.spec.ts 2>&1)
+if ! echo "$GRAPH_OUT" | grep -q "failed" && echo "$GRAPH_OUT" | grep -qE "Tests: +[0-9]+ passed"; then
+  say "ZERO CAPABILITY CALLS ON TIMELINE READ:" "PASS  (closed compiler import graph; owners behind exact ports)"
+else
+  say "ZERO CAPABILITY CALLS ON TIMELINE READ:" "FAIL  (canonical D-6 import-graph ratchet red)"
+  echo "$GRAPH_OUT"
+  bad
+fi
 
 # ── the five stores and the one control ──────────────────────────────────────────────────────
 for f in stores/widget-stores.service.ts emission/emitter.service.ts control/control-registry.service.ts; do

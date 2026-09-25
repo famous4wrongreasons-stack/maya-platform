@@ -242,7 +242,9 @@ function selfTest() {
     { id: 'N7 an audit of schema /1', mutate: (x) => (x.audit.contract = 'maya.gate-conformance-audit/1'), expect: ['SCHEMA'] },
     {
       id: 'N8 a headline that does not follow from the states',
-      mutate: (x) => (x.audit.headline = x.audit.headline.replace('CONTRACT-COMPLETE 0/15', 'CONTRACT-COMPLETE 6/15')),
+      // Do not pin this counterfactual to I-AUD0's former 0/15 baseline.  A-W5 legitimately
+      // promotes the headline, so corrupt the complete recorded value instead.
+      mutate: (x) => (x.audit.headline = `${x.audit.headline} (corrupt)`),
       expect: ['HEADLINE'],
     },
     { id: 'N9 a DEV-1 clause without its reason', mutate: (x) => delete x.audit.gates.find((g) => g.n === '13').clauses['G13-R2'].reason, expect: ['DEV1'] },
@@ -253,7 +255,9 @@ function selfTest() {
     },
     {
       id: 'N11 a false clause that claims to conform',
-      mutate: (x) => (x.audit.gates.find((g) => g.n === '2').clauses['G2-a'].conforms = true),
+      // G2-a becomes live at A-W5.  DEV-1 keeps this clause false until discharge and
+      // therefore gives the self-test a stable nonconforming witness.
+      mutate: (x) => (x.audit.gates.find((g) => g.n === '12').clauses['G12-R1b'].conforms = true),
       expect: ['STATE'],
     },
     {
@@ -275,9 +279,9 @@ function selfTest() {
       id: 'N15 an L state without an HTTP/BIN pair',
       mutate: (x) => {
         const clause = x.audit.gates.find((g) => g.n === '1').clauses['G1-b'];
-        clause.state = 'L';
-        clause.conforms = true;
-        x.audit.headline = recomputeHeadline(x.audit);
+        // G1-b is already L at A-W5; remove its evidence rather than restating the same
+        // valid state, so the counterfactual remains load-bearing after promotion.
+        clause.evidence = [];
       },
       expect: ['EVIDENCE'],
     },
@@ -309,6 +313,11 @@ function selfTest() {
   ];
   for (const [states, prefix] of headlineCases) {
     const x = clone(base.audit);
+    // Isolate the headline truth table from whichever legitimate promotions the committed
+    // audit currently contains.  Otherwise A-W5's 3/15 baseline makes these positive
+    // recomputation examples assert I-AUD0-specific totals.
+    for (const candidate of x.gates)
+      for (const clause of Object.values(candidate.clauses)) clause.state = 'false';
     const gate = x.gates.find((candidate) => candidate.n === '4');
     Object.keys(gate.clauses).forEach((key, index) => (gate.clauses[key].state = states[index]));
     if (!recomputeHeadline(x).startsWith(prefix)) failures += 1;
