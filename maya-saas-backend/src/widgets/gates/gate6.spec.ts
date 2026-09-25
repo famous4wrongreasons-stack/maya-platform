@@ -111,15 +111,9 @@ const handoff = (key: string, cls: unknown, space = 'C9') =>
 
 describe('Gate 6 — the subject is bound once, and the dispatch is scoped by effect (G6-1)', () => {
   it('G6-5: a null subject proceeds, and no owner is reached', async () => {
-    // NONE, and every `w`/`i`/`s`/`detail` NAVIGATE (C11:4740-4741). A5 adds no branch here, and a
-    // branch that called an owner would be M28.
-    for (const target of [
-      null,
-      { class: 'w' },
-      { class: 'detail' },
-      { class: 's' },
-      { class: 'i' },
-    ]) {
+    // NONE and non-reprojecting NAVIGATE classes name no authority subject. Contract V1.2 moves
+    // detail/w to their sealed source capability, covered in the next test.
+    for (const target of [null, { class: 's' }, { class: 'i' }]) {
       const v = await gate6(
         ctx(
           rec({
@@ -135,6 +129,35 @@ describe('Gate 6 — the subject is bound once, and the dispatch is scoped by ef
         target,
         outcome: 'pass',
       });
+    }
+  });
+
+  it('G6-V12: detail/w NAVIGATE rechecks the sealed source capability and fails closed without it', async () => {
+    for (const klass of ['detail', 'w']) {
+      const missing = await gate6(
+        ctx(rec({ effect: 'NAVIGATE', targetJson: { class: klass } })),
+        unreachableOwners(),
+      );
+      expect(detail(missing)).toBe(
+        'NAVIGATE detail/w has no sealed source capability',
+      );
+
+      const owners = admittingOwners();
+      const admitted = await gate6(
+        withPrincipal(
+          ctx(
+            rec({
+              effect: 'NAVIGATE',
+              targetJson: { class: klass },
+              sourceCapabilitySpace: 'C9',
+              sourceCapabilityKey: CATALOGUE,
+            }),
+          ),
+        ),
+        owners,
+      );
+      expect(admitted).toEqual({ outcome: 'pass' });
+      expect(owners.assertCanExecute).toHaveBeenCalled();
     }
   });
 

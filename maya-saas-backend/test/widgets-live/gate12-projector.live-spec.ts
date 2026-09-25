@@ -38,6 +38,8 @@ const plan = (over: Partial<ProjectionPlan> = {}): ProjectionPlan =>
     effect: 'REFINE',
     capabilitySpace: 'C9',
     capabilityKey: 'catalog.services.read',
+    sourceCapabilitySpace: null,
+    sourceCapabilityKey: null,
     targetJson: null,
     runId: null,
     revisionId: null,
@@ -271,13 +273,32 @@ describe('U12b [GW G-SYNTH] registered projector rows', () => {
     expect(readMock(port)).toHaveBeenCalledTimes(1);
   });
 
-  it('G12-L20 NAVIGATE remains DEV-1 degraded with zero reads', () => {
+  it('G12-L20 NAVIGATE detail reprojects only from its sealed source capability', async () => {
     const port = successPort({ services: [] }, 'catalog.services.read');
-    const result = new WidgetProjectorService(port).composeNavigate(
-      plan({ effect: 'NAVIGATE', targetJson: { class: 'detail' } }),
+    const result = await new WidgetProjectorService(port).composeNavigate(
+      plan({
+        effect: 'NAVIGATE',
+        targetJson: { class: 'detail' },
+        widgetKind: 'SERVICE_SELECTOR',
+        capabilitySpace: null,
+        capabilityKey: null,
+        sourceCapabilitySpace: 'C9',
+        sourceCapabilityKey: 'catalog.services.read',
+      }),
     );
-    expect(result).toEqual({ kind: 'degraded', why: 'navigate_interim' });
-    expect(readMock(port)).not.toHaveBeenCalled();
+    expect(result.kind).toBe('composer_input');
+    expect(readMock(port)).toHaveBeenCalledTimes(1);
+    await expect(
+      new WidgetProjectorService(port).composeNavigate(
+        plan({
+          effect: 'NAVIGATE',
+          targetJson: { class: 'w', ref: 'stored-widget' },
+          sourceCapabilitySpace: 'C9',
+          sourceCapabilityKey: 'catalog.services.read',
+        }),
+      ),
+    ).resolves.toEqual({ kind: 'degraded', why: 'no_registered_row' });
+    expect(readMock(port)).toHaveBeenCalledTimes(1);
   });
 });
 

@@ -104,6 +104,23 @@ const targetClass = (r: IntentRecordRow): string | null => {
 };
 
 /**
+ * Contract V1.2 / OD-1: detail and stored-widget NAVIGATE records retain the source capability that
+ * produced the widget.  The retained pair is evidence only; dispatch below re-runs the ordinary C9
+ * authority checks for the current principal.  A missing or malformed pair never falls back to the
+ * old null-subject pass.
+ */
+const navigateSource = (r: IntentRecordRow): CapabilityRef | null => {
+  const klass = targetClass(r);
+  if (r.effect !== 'NAVIGATE' || (klass !== 'detail' && klass !== 'w'))
+    return null;
+  return r.sourceCapabilitySpace === 'C9' &&
+    typeof r.sourceCapabilityKey === 'string' &&
+    r.sourceCapabilityKey.length > 0
+    ? { space: 'C9', key: r.sourceCapabilityKey }
+    : null;
+};
+
+/**
  * The HANDOFF destination fences, and ONLY those (G6-6, G6-7; C11:4743-4747).
  *
  * Two of the four fences are Gate 6's: registration in the subject's own space, and F48's
@@ -301,7 +318,16 @@ export const gate6 = async (
 
   // G6-1: bound ONCE, and every branch below reads THIS binding. Binding it twice is how a gate
   // starts authorising one capability and admitting another.
-  const ref = subjectOf(r);
+  const requiresRetainedSource =
+    r.effect === 'NAVIGATE' &&
+    (targetClass(r) === 'detail' || targetClass(r) === 'w');
+  const ref = requiresRetainedSource ? navigateSource(r) : subjectOf(r);
+
+  if (requiresRetainedSource && ref === null)
+    return refuse(
+      'insufficient_authority',
+      'NAVIGATE detail/w has no sealed source capability',
+    );
 
   // G6-5: `if (ref === null)` -> no capability is exercised; Gate 6 has nothing to check and the
   // intent proceeds (C11:4740-4741). NONE, and a `w`/`i`/`s`/`detail` NAVIGATE. Refusing here would
