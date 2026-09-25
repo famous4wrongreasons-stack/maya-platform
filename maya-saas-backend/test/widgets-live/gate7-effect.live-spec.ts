@@ -344,6 +344,8 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
       await mint('METRIC', 'guest-chat', {
         effect: 'NAVIGATE',
         targetJson: { class: 'w', route: 'shell.home' },
+        sourceCapabilitySpace: 'C9',
+        sourceCapabilityKey: 'c7.measurement.read',
       }),
     );
     refusedAtSeven(scope, a, 'effect_not_admissible');

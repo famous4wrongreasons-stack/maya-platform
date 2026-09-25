@@ -206,7 +206,7 @@
       "candidate_scope": null,
       "absence": {
         "source": "src/widgets/emission/intent-template.registry.spec.ts",
-        "marker": "MINT-3 keeps DRAFT, REQUEST_APPROVAL and COMMIT behind A2.2"
+        "marker": "MINT-3 refuses generic DRAFT, REQUEST_APPROVAL and COMMIT after exact booking discharge"
       },
       "refusal": {
         "source": "test/widgets-live/gate11-nouns.live-spec.ts",
@@ -225,7 +225,7 @@
       "candidate_scope": null,
       "absence": {
         "source": "src/widgets/emission/intent-template.registry.spec.ts",
-        "marker": "MINT-3 keeps DRAFT, REQUEST_APPROVAL and COMMIT behind A2.2"
+        "marker": "MINT-3 refuses generic DRAFT, REQUEST_APPROVAL and COMMIT after exact booking discharge"
       },
       "refusal": {
         "source": "test/widgets-live/gate11-nouns.live-spec.ts",
@@ -244,7 +244,7 @@
       "candidate_scope": null,
       "absence": {
         "source": "src/widgets/emission/intent-template.registry.spec.ts",
-        "marker": "MINT-3 keeps DRAFT, REQUEST_APPROVAL and COMMIT behind A2.2"
+        "marker": "MINT-3 refuses generic DRAFT, REQUEST_APPROVAL and COMMIT after exact booking discharge"
       },
       "refusal": {
         "source": "test/widgets-live/gate11-nouns.live-spec.ts",
@@ -263,7 +263,7 @@
       "candidate_scope": null,
       "absence": {
         "source": "src/widgets/emission/intent-template.registry.spec.ts",
-        "marker": "MINT-3 keeps DRAFT, REQUEST_APPROVAL and COMMIT behind A2.2"
+        "marker": "MINT-3 refuses generic DRAFT, REQUEST_APPROVAL and COMMIT after exact booking discharge"
       },
       "refusal": {
         "source": "test/widgets-live/gate11-nouns.live-spec.ts",
@@ -282,7 +282,7 @@
       "candidate_scope": null,
       "absence": {
         "source": "src/widgets/emission/intent-template.registry.spec.ts",
-        "marker": "MINT-3 keeps DRAFT, REQUEST_APPROVAL and COMMIT behind A2.2"
+        "marker": "MINT-3 refuses generic DRAFT, REQUEST_APPROVAL and COMMIT after exact booking discharge"
       },
       "refusal": {
         "source": "test/widgets-live/gate13-routing.live-spec.ts",
@@ -301,7 +301,7 @@
       "candidate_scope": null,
       "absence": {
         "source": "src/widgets/emission/intent-template.registry.spec.ts",
-        "marker": "MINT-3 keeps DRAFT, REQUEST_APPROVAL and COMMIT behind A2.2"
+        "marker": "MINT-3 refuses generic DRAFT, REQUEST_APPROVAL and COMMIT after exact booking discharge"
       },
       "refusal": {
         "source": "test/widgets-live/gate13-routing.live-spec.ts",
@@ -320,7 +320,7 @@
       "candidate_scope": null,
       "absence": {
         "source": "src/widgets/emission/intent-template.registry.spec.ts",
-        "marker": "MINT-3 keeps DRAFT, REQUEST_APPROVAL and COMMIT behind A2.2"
+        "marker": "MINT-3 refuses generic DRAFT, REQUEST_APPROVAL and COMMIT after exact booking discharge"
       },
       "refusal": {
         "source": "test/widgets-live/gate13-routing.live-spec.ts",
