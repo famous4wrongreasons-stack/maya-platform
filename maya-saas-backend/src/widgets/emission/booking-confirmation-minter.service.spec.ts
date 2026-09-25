@@ -94,4 +94,37 @@ describe('P-MINT-BOOK confirmation minter', () => {
     expect(request.composerInput.facts_origin).toEqual(['copied']);
     expect(request.composerInput.origin.emitter).toBe('capability_read');
   });
+
+  it('renders missing canonical price as not measured instead of inventing zero', async () => {
+    const emitBookingConfirmation = jest.fn(async (request: MintRequest) => {
+      void request;
+      return Promise.resolve({ envelope: {} } as never);
+    });
+    const service = new BookingConfirmationMinterService(
+      {
+        widgetEmission: {
+          findFirst: jest.fn().mockResolvedValue({ turnId: 'turn-1' }),
+        },
+      } as never,
+      { emitBookingConfirmation } as never,
+    );
+
+    await service.mint({
+      tenantId: 't1',
+      predecessorWidgetId: 'widget-1',
+      principal: principal(),
+      deliveryChannel: 'pwa',
+      now: new Date('2026-09-25T12:00:00.000Z'),
+      preview: { ...preview(canonicalFact()), priceKopecks: null },
+    });
+
+    const request = emitBookingConfirmation.mock.calls[0]?.[0];
+    expect(request.body.price_total).toEqual(
+      expect.objectContaining({
+        state: 'NOT_MEASURED',
+        value: null,
+        reason_code: 'NOT_COLLECTED',
+      }),
+    );
+  });
 });

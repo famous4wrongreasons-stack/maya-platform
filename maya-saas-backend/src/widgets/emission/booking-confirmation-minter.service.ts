@@ -54,6 +54,24 @@ const measure = (args: {
   comparison: null,
 });
 
+const unknownMoneyMeasure = (currency: string): Measure => ({
+  state: 'NOT_MEASURED',
+  value: null,
+  label: 'Not measured',
+  reason_code: 'NOT_COLLECTED',
+  fact_ref: null,
+  as_of: null,
+  evidence_refs: [],
+  next_intent_ref: null,
+  key: 'booking.price',
+  unit: 'RUB',
+  basis_key: null,
+  basis: 'Canonical booking owner',
+  currency,
+  formatted: 'Not measured',
+  comparison: null,
+});
+
 const templateFor = (
   subject: BookingConfirmationBody['confirmation_subject'],
 ) => `commit.booking.${subject}@1`;
@@ -118,13 +136,16 @@ export class BookingConfirmationMinterService implements BookingConfirmationMint
         unit: 'minutes',
         formatted: `${p.durationMinutes} min`,
       }),
-      price_total: measure({
-        key: 'booking.price',
-        value: p.priceKopecks / 100,
-        unit: 'RUB',
-        currency: p.currency,
-        formatted: `${p.priceKopecks / 100} ${p.currency}`,
-      }),
+      price_total:
+        p.priceKopecks === null
+          ? unknownMoneyMeasure(p.currency)
+          : measure({
+              key: 'booking.price',
+              value: p.priceKopecks / 100,
+              unit: 'RUB',
+              currency: p.currency,
+              formatted: `${p.priceKopecks / 100} ${p.currency}`,
+            }),
       price_delta: null,
       refund_preview: null,
       loyalty_applied: null,

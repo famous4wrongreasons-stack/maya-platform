@@ -193,7 +193,7 @@ export class BookingPreviewAdapter
           (appointment.endAt.getTime() - appointment.startAt.getTime()) / 60000,
         ),
       ),
-      priceKopecks: appointment.totalPriceKopecks ?? 0,
+      priceKopecks: appointment.totalPriceKopecks,
       currency: appointment.currency,
       fact: fact(
         'appointments.own.reschedule',
@@ -238,7 +238,7 @@ export class BookingPreviewAdapter
           (appointment.endAt.getTime() - appointment.startAt.getTime()) / 60000,
         ),
       ),
-      priceKopecks: appointment.totalPriceKopecks ?? 0,
+      priceKopecks: appointment.totalPriceKopecks,
       currency: appointment.currency,
       fact: fact(
         'appointments.own.cancel',

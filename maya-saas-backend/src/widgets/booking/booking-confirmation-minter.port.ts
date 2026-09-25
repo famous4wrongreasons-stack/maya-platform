@@ -15,7 +15,7 @@ export interface BookingConfirmationPreview {
   readonly serviceLabel: string;
   readonly staffLabel: string;
   readonly durationMinutes: number;
-  readonly priceKopecks: number;
+  readonly priceKopecks: number | null;
   readonly currency: string;
   readonly fact: FactUsed;
 }
