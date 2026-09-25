@@ -1178,6 +1178,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       'DRAFT_OWNER_REGISTRY',
       'APPROVAL_REQUEST_OWNER',
       'COMMIT_BOOKING_OWNER',
+      'BOOKING_PROPOSE_OWNER',
     ]);
   });
 

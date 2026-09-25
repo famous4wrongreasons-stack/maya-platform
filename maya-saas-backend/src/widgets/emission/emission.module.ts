@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import {
   BOOKING_CONFIRMATION_MINTER,
   HANDOFF_SIGNER,
+  NAVIGATE_WIDGET_MINTER,
   SEAL_VERIFIER,
   SUCCESSOR_MINTER,
 } from '../di-tokens';
@@ -25,6 +26,7 @@ import { BookingConfirmationMinterService } from './booking-confirmation-minter.
       provide: BOOKING_CONFIRMATION_MINTER,
       useExisting: BookingConfirmationMinterService,
     },
+    { provide: NAVIGATE_WIDGET_MINTER, useExisting: WidgetEmitterService },
     { provide: SEAL_VERIFIER, useExisting: SealVerifierService },
     { provide: SUCCESSOR_MINTER, useExisting: SuccessorMinterService },
     HandoffTargetSigner,
@@ -38,6 +40,7 @@ import { BookingConfirmationMinterService } from './booking-confirmation-minter.
     SuccessorMinterService,
     HANDOFF_SIGNER,
     BOOKING_CONFIRMATION_MINTER,
+    NAVIGATE_WIDGET_MINTER,
   ],
 })
 export class WidgetEmissionModule {}

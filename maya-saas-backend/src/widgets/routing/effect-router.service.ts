@@ -14,6 +14,7 @@ import {
   COMMIT_BOOKING_OWNER,
   BOOKING_PROPOSE_OWNER,
   BOOKING_CONFIRMATION_MINTER,
+  NAVIGATE_WIDGET_MINTER,
   DRAFT_OWNER_REGISTRY,
   HANDOFF_SIGNER,
   SUCCESSOR_MINTER,
@@ -29,6 +30,7 @@ import {
   type ApprovalRequestOwnerPort,
   type CommitBookingOwnerPort,
   type BookingProposeOwnerPort,
+  type NavigateWidgetMinterPort,
   bookingPreviewOf,
   type DraftOwnerRegistryPort,
   type HandoffSignerPort,
@@ -42,7 +44,6 @@ import { approvalRequestDestination } from './edges/request-approval.edge';
 import { Gate14DisagreementMetric } from './gate14-disagreement.metric';
 import { WidgetProjectorService } from '../projection/widget-projector.service';
 import type { ProjectionPlan } from '../projection/canonical-read.port';
-import { WidgetEmitterService } from '../emission/emitter.service';
 import { WidgetThreadPageService } from '../resolve/thread-page.service';
 import { actuatingInputOf } from './edges/actuating-input';
 import type { BookingConfirmationMinterPort } from '../booking/booking-confirmation-minter.port';
@@ -103,7 +104,8 @@ export class EffectRouterService {
     private readonly bookingMinter: BookingConfirmationMinterPort,
     private readonly gate14Disagreements: Gate14DisagreementMetric,
     private readonly projector: WidgetProjectorService,
-    private readonly emitter: WidgetEmitterService,
+    @Inject(NAVIGATE_WIDGET_MINTER)
+    private readonly emitter: NavigateWidgetMinterPort,
     private readonly threadPage: WidgetThreadPageService,
   ) {}
 

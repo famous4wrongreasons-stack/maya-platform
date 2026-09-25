@@ -211,6 +211,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       DI_TOKENS.COMMIT_BOOKING_OWNER,
       DI_TOKENS.BOOKING_PROPOSE_OWNER,
       DI_TOKENS.BOOKING_CONFIRMATION_MINTER,
+      DI_TOKENS.NAVIGATE_WIDGET_MINTER,
     ];
     const moduleRef = await Test.createTestingModule({
       // The owner modules the boundary now imports resolve configuration the way the application does:

@@ -66,6 +66,9 @@ export const COMMIT_BOOKING_OWNER = 'COMMIT_BOOKING_OWNER';
 /** P-MINT-BOOK: the single widget-internal confirmation minter used by canonical booking owners. */
 export const BOOKING_CONFIRMATION_MINTER = 'BOOKING_CONFIRMATION_MINTER';
 
+/** U13d: Gate 13 requests a NAVIGATE successor without importing the seal-key holder. */
+export const NAVIGATE_WIDGET_MINTER = 'NAVIGATE_WIDGET_MINTER';
+
 /** P-MINT-BOOK: exact reschedule/cancel propose edge; no generic C9 dispatch. */
 export const BOOKING_PROPOSE_OWNER = 'BOOKING_PROPOSE_OWNER';
 

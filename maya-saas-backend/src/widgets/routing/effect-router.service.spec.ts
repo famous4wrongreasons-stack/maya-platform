@@ -130,7 +130,7 @@ const fixture = () => {
       bookingMinter,
       metric as never,
       projector as never,
-      emitter as never,
+      emitter,
       threadPage as never,
     ),
   };

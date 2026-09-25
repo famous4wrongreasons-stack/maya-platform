@@ -2,6 +2,7 @@ import type { RoutingInput } from './routing-input';
 import type { ResolvedNouns } from '../gate.types';
 import type { PrincipalView } from '../gate.types';
 import type { BookingConfirmationPreview } from '../booking/booking-confirmation-minter.port';
+import type { MintRequest, SealedEmission } from '../emission/emitter.service';
 
 /**
  * Widget-internal audit edge used by Gate 13.
@@ -11,6 +12,14 @@ import type { BookingConfirmationPreview } from '../booking/booking-confirmation
  * antecedent (INV-30).
  */
 export const EFFECT_ROUTE_AUDIT = 'EFFECT_ROUTE_AUDIT';
+
+/**
+ * Widget-internal emission edge used by Gate 13 NAVIGATE(detail). The concrete minter and seal-key
+ * custody stay inside WidgetEmissionModule; this type-only port adds no key holder to the gateway.
+ */
+export interface NavigateWidgetMinterPort {
+  emit(request: MintRequest, now?: Date): Promise<SealedEmission>;
+}
 
 export interface EffectRouteAuditPort {
   readonly claimIntentRecord: (input: {
