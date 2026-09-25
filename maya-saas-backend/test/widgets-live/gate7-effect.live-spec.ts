@@ -94,6 +94,8 @@ interface SyntheticColumns {
   handoffSpace?: string | null;
   handoffKey?: string | null;
   targetJson?: Record<string, unknown> | null;
+  sourceCapabilitySpace?: string | null;
+  sourceCapabilityKey?: string | null;
   priority?: number;
   singleUse?: boolean;
   utteranceTemplate?: string | null;

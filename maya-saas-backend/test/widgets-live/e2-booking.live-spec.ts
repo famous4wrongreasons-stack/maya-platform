@@ -15,13 +15,15 @@ import type {
 import { WIDGET_INTENT_SUBMISSION_CONTRACT } from '../../src/widgets/dto/submit-intent.dto';
 import { SealService } from '../../src/widgets/emission/seal.service';
 import type { PrincipalView } from '../../src/widgets/gate.types';
-import {
-  bootFixtureContext,
-  bootGateway,
-  type FixtureContext,
-  type GatewayHarness,
-} from './support/bootstrap';
+import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
 import { Fixtures, type TenantFixture } from './support/fixtures';
+import {
+  bootHttp,
+  fixturesForHttp,
+  type HttpHarness,
+} from './support/http-bootstrap';
+import { WidgetEmitterService } from '../../src/widgets/emission/emitter.service';
+import { WidgetStoresService } from '../../src/widgets/stores/widget-stores.service';
 
 type Envelope = Readonly<Record<string, unknown>>;
 type Intent = Readonly<Record<string, unknown>>;
@@ -119,47 +121,49 @@ const widgetIdOf = (value: Envelope): string => {
   return value.widget_id;
 };
 
-describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [GW, PostgreSQL]', () => {
+describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP, PostgreSQL]', () => {
   let db: FixtureContext;
-  let gw: GatewayHarness;
+  let http: HttpHarness;
   let fx: Fixtures;
   let seals: SealService;
+  let emitter: WidgetEmitterService;
+  let stores: WidgetStoresService;
 
   beforeAll(async () => {
     db = await bootFixtureContext();
-    gw = await bootGateway();
-    fx = new Fixtures(db, gw);
-    seals = gw.moduleRef.get(SealService);
+    http = await bootHttp();
+    fx = fixturesForHttp(db, http);
+    seals = http.app.get(SealService);
+    emitter = http.app.get(WidgetEmitterService);
+    stores = http.app.get(WidgetStoresService);
   });
 
   afterEach(async () => {
     await fx.teardown();
-    gw.recorder.clear();
+    http.recorder.clear();
   });
 
   afterAll(async () => {
-    await gw?.close();
+    await http?.close();
     await db?.close();
   });
 
   const submit = async (
-    actor: Awaited<ReturnType<Fixtures['actor']>>,
+    accessToken: string,
     envelope: Envelope,
     selected: Intent,
     label: string,
   ) =>
-    (await gw.intent(
-      actor,
-      {
+    (
+      await http.postIntent(accessToken, {
         contract: WIDGET_INTENT_SUBMISSION_CONTRACT,
         widget_id: widgetIdOf(envelope),
         intent_token: tokenOf(selected),
         inputs: null,
         client_nonce: `e2-${label}-${randomUUID().slice(0, 8)}`,
         profile_id: 'pwa.default',
-      },
-      `E2:${label}`,
-    )) as unknown as Record<string, unknown>;
+      })
+    ).body as Record<string, unknown>;
 
   const emit = async (args: {
     tenant: TenantFixture;
@@ -172,7 +176,7 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [GW, PostgreSQL
     label: string;
   }): Promise<Envelope> => {
     const conversationId = randomUUID();
-    const turn = await gw.stores.appendTurn({
+    const turn = await stores.appendTurn({
       tenantId: args.tenant.id,
       conversationId,
       turnIndex: 0,
@@ -180,7 +184,7 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [GW, PostgreSQL
       principalProofHash: args.principal.proofHash,
       channel: 'pwa',
     });
-    const minted = await gw.emitter.emit({
+    const minted = await emitter.emit({
       tenantId: args.tenant.id,
       conversationId,
       turnId: turn.id,
@@ -247,6 +251,11 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [GW, PostgreSQL
 
     const actor = await fx.actor(tenant, user);
     const principal = await fx.principalView(actor);
+    const accessToken = await http.login(
+      tenant.slug,
+      user.email,
+      user.password,
+    );
 
     const day = (offset: number): string => {
       const value = new Date(Date.now() + offset * 86_400_000);
@@ -287,7 +296,7 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [GW, PostgreSQL
       label: 'BOOK-1',
     });
     const book1 = await submit(
-      actor,
+      accessToken,
       createSource,
       intent(createSource, 'DRAFT'),
       'BOOK-1',
@@ -303,7 +312,7 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [GW, PostgreSQL
 
     // BOOK-2: the linked COMMIT reaches Gate 14 and the existing Action Engine owner.
     const book2 = await submit(
-      actor,
+      accessToken,
       createConfirmation,
       intent(createConfirmation, 'COMMIT'),
       'BOOK-2',
@@ -313,6 +322,8 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [GW, PostgreSQL
     expect(book2).toMatchObject({
       outcome: 'terminate',
       receipt_outcome: 'ACCEPTED',
+      gates_run: 14,
+      stopped_at_gate: '13',
     });
     expect(book2.owner_decision).toMatchObject({ state: 'SUCCEEDED' });
     const appointment = await db.prisma.appointment.findFirstOrThrow({
@@ -358,7 +369,7 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [GW, PostgreSQL
       label: 'BOOK-3',
     });
     const book3 = await submit(
-      actor,
+      accessToken,
       rescheduleSource,
       intent(rescheduleSource, 'REFINE'),
       'BOOK-3',
@@ -369,7 +380,7 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [GW, PostgreSQL
     });
     const rescheduleConfirmation = book3.next_envelope as Envelope;
     const book4 = await submit(
-      actor,
+      accessToken,
       rescheduleConfirmation,
       intent(rescheduleConfirmation, 'COMMIT'),
       'BOOK-4',
@@ -377,6 +388,8 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [GW, PostgreSQL
     expect(book4).toMatchObject({
       outcome: 'terminate',
       receipt_outcome: 'ACCEPTED',
+      gates_run: 14,
+      stopped_at_gate: '13',
     });
     expect(book4.owner_decision).toMatchObject({ state: 'SUCCEEDED' });
     const moved = await db.prisma.appointment.findUniqueOrThrow({
@@ -405,7 +418,7 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [GW, PostgreSQL
       label: 'BOOK-5',
     });
     const book5 = await submit(
-      actor,
+      accessToken,
       cancelSource,
       intent(cancelSource, 'REFINE'),
       'BOOK-5',
@@ -416,7 +429,7 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [GW, PostgreSQL
     });
     const cancelConfirmation = book5.next_envelope as Envelope;
     const book6 = await submit(
-      actor,
+      accessToken,
       cancelConfirmation,
       intent(cancelConfirmation, 'COMMIT'),
       'BOOK-6',
@@ -424,6 +437,8 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [GW, PostgreSQL
     expect(book6).toMatchObject({
       outcome: 'terminate',
       receipt_outcome: 'ACCEPTED',
+      gates_run: 14,
+      stopped_at_gate: '13',
     });
     expect(book6.owner_decision).toMatchObject({ state: 'SUCCEEDED' });
     await expect(
