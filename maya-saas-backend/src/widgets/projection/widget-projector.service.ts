@@ -51,7 +51,7 @@ export type DegradedReason =
   /** No row answers `(tapped_kind, subject_key)` — in U12a, no row answers anything. */
   | 'no_registered_row'
   /** DEV-1: every `NAVIGATE`, whatever its target class. Zero reads, by absence. */
-  | 'navigate_interim'
+  | 'navigate_source_invalid'
   /** I47: no live principal or no actor. A read under nobody's authority is not a read we make. */
   | 'no_principal'
   /**
@@ -188,9 +188,34 @@ export class WidgetProjectorService {
    * F15-failing `provenance.source_capability` (C11:7373); so every class lands here, and the answer is
    * the same for all of them.
    */
-  composeNavigate(plan: ProjectionPlan): ProjectionOutcome {
+  async composeNavigate(plan: ProjectionPlan): Promise<ProjectionOutcome> {
     if (!this.hasPrincipal(plan)) return degraded('no_principal');
-    return degraded('navigate_interim');
+    if (!this.sameAuthority(plan)) return degraded('authority_mismatch');
+    const target = targetClassOf(plan.targetJson);
+    if (target !== 'detail') return degraded('no_registered_row');
+    const source = sourceKeyOf(plan);
+    if (source === null) return degraded('navigate_source_invalid');
+    const row = projectorRowFor(plan.widgetKind, source);
+    if (row === null || row.composition !== 'canonical_read')
+      return degraded('no_registered_row');
+    const result = await this.canonicalRead.read({
+      plan,
+      row,
+      ownerArguments: this.ownerArguments(plan, row),
+    });
+    if (result.kind === 'value' && !hasRequiredFields(result.value, row))
+      return degraded('missing_source_field');
+    const limitationCodes =
+      result.kind === 'owner_exception'
+        ? [projectC9Denial(result.denial_code).reason_code]
+        : [];
+    return this.outcome(
+      plan,
+      row,
+      result.kind === 'value' ? result.value : null,
+      result.fact,
+      limitationCodes,
+    );
   }
 
   /**
@@ -279,6 +304,21 @@ export const subjectKeyOf = (plan: ProjectionPlan): string | null =>
   plan.capabilitySpace === null || plan.capabilityKey === null
     ? null
     : `${plan.capabilitySpace}:${plan.capabilityKey}`;
+
+export const sourceKeyOf = (plan: ProjectionPlan): string | null =>
+  plan.sourceCapabilitySpace === 'C9' &&
+  plan.sourceCapabilityKey !== null &&
+  plan.sourceCapabilityKey.length > 0
+    ? `C9:${plan.sourceCapabilityKey}`
+    : null;
+
+const targetClassOf = (value: unknown): string | null =>
+  typeof value === 'object' &&
+  value !== null &&
+  !Array.isArray(value) &&
+  typeof (value as { class?: unknown }).class === 'string'
+    ? (value as { class: string }).class
+    : null;
 
 const degraded = (why: DegradedReason): ProjectionOutcome => ({
   kind: 'degraded',

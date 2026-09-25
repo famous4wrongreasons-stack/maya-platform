@@ -72,6 +72,9 @@ export interface ProjectionPlan {
   readonly effect: string;
   readonly capabilitySpace: string | null;
   readonly capabilityKey: string | null;
+  /** OD-1 sealed source evidence for NAVIGATE(detail/w); never authority by itself. */
+  readonly sourceCapabilitySpace: string | null;
+  readonly sourceCapabilityKey: string | null;
   readonly targetJson: unknown;
   readonly runId: string | null;
   readonly revisionId: string | null;

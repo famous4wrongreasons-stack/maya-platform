@@ -47,8 +47,8 @@
     "id": "MUT-12-G",
     "description": "one composition performs two canonical reads",
     "file": "src/widgets/projection/widget-projector.service.ts",
-    "find": "    const result = await this.canonicalRead.read({\n      plan,\n      row,\n      ownerArguments: this.ownerArguments(plan, row),\n    });\n",
-    "replace": "    await this.canonicalRead.read({ plan, row, ownerArguments: this.ownerArguments(plan, row) });\n    const result = await this.canonicalRead.read({\n      plan,\n      row,\n      ownerArguments: this.ownerArguments(plan, row),\n    });\n",
+    "find": "    if (row.composition !== 'canonical_read')\n      return degraded('no_registered_row');\n    const result = await this.canonicalRead.read({\n      plan,\n      row,\n      ownerArguments: this.ownerArguments(plan, row),\n    });\n",
+    "replace": "    if (row.composition !== 'canonical_read')\n      return degraded('no_registered_row');\n    await this.canonicalRead.read({ plan, row, ownerArguments: this.ownerArguments(plan, row) });\n    const result = await this.canonicalRead.read({\n      plan,\n      row,\n      ownerArguments: this.ownerArguments(plan, row),\n    });\n",
     "killers": [
       "G12-L19"
     ],
@@ -58,8 +58,8 @@
     "id": "MUT-12-H",
     "description": "client target is smuggled into owner arguments",
     "file": "src/widgets/projection/widget-projector.service.ts",
-    "find": "      ownerArguments: this.ownerArguments(plan, row),\n",
-    "replace": "      ownerArguments: { ...this.ownerArguments(plan, row), submission: plan.targetJson },\n",
+    "find": "    const row = projectorRowFor(plan.widgetKind, subjectKeyOf(plan));\n    if (row === null) return degraded('no_registered_row');\n    if (row.composition !== 'canonical_read')\n      return degraded('no_registered_row');\n    const result = await this.canonicalRead.read({\n      plan,\n      row,\n      ownerArguments: this.ownerArguments(plan, row),\n    });\n    if (result.kind === 'value' && !hasRequiredFields(result.value, row))\n",
+    "replace": "    const row = projectorRowFor(plan.widgetKind, subjectKeyOf(plan));\n    if (row === null) return degraded('no_registered_row');\n    if (row.composition !== 'canonical_read')\n      return degraded('no_registered_row');\n    const result = await this.canonicalRead.read({\n      plan,\n      row,\n      ownerArguments: { ...this.ownerArguments(plan, row), submission: plan.targetJson },\n    });\n    if (result.kind === 'value' && !hasRequiredFields(result.value, row))\n",
     "killers": [
       "G12-L17/L18"
     ],
@@ -69,8 +69,8 @@
     "id": "MUT-12-I",
     "description": "missing L2 owner field is composed as a partial widget",
     "file": "src/widgets/projection/widget-projector.service.ts",
-    "find": "    if (result.kind === 'value' && !hasRequiredFields(result.value, row))\n",
-    "replace": "    if (false && result.kind === 'value' && !hasRequiredFields(result.value, row))\n",
+    "find": "    if (row.composition !== 'canonical_read')\n      return degraded('no_registered_row');\n    const result = await this.canonicalRead.read({\n      plan,\n      row,\n      ownerArguments: this.ownerArguments(plan, row),\n    });\n    if (result.kind === 'value' && !hasRequiredFields(result.value, row))\n",
+    "replace": "    if (row.composition !== 'canonical_read')\n      return degraded('no_registered_row');\n    const result = await this.canonicalRead.read({\n      plan,\n      row,\n      ownerArguments: this.ownerArguments(plan, row),\n    });\n    if (false && result.kind === 'value' && !hasRequiredFields(result.value, row))\n",
     "killers": [
       "G12-L16"
     ],
@@ -80,8 +80,8 @@
     "id": "MUT-12-L",
     "description": "raw owner exception becomes the composition source",
     "file": "src/widgets/projection/widget-projector.service.ts",
-    "find": "      result.kind === 'value' ? result.value : null,\n",
-    "replace": "      result.kind === 'value' ? result.value : result.exception,\n",
+    "find": "    const row = projectorRowFor(plan.widgetKind, subjectKeyOf(plan));\n    if (row === null) return degraded('no_registered_row');\n    if (row.composition !== 'canonical_read')\n      return degraded('no_registered_row');\n    const result = await this.canonicalRead.read({\n      plan,\n      row,\n      ownerArguments: this.ownerArguments(plan, row),\n    });\n    if (result.kind === 'value' && !hasRequiredFields(result.value, row))\n      return degraded('missing_source_field');\n    const limitationCodes =\n      result.kind === 'owner_exception'\n        ? [projectC9Denial(result.denial_code).reason_code]\n        : [];\n    return this.outcome(\n      plan,\n      row,\n      result.kind === 'value' ? result.value : null,\n",
+    "replace": "    const row = projectorRowFor(plan.widgetKind, subjectKeyOf(plan));\n    if (row === null) return degraded('no_registered_row');\n    if (row.composition !== 'canonical_read')\n      return degraded('no_registered_row');\n    const result = await this.canonicalRead.read({\n      plan,\n      row,\n      ownerArguments: this.ownerArguments(plan, row),\n    });\n    if (result.kind === 'value' && !hasRequiredFields(result.value, row))\n      return degraded('missing_source_field');\n    const limitationCodes =\n      result.kind === 'owner_exception'\n        ? [projectC9Denial(result.denial_code).reason_code]\n        : [];\n    return this.outcome(\n      plan,\n      row,\n      result.kind === 'value' ? result.value : result.exception,\n",
     "killers": [
       "G12-L09"
     ],
@@ -89,10 +89,10 @@
   },
   {
     "id": "MUT-12-N",
-    "description": "NAVIGATE enters the projector path during DEV-1",
+    "description": "stored-widget NAVIGATE is allowed to invoke the detail projector",
     "file": "src/widgets/projection/widget-projector.service.ts",
-    "find": "    return degraded('navigate_interim');\n",
-    "replace": "    return this.compose(plan) as unknown as ProjectionOutcome;\n",
+    "find": "    if (target !== 'detail') return degraded('no_registered_row');\n",
+    "replace": "    if (target !== 'w') return degraded('no_registered_row');\n",
     "killers": [
       "G12-L20"
     ],

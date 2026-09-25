@@ -604,12 +604,15 @@ const declaredMembers = (s: Source, typeName: string): string[] => {
 const MAY_REFERENCE_PROJECTOR: readonly string[] = [
   'widgets/widgets.module.ts',
   'widgets/gates/gate13.ts',
+  // Gate 13 delegates its closed effect switch to this widget-internal router.
+  'widgets/routing/effect-router.service.ts',
   // P-MT2a projects the canonical READ result that has just completed. It
   // cannot invoke the owner and can call only composeCompletedRead.
   'widgets/composition/chat-read.trigger.ts',
 ];
 const MAY_CALL_PROJECTOR: readonly string[] = [
   'widgets/gates/gate13.ts',
+  'widgets/routing/effect-router.service.ts',
   'widgets/composition/chat-read.trigger.ts',
 ];
 const COMPOSE_METHODS: readonly string[] = [
@@ -1115,7 +1118,7 @@ describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
       'async compose(',
       'composeCompletedRead(',
       'composeFromOwnerResponse(',
-      'composeNavigate(',
+      'async composeNavigate(',
     ];
     for (const entry of entryPoints) {
       const body = service.text.slice(service.text.indexOf(`  ${entry}`));
@@ -1127,8 +1130,8 @@ describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
         guarded: true,
       });
     }
-    // U12b adds exactly one call site; every compose read flows through it after the precondition.
-    expect(service.text.match(/this\.canonicalRead\.read\(/g)).toHaveLength(1);
+    // U12b plus V1.2 NAVIGATE each have one explicit read site, both after the precondition.
+    expect(service.text.match(/this\.canonicalRead\.read\(/g)).toHaveLength(2);
   });
 
   it('ARCH-12-9 [BUILD] the projector is referenced only by the module that provides it and Gate 13, and called only by Gate 13', () => {
@@ -1293,29 +1296,23 @@ describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
     ).toEqual([]);
   });
 
-  it('ARCH-12-12 [BUILD] composeNavigate reads nothing: no registry lookup, no port call, no branch on the target class (DEV-1)', () => {
+  it('ARCH-12-12 [BUILD] composeNavigate reads only an exact sealed-source row for detail', () => {
     const service = projectionSources().find((s) =>
       s.key.endsWith('widget-projector.service.ts'),
     )!;
     const method = service.text.slice(
-      service.text.indexOf('  composeNavigate('),
+      service.text.indexOf('  async composeNavigate('),
     );
     const body = method.slice(0, method.indexOf('\n  }'));
-    for (const forbidden of [
-      'projectorRowFor',
-      'PROJECTOR_REGISTRY',
-      'targetJson',
-      '.read(',
-    ])
+    for (const forbidden of ['PROJECTOR_REGISTRY'])
       expect({ forbidden, present: body.includes(forbidden) }).toEqual({
         forbidden,
         present: false,
       });
-    // And no row is reachable from a NAVIGATE: the registry holds none at all today.
-    expect(
-      PROJECTOR_REGISTRY.filter((r) => r.tapped_kind === undefined),
-    ).toEqual([]);
-    expect(projectorRowFor('any-kind', 'C9:any.key')).toBeNull();
+    expect(body).toContain("target !== 'detail'");
+    expect(body).toContain('sourceKeyOf(plan)');
+    expect(body).toContain('projectorRowFor(plan.widgetKind, source)');
+    expect(body).toContain('this.canonicalRead.read');
   });
 
   it('ARCH-12-13 [BUILD] the finite first row set has no blocker; deferred categories remain unregistered', () => {
@@ -1397,6 +1394,8 @@ const planFor = (over: Partial<ProjectionPlan> = {}): ProjectionPlan =>
     effect: 'REFINE',
     capabilitySpace: 'C9',
     capabilityKey: 'c7.measurement.read',
+    sourceCapabilitySpace: null,
+    sourceCapabilityKey: null,
     targetJson: null,
     runId: null,
     revisionId: null,
@@ -1454,18 +1453,18 @@ describe('U12b [U] the projector reads only registered rows', () => {
     expect(JSON.stringify(outcome)).not.toContain('owner-byte');
   });
 
-  it('[U] composeNavigate degrades for every NAVIGATE, whatever the target class (DEV-1 interim; holds by absence)', () => {
-    for (const target of [
-      { class: 's' },
-      { class: 'i' },
-      { class: 'detail' },
-      { class: 'w' },
-    ])
-      expect(
+  it('[U] composeNavigate requires detail plus exact sealed source evidence', async () => {
+    for (const target of [{ class: 's' }, { class: 'i' }, { class: 'w' }])
+      await expect(
         projector.composeNavigate(
           planFor({ effect: 'NAVIGATE', targetJson: target }),
         ),
-      ).toEqual(degradedWith('navigate_interim'));
+      ).resolves.toEqual(degradedWith('no_registered_row'));
+    await expect(
+      projector.composeNavigate(
+        planFor({ effect: 'NAVIGATE', targetJson: { class: 'detail' } }),
+      ),
+    ).resolves.toEqual(degradedWith('navigate_source_invalid'));
   });
 
   it('[U] no principal, no read (I47)', async () => {
@@ -1475,9 +1474,9 @@ describe('U12b [U] the projector reads only registered rows', () => {
     await expect(projector.compose(planFor({ actor: null }))).resolves.toEqual(
       degradedWith('no_principal'),
     );
-    expect(projector.composeNavigate(planFor({ authority: null }))).toEqual(
-      degradedWith('no_principal'),
-    );
+    await expect(
+      projector.composeNavigate(planFor({ authority: null })),
+    ).resolves.toEqual(degradedWith('no_principal'));
   });
 
   it('[U] one registered capability row makes exactly one canonical read', async () => {

@@ -84,6 +84,8 @@ interface Subject {
   readonly handoffSpace?: string | null;
   readonly handoffKey?: string | null;
   readonly targetJson?: Record<string, unknown> | null;
+  readonly sourceCapabilitySpace?: string | null;
+  readonly sourceCapabilityKey?: string | null;
   /** Not a floor term (AREA-A §3.1), so it is set without a recompute. */
   readonly c9Domain?: string | null;
 }
@@ -252,8 +254,8 @@ describe('Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736
       }).toEqual({ scope, assertCanExecute: 0, c9Capability: 0 });
     };
 
-    it('P-NULL / P-NULL-DETAIL [GW]: a `w`, `i`, `s` or `detail` NAVIGATE has no subject, passes slot 6 and reaches no owner (G6-5; A5 adds no branch, M28)', async () => {
-      for (const cls of ['w', 'i', 's', 'detail']) {
+    it('P-NULL [GW]: an `i` or `s` NAVIGATE has no subject, passes slot 6 and reaches no owner', async () => {
+      for (const cls of ['i', 's']) {
         const scope = `P-NULL ${cls}`;
         await admits(scope, {
           effect: 'NAVIGATE',
@@ -263,6 +265,21 @@ describe('Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736
         });
         noOwnerReached(scope);
       }
+    }, 120_000);
+
+    it('P-NAV-SOURCE [GW]: detail/w use sealed source evidence and recheck current authority', async () => {
+      for (const cls of ['w', 'detail']) {
+        const scope = `P-NAV-SOURCE ${cls}`;
+        await admits(scope, {
+          effect: 'NAVIGATE',
+          capabilitySpace: null,
+          capabilityKey: null,
+          targetJson: { class: cls, route: '/x' },
+          sourceCapabilitySpace: 'C9',
+          sourceCapabilityKey: 'catalog.services.read',
+        });
+      }
+      expect(owners.canExecute).toHaveBeenCalledTimes(2);
     }, 120_000);
 
     it('P-CONTROL / P-CONTROL-HANDLER [GW]: a CONTROL subject passes slot 6 with NO execute-admission test (G6-18, C11:4771-4773)', async () => {
@@ -749,6 +766,8 @@ describe('Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736
         capabilitySpace: null,
         capabilityKey: null,
         targetJson: { class: 'w', route: '/x' },
+        sourceCapabilitySpace: 'C9',
+        sourceCapabilityKey: 'catalog.services.read',
       });
       for (const extra of [
         { authority_hint: 'owner' },

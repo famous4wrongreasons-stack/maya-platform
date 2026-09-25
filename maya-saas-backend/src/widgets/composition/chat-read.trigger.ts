@@ -187,6 +187,8 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
       effect: 'REFINE',
       capabilitySpace: 'C9',
       capabilityKey: input.toolName,
+      sourceCapabilitySpace: null,
+      sourceCapabilityKey: null,
       targetJson: null,
       runId: null,
       revisionId: null,
