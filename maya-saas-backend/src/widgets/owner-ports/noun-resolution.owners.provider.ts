@@ -47,13 +47,22 @@ export class NounResolutionOwnersProvider implements NounReadPort {
     }
     try {
       const key = input.capability?.key ?? '';
-      if (key === 'appointments.own.create') {
+      if (
+        key === 'appointments.own.create' ||
+        key === 'crm.appointment.create.v1'
+      ) {
         if ((await this.create.quote(actor, values)) === null)
           return { kind: 'gone', reason: 'slot_taken' };
-      } else if (key === 'appointments.own.reschedule') {
+      } else if (
+        key === 'appointments.own.reschedule' ||
+        key === 'crm.appointment.reschedule.v1'
+      ) {
         if ((await this.reschedule.quote(actor, values)) === null)
           return { kind: 'gone', reason: 'slot_taken' };
-      } else if (key === 'appointments.own.cancel') {
+      } else if (
+        key === 'appointments.own.cancel' ||
+        key === 'crm.appointment.cancel.v1'
+      ) {
         const appointment = values.get('appointment');
         if (!appointment) return { kind: 'gone', reason: 'not_found' };
         const answer = await this.cancel.read(actor, appointment);

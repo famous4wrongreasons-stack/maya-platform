@@ -17,7 +17,7 @@ const proposal = (
 };
 
 describe('P-MINT-BOOK closed booking intent templates', () => {
-  it('owns exactly one DRAFT and three typed COMMIT recipes', () => {
+  it('owns the three propose edges and three typed COMMIT recipes', () => {
     expect(
       Object.values(BOOKING_INTENT_TEMPLATE_REGISTRY).map((row) => [
         row.effect,
@@ -25,6 +25,8 @@ describe('P-MINT-BOOK closed booking intent templates', () => {
       ]),
     ).toEqual([
       ['DRAFT', 'appointments.own.create'],
+      ['REFINE', 'appointments.own.reschedule'],
+      ['REFINE', 'appointments.own.cancel'],
       ['COMMIT', 'crm.appointment.create.v1'],
       ['COMMIT', 'crm.appointment.reschedule.v1'],
       ['COMMIT', 'crm.appointment.cancel.v1'],

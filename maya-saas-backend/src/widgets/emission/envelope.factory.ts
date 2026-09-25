@@ -13,7 +13,12 @@ import type { F88NestedShape } from '../validation/f88-walk';
 
 const CELL_PATHS_BY_KIND: Readonly<
   Record<
-    'METRIC' | 'SCHEDULE' | 'SOURCE_STATUS' | 'PROGRESS' | 'LIMITATION',
+    | 'METRIC'
+    | 'SCHEDULE'
+    | 'SOURCE_STATUS'
+    | 'PROGRESS'
+    | 'LIMITATION'
+    | 'BOOKING_CONFIRMATION',
     readonly string[]
   >
 > = Object.freeze({
@@ -33,6 +38,17 @@ const CELL_PATHS_BY_KIND: Readonly<
   ]),
   PROGRESS: Object.freeze(['body.headline', 'body.steps[].state']),
   LIMITATION: Object.freeze([]),
+  BOOKING_CONFIRMATION: Object.freeze([
+    'body.lines[].detail',
+    'body.when',
+    'body.when_previous',
+    'body.staff_label',
+    'body.duration_total',
+    'body.price_total',
+    'body.price_delta',
+    'body.refund_preview',
+    'body.loyalty_applied',
+  ]),
 });
 
 /**

@@ -106,4 +106,15 @@ describe('P-HANDLE — owner-minted frozen noun handles', () => {
       ownerRef: 'slot_A',
     });
   });
+
+  it('PH-6 preserves a canonical namespaced Appointment id as one opaque owner reference', () => {
+    const signer = identity();
+    const namespaced = {
+      ...APPOINTMENT,
+      ownerRef: 'appointment-action:461ba982-b96b-4479-b01a-9400d0605473',
+    };
+    const handle = mintOwnerNounHandle(namespaced, signer);
+    expect(openOwnerNounHandle(handle, signer)).toEqual(namespaced);
+    expect(handle).not.toContain(namespaced.ownerRef);
+  });
 });

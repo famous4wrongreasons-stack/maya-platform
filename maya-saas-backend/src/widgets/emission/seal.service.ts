@@ -30,6 +30,7 @@ import { Injectable } from '@nestjs/common';
 import { ActionIdentityService } from '../../action-engine/action-engine.identity';
 import type { Handle } from '../noun-resolution/noun-handles';
 import {
+  mintFrozenNouns,
   openOwnerNounHandle,
   type OwnerNounIdentity,
 } from '../noun-resolution/noun-handle.codec';
@@ -168,6 +169,19 @@ export class SealService {
 
   signHandoff(value: unknown): string {
     return this.key().hmac(HANDOFF_NAMESPACE, value);
+  }
+
+  /**
+   * P-HANDLE/P-MINT-BOOK's server-owned mint edge.  Callers supply canonical
+   * owner identities after their read; clients and LLM output never reach
+   * this method.  The same platform key that authenticates envelope seals
+   * authenticates the retained noun handles, so there is no second key
+   * custody or client-mintable handle format.
+   */
+  mintNounHandles(
+    identities: readonly OwnerNounIdentity[],
+  ): Readonly<Record<string, Handle>> {
+    return mintFrozenNouns(identities, this.key());
   }
 
   private key(): ActionIdentityService {

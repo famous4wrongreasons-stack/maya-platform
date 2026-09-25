@@ -36,7 +36,11 @@ export class InvalidOwnerNounIdentityError extends Error {
 }
 
 const NAME = /^[a-z][a-z0-9_]{0,63}$/;
-const OPAQUE_REF = /^[A-Za-z0-9_-]{1,256}$/;
+// Canonical owner ids are opaque to the widget layer. Internal Appointment ids deliberately use
+// the namespaced `appointment-action:<execution-id>` form, so `:` is part of the owner's stable
+// identity alphabet; accepting it here does not make the value client-authoritative because the
+// whole payload remains server-minted and HMAC authenticated.
+const OPAQUE_REF = /^[A-Za-z0-9_:-]{1,256}$/;
 
 const normalize = (input: OwnerNounIdentity): NounHandlePayload => {
   const tenantId = input.tenantId.trim();

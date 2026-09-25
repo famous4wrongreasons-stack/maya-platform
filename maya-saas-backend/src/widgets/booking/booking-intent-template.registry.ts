@@ -12,6 +12,8 @@ export const BOOKING_TEMPLATE_REGISTRY_VERSION = 1 as const;
 
 export type BookingIntentTemplateKey =
   | 'draft.booking.create@1'
+  | 'refine.booking.reschedule@1'
+  | 'refine.booking.cancel@1'
   | 'commit.booking.create@1'
   | 'commit.booking.reschedule@1'
   | 'commit.booking.cancel@1';
@@ -19,10 +21,10 @@ export type BookingIntentTemplateKey =
 export interface BookingIntentTemplateRow {
   readonly key: BookingIntentTemplateKey;
   readonly version: typeof BOOKING_TEMPLATE_REGISTRY_VERSION;
-  readonly effect: Extract<EffectClass, 'DRAFT' | 'COMMIT'>;
+  readonly effect: Extract<EffectClass, 'DRAFT' | 'REFINE' | 'COMMIT'>;
   readonly kind: Extract<
     WidgetKind,
-    'SERVICE_SELECTOR' | 'BOOKING_CONFIRMATION'
+    'SERVICE_SELECTOR' | 'SCHEDULE' | 'BOOKING_CONFIRMATION'
   >;
   readonly subject: CapabilityRef;
   readonly role: WidgetIntent['role'];
@@ -55,6 +57,32 @@ export const BOOKING_INTENT_TEMPLATE_REGISTRY: Readonly<
     label: 'Review booking',
     utteranceTemplate: 'Review booking',
     speechAliases: ['review booking'],
+    ttlSeconds: 600,
+  }),
+  'refine.booking.reschedule@1': row({
+    key: 'refine.booking.reschedule@1',
+    version: 1,
+    effect: 'REFINE',
+    kind: 'SCHEDULE',
+    subject: { space: 'C9', key: 'appointments.own.reschedule' },
+    role: 'primary',
+    allowedArgumentHandles: ['appointment', 'service', 'staff', 'slot'],
+    label: 'Review reschedule',
+    utteranceTemplate: 'Review reschedule',
+    speechAliases: ['review reschedule'],
+    ttlSeconds: 600,
+  }),
+  'refine.booking.cancel@1': row({
+    key: 'refine.booking.cancel@1',
+    version: 1,
+    effect: 'REFINE',
+    kind: 'SCHEDULE',
+    subject: { space: 'C9', key: 'appointments.own.cancel' },
+    role: 'primary',
+    allowedArgumentHandles: ['appointment'],
+    label: 'Review cancellation',
+    utteranceTemplate: 'Review cancellation',
+    speechAliases: ['review cancellation'],
     ttlSeconds: 600,
   }),
   'commit.booking.create@1': row({
@@ -172,14 +200,14 @@ export const bookingTemplateAsIntentRow = (
 export const assertBookingTemplateRegistry = (): void => {
   const rows = Object.values(BOOKING_INTENT_TEMPLATE_REGISTRY);
   if (
-    rows.length !== 4 ||
+    rows.length !== 6 ||
     new Set(rows.map((entry) => entry.key)).size !== rows.length
   )
     throw new Error('booking intent registry is not closed');
   for (const entry of rows) {
     if (!entry.key.endsWith(`@${entry.version}`))
       throw new Error(`${entry.key}: version mismatch`);
-    if (!['DRAFT', 'COMMIT'].includes(entry.effect))
+    if (!['DRAFT', 'REFINE', 'COMMIT'].includes(entry.effect))
       throw new Error(`${entry.key}: effect mismatch`);
   }
 };

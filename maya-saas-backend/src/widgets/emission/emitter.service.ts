@@ -179,14 +179,26 @@ export class WidgetEmitterService {
     const retainedLocalBusinessDate = this.retainedJournalDate(request);
 
     const resolved = input.intent_proposals.map((proposal) => {
-      const bookingTemplate =
-        booking && proposal.intent_template_key.startsWith('commit.booking.')
-          ? resolveBookingTemplateForSynthesis({
-              proposal,
-              widgetKind: input.kind_proposal,
-              deliveryChannel: request.deliveryChannel,
-            })
-          : null;
+      const bookingKey =
+        proposal.intent_template_key.startsWith('draft.booking.') ||
+        proposal.intent_template_key.startsWith('refine.booking.') ||
+        proposal.intent_template_key.startsWith('commit.booking.');
+      if (bookingKey && !BOOKING_ACTUATING_TEMPLATES_DISCHARGED)
+        throw new IntentTemplateRefusal('a2_booking_not_discharged');
+      if (
+        proposal.intent_template_key.startsWith('commit.booking.') &&
+        booking === null
+      )
+        throw new IntentTemplateRefusal(
+          'booking_confirmation_context_required',
+        );
+      const bookingTemplate = bookingKey
+        ? resolveBookingTemplateForSynthesis({
+            proposal,
+            widgetKind: input.kind_proposal,
+            deliveryChannel: request.deliveryChannel,
+          })
+        : null;
       return {
         proposal,
         resolved: bookingTemplate
