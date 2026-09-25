@@ -5,7 +5,10 @@
     "file": "src/widgets/authority/principal-view.ts",
     "find": "  new Set(['tenant_owner', 'business_owner']),\n",
     "replace": "  new Set(['tenant_owner']),\n",
-    "killers": ["PR-6U-2", "PR-6"],
+    "killers": [
+      "PR-6U-2",
+      "PR-6"
+    ],
     "expect": "live-killed"
   },
   {
@@ -14,7 +17,10 @@
     "file": "src/widgets/authority/principal-view.ts",
     "find": "  return 'staff';\n",
     "replace": "  return 'system' as unknown as Presentation['presentation_mode'];\n",
-    "killers": ["PR-6U-2", "PR-6"],
+    "killers": [
+      "PR-6U-2",
+      "PR-6"
+    ],
     "expect": "build-killed"
   },
   {
@@ -23,7 +29,10 @@
     "file": "src/widgets/authority/principal-view.ts",
     "find": "    membershipResolved: kind === 'USER',\n    channelLinkActive: kind === 'CLIENT_CHANNEL',\n",
     "replace": "    membershipResolved: kind === 'CLIENT_CHANNEL',\n    channelLinkActive: kind === 'USER',\n",
-    "killers": ["PR-7U-1", "PR-7"],
+    "killers": [
+      "PR-7U-1",
+      "PR-7"
+    ],
     "expect": "build-killed"
   },
   {
@@ -41,7 +50,9 @@
         "replace": "      proofHash: sha256Hex(\n        [\n          authority.userId ?? '',\n          authority.tenantId,\n          authority.membershipId ?? '',\n        ].join('\\u0000'),\n      ),\n"
       }
     ],
-    "killers": ["PR-7"],
+    "killers": [
+      "PR-7"
+    ],
     "expect": "live-killed"
   },
   {
@@ -50,7 +61,10 @@
     "file": "src/widgets/owner-ports/principal.adapter.ts",
     "find": "    if (authority.membershipId === null || authority.userId === null)\n      return null;\n",
     "replace": "    if ((true as boolean) || authority.membershipId === null) return null;\n",
-    "killers": ["PR-3", "PR-6"],
+    "killers": [
+      "PR-3",
+      "PR-6"
+    ],
     "expect": "live-killed"
   },
   {
@@ -68,7 +82,9 @@
         "replace": ""
       }
     ],
-    "killers": ["PR-8"],
+    "killers": [
+      "PR-8"
+    ],
     "expect": "live-killed"
   },
   {
@@ -77,7 +93,9 @@
     "file": "src/widgets/owner-ports/principal.adapter.ts",
     "find": "const isDenial = (error: unknown): boolean =>\n  error instanceof ForbiddenException || error instanceof UnauthorizedException;\n",
     "replace": "const isDenial = (error: unknown): boolean => error !== error;\n",
-    "killers": ["PR-2"],
+    "killers": [
+      "PR-2"
+    ],
     "expect": "live-killed"
   },
   {
@@ -86,7 +104,9 @@
     "file": "src/widgets/authority/principal-view.ts",
     "find": "  Object.freeze({\n    authority: input.authority,\n",
     "replace": "  ({\n    authority: input.authority,\n",
-    "killers": ["PR-VIEW-1"],
+    "killers": [
+      "PR-VIEW-1"
+    ],
     "expect": "build-killed"
   },
   {
@@ -109,17 +129,24 @@
     "file": "src/widgets/intent-gateway.service.ts",
     "find": "      run: (ctx) =>\n        transportSessionPresent(ctx.actor)\n          ? PASS\n",
     "replace": "      run: (ctx) =>\n        transportSessionPresent(ctx.actor) && ctx.principal !== null\n          ? PASS\n",
-    "killers": ["PR-4", "PR-5", "G2-EQ"],
+    "killers": [
+      "PR-4",
+      "PR-5",
+      "G2-EQ"
+    ],
     "expect": "live-killed"
   },
   {
     "id": "P-M11",
-    "description": "`T` is held past slot 10: the whole array runs inside the request transaction, so a row lock is still held while the owners at slots 11-13 run (D-1)",
+    "description": "`T` is held past slot 10: the whole array runs inside the request transaction, so a row lock is still held while the owners at slots 11-13 run (D-1). E2 BOOK-1 now reaches slot 11 and kills this former pending mutant.",
     "file": "src/widgets/intent-gateway.service.ts",
     "find": "    const inTransactionSlots = this.gates.slice(0, lastInTx + 1);\n    const afterCommitSlots = this.gates.slice(lastInTx + 1);\n",
     "replace": "    const inTransactionSlots = this.gates.slice(0, this.gates.length);\n    const afterCommitSlots = this.gates.slice(this.gates.length);\n",
-    "killers": ["PR-9b"],
-    "expect": "pending"
+    "killers": [
+      "PR-9b",
+      "BOOK-1"
+    ],
+    "expect": "live-killed"
   },
   {
     "id": "P-M12",
@@ -136,7 +163,11 @@
         "replace": "  })\n    .overrideProvider(PRINCIPAL_RESOLVER)\n    .useValue({\n      resolve: () =>\n        Promise.resolve({\n          authority: null,\n          role: null,\n          presentationMode: 'staff',\n          verificationLevel: 'SESSION_VERIFIED',\n          proofHash: 'harness-bound-principal',\n        }),\n    })\n    .overrideProvider(PrismaService)\n"
       }
     ],
-    "killers": ["PR-12", "PR-8", "PR-2"],
+    "killers": [
+      "PR-12",
+      "PR-8",
+      "PR-2"
+    ],
     "expect": "live-killed"
   }
 ]
