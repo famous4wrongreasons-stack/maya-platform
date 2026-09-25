@@ -66,6 +66,49 @@ const submissionBody = (record: WidgetFixture): Record<string, unknown> => ({
   profile_id: 'widgets-live-gate11',
 });
 
+const FORBIDDEN_SUBMISSION_MEMBERS = new Set([
+  'frozen_nouns',
+  'revision_id',
+  'run_id',
+]);
+const NOUN_HANDLE = /^h_[a-f0-9]{32,64}$/;
+
+/**
+ * Inspect the wire structure, rather than arbitrary bytes inside opaque values. In particular an
+ * `intent_token` is a base64url value and may legitimately contain the two-character sequence `h_`;
+ * that does not turn the token into a C9 noun handle. Handles are forbidden only as submitted input,
+ * while witness/frozen-noun members are forbidden anywhere in the submission shape.
+ */
+const forbiddenSubmissionMaterial = (
+  value: unknown,
+  path: readonly string[] = [],
+  insideInputs = false,
+): readonly string[] => {
+  if (typeof value === 'string')
+    return insideInputs && NOUN_HANDLE.test(value) ? [path.join('.')] : [];
+  if (Array.isArray(value))
+    return value.flatMap((entry, index) =>
+      forbiddenSubmissionMaterial(
+        entry,
+        [...path, String(index)],
+        insideInputs,
+      ),
+    );
+  if (value === null || typeof value !== 'object') return [];
+
+  return Object.entries(value).flatMap(([key, entry]) => {
+    const memberPath = [...path, key];
+    return [
+      ...(FORBIDDEN_SUBMISSION_MEMBERS.has(key) ? [memberPath.join('.')] : []),
+      ...forbiddenSubmissionMaterial(
+        entry,
+        memberPath,
+        insideInputs || key === 'inputs',
+      ),
+    ];
+  });
+};
+
 describe('Gate 11 — the witness lane refuses while it is unbound, and its twin still passes (C11:4731)', () => {
   let ctx: FixtureContext;
   let gw: GatewayHarness;
@@ -248,11 +291,28 @@ describe('Gate 11 — the witness lane refuses while it is unbound, and its twin
       'profile_id',
       'widget_id',
     ]);
-    const serialized = JSON.stringify(body);
-    for (const forbidden of ['frozen_nouns', 'revision_id', 'run_id', 'h_'])
-      expect({ forbidden, present: serialized.includes(forbidden) }).toEqual({
-        forbidden,
-        present: false,
-      });
+    expect(body.inputs).toBeNull();
+    expect(forbiddenSubmissionMaterial(body)).toEqual([]);
   }, 60_000);
+
+  it('G11-N4d-SHAPE-CF: structural noun/witness material is refused without treating opaque token bytes as a handle', () => {
+    const allowed = {
+      contract: WIDGET_INTENT_SUBMISSION_CONTRACT,
+      widget_id: 'widget',
+      intent_token: `opaque-h_${'a'.repeat(32)}`,
+      inputs: null,
+      client_nonce: 'nonce',
+      profile_id: 'widgets-live-gate11',
+    };
+    expect(forbiddenSubmissionMaterial(allowed)).toEqual([]);
+
+    const counterfactuals = [
+      { ...allowed, frozen_nouns: { client: `h_${'b'.repeat(32)}` } },
+      { ...allowed, context: { revision_id: 'revision' } },
+      { ...allowed, context: { run_id: 'run' } },
+      { ...allowed, inputs: { client: `h_${'c'.repeat(32)}` } },
+    ];
+    for (const counterfactual of counterfactuals)
+      expect(forbiddenSubmissionMaterial(counterfactual)).not.toEqual([]);
+  });
 });
