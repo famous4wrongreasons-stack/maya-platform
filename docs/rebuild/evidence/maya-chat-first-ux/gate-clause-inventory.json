@@ -4,7 +4,7 @@
   "against": {
     "document": "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md",
     "version": "1.1",
-    "sha256": "4629f8762bd47245cfd90078c329439ddd8bbb7fa15439ad76adee49d5105d09",
+    "sha256": "ddced8c087636b62d3fd7a55f51723588789d9071d29d15767e85ce802be741d",
     "lines": 7433
   },
   "note": "The key set of gate-conformance-audit.json must equal this inventory, gate by gate and in order, with identical clause texts; gate-audit-check.mjs enforces it. The inventory changes only with the contract (C-V12) or a re-audit commit that records why.",

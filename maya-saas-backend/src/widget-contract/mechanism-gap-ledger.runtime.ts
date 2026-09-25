@@ -20,17 +20,17 @@
 
 import type { MechanismGap } from './registries';
 
-/** F35's declared range, read from its own block: `'P-01' … 'P-34'`. */
+/** F35's declared range, read from its own block: `'P-01' … 'P-39'`. */
 export const MECHANISM_GAP_PREREQUISITE_FIRST = 1;
-export const MECHANISM_GAP_PREREQUISITE_LAST = 34;
-/** F92's thirty-four rows, as a number the start-up assertion can compare the ledger against. */
-export const MECHANISM_GAP_DECLARED_ROW_COUNT = 34;
+export const MECHANISM_GAP_PREREQUISITE_LAST = 39;
+/** F92's thirty-nine rows, as a number the start-up assertion can compare the ledger against. */
+export const MECHANISM_GAP_DECLARED_ROW_COUNT = 39;
 
 const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
   {
     gap_key: 'MG-P-01',
     p_ref: 'P-01',
-    component: 'IntentGateway',
+    component: 'IntentGateway JWT widget route',
     status: '[ABSENT]',
     package: 'K3',
     blocking_rules: [],
@@ -180,6 +180,46 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     blocking_rules: [],
   },
   {
+    gap_key: 'MG-P-35',
+    p_ref: 'P-35',
+    component: 'Step 0 Telegram callback-token carrier',
+    status: '[ABSENT]',
+    package: 'K14',
+    blocking_rules: [],
+  },
+  {
+    gap_key: 'MG-P-36',
+    p_ref: 'P-36',
+    component: 'Step 0 web-push action carrier',
+    status: '[ABSENT]',
+    package: 'K13',
+    blocking_rules: [],
+  },
+  {
+    gap_key: 'MG-P-37',
+    p_ref: 'P-37',
+    component: 'Step 0 voice carrier',
+    status: '[ABSENT]',
+    package: 'K6',
+    blocking_rules: [],
+  },
+  {
+    gap_key: 'MG-P-38',
+    p_ref: 'P-38',
+    component: 'Step 0 SMS/e-mail signed-link carrier',
+    status: '[ABSENT]',
+    package: 'K6',
+    blocking_rules: [],
+  },
+  {
+    gap_key: 'MG-P-39',
+    p_ref: 'P-39',
+    component: 'The spoken-readback path',
+    status: '[ABSENT]',
+    package: 'K6',
+    blocking_rules: [],
+  },
+  {
     gap_key: 'MG-P-18',
     p_ref: 'P-18',
     component: 'produced_by_intent_token_hash: string \\| null',
@@ -279,9 +319,9 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
   {
     gap_key: 'MG-P-30',
     p_ref: 'P-30',
-    component: "The gateway's record fields and the spoken-readback path",
+    component: "The gateway's retained record fields",
     status: '[ABSENT]',
-    package: 'K3+K6',
+    package: 'K3',
     blocking_rules: [],
   },
   {

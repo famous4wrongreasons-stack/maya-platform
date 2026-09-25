@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Contract V1.1 — Annex C is a record, not rule. This checks that the record is exactly what the owner
+// Contract V1.2 — Annexes C/D are records, not rules. This checks that the record is exactly what the owner
 // approved and that it cannot be read as rule. Proposed location:
 //   docs/rebuild/evidence/maya-chat-first-ux/contract-version-record-check.mjs
 // Paths resolve from this file, so it runs in CI and in a scratch copy alike.
@@ -19,14 +19,20 @@ const lines = C.split('\n');
 const top = lines.map((l, i) => [l, i]).filter(([l]) => /^# /.test(l));
 const iB = lines.findIndex((l) => l.startsWith('# Annex B'));
 const iC = lines.findIndex((l) => l.startsWith('# Annex C'));
-chk('exactly one Annex B and one Annex C, in that order, Annex C last',
-  top.filter(([l]) => l.startsWith('# Annex B')).length === 1 && top.filter(([l]) => l.startsWith('# Annex C')).length === 1 &&
-  iB >= 0 && iC > iB && top[top.length - 1][1] === iC, `B@${iB + 1} C@${iC + 1}`);
-const annex = lines.slice(iC).join('\n');
+const iD = lines.findIndex((l) => l.startsWith('# Annex D'));
+chk('exactly one Annex B, C and D, in order, Annex D last',
+  top.filter(([l]) => l.startsWith('# Annex B')).length === 1 &&
+  top.filter(([l]) => l.startsWith('# Annex C')).length === 1 &&
+  top.filter(([l]) => l.startsWith('# Annex D')).length === 1 &&
+  iB >= 0 && iC > iB && iD > iC && top[top.length - 1][1] === iD,
+  `B@${iB + 1} C@${iC + 1} D@${iD + 1}`);
+const annex = lines.slice(iC, iD).join('\n');
+const annexD = lines.slice(iD).join('\n');
 
-chk('header names Version 1 by commit and SHA-256, and points to Annex C',
-  /Version 1\.1\. Version 1 is this file at commit `81bcc5ec` \(SHA-256 `15c383f1d173ad7bc83b6b4df8138b06c96c4131452d5fe05549ed6d59aca4d3`\)/.test(lines[2]) &&
-  /Annex C/.test(lines[2]) && lines[0] === '# MAYA WIDGET CONTRACT v1.1', 'line 1 and line 3');
+chk('header pins Version 1.1 by commit and SHA-256 and points to Annexes C/D',
+  new RegExp('Version 1\\.2\\. Version 1\\.1 is this file at commit `17b5dc0b` ' +
+    '\\(SHA-256 `4629f8762bd47245cfd90078c329439ddd8bbb7fa15439ad76adee49d5105d09`\\)').test(lines[2]) &&
+  lines[2].includes('Annexes C and D') && lines[0] === '# MAYA WIDGET CONTRACT v1.2', 'line 1 and line 3');
 
 const A_BLOCK = PK.slice(210, 286).join('\n');
 const B_BLOCK = PK.slice(289, 355).join('\n');
@@ -57,6 +63,11 @@ const bad = [...new Set([...annex.matchAll(/§(A?\d+(?:\.\d+)*)/g)].map((m) => m
 chk('every § pointer in Annex C resolves to a heading of the body', bad.length === 0, bad.join(', ') || 'all resolve');
 chk('Annex C can state no rule: no code fence, no Mechanism, no evaluation point, no P-row, no backticked GAP key',
   !/```/.test(annex) && !/\*Mechanism|\*Evaluation point|\*Evaluated at/.test(annex) && !/^\| \*\*P-\d\d\*\*/m.test(annex) && !/`GAP-[A-Z]/.test(annex), 'clean');
+
+chk('Annex D records OD-1 A, OD-2 C, I-MIG3 approval and P-G15c non-activation',
+  annexD.includes('| OD-1 | Option A |') && annexD.includes('| OD-2 | Option C |') &&
+  annexD.includes('| I-MIG3 | Approved |') && annexD.includes('| P-G15c | Not activated |'),
+  'four dispositions');
 // F2, targeted: every identifier this version introduces into the body is declared in a ts fence of the body
 const body = lines.slice(0, iB).join('\n');
 const tsFences = [...body.matchAll(/```ts\n([\s\S]*?)```/g)].map((m) => m[1]).join('\n');
@@ -76,6 +87,8 @@ chk('every identifier this version introduces is declared in a ts block of the b
   const ws = (s) => s.replace(/\s+/g, ' ');
   const pre = ws(lines.slice(3, lines.findIndex((l) => l.startsWith('## 0. '))).join('\n'));
   const p01 = lines.find((l) => l.startsWith('| **P-01** |')) || '';
+  const p33 = lines.find((l) => l.startsWith('| **P-33** |')) || '';
+  const p34 = lines.find((l) => l.startsWith('| **P-34** |')) || '';
   const s0 = body.indexOf('**R3.5.5 — '); const s1 = body.indexOf('\n### 3.6 ', s0);
   const door = s0 >= 0 && s1 > s0 ? ws(body.slice(s0, s1)) : '';
   const ENV = fs.readFileSync(path.join(ROOT, 'docs/rebuild/MAYA-CHAT-FIRST-IMPLEMENTATION-ENVELOPE.md'), 'utf8');
@@ -102,7 +115,7 @@ chk('every identifier this version introduces is declared in a ts block of the b
   const miss = [
     ...(/Exactly \*\*three\*\* new routes exist in the chat-first widget programme/.test(pre) ? [] : ['preamble: three programme routes']),
     ...(/exactly \*\*one\*\* further ingress/.test(pre) && pre.includes('§3.5 R3.5.5') && pre.includes('§A1.3 P-34') ? [] : ['preamble: the R-04 door']),
-    ...(p01.includes('§3.12 R3.12.7') && p01.includes('§3.5 R3.5.5') && p01.includes('**P-34**') ? [] : ['P-01: the R-03 ingress and the R-04 door']),
+    ...(p01.includes('POST /api/widgets/resolve') && p01.includes('POST /api/widgets/intent') && p33.includes('§3.12 R3.12.7') && p34.includes('§3.5 R3.5.5') ? [] : ['V1.2 split route rows P-01/P-33/P-34']),
     ...(/^\| \*\*P-34\*\* \|/m.test(C) ? [] : ['P-34 row']),
     ...(g8.includes('§3.12 R3.12.7') && g8.includes('§3.5 R3.5.5') && g8.includes('R-04 revoke-only staff authority') ? [] : ['envelope G8']),
     ...LIMITS.filter((l) => !door.includes(l)).map((l) => `R3.5.5 lacks «${l}»`),
@@ -116,7 +129,7 @@ chk('every identifier this version introduces is declared in a ts block of the b
   chk('R-04: the staff door is counted beside the three programme routes and carries every limit of the ruling and its one engine branch (§3.5 R3.5.5, P-34, FR-6a, G8)',
     miss.length === 0, miss.join('; ') || `${LIMITS.length} limits, ${LETTERS.length} clauses, 10 staff roles, P-01, P-34, FR-6a, G8`);
 }
-chk('the body carries no version mark', !/V1\.1|Contract v1\.1|\(V1\.1\)/.test(lines.slice(3, iB).join('\n').replace(/MAYA WIDGET CONTRACT v1\.1/g, '')), 'lines 4..Annex B');
+chk('the body carries no version mark', !/V1\.1|Contract v1\.1|\(V1\.1\)/.test(lines.slice(3, iB).join('\n').replace(/MAYA WIDGET CONTRACT v1\.2/g, '')), 'lines 4..Annex B');
 
 let fail = 0;
 for (const c of out) { if (!c.ok) fail++; console.log(`${c.ok ? 'PASS' : 'FAIL'}  ${c.n}\n        ${c.ev}`); }

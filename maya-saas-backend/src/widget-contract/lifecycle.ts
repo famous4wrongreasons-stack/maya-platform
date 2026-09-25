@@ -31,7 +31,7 @@ import {
   WidgetKind,
 } from './kinds';
 
-// --- section 4.1 (contract line 5428) ---
+// --- section 4.1 (contract line 5456) ---
 export type LifecycleState =
   | 'MINTED' // sealed, not yet delivered
   | 'DELIVERED' // handed to a channel adapter, already degraded (§4.5)
@@ -44,7 +44,7 @@ export type LifecycleState =
   | 'BODY_DROPPED' // retention_sec elapsed; headline + summary only
   | 'REDACTED'; // erasure applied (§4.4)
 
-// --- section 4.1 (contract line 5453) ---
+// --- section 4.1 (contract line 5481) ---
 export interface Lifecycle {
   freshness_class: 'live' | 'scenario' | 'proactive_once' | 'static';
   state: LifecycleState;
@@ -63,7 +63,7 @@ export interface Lifecycle {
   delivery_channel: ChannelId; // the channel this emission was fitted for (§4.5)
 }
 
-// --- section 4.2 (contract line 5574) ---
+// --- section 4.2 (contract line 5602) ---
 export type TerminalOutcome =
   | 'SUBMITTED' // a receipt exists, outcome ACCEPTED
   | 'CONFIRMED' // a receipt exists and a canonical action completed
@@ -79,14 +79,14 @@ export interface TerminalLine {
   action_receipt_ref: string | null; // present iff outcome === 'CONFIRMED'
 }
 
-// --- section 4.2 (contract line 5597) ---
+// --- section 4.2 (contract line 5625) ---
 export interface HistorisedWidget {
   envelope: WidgetEnvelope; // frozen, as sealed
   terminal_lines: TerminalLine[];
   reread_intent: WidgetIntent | null; // minted NOW, effect 'REFINE', for the CURRENT principal
 }
 
-// --- section 4.3 (contract line 5637) ---
+// --- section 4.3 (contract line 5665) ---
 export interface DeliveryRecord {
   delivery_state:
     | 'live' // deliverable, interactive where the channel allows
@@ -100,13 +100,13 @@ export interface DeliveryRecord {
   action_receipt_ref: string | null; // the ONLY pointer to a business fact
 }
 
-// --- section 4.4.3 (contract line 5720) ---
+// --- section 4.4.3 (contract line 5748) ---
 export type ErasureClass =
   | 'AUDIT_RETAINED' // authority & audit; survives a conversation-erasure request
   | 'CONVERSATION_CONTENT' // erased with conversation content
   | 'CANONICAL_ELSEWHERE'; // a copy of a value a canonical owner holds; erased HERE, retained THERE
 
-// --- section 4.5.2 (contract line 5821) ---
+// --- section 4.5.2 (contract line 5849) ---
 export interface ChannelProfile {
   contract: 'maya.channel.profile/1';
   profile_id: string; // 'pwa.v1', 'tg.bot.v3', 'push.v1', …
@@ -187,7 +187,7 @@ export type TokenCarrier =
   | 'spoken_alias'
   | 'signed_path_segment';
 
-// --- section 4.5.5 (contract line 5950) ---
+// --- section 4.5.5 (contract line 5978) ---
 export interface RenderReceipt {
   contract: 'maya.render.receipt/1';
   profile_id: string;
@@ -216,7 +216,7 @@ export interface RenderReceipt {
   degraded_at: string;
 }
 
-// --- section 4.6 (contract line 6050) ---
+// --- section 4.6 (contract line 6078) ---
 export interface BundleBridgeRequirements {
   required: []; // NORMATIVE: the empty tuple. The illegal state cannot be written.
   optional: BridgeKey[];
@@ -231,7 +231,7 @@ export interface BundleBridgeRequirements {
   >;
 }
 
-// --- section 4.8 (contract line 6155) ---
+// --- section 4.8 (contract line 6183) ---
 export interface A11yEnvironment {
   // reported by the renderer; PRESENTATION ONLY
   reduced_motion: boolean;
@@ -272,7 +272,7 @@ export declare function refKey(ref: InteractiveRef): InteractiveRefKey; // `${re
 // because `k` is one of seven fixed tokens and ':' is the
 // only separator, so no two refs collide.
 
-// --- section 4.8 (contract line 6201) ---
+// --- section 4.8 (contract line 6229) ---
 export declare function refSet(
   paths: readonly string[],
   body: WidgetBody,
@@ -306,7 +306,7 @@ export declare function refSet(
 // four kinds declare a `more_intent` path. This form subsumes escape, remedy, `more`
 // and any future server-minted role by construction.
 
-// --- section 4.8.1 (contract line 6273) ---
+// --- section 4.8.1 (contract line 6301) ---
 // The SEVEN body shapes a ref can denote, each named as this contract names it. A 'row' ref
 // resolves to its row AND its owning table, because one envelope may hold many tables —
 // REPORT declares `sections[].table: TableSpec | null` — so a row key alone does not determine
@@ -445,7 +445,7 @@ export function nameSourceOf(
 // A-2, in one line: the accessible name begins with the label of whatever the ref denotes.
 // [SPEC, not code] ∀ ref ∈ reading_order : accessible_names[refKey(ref)].startsWith(nameSourceOf(ref, env).label)
 
-// --- section 4.8.2 (contract line 6419) ---
+// --- section 4.8.2 (contract line 6447) ---
 // [MEMBER FRAGMENT] accessible_name_suffix: Partial<Record<
 // [MEMBER FRAGMENT]     `${InteractiveRef['k']}:${WidgetIntent['role'] | '*'}`,
 // [MEMBER FRAGMENT]     { base: 'element' | 'body'; pointers: readonly string[] }
@@ -463,7 +463,7 @@ export function nameSourceOf(
 // other ref kind, which denotes an element carrying no role at all. A more specific
 // entry wins over '*'.
 
-// --- section 4.9.3 (contract line 6484) ---
+// --- section 4.9.3 (contract line 6512) ---
 export interface ProactiveProvenance {
   // REQUIRED when trigger === 'proactive'
   artefact_ref: string; // a canonical row: Opportunity, approval object,
@@ -485,7 +485,7 @@ export interface ProactiveProvenance {
   //   resolved in NOTIFICATION_CONSENT_REGISTRY at delivery
 }
 
-// --- section 4.9.3 (contract line 6505) ---
+// --- section 4.9.3 (contract line 6533) ---
 export interface Moment {
   moment_key: string;
   kind: WidgetKind; // the final projected kind; its strict body schema remains final

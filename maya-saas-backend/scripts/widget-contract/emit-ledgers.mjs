@@ -11,7 +11,7 @@
 // NOTHING HERE IS AUTHORED. Two sources, cross-checked against each other, and a build that stops
 // when they disagree:
 //
-//   1. the certified contract's §A1 register — the 34 prerequisite rows P-01 … P-34, each with its
+//   1. the certified contract's §A1 register — the 39 prerequisite rows P-01 … P-39, each with its
 //      component, its status and the K-package that owes it. §A1.1–§A1.6 state the status in a cell;
 //      §A1.7's ten machinery rows have no status column and are grounded instead by the sentence
 //      that opens the table ("Every one is `[ABSENT]`"), which this script requires to be present
@@ -230,7 +230,7 @@ import type { MechanismGap } from './registries';
 /** F35's declared range, read from its own block: \`'P-${String(range.first).padStart(2, '0')}' … 'P-${String(range.last).padStart(2, '0')}'\`. */
 export const MECHANISM_GAP_PREREQUISITE_FIRST = ${range.first};
 export const MECHANISM_GAP_PREREQUISITE_LAST = ${range.last};
-/** F92's thirty-four rows, as a number the start-up assertion can compare the ledger against. */
+/** F92's thirty-nine rows, as a number the start-up assertion can compare the ledger against. */
 export const MECHANISM_GAP_DECLARED_ROW_COUNT = ${range.last - range.first + 1};
 
 const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [

@@ -365,7 +365,7 @@ after the dark window.**
 ```
 WIDGET-LAYER MODELS: 14
 PHYSICAL FIELDS:    191
-MIGRATIONS:           2
+MIGRATIONS:           3
 ```
 
 Every number re-derived from the schema by `widget-schema-count.mjs`, which is committed beside
@@ -440,7 +440,7 @@ rounds proving that, and the counters exist so that no figure here is typed by h
 | `WidgetDraft` | the server-owned draft a COMMIT confirms | 11 A / 1 C = **12** | `@@unique([tenantId, draftRef])`; CHECK `DraftClass` (5), `CapabilitySpace`; FK → `Tenant` | `T_AUDIT`, `expiresAt` bounded | named by `confirmation_of_ref.kind === 'draft'`; the draft owner is canonical |
 | `WidgetErasureTombstone` | the record that an erasure happened | **7**, all A | CHECK `TombstoneStore`; FK → `Tenant` | append-only, floor `T_AUDIT` — **never erased** | in the receipt store by rule; the Action Engine receipts themselves are **not re-declared** here |
 | `WidgetCapabilityGap` | the eight `owner: NONE` acts, and every gap a later package opens | **8**, registry | `@@unique([gapKey])`; CHECK `GapOwnerState` | n/a — no data subject | names acts that have no owner; depends on none |
-| `WidgetMechanismGap` | `MG-P01 … MG-P34`, one per prerequisite | **7**, registry | `@@unique([gapKey])`; CHECK `MechanismGapStatus` | n/a | every build-status count is **printed from here, never transcribed** |
+| `WidgetMechanismGap` | `MG-P01 … MG-P39`, one per prerequisite | **7**, registry | `@@unique([gapKey])`; CHECK `MechanismGapStatus` | n/a | every build-status count is **printed from here, never transcribed** |
 | `WidgetCapabilityPolicy` | `min_verification`, `consent_class`, `dispatch_is_synchronous` per key | **7**, registry | `@@unique([capabilitySpace, capabilityKey])`; CHECK `CapabilitySpace`, `VerificationLevel`, `ConsentClass` | n/a | **total over C9-CAP's 56 keys (71 once contract §0.7 F36a registers its set) and over those only** — AE-CAP totality is the allowlist's and the gap ledger's job |
 
 **Erasure classes, every column exactly once:** 150 `AUDIT_RETAINED` · 18 `CONVERSATION_CONTENT` ·
@@ -487,7 +487,12 @@ joins on a conversation id — which is why the replay is the one that governs.)
 **`MIGRATION 2` — `<stamp>_widget_layer_runtime` (K3, wave 2)**
 11 models · 169 columns · 19 unique · 22 index · 34 CHECK · 18 FK (11 → `Tenant`, 7 widget → widget).
 
-**Why two, and not one.** Because the waves have different fences, and one migration would
+**`MIGRATION 3` — `<stamp>_widget_intent_source_capability` (Wave 6, I-MIG3)**
+
+Two nullable, jointly constrained `WidgetIntentRecord` fields store the sealed source-capability reference required
+by Contract V1.2 OD-1. It is additive, has no backfill and changes no business owner.
+
+**Why the first two remain two.** Because the waves have different fences, and one migration would
 collapse them.
 
 1. **Wave 1's fence is that the deployed bytes do not change.** Its three tables are *ledgers about
@@ -653,7 +658,7 @@ complete. There is no partial completion and no «complete with caveats».
 | **G5** | widget contract certified — portability | R1 failures 0; forbidden keys accepted 0; `MUTATE`/`EXECUTE`/`ERROR`/`overlay` 0 | K2 |
 | **G6** | provenance of numbers | numerals without a `Measure` 0; `Cell.label` from the error lexicon 0 | K3 · K10 |
 | **G7** | role modes out of UX, not out of security | mode switchers in UI 0; intent-set difference across the three modes **0 bytes**; server control points ≥ baseline | K4 · K5 |
-| **G8** | backend authority unchanged beyond the recorded R-01 read set and the R-04 revoke-only staff authority | C6–C9 diff = **exactly contract §0.7 F36a's enumerated read set**, asserted by F36a's registry pin test, **plus the one R-04 staff-revoke branch of contract §3.5 R3.5.5 (j)** on `package5.wave3.record-client-consent.execute.v1`'s actor policy and executable input contract, and every other C6–C9 contract diff 0; **modified business tables 0**; migrations other than the two 0; **FKs into business tables 0**; routes: ≤ 3 widget-programme routes — P-01's two widget routes and the internal Telegram command ingress of contract §3.12 R3.12.7 — plus exactly 1 R-04 consent door, the staff revoke-only door of contract §3.5 R3.5.5; staff consent authority other than that door's marketing withdrawal 0 | K2 |
+| **G8** | backend authority unchanged beyond the recorded R-01 read set and the R-04 revoke-only staff authority | C6–C9 diff = **exactly contract §0.7 F36a's enumerated read set**, asserted by F36a's registry pin test, **plus the one R-04 staff-revoke branch of contract §3.5 R3.5.5 (j)** on `package5.wave3.record-client-consent.execute.v1`'s actor policy and executable input contract, and every other C6–C9 contract diff 0; **modified business tables 0**; migrations other than the three approved widget migrations 0; **FKs into business tables 0**; routes: ≤ 3 widget-programme routes — P-01's two widget routes and the internal Telegram command ingress of contract §3.12 R3.12.7 — plus exactly 1 R-04 consent door, the staff revoke-only door of contract §3.5 R3.5.5; staff consent authority other than that door's marketing withdrawal 0 | K2 |
 | **G9** | fullscreen parity, overlays gone | rows without `fullscreen_intent` 0 of 76; self-mounting hosts 0; 6 overlays → 9 route keys | K5 |
 | **G10** | bundle disposition | bundles with the shell 1; shell sources 1; `maya-os-site/index.html` unreachable, **probe recorded** | K15 |
 | **G11** | primary-nav target reached | ≤ the accepted number (5); members without justification 0; ratchet **non-increasing** | K5 · K16 |

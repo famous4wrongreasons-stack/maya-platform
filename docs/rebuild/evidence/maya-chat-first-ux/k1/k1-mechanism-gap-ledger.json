@@ -4,7 +4,7 @@
   {
    "gapKey": "MG-P-01",
    "pRef": "P-01",
-   "component": "IntentGateway",
+   "component": "IntentGateway JWT widget route",
    "status": "[ABSENT]",
    "packageKey": "K3",
    "blockingRules": []
@@ -154,6 +154,46 @@
    "blockingRules": []
   },
   {
+   "gapKey": "MG-P-35",
+   "pRef": "P-35",
+   "component": "Step 0 Telegram callback-token carrier",
+   "status": "[ABSENT]",
+   "packageKey": "K14",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-36",
+   "pRef": "P-36",
+   "component": "Step 0 web-push action carrier",
+   "status": "[ABSENT]",
+   "packageKey": "K13",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-37",
+   "pRef": "P-37",
+   "component": "Step 0 voice carrier",
+   "status": "[ABSENT]",
+   "packageKey": "K6",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-38",
+   "pRef": "P-38",
+   "component": "Step 0 SMS/e-mail signed-link carrier",
+   "status": "[ABSENT]",
+   "packageKey": "K6",
+   "blockingRules": []
+  },
+  {
+   "gapKey": "MG-P-39",
+   "pRef": "P-39",
+   "component": "The spoken-readback path",
+   "status": "[ABSENT]",
+   "packageKey": "K6",
+   "blockingRules": []
+  },
+  {
    "gapKey": "MG-P-18",
    "pRef": "P-18",
    "component": "produced_by_intent_token_hash: string \\| null",
@@ -252,9 +292,9 @@
   {
    "gapKey": "MG-P-30",
    "pRef": "P-30",
-   "component": "The gateway's record fields and the spoken-readback path",
+   "component": "The gateway's retained record fields",
    "status": "[ABSENT]",
-   "packageKey": "K3+K6",
+   "packageKey": "K3",
    "blockingRules": []
   },
   {

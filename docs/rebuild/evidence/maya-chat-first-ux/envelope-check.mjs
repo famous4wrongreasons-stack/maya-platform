@@ -34,7 +34,7 @@ for(const l of sch.split('\n')){ if(/^model\s/.test(l)){cur=1;continue;} if(/^\}
   if(cur&&/^\s{2}\w+\s+\S/.test(l)&&!/^\s*@@/.test(l)&&!/@relation/.test(l))F++; }
 chk('WIDGET-LAYER MODELS: 14', countModels===14 && /WIDGET-LAYER MODELS: 14/.test(env), `${countModels}`);
 chk('PHYSICAL FIELDS: 191', F===191 && /PHYSICAL FIELDS:\s+191/.test(env), `${F}`);
-chk('MIGRATIONS: 2', /MIGRATIONS:\s+2/.test(env) && /\*\*MIGRATIONS EXPECTED\*\* \| \*\*2\*\*/.test(map), '2');
+chk('MIGRATIONS: 3', /MIGRATIONS:\s+3/.test(env) && /\*\*MIGRATIONS EXPECTED\*\* \| \*\*3\*\*/.test(map), '3');
 // per-model field counts quoted in the envelope match the schema
 const perModel={}; cur=null;
 for(const l of sch.split('\n')){ const m=l.match(/^model\s+(\w+)/); if(m){cur=m[1];perModel[cur]=0;continue;}

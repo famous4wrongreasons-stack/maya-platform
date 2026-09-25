@@ -1,6 +1,6 @@
-# MAYA WIDGET CONTRACT v1.1
+# MAYA WIDGET CONTRACT v1.2
 
-*Canonical. Normative. Version 1.1. Version 1 is this file at commit `81bcc5ec` (SHA-256 `15c383f1d173ad7bc83b6b4df8138b06c96c4131452d5fe05549ed6d59aca4d3`), consolidated 2026-09-15 on branch `codex/maya-identity-consent-20260913`. The owner decisions this version carries are recorded in Annex C, which states no rule.*
+*Canonical. Normative. Version 1.2. Version 1.1 is this file at commit `17b5dc0b` (SHA-256 `4629f8762bd47245cfd90078c329439ddd8bbb7fa15439ad76adee49d5105d09`), consolidated 2026-09-25 on branch `codex/maya-identity-consent-20260913`. The owner decisions carried by Versions 1.1 and 1.2 are recorded in Annexes C and D, which state no rule.*
 
 **One document, one place per rule.** This contract has no errata layer and no precedence
 chain. Every rule is stated once, where it belongs, in its final form. A reader never needs to
@@ -589,8 +589,8 @@ control). A **mechanism gap** is "this component is not built yet":
 
 ```ts
 interface MechanismGap {
-  gap_key: `MG-${string}`;      // one per prerequisite row: MG-P01 … MG-P34
-  p_ref: string;                // 'P-01' … 'P-34'
+  gap_key: `MG-${string}`;      // one per prerequisite row: MG-P01 … MG-P39
+  p_ref: string;                // 'P-01' … 'P-39'
   component: string;
   status: '[ABSENT]' | '[EXISTS]' | '[PARTIAL]' | '[UNENFORCEABLE-TODAY]';
   package: string;              // the K-package that builds it
@@ -599,7 +599,7 @@ interface MechanismGap {
 declare const MECHANISM_GAP_LEDGER: Readonly<Record<string, MechanismGap>>;
 ```
 
-At `EP-REGISTRY-LOAD`, over the thirty-four prerequisite rows: (1) every row whose `status` is
+At `EP-REGISTRY-LOAD`, over the thirty-nine prerequisite rows: (1) every row whose `status` is
 not `[EXISTS]` resolves in `MECHANISM_GAP_LEDGER` under its own `gap_key`; (2) every
 `NORMATIVE-PENDING` clause appears in **at least one** row's `blocking_rules`, and in **every**
 row whose `p_ref` that clause's status names; (3) the binding is the **pair** `(clause, p_ref)`,
@@ -1844,7 +1844,7 @@ Gate 6. An unasked-for raise withholds capability while looking like caution.
 
 ### 0.18 Prerequisites and what "pending" means
 
-**F92 — thirty-four prerequisite rows carry the build status of every mechanism this contract
+**F92 — thirty-nine prerequisite rows carry the build status of every mechanism this contract
 names**, each with a `MG-P01` … `MG-P34` key in `MECHANISM_GAP_LEDGER`. A row leaves
 `NORMATIVE-PENDING` when, **and only when**, (a) the named mechanism exists at a stated path,
 (b) `EP-BUILD` carries a test that fails if it is removed, and (c) the corresponding gap key is
@@ -4492,6 +4492,8 @@ interface IntentRecord {
   capability: CapabilityRef | null;
   handoff_capability_ref: CapabilityRef | null;
   target: IntentTarget | null;
+  source_capability: CapabilityRef | null;    // server-owned source of a NAVIGATE(detail/w);
+                                              // sealed at mint, AUDIT_RETAINED, never authority
   verification_floor: VerificationLevel;
   confirmation: Omit<ConfirmationRequirement, 'readback_text'> | null;
                                               // readback_text is CONVERSATION_CONTENT and is not
@@ -4550,12 +4552,13 @@ interface IntentRecord {
 }
 ```
 
-`widget_kind`, `priority`, `body_hash`, `selection_domain`, `c9_domain`, `confirmation_subject` and `approval_decision`
-are mint class **D** — derived by the minter, never authored — and are `AUDIT_RETAINED`: a kind name, an integer, two
-hashes, a domain enum and two closed decision enums carry no conversation content, so the erasure-reachability test
-stays green. All seven are components of the gateway prerequisite **P-30**, so a gateway built without any of them
-fails its own completeness assertion rather than shipping a Gate 5 that cannot recompute, a Gate 6 that cannot call its
-own fence, a Gate 7 that cannot check BOOK.1, or a Gate 13 that cannot tell an approval from a rejection.
+`widget_kind`, `priority`, `body_hash`, `selection_domain`, `c9_domain`, `confirmation_subject`,
+`approval_decision` and `source_capability` are mint class **D** — derived by the minter, never authored — and are
+`AUDIT_RETAINED`: they carry no conversation content, so the erasure-reachability test stays green. They are
+components of the gateway record-fields prerequisite **P-30**. `source_capability` is non-null only on a server-minted
+`NAVIGATE` to class `detail` or `w`, is copied from the emitting envelope's server-owned provenance, and is included
+in the record seal. It is a retained reference, not authority or permission. The client and the LLM have no member
+that can author or override it. Every submission re-evaluates its capability for the live principal and exact tenant.
 
 **R3.7.1 — `c9_domain` is derived on the run-bearing path and null by construction on the
 others.** On the run-bearing path — `correlation.run_id !== null` — an envelope carrying an
@@ -4604,6 +4607,17 @@ every intent of a `BOOKING_CONFIRMATION` envelope and to `null` for every other 
 intent `ApprovalBody.reject_intent` names, and to `null` for every other intent. *Mechanism:* the record writer's
 derivation from the sealed body inside the mint transaction, plus the closed-shape validator's two biconditional checks.
 *Evaluated at:* `EP-MINT`. *Status:* `NORMATIVE-PENDING` on **P-30**.
+
+**R3.7.6 — a retained source capability is evidence, never permission.** For a server-minted `NAVIGATE` whose
+target class is `detail` or `w`, `source_capability` is copied from the emitting envelope's server-owned
+`provenance.source_capability`, sealed with the record and classified `AUDIT_RETAINED`. It is null on every other
+record. The client, renderer and model cannot author it. At every submission Gate 13 treats it only as the key of a
+fresh current-authority evaluation: the exact live principal, tenant, current capability registration and current
+owner policy are re-checked. A revoked, stale, foreign-tenant or foreign-principal reference refuses; retaining the
+reference preserves neither authority nor permission. *Mechanism:* record-writer derivation, seal verification,
+the target/source biconditional at `EP-MINT`, and the fresh Gate 6 evaluation before the projector or sealed-envelope
+read. *Evaluated at:* `EP-MINT`, `EP-INGRESS` Gates 1, 6 and 13, and `EP-BUILD`. *Status:*
+`NORMATIVE-PENDING` on **P-02** and **P-30**.
 
 ---
 
@@ -4733,12 +4747,26 @@ the internal ingress of §3.12 R3.12.7.
 | 13 | **Effect routing** | `NONE` — unreachable (no token). `NAVIGATE` / `REFINE` → projector → `next_envelope`, **terminates here; no business effect is reachable from a selector**. `CONTROL` → the one registered control handler, which performs its own principal and tenant check; no Action Engine edge. `DRAFT` → canonical draft owner. `REQUEST_APPROVAL` → approval object → PENDING. `HANDOFF` → one R3.8.5 `HandoffTarget` in `resolved_widget`, no capability invoked. `COMMIT` → Gate 14 | per class | effect router | [TO BUILD] |
 | 14 | **Canonical action** | `CanonicalActionIngressService.prepare()` receives the capability key, the normalized input, the **server-minted** idempotency key and the evidence refs; the policy resolver — not the caller — owns the decision (`assertNoCallerAuthority` at `action-engine.ingress.ts:161`, `assertResolverOwnsDecision` at `:141`); the Action Engine, never the widget, chat or renderer, calls the provider owner | policy decision | CanonicalActionIngressService → ActionEngineKernel → provider owner | [EXISTS] — `action-engine.ingress.ts` |
 
+**R3.9.6 — NAVIGATE re-projection uses retained source evidence under current authority.** A `NAVIGATE(detail)`
+submission passes Gates 1–13 and, after Gate 6 has admitted the record's sealed `source_capability` for the live
+principal and exact tenant, Gate 13 asks the registered projector for a new envelope. A `NAVIGATE(w)` submission
+returns the stored sealed envelope under FR-4 after the same current-authority check and does not re-project business
+facts. Class `i` follows the same current-authority rule wherever a registered projection exists. The projector
+cannot reinterpret the retained key, mint authority or read on a refusal. K16's `(widget_id, density)` describes only
+this admitted detail branch and is not a request member of `/api/widgets/resolve`. *Mechanism:* the sealed record
+member, Gate 6's current owner evaluation, the closed projector registry and Gate 13's effect router. *Evaluated at:*
+`EP-INGRESS` Gates 6, 12 and 13. *Status:* `NORMATIVE-PENDING` on **P-01**, **P-02** and **P-30**.
+
+
 **Gate 6 in full.** The subject is bound once and the dispatch reads it, never `record.capability`:
 
 ```
 const ref = subjectCapability(record);        // bound once; NOT record.capability
-if (ref === null)                             // NONE, and w/i/s/detail NAVIGATE
+if (ref === null)                             // NONE and class-s NAVIGATE
   → no capability is exercised; Gate 6 has nothing to check and the intent proceeds
+
+if (record.effect === 'NAVIGATE' && record.source_capability !== null)
+  → evaluate that sealed source capability for the live principal and tenant; it confers no retained permission
 
 if (record.effect === 'HANDOFF')
   → the subject resolves the DESTINATION fences ONLY: registration in its space,
@@ -6633,7 +6661,7 @@ Columns: **Component** — the named artefact. **Depends on it** — the contrac
 
 | # | Component | Depends on it | Status | Package |
 |---|---|---|---|---|
-| **P-01** | **`IntentGateway`** — Step 0 plus Gates 1–13, one ordered pipeline, and the programme's only three new routes: the two widget routes `POST /api/widgets/resolve`, `POST /api/widgets/intent`, and the internal Telegram command ingress of §3.12 R3.12.7 (owner ruling R-03), which is not a widget route and whose build is row **P-33**. The one further ingress owner ruling R-04 authorises, the staff revoke-only consent door of §3.5 R3.5.5, is counted beside these three; it is not a widget route, none of the three reaches it, and its build is row **P-34** | FR-1, FR-2, FR-3, FR-4, FR-5, FR-7, FR-9, FR-13; §3.9 R3.9.1; every `EP-INGRESS` rule in the contract other than §3.12 R3.12.7 | `[ABSENT]` — `api/widgets` 0 hits; `IntentGateway` 0 hits | **K3** (wave 2) |
+| **P-01** | **`IntentGateway` JWT widget route** — the two authenticated widget routes `POST /api/widgets/resolve` and `POST /api/widgets/intent`, the ordered Gate 1–13 pipeline, and Step 0 for the server-issued JWT token carried by the PWA, native shell and Mini App | FR-1, FR-2, FR-3, FR-4, FR-5, FR-7, FR-9, FR-13; §3.9 R3.9.1; every `EP-INGRESS` rule in the contract other than the separately registered carrier rows | `[ABSENT]` — `api/widgets` 0 hits; `IntentGateway` 0 hits | **K3** (wave 2) |
 | **P-33** | **The internal Telegram command ingress** — the one internal service-to-service route of §3.12 R3.12.7, declared outside the widget layer and reachable through no public edge, with the tests its clauses name | §3.12 R3.12.7; §3.9 Step 0 for the Telegram typed carrier | `[ABSENT]` — no such route is declared in `maya-saas-backend/src` | **K14** (wave 6) |
 | **P-02** | **`IntentRecord`** — the stored record and its type, including `principal_proof_hash`, `capability`, `effect`, `verification_floor`, `widget_kind`, `frozen_nouns` | Gate 1 single-use consumption, Gate 3 principal binding, Gate 7's COMMIT check, §3.7, §4.2's frozen receipt, §0.4 F15's noun-resolver input set, idempotency of a tap, "who pressed what" audit | `[ABSENT]` — 0 hits | **K3** (wave 2) |
 | **P-03** | **Timeline store** — conversation turns, envelopes, bodies, minted text, `spoken_transcript`, rendered utterances | §4.2's week-later receipt; §4.4.2 retention and per-kind body drop; §4.4.1 RT3(b)'s history-blind replay; §4.7 V5's "stored exactly once"; `EP-FETCH` timeline read | `[ABSENT]` — 0 hits | **K3** (wave 2) |
@@ -6665,6 +6693,12 @@ Columns: **Component** — the named artefact. **Depends on it** — the contrac
 | **P-16** | **`control.widget.dismiss`** — the handler that sets `Lifecycle.delivery` on one emission, `CONTROL_FLOOR = ANONYMOUS` | §0.9 F60's escape verb on **every non-`RICH_INTERACTIVE` tier** — i.e. Telegram, web push, SMS, e-mail, voice. Without it the mandatory escape is unreachable off the PWA, contradicting §3.12.6, §4.7 V9, §4.8 A-5 | `[ABSENT]` — 0 hits | **K3** (handler, wave 2) + **K6** (the `EP-FIT` branch that selects it, wave 2) |
 | **P-17** | **`control.delivery.resolve`** — the handler that resolves one `dedupe_key` across channels, `CONTROL_FLOOR = BOUND_CLIENT` | §0.7 F27; cross-channel duplicate suppression; §4.9's proactive `dedupe_key` | `[ABSENT]` — 0 hits | **K13** (wave 5 — "0 duplicate deliveries across push, chat and the Telegram mirror over a 14-day window") |
 | **P-34** | **The staff marketing-revoke door** — the one staff ingress of §3.5 R3.5.5 onto the existing canonical consent owner (owner ruling R-04), declared outside the widget layer and outside the ingress of §3.12 R3.12.7, with the owner's staff-revoke branch and contact match, the executor's staff source types, the Action Engine's staff-revoke branch of R3.5.5 (j), and the tests its clauses name | §3.5 R3.5.5; the engine exception named in §0.16 FR-6a and §3.4 R3.4.4 | `[ABSENT]` — no staff path records a marketing-consent withdrawal: the owner refuses any actor but the client's own verified channel link (`package5-wave3/package5-wave3-canonical-cutover.service.ts:265-289`), the policy resolver requires a durable channel binding (`action-engine/action-engine.policy-resolver.ts:748-756`), the capability's input contract requires client channel authority for every consent write (`action-engine/package5-wave3-executable.contract.ts:278`), and the executor writes every consent fact as `'client_command'` (`package5-wave3/package5-wave3.service.ts:1384`) | **K14** (wave 6) |
+
+| **P-35** | **Step 0 Telegram callback-token carrier** — a Telegram callback reaches the same typed token decoder; the separately governed typed command ingress remains P-33 | §3.9 Step 0's Telegram carrier | `[ABSENT]` — no callback-token carrier is admitted this cycle | **K14** |
+| **P-36** | **Step 0 web-push action carrier** — `event.action` carries only the server-issued widget token into the same decoder | §3.9 Step 0's web-push carrier | `[ABSENT]` — no web-push token carrier is admitted this cycle | **K13** |
+| **P-37** | **Step 0 voice carrier** — deterministic matching over server-owned speech aliases or ordinal after transcription, with no model-authored intent authority | §3.9 Step 0's voice carrier | `[ABSENT]` — voice readiness is outside Chat-First booking scope | **K6** |
+| **P-38** | **Step 0 SMS/e-mail signed-link carrier** — a signed server-issued link resolves to the same token decoder and current authority checks | §3.9 Step 0's SMS/e-mail carrier | `[ABSENT]` — no signed-link carrier is admitted this cycle | **K6** |
+| **P-39** | **The spoken-readback path** — `ReadbackAck` and Gate 8-R's closed spoken affirmation vocabulary | §3.8 `ReadbackAck`; Gate 8-R; §4.7 V4 | `[ABSENT]` — spoken/voice readiness remains pending | **K6** |
 
 *`control.run.cancel` is the only one of the three control keys whose owner endpoint exists today: `src/orchestration/c9.controller.ts:92`, write-once under `cancelKeyHash`, principal- and tenant-locked, `c9.store.ts:588-615`. The key itself is not a C9 canon member, by design (§0.7 F27).*
 
@@ -6709,8 +6743,8 @@ Columns: **Component** — the named artefact. **Depends on it** — the contrac
 
 ### A1.7 The contract's own machinery — P-23 … P-32
 
-§0.18 F92 declares **thirty-four** prerequisite rows; F93 names the thirteen this contract's own machinery depends on, and §A1.1–§A1.7 together carry all thirty-four. §A1.1–§A1.6 detail the
-twenty-four that are components of the product (P-01 … P-22, P-33 and P-34). The remaining ten are components of **this
+§0.18 F92 declares **thirty-four** prerequisite rows; F93 names the thirteen this contract's own machinery depends on, and §A1.1–§A1.7 together carry all thirty-nine. §A1.1–§A1.6 detail the
+twenty-nine that are components of the product (P-01 … P-22 and P-33 … P-39). The remaining ten are components of **this
 contract's own enforcement machinery** — the registries, assertions and ledgers without which
 the contract's rules are statements rather than fences. They were cited by `NORMATIVE-PENDING`
 statuses throughout §§0–4 with no row to resolve them against; the rows are here.
@@ -6725,8 +6759,8 @@ Every one is `[ABSENT]`: the widget layer does not exist in any form (§A0.5).
 | **P-26** | **Gate 6's key-space dispatch** — the four-branch dispatch on `subjectCapability(record).space`, scoped by effect | §0.8 F54; §3.9 «Gate 6 in full»; FR-6a … FR-6f | **K4** (wave 2) |
 | **P-27** | **The `controlledFixtureMode === false` build assertion** — without it `APPROVER_ROLES` admits six roles where the canonical policy names two | §0.16 F90(4), which bounds the FR-6f row; §3.11 R3.11.6 | **K3** (wave 2) |
 | **P-28** | **The widget `ActionSourceType` discipline** — the widget layer's own source type, and the assertion that a widget-minted request never claims `legacy_bridge` or `synthetic_shadow` | §0.7's `allowedSourceTypes` conditions; Gate 14; FR-3 | **K4** (wave 2) |
-| **P-29** | **`MECHANISM_GAP_LEDGER`** — the ledger itself, `MG-P01` … `MG-P34`, total over these thirty-four rows, from which every status count is printed at build | §0.18 F92; §A2's entire mechanism; §A5's refusal to transcribe a tally | **K1** (wave 1) |
-| **P-30** | **The gateway's record fields and the spoken-readback path** — `IntentRecord`'s `priority`, `widget_kind`, `body_hash`, `selection_domain`, `c9_domain`, `confirmation_subject`, `approval_decision` and `produced_by_intent_token_hash`, plus `ReadbackAck` and Gate 8-R | §3.7's declaration and R3.7.5; Gate 5's recompute; §2.6.5 BOOK.1's Gate 7 half; Gate 13's `APPROVAL` decision routing; Gate 8-R; §4.7 V4 | **K3** (wave 2) + **K6** (voice) |
+| **P-29** | **`MECHANISM_GAP_LEDGER`** — the ledger itself, `MG-P01` … `MG-P34`, total over these thirty-nine rows, from which every status count is printed at build | §0.18 F92; §A2's entire mechanism; §A5's refusal to transcribe a tally | **K1** (wave 1) |
+| **P-30** | **The gateway's retained record fields** — `IntentRecord`'s `priority`, `widget_kind`, `body_hash`, `selection_domain`, `c9_domain`, `confirmation_subject`, `approval_decision`, `produced_by_intent_token_hash` and `source_capability` | §3.7's declaration and R3.7.1/R3.7.5/R3.7.6; Gate 5's recompute; §2.6.5 BOOK.1's Gate 7 half; Gate 13's `APPROVAL` and `NAVIGATE` routing | **K3** (wave 2) |
 | **P-31** | **`A11yBlock.accessible_names`** — the total, closed name map keyed through `refKey(ref)`, and `nameSourceOf`'s seven branches | §4.8 A-0, A-2, A-3; §0.11 F67–F68 | **K5** (wave 2) |
 | **P-32** | **The moment, notification-consent and template catalogues** — `MOMENT_REGISTRY` (twelve rows), `NOTIFICATION_CONSENT_REGISTRY`, `MOMENT_TEMPLATES`, and the `EP-REGISTRY-LOAD` resolution chain over them | §4.9.3 PR3; `ProactiveProvenance`; every proactive emission | **K13** (wave 5) |
 
@@ -6900,7 +6934,7 @@ All copies embed the same `PARTNER_TOKEN` (`'U7nDBjvTOj21WqF0y94l'`), set `Acces
 
 ## A5 Closing statement
 
-§A1 enumerates the prerequisite components P-01 … P-34 — the twenty-four product components of §A1.1–§A1.6 (P-01 … P-22, P-33 and P-34) and the ten machinery components of §A1.7. **Their per-status counts are not transcribed here.** F92 requires the build status of every mechanism this contract names to be printed from `MECHANISM_GAP_LEDGER` at `EP-BUILD`, and a tally written into prose is a second record of the same thing that drifts the moment one row changes — which is what happened to the count that stood here. §A2 binds each of them to the existing capability-gap machinery with a fail-closed default evaluated at `EP-REGISTRY-LOAD`, `EP-COMPOSE` and `EP-MINT`. §A3 states the schema position without narrowing it silently and hands the decision to the owner as D12. §A4 records five repository defects that the contract cannot reach and does not claim to.
+§A1 enumerates the prerequisite components P-01 … P-39 — the twenty-four product components of §A1.1–§A1.6 (P-01 … P-22, P-33 and P-34) and the ten machinery components of §A1.7. **Their per-status counts are not transcribed here.** F92 requires the build status of every mechanism this contract names to be printed from `MECHANISM_GAP_LEDGER` at `EP-BUILD`, and a tally written into prose is a second record of the same thing that drifts the moment one row changes — which is what happened to the count that stood here. §A2 binds each of them to the existing capability-gap machinery with a fail-closed default evaluated at `EP-REGISTRY-LOAD`, `EP-COMPOSE` and `EP-MINT`. §A3 states the schema position without narrowing it silently and hands the decision to the owner as D12. §A4 records five repository defects that the contract cannot reach and does not claim to.
 
 Against the owner's bar, and for the class of finding this annex addresses: **an unmarked claim about an unbuilt mechanism is an unproven claim; a marked one, bound to a gap key and a refusal, is a declared prerequisite.** Every such claim in this contract is now marked. `[NON-NORMATIVE]` The residual findings this annex does not close are the ones §0.16 F90 and §0.21 carry, in the wording those clauses use; this statement does not enumerate them a second time. What follows was written against an earlier body and is retained only as the reason the annex exists. The two findings this annex does **not** close, because they are not in its scope, are the two conferral-fence falsifications (FR-6c's bulk-send ceiling and FR-6d's `'financial'`-token classifier) and the FR-3 authority-gate gap over the Action Engine key space — those are defects in Section 0's derivations, not missing components, and they require an edit to Section 0 rather than a status marker. §A1.6.2 is the one place where this annex adds a normative fence of its own, because a registration gate with four live keys behind it is a materially different gate from one with none.
 
@@ -7431,3 +7465,22 @@ the body; each stays implementable only where the body already permits it.
 | AMB-21h, the boolean half | a retention class for a boolean answer: Block B AMB-21e concerns Gate 8's check only, and §0.4 F16 classifies a data subject's affirmation as `CONVERSATION_CONTENT` | not stated; booleans and scalars stay unclassified until an owner or privacy decision |
 | G2-15, G2-17 | pre-auth credential and trial forms | shell and G2 plan |
 | G2-36 (SC-17) | master-scoped client list with a chat key «through R-01»; not in the ruling's set | not registered |
+
+# Annex D — Version 1.2 owner decisions record
+
+**Non-normative record.** This annex records provenance only. It states no rule, mechanism, evaluation point or
+implementation permission beyond the normative body.
+
+## D.1 Decisions carried by Version 1.2
+
+| Decision | Owner answer | Body consequence |
+|---|---|---|
+| OD-1 | Option A | A sealed server-owned source-capability reference is retained on the corresponding NAVIGATE record; the normative body defines its non-authority semantics and fresh checks |
+| OD-2 | Option C | The JWT route, carrier mechanisms, retained record fields and spoken-readback mechanism have independent prerequisite rows, so only complete mechanisms can discharge |
+| I-MIG3 | Approved | The source-capability fields use a new additive migration |
+| P-G15c | Not activated | The existing U-class shortfall remains pending and is outside the first Chat-First booking E2E |
+
+## D.2 Scope preserved
+
+Version 1.2 changes no business owner, adds no generic client-controlled authority, and does not claim voice or
+spoken readiness. The full decision wording is preserved in `MAYA-WIDGET-CONTRACT-V1.2-DECISION-RECORD.md`.

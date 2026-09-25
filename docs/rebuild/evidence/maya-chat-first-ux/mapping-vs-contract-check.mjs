@@ -14,7 +14,7 @@ for(const l of c.split('\n')){const x=l.match(/^\| \*\*(P-\d\d)\*\* \|/); if(x) 
 for(const l of m.split('\n')){const x=l.match(/^\| (P-\d\d) \|/); if(x) mP[x[1]]=pk(l.split('|').slice(-2)[0]);}
 const pAll=[...new Set([...Object.keys(cP),...Object.keys(mP)])].sort();
 const pBad=pAll.filter(p=>cP[p]!==mP[p]);
-chk('every prerequisite row agrees with Annex A on its package', pBad.length===0 && pAll.length===34,
+chk('every prerequisite row agrees with Annex A on its package', pBad.length===0 && pAll.length===39,
     `${pAll.length} rows, ${pBad.length} disagreements${pBad.length?': '+pBad.map(p=>`${p} contract=${cP[p]} mapping=${mP[p]}`).join(' | '):''}`);
 
 // 2. all 24 gate conditions owned, and each named in a package section
@@ -38,11 +38,11 @@ for(const [name,reM,reC] of fig) chk(`mapping and contract agree: ${name}`, reM.
 // 4. the mapping must not claim a business-schema change
 chk('mapping asserts BUSINESS SCHEMA OWNERS CHANGED: 0', /BUSINESS SCHEMA OWNERS CHANGED\*{0,2} \| \*\*0\*\*|\*\*BUSINESS SCHEMA OWNERS CHANGED\*\*/.test(m), 'present');
 chk('mapping declares no FK from a business table into the widget layer', /business table\s+──FK──► widget-layer\s+FORBIDDEN/.test(m), 'direction rule present');
-chk('mapping declares exactly 2 migrations', /\*\*MIGRATIONS EXPECTED\*\* \| \*\*2\*\*/.test(m), '2');
+chk('mapping declares exactly 3 migrations', /\*\*MIGRATIONS EXPECTED\*\* \| \*\*3\*\*/.test(m), '3');
 
 // 5. the mapping must not authorize implementation
-chk('mapping states implementation is not authorized', /Implementation has not begun and is not authorized/.test(m), 'header');
-chk('mapping does not open wave 1', /It does not open wave 1\./.test(m), '§10.1');
+chk('mapping does not self-authorize implementation', /remains descriptive/.test(m), 'header');
+chk('mapping records separate owner authorization for Wave 6', /Wave 6 is open only because the owner separately authorized it/.test(m), '§0');
 
 let bad=0;
 console.log('MAPPING vs CERTIFIED CONTRACT\n');

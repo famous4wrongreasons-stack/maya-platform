@@ -40,8 +40,8 @@ export declare const AE_PROPOSE_PAIRING: readonly {
 
 // --- section 0.7 (contract line 590) ---
 export interface MechanismGap {
-  gap_key: `MG-${string}`; // one per prerequisite row: MG-P01 … MG-P34
-  p_ref: string; // 'P-01' … 'P-34'
+  gap_key: `MG-${string}`; // one per prerequisite row: MG-P01 … MG-P39
+  p_ref: string; // 'P-01' … 'P-39'
   component: string;
   status: '[ABSENT]' | '[EXISTS]' | '[PARTIAL]' | '[UNENFORCEABLE-TODAY]';
   package: string; // the K-package that builds it

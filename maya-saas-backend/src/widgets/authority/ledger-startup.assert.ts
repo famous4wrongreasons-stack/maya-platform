@@ -5,7 +5,7 @@
 // assertion and the process does not start." Errata EC-5 restates that assertion over
 // `MECHANISM_GAP_LEDGER` rather than over the capability ledger, because "§A1 has no such column and
 // the capability ledger holds a different kind of gap" — F35's own distinction. §0.7 F35 then states
-// the assertion in full: over the thirty-four prerequisite rows, "every row whose `status` is not
+// the assertion in full: over the thirty-nine prerequisite rows, "every row whose `status` is not
 // `[EXISTS]` resolves in `MECHANISM_GAP_LEDGER` under its own `gap_key`", and "a build assertion
 // states that the two ledgers' key shapes (`MG-` versus `GAP-`) are disjoint".
 //
@@ -19,7 +19,7 @@
 //     cite. F35's own sentence is already written this way.
 //   - F35 (2) and (3) — every NORMATIVE-PENDING clause bound to the rows its status line names, as
 //     `(clause, p_ref)` pairs — is NOT asserted. K1's ledger carries `blocking_rules: []` on all
-//     thirty-four rows, so there is nothing to check them against; the generator refuses a populated
+//     thirty-nine rows, so there is nothing to check them against; the generator refuses a populated
 //     list for the same reason. Deriving the pairs from the clauses' own status lines is
 //     P-DISCHARGE's DIS-0 reader. This is a disclosed residual of the unit, not a softening: it means
 //     the pair half of F35's assertion is unproven, and it is recorded in the unit's report.

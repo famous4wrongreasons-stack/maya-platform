@@ -43,7 +43,7 @@ ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_approvalDeci
 -- C9Domain (4) — contract union `C9Domain` (ambient.ts)
 ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_c9Domain_check" CHECK ("c9Domain" IN ('ADMIN', 'CLIENT_LIFECYCLE', 'OCCUPANCY', 'BUSINESS_INTELLIGENCE'));
 
--- ConfirmationOfKind (3) — contract `IntentRecord.kind` (intent.ts:303)
+-- ConfirmationOfKind (3) — contract `IntentRecord.kind` (intent.ts:305)
 ALTER TABLE "WidgetIntentRecord" ADD CONSTRAINT "WidgetIntentRecord_confirmationOfKind_check" CHECK ("confirmationOfKind" IN ('draft', 'record', 'approval'));
 
 -- EffectClass (8) — contract union `EffectClass` (intent.ts)

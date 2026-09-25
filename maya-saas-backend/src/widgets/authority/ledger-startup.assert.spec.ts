@@ -149,14 +149,14 @@ describe('P-LEDGER — the runtime mechanism-gap and capability-gap ledgers', ()
     return line ?? '';
   };
 
-  // ── LED-1: the thirty-four rows equal the JSON and §A1 ─────────────────────────────────────────
+  // ── LED-1: the thirty-nine rows equal the JSON and §A1 ─────────────────────────────────────────
 
-  it('LED-1a the ledger carries K1’s thirty-four rows, and F92’s declared count', () => {
+  it('LED-1a the ledger carries K1’s thirty-nine rows, and F92’s declared count', () => {
     const k1 = readK1('k1-mechanism-gap-ledger.json');
     expect(k1.contract).toBe('maya.k1.mechanism-gap-ledger/1');
     expect(MECHANISM_GAP_ROWS).toHaveLength(k1.rows.length);
     expect(MECHANISM_GAP_ROWS).toHaveLength(MECHANISM_GAP_DECLARED_ROW_COUNT);
-    expect(MECHANISM_GAP_DECLARED_ROW_COUNT).toBe(34);
+    expect(MECHANISM_GAP_DECLARED_ROW_COUNT).toBe(39);
   });
 
   it('LED-1b the ledger is K1’s rows field for field, in K1’s order', () => {
@@ -190,13 +190,13 @@ describe('P-LEDGER — the runtime mechanism-gap and capability-gap ledgers', ()
     }
   });
 
-  it('LED-1d the ledger covers F35’s declared range P-01 … P-34, once each', () => {
+  it('LED-1d the ledger covers F35’s declared range P-01 … P-39, once each', () => {
     expect([
       MECHANISM_GAP_PREREQUISITE_FIRST,
       MECHANISM_GAP_PREREQUISITE_LAST,
-    ]).toEqual([1, 34]);
-    expect(CONTRACT).toContain('MG-P01 … MG-P34');
-    expect(CONTRACT).toContain("'P-01' … 'P-34'");
+    ]).toEqual([1, 39]);
+    expect(CONTRACT).toContain('MG-P01 … MG-P39');
+    expect(CONTRACT).toContain("'P-01' … 'P-39'");
     expect(MECHANISM_GAP_ROWS.map((row) => row.p_ref).sort()).toEqual(
       Array.from(
         {

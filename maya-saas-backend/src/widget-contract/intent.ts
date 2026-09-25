@@ -266,6 +266,8 @@ export interface IntentRecord {
   capability: CapabilityRef | null;
   handoff_capability_ref: CapabilityRef | null;
   target: IntentTarget | null;
+  source_capability: CapabilityRef | null; // server-owned source of a NAVIGATE(detail/w);
+  // sealed at mint, AUDIT_RETAINED, never authority
   verification_floor: VerificationLevel;
   confirmation: Omit<ConfirmationRequirement, 'readback_text'> | null;
   // readback_text is CONVERSATION_CONTENT and is not
@@ -329,7 +331,7 @@ export interface IntentRecord {
   spoken_transcript: string | null; // voice turns only; authority NONE
 }
 
-// --- section 3.8 (contract line 4612) ---
+// --- section 3.8 (contract line 4626) ---
 export interface WidgetIntentSubmission {
   // "maya.widget.intent.submission/1"
   contract: 'maya.widget.intent.submission/1';
@@ -352,7 +354,7 @@ export interface ReadbackAck {
   // affirmation vocabulary at submission time only.
 }
 
-// --- section 3.8 (contract line 4679) ---
+// --- section 3.8 (contract line 4693) ---
 export interface HandoffTarget {
   // resolved_widget member for effect === 'HANDOFF' (Gate 13)
   route_key: string; // D — derived from the record's own target; never client-supplied
@@ -367,7 +369,7 @@ export interface HandoffAnswer {
   resolved_widget: HandoffTarget;
 }
 
-// --- section 3.9 (contract line 4804) ---
+// --- section 3.9 (contract line 4832) ---
 export declare function routeUtterance(
   utterance: string,
   candidates: readonly IntentRecord[],
@@ -399,7 +401,7 @@ export interface DivergenceAuditRecord {
   observed_at: string; // D — RFC3339
 }
 
-// --- section 3.12 (contract line 5204) ---
+// --- section 3.12 (contract line 5232) ---
 export interface TelegramCommandIngress {
   // "maya.telegram.command-ingress/1"
   contract: 'maya.telegram.command-ingress/1';

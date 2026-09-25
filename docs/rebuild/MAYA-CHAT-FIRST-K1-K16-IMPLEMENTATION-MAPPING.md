@@ -1,8 +1,8 @@
 # MAYA CHAT-FIRST — K1…K16 IMPLEMENTATION MAPPING
 
-> **Status: CANONICAL. Implementation has not begun and is not authorized by this document.**
+> **Status: CANONICAL. Waves 1–5 are certified; Wave 6 is separately owner-authorized. This mapping remains descriptive.**
 > This is the frozen mapping between the approved architecture, the certified
-> `MAYA WIDGET CONTRACT v1`, and sixteen packages across six waves. It names what each
+> `MAYA WIDGET CONTRACT v1.2`, and sixteen packages across six waves. It names what each
 > package builds, which contract prerequisite it discharges, which surfaces it owns, which
 > widget kinds it may emit, what it is allowed to write, and the single condition on which
 > it is accepted. **It authorizes no code**, and adoption is not authorization: the owner
@@ -45,8 +45,8 @@ package whose exit criterion is two different kinds of evidence has two exit cri
 
 **Three things this document may not do, and does not:**
 
-1. **It may not begin implementation.** No package opens on the strength of this mapping.
-   Wave 1 opens when the owner authorizes wave 1.
+1. **It may not begin implementation by itself.** No package opens on the strength of this mapping.
+   Wave 6 is open only because the owner separately authorized it.
 2. **It may not invent a physical field the contract does not require.** Where the contract
    names an artefact without declaring its shape, this document declares the shape **only**
    where the contract's own rules fix it completely, and otherwise records the open question
@@ -63,7 +63,7 @@ package whose exit criterion is two different kinds of evidence has two exit cri
 | Input | Value | Where it is fixed |
 |---|---|---|
 | Owner decisions | D1–D12, approved | `MAYA-CHAT-FIRST-UX-OWNER-DECISIONS.md` |
-| Contract | `MAYA WIDGET CONTRACT v1`, consolidated | `MAYA-WIDGET-CONTRACT-V1.md` |
+| Contract | `MAYA WIDGET CONTRACT v1.2`, consolidated | `MAYA-WIDGET-CONTRACT-V1.md` |
 | Widget kinds | 22, closed | contract §2.1 |
 | Emittable today | 16 + `ARTIFACT` narrowly; `CHART` blocked on P-13; 4 blocked on registration | contract §2.7 |
 | Surfaces | 795, triaged 795/795 | architecture §9, §13 |
@@ -129,12 +129,12 @@ cannot be a dependency of its producers.
 
 ## 3. The prerequisite register, mapped to packages
 
-Annex A of the contract registers twenty-four product prerequisite components (P-01 … P-22, P-33 and P-34). Every one is assigned
+Annex A of the contract registers twenty-nine product prerequisite components (P-01 … P-22 and P-33 … P-39). Every one is assigned
 here. **Two are assigned to no package, and that is a finding, not an omission.**
 
 | # | Component | Status today | Package |
 |---|---|---|---|
-| P-01 | `IntentGateway` + the two widget routes `POST /api/widgets/resolve`, `POST /api/widgets/intent`; the programme's third new route, the internal Telegram command ingress of contract §3.12 R3.12.7, is P-33; the one further ingress of owner ruling R-04, the staff revoke-only consent door of contract §3.5 R3.5.5, is counted beside those three, is not a widget route and is P-34 | `[ABSENT]` | **K3** |
+| P-01 | `IntentGateway` JWT widget route + the two routes `POST /api/widgets/resolve`, `POST /api/widgets/intent`; carrier mechanisms are independent P-35 … P-38 rows | `[ABSENT]` | **K3** |
 | P-02 | `IntentRecord` — the stored record and its type | `[ABSENT]` | **K3** |
 | P-03 | Timeline store | `[ABSENT]` | **K3** |
 | P-04 | Receipt store (append-only; no FK into the timeline) | `[ABSENT]` | **K3** creates · K7/K9/K11/K12 write · K12 proves the split by erasure replay |
@@ -159,10 +159,15 @@ here. **Two are assigned to no package, and that is a finding, not an omission.*
 | P-22 | `NEVER_CHAT_ACTUATED` — the eight reserved names | `[ABSENT]` as keys | **K12** |
 | P-33 | The internal Telegram command ingress of contract §3.12 R3.12.7 (owner ruling R-03) | `[ABSENT]` | **K14** |
 | P-34 | The staff revoke-only marketing-consent door of contract §3.5 R3.5.5 (owner ruling R-04) | `[ABSENT]` | **K14** |
+| P-35 | Step 0 Telegram callback-token carrier | `[ABSENT]` | **K14** |
+| P-36 | Step 0 web-push action carrier | `[ABSENT]` | **K13** |
+| P-37 | Step 0 voice carrier | `[ABSENT]` | **K6** |
+| P-38 | Step 0 SMS/e-mail signed-link carrier | `[ABSENT]` | **K6** |
+| P-39 | spoken readback (`ReadbackAck` + Gate 8-R spoken vocabulary) | `[ABSENT]` | **K6** |
 
 ### 3.2 The contract's own machinery — P-23 … P-32
 
-Annex A registers thirty-four prerequisites, not twenty-four. The other ten are components of the
+Annex A registers thirty-nine prerequisites, not twenty-nine. The other ten are components of the
 contract's **enforcement machinery** — the registries, assertions and ledgers without which its
 rules are statements rather than fences. Every one is `[ABSENT]`: the widget layer does not exist
 in any form.
@@ -175,8 +180,8 @@ in any form.
 | P-26 | Gate 6's four-branch key-space dispatch, scoped by effect | **K4** |
 | P-27 | the `controlledFixtureMode === false` build assertion | **K3** |
 | P-28 | the widget `ActionSourceType` discipline — a widget-minted request never claims `legacy_bridge` or `synthetic_shadow` | **K4** |
-| P-29 | `MECHANISM_GAP_LEDGER` (`MG-P01` … `MG-P34`), from which every status count is **printed at build, never transcribed** | **K1** |
-| P-30 | the gateway's record fields (`priority`, `widget_kind`, `body_hash`, `selection_domain`, `c9_domain`, `produced_by_intent_token_hash`) plus `ReadbackAck` and Gate 8-R | **K3** + **K6** (voice) |
+| P-29 | `MECHANISM_GAP_LEDGER` (`MG-P01` … `MG-P39`), from which every status count is **printed at build, never transcribed** | **K1** |
+| P-30 | retained gateway record fields (`priority`, `widget_kind`, `body_hash`, `selection_domain`, `c9_domain`, `confirmation_subject`, `approval_decision`, `produced_by_intent_token_hash`, `source_capability`) | **K3** |
 | P-31 | `A11yBlock.accessible_names` — total, closed, keyed through `refKey`, with `nameSourceOf`'s seven branches | **K5** |
 | P-32 | `MOMENT_REGISTRY` (twelve rows), `NOTIFICATION_CONSENT_REGISTRY`, `MOMENT_TEMPLATES` and the `EP-REGISTRY-LOAD` resolution chain over them | **K13** |
 
@@ -581,7 +586,7 @@ trusting this table.
 | **CHECK** | **39** — 31 enum-valued, 8 range/ordering |
 | **UNIQUE** | **22** |
 | **INDEXES** | **25** |
-| **MIGRATIONS EXPECTED** | **2** |
+| **MIGRATIONS EXPECTED** | **3** |
 | **BUSINESS SCHEMA OWNERS CHANGED** | **0** |
 | erasure classes, every column exactly one | `AUDIT_RETAINED` 150 · `CONVERSATION_CONTENT` 18 · `CANONICAL_ELSEWHERE` 1 · registry (no data subject) 22 = **191** |
 
