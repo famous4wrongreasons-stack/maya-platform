@@ -256,6 +256,7 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
     only: [
       'owner-ports/noun-booking-create.adapter.ts',
       'owner-ports/commit-booking.adapter.ts',
+      'owner-ports/booking-preview.adapter.ts',
     ],
   },
   'crm/client-appointment-cancel.service.ts': {
@@ -263,6 +264,7 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
     only: [
       'owner-ports/noun-booking-cancel.adapter.ts',
       'owner-ports/commit-booking.adapter.ts',
+      'owner-ports/booking-preview.adapter.ts',
     ],
   },
   'crm/client-appointment-reschedule.service.ts': {
@@ -270,6 +272,7 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
     only: [
       'owner-ports/noun-booking-reschedule.adapter.ts',
       'owner-ports/commit-booking.adapter.ts',
+      'owner-ports/booking-preview.adapter.ts',
     ],
   },
   'crm/client-appointment-read.service.ts': {

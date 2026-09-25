@@ -73,6 +73,17 @@ const fixture = () => {
     }),
   };
   const metric = { increment: jest.fn(), value: jest.fn() };
+  const bookingPropose = {
+    propose: jest.fn().mockResolvedValue({
+      receiptOutcome: 'REFUSED',
+      refusalCode: 'effect_not_admissible',
+      actionReceiptRef: null,
+      nextEnvelope: null,
+      resolvedWidget: null,
+      ownerDecision: null,
+    }),
+  };
+  const bookingMinter = { mint: jest.fn() };
   const projector = {
     composeNavigate: jest.fn().mockResolvedValue({
       kind: 'composer_input',
@@ -115,6 +126,8 @@ const fixture = () => {
       drafts,
       approvals,
       commits,
+      bookingPropose,
+      bookingMinter,
       metric as never,
       projector as never,
       emitter as never,

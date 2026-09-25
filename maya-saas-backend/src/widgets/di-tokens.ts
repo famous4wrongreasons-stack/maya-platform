@@ -63,6 +63,12 @@ export const APPROVAL_REQUEST_OWNER = 'APPROVAL_REQUEST_OWNER';
 /** U13c: canonical appointment COMMIT edge, through the existing CRM owners. */
 export const COMMIT_BOOKING_OWNER = 'COMMIT_BOOKING_OWNER';
 
+/** P-MINT-BOOK: the single widget-internal confirmation minter used by canonical booking owners. */
+export const BOOKING_CONFIRMATION_MINTER = 'BOOKING_CONFIRMATION_MINTER';
+
+/** P-MINT-BOOK: exact reschedule/cancel propose edge; no generic C9 dispatch. */
+export const BOOKING_PROPOSE_OWNER = 'BOOKING_PROPOSE_OWNER';
+
 /** Gate 8-R's owner set; bound to `GATE_8R_OWNERS_UNRULED` in `gates/gate-8r.owners.ts` (U8R, R8R-1). */
 export const GATE_8R_OWNERS = 'GATE_8R_OWNERS';
 

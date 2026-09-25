@@ -1,11 +1,17 @@
 import { Module } from '@nestjs/common';
 
-import { HANDOFF_SIGNER, SEAL_VERIFIER, SUCCESSOR_MINTER } from '../di-tokens';
+import {
+  BOOKING_CONFIRMATION_MINTER,
+  HANDOFF_SIGNER,
+  SEAL_VERIFIER,
+  SUCCESSOR_MINTER,
+} from '../di-tokens';
 import { HandoffTargetSigner } from '../routing/handoff-target.signer';
 import { WidgetEmitterService } from './emitter.service';
 import { SealService } from './seal.service';
 import { SealVerifierService } from './seal-verifier.service';
 import { SuccessorMinterService } from './successor-minter.service';
+import { BookingConfirmationMinterService } from './booking-confirmation-minter.service';
 
 /** B-22: minting and seal-key custody share one module; the gateway receives only the verifier port. */
 @Module({
@@ -14,6 +20,11 @@ import { SuccessorMinterService } from './successor-minter.service';
     SealService,
     SealVerifierService,
     SuccessorMinterService,
+    BookingConfirmationMinterService,
+    {
+      provide: BOOKING_CONFIRMATION_MINTER,
+      useExisting: BookingConfirmationMinterService,
+    },
     { provide: SEAL_VERIFIER, useExisting: SealVerifierService },
     { provide: SUCCESSOR_MINTER, useExisting: SuccessorMinterService },
     HandoffTargetSigner,
@@ -26,6 +37,7 @@ import { SuccessorMinterService } from './successor-minter.service';
     SUCCESSOR_MINTER,
     SuccessorMinterService,
     HANDOFF_SIGNER,
+    BOOKING_CONFIRMATION_MINTER,
   ],
 })
 export class WidgetEmissionModule {}

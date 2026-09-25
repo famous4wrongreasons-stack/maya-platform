@@ -21,5 +21,6 @@ export const actuatingInputOf = (
     routing,
     actorUserId: ctx.actor.userId,
     resolvedNouns: nouns,
+    principal: ctx.principal,
   };
 };

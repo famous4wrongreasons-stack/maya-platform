@@ -27,6 +27,7 @@ import {
 import {
   intentRecordData,
   mintIntentMaterial,
+  type BookingConfirmationLinkage,
   type MintedIntentMaterial,
 } from './record-writer';
 import { SealService } from './seal.service';
@@ -39,6 +40,11 @@ import {
   type RetainedLocalBusinessDate,
   validateRetainedLocalBusinessDate,
 } from '../query-scalars/local-business-date';
+import { BOOKING_ACTUATING_TEMPLATES_DISCHARGED } from '../booking/booking-discharge.runtime';
+import {
+  bookingTemplateAsIntentRow,
+  resolveBookingTemplateForSynthesis,
+} from '../booking/booking-intent-template.registry';
 
 export const K3_EMITTABLE_KINDS = [
   'METRIC',
@@ -97,6 +103,8 @@ interface SuccessorEmissionContext {
   readonly textEquivalent: Readonly<Record<string, unknown>>;
 }
 
+export type BookingConfirmationEmissionContext = BookingConfirmationLinkage;
+
 @Injectable()
 export class WidgetEmitterService {
   constructor(
@@ -110,7 +118,7 @@ export class WidgetEmitterService {
    * owned by the emission service, and contains no effect or target member.
    */
   async emit(request: MintRequest, now = new Date()): Promise<SealedEmission> {
-    return this.emitInternal(request, now, null);
+    return this.emitInternal(request, now, null, null);
   }
 
   /** R3.9.4's dedicated server-owned lane. Generic composer calls cannot resolve this template. */
@@ -127,16 +135,35 @@ export class WidgetEmitterService {
       request.composerInput.intent_proposals[0]?.role !== 'remedy'
     )
       throw new IntentTemplateRefusal('successor_shape_invalid');
-    return this.emitInternal(request, now, {
-      sourceCapability,
-      textEquivalent,
-    });
+    return this.emitInternal(
+      request,
+      now,
+      { sourceCapability, textEquivalent },
+      null,
+    );
+  }
+
+  /**
+   * K7's only confirmation minter. The linkage is a server-owned owner result and never appears in
+   * WidgetComposerInput. Until P-DISCHARGE flips the exact booking recipes this path fails closed.
+   */
+  async emitBookingConfirmation(
+    request: MintRequest,
+    linkage: BookingConfirmationEmissionContext,
+    now = new Date(),
+  ): Promise<SealedEmission> {
+    if (!BOOKING_ACTUATING_TEMPLATES_DISCHARGED)
+      throw new IntentTemplateRefusal('a2_booking_not_discharged');
+    if (request.kind !== 'BOOKING_CONFIRMATION')
+      throw new IntentTemplateRefusal('booking_confirmation_kind_required');
+    return this.emitInternal(request, now, null, linkage);
   }
 
   private async emitInternal(
     request: MintRequest,
     now: Date,
     successor: SuccessorEmissionContext | null,
+    booking: BookingConfirmationEmissionContext | null,
   ): Promise<SealedEmission> {
     const input = request.composerInput;
     const principal = request.principal;
@@ -151,17 +178,32 @@ export class WidgetEmitterService {
 
     const retainedLocalBusinessDate = this.retainedJournalDate(request);
 
-    const resolved = input.intent_proposals.map((proposal) => ({
-      proposal,
-      resolved: resolveIntentTemplate({
+    const resolved = input.intent_proposals.map((proposal) => {
+      const bookingTemplate =
+        booking && proposal.intent_template_key.startsWith('commit.booking.')
+          ? resolveBookingTemplateForSynthesis({
+              proposal,
+              widgetKind: input.kind_proposal,
+              deliveryChannel: request.deliveryChannel,
+            })
+          : null;
+      return {
         proposal,
-        widgetKind: input.kind_proposal,
-        deliveryChannel: request.deliveryChannel,
-        ...(successor === null
-          ? {}
-          : { successorSourceCapability: successor.sourceCapability }),
-      }),
-    }));
+        resolved: bookingTemplate
+          ? {
+              kind: 'intent' as const,
+              row: bookingTemplateAsIntentRow(bookingTemplate),
+            }
+          : resolveIntentTemplate({
+              proposal,
+              widgetKind: input.kind_proposal,
+              deliveryChannel: request.deliveryChannel,
+              ...(successor === null
+                ? {}
+                : { successorSourceCapability: successor.sourceCapability }),
+            }),
+      };
+    });
 
     const a2Limited = resolved.some(
       (entry) => entry.resolved.kind === 'a2_limitation',
@@ -284,6 +326,7 @@ export class WidgetEmitterService {
           retainedLocalBusinessDate,
           revisionId: request.runWitness?.revisionId ?? null,
           c9Domain: request.runWitness?.c9Domain ?? null,
+          bookingLinkage: booking,
         }) as never,
       }),
     );

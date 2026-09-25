@@ -1,5 +1,7 @@
 import type { RoutingInput } from './routing-input';
 import type { ResolvedNouns } from '../gate.types';
+import type { PrincipalView } from '../gate.types';
+import type { BookingConfirmationPreview } from '../booking/booking-confirmation-minter.port';
 
 /**
  * Widget-internal audit edge used by Gate 13.
@@ -40,6 +42,19 @@ export interface EffectRouteAuditPort {
     intentTokenHash: string;
     actionReceiptRef: string;
   }) => Promise<boolean>;
+  readonly putDraft: (
+    input: {
+      tenantId: string;
+      draftRef: string;
+      draftClass: string;
+      ownerCapabilitySpace: string;
+      ownerCapabilityKey: string;
+      principalProofHash: string;
+      diff: unknown;
+      ttlSeconds: number;
+    },
+    now?: Date,
+  ) => Promise<{ id: string }>;
 }
 
 /** Closed result of one resolved Gate 13 destination. */
@@ -82,6 +97,7 @@ export interface ActuatingRoutingInput {
   readonly routing: RoutingInput;
   readonly actorUserId: string;
   readonly resolvedNouns: ResolvedNouns;
+  readonly principal: PrincipalView;
 }
 
 export interface DraftOwnerRegistryPort {
@@ -96,3 +112,25 @@ export interface ApprovalRequestOwnerPort {
 export interface CommitBookingOwnerPort {
   commit(input: ActuatingRoutingInput): Promise<EffectRouteOutcome>;
 }
+
+export interface BookingProposeOwnerPort {
+  propose(input: ActuatingRoutingInput): Promise<EffectRouteOutcome>;
+}
+
+export interface BookingPreviewDecision {
+  readonly kind: 'booking_preview';
+  readonly preview: BookingConfirmationPreview;
+}
+
+export const bookingPreviewOf = (
+  value: unknown,
+): BookingConfirmationPreview | null => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value))
+    return null;
+  const record = value as Partial<BookingPreviewDecision>;
+  return record.kind === 'booking_preview' &&
+    typeof record.preview === 'object' &&
+    record.preview !== null
+    ? record.preview
+    : null;
+};

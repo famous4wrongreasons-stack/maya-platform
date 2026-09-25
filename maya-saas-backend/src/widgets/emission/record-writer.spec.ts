@@ -112,6 +112,72 @@ describe('U7c mint-side BOOK.1 subject binding', () => {
   });
 });
 
+describe('P-MINT-BOOK server-only confirmation linkage', () => {
+  const linked = (
+    over: Partial<
+      Parameters<typeof intentRecordData>[0]['bookingLinkage']
+    > = {},
+  ) =>
+    intentRecordData({
+      material: material('crm.appointment.create.v1'),
+      input: input('BOOKING_CONFIRMATION'),
+      tenantId: 'tenant-1',
+      widgetId: 'widget-1',
+      principalProofHash: 'p'.repeat(64),
+      bodyHash: 'b'.repeat(64),
+      body: { confirmation_subject: 'create' },
+      issuedAt: new Date('2026-09-23T00:00:00.000Z'),
+      bookingLinkage: {
+        commitIntentIndex: 0,
+        confirmationOfKind: 'draft',
+        confirmationOfRef: 'draft-1',
+        producedByIntentTokenHash: null,
+        idempotencyKey: 'server-idempotency-1',
+        requiresReadback: false,
+        readbackRef: null,
+        ...over,
+      },
+    });
+
+  it('persists exact immutable draft linkage and server idempotency', () => {
+    expect(linked()).toMatchObject({
+      confirmationOfKind: 'draft',
+      confirmationOfRef: 'draft-1',
+      producedByIntentTokenHash: null,
+      confirmationJson: {
+        requires_readback: false,
+        readback_ref: null,
+        idempotency_key: 'server-idempotency-1',
+      },
+    });
+  });
+
+  it('refuses attaching booking linkage to a non-COMMIT material', () => {
+    const base = material('crm.appointment.create.v1');
+    expect(() =>
+      intentRecordData({
+        material: { ...base, intent: { ...base.intent, effect: 'REFINE' } },
+        input: input('BOOKING_CONFIRMATION'),
+        tenantId: 'tenant-1',
+        widgetId: 'widget-1',
+        principalProofHash: 'p'.repeat(64),
+        bodyHash: 'b'.repeat(64),
+        body: { confirmation_subject: 'create' },
+        issuedAt: new Date(),
+        bookingLinkage: {
+          commitIntentIndex: 0,
+          confirmationOfKind: 'draft',
+          confirmationOfRef: 'draft-1',
+          producedByIntentTokenHash: null,
+          idempotencyKey: 'server-idempotency-1',
+          requiresReadback: false,
+          readbackRef: null,
+        },
+      }),
+    ).toThrow('booking_linkage_not_commit');
+  });
+});
+
 describe('I-MIG3 server-owned NAVIGATE source-capability evidence', () => {
   const navigate = (target: WidgetIntent['target']) => {
     const base = material('crm.appointment.create.v1');

@@ -12,6 +12,8 @@ import {
   APPROVAL_REQUEST_OWNER,
   C9_CANCEL_OWNER,
   COMMIT_BOOKING_OWNER,
+  BOOKING_PROPOSE_OWNER,
+  BOOKING_CONFIRMATION_MINTER,
   DRAFT_OWNER_REGISTRY,
   HANDOFF_SIGNER,
   SUCCESSOR_MINTER,
@@ -26,6 +28,8 @@ import {
   type C9CancelOwnerPort,
   type ApprovalRequestOwnerPort,
   type CommitBookingOwnerPort,
+  type BookingProposeOwnerPort,
+  bookingPreviewOf,
   type DraftOwnerRegistryPort,
   type HandoffSignerPort,
 } from './effect-router.ports';
@@ -34,13 +38,14 @@ import {
   approvalPairClaimOf,
 } from './edges/approval-decision.edge';
 import { bookingCommitDestination } from './edges/commit.edge';
-import { draftDestination } from './edges/draft.edge';
 import { approvalRequestDestination } from './edges/request-approval.edge';
 import { Gate14DisagreementMetric } from './gate14-disagreement.metric';
 import { WidgetProjectorService } from '../projection/widget-projector.service';
 import type { ProjectionPlan } from '../projection/canonical-read.port';
 import { WidgetEmitterService } from '../emission/emitter.service';
 import { WidgetThreadPageService } from '../resolve/thread-page.service';
+import { actuatingInputOf } from './edges/actuating-input';
+import type { BookingConfirmationMinterPort } from '../booking/booking-confirmation-minter.port';
 
 type Destination = () => Promise<EffectRouteOutcome>;
 type RoutableEffect = Exclude<EffectClass, 'NONE'>;
@@ -92,6 +97,10 @@ export class EffectRouterService {
     private readonly approvals: ApprovalRequestOwnerPort,
     @Inject(COMMIT_BOOKING_OWNER)
     private readonly bookingCommit: CommitBookingOwnerPort,
+    @Inject(BOOKING_PROPOSE_OWNER)
+    private readonly bookingPropose: BookingProposeOwnerPort,
+    @Inject(BOOKING_CONFIRMATION_MINTER)
+    private readonly bookingMinter: BookingConfirmationMinterPort,
     private readonly gate14Disagreements: Gate14DisagreementMetric,
     private readonly projector: WidgetProjectorService,
     private readonly emitter: WidgetEmitterService,
@@ -172,11 +181,11 @@ export class EffectRouterService {
       case 'NAVIGATE':
         return this.navigate(ctx);
       case 'REFINE':
-        return this.refine(ctx);
+        return this.refine(ctx, resolvedNouns);
       case 'CONTROL':
         return this.control(ctx);
       case 'DRAFT':
-        return draftDestination(ctx, resolvedNouns, this.drafts);
+        return this.draft(ctx, resolvedNouns);
       case 'REQUEST_APPROVAL':
         return approvalRequestDestination(ctx, resolvedNouns, this.approvals);
       case 'HANDOFF':
@@ -291,9 +300,27 @@ export class EffectRouterService {
     };
   }
 
-  private refine(ctx: GateContext): Destination | null {
+  private refine(
+    ctx: GateContext,
+    resolvedNouns: ResolvedNouns | undefined,
+  ): Destination | null {
     const input = routingInputOf(ctx);
     if (input === null || ctx.principal === null) return null;
+    const subject = subjectOf(input.record);
+    if (
+      subject?.space === 'C9' &&
+      (subject.key === 'appointments.own.reschedule' ||
+        subject.key === 'appointments.own.cancel')
+    ) {
+      const actuating = actuatingInputOf(ctx, resolvedNouns);
+      return actuating === null
+        ? null
+        : async () =>
+            this.completeBookingPreview(
+              actuating,
+              await this.bookingPropose.propose(actuating),
+            );
+    }
     return async () => {
       const successor = await this.successors.mint({
         tenantId: input.tenantId,
@@ -309,6 +336,55 @@ export class EffectRouterService {
           })
         : admitted({ nextEnvelope: successor.envelope });
     };
+  }
+
+  private draft(
+    ctx: GateContext,
+    resolvedNouns: ResolvedNouns | undefined,
+  ): Destination | null {
+    const actuating = actuatingInputOf(ctx, resolvedNouns);
+    if (actuating === null) return null;
+    const pending = this.drafts.route(actuating);
+    return pending === null
+      ? null
+      : async () => this.completeBookingPreview(actuating, await pending);
+  }
+
+  private async completeBookingPreview(
+    input: import('./effect-router.ports').ActuatingRoutingInput,
+    outcome: EffectRouteOutcome,
+  ): Promise<EffectRouteOutcome> {
+    const preview = bookingPreviewOf(outcome.ownerDecision);
+    if (outcome.receiptOutcome !== 'ACCEPTED' || preview === null)
+      return outcome;
+    if (preview.subject === 'create' && preview.draftRef !== null) {
+      await this.stores.putDraft(
+        {
+          tenantId: input.routing.tenantId,
+          draftRef: preview.draftRef,
+          draftClass: 'task',
+          ownerCapabilitySpace: 'C9',
+          ownerCapabilityKey: 'c9.booking.propose',
+          principalProofHash: input.routing.principalProofHash,
+          diff: {
+            service: input.resolvedNouns.values.get('service'),
+            staff: input.resolvedNouns.values.get('staff'),
+            slot: input.resolvedNouns.values.get('slot'),
+          },
+          ttlSeconds: 900,
+        },
+        input.routing.now,
+      );
+    }
+    const envelope = await this.bookingMinter.mint({
+      tenantId: input.routing.tenantId,
+      predecessorWidgetId: input.routing.record.widgetId,
+      principal: input.principal,
+      deliveryChannel: input.routing.answeringChannel,
+      now: input.routing.now,
+      preview,
+    });
+    return { ...outcome, nextEnvelope: envelope };
   }
 
   private signedDestination(ctx: GateContext): Destination | null {

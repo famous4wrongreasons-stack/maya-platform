@@ -48,6 +48,7 @@ import { WitnessC9RevisionAdapter } from './witness-c9-revision.adapter';
 import { C9CancelAdapter } from './c9-cancel.adapter';
 import { ApprovalRequestAdapter } from './approval-request.adapter';
 import { CommitBookingAdapter } from './commit-booking.adapter';
+import { BookingPreviewAdapter } from './booking-preview.adapter';
 
 const meta = (key: string, target: object): unknown =>
   Reflect.getMetadata(key, target);
@@ -113,7 +114,12 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       { provide: DI_TOKENS.C9_CANCEL_OWNER, useExisting: C9CancelAdapter },
       ApprovalRequestAdapter,
       CommitBookingAdapter,
+      BookingPreviewAdapter,
       expect.objectContaining({ provide: DI_TOKENS.DRAFT_OWNER_REGISTRY }),
+      {
+        provide: DI_TOKENS.BOOKING_PROPOSE_OWNER,
+        useExisting: BookingPreviewAdapter,
+      },
       {
         provide: DI_TOKENS.APPROVAL_REQUEST_OWNER,
         useExisting: ApprovalRequestAdapter,
@@ -136,6 +142,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       DI_TOKENS.DRAFT_OWNER_REGISTRY,
       DI_TOKENS.APPROVAL_REQUEST_OWNER,
       DI_TOKENS.COMMIT_BOOKING_OWNER,
+      DI_TOKENS.BOOKING_PROPOSE_OWNER,
     ]);
   });
 
@@ -202,6 +209,8 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       DI_TOKENS.DRAFT_OWNER_REGISTRY,
       DI_TOKENS.APPROVAL_REQUEST_OWNER,
       DI_TOKENS.COMMIT_BOOKING_OWNER,
+      DI_TOKENS.BOOKING_PROPOSE_OWNER,
+      DI_TOKENS.BOOKING_CONFIRMATION_MINTER,
     ];
     const moduleRef = await Test.createTestingModule({
       // The owner modules the boundary now imports resolve configuration the way the application does:

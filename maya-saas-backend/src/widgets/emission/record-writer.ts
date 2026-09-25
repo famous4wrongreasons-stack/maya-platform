@@ -33,6 +33,16 @@ export interface MintedIntentMaterial {
   > | null;
 }
 
+export interface BookingConfirmationLinkage {
+  readonly commitIntentIndex: number;
+  readonly confirmationOfKind: 'draft' | 'record';
+  readonly confirmationOfRef: string;
+  readonly producedByIntentTokenHash: string | null;
+  readonly idempotencyKey: string;
+  readonly requiresReadback: boolean;
+  readonly readbackRef: string | null;
+}
+
 const cellTrue = (label: string): WidgetIntent['enabled'] => ({
   state: 'KNOWN',
   value: true,
@@ -161,6 +171,7 @@ export const intentRecordData = (args: {
   readonly retainedLocalBusinessDate?: string | null;
   readonly revisionId?: string | null;
   readonly c9Domain?: C9Domain | null;
+  readonly bookingLinkage?: BookingConfirmationLinkage | null;
 }): Record<string, unknown> => {
   const { intent } = args.material;
   if (args.material.tokenHash === null)
@@ -177,6 +188,13 @@ export const intentRecordData = (args: {
     body: args.body,
     intent,
   });
+  const booking = args.bookingLinkage;
+  const isBookingCommit =
+    booking !== null &&
+    booking !== undefined &&
+    args.material.intent.ordinal === booking.commitIntentIndex + 1;
+  if (isBookingCommit && intent.effect !== 'COMMIT')
+    throw new IntentTemplateRefusal('booking_linkage_not_commit');
   return {
     tenantId: args.tenantId,
     intentTokenHash: args.material.tokenHash,
@@ -193,7 +211,13 @@ export const intentRecordData = (args: {
     sourceCapabilitySpace: retainsSourceCapability ? 'C9' : null,
     sourceCapabilityKey: retainsSourceCapability ? args.input.capability : null,
     verificationFloor: intent.verification_floor,
-    confirmationJson: null,
+    confirmationJson: isBookingCommit
+      ? {
+          requires_readback: booking.requiresReadback,
+          readback_ref: booking.readbackRef,
+          idempotency_key: booking.idempotencyKey,
+        }
+      : null,
     confirmationSubject,
     approvalDecision: null,
     inputSchemaHash: args.material.inputSchemaHash,
@@ -208,9 +232,11 @@ export const intentRecordData = (args: {
     runId,
     revisionId: args.revisionId ?? null,
     approvalOfIntentRef: null,
-    confirmationOfKind: null,
-    confirmationOfRef: null,
-    producedByIntentTokenHash: null,
+    confirmationOfKind: isBookingCommit ? booking.confirmationOfKind : null,
+    confirmationOfRef: isBookingCommit ? booking.confirmationOfRef : null,
+    producedByIntentTokenHash: isBookingCommit
+      ? booking.producedByIntentTokenHash
+      : null,
     issuedAt: args.issuedAt,
     expiresAt: new Date(intent.expires_at),
     singleUse: intent.single_use,

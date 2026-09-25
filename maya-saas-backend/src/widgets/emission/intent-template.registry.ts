@@ -48,12 +48,9 @@ export class IntentTemplateRefusal extends Error {
 }
 
 export interface IntentTemplateRow {
-  readonly key: IntentTemplateKey;
+  readonly key: string;
   readonly version: typeof INTENT_TEMPLATE_REGISTRY_VERSION;
-  readonly effect: Extract<
-    EffectClass,
-    'NONE' | 'NAVIGATE' | 'REFINE' | 'CONTROL' | 'HANDOFF'
-  >;
+  readonly effect: EffectClass;
   readonly kinds: readonly WidgetKind[];
   readonly roles: readonly IntentRole[];
   readonly subject: CapabilityRef | null;
