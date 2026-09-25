@@ -73,6 +73,26 @@ const fixture = () => {
     }),
   };
   const metric = { increment: jest.fn(), value: jest.fn() };
+  const projector = {
+    composeNavigate: jest.fn().mockResolvedValue({
+      kind: 'composer_input',
+      input: { kind_proposal: 'SERVICE_SELECTOR' },
+      source: { services: [] },
+    }),
+  };
+  const emitter = {
+    emit: jest.fn().mockResolvedValue({
+      envelope: { contract: 'maya.widget.envelope/1', widget_id: 'w-nav' },
+    }),
+  };
+  const threadPage = {
+    resolveForNavigate: jest.fn().mockResolvedValue({
+      conversationId: '00000000-0000-4000-8000-000000000010',
+      turnId: '00000000-0000-4000-8000-000000000011',
+      deliveryChannel: 'pwa',
+      envelope: { contract: 'maya.widget.envelope/1', widget_id: 'w-stored' },
+    }),
+  };
   return {
     stores,
     controls,
@@ -83,6 +103,9 @@ const fixture = () => {
     approvals,
     commits,
     metric,
+    projector,
+    emitter,
+    threadPage,
     router: new EffectRouterService(
       stores,
       controls as never,
@@ -93,6 +116,9 @@ const fixture = () => {
       approvals,
       commits,
       metric as never,
+      projector as never,
+      emitter as never,
+      threadPage as never,
     ),
   };
 };
@@ -274,19 +300,69 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
     expect(metric.increment).toHaveBeenCalledWith('entitlement_denied');
   });
 
-  it('G13-P02 NAVIGATE terminates as the zero-read DEV-1 degraded result', async () => {
-    const { router, stores, successors } = fixture();
+  it('G13-P02 NAVIGATE(detail) reprojects and mints one successor envelope', async () => {
+    const { router, stores, successors, projector, emitter } = fixture();
     await expect(
       routeEffect(
         router,
-        ctx(rec({ effect: 'NAVIGATE' }), { principal: PRINCIPAL }),
+        ctx(
+          rec({
+            effect: 'NAVIGATE',
+            targetJson: { class: 'detail', ref: { route: 'shell.detail' } },
+            sourceCapabilitySpace: 'C9',
+            sourceCapabilityKey: 'catalog.services.read',
+            widgetKind: 'SERVICE_SELECTOR',
+          }),
+          { principal: PRINCIPAL },
+        ),
       ),
     ).resolves.toMatchObject({
       outcome: 'terminate',
-      route: { resolved_widget: { degraded: 'navigate_interim' } },
+      route: {
+        next_envelope: {
+          contract: 'maya.widget.envelope/1',
+          widget_id: 'w-nav',
+        },
+      },
     });
     expect(stores.claimIntentRecord).toHaveBeenCalledTimes(1);
+    expect(projector.composeNavigate).toHaveBeenCalledTimes(1);
+    expect(emitter.emit).toHaveBeenCalledTimes(1);
     expect(successors.mint).not.toHaveBeenCalled();
+  });
+
+  it('G13-P02-W returns the exact stored sealed envelope after current authority', async () => {
+    const { router, threadPage, projector, emitter } = fixture();
+    await expect(
+      routeEffect(
+        router,
+        ctx(
+          rec({
+            effect: 'NAVIGATE',
+            targetJson: { class: 'w', ref: 'w-stored' },
+            sourceCapabilitySpace: 'C9',
+            sourceCapabilityKey: 'catalog.services.read',
+          }),
+          { principal: PRINCIPAL },
+        ),
+      ),
+    ).resolves.toMatchObject({
+      route: {
+        resolved_widget: {
+          contract: 'maya.widget.envelope/1',
+          widget_id: 'w-stored',
+        },
+      },
+    });
+    expect(threadPage.resolveForNavigate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 't1',
+        widgetId: 'w-stored',
+        principalProofHash: PRINCIPAL.proofHash,
+      }),
+    );
+    expect(projector.composeNavigate).not.toHaveBeenCalled();
+    expect(emitter.emit).not.toHaveBeenCalled();
   });
 
   it('G13-P03 REFINE mints one successor for the same live principal', async () => {

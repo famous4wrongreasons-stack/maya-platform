@@ -125,6 +125,88 @@ describe('Gate 13 — PostgreSQL claim, receipt and CONTROL routing (U13a)', () 
     return { tenant, user, actor, widget, principal, context };
   };
 
+  const storedWidgetNavigation = async (label: string) => {
+    const tenant = await fx.tenant(label);
+    const user = await fx.user(tenant, UserRole.ADMINISTRATOR);
+    const actor = await fx.actor(tenant, user);
+    const targetWidget = await fx.widget({
+      tenant,
+      actor,
+      kind: 'METRIC',
+      body: { value: 2 },
+    });
+    const widget = await fx.widget({
+      tenant,
+      actor,
+      kind: 'METRIC',
+      body: { value: 1 },
+    });
+    await fx.synthetic(widget, {
+      effect: 'NAVIGATE',
+      capabilitySpace: null,
+      capabilityKey: null,
+      targetJson: { class: 'w', ref: targetWidget.widgetId },
+      sourceCapabilitySpace: 'C9',
+      sourceCapabilityKey: 'c7.measurement.read',
+      singleUse: true,
+    });
+    const stored = await db.prisma.widgetIntentRecord.findUniqueOrThrow({
+      where: {
+        intentTokenHash_tenantId: {
+          tenantId: tenant.id,
+          intentTokenHash: widget.intentTokenHash,
+        },
+      },
+      select: { principalProofHash: true },
+    });
+    const principal: PrincipalView = {
+      authority: {
+        kind: 'USER',
+        tenantId: tenant.id,
+        userId: user.id,
+        membershipId: actor.membershipId,
+        clientId: null,
+        channelLinkId: null,
+        branchRefs: [],
+        staffRef: null,
+        proofHash: stored.principalProofHash,
+      },
+      role: 'administrator',
+      presentationMode: 'owner',
+      verificationLevel: 'SESSION_VERIFIED',
+      proofHash: stored.principalProofHash,
+    };
+    return {
+      tenant,
+      widget,
+      targetWidget,
+      principal,
+      context: gateContext(
+        rec({
+          tenantId: tenant.id,
+          widgetId: widget.widgetId,
+          intentTokenHash: widget.intentTokenHash,
+          widgetKind: 'METRIC',
+          effect: 'NAVIGATE',
+          capabilitySpace: null,
+          capabilityKey: null,
+          targetJson: { class: 'w', ref: targetWidget.widgetId },
+          sourceCapabilitySpace: 'C9',
+          sourceCapabilityKey: 'c7.measurement.read',
+          principalProofHash: stored.principalProofHash,
+          singleUse: true,
+        }),
+        {
+          tenantId: tenant.id,
+          actor,
+          principal,
+          principalProofHash: stored.principalProofHash,
+          now: new Date('2026-09-25T00:00:00.000Z'),
+        },
+      ),
+    };
+  };
+
   it('G13-R5/N06/N10 [U] claims the exact record, cancels the live widget and writes one echo-free B-29 receipt', async () => {
     const built = await control('G13-R5');
     await expect(routeEffect(built.context)).resolves.toMatchObject({
@@ -175,6 +257,36 @@ describe('Gate 13 — PostgreSQL claim, receipt and CONTROL routing (U13a)', () 
       refusalCode: null,
       actionReceiptRef: null,
       utteranceEcho: null,
+    });
+  }, 60_000);
+
+  it('G13-NAV-W [U] returns the exact stored sealed widget under the current tenant/principal', async () => {
+    const built = await storedWidgetNavigation('G13-NAV-W');
+    await expect(routeEffect(built.context)).resolves.toMatchObject({
+      outcome: 'terminate',
+      route: {
+        receipt_outcome: 'ACCEPTED',
+        resolved_widget: {
+          contract: 'maya.widget.envelope/1',
+          widget_id: built.targetWidget.widgetId,
+        },
+      },
+    });
+  }, 60_000);
+
+  it('G13-NAV-FOREIGN [U] never returns a stored envelope to a foreign current proof', async () => {
+    const built = await storedWidgetNavigation('G13-NAV-FOREIGN');
+    const foreign = {
+      ...built.context,
+      principal: { ...built.principal, proofHash: 'f'.repeat(64) },
+      principalProofHash: 'f'.repeat(64),
+    };
+    await expect(routeEffect(foreign)).resolves.toMatchObject({
+      outcome: 'terminate',
+      route: {
+        receipt_outcome: 'REFUSED',
+        resolved_widget: null,
+      },
     });
   }, 60_000);
 

@@ -1,5 +1,23 @@
 [
   {
+    "id": "M13-NAV-1",
+    "description": "stored-widget NAVIGATE drops the current principal-proof predicate",
+    "file": "src/widgets/resolve/thread-page.service.ts",
+    "find": "          intentRecords: {\n            some: { principalProofHash: input.principalProofHash },\n          },\n",
+    "replace": "          intentRecords: { some: {} },\n",
+    "killers": ["G13-NAV-FOREIGN"],
+    "expect": "live-killed"
+  },
+  {
+    "id": "M13-NAV-2",
+    "description": "stored-widget NAVIGATE resolves the tapped widget instead of the sealed target",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "          widgetId: target.ref,\n",
+    "replace": "          widgetId: input.record.widgetId,\n",
+    "killers": ["G13-NAV-W"],
+    "expect": "live-killed"
+  },
+  {
     "id": "M13-1",
     "description": "a missing record passes Gate 13",
     "file": "src/widgets/routing/effect-router.service.ts",

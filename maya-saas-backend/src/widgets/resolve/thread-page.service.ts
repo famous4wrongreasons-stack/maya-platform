@@ -14,6 +14,13 @@ export interface ThreadPageRequest {
   readonly limit: number;
 }
 
+export interface NavigateEmissionSource {
+  readonly conversationId: string;
+  readonly turnId: string;
+  readonly deliveryChannel: string;
+  readonly envelope: Readonly<Record<string, unknown>>;
+}
+
 /** P-RESOLVE: one bounded, current-principal-only timeline read. */
 @Injectable()
 export class WidgetThreadPageService {
@@ -95,6 +102,62 @@ export class WidgetThreadPageService {
       return page;
     });
   }
+
+  /**
+   * Contract V1.2's stored-widget resolver.  The caller supplies only the current, server-resolved
+   * tenant/proof pair; foreign, revoked, erased or unsealed rows are indistinguishable from absence.
+   */
+  async resolveForNavigate(input: {
+    tenantId: string;
+    widgetId: string;
+    principalProofHash: string;
+  }): Promise<NavigateEmissionSource | null> {
+    return this.prisma.$transaction(async (tx) => {
+      const row = await tx.widgetEmission.findFirst({
+        where: {
+          tenantId: input.tenantId,
+          widgetId: input.widgetId,
+          erasedAt: null,
+          intentRecords: {
+            some: { principalProofHash: input.principalProofHash },
+          },
+        },
+        select: {
+          turnId: true,
+          deliveryChannel: true,
+          turn: { select: { conversationId: true } },
+          intentRecords: {
+            where: { principalProofHash: input.principalProofHash },
+            orderBy: { issuedAt: 'asc' },
+            take: 1,
+            select: { intentTokenHash: true },
+          },
+          renderReceipts: {
+            where: { erasedAt: null },
+            orderBy: { degradedAt: 'desc' },
+            take: 1,
+            select: { emittedEnvelopeJson: true },
+          },
+        },
+      });
+      const tokenHash = row?.intentRecords[0]?.intentTokenHash;
+      const envelope = row?.renderReceipts[0]?.emittedEnvelopeJson;
+      if (row === null || tokenHash === undefined || !isRecord(envelope))
+        return null;
+      const seal = await this.seals.verify(
+        tokenHash,
+        { tenantId: input.tenantId },
+        tx,
+      );
+      if (!seal.ok) return null;
+      return Object.freeze({
+        conversationId: row.turn.conversationId,
+        turnId: row.turnId,
+        deliveryChannel: row.deliveryChannel,
+        envelope: Object.freeze(envelope),
+      });
+    });
+  }
 }
 
 const terminalLines = (value: unknown): TerminalLine[] => {
@@ -111,3 +174,6 @@ const isTerminalLine = (value: unknown): value is TerminalLine =>
     null ||
     typeof (value as { action_receipt_ref?: unknown }).action_receipt_ref ===
       'string');
+
+const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);

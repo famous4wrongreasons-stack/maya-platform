@@ -37,6 +37,10 @@ import { bookingCommitDestination } from './edges/commit.edge';
 import { draftDestination } from './edges/draft.edge';
 import { approvalRequestDestination } from './edges/request-approval.edge';
 import { Gate14DisagreementMetric } from './gate14-disagreement.metric';
+import { WidgetProjectorService } from '../projection/widget-projector.service';
+import type { ProjectionPlan } from '../projection/canonical-read.port';
+import { WidgetEmitterService } from '../emission/emitter.service';
+import { WidgetThreadPageService } from '../resolve/thread-page.service';
 
 type Destination = () => Promise<EffectRouteOutcome>;
 type RoutableEffect = Exclude<EffectClass, 'NONE'>;
@@ -89,6 +93,9 @@ export class EffectRouterService {
     @Inject(COMMIT_BOOKING_OWNER)
     private readonly bookingCommit: CommitBookingOwnerPort,
     private readonly gate14Disagreements: Gate14DisagreementMetric,
+    private readonly projector: WidgetProjectorService,
+    private readonly emitter: WidgetEmitterService,
+    private readonly threadPage: WidgetThreadPageService,
   ) {}
 
   async route(
@@ -163,10 +170,7 @@ export class EffectRouterService {
   ): Destination | null {
     switch (effect) {
       case 'NAVIGATE':
-        return () =>
-          Promise.resolve(
-            admitted({ resolvedWidget: { degraded: 'navigate_interim' } }),
-          );
+        return this.navigate(ctx);
       case 'REFINE':
         return this.refine(ctx);
       case 'CONTROL':
@@ -182,6 +186,69 @@ export class EffectRouterService {
           ? approvalDecisionDestination(ctx, resolvedNouns, this.approvals)
           : bookingCommitDestination(ctx, resolvedNouns, this.bookingCommit);
     }
+  }
+
+  private navigate(ctx: GateContext): Destination | null {
+    const input = routingInputOf(ctx);
+    const principal = ctx.principal;
+    if (input === null || principal === null) return null;
+    const target = navigationTarget(input.record.targetJson);
+    if (target === null) return null;
+
+    if (target.class === 'w')
+      return async () => {
+        const stored = await this.threadPage.resolveForNavigate({
+          tenantId: input.tenantId,
+          widgetId: target.ref,
+          principalProofHash: principal.proofHash,
+        });
+        return stored === null
+          ? admitted({
+              receiptOutcome: 'REFUSED',
+              refusalCode: 'effect_not_admissible',
+            })
+          : admitted({ resolvedWidget: stored.envelope });
+      };
+
+    return async () => {
+      const source = await this.threadPage.resolveForNavigate({
+        tenantId: input.tenantId,
+        widgetId: input.record.widgetId,
+        principalProofHash: principal.proofHash,
+      });
+      if (source === null)
+        return admitted({
+          receiptOutcome: 'REFUSED',
+          refusalCode: 'effect_not_admissible',
+        });
+      const projected = await this.projector.composeNavigate(
+        projectionPlan(ctx, input.record),
+      );
+      if (projected.kind !== 'composer_input' || !isRecord(projected.source))
+        return admitted({
+          receiptOutcome: 'REFUSED',
+          refusalCode: 'effect_not_admissible',
+          resolvedWidget:
+            projected.kind === 'degraded' ? { degraded: projected.why } : null,
+        });
+      const minted = await this.emitter.emit(
+        {
+          tenantId: input.tenantId,
+          conversationId: source.conversationId,
+          turnId: source.turnId,
+          kind: projected.input.kind_proposal,
+          principalProofHash: principal.proofHash,
+          deliveryChannel: input.answeringChannel,
+          body: { ...projected.source },
+          ttlSeconds: 600,
+          freshnessClass: 'live',
+          composerInput: projected.input,
+          principal,
+        },
+        input.now,
+      );
+      return admitted({ nextEnvelope: minted.envelope });
+    };
   }
 
   private control(ctx: GateContext): Destination | null {
@@ -261,6 +328,51 @@ export class EffectRouterService {
       : () => Promise.resolve(admitted({ resolvedWidget: target }));
   }
 }
+
+const navigationTarget = (
+  value: unknown,
+):
+  | { readonly class: 'detail'; readonly ref: unknown }
+  | {
+      readonly class: 'w';
+      readonly ref: string;
+    }
+  | null => {
+  if (!isRecord(value)) return null;
+  if (value.class === 'detail') return { class: 'detail', ref: value.ref };
+  if (value.class === 'w' && typeof value.ref === 'string')
+    return { class: 'w', ref: value.ref };
+  return null;
+};
+
+const projectionPlan = (
+  ctx: GateContext,
+  record: NonNullable<GateContext['record']>,
+): ProjectionPlan => ({
+  widgetId: record.widgetId,
+  widgetKind: record.widgetKind,
+  effect: record.effect,
+  capabilitySpace: record.capabilitySpace,
+  capabilityKey: record.capabilityKey,
+  sourceCapabilitySpace: record.sourceCapabilitySpace,
+  sourceCapabilityKey: record.sourceCapabilityKey,
+  targetJson: record.targetJson,
+  runId: record.runId,
+  revisionId: record.revisionId,
+  c9Domain: record.c9Domain,
+  frozenNounsJson: record.frozenNounsJson,
+  requestedScopeHash: record.requestedScopeHash,
+  retainedLocalBusinessDate: record.retainedLocalBusinessDate,
+  authority: ctx.principal?.authority ?? null,
+  actor: ctx.actor,
+  aiToolSurface: 'web',
+  answeringChannel: ctx.carrier,
+  resolvedNouns: ctx.facts.resolvedNouns ?? null,
+  closedInputs: ctx.facts.validatedInputs?.closed ?? null,
+});
+
+const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const isRoutableEffect = (value: string): value is RoutableEffect =>
   (ROUTABLE_EFFECTS as readonly string[]).includes(value);

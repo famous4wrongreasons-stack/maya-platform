@@ -82,6 +82,42 @@ describe('P-RESOLVE principal thread page', () => {
     );
   });
 
+  it('resolves one stored envelope only through the current tenant/proof and a valid seal', async () => {
+    const { service, tx, seals } = make();
+    tx.widgetEmission.findFirst.mockResolvedValueOnce({
+      turnId: 'turn-1',
+      deliveryChannel: 'pwa',
+      turn: { conversationId: 'conversation-1' },
+      intentRecords: [{ intentTokenHash: 'a'.repeat(64) }],
+      renderReceipts: [{ emittedEnvelopeJson: envelope }],
+    });
+    await expect(
+      service.resolveForNavigate({
+        tenantId: 'tenant-1',
+        widgetId: String(envelope.widget_id),
+        principalProofHash: 'p'.repeat(64),
+      }),
+    ).resolves.toEqual({
+      conversationId: 'conversation-1',
+      turnId: 'turn-1',
+      deliveryChannel: 'pwa',
+      envelope,
+    });
+    expect(tx.widgetEmission.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        where: expect.objectContaining({
+          tenantId: 'tenant-1',
+          widgetId: envelope.widget_id,
+          intentRecords: {
+            some: { principalProofHash: 'p'.repeat(64) },
+          },
+        }),
+      }),
+    );
+    expect(seals.verify).toHaveBeenCalled();
+  });
+
   it('returns nothing when current authority is revoked or a stored seal fails', async () => {
     const revoked = make({ principal: null });
     await expect(revoked.service.read({ limit: 20 })).resolves.toEqual([]);

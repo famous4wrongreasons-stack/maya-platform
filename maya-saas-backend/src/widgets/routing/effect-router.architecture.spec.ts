@@ -39,7 +39,10 @@ describe('U13a — Gate 13 architecture barriers', () => {
   });
 
   it('B19 obtains a CONTROL destination only through subjectOf, never direct handoff/capability reads', () => {
-    const controlBranch = router.slice(router.indexOf('  private control('));
+    const controlBranch = router.slice(
+      router.indexOf('  private control('),
+      router.indexOf('  private refine('),
+    );
     expect(controlBranch).toContain('subjectOf(input.record)');
     expect(controlBranch).not.toMatch(
       /record\.(?:handoffSpace|handoffKey|capabilitySpace|capabilityKey)/,
