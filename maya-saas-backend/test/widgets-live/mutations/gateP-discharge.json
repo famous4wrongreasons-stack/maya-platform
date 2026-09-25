@@ -1,0 +1,101 @@
+[
+  {
+    "id": "DIS-M1",
+    "description": "re-close the exact booking discharge switch",
+    "file": "src/widgets/booking/booking-discharge.runtime.ts",
+    "find": "export const BOOKING_ACTUATING_TEMPLATES_DISCHARGED = true as boolean;",
+    "replace": "export const BOOKING_ACTUATING_TEMPLATES_DISCHARGED = false as boolean;",
+    "killers": [
+      "DIS-2"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "DIS-M2",
+    "description": "remove the JWT intent route from the discharged gateway",
+    "file": "src/widgets/widgets.controller.ts",
+    "find": "  @Post('intent')",
+    "replace": "  @Post('intent-disabled')",
+    "killers": [
+      "DIS-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "DIS-M3",
+    "description": "remove the canonical booking minter handoff",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "    const envelope = await this.bookingMinter.mint({",
+    "replace": "    const envelope = await this.bookingMinter.disabled({",
+    "killers": [
+      "DIS-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "DIS-M4",
+    "description": "remove the canonical dismiss key",
+    "file": "src/widgets/control/control-registry.service.ts",
+    "find": "export const CONTROL_KEYS = ['control.widget.dismiss'] as const;",
+    "replace": "export const CONTROL_KEYS = [] as const;",
+    "killers": [
+      "DIS-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "DIS-M5",
+    "description": "drop produced-by lineage from the record writer",
+    "file": "src/widgets/emission/record-writer.ts",
+    "find": "    producedByIntentTokenHash: isBookingCommit\n      ? booking.producedByIntentTokenHash\n      : null,\n",
+    "replace": "    producedByIntentTokenHash: null,\n",
+    "killers": [
+      "DIS-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "DIS-M6",
+    "description": "remove one booking capability from the allowlist",
+    "file": "src/widgets/authority/ae-commit-allowlist.runtime.ts",
+    "find": "export const BOOKING = (cap: RegisteredActionCapabilityV1): boolean =>\n  cap.targetKind === 'appointment';\n",
+    "replace": "export const BOOKING = (cap: RegisteredActionCapabilityV1): boolean =>\n  cap.targetKind === 'appointment' && cap.capability !== 'crm.appointment.cancel.v1';\n",
+    "killers": [
+      "DIS-2"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "DIS-M7",
+    "description": "remove one exact propose pairing",
+    "file": "src/widgets/authority/propose-pairing.ts",
+    "find": "  row('appointments.own.cancel', 'crm.appointment.cancel.v1'),",
+    "replace": "",
+    "killers": [
+      "DIS-2"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "DIS-M8",
+    "description": "remove the AE arm from Gate 6 dispatch",
+    "file": "src/widgets/gates/gate6.ts",
+    "find": "    case 'AE':",
+    "replace": "    case 'AE_DISABLED':",
+    "killers": [
+      "DIS-1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "DIS-M9",
+    "description": "let the generic COMMIT placeholder bypass exact booking typing",
+    "file": "src/widgets/emission/intent-template.registry.ts",
+    "find": "  if (blocked)\n    throw new IntentTemplateRefusal('generic_actuating_template_forbidden');",
+    "replace": "  if (blocked) return { kind: 'intent', row: Object.values(INTENT_TEMPLATE_REGISTRY)[0] };",
+    "killers": [
+      "DIS-3"
+    ],
+    "expect": "build-killed"
+  }
+]

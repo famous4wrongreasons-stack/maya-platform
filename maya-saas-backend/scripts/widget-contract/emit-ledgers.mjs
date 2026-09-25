@@ -12,10 +12,7 @@
 // when they disagree:
 //
 //   1. the certified contract's §A1 register — the 39 prerequisite rows P-01 … P-39, each with its
-//      component, its status and the K-package that owes it. §A1.1–§A1.6 state the status in a cell;
-//      §A1.7's ten machinery rows have no status column and are grounded instead by the sentence
-//      that opens the table ("Every one is `[ABSENT]`"), which this script requires to be present
-//      before it applies that status to a single row;
+//      component, its explicit status and the K-package that owes it;
 //   2. K1's versioned ledgers, `docs/rebuild/evidence/maya-chat-first-ux/k1/k1-{mechanism,capability}-
 //      gap-ledger.json`. F92 requires the ledger to be versioned with the contract "so that a
 //      withdrawal is a reviewable diff" (A2.7 (c), RT8), so the JSON is the artefact a discharge
@@ -42,6 +39,7 @@
 // Output is formatted with the repository's prettier configuration before it is written or compared,
 // so `--check` has no formatting noise to hide a drift in.
 import fs from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -58,7 +56,8 @@ const fail = (message) => {
   process.exit(1);
 };
 
-const readJson = (file) => JSON.parse(fs.readFileSync(path.join(K1, file), 'utf8'));
+const readJson = (file) =>
+  JSON.parse(fs.readFileSync(path.join(K1, file), 'utf8'));
 
 // ── 1. §A1, parsed ───────────────────────────────────────────────────────────────────────────────
 //
@@ -71,61 +70,110 @@ const STATUSES = ['[ABSENT]', '[EXISTS]', '[PARTIAL]', '[UNENFORCEABLE-TODAY]'];
 const declaredRange = () => {
   const gap = CONTRACT.match(/MG-P(\d\d) … MG-P(\d\d)/);
   const pRef = CONTRACT.match(/'P-(\d\d)' … 'P-(\d\d)'/);
-  if (!gap || !pRef) fail('§0.7 F35 does not state the MG-P/P- range; the declaration moved');
+  if (!gap || !pRef)
+    fail('§0.7 F35 does not state the MG-P/P- range; the declaration moved');
   if (gap[1] !== pRef[1] || gap[2] !== pRef[2])
-    fail(`§0.7 F35's two ranges disagree: MG-P${gap[1]}..${gap[2]} vs P-${pRef[1]}..${pRef[2]}`);
+    fail(
+      `§0.7 F35's two ranges disagree: MG-P${gap[1]}..${gap[2]} vs P-${pRef[1]}..${pRef[2]}`,
+    );
   return { first: Number(pRef[1]), last: Number(pRef[2]) };
 };
 
-/**
- * §A1.7 carries no status column. Its ten rows take `[ABSENT]` from the sentence that opens the
- * table, and only from it: without the sentence this script has no ground for the status and stops,
- * rather than defaulting ten rows to a status nothing states.
- */
-const A17_SENTENCE = 'Every one is `[ABSENT]`: the widget layer does not exist in any form';
-
 const a1Rows = () => {
-  if (!CONTRACT.includes(A17_SENTENCE))
-    fail("§A1.7's status sentence is gone; the ten machinery rows have no stated status");
-  const rows = [...CONTRACT.matchAll(/^\| \*\*(P-\d\d)\*\* \| \*\*(.+?)\*\*(.*)$/gm)].map((m) => {
+  const rows = [
+    ...CONTRACT.matchAll(/^\| \*\*(P-\d\d)\*\* \| \*\*(.+?)\*\*(.*)$/gm),
+  ].map((m) => {
     const [, pRef, component, rest] = m;
-    const stated = rest.match(/`(\[ABSENT\]|\[PARTIAL\]|\[UNENFORCEABLE-TODAY\]|\[EXISTS\])`/);
-    const packages = [...new Set([...rest.matchAll(/\*\*(K1[0-6]|K[1-9])\*\*/g)].map((x) => x[1]))];
+    const stated = rest.match(
+      /`(\[ABSENT\]|\[PARTIAL\]|\[UNENFORCEABLE-TODAY\]|\[EXISTS\])`/,
+    );
+    const packages = [
+      ...new Set(
+        [...rest.matchAll(/\*\*(K1[0-6]|K[1-9])\*\*/g)].map((x) => x[1]),
+      ),
+    ];
     return {
       gapKey: `MG-${pRef}`,
       pRef,
       component: component.replace(/`/g, ''),
-      // §A1.7's rows have no cell; A17_SENTENCE above is what admits the fallback.
-      status: stated ? stated[1] : '[ABSENT]',
-      packageKey: packages.length ? packages.join('+') : 'NONE - outside the sixteen',
-      blockingRules: [],
+      status: stated?.[1] ?? fail(`${pRef}: §A1 row has no explicit status`),
+      packageKey: packages.length
+        ? packages.join('+')
+        : 'NONE - outside the sixteen',
     };
   });
   const { first, last } = declaredRange();
   const expected = last - first + 1;
   if (rows.length !== expected)
-    fail(`§A1 yields ${rows.length} prerequisite rows; F35 declares ${expected}`);
+    fail(
+      `§A1 yields ${rows.length} prerequisite rows; F35 declares ${expected}`,
+    );
   for (let n = first; n <= last; n += 1) {
     const pRef = `P-${String(n).padStart(2, '0')}`;
     if (!rows.some((r) => r.pRef === pRef)) fail(`§A1 has no row ${pRef}`);
   }
-  if (new Set(rows.map((r) => r.pRef)).size !== rows.length) fail('§A1 repeats a prerequisite row');
-  for (const r of rows) if (!STATUSES.includes(r.status)) fail(`${r.pRef}: unknown status ${r.status}`);
+  if (new Set(rows.map((r) => r.pRef)).size !== rows.length)
+    fail('§A1 repeats a prerequisite row');
+  for (const r of rows)
+    if (!STATUSES.includes(r.status))
+      fail(`${r.pRef}: unknown status ${r.status}`);
   return rows;
+};
+
+const normalized = (value) => value.replace(/\s+/g, ' ').trim();
+
+/** F35 (2)/(3), DIS-0: derive every clause→row pair from its own normative Status paragraph. */
+const normativePendingBindings = () => {
+  const bindings = [];
+  for (const paragraph of CONTRACT.split(/\n\s*\n/)) {
+    const statusAt = Math.max(
+      paragraph.indexOf('*Status:*'),
+      paragraph.indexOf('**Status.**'),
+    );
+    if (statusAt < 0) continue;
+    const status = paragraph.slice(statusAt);
+    if (!status.includes('NORMATIVE-PENDING')) continue;
+    const pRefs = [
+      ...new Set([...status.matchAll(/P-\d\d/g)].map((m) => m[0])),
+    ].sort();
+    if (!pRefs.length)
+      fail(
+        `NORMATIVE-PENDING status names no prerequisite row: ${normalized(status).slice(0, 160)}`,
+      );
+    const clauseId = `NP-${createHash('sha256').update(normalized(paragraph)).digest('hex').slice(0, 16)}`;
+    bindings.push({ clauseId, pRefs });
+  }
+  if (!bindings.length)
+    fail('the contract yields no NORMATIVE-PENDING clause bindings');
+  if (
+    new Set(bindings.map((binding) => binding.clauseId)).size !==
+    bindings.length
+  )
+    fail('two NORMATIVE-PENDING paragraphs derive the same clause id');
+  return bindings.sort((a, b) => a.clauseId.localeCompare(b.clauseId));
 };
 
 // ── 2. the capability gaps the contract declares ─────────────────────────────────────────────────
 
 /** Every `GAP-…` key the certified text names, which is what P-07 registers (§A1.1 P-07). */
 const contractGapKeys = () =>
-  [...new Set([...CONTRACT.matchAll(/`(GAP-[A-Z][A-Z-]+)`/g)].map((m) => m[1]))].sort();
+  [
+    ...new Set(
+      [...CONTRACT.matchAll(/`(GAP-[A-Z][A-Z-]+)`/g)].map((m) => m[1]),
+    ),
+  ].sort();
 
 /** §0.7 F36's "Declared GAPs." cell — the eight reserved consent/identity/erasure acts, in its order. */
 const f36DeclaredGaps = () => {
-  const line = CONTRACT.split('\n').find((l) => l.includes('**Declared GAPs.**'));
+  const line = CONTRACT.split('\n').find((l) =>
+    l.includes('**Declared GAPs.**'),
+  );
   if (!line) fail("§0.7 F36's declared-GAP row is gone");
-  const keys = [...new Set([...line.matchAll(/`(GAP-[A-Z][A-Z-]+)`/g)].map((m) => m[1]))];
-  if (keys.length !== 8) fail(`§0.7 F36 names ${keys.length} declared GAPs; §A1.6 tracks eight`);
+  const keys = [
+    ...new Set([...line.matchAll(/`(GAP-[A-Z][A-Z-]+)`/g)].map((m) => m[1])),
+  ];
+  if (keys.length !== 8)
+    fail(`§0.7 F36 names ${keys.length} declared GAPs; §A1.6 tracks eight`);
   return keys;
 };
 
@@ -133,12 +181,23 @@ const f36DeclaredGaps = () => {
 
 const mechanismRows = () => {
   const fromContract = a1Rows();
+  const bindings = normativePendingBindings();
+  const blockingByPRef = new Map(fromContract.map((row) => [row.pRef, []]));
+  for (const binding of bindings)
+    for (const pRef of binding.pRefs) {
+      const rules = blockingByPRef.get(pRef);
+      if (!rules)
+        fail(`${binding.clauseId}: status names unknown prerequisite ${pRef}`);
+      rules.push(binding.clauseId);
+    }
   const ledger = readJson('k1-mechanism-gap-ledger.json');
   if (ledger.contract !== 'maya.k1.mechanism-gap-ledger/1')
     fail(`k1-mechanism-gap-ledger.json declares ${ledger.contract}`);
   const byPRef = new Map(ledger.rows.map((r) => [r.pRef, r]));
   if (ledger.rows.length !== fromContract.length)
-    fail(`K1 carries ${ledger.rows.length} mechanism rows; §A1 carries ${fromContract.length}`);
+    fail(
+      `K1 carries ${ledger.rows.length} mechanism rows; §A1 carries ${fromContract.length}`,
+    );
   for (const row of fromContract) {
     const k1 = byPRef.get(row.pRef);
     if (!k1) fail(`K1's ledger has no row for ${row.pRef}`);
@@ -148,13 +207,22 @@ const mechanismRows = () => {
           `${row.pRef}.${field}: §A1 says ${JSON.stringify(row[field])}, ` +
             `K1's ledger says ${JSON.stringify(k1[field])}`,
         );
-    if (!Array.isArray(k1.blockingRules) || k1.blockingRules.length)
-      // F35 (2)/(3) bind (clause, p_ref) pairs. K1 opened every row with an empty list and this
-      // script does not invent one: a populated list is a real change and must come with the reader
-      // that derives it from the clauses' own status lines (P-DISCHARGE DIS-0).
-      fail(`${row.pRef}: blockingRules is populated; F35 (2)/(3) has no reader in this unit`);
+    const expectedBlockingRules = [
+      ...(blockingByPRef.get(row.pRef) ?? []),
+    ].sort();
+    if (
+      !Array.isArray(k1.blockingRules) ||
+      JSON.stringify([...k1.blockingRules].sort()) !==
+        JSON.stringify(expectedBlockingRules)
+    )
+      fail(
+        `${row.pRef}.blockingRules: contract derives ${JSON.stringify(expectedBlockingRules)}, ` +
+          `K1 says ${JSON.stringify(k1.blockingRules)}`,
+      );
     if (k1.gapKey !== `MG-${k1.pRef}`)
-      fail(`${row.pRef}: gap_key ${k1.gapKey} is not MG- + p_ref, so the range is not derivable`);
+      fail(
+        `${row.pRef}: gap_key ${k1.gapKey} is not MG- + p_ref, so the range is not derivable`,
+      );
   }
   // K1's row order is the order the discharge diff reads; §A1's is the register's. Keep K1's.
   return ledger.rows.map((r) => ({
@@ -163,6 +231,7 @@ const mechanismRows = () => {
     component: r.component,
     status: r.status,
     packageKey: r.packageKey,
+    blockingRules: [...r.blockingRules].sort(),
   }));
 };
 
@@ -178,13 +247,18 @@ const capabilityRows = () => {
         `ledger ${keys.length}, contract ${declared.length}`,
     );
   const eight = f36DeclaredGaps();
-  const flagged = ledger.rows.filter((r) => r.isOneOfTheEight).map((r) => r.gapKey).sort();
+  const flagged = ledger.rows
+    .filter((r) => r.isOneOfTheEight)
+    .map((r) => r.gapKey)
+    .sort();
   if (JSON.stringify(flagged) !== JSON.stringify([...eight].sort()))
     fail("P-07's eight-act flags are not §0.7 F36's declared GAPs");
   const OWNER_STATES = ['none', 'registered_elsewhere', 'unreachable'];
   for (const r of ledger.rows) {
-    if (!OWNER_STATES.includes(r.ownerState)) fail(`${r.gapKey}: unknown ownerState ${r.ownerState}`);
-    if (r.gapKey.startsWith('MG-')) fail(`${r.gapKey}: F35 keeps the two key shapes disjoint`);
+    if (!OWNER_STATES.includes(r.ownerState))
+      fail(`${r.gapKey}: unknown ownerState ${r.ownerState}`);
+    if (r.gapKey.startsWith('MG-'))
+      fail(`${r.gapKey}: F35 keeps the two key shapes disjoint`);
   }
   return ledger.rows.map((r) => ({
     gapKey: r.gapKey,
@@ -205,7 +279,10 @@ const capabilityRows = () => {
 // as a backslash and LED-1 compares byte for byte.
 const lit = (s) => JSON.stringify(s);
 
-const mechanismModule = (rows, range) => `// GENERATED from §A1 of the certified contract and K1's versioned ledger — do not hand-edit.
+const mechanismModule = (
+  rows,
+  range,
+) => `// GENERATED from §A1 of the certified contract and K1's versioned ledger — do not hand-edit.
 // Source:     docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md §A1, §0.7 F35, §0.18 F92, §A2.4 (errata EC-5)
 //             docs/rebuild/evidence/maya-chat-first-ux/k1/k1-mechanism-gap-ledger.json
 // Regenerate: node scripts/widget-contract/emit-ledgers.mjs
@@ -220,10 +297,9 @@ const mechanismModule = (rows, range) => `// GENERATED from §A1 of the certifie
 // where F35's prose range writes \`MG-P01\`. Read a row through \`MECHANISM_GAP_BY_PREF\` and the
 // spelling never reaches a caller.
 //
-// \`blocking_rules\` is empty on every row. F35 (2) and (3) bind each NORMATIVE-PENDING clause to the
-// rows its status names; K1 opened the ledger with the pairs underived, and deriving them is
-// P-DISCHARGE's DIS-0 reader, not this unit's. The build refuses a populated list rather than let a
-// half-derived pair set look like a checked one.
+// \`blocking_rules\` is derived from every normative paragraph's own Status sentence. F35 (2)/(3)
+// is checked in both directions: each clause reaches every named row, and no row carries a clause
+// its status sentence does not name.
 
 import type { MechanismGap } from './registries';
 
@@ -242,7 +318,7 @@ ${rows
     component: ${lit(r.component)},
     status: ${lit(r.status)},
     package: ${lit(r.packageKey)},
-    blocking_rules: [],
+    blocking_rules: [${r.blockingRules.map(lit).join(', ')}],
   },`,
   )
   .join('\n')}
@@ -278,6 +354,16 @@ export const MECHANISM_GAP_STATUS_COUNTS: Readonly<Record<MechanismGap['status']
     ),
   );
 
+/** F35 (2)/(3)'s clause→row side, derived from the contract Status sentences. */
+export const NORMATIVE_PENDING_BINDINGS = Object.freeze([
+${normativePendingBindings()
+  .map(
+    (binding) =>
+      `  Object.freeze({ clause_id: ${lit(binding.clauseId)}, p_refs: Object.freeze([${binding.pRefs.map(lit).join(', ')}]) }),`,
+  )
+  .join('\n')}
+]);
+
 export const mechanismGapForPRef = (pRef: string): Readonly<MechanismGap> | undefined =>
   MECHANISM_GAP_BY_PREF.get(pRef);
 
@@ -293,7 +379,10 @@ export const isMechanismNormativePending = (pRef: string): boolean =>
 export const MECHANISM_GAP_KEY_PREFIX = 'MG-';
 `;
 
-const capabilityModule = (rows, eight) => `// GENERATED from the certified contract and K1's versioned ledger — do not hand-edit.
+const capabilityModule = (
+  rows,
+  eight,
+) => `// GENERATED from the certified contract and K1's versioned ledger — do not hand-edit.
 // Source:     docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md §A1.1 P-07, §0.7 F35, §0.7 F36, §A1.6
 //             docs/rebuild/evidence/maya-chat-first-ux/k1/k1-capability-gap-ledger.json
 // Regenerate: node scripts/widget-contract/emit-ledgers.mjs
@@ -403,25 +492,42 @@ const caps = capabilityRows();
 const eight = f36DeclaredGaps();
 
 const outputs = [
-  { file: 'mechanism-gap-ledger.runtime.ts', text: mechanismModule(mech, range) },
-  { file: 'capability-gap-ledger.runtime.ts', text: capabilityModule(caps, eight) },
+  {
+    file: 'mechanism-gap-ledger.runtime.ts',
+    text: mechanismModule(mech, range),
+  },
+  {
+    file: 'capability-gap-ledger.runtime.ts',
+    text: capabilityModule(caps, eight),
+  },
 ];
 
 const check = process.argv.includes('--check');
 const outDir = path.resolve(
-  process.argv.slice(2).find((a) => !a.startsWith('--')) ?? path.join(BACKEND, 'src/widget-contract'),
+  process.argv.slice(2).find((a) => !a.startsWith('--')) ??
+    path.join(BACKEND, 'src/widget-contract'),
 );
 
 const prettier = await import('prettier');
 let drift = 0;
 for (const output of outputs) {
   const committed = path.join(BACKEND, 'src/widget-contract', output.file);
-  const config = await prettier.resolveConfig(committed, { editorconfig: true });
-  if (!config) fail(`no prettier configuration resolves for src/widget-contract/${output.file}`);
-  const formatted = await prettier.format(output.text, { ...config, filepath: committed });
+  const config = await prettier.resolveConfig(committed, {
+    editorconfig: true,
+  });
+  if (!config)
+    fail(
+      `no prettier configuration resolves for src/widget-contract/${output.file}`,
+    );
+  const formatted = await prettier.format(output.text, {
+    ...config,
+    filepath: committed,
+  });
   const target = path.join(outDir, output.file);
   if (check) {
-    const current = fs.existsSync(target) ? fs.readFileSync(target, 'utf8') : null;
+    const current = fs.existsSync(target)
+      ? fs.readFileSync(target, 'utf8')
+      : null;
     if (current !== formatted) {
       console.error(
         `emit-ledgers --check: ${path.relative(BACKEND, target)} is not what emit-ledgers.mjs writes; regenerate it`,
@@ -435,9 +541,15 @@ for (const output of outputs) {
 }
 
 // F92 — the build-printed status counts, from the ledger, never from prose.
-const byStatus = mech.reduce((acc, r) => ((acc[r.status] = (acc[r.status] ?? 0) + 1), acc), {});
+const byStatus = mech.reduce(
+  (acc, r) => ((acc[r.status] = (acc[r.status] ?? 0) + 1), acc),
+  {},
+);
 const statusLine = STATUSES.map((s) => `${s} ${byStatus[s] ?? 0}`).join(' | ');
-const ownerStates = caps.reduce((acc, r) => ((acc[r.ownerState] = (acc[r.ownerState] ?? 0) + 1), acc), {});
+const ownerStates = caps.reduce(
+  (acc, r) => ((acc[r.ownerState] = (acc[r.ownerState] ?? 0) + 1), acc),
+  {},
+);
 console.log(
   `F92 MECHANISM_GAP_LEDGER ${mech.length} rows (P-${String(range.first).padStart(2, '0')}..P-${String(range.last).padStart(2, '0')}) | ${statusLine}`,
 );

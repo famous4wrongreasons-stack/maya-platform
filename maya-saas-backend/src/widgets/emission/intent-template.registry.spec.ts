@@ -1,6 +1,5 @@
 import type { IntentProposal } from '../../widget-contract/derived-shapes';
 import {
-  A2_GAP_REF,
   INTENT_TEMPLATE_REGISTRY,
   IntentTemplateRefusal,
   assertIntentTemplateRegistry,
@@ -84,18 +83,16 @@ describe('P-MINT — closed intent template registry', () => {
     );
   });
 
-  it('MINT-3 keeps DRAFT, REQUEST_APPROVAL and COMMIT behind A2.2 as limitation outcomes', () => {
+  it('MINT-3 refuses generic DRAFT, REQUEST_APPROVAL and COMMIT after exact booking discharge', () => {
     for (const key of [
       'draft.blocked@1',
       'request-approval.blocked@1',
       'commit.blocked@1',
     ] as const) {
-      const result = resolve({ intent_template_key: key, role: 'primary' });
-      expect(result).toEqual(
-        expect.objectContaining({
-          kind: 'a2_limitation',
-          capabilityGapRef: A2_GAP_REF,
-        }),
+      expect(() =>
+        resolve({ intent_template_key: key, role: 'primary' }),
+      ).toThrow(
+        new IntentTemplateRefusal('generic_actuating_template_forbidden'),
       );
     }
     expect(() => assertIntentTemplateRegistry()).not.toThrow();

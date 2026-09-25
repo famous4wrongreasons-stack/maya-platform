@@ -15,6 +15,7 @@ import type {
 import type { WidgetKind } from '../../widget-contract/kinds';
 import { KIND_PERMITTED_EFFECTS } from '../../widget-contract/tables';
 import { carrierAdmits } from '../carriers/channel-profile';
+import { BOOKING_ACTUATING_TEMPLATES_DISCHARGED } from '../booking/booking-discharge.runtime';
 import {
   isInheritedOwner,
   isOwnerClassKey,
@@ -406,12 +407,14 @@ export const resolveIntentTemplate = (args: {
   const blocked = (A2_BLOCKED as Record<string, EffectClass | undefined>)[
     proposal.intent_template_key
   ];
-  if (blocked)
+  if (blocked && !BOOKING_ACTUATING_TEMPLATES_DISCHARGED)
     return Object.freeze({
       kind: 'a2_limitation' as const,
       requestedEffect: blocked,
       capabilityGapRef: A2_GAP_REF,
     });
+  if (blocked)
+    throw new IntentTemplateRefusal('generic_actuating_template_forbidden');
 
   const template = (
     INTENT_TEMPLATE_REGISTRY as Record<string, IntentTemplateRow | undefined>
@@ -479,7 +482,7 @@ export const resolveIntentTemplate = (args: {
   return Object.freeze({ kind: 'intent' as const, row: resolvedTemplate });
 };
 
-/** Registry-load assertion: no actuating recipe may exist while A2.2/MG-P01 is present. */
+/** Registry-load assertion: the common registry never becomes a generic business-mutation owner. */
 export const assertIntentTemplateRegistry = (): void => {
   const problems: string[] = [];
   for (const [key, value] of Object.entries(INTENT_TEMPLATE_REGISTRY)) {
@@ -487,7 +490,7 @@ export const assertIntentTemplateRegistry = (): void => {
       problems.push(`${key}: key/version mismatch`);
     if (['DRAFT', 'REQUEST_APPROVAL', 'COMMIT'].includes(value.effect))
       problems.push(
-        `${key}: actuating recipe present while ${A2_GAP_REF} is open`,
+        `${key}: actuating recipe present outside the closed booking registry`,
       );
   }
   if (problems.length)

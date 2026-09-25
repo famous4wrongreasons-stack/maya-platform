@@ -17,12 +17,9 @@
 //     `[PARTIAL]` row is NORMATIVE-PENDING "on identical terms to `[ABSENT]`", so a status that
 //     escaped the binding would be the one status that gets to cite a mechanism it is forbidden to
 //     cite. F35's own sentence is already written this way.
-//   - F35 (2) and (3) — every NORMATIVE-PENDING clause bound to the rows its status line names, as
-//     `(clause, p_ref)` pairs — is NOT asserted. K1's ledger carries `blocking_rules: []` on all
-//     thirty-nine rows, so there is nothing to check them against; the generator refuses a populated
-//     list for the same reason. Deriving the pairs from the clauses' own status lines is
-//     P-DISCHARGE's DIS-0 reader. This is a disclosed residual of the unit, not a softening: it means
-//     the pair half of F35's assertion is unproven, and it is recorded in the unit's report.
+//   - F35 (2) and (3) are asserted in both directions. P-DISCHARGE's DIS-0 reader derives stable
+//     clause ids and their P-row sets from the contract's own Status paragraphs; the K1 JSON and
+//     generated runtime rows must carry that exact pair set. A missing or invented pair stops boot.
 //
 // What this file is NOT: it does not decide whether a mechanism exists. The ledger says that, §A1
 // says the ledger, and the generator refuses to emit a row the two disagree on. This file only makes
@@ -42,6 +39,7 @@ import {
   MECHANISM_GAP_PREREQUISITE_FIRST,
   MECHANISM_GAP_PREREQUISITE_LAST,
   MECHANISM_GAP_ROWS,
+  NORMATIVE_PENDING_BINDINGS,
 } from '../../widget-contract/mechanism-gap-ledger.runtime';
 import type { MechanismGap } from '../../widget-contract/registries';
 
@@ -73,6 +71,11 @@ export interface LedgerPair {
   readonly declaredRowCount: number;
   readonly firstPRef: number;
   readonly lastPRef: number;
+  /** F35 (2)/(3), clause→row pairs derived from the contract's own Status paragraphs. */
+  readonly normativePendingBindings: readonly Readonly<{
+    readonly clause_id: string;
+    readonly p_refs: readonly string[];
+  }>[];
 }
 
 /** The ledgers this build ships. */
@@ -85,6 +88,7 @@ export const SHIPPED_LEDGERS: LedgerPair = Object.freeze({
   declaredRowCount: MECHANISM_GAP_DECLARED_ROW_COUNT,
   firstPRef: MECHANISM_GAP_PREREQUISITE_FIRST,
   lastPRef: MECHANISM_GAP_PREREQUISITE_LAST,
+  normativePendingBindings: NORMATIVE_PENDING_BINDINGS,
 });
 
 const has = (record: Readonly<Record<string, unknown>>, key: string): boolean =>
@@ -109,6 +113,7 @@ export const ledgerStartupProblems = (
     declaredRowCount,
     firstPRef,
     lastPRef,
+    normativePendingBindings,
   } = ledgers;
 
   // ── F92: the register is total over the declared range ─────────────────────────────────────────
@@ -161,6 +166,45 @@ export const ledgerStartupProblems = (
       problems.push(
         `F35: MECHANISM_GAP_LEDGER holds ${key}, which is no prerequisite row`,
       );
+
+  // ── F35 (2)/(3): every pending clause is bound to exactly the rows its status names ──────────
+  const expectedPairs = new Set<string>();
+  for (const binding of normativePendingBindings) {
+    if (!binding.clause_id || !binding.p_refs.length)
+      problems.push(
+        'F35: a NORMATIVE-PENDING binding has no clause id or prerequisite row',
+      );
+    for (const pRef of binding.p_refs) {
+      if (!byPRef.has(pRef))
+        problems.push(
+          `F35: ${binding.clause_id} names unknown prerequisite ${pRef}`,
+        );
+      expectedPairs.add(`${binding.clause_id}\u0000${pRef}`);
+    }
+  }
+  const actualPairs = new Set<string>();
+  for (const row of mechanismRows) {
+    for (const clauseId of row.blocking_rules) {
+      const pair = `${clauseId}\u0000${row.p_ref}`;
+      if (actualPairs.has(pair))
+        problems.push(`F35: ${clauseId} is repeated on ${row.p_ref}`);
+      actualPairs.add(pair);
+    }
+    if (row.status === '[EXISTS]' && row.blocking_rules.length)
+      problems.push(
+        `A2.7: ${row.p_ref} is [EXISTS] but still carries blocking rules`,
+      );
+  }
+  for (const pair of expectedPairs)
+    if (!actualPairs.has(pair)) {
+      const [clauseId, pRef] = pair.split('\u0000');
+      problems.push(`F35: pending clause ${clauseId} is not bound to ${pRef}`);
+    }
+  for (const pair of actualPairs)
+    if (!expectedPairs.has(pair)) {
+      const [clauseId, pRef] = pair.split('\u0000');
+      problems.push(`F35: ${pRef} carries unowned blocking clause ${clauseId}`);
+    }
 
   // ── §A1.1 P-07: the capability-gap register ────────────────────────────────────────────────────
   if (capabilityRows.length === 0)

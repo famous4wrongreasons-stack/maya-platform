@@ -319,21 +319,18 @@ describe('K3 emission — mint, compose, fit, seal', () => {
     ).toHaveLength(1);
   });
 
-  it('MINT-3 turns an actuating template request into LIMITATION and mints no token', async () => {
+  it('MINT-3 refuses a generic actuating template and writes nothing after exact discharge', async () => {
     const { prisma, emitter } = make();
-    const minted = await emitter.emit({
-      ...req(),
-      composerInput: composer([
-        { intent_template_key: 'commit.blocked@1', role: 'primary' },
-      ]),
-    });
-    expect(minted).toEqual(
-      expect.objectContaining({ kind: 'LIMITATION', a2Limited: true }),
-    );
+    await expect(
+      emitter.emit({
+        ...req(),
+        composerInput: composer([
+          { intent_template_key: 'commit.blocked@1', role: 'primary' },
+        ]),
+      }),
+    ).rejects.toThrow('generic_actuating_template_forbidden');
     expect(prisma.records).toEqual([]);
-    expect(prisma.emissions[0].bodyJson).toEqual(
-      expect.objectContaining({ capability_gap_ref: 'MG-P01' }),
-    );
+    expect(prisma.emissions).toEqual([]);
   });
 
   it('MINT-1 writes the exact derived audit members', async () => {

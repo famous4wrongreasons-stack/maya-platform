@@ -1,11 +1,17 @@
 [
   {
     "id": "LED-M1",
-    "description": "drop MG-P-01 — the IntentGateway row leaves the ledger, so §A1's P-01 is bound to no gap key (A2.4)",
+    "description": "drop discharged P-01 — F92 totality and the exact A2.7 withdrawal must fail",
     "file": "src/widget-contract/mechanism-gap-ledger.runtime.ts",
-    "find": "  {\n    gap_key: 'MG-P-01',\n    p_ref: 'P-01',\n    component: 'IntentGateway',\n    status: '[ABSENT]',\n    package: 'K3',\n    blocking_rules: [],\n  },\n",
+    "find": "  {\n    gap_key: 'MG-P-01',\n    p_ref: 'P-01',\n    component: 'IntentGateway JWT widget route',\n    status: '[EXISTS]',\n    package: 'K3',\n    blocking_rules: [],\n  },\n",
     "replace": "",
-    "killers": ["LED-1a", "LED-1b", "LED-1d", "LED-3a", "LED-4a"],
+    "killers": [
+      "LED-1a",
+      "LED-1b",
+      "LED-1d",
+      "LED-3a",
+      "LED-4a"
+    ],
     "expect": "build-killed"
   },
   {
@@ -14,7 +20,9 @@
     "file": "src/widgets/authority/ledger-startup.assert.ts",
     "find": "  const problems = ledgerStartupProblems(ledgers);\n  if (problems.length) throw new LedgerStartupAssertionError(problems);\n",
     "replace": "  ledgerStartupProblems(ledgers);\n",
-    "killers": ["LED-3b"],
+    "killers": [
+      "LED-3b"
+    ],
     "expect": "build-killed"
   },
   {
@@ -23,7 +31,9 @@
     "file": "src/widgets/authority/ledger-startup.assert.ts",
     "find": "    if (row.status === '[EXISTS]') continue;\n",
     "replace": "    if (row.status !== '[ABSENT]') continue;\n",
-    "killers": ["LED-3c"],
+    "killers": [
+      "LED-3c"
+    ],
     "expect": "build-killed"
   },
   {
@@ -32,25 +42,33 @@
     "file": "src/widgets/authority/ledger-startup.assert.ts",
     "find": "  for (const row of capabilityRows)\n    if (row.gap_key.startsWith(MECHANISM_GAP_KEY_PREFIX))\n      problems.push(\n        `F35: capability key ${row.gap_key} is shaped like a mechanism gap`,\n      );\n",
     "replace": "",
-    "killers": ["LED-3f"],
+    "killers": [
+      "LED-3f"
+    ],
     "expect": "build-killed"
   },
   {
     "id": "LED-M5",
-    "description": "the generator reads §A1's status from a default instead of from the cell, so P-09's [PARTIAL] and P-19's [UNENFORCEABLE-TODAY] flatten to [ABSENT]",
+    "description": "the generator flattens every explicit §A1 status to ABSENT",
     "file": "scripts/widget-contract/emit-ledgers.mjs",
-    "find": "      status: stated ? stated[1] : '[ABSENT]',\n",
+    "find": "      status: stated?.[1] ?? fail(`${pRef}: §A1 row has no explicit status`),\n",
     "replace": "      status: '[ABSENT]',\n",
-    "killers": ["LED-4a", "LED-4b", "LED-4c"],
+    "killers": [
+      "LED-4a",
+      "LED-4b",
+      "LED-4c"
+    ],
     "expect": "build-killed"
   },
   {
     "id": "LED-M6",
     "description": "the F92 counts are transcribed instead of derived — the printed status line stops following the rows (§A5)",
     "file": "scripts/widget-contract/emit-ledgers.mjs",
-    "find": "const byStatus = mech.reduce((acc, r) => ((acc[r.status] = (acc[r.status] ?? 0) + 1), acc), {});\n",
-    "replace": "const byStatus = { '[ABSENT]': 34, '[EXISTS]': 0, '[PARTIAL]': 0, '[UNENFORCEABLE-TODAY]': 0 };\n",
-    "killers": ["LED-4b"],
+    "find": "const byStatus = mech.reduce(\n  (acc, r) => ((acc[r.status] = (acc[r.status] ?? 0) + 1), acc),\n  {},\n);\n",
+    "replace": "const byStatus = { '[ABSENT]': 29, '[EXISTS]': 8, '[PARTIAL]': 1, '[UNENFORCEABLE-TODAY]': 1 };\n",
+    "killers": [
+      "LED-4b"
+    ],
     "expect": "build-killed"
   },
   {
@@ -59,7 +77,31 @@
     "file": "src/widget-contract/capability-gap-ledger.runtime.ts",
     "find": "export const isCapabilityGapKey = (ref: string | null | undefined): boolean =>\n  typeof ref === 'string' &&\n  Object.prototype.hasOwnProperty.call(CAPABILITY_GAP_LEDGER_RUNTIME, ref);\n",
     "replace": "export const isCapabilityGapKey = (ref: string | null | undefined): boolean =>\n  typeof ref === 'string' && ref.startsWith('GAP-');\n",
-    "killers": ["LED-2b"],
+    "killers": [
+      "LED-2b"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "LED-M8",
+    "description": "missing clause→row bindings are no longer rejected",
+    "file": "src/widgets/authority/ledger-startup.assert.ts",
+    "find": "  for (const pair of expectedPairs)\n    if (!actualPairs.has(pair)) {\n      const [clauseId, pRef] = pair.split('\\u0000');\n      problems.push(`F35: pending clause ${clauseId} is not bound to ${pRef}`);\n    }\n",
+    "replace": "",
+    "killers": [
+      "LED-3e2"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "LED-M9",
+    "description": "invented clause→row bindings are no longer rejected",
+    "file": "src/widgets/authority/ledger-startup.assert.ts",
+    "find": "  for (const pair of actualPairs)\n    if (!expectedPairs.has(pair)) {\n      const [clauseId, pRef] = pair.split('\\u0000');\n      problems.push(`F35: ${pRef} carries unowned blocking clause ${clauseId}`);\n    }\n",
+    "replace": "",
+    "killers": [
+      "LED-3e2"
+    ],
     "expect": "build-killed"
   }
 ]

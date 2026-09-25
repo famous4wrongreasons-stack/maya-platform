@@ -1,5 +1,5 @@
 /**
- * A2.2's runtime switch. P-MINT-BOOK builds the exact recipes while this is false.
- * P-DISCHARGE is the sole commit permitted to flip it after its mechanism proof.
+ * A2.7's exact booking discharge. This admits only the closed booking registry; the common intent
+ * registry remains non-actuating and unknown/generic templates still fail closed.
  */
-export const BOOKING_ACTUATING_TEMPLATES_DISCHARGED = false as boolean;
+export const BOOKING_ACTUATING_TEMPLATES_DISCHARGED = true as boolean;

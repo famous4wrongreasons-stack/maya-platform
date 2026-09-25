@@ -34,6 +34,7 @@ import {
   MECHANISM_GAP_PREREQUISITE_LAST,
   MECHANISM_GAP_ROWS,
   MECHANISM_GAP_STATUS_COUNTS,
+  NORMATIVE_PENDING_BINDINGS,
   isMechanismNormativePending,
   mechanismGapForPRef,
 } from '../../widget-contract/mechanism-gap-ledger.runtime';
@@ -62,9 +63,6 @@ describe('P-LEDGER — the runtime mechanism-gap and capability-gap ledgers', ()
 
   const LINES = CONTRACT.split('\n');
   const pRefOf = (n: number): string => `P-${String(n).padStart(2, '0')}`;
-  const A17_AT = LINES.findIndex((l) => l.startsWith('### A1.7'));
-  const A17_SENTENCE =
-    'Every one is `[ABSENT]`: the widget layer does not exist in any form';
   const GAP_KEY = /`(GAP-[A-Z][A-Z-]+)`/g;
 
   /**
@@ -79,7 +77,7 @@ describe('P-LEDGER — the runtime mechanism-gap and capability-gap ledgers', ()
       l.startsWith(prefix),
     );
     expect(matches).toHaveLength(1);
-    const { l: line, i: at } = matches[0];
+    const { l: line } = matches[0];
     const rest = line.slice(`| **${pRef}** | `.length);
     const component =
       /^\*\*(.+?)\*\*/.exec(rest)?.[1].replace(/`/g, '') ?? '<unparsed>';
@@ -87,12 +85,7 @@ describe('P-LEDGER — the runtime mechanism-gap and capability-gap ledgers', ()
       /`(\[ABSENT\]|\[PARTIAL\]|\[UNENFORCEABLE-TODAY\]|\[EXISTS\])`/.exec(
         rest,
       )?.[1];
-    // §A1.7's ten machinery rows have no status cell; the sentence that opens that table is what
-    // gives them one, and nothing else may.
-    if (stated === undefined) {
-      expect(at).toBeGreaterThan(A17_AT);
-      expect(CONTRACT).toContain(A17_SENTENCE);
-    }
+    expect(stated).toBeDefined();
     const packages = [
       ...new Set(
         [...rest.matchAll(/\*\*(K1[0-6]|K[1-9])\*\*/g)].map((m) => m[1]),
@@ -100,7 +93,7 @@ describe('P-LEDGER — the runtime mechanism-gap and capability-gap ledgers', ()
     ];
     return {
       component,
-      status: stated ?? '[ABSENT]',
+      status: stated ?? '<unparsed>',
       pkg: packages.length ? packages.join('+') : 'NONE - outside the sixteen',
     };
   };
@@ -222,13 +215,23 @@ describe('P-LEDGER — the runtime mechanism-gap and capability-gap ledgers', ()
     );
   });
 
-  it('LED-1f blocking_rules is empty on every row: F35 (2)/(3) has no reader in this unit', () => {
-    for (const row of MECHANISM_GAP_ROWS)
+  it('LED-1f blocking_rules equals every contract-derived clause→row pair in both directions', () => {
+    const expected = NORMATIVE_PENDING_BINDINGS.flatMap((binding) =>
+      binding.p_refs.map((pRef) => `${binding.clause_id}\u0000${pRef}`),
+    ).sort();
+    const actual = MECHANISM_GAP_ROWS.flatMap((row) =>
+      row.blocking_rules.map((clauseId) => `${clauseId}\u0000${row.p_ref}`),
+    ).sort();
+    expect(expected.length).toBeGreaterThan(0);
+    expect(actual).toEqual(expected);
+    for (const row of MECHANISM_GAP_ROWS.filter(
+      (candidate) => candidate.status === '[EXISTS]',
+    ))
       expect(row.blocking_rules).toEqual([]);
   });
 
   it('LED-1g every row that is not [EXISTS] is NORMATIVE-PENDING, and so is an unknown p_ref', () => {
-    expect(MECHANISM_GAP_STATUS_COUNTS['[EXISTS]']).toBe(0);
+    expect(MECHANISM_GAP_STATUS_COUNTS['[EXISTS]']).toBe(8);
     for (const row of MECHANISM_GAP_ROWS)
       expect(isMechanismNormativePending(row.p_ref)).toBe(
         row.status !== '[EXISTS]',
@@ -385,6 +388,26 @@ describe('P-LEDGER — the runtime mechanism-gap and capability-gap ledgers', ()
     );
   });
 
+  it('LED-3e2 a missing or invented clause→row binding fails in either direction', () => {
+    const source = MECHANISM_GAP_ROWS.find(
+      (row) => row.blocking_rules.length > 0,
+    );
+    if (!source) throw new Error('contract carries no pending clause binding');
+    const missing = edit(source.p_ref, {
+      blocking_rules: source.blocking_rules.slice(1),
+    });
+    expect(ledgerStartupProblems(pairOf(missing))).toContain(
+      `F35: pending clause ${source.blocking_rules[0]} is not bound to ${source.p_ref}`,
+    );
+
+    const invented = edit(source.p_ref, {
+      blocking_rules: [...source.blocking_rules, 'NP-invented'],
+    });
+    expect(ledgerStartupProblems(pairOf(invented))).toContain(
+      `F35: ${source.p_ref} carries unowned blocking clause NP-invented`,
+    );
+  });
+
   it('LED-3f the capability ledger fails on a mechanism-shaped key, a lost reserved act, and an uncommitted withdrawal', () => {
     const shaped: CapabilityGapRow[] = [
       ...CAPABILITY_GAP_ROWS,
@@ -430,6 +453,16 @@ describe('P-LEDGER — the runtime mechanism-gap and capability-gap ledgers', ()
   });
 
   it('LED-4b the build prints the ledger’s own per-status counts (F92, §A5)', () => {
+    const emitter = fs.readFileSync(
+      path.join(BACKEND, 'scripts/widget-contract/emit-ledgers.mjs'),
+      'utf8',
+    );
+    expect(emitter).toContain(
+      'const byStatus = mech.reduce(\n' +
+        '  (acc, r) => ((acc[r.status] = (acc[r.status] ?? 0) + 1), acc),\n' +
+        '  {},\n' +
+        ');',
+    );
     const line = printedLine('F92 MECHANISM_GAP_LEDGER');
     expect(line).toContain(
       `${MECHANISM_GAP_ROWS.length} rows (${pRefOf(MECHANISM_GAP_PREREQUISITE_FIRST)}..${pRefOf(MECHANISM_GAP_PREREQUISITE_LAST)})`,

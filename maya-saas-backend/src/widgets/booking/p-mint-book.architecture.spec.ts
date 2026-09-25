@@ -26,11 +26,17 @@ describe('P-MINT-BOOK architecture', () => {
     expect(adapter).not.toMatch(/YClients|yclients|createAppointment\(/);
   });
 
-  it('keeps A2.2 closed before P-DISCHARGE', () => {
+  it('records the exact booking discharge without opening a generic mutation registry', () => {
     const discharge = fs.readFileSync(
       path.join(__dirname, 'booking-discharge.runtime.ts'),
       'utf8',
     );
-    expect(discharge).toContain('= false as boolean');
+    expect(discharge).toContain('= true as boolean');
+    const commonRegistry = fs.readFileSync(
+      path.resolve(__dirname, '..', 'emission/intent-template.registry.ts'),
+      'utf8',
+    );
+    expect(commonRegistry).toContain('generic_actuating_template_forbidden');
+    expect(commonRegistry).not.toContain("effect: 'COMMIT'");
   });
 });

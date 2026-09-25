@@ -200,17 +200,13 @@ describe('U12b [GW G-SYNTH] registered projector rows', () => {
     if (outcome.kind === 'composer_input') {
       expect(outcome.input.intent_proposals).toHaveLength(1);
       expect(outcome.input.facts_origin).toEqual(['copied']);
-      expect(
+      expect(() =>
         resolveIntentTemplate({
           proposal: outcome.input.intent_proposals[0],
           widgetKind: 'BOOKING_CONFIRMATION',
           deliveryChannel: 'pwa',
         }),
-      ).toEqual({
-        kind: 'a2_limitation',
-        requestedEffect: 'COMMIT',
-        capabilityGapRef: 'MG-P01',
-      });
+      ).toThrow('generic_actuating_template_forbidden');
     }
   });
 

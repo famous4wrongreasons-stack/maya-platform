@@ -6,7 +6,7 @@
   "against": {
     "document": "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md",
     "version": "1.1",
-    "sha256": "ddced8c087636b62d3fd7a55f51723588789d9071d29d15767e85ce802be741d",
+    "sha256": "d2a97b17c0e121d366939be4ff1142c4b9b09b06ff17b7eb8f05bafc4f61b271",
     "lines": 7433,
     "gateTable": "C11:4718-4734",
     "gate6InFull": "C11:4736-4798",

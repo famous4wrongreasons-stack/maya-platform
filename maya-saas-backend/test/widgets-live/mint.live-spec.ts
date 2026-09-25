@@ -167,43 +167,35 @@ describe('P-MINT — canonical writer [GW, PostgreSQL]', () => {
     ).toBe(0);
   });
 
-  it('MINT-3 converts an actuating key to MG-P01 LIMITATION with no token or record', async () => {
+  it('MINT-3 refuses a generic actuating key with no token, record or emission', async () => {
     const s = await setup('P-MINT-3');
-    const minted = await gw.emitter.emit({
-      tenantId: s.tenant.id,
-      conversationId: s.conversationId,
-      turnId: s.turn.id,
-      kind: 'METRIC',
-      principalProofHash: s.proofHash,
-      deliveryChannel: 'pwa',
-      body: { hostile: 'not persisted' },
-      ttlSeconds: 600,
-      freshnessClass: 'live',
-      composerInput: input([
-        { intent_template_key: 'commit.blocked@1', role: 'primary' },
-      ]),
-      principal: s.principal,
-    });
-    expect(minted).toEqual(
-      expect.objectContaining({ kind: 'LIMITATION', a2Limited: true }),
-    );
+    await expect(
+      gw.emitter.emit({
+        tenantId: s.tenant.id,
+        conversationId: s.conversationId,
+        turnId: s.turn.id,
+        kind: 'METRIC',
+        principalProofHash: s.proofHash,
+        deliveryChannel: 'pwa',
+        body: { hostile: 'not persisted' },
+        ttlSeconds: 600,
+        freshnessClass: 'live',
+        composerInput: input([
+          { intent_template_key: 'commit.blocked@1', role: 'primary' },
+        ]),
+        principal: s.principal,
+      }),
+    ).rejects.toThrow('generic_actuating_template_forbidden');
     expect(
       await ctx.prisma.widgetIntentRecord.count({
-        where: { tenantId: s.tenant.id, widgetId: minted.widgetId },
+        where: { tenantId: s.tenant.id },
       }),
     ).toBe(0);
-    const emission = await ctx.prisma.widgetEmission.findUniqueOrThrow({
-      where: {
-        widgetId_tenantId: {
-          widgetId: minted.widgetId,
-          tenantId: s.tenant.id,
-        },
-      },
-      select: { bodyJson: true },
-    });
-    expect(emission.bodyJson).toEqual(
-      expect.objectContaining({ capability_gap_ref: 'MG-P01' }),
-    );
+    expect(
+      await ctx.prisma.widgetEmission.count({
+        where: { tenantId: s.tenant.id },
+      }),
+    ).toBe(0);
   });
 
   it('MINT-6 stores no interpolated label template for client-identified content', async () => {

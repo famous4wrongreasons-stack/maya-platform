@@ -13,10 +13,9 @@
 // where F35's prose range writes `MG-P01`. Read a row through `MECHANISM_GAP_BY_PREF` and the
 // spelling never reaches a caller.
 //
-// `blocking_rules` is empty on every row. F35 (2) and (3) bind each NORMATIVE-PENDING clause to the
-// rows its status names; K1 opened the ledger with the pairs underived, and deriving them is
-// P-DISCHARGE's DIS-0 reader, not this unit's. The build refuses a populated list rather than let a
-// half-derived pair set look like a checked one.
+// `blocking_rules` is derived from every normative paragraph's own Status sentence. F35 (2)/(3)
+// is checked in both directions: each clause reaches every named row, and no row carries a clause
+// its status sentence does not name.
 
 import type { MechanismGap } from './registries';
 
@@ -31,7 +30,7 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     gap_key: 'MG-P-01',
     p_ref: 'P-01',
     component: 'IntentGateway JWT widget route',
-    status: '[ABSENT]',
+    status: '[EXISTS]',
     package: 'K3',
     blocking_rules: [],
   },
@@ -41,7 +40,7 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     component: 'The internal Telegram command ingress',
     status: '[ABSENT]',
     package: 'K14',
-    blocking_rules: [],
+    blocking_rules: ['NP-baf9f90d76548a4c'],
   },
   {
     gap_key: 'MG-P-02',
@@ -49,7 +48,13 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     component: 'IntentRecord',
     status: '[ABSENT]',
     package: 'K3',
-    blocking_rules: [],
+    blocking_rules: [
+      'NP-60285de7e4a83ec3',
+      'NP-6b44191ce6a0c77e',
+      'NP-74e5aa76e447f542',
+      'NP-a10e7e6ba2de166d',
+      'NP-a766de93521269df',
+    ],
   },
   {
     gap_key: 'MG-P-03',
@@ -95,7 +100,7 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     gap_key: 'MG-P-08',
     p_ref: 'P-08',
     component: 'Server-owned draft store',
-    status: '[ABSENT]',
+    status: '[EXISTS]',
     package: 'K3+K7',
     blocking_rules: [],
   },
@@ -121,7 +126,11 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     component: 'VerificationLevel ladder and verificationFloor()',
     status: '[ABSENT]',
     package: 'K2+K4',
-    blocking_rules: [],
+    blocking_rules: [
+      'NP-3967577d0093a34f',
+      'NP-6764621e5569f2a4',
+      'NP-c4f024295af6eaa0',
+    ],
   },
   {
     gap_key: 'MG-P-12',
@@ -159,7 +168,7 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     gap_key: 'MG-P-16',
     p_ref: 'P-16',
     component: 'control.widget.dismiss',
-    status: '[ABSENT]',
+    status: '[EXISTS]',
     package: 'K3+K6',
     blocking_rules: [],
   },
@@ -169,7 +178,7 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     component: 'control.delivery.resolve',
     status: '[ABSENT]',
     package: 'K13',
-    blocking_rules: [],
+    blocking_rules: ['NP-7caf6408e9465cd8'],
   },
   {
     gap_key: 'MG-P-34',
@@ -177,7 +186,7 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     component: 'The staff marketing-revoke door',
     status: '[ABSENT]',
     package: 'K14',
-    blocking_rules: [],
+    blocking_rules: ['NP-673b3fc1ef835229', 'NP-7eba5cf393449863'],
   },
   {
     gap_key: 'MG-P-35',
@@ -217,13 +226,13 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     component: 'The spoken-readback path',
     status: '[ABSENT]',
     package: 'K6',
-    blocking_rules: [],
+    blocking_rules: ['NP-a10e7e6ba2de166d'],
   },
   {
     gap_key: 'MG-P-18',
     p_ref: 'P-18',
     component: 'produced_by_intent_token_hash: string \\| null',
-    status: '[ABSENT]',
+    status: '[EXISTS]',
     package: 'K3+K7',
     blocking_rules: [],
   },
@@ -233,7 +242,14 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     component: 'Renderer sandboxing / import-graph allowlist',
     status: '[UNENFORCEABLE-TODAY]',
     package: 'K5+K15',
-    blocking_rules: [],
+    blocking_rules: [
+      'NP-3967577d0093a34f',
+      'NP-6764621e5569f2a4',
+      'NP-94ce85517e8bf971',
+      'NP-bc82abdc4fcbb88a',
+      'NP-c4f024295af6eaa0',
+      'NP-e63da67d0864b0ac',
+    ],
   },
   {
     gap_key: 'MG-P-20',
@@ -257,14 +273,14 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     component: 'NEVER_CHAT_ACTUATED — the eight reserved names',
     status: '[ABSENT]',
     package: 'K12',
-    blocking_rules: [],
+    blocking_rules: ['NP-8ec369d49df7c0bc'],
   },
   {
     gap_key: 'MG-P-23',
     p_ref: 'P-23',
     component:
       'AE_WIDGET_COMMIT_ALLOWLIST + AE_CAPABILITY_GAP_LEDGER, with the start-up assertion set',
-    status: '[ABSENT]',
+    status: '[EXISTS]',
     package: 'K2+K4',
     blocking_rules: [],
   },
@@ -274,13 +290,18 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     component: 'CapabilityRef and the per-effect key-space rule',
     status: '[ABSENT]',
     package: 'K2',
-    blocking_rules: [],
+    blocking_rules: [
+      'NP-12da373e00c0e596',
+      'NP-2ded496dfa94a8a9',
+      'NP-910daee079c2fb1a',
+      'NP-ea396e0385e57f6f',
+    ],
   },
   {
     gap_key: 'MG-P-25',
     p_ref: 'P-25',
     component: 'AE_PROPOSE_PAIRING',
-    status: '[ABSENT]',
+    status: '[EXISTS]',
     package: 'K2+K7',
     blocking_rules: [],
   },
@@ -288,7 +309,7 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     gap_key: 'MG-P-26',
     p_ref: 'P-26',
     component: "Gate 6's key-space dispatch",
-    status: '[ABSENT]',
+    status: '[EXISTS]',
     package: 'K4',
     blocking_rules: [],
   },
@@ -298,7 +319,7 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     component: 'The controlledFixtureMode === false build assertion',
     status: '[ABSENT]',
     package: 'K3',
-    blocking_rules: [],
+    blocking_rules: ['NP-048cb92576ace3ff'],
   },
   {
     gap_key: 'MG-P-28',
@@ -306,7 +327,7 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     component: 'The widget ActionSourceType discipline',
     status: '[ABSENT]',
     package: 'K4',
-    blocking_rules: [],
+    blocking_rules: ['NP-81e9dcb058c0a1c3'],
   },
   {
     gap_key: 'MG-P-29',
@@ -314,13 +335,13 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     component: 'MECHANISM_GAP_LEDGER',
     status: '[ABSENT]',
     package: 'K1',
-    blocking_rules: [],
+    blocking_rules: ['NP-da84d6f05a04d484'],
   },
   {
     gap_key: 'MG-P-30',
     p_ref: 'P-30',
     component: "The gateway's retained record fields",
-    status: '[ABSENT]',
+    status: '[EXISTS]',
     package: 'K3',
     blocking_rules: [],
   },
@@ -330,7 +351,7 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     component: 'A11yBlock.accessible_names',
     status: '[ABSENT]',
     package: 'K5',
-    blocking_rules: [],
+    blocking_rules: ['NP-94ce85517e8bf971', 'NP-e63da67d0864b0ac'],
   },
   {
     gap_key: 'MG-P-32',
@@ -338,7 +359,7 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     component: 'The moment, notification-consent and template catalogues',
     status: '[ABSENT]',
     package: 'K13',
-    blocking_rules: [],
+    blocking_rules: ['NP-7caf6408e9465cd8'],
   },
 ];
 
@@ -381,6 +402,102 @@ export const MECHANISM_GAP_STATUS_COUNTS: Readonly<
     },
   ),
 );
+
+/** F35 (2)/(3)'s clause→row side, derived from the contract Status sentences. */
+export const NORMATIVE_PENDING_BINDINGS = Object.freeze([
+  Object.freeze({
+    clause_id: 'NP-048cb92576ace3ff',
+    p_refs: Object.freeze(['P-27']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-12da373e00c0e596',
+    p_refs: Object.freeze(['P-24']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-2ded496dfa94a8a9',
+    p_refs: Object.freeze(['P-24']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-3967577d0093a34f',
+    p_refs: Object.freeze(['P-11', 'P-19']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-60285de7e4a83ec3',
+    p_refs: Object.freeze(['P-02']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-673b3fc1ef835229',
+    p_refs: Object.freeze(['P-34']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-6764621e5569f2a4',
+    p_refs: Object.freeze(['P-11', 'P-19']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-6b44191ce6a0c77e',
+    p_refs: Object.freeze(['P-02']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-74e5aa76e447f542',
+    p_refs: Object.freeze(['P-02']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-7caf6408e9465cd8',
+    p_refs: Object.freeze(['P-17', 'P-32']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-7eba5cf393449863',
+    p_refs: Object.freeze(['P-34']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-81e9dcb058c0a1c3',
+    p_refs: Object.freeze(['P-28']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-8ec369d49df7c0bc',
+    p_refs: Object.freeze(['P-22']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-910daee079c2fb1a',
+    p_refs: Object.freeze(['P-24']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-94ce85517e8bf971',
+    p_refs: Object.freeze(['P-19', 'P-31']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-a10e7e6ba2de166d',
+    p_refs: Object.freeze(['P-02', 'P-39']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-a766de93521269df',
+    p_refs: Object.freeze(['P-02']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-baf9f90d76548a4c',
+    p_refs: Object.freeze(['P-33']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-bc82abdc4fcbb88a',
+    p_refs: Object.freeze(['P-19']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-c4f024295af6eaa0',
+    p_refs: Object.freeze(['P-11', 'P-19']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-da84d6f05a04d484',
+    p_refs: Object.freeze(['P-29']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-e63da67d0864b0ac',
+    p_refs: Object.freeze(['P-19', 'P-31']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-ea396e0385e57f6f',
+    p_refs: Object.freeze(['P-24']),
+  }),
+]);
 
 export const mechanismGapForPRef = (
   pRef: string,

@@ -113,7 +113,7 @@ describe('S-G7-F69 [BUILD] — the two halves of F69 are the contract’s own (C
   it('S-G7-F69-SHA: the contract this suite reads is the certified V1.2 build', () => {
     expect(
       createHash('sha256').update(fs.readFileSync(CONTRACT)).digest('hex'),
-    ).toBe('ddced8c087636b62d3fd7a55f51723588789d9071d29d15767e85ce802be741d');
+    ).toBe('d2a97b17c0e121d366939be4ff1142c4b9b09b06ff17b7eb8f05bafc4f61b271');
   });
 
   it('S-G7-F69-ROWS: F69 has one row per effect class, and the rows are the eight `EffectClass` members', () => {
