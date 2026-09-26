@@ -135,7 +135,7 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
           : input.result;
       if (!isRecord(body)) return null;
 
-      const minted = await this.emitter.emit({
+      const mintRequest: import('../emission/emitter.service').MintRequest = {
         tenantId,
         conversationId,
         turnId: turn.id,
@@ -156,7 +156,15 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
               },
             }
           : {}),
-      });
+      };
+      const minted =
+        row.result_kind === 'SERVICE_SELECTOR' ||
+        row.result_kind === 'STAFF_SELECTOR' ||
+        row.result_kind === 'TIME_SLOT_SELECTOR'
+          ? await this.emitter.emitBookingSelector(mintRequest, {
+              source: input.result,
+            })
+          : await this.emitter.emit(mintRequest);
       for (const tokenHash of minted.intentTokenHashes)
         provenance.log(
           JSON.stringify({

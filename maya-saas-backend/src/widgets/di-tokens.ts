@@ -72,6 +72,9 @@ export const NAVIGATE_WIDGET_MINTER = 'NAVIGATE_WIDGET_MINTER';
 /** P-MINT-BOOK: exact reschedule/cancel propose edge; no generic C9 dispatch. */
 export const BOOKING_PROPOSE_OWNER = 'BOOKING_PROPOSE_OWNER';
 
+/** FBE2E: exact selector progression through existing catalog/availability read owners. */
+export const BOOKING_SELECTOR_OWNER = 'BOOKING_SELECTOR_OWNER';
+
 /** Gate 8-R's owner set; bound to `GATE_8R_OWNERS_UNRULED` in `gates/gate-8r.owners.ts` (U8R, R8R-1). */
 export const GATE_8R_OWNERS = 'GATE_8R_OWNERS';
 

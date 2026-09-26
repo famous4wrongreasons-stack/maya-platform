@@ -3,6 +3,8 @@ import type { ResolvedNouns } from '../gate.types';
 import type { PrincipalView } from '../gate.types';
 import type { BookingConfirmationPreview } from '../booking/booking-confirmation-minter.port';
 import type { MintRequest, SealedEmission } from '../emission/emitter.service';
+import type { AuthenticatedUser } from '../../common/authenticated-user.interface';
+import type { FactUsed } from '../../widget-contract/envelope';
 
 /**
  * Widget-internal audit edge used by Gate 13.
@@ -124,6 +126,30 @@ export interface CommitBookingOwnerPort {
 
 export interface BookingProposeOwnerPort {
   propose(input: ActuatingRoutingInput): Promise<EffectRouteOutcome>;
+  proposeCreateSelection(input: {
+    routing: RoutingInput;
+    actorUserId: string;
+    principal: PrincipalView;
+    handles: Readonly<Record<'service' | 'staff' | 'slot', string>>;
+  }): Promise<{
+    outcome: EffectRouteOutcome;
+    values: ReadonlyMap<string, string>;
+  }>;
+}
+
+export interface BookingSelectorOwnerPort {
+  advance(input: {
+    routing: RoutingInput;
+    actor: Readonly<AuthenticatedUser>;
+    step: 'service' | 'staff';
+    handles: Readonly<Record<string, string>>;
+  }): Promise<{
+    nextKind: 'STAFF_SELECTOR' | 'TIME_SLOT_SELECTOR';
+    capabilityKey: 'catalog.staff.read' | 'booking.availability.read';
+    source: unknown;
+    fact: FactUsed;
+    inheritedHandles: Readonly<Record<string, string>>;
+  } | null>;
 }
 
 export interface BookingPreviewDecision {

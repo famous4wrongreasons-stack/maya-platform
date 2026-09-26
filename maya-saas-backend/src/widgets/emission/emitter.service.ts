@@ -45,6 +45,8 @@ import {
   bookingTemplateAsIntentRow,
   resolveBookingTemplateForSynthesis,
 } from '../booking/booking-intent-template.registry';
+import { presentBookingSelector } from '../booking/booking-selector.presenter';
+import type { OwnerNounIdentity } from '../noun-resolution/noun-handle.codec';
 
 export const K3_EMITTABLE_KINDS = [
   'METRIC',
@@ -98,6 +100,12 @@ export interface SealedEmission {
   envelope: Readonly<Record<string, unknown>>;
 }
 
+export interface BookingSelectorContext {
+  readonly source: unknown;
+  readonly inheritedHandles?: Readonly<Record<string, string>>;
+  readonly predecessorWidgetId?: string;
+}
+
 interface SuccessorEmissionContext {
   readonly sourceCapability: CapabilityRef;
   readonly textEquivalent: Readonly<Record<string, unknown>>;
@@ -118,7 +126,76 @@ export class WidgetEmitterService {
    * owned by the emission service, and contains no effect or target member.
    */
   async emit(request: MintRequest, now = new Date()): Promise<SealedEmission> {
-    return this.emitInternal(request, now, null, null);
+    return this.emitInternal(request, now, null, null, null);
+  }
+
+  /** FBE2E-2: server-owned canonical facts become a strict selector and closed-domain intent. */
+  async emitBookingSelector(
+    request: MintRequest,
+    selector: BookingSelectorContext,
+    now = new Date(),
+  ): Promise<SealedEmission> {
+    if (
+      request.kind !== 'SERVICE_SELECTOR' &&
+      request.kind !== 'STAFF_SELECTOR' &&
+      request.kind !== 'TIME_SLOT_SELECTOR'
+    )
+      throw new IntentTemplateRefusal('booking_selector_kind_required');
+    const presented = presentBookingSelector({
+      tenantId: request.tenantId,
+      kind: request.kind,
+      source: selector.source,
+      inherited: selector.inheritedHandles,
+      mint: (identity: OwnerNounIdentity) =>
+        this.seals.mintNounHandles([identity])[identity.noun],
+    });
+    if (presented === null)
+      throw new IntentTemplateRefusal('booking_selector_source_unavailable');
+    const template =
+      request.kind === 'SERVICE_SELECTOR'
+        ? 'refine.booking.service@1'
+        : request.kind === 'STAFF_SELECTOR'
+          ? 'refine.booking.staff@1'
+          : 'draft.booking.selection@1';
+    const sourceCapability =
+      request.kind === 'SERVICE_SELECTOR'
+        ? 'catalog.services.read'
+        : request.kind === 'STAFF_SELECTOR'
+          ? 'catalog.staff.read'
+          : 'booking.availability.read';
+    const intentCapability =
+      request.kind === 'TIME_SLOT_SELECTOR'
+        ? 'appointments.own.create'
+        : sourceCapability;
+    const composerInput: WidgetComposerInput = {
+      ...request.composerInput,
+      kind_proposal: request.kind,
+      capability: sourceCapability,
+      intent_proposals: [
+        {
+          intent_template_key: template,
+          capability: { space: 'C9', key: intentCapability },
+          argument_handles: selector.inheritedHandles ?? {},
+          role: 'primary',
+        },
+        {
+          intent_template_key: 'control.dismiss@1',
+          capability: { space: 'CONTROL', key: 'control.widget.dismiss' },
+          role: 'escape',
+        },
+      ],
+    };
+    return this.emitInternal(
+      {
+        ...request,
+        body: presented.body as unknown as Record<string, unknown>,
+        composerInput,
+      },
+      now,
+      null,
+      null,
+      selector.predecessorWidgetId ?? null,
+    );
   }
 
   /** R3.9.4's dedicated server-owned lane. Generic composer calls cannot resolve this template. */
@@ -140,6 +217,7 @@ export class WidgetEmitterService {
       now,
       { sourceCapability, textEquivalent },
       null,
+      null,
     );
   }
 
@@ -156,7 +234,7 @@ export class WidgetEmitterService {
       throw new IntentTemplateRefusal('a2_booking_not_discharged');
     if (request.kind !== 'BOOKING_CONFIRMATION')
       throw new IntentTemplateRefusal('booking_confirmation_kind_required');
-    return this.emitInternal(request, now, null, linkage);
+    return this.emitInternal(request, now, null, linkage, null);
   }
 
   private async emitInternal(
@@ -164,6 +242,7 @@ export class WidgetEmitterService {
     now: Date,
     successor: SuccessorEmissionContext | null,
     booking: BookingConfirmationEmissionContext | null,
+    supersedesWidgetId: string | null,
   ): Promise<SealedEmission> {
     const input = request.composerInput;
     const principal = request.principal;
@@ -204,7 +283,13 @@ export class WidgetEmitterService {
         resolved: bookingTemplate
           ? {
               kind: 'intent' as const,
-              row: bookingTemplateAsIntentRow(bookingTemplate),
+              row: bookingTemplateAsIntentRow(
+                bookingTemplate,
+                bookingSelectionDomain(
+                  bookingTemplate.selectionField,
+                  request.body,
+                ),
+              ),
             }
           : resolveIntentTemplate({
               proposal,
@@ -289,6 +374,7 @@ export class WidgetEmitterService {
       ttlSeconds: request.ttlSeconds,
       limitations: a2Limited ? [A2_GAP_REF] : input.limitation_codes,
       textEquivalentOverride: successor?.textEquivalent ?? null,
+      supersedesWidgetId,
     });
     const bodyHash = envelopeBodyHash(unsignedEnvelope);
     const envelopeSeal = this.seals.seal({
@@ -362,6 +448,7 @@ export class WidgetEmitterService {
           deliveryChannel: request.deliveryChannel,
           deliveryStateJson: { state: 'composed', delivered: false } as never,
           bodyJson: body as never,
+          ...(supersedesWidgetId === null ? {} : { supersedesWidgetId }),
           ...(successor === null
             ? {}
             : { textEquivalentJson: successor.textEquivalent as never }),
@@ -461,6 +548,53 @@ export class WidgetEmitterService {
     return bodyStillMatches && expected === row.envelopeSeal;
   }
 }
+
+const bookingSelectionDomain = (
+  field: 'service_ref' | 'staff_ref' | 'slot_ref' | null,
+  body: Readonly<Record<string, unknown>>,
+):
+  | { ids: readonly string[]; labels: Readonly<Record<string, string>> }
+  | undefined => {
+  if (field === null) return undefined;
+  const candidates: unknown[] = [];
+  if (field === 'slot_ref' && Array.isArray(body.groups)) {
+    const groups: unknown[] = body.groups;
+    for (const group of groups)
+      if (isRecordValue(group) && Array.isArray(group.slots))
+        candidates.push(...(group.slots as unknown[]));
+  } else if (Array.isArray(body.options)) {
+    candidates.push(...(body.options as unknown[]));
+  }
+  const ids: string[] = [];
+  const labels: Record<string, string> = {};
+  for (const candidate of candidates) {
+    if (!isRecordValue(candidate)) continue;
+    const id = candidate[field] ?? candidate.option_id;
+    if (typeof id !== 'string' || id.length === 0) continue;
+    ids.push(id);
+    const label = isRecordValue(candidate.label)
+      ? candidate.label.label
+      : undefined;
+    const start = isRecordValue(candidate.start)
+      ? candidate.start.label
+      : undefined;
+    labels[id] =
+      typeof label === 'string'
+        ? label
+        : typeof start === 'string'
+          ? start
+          : id;
+  }
+  if (ids.length === 0)
+    throw new IntentTemplateRefusal('selection_domain_empty');
+  return Object.freeze({
+    ids: Object.freeze(ids),
+    labels: Object.freeze(labels),
+  });
+};
+
+const isRecordValue = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);

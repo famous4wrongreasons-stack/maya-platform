@@ -13,6 +13,11 @@ import type {
   EffectRouteOutcome,
 } from '../routing/effect-router.ports';
 import type { DraftOwnerPort } from './draft-owner.registry';
+import { openWidgetNounHandle } from '../emission/seal.service';
+import {
+  decodeBookingSlotOwnerRef,
+  isBookingNounIdentity,
+} from '../booking/booking-noun-identity';
 
 const refused = (): EffectRouteOutcome => ({
   receiptOutcome: 'REFUSED',
@@ -150,6 +155,76 @@ export class BookingPreviewAdapter
       return refused();
     } catch {
       return refused();
+    }
+  }
+
+  async proposeCreateSelection(
+    input: Parameters<BookingProposeOwnerPort['proposeCreateSelection']>[0],
+  ): Promise<{
+    outcome: EffectRouteOutcome;
+    values: ReadonlyMap<string, string>;
+  }> {
+    const opened = new Map<string, string>();
+    for (const noun of ['service', 'staff', 'slot'] as const) {
+      const value = openWidgetNounHandle(input.handles[noun] as never);
+      if (
+        value === null ||
+        value.tenantId !== input.routing.tenantId ||
+        !isBookingNounIdentity(value, noun)
+      )
+        return { outcome: refused(), values: new Map() };
+      const ownerRef =
+        noun === 'slot'
+          ? decodeBookingSlotOwnerRef(value.ownerRef)
+          : value.ownerRef;
+      if (ownerRef === null) return { outcome: refused(), values: new Map() };
+      opened.set(noun, ownerRef);
+    }
+    const serviceId = opened.get('service');
+    const staffId = opened.get('staff');
+    const start = opened.get('slot');
+    if (!serviceId || !staffId || !start)
+      return { outcome: refused(), values: new Map() };
+    try {
+      const quoted = await this.create.quoteForAccount(
+        input.routing.tenantId,
+        input.actorUserId,
+        { staffId, serviceIds: [serviceId], start },
+      );
+      const service = quoted.services.find(
+        (candidate) => candidate.id === serviceId,
+      );
+      if (!service) return { outcome: refused(), values: new Map() };
+      const draftRef = randomUUID();
+      return {
+        outcome: accepted({
+          subject: 'create',
+          sourceCapabilityKey: 'appointments.own.create',
+          frozenArgumentHandles: input.handles,
+          draftRef,
+          appointmentRef: null,
+          producingIntentTokenHash: null,
+          when: quoted.start,
+          whenPrevious: null,
+          serviceLabel: service.name,
+          staffLabel: staffId,
+          durationMinutes: service.duration_minutes,
+          priceKopecks: Math.round(service.price * 100),
+          currency: service.currency,
+          fact: fact(
+            'appointments.own.create',
+            input.routing.now,
+            input.routing.record.requestedScopeHash,
+          ),
+        }),
+        values: new Map([
+          ['service', serviceId],
+          ['staff', staffId],
+          ['slot', quoted.start],
+        ]),
+      };
+    } catch {
+      return { outcome: refused(), values: new Map() };
     }
   }
 

@@ -11,6 +11,9 @@ import {
 export const BOOKING_TEMPLATE_REGISTRY_VERSION = 1 as const;
 
 export type BookingIntentTemplateKey =
+  | 'refine.booking.service@1'
+  | 'refine.booking.staff@1'
+  | 'draft.booking.selection@1'
   | 'draft.booking.create@1'
   | 'refine.booking.reschedule@1'
   | 'refine.booking.cancel@1'
@@ -24,7 +27,11 @@ export interface BookingIntentTemplateRow {
   readonly effect: Extract<EffectClass, 'DRAFT' | 'REFINE' | 'COMMIT'>;
   readonly kind: Extract<
     WidgetKind,
-    'SERVICE_SELECTOR' | 'SCHEDULE' | 'BOOKING_CONFIRMATION'
+    | 'SERVICE_SELECTOR'
+    | 'STAFF_SELECTOR'
+    | 'TIME_SLOT_SELECTOR'
+    | 'SCHEDULE'
+    | 'BOOKING_CONFIRMATION'
   >;
   readonly subject: CapabilityRef;
   readonly role: WidgetIntent['role'];
@@ -33,6 +40,7 @@ export interface BookingIntentTemplateRow {
   readonly utteranceTemplate: string;
   readonly speechAliases: readonly string[];
   readonly ttlSeconds: number;
+  readonly selectionField: 'service_ref' | 'staff_ref' | 'slot_ref' | null;
 }
 
 const row = (value: BookingIntentTemplateRow): BookingIntentTemplateRow =>
@@ -46,6 +54,48 @@ const row = (value: BookingIntentTemplateRow): BookingIntentTemplateRow =>
 export const BOOKING_INTENT_TEMPLATE_REGISTRY: Readonly<
   Record<BookingIntentTemplateKey, BookingIntentTemplateRow>
 > = Object.freeze({
+  'refine.booking.service@1': row({
+    key: 'refine.booking.service@1',
+    version: 1,
+    effect: 'REFINE',
+    kind: 'SERVICE_SELECTOR',
+    subject: { space: 'C9', key: 'catalog.services.read' },
+    role: 'primary',
+    allowedArgumentHandles: [],
+    label: 'Choose service',
+    utteranceTemplate: 'Choose service',
+    speechAliases: ['choose service'],
+    ttlSeconds: 600,
+    selectionField: 'service_ref',
+  }),
+  'refine.booking.staff@1': row({
+    key: 'refine.booking.staff@1',
+    version: 1,
+    effect: 'REFINE',
+    kind: 'STAFF_SELECTOR',
+    subject: { space: 'C9', key: 'catalog.staff.read' },
+    role: 'primary',
+    allowedArgumentHandles: ['service'],
+    label: 'Choose specialist',
+    utteranceTemplate: 'Choose specialist',
+    speechAliases: ['choose specialist'],
+    ttlSeconds: 600,
+    selectionField: 'staff_ref',
+  }),
+  'draft.booking.selection@1': row({
+    key: 'draft.booking.selection@1',
+    version: 1,
+    effect: 'DRAFT',
+    kind: 'TIME_SLOT_SELECTOR',
+    subject: { space: 'C9', key: 'appointments.own.create' },
+    role: 'primary',
+    allowedArgumentHandles: ['service', 'staff'],
+    label: 'Review booking',
+    utteranceTemplate: 'Review booking',
+    speechAliases: ['review booking'],
+    ttlSeconds: 600,
+    selectionField: 'slot_ref',
+  }),
   'draft.booking.create@1': row({
     key: 'draft.booking.create@1',
     version: 1,
@@ -58,6 +108,7 @@ export const BOOKING_INTENT_TEMPLATE_REGISTRY: Readonly<
     utteranceTemplate: 'Review booking',
     speechAliases: ['review booking'],
     ttlSeconds: 600,
+    selectionField: null,
   }),
   'refine.booking.reschedule@1': row({
     key: 'refine.booking.reschedule@1',
@@ -71,6 +122,7 @@ export const BOOKING_INTENT_TEMPLATE_REGISTRY: Readonly<
     utteranceTemplate: 'Review reschedule',
     speechAliases: ['review reschedule'],
     ttlSeconds: 600,
+    selectionField: null,
   }),
   'refine.booking.cancel@1': row({
     key: 'refine.booking.cancel@1',
@@ -84,6 +136,7 @@ export const BOOKING_INTENT_TEMPLATE_REGISTRY: Readonly<
     utteranceTemplate: 'Review cancellation',
     speechAliases: ['review cancellation'],
     ttlSeconds: 600,
+    selectionField: null,
   }),
   'commit.booking.create@1': row({
     key: 'commit.booking.create@1',
@@ -97,6 +150,7 @@ export const BOOKING_INTENT_TEMPLATE_REGISTRY: Readonly<
     utteranceTemplate: 'Confirm booking',
     speechAliases: ['confirm booking'],
     ttlSeconds: 600,
+    selectionField: null,
   }),
   'commit.booking.reschedule@1': row({
     key: 'commit.booking.reschedule@1',
@@ -110,6 +164,7 @@ export const BOOKING_INTENT_TEMPLATE_REGISTRY: Readonly<
     utteranceTemplate: 'Confirm reschedule',
     speechAliases: ['confirm reschedule'],
     ttlSeconds: 600,
+    selectionField: null,
   }),
   'commit.booking.cancel@1': row({
     key: 'commit.booking.cancel@1',
@@ -123,6 +178,7 @@ export const BOOKING_INTENT_TEMPLATE_REGISTRY: Readonly<
     utteranceTemplate: 'Confirm cancellation',
     speechAliases: ['confirm cancellation'],
     ttlSeconds: 600,
+    selectionField: null,
   }),
 });
 
@@ -175,6 +231,10 @@ export const resolveBookingTemplateForSynthesis = (args: {
 /** Adapt a closed booking row to the common mint material without adding another minter. */
 export const bookingTemplateAsIntentRow = (
   value: BookingIntentTemplateRow,
+  selection?: Readonly<{
+    ids: readonly string[];
+    labels: Readonly<Record<string, string>>;
+  }>,
 ): IntentTemplateRow =>
   Object.freeze({
     key: value.key as never,
@@ -184,9 +244,39 @@ export const bookingTemplateAsIntentRow = (
     roles: Object.freeze([value.role]),
     subject: value.subject,
     target: null,
-    inputSchema: null,
-    selectionDomain: Object.freeze({}),
-    selectionDomainLabels: Object.freeze({}),
+    inputSchema:
+      value.selectionField === null
+        ? null
+        : Object.freeze({
+            fields: [
+              {
+                name: value.selectionField,
+                required: true,
+                kind: 'ref' as const,
+                domain_ref: value.selectionField,
+                selection_min: 1,
+                selection_max: 1,
+              },
+            ],
+            max_total_bytes: 2048,
+            free_input_justification: null,
+          }),
+    selectionDomain: Object.freeze(
+      value.selectionField === null
+        ? {}
+        : {
+            [value.selectionField]: Object.freeze([...(selection?.ids ?? [])]),
+          },
+    ),
+    selectionDomainLabels: Object.freeze(
+      value.selectionField === null
+        ? {}
+        : {
+            [value.selectionField]: Object.freeze({
+              ...(selection?.labels ?? {}),
+            }),
+          },
+    ),
     priority: 1,
     singleUse: true,
     ttlSeconds: value.ttlSeconds,
@@ -200,7 +290,7 @@ export const bookingTemplateAsIntentRow = (
 export const assertBookingTemplateRegistry = (): void => {
   const rows = Object.values(BOOKING_INTENT_TEMPLATE_REGISTRY);
   if (
-    rows.length !== 6 ||
+    rows.length !== 9 ||
     new Set(rows.map((entry) => entry.key)).size !== rows.length
   )
     throw new Error('booking intent registry is not closed');

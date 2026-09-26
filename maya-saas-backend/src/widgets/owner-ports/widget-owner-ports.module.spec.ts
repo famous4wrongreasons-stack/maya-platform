@@ -49,6 +49,7 @@ import { C9CancelAdapter } from './c9-cancel.adapter';
 import { ApprovalRequestAdapter } from './approval-request.adapter';
 import { CommitBookingAdapter } from './commit-booking.adapter';
 import { BookingPreviewAdapter } from './booking-preview.adapter';
+import { BookingSelectorAdapter } from './booking-selector.adapter';
 
 const meta = (key: string, target: object): unknown =>
   Reflect.getMetadata(key, target);
@@ -115,10 +116,15 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       ApprovalRequestAdapter,
       CommitBookingAdapter,
       BookingPreviewAdapter,
+      BookingSelectorAdapter,
       expect.objectContaining({ provide: DI_TOKENS.DRAFT_OWNER_REGISTRY }),
       {
         provide: DI_TOKENS.BOOKING_PROPOSE_OWNER,
         useExisting: BookingPreviewAdapter,
+      },
+      {
+        provide: DI_TOKENS.BOOKING_SELECTOR_OWNER,
+        useExisting: BookingSelectorAdapter,
       },
       {
         provide: DI_TOKENS.APPROVAL_REQUEST_OWNER,
@@ -143,6 +149,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       DI_TOKENS.APPROVAL_REQUEST_OWNER,
       DI_TOKENS.COMMIT_BOOKING_OWNER,
       DI_TOKENS.BOOKING_PROPOSE_OWNER,
+      DI_TOKENS.BOOKING_SELECTOR_OWNER,
     ]);
   });
 
@@ -210,6 +217,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       DI_TOKENS.APPROVAL_REQUEST_OWNER,
       DI_TOKENS.COMMIT_BOOKING_OWNER,
       DI_TOKENS.BOOKING_PROPOSE_OWNER,
+      DI_TOKENS.BOOKING_SELECTOR_OWNER,
       DI_TOKENS.BOOKING_CONFIRMATION_MINTER,
       DI_TOKENS.NAVIGATE_WIDGET_MINTER,
     ];

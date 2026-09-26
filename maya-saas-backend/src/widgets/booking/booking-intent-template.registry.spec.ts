@@ -17,13 +17,16 @@ const proposal = (
 };
 
 describe('P-MINT-BOOK closed booking intent templates', () => {
-  it('owns the three propose edges and three typed COMMIT recipes', () => {
+  it('owns typed selector progression, three propose edges and three typed COMMIT recipes', () => {
     expect(
       Object.values(BOOKING_INTENT_TEMPLATE_REGISTRY).map((row) => [
         row.effect,
         row.subject.key,
       ]),
     ).toEqual([
+      ['REFINE', 'catalog.services.read'],
+      ['REFINE', 'catalog.staff.read'],
+      ['DRAFT', 'appointments.own.create'],
       ['DRAFT', 'appointments.own.create'],
       ['REFINE', 'appointments.own.reschedule'],
       ['REFINE', 'appointments.own.cancel'],

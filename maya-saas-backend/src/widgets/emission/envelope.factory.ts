@@ -15,6 +15,9 @@ const CELL_PATHS_BY_KIND: Readonly<
   Record<
     | 'METRIC'
     | 'SCHEDULE'
+    | 'SERVICE_SELECTOR'
+    | 'STAFF_SELECTOR'
+    | 'TIME_SLOT_SELECTOR'
     | 'SOURCE_STATUS'
     | 'PROGRESS'
     | 'LIMITATION'
@@ -29,6 +32,35 @@ const CELL_PATHS_BY_KIND: Readonly<
     'body.entries[].subtitle',
     'body.entries[].state',
     'body.gaps[].recoverable',
+  ]),
+  SERVICE_SELECTOR: Object.freeze([
+    'body.options[].label',
+    'body.options[].sublabel',
+    'body.options[].measures',
+    'body.options[].enabled',
+    'body.options[].duration',
+    'body.options[].price',
+    'body.options[].requires_consultation',
+    'body.total_preview',
+  ]),
+  STAFF_SELECTOR: Object.freeze([
+    'body.options[].label',
+    'body.options[].sublabel',
+    'body.options[].measures',
+    'body.options[].enabled',
+    'body.options[].role_label',
+    'body.options[].nearest_availability',
+    'body.options[].rating',
+    'body.any_staff_option.label',
+    'body.any_staff_option.sublabel',
+    'body.any_staff_option.measures',
+    'body.any_staff_option.enabled',
+  ]),
+  TIME_SLOT_SELECTOR: Object.freeze([
+    'body.groups[].slots[].start',
+    'body.groups[].slots[].duration',
+    'body.groups[].slots[].price',
+    'body.groups[].slots[].availability',
   ]),
   SOURCE_STATUS: Object.freeze([
     'body.sources[].label',
@@ -265,6 +297,7 @@ export const buildEnvelopeWithoutSeal = (args: {
   ttlSeconds: number;
   limitations: readonly string[];
   textEquivalentOverride?: Readonly<Record<string, unknown>> | null;
+  supersedesWidgetId?: string | null;
 }) => {
   const completeness =
     args.input.facts[0]?.completeness ??
@@ -368,7 +401,7 @@ export const buildEnvelopeWithoutSeal = (args: {
         args.freshnessClass === 'proactive_once'
           ? 'mark_stale'
           : 'collapse_to_summary',
-      supersedes_widget_id: null,
+      supersedes_widget_id: args.supersedesWidgetId ?? null,
       superseded_by_widget_id: null,
       delivery: {
         delivery_state: 'live',

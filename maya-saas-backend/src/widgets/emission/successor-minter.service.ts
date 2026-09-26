@@ -35,6 +35,16 @@ export interface SuccessorMintRequest {
 
 export interface SuccessorMinterPort {
   mint(request: SuccessorMintRequest): Promise<SuccessorMintResult | null>;
+  mintBookingSelector(
+    request: BookingSelectorSuccessorRequest,
+  ): Promise<SuccessorMintResult | null>;
+}
+
+export interface BookingSelectorSuccessorRequest extends SuccessorMintRequest {
+  readonly kind: Extract<WidgetKind, 'STAFF_SELECTOR' | 'TIME_SLOT_SELECTOR'>;
+  readonly composerInput: WidgetComposerInput;
+  readonly source: unknown;
+  readonly inheritedHandles: Readonly<Record<string, string>>;
 }
 
 export interface SuccessorMintResult {
@@ -216,6 +226,140 @@ export class SuccessorMinterService implements SuccessorMinterPort {
           data: { supersedesWidgetId: predecessor.widgetId },
         });
         if (linked.count !== 1) throw new SuccessorLinkConflict();
+      });
+    } catch (error) {
+      await this.prisma.widgetEmission.updateMany({
+        where: {
+          tenantId: request.tenantId,
+          widgetId: successor.widgetId,
+          lifecycleState: 'MINTED',
+        },
+        data: { lifecycleState: 'CANCELLED' },
+      });
+      if (error instanceof SuccessorLinkConflict)
+        return this.readLinkedSuccessor(
+          request.tenantId,
+          predecessor.widgetId,
+          predecessor.widgetId,
+          predecessor.turnId,
+          predecessor.deliveryChannel,
+          true,
+        );
+      throw error;
+    }
+    return successor;
+  }
+
+  /** FBE2E-2: link one server-owned typed selector successor through the existing emission owner. */
+  async mintBookingSelector(
+    request: BookingSelectorSuccessorRequest,
+  ): Promise<SuccessorMintResult | null> {
+    if (request.principal.authority.tenantId !== request.tenantId) return null;
+    const predecessor = await this.prisma.widgetEmission.findFirst({
+      where: {
+        tenantId: request.tenantId,
+        widgetId: request.predecessorWidgetId,
+      },
+      select: {
+        widgetId: true,
+        turnId: true,
+        kind: true,
+        lifecycleState: true,
+        supersededByWidgetId: true,
+        deliveryChannel: true,
+        textEquivalentJson: true,
+        erasedAt: true,
+        turn: { select: { conversationId: true, erasedAt: true } },
+        intentRecords: {
+          where: { intentTokenHash: request.predecessorIntentTokenHash },
+          select: { principalProofHash: true, erasedAt: true },
+          take: 1,
+        },
+        renderReceipts: {
+          select: {
+            deliveryChannel: true,
+            composedEnvelopeJson: true,
+            erasedAt: true,
+          },
+        },
+      },
+    });
+    if (predecessor === null || successorTerms(predecessor, request) === null)
+      return null;
+    if (
+      predecessor.lifecycleState === 'SUPERSEDED' &&
+      predecessor.supersededByWidgetId !== null
+    )
+      return this.readLinkedSuccessor(
+        request.tenantId,
+        predecessor.widgetId,
+        predecessor.supersededByWidgetId,
+        predecessor.turnId,
+        predecessor.deliveryChannel,
+      );
+    if (predecessor.lifecycleState !== 'LIVE') return null;
+
+    const successor = await this.emitter.emitBookingSelector(
+      {
+        tenantId: request.tenantId,
+        conversationId: predecessor.turn.conversationId,
+        turnId: predecessor.turnId,
+        kind: request.kind,
+        principalProofHash: request.principal.proofHash,
+        deliveryChannel: predecessor.deliveryChannel,
+        body: {},
+        ttlSeconds: 600,
+        freshnessClass: 'live',
+        piiClass: 'client_identified',
+        composerInput: request.composerInput,
+        principal: request.principal,
+      },
+      {
+        source: request.source,
+        inheritedHandles: request.inheritedHandles,
+        predecessorWidgetId: predecessor.widgetId,
+      },
+      request.now,
+    );
+
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await TimelineStore.lockConversation(
+          tx,
+          request.tenantId,
+          predecessor.turn.conversationId,
+        );
+        const closed = await tx.widgetEmission.updateMany({
+          where: {
+            tenantId: request.tenantId,
+            widgetId: predecessor.widgetId,
+            lifecycleState: 'LIVE',
+            supersededByWidgetId: null,
+            erasedAt: null,
+            intentRecords: {
+              some: {
+                intentTokenHash: request.predecessorIntentTokenHash,
+                principalProofHash: request.principal.proofHash,
+                erasedAt: null,
+              },
+            },
+          },
+          data: {
+            lifecycleState: 'SUPERSEDED',
+            supersededByWidgetId: successor.widgetId,
+          },
+        });
+        if (closed.count !== 1) throw new SuccessorLinkConflict();
+        const linked = await tx.widgetEmission.count({
+          where: {
+            tenantId: request.tenantId,
+            widgetId: successor.widgetId,
+            supersedesWidgetId: predecessor.widgetId,
+            lifecycleState: 'MINTED',
+            erasedAt: null,
+          },
+        });
+        if (linked !== 1) throw new SuccessorLinkConflict();
       });
     } catch (error) {
       await this.prisma.widgetEmission.updateMany({

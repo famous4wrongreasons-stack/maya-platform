@@ -13,6 +13,7 @@ import {
   C9_CANCEL_OWNER,
   COMMIT_BOOKING_OWNER,
   BOOKING_PROPOSE_OWNER,
+  BOOKING_SELECTOR_OWNER,
   BOOKING_CONFIRMATION_MINTER,
   NAVIGATE_WIDGET_MINTER,
   DRAFT_OWNER_REGISTRY,
@@ -30,6 +31,7 @@ import {
   type ApprovalRequestOwnerPort,
   type CommitBookingOwnerPort,
   type BookingProposeOwnerPort,
+  type BookingSelectorOwnerPort,
   type NavigateWidgetMinterPort,
   bookingPreviewOf,
   type DraftOwnerRegistryPort,
@@ -100,6 +102,8 @@ export class EffectRouterService {
     private readonly bookingCommit: CommitBookingOwnerPort,
     @Inject(BOOKING_PROPOSE_OWNER)
     private readonly bookingPropose: BookingProposeOwnerPort,
+    @Inject(BOOKING_SELECTOR_OWNER)
+    private readonly bookingSelectors: BookingSelectorOwnerPort,
     @Inject(BOOKING_CONFIRMATION_MINTER)
     private readonly bookingMinter: BookingConfirmationMinterPort,
     private readonly gate14Disagreements: Gate14DisagreementMetric,
@@ -311,6 +315,14 @@ export class EffectRouterService {
     const subject = subjectOf(input.record);
     if (
       subject?.space === 'C9' &&
+      ((input.record.widgetKind === 'SERVICE_SELECTOR' &&
+        subject.key === 'catalog.services.read') ||
+        (input.record.widgetKind === 'STAFF_SELECTOR' &&
+          subject.key === 'catalog.staff.read'))
+    )
+      return () => this.advanceBookingSelector(ctx, input);
+    if (
+      subject?.space === 'C9' &&
       (subject.key === 'appointments.own.reschedule' ||
         subject.key === 'appointments.own.cancel')
     ) {
@@ -344,12 +356,130 @@ export class EffectRouterService {
     ctx: GateContext,
     resolvedNouns: ResolvedNouns | undefined,
   ): Destination | null {
+    const input = routingInputOf(ctx);
+    const subject = ctx.record === null ? null : subjectOf(ctx.record);
+    if (
+      input !== null &&
+      ctx.principal !== null &&
+      input.record.widgetKind === 'TIME_SLOT_SELECTOR' &&
+      subject?.space === 'C9' &&
+      subject.key === 'appointments.own.create'
+    )
+      return () => this.completeBookingSelection(ctx, input);
     const actuating = actuatingInputOf(ctx, resolvedNouns);
     if (actuating === null) return null;
     const pending = this.drafts.route(actuating);
     return pending === null
       ? null
       : async () => this.completeBookingPreview(actuating, await pending);
+  }
+
+  private async advanceBookingSelector(
+    ctx: GateContext,
+    input: import('./routing-input').RoutingInput,
+  ): Promise<EffectRouteOutcome> {
+    const serviceStep = input.record.widgetKind === 'SERVICE_SELECTOR';
+    const selected = selectedClosedInput(
+      ctx,
+      serviceStep ? 'service_ref' : 'staff_ref',
+    );
+    const inherited = frozenHandles(
+      input.record.frozenNounsJson,
+      serviceStep ? [] : ['service'],
+    );
+    if (selected === null || inherited === null)
+      return admitted({
+        receiptOutcome: 'REFUSED',
+        refusalCode: 'effect_not_admissible',
+      });
+    const handles = Object.freeze({
+      ...inherited,
+      [serviceStep ? 'service' : 'staff']: selected,
+    });
+    const advanced = await this.bookingSelectors.advance({
+      routing: input,
+      actor: ctx.actor,
+      step: serviceStep ? 'service' : 'staff',
+      handles,
+    });
+    if (advanced === null)
+      return admitted({
+        receiptOutcome: 'REFUSED',
+        refusalCode: 'effect_not_admissible',
+      });
+    const projected = this.projector.composeCompletedRead(
+      {
+        ...projectionPlan(ctx, input.record),
+        widgetKind: advanced.nextKind,
+        capabilitySpace: 'C9',
+        capabilityKey: advanced.capabilityKey,
+        frozenNounsJson: advanced.inheritedHandles,
+      },
+      { value: advanced.source, fact: advanced.fact },
+    );
+    if (projected.kind !== 'composer_input')
+      return admitted({
+        receiptOutcome: 'REFUSED',
+        refusalCode: 'effect_not_admissible',
+      });
+    const minted = await this.successors.mintBookingSelector({
+      tenantId: input.tenantId,
+      predecessorWidgetId: input.record.widgetId,
+      predecessorIntentTokenHash: input.record.intentTokenHash,
+      principal: ctx.principal!,
+      now: input.now,
+      kind: advanced.nextKind,
+      composerInput: projected.input,
+      source: advanced.source,
+      inheritedHandles: advanced.inheritedHandles,
+    });
+    return minted === null
+      ? admitted({
+          receiptOutcome: 'REFUSED',
+          refusalCode: 'effect_not_admissible',
+        })
+      : admitted({ nextEnvelope: minted.envelope });
+  }
+
+  private async completeBookingSelection(
+    ctx: GateContext,
+    input: import('./routing-input').RoutingInput,
+  ): Promise<EffectRouteOutcome> {
+    const slot = selectedClosedInput(ctx, 'slot_ref');
+    const inherited = frozenHandles(input.record.frozenNounsJson, [
+      'service',
+      'staff',
+    ]);
+    if (slot === null || inherited === null || ctx.principal === null)
+      return admitted({
+        receiptOutcome: 'REFUSED',
+        refusalCode: 'effect_not_admissible',
+      });
+    const handles = Object.freeze({
+      service: inherited.service,
+      staff: inherited.staff,
+      slot,
+    });
+    const proposed = await this.bookingPropose.proposeCreateSelection({
+      routing: input,
+      actorUserId: ctx.actor.userId,
+      principal: ctx.principal,
+      handles,
+    });
+    return this.completeBookingPreview(
+      {
+        routing: input,
+        actorUserId: ctx.actor.userId,
+        principal: ctx.principal,
+        resolvedNouns: {
+          row: 'A1',
+          diverged: false,
+          diff: [],
+          values: proposed.values,
+        },
+      },
+      proposed.outcome,
+    );
   }
 
   private async completeBookingPreview(
@@ -451,6 +581,36 @@ const projectionPlan = (
 
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const selectedClosedInput = (
+  ctx: GateContext,
+  field: 'service_ref' | 'staff_ref' | 'slot_ref',
+): string | null => {
+  const values = ctx.facts.validatedInputs?.closed.get(field);
+  return values?.length === 1 && typeof values[0] === 'string'
+    ? values[0]
+    : null;
+};
+
+const frozenHandles = (
+  value: unknown,
+  expected: readonly string[],
+): Readonly<Record<string, string>> | null => {
+  if (!isRecord(value)) return expected.length === 0 ? Object.freeze({}) : null;
+  const keys = Object.keys(value).sort();
+  const exact = [...expected].sort();
+  if (
+    keys.length !== exact.length ||
+    !keys.every((key, index) => key === exact[index]) ||
+    keys.some(
+      (key) => typeof value[key] !== 'string' || value[key].length === 0,
+    )
+  )
+    return null;
+  return Object.freeze(
+    Object.fromEntries(keys.map((key) => [key, value[key] as string])),
+  );
+};
 
 const isRoutableEffect = (value: string): value is RoutableEffect =>
   (ROUTABLE_EFFECTS as readonly string[]).includes(value);

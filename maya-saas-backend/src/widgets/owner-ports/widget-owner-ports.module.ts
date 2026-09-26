@@ -20,6 +20,7 @@ import {
   NOUN_RESOLUTION_PORTS,
   C9_CANCEL_OWNER,
   BOOKING_PROPOSE_OWNER,
+  BOOKING_SELECTOR_OWNER,
 } from '../di-tokens';
 import { CanonicalReadAdapter } from './canonical-read.provider';
 import { Gate6OwnersAdapter } from './gate6.owners.provider';
@@ -36,6 +37,7 @@ import { ApprovalRequestAdapter } from './approval-request.adapter';
 import { CommitBookingAdapter } from './commit-booking.adapter';
 import { DraftOwnerRegistry } from './draft-owner.registry';
 import { BookingPreviewAdapter } from './booking-preview.adapter';
+import { BookingSelectorAdapter } from './booking-selector.adapter';
 
 /**
  * The widget layer's one boundary to non-widget owners (integrator decision D-6).
@@ -85,6 +87,7 @@ import { BookingPreviewAdapter } from './booking-preview.adapter';
     ApprovalRequestAdapter,
     CommitBookingAdapter,
     BookingPreviewAdapter,
+    BookingSelectorAdapter,
     {
       provide: DRAFT_OWNER_REGISTRY,
       useFactory: (booking: BookingPreviewAdapter) =>
@@ -92,6 +95,7 @@ import { BookingPreviewAdapter } from './booking-preview.adapter';
       inject: [BookingPreviewAdapter],
     },
     { provide: BOOKING_PROPOSE_OWNER, useExisting: BookingPreviewAdapter },
+    { provide: BOOKING_SELECTOR_OWNER, useExisting: BookingSelectorAdapter },
     {
       provide: APPROVAL_REQUEST_OWNER,
       useExisting: ApprovalRequestAdapter,
@@ -119,6 +123,7 @@ import { BookingPreviewAdapter } from './booking-preview.adapter';
     APPROVAL_REQUEST_OWNER,
     COMMIT_BOOKING_OWNER,
     BOOKING_PROPOSE_OWNER,
+    BOOKING_SELECTOR_OWNER,
   ],
 })
 export class WidgetOwnerPortsModule {}

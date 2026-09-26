@@ -58,6 +58,21 @@ const make = () => {
   const seals = {
     seal: (terms: unknown) =>
       createHash('sha256').update(JSON.stringify(terms)).digest('hex'),
+    mintNounHandles: (
+      identities: readonly {
+        noun: string;
+        ownerKind: string;
+        ownerRef: string;
+      }[],
+    ) =>
+      Object.freeze(
+        Object.fromEntries(
+          identities.map((identity) => [
+            identity.noun,
+            `opaque:${identity.noun}:${identity.ownerKind}:${identity.ownerRef}`,
+          ]),
+        ),
+      ),
   };
   return {
     prisma,
@@ -133,6 +148,63 @@ const composer = (
   composerFor('METRIC', 'c7.measurement.read', intentProposals);
 
 describe('K3 emission — mint, compose, fit, seal', () => {
+  it('FBE2E-2 mints a strict service selector and a closed server-owned transition domain', async () => {
+    const { prisma, emitter } = make();
+    const minted = await emitter.emitBookingSelector(
+      {
+        ...req(),
+        kind: 'SERVICE_SELECTOR',
+        composerInput: composerFor(
+          'SERVICE_SELECTOR',
+          'catalog.services.read',
+          [],
+        ),
+      },
+      {
+        source: {
+          services: [
+            {
+              id: 'service-1',
+              name: 'Haircut',
+              price: 1500,
+              duration_minutes: 60,
+              currency: 'RUB',
+            },
+          ],
+        },
+      },
+      new Date('2026-10-01T09:00:00.000Z'),
+    );
+    expect(prisma.records).toHaveLength(2);
+    expect(
+      prisma.records.find((record) => record.effect === 'REFINE'),
+    ).toMatchObject({
+      widgetKind: 'SERVICE_SELECTOR',
+      effect: 'REFINE',
+      capabilitySpace: 'C9',
+      capabilityKey: 'catalog.services.read',
+      selectionDomain:
+        '{"service_ref":["opaque:service:catalog_service:service-1"]}',
+      frozenNounsJson: {},
+    });
+    const envelope = minted.envelope as {
+      body: { options: Array<{ service_ref: string }> };
+      intents: Array<{
+        effect: string;
+        input_schema: { fields: Array<{ name: string }> } | null;
+      }>;
+    };
+    expect(envelope.body.options).toHaveLength(1);
+    expect(envelope.body.options[0]?.service_ref).toBe(
+      'opaque:service:catalog_service:service-1',
+    );
+    const refine = envelope.intents.find(
+      (intent) => intent.effect === 'REFINE',
+    );
+    expect(refine?.input_schema?.fields).toHaveLength(1);
+    expect(refine?.input_schema?.fields[0]?.name).toBe('service_ref');
+  });
+
   it('retains only a server-validated journal business date on the exact journal REFINE record', async () => {
     const { prisma, emitter } = make();
     const input = composerFor('SCHEDULE', 'operations.journal.read', [

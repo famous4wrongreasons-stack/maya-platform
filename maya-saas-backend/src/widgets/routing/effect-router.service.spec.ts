@@ -25,6 +25,7 @@ const fixture = () => {
     claimIntentRecord: jest.fn().mockResolvedValue(true),
     writeReceipt: jest.fn().mockResolvedValue({ id: 'receipt-1' }),
     reconcileAcceptedReceipt: jest.fn().mockResolvedValue(true),
+    putDraft: jest.fn().mockResolvedValue({ id: 'draft-1' }),
   };
   const controls = {
     isRegistered: jest.fn((key: string) => key === 'control.widget.dismiss'),
@@ -34,6 +35,13 @@ const fixture = () => {
     mint: jest.fn().mockResolvedValue({
       widgetId: 'w2',
       envelope: { contract: 'maya.widget.envelope/1', widget_id: 'w2' },
+    }),
+    mintBookingSelector: jest.fn().mockResolvedValue({
+      widgetId: 'w-selector',
+      envelope: {
+        contract: 'maya.widget.envelope/1',
+        widget_id: 'w-selector',
+      },
     }),
   };
   const c9Cancel = { cancel: jest.fn().mockResolvedValue(true) };
@@ -82,14 +90,32 @@ const fixture = () => {
       resolvedWidget: null,
       ownerDecision: null,
     }),
+    proposeCreateSelection: jest.fn().mockResolvedValue({
+      outcome: {
+        receiptOutcome: 'REFUSED',
+        refusalCode: 'effect_not_admissible',
+        actionReceiptRef: null,
+        nextEnvelope: null,
+        resolvedWidget: null,
+        ownerDecision: null,
+      },
+      values: new Map(),
+    }),
   };
-  const bookingMinter = { mint: jest.fn() };
+  const bookingSelectors = { advance: jest.fn().mockResolvedValue(null) };
+  const bookingMinter = {
+    mint: jest.fn().mockResolvedValue({
+      contract: 'maya.widget.envelope/1',
+      widget_id: 'w-confirmation',
+    }),
+  };
   const projector = {
     composeNavigate: jest.fn().mockResolvedValue({
       kind: 'composer_input',
       input: { kind_proposal: 'SERVICE_SELECTOR' },
       source: { services: [] },
     }),
+    composeCompletedRead: jest.fn(),
   };
   const emitter = {
     emit: jest.fn().mockResolvedValue({
@@ -117,6 +143,9 @@ const fixture = () => {
     projector,
     emitter,
     threadPage,
+    bookingPropose,
+    bookingSelectors,
+    bookingMinter,
     router: new EffectRouterService(
       stores,
       controls as never,
@@ -127,6 +156,7 @@ const fixture = () => {
       approvals,
       commits,
       bookingPropose,
+      bookingSelectors,
       bookingMinter,
       metric as never,
       projector as never,
@@ -402,6 +432,217 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
         principal: PRINCIPAL,
       }),
     );
+  });
+
+  it('FBE2E-2 SERVICE_SELECTOR uses the validated opaque option and the canonical server owner to choose STAFF_SELECTOR', async () => {
+    const { router, bookingSelectors, successors, projector } = fixture();
+    bookingSelectors.advance.mockResolvedValue({
+      nextKind: 'STAFF_SELECTOR',
+      capabilityKey: 'catalog.staff.read',
+      source: { staff: [{ id: 'canonical-staff-1', name: 'Alice' }] },
+      fact: { capability: 'catalog.staff.read' },
+      inheritedHandles: { service: 'opaque-service' },
+    });
+    projector.composeCompletedRead.mockReturnValue({
+      kind: 'composer_input',
+      input: { kind_proposal: 'STAFF_SELECTOR' },
+    });
+    const input = ctx(
+      rec({
+        effect: 'REFINE',
+        widgetKind: 'SERVICE_SELECTOR',
+        capabilitySpace: 'C9',
+        capabilityKey: 'catalog.services.read',
+        frozenNounsJson: {},
+      }),
+      {
+        principal: PRINCIPAL,
+        facts: {
+          validatedInputs: {
+            closed: new Map([['service_ref', ['opaque-service']]]),
+          },
+        },
+      },
+    );
+    await expect(routeEffect(router, input)).resolves.toMatchObject({
+      outcome: 'terminate',
+      route: { next_envelope: { widget_id: 'w-selector' } },
+    });
+    expect(bookingSelectors.advance).toHaveBeenCalledWith(
+      expect.objectContaining({
+        step: 'service',
+        actor: input.actor,
+        handles: { service: 'opaque-service' },
+      }),
+    );
+    expect(successors.mintBookingSelector).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'STAFF_SELECTOR' }),
+    );
+  });
+
+  it('FBE2E-2 STAFF_SELECTOR retains the exact service handle and lets the canonical owner choose TIME_SLOT_SELECTOR', async () => {
+    const { router, bookingSelectors, successors, projector } = fixture();
+    bookingSelectors.advance.mockResolvedValue({
+      nextKind: 'TIME_SLOT_SELECTOR',
+      capabilityKey: 'booking.availability.read',
+      source: { slots: [{ start: '2026-06-02T10:00:00.000Z' }] },
+      fact: { capability: 'booking.availability.read' },
+      inheritedHandles: {
+        service: 'opaque-service',
+        staff: 'opaque-staff',
+      },
+    });
+    projector.composeCompletedRead.mockReturnValue({
+      kind: 'composer_input',
+      input: { kind_proposal: 'TIME_SLOT_SELECTOR' },
+    });
+    await expect(
+      routeEffect(
+        router,
+        ctx(
+          rec({
+            effect: 'REFINE',
+            widgetKind: 'STAFF_SELECTOR',
+            capabilitySpace: 'C9',
+            capabilityKey: 'catalog.staff.read',
+            frozenNounsJson: { service: 'opaque-service' },
+          }),
+          {
+            principal: PRINCIPAL,
+            facts: {
+              validatedInputs: {
+                closed: new Map([['staff_ref', ['opaque-staff']]]),
+              },
+            },
+          },
+        ),
+      ),
+    ).resolves.toMatchObject({
+      outcome: 'terminate',
+      route: { next_envelope: { widget_id: 'w-selector' } },
+    });
+    expect(bookingSelectors.advance).toHaveBeenCalledWith(
+      expect.objectContaining({
+        step: 'staff',
+        handles: {
+          service: 'opaque-service',
+          staff: 'opaque-staff',
+        },
+      }),
+    );
+    expect(successors.mintBookingSelector).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'TIME_SLOT_SELECTOR' }),
+    );
+  });
+
+  it('FBE2E-2 TIME_SLOT_SELECTOR creates an existing server draft and confirmation without client-selected capability', async () => {
+    const { router, bookingPropose, bookingMinter, stores } = fixture();
+    bookingPropose.proposeCreateSelection.mockResolvedValue({
+      outcome: {
+        receiptOutcome: 'ACCEPTED',
+        refusalCode: null,
+        actionReceiptRef: null,
+        nextEnvelope: null,
+        resolvedWidget: null,
+        ownerDecision: {
+          kind: 'booking_preview',
+          preview: {
+            subject: 'create',
+            sourceCapabilityKey: 'appointments.own.create',
+            frozenArgumentHandles: {
+              service: 'opaque-service',
+              staff: 'opaque-staff',
+              slot: 'opaque-slot',
+            },
+            draftRef: 'draft-ref',
+            appointmentRef: null,
+            producingIntentTokenHash: null,
+            when: '2026-06-02T10:00:00.000Z',
+            whenPrevious: null,
+            serviceLabel: 'Service',
+            staffLabel: 'Staff',
+            durationMinutes: 60,
+            priceKopecks: 100000,
+            currency: 'RUB',
+            fact: { capability: 'appointments.own.create' },
+          },
+        },
+      },
+      values: new Map([
+        ['service', 'service-1'],
+        ['staff', 'staff-1'],
+        ['slot', '2026-06-02T10:00:00.000Z'],
+      ]),
+    });
+    await expect(
+      routeEffect(
+        router,
+        ctx(
+          rec({
+            effect: 'DRAFT',
+            widgetKind: 'TIME_SLOT_SELECTOR',
+            capabilitySpace: 'C9',
+            capabilityKey: 'appointments.own.create',
+            frozenNounsJson: {
+              service: 'opaque-service',
+              staff: 'opaque-staff',
+            },
+          }),
+          {
+            principal: PRINCIPAL,
+            facts: {
+              validatedInputs: {
+                closed: new Map([['slot_ref', ['opaque-slot']]]),
+              },
+            },
+          },
+        ),
+      ),
+    ).resolves.toMatchObject({
+      outcome: 'terminate',
+      route: { next_envelope: { widget_id: 'w-confirmation' } },
+    });
+    expect(bookingPropose.proposeCreateSelection).toHaveBeenCalledWith(
+      expect.objectContaining({
+        handles: {
+          service: 'opaque-service',
+          staff: 'opaque-staff',
+          slot: 'opaque-slot',
+        },
+      }),
+    );
+    expect(stores.putDraft).toHaveBeenCalledTimes(1);
+    expect(bookingMinter.mint).toHaveBeenCalledTimes(1);
+  });
+
+  it('FBE2E-2 fails closed when a selector input or inherited handle set is not exact', async () => {
+    const { router, bookingSelectors, bookingPropose } = fixture();
+    await expect(
+      routeEffect(
+        router,
+        ctx(
+          rec({
+            effect: 'REFINE',
+            widgetKind: 'STAFF_SELECTOR',
+            capabilitySpace: 'C9',
+            capabilityKey: 'catalog.staff.read',
+            frozenNounsJson: { service: 's', client_capability: 'forged' },
+          }),
+          {
+            principal: PRINCIPAL,
+            facts: {
+              validatedInputs: {
+                closed: new Map([['staff_ref', ['staff-a', 'staff-b']]]),
+              },
+            },
+          },
+        ),
+      ),
+    ).resolves.toMatchObject({
+      route: { receipt_outcome: 'REFUSED' },
+    });
+    expect(bookingSelectors.advance).not.toHaveBeenCalled();
+    expect(bookingPropose.proposeCreateSelection).not.toHaveBeenCalled();
   });
 
   it('G13-P04 HANDOFF returns exactly one signed principal-bound target', async () => {
