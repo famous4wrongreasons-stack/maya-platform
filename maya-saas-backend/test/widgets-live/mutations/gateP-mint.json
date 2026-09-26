@@ -95,7 +95,7 @@
     "file": "src/widgets/emission/record-writer.ts",
     "find": "          idempotency_key: booking.idempotencyKey,\n        }\n      : null,",
     "replace": "          idempotency_key: booking.idempotencyKey,\n        }\n      : { readback_text: 'invented' },",
-    "killers": ["MINT-5"],
+    "killers": ["MINT-1"],
     "expect": "live-killed"
   },
   {
