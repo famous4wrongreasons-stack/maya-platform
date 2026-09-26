@@ -272,7 +272,14 @@ export class SuccessorMinterService implements SuccessorMinterPort {
         turn: { select: { conversationId: true, erasedAt: true } },
         intentRecords: {
           where: { intentTokenHash: request.predecessorIntentTokenHash },
-          select: { principalProofHash: true, erasedAt: true },
+          select: {
+            principalProofHash: true,
+            erasedAt: true,
+            consumedAt: true,
+            effect: true,
+            capabilitySpace: true,
+            capabilityKey: true,
+          },
           take: 1,
         },
         renderReceipts: {
@@ -284,7 +291,7 @@ export class SuccessorMinterService implements SuccessorMinterPort {
         },
       },
     });
-    if (predecessor === null || successorTerms(predecessor, request) === null)
+    if (predecessor === null || !bookingSuccessorTerms(predecessor, request))
       return null;
     if (
       predecessor.lifecycleState === 'SUPERSEDED' &&
@@ -297,7 +304,7 @@ export class SuccessorMinterService implements SuccessorMinterPort {
         predecessor.turnId,
         predecessor.deliveryChannel,
       );
-    if (predecessor.lifecycleState !== 'LIVE') return null;
+    if (!['MINTED', 'LIVE'].includes(predecessor.lifecycleState)) return null;
 
     const successor = await this.emitter.emitBookingSelector(
       {
@@ -310,7 +317,6 @@ export class SuccessorMinterService implements SuccessorMinterPort {
         body: {},
         ttlSeconds: 600,
         freshnessClass: 'live',
-        piiClass: 'client_identified',
         composerInput: request.composerInput,
         principal: request.principal,
       },
@@ -329,6 +335,33 @@ export class SuccessorMinterService implements SuccessorMinterPort {
           request.tenantId,
           predecessor.turn.conversationId,
         );
+        // The first real shell tap is the first server-observed proof that the returned MINTED
+        // envelope crossed delivery and render. Catch its persisted lifecycle up through the two
+        // legal contract transitions before superseding it; never weaken the generic successor.
+        if (predecessor.lifecycleState === 'MINTED') {
+          const delivered = await tx.widgetEmission.updateMany({
+            where: {
+              tenantId: request.tenantId,
+              widgetId: predecessor.widgetId,
+              lifecycleState: 'MINTED',
+              supersededByWidgetId: null,
+              erasedAt: null,
+            },
+            data: { lifecycleState: 'DELIVERED' },
+          });
+          if (delivered.count !== 1) throw new SuccessorLinkConflict();
+          const live = await tx.widgetEmission.updateMany({
+            where: {
+              tenantId: request.tenantId,
+              widgetId: predecessor.widgetId,
+              lifecycleState: 'DELIVERED',
+              supersededByWidgetId: null,
+              erasedAt: null,
+            },
+            data: { lifecycleState: 'LIVE' },
+          });
+          if (live.count !== 1) throw new SuccessorLinkConflict();
+        }
         const closed = await tx.widgetEmission.updateMany({
           where: {
             tenantId: request.tenantId,
@@ -430,6 +463,67 @@ interface PredecessorTerms {
   readonly sourceCapability: CapabilityRef;
   readonly textEquivalent: Readonly<Record<string, unknown>>;
 }
+
+interface BookingSelectorPredecessor {
+  readonly kind: string;
+  readonly lifecycleState: string;
+  readonly deliveryChannel: string;
+  readonly erasedAt: Date | null;
+  readonly turn: { readonly erasedAt: Date | null };
+  readonly intentRecords: ReadonlyArray<{
+    readonly principalProofHash: string;
+    readonly erasedAt: Date | null;
+    readonly consumedAt: Date | null;
+    readonly effect: string;
+    readonly capabilitySpace: string | null;
+    readonly capabilityKey: string | null;
+  }>;
+  readonly renderReceipts: ReadonlyArray<{
+    readonly deliveryChannel: string;
+    readonly composedEnvelopeJson: unknown;
+    readonly erasedAt: Date | null;
+  }>;
+}
+
+/**
+ * Selector successors are not generic REFINE remedies. They are reached only after Gate 13 has
+ * claimed the exact server-minted selector token, so a freshly returned HTTP envelope is still
+ * MINTED while its intent record is already consumed. Requiring generic successor text or a
+ * synthetic LIVE promotion here would either dead-end the real shell or invent a render receipt.
+ */
+const bookingSuccessorTerms = (
+  predecessor: BookingSelectorPredecessor,
+  request: BookingSelectorSuccessorRequest,
+): boolean => {
+  const expected =
+    predecessor.kind === 'SERVICE_SELECTOR' && request.kind === 'STAFF_SELECTOR'
+      ? 'catalog.services.read'
+      : predecessor.kind === 'STAFF_SELECTOR' &&
+          request.kind === 'TIME_SLOT_SELECTOR'
+        ? 'catalog.staff.read'
+        : null;
+  const record = predecessor.intentRecords[0];
+  const render = predecessor.renderReceipts.find(
+    (receipt) => receipt.deliveryChannel === predecessor.deliveryChannel,
+  );
+  const envelope = asObject(render?.composedEnvelopeJson ?? null);
+  const provenance = asObject(envelope?.provenance ?? null);
+  return (
+    expected !== null &&
+    ['MINTED', 'LIVE', 'SUPERSEDED'].includes(predecessor.lifecycleState) &&
+    predecessor.erasedAt === null &&
+    predecessor.turn.erasedAt === null &&
+    record !== undefined &&
+    record.erasedAt === null &&
+    record.consumedAt !== null &&
+    record.effect === 'REFINE' &&
+    record.capabilitySpace === 'C9' &&
+    record.capabilityKey === expected &&
+    digestEquals(record.principalProofHash, request.principal.proofHash) &&
+    render?.erasedAt === null &&
+    provenance?.source_capability === expected
+  );
+};
 
 const successorTerms = (
   predecessor: {

@@ -90,7 +90,10 @@ export class BookingConfirmationMinterService implements BookingConfirmationMint
   ): Promise<Readonly<Record<string, unknown>>> {
     const source = await this.prisma.widgetEmission.findFirst({
       where: { tenantId: input.tenantId, widgetId: input.predecessorWidgetId },
-      select: { turnId: true },
+      select: {
+        turnId: true,
+        turn: { select: { conversationId: true } },
+      },
     });
     if (!source) throw new Error('BOOKING_PREDECESSOR_NOT_FOUND');
     const p = input.preview;
@@ -193,7 +196,7 @@ export class BookingConfirmationMinterService implements BookingConfirmationMint
     const minted = await this.emitter.emitBookingConfirmation(
       {
         tenantId: input.tenantId,
-        conversationId: input.predecessorWidgetId,
+        conversationId: source.turn.conversationId,
         turnId: source.turnId,
         kind: 'BOOKING_CONFIRMATION',
         principalProofHash: input.principal.proofHash,
@@ -214,6 +217,7 @@ export class BookingConfirmationMinterService implements BookingConfirmationMint
         readbackRef: null,
       },
       input.now,
+      p.subject === 'create' ? input.predecessorWidgetId : null,
     );
     return minted.envelope;
   }

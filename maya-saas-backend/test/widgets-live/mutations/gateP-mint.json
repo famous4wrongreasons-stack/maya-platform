@@ -133,5 +133,50 @@
     "replace": "    if (predecessor.lifecycleState !== 'MINTED') return null;",
     "killers": ["MINT-8"],
     "expect": "live-killed"
+  },
+  {
+    "id": "MINT-M16",
+    "description": "duplicate a selector's represented intent as a separate sealed control, so the strict renderer can no longer reproduce the server reading order",
+    "file": "src/widgets/emission/envelope.factory.ts",
+    "find": "    if (typeof intentRef === 'string' && intentRef.length > 0)\n      representedIntents.add(intentRef);",
+    "replace": "    void intentRef;",
+    "killers": ["FBE2E-2 mints a strict service selector"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M17",
+    "description": "mint a create confirmation without naming the selector it replaces",
+    "file": "src/widgets/emission/booking-confirmation-minter.service.ts",
+    "find": "      p.subject === 'create' ? input.predecessorWidgetId : null,",
+    "replace": "      null,",
+    "killers": ["FBE2E-2 links create confirmation"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M18",
+    "description": "pass the encoded booking availability owner ref to the canonical owner instead of decoding the exact server format",
+    "file": "src/widgets/owner-ports/noun-resolution.owners.provider.ts",
+    "find": "      const ownerValue = bookingSlot\n        ? decodeBookingSlotOwnerRef(opened.ownerRef)\n        : opened.ownerRef;",
+    "replace": "      const ownerValue = opened.ownerRef;\n      void bookingSlot;",
+    "killers": ["decodes only the recognized opaque booking slot"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M19",
+    "description": "remove the exact selector-stage Gate 11 deferral and ask the booking owner to quote without the selected slot",
+    "file": "src/widgets/owner-ports/noun-resolution.owners.provider.ts",
+    "find": "      if (\n        key === 'appointments.own.create' &&\n        values.size === 2 &&",
+    "replace": "      if (\n        false &&\n        key === 'appointments.own.create' &&\n        values.size === 2 &&",
+    "killers": ["defers the exact selector-stage pair"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "MINT-M20",
+    "description": "refuse the first real selector transition merely because its returned HTTP envelope is still in the legal MINTED lifecycle",
+    "file": "src/widgets/emission/successor-minter.service.ts",
+    "find": "    if (!['MINTED', 'LIVE'].includes(predecessor.lifecycleState)) return null;",
+    "replace": "    if (predecessor.lifecycleState !== 'LIVE') return null;",
+    "killers": ["BOOK-1…BOOK-6"],
+    "expect": "live-killed"
   }
 ]

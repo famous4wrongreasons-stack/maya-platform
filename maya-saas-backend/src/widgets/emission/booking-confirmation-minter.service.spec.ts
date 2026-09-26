@@ -61,18 +61,31 @@ const preview = (fact: FactUsed): BookingConfirmationPreview => ({
 });
 
 describe('P-MINT-BOOK confirmation minter', () => {
-  it('copies the exact canonical owner fact into the server-owned composer input', async () => {
+  it('FBE2E-2 links create confirmation to its selector while copying the exact canonical owner fact', async () => {
     const fact = canonicalFact();
-    const emitBookingConfirmation = jest.fn(async (request: MintRequest) => {
-      void request;
-      return Promise.resolve({
-        envelope: { contract: 'maya.widget.envelope/1' },
-      } as never);
-    });
+    const emitBookingConfirmation = jest.fn(
+      async (
+        request: MintRequest,
+        linkage: unknown,
+        now: Date,
+        supersedesWidgetId: string | null,
+      ) => {
+        void request;
+        void linkage;
+        void now;
+        void supersedesWidgetId;
+        return Promise.resolve({
+          envelope: { contract: 'maya.widget.envelope/1' },
+        } as never);
+      },
+    );
     const service = new BookingConfirmationMinterService(
       {
         widgetEmission: {
-          findFirst: jest.fn().mockResolvedValue({ turnId: 'turn-1' }),
+          findFirst: jest.fn().mockResolvedValue({
+            turnId: 'turn-1',
+            turn: { conversationId: 'conversation-1' },
+          }),
         },
       } as never,
       { emitBookingConfirmation } as never,
@@ -93,17 +106,31 @@ describe('P-MINT-BOOK confirmation minter', () => {
     expect(request.composerInput.facts[0]).toBe(fact);
     expect(request.composerInput.facts_origin).toEqual(['copied']);
     expect(request.composerInput.origin.emitter).toBe('capability_read');
+    expect(emitBookingConfirmation.mock.calls[0]?.[3]).toBe('widget-1');
   });
 
   it('renders missing canonical price as not measured instead of inventing zero', async () => {
-    const emitBookingConfirmation = jest.fn(async (request: MintRequest) => {
-      void request;
-      return Promise.resolve({ envelope: {} } as never);
-    });
+    const emitBookingConfirmation = jest.fn(
+      async (
+        request: MintRequest,
+        linkage: unknown,
+        now: Date,
+        supersedesWidgetId: string | null,
+      ) => {
+        void request;
+        void linkage;
+        void now;
+        void supersedesWidgetId;
+        return Promise.resolve({ envelope: {} } as never);
+      },
+    );
     const service = new BookingConfirmationMinterService(
       {
         widgetEmission: {
-          findFirst: jest.fn().mockResolvedValue({ turnId: 'turn-1' }),
+          findFirst: jest.fn().mockResolvedValue({
+            turnId: 'turn-1',
+            turn: { conversationId: 'conversation-1' },
+          }),
         },
       } as never,
       { emitBookingConfirmation } as never,

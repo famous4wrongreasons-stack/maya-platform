@@ -5,6 +5,8 @@
 // WidgetEmitter → 13 gates → Gate 14 → Action Engine path.
 
 import { randomUUID } from 'node:crypto';
+import { spawn } from 'node:child_process';
+import path from 'node:path';
 
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
 import { C9_REGISTRY_HASH } from '../../src/orchestration/c9.registry';
@@ -24,6 +26,10 @@ import {
 } from './support/http-bootstrap';
 import { WidgetEmitterService } from '../../src/widgets/emission/emitter.service';
 import { WidgetStoresService } from '../../src/widgets/stores/widget-stores.service';
+import {
+  BOOKING_NOUN_OWNERS,
+  encodeBookingSlotOwnerRef,
+} from '../../src/widgets/booking/booking-noun-identity';
 
 type Envelope = Readonly<Record<string, unknown>>;
 type Intent = Readonly<Record<string, unknown>>;
@@ -121,6 +127,54 @@ const widgetIdOf = (value: Envelope): string => {
   return value.widget_id;
 };
 
+const object = (value: unknown, label: string): Record<string, unknown> => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value))
+    throw new Error(`E2 ${label} is not an object`);
+  return value as Record<string, unknown>;
+};
+
+const runShellBookingFlow = async (input: {
+  readonly baseUrl: string;
+  readonly accessToken: string;
+  readonly tenantName: string;
+  readonly envelope: Envelope;
+}): Promise<{
+  readonly confirmationWidgetId: string;
+  readonly assistantLines: readonly string[];
+  readonly counters: Readonly<Record<string, number>>;
+}> =>
+  new Promise((resolve, reject) => {
+    const script = path.resolve(
+      process.cwd(),
+      'test/widgets-live/support/shell-booking-flow.mjs',
+    );
+    const child = spawn(process.execPath, [script], {
+      cwd: process.cwd(),
+      env: process.env,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    let stdout = '';
+    let stderr = '';
+    child.stdout.setEncoding('utf8');
+    child.stderr.setEncoding('utf8');
+    child.stdout.on('data', (chunk: string) => (stdout += chunk));
+    child.stderr.on('data', (chunk: string) => (stderr += chunk));
+    child.once('error', reject);
+    child.once('close', (code) => {
+      if (code !== 0)
+        reject(
+          new Error(
+            `FBE2E shell process failed with ${code}: ${stderr || '<no stderr>'}`,
+          ),
+        );
+      else
+        resolve(
+          JSON.parse(stdout) as Awaited<ReturnType<typeof runShellBookingFlow>>,
+        );
+    });
+    child.stdin.end(JSON.stringify(input));
+  });
+
 describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP, PostgreSQL]', () => {
   let db: FixtureContext;
   let http: HttpHarness;
@@ -153,13 +207,14 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP, PostgreS
     envelope: Envelope,
     selected: Intent,
     label: string,
+    inputs: Record<string, string> | null = null,
   ) =>
     (
       await http.postIntent(accessToken, {
         contract: WIDGET_INTENT_SUBMISSION_CONTRACT,
         widget_id: widgetIdOf(envelope),
         intent_token: tokenOf(selected),
-        inputs: null,
+        inputs,
         client_nonce: `e2-${label}-${randomUUID().slice(0, 8)}`,
         profile_id: 'pwa.default',
       })
@@ -213,6 +268,7 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP, PostgreS
     const client = await fx.client(tenant, user);
     await fx.grantFeature(tenant, 'widgets.runtime');
     await fx.grantFeature(tenant, 'ai.consultant');
+    await fx.grantFeature(tenant, 'booking');
     await fx.grantFeature(tenant, 'booking.customer_app');
     await fx.grantFeature(tenant, 'crm.integration');
 
@@ -245,7 +301,7 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP, PostgreS
         providerId: provider.id,
         weekday,
         startMinute: 0,
-        endMinute: 1440,
+        endMinute: 120,
       })),
     });
 
@@ -256,80 +312,80 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP, PostgreS
       user.email,
       user.password,
     );
-
-    const day = (offset: number): string => {
-      const value = new Date(Date.now() + offset * 86_400_000);
-      return value.toISOString().slice(0, 10);
+    // FBE2E-4 / BOOK-1: the real read-tool HTTP path mints the first selector. The shell can send
+    // only the selected opaque value under the server-declared field; every successor comes from
+    // the existing server transition owner and returns through the existing shell transport.
+    const trace = `fbe2e-${randomUUID()}`;
+    const catalog = await http.executeTool(
+      accessToken,
+      'catalog.services.read',
+      { arguments: {}, surface: 'web' },
+      trace,
+    );
+    expect([200, 201]).toContain(catalog.status);
+    const execution = object(catalog.body, 'catalog execution');
+    const resolution = object(execution.resolution, 'catalog resolution');
+    const catalogReceipt = object(resolution.receipt, 'catalog receipt');
+    const createSource = object(
+      catalogReceipt.envelope,
+      'service selector envelope',
+    );
+    expect(createSource).toMatchObject({ kind: 'SERVICE_SELECTOR' });
+    const shell = await runShellBookingFlow({
+      baseUrl: await http.listenLoopback(),
+      accessToken,
+      tenantName: 'E2 booking',
+      envelope: createSource,
+    });
+    expect(shell.assistantLines).toContain('Запись подтверждена.');
+    expect(shell.counters).toMatchObject({
+      activations: 4,
+      submissions: 4,
+      sentences: 0,
+    });
+    const createConfirmation = {
+      widget_id: shell.confirmationWidgetId,
     };
-    const createDay = day(14);
-    const rescheduleDay = day(16);
-    const createHandles = seals.mintNounHandles([
-      {
+
+    // BOOK-2: the shell's linked COMMIT reached Gate 14 and the existing Action Engine owner.
+    const actionReceipt = await db.prisma.widgetIntentReceipt.findFirstOrThrow({
+      where: {
         tenantId: tenant.id,
-        noun: 'service',
-        ownerKind: 'internal_service',
-        ownerRef: service.id,
+        widgetId: widgetIdOf(createConfirmation),
+        outcome: 'ACCEPTED',
       },
+      select: { actionReceiptRef: true },
+    });
+    expect(actionReceipt.actionReceiptRef).toEqual(expect.any(String));
+    const conversation = await http.resolveWidgets(accessToken, {
+      thread_page: { limit: 20 },
+    });
+    expect(conversation.status).toBe(200);
+    const resolved = object(conversation.body, 'conversation resolution');
+    const widgets = Array.isArray(resolved.widgets) ? resolved.widgets : [];
+    const confirmed = widgets
+      .map((value, index) => object(value, `resolved widget ${index}`))
+      .find((value) => {
+        const current = object(value.envelope, 'resolved envelope');
+        return current.widget_id === widgetIdOf(createConfirmation);
+      });
+    expect(confirmed).toBeDefined();
+    expect(confirmed?.terminal_lines).toEqual([
       {
-        tenantId: tenant.id,
-        noun: 'staff',
-        ownerKind: 'internal_provider',
-        ownerRef: provider.id,
-      },
-      {
-        tenantId: tenant.id,
-        noun: 'slot',
-        ownerKind: 'availability_slot',
-        ownerRef: createDay,
+        outcome: 'CONFIRMED',
+        text: 'Запись подтверждена.',
+        action_receipt_ref: actionReceipt.actionReceiptRef,
       },
     ]);
-
-    // BOOK-1: a server-minted DRAFT reaches the canonical read-only booking owner.
-    const createSource = await emit({
-      tenant,
-      principal,
-      kind: 'SERVICE_SELECTOR',
-      sourceCapability: 'catalog.services.read',
-      template: 'draft.booking.create@1',
-      subject: 'appointments.own.create',
-      handles: createHandles,
-      label: 'BOOK-1',
-    });
-    const book1 = await submit(
-      accessToken,
-      createSource,
-      intent(createSource, 'DRAFT'),
-      'BOOK-1',
-    );
-    if (book1.outcome !== 'terminate')
-      throw new Error(`BOOK-1 refused: ${JSON.stringify(book1)}`);
-    expect(book1).toMatchObject({
-      outcome: 'terminate',
-      receipt_outcome: 'ACCEPTED',
-    });
-    const createConfirmation = book1.next_envelope as Envelope;
-    expect(createConfirmation).toMatchObject({ kind: 'BOOKING_CONFIRMATION' });
-
-    // BOOK-2: the linked COMMIT reaches Gate 14 and the existing Action Engine owner.
-    const book2 = await submit(
-      accessToken,
-      createConfirmation,
-      intent(createConfirmation, 'COMMIT'),
-      'BOOK-2',
-    );
-    if (book2.receipt_outcome !== 'ACCEPTED')
-      throw new Error(`BOOK-2 refused: ${JSON.stringify(book2)}`);
-    expect(book2).toMatchObject({
-      outcome: 'terminate',
-      receipt_outcome: 'ACCEPTED',
-      gates_run: 14,
-      stopped_at_gate: '13',
-    });
-    expect(book2.owner_decision).toMatchObject({ state: 'SUCCEEDED' });
     const appointment = await db.prisma.appointment.findFirstOrThrow({
       where: { tenantId: tenant.id, mayaClientId: client.clientId },
     });
     expect(appointment.status).toBe('confirmed');
+    const rescheduleSlot = encodeBookingSlotOwnerRef(
+      new Date(appointment.startAt.getTime() + 30 * 60_000).toISOString(),
+    );
+    if (rescheduleSlot === null)
+      throw new Error('E2 could not encode the next canonical booking slot');
     const rescheduleHandles = seals.mintNounHandles([
       {
         tenantId: tenant.id,
@@ -352,8 +408,8 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP, PostgreS
       {
         tenantId: tenant.id,
         noun: 'slot',
-        ownerKind: 'availability_slot',
-        ownerRef: rescheduleDay,
+        ownerKind: BOOKING_NOUN_OWNERS.slot,
+        ownerRef: rescheduleSlot,
       },
     ]);
 
@@ -374,6 +430,8 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP, PostgreS
       intent(rescheduleSource, 'REFINE'),
       'BOOK-3',
     );
+    if (book3.outcome !== 'terminate')
+      throw new Error(`BOOK-3 refused: ${JSON.stringify(book3)}`);
     expect(book3).toMatchObject({
       outcome: 'terminate',
       receipt_outcome: 'ACCEPTED',

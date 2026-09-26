@@ -96,12 +96,15 @@ describe('P-DISCHARGE — exact A2.7 booking discharge', () => {
     expect(read('emission/record-writer.ts')).toContain('sourceCapabilityKey');
   });
 
-  it('DIS-2 admits only the six closed server-owned booking templates', () => {
+  it('DIS-2 admits only the nine closed server-owned booking and selector templates', () => {
     expect(BOOKING_ACTUATING_TEMPLATES_DISCHARGED).toBe(true);
     const keys = Object.keys(BOOKING_INTENT_TEMPLATE_REGISTRY) as Array<
       keyof typeof BOOKING_INTENT_TEMPLATE_REGISTRY
     >;
     expect(keys).toEqual([
+      'refine.booking.service@1',
+      'refine.booking.staff@1',
+      'draft.booking.selection@1',
       'draft.booking.create@1',
       'refine.booking.reschedule@1',
       'refine.booking.cancel@1',

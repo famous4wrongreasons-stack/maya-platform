@@ -712,6 +712,7 @@ const BOUND_PORT_TOKENS = [
   'APPROVAL_REQUEST_OWNER',
   'COMMIT_BOOKING_OWNER',
   'BOOKING_PROPOSE_OWNER',
+  'BOOKING_SELECTOR_OWNER',
 ];
 const NEVER_IMPORTED = ['action-engine/action-engine.module.ts#ActionEngineModule'];
 /** The widget layer's own store client, and where it may be imported (`null`: any widget file). */

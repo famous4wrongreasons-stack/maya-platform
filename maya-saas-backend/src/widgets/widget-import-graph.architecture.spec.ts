@@ -185,7 +185,10 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
   },
   'ai-tools/ai-tool-runtime.service.ts': {
     why: 'U12b canonical capability-read call site',
-    only: ['owner-ports/canonical-read.provider.ts'],
+    only: [
+      'owner-ports/canonical-read.provider.ts',
+      'owner-ports/booking-selector.adapter.ts',
+    ],
   },
   'measurement/measurement.module.ts': {
     why: 'U12b canonical measurement-read owner module',

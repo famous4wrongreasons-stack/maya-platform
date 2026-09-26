@@ -229,12 +229,13 @@ export class WidgetEmitterService {
     request: MintRequest,
     linkage: BookingConfirmationEmissionContext,
     now = new Date(),
+    supersedesWidgetId: string | null = null,
   ): Promise<SealedEmission> {
     if (!BOOKING_ACTUATING_TEMPLATES_DISCHARGED)
       throw new IntentTemplateRefusal('a2_booking_not_discharged');
     if (request.kind !== 'BOOKING_CONFIRMATION')
       throw new IntentTemplateRefusal('booking_confirmation_kind_required');
-    return this.emitInternal(request, now, null, linkage, null);
+    return this.emitInternal(request, now, null, linkage, supersedesWidgetId);
   }
 
   private async emitInternal(

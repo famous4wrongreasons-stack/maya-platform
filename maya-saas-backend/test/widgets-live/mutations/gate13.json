@@ -128,8 +128,8 @@
     "edits": [
       {
         "file": "src/widgets/stores/intent-audit.store.ts",
-        "find": "    return this.prisma.widgetIntentReceipt.upsert({",
-        "replace": "    return this.prisma.widgetIntentReceipt.create({"
+        "find": "    const receipt = await this.prisma.widgetIntentReceipt.upsert({",
+        "replace": "    const receipt = await this.prisma.widgetIntentReceipt.create({"
       },
       {
         "file": "src/widgets/stores/intent-audit.store.ts",
@@ -146,13 +146,22 @@
   {
     "id": "M13-18",
     "description": "reconciliation may overwrite a non-accepted adjudication",
-    "file": "src/widgets/stores/intent-audit.store.ts",
-    "find": "        outcome: 'ACCEPTED',\n        actionReceiptRef: null,",
-    "replace": "        actionReceiptRef: null,",
     "killers": [
       "claim and reconciliation are tenant-scoped compare-and-set writes"
     ],
-    "expect": "build-killed"
+    "expect": "build-killed",
+    "edits": [
+      {
+        "file": "src/widgets/stores/intent-audit.store.ts",
+        "find": "        intentTokenHash: input.intentTokenHash,\n        outcome: 'ACCEPTED',\n        actionReceiptRef: null,",
+        "replace": "        intentTokenHash: input.intentTokenHash,\n        actionReceiptRef: null,"
+      },
+      {
+        "file": "src/widgets/stores/intent-audit.store.ts",
+        "find": "        id: row.id,\n        outcome: 'ACCEPTED',\n        actionReceiptRef: null,",
+        "replace": "        id: row.id,\n        actionReceiptRef: null,"
+      }
+    ]
   },
   {
     "id": "M13-20",

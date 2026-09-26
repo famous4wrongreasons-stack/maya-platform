@@ -52,6 +52,8 @@ export interface HttpResponse {
 export interface HttpHarness {
   readonly app: NestExpressApplication;
   readonly recorder: WriteRecorder;
+  /** Bind the already initialized application to an ephemeral loopback port for the real shell process. */
+  listenLoopback(): Promise<string>;
   /** `POST /api/auth/login` for a tenant user; returns the access token. */
   login(tenantSlug: string, email: string, password: string): Promise<string>;
   /** `POST /api/widgets/intent` with a bearer token. */
@@ -61,6 +63,11 @@ export interface HttpHarness {
   ): Promise<HttpResponse>;
   /** The same production route without credentials, for the transport-auth refusal proof. */
   postIntentUnauthenticated(
+    body: Record<string, unknown>,
+  ): Promise<HttpResponse>;
+  /** `POST /api/widgets/resolve` with current authority, as the shell reads the conversation. */
+  resolveWidgets(
+    accessToken: string,
     body: Record<string, unknown>,
   ): Promise<HttpResponse>;
   /** A canonical AI-tool execution request; used by E1 to reach the T-2b production minter. */
@@ -143,9 +150,21 @@ export async function bootHttp(
     );
 
   const server = app.getHttpServer() as Parameters<typeof request>[0];
+  let loopbackUrl: string | null = null;
   return {
     app,
     recorder,
+    listenLoopback: async () => {
+      if (loopbackUrl !== null) return loopbackUrl;
+      await app.listen(0, '127.0.0.1');
+      const address = app.getHttpServer().address();
+      if (typeof address !== 'object' || address === null)
+        throw new Error(
+          'widgets-live loopback listener returned no TCP address',
+        );
+      loopbackUrl = `http://127.0.0.1:${address.port}`;
+      return loopbackUrl;
+    },
     login: async (tenantSlug, email, password) => {
       await recorder.within(LOGIN_RATE_LIMIT_SCOPE, () =>
         resetLoopbackLoginPreflight(app.get(PrismaService)),
@@ -173,6 +192,13 @@ export async function bootHttp(
       const res = await request(server)
         .post('/api/widgets/intent')
         .send({ ...submissionDefaults(), ...body });
+      return { status: res.status, body: res.body as unknown };
+    },
+    resolveWidgets: async (accessToken, body) => {
+      const res = await request(server)
+        .post('/api/widgets/resolve')
+        .set('authorization', `Bearer ${accessToken}`)
+        .send(body);
       return { status: res.status, body: res.body as unknown };
     },
     executeTool: async (accessToken, toolName, body, requestId) => {

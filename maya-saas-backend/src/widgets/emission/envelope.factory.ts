@@ -5,6 +5,10 @@ import type {
 } from '../../widget-contract/envelope';
 import type { WidgetIntent } from '../../widget-contract/intent';
 import type { WidgetKind } from '../../widget-contract/kinds';
+import type {
+  InteractiveRef,
+  InteractiveRefKey,
+} from '../../widget-contract/lifecycle';
 import { stableActionJson } from '../authority/contract-bindings';
 import type { PrincipalView } from '../gate.types';
 import { sha256Hex } from '../token.util';
@@ -211,20 +215,72 @@ const interactiveRefs = (
   body: Readonly<Record<string, unknown>>,
   intents: readonly WidgetIntent[],
 ) => {
-  const refs: Array<{ k: 'entry' | 'intent'; id: string }> = [];
-  const names: Record<string, string> = {};
+  const refs: InteractiveRef[] = [];
+  const names: Partial<Record<InteractiveRefKey, string>> = {};
+  const representedIntents = new Set<string>();
+  const append = (
+    k: InteractiveRef['k'],
+    id: unknown,
+    name: string | null,
+    intentRef?: unknown,
+  ): void => {
+    if (typeof id !== 'string' || id.length === 0) return;
+    refs.push({ k, id });
+    names[`${k}:${id}`] = name ?? id;
+    if (typeof intentRef === 'string' && intentRef.length > 0)
+      representedIntents.add(intentRef);
+  };
   if (kind === 'SCHEDULE' && Array.isArray(body.entries)) {
     for (const entry of body.entries as Array<Record<string, unknown>>) {
-      if (typeof entry.entry_ref !== 'string') continue;
-      refs.push({ k: 'entry', id: entry.entry_ref });
-      names[`entry:${entry.entry_ref}`] = cellLabel(entry.title) ?? 'Запись';
+      append(
+        'entry',
+        entry.entry_ref,
+        cellLabel(entry.title) ?? 'Запись',
+        entry.detail_intent,
+      );
+    }
+  }
+  if (
+    (kind === 'SERVICE_SELECTOR' || kind === 'STAFF_SELECTOR') &&
+    Array.isArray(body.options)
+  ) {
+    for (const option of body.options as Array<Record<string, unknown>>) {
+      append(
+        'option',
+        option.option_id,
+        cellLabel(option.label),
+        option.intent_ref,
+      );
+    }
+    if (
+      kind === 'STAFF_SELECTOR' &&
+      typeof body.any_staff_option === 'object' &&
+      body.any_staff_option !== null &&
+      !Array.isArray(body.any_staff_option)
+    ) {
+      const option = body.any_staff_option as Record<string, unknown>;
+      append(
+        'option',
+        option.option_id,
+        cellLabel(option.label),
+        option.intent_ref,
+      );
+    }
+  }
+  if (kind === 'TIME_SLOT_SELECTOR' && Array.isArray(body.groups)) {
+    for (const group of body.groups as Array<Record<string, unknown>>) {
+      if (!Array.isArray(group.slots)) continue;
+      for (const slot of group.slots as Array<Record<string, unknown>>) {
+        append('slot', slot.slot_ref, cellLabel(slot.start), slot.intent_ref);
+      }
     }
   }
   for (const intent of intents) {
+    if (representedIntents.has(intent.intent_ref)) continue;
     refs.push({ k: 'intent', id: intent.intent_ref });
     names[`intent:${intent.intent_ref}`] = intent.label;
   }
-  return { refs, names };
+  return { refs, names: names as Record<InteractiveRefKey, string> };
 };
 
 const leafPaths = (value: unknown): readonly string[] => {

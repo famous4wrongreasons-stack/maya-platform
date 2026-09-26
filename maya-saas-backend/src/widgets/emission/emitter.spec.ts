@@ -190,9 +190,16 @@ describe('K3 emission — mint, compose, fit, seal', () => {
     const envelope = minted.envelope as {
       body: { options: Array<{ service_ref: string }> };
       intents: Array<{
+        intent_ref: string;
         effect: string;
         input_schema: { fields: Array<{ name: string }> } | null;
       }>;
+      presentation: {
+        a11y: {
+          reading_order: Array<{ k: string; id: string }>;
+          accessible_names: Record<string, string>;
+        };
+      };
     };
     expect(envelope.body.options).toHaveLength(1);
     expect(envelope.body.options[0]?.service_ref).toBe(
@@ -203,6 +210,22 @@ describe('K3 emission — mint, compose, fit, seal', () => {
     );
     expect(refine?.input_schema?.fields).toHaveLength(1);
     expect(refine?.input_schema?.fields[0]?.name).toBe('service_ref');
+    expect(envelope.presentation.a11y.reading_order).toEqual([
+      {
+        k: 'option',
+        id: 'opaque:service:catalog_service:service-1',
+      },
+      expect.objectContaining({ k: 'intent' }),
+    ]);
+    expect(envelope.presentation.a11y.reading_order).not.toContainEqual({
+      k: 'intent',
+      id: refine?.intent_ref,
+    });
+    expect(
+      envelope.presentation.a11y.accessible_names[
+        'option:opaque:service:catalog_service:service-1'
+      ],
+    ).toBe('Haircut');
   });
 
   it('retains only a server-validated journal business date on the exact journal REFINE record', async () => {

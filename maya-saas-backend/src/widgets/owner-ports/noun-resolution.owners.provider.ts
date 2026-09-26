@@ -18,6 +18,10 @@ import { BookingCreateNounAdapter } from './noun-booking-create.adapter';
 import { BookingCancelNounAdapter } from './noun-booking-cancel.adapter';
 import { BookingRescheduleNounAdapter } from './noun-booking-reschedule.adapter';
 import { ClientAppointmentReadNounAdapter } from './noun-client-appointment-read.adapter';
+import {
+  decodeBookingSlotOwnerRef,
+  isBookingNounIdentity,
+} from '../booking/booking-noun-identity';
 
 @Injectable()
 export class NounResolutionOwnersProvider implements NounReadPort {
@@ -43,10 +47,30 @@ export class NounResolutionOwnersProvider implements NounReadPort {
         opened.noun !== noun
       )
         return { kind: 'gone', reason: 'not_found' };
-      values.set(noun, opened.ownerRef);
+      const bookingSlot =
+        noun === 'slot' && isBookingNounIdentity(opened, 'slot');
+      const ownerValue = bookingSlot
+        ? decodeBookingSlotOwnerRef(opened.ownerRef)
+        : opened.ownerRef;
+      if (ownerValue === null) return { kind: 'gone', reason: 'not_found' };
+      values.set(noun, ownerValue);
     }
     try {
       const key = input.capability?.key ?? '';
+      // A TIME_SLOT_SELECTOR record freezes the server-minted service/staff handles at mint and
+      // receives the selected slot only after Gate 8 validates it against the closed domain. Gate
+      // 11 therefore cannot quote the complete proposal from its retained seven-field view. The
+      // exact selector edge is re-read atomically by BookingPreviewAdapter at Gate 13 with all
+      // three opened handles; this lane is deferred to that existing canonical owner, never passed
+      // as a successful quote and never generalized to another capability or noun set.
+      if (
+        key === 'appointments.own.create' &&
+        values.size === 2 &&
+        values.has('service') &&
+        values.has('staff') &&
+        !values.has('slot')
+      )
+        return { kind: 'policy_deferred' };
       if (
         key === 'appointments.own.create' ||
         key === 'crm.appointment.create.v1'
