@@ -89,6 +89,8 @@ const U = {
   logout: '/api/auth/logout',
   chat: '/api/ai/chat',
   transcribe: '/api/ai/transcribe',
+  widgetIntent: '/api/widgets/intent',
+  widgetResolve: '/api/widgets/resolve',
 };
 
 const client = await import('../src/net/client.ts');
@@ -307,30 +309,82 @@ const signedIn = async (options = {}) => {
 
 // ── 1. the module surface ──────────────────────────────────────────────────────────────────────
 
-test('PATHS holds exactly the seven P1 literals; one fetch call site; API_BASE is the one endpoint line', async () => {
+test('PATHS holds exactly the nine approved literals; one fetch call site; API_BASE is the one endpoint line', async () => {
   const src = read('src/net/client.ts');
   const block = src.match(/const PATHS = \{([\s\S]*?)\} as const;/);
   assert.ok(block, 'const PATHS = {…} as const');
   const values = [...block[1].matchAll(/'([^']*)'/g)].map((m) => m[1]).sort();
-  assert.deepEqual(values, ['/ai/chat', '/ai/transcribe', '/auth/email/start', '/auth/email/verify', '/auth/login', '/auth/logout', '/auth/refresh']);
+  assert.deepEqual(values, ['/ai/chat', '/ai/transcribe', '/auth/email/start', '/auth/email/verify', '/auth/login', '/auth/logout', '/auth/refresh', '/widgets/intent', '/widgets/resolve']);
   const { P1_PATHS } = await import('../build.mjs');
   assert.deepEqual(values, [...P1_PATHS].sort());
 
   const netSources = ['client.ts', 'session.ts', 'project.ts', 'endpoint.ts'].map((f) => [f, read(`src/net/${f}`)]);
   const fetchCalls = netSources.flatMap(([f, s]) => [...s.matchAll(/\bfetch\s*\(/g)].map(() => f));
   assert.deepEqual(fetchCalls, ['client.ts'], 'exactly one fetch( call, in client.ts');
-  for (const [f, s] of netSources) assert.ok(!/\/widgets\//.test(s), `${f} names no /widgets/ path`);
+  assert.equal((src.match(/\/widgets\/intent/g) ?? []).length, 1, 'one approved widget intent literal');
+  assert.equal((src.match(/\/widgets\/resolve/g) ?? []).length, 1, 'one approved widget resolve literal');
   assert.equal(read('src/net/endpoint.ts').split('\n').filter((l) => !l.startsWith('//') && l.trim() !== '').join('\n'), "export const API_BASE = '/api';");
   assert.equal(endpoint.API_BASE, '/api');
 });
 
-test('typed methods only: no submitIntent, no resolve, no generic request, no token accessor', () => {
+test('typed methods only: the two widget methods are explicit; no generic request or token accessor', () => {
   const surface = [...Object.keys(client), ...Object.keys(sessionModule), ...Object.keys(project)];
-  for (const name of surface) assert.ok(!/submit|resolve|intent|widget|fetch|token|^request$|^send$|^post$/i.test(name), `exported "${name}"`);
+  const approvedWidgetExports = new Set(['isIngestibleEnvelope', 'projectWidgetIntent', 'projectWidgetResolve']);
+  for (const name of surface)
+    assert.ok(
+      !/fetch|token|^request$|^send$|^post$|submit/i.test(name) &&
+        (!/resolve|intent|widget/i.test(name) || approvedWidgetExports.has(name)),
+      `exported "${name}"`,
+    );
   const net = createNet();
   assert.deepEqual(Object.keys(net).sort(), ['session', 'transport']);
   assert.deepEqual(Object.keys(net.session).sort(), ['signInPassword', 'signOut', 'startEmail', 'subscribe', 'verifyEmail', 'view']);
-  assert.deepEqual(Object.keys(net.transport).sort(), ['chat', 'transcribe']);
+  assert.deepEqual(Object.keys(net.transport).sort(), ['chat', 'resolveWidgets', 'transcribe', 'widgetIntent']);
+});
+
+test('widget transport sends only typed bodies and retains only authorized response members', async () => {
+  const { net } = await signedIn();
+  const submission = {
+    contract: 'maya.widget.intent.submission/1',
+    widget_id: 'widget-00000001',
+    intent_token: 'opaque-intent-token',
+    inputs: { service_ref: 'opaque-service-option' },
+    client_nonce: 'client-00000001',
+    profile_id: 'profile-owner-web',
+  };
+  serve({
+    [U.widgetIntent]: json(200, {
+      contract: 'maya.widget.intent/1',
+      outcome: 'terminate',
+      code: null,
+      next_envelope: null,
+      receipt_outcome: 'ACCEPTED',
+      ignored_authority: 'must-not-survive',
+    }),
+  });
+  const intent = await net.transport.widgetIntent(submission, new AbortController().signal);
+  assert.deepEqual(intent, {
+    ok: true,
+    value: { outcome: 'terminate', code: null, next_envelope: null, receipt_outcome: 'ACCEPTED' },
+  });
+  assert.deepEqual(calls(U.widgetIntent)[0].body, submission);
+
+  serve({
+    [U.widgetResolve]: json(200, {
+      contract: 'maya.widget.resolve/1',
+      widgets: [],
+      tenant_bound: true,
+      ignored_platform_rows: ['must-not-survive'],
+    }),
+  });
+  const resolved = await net.transport.resolveWidgets(
+    { thread_page: { limit: 20, before: 'opaque-cursor' } },
+    new AbortController().signal,
+  );
+  assert.deepEqual(resolved, { ok: true, value: { widgets: [], tenant_bound: true } });
+  assert.deepEqual(calls(U.widgetResolve)[0].body, {
+    thread_page: { limit: 20, before: 'opaque-cursor' },
+  });
 });
 
 // ── 2. projections fed the verified full responses (D12c) ──────────────────────────────────────
@@ -1077,14 +1131,14 @@ test('the purity gates admit src/net/** as written (fetch shape, PATHS, surface,
   assert.equal(r.ok, true);
 });
 
-test('the gates are not vacuous over these files: an eighth path, a second fetch, a storage read and surface "voice" are refused', () => {
+test('the gates are not vacuous over these files: a tenth path, a second fetch, a storage read and surface "voice" are refused', () => {
   const c = contractOnce();
   const shared = sharedDirs(ts, c);
   const mutate = (id, rel, fn, rule) => {
     const r = runFixture(ts, c, netFixture(id, 'refuse', (files) => files.set(rel, fn(files.get(rel)))), shared);
     assert.ok(r.got.includes(rule), `${id}: got {${r.got.join(', ')}}, want ${rule}`);
   };
-  mutate('eighth-path', 'src/net/client.ts', (s) => s.replace("transcribe: '/ai/transcribe',", "transcribe: '/ai/transcribe',\n  intent: '/widgets/intent',"), 'fetch-shape');
+  mutate('tenth-path', 'src/net/client.ts', (s) => s.replace("widgetResolve: '/widgets/resolve',", "widgetResolve: '/widgets/resolve',\n  widgetAdmin: '/widgets/admin',"), 'fetch-shape');
   mutate('second-fetch', 'src/net/client.ts', (s) => `${s}\nexport const leak = () => fetch(API_BASE + PATHS.chat);\n`, 'fetch-shape');
   mutate('storage', 'src/net/session.ts', (s) => `${s}\nexport const leak = (): unknown => globalThis['local' + 'Storage'];\n`, 'identifier-ban');
   mutate('surface', 'src/net/client.ts', (s) => s.replace("surface: 'web',", "surface: 'voice',"), 'surface');
@@ -1123,7 +1177,7 @@ test('no storage, no document, no cookie: never touched at runtime, never named 
   }
 });
 
-test('every request of this suite went to one of the seven P1 URLs, and all seven were exercised', () => {
+test('every request of this suite went to one of the nine approved URLs, and all nine were exercised', () => {
   const allowed = Object.values(U).sort();
   assert.deepEqual([...everyUrl].sort(), allowed);
 });

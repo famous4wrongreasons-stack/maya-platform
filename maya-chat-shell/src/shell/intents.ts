@@ -32,6 +32,7 @@ import type {
   Scheduler,
   SubmissionOutcome,
   SubmissionPort,
+  Transport,
   WidgetSentence,
 } from './ports.ts';
 import type { DetailOpener, DetailSource, ShellChrome } from './shell.ts';
@@ -82,6 +83,31 @@ export const createTokenVault = (): TokenVault => {
 /** D9: until R7-E1 and B3, every submission answers `unavailable`. It sends nothing. */
 export const createUnavailableSubmission = (): SubmissionPort => ({
   submit: () => Promise.resolve({ status: 'unavailable' }),
+});
+
+/** FBE2E-1/3: the sole authenticated widget ingress and bounded receipt reread. */
+export const createLiveSubmission = (
+  transport: Pick<Transport, 'widgetIntent' | 'resolveWidgets'>,
+): SubmissionPort => ({
+  async submit(submission, signal) {
+    const sent = await transport.widgetIntent(submission, signal);
+    if (!sent.ok) {
+      if (sent.failure.reason === 'forbidden' || sent.failure.reason === 'signed_out') return { status: 'forbidden' };
+      if (sent.failure.reason === 'no_connection') return { status: 'no_connection' };
+      if (sent.failure.reason === 'server_error') return { status: 'server_error' };
+      return { status: 'unexpected_response' };
+    }
+    if (sent.value.next_envelope !== null) return { status: 'advanced', envelope: sent.value.next_envelope };
+    if (sent.value.outcome !== 'terminate' || sent.value.receipt_outcome !== 'ACCEPTED') {
+      return { status: 'forbidden' };
+    }
+    const page = await transport.resolveWidgets({ thread_page: { limit: 20 } }, signal);
+    if (!page.ok) return { status: 'accepted' };
+    const current = page.value.widgets.find((widget) => widget.envelope.widget_id === submission.widget_id);
+    return current !== undefined && current.terminal_lines.length > 0
+      ? { status: 'settled', lines: current.terminal_lines }
+      : { status: 'accepted' };
+  },
 });
 
 // ── types ──────────────────────────────────────────────────────────────────────────────────────
@@ -212,7 +238,28 @@ const sentenceFor = (outcome: SubmissionOutcome): WidgetSentence => {
     case 'server_error':
     case 'unexpected_response':
       return 'activation_unavailable';
+    case 'advanced':
+    case 'settled':
+    case 'accepted':
+      return 'activation_unavailable';
   }
+};
+
+/** A drawn option may echo only one value from the server-declared closed input schema. */
+export const inputsForActivation = (
+  intent: WidgetIntent,
+  ref: InteractiveRefKey,
+): WidgetIntentSubmission['inputs'] | undefined => {
+  if (intent.input_schema === null) return ref.startsWith('intent:') ? null : undefined;
+  const fields = intent.input_schema.fields;
+  if (fields.length !== 1) return undefined;
+  const field = fields[0];
+  if (field === undefined || !field.required || (field.kind !== 'enum' && field.kind !== 'ref')) return undefined;
+  if (field.selection_min !== 1 || field.selection_max !== 1) return undefined;
+  const separator = ref.indexOf(':');
+  if (separator < 1 || separator === ref.length - 1) return undefined;
+  if (!ref.startsWith('option:') && !ref.startsWith('slot:')) return undefined;
+  return { [field.name]: ref.slice(separator + 1) };
 };
 
 // ── the store ──────────────────────────────────────────────────────────────────────────────────
@@ -450,11 +497,13 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     const token = vault.get(entry.itemId, intent.intent_ref);
     if (token === null) return endInSentence(entry, 'activation_unavailable', false);
 
+    const inputs = inputsForActivation(intent, ref);
+    if (inputs === undefined) return endInSentence(entry, 'activation_unavailable', false);
     const submission: WidgetIntentSubmission = {
       contract: 'maya.widget.intent.submission/1',
       widget_id: entry.envelope.widget_id,
       intent_token: token,
-      inputs: null,
+      inputs,
       client_nonce: deps.newNonce(),
       profile_id: entry.envelope.render.profile_id,
     };
@@ -484,7 +533,27 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     }
     entry.inflight = null;
     entry.pending = null;
-    // P1 has no receipt: every outcome is a neutral sentence; the control is usable again (D9).
+    if (outcome.status === 'advanced') {
+      const ingested = ingest(outcome.envelope);
+      if (ingested.ingested === 'duplicate') return endInSentence(entry, 'activation_unavailable', true);
+      counters = { ...counters, stateChanges: counters.stateChanges + 1 };
+      return { outcome: 'dismissed' };
+    }
+    if (outcome.status === 'settled') {
+      for (const line of outcome.lines) deps.timeline.appendServerLine(line.text);
+      entry.display = 'terminal';
+      entry.sentence = null;
+      publish(entry);
+      counters = { ...counters, stateChanges: counters.stateChanges + 1 };
+      return { outcome: 'dismissed' };
+    }
+    if (outcome.status === 'accepted') {
+      entry.display = 'terminal';
+      entry.sentence = null;
+      publish(entry);
+      counters = { ...counters, stateChanges: counters.stateChanges + 1 };
+      return { outcome: 'dismissed' };
+    }
     return endInSentence(entry, sentenceFor(outcome), true);
   };
 

@@ -19,6 +19,8 @@ import type {
   SessionGrant,
   SignInDisplay,
   TranscribeProjection,
+  WidgetIntentProjection,
+  WidgetResolveProjection,
 } from './types.ts';
 
 /** One own data property of a parsed JSON value, or undefined. */
@@ -175,7 +177,7 @@ const projectChatResolution = (
   };
 };
 
-const isIngestibleEnvelope = (value: unknown): value is ChatWidgetResolution['receipt']['envelope'] => {
+export const isIngestibleEnvelope = (value: unknown): value is ChatWidgetResolution['receipt']['envelope'] => {
   if (!isRecord(value) || own(value, 'contract') !== 'maya.widget.envelope/1') return false;
   if (filled(own(value, 'widget_id')) === null || filled(own(value, 'tenant_id')) === null) return false;
   if (!Array.isArray(own(value, 'intents')) || !Array.isArray(own(value, 'limitations'))) return false;
@@ -211,6 +213,61 @@ const isIngestibleEnvelope = (value: unknown): value is ChatWidgetResolution['re
     filled(own(integrity, 'body_hash')) !== null &&
     filled(own(integrity, 'envelope_seal')) !== null
   );
+};
+
+const INTENT_OUTCOMES = new Set(['terminate', 'refuse', 'expired', 'superseded']);
+const RECEIPT_OUTCOMES = new Set(['ACCEPTED', 'REFUSED', 'NEEDS_CONFIRMATION', 'NEEDS_VERIFICATION']);
+
+export const projectWidgetIntent = (body: unknown): WidgetIntentProjection | null => {
+  if (!isRecord(body) || own(body, 'contract') !== 'maya.widget.intent/1') return null;
+  const outcome = own(body, 'outcome');
+  const code = own(body, 'code');
+  const next = own(body, 'next_envelope');
+  const receipt = own(body, 'receipt_outcome');
+  if (typeof outcome !== 'string' || !INTENT_OUTCOMES.has(outcome)) return null;
+  if (code !== null && typeof code !== 'string') return null;
+  if (next !== null && !isIngestibleEnvelope(next)) return null;
+  if (receipt !== null && (typeof receipt !== 'string' || !RECEIPT_OUTCOMES.has(receipt))) return null;
+  return {
+    outcome: outcome as WidgetIntentProjection['outcome'],
+    code: code as string | null,
+    next_envelope: next as WidgetIntentProjection['next_envelope'],
+    receipt_outcome: receipt as WidgetIntentProjection['receipt_outcome'],
+  };
+};
+
+const TERMINAL_OUTCOMES = new Set([
+  'SUBMITTED', 'CONFIRMED', 'NOT_CONFIRMED', 'EXPIRED_UNUSED', 'SUPERSEDED', 'CANCELLED', 'DELIVERED_ONLY',
+]);
+
+export const projectWidgetResolve = (body: unknown): WidgetResolveProjection | null => {
+  if (!isRecord(body) || own(body, 'contract') !== 'maya.widget.resolve/1') return null;
+  const raw = own(body, 'widgets');
+  const tenantBound = own(body, 'tenant_bound');
+  if (!Array.isArray(raw) || typeof tenantBound !== 'boolean') return null;
+  const widgets: WidgetResolveProjection['widgets'][number][] = [];
+  for (const item of raw) {
+    if (!isRecord(item) || !isIngestibleEnvelope(own(item, 'envelope'))) return null;
+    const lines = own(item, 'terminal_lines');
+    if (!Array.isArray(lines)) return null;
+    const terminalLines = [] as Array<{ outcome: WidgetResolveProjection['widgets'][number]['terminal_lines'][number]['outcome']; text: string; action_receipt_ref: string | null }>;
+    for (const line of lines) {
+      if (!isRecord(line)) return null;
+      const terminalOutcome = own(line, 'outcome');
+      const textValue = own(line, 'text');
+      const actionRef = own(line, 'action_receipt_ref');
+      if (typeof terminalOutcome !== 'string' || !TERMINAL_OUTCOMES.has(terminalOutcome) || typeof textValue !== 'string') return null;
+      if (actionRef !== null && typeof actionRef !== 'string') return null;
+      if ((terminalOutcome === 'CONFIRMED') !== (typeof actionRef === 'string' && actionRef.length > 0)) return null;
+      terminalLines.push({ outcome: terminalOutcome as typeof terminalLines[number]['outcome'], text: textValue, action_receipt_ref: actionRef as string | null });
+    }
+    widgets.push({
+      envelope: own(item, 'envelope') as WidgetResolveProjection['widgets'][number]['envelope'],
+      terminal_lines: terminalLines,
+      reread_intent: null,
+    });
+  }
+  return { widgets, tenant_bound: tenantBound };
 };
 
 /** `POST /ai/transcribe` → `{transcript}` (`ai-speech.service.ts:120`). */

@@ -8,7 +8,9 @@ const PATHS = {
   logout: '/auth/logout',
   chat: '/ai/chat',
   transcribe: '/ai/transcribe',
-  intent: '/widgets/intent',
+  widgetIntent: '/widgets/intent',
+  widgetResolve: '/widgets/resolve',
+  widgetAdmin: '/widgets/admin',
 } as const;
 
 export const post = (key: keyof typeof PATHS, signal: AbortSignal): Promise<Response> =>

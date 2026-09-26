@@ -10,7 +10,7 @@
 // hands it to the existing H7/vault/render owner; the transport never reconstructs business facts.
 // Types only; this module emits no runtime bytes.
 
-import type { WidgetEnvelope } from '../contract.ts';
+import type { HistorisedWidget, WidgetEnvelope, WidgetIntentSubmission } from '../contract.ts';
 
 // ── requests ───────────────────────────────────────────────────────────────────────────────────
 
@@ -61,6 +61,12 @@ export interface ChatRequest {
 /** `POST /ai/transcribe` — JSON form: `data:audio/wav;base64,…` (WAV PCM16 mono 16 kHz). */
 export interface TranscribeRequest {
   readonly audioBase64: string;
+}
+
+export type WidgetIntentRequest = WidgetIntentSubmission;
+
+export interface WidgetResolveRequest {
+  readonly thread_page: { readonly limit: number; readonly before?: string };
 }
 
 // ── projections ────────────────────────────────────────────────────────────────────────────────
@@ -128,6 +134,25 @@ export interface ChatWidgetResolution {
 export interface TranscribeProjection {
   readonly transcript: string;
 }
+
+export interface WidgetIntentProjection {
+  readonly outcome: 'terminate' | 'refuse' | 'expired' | 'superseded';
+  readonly code: string | null;
+  readonly next_envelope: WidgetEnvelope | null;
+  readonly receipt_outcome: 'ACCEPTED' | 'REFUSED' | 'NEEDS_CONFIRMATION' | 'NEEDS_VERIFICATION' | null;
+}
+
+export interface WidgetResolveProjection {
+  readonly widgets: readonly HistorisedWidget[];
+  readonly tenant_bound: boolean;
+}
+
+export type WidgetFailure =
+  | { readonly reason: 'signed_out'; readonly signedOut: SignedOutReason }
+  | { readonly reason: 'forbidden' }
+  | { readonly reason: 'no_connection' }
+  | { readonly reason: 'server_error' }
+  | { readonly reason: 'unexpected_response' };
 
 // ── failures ───────────────────────────────────────────────────────────────────────────────────
 

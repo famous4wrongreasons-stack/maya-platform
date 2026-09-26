@@ -8,6 +8,8 @@ const PATHS = {
   logout: '/auth/logout',
   chat: '/ai/chat',
   transcribe: '/ai/transcribe',
+  widgetIntent: '/widgets/intent',
+  widgetResolve: '/widgets/resolve',
 } as const;
 
 export const post = (path: string, signal: AbortSignal): Promise<Response> => fetch(API_BASE + path, { method: 'POST', signal });

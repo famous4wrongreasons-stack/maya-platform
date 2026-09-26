@@ -58,6 +58,8 @@ export type DropReason = 'cap' | 'cleared';
 /** How `shell/intents.ts` and the deep-link landing write into the one timeline. */
 export interface TimelineWriter {
   appendWidget(item: WidgetItemView): void;
+  /** Server-authored terminal receipt text; never client or LLM-authored. */
+  appendServerLine(text: string): void;
   /** Replace a widget item at its position (L7). False when the id is not on the timeline. */
   replaceWidget(item: WidgetItemView): boolean;
   hasItem(itemId: string): boolean;
@@ -393,6 +395,11 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
   const timeline: TimelineWriter = {
     appendWidget(view) {
       append({ kind: 'widget', id: view.id, view });
+      emit();
+    },
+    appendServerLine(text) {
+      if (text.trim().length === 0) return;
+      append({ kind: 'assistant', id: nextId('a'), text });
       emit();
     },
     replaceWidget(view) {

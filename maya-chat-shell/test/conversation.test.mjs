@@ -127,8 +127,9 @@ test('submitUserTurn is the sole path: only it (and retry of its own turn) calls
   // Surface: the port adds nothing that sends.
   const s = setup();
   assert.deepEqual(Object.keys(s.conversation).sort(), ['dispose', 'retry', 'submitUserTurn', 'subscribe', 'timeline', 'view']);
-  assert.deepEqual(Object.keys(s.conversation.timeline).sort(), ['appendNotice', 'appendWidget', 'hasItem', 'onDropped', 'replaceWidget']);
+  assert.deepEqual(Object.keys(s.conversation.timeline).sort(), ['appendNotice', 'appendServerLine', 'appendWidget', 'hasItem', 'onDropped', 'replaceWidget']);
   s.conversation.timeline.appendNotice('deeplink_refused');
+  s.conversation.timeline.appendServerLine('server-authored receipt');
   s.conversation.timeline.appendWidget({ kind: 'widget', id: 'w1', result: {}, display: 'live', pending: null, sentence: null });
   s.conversation.retry('nope');
   assert.equal(s.calls.length, 0, 'writing the timeline or retrying nothing sends nothing');
@@ -136,7 +137,14 @@ test('submitUserTurn is the sole path: only it (and retry of its own turn) calls
   const r = s.conversation.submitUserTurn('Когда ближайшее окно?', TYPED);
   assert.equal(r.accepted, true);
   assert.equal(s.calls.length, 1);
-  assert.deepEqual(s.calls[0].body, { surface: 'web', requestId: 'turn-00000001', messages: [{ role: 'user', content: 'Когда ближайшее окно?' }] });
+  assert.deepEqual(s.calls[0].body, {
+    surface: 'web',
+    requestId: 'turn-00000001',
+    messages: [
+      { role: 'assistant', content: 'server-authored receipt' },
+      { role: 'user', content: 'Когда ближайшее окно?' },
+    ],
+  });
 
   // The voice hook reaches the conversation through submitUserTurn only.
   assert.match(read('src/shell/voice-state.ts'), /deps\.conversation\.submitUserTurn\(transcript, SPOKEN\)/);

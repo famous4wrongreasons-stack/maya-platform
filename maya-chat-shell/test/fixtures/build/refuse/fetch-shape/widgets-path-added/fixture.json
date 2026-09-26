@@ -2,5 +2,5 @@
   "expect": [
     "fetch-shape"
   ],
-  "note": "PATHS gains /widgets/intent before R7-E1/B3"
+  "note": "PATHS gains an unapproved /widgets/admin endpoint after the exact FBE2E allowlist"
 }

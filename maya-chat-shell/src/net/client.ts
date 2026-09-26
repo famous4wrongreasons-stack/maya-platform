@@ -22,6 +22,8 @@ import {
   projectPasswordLogin,
   projectRefresh,
   projectTranscribe,
+  projectWidgetIntent,
+  projectWidgetResolve,
 } from './project.ts';
 import type {
   ChatFailure,
@@ -41,6 +43,9 @@ import type {
   TranscribeFailure,
   TranscribeProjection,
   TranscribeRequest,
+  WidgetFailure,
+  WidgetIntentRequest,
+  WidgetResolveRequest,
 } from './types.ts';
 
 const PATHS = {
@@ -51,6 +56,8 @@ const PATHS = {
   logout: '/auth/logout',
   chat: '/ai/chat',
   transcribe: '/ai/transcribe',
+  widgetIntent: '/widgets/intent',
+  widgetResolve: '/widgets/resolve',
 } as const;
 
 type Endpoint = keyof typeof PATHS;
@@ -69,6 +76,8 @@ type RequestBody =
   | RefreshRequest
   | ChatRequest
   | TranscribeRequest
+  | WidgetIntentRequest
+  | WidgetResolveRequest
   | Readonly<Record<string, never>>;
 
 /** What one request produced, before any endpoint reads it. */
@@ -332,7 +341,7 @@ const unlessAborted = <T>(work: Promise<T>, signal: AbortSignal): Promise<T | nu
 };
 
 /** 401 → refresh once → retry once (§1.4). A second 401 ends the session; it never loops. */
-async function authorizedExchange(auth: Authorizer, endpoint: 'chat' | 'transcribe', body: RequestBody, signal: AbortSignal, timeoutMs: number): Promise<AuthorizedExchange> {
+async function authorizedExchange(auth: Authorizer, endpoint: 'chat' | 'transcribe' | 'widgetIntent' | 'widgetResolve', body: RequestBody, signal: AbortSignal, timeoutMs: number): Promise<AuthorizedExchange> {
   const first = await unlessAborted(auth.authorize(), signal);
   if (first === null) return { kind: 'aborted' };
   if (first.kind !== 'bearer') return first;
@@ -448,5 +457,43 @@ export function createTransport(auth: Authorizer, timeouts: Timeouts = { request
       }
       return fail(transcribeFailure(ex));
     },
+
+    async widgetIntent(request: WidgetIntentRequest, signal: AbortSignal) {
+      const body: WidgetIntentRequest = {
+        contract: 'maya.widget.intent.submission/1',
+        widget_id: request.widget_id,
+        intent_token: request.intent_token,
+        inputs: request.inputs,
+        client_nonce: request.client_nonce,
+        profile_id: request.profile_id,
+        ...(request.client_emitted_at === undefined ? {} : { client_emitted_at: request.client_emitted_at }),
+      };
+      const ex = await authorizedExchange(auth, 'widgetIntent', body, signal, timeouts.requestMs);
+      return widgetOutcome(ex, projectWidgetIntent);
+    },
+
+    async resolveWidgets(request: WidgetResolveRequest, signal: AbortSignal) {
+      const body: WidgetResolveRequest = {
+        thread_page: {
+          limit: request.thread_page.limit,
+          ...(request.thread_page.before === undefined ? {} : { before: request.thread_page.before }),
+        },
+      };
+      const ex = await authorizedExchange(auth, 'widgetResolve', body, signal, timeouts.requestMs);
+      return widgetOutcome(ex, projectWidgetResolve);
+    },
   };
 }
+
+const widgetOutcome = <T>(ex: AuthorizedExchange, project: (body: unknown) => T | null): Outcome<T, WidgetFailure> => {
+  if (ex.kind === 'signed_out') return fail({ reason: 'signed_out', signedOut: ex.reason });
+  if (ex.kind === 'unavailable') return fail({ reason: 'no_connection' });
+  if (ex.kind !== 'response') return fail({ reason: 'no_connection' });
+  if (isSuccess(ex.status)) {
+    const value = project(ex.body);
+    return value === null ? fail({ reason: 'unexpected_response' }) : { ok: true, value };
+  }
+  if (ex.status === 401 || ex.status === 403) return fail({ reason: 'forbidden' });
+  if (ex.status >= 500) return fail({ reason: 'server_error' });
+  return fail({ reason: 'unexpected_response' });
+};

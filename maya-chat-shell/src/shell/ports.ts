@@ -17,7 +17,7 @@
 //
 // Types only; this module emits no runtime bytes.
 
-import type { A11yEnvironment, Cell, InteractiveRefKey, ShellRoute, WidgetIntentSubmission } from '../contract.ts';
+import type { A11yEnvironment, Cell, InteractiveRefKey, ShellRoute, TerminalLine, WidgetEnvelope, WidgetIntentSubmission } from '../contract.ts';
 import type { RenderInput, RenderResult } from '../renderer/nodes.ts';
 import type {
   BusinessChoice,
@@ -31,6 +31,10 @@ import type {
   TranscribeFailure,
   TranscribeProjection,
   TranscribeRequest,
+  WidgetFailure,
+  WidgetIntentProjection,
+  WidgetResolveProjection,
+  WidgetResolveRequest,
 } from '../net/types.ts';
 
 // `dom/` may not import `net/types.ts`; the shapes it draws are re-exported here unchanged.
@@ -143,6 +147,8 @@ export type RenderFn = (input: RenderInput) => RenderResult;
 export interface Transport {
   chat(request: ChatRequest, signal: AbortSignal): Promise<Outcome<ChatProjection, ChatFailure>>;
   transcribe(request: TranscribeRequest, signal: AbortSignal): Promise<Outcome<TranscribeProjection, TranscribeFailure>>;
+  widgetIntent(request: WidgetIntentSubmission, signal: AbortSignal): Promise<Outcome<WidgetIntentProjection, WidgetFailure>>;
+  resolveWidgets(request: WidgetResolveRequest, signal: AbortSignal): Promise<Outcome<WidgetResolveProjection, WidgetFailure>>;
 }
 
 export type SessionView =
@@ -171,6 +177,9 @@ export interface SessionPort {
  * then no receipt shape exists in the shell.
  */
 export type SubmissionOutcome =
+  | { readonly status: 'advanced'; readonly envelope: WidgetEnvelope }
+  | { readonly status: 'settled'; readonly lines: readonly TerminalLine[] }
+  | { readonly status: 'accepted' }
   | { readonly status: 'unavailable' }
   | { readonly status: 'forbidden' }
   | { readonly status: 'no_connection' }

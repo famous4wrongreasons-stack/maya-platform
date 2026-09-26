@@ -183,6 +183,8 @@ export const P1_PATHS = [
   '/auth/logout',
   '/ai/chat',
   '/ai/transcribe',
+  '/widgets/intent',
+  '/widgets/resolve',
 ];
 export const TARGETS = {
   web: { apiBase: '/api', connectSrc: "'self'" },

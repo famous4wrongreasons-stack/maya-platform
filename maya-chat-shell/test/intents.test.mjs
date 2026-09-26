@@ -18,7 +18,14 @@ import { fileURLToPath } from 'node:url';
 import { render } from '../src/renderer/render.ts';
 import { bodyHash } from '../src/integrity/h7.ts';
 import { createShellRuntime } from '../src/shell/shell.ts';
-import { createTokenVault, createUnavailableSubmission, displayOf, intentRefFor } from '../src/shell/intents.ts';
+import {
+  createLiveSubmission,
+  createTokenVault,
+  createUnavailableSubmission,
+  displayOf,
+  inputsForActivation,
+  intentRefFor,
+} from '../src/shell/intents.ts';
 import { emitContract, loadTypeScript } from '../build.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -126,6 +133,101 @@ test('the vault: tokens by item and intent ref; lookups only, no enumeration; dr
   vault.clear();
   assert.equal(vault.size(), 0);
   assert.ok(!JSON.stringify(vault).includes('tok-'), 'serializing the vault shows no token');
+});
+
+test('FBE2E-1: live submission uses only widget intent/resolve and returns the authorized successor or receipt line', async () => {
+  const successor = envelope('slots-superseded-successor');
+  const submission = {
+    contract: 'maya.widget.intent.submission/1',
+    widget_id: 'w1',
+    intent_token: 'opaque-token',
+    inputs: { service_ref: 'opaque-option' },
+    client_nonce: 'nonce-1',
+    profile_id: 'owner-web',
+  };
+  const calls = [];
+  const port = createLiveSubmission({
+    widgetIntent: async (body) => (
+      calls.push(['intent', body]),
+      { ok: true, value: { outcome: 'terminate', code: null, next_envelope: successor, receipt_outcome: null } }
+    ),
+    resolveWidgets: async () => {
+      throw new Error('successor must not query receipts');
+    },
+  });
+  assert.deepEqual(await port.submit(submission, new AbortController().signal), {
+    status: 'advanced',
+    envelope: successor,
+  });
+  assert.deepEqual(calls, [['intent', submission]]);
+
+  const receiptPort = createLiveSubmission({
+    widgetIntent: async () => ({
+      ok: true,
+      value: { outcome: 'terminate', code: null, next_envelope: null, receipt_outcome: 'ACCEPTED' },
+    }),
+    resolveWidgets: async (body) => (
+      calls.push(['resolve', body]),
+      {
+        ok: true,
+        value: {
+          tenant_bound: true,
+          widgets: [{
+            envelope: { ...successor, widget_id: 'w1' },
+            terminal_lines: [{ outcome: 'CONFIRMED', text: 'Запись подтверждена', action_receipt_ref: 'ae-1' }],
+            reread_intent: null,
+          }],
+        },
+      }
+    ),
+  });
+  assert.deepEqual(await receiptPort.submit(submission, new AbortController().signal), {
+    status: 'settled',
+    lines: [{ outcome: 'CONFIRMED', text: 'Запись подтверждена', action_receipt_ref: 'ae-1' }],
+  });
+  assert.deepEqual(calls.at(-1), ['resolve', { thread_page: { limit: 20 } }]);
+});
+
+test('FBE2E-1: a drawn selector can submit only one server-declared option/ref value', () => {
+  const base = envelope('kind-choice').intents[0];
+  assert.deepEqual(inputsForActivation(base, 'option:opaque-service'), {
+    selection: 'opaque-service',
+  });
+  assert.equal(inputsForActivation(base, 'intent:i1'), undefined);
+  assert.equal(inputsForActivation(base, 'option:'), undefined);
+  assert.equal(inputsForActivation({ ...base, input_schema: null }, 'intent:i1'), null);
+  assert.equal(inputsForActivation({ ...base, input_schema: null }, 'option:opaque'), undefined);
+  assert.equal(
+    inputsForActivation(
+      { ...base, input_schema: { ...base.input_schema, fields: [...base.input_schema.fields, base.input_schema.fields[0]] } },
+      'option:opaque',
+    ),
+    undefined,
+  );
+});
+
+test('FBE2E-1/3: successor replaces the selector and only a server terminal receipt enters conversation', async () => {
+  const successor = envelope('slots-superseded-successor');
+  const advanced = setup({ submission: { submit: async () => ({ status: 'advanced', envelope: successor }) } });
+  const predecessor = advanced.runtime.widgets.ingest(
+    reseal({ ...structuredClone(envelope('slots-superseded-predecessor')), lifecycle: { ...envelope('slots-superseded-predecessor').lifecycle, state: 'LIVE' } }),
+  );
+  assert.deepEqual(await advanced.runtime.widgets.activate(predecessor.itemId, 'intent:i2'), { outcome: 'dismissed' });
+  assert.equal(advanced.item(predecessor.itemId).display, 'live');
+  assert.equal(advanced.runtime.widgets.counters().stateChanges, 1);
+
+  const settled = setup({
+    submission: {
+      submit: async () => ({
+        status: 'settled',
+        lines: [{ outcome: 'CONFIRMED', text: 'Запись подтверждена', action_receipt_ref: 'ae-1' }],
+      }),
+    },
+  });
+  const confirmation = settled.runtime.widgets.ingest(envelope('kind-booking-confirmation'));
+  assert.deepEqual(await settled.runtime.widgets.activate(confirmation.itemId, 'intent:i1'), { outcome: 'dismissed' });
+  assert.equal(settled.item(confirmation.itemId).display, 'terminal');
+  assert.ok(settled.items().some((item) => item.kind === 'assistant' && item.text === 'Запись подтверждена'));
 });
 
 // ── ingest ─────────────────────────────────────────────────────────────────────────────────────
@@ -316,7 +418,7 @@ test('the submission literal is checked against the closed contract type: an ext
       return ts.getPreEmitDiagnostics(program).filter((d) => d.file && path.resolve(d.file.fileName) === target);
     };
     assert.deepEqual(diagnosticsWith(original).map((d) => ts.flattenDiagnosticMessageText(d.messageText, '\n')), []);
-    const extra = original.replace("      inputs: null,\n", "      inputs: null,\n      audience_hint: 'owner',\n");
+    const extra = original.replace("      inputs,\n", "      inputs,\n      audience_hint: 'owner',\n");
     assert.notEqual(extra, original);
     const errors = diagnosticsWith(extra).map((d) => ts.flattenDiagnosticMessageText(d.messageText, '\n'));
     assert.ok(errors.some((m) => /audience_hint/.test(m) && /WidgetIntentSubmission/.test(m)), errors.join('\n'));

@@ -8,6 +8,8 @@ const PATHS = {
   logout: '/auth/logout',
   chat: '/ai/chat',
   transcribe: '/ai/transcribe',
+  widgetIntent: '/widgets/intent',
+  widgetResolve: '/widgets/resolve',
 } as const;
 
 export const postChat = (signal: AbortSignal): Promise<Response> =>

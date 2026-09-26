@@ -18,6 +18,7 @@ import { createNet } from '../src/net/session.ts';
 import { render } from '../src/renderer/render.ts';
 import type { Cancel, DomFactory, DomInputType, DomTag, EnvironmentProbe, HistoryPort, Scheduler, ViewportPort } from '../src/shell/ports.ts';
 import { createShellRuntime } from '../src/shell/shell.ts';
+import { createLiveSubmission } from '../src/shell/intents.ts';
 import { createVoiceControl } from '../src/shell/voice-state.ts';
 import { createCapture } from '../src/voice/capture.ts';
 
@@ -131,7 +132,16 @@ function start(mountRoot: HTMLElement): void {
 
   const newAbort = (): AbortController => new view.AbortController();
   const net = createNet();
-  const runtime = createShellRuntime({ transport: net.transport, session: net.session, render, environment, scheduler, history, newAbort });
+  const runtime = createShellRuntime({
+    transport: net.transport,
+    session: net.session,
+    submission: createLiveSubmission(net.transport),
+    render,
+    environment,
+    scheduler,
+    history,
+    newAbort,
+  });
   const voice = createVoiceControl({
     capture: createCapture({ secureContext: view.isSecureContext }),
     transport: net.transport,
