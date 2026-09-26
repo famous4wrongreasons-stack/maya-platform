@@ -1,7 +1,7 @@
 [
   {
     "id": "G15B-M1",
-    "description": "foreign principal proof is no longer compared initially or under the successor-link lock",
+    "description": "foreign principal proof is no longer compared initially or under the generic successor-link lock",
     "edits": [
       {
         "file": "src/widgets/emission/successor-minter.service.ts",
@@ -10,8 +10,8 @@
       },
       {
         "file": "src/widgets/emission/successor-minter.service.ts",
-        "find": "                intentTokenHash: request.predecessorIntentTokenHash,\n                principalProofHash: request.principal.proofHash,\n                erasedAt: null,",
-        "replace": "                intentTokenHash: request.predecessorIntentTokenHash,\n                erasedAt: null,"
+        "find": "            intentRecords: {\n              some: {\n                intentTokenHash: request.predecessorIntentTokenHash,\n                principalProofHash: request.principal.proofHash,\n                erasedAt: null,\n              },\n            },\n            renderReceipts:",
+        "replace": "            intentRecords: {\n              some: {\n                intentTokenHash: request.predecessorIntentTokenHash,\n                erasedAt: null,\n              },\n            },\n            renderReceipts:"
       }
     ],
     "killers": ["G15-9"],
