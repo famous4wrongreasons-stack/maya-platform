@@ -98,6 +98,20 @@ describe('U13a — Gate 13 architecture barriers', () => {
     );
   });
 
+  it('FBE2E-3 never publishes CONFIRMED without a durable canonical action receipt', () => {
+    const terminal = audit.slice(audit.indexOf('const terminalLine'));
+    expect(terminal).toMatch(
+      /receipt\.outcome === 'ACCEPTED' && receipt\.actionReceiptRef !== null/,
+    );
+    expect(terminal).toMatch(
+      /outcome: 'CONFIRMED',[\s\S]*action_receipt_ref: receipt\.actionReceiptRef/,
+    );
+    expect(terminal).toMatch(
+      /outcome: 'SUBMITTED',[\s\S]*action_receipt_ref: null/,
+    );
+    expect(terminal).not.toMatch(/client|submission|tap|button/i);
+  });
+
   it('P-27/U13c observes the canonical execution without widget authority or controlled fixture mode', () => {
     expect(commitOwner).toContain('withActionInvocationReceipt');
     expect(commitOwner).toContain(

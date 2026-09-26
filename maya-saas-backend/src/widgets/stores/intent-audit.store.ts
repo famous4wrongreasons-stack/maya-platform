@@ -68,7 +68,7 @@ export class IntentAuditStore {
     },
     now = new Date(),
   ): Promise<{ id: string }> {
-    return this.prisma.widgetIntentReceipt.upsert({
+    const receipt = await this.prisma.widgetIntentReceipt.upsert({
       where: scoped(input.tenantId, {
         tenantId_intentTokenHash: {
           tenantId: input.tenantId,
@@ -90,8 +90,26 @@ export class IntentAuditStore {
       },
       // A retry observes the same adjudication. It must not rewrite its time, outcome or evidence.
       update: {},
-      select: { id: true },
+      select: {
+        id: true,
+        widgetId: true,
+        outcome: true,
+        actionReceiptRef: true,
+      },
     });
+    // A missing terminal-line write can be repaired by the same idempotent retry. Crucially, no
+    // branch can publish CONFIRMED without the durable canonical action receipt returned above.
+    await this.prisma.widgetEmission.updateMany({
+      where: scoped(input.tenantId, {
+        widgetId: receipt.widgetId,
+        kind: 'BOOKING_CONFIRMATION',
+        erasedAt: null,
+      }),
+      data: {
+        terminalLinesJson: [terminalLine(receipt)] as never,
+      },
+    });
+    return { id: receipt.id };
   }
 
   /**
@@ -190,14 +208,62 @@ export class IntentAuditStore {
     intentTokenHash: string;
     actionReceiptRef: string;
   }): Promise<boolean> {
-    const updated = await this.prisma.widgetIntentReceipt.updateMany({
+    const row = await this.prisma.widgetIntentReceipt.findFirst({
       where: scoped(input.tenantId, {
         intentTokenHash: input.intentTokenHash,
         outcome: 'ACCEPTED',
         actionReceiptRef: null,
       }),
+      select: { id: true, widgetId: true },
+    });
+    if (row === null) return false;
+    const updated = await this.prisma.widgetIntentReceipt.updateMany({
+      where: scoped(input.tenantId, {
+        id: row.id,
+        outcome: 'ACCEPTED',
+        actionReceiptRef: null,
+      }),
       data: { actionReceiptRef: input.actionReceiptRef },
     });
-    return updated.count === 1;
+    if (updated.count !== 1) return false;
+    await this.prisma.widgetEmission.updateMany({
+      where: scoped(input.tenantId, {
+        widgetId: row.widgetId,
+        kind: 'BOOKING_CONFIRMATION',
+        erasedAt: null,
+      }),
+      data: {
+        terminalLinesJson: [
+          terminalLine({
+            outcome: 'ACCEPTED',
+            actionReceiptRef: input.actionReceiptRef,
+          }),
+        ] as never,
+      },
+    });
+    return true;
   }
 }
+
+const terminalLine = (receipt: {
+  outcome: string;
+  actionReceiptRef: string | null;
+}) => {
+  if (receipt.outcome === 'ACCEPTED' && receipt.actionReceiptRef !== null)
+    return Object.freeze({
+      outcome: 'CONFIRMED',
+      text: 'Запись подтверждена.',
+      action_receipt_ref: receipt.actionReceiptRef,
+    });
+  if (receipt.outcome === 'ACCEPTED')
+    return Object.freeze({
+      outcome: 'SUBMITTED',
+      text: 'Запрос принят. Подтверждение ожидается.',
+      action_receipt_ref: null,
+    });
+  return Object.freeze({
+    outcome: 'NOT_CONFIRMED',
+    text: 'Запись не подтверждена.',
+    action_receipt_ref: null,
+  });
+};

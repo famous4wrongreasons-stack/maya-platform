@@ -18,12 +18,13 @@ import ts from 'typescript';
 import { RETENTION, WidgetStoresService } from './widget-stores.service';
 
 type Call = { model: string; op: string; args: unknown };
+type Reply = (model: string, op: string, args: unknown) => unknown;
 
 const NOW = new Date('2026-09-17T10:00:00.000Z');
 const DAY = 24 * 60 * 60 * 1000;
 
 /** A Prisma double that records every `prisma.<model>.<op>(args)` and answers with `result`. */
-const recordingPrisma = (result: unknown) => {
+const recordingPrisma = (result: unknown, reply?: Reply) => {
   const calls: Call[] = [];
   const prisma = new Proxy(
     {},
@@ -34,7 +35,7 @@ const recordingPrisma = (result: unknown) => {
           {
             get: (_m, op: string) => (args: unknown) => {
               calls.push({ model, op, args });
-              return Promise.resolve(result);
+              return Promise.resolve(reply ? reply(model, op, args) : result);
             },
           },
         ),
@@ -43,8 +44,8 @@ const recordingPrisma = (result: unknown) => {
   return { prisma, calls };
 };
 
-const storesOver = (result: unknown = { id: 'row-1' }) => {
-  const { prisma, calls } = recordingPrisma(result);
+const storesOver = (result: unknown = { id: 'row-1' }, reply?: Reply) => {
+  const { prisma, calls } = recordingPrisma(result, reply);
   return { stores: new WidgetStoresService(prisma as never), calls };
 };
 
@@ -246,7 +247,12 @@ describe('WidgetStoresService — every existing method sends what it sent befor
 
   describe('3. receipt store (shell)', () => {
     it('writeReceipt is idempotent by tenant/token and never retains an utterance echo', async () => {
-      const { stores, calls } = storesOver();
+      const { stores, calls } = storesOver({
+        id: 'row-1',
+        widgetId: 'w-1',
+        outcome: 'REFUSED',
+        actionReceiptRef: null,
+      });
       await stores.writeReceipt(
         {
           tenantId: 't-1',
@@ -294,20 +300,106 @@ describe('WidgetStoresService — every existing method sends what it sent befor
             utteranceEcho: null,
           },
           update: {},
-          select: { id: true },
+          select: {
+            id: true,
+            widgetId: true,
+            outcome: true,
+            actionReceiptRef: true,
+          },
         });
       expect(calls.map((c) => `${c.model}.${c.op}`)).toEqual([
         'widgetIntentReceipt.upsert',
+        'widgetEmission.updateMany',
         'widgetIntentReceipt.upsert',
+        'widgetEmission.updateMany',
       ]);
       expect(exactly(calls[0].args)).toBe(expected('h-1', null, null));
-      expect(exactly(calls[1].args)).toBe(
+      expect(exactly(calls[2].args)).toBe(
         expected('h-2', 'effect_not_admissible', 'ae-1'),
       );
+      expect(calls[1].args).toEqual({
+        where: {
+          widgetId: 'w-1',
+          kind: 'BOOKING_CONFIRMATION',
+          erasedAt: null,
+          tenantId: 't-1',
+        },
+        data: {
+          terminalLinesJson: [
+            {
+              outcome: 'NOT_CONFIRMED',
+              text: 'Запись не подтверждена.',
+              action_receipt_ref: null,
+            },
+          ],
+        },
+      });
+    });
+
+    it('derives the terminal outcome from the durable receipt, never from the submitted claim', async () => {
+      const replies = [
+        {
+          id: 'receipt-success',
+          widgetId: 'w-1',
+          outcome: 'ACCEPTED',
+          actionReceiptRef: 'ae-success',
+        },
+        {
+          id: 'receipt-unknown',
+          widgetId: 'w-2',
+          outcome: 'ACCEPTED',
+          actionReceiptRef: null,
+        },
+      ];
+      const { stores, calls } = storesOver(undefined, (model, op) =>
+        model === 'widgetIntentReceipt' && op === 'upsert'
+          ? replies.shift()
+          : { count: 1 },
+      );
+
+      // Deliberately contradictory caller fields are ignored by the idempotent upsert result.
+      // The already-durable canonical receipt is the only source of the conversation outcome.
+      await stores.writeReceipt({
+        tenantId: 't-1',
+        widgetId: 'w-1',
+        intentTokenHash: 'h-1',
+        outcome: 'REFUSED',
+        answeringChannel: 'pwa',
+      });
+      await stores.writeReceipt({
+        tenantId: 't-1',
+        widgetId: 'w-2',
+        intentTokenHash: 'h-2',
+        outcome: 'ACCEPTED',
+        answeringChannel: 'pwa',
+        actionReceiptRef: 'client-claim-cannot-confirm',
+      });
+
+      expect(calls[1].args).toMatchObject({
+        data: {
+          terminalLinesJson: [
+            {
+              outcome: 'CONFIRMED',
+              action_receipt_ref: 'ae-success',
+            },
+          ],
+        },
+      });
+      expect(calls[3].args).toMatchObject({
+        data: {
+          terminalLinesJson: [
+            { outcome: 'SUBMITTED', action_receipt_ref: null },
+          ],
+        },
+      });
     });
 
     it('claim and reconciliation are tenant-scoped compare-and-set writes', async () => {
-      const { stores, calls } = storesOver({ count: 1 });
+      const { stores, calls } = storesOver({
+        id: 'receipt-1',
+        widgetId: 'w-1',
+        count: 1,
+      });
       await expect(
         stores.claimIntentRecord({
           tenantId: 't-1',
@@ -339,15 +431,49 @@ describe('WidgetStoresService — every existing method sends what it sent befor
         },
         {
           model: 'widgetIntentReceipt',
-          op: 'updateMany',
+          op: 'findFirst',
           args: {
             where: {
-              tenantId: 't-1',
               intentTokenHash: 'h-1',
               outcome: 'ACCEPTED',
               actionReceiptRef: null,
+              tenantId: 't-1',
+            },
+            select: { id: true, widgetId: true },
+          },
+        },
+        {
+          model: 'widgetIntentReceipt',
+          op: 'updateMany',
+          args: {
+            where: {
+              id: 'receipt-1',
+              outcome: 'ACCEPTED',
+              actionReceiptRef: null,
+              tenantId: 't-1',
             },
             data: { actionReceiptRef: 'ae-1' },
+          },
+        },
+        {
+          model: 'widgetEmission',
+          op: 'updateMany',
+          args: {
+            where: {
+              widgetId: 'w-1',
+              kind: 'BOOKING_CONFIRMATION',
+              erasedAt: null,
+              tenantId: 't-1',
+            },
+            data: {
+              terminalLinesJson: [
+                {
+                  outcome: 'CONFIRMED',
+                  text: 'Запись подтверждена.',
+                  action_receipt_ref: 'ae-1',
+                },
+              ],
+            },
           },
         },
       ]);
