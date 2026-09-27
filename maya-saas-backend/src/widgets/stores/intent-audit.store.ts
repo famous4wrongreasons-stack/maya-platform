@@ -99,14 +99,27 @@ export class IntentAuditStore {
     });
     // A missing terminal-line write can be repaired by the same idempotent retry. Crucially, no
     // branch can publish CONFIRMED without the durable canonical action receipt returned above.
+    const line = terminalLine(receipt);
     await this.prisma.widgetEmission.updateMany({
       where: scoped(input.tenantId, {
         widgetId: receipt.widgetId,
         kind: 'BOOKING_CONFIRMATION',
         erasedAt: null,
+        // The line belongs to the intent this receipt adjudicates, not to the widget it was drawn
+        // on. A confirmation carries the escape §4 requires on every tier as a SECOND tokenised
+        // record on the same `widgetId`, so a widget-keyed write let that escape's receipt rewrite
+        // the booking's CONFIRMED line while the appointment stayed confirmed. `line` may be
+        // published only by the record this token names — the confirmation's own Action-Engine
+        // COMMIT — and only when it does not take back a CONFIRMED line that already earned its
+        // canonical receipt reference. An intent that cannot be identified writes nothing.
+        intentRecords: ownedBy(
+          input.tenantId,
+          input.intentTokenHash,
+          line.outcome === 'CONFIRMED',
+        ),
       }),
       data: {
-        terminalLinesJson: [terminalLine(receipt)] as never,
+        terminalLinesJson: [line] as never,
       },
     });
     return { id: receipt.id };
@@ -231,6 +244,9 @@ export class IntentAuditStore {
         widgetId: row.widgetId,
         kind: 'BOOKING_CONFIRMATION',
         erasedAt: null,
+        // The same ownership predicate: reconciliation publishes the line of the intent it filled in.
+        // It always publishes CONFIRMED, which is the one line that never downgrades another.
+        intentRecords: ownedBy(input.tenantId, input.intentTokenHash, true),
       }),
       data: {
         terminalLinesJson: [
@@ -244,6 +260,41 @@ export class IntentAuditStore {
     return true;
   }
 }
+
+/**
+ * Which emission's terminal line one adjudication may publish, expressed as the record it adjudicates.
+ *
+ * `some` is the identification: the emission must hold the very record this token named, and that
+ * record must be the confirmation's Action-Engine COMMIT. A CONTROL escape, a REFINE, a DRAFT or a
+ * token whose record is gone matches nothing, so nothing is written — the fail-closed direction.
+ * `none` is the monotonicity: unless the line being published is itself CONFIRMED, no COMMIT of that
+ * emission may already hold the canonical action receipt, because that receipt is what CONFIRMED is
+ * made of and no later line may take it back.
+ */
+const ownedBy = (
+  tenantId: string,
+  intentTokenHash: string,
+  publishesConfirmed: boolean,
+) => ({
+  some: scoped(tenantId, {
+    intentTokenHash,
+    effect: 'COMMIT',
+    capabilitySpace: 'AE',
+  }),
+  ...(publishesConfirmed
+    ? {}
+    : {
+        none: scoped(tenantId, {
+          effect: 'COMMIT',
+          receipts: {
+            some: scoped(tenantId, {
+              outcome: 'ACCEPTED',
+              actionReceiptRef: { not: null },
+            }),
+          },
+        }),
+      }),
+});
 
 const terminalLine = (receipt: {
   outcome: string;

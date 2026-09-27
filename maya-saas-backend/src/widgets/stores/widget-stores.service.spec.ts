@@ -317,11 +317,34 @@ describe('WidgetStoresService — every existing method sends what it sent befor
       expect(exactly(calls[2].args)).toBe(
         expected('h-2', 'effect_not_admissible', 'ae-1'),
       );
+      // The line is written for the intent the receipt adjudicates: the emission must hold THIS
+      // token's record, and that record must be the confirmation's own Action-Engine COMMIT. A
+      // refusal cannot say CONFIRMED, so it may not land on an emission whose COMMIT already earned
+      // the canonical action receipt either.
       expect(calls[1].args).toEqual({
         where: {
           widgetId: 'w-1',
           kind: 'BOOKING_CONFIRMATION',
           erasedAt: null,
+          intentRecords: {
+            some: {
+              intentTokenHash: 'h-1',
+              effect: 'COMMIT',
+              capabilitySpace: 'AE',
+              tenantId: 't-1',
+            },
+            none: {
+              effect: 'COMMIT',
+              receipts: {
+                some: {
+                  outcome: 'ACCEPTED',
+                  actionReceiptRef: { not: null },
+                  tenantId: 't-1',
+                },
+              },
+              tenantId: 't-1',
+            },
+          },
           tenantId: 't-1',
         },
         data: {
@@ -392,6 +415,16 @@ describe('WidgetStoresService — every existing method sends what it sent befor
           ],
         },
       });
+      // Monotonicity, at the same granularity: CONFIRMED is published unconditionally, because it is
+      // the line that cannot take another back. Every line that is not CONFIRMED carries the guard.
+      expect(
+        (calls[1].args as { where: { intentRecords: object } }).where
+          .intentRecords,
+      ).not.toHaveProperty('none');
+      expect(
+        (calls[3].args as { where: { intentRecords: object } }).where
+          .intentRecords,
+      ).toHaveProperty('none');
     });
 
     it('claim and reconciliation are tenant-scoped compare-and-set writes', async () => {
@@ -463,6 +496,16 @@ describe('WidgetStoresService — every existing method sends what it sent befor
               widgetId: 'w-1',
               kind: 'BOOKING_CONFIRMATION',
               erasedAt: null,
+              // Reconciliation publishes the line of the intent whose receipt it filled in, under the
+              // same ownership predicate; CONFIRMED needs no monotonicity guard.
+              intentRecords: {
+                some: {
+                  intentTokenHash: 'h-1',
+                  effect: 'COMMIT',
+                  capabilitySpace: 'AE',
+                  tenantId: 't-1',
+                },
+              },
               tenantId: 't-1',
             },
             data: {
