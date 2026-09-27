@@ -49,10 +49,19 @@
 //   equivalent     declared, not run
 //   SURVIVED       nothing a killer names failed
 //   UNEXPECTED     something failed, but no declared killer
+// And for the shard as a whole, beside AS-DECLARED / PARTITION-AS-DECLARED / MISMATCH / EMPTY / DRY-RUN:
+//   BASELINE-RED            a BASELINE control — the UNMUTATED mirror — was not green, so the shard measured
+//                           nothing it can be trusted on. `baseline_red` names the control, the steps that exited
+//                           non-zero and every failing baseline test. This is NOT conditional on a killer being
+//                           among them: what a red baseline destroys is the comparison every mutant is judged by,
+//                           since a red control both makes its own killers vacuous and subtracts its failures from
+//                           every mutant's. Neutraliser controls are exempt — red is a neutraliser's declared job.
+//   BASELINE-RED+MISMATCH   both, so neither hides the other.
 // Every kill carries its killer's entry level, read from the failing test's `[GW]`, `[HTTP]` or `[BIN]` tag (title
 // first, then the innermost describe); k3/typecheck/unit kills are BUILD. Only an `[HTTP]` kill in the live step is
 // marked `evidence: true` (§3.2); a mutant's `live_evidence` says whether it has one.
-// Exit 0 when every mutant's status equals its declared expectation; 1 otherwise; 2 on a usage error.
+// Exit 0 when every mutant's status equals its declared expectation AND every baseline control was green;
+// 1 otherwise; 2 on a usage error.
 //
 //   node scripts/widgets-mutation-battery.mjs [--gate <id>] [--mutations <dir>] [--steps unit,typecheck,k3,live]
 //        [--live-tests <path>] [--live-filter <name pattern>] [--unit-tests <path>]
@@ -71,7 +80,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { selectPartition } from './widgets-mutation-ci.mjs';
+import { describeRedBaselines, redBaselineControls, selectPartition, shardStatus } from './widgets-mutation-ci.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BACKEND = path.resolve(HERE, '..');
@@ -315,6 +324,9 @@ const report = {
   jest_cache: JEST_CACHE,
   neutraliser_controls: {},
   baseline_controls: {},
+  // Always present, so "no red baseline" is something the receipt SAYS rather than something a
+  // reader infers from a missing field. Filled from the controls once they have all run.
+  baseline_red: [],
   mutants: [],
 };
 
@@ -685,8 +697,20 @@ for (const m of mutants) {
 }
 fs.rmSync(MIRROR_ROOT, { recursive: true, force: true });
 
-report.status = mismatches === 0 ? (partition ? 'PARTITION-AS-DECLARED' : 'AS-DECLARED') : 'MISMATCH';
+// The baseline gate. Every baseline control the run created is judged, with the same function the
+// aggregation judges a receipt by (`widgets-mutation-ci.mjs`), so the shard and the receipt assembly
+// cannot disagree about what a red baseline is. The vacuity accounting above is untouched: a killer
+// red on the baseline is still reported `vacuous` and credited to nobody. What changes is that the
+// shard no longer signs off on a run whose reference point was broken.
+const redBaselines = redBaselineControls(report.baseline_controls);
+report.baseline_red = redBaselines;
+const outcome = shardStatus({ red: redBaselines, mismatches, partition });
+report.status = outcome.status;
 report.mismatches = mismatches;
+if (redBaselines.length > 0)
+  process.stderr.write(
+    `widgets-mutation-battery: ${outcome.status} — the unmutated baseline was not green, so this shard measured nothing:\n${describeRedBaselines(redBaselines)}\n`,
+  );
 report.live_evidence_mutants = report.mutants.filter((x) => x.live_evidence).map((x) => `${x.battery}#${x.id}`);
 // CKPT-W1 review finding 7: what `live_evidence` above does and does not assert, stated IN the artifact
 // rather than in a report beside it, because the artifact is what a §3.3 re-audit reads.
@@ -698,7 +722,7 @@ report.evidence_rule = {
   ],
   therefore: 'live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)',
 };
-finish(mismatches === 0 ? 0 : 1);
+finish(outcome.exit);
 
 // ── the CI shard list (widgets-mutation.yml) ─────────────────────────────────────────────────────────────────
 function shards() {
@@ -792,6 +816,13 @@ function selfTest() {
       Object.values(r?.baseline_controls ?? {})[0]?.failed?.length === 0 &&
       (byId('H11-M3')?.vacuous ?? ['?']).length === 0,
     JSON.stringify(r?.baseline_controls),
+  );
+  // The baseline gate's artifact side: a shard that ran with a green baseline says so in the receipt,
+  // in the field the aggregation reads, rather than leaving a reader to infer it from an absence.
+  expectThat(
+    'the receipt states baseline_red: [] when every baseline control was green',
+    Array.isArray(r?.baseline_red) && r.baseline_red.length === 0,
+    JSON.stringify(r?.baseline_red),
   );
   expectThat('H11-M2 one edit on NH survives (pending): both edits are needed', byId('H11-M2')?.status === 'pending', byId('H11-M2')?.status);
   expectThat('H11-M3 both edits without NH survive (pending): the set is needed', byId('H11-M3')?.status === 'pending', byId('H11-M3')?.status);

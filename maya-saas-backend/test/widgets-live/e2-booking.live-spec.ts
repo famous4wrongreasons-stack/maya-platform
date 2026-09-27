@@ -295,13 +295,20 @@ describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP, PostgreS
         serviceId: service.id,
       },
     });
+    // The salon opens midday in its own timezone (the tenant default, Europe/Moscow), not at
+    // 00:00. The selector asks the internal calendar for the UTC calendar date of now + 24 h and
+    // then drops every candidate closer than the industry preset's 120-minute minimum notice, so a
+    // window at the very start of the local day is empty for every wall clock after 20:30 UTC and
+    // the walk below would refuse with `booking_selector_source_unavailable`. A midday window is
+    // between 9 h and 33 h ahead of `now` at every hour, and stays two hours wide so the selector
+    // envelope keeps the same four candidate slots (a full open day exceeds its size cap).
     await db.prisma.internalAvailabilityRule.createMany({
       data: Array.from({ length: 7 }, (_, weekday) => ({
         tenantId: tenant.id,
         providerId: provider.id,
         weekday,
-        startMinute: 0,
-        endMinute: 120,
+        startMinute: 12 * 60,
+        endMinute: 14 * 60,
       })),
     });
 

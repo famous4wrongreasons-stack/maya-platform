@@ -5,8 +5,10 @@ name: Widgets Mutation
 # backend, never to the checkout, and must turn its declared killer red. Measured full runs of Gates 6, 7,
 # 9, 10 and 13 exceed the unchanged 180-minute job budget, while P-mint completed with only two minutes of margin.
 # Those batteries partition mutants while retaining UNFILTERED tests and independent controls in every job.
-# Other batteries run whole. Mandatory aggregation refuses missing/duplicate/stale
-# parts, restricted tests, crashes and vacuous kills before publishing 30 complete battery receipts.
+# Other batteries run whole. A shard whose UNMUTATED baseline control was not green reports BASELINE-RED and exits
+# non-zero — it measured nothing its mutants can be judged by, whether or not a declared killer was among the
+# failures. Mandatory aggregation refuses missing/duplicate/stale
+# parts, restricted tests, crashes, red baseline controls and vacuous kills before publishing 30 complete battery receipts.
 # CKPT-W step 7 dispatches this workflow for the flipping commit with
 # `gates=<every battery touched in the wave>` (pushes to the canonical closure branch also run every battery) and records every shard's run and artifact
 # id. Only `[HTTP]` kills in a shard report count toward L/L-T (§3.2). While no battery is declared the one shard

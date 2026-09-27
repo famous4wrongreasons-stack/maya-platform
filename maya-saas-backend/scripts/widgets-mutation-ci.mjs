@@ -45,6 +45,74 @@ export function plan(declared, requested = '') {
   return { gates, matrix: { include } };
 }
 
+// ── the baseline-control gate (FBE2E receipt integrity) ──────────────────────────────────────────
+//
+// A BASELINE control is the UNMUTATED mirror. It is the sentence "at this HEAD, with these steps,
+// everything the shard is about to judge a mutant by is green". When it is not green the shard has
+// measured nothing it can be trusted on: every killer already red there is reported `vacuous` and
+// credited to no mutant, and whatever else is red there is subtracted from every mutant's own
+// failures — so a mutant can only look MORE alive than it is, never less.
+//
+// Until this gate the runner drew no conclusion from that at all. Vacuity is tested per mutant
+// against that mutant's OWN killers, and `failingSteps` counts a step only when the CONTROL's same
+// step exited 0, so a control that was red in a step the mutants also failed in explained their
+// failure away. A shard whose baseline was red therefore still reported AS-DECLARED and exited 0.
+// Run 36262327428 shipped seven such shards: six with a red `baseline|live` and one — P-f88 — with
+// `baseline|unit,typecheck,k3` exits { unit: 1 } on `K9 — the finance fence shell.pay carries ONE
+// opaque session_ref and nothing else`. All seven receipts read green.
+//
+// The rule here is deliberately not "a killer was among the failures". It is "the unmutated copy was
+// green", and nothing weaker, because what a red baseline destroys is the shard's whole comparison,
+// not one killer's credit.
+//
+// NEUTRALISER controls are not covered and must not be: a neutraliser set exists to switch a check
+// off, so red is its declared job, and vacuity is exactly how that is accounted for.
+const redBaselineSteps = (control) =>
+  Object.fromEntries(Object.entries(control?.exits ?? {}).filter(([, status]) => status !== 0));
+
+/**
+ * The baseline controls of one receipt that were NOT green, each with why: the steps that exited
+ * non-zero, the assertions that failed, and the reports that never arrived.
+ *
+ * Read from `baseline_controls`, which every receipt of contract `maya.widgets-mutation-battery/2`
+ * carries, so a receipt written before the runner learned to refuse its own red baseline is still
+ * judged by its measurements rather than by its self-assessment.
+ */
+export function redBaselineControls(baselineControls) {
+  return Object.entries(baselineControls ?? {})
+    .map(([control, c]) => ({
+      control,
+      steps: c?.steps ?? null,
+      nonzero_exits: redBaselineSteps(c),
+      failed: c?.failed ?? [],
+      problems: c?.problems ?? [],
+    }))
+    .filter((r) => Object.keys(r.nonzero_exits).length > 0 || r.failed.length > 0 || r.problems.length > 0);
+}
+
+/** One line per red baseline, naming the failing tests. */
+export function describeRedBaselines(red) {
+  return red
+    .map(
+      (r) =>
+        `${r.control}: exits ${JSON.stringify(r.nonzero_exits)}` +
+        `; failing baseline tests: ${r.failed.length > 0 ? r.failed.map((t) => JSON.stringify(t)).join(', ') : '(none reported)'}` +
+        (r.problems.length > 0 ? `; problems: ${r.problems.join(' | ')}` : ''),
+    )
+    .join('\n');
+}
+
+/**
+ * A shard's status and exit code. A red baseline is fatal and names itself; it never collapses into
+ * AS-DECLARED, and it never hides a declaration mismatch either — the two are reported together.
+ */
+export function shardStatus({ red, mismatches, partition }) {
+  const status = red.length > 0
+    ? mismatches > 0 ? 'BASELINE-RED+MISMATCH' : 'BASELINE-RED'
+    : mismatches > 0 ? 'MISMATCH' : partition ? 'PARTITION-AS-DECLARED' : 'AS-DECLARED';
+  return { status, exit: status === 'AS-DECLARED' || status === 'PARTITION-AS-DECLARED' ? 0 : 1 };
+}
+
 const exact = (actual, expected, context) => assert.deepEqual(actual, expected, context);
 const sortedKeys = (value) => Object.keys(value ?? {}).sort();
 const defaultSteps = (m) => (m.expect ?? 'live-killed') === 'build-killed' ? ['unit', 'typecheck', 'k3'] : ['live'];
@@ -67,6 +135,16 @@ export function assemble(declared, receipts, head, requested = '') {
       exact(candidates.length, 1, `${job.slot}: missing or duplicate receipt`);
       const r = candidates[0]; assert(!used.has(r)); used.add(r);
       exact(r.contract, 'maya.widgets-mutation-battery/2', `${job.slot}: runner contract`);
+      // Before anything else this part claims. A part whose unmutated baseline was red measured
+      // nothing, so it cannot contribute to a complete receipt whatever its own status says — and
+      // the refusal names the controls and the failing baseline tests, rather than resolving into
+      // "incomplete/failed run" three lines below. The recomputation is from `baseline_controls`,
+      // which is measurement; `baseline_red`, which is the runner's own conclusion, must agree with
+      // it when the runner was new enough to draw one.
+      const red = redBaselineControls(r.baseline_controls);
+      assert.equal(red.length, 0, `${job.slot}: red baseline control — the unmutated mirror was not green:\n${describeRedBaselines(red)}`);
+      if (r.baseline_red !== undefined)
+        exact(r.baseline_red, [], `${job.slot}: the receipt declares a red baseline`);
       exact(r.source_head, head, `${job.slot}: stale source`);
       exact(r.battery_hashes, { [battery.file]: battery.hash }, `${job.slot}: declaration changed`);
       exact(r.partition, partition?.metadata ?? null, `${job.slot}: partition manifest`);
@@ -126,7 +204,9 @@ export function assemble(declared, receipts, head, requested = '') {
     exact(rows.length, battery.mutants.length, `${gate}: coverage`);
     const byId = new Map(rows.map((m) => [m.id, m])); exact(byId.size, rows.length, `${gate}: duplicate mutant`);
     result.push({
-      ...parts[0], status: 'AS-DECLARED', partition: null,
+      // `baseline_red: []` is asserted above for every part, so the assembled receipt states it
+      // outright rather than inheriting whatever the first part happened to carry.
+      ...parts[0], status: 'AS-DECLARED', baseline_red: [], partition: null,
       startedAt: parts.map((r) => r.startedAt).sort()[0], finishedAt: parts.map((r) => r.finishedAt).sort().at(-1),
       assembly: { contract: 'maya.widgets-mutation-ci/1', partitions: parts.length, all_declared_mutants: true, unrestricted_tests: true },
       baseline_controls: baseline, neutraliser_controls: neutralisers,
