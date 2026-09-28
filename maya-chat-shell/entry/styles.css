@@ -21,6 +21,13 @@
   --gap: 0.75rem;
   --target: 44px;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* The device's own unsafe edges — notch or status bar, home indicator, landscape cheeks — read once
+   * here so every fixed and full-height surface pads from the same four numbers. `viewport-fit=cover`
+   * in entry/index.html is what makes them non-zero in a standalone window (§1.11, A-10). */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
   color-scheme: light dark;
 }
 
@@ -55,6 +62,10 @@ html,
 body {
   margin: 0;
   padding: 0;
+  /* A drag that runs out of scrollable content must stop there. Chained up to the page it becomes
+   * pull-to-refresh, and a reload ends the memory-only session (A6): the owner is signed out and the
+   * conversation is gone. Every scroll container below repeats this with `contain`. */
+  overscroll-behavior: none;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
@@ -118,13 +129,23 @@ textarea {
 }
 
 .app-shell {
+  /* The height the owner can actually SEE: the window less the virtual keyboard that entry/main.ts
+   * measured from visualViewport. On iOS the LAYOUT viewport keeps its full height when the keyboard
+   * opens, so `vh`, `dvh` and `@media (max-height: …)` all still report the whole window and this inset
+   * is what closes the gap. Where the layout viewport DOES shrink for the keyboard — Chrome, honouring
+   * the `interactive-widget=resizes-content` this page asks for — the measured inset is 0 and `100dvh`
+   * has already shrunk. So the token is the visible height on both carriers, with no branch. */
+  --maya-visible-height: calc(100dvh - var(--maya-keyboard-inset, 0px));
   display: flex;
   flex-direction: column;
   height: 100vh;
   height: 100dvh;
   max-width: 48rem;
   margin: 0 auto;
+  padding-top: var(--safe-top);
+  padding-right: var(--safe-right);
   padding-bottom: var(--maya-keyboard-inset, 0px);
+  padding-left: var(--safe-left);
   background: var(--bg);
 }
 
@@ -157,7 +178,27 @@ textarea {
   min-width: 0;
 }
 
+/* The conversation column lives INSIDE a fixed-height shell, so it may never be taller than the room
+ * that shell gives it: whatever does not fit has to scroll here rather than spill out of the window.
+ * Without this the column's own minimum (the cold-start hint at a 2x text scale plus a composer that
+ * does not shrink) pushed the composer and «Отправить» below the window and made the page scrollable.
+ * The hint's shrink below is what keeps that from happening at the sizes this shell is built for; this
+ * is the floor under it. With room to spare nothing here scrolls and the composer does not move. */
+.panel--conversation {
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
+/* The cold-start hint is the one part of the column with no upper bound: it is prose, it wraps, and at
+ * a 2x text scale on a 320 px screen its own minimum is most of the screen. So it gives its room back
+ * (`min-height: 0`, which a flex item does not do by itself) and carries its remainder itself — the
+ * composer below it cannot shrink and «Отправить» has to stay inside the window. */
 .timeline-hint {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 1rem 1rem 0;
   color: var(--text-muted);
 }
@@ -167,6 +208,7 @@ textarea {
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
   padding: 0.75rem 1rem;
   display: flex;
   flex-direction: column;
@@ -268,7 +310,9 @@ textarea {
   display: block;
   width: 100%;
   min-height: var(--target);
-  max-height: 40vh;
+  /* Two fifths of the room, where "the room" is what the keyboard left. `40vh` alone lets the owner
+   * drag the textarea taller than the visible area, and «Отправить» goes under the keyboard. */
+  max-height: min(40vh, calc(0.4 * var(--maya-visible-height, 100dvh)));
   resize: vertical;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
@@ -397,9 +441,17 @@ textarea {
 /* ── navigation and route chrome ─────────────────────────────────────────────────────────── */
 
 .nav {
+  /* The nav is the surface that ends the column, so the home indicator is its job at EVERY viewport.
+   * The row's own padding is a token and the bottom inset is its own longhand, declared after the
+   * shorthand: a media block below changes only the token, so it cannot drop the inset by restating
+   * `padding` or `padding-block` — which is exactly how the short-viewport block used to lose it. */
+  --nav-pad-block: 0.35rem;
   border-top: 1px solid var(--border);
-  padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
+  padding: var(--nav-pad-block) 0.5rem;
+  padding-bottom: calc(var(--nav-pad-block) + var(--safe-bottom));
   background: var(--bg);
+  /* The five routes scroll sideways on a short viewport (below); that drag stays in the nav. */
+  overscroll-behavior: contain;
 }
 
 .nav-list {
@@ -434,6 +486,7 @@ textarea {
 
 .panel--route {
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .route {
@@ -457,7 +510,9 @@ textarea {
   gap: var(--gap);
   max-width: 30rem;
   margin: 0 auto;
-  padding: 1.5rem 1rem 2rem;
+  /* Sign-in is the root screen when signed out (SH-04) and has no .app-shell above it, so it carries
+   * its own insets. */
+  padding: calc(1.5rem + var(--safe-top)) calc(1rem + var(--safe-right)) calc(2rem + var(--safe-bottom)) calc(1rem + var(--safe-left));
 }
 
 .signin-title {
@@ -559,7 +614,7 @@ textarea {
 }
 
 .noscript {
-  padding: 1rem;
+  padding: calc(1rem + var(--safe-top)) calc(1rem + var(--safe-right)) calc(1rem + var(--safe-bottom)) calc(1rem + var(--safe-left));
 }
 
 /* ── widgets (dom/host.ts) ───────────────────────────────────────────────────────────────── */
@@ -629,6 +684,7 @@ textarea {
 .widget-table-scroll {
   max-width: 100%;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
 }
 
 .widget-table {
@@ -673,10 +729,25 @@ textarea {
   height: 100dvh;
   max-height: 100dvh;
   margin: 0 auto;
-  padding: 0;
+  /* The dialog fills the window, so it clears the notch and the cheeks itself; the home-indicator inset
+   * is on .fullscreen-body, which is the surface that ends there. The bottom padding is the keyboard
+   * inset — the same term .app-shell uses, for the same reason: `100dvh` is the whole window on iOS
+   * even with the keyboard up, so without it the body's last line and the close control sit under the
+   * keyboard. The box still reaches the window's edge; only its CONTENT stops above the keyboard. */
+  padding: var(--safe-top) var(--safe-right) var(--maya-keyboard-inset, 0px) var(--safe-left);
   border: 0;
+  /* The UA gives <dialog> `overflow: auto`, which made the DIALOG the scroll container: the bar
+   * scrolled away and the drag chained out. The body scrolls instead. */
+  overflow: hidden;
   background: var(--bg);
   color: var(--text);
+}
+
+/* Scoped to [open]: an author `display` on a closed <dialog> would beat the UA's
+ * `dialog:not([open]) { display: none }` by origin and show the empty chrome. */
+.fullscreen[open] {
+  display: flex;
+  flex-direction: column;
 }
 
 .fullscreen::backdrop {
@@ -700,12 +771,19 @@ textarea {
 }
 
 .fullscreen-body {
-  padding: 1rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 1rem 1rem calc(1rem + var(--safe-bottom));
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
-/* ── short viewports (landscape phones, an open keyboard, large text): the conversation keeps
- *    its room — one identity line, and the five routes in one row that scrolls inside the nav ── */
+/* ── short LAYOUT viewports (landscape phones, large text): the conversation keeps its room — one
+ *    identity line, and the five routes in one row that scrolls inside the nav.
+ *
+ *    On iOS an open keyboard does NOT reach this query: the layout viewport keeps its full height and
+ *    only the visual viewport shrinks, so `max-height` never sees the keyboard. What has to fit above
+ *    the keyboard is bounded by --maya-visible-height instead, which is correct on both carriers. ── */
 
 @media (max-height: 32rem) {
   .identity {
@@ -719,13 +797,22 @@ textarea {
     text-overflow: ellipsis;
   }
 
+  /* `min-height: 0` lets a flex item give up its CONTENT box, never its padding — a border-box item
+   * cannot shrink below padding + border. At a 2x text scale those two paddings are 80 px of floor
+   * under the log and the hint, which is room the composer needs to stay inside the column. So the
+   * short viewport tightens them, exactly as it tightens the identity's and the composer's own. */
+  .timeline-hint,
+  .timeline {
+    padding-block: 0.25rem;
+  }
+
   .composer {
     padding-block: 0.35rem;
   }
 
   .composer-input {
     height: max(var(--target), calc(1lh + 1rem + 2px));
-    max-height: 30vh;
+    max-height: min(30vh, calc(0.3 * var(--maya-visible-height, 100dvh)));
     resize: none;
   }
 
@@ -776,7 +863,8 @@ textarea {
   .nav {
     overflow-x: auto;
     overflow-y: hidden;
-    padding-block: 0.25rem;
+    /* Only the token: the bottom inset stays whatever the base rule computed it to be. */
+    --nav-pad-block: 0.25rem;
   }
 
   .nav-list {

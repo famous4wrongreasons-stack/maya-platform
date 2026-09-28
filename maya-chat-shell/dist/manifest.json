@@ -3,6 +3,7 @@
   "sources": [
     "entry/index.html",
     "entry/main.ts",
+    "entry/manifest.webmanifest",
     "entry/styles.css",
     "src/contract.ts",
     "src/dom/composer.ts",
@@ -34,8 +35,8 @@
     "src/voice/capture.ts",
     "src/voice/wav.ts"
   ],
-  "bytes": 391865,
-  "digest": "a8d502d0ce81e608e9f9055b2da9c2a2a419b1d0d00ec80068ab294bd06cd094",
+  "bytes": 399291,
+  "digest": "fe2a8c9d52a4291ca1459475ad63670ac023b10ec355653bc3512b8945eb1199",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -43,8 +44,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "d956a485da3326f6c74aa27d2e9ed7dd7802405e365f19ca880b83da91472eb4",
-    "modulePath": "m/d956a485da3326f6/",
+    "digest": "d49934adca496b6cf20ad46efad2a4e752c0eb443c81bfa75fc2a6bdee4ab3cc",
+    "modulePath": "m/d49934adca496b6c/",
     "files": [
       {
         "path": "entry/main.js",
@@ -198,13 +199,40 @@
       }
     ],
     "styles": {
-      "sha256": "a54e06012a59752e06fa77a408ec8861bfd30760dab67713339947e84fe031fd",
-      "bytes": 16238
+      "sha256": "83b8bb8f7cfc1e13da8d48c34d519d6f325b0304942adf9044fde60fff633265",
+      "bytes": 22401
     },
     "index": {
-      "sha256": "dd597d0cede844a9165f5d19b943ba3d641654f15b90b4f5ae7cc05aa162e608",
-      "bytes": 903
-    }
+      "sha256": "a4311e7d8ef88cb60993251326bb64fc4e3794cc9a55acbde02c321cd60ad48c",
+      "bytes": 1325
+    },
+    "assets": [
+      {
+        "path": "icons/maya-192.png",
+        "sha256": "637b5057ffa74db89bf170450c27b8b31233de3c0c8fcb51ffb33c239301b7cc",
+        "bytes": 1970
+      },
+      {
+        "path": "icons/maya-512-maskable.png",
+        "sha256": "37dae9c45b1dba43a2a4c04c8b24ec1a0b72c0e36ef94256e4b02215bdab2ae2",
+        "bytes": 4476
+      },
+      {
+        "path": "icons/maya-512.png",
+        "sha256": "9f6d69b4aa900d81d6aeba93b277f8e0bf16b39f2dcf8bf445d1fd13d64927fb",
+        "bytes": 5951
+      },
+      {
+        "path": "icons/maya-apple-180.png",
+        "sha256": "8ee4557f95e81ddc21b72b0f82c4cdc25f3b02547321fbcb06615b9d5030e84e",
+        "bytes": 1977
+      },
+      {
+        "path": "manifest.webmanifest",
+        "sha256": "40a32311bba22066b544639618332d89d91e8e50d2b874f62af691fe2d4790bd",
+        "bytes": 670
+      }
+    ]
   },
   "targets": {
     "web": {
@@ -215,5 +243,10 @@
       "apiBase": "https://mayaos.ru/api",
       "connectSrc": "'self' https://mayaos.ru"
     }
+  },
+  "serving": {
+    "mustNotBeServedAtOrUnder": "/app/",
+    "why": "the retired PWA's service worker is still live at /app/service-worker.js (max-age=604800) and its scope is /app/; a shell served there would be controlled by a worker this build never wrote",
+    "check": "node build.mjs --serve-path=<the path this tree will be served from>"
   }
 }

@@ -111,7 +111,7 @@ const SIGN_IN_FOCUS = Object.freeze({
  * the trusted click; MediaRecorder, decodeAudioData, OfflineAudioContext, the WAV encoder, CSP and track
  * stop are real Chromium. The shim also records every voice indicator state it sees.
  */
-const voiceShim = ({ deny = false } = {}) => `(() => {
+export const voiceShim = ({ deny = false } = {}) => `(() => {
   window.__cdpGum = { calls: 0, tracks: [] };
   window.__voiceStates = [];
   MediaDevices.prototype.getUserMedia = async function () {
@@ -170,7 +170,7 @@ const Q = {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-class Browser {
+export class Browser {
   static async launch(chromePath, extraArgs = []) {
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'maya-shell-cdp-'));
     const child = spawn(chromePath, ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--disable-extensions', '--disable-background-networking', '--disable-component-update', '--disable-sync', '--metrics-recording-only', '--remote-debugging-port=0', `--user-data-dir=${userDataDir}`, ...extraArgs, 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
@@ -248,7 +248,7 @@ class Browser {
   }
 }
 
-class Page {
+export class Page {
   constructor(browser, sessionId, targetId, browserContextId) {
     this.browser = browser;
     this.sessionId = sessionId;

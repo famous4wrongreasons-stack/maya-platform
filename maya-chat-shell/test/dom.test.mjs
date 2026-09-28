@@ -169,6 +169,280 @@ test('entry/styles.css: tokens, forced colours, reduced motion, 44 px targets, n
   assert.ok(!/\bdocument\b/.test(css), 'the K5 one-line count walks entry/');
 });
 
+// ── the phone (§1.11, A-10): overscroll, the four device insets, the keyboard ─────────────────────
+//
+// The browser measurements live in test/mobile-probe.mjs (headless Chrome, 390x844 and 320x568, real
+// Emulation.setSafeAreaInsetsOverride). These read the stylesheet itself so `npm test` keeps the shape
+// of the fix without a browser: one shared shell, no carrier branch.
+
+const STYLES = () => fs.readFileSync(path.join(SH, 'entry', 'styles.css'), 'utf8');
+
+/**
+ * styles.css as { selector, body, at } rules in source order, flattening @media (and any other)
+ * at-rule blocks but REMEMBERING which one each rule came from: `at` is '' at the top level and the
+ * at-rule prelude(s) otherwise. The context is what makes it possible to ask what a selector's
+ * padding actually is inside a media block rather than trusting the base declaration — which is how a
+ * `padding-block` override silently dropped the nav's home-indicator inset on every short viewport.
+ */
+function cssRules(css) {
+  const text = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const rules = [];
+  const walk = (from, to, at) => {
+    let sel = '';
+    let j = from;
+    while (j < to) {
+      if (text[j] !== '{') {
+        sel += text[j];
+        j += 1;
+        continue;
+      }
+      let depth = 1;
+      let k = j + 1;
+      while (k < to && depth > 0) {
+        if (text[k] === '{') depth += 1;
+        else if (text[k] === '}') depth -= 1;
+        k += 1;
+      }
+      const name = sel.trim();
+      if (name.startsWith('@')) walk(j + 1, k - 1, at === '' ? name : `${at} ${name}`);
+      else rules.push({ selector: name, body: text.slice(j + 1, k - 1), at });
+      sel = '';
+      j = k;
+    }
+  };
+  walk(0, text.length, '');
+  return rules;
+}
+
+const selectorsOf = (rule) => rule.selector.split(',').map((s) => s.trim()).filter((s) => s !== '');
+const declsOf = (body) => {
+  const out = new Map();
+  let depth = 0;
+  let cut = 0;
+  const parts = [];
+  for (let i = 0; i < body.length; i += 1) {
+    if (body[i] === '(') depth += 1;
+    else if (body[i] === ')') depth -= 1;
+    else if (body[i] === ';' && depth === 0) {
+      parts.push(body.slice(cut, i));
+      cut = i + 1;
+    }
+  }
+  parts.push(body.slice(cut));
+  for (const part of parts) {
+    const at = part.indexOf(':');
+    if (at < 0) continue;
+    const prop = part.slice(0, at).trim();
+    if (prop === '') continue;
+    out.set(prop, part.slice(at + 1).trim().replace(/\s*!important$/, ''));
+  }
+  return out;
+};
+/** A property value split on top-level whitespace: `calc(a + b) 0.5rem` is two values, not five. */
+const splitTop = (value) => {
+  const out = [];
+  let depth = 0;
+  let cut = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    if (value[i] === '(') depth += 1;
+    else if (value[i] === ')') depth -= 1;
+    else if (depth === 0 && /\s/.test(value[i])) {
+      if (i > cut) out.push(value.slice(cut, i));
+      cut = i + 1;
+    }
+  }
+  if (value.length > cut) out.push(value.slice(cut));
+  return out.map((v) => v.trim()).filter((v) => v !== '');
+};
+
+/** Which sides a padding declaration sets, and to what. Every form the stylesheet may use. */
+function paddingSides(prop, value) {
+  const v = splitTop(value);
+  if (v.length === 0) return null;
+  const four = (t, r, b, l) => ({ top: t, right: r, bottom: b, left: l });
+  switch (prop) {
+    case 'padding':
+      if (v.length === 1) return four(v[0], v[0], v[0], v[0]);
+      if (v.length === 2) return four(v[0], v[1], v[0], v[1]);
+      if (v.length === 3) return four(v[0], v[1], v[2], v[1]);
+      return four(v[0], v[1], v[2], v[3]);
+    case 'padding-block':
+      return v.length === 1 ? { top: v[0], bottom: v[0] } : { top: v[0], bottom: v[1] };
+    case 'padding-inline':
+      // The shell is `dir: ltr` (entry/index.html, and the manifest says so): start is left.
+      return v.length === 1 ? { left: v[0], right: v[0] } : { left: v[0], right: v[1] };
+    case 'padding-top':
+    case 'padding-block-start':
+      return { top: v.join(' ') };
+    case 'padding-bottom':
+    case 'padding-block-end':
+      return { bottom: v.join(' ') };
+    case 'padding-left':
+    case 'padding-inline-start':
+      return { left: v.join(' ') };
+    case 'padding-right':
+    case 'padding-inline-end':
+      return { right: v.join(' ') };
+    default:
+      return null;
+  }
+}
+
+/** Every at-rule context the stylesheet has, plus the top level — the cascade is base, then context. */
+const cssContexts = (rules) => [...new Set(rules.map((r) => r.at))];
+
+/**
+ * The padding a selector really has in one at-rule context: the base rules first, then that context's,
+ * every padding form applied in source order. This is what a browser computes, and it is the only
+ * honest way to ask "does the nav still carry the home-indicator inset inside this media block?".
+ */
+function paddingIn(rules, selector, at) {
+  const sides = { top: null, right: null, bottom: null, left: null };
+  for (const rule of rules) {
+    if (rule.at !== '' && rule.at !== at) continue;
+    if (!selectorsOf(rule).includes(selector)) continue;
+    for (const [prop, value] of declsOf(rule.body)) {
+      const set = paddingSides(prop, value);
+      if (set !== null) Object.assign(sides, set);
+    }
+  }
+  return sides;
+}
+
+/** Every value a selector declares for a property, in source order (the last one wins in CSS). */
+const declared = (rules, selector, prop) => rules.filter((r) => selectorsOf(r).includes(selector)).map((r) => declsOf(r.body).get(prop)).filter((v) => v !== undefined);
+const lastDecl = (rules, selector, prop) => declared(rules, selector, prop).at(-1) ?? null;
+
+test('entry/styles.css: the document refuses overscroll and EVERY scroll container contains it — a pull-to-refresh reload would end the memory-only session (A6)', () => {
+  const rules = cssRules(STYLES());
+  assert.equal(lastDecl(rules, 'html', 'overscroll-behavior'), 'none', 'html');
+  assert.equal(lastDecl(rules, 'body', 'overscroll-behavior'), 'none', 'body');
+
+  const scrolls = (v) => v !== undefined && /\b(auto|scroll)\b/.test(v);
+  const scrollers = rules.filter((r) => {
+    const d = declsOf(r.body);
+    return scrolls(d.get('overflow')) || scrolls(d.get('overflow-y')) || scrolls(d.get('overflow-x'));
+  });
+  // The log, the route panel, the fullscreen body, the wide-table scroller and the short-viewport nav.
+  assert.ok(scrollers.length >= 5, `only ${scrollers.length} scroll containers found: ${scrollers.map((r) => r.selector).join(' | ')}`);
+  const uncontained = [];
+  for (const rule of scrollers)
+    for (const selector of selectorsOf(rule)) {
+      const contained = rules
+        .filter((r) => selectorsOf(r).includes(selector))
+        .some((r) => [...declsOf(r.body).keys()].some((p) => p === 'overscroll-behavior' || p.startsWith('overscroll-behavior-')));
+      if (!contained) uncontained.push(selector);
+    }
+  assert.deepEqual([...new Set(uncontained)], [], 'a scroll container whose drag can chain out of it');
+});
+
+test('entry/styles.css: the four device insets are read once, and every surface with no .app-shell above it pads from them — IN EVERY at-rule context', () => {
+  const rules = cssRules(STYLES());
+  for (const side of ['top', 'right', 'bottom', 'left']) assert.equal(lastDecl(rules, ':root', `--safe-${side}`), `env(safe-area-inset-${side}, 0px)`, side);
+
+  /* Enumerated, not trusted. A media block that restates `padding` or `padding-block` replaces the
+   * side the base rule had computed, and the inset is gone with it — which is exactly what the
+   * short-viewport block did to the nav's home-indicator inset while a test that read only the base
+   * declaration kept passing. So every surface below is checked in every context the stylesheet has,
+   * and a new media block that drops an inset fails here even if the base rule still names it. */
+  const needed = {
+    // The signed-in shell: the notch and the two cheeks here, the keyboard at the bottom (the home
+    // indicator is the nav's, below).
+    '.app-shell': { top: /var\(--safe-top\)/, right: /var\(--safe-right\)/, left: /var\(--safe-left\)/, bottom: /var\(--maya-keyboard-inset/ },
+    // The nav ends the column at every viewport, so the home indicator is its job at every viewport.
+    '.nav': { bottom: /var\(--safe-bottom\)/ },
+    // Sign-in is the root screen when signed out (SH-04) and the noscript line is drawn without any
+    // shell at all, so each carries all four edges itself.
+    '.signin': { top: /--safe-top\b/, right: /--safe-right\b/, bottom: /--safe-bottom\b/, left: /--safe-left\b/ },
+    '.noscript': { top: /--safe-top\b/, right: /--safe-right\b/, bottom: /--safe-bottom\b/, left: /--safe-left\b/ },
+    // The dialog fills the window: notch and cheeks on the dialog, keyboard at its bottom (the same
+    // term .app-shell uses — `100dvh` is the whole window on iOS even with the keyboard up), and the
+    // home indicator on .fullscreen-body, the surface that actually ends there.
+    '.fullscreen': { top: /var\(--safe-top\)/, right: /var\(--safe-right\)/, left: /var\(--safe-left\)/, bottom: /var\(--maya-keyboard-inset/ },
+    '.fullscreen-body': { bottom: /var\(--safe-bottom\)/ },
+  };
+  const contexts = cssContexts(rules);
+  assert.ok(contexts.length >= 2 && contexts.includes(''), `contexts: ${JSON.stringify(contexts)}`);
+  const missing = [];
+  for (const [selector, sides] of Object.entries(needed))
+    for (const at of contexts) {
+      const padding = paddingIn(rules, selector, at);
+      for (const [side, want] of Object.entries(sides))
+        if (padding[side] === null || !want.test(padding[side]))
+          missing.push(`${selector} ${side} in "${at || 'the top level'}" is ${JSON.stringify(padding[side])}, wanted ${want}`);
+    }
+  assert.deepEqual(missing, []);
+
+  // One source for the four numbers: no other rule reaches for env() itself.
+  assert.deepEqual(rules.filter((r) => r.selector !== ':root' && /env\(\s*safe-area/.test(r.body)).map((r) => r.selector), []);
+});
+
+test('entry/styles.css: the nav keeps its home-indicator inset because a media block can only change the row token, not the inset', () => {
+  const rules = cssRules(STYLES());
+  // The shape that makes the enumeration above hold by construction rather than by review: the row's
+  // own padding is a token, and the bottom is a separate longhand declared after the shorthand.
+  const base = rules.filter((r) => r.at === '');
+  assert.equal(lastDecl(base, '.nav', '--nav-pad-block'), '0.35rem');
+  assert.equal(lastDecl(base, '.nav', 'padding'), 'var(--nav-pad-block) 0.5rem');
+  // The short viewport changes the token and nothing else about the nav's padding.
+  const short0 = cssContexts(rules).find((at) => /max-height/.test(at));
+  assert.equal(lastDecl(rules.filter((r) => r.at === short0), '.nav', '--nav-pad-block'), '0.25rem');
+  assert.equal(lastDecl(base, '.nav', 'padding-bottom'), 'calc(var(--nav-pad-block) + var(--safe-bottom))');
+  // No rule for .nav in any media block may restate a padding that covers the bottom side.
+  const offenders = rules
+    .filter((r) => r.at !== '' && selectorsOf(r).includes('.nav'))
+    .filter((r) => [...declsOf(r.body).keys()].some((prop) => (paddingSides(prop, declsOf(r.body).get(prop)) ?? {}).bottom !== undefined))
+    .map((r) => `${r.at}: ${[...declsOf(r.body).keys()].join(', ')}`);
+  assert.deepEqual(offenders, []);
+});
+
+test('entry/styles.css: the conversation column cannot spill out of the fixed-height shell, and the hint is what gives way', () => {
+  const rules = cssRules(STYLES());
+  // The floor: the column carries its own remainder instead of pushing it past the window, and that
+  // drag stays inside it (A6 — a chained drag becomes pull-to-refresh, and a reload ends the session).
+  assert.equal(lastDecl(rules, '.panel--conversation', 'overflow-y'), 'auto');
+  assert.equal(lastDecl(rules, '.panel--conversation', 'overscroll-behavior'), 'contain');
+  // The hint is the one part with no upper bound: it must be able to give its room back and carry its
+  // own remainder. `min-height: 0` is the load-bearing half — a flex item's default `auto` minimum is
+  // what pushed the composer out of the column at a 2x text scale.
+  assert.equal(lastDecl(rules, '.timeline-hint', 'min-height'), '0');
+  assert.equal(lastDecl(rules, '.timeline-hint', 'overflow-y'), 'auto');
+  assert.equal(lastDecl(rules, '.timeline-hint', 'overscroll-behavior'), 'contain');
+  assert.match(lastDecl(rules, '.timeline-hint', 'flex') ?? '', /^0 1 /);
+  // A border-box item cannot shrink below its own padding, so the short viewport tightens the two
+  // paddings that sit above the composer; without this the composer was clipped by 26.5 px at
+  // 320x568 with a 2x text scale and the device insets applied.
+  const short = cssContexts(rules).find((at) => /max-height/.test(at));
+  assert.ok(short, 'the short-viewport block');
+  for (const selector of ['.timeline-hint', '.timeline'])
+    assert.equal(paddingIn(rules, selector, short).top, '0.25rem', selector);
+  // The composer is the item that must NOT shrink: it is the control the owner needs to reach.
+  assert.equal(lastDecl(rules, '.composer', 'flex-shrink'), '0');
+});
+
+test('entry/styles.css + entry/main.ts: what must fit above the on-screen keyboard is sized from the visible height, never from vh', () => {
+  const rules = cssRules(STYLES());
+  const main = fs.readFileSync(path.join(SH, 'entry', 'main.ts'), 'utf8');
+  assert.match(main, /visualViewport/, 'the entry measures the inset from the visual viewport');
+  assert.match(main, /--maya-keyboard-inset/, 'and writes it as one custom property');
+  assert.equal(lastDecl(rules, '.app-shell', '--maya-visible-height'), 'calc(100dvh - var(--maya-keyboard-inset, 0px))');
+  assert.equal(lastDecl(rules, '.app-shell', 'padding-bottom'), 'var(--maya-keyboard-inset, 0px)');
+  // Every height the owner can drag the textarea to — the base rule and the short-viewport override.
+  const caps = declared(rules, '.composer-input', 'max-height');
+  assert.ok(caps.length >= 2, `max-height declared ${caps.length} times`);
+  for (const cap of caps) assert.match(cap, /var\(--maya-visible-height/, cap);
+});
+
+test('entry/styles.css: the fullscreen BODY scrolls, not the <dialog>, and the flex display is scoped to [open]', () => {
+  const rules = cssRules(STYLES());
+  assert.equal(lastDecl(rules, '.fullscreen', 'overflow'), 'hidden', 'the UA gives <dialog> overflow: auto');
+  assert.equal(lastDecl(rules, '.fullscreen', 'display'), null, 'an author display on a closed dialog beats the UA display:none by origin');
+  assert.equal(lastDecl(rules, '.fullscreen[open]', 'display'), 'flex');
+  assert.equal(lastDecl(rules, '.fullscreen-body', 'overflow-y'), 'auto');
+  assert.equal(lastDecl(rules, '.fullscreen-body', 'min-height'), '0');
+  assert.equal(lastDecl(rules, '.fullscreen-body', 'flex'), '1 1 auto');
+});
+
 test('the only href write in src/** is renderReplyLink in dom/timeline.ts (N-3, V2-15)', () => {
   const hits = [];
   const walk = (dir) => {

@@ -13,18 +13,26 @@
 //   node build.mjs --dry-run          the whole pipeline into os.tmpdir(); print digests; write nothing
 //   node build.mjs --target=capacitor emit dist/capacitor and run the three-part target proof (§1.10)
 //   node build.mjs --no-baseline      additionally refuse while build-baseline/ exists (S8)
+//   node build.mjs --serve-path=/x/   additionally refuse if THAT deploy path is unsafe: the retired
+//                                     PWA's service worker is live at /app/ and its scope is /app/, so
+//                                     a shell served at or under /app/ would be controlled by a worker
+//                                     this build never wrote (PWA_SERVING; printed by every build and
+//                                     recorded in dist/manifest.json, which --check compares)
 //
 // Pipeline: 1 paths · 2 toolchain + contract declarations · 3 layered purity gate (a-m) ·
 // 4 full typecheck · 5 guarded emit · 6 post-emit scan · 7 content addressing · 8 manifest ·
-// 9 target · 10 no service worker (nothing here registers or emits one).
+// 9 target · 9(b) the PWA identity · 10 no service worker (nothing here registers or emits one).
 //
 // index.html contract (entry/index.html): the module path is written with the literal placeholder
 // `<webDigest16>` (e.g. `./m/<webDigest16>/entry/main.js`), and the meta CSP carries
-// `connect-src 'self'` exactly once; the capacitor target substitutes that token.
+// `connect-src 'self'` exactly once; the capacitor target substitutes that token. Its head also
+// carries the installable identity — the manifest link, the apple-touch icon and the three metas
+// iOS and Android read — and step 9(b) refuses the build unless every one of them is intact.
 
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import zlib from 'node:zlib';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -190,6 +198,64 @@ export const TARGETS = {
   web: { apiBase: '/api', connectSrc: "'self'" },
   capacitor: { apiBase: 'https://mayaos.ru/api', connectSrc: "'self' https://mayaos.ru" },
 };
+
+// ── 9(b) the PWA identity ────────────────────────────────────────────────────────────────────────
+// The installable identity of the SHARED shell: one manifest and one icon set, emitted for BOTH
+// targets from the same bytes, so an installable PWA and the Capacitor carrier can never drift.
+//
+// `id` is the load-bearing member. An install is identified by (origin, manifest id), and the
+// retired PWA still served at /app/ declares id "/app/" — a manifest resolving to that id would
+// silently UPDATE the owner's existing install instead of installing beside it. The id below is
+// origin-relative and fixed, so it cannot become "/app/" by being deployed under that path, and
+// `pwaContract` refuses any id that could.
+//
+// The artwork is a placeholder: `brand/make-icons.mjs` generates it from a description, and its
+// --check proves the committed bytes are a fresh generation. The build takes it as given and checks
+// only what a phone needs — a whole PNG, square, at the declared size.
+const PWA_MANIFEST = 'manifest.webmanifest';
+const PWA_ICON_DIR = 'icons';
+const PWA_ICON_SOURCE = 'brand/icons';
+const LEGACY_PWA_ID = '/app/';
+/**
+ * WHERE THIS TREE MAY BE SERVED — the one identity rule the build cannot check for itself.
+ *
+ * `scope` and `start_url` are "./": the shell is the same bytes wherever it is served, and its install
+ * identity is fixed by the absolute `id` regardless. What is NOT indifferent to the path is the RETIRED
+ * PWA's service worker, which is still live at /app/service-worker.js with max-age=604800 (phase 2, E8).
+ * A worker's scope is its own directory, so a shell served at or under /app/ would be CONTROLLED by a
+ * worker this build never wrote, could be pinned to a stale cache, and could not be told to let go.
+ *
+ * The build cannot know the deploy path, so it does three things instead of guessing: it prints this
+ * constraint on every run, it records it in dist/manifest.json so it travels with the tree (and
+ * --check compares it, so it cannot be dropped quietly), and `node build.mjs --serve-path=<path>`
+ * refuses an unsafe path when a deployer names one.
+ */
+export const PWA_SERVING = Object.freeze({
+  mustNotBeServedAtOrUnder: LEGACY_PWA_ID,
+  why: `the retired PWA's service worker is still live at ${LEGACY_PWA_ID}service-worker.js (max-age=604800) and its scope is ${LEGACY_PWA_ID}; a shell served there would be controlled by a worker this build never wrote`,
+  check: 'node build.mjs --serve-path=<the path this tree will be served from>',
+});
+
+/** Is this deploy path safe? The one configuration the build can refuse without guessing. */
+export function servingRefusals(servePath) {
+  if (servePath === null || servePath === undefined) return [];
+  const raw = String(servePath);
+  if (!raw.startsWith('/')) return [refusal('target', `entry/${PWA_MANIFEST}`, 0, '', `--serve-path must be an origin-relative path beginning with "/" (got ${JSON.stringify(raw)})`)];
+  const norm = raw.endsWith('/') ? raw : `${raw}/`;
+  if (norm === LEGACY_PWA_ID || norm.startsWith(LEGACY_PWA_ID))
+    return [refusal('target', `entry/${PWA_MANIFEST}`, 0, '', `this tree may not be served from ${JSON.stringify(raw)}: ${PWA_SERVING.why}`)];
+  return [];
+}
+const PWA_ICONS = [
+  { name: 'maya-192.png', size: 192, purpose: 'any' },
+  { name: 'maya-512.png', size: 512, purpose: 'any' },
+  { name: 'maya-512-maskable.png', size: 512, purpose: 'maskable' },
+];
+const APPLE_TOUCH_ICON = { name: 'maya-apple-180.png', size: 180 };
+const APPLE_STATUS_BAR_STYLES = new Set(['default', 'black', 'black-translucent']);
+
+/** The non-TypeScript sources under entry/: the page, its stylesheet and its web app manifest. */
+const ENTRY_ASSETS = new Set(['entry/index.html', 'entry/styles.css', `entry/${PWA_MANIFEST}`]);
 
 const DOM_TAGS = new Set([
   'div', 'span', 'p', 'section', 'article', 'header', 'footer', 'h2', 'h3', 'h4', 'ul', 'ol', 'li',
@@ -1050,13 +1116,13 @@ function diagnosticsToRefusals(ts, rule, root, diags) {
  * The whole pipeline, writing only into `tmp`. Returns the artefacts; the caller decides whether to
  * copy them into dist/ (build), compare them (check) or print them (dry-run).
  */
-export function runBuild(ts, { root = ROOT, tmp, target = 'web', typecheckOnly = false, noBaseline = false } = {}) {
+export function runBuild(ts, { root = ROOT, tmp, target = 'web', typecheckOnly = false, noBaseline = false, servePath = null } = {}) {
   const log = [];
   const refusals = [];
   const all = listShellFiles(root);
   for (const rel of all)
-    if (layerOf(rel) === null && rel !== 'entry/index.html' && rel !== 'entry/styles.css')
-      refusals.push(refusal('unknown-layer', rel, 0, '', 'not a shell source (src/<layer>/**/*.ts, src/contract.ts, entry/**/*.ts, entry/index.html, entry/styles.css)'));
+    if (layerOf(rel) === null && !ENTRY_ASSETS.has(rel))
+      refusals.push(refusal('unknown-layer', rel, 0, '', `not a shell source (src/<layer>/**/*.ts, src/contract.ts, entry/**/*.ts, ${[...ENTRY_ASSETS].join(', ')})`));
   const tsFiles = all.filter((r) => layerOf(r) !== null);
 
   // 2. toolchain + contract declarations
@@ -1147,11 +1213,24 @@ export function runBuild(ts, { root = ROOT, tmp, target = 'web', typecheckOnly =
   const styles = fs.existsSync(stylesPath) ? fs.readFileSync(stylesPath) : null;
   const indexPath = path.join(root, 'entry', 'index.html');
   const indexTemplate = fs.existsSync(indexPath) ? fs.readFileSync(indexPath, 'utf8') : null;
-  const web = addressTarget('web', modules, styles, indexTemplate);
+
+  // 9(b). the PWA identity — refuse before addressing, so a broken identity is never emitted
+  const pwaInputs = readPwaInputs(root);
+  const pwaRefusals = pwaContract(pwaInputs);
+  refusals.push(...pwaRefusals);
+  refusals.push(...servingRefusals(servePath));
+  if (refusals.length) throw new BuildRefused(refusals, log);
+  const assets = pwaAssets(pwaInputs);
+  const pwa = { id: JSON.parse(pwaInputs.manifestText).id, assets: assets.size };
+  log.push(`pwa: ${PWA_MANIFEST} id ${pwa.id}, start_url ./, standalone portrait; ${PWA_ICONS.length} manifest icons + 1 apple-touch icon; no service worker`);
+  // Printed on every build because it is the one identity rule nothing here can check by itself.
+  log.push(`serving: do NOT serve this tree at or under ${PWA_SERVING.mustNotBeServedAtOrUnder} — ${PWA_SERVING.why}. Check a path with: ${PWA_SERVING.check}${servePath === null ? '' : ` (checked: ${servePath})`}`);
+
+  const web = addressTarget('web', modules, styles, indexTemplate, assets);
   refusals.push(...web.refusals);
   let capacitor = null;
   if (target === 'capacitor') {
-    capacitor = addressTarget('capacitor', modules, styles, indexTemplate);
+    capacitor = addressTarget('capacitor', modules, styles, indexTemplate, assets);
     refusals.push(...capacitor.refusals);
     if (!capacitor.refusals.length && !web.refusals.length) refusals.push(...capacitorProof(web, capacitor));
   }
@@ -1173,11 +1252,14 @@ export function runBuild(ts, { root = ROOT, tmp, target = 'web', typecheckOnly =
     toolchain: { typescript: ts.version, target: 'ES2022', module: 'ESNext', moduleResolution: 'Bundler' },
     web: web.manifest,
     targets: TARGETS,
+    // The constraint travels with the artefact, and compareManifest diffs it: a build that stops
+    // carrying it fails --check instead of losing it quietly.
+    serving: PWA_SERVING,
   };
-  return { log, presence, manifest, joined, web, capacitor };
+  return { log, presence, manifest, joined, web, capacitor, pwa };
 }
 
-function addressTarget(name, modules, styles, indexTemplate) {
+function addressTarget(name, modules, styles, indexTemplate, assets = new Map()) {
   const refusals = [];
   const files = new Map(modules);
   if (name === 'capacitor') {
@@ -1208,7 +1290,12 @@ function addressTarget(name, modules, styles, indexTemplate) {
     if (name === 'capacitor') html = html.replace(token, `connect-src ${TARGETS.capacitor.connectSrc}`);
     index = Buffer.from(html, 'utf8');
   }
-  const manifestFiles = [...files.entries()].sort((a, b) => codeUnitOrder(a[0], b[0])).map(([rel, bytes]) => ({ path: rel, sha256: sha256(bytes), bytes: bytes.length }));
+  const record = (entries) => entries.sort((a, b) => codeUnitOrder(a[0], b[0])).map(([rel, bytes]) => ({ path: rel, sha256: sha256(bytes), bytes: bytes.length }));
+  const manifestFiles = record([...files.entries()]);
+  // The PWA assets are addressed by their own recorded hashes rather than folded into `digest`:
+  // `digest` is the address of the EXECUTABLE graph, and the module URLs it names should not churn
+  // because the owner replaced a placeholder icon. --check compares these hashes file by file.
+  const manifestAssets = record([...assets.entries()]);
   return {
     name,
     digest,
@@ -1216,6 +1303,7 @@ function addressTarget(name, modules, styles, indexTemplate) {
     files,
     styles,
     index,
+    assets,
     refusals,
     manifest: {
       digest,
@@ -1223,6 +1311,7 @@ function addressTarget(name, modules, styles, indexTemplate) {
       files: manifestFiles,
       styles: styles ? { sha256: sha256(styles), bytes: styles.length } : null,
       index: index ? { sha256: sha256(index), bytes: index.length } : null,
+      assets: manifestAssets,
     },
   };
 }
@@ -1242,7 +1331,424 @@ function capacitorProof(web, cap) {
   } else out.push(refusal('target', 'entry/index.html', 0, '', 'the capacitor proof needs entry/index.html'));
   if ((web.styles === null) !== (cap.styles === null) || (web.styles && Buffer.compare(web.styles, cap.styles) !== 0))
     out.push(refusal('target', 'styles.css', 0, '', 'styles.css differs between targets'));
+  // 9(b): the installable identity is the SHARED shell's, so it is the same bytes on both carriers.
+  for (const [rel, bytes] of web.assets) {
+    const other = cap.assets.get(rel);
+    if (!other || Buffer.compare(bytes, other) !== 0) out.push(refusal('target', rel, 0, '', 'a PWA asset differs between targets'));
+  }
+  for (const rel of cap.assets.keys()) if (!web.assets.has(rel)) out.push(refusal('target', rel, 0, '', 'the capacitor target emits a PWA asset the web target does not'));
   return out;
+}
+
+// ── 9(b). the PWA identity: the manifest, the head that links it, the icons ──────────────────────
+
+/**
+ * Every `:root` declaration block, split into the two scopes the schemes are read from: the top level
+ * (what a light-scheme window paints) and the body of `@media (prefers-color-scheme: dark)`. Both are
+ * lists, in source order, because a stylesheet may carry more than one `:root` per scope and the
+ * cascade resolves that by ORDER — see `schemeToken`. Declaration blocks in entry/styles.css nest no
+ * braces, so one `}` closes one block; the at-rule depth is tracked for the scopes themselves.
+ */
+function rootBlocks(css) {
+  const DARK = '@media (prefers-color-scheme: dark)';
+  const light = [];
+  const dark = [];
+  let depth = 0;
+  let darkDepth = -1;
+  let at = 0;
+  while (at < css.length) {
+    if (css.startsWith(DARK, at)) {
+      darkDepth = depth + 1;
+      at += DARK.length;
+      continue;
+    }
+    if (css.startsWith(':root', at)) {
+      const open = css.indexOf('{', at);
+      const close = open < 0 ? -1 : css.indexOf('}', open);
+      if (open < 0 || close < 0) break;
+      if (depth === 0) light.push(css.slice(open + 1, close));
+      else if (depth === darkDepth) dark.push(css.slice(open + 1, close));
+      at = close + 1; // both braces consumed, so `depth` is unchanged
+      continue;
+    }
+    if (css[at] === '{') depth += 1;
+    else if (css[at] === '}') {
+      if (depth === darkDepth) darkDepth = -1;
+      depth -= 1;
+    }
+    at += 1;
+  }
+  return { light, dark };
+}
+
+/**
+ * One stylesheet token in both schemes. A manifest colour or a theme-color meta that does not equal
+ * the token the page actually paints is the seam every PWA shows at the top of a standalone window.
+ *
+ * The LAST declaration is the one read, in both senses — the last `--name` inside a block and the last
+ * `:root` block of the scope — because that is what CSS paints: among declarations of equal
+ * specificity the later one wins. Reading the FIRST was a hole in exactly the direction that matters:
+ * a second `--bg` appended to `:root` repainted the page while this reader still returned the value
+ * nothing paints, so the manifest's two colours and both theme-color metas kept matching a dead token
+ * and the build stayed green with a chrome that no longer equals the page. Measured: a doubled `--bg`
+ * put the painted body background at `rgb(255, 0, 0)` with the theme-color meta still saying #f6f5f2.
+ */
+export function schemeToken(css, name) {
+  if (typeof css !== 'string') return { light: null, dark: null };
+  const blocks = rootBlocks(css);
+  const read = (scope) => {
+    let value = null;
+    for (const block of scope)
+      for (const m of block.matchAll(new RegExp(`--${name}:\\s*([^;]+);`, 'g'))) value = m[1].trim();
+    return value;
+  };
+  return { light: read(blocks.light), dark: read(blocks.dark) };
+}
+
+/**
+ * A PNG read as a phone reads it: the signature, a 13-byte IHDR, a whole chunk walk ending at IEND,
+ * and IDAT that actually inflates. Nothing here assumes the colour type or bit depth, so replacing
+ * the placeholder artwork with anything a browser can decode keeps the build green.
+ */
+export function pngProbe(bytes) {
+  const SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  if (!Buffer.isBuffer(bytes) || bytes.length < 45) return null;
+  if (Buffer.compare(bytes.subarray(0, 8), SIGNATURE) !== 0) return null;
+  if (bytes.readUInt32BE(8) !== 13 || bytes.toString('latin1', 12, 16) !== 'IHDR') return null;
+  const width = bytes.readUInt32BE(16);
+  const height = bytes.readUInt32BE(20);
+  const idat = [];
+  let at = 8;
+  let end = false;
+  while (at + 12 <= bytes.length) {
+    const length = bytes.readUInt32BE(at);
+    const type = bytes.toString('latin1', at + 4, at + 8);
+    const next = at + 12 + length;
+    if (length > bytes.length || next > bytes.length) return null;
+    if (type === 'IDAT') idat.push(bytes.subarray(at + 8, at + 8 + length));
+    if (type === 'IEND') {
+      end = next === bytes.length;
+      break;
+    }
+    at = next;
+  }
+  if (!end || idat.length === 0) return null;
+  let raw;
+  try {
+    raw = zlib.inflateSync(Buffer.concat(idat));
+  } catch {
+    return null;
+  }
+  return width > 0 && height > 0 && raw.length >= height ? { width, height, pixelBytes: raw.length } : null;
+}
+
+/** The sources 9(b) reads: the manifest, the icon bytes, the head template and the stylesheet. */
+export function readPwaInputs(root) {
+  const read = (rel) => (fs.existsSync(path.join(root, rel)) ? fs.readFileSync(path.join(root, rel)) : null);
+  const icons = new Map();
+  for (const icon of [...PWA_ICONS, APPLE_TOUCH_ICON]) icons.set(icon.name, read(`${PWA_ICON_SOURCE}/${icon.name}`));
+  const manifest = read(`entry/${PWA_MANIFEST}`);
+  const index = read('entry/index.html');
+  const css = read('entry/styles.css');
+  return {
+    manifestText: manifest === null ? null : manifest.toString('utf8'),
+    index: index === null ? null : index.toString('utf8'),
+    css: css === null ? null : css.toString('utf8'),
+    icons,
+  };
+}
+
+/**
+ * Every <base>, <link> and <meta> the document really has, in tree order, with its attributes parsed:
+ * attribute order, quoting and letter case are the author's business, and a browser does not care
+ * about any of them. This is what makes the head contract a count of what the page HAS rather than a
+ * count of the literal the build hoped to find. The whole document is scanned, not the head alone —
+ * Chrome honours a `<base href>` wherever it is parsed, and a tag in the body is no less real.
+ */
+export function headTags(html) {
+  const out = [];
+  for (const tag of html.matchAll(/<(base|link|meta)\b([^>]*)>/gi)) {
+    const attrs = new Map();
+    for (const a of tag[2].matchAll(/([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*(?:=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g))
+      if (!attrs.has(a[1].toLowerCase())) attrs.set(a[1].toLowerCase(), (a[2] ?? a[3] ?? a[4] ?? '').trim());
+    out.push({ tag: tag[1].toLowerCase(), attrs, raw: tag[0] });
+  }
+  return out;
+}
+const attrOf = (tag, name) => tag.attrs.get(name) ?? '';
+/** `rel` is a space-separated, case-insensitive token list — `REL=manifest` is the same role. */
+const relTokens = (tag) => attrOf(tag, 'rel').toLowerCase().split(/\s+/).filter((t) => t !== '');
+/** One CSP policy string as a browser reads it: directive name → its value tokens. */
+const cspDirectives = (policy) => {
+  const out = new Map();
+  for (const part of String(policy).split(';')) {
+    const tokens = part.trim().split(/\s+/).filter((t) => t !== '');
+    if (tokens.length && !out.has(tokens[0].toLowerCase())) out.set(tokens[0].toLowerCase(), tokens.slice(1));
+  }
+  return out;
+};
+/**
+ * The `content` of a `<meta name="viewport">` as a comma-separated key=value list, whitespace around
+ * the `=` removed, so `viewport-fit = cover` and `viewport-fit=cover` are the same token.
+ */
+const viewportTokens = (tag) =>
+  attrOf(tag, 'content')
+    .split(',')
+    .map((t) => t.trim().replace(/\s*=\s*/, '=').toLowerCase())
+    .filter((t) => t !== '');
+/**
+ * The viewport the whole mobile layout is written against. `viewport-fit=cover` is what makes
+ * `env(safe-area-inset-*)` non-zero, so without it every `--safe-*` token in entry/styles.css is 0px
+ * and the notch and the home indicator paint over the shell; `interactive-widget=resizes-content` is
+ * what makes Chrome shrink the layout viewport for the on-screen keyboard, which is the behaviour the
+ * composer's keyboard inset is built on. Neither is decorative and neither is visible in a test that
+ * only reads the stylesheet, so both are pinned here.
+ */
+const VIEWPORT_TOKENS = Object.freeze(['width=device-width', 'initial-scale=1', 'viewport-fit=cover', 'interactive-widget=resizes-content']);
+/**
+ * Tokens that forbid scaling. `user-scalable=no` and a `maximum-scale`/`minimum-scale` pin are the
+ * three ways a viewport meta takes zoom away, and every one of them breaks the large-text reflow the
+ * mobile probe measures. They are refused rather than merely absent, because a later edit that adds
+ * one would pass a presence-only check.
+ */
+const VIEWPORT_FORBIDDEN = Object.freeze(['user-scalable', 'maximum-scale', 'minimum-scale']);
+
+/**
+ * The manifest members this shell admits, and nothing else. An open set is not a contract: a member
+ * the build never looked at can override one it checked. `display_override` is the case that matters
+ * — a browser that understands it takes it INSTEAD of `display`, so `display_override: ["browser"]`
+ * turns the standalone window this layout is built for back into a tab while every checked member
+ * still reads as it should. The others (share_target, protocol_handlers, file_handlers,
+ * launch_handler, scope_extensions, prefer_related_applications, shortcuts, …) each hand the OS a way
+ * into the app that no part of this shell was designed for, so they are refused by name rather than
+ * by being unlisted.
+ */
+const PWA_MANIFEST_MEMBERS = Object.freeze([
+  'id', 'name', 'short_name', 'lang', 'dir', 'start_url', 'scope', 'display', 'orientation',
+  'theme_color', 'background_color', 'icons',
+]);
+
+/**
+ * Everything a phone needs before it will install this shell, checked as a contract rather than
+ * described in a document: the identity that must never collide with the retired install, a
+ * start_url that opens the chat rather than restoring a route, colours that equal the stylesheet's
+ * own tokens in both schemes, the head tags iOS and Android read, and icons that decode.
+ *
+ * Refusals carry the `target` rule — step 9's rule — because this is the same class of failure:
+ * an emitted page that does not match the contract its carriers were promised.
+ */
+export function pwaContract({ manifestText, index, css, icons }) {
+  const out = [];
+  const MF = `entry/${PWA_MANIFEST}`;
+  const say = (file, message) => out.push(refusal('target', file, 0, '', message));
+  const bg = schemeToken(css, 'bg');
+  if (bg.light === null || bg.dark === null) say('entry/styles.css', 'entry/styles.css must declare --bg in :root and in the dark scheme — the PWA colours are read from it');
+
+  // ── the manifest ──
+  let manifest = null;
+  if (manifestText === null) say(MF, 'the shell has no web app manifest, so it cannot be installed');
+  else if (manifestText.charCodeAt(0) === 0xfeff) say(MF, 'the manifest starts with a byte-order mark');
+  else {
+    try {
+      manifest = JSON.parse(manifestText);
+    } catch (e) {
+      say(MF, `the manifest is not JSON: ${e.message}`);
+    }
+    if (manifest !== null && (typeof manifest !== 'object' || Array.isArray(manifest))) {
+      say(MF, 'the manifest must be a JSON object');
+      manifest = null;
+    }
+    if (manifest !== null && `${JSON.stringify(manifest, null, 2)}\n` !== manifestText)
+      say(MF, 'the manifest must be written in canonical form (JSON.stringify with two-space indent, one trailing newline) so its emitted bytes are predictable');
+    if (/service.?worker/i.test(manifestText)) say(MF, 'the manifest names a service worker; the shell deliberately has none (the build bans the name)');
+  }
+  if (manifest !== null) {
+    const m = manifest;
+    const admitted = new Set(PWA_MANIFEST_MEMBERS);
+    for (const key of Object.keys(m))
+      if (!admitted.has(key))
+        say(
+          MF,
+          key === 'display_override'
+            ? 'the manifest declares display_override, which a browser takes INSTEAD of display: it can put the installed app back in a tab while `display: "standalone"` still reads correctly. The admitted members are exactly ' +
+                `${PWA_MANIFEST_MEMBERS.join(', ')}`
+            : `the manifest declares "${key}", which is not one of the admitted members (${PWA_MANIFEST_MEMBERS.join(', ')}) — an unchecked member can override a checked one, so the set is closed`,
+        );
+    for (const key of ['id', 'name', 'short_name', 'lang', 'dir', 'start_url', 'scope', 'display', 'orientation', 'theme_color', 'background_color', 'icons'])
+      if (!(key in m)) say(MF, `the manifest has no ${key}`);
+    const id = m.id;
+    if (typeof id !== 'string' || !id.startsWith('/'))
+      say(MF, 'the manifest id must be an origin-relative path, so the identity cannot change with the directory the shell is deployed under');
+    else if (id === LEGACY_PWA_ID || id === LEGACY_PWA_ID.replace(/\/$/, '') || id.startsWith(LEGACY_PWA_ID))
+      say(MF, `the manifest id is "${id}" — the retired PWA's install id is "${LEGACY_PWA_ID}", and an install is (origin, id): this would update the owner's legacy install instead of installing beside it`);
+    if (typeof m.start_url === 'string' && m.start_url.includes('#'))
+      say(MF, 'start_url carries a fragment; the shell reads its route from the fragment, so a launch would restore a stored route instead of opening the chat');
+    else if (m.start_url !== './')
+      say(MF, `start_url must be "./" (got ${JSON.stringify(m.start_url ?? null)}) so a launch opens the chat at the shell's own directory`);
+    if (m.scope !== './') say(MF, `scope must be "./" (got ${JSON.stringify(m.scope ?? null)})`);
+    if (m.display !== 'standalone') say(MF, `display must be "standalone" (got ${JSON.stringify(m.display ?? null)})`);
+    if (m.orientation !== 'portrait') say(MF, `orientation must be "portrait" (got ${JSON.stringify(m.orientation ?? null)})`);
+    if (m.lang !== 'ru') say(MF, `lang must be "ru" (got ${JSON.stringify(m.lang ?? null)}) — it is the language of the page it installs`);
+    if (typeof m.name !== 'string' || m.name.trim() === '') say(MF, 'name must be a non-empty string');
+    if (typeof m.short_name !== 'string' || m.short_name.trim() === '') say(MF, 'short_name must be a non-empty string');
+    else if (m.short_name.length > 12) say(MF, `short_name is ${m.short_name.length} characters; a home screen truncates past about 12`);
+    for (const key of ['theme_color', 'background_color'])
+      if (m[key] !== bg.light)
+        say(MF, `${key} is ${JSON.stringify(m[key] ?? null)} but the stylesheet's light --bg is ${JSON.stringify(bg.light)}; a window whose chrome does not equal the page's own background shows a seam`);
+    const want = PWA_ICONS.map((i) => ({ src: `./${PWA_ICON_DIR}/${i.name}`, sizes: `${i.size}x${i.size}`, type: 'image/png', purpose: i.purpose }));
+    const got = Array.isArray(m.icons) ? m.icons : null;
+    if (got === null) say(MF, 'icons must be an array');
+    else if (`${JSON.stringify(got)}` !== `${JSON.stringify(want)}`)
+      say(MF, `icons must be exactly ${JSON.stringify(want)} — the rows the build emits, at 192, 512 and a maskable 512`);
+  }
+
+  // ── the head that links it ──
+  // Counted structurally, never by matching an expected literal. A browser reads the HEAD, not the
+  // bytes this build hoped for, and for the manifest it uses the FIRST `<link rel=manifest>` in tree
+  // order. A literal count therefore admitted a SECOND link in another spelling placed before the
+  // canonical one, and Chrome's own Page.getAppId then answered the retired install's id while this
+  // build printed the canonical one. So: parse every base, link and meta the head really has, group
+  // them by the role the browser reads them for, and refuse anything but exactly one of each role.
+  if (index === null) say('entry/index.html', 'the PWA head contract needs entry/index.html');
+  else {
+    const tags = headTags(index);
+    const links = (token) => tags.filter((t) => t.tag === 'link' && relTokens(t).includes(token));
+    const metas = (name) => tags.filter((t) => t.tag === 'meta' && attrOf(t, 'name').toLowerCase() === name);
+    const seen = (found) => found.map((t) => JSON.stringify(t.raw)).join(', ');
+    /** Exactly one tag in this role, and it is the canonical spelling. */
+    const onlyOne = (found, what, canonical) => {
+      if (found.length !== 1) {
+        say('entry/index.html', `${what} must appear exactly once in the head — a browser uses the FIRST tag in this role in tree order, whatever its spelling (found ${found.length}${found.length ? `: ${seen(found)}` : ''})`);
+        return null;
+      }
+      if (canonical !== null && found[0].raw !== canonical) {
+        say('entry/index.html', `${what} must be written exactly \`${canonical}\` (found ${JSON.stringify(found[0].raw)})`);
+        return null;
+      }
+      return found[0];
+    };
+
+    onlyOne(links('manifest'), `the manifest link \`<link rel="manifest" href="./${PWA_MANIFEST}">\``, `<link rel="manifest" href="./${PWA_MANIFEST}">`);
+
+    // ── the base URL every relative URL in the page resolves against ──
+    // Both halves of this are MEASURED, not reasoned, because the obvious reading of the meta CSP is
+    // wrong. `base-uri 'none'` in a META policy fences a `<base>` only when the `<base>` is parsed
+    // AFTER the meta, since a meta-delivered policy governs what follows it in the document. Served
+    // with no CSP header, Chrome 154 honoured a `<base href="/app/">` planted as the FIRST tag of this
+    // very head WITH the token intact: document.baseURI became http://…/app/, the manifest was fetched
+    // from /app/manifest.webmanifest instead of the shell's own, and Page.getAppId answered
+    // http://…/app/ — the retired install's identity, which is the one thing the absolute `id` exists
+    // to keep apart. The same tag placed after the meta was inert. So neither clause below is
+    // redundant: the element is the only thing that covers the before-the-meta position, and the token
+    // covers the after-the-meta one and does not depend on the deploy host sending a header CSP (the
+    // shell's own dev server does send one, and it made all four planted variants inert — which is
+    // exactly why the meta cannot be checked by serving it there).
+    const bases = tags.filter((t) => t.tag === 'base');
+    if (bases.length)
+      say('entry/index.html', `the page declares a <base> element, which moves the base URL every relative URL resolves against — including ./${PWA_MANIFEST}, so the install identity becomes whatever manifest lives at the new base. Measured in Chrome: a <base href="${LEGACY_PWA_ID}"> placed before the meta CSP is honoured DESPITE base-uri 'none' in it, and Page.getAppId then answered the retired install's id. The shell has no <base> and must not acquire one (found ${seen(bases)})`);
+    const csps = tags.filter((t) => t.tag === 'meta' && attrOf(t, 'http-equiv').toLowerCase() === 'content-security-policy');
+    if (csps.length !== 1)
+      say('entry/index.html', `the head must carry exactly one meta Content-Security-Policy — a browser enforces the INTERSECTION of every policy it is given, so a second one silently narrows or widens nothing predictably (found ${csps.length}${csps.length ? `: ${seen(csps)}` : ''})`);
+    else {
+      const baseUri = cspDirectives(attrOf(csps[0], 'content')).get('base-uri') ?? null;
+      if (baseUri === null || baseUri.join(' ') !== "'none'")
+        say('entry/index.html', `the meta CSP must carry base-uri 'none' — it is what makes a <base> element parsed after it inert, and it is the only such fence on a host that serves this tree without a CSP header (found ${JSON.stringify(baseUri === null ? null : baseUri.join(' '))})`);
+    }
+
+    // ── the viewport ──
+    // A browser uses the FIRST viewport meta, so a second one in any spelling decides the layout.
+    const viewports = metas('viewport');
+    if (viewports.length !== 1)
+      say('entry/index.html', `the viewport meta must appear exactly once in the head — a browser uses the FIRST one in tree order, whatever its spelling (found ${viewports.length}${viewports.length ? `: ${seen(viewports)}` : ''})`);
+    else {
+      const got = viewportTokens(viewports[0]);
+      for (const token of VIEWPORT_TOKENS)
+        if (!got.includes(token))
+          say(
+            'entry/index.html',
+            `the viewport meta must carry ${token} — ${
+              token === 'viewport-fit=cover'
+                ? 'without it every env(safe-area-inset-*) is 0px, so the --safe-* tokens the whole shell pads from collapse and the notch and the home indicator paint over it'
+                : token === 'interactive-widget=resizes-content'
+                  ? "without it Chrome leaves the layout viewport at full height when the keyboard opens, so the composer's keyboard inset never has a smaller viewport to react to"
+                  : 'the layout is written against it'
+            } (found ${JSON.stringify(attrOf(viewports[0], 'content'))})`,
+          );
+      // Presence of the four is not enough: a token that FORBIDS scaling defeats the reflow this shell
+      // is measured at. test/mobile-probe.mjs gates every control at a 2x text scale, and a pinch-zoom
+      // ban is an accessibility failure the build must not be able to ship quietly.
+      for (const token of got)
+        if (VIEWPORT_FORBIDDEN.some((f) => token === f || token.startsWith(`${f}=`)))
+          say(
+            'entry/index.html',
+            `the viewport meta carries ${token}, which stops the page being scaled — the shell is built to reflow and the mobile probe gates every control at a 2x text scale, so zoom may not be forbidden (found ${JSON.stringify(attrOf(viewports[0], 'content'))})`,
+          );
+    }
+    onlyOne(
+      links('apple-touch-icon'),
+      'the apple-touch-icon link (iOS reads no manifest icon when it is added to the home screen)',
+      `<link rel="apple-touch-icon" sizes="${APPLE_TOUCH_ICON.size}x${APPLE_TOUCH_ICON.size}" href="./${PWA_ICON_DIR}/${APPLE_TOUCH_ICON.name}">`,
+    );
+    // iOS prefers `apple-touch-icon-precomposed` over `apple-touch-icon`, so one of those would decide
+    // the home-screen artwork without the checked link ever being read.
+    const precomposed = links('apple-touch-icon-precomposed');
+    if (precomposed.length) say('entry/index.html', `the head declares apple-touch-icon-precomposed, which iOS prefers over the apple-touch-icon link this build checks (found ${seen(precomposed)})`);
+
+    const capable = metas('apple-mobile-web-app-capable');
+    if (capable.length !== 1 || attrOf(capable[0], 'content') !== 'yes')
+      say('entry/index.html', `apple-mobile-web-app-capable must appear exactly once with content="yes" (found ${capable.length}${capable.length ? `: ${seen(capable)}` : ''})`);
+    const bars = metas('apple-mobile-web-app-status-bar-style');
+    if (bars.length !== 1 || !APPLE_STATUS_BAR_STYLES.has(attrOf(bars[0], 'content')))
+      say('entry/index.html', `apple-mobile-web-app-status-bar-style must appear exactly once with one of ${[...APPLE_STATUS_BAR_STYLES].join(', ')} (found ${bars.length}${bars.length ? `: ${seen(bars)}` : ''})`);
+
+    // A browser paints the chrome from the FIRST theme-color whose media query matches, so a third
+    // meta in any spelling decides it. Exactly two, one per scheme, each equal to that scheme's token.
+    const themes = metas('theme-color');
+    if (themes.length !== 2)
+      say('entry/index.html', `the head must carry exactly two theme-color metas, one per prefers-color-scheme — a browser paints from the first that matches, so an unscoped or extra one paints the wrong chrome (found ${themes.length}${themes.length ? `: ${seen(themes)}` : ''})`);
+    else {
+      const byScheme = new Map();
+      for (const t of themes) {
+        const media = attrOf(t, 'media').replace(/\s+/g, ' ').trim();
+        const m = /^\(prefers-color-scheme: (light|dark)\)$/.exec(media);
+        if (m === null) say('entry/index.html', `every theme-color meta must be scoped to one prefers-color-scheme (found media=${JSON.stringify(media)} in ${JSON.stringify(t.raw)})`);
+        else if (byScheme.has(m[1])) say('entry/index.html', `two theme-color metas claim the ${m[1]} scheme`);
+        else byScheme.set(m[1], attrOf(t, 'content'));
+      }
+      for (const scheme of ['light', 'dark']) {
+        if (!byScheme.has(scheme)) say('entry/index.html', `the head has no theme-color meta for the ${scheme} scheme`);
+        else if (byScheme.get(scheme) !== bg[scheme])
+          say('entry/index.html', `the ${scheme} theme-color is ${JSON.stringify(byScheme.get(scheme))} but the stylesheet's ${scheme} --bg is ${JSON.stringify(bg[scheme])}`);
+      }
+    }
+    if (/service.?worker/i.test(index)) say('entry/index.html', 'the page names a service worker; the shell deliberately has none');
+  }
+
+  // ── the icons ──
+  for (const icon of [...PWA_ICONS, APPLE_TOUCH_ICON]) {
+    const rel = `${PWA_ICON_SOURCE}/${icon.name}`;
+    const bytes = icons.get(icon.name) ?? null;
+    if (bytes === null) {
+      say(rel, `the icon is missing — regenerate the set with \`node ${PWA_ICON_SOURCE.replace(/\/icons$/, '')}/make-icons.mjs\``);
+      continue;
+    }
+    const probe = pngProbe(bytes);
+    if (probe === null) say(rel, 'the icon is not a whole, decodable PNG (signature, IHDR, an IDAT that inflates, IEND)');
+    else if (probe.width !== icon.size || probe.height !== icon.size)
+      say(rel, `the icon is ${probe.width}x${probe.height} but is declared ${icon.size}x${icon.size}`);
+  }
+  return out;
+}
+
+/** The manifest and icon bytes as they are emitted, keyed by their path inside the target. */
+export function pwaAssets(inputs) {
+  const assets = new Map();
+  if (inputs.manifestText !== null) assets.set(PWA_MANIFEST, Buffer.from(inputs.manifestText, 'utf8'));
+  for (const icon of [...PWA_ICONS, APPLE_TOUCH_ICON]) {
+    const bytes = inputs.icons.get(icon.name) ?? null;
+    if (bytes !== null) assets.set(`${PWA_ICON_DIR}/${icon.name}`, bytes);
+  }
+  return assets;
 }
 
 /** 6. The emitted graph's runtime imports against the layer table; needles in modules that reach nothing. */
@@ -1391,6 +1897,185 @@ export function runFixture(ts, contract, fixture, shared) {
   return { id: fixture.id, direction: fixture.direction, row: fixture.row, ok, expected: [...fixture.expect].sort(codeUnitOrder), got: [...got].sort(codeUnitOrder), refusals, detail };
 }
 
+/**
+ * 9(b) proven the way the gate rows are: against the REAL committed manifest, head and icons, and
+ * then once per mutation that a phone would feel — each of which must be refused by a named clause,
+ * not merely by "some refusal happened".
+ *
+ * The TypeScript fixtures under test/fixtures/build/** cannot carry these: they are compiled from a
+ * virtual root through `runGates`, and nothing in them is HTML, JSON or PNG. So the identity gets a
+ * table here, next to the write guard, which is the other rule that is proven by execution.
+ */
+export function pwaContractTest(root = ROOT) {
+  const base = readPwaInputs(root);
+  const rows = [];
+  const clone = () => ({ manifestText: base.manifestText, index: base.index, css: base.css, icons: new Map(base.icons) });
+  const canonical = (m) => `${JSON.stringify(m, null, 2)}\n`;
+  const parsed = () => JSON.parse(base.manifestText);
+  const row = (name, input, needle) => {
+    const refusals = pwaContract(input);
+    const hit = needle === null ? refusals.length === 0 : refusals.some((r) => r.message.includes(needle));
+    rows.push({
+      name: `pwa: ${name}`,
+      ok: hit && (needle === null || refusals.length > 0),
+      detail: needle === null && refusals.length ? ` — ${refusals.map((r) => `${r.file}: ${r.message}`).join(' | ')}` : '',
+    });
+  };
+  const withManifest = (name, needle, mutate) => {
+    const input = clone();
+    const m = parsed();
+    mutate(m);
+    input.manifestText = canonical(m);
+    row(name, input, needle);
+  };
+  const withIndex = (name, needle, mutate) => {
+    const input = clone();
+    input.index = mutate(base.index);
+    row(name, input, needle);
+  };
+  const withIcon = (name, needle, icon, bytes) => {
+    const input = clone();
+    input.icons.set(icon, bytes);
+    row(name, input, needle);
+  };
+
+  row('the committed manifest, head and icons are admitted', clone(), null);
+  withManifest('an id equal to the retired install is refused', 'update the owner\'s legacy install', (m) => { m.id = LEGACY_PWA_ID; });
+  withManifest('an id under the retired install is refused', 'update the owner\'s legacy install', (m) => { m.id = '/app/maya'; });
+  withManifest('a relative id is refused', 'origin-relative path', (m) => { m.id = './'; });
+  withManifest('a start_url with a fragment is refused', 'restore a stored route', (m) => { m.start_url = './#fs.history'; });
+  withManifest('a start_url outside the shell directory is refused', 'start_url must be "./"', (m) => { m.start_url = '/app/'; });
+  withManifest('a scope other than ./ is refused', 'scope must be', (m) => { m.scope = '/'; });
+  withManifest('display browser is refused', 'display must be', (m) => { m.display = 'browser'; });
+  withManifest('a free orientation is refused', 'orientation must be', (m) => { m.orientation = 'any'; });
+  withManifest('the wrong lang is refused', 'lang must be', (m) => { m.lang = 'en'; });
+  withManifest('an empty short_name is refused', 'short_name must be', (m) => { m.short_name = ''; });
+  withManifest('a theme_color that is not the stylesheet token is refused', 'shows a seam', (m) => { m.theme_color = '#000000'; });
+  withManifest('a background_color that is not the stylesheet token is refused', 'shows a seam', (m) => { m.background_color = '#ffffff'; });
+  withManifest('a missing icon row is refused', 'icons must be exactly', (m) => { m.icons = m.icons.slice(1); });
+  withManifest('an icon row of the wrong size is refused', 'icons must be exactly', (m) => { m.icons[0].sizes = '144x144'; });
+  withManifest('a manifest that names a service worker is refused', 'names a service worker', (m) => { m.serviceworker = { src: './sw.js' }; });
+  {
+    const input = clone();
+    input.manifestText = `${JSON.stringify(parsed(), null, 4)}\n`;
+    row('a manifest that is not in canonical form is refused', input, 'canonical form');
+  }
+  {
+    const input = clone();
+    input.manifestText = null;
+    row('no manifest at all is refused', input, 'cannot be installed');
+  }
+  withIndex('a head without the manifest link is refused', 'must appear exactly once', (h) => h.replace(`<link rel="manifest" href="./${PWA_MANIFEST}">\n`, ''));
+  withIndex('a head without the apple-touch icon is refused', 'apple-touch-icon link', (h) => h.replace(/<link rel="apple-touch-icon"[^>]*>\n/, ''));
+  withIndex('a head without apple-mobile-web-app-capable is refused', 'apple-mobile-web-app-capable', (h) => h.replace(/<meta name="apple-mobile-web-app-capable"[^>]*>\n/, ''));
+  withIndex('an unknown status bar style is refused', 'status-bar-style must appear exactly once with one of', (h) => h.replace(/content="(default|black|black-translucent)">/, 'content="translucent">'));
+  withIndex('a single unscoped theme-color is refused', 'exactly two theme-color metas', (h) => h.replace(/<meta name="theme-color"[^>]*>\n<meta name="theme-color"[^>]*>\n/, '<meta name="theme-color" content="#f6f5f2">\n'));
+  withIndex('a theme-color that is not the dark token is refused', 'dark --bg is', (h) => h.replace(/(<meta name="theme-color" media="\(prefers-color-scheme: dark\)" content=")[^"]*/, '$1#000000'));
+  withIndex('a page that registers a service worker is refused', 'names a service worker', (h) => h.replace('</head>', '<link rel="serviceworker" href="./sw.js">\n</head>'));
+
+  // ── the bypasses a literal count admitted: a second tag in the same ROLE, in another spelling ──
+  // The first of these was measured in a browser, not argued: with the planted link in place, Chrome's
+  // Page.getAppManifest fetched ./legacy.webmanifest and Page.getAppId answered the retired install's
+  // id, while `node build.mjs` printed `id /maya-chat-shell/` and exited 0.
+  withIndex(
+    'a SECOND manifest link, differently spelled, placed BEFORE the canonical one is refused (the browser uses the first)',
+    'must appear exactly once in the head',
+    (h) => h.replace(`<link rel="manifest" href="./${PWA_MANIFEST}">`, `<link href='./legacy.webmanifest' REL=manifest>\n<link rel="manifest" href="./${PWA_MANIFEST}">`),
+  );
+  withIndex(
+    'a manifest link with its attributes reordered is refused (one spelling, so the emitted bytes are predictable)',
+    'must be written exactly',
+    (h) => h.replace(`<link rel="manifest" href="./${PWA_MANIFEST}">`, `<link href="./${PWA_MANIFEST}" rel="manifest">`),
+  );
+  withIndex(
+    'a second apple-touch-icon link before the canonical one is refused',
+    'apple-touch-icon link',
+    (h) => h.replace('<link rel="apple-touch-icon"', '<link rel="APPLE-TOUCH-ICON" sizes="180x180" href="./icons/other.png">\n<link rel="apple-touch-icon"'),
+  );
+  withIndex(
+    'an apple-touch-icon-precomposed link is refused (iOS prefers it over the checked one)',
+    'apple-touch-icon-precomposed',
+    (h) => h.replace('</head>', '<link rel="apple-touch-icon-precomposed" sizes="180x180" href="./icons/other.png">\n</head>'),
+  );
+  withIndex(
+    'a THIRD theme-color meta, differently spelled, is refused',
+    'exactly two theme-color metas',
+    (h) => h.replace('<meta name="theme-color"', '<meta content=#000000 NAME=theme-color>\n<meta name="theme-color"'),
+  );
+  withIndex(
+    'a second apple-mobile-web-app-capable meta is refused',
+    'apple-mobile-web-app-capable must appear exactly once',
+    (h) => h.replace('</head>', "<meta name='APPLE-MOBILE-WEB-APP-CAPABLE' content=yes>\n</head>"),
+  );
+  withIndex(
+    'a theme-color scoped to something other than a colour scheme is refused',
+    'scoped to one prefers-color-scheme',
+    (h) => h.replace('media="(prefers-color-scheme: light)"', 'media="(min-width: 1px)"'),
+  );
+
+  // ── the base URL, both halves, each measured in a browser before it was pinned ──
+  // Dropping the token: a <base> parsed after the meta goes from inert to honoured.
+  // Planting the element: honoured even WITH the token, because it is parsed before the policy exists.
+  // In both cases Chrome's Page.getAppId answered http://…/app/ — the retired install's identity.
+  withIndex(
+    "a meta CSP that has lost base-uri 'none' is refused (measured: the same planted <base> goes from inert to honoured, and Page.getAppId becomes the retired install's id)",
+    "must carry base-uri 'none'",
+    (h) => h.replace("base-uri 'none'; ", ''),
+  );
+  withIndex(
+    'a planted <base href="/app/"> is refused (measured: honoured DESPITE the meta token, because a meta policy governs only what follows it)',
+    'declares a <base> element',
+    (h) => h.replace('<head>', '<head>\n<base href="/app/">'),
+  );
+
+  // ── the viewport the mobile layout is written against ──
+  withIndex(
+    'a viewport meta without viewport-fit=cover is refused (every env(safe-area-inset-*) would be 0px)',
+    'must carry viewport-fit=cover',
+    (h) => h.replace(', viewport-fit=cover', ''),
+  );
+  withIndex(
+    'a SECOND viewport meta, differently spelled, placed BEFORE the canonical one is refused (the browser uses the first)',
+    'viewport meta must appear exactly once',
+    (h) => h.replace('<meta name="viewport"', "<meta NAME=VIEWPORT content='width=device-width, initial-scale=1'>\n<meta name=\"viewport\""),
+  );
+
+  // ── the manifest is a CLOSED set: an unchecked member can override a checked one ──
+  withManifest('display_override is refused by name — a browser takes it INSTEAD of display', 'display_override', (m) => { m.display_override = ['browser']; });
+  withManifest('an unknown member (share_target) is refused', 'not one of the admitted members', (m) => { m.share_target = { action: './', method: 'POST', enctype: 'multipart/form-data', params: { title: 'title' } }; });
+  withManifest('an unknown member (scope_extensions) is refused', 'not one of the admitted members', (m) => { m.scope_extensions = [{ origin: 'https://example.invalid' }]; });
+  withManifest('an unknown member (protocol_handlers) is refused', 'not one of the admitted members', (m) => { m.protocol_handlers = [{ protocol: 'web+maya', url: './?x=%s' }]; });
+  withManifest('an unknown member (launch_handler) is refused', 'not one of the admitted members', (m) => { m.launch_handler = { client_mode: 'navigate-new' }; });
+  withManifest('an unknown member (file_handlers) is refused', 'not one of the admitted members', (m) => { m.file_handlers = [{ action: './', accept: { 'text/plain': ['.txt'] } }]; });
+  withManifest('an unknown member (prefer_related_applications) is refused', 'not one of the admitted members', (m) => { m.prefer_related_applications = true; });
+  withManifest('an unknown member (shortcuts) is refused', 'not one of the admitted members', (m) => { m.shortcuts = [{ name: 'История', url: './#fs.history' }]; });
+  withManifest('a manifest missing an admitted member is refused', 'the manifest has no dir', (m) => { delete m.dir; });
+  withIcon('an icon at the wrong pixel size is refused', 'but is declared', PWA_ICONS[0].name, base.icons.get(APPLE_TOUCH_ICON.name));
+  withIcon('a truncated icon is refused', 'whole, decodable PNG', PWA_ICONS[1].name, base.icons.get(PWA_ICONS[1].name).subarray(0, 60));
+  withIcon('an icon whose deflate stream is corrupted is refused', 'whole, decodable PNG', PWA_ICONS[2].name, (() => {
+    const bytes = Buffer.from(base.icons.get(PWA_ICONS[2].name));
+    bytes[bytes.length - 20] ^= 0xff; // inside IDAT: the stream no longer inflates cleanly
+    return bytes;
+  })());
+  withIcon('a missing icon is refused', 'the icon is missing', APPLE_TOUCH_ICON.name, null);
+  {
+    const input = clone();
+    input.css = (input.css ?? '').replace(/--bg:[^;]*;/g, '');
+    row('a stylesheet with no --bg token is refused', input, 'must declare --bg');
+  }
+  {
+    // The reader takes the LAST declaration because that is the one CSS paints. Measured in Chrome
+    // with this exact mutation: the painted body background was rgb(255, 0, 0) while the theme-color
+    // meta still said #f6f5f2. Reading the first left the whole colour clause green over a page that
+    // paints something else, so the mutation must now be refused by the colour clauses themselves.
+    const input = clone();
+    const first = /--bg:[^;]*;/.exec(input.css ?? '');
+    input.css = (input.css ?? '').replace(first[0], `${first[0]}\n  --bg: #ff0000;`);
+    row('a SECOND --bg appended to :root is read as CSS paints it — the last — so the manifest and meta colours no longer match', input, 'light --bg is "#ff0000"');
+  }
+  return rows;
+}
+
 /** The write guard, proven twice: directly, and against a real tsc emit whose output leaves outDir. */
 export function writeGuardTest(ts, tmp) {
   const results = [];
@@ -1432,8 +2117,9 @@ export function selfTest(ts, { tmp, base = FIXTURE_BASE } = {}) {
   for (const f of fixtures)
     for (const r of f.expect) if (!RULE_IDS.includes(r)) coverage.push({ name: `coverage: ${f.id} names an unknown rule "${r}"`, ok: false });
   const guard = writeGuardTest(ts, tmp);
-  const ok = results.every((r) => r.ok) && coverage.every((c) => c.ok) && guard.every((g) => g.ok);
-  return { ok, results, coverage, guard };
+  const pwa = pwaContractTest();
+  const ok = results.every((r) => r.ok) && coverage.every((c) => c.ok) && guard.every((g) => g.ok) && pwa.every((p) => p.ok);
+  return { ok, results, coverage, guard, pwa };
 }
 
 // ── main ─────────────────────────────────────────────────────────────────────────────────────────
@@ -1447,6 +2133,7 @@ function writeDist(result, target) {
   for (const [rel, bytes] of t.files) guard.write(path.join(outDir, 'm', t.d16, rel), bytes);
   if (t.styles) guard.write(path.join(outDir, 'styles.css'), t.styles);
   if (t.index) guard.write(path.join(outDir, 'index.html'), t.index);
+  for (const [rel, bytes] of t.assets) guard.write(path.join(outDir, ...rel.split('/')), bytes);
   if (target === 'web') {
     guard.write(path.join(dist, 'maya-chat-shell.ts'), result.joined);
     guard.write(path.join(dist, 'manifest.json'), `${JSON.stringify(result.manifest, null, 2)}\n`);
@@ -1462,8 +2149,15 @@ export function compareManifest(fresh, prior) {
   const freshFiles = new Map(fresh.web.files.map((f) => [f.path, f.sha256]));
   for (const [p, h] of freshFiles) if (priorFiles.get(p) !== h) diffs.push(`${p}: ${priorFiles.get(p) ?? 'absent'} != fresh ${h}`);
   for (const p of priorFiles.keys()) if (!freshFiles.has(p)) diffs.push(`${p}: no longer emitted`);
+  // 9(b): the PWA assets are not part of `digest`, so they are compared here by name and hash.
+  const priorAssets = new Map((prior.web?.assets ?? []).map((f) => [f.path, f.sha256]));
+  const freshAssets = new Map(fresh.web.assets.map((f) => [f.path, f.sha256]));
+  for (const [p, h] of freshAssets) if (priorAssets.get(p) !== h) diffs.push(`${p}: ${priorAssets.get(p) ?? 'absent'} != fresh ${h}`);
+  for (const p of priorAssets.keys()) if (!freshAssets.has(p)) diffs.push(`${p}: no longer emitted`);
   for (const k of ['styles', 'index'])
     if ((prior.web?.[k]?.sha256 ?? null) !== (fresh.web[k]?.sha256 ?? null)) diffs.push(`${k}: ${prior.web?.[k]?.sha256 ?? 'absent'} != fresh ${fresh.web[k]?.sha256 ?? 'absent'}`);
+  if (JSON.stringify(prior.serving ?? null) !== JSON.stringify(fresh.serving))
+    diffs.push(`serving: ${JSON.stringify(prior.serving ?? null)} != fresh ${JSON.stringify(fresh.serving)}`);
   return diffs;
 }
 
@@ -1471,10 +2165,18 @@ export async function main(argv) {
   const flags = new Set(argv.filter((a) => a.startsWith('--') && !a.includes('=')));
   const targetArg = argv.find((a) => a.startsWith('--target='));
   const target = targetArg ? targetArg.slice('--target='.length) : 'web';
+  const servePathArg = argv.find((a) => a.startsWith('--serve-path='));
+  const servePath = servePathArg ? servePathArg.slice('--serve-path='.length) : null;
   const known = new Set(['--check', '--self-test', '--typecheck', '--dry-run', '--no-baseline']);
+  const knownValued = new Set(['--target', '--serve-path']);
   for (const f of flags)
     if (!known.has(f)) {
       console.error(`unknown flag ${f}`);
+      return 2;
+    }
+  for (const a of argv)
+    if (a.startsWith('--') && a.includes('=') && !knownValued.has(a.slice(0, a.indexOf('=')))) {
+      console.error(`unknown flag ${a.slice(0, a.indexOf('='))}`);
       return 2;
     }
   if (!(target in TARGETS)) {
@@ -1491,15 +2193,15 @@ export async function main(argv) {
         console.log(`${x.ok ? 'PASS' : 'FAIL'}  ${x.id}  ${what}${x.detail}`);
         if (!x.ok) for (const rf of x.refusals) console.log(`        ${formatRefusal(rf)}`);
       }
-      for (const c of [...r.coverage, ...r.guard]) console.log(`${c.ok ? 'PASS' : 'FAIL'}  ${c.name}`);
+      for (const c of [...r.coverage, ...r.guard, ...r.pwa]) console.log(`${c.ok ? 'PASS' : 'FAIL'}  ${c.name}${c.detail ?? ''}`);
       const refuse = r.results.filter((x) => x.direction === 'refuse');
       const admit = r.results.filter((x) => x.direction === 'admit');
       const bypass = r.results.find((x) => x.row === 'bypass');
-      console.log(`self-test: refuse ${refuse.filter((x) => x.ok).length}/${refuse.length} refused with the named rule, admit ${admit.filter((x) => x.ok).length}/${admit.length} admitted, coverage ${r.coverage.filter((c) => c.ok).length}/${r.coverage.length}, write guard ${r.guard.filter((g) => g.ok).length}/${r.guard.length}${bypass ? `, bypass${bypass.detail}` : ''}`);
+      console.log(`self-test: refuse ${refuse.filter((x) => x.ok).length}/${refuse.length} refused with the named rule, admit ${admit.filter((x) => x.ok).length}/${admit.length} admitted, coverage ${r.coverage.filter((c) => c.ok).length}/${r.coverage.length}, write guard ${r.guard.filter((g) => g.ok).length}/${r.guard.length}, pwa contract ${r.pwa.filter((p) => p.ok).length}/${r.pwa.length}${bypass ? `, bypass${bypass.detail}` : ''}`);
       console.log(`self-test: ${r.ok ? 'PASS' : 'FAIL'}`);
       return r.ok ? 0 : 1;
     }
-    const result = runBuild(ts, { tmp, target, typecheckOnly: flags.has('--typecheck'), noBaseline: flags.has('--no-baseline') });
+    const result = runBuild(ts, { tmp, target, typecheckOnly: flags.has('--typecheck'), noBaseline: flags.has('--no-baseline'), servePath });
     if (flags.has('--typecheck')) {
       for (const l of result.log) console.log(l);
       console.log('typecheck: PASS');
@@ -1508,11 +2210,11 @@ export async function main(argv) {
     // The joined-source digest is the FIRST 64-hex token printed (k5-exit-gate.sh:17).
     console.log(`digest ${result.manifest.digest}`);
     const t = target === 'capacitor' ? result.capacitor : result.web;
-    console.log(`web ${t.digest} (${target}; ${t.files.size} modules; styles.css ${t.styles ? 'present' : 'absent'}; index.html ${t.index ? 'present' : 'absent'})`);
+    console.log(`web ${t.digest} (${target}; ${t.files.size} modules; styles.css ${t.styles ? 'present' : 'absent'}; index.html ${t.index ? 'present' : 'absent'}; ${t.assets.size} pwa assets)`);
     for (const l of result.log) console.log(l);
     console.log(`entry: ${result.presence.entry}`);
     console.log(`net/client.ts: ${result.presence.client}`);
-    if (target === 'capacitor') console.log('capacitor proof: PASS (only net/endpoint.js differs; index.html differs only in digest path and connect-src; styles.css identical)');
+    if (target === 'capacitor') console.log('capacitor proof: PASS (only net/endpoint.js differs; index.html differs only in digest path and connect-src; styles.css and every PWA asset identical)');
     if (flags.has('--check')) {
       const priorPath = path.join(ROOT, 'dist', 'manifest.json');
       if (!fs.existsSync(priorPath)) {

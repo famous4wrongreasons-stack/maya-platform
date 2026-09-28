@@ -12,6 +12,7 @@
     "check": "node build.mjs --check",
     "self-test": "node build.mjs --self-test",
     "typecheck": "node build.mjs --typecheck",
+    "check:serving": "node build.mjs --dry-run --serve-path=$MAYA_SHELL_SERVE_PATH",
     "test": "node --test conformance.test.mjs test/*.test.mjs",
     "serve:mock": "node dev/serve.mjs --root=dist/web --port=8787 --mock=dev/fixtures --scenario=happy",
     "serve:api": "node dev/serve.mjs --root=dist/web --port=8788 --api=http://127.0.0.1:3310/api",

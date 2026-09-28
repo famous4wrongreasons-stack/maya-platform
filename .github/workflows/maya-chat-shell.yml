@@ -68,6 +68,12 @@ jobs:
           cmp dist/manifest.json "$RUNNER_TEMP/manifest.committed.json"
       - name: Self-test - every refuse fixture refused, every admit fixture admitted
         run: node build.mjs --self-test
+      # brand/ is a build-time generator, not shipped code: the purity gate and the K5/K15 censuses walk
+      # src + entry and do not reach it. What honestly covers it is this - the committed artwork is a
+      # fresh generation of its own description, on both matrix runtimes - plus the build's PNG probe,
+      # the per-file hashes --check compares, and the text scan in test/brand.test.mjs.
+      - name: Brand icons - the committed bytes are a fresh generation (brand/ is not typechecked; it is not TypeScript and not in the emitted graph)
+        run: node brand/make-icons.mjs --check
       - name: Typecheck
         run: node build.mjs --typecheck --no-baseline
       - name: Node test suite
