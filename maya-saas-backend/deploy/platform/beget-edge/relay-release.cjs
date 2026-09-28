@@ -43,7 +43,7 @@ function candidate(source) {
   return result;
 }
 
-const {inspectScript} = require('./public-relay-inventory.cjs');
+const {inspectScript, archiveScript} = require('./public-relay-inventory.cjs');
 function sshPython(script, input) {
   // Script is fixed repository code; data (including candidate credentials) uses stdin.
   const command = 'python3 -c ' + "'" + script.replaceAll("'", "'\\''") + "'";
@@ -62,6 +62,27 @@ function parseCandidate(source) {
     {input: source, encoding: 'utf8', timeout: 45000});
   assert.ok(result.status === 0 && result.stdout === 'PARSE_PASS', 'Candidate PHP syntax check failed');
 }
+// A+ tightening 1: a pin may not be edited without the committed bytes it owns.
+// Together with the live-equality assertion below this is three-way
+// committed <-> manifest <-> live equality, so a manifest-only edit
+// "just to get a green release" fails mechanically, not only by policy.
+function validateCommittedSources(entries, baseDir = __dirname) {
+  let checked = 0;
+  for (const entry of entries) {
+    if (!entry.committedSource) continue;
+    const file = path.resolve(baseDir, entry.committedSource);
+    const inside = path.relative(baseDir, file);
+    assert.ok(inside && !inside.startsWith('..') && !path.isAbsolute(inside),
+      'Committed routing source must live beside the gate: ' + entry.path);
+    assert.equal(sha(fs.readFileSync(file)), entry.sha256,
+      'Committed routing source does not match its pin: ' + entry.path);
+    checked++;
+  }
+  return checked;
+}
+const archivedOffroot = entry => entry.role === 'archived_offroot';
+const preservedClass = entry =>
+  ['preserved_html', 'preserved_backup', 'archived_offroot'].includes(entry.role);
 function validateObserved(observed, allowIncident = false) {
   const expectedRoots = [...new Set(manifest.entries.map(e =>
     e.path.slice(0, e.path.indexOf('/public_html') + '/public_html'.length)))].sort();
@@ -75,15 +96,26 @@ function validateObserved(observed, allowIncident = false) {
       && observed.rows.some(r => r.path === e.path && r.missing))).map(e => e.path).sort();
   assert.deepEqual(observed.configurationFound, expectedConfiguration, 'Unreconciled local routing/handler configuration');
   assert.equal(observed.rows.length, manifest.entries.length);
+  const committedRoutingFiles = validateCommittedSources(manifest.entries);
   const seen = new Set();
   for (const entry of manifest.entries) {
     const row = observed.rows.find(r => r.path === entry.path);
     assert.ok(row && !seen.has(row.path), 'Missing/duplicate manifest entry'); seen.add(row.path);
+    if (archivedOffroot(entry)) {
+      // R3 ruling: archived off-root. Absence from every public root is the assertion;
+      // no escape branch applies and a restored copy can never be accepted as correct.
+      assert.ok(row.missing === true && row.sha256 === null,
+        'Archived artifact restored into a public root: ' + entry.path);
+      continue;
+    }
     const incident = allowIncident && entry.path === manifest.incident.path;
     const retirement = allowIncident && manifest.retirements.find(r => r.path === entry.path);
     assert.ok(row.sha256 === entry.sha256 || (incident && row.sha256 === manifest.incident.unsafeSha256)
       || (retirement && row.sha256 === retirement.beforeSha256
         && (row.sha256 !== null || row.missing === true)), 'Live artifact changed: ' + entry.path);
+    // A committed routing file owns no escape branch: live must equal the pin exactly.
+    if (entry.committedSource) assert.equal(row.sha256, entry.sha256,
+      'Live routing file differs from its committed source: ' + entry.path);
     if (entry.role.endsWith('php')) {
       const bytes = Buffer.from(row.source, 'base64'); assert.equal(sha(bytes), row.sha256);
       const text = incident ? candidate(bytes.toString('utf8')) : bytes.toString('utf8');
@@ -92,7 +124,10 @@ function validateObserved(observed, allowIncident = false) {
     }
   }
   return {entries: seen.size, activePhp: manifest.entries.filter(e => e.role.endsWith('php')).length,
-    publicRoots: expectedRoots.length, localRoutingFiles: expectedConfiguration.length, protectedHtmlAndBackups: 7,
+    publicRoots: expectedRoots.length, localRoutingFiles: expectedConfiguration.length,
+    // Derived, never a literal: a silent drift in these counts must fail, not pass.
+    protectedHtmlAndBackups: manifest.entries.filter(preservedClass).length,
+    archivedOffroot: manifest.entries.filter(archivedOffroot).length, committedRoutingFiles,
     blockedArchives: manifest.entries.filter(e => e.role === 'blocked_archive').length};
 }
 function denialUrls(entry) {
@@ -102,9 +137,18 @@ function denialUrls(entry) {
   const suffixes = manifest.retirements.some(r => r.artifact === entry.path) ? ['', '/r01-path-info'] : [''];
   return root.origins.flatMap(origin => suffixes.map(suffix => origin + relative + suffix));
 }
+const deniedStatuses = ['403', '404', '410'];
+function assertDenialResponse(probe) {
+  assert.ok(deniedStatuses.includes(probe.status), 'Historical archive is publicly reachable: ' + probe.url);
+  assert.ok(manifest.hosting.roots.some(r => r.origins.includes(new URL(probe.effectiveUrl).origin)),
+    'Unreviewed redirect target');
+}
+// archived_offroot is probed exactly like blocked_archive: a former public URL that
+// answers 200 on any reviewed alias fails the release.
+const deniedRoles = ['blocked_archive', 'archived_offroot'];
 function verifyBlockedArchives(allowIncident = false) {
   const receipts = [];
-  for (const entry of manifest.entries.filter(e => e.role === 'blocked_archive')) {
+  for (const entry of manifest.entries.filter(e => deniedRoles.includes(e.role))) {
     if (allowIncident && manifest.retirements.some(r => r.artifact === entry.path)) continue;
     for (const url of denialUrls(entry)) {
     const result = spawnSync('curl', ['--silent', '--show-error', '--head', '--output', '/dev/null',
@@ -112,12 +156,34 @@ function verifyBlockedArchives(allowIncident = false) {
       '--write-out', '%{http_code} %{url_effective}', '--max-time', '15', url], {encoding: 'utf8', timeout: 20000});
     assert.equal(result.status, 0, 'Archive accessibility check unavailable');
     const [status, effectiveUrl] = result.stdout.trim().split(' ');
-    assert.ok(['403', '404', '410'].includes(status), 'Historical archive is publicly reachable: ' + url);
-    assert.ok(manifest.hosting.roots.some(r => r.origins.includes(new URL(effectiveUrl).origin)), 'Unreviewed redirect target');
+    assertDenialResponse({url, status, effectiveUrl});
     receipts.push({url, status, effectiveUrl});
     }
   }
   return receipts;
+}
+
+// R3 archive equality. The archive directory is operator-local and deliberately
+// absent from this repository: it is resolved from MAYA_R01_ARCHIVE_DIR, or from a
+// one-line pointer file under the private evidence directory the retirement writer
+// already owns. An unresolved locator fails the gate closed; it never skips the class.
+function archiveRequest(env = process.env) {
+  const locator = manifest.archive.locator;
+  return {dir: env[locator.env] || null, pointer: env[locator.pointerEnv] || locator.pointerDefault};
+}
+function validateArchive(archive) {
+  const entries = manifest.entries.filter(archivedOffroot);
+  assert.ok(archive && archive.resolved === true,
+    'Private archive locator unresolved: ' + ((archive && archive.reason) || 'no result'));
+  assert.deepEqual(archive.errors, [], 'Incomplete private archive scan');
+  assert.equal(archive.symlinks, 0, 'Unreconciled private archive symlink');
+  assert.equal(archive.insidePublicRoot, false, 'Private archive must sit outside every public root');
+  const hashes = new Set(archive.hashes);
+  assert.ok(hashes.has(manifest.archive.rollbackManifestSha256),
+    'R3 rollback manifest of record is absent from the private archive');
+  for (const entry of entries) assert.ok(hashes.has(entry.sha256),
+    'Archived artifact is no longer present at its pinned hash: ' + entry.path);
+  return {archivedOffrootVerified: entries.length, archiveFiles: archive.files};
 }
 
 // Monotonic HTTP retirement, not a new PHP owner. Validate the entire finite
@@ -208,27 +274,31 @@ function main(mode) {
   assert.ok(['verify', 'prepare', 'repair'].includes(mode), 'Usage: relay-release.cjs verify|prepare|repair');
   const observed = sshPython(inspectScript, manifest);
   const summary = validateObserved(observed, mode !== 'verify');
+  const archive = validateArchive(sshPython(archiveScript, archiveRequest()));
   let denials = verifyBlockedArchives(mode !== 'verify');
   const row = observed.rows.find(e => e.path === manifest.incident.path);
   const result = candidate(Buffer.from(row.source, 'base64').toString('utf8'));
   parseCandidate(result);
   let repair = null;
   if (mode === 'repair') {
+    const archivedPaths = new Set(manifest.entries.filter(archivedOffroot).map(e => e.path));
     const retirement = sshPython(retireScript, {retirements: manifest.retirements,
       protected: observed.rows.filter(e => !manifest.retirements.some(r => r.path === e.path))
-        .map(e => ({path: e.path, sha256: e.sha256}))});
+        .filter(e => !archivedPaths.has(e.path)).map(e => ({path: e.path, sha256: e.sha256}))});
     // Denial must work at the actual known URLs before the active relay repair.
     denials = verifyBlockedArchives();
     repair = sshPython(replaceScript, {candidate: Buffer.from(result).toString('base64'),
-      protected: manifest.entries.filter(e => e.path !== manifest.incident.path)});
+      protected: manifest.entries.filter(e => e.path !== manifest.incident.path && !archivedOffroot(e))});
     repair.retirement = retirement;
     validateObserved(sshPython(inspectScript, manifest));
     denials = verifyBlockedArchives();
   }
-  console.log(JSON.stringify({status: 'PASS', mode, ...summary, repair, denials,
+  console.log(JSON.stringify({status: 'PASS', mode, ...summary, ...archive, repair, denials,
     phpSourceEvaluation: 0, bookingProviderMessageEffects: 0}));
 }
-module.exports = {candidate, sanitized, validateObserved, inspectScript, replaceScript, retireScript, denialUrls, manifest};
+module.exports = {candidate, sanitized, validateObserved, validateCommittedSources, validateArchive,
+  archiveRequest, assertDenialResponse, deniedStatuses, deniedRoles, inspectScript, archiveScript,
+  replaceScript, retireScript, denialUrls, manifest};
 if (require.main === module) {
   try { main(process.argv[2]); } catch (e) {
     // Assertion errors can include private actual/expected source strings.

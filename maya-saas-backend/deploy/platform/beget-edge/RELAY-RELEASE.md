@@ -14,17 +14,44 @@ candidate is accepted. A matching new fixture hash alone does not certify safety
 
 `verify-edge-candidate.cjs DIRECTORY` inspects all candidate PHP/PWA files,
 rejects backup PHP and placeholder credentials, and is mandatory in the edge
-builder. The existing R01 registered-overlay checks remain mandatory for alias
+builder. `verify-edge-candidate.cjs --shell DIRECTORY [PUBLISH_PATH]` is the
+second, equally strict shape for a static shell/PWA input, which carries no PHP
+at all: it requires zero PHP-like files by the live scanner's own predicate, zero
+routing/handler configuration, zero symlinks, zero archive-named files, exactly
+one web app manifest whose every icon resolves inside the candidate, a relative
+`scope`/`start_url`, and an `id` that neither claims nor extends a reserved legacy
+install id. It is not a relaxation of `verify()`, which is unchanged.
+The existing R01 registered-overlay checks remain mandatory for alias
 changes. `relay-release-manifest.json` pins the 26 inspected PHP artifacts in three mapped roots (10 active,
-16 denied), seven HTML/backup files and nine local routing files. Archive content
+16 denied), seven preserved HTML/backup files — two served maintenance pages and
+five `archived_offroot` bundles the owner-approved R3 ruling moved out of the
+served roots — and nine local routing files. Archive content
 is historical evidence, not a permitted rollback target.
 
 `node deploy/platform/beget-edge/relay-release.cjs verify` reads the live manifest,
-checks all ten active PHP copies, pins both maintenance pages and both backups,
-and checks HTTP HEAD denial across known domain aliases for every denied PHP
-artifact. Source inspection never evaluates PHP; HTTP probes have no action/body. Backend deployment runs this gate before upload, before
+checks all ten active PHP copies, pins both maintenance pages, requires every
+`archived_offroot` entry to be **absent** from every public root, and checks HTTP
+HEAD denial across known domain aliases for every denied PHP artifact and every
+former `archived_offroot` URL. Source inspection never evaluates PHP; HTTP probes have no action/body. Backend deployment runs this gate before upload, before
 activation and after activation. An unknown file or hash fails closed and needs
 exact reconciliation; do not change the manifest just to get a green release.
+
+Three classes make that last sentence mechanical rather than advisory. **Absence:**
+an `archived_offroot` artifact that reappears at its pinned path fails closed, and
+for HTML this is the only mechanism, because HTML never enters the PHP-like
+inventory. **Archive equality:** the gate hashes the private R3 archive read-only
+and requires the R3 rollback manifest of record and each `archived_offroot` pin to
+be present there; no archive byte, name or path ever leaves the host, nothing is
+copied or restored, and an unresolved locator fails the gate instead of skipping
+the class. The archive directory is operator-local and deliberately absent from
+this repository: it is resolved from `MAYA_R01_ARCHIVE_DIR`, or from a one-line
+pointer file under the mode-0700 private evidence directory the retirement writer
+already owns (`MAYA_R01_ARCHIVE_POINTER`, default
+`.maya-release-evidence/r01-20260912/archive-dir`). **Three-way equality:** a
+manifest entry that names a `committedSource` must satisfy
+`sha256(committed) == pin == live`, so editing a pin to match a changed file fails
+against the committed bytes. Class counts in the receipt are derived from the
+roles, never written as literals.
 
 For the owner-approved 2026-09-12 incident only, `prepare` derives the exact
 certified b1006160… result from the exact d5eeaa82… incident by replacing the one
@@ -79,7 +106,9 @@ must pass the whole-source guard. HTTP 500 is never accepted as safe retirement.
 
 `prepare` accepts only the exact known incident pre-state, without mutation.
 `repair` is authorized only after mandatory gates. It writes two exact HTTP
-denial rules and restores the certified main relay; historical PHP, maintenance
-pages and both PWA backups are pinned byte-for-byte. `verify` never accepts the
-incident pre-state. A failed post-state check blocks backend cutover; never
+denial rules and restores the certified main relay; historical PHP and the
+maintenance pages are pinned byte-for-byte in the host writers' protected
+pre-state. An `archived_offroot` artifact is absent by ruling, so it is pinned by
+absence in `validateObserved` and by hash in the private archive, never by
+presence in that pre-state. `verify` never accepts the incident pre-state. A failed post-state check blocks backend cutover; never
 restore unsafe bytes as a rollback. No business/provider/message proof is used.

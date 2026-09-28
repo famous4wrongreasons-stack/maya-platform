@@ -17,18 +17,46 @@ const boundary = load(
 const release = load('../../deploy/platform/beget-edge/relay-release.cjs') as {
   candidate: (source: string) => string;
   validateObserved: (observed: object) => unknown;
+  validateCommittedSources: (
+    entries: Array<{ path: string; sha256: string; committedSource?: string }>,
+    baseDir?: string,
+  ) => number;
+  archiveRequest: (env?: Record<string, string | undefined>) => {
+    dir: string | null;
+    pointer: string;
+  };
+  deniedStatuses: string[];
+  deniedRoles: string[];
   replaceScript: string;
   retireScript: string;
   denialUrls: (entry: { path: string }) => string[];
   manifest: {
     incident: { path: string; canonicalSha256: string; unsafeSha256: string };
-    entries: Array<{ path: string; role: string; sha256: string }>;
+    archive: {
+      rollbackManifestSha256: string;
+      locator: {
+        note: string;
+        env: string;
+        pointerEnv: string;
+        pointerDefault: string;
+      };
+    };
+    entries: Array<{
+      path: string;
+      role: string;
+      sha256: string;
+      committedSource?: string;
+    }>;
   };
 };
 const edge = load(
   '../../deploy/platform/beget-edge/verify-edge-candidate.cjs',
 ) as {
   verify: (directory: string) => object;
+  verifyShellCandidate: (
+    directory: string,
+    options?: { publishPath?: string; reservedIds?: string[] },
+  ) => { files: number; php: number; icons: number; id: string };
 };
 const source = read('test/fixtures/beget/api-proxy.sanitized.php');
 const sha = (value: string) => createHash('sha256').update(value).digest('hex');
@@ -95,10 +123,22 @@ describe('R01 live artifact and release/recovery protection', () => {
     expect(entries).toHaveLength(42);
     expect(new Set(entries.map((e) => e.path)).size).toBe(42);
     expect(entries.filter((e) => e.role.endsWith('php'))).toHaveLength(10);
-    expect(entries.filter((e) => e.role === 'preserved_html')).toHaveLength(5);
+    expect(entries.filter((e) => e.role === 'preserved_html')).toHaveLength(2);
     expect(entries.filter((e) => e.role === 'preserved_backup')).toHaveLength(
-      2,
+      0,
     );
+    // R3 moved five of the seven preserved files off-root. The class total is
+    // what is pinned, so a role rename can never quietly drop one of them.
+    expect(entries.filter((e) => e.role === 'archived_offroot')).toHaveLength(
+      5,
+    );
+    expect(
+      entries.filter((e) =>
+        ['preserved_html', 'preserved_backup', 'archived_offroot'].includes(
+          e.role,
+        ),
+      ),
+    ).toHaveLength(7);
     expect(entries.filter((e) => e.role === 'blocked_archive')).toHaveLength(
       16,
     );
@@ -135,6 +175,97 @@ describe('R01 live artifact and release/recovery protection', () => {
     expect(deploy).not.toMatch(/public_html|relay-release.cjs" repair/);
     expect(read('deploy/platform/build-mayaos-edge.sh')).toContain(
       'verify-edge-candidate.cjs" "$output"',
+    );
+  });
+
+  it('probes every former public URL of an archived bundle on every reviewed alias', () => {
+    const entries = release.manifest.entries;
+    expect(release.deniedRoles).toEqual([
+      'blocked_archive',
+      'archived_offroot',
+    ]);
+    expect(release.deniedStatuses).toEqual(['403', '404', '410']);
+    const archived = entries.filter((e) => e.role === 'archived_offroot');
+    // Four archived files on the eight-origin root, one on the four-origin root.
+    expect(archived.flatMap((e) => release.denialUrls(e))).toHaveLength(36);
+    expect(
+      entries
+        .filter((e) => release.deniedRoles.includes(e.role))
+        .flatMap((e) => release.denialUrls(e)),
+    ).toHaveLength(164);
+    // An archived bundle is not a retirement, so it gets one suffix, not two.
+    expect(
+      archived.flatMap((e) =>
+        release.denialUrls(e).filter((u) => u.endsWith('/r01-path-info')),
+      ),
+    ).toHaveLength(0);
+  });
+
+  it('keeps the private archive operator-local and never pins a host archive path', () => {
+    const locator = release.manifest.archive.locator;
+    expect(Object.keys(locator).sort()).toEqual([
+      'env',
+      'note',
+      'pointerDefault',
+      'pointerEnv',
+    ]);
+    expect(locator.env).toBe('MAYA_R01_ARCHIVE_DIR');
+    expect(locator.pointerEnv).toBe('MAYA_R01_ARCHIVE_POINTER');
+    // The already-committed private evidence directory the retirement writer owns.
+    expect(locator.pointerDefault).toBe(
+      '.maya-release-evidence/r01-20260912/archive-dir',
+    );
+    expect(locator.pointerDefault.startsWith('/')).toBe(false);
+    expect(release.manifest.archive.rollbackManifestSha256).toBe(
+      'f93c052092bd9ca68a04b4ec56fbe9ee2068ce92345c7f4e606454369e44342e',
+    );
+    expect(release.archiveRequest({})).toEqual({
+      dir: null,
+      pointer: '.maya-release-evidence/r01-20260912/archive-dir',
+    });
+    expect(
+      release.archiveRequest({ MAYA_R01_ARCHIVE_DIR: '/operator/local' }).dir,
+    ).toBe('/operator/local');
+    // The repository publishes the R3 hash of record and nothing else about the archive.
+    const evidence = JSON.parse(
+      read(
+        '../docs/rebuild/evidence/maya-chat-first-ux/legacy-bundle-remediation-r3.json',
+      ),
+    ) as { rollbackManifestSha256: string };
+    expect(evidence.rollbackManifestSha256).toBe(
+      release.manifest.archive.rollbackManifestSha256,
+    );
+  });
+
+  it('pins the two repository-owned routing files against their committed bytes', () => {
+    const owned = release.manifest.entries.filter((e) => e.committedSource);
+    expect(owned).toHaveLength(2);
+    expect(owned.map((e) => e.committedSource).sort()).toEqual([
+      '.htaccess',
+      'rc/r12-legacy-team-media.htaccess',
+    ]);
+    for (const entry of owned)
+      expect(
+        sha(read('deploy/platform/beget-edge/' + entry.committedSource!)),
+      ).toBe(entry.sha256);
+    expect(release.validateCommittedSources(release.manifest.entries)).toBe(2);
+  });
+
+  it('gates a static shell candidate as strictly as a PHP edge candidate', () => {
+    const shell = resolve(root, '../maya-chat-shell/dist/web');
+    const result = edge.verifyShellCandidate(shell);
+    expect(result).toMatchObject({ files: 37, php: 0, icons: 3 });
+    // A shell that claims the legacy install id would update the owner's existing PWA.
+    expect(result.id).toBe('/maya-chat-shell/');
+    expect(() =>
+      edge.verifyShellCandidate(shell, { reservedIds: ['/maya-chat-shell/'] }),
+    ).toThrow('reserved legacy install id');
+    expect(() =>
+      edge.verifyShellCandidate(shell, { publishPath: '/app/' }),
+    ).toThrow('escapes the publish path');
+    // verify() keeps its own shape: a PHP-free input is still not an edge release.
+    expect(() => edge.verify(shell)).toThrow(
+      'Incomplete PWA/relay release input',
     );
   });
 

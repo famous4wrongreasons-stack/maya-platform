@@ -16,17 +16,17 @@
     {
       "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.codex-loyalty-20260721.html",
       "sha256": "23e03edb05a6ff07eaa7d81338092796fe9868a4b061cb47d6a834dcf94bce5c",
-      "role": "preserved_html"
+      "role": "archived_offroot"
     },
     {
       "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.backup-20260731-anton-analytics.html",
       "sha256": "b2d84aeaf5501e0b417c42fc4bb0473fd216cdfb0e9568caec9b911df353d7ab",
-      "role": "preserved_html"
+      "role": "archived_offroot"
     },
     {
       "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/tenant-test.html",
       "sha256": "4d9fc3528ca88f6ecd43e93594814e8eaa60de4ceec82b17166595927276b4e5",
-      "role": "preserved_html"
+      "role": "archived_offroot"
     },
     {
       "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php",
@@ -51,12 +51,12 @@
     {
       "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/index.html.pre-maintenance-20260908-211040",
       "sha256": "784b68630d659a5aceb9832d84f6ebd5c6519a1ecd0a15adcbe5e5dd029607b6",
-      "role": "preserved_backup"
+      "role": "archived_offroot"
     },
     {
       "path": "/home/m/mocine3388/mayaos.ru/public_html/app/index.html.pre-maintenance-20260908-211040",
       "sha256": "b3278512ca71beee709b93c1de2892fa841ef0cb19ae965791d71dfcb2a65e6e",
-      "role": "preserved_backup"
+      "role": "archived_offroot"
     },
     {
       "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php.bak-20260704_230004",
@@ -171,7 +171,8 @@
     {
       "path": "/home/m/mocine3388/mayaos.ru/public_html/.htaccess",
       "sha256": "b265cfd8a86708ec88589921091240c1f21f12892870f615747bff2f675b2e98",
-      "role": "hosting_config"
+      "role": "hosting_config",
+      "committedSource": ".htaccess"
     },
     {
       "path": "/home/m/mocine3388/mocine3388.beget.tech/public_html/.htaccess",
@@ -206,7 +207,8 @@
     {
       "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/media/team/.htaccess",
       "sha256": "f8a587c3f1d5d45f4b977e9164cd325ad5161d8747984d80b215063e5593864f",
-      "role": "hosting_config"
+      "role": "hosting_config",
+      "committedSource": "rc/r12-legacy-team-media.htaccess"
     },
     {
       "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/backups/.htaccess",
@@ -214,6 +216,18 @@
       "role": "hosting_config"
     }
   ],
+  "archive": {
+    "ruling": "R3 — confirmed publicly reachable legacy bundles live off-root in a private archive; archived_offroot entries are absent from every public root and their former URLs must deny",
+    "evidence": "docs/rebuild/evidence/maya-chat-first-ux/legacy-bundle-remediation-r3.json",
+    "rollbackManifestSha256": "f93c052092bd9ca68a04b4ec56fbe9ee2068ce92345c7f4e606454369e44342e",
+    "locator": {
+      "note": "The archive directory is operator-local and is deliberately absent from this repository. The gate resolves it from MAYA_R01_ARCHIVE_DIR, or from the one-line pointer file below, read on the host relative to $HOME. An unresolved locator fails the gate closed.",
+      "env": "MAYA_R01_ARCHIVE_DIR",
+      "pointerEnv": "MAYA_R01_ARCHIVE_POINTER",
+      "pointerDefault": ".maya-release-evidence/r01-20260912/archive-dir"
+    },
+    "read": "hash-only: the gate hashes every regular file in the archive and compares hashes; it never returns archive bytes, names or paths, and never writes, copies or restores"
+  },
   "incident": {
     "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/api-proxy.php",
     "unsafeSha256": "d5eeaa82f69f6d72c366576797c2920fecd0d27f76262e2c5f4a342f363ddd05",
