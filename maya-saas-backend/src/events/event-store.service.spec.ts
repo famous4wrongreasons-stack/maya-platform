@@ -18,6 +18,13 @@ type Mock<T extends (...args: never[]) => unknown> = jest.MockedFunction<T>;
 /** Аргумент записи: без явного типа `mock.calls` становится `any`. */
 type WriteArgs = { data: Record<string, unknown> };
 
+/** Приём факта идёт `createManyAndReturn` + `skipDuplicates`, поэтому мок — на нём. */
+type AppendArgs = {
+  data: Record<string, unknown>[];
+  skipDuplicates?: boolean;
+};
+type AppendMany = Mock<(args: AppendArgs) => Promise<{ id: string }[]>>;
+
 const uniqueViolation = () =>
   new Prisma.PrismaClientKnownRequestError('unique', {
     code: 'P2002',
@@ -25,14 +32,14 @@ const uniqueViolation = () =>
   });
 
 const buildService = (overrides?: {
-  create?: Mock<(args: WriteArgs) => Promise<{ id: string }>>;
+  appendMany?: AppendMany;
   quarantineCreate?: Mock<(args: WriteArgs) => Promise<{ id: string }>>;
   update?: Mock<(args: WriteArgs) => Promise<{ attempts: number }>>;
 }) => {
   // Тип задаётся явно и здесь: у голого `jest.fn()` он выводится как `any`, и
   // тогда `mock.calls` перестаёт проверяться типами вовсе.
-  const create: Mock<(args: WriteArgs) => Promise<{ id: string }>> =
-    overrides?.create ?? jest.fn().mockResolvedValue({ id: 'event-1' });
+  const appendMany: AppendMany =
+    overrides?.appendMany ?? jest.fn().mockResolvedValue([{ id: 'event-1' }]);
   const quarantineCreate: Mock<(args: WriteArgs) => Promise<{ id: string }>> =
     overrides?.quarantineCreate ??
     jest.fn().mockResolvedValue({ id: 'quarantine-1' });
@@ -40,13 +47,13 @@ const buildService = (overrides?: {
     overrides?.update ?? jest.fn().mockResolvedValue({ attempts: 1 });
 
   const prisma = {
-    domainEvent: { create, update },
+    domainEvent: { createManyAndReturn: appendMany, update },
     ingestionQuarantine: { create: quarantineCreate },
   } as unknown as PrismaService;
 
   const tenantContext = new TenantContextService();
   const service = new EventStoreService(prisma, tenantContext);
-  return { service, tenantContext, create, quarantineCreate, update };
+  return { service, tenantContext, appendMany, quarantineCreate, update };
 };
 
 const appendInput = {
@@ -75,10 +82,13 @@ describe('приём факта', () => {
     // Повтор ожидаем: измерено до семи доставок одной пары за минуты. Если бы
     // здесь летело исключение, штатное поведение провайдера выглядело бы
     // аварией и заглушало бы настоящие сбои.
-    const create: Mock<(args: WriteArgs) => Promise<{ id: string }>> = jest
-      .fn()
-      .mockRejectedValue(uniqueViolation());
-    const { service, tenantContext } = buildService({ create });
+    //
+    // Пустой результат — это ровно то, что возвращает `ON CONFLICT DO NOTHING`:
+    // строки нет, ошибки нет. Прежний мок отклонял промис с `P2002`, и именно
+    // поэтому дефект был невидим — у мока нет состояния aborted, которое в
+    // живой базе и разворачивало весь проход.
+    const appendMany: AppendMany = jest.fn().mockResolvedValue([]);
+    const { service, tenantContext } = buildService({ appendMany });
 
     await expect(
       tenantContext.runAsSystemTenant('tenant-1', () =>
@@ -87,19 +97,34 @@ describe('приём факта', () => {
     ).resolves.toEqual({ outcome: 'duplicate', eventId: null });
   });
 
+  it('🔴 уникальность гасится в запросе, а не в `catch`', async () => {
+    // Сторож против возврата к `domainEvent.create`: снаружи транзакции такой
+    // код выглядит работающим, а внутри чужой транзакции роняет весь проход.
+    const { service, tenantContext, appendMany } = buildService();
+
+    await tenantContext.runAsSystemTenant('tenant-1', () =>
+      service.append(appendInput),
+    );
+
+    // Без `skipDuplicates` вставка снова поднимет `P2002` внутри чужой
+    // транзакции — ровно тот дефект. Цель конфликта задаёт схема
+    // (`@@unique([tenantId, dedupFingerprint])`), а не этот вызов.
+    expect(appendMany.mock.calls[0][0].skipDuplicates).toBe(true);
+  });
+
   it('🔴 идентичность в событии — Maya, версия задана явно', async () => {
-    const { service, tenantContext, create } = buildService();
+    const { service, tenantContext, appendMany } = buildService();
 
     await tenantContext.runAsSystemTenant('tenant-1', () =>
       service.append({ ...appendInput, sourceRef: '1911799161' }),
     );
 
-    const written = create.mock.calls[0][0];
-    expect(written.data.entityId).toBe('appointment-maya-1');
+    const written = appendMany.mock.calls[0][0].data[0];
+    expect(written.entityId).toBe('appointment-maya-1');
     // Внешний идентификатор допустим ТОЛЬКО как провенанс.
-    expect(written.data.sourceRef).toBe('1911799161');
-    expect(written.data.version).toBe(1);
-    expect(written.data.observation).toBe('after_watch_started');
+    expect(written.sourceRef).toBe('1911799161');
+    expect(written.version).toBe(1);
+    expect(written.observation).toBe('after_watch_started');
   });
 
   it('чужой контекст арендатора отвергается', async () => {
@@ -113,10 +138,10 @@ describe('приём факта', () => {
   });
 
   it('иная ошибка базы не выдаётся за дубликат', async () => {
-    const create: Mock<(args: WriteArgs) => Promise<{ id: string }>> = jest
+    const appendMany: AppendMany = jest
       .fn()
       .mockRejectedValue(new Error('connection lost'));
-    const { service, tenantContext } = buildService({ create });
+    const { service, tenantContext } = buildService({ appendMany });
 
     await expect(
       tenantContext.runAsSystemTenant('tenant-1', () =>

@@ -79,6 +79,12 @@ jobs:
       - run: node scripts/k3-gateway-check.mjs
       - run: npm test -- --runInBand
       - run: npm run test:e2e -- --runInBand
+      # 🔴 Регрессия на дефект приёма фактов (2026-09-20..28): повтор внутри чужой
+      # транзакции разворачивал весь проход сверки. Доказать это можно только на
+      # живом PostgreSQL — у мока нет состояния aborted, и прежний модульный тест
+      # именно поэтому проходил. Своя конфигурация, потому что suite ПИШЕТ и его
+      # проверка базы обязана сработать до первого соединения.
+      - run: npm run test:events:live
       - run: npm run build
       - name: HTTP smoke with explicit AppModule test prerequisites
         # The same public fixture literals as Widgets Live; no production secrets

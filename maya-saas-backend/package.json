@@ -36,6 +36,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:events:live": "jest --config ./test/jest-events-live.json --runInBand",
     "test:widgets:live": "jest --config ./test/jest-widgets-live.json --runInBand",
     "test:widgets:http": "ts-node --project tsconfig.scripts.json --transpile-only scripts/widgets-intent-http-proof.ts",
     "typecheck:widgets-live": "tsc --noEmit --project test/tsconfig.widgets-live.json --incremental false",

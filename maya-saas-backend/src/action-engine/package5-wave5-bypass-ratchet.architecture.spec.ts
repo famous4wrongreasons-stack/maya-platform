@@ -223,7 +223,32 @@ describe('Package 5 Wave 5 fact-plane and bypass ratchet', () => {
     expect(mirror).toContain('async bootstrap');
     expect(mirror).toContain('apply: boolean');
     expect(mirror).not.toMatch(/domainEvent\.(create|update|upsert|delete)/);
-    expect(eventStore).toContain('db.domainEvent.create');
+    // Владелец плоскости фактов тот же, механизм приёма — нет. Повтор гасится
+    // в САМОЙ вставке: `P2002` из `create` внутри чужой транзакции уже оставлял
+    // её в состоянии aborted, и следующий оператор ронял весь проход сверки
+    // (154 прохода, 2026-09-20..28). Запись по-прежнему идёт здесь и по клиенту
+    // вызывающего, поэтому зеркало и события остаются одним коммитом.
+    const append = eventStore.slice(
+      eventStore.indexOf('async append('),
+      eventStore.indexOf('async quarantine('),
+    );
+    // Приём факта обязан быть идемпотентным НА СТОРОНЕ БАЗЫ. `skipDuplicates`
+    // разворачивается в `ON CONFLICT DO NOTHING`, который не поднимает ошибку,
+    // поэтому чужая транзакция остаётся пригодной.
+    expect(append).toContain('db.domainEvent.createManyAndReturn');
+    expect(append).toContain('skipDuplicates: true');
+    // 🔴 Возврат к `create`/`upsert` запрещён: снаружи транзакции такой код
+    // выглядит работающим, внутри — разворачивает проход целиком.
+    // `update` остаётся: исход обработки к приёму факта отношения не имеет.
+    expect(append).not.toMatch(/domainEvent\.create\(/);
+    expect(append).not.toMatch(/domainEvent\.upsert\(/);
+    // И ловушки `P2002` внутри приёма быть не должно — она и была дефектом.
+    // Проверяется КОНСТРУКЦИЯ, а не слово: в комментарии код ошибки назван
+    // намеренно, и запрет на подстроку запрещал бы объяснять причину.
+    // В `quarantine()` такая ловушка законна — там всегда `this.prisma`,
+    // никогда чужая транзакция, поэтому срез ограничен именно `append`.
+    expect(append).not.toMatch(/code\s*===\s*'P2002'/);
+    expect(append).not.toMatch(/catch\s*\(/);
     expect(eventStore).not.toMatch(
       /recoveryConversion\.|recoveryTouchpoint\.|loyaltyTransaction\.|billingPayment\./,
     );

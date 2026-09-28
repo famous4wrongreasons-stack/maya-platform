@@ -96,9 +96,41 @@ export class EventStoreService {
     const tenantId = this.tenantContext.assertTenantId(input.tenantId);
     const db = client ?? this.prisma;
 
-    try {
-      const event = await db.domainEvent.create({
-        data: {
+    /**
+     * 🔴 Повтор гасится В САМОЙ ВСТАВКЕ, а не в `catch`.
+     *
+     * Ловить `P2002` здесь было нельзя, и это стоило восьми дней сверки. Когда
+     * `client` — чужая транзакция (а это штатный режим, ради него параметр и
+     * существует), PostgreSQL к моменту возврата ошибки УЖЕ перевёл транзакцию
+     * в состояние aborted. Из этого состояния JavaScript не выводит: `catch`
+     * возвращал `duplicate`, вызывающий спокойно продолжал цикл переходов, и
+     * следующий же оператор на том же соединении падал с
+     * `25P02 current transaction is aborted`. Весь проход сверки разворачивался
+     * из-за штатного повтора — 154 прохода с 2026-09-20 по 2026-09-28, причём
+     * откат отменял и обновление зеркала, поэтому следующий проход находил тот
+     * же переход и падал снова.
+     *
+     * `skipDuplicates` разворачивается в `ON CONFLICT DO NOTHING`, который
+     * ошибки не поднимает вовсе: транзакция остаётся пригодной, а зеркало и
+     * события по-прежнему коммитятся вместе. Арбитром уникальности остаётся
+     * индекс в базе — два процесса, принявшие одну доставку одновременно,
+     * договориться в памяти не могут, поэтому проверять существование отдельным
+     * `SELECT` нельзя: между ним и вставкой помещается ровно та гонка, ради
+     * которой уникальность и живёт в базе.
+     *
+     * Почему не сырой `INSERT ... ON CONFLICT`: он дал бы то же самое, но
+     * заставил бы задавать `id` самому. Идентификатор здесь `@default(cuid())`,
+     * то есть монотонный по времени, а `DomainEvent` читается постранично с
+     * `orderBy: { id: 'asc' }` в четырёх местах (проекция инбокса, оповещения о
+     * released-слотах). Случайный `randomUUID()` порядок бы сломал. Здесь же
+     * идентификатор по-прежнему генерирует Prisma, а список колонок остаётся
+     * типизированным — перепутать колонку со значением негде.
+     *
+     * Пустой результат — это и есть «уже было».
+     */
+    const [event] = await db.domainEvent.createManyAndReturn({
+      data: [
+        {
           tenantId,
           type: input.type,
           version: DOMAIN_EVENT_VERSION,
@@ -113,20 +145,14 @@ export class EventStoreService {
           dedupFingerprint: input.dedupFingerprint,
           payload: input.payload,
         },
-        select: { id: true },
-      });
-      return { outcome: 'persisted', eventId: event.id };
-    } catch (error) {
-      // 🔴 Уникальность в базе — единственный надёжный арбитр: два процесса,
-      // принявшие одну доставку одновременно, договориться в памяти не могут.
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      ) {
-        return { outcome: 'duplicate', eventId: null };
-      }
-      throw error;
-    }
+      ],
+      skipDuplicates: true,
+      select: { id: true },
+    });
+
+    return event
+      ? { outcome: 'persisted', eventId: event.id }
+      : { outcome: 'duplicate', eventId: null };
   }
 
   /**
