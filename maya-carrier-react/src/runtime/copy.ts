@@ -1,0 +1,226 @@
+// The shell's sentences, re-typed.
+//
+// These live in maya-chat-shell/src/dom/timeline.ts, which is NOT in the published runtime package
+// — `dom/` is the other carrier's view layer and the allowlist refuses it by design. So the strings
+// are transcribed verbatim rather than imported, and this file is the one place a carrier sentence
+// may be written.
+//
+// Why the runtime does not simply send text: ports.ts:191 — "Shell chrome, never model history
+// (P-11). The DOM owns the sentence for each kind." A NoticeKind and a WidgetSentence are shell
+// chrome; putting their words on the wire would make them look like something MAYA said.
+//
+// The exception is VoiceView.unavailable, whose `.label` IS minted by the runtime and must be
+// rendered verbatim — not applicable here while voice is unbuilt.
+
+import type {
+  NoticeKind,
+  TurnRetry,
+  WidgetSentence,
+} from '../../../maya-chat-shell/src/shell/ports.ts';
+import type {
+  ChatFailure,
+  FirstRunFailure,
+  SignedOutReason,
+  SignInFailure,
+} from '../../../maya-chat-shell/src/net/types.ts';
+
+/** SH-06, exactly. dom/timeline.ts:49 */
+export const APPROVAL_NOT_HERE = 'Действие ждёт подтверждения; подтвердить его здесь пока нельзя.';
+export const COLD_START_HINT = 'Напишите MAYA, что нужно сделать, — ответ появится здесь.';
+export const THINKING = 'MAYA думает…';
+export const NEW_TURN_NOTE =
+  'Текст остался в поле ввода — отправьте его ещё раз, это будет новый запрос.';
+
+/** dom/timeline.ts:55-73 */
+export const noticeSentence = (notice: NoticeKind): string => {
+  switch (notice) {
+    case 'approval_not_here':
+      return APPROVAL_NOT_HERE;
+    case 'subscription_required':
+      return 'Разговор с MAYA недоступен для этого бизнеса: нужна активная подписка.';
+    case 'feature_locked':
+      return 'MAYA сейчас недоступна для этого бизнеса.';
+    case 'tenant_required':
+      return 'Для разговора с MAYA нужен вход в бизнес';
+    case 'outdated_client':
+      return 'Версия MAYA устарела — обновите страницу';
+    case 'display_capped':
+      return 'Ранние сообщения скрыты: на экране остаются последние 200.';
+    case 'deeplink_refused':
+      return 'Эту ссылку нельзя открыть здесь.';
+    case 'deeplink_unavailable':
+      return 'Карточку по этой ссылке пока нельзя показать.';
+  }
+};
+
+/** What happened to a turn, before any retry wording. dom/timeline.ts:78-106 */
+export const failureBase = (failure: ChatFailure): string => {
+  switch (failure.reason) {
+    case 'signed_out':
+      return 'Сессия завершена';
+    case 'subscription_required':
+      return 'Сообщение не отправлено: MAYA недоступна для этого бизнеса';
+    case 'feature_locked':
+      return 'Сообщение не отправлено: MAYA сейчас недоступна для этого бизнеса';
+    case 'tenant_required':
+      return 'Сообщение не отправлено: нужен вход в бизнес';
+    case 'forbidden':
+      return 'Сообщение не отправлено: этот запрос сейчас недоступен';
+    case 'rate_limited':
+      return 'Слишком много запросов';
+    case 'outdated_client':
+      return 'Сообщение не отправлено';
+    case 'model_failure':
+      return 'MAYA не смогла безопасно ответить';
+    case 'conflict':
+      return 'MAYA не приняла этот запрос';
+    case 'no_connection':
+      return 'Нет связи';
+    case 'aborted':
+      return 'Отправка прервана';
+    case 'server_error':
+      return 'Сервер MAYA не ответил';
+    case 'unexpected_response':
+      return 'Ответ MAYA не получен';
+  }
+};
+
+/** Why a widget carries a neutral sentence instead of a state change (D9). */
+export const widgetSentence = (sentence: WidgetSentence): string => {
+  switch (sentence) {
+    case 'activation_unavailable':
+      return 'Это действие сейчас недоступно.';
+    case 'activation_forbidden':
+      return 'Это действие сейчас закрыто.';
+    case 'no_connection':
+      return 'Нет связи.';
+    case 'route_refused':
+      return 'Этот переход здесь недоступен.';
+    case 'expired_not_resolved':
+      return 'Карточка устарела.';
+  }
+};
+
+/** Why the composer will not send. The runtime decides this; the carrier only words it. */
+export const composerReason = (
+  reason: 'subscription_required' | 'tenant_required' | 'signed_out',
+): string => {
+  switch (reason) {
+    case 'signed_out':
+      return 'Войдите, чтобы написать MAYA';
+    case 'subscription_required':
+      return 'Нужна активная подписка';
+    case 'tenant_required':
+      return 'Нужен вход в бизнес';
+  }
+};
+
+/** Whole seconds left before a same-request retry is allowed; 0 when allowed now. */
+export const secondsLeft = (retry: TurnRetry, now: number): number =>
+  retry.retry === 'same_request' && retry.notBefore !== null && retry.notBefore > now
+    ? Math.ceil((retry.notBefore - now) / 1000)
+    : 0;
+
+// ── the first run, from dom/signin.ts ──────────────────────────────────────────────────────────
+
+/** dom/signin.ts:60 */
+export const SIGN_IN_TITLE = 'Вход в MAYA';
+
+/** dom/signin.ts:62 */
+export const rateLimitSentence = (seconds: number): string =>
+  `Слишком много попыток — повторите через ${seconds} с`;
+
+/** The first run's own outcomes: finding a business, and being handed to Telegram. dom/signin.ts:95 */
+export const firstRunSentence = (failure: FirstRunFailure): string => {
+  switch (failure.state) {
+    case 'term_too_short':
+      return 'Введите хотя бы два символа';
+    case 'rate_limited':
+      return rateLimitSentence(failure.retryAfterSec);
+    case 'telegram_unavailable':
+      return 'Вход через Telegram сейчас недоступен';
+    case 'business_unavailable':
+      return 'Этот бизнес сейчас не принимает вход';
+    case 'callback_unsolicited':
+      // Says what to do without describing the attack, and without implying the person did wrong.
+      return 'Этот вход начали не здесь — начните заново';
+    case 'login_expired':
+      return 'Вход устарел — начните заново';
+    case 'telegram_declined':
+      return 'Вход через Telegram отменён';
+    case 'account_unavailable':
+      return 'Вход для этой учётной записи сейчас недоступен';
+    case 'phone_required':
+      return 'Разрешите Telegram передать номер телефона и попробуйте снова';
+    case 'registration_closed':
+      return 'Этот бизнес сейчас не принимает новых пользователей';
+    case 'no_connection':
+      return 'Нет связи — повторить';
+    case 'unexpected_response':
+      return 'Не удалось — повторить';
+  }
+};
+
+/** dom/signin.ts:116 */
+export const fieldSentence = (field: 'email' | 'password' | 'code' | 'business'): string => {
+  switch (field) {
+    case 'email':
+      return 'Введите email полностью, например name@example.ru';
+    case 'password':
+      return 'Пароль — не короче 8 символов';
+    case 'code':
+      return 'Введите цифры из письма: от 4 до 8';
+    case 'business':
+      return 'Выберите бизнес ещё раз';
+  }
+};
+
+/** dom/signin.ts:65-92 */
+export const failureSentence = (failure: SignInFailure): string => {
+  switch (failure.state) {
+    case 'rate_limited':
+      return rateLimitSentence(failure.retryAfterSec);
+    case 'code_attempts_exhausted':
+      return 'Слишком много попыток ввода кода — запросите новый код';
+    case 'email_login_unavailable':
+      return 'Вход по коду сейчас недоступен — войдите через Telegram';
+    case 'code_invalid':
+      return 'Код не подошёл — проверьте и введите ещё раз';
+    case 'code_expired':
+      return 'Код устарел — запросите новый';
+    case 'email_not_linked':
+      return 'Этот email не связан с пользователем выбранного бизнеса';
+    case 'credentials_invalid':
+      // Never says which of the two was wrong — also for an account whose business does not accept
+      // sign-in now (403, answered before the password is checked). The second clause keeps that
+      // case truthful without confirming an account.
+      return 'Неверный email или пароль — или вход сейчас недоступен';
+    case 'account_unavailable':
+      return 'Вход для этой учётной записи сейчас недоступен';
+    case 'field_invalid':
+      return fieldSentence(failure.field);
+    case 'no_connection':
+      return 'Нет связи — повторить';
+    case 'unexpected_response':
+      return 'Вход не удался — повторить';
+  }
+};
+
+/** Why the session ended, when it did. A fresh load has no reason and shows none. dom/signin.ts:130 */
+export const signedOutSentence = (reason: SignedOutReason | null): string | null => {
+  switch (reason) {
+    case null:
+      return null;
+    case 'signed_out':
+      return 'Вы вышли из MAYA.';
+    case 'session_expired':
+      return 'Сессия истекла — войдите снова.';
+    case 'refresh_token_reused':
+      // Distinct on purpose: a reused refresh token is a security event, and the sentence says so
+      // without describing the attack. Flattening it into the generic line loses that.
+      return 'Сессия завершена ради безопасности — войдите снова.';
+    case 'refresh_token_invalid':
+    case 'session_revoked':
+      return 'Сессия завершена — войдите снова.';
+  }
+};

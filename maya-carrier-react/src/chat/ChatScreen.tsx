@@ -1,21 +1,36 @@
-// The canonical MAYA chat screen.
+// The canonical MAYA chat screen, over the headless runtime.
 //
-// Ported from the owner's app.html:21176-22335 — the presentation tail of AChat. Every number is
-// quoted from that source; nothing here is designed. The 4 504-line logic head above it (the legacy
-// salon relay, MAYA OS onboarding, CRM connect, email OTP, payments) is NOT carried: those are
-// legacy product screens that happened to live inside the same function.
+// The presentation is app.html:21176-22335 — the owner's AChat tail, ported at M5 and unchanged
+// here. What changed is where the content comes from: this screen now renders a `ConversationView`
+// published by the runtime, and hands gestures back through `ConversationPort`. It owns no message
+// list, mints no request id, assembles no history, and decides nothing.
 //
-// The composition is what was lost, and it is layering rather than colour. ONE fixed container
-// holds a transparent floating header (absolute, top) and an absolutely-positioned footer
-// (absolute, bottom, zIndex 5) that both OVERLAP a single full-bleed scroller. The scroller
-// reserves room for both with its own padding — 84px at the top, 212px at the bottom — so messages
-// pass under the header and behind the composer, and a gradient scrim softens the lower edge. The
-// current minimal shell is a three-row document flow in which nothing floats, which is why it reads
-// as a different product even where the colours agree.
+// Specifically, and on purpose:
+//   * whether the composer may send is `view.composer`, never derived from the session;
+//   * one turn at a time is the runtime's `inflight` guard — the local check is cosmetic;
+//   * a failed turn is retried with `conversation.retry(id)`, never by re-submitting the text,
+//     which would mint a new request id and defeat the de-duplication;
+//   * `submitUserTurn` returning `accepted: true` means the turn was QUEUED. It is not success,
+//     and nothing here draws a tick from it — the turn's fate arrives as `state` in the next view;
+//   * assistant text has exactly two writers, both server-side. There is no optimistic bubble.
 
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type {
+  ConversationView,
+  TimelineItemView,
+} from '../../../maya-chat-shell/src/shell/ports.ts';
+import { conversation } from '../runtime/compose.ts';
+import {
+  COLD_START_HINT,
+  composerReason,
+  failureBase,
+  NEW_TURN_NOTE,
+  noticeSentence,
+  secondsLeft,
+  widgetSentence,
+} from '../runtime/copy.ts';
 import { Backdrop } from '../identity/Backdrop.tsx';
 import { MayaMark, MayaVolumeMark } from '../identity/MayaMark.tsx';
-import { MayaTypewriterText } from '../identity/MayaTypewriterText.tsx';
 import { MAYA_ACCENT, MAYA_ACCENT_ON, type Tokens } from '../identity/tokens.ts';
 
 /** The reading face MAYA's own words are set in (app.html:21307). */
@@ -25,16 +40,19 @@ const READING = '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sa
  * (app.html:1954-1955), served locally from fonts.css. Montserrat is NOT shipped here: the carrier
  * may load no external resource, and the owner deferred the ~820 KB payload as its own decision.
  * The stack therefore falls through to the platform face — the tracking and sizes below are the
- * owner's, the letterforms are not. This is the one knowingly unfaithful value on the screen.
+ * owner's, the letterforms are not.
  */
 const DISPLAY = READING;
 
-export interface ChatMessage {
-  readonly role: 'user' | 'bot';
-  readonly text: string;
-  /** Reveal this turn with the typewriter, as the canonical chat does for MAYA's words. */
-  readonly typewriter?: boolean;
-}
+/** dom/timeline.ts:44 — the distance from the end within which the lane sticks to the end. */
+const STICK_TO_END_PX = 96;
+
+/**
+ * A timeline item id, or none yet. Named rather than written inline: the carrier's closed-tag
+ * scanner reads raw text, so a lowercase type argument — `useRef<string | null>` — matches its tag
+ * pattern and refuses the build. An uppercase alias is unambiguous to both readers.
+ */
+type ItemId = string | null;
 
 /** app.html:21254 — the thinking state, docked above the composer, never inside the lane. */
 function TypingDots({ dark }: { readonly dark: boolean }) {
@@ -52,23 +70,259 @@ function TypingDots({ dark }: { readonly dark: boolean }) {
   );
 }
 
+/**
+ * dom/timeline.ts:228-232 — a failed turn that may be retried "in N seconds" re-renders on a
+ * self-scheduled timer computed to land on the NEXT WHOLE SECOND. A plain 1 000 ms interval drifts
+ * and double-fires on the boundary, which is why the shell does not use one either.
+ */
+function useCountdownClock(view: ConversationView): number {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    let soonest: number | null = null;
+    for (const item of view.items) {
+      if (item.kind !== 'user' || item.state !== 'failed') continue;
+      if (item.retry.retry !== 'same_request' || item.retry.notBefore === null) continue;
+      if (soonest === null || item.retry.notBefore < soonest) soonest = item.retry.notBefore;
+    }
+    if (soonest === null) return;
+    const at = Date.now();
+    if (soonest <= at) return;
+    const left = Math.ceil((soonest - at) / 1000);
+    const wait = Math.max(1, Math.min(1000, soonest - at - (left - 1) * 1000));
+    const handle = window.setTimeout(() => setNow(Date.now()), wait);
+    return () => window.clearTimeout(handle);
+  }, [view, now]);
+  return now;
+}
+
+/** Shell chrome — a notice, a widget sentence, the cold-start hint. Never model history (P-11). */
+function ChromeLine({ t, text }: { readonly t: Tokens; readonly text: string }) {
+  return (
+    <div
+      style={{
+        margin: '4px 0 14px',
+        fontFamily: READING,
+        fontSize: 13,
+        lineHeight: '19px',
+        letterSpacing: '-0.005em',
+        textAlign: 'center',
+        color: t.dark ? 'rgba(244,240,235,0.52)' : 'rgba(11,11,12,0.52)',
+      }}
+    >
+      {text}
+    </div>
+  );
+}
+
+function Row({
+  item,
+  t,
+  now,
+}: {
+  readonly item: TimelineItemView;
+  readonly t: Tokens;
+  readonly now: number;
+}) {
+  const dark = t.dark;
+
+  if (item.kind === 'notice') return <ChromeLine t={t} text={noticeSentence(item.notice)} />;
+
+  // 🔴 A widget item carries a sealed `RenderResult` that only the headless renderer's React drawer
+  // can draw, and that drawer is the next unit. It is NOT silently dropped here: a server-authored
+  // card that vanished without a word would be the presentation deciding the person did not need to
+  // see it. Its own sentence is shown when the runtime supplied one.
+  if (item.kind === 'widget')
+    return (
+      <ChromeLine
+        t={t}
+        text={
+          item.sentence === null
+            ? 'Карточку пока нельзя показать в этой версии.'
+            : widgetSentence(item.sentence)
+        }
+      />
+    );
+
+  const user = item.kind === 'user';
+  const failed = item.kind === 'user' && item.state === 'failed' && item.failure !== null;
+  const left = item.kind === 'user' ? secondsLeft(item.retry, now) : 0;
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: user ? 'flex-end' : 'flex-start',
+        gap: 7,
+        marginBottom: 14,
+        minWidth: 0,
+      }}
+    >
+      <div
+        data-chat-message={user ? 'user' : 'maya'}
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          width: user ? 'fit-content' : '100%',
+          maxWidth: user ? '78%' : '100%',
+          minWidth: 0,
+          flex: user ? '0 1 auto' : '1 1 100%',
+          transformOrigin: user ? 'right center' : 'left center',
+        }}
+      >
+        {/*
+          The asymmetry that IS the design: only the person speaks inside a container. MAYA's words
+          are the page itself — no background, no border, no radius, no padding. Giving MAYA a
+          bubble turns a conversation into a support ticket.
+        */}
+        <div
+          style={{
+            width: '100%',
+            minWidth: 0,
+            boxSizing: 'border-box',
+            borderRadius: user ? 20 : 0,
+            padding: user ? '10px 15px' : 0,
+            background: user ? (dark ? '#2A2A2C' : '#ECEAE5') : 'transparent',
+            opacity: item.kind === 'user' && item.state === 'sending' ? 0.62 : 1,
+            transition: 'opacity .18s ease',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: user ? DISPLAY : READING,
+              fontSize: user ? 15 : 17,
+              lineHeight: user ? '22px' : '25px',
+              letterSpacing: user ? 0 : '-0.01em',
+              fontWeight: 400,
+              color: dark ? '#F4F0EB' : '#0B0B0C',
+              whiteSpace: 'pre-wrap',
+              overflowWrap: 'anywhere',
+            }}
+          >
+            {item.text}
+          </div>
+        </div>
+
+        {/* dom/timeline.ts:224-246 — the failure line, with the runtime's own retry wording. */}
+        {failed && item.kind === 'user' && item.failure !== null ? (
+          <div
+            style={{
+              marginTop: 6,
+              textAlign: 'right',
+              fontFamily: READING,
+              fontSize: 12,
+              lineHeight: '17px',
+              color: dark ? 'rgba(244,240,235,0.6)' : 'rgba(11,11,12,0.6)',
+            }}
+          >
+            {item.retry.retry === 'same_request' && left > 0 ? (
+              <span>{`${failureBase(item.failure)} — повторить можно через ${left} с`}</span>
+            ) : item.retry.retry === 'same_request' ? (
+              <span>
+                {`${failureBase(item.failure)} — `}
+                <button
+                  type="button"
+                  aria-label="Повторить отправку"
+                  onClick={() => conversation.retry(item.id)}
+                  style={{
+                    appearance: 'none',
+                    border: '0',
+                    background: 'transparent',
+                    padding: 0,
+                    font: 'inherit',
+                    color: MAYA_ACCENT,
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  повторить
+                </button>
+              </span>
+            ) : item.retry.retry === 'new_turn_only' ? (
+              <span>{`${failureBase(item.failure)}. ${NEW_TURN_NOTE}`}</span>
+            ) : (
+              <span>{`${failureBase(item.failure)}.`}</span>
+            )}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export function ChatScreen({
   t,
-  messages,
-  draft,
-  thinking = false,
+  view,
   role = 'Администратор',
   status = 'онлайн',
 }: {
   readonly t: Tokens;
-  readonly messages: readonly ChatMessage[];
-  readonly draft: string;
-  readonly thinking?: boolean;
+  readonly view: ConversationView;
   readonly role?: string;
   readonly status?: string;
 }) {
   const dark = t.dark;
+  const [draft, setDraft] = useState('');
   const hasDraft = draft.trim().length > 0;
+  const now = useCountdownClock(view);
+
+  const laneRef = useRef<HTMLDivElement | null>(null);
+  const stickRef = useRef(true);
+  const newestUserRef = useRef<ItemId>(null);
+  const awaitingRef = useRef<{ itemId: string; text: string } | null>(null);
+
+  const canSend = view.composer.enabled && !view.inFlight && hasDraft;
+
+  const send = useCallback(() => {
+    const text = draft;
+    // Cosmetic only. The authority is the runtime's own refusal set — `empty`, `too_long`,
+    // `in_flight`, `composer_disabled` — decided inside submitUserTurn against state this screen
+    // cannot see. Keeping only this check would allow a double-send whenever the snapshot is stale.
+    if (!view.composer.enabled || view.inFlight || text.trim().length === 0) return;
+    const outcome = conversation.submitUserTurn(text, { modality: 'typed' });
+    // `accepted: true` means QUEUED. Nothing is drawn from it.
+    if (outcome.accepted) awaitingRef.current = { itemId: outcome.itemId, text };
+  }, [draft, view]);
+
+  // dom/composer.ts:141-150 — the draft clears when the turn is SENT, not when it is submitted, and
+  // only if the person has not typed something else meanwhile. On a failure the text stays in the
+  // field: losing it is exactly what the shell refuses to do.
+  //
+  // Note the two exits, and only these two: the turn reached `sent`, or the item is gone. `failed`
+  // is deliberately NOT one of them — the turn is still awaited, so when a same-request retry
+  // finally succeeds the draft clears then. Treating `failed` as an exit leaves the text stranded
+  // in the field after a successful retry, which is what this code did before it was measured.
+  useEffect(() => {
+    const pending = awaitingRef.current;
+    if (pending === null) return;
+    const entry = view.items.find((row) => row.id === pending.itemId);
+    if (entry === undefined) {
+      awaitingRef.current = null;
+      return;
+    }
+    if (entry.kind !== 'user' || entry.state !== 'sent') return;
+    awaitingRef.current = null;
+    setDraft((current) => (current === pending.text ? '' : current));
+  }, [view]);
+
+  // dom/timeline.ts:309-338 — stick to the end, and ALWAYS follow the person's own new turn even
+  // if they had scrolled up.
+  useLayoutEffect(() => {
+    const lane = laneRef.current;
+    if (lane === null) return;
+    let newest: ItemId = null;
+    for (const item of view.items) if (item.kind === 'user') newest = item.id;
+    const ownTurn = newest !== null && newest !== newestUserRef.current;
+    newestUserRef.current = newest;
+    if (ownTurn || stickRef.current) lane.scrollTop = lane.scrollHeight;
+  }, [view]);
+
+  const onLaneScroll = useCallback(() => {
+    const lane = laneRef.current;
+    if (lane === null) return;
+    stickRef.current = lane.scrollHeight - lane.scrollTop - lane.clientHeight <= STICK_TO_END_PX;
+  }, []);
 
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: t.bg }}>
@@ -79,7 +333,13 @@ export function ChatScreen({
       <div
         style={{
           position: 'absolute',
-          inset: 0,
+          top: 0,
+          left: 0,
+          right: 0,
+          // The canonical container shrinks by the keyboard rather than sliding under it:
+          // `calc(var(--me-app-height,100dvh) - var(--me-kbd-height,0px))` (app.html:21646). The
+          // property defaults to 0px, so on a desktop this is identical to `inset: 0`.
+          bottom: 'var(--maya-keyboard-inset, 0px)',
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
@@ -169,6 +429,8 @@ export function ChatScreen({
 
         {/* app.html:21647-21658 — the one scroller. 84px clears the header, 212px the composer. */}
         <div
+          ref={laneRef}
+          onScroll={onLaneScroll}
           style={{
             flex: 1,
             overflow: 'auto',
@@ -177,67 +439,10 @@ export function ChatScreen({
             padding: 'calc(env(safe-area-inset-top, 0px) + 84px) 18px calc(env(safe-area-inset-bottom, 0px) + 212px)',
           }}
         >
-          {messages.map((m, i) => {
-            const user = m.role === 'user';
-            return (
-              <div
-                key={i}
-                style={{
-                  position: 'relative',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  justifyContent: user ? 'flex-end' : 'flex-start',
-                  gap: 7,
-                  marginBottom: 14,
-                  minWidth: 0,
-                }}
-              >
-                <div
-                  data-chat-message={user ? 'user' : 'maya'}
-                  style={{
-                    position: 'relative',
-                    zIndex: 1,
-                    width: user ? 'fit-content' : '100%',
-                    maxWidth: user ? '78%' : '100%',
-                    minWidth: 0,
-                    flex: user ? '0 1 auto' : '1 1 100%',
-                    transformOrigin: user ? 'right center' : 'left center',
-                  }}
-                >
-                  {/*
-                    The asymmetry that IS the design: only the person speaks inside a container.
-                    MAYA's words are the page itself — no background, no border, no radius, no
-                    padding. Giving MAYA a bubble turns a conversation into a support ticket.
-                  */}
-                  <div
-                    style={{
-                      width: '100%',
-                      minWidth: 0,
-                      boxSizing: 'border-box',
-                      borderRadius: user ? 20 : 0,
-                      padding: user ? '10px 15px' : 0,
-                      background: user ? (dark ? '#2A2A2C' : '#ECEAE5') : 'transparent',
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontFamily: user ? DISPLAY : READING,
-                        fontSize: user ? 15 : 17,
-                        lineHeight: user ? '22px' : '25px',
-                        letterSpacing: user ? 0 : '-0.01em',
-                        fontWeight: 400,
-                        color: dark ? '#F4F0EB' : '#0B0B0C',
-                        whiteSpace: 'pre-wrap',
-                        overflowWrap: 'anywhere',
-                      }}
-                    >
-                      {!user && m.typewriter ? <MayaTypewriterText text={m.text} /> : m.text}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {view.items.length === 0 ? <ChromeLine t={t} text={COLD_START_HINT} /> : null}
+          {view.items.map((item) => (
+            <Row key={item.id} item={item} t={t} now={now} />
+          ))}
         </div>
 
         {/* app.html:21759-21762 — the footer overlays the lane; only the pill takes pointer events. */}
@@ -253,7 +458,7 @@ export function ChatScreen({
             pointerEvents: 'none',
           }}
         >
-          {thinking ? (
+          {view.inFlight ? (
             <div
               data-maya-thinking-dock="true"
               style={{
@@ -286,7 +491,7 @@ export function ChatScreen({
               pointerEvents: 'auto',
             }}
           >
-            {/* app.html:21806-21823 — the soft ground, so messages under the bar do not compete with it. */}
+            {/* app.html:21806-21823 — the soft ground, so messages under the bar do not compete. */}
             <div
               aria-hidden="true"
               style={{
@@ -325,31 +530,66 @@ export function ChatScreen({
                   overflow: 'hidden',
                 }}
               >
-                <div
+                {/*
+                  Canonically an <input type="text">. The carrier's closed tag set has no `input` —
+                  the shell reaches one only through a separate, type-restricted door — so this is a
+                  single-row <textarea> styled to the same metrics. Disclosed, not hidden.
+
+                  `readOnly` + `aria-disabled` rather than `disabled`, so the reason stays reachable
+                  to a screen reader instead of the control vanishing from the tab order.
+                */}
+                <textarea
+                  rows={1}
+                  value={draft}
+                  readOnly={!view.composer.enabled}
+                  aria-disabled={!view.composer.enabled}
+                  aria-label="Сообщение Maya"
+                  placeholder={
+                    view.composer.enabled ? 'Сообщение Maya…' : composerReason(view.composer.reason)
+                  }
+                  autoComplete="off"
+                  enterKeyHint="send"
+                  onChange={(event) => setDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    // dom/composer.ts:171 — BOTH IME guards. An Enter during composition is the IME
+                    // accepting a candidate, not the person sending.
+                    if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
+                    if (event.key !== 'Enter' || event.shiftKey) return;
+                    event.preventDefault();
+                    send();
+                  }}
                   style={{
                     flex: 1,
                     minWidth: 0,
                     width: '100%',
                     height: 50,
-                    display: 'flex',
-                    alignItems: 'center',
+                    border: 'none',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
                     background: 'transparent',
-                    padding: '0 4px',
+                    padding: '15px 4px 0',
+                    margin: 0,
+                    resize: 'none',
+                    overflow: 'hidden',
                     fontFamily: DISPLAY,
                     fontSize: 13,
                     lineHeight: '20px',
-                    color: hasDraft ? t.ink : dark ? 'rgba(244,240,235,0.45)' : 'rgba(24,22,15,0.45)',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
+                    color: t.ink,
+                    outline: 'none',
                   }}
-                >
-                  {hasDraft ? draft : 'Сообщение Maya…'}
-                </div>
+                />
 
-                {/* app.html:21855 — a round blue ground, the same asymmetric MAYA wave, in white. */}
-                <div
-                  title="Нажмите — запись, ещё раз — отправить"
+                {/*
+                  app.html:21855 — a round blue ground, the same asymmetric MAYA wave, in white.
+                  🔴 Announced unavailable rather than inert: the voice machine needs a CapturePort,
+                  whose only implementation is outside the published runtime package. A button that
+                  looks live and does nothing is worse than one that says so.
+                */}
+                <button
+                  type="button"
+                  aria-disabled="true"
+                  aria-label="Голосовой ввод недоступен в этой версии"
+                  title="Голосовой ввод недоступен в этой версии"
                   style={{
                     width: 36,
                     height: 36,
@@ -359,18 +599,23 @@ export function ChatScreen({
                     alignItems: 'center',
                     justifyContent: 'center',
                     border: '0',
+                    padding: 0,
                     background: MAYA_ACCENT,
                     color: MAYA_ACCENT_ON,
-                    cursor: 'pointer',
+                    opacity: 0.38,
+                    cursor: 'default',
                     touchAction: 'none',
-                    transition: 'transform .16s ease, background .16s ease',
                   }}
                 >
                   <MayaVolumeMark size={18} />
-                </div>
+                </button>
 
                 {/* app.html:21861-21863 */}
-                <div
+                <button
+                  type="button"
+                  aria-label="Отправить"
+                  aria-disabled={!canSend}
+                  onClick={() => send()}
                   style={{
                     width: 36,
                     height: 36,
@@ -379,15 +624,17 @@ export function ChatScreen({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    cursor: hasDraft ? 'pointer' : 'default',
+                    border: '0',
+                    padding: 0,
+                    cursor: canSend ? 'pointer' : 'default',
                     background: MAYA_ACCENT,
                     color: MAYA_ACCENT_ON,
                     boxShadow: '0 6px 16px rgba(10,132,255,.4)',
-                    opacity: hasDraft ? 1 : 0.55,
+                    opacity: view.inFlight ? 0.5 : canSend ? 1 : 0.55,
                   }}
                 >
                   <span style={{ fontSize: 16, fontWeight: 600 }}>↑</span>
-                </div>
+                </button>
               </div>
             </div>
           </div>

@@ -1,54 +1,76 @@
-// The carrier's proof harness.
+// The app root: the one branch.
 //
-// M5 has no ports wired yet — the chat's transport, session and widget ports arrive with the
-// runtime boundary. What this renders is the PRESENTATION under fixed content, in two phone
-// frames, so the owner can judge one thing: whether this is their chat. Nothing here reaches the
-// network, and no state is owned.
+// `entry/main.ts` ends by handing five ports to `mountApp`, whose single top-level decision is
+// `SessionView.signedIn`. That is the seam React replaces, and this is the whole of it. The branch
+// is a real unmount: the signed-in tree is torn down on sign-out and rebuilt on sign-in, because
+// the runtime clears the timeline, aborts the flight and resets the shell on that transition, and a
+// component that survived it would be holding a copy of something that no longer exists.
 
-import { ChatScreen, type ChatMessage } from './chat/ChatScreen.tsx';
+import { useEffect, useSyncExternalStore } from 'react';
+import { ChatScreen } from './chat/ChatScreen.tsx';
+import { SignIn } from './signin/SignIn.tsx';
+import { conversation, landFragment, session } from './runtime/compose.ts';
+import { usePortView } from './runtime/useView.ts';
 import { tokens } from './identity/tokens.ts';
 
-const CONVERSATION: readonly ChatMessage[] = [
-  { role: 'bot', text: 'Доброе утро, Стас. Смена открыта, в зале четверо мастеров.' },
-  { role: 'user', text: 'Что по сегодняшнему дню?' },
-  {
-    role: 'bot',
-    text: 'Сегодня 14 записей. Первая в 10:00, последняя в 20:30.\n\nУ Ильи окно с 15:00 до 17:00 — два часа подряд, это самая дорогая дыра в расписании. Остальные загружены плотно.',
-  },
-  { role: 'user', text: 'Предложи что-нибудь на это окно' },
-  {
-    role: 'bot',
-    text: 'Могу разослать напоминание тем, кто стригся у Ильи больше пяти недель назад — таких сейчас девять человек. Обычно на подобную рассылку откликаются двое-трое.\n\nПодготовить список?',
-  },
-];
+const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-function Frame({ dark, label }: { readonly dark: boolean; readonly label: string }) {
-  return (
-    <div style={{ margin: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-      <div
-        style={{
-          position: 'relative',
-          width: 393,
-          height: 852,
-          overflow: 'hidden',
-          borderRadius: 44,
-          border: '1px solid rgba(128,128,128,0.45)',
-        }}
-      >
-        <ChatScreen t={tokens(dark)} messages={CONVERSATION} draft="" thinking />
-      </div>
-      <p style={{ font: '12px/1 ui-monospace, monospace', color: '#888', letterSpacing: '0.08em' }}>
-        {label}
-      </p>
-    </div>
+function useDark(): boolean {
+  return useSyncExternalStore(
+    (onChange) => {
+      const fire = (): void => onChange();
+      darkQuery.addEventListener('change', fire);
+      return () => darkQuery.removeEventListener('change', fire);
+    },
+    () => darkQuery.matches,
   );
 }
 
+/**
+ * The visual viewport inset, published as one custom property — exactly what entry/main.ts:210 does
+ * with it. This is presentation, not runtime: no factory receives it.
+ */
+function useKeyboardInset(): void {
+  useEffect(() => {
+    const visual = window.visualViewport;
+    if (visual === null) return;
+    const measure = (): void => {
+      const inset = Math.max(0, Math.round(window.innerHeight - visual.height - visual.offsetTop));
+      document.documentElement.style.setProperty('--maya-keyboard-inset', `${inset}px`);
+    };
+    visual.addEventListener('resize', measure);
+    visual.addEventListener('scroll', measure);
+    measure();
+    return () => {
+      visual.removeEventListener('resize', measure);
+      visual.removeEventListener('scroll', measure);
+    };
+  }, []);
+}
+
+/**
+ * A deep link appends a NOTICE to the timeline, so it must land only once the presentation is
+ * subscribed — entry/main.ts calls it after the mount, not during composition. An effect is the
+ * React equivalent; the module-scope guard is because StrictMode invokes effects twice and a
+ * fragment is single-use.
+ */
+let landed = false;
+function useLandedFragment(): void {
+  useEffect(() => {
+    if (landed) return;
+    landed = true;
+    landFragment();
+  }, []);
+}
+
 export function App() {
-  return (
-    <div style={{ display: 'flex', gap: 48, justifyContent: 'center', padding: 32, flexWrap: 'wrap' }}>
-      <Frame dark label="AURORA · DARK" />
-      <Frame dark={false} label="AURORA · LIGHT" />
-    </div>
-  );
+  const dark = useDark();
+  const sessionView = usePortView(session);
+  const chat = usePortView(conversation);
+  useKeyboardInset();
+  useLandedFragment();
+
+  const t = tokens(dark);
+  if (!sessionView.signedIn) return <SignIn t={t} reason={sessionView.reason} />;
+  return <ChatScreen t={t} view={chat} />;
 }

@@ -170,8 +170,46 @@ export const CLOSED_TAGS = new Set([
   'th', 'td', 'time', 'output', 'a',
 ]);
 
+/**
+ * 🔴 CONSTRAINT RELAXED, deliberately, and only as far as the shell already goes.
+ *
+ * WHY `input` IS ABSENT FROM CLOSED_TAGS: it was transcribed from the shell's `DomTag`, and `DomTag`
+ * omits `input` because the shell does not reach one through `create()` at all. It reaches one
+ * through a SECOND, type-restricted door — `DomFactory.createInput(type: DomInputType)`, with
+ * `INPUT_TYPES = {text, email, password}` enforced at entry/main.ts:63. So the property was never
+ * "no text fields"; it was "a text field may exist only with a vetted type".
+ *
+ * WHAT THE EXCLUSION LIST PROTECTS, in its own words: outbound-request sinks (img/video/audio/
+ * object/embed/iframe), navigation (form), and an independent script surface (svg/math). An
+ * `<input type="text|email|password">` is none of the three. The two dangerous spellings stay
+ * refused: `type="image"` is a request sink and is not in the set, and `formAction` navigates and
+ * is already a REQUEST_SINK.
+ *
+ * REPLACEMENT RATCHET: `input` is admitted ONLY with a literal `type` from that same three-member
+ * set, written at the call site. A computed type (`type={kind}`) is refused, because a type that
+ * arrives through an identifier cannot be read here — the same reasoning as `inline-style-shape`.
+ * `createElement('input', …)` is refused outright: its attributes are an object this scanner cannot
+ * vet, and the carrier writes JSX.
+ *
+ * PROOF: four fixtures — no type, `image`, computed, and `createElement` all refuse; the three
+ * literal types admit. See `input-type` in the self-test.
+ */
+const INPUT_TYPES = new Set(['text', 'email', 'password']);
+
 /** Attributes that make a browser issue a request or navigate. */
 const REQUEST_SINKS = ['src', 'srcSet', 'href', 'action', 'formAction', 'poster', 'ping', 'data', 'background'];
+
+/** The source of one JSX opening tag, brace-aware, so `onChange={(e) => …}` does not end it early. */
+const openingTag = (code, at) => {
+  let depth = 0;
+  for (let i = at; i < code.length; i += 1) {
+    const ch = code[i];
+    if (ch === '{') depth += 1;
+    else if (ch === '}') depth -= 1;
+    else if (ch === '>' && depth <= 0) return code.slice(at, i + 1);
+  }
+  return code.slice(at);
+};
 
 export function scanJsx(rel, text, { hrefAllowed = false } = {}) {
   const out = [];
@@ -184,6 +222,18 @@ export function scanJsx(rel, text, { hrefAllowed = false } = {}) {
   ];
   for (const m of tagSites) {
     const tag = m[1];
+    if (tag === 'input') {
+      const viaCreateElement = !m[0].startsWith('<');
+      // Read from the RAW text: `code` has had its string bodies blanked, so the literal type would
+      // be a run of spaces. codeOnly is length-preserving, so the index still lines up.
+      const literal = viaCreateElement ? null : openingTag(text, m.index).match(/\stype\s*=\s*['"]([a-z]+)['"]/);
+      if (literal === null || !INPUT_TYPES.has(literal[1]))
+        out.push(refusal('input-type', rel, lineAt(text, m.index), 'input',
+          viaCreateElement
+            ? 'createElement(\'input\', …) is refused: its attributes are an object this scanner cannot vet.'
+            : 'an <input> is admitted only with a literal type of text, email or password — the same three the shell\u2019s createInput door allows.'));
+      continue;
+    }
     if (!CLOSED_TAGS.has(tag))
       out.push(refusal('closed-tag-set', rel, lineAt(text, m.index), tag,
         `<${tag}> is outside the closed set. The exclusions are a capability-denial list: img/video/audio/object/embed/iframe are outbound-request sinks, form navigates, svg/math carry their own script surface.`));

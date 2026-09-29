@@ -78,6 +78,10 @@ const CASES = [
   ['inline-style-shape', `<div style={theme.box} />`, `<div style={{ color: 'red' }} />`],
   ['style-url', `<div style={{ backgroundImage: 'url(https://x/y.png)' }} />`, `<div style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg%3E%3C/svg%3E")' }} />`],
   ['closed-tag-set', `React.createElement('img', { src: 'x' })`, `React.createElement('div', null)`],
+  ['input-type', `<input />`, `<input type="text" />`],
+  ['input-type', `<input type="image" />`, `<input type="email" />`],
+  ['input-type', `<input type={kind} onChange={(e) => set(e)} />`, `<input type="password" onChange={(e) => set(e)} />`],
+  ['input-type', `React.createElement('input', { type: 'text' })`, `<input type="text" value={v} />`],
   ['style-url', `<div style={{ background: "url('//evil/x')" }} />`, `<div style={{ filter: "url(%23n)" }} />`],
 ];
 
