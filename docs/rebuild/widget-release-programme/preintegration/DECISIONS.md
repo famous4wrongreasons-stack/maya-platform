@@ -9,11 +9,11 @@ Canonical basis: Decision Sheet 07; V1.2 settled OD-1 A and OD-2 C only. Histori
 
 **OPTION A:** Accept U-class separately, only with all four absence/refusal/mechanism/basis duties. Preserve the strict live figure.
 
-**OPTION B:** Accept only the strict live figure; retain U as disclosed, unaccepted partial coverage. This is Sheet 07's original option C.
+**OPTION C (canonical Sheet 07 ID):** Accept only the strict live figure; retain U as disclosed, unaccepted partial coverage. Canonical option IDs are preserved; excluded option B is not renumbered.
 
 **RECOMMENDED OPTION:** A, as in the existing sheet.
 
-**EXACT SECURITY/PRODUCT CONSEQUENCE:** A does not call an unreachable path live, waive a missing implementation, or enable a feature. B leaves the affected gates partial. Neither defines an activation threshold. The original option B (bring excluded carriers into scope) is a separate future contract programme, unavailable within this pass's ownership/scope; it is not presented as an immediate acceptance choice.
+**EXACT SECURITY/PRODUCT CONSEQUENCE:** A does not call an unreachable path live, waive a missing implementation, or enable a feature. C leaves the affected gates partial. Neither defines an activation threshold. Canonical option B (bring excluded carriers into scope) is a separate future contract programme, unavailable within this pass's ownership/scope; it is not presented as an immediate acceptance choice.
 
 **WHAT IT UNBLOCKS:** The acceptance interpretation of the existing 17 U clauses and OD-4 B. It does not close any of the remaining false clauses.
 
