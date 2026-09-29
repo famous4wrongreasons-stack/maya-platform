@@ -1,0 +1,277 @@
+{
+  "contract": "maya.widget-release-local-verification/1",
+  "code_target": "67166a247d5b191ef5a3e32ef5077e30c1a4ff36",
+  "baseline": "62bb81b871b772efe43cc566423727b653a9635a",
+  "node": "22.23.2",
+  "postgres": "16.14; isolated loopback cluster, port 55729",
+  "new_migrations": 0,
+  "existing_migrations_replayed": 99,
+  "proof_cluster": "STOPPED after verification; only this task-owned cluster was stopped",
+  "backend_regression": {
+    "numTotalTestSuites": 572,
+    "numPassedTestSuites": 571,
+    "numTotalTests": 5349,
+    "numPassedTests": 5348,
+    "numPendingTests": 0,
+    "numFailedTests": 1,
+    "status": "NOT_PASS: one missing presentation build artifact",
+    "failure": "beget-relay-release.architecture.spec.ts: verifyShellCandidate requires absent maya-chat-shell/dist/web; shell build belongs to Claude; test and package untouched"
+  },
+  "widgets_live": {
+    "numTotalTestSuites": 24,
+    "numPassedTestSuites": 24,
+    "numTotalTests": 341,
+    "numPassedTests": 341,
+    "numPendingTests": 0,
+    "numFailedTests": 0
+  },
+  "production_binary_cases": {
+    "pass": 15,
+    "failed": 0,
+    "health": 200,
+    "fbe2e_binary_coverage": false
+  },
+  "new_mutations": {
+    "status": "AS-DECLARED",
+    "source_head": "67166a247d5b191ef5a3e32ef5077e30c1a4ff36",
+    "baseline_red": [],
+    "restrictions": {
+      "live_tests": null,
+      "live_filter": null,
+      "unit_tests": "widgets/(booking|owner-ports/booking|resolve/thread-page|routing/effect-router.service|stores/widget-stores.service|composition/chat-read.trigger|emission/booking-successor-boundary)"
+    },
+    "steps": [
+      "unit"
+    ],
+    "mutants": [
+      {
+        "id": "WR-M01",
+        "status": "build-killed",
+        "killers": [
+          "FBE2E-2 — canonical booking selector owner adapter reads staff through the existing policy/runtime and never accepts a raw service id"
+        ]
+      },
+      {
+        "id": "WR-M02",
+        "status": "build-killed",
+        "killers": [
+          "FBE2E-2 — canonical booking selector owner adapter WR-L8 refuses an unrecognised staff result null instead of certifying an empty complete list",
+          "FBE2E-2 — canonical booking selector owner adapter WR-L8 refuses an unrecognised staff result {} instead of certifying an empty complete list",
+          "FBE2E-2 — canonical booking selector owner adapter WR-L8 refuses an unrecognised staff result {\"staff\": null} instead of certifying an empty complete list",
+          "FBE2E-2 — canonical booking selector owner adapter WR-L8 refuses an unrecognised staff result {\"slots\": [Array]} instead of certifying an empty complete list",
+          "FBE2E-2 — canonical booking selector owner adapter WR-L8 refuses an unrecognised staff result \"not a result\" instead of certifying an empty complete list"
+        ]
+      },
+      {
+        "id": "WR-M03",
+        "status": "build-killed",
+        "killers": [
+          "FBE2E-2 — booking selector presentation projects canonical services into opaque server-minted choices"
+        ]
+      },
+      {
+        "id": "WR-M04",
+        "status": "build-killed",
+        "killers": [
+          "FBE2E-2 — booking selector presentation projects valid availability into exact opaque slot refs and refuses malformed facts"
+        ]
+      },
+      {
+        "id": "WR-M05",
+        "status": "build-killed",
+        "killers": [
+          "FBE2E-2 — booking selector presentation requires the inherited service for staff and the inherited staff for slots"
+        ]
+      },
+      {
+        "id": "WR-M06",
+        "status": "build-killed",
+        "killers": [
+          "P-RESOLVE principal thread page WR-L21 filters invalid stored outcomes and receipt bindings before the wire"
+        ]
+      },
+      {
+        "id": "WR-M07",
+        "status": "build-killed",
+        "killers": [
+          "P-RESOLVE principal thread page WR-L21 filters invalid stored outcomes and receipt bindings before the wire"
+        ]
+      },
+      {
+        "id": "WR-M08",
+        "status": "build-killed",
+        "killers": [
+          "P-RESOLVE principal thread page WR-L21 filters invalid stored outcomes and receipt bindings before the wire"
+        ]
+      },
+      {
+        "id": "WR-M09",
+        "status": "build-killed",
+        "killers": [
+          "U13a — closed Gate 13 spine, claim, receipt and dismiss WR-L7 refuses selector DRAFT when authority-tenant disagrees, before quoting or storing"
+        ]
+      },
+      {
+        "id": "WR-M10",
+        "status": "build-killed",
+        "killers": [
+          "U13a — closed Gate 13 spine, claim, receipt and dismiss WR-L7 refuses selector DRAFT when authority-user disagrees, before quoting or storing"
+        ]
+      },
+      {
+        "id": "WR-M11",
+        "status": "build-killed",
+        "killers": [
+          "U13a — closed Gate 13 spine, claim, receipt and dismiss WR-L7 refuses selector DRAFT when actor-tenant disagrees, before quoting or storing"
+        ]
+      },
+      {
+        "id": "WR-M12",
+        "status": "build-killed",
+        "killers": [
+          "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) writeReceipt is idempotent by tenant/token and never retains an utterance echo",
+          "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) claim and reconciliation are tenant-scoped compare-and-set writes"
+        ]
+      },
+      {
+        "id": "WR-M13",
+        "status": "build-killed",
+        "killers": [
+          "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) writeReceipt is idempotent by tenant/token and never retains an utterance echo",
+          "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) claim and reconciliation are tenant-scoped compare-and-set writes"
+        ]
+      },
+      {
+        "id": "WR-M14",
+        "status": "build-killed",
+        "killers": [
+          "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) writeReceipt is idempotent by tenant/token and never retains an utterance echo",
+          "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) WR-L22 idempotent retries derive the terminal outcome from the existing durable receipt",
+          "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) claim and reconciliation are tenant-scoped compare-and-set writes"
+        ]
+      },
+      {
+        "id": "WR-M15",
+        "status": "build-killed",
+        "killers": [
+          "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) WR-L22 idempotent retries derive the terminal outcome from the existing durable receipt",
+          "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) claim and reconciliation are tenant-scoped compare-and-set writes"
+        ]
+      },
+      {
+        "id": "WR-M16",
+        "status": "build-killed",
+        "killers": [
+          "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) claim and reconciliation are tenant-scoped compare-and-set writes"
+        ]
+      },
+      {
+        "id": "WR-M17",
+        "status": "build-killed",
+        "killers": [
+          "P-MT2a ChatReadTriggerService WR-L11 dispatches catalog.services.read to the canonical selector minter",
+          "P-MT2a ChatReadTriggerService WR-L11 dispatches catalog.staff.read to the canonical selector minter",
+          "P-MT2a ChatReadTriggerService WR-L11 dispatches booking.availability.read to the canonical selector minter"
+        ]
+      },
+      {
+        "id": "WR-M18",
+        "status": "build-killed",
+        "killers": [
+          "Booking successor principal boundary [BUILD] WR-L13 refuses a foreign principal before minting a selector"
+        ]
+      },
+      {
+        "id": "WR-M19",
+        "status": "build-killed",
+        "killers": [
+          "Booking successor principal boundary [BUILD] WR-L13 lock-time principal change cancels the newly minted successor"
+        ]
+      },
+      {
+        "id": "WR-M20",
+        "status": "build-killed",
+        "killers": [
+          "Canonical booking noun identity [BUILD] WR-L12 requires both the exact noun and its canonical owner"
+        ]
+      },
+      {
+        "id": "WR-M21",
+        "status": "build-killed",
+        "killers": [
+          "FBE2E-2 — selected slot to canonical booking preview rejects raw or foreign handles before asking the booking owner"
+        ]
+      }
+    ]
+  },
+  "http_tag_mutations": [
+    {
+      "source_head": "e180086fb8dde6568696b8a8ef50e9f6389ad3eb",
+      "status": "PARTITION-AS-DECLARED",
+      "restriction": {
+        "live_tests": "test/widgets-live/e2-booking.live-spec.ts",
+        "live_filter": null,
+        "unit_tests": null
+      },
+      "id": "MINT-M20",
+      "entry": "HTTP",
+      "status_of_mutant": "live-killed"
+    },
+    {
+      "source_head": "e180086fb8dde6568696b8a8ef50e9f6389ad3eb",
+      "status": "PARTITION-AS-DECLARED",
+      "restriction": {
+        "live_tests": "test/widgets-live/e2-booking.live-spec.ts",
+        "live_filter": null,
+        "unit_tests": null
+      },
+      "id": "P-M11",
+      "entry": "HTTP",
+      "status_of_mutant": "live-killed"
+    }
+  ],
+  "mutation_runner_selftest": "18/18 PASS, includes plain live baseline for a neutraliser-only partition",
+  "mutation_planner_assembler": "34/34 PASS; 32 batteries, 53 shards, 394 declarations planned, not 394 executed",
+  "typecheck": "application, scripts, widgets-live, widget-contract PASS",
+  "lint": "changed TS files PASS",
+  "build": "PASS",
+  "k3": "10/10 PASS",
+  "widget_contract": "31/31 PASS; 4 pre-existing pending mechanisms",
+  "gate_state": {
+    "L-T": 4,
+    "L": 113,
+    "U": 17,
+    "false": 31
+  },
+  "gate_headline": "GATES LIVE CONTRACT-COMPLETE 3/15 · WITH U-CLASS 6/15 · STOPPED CLAUSES 0 · BLOCKED-DISCHARGE CLAUSES 0",
+  "false_clause_classification": {
+    "IMPLEMENTATION_MISSING": 3,
+    "EVIDENCE_MISSING": 24,
+    "OWNER_DECISION_REQUIRED": 4
+  },
+  "fbe2e_counts": {
+    "CLOSED": 13,
+    "OPEN": 12,
+    "PARTIAL": 3
+  },
+  "ci": {
+    "status": "NOT_RUN",
+    "scope": "No push, workflow dispatch or repository-settings change. Historical canonical-branch receipts are not receipts for this branch. Full unfiltered 394-mutant programme not run."
+  },
+  "safe_to_integrate": "NO",
+  "reason": "Review checkpoint only: Full backend regression has one missing Claude-owned shell artifact; current-branch CI and full unfiltered mutation certification are absent. This is distinct from production activation, which is forbidden.",
+  "runtime_source_hashes": {
+    "maya-saas-backend/src/widgets/booking/booking-selector.presenter.ts": "5de536dd62e10a91c3d6b58aab8e1a563984fad41318c3adc654762623361cb6",
+    "maya-saas-backend/src/widgets/owner-ports/booking-selector.adapter.ts": "449e5654fa168de53a8e73d6ccb5cc75af27f983acffb36a0f1dcb12d3aa996a",
+    "maya-saas-backend/src/widgets/resolve/thread-page.service.ts": "c65bea7d7509355bf26a4e86e6f0b078070ab682c7e057690e2d628cdd80701b",
+    "maya-saas-backend/src/widgets/routing/effect-router.service.ts": "3a0c3291cce64dd0f3fb515af71cf9e7840faa69f78ce37a754e85bedfc6b636",
+    "maya-saas-backend/src/widgets/stores/intent-audit.store.ts": "5d066f2155a7cc1a7953a3057e75f975bf8d3c5a438d559ba37b71d399adde13"
+  },
+  "ownership": {
+    "claude_head": "5dc6b7047322ff379a4c3b49cf46865e9c288d3a",
+    "overlap": [],
+    "protected_paths_basis": "All baseline Claude changed paths plus current Claude committed/uncommitted delta and all carrier/shell/UI/CSS paths; check.mjs asserts zero overlap."
+  },
+  "proof_scope": "Local fixture/internal-provider evidence. Injected second-COMMIT test is RI persistence proof, not production-minted HTTP evidence. New WR mutations are restricted BUILD proofs, not a complete CI receipt.",
+  "first_full_live_run": "340 pass / 1 fail: B-29 previously used CONTROL as uncertain AE receipt; corrected to explicit AE COMMIT U fixture; final full live corpus passes."
+}

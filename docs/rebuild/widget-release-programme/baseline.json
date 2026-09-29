@@ -11,7 +11,9 @@
       "after": "false",
       "classification": "IMPLEMENTATION_MISSING",
       "reason": "LANDING-VERIFY end-to-end destination verification is not closed; HandoffTarget signer is not a landing ingress. Presentation dependency; no new route or security semantics invented.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate6.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G6-8",
@@ -21,7 +23,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate6.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G6-9",
@@ -31,7 +35,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate6.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G6-10",
@@ -41,7 +47,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate6.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G6-11",
@@ -51,7 +59,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate6.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G6-12",
@@ -61,7 +71,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate6.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G6-13",
@@ -71,7 +83,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate6.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G7-4",
@@ -81,7 +95,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate7.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G7-5",
@@ -91,7 +107,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate7.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G7-6",
@@ -101,7 +119,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate7.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G7-BOOK1",
@@ -111,7 +131,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate7.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G7-FR6b",
@@ -121,7 +143,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate7.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G7-FR6d",
@@ -131,7 +155,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate7.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G8-3",
@@ -141,7 +167,9 @@
       "after": "false",
       "classification": "OWNER_DECISION_REQUIRED",
       "reason": "No approved registered bounds/normalizer/text source for the whole clause; engineering omission is not U-class. Scope or new owner contract required before source registration.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/routing/effect-router.service.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G8-4",
@@ -151,7 +179,9 @@
       "after": "false",
       "classification": "OWNER_DECISION_REQUIRED",
       "reason": "No approved registered bounds/normalizer/text source for the whole clause; engineering omission is not U-class. Scope or new owner contract required before source registration.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/routing/effect-router.service.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G8-5t",
@@ -161,7 +191,9 @@
       "after": "false",
       "classification": "OWNER_DECISION_REQUIRED",
       "reason": "No approved registered bounds/normalizer/text source for the whole clause; engineering omission is not U-class. Scope or new owner contract required before source registration.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/routing/effect-router.service.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G8-DENY",
@@ -171,7 +203,9 @@
       "after": "false",
       "classification": "OWNER_DECISION_REQUIRED",
       "reason": "No approved registered bounds/normalizer/text source for the whole clause; engineering omission is not U-class. Scope or new owner contract required before source registration.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/routing/effect-router.service.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "R-1a",
@@ -181,7 +215,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate8r.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "9.6",
@@ -191,7 +227,9 @@
       "after": "false",
       "classification": "IMPLEMENTATION_MISSING",
       "reason": "Typed-turn parity through the identical canonical conversation writer is not established. Shared chat/runtime ownership boundary: dependency only.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/routing/effect-router.service.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G11-I9",
@@ -201,7 +239,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate11.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G12-R1b",
@@ -211,7 +251,10 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": true
+      "metadata_drift": true,
+      "implementation_source": "maya-saas-backend/src/widgets/projection/widget-projector.service.ts + maya-saas-backend/src/widgets/routing/effect-router.service.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion.",
+      "secondary_classification": "STALE_DOC"
     },
     {
       "id": "G12-I11",
@@ -221,7 +264,10 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": true
+      "metadata_drift": true,
+      "implementation_source": "maya-saas-backend/src/widgets/projection/widget-projector.service.ts + maya-saas-backend/src/widgets/routing/effect-router.service.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion.",
+      "secondary_classification": "STALE_DOC"
     },
     {
       "id": "G13-R2",
@@ -231,7 +277,10 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": true
+      "metadata_drift": true,
+      "implementation_source": "maya-saas-backend/src/widgets/projection/widget-projector.service.ts + maya-saas-backend/src/widgets/routing/effect-router.service.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion.",
+      "secondary_classification": "STALE_DOC"
     },
     {
       "id": "G13-R6",
@@ -241,7 +290,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate13.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G13-R8",
@@ -251,7 +302,9 @@
       "after": "false",
       "classification": "IMPLEMENTATION_MISSING",
       "reason": "LANDING-VERIFY end-to-end destination verification is not closed; HandoffTarget signer is not a landing ingress. Presentation dependency; no new route or security semantics invented.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate13.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G13-R9",
@@ -261,7 +314,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate13.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G13-I3",
@@ -271,7 +326,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate13.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G13-I7",
@@ -281,7 +338,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/gates/gate13.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G14-a",
@@ -291,7 +350,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/routing/effect-router.service.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G14-b",
@@ -301,7 +362,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/routing/effect-router.service.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     },
     {
       "id": "G14-c",
@@ -311,7 +374,9 @@
       "after": "false",
       "classification": "EVIDENCE_MISSING",
       "reason": "Implementation exists; whole-clause production-triggered HTTP/BIN pair has not been admitted. Unit/GW/internal-provider proof does not promote this clause.",
-      "metadata_drift": false
+      "metadata_drift": false,
+      "implementation_source": "maya-saas-backend/src/widgets/routing/effect-router.service.ts",
+      "proof_boundary": "Historical audit state retained; see local verification.json. No automatic admission/promotion."
     }
   ],
   "existing_u_class": 17,
