@@ -85,19 +85,25 @@ export const failureBase = (failure: ChatFailure): string => {
   }
 };
 
-/** Why a widget carries a neutral sentence instead of a state change (D9). */
+/**
+ * Why a widget carries a neutral sentence instead of a state change (D9). dom/host.ts:526-538.
+ *
+ * `activation_unavailable` and `activation_forbidden` share ONE sentence on purpose. Splitting them
+ * would tell the person which of the two happened — that is, whether the action exists and is
+ * merely unavailable, or exists and is closed TO THEM. That distinction is authorization state, and
+ * presentation saying it out loud is a disclosure the runtime deliberately does not make.
+ */
 export const widgetSentence = (sentence: WidgetSentence): string => {
   switch (sentence) {
     case 'activation_unavailable':
-      return 'Это действие сейчас недоступно.';
     case 'activation_forbidden':
-      return 'Это действие сейчас закрыто.';
+      return 'Это действие сейчас недоступно';
     case 'no_connection':
-      return 'Нет связи.';
+      return 'Нет связи — действие не выполнено';
     case 'route_refused':
-      return 'Этот переход здесь недоступен.';
+      return 'Этот переход здесь недоступен';
     case 'expired_not_resolved':
-      return 'Карточка устарела.';
+      return 'Карточка устарела — показана сводка';
   }
 };
 

@@ -9,7 +9,23 @@
   :root { --bg: #000000; --text: #f4f0eb; }
 }
 html, body { margin: 0; background: var(--bg); color: var(--text); overscroll-behavior: none; }
-.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+/*
+ * Visually hidden, from the shell's entry/styles.css:92-100 verbatim. The carrier's earlier rule
+ * dropped `margin`, `padding`, `clip` and `!important`; without them a hidden live region can still
+ * take layout space and a 1px box with padding is not reliably hidden from a visual reader.
+ */
+.vh {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
 .app { min-height: 100dvh; overflow-wrap: anywhere; }
 @media (forced-colors: active) { :root { --text: CanvasText; } }
 @media (prefers-reduced-motion: reduce) {

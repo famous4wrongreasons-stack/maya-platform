@@ -19,7 +19,8 @@ import type {
   ConversationView,
   TimelineItemView,
 } from '../../../maya-chat-shell/src/shell/ports.ts';
-import { conversation } from '../runtime/compose.ts';
+import { conversation, widgets } from '../runtime/compose.ts';
+import { WidgetCard } from '../widgets/WidgetCard.tsx';
 import {
   COLD_START_HINT,
   composerReason,
@@ -27,7 +28,6 @@ import {
   NEW_TURN_NOTE,
   noticeSentence,
   secondsLeft,
-  widgetSentence,
 } from '../runtime/copy.ts';
 import { Backdrop } from '../identity/Backdrop.tsx';
 import { MayaMark, MayaVolumeMark } from '../identity/MayaMark.tsx';
@@ -127,20 +127,28 @@ function Row({
 
   if (item.kind === 'notice') return <ChromeLine t={t} text={noticeSentence(item.notice)} />;
 
-  // 🔴 A widget item carries a sealed `RenderResult` that only the headless renderer's React drawer
-  // can draw, and that drawer is the next unit. It is NOT silently dropped here: a server-authored
-  // card that vanished without a word would be the presentation deciding the person did not need to
-  // see it. Its own sentence is shown when the runtime supplied one.
+  // A server-authored card. It sits on MAYA's side of the lane and inside MAYA's turn — the card
+  // IS the container, which is why MAYA's words still have none.
+  //
+  // `widgets.activate(id, ref)` returns void on purpose: the outcome is discarded at the port. What
+  // happened arrives as the next view.
   if (item.kind === 'widget')
     return (
-      <ChromeLine
-        t={t}
-        text={
-          item.sentence === null
-            ? 'Карточку пока нельзя показать в этой версии.'
-            : widgetSentence(item.sentence)
-        }
-      />
+      <div
+        style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'flex-start',
+          gap: 7,
+          marginBottom: 14,
+          minWidth: 0,
+        }}
+      >
+        <div style={{ width: '100%', minWidth: 0, flex: '1 1 100%' }}>
+          <WidgetCard item={item} t={t} activate={widgets.activate} />
+        </div>
+      </div>
     );
 
   const user = item.kind === 'user';
