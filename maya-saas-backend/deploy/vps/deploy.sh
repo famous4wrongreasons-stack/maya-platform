@@ -31,7 +31,7 @@ JUMP="ssh -i $HOME/.ssh/beget_deploy -o BatchMode=yes -o ConnectTimeout=20 -o Co
 SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=25 -o ConnectionAttempts=5 -o ServerAliveInterval=15
           -o StrictHostKeyChecking=accept-new -o "ProxyCommand=$JUMP"
           -i "$HOME/.ssh/yandex_bot")
-HOST="botadmin@111.88.148.206"
+HOST="botadmin@api.mayaos.ru"
 STAMP="${1:?укажите имя релиза, например 20260807i-clean-deploy}"
 REL="/opt/maya-saas/releases/$STAMP"
 KEEP=3   # меньше пяти: полноценный npm ci весит больше заимствованного

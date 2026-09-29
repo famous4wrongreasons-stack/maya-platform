@@ -2,7 +2,7 @@
 
 // Stable native-app relay. The upstream is fixed deliberately so this file
 // cannot be used as an open proxy.
-const MAYA_NATIVE_UPSTREAM = 'https://maya.111.88.148.206.nip.io/api';
+const MAYA_NATIVE_UPSTREAM = 'https://api.mayaos.ru/api';
 
 $allowedOrigins = [
     'capacitor://malesthetic.pro',

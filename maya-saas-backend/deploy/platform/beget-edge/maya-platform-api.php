@@ -1,7 +1,7 @@
 <?php
 
 // Fixed upstream: this relay must never become a user-controlled open proxy.
-const MAYA_PLATFORM_UPSTREAM = 'https://maya.111.88.148.206.nip.io/api';
+const MAYA_PLATFORM_UPSTREAM = 'https://api.mayaos.ru/api';
 
 $allowedOrigins = [
     'https://mayaos.ru',

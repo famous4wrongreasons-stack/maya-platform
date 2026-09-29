@@ -9,8 +9,8 @@ tenant and is not the future platform domain of MAYA APP.
 
 ## Public contract
 
-- API base: `https://api.111.88.148.206.nip.io/api`
-- Health: `GET https://api.111.88.148.206.nip.io/api/health`
+- API base: `https://api.mayaos.ru/api`
+- Health: `GET https://api.mayaos.ru/api/health`
 - Demo tenant slug: `demo-business`
 - Calendar source: mock CRM
 - Booking mode: preview
@@ -32,7 +32,7 @@ or social-login credentials.
 - Service: `maya-saas.service`
 - Bind address: `127.0.0.1:3107`
 - Database: local PostgreSQL database `maya_saas`
-- Reverse proxy: `/etc/nginx/sites-available/api.111.88.148.206.nip.io`
+- Reverse proxy: `/etc/nginx/sites-available/api.mayaos.ru`
 - Certificate: Let's Encrypt, auto-renewed by Certbot
 - Renewal deploy hook: `/etc/letsencrypt/renewal-hooks/deploy/reload-nginx`
 
@@ -65,7 +65,7 @@ multi-tenant boot script runs:
 <script>
   window.__ME_TENANT_BOOT = Object.freeze({
     enabled: true,
-    api: 'https://api.111.88.148.206.nip.io/api',
+    api: 'https://api.mayaos.ru/api',
     slug: 'demo-business',
   });
 </script>
@@ -88,7 +88,7 @@ Inspect without exposing environment values:
 ```bash
 sudo systemctl status maya-saas.service
 sudo journalctl -u maya-saas.service --since '15 minutes ago'
-curl -fsS https://api.111.88.148.206.nip.io/api/health
+curl -fsS https://api.mayaos.ru/api/health
 ```
 
 Validate a release before restart:

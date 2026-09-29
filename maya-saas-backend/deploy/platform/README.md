@@ -4,11 +4,16 @@ The neutral MAYA host serves the universal PWA and proxies `/api` to the
 isolated multi-tenant backend. It must never reuse `malesthetic.pro`, because
 that domain belongs to one tenant.
 
-Temporary acceptance host:
+Temporary acceptance host: **retired 2026-09-29 and permanently dead.**
 
-- `https://maya.111.88.148.206.nip.io/app.html`
-- web OAuth callback: `https://maya.111.88.148.206.nip.io/oauth-callback.html`
-- native OAuth callback: `https://maya.111.88.148.206.nip.io/api/auth/oauth/native/callback`
+It was `maya.111.88.148.206.nip.io`, and the name carried the address inside it. When the
+ephemeral address was lost on 2026-09-23 the name began resolving to an unrelated tenant, and
+because ACME HTTP-01 validates against whatever the name resolves to, its certificate can never
+renew either. That is the defect the canonical host below exists to avoid.
+
+Canonical API host (since 2026-09-29):
+
+- `https://api.mayaos.ru` — a real name on a reserved address, certificate renews normally
 
 Final production host:
 
@@ -35,11 +40,16 @@ does not need to create its own Telegram bot or Yandex application.
 - Provider credentials live only in `/etc/maya-saas/live-widgets.env` on the
   platform server and must never be committed to Git.
 
-Telegram allows exactly these temporary acceptance addresses:
+🔴 **Owner action outstanding — shared platform login.** Telegram's allow-list still permits only
+the retired acceptance addresses, which no longer resolve to us:
 
-- redirect URI: `https://maya.111.88.148.206.nip.io/oauth-callback.html`
-- redirect URI: `https://maya.111.88.148.206.nip.io/api/auth/oauth/native/callback`
-- trusted origin: `https://maya.111.88.148.206.nip.io`
+- redirect URI: `https://maya.111.88.148.206.nip.io/oauth-callback.html` — **dead**
+- redirect URI: `https://maya.111.88.148.206.nip.io/api/auth/oauth/native/callback` — **dead**
+- trusted origin: `https://maya.111.88.148.206.nip.io` — **dead**
+
+Until they are replaced in the Telegram bot's settings with the final production addresses below,
+Telegram login cannot complete. Nothing in this repository can change a provider allow-list; it is a
+change in the provider's own console.
 
 The existing `malesthetic.pro` OAuth configuration and salon Telegram bot are
 separate tenant infrastructure and are not modified by this platform setup.

@@ -114,7 +114,11 @@ PWA/APK попросит разрешение на уведомления и с�
 - Открой DevTools (F12) → Console — смотри ошибки
 - Открой Network — смотри что отдаёт `tg_login_verify` и `cabinet_me_login`
 - Если `invalid_signature_or_expired` — проверь что в `tg-config.php` правильный BOT_TOKEN
-- Если `bot_unreachable` — проверь что бот работает: `curl http://111.88.148.206:8080/api/cabinet/me-via-login`
+- Если `bot_unreachable` — проверь что бот работает. Порт 8080 закрыт наружу правилом iptables
+  (только loopback), поэтому проверять нужно НА сервере:
+  `curl http://127.0.0.1:8080/api/cabinet/me-via-login`.
+  Снаружи бот доступен только через `https://rt.malesthetic.pro`, и только с адресов Beget —
+  vhost отдаёт `deny all` всем остальным.
 
 ---
 

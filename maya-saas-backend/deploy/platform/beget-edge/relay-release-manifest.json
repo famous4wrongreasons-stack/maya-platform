@@ -40,12 +40,12 @@
     },
     {
       "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/maya-native-api.php",
-      "sha256": "91429681ea3118a158e37fe42be9a0306062f06fb8f2926935391d6081ea4391",
+      "sha256": "137ac3dd9adfbaea58a5e963887cd35fed603c9ff521ee061e2be1ec9bedac82",
       "role": "relay_php"
     },
     {
       "path": "/home/m/mocine3388/mayaos.ru/public_html/maya-platform-api.php",
-      "sha256": "0f33e067495b40ab64b91e4aa1eb179f7403903ccc404bac1872e025671dfb50",
+      "sha256": "32c3e67856db2f7892537ad672ed66c383b071538fd0dd7a566a236226edd0e2",
       "role": "relay_php"
     },
     {
