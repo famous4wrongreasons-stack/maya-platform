@@ -79,6 +79,33 @@ export class PhoneAuthDeliveryService {
     };
   }
 
+  /** Reuse the existing provider, never phone-login debug/test delivery.
+   * The caller must resolve the destination from exact canonical Client data.
+   * Delivery acceptance alone is not a verified Client proof.
+   */
+  assertClientVerificationAvailable(): void {
+    let provider: 'debug' | 'smsru';
+    try {
+      provider = this.resolveProvider();
+    } catch {
+      throw new PhoneAuthDeliveryUnavailableError('VERIFIER TRANSPORT MISSING');
+    }
+    if (
+      provider !== 'smsru' ||
+      this.configService.get<string>('SMSRU_TEST') === 'true'
+    )
+      throw new PhoneAuthDeliveryUnavailableError('VERIFIER TRANSPORT MISSING');
+  }
+
+  async deliverClientVerificationCode(params: {
+    phone: string;
+    code: string;
+  }): Promise<{ delivery: 'sms' }> {
+    this.assertClientVerificationAvailable();
+    await this.sendViaSmsRu(params, true);
+    return { delivery: 'sms' };
+  }
+
   private async planShadow(params: {
     phone: string;
     shadow?: {
@@ -172,11 +199,15 @@ export class PhoneAuthDeliveryService {
     );
   }
 
-  private async sendViaSmsRu(params: {
-    phone: string;
-    code: string;
-    clientIp?: string | null;
-  }): Promise<void> {
+  private async sendViaSmsRu(
+    params: {
+      phone: string;
+      code: string;
+      clientIp?: string | null;
+    },
+    clientVerification = false,
+  ): Promise<void> {
+    if (clientVerification) this.assertClientVerificationAvailable();
     const apiId = this.configService.get<string>('SMSRU_API_ID')?.trim();
 
     if (!apiId) {
@@ -188,7 +219,9 @@ export class PhoneAuthDeliveryService {
     const form = new URLSearchParams({
       api_id: apiId,
       to: this.normalizeSmsRuPhone(params.phone),
-      msg: this.renderSmsText(params.code),
+      msg: clientVerification
+        ? `MAYA: код подтверждения личного клиентского профиля ${params.code}. Никому не сообщайте его.`
+        : this.renderSmsText(params.code),
       json: '1',
     });
     const from = this.configService.get<string>('SMSRU_FROM')?.trim();
@@ -238,7 +271,11 @@ export class PhoneAuthDeliveryService {
       const details =
         error instanceof Error ? error.message : 'Unknown transport error';
 
-      this.logger.error(`SMS.ru transport error: ${details}`);
+      this.logger.error(
+        clientVerification
+          ? 'Client verification SMS transport failed'
+          : `SMS.ru transport error: ${details}`,
+      );
       throw new PhoneAuthDeliveryFailedError(
         'Could not reach SMS transport provider.',
       );
@@ -250,7 +287,9 @@ export class PhoneAuthDeliveryService {
       payload = JSON.parse(responseText) as SmsRuSendResponse;
     } catch {
       this.logger.error(
-        `SMS.ru returned non-JSON response: ${responseText.slice(0, 300)}`,
+        clientVerification
+          ? 'Client verification SMS returned an unreadable response'
+          : `SMS.ru returned non-JSON response: ${responseText.slice(0, 300)}`,
       );
       throw new PhoneAuthDeliveryFailedError(
         'SMS provider returned an unreadable response.',
@@ -259,7 +298,8 @@ export class PhoneAuthDeliveryService {
 
     if (payload.status !== 'OK' || payload.status_code !== 100) {
       throw new PhoneAuthDeliveryFailedError(
-        payload.status_text || 'SMS provider rejected the verification code.',
+        (!clientVerification && payload.status_text) ||
+          'SMS provider rejected the verification code.',
       );
     }
 
@@ -271,7 +311,7 @@ export class PhoneAuthDeliveryService {
       smsStatus.status_code !== 100
     ) {
       throw new PhoneAuthDeliveryFailedError(
-        smsStatus?.status_text ||
+        (!clientVerification && smsStatus?.status_text) ||
           'SMS provider did not accept the verification code for delivery.',
       );
     }
