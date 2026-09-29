@@ -1,0 +1,192 @@
+{
+  "contract": "maya.widget-final-evidence-checkpoint/1",
+  "source_head": "22292a1e76c19b547a05c559a196aac12317ff6d",
+  "runtime_changed_this_pass": false,
+  "mutations": {
+    "7": {
+      "mutants": 38,
+      "source_head": "025248aec442aded65aa3ebd06e86d8f0c41a37c",
+      "status": "AS-DECLARED",
+      "restrictions": {
+        "live_tests": "gate7-effect.live-spec.ts",
+        "live_filter": null,
+        "unit_tests": "(gate7|propose-pairing|commit-guard|gate-context.source|gate-antecedents.inv30|r353-readers.source).*spec.ts"
+      },
+      "baseline_red": [],
+      "sha256": "bf51854ba9fbbebd764fa504de80c412027ba8c8cd5936a1176ab913c288b253"
+    },
+    "8r": {
+      "mutants": 29,
+      "source_head": "13b4a4f88f8b7feb69762e97f73689f4921425db",
+      "status": "AS-DECLARED",
+      "restrictions": {
+        "live_tests": "gate8r-readback.live-spec.ts",
+        "live_filter": null,
+        "unit_tests": "(gate8r|gate-8r).*spec.ts"
+      },
+      "baseline_red": [],
+      "sha256": "b8be0fb87848ada0bd8ada43570662ee8774512f014b1d76a3f673ac7aaa8d9e"
+    },
+    "AB": {
+      "mutants": 2,
+      "source_head": "22292a1e76c19b547a05c559a196aac12317ff6d",
+      "status": "AS-DECLARED",
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": "widgets/(routing/g13-action-boundary.architecture|owner-ports/commit-booking.adapter).spec.ts",
+        "unit_filter": "WR-F33|WR-F76"
+      },
+      "baseline_red": [],
+      "sha256": "0640dacfe82aeaed87641f8581f1ecad253736104c0f6937ef146718c1b7677c"
+    },
+    "H-harness": {
+      "mutants": 21,
+      "source_head": "22292a1e76c19b547a05c559a196aac12317ff6d",
+      "status": "AS-DECLARED",
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": "(?:^|\\s)(?:HAR\\-10|HAR\\-12|HAR\\-13|HAR\\-14|HAR\\-3\\ \\[GW\\]|HAR\\-5|HAR\\-9\\ \\[GW\\]|WR\\-H1)(?=$|[^A-Za-z0-9_.-])",
+        "unit_tests": "widgets/",
+        "unit_filter": "(?:^|\\s)(?:HAR\\-10|HAR\\-12|HAR\\-13|HAR\\-14|HAR\\-3\\ \\[GW\\]|HAR\\-5|HAR\\-9\\ \\[GW\\]|WR\\-H1)(?=$|[^A-Za-z0-9_.-])"
+      },
+      "baseline_red": [],
+      "sha256": "b2a6c8dd56dc100142cb48be90966486315c6a6924de237cf7b5cfd8e98a26c1"
+    },
+    "P-pairing": {
+      "mutants": 6,
+      "source_head": "13b4a4f88f8b7feb69762e97f73689f4921425db",
+      "status": "AS-DECLARED",
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": "propose-pairing.spec.ts",
+        "unit_filter": "PAIR-"
+      },
+      "baseline_red": [],
+      "sha256": "7c8095b29fa756ce485ff77fb479866d8995a7e7a6094d0ad6728a5e3edb2f3d"
+    },
+    "WF": {
+      "mutants": 3,
+      "source_head": "13b4a4f88f8b7feb69762e97f73689f4921425db",
+      "status": "AS-DECLARED",
+      "restrictions": {
+        "live_tests": "wr-release.live-spec.ts",
+        "live_filter": "WR-CREATE",
+        "unit_tests": "release-evidence.spec.ts",
+        "unit_filter": "WF-"
+      },
+      "baseline_red": [],
+      "sha256": "a2d3cced4de0c48172e4301ee85ce4922559ae21a923dfc9811ca17bcd9cde76"
+    },
+    "WR": {
+      "mutants": 23,
+      "source_head": "22292a1e76c19b547a05c559a196aac12317ff6d",
+      "status": "AS-DECLARED",
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": "(?:^|\\s)(?:WR\\-CREATE|WR\\-L11|WR\\-L12\\ requires|WR\\-L13\\ lock\\-time|WR\\-L13\\ refuses|WR\\-L21|WR\\-L22|WR\\-L7|WR\\-L8|claim\\ and\\ reconciliation|projects\\ canonical\\ services|projects\\ valid\\ availability|reads\\ staff\\ through\\ the\\ existing\\ policy/runtime|rejects\\ raw\\ or\\ foreign\\ handles|requires\\ the\\ inherited\\ service|writeReceipt\\ is\\ idempotent)(?=$|[^A-Za-z0-9_.-])",
+        "unit_tests": "(widgets/stores/widget\\-stores\\.service\\.spec\\.ts|widgets/emission/booking\\-successor\\-boundary\\.spec\\.ts|widgets/owner\\-ports/booking\\-selector\\.adapter\\.spec\\.ts|widgets/booking/booking\\-noun\\-identity\\.spec\\.ts|widgets/routing/effect\\-router\\.service\\.spec\\.ts|widgets/owner\\-ports/booking\\-preview\\.adapter\\.spec\\.ts|widgets/composition/chat\\-read\\.trigger\\.spec\\.ts|widgets/resolve/thread\\-page\\.service\\.spec\\.ts|widgets/booking/booking\\-selector\\.presenter\\.spec\\.ts)",
+        "unit_filter": "(?:^|\\s)(?:WR\\-CREATE|WR\\-L11|WR\\-L12\\ requires|WR\\-L13\\ lock\\-time|WR\\-L13\\ refuses|WR\\-L21|WR\\-L22|WR\\-L7|WR\\-L8|claim\\ and\\ reconciliation|projects\\ canonical\\ services|projects\\ valid\\ availability|reads\\ staff\\ through\\ the\\ existing\\ policy/runtime|rejects\\ raw\\ or\\ foreign\\ handles|requires\\ the\\ inherited\\ service|writeReceipt\\ is\\ idempotent)(?=$|[^A-Za-z0-9_.-])"
+      },
+      "baseline_red": [],
+      "sha256": "8138cb2556ebccb7be68e805dbc90f5727dabb865ee4a1c50c077240657969c4"
+    }
+  },
+  "fresh_mutants": 122,
+  "test_summaries": {
+    "unit": {
+      "numPassedTestSuites": 5,
+      "numPassedTests": 59,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "success": true
+    },
+    "backend-scope": {
+      "numPassedTestSuites": 16,
+      "numPassedTests": 239,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "success": true
+    },
+    "widgets": {
+      "numPassedTestSuites": 26,
+      "numPassedTests": 368,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "success": true
+    },
+    "http": {
+      "numPassedTestSuites": 3,
+      "numPassedTests": 9,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "success": true
+    },
+    "u-scope": {
+      "numPassedTestSuites": 1,
+      "numPassedTests": 1,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "success": true
+    }
+  },
+  "bin_cases": 17,
+  "evidence": {
+    "contract": "maya.widgets-evidence-verify/1",
+    "manifest": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-evidence/final-capture/evidence-manifest.jsonl",
+    "manifest_sha256": "23e60bfcde676d1a94282f000c8056137bcf7dd995da3a6a9b3309cefe969266",
+    "inventory": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/widget-release/docs/rebuild/evidence/maya-chat-first-ux/gate-clause-inventory.json",
+    "lines": 22,
+    "claims": 20,
+    "captured_mints": {
+      "HTTP": 18,
+      "BIN": 10
+    },
+    "refused_mints": 0,
+    "records_before_teardown": 28,
+    "harness_files_scanned": 22,
+    "u_proof_map": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/widget-release/docs/rebuild/widget-release-programme/final-evidence/u-proofs.json",
+    "violations": []
+  },
+  "inventory": {
+    "declarations": 434,
+    "batteries": 37,
+    "ci_jobs": 58
+  },
+  "audit_selftests": 57,
+  "receipt_selftests": 47,
+  "typecheck_widgets_live": "PASS",
+  "typecheck_scripts": "PASS",
+  "changed_test_lint": "PASS",
+  "build": "PASS",
+  "K3_structural_checks": "10/10",
+  "full_backend_regression": "Inherited exact runtime bytes: previous 578 suites / 5458 passing; this pass re-ran affected backend suites plus whole widgets live suite. No fresh full-backend claim.",
+  "remote_ci": "NOT RUN; restricted receipts are not a complete CI certificate",
+  "integration_artifact": {
+    "status": "INTEGRATION-ONLY CHECK",
+    "present": false,
+    "copied": false
+  },
+  "9.6": "INTEGRATION-OWNED; still false",
+  "fbe2e": {
+    "CLOSED": 13,
+    "PARTIAL": 6,
+    "OPEN": 9,
+    "new_whole_closures": 0
+  },
+  "self_booking": "Previous implemented mechanism preserved; no production identity change",
+  "AR-1": {
+    "envelope": "READY",
+    "status": "PROPOSED / UNAPPROVED / NOT ACTIVATED",
+    "writer_implemented": false
+  },
+  "effects": {
+    "production": 0,
+    "otp": 0,
+    "yclients": 0
+  },
+  "claude_path_overlap": 0,
+  "safe_to_integrate": "NO",
+  "reason": "No combined carrier/backend candidate, canonical 9.6 persisted-turn proof or fresh integration CI; this is not a backend regression failure."
+}

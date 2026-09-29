@@ -1,0 +1,32 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {greenReport,pair,promote,requireTest} from './recompute.mjs';
+import {sha} from '../preintegration/current-audit.mjs';
+const okTest=title=>({success:true,numFailedTests:0,numFailedTestSuites:0,testResults:[{assertionResults:[{title,status:'passed'}]}]});
+const report=()=>({contract:'maya.widgets-mutation-battery/2',source_head:'head',status:'AS-DECLARED',mismatches:0,baseline_red:[],baseline_controls:{plain:{exits:{live:0},failed:[],problems:[]}},mutants:[{id:'m',status:'live-killed',expect:'live-killed',kills:[{entry:'HTTP'}]}]});
+for(const [name,edit]of Object.entries({stale:r=>r.source_head='old',forgedExpectation:r=>{r.mutants[0].expect='build-killed';r.mutants[0].status='build-killed';},missing:r=>r.mutants=[],red:r=>r.baseline_red=['bad'],survived:r=>r.mutants[0].status='SURVIVED',noControls:r=>r.baseline_controls={},redControl:r=>r.baseline_controls.plain.exits.live=1,noKiller:r=>r.mutants[0].kills=[]}))test('receipt rejects '+name,()=>{const r=report();edit(r);assert.throws(()=>greenReport(r,'head',[{id:'m',expect:'live-killed'}]));});
+test('complete green restricted receipt passes only as targeted evidence',()=>greenReport(report(),'head',[{id:'m',expect:'live-killed'}]));
+const paired=()=>['HTTP','BIN'].map((entry,i)=>({test_id:'p',entry,pid:i+1,claim:'L',clauses:['G7-FR6b'],stopped_at_gate:'13',gates_run:14,record_hash:'record'+i,trigger_trace_id:'trace'+i,labels:['[E-MINT]']}));
+for(const [name,edit]of Object.entries({missing:p=>p.pop(),sameProcess:p=>p[1].pid=1,wrongGate:p=>p[0].stopped_at_gate='7',wrongClause:p=>p[0].clauses=['G7-5'],forged:p=>p[0].labels=['[RI]'],missingMint:p=>p[0].record_hash=null}))test('paired claim rejects '+name,()=>{const p=paired();edit(p);assert.throws(()=>pair(p,'p',['G7-FR6b']));});
+test('separate production pair passes',()=>assert.equal(pair(paired(),'p',['G7-FR6b']).length,2));
+test('pending test is not a proof',()=>{const r=okTest('WF-');r.testResults[0].assertionResults[0].status='pending';assert.throws(()=>requireTest(r,'WF-'));});
+const baseline=()=>JSON.parse(fs.readFileSync(new URL('../sb1-v2/current-audit.json',import.meta.url)));
+const uMap=()=>JSON.parse(fs.readFileSync(new URL('./u-proofs.json',import.meta.url)));
+const caseData=()=>{
+ const p=paired().map(x=>({...x,test_id:'WF-PAIRING'}));
+ const r=p.map(x=>({...x,test_id:'WF-READBACK-POSITIVE',clauses:['R-1a']}));
+ const n=r.map(x=>({...x,test_id:'WF-READBACK-DIVERGENCE',claim:'L-T',stopped_at_gate:'8-R',gates_run:9,labels:['[E-TAMPER:confirmationJson]']}));
+ const lines=[...p,...r,...n,{test_id:'WF-U-R1A',entry:'HTTP',claim:'U',clauses:['R-1a'],labels:['[U-proof]'],record_hash:null,stopped_at_gate:null,gates_run:null}];
+ const bytes=Buffer.from(lines.map(JSON.stringify).join('\n'));
+ const unit=okTest('WF-PAIR-ALL');unit.testResults[0].assertionResults.push({title:'WF-U-R1A-ABSENCE',status:'passed'});
+ return {audit:baseline(),lines,bytes,verification:{contract:'maya.widgets-evidence-verify/1',violations:[],manifest_sha256:sha(bytes)},unit,scope:okTest('WF-U-R1A'),map:uMap()};
+};
+const go=d=>promote(d.audit,d.lines,d.verification,d.bytes,d.unit,d.scope,d.map);
+test('only two clauses promoted; 9.6 stays false/integration-owned',()=>{
+ const a=go(caseData()),c=Object.fromEntries(a.gates.flatMap(g=>Object.entries(g.clauses)));
+ assert.equal(c['G7-FR6b'].state,'L');assert.equal(c['R-1a'].state,'U');assert.equal(c['R-1a'].acceptance.strict_live,false);
+ assert.equal(c['9.6'].state,'false');assert.equal(c['9.6'].current_classification,'INTEGRATION_OWNED');
+ assert.equal(Object.values(c).filter(x=>x.state==='false').length,16);
+});
+for(const [name,edit]of Object.entries({changedManifest:d=>d.bytes=Buffer.from('changed'),rejectedEvidence:d=>d.verification.violations=['bad'],noUDecision:d=>d.audit.historical_widget_scope_decisions.decisions['OD-3']='C',broadU:d=>d.map.proofs.find(p=>p.clause==='R-1a').candidate_scope='whole clause U',missingUReceipt:d=>d.lines.pop(),fakeUTraversal:d=>d.lines.at(-1).stopped_at_gate='8-R',missingAbsence:d=>d.unit.testResults[0].assertionResults.pop()}))test('promotion rejects '+name,()=>{const d=caseData();edit(d);assert.throws(()=>go(d));});

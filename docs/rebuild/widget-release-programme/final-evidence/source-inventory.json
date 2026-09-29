@@ -1,0 +1,249 @@
+{
+  "contract": "maya.widget-release-source-boundaries/1",
+  "source_head": "13b4a4f88f8b7feb69762e97f73689f4921425db",
+  "level": "read-only source inventory, not live proof",
+  "files": [
+    {
+      "source": "maya-saas-backend/src/widgets/composition/chat-read.trigger.ts",
+      "sha256": "78916bff12971e473253cb5aadcb55f30eb8ca183feaac427bee21db922086ce",
+      "observations": []
+    },
+    {
+      "source": "maya-saas-backend/src/widgets/composition/moment.trigger.ts",
+      "sha256": "a36dec5ab888858eab649093b6f88befad5751cd6e8b3c9d8de202f726db8975",
+      "observations": [
+        {
+          "line": 347,
+          "source": "intent_template_key: 'navigate.schedule@1',"
+        }
+      ]
+    },
+    {
+      "source": "maya-saas-backend/src/widgets/booking/booking-intent-template.registry.ts",
+      "sha256": "b941723c827c453f38d8e5042e8576dda69f6f6ca90aedf4df4a3462c2f9454f",
+      "observations": [
+        {
+          "line": 18,
+          "source": "| 'refine.booking.reschedule@1'"
+        },
+        {
+          "line": 19,
+          "source": "| 'refine.booking.cancel@1'"
+        },
+        {
+          "line": 113,
+          "source": "'refine.booking.reschedule@1': row({"
+        },
+        {
+          "line": 114,
+          "source": "key: 'refine.booking.reschedule@1',"
+        },
+        {
+          "line": 127,
+          "source": "'refine.booking.cancel@1': row({"
+        },
+        {
+          "line": 128,
+          "source": "key: 'refine.booking.cancel@1',"
+        }
+      ]
+    },
+    {
+      "source": "maya-saas-backend/src/widgets/projection/rows/initial-projector.rows.ts",
+      "sha256": "230336c8416aa83ffd730ec171056be72775e64db51cccea0fb11ccf9a6e1c4a",
+      "observations": [
+        {
+          "line": 131,
+          "source": "intent_template_key: 'commit.blocked@1',"
+        }
+      ]
+    },
+    {
+      "source": "maya-saas-backend/src/widgets/emission/intent-template.registry.ts",
+      "sha256": "97f653ac8ec8d916c8a68b72f6eb8343fda93bb37fe1a822f7f745b60d7f2d1a",
+      "observations": [
+        {
+          "line": 31,
+          "source": "| 'navigate.account@1'"
+        },
+        {
+          "line": 32,
+          "source": "| 'navigate.schedule@1'"
+        },
+        {
+          "line": 42,
+          "source": "'draft.blocked@1' | 'request-approval.blocked@1' | 'commit.blocked@1';"
+        },
+        {
+          "line": 81,
+          "source": "key: 'settings.read',"
+        },
+        {
+          "line": 169,
+          "source": "'navigate.account@1': row({"
+        },
+        {
+          "line": 170,
+          "source": "key: 'navigate.account@1',"
+        },
+        {
+          "line": 176,
+          "source": "target: { class: 's', ref: { route: 'shell.account', param: null } },"
+        },
+        {
+          "line": 189,
+          "source": "'navigate.schedule@1': row({"
+        },
+        {
+          "line": 190,
+          "source": "key: 'navigate.schedule@1',"
+        },
+        {
+          "line": 196,
+          "source": "target: { class: 's', ref: { route: 'shell.root', param: null } },"
+        },
+        {
+          "line": 338,
+          "source": "target: { class: 's', ref: { route: 'shell.account', param: null } },"
+        },
+        {
+          "line": 357,
+          "source": "'commit.blocked@1': 'COMMIT',"
+        }
+      ]
+    },
+    {
+      "source": "maya-saas-backend/src/widgets/projection/widget-projector.service.ts",
+      "sha256": "88c1b235bbceabd134640795871fe241e4a4fa5914a7dfeb23febf4d7139457d",
+      "observations": [
+        {
+          "line": 15,
+          "source": "// DEV-1 (GATES-PLAN-V11 \u00a70.4), stated here because this file is where it lives: `composeNavigate`"
+        },
+        {
+          "line": 191,
+          "source": "async composeNavigate(plan: ProjectionPlan): Promise<ProjectionOutcome> {"
+        },
+        {
+          "line": 195,
+          "source": "if (target !== 'detail') return degraded('no_registered_row');"
+        }
+      ]
+    },
+    {
+      "source": "maya-saas-backend/src/widgets/routing/effect-router.service.ts",
+      "sha256": "3a0c3291cce64dd0f3fb515af71cf9e7840faa69f78ce37a754e85bedfc6b636",
+      "observations": [
+        {
+          "line": 213,
+          "source": "if (target.class === 'w')"
+        },
+        {
+          "line": 239,
+          "source": "const projected = await this.projector.composeNavigate("
+        }
+      ]
+    },
+    {
+      "source": "maya-saas-backend/src/widgets/routing/handoff-target.signer.ts",
+      "sha256": "089b47c1f7f9faee43255727a5c2e94f999aa64e991bab570af22c06f074fb18",
+      "observations": []
+    },
+    {
+      "source": "maya-saas-backend/src/widgets/input-validation/input-bounds.registry.ts",
+      "sha256": "67488654f569df240bd7bee004f98150e54c2022e24e55a0474760c8949d8474",
+      "observations": [
+        {
+          "line": 22,
+          "source": "export const EMPTY_INPUT_BOUNDS_REGISTRY: InputBoundsRegistry = Object.freeze("
+        }
+      ]
+    },
+    {
+      "source": "maya-saas-backend/src/widgets/input-validation/input-normalizers.registry.ts",
+      "sha256": "3dded852cec6a2af92d1c234a8f6ff225a7bd4323b463853675d5738f824bef7",
+      "observations": [
+        {
+          "line": 5,
+          "source": "export const EMPTY_INPUT_NORMALIZER_REGISTRY: InputNormalizerRegistry ="
+        }
+      ]
+    },
+    {
+      "source": "maya-saas-backend/src/common/feature-catalog.ts",
+      "sha256": "b916a8a04a1db8fe468d1cfaff27e2fe2fa164fb738cf9d735dd759e21049014",
+      "observations": [
+        {
+          "line": 328,
+          "source": "'widgets.runtime': defineReadiness('planned', PLATFORM_BACKEND, ["
+        }
+      ]
+    },
+    {
+      "source": "maya-saas-backend/src/entitlements/feature-registry.service.ts",
+      "sha256": "d9d9fd891152f1182dad041cb7fe9a864620558d4e705400347ebebd614c82bf",
+      "observations": [
+        {
+          "line": 64,
+          "source": "trialGrantable(featureKey: MayaFeatureKey): boolean {"
+        },
+        {
+          "line": 67,
+          "source": "MAYA_FEATURE_READINESS[featureKey].implementationStatus !== 'planned'"
+        }
+      ]
+    },
+    {
+      "source": "maya-saas-backend/src/entitlements/entitlements.service.ts",
+      "sha256": "a22077b323e3db92056adb1d031658e10cb27be11fc70973bdb27905639e5d42",
+      "observations": [
+        {
+          "line": 140,
+          "source": "if (this.registry.trialGrantable(featureKey)) {"
+        }
+      ]
+    },
+    {
+      "source": "maya-saas-backend/src/widgets/routing/gate14-disagreement.metric.ts",
+      "sha256": "99bd1fda62ac0172abd17e73b87f5a542e3db77956ba331897192f8a435fd416",
+      "observations": [
+        {
+          "line": 18,
+          "source": "private readonly counts = new Map<Gate14ReresolutionReason, number>();"
+        },
+        {
+          "line": 25,
+          "source": "value(reason?: Gate14ReresolutionReason): number {"
+        }
+      ]
+    },
+    {
+      "source": "maya-saas-backend/test/widgets-live/support/http-proof-contract.ts",
+      "sha256": "fdc5148a186067334647b103f1493d19ba9c271db86157998a750e6277b28e39",
+      "observations": [
+        {
+          "line": 12,
+          "source": "export interface HttpProofContext {"
+        },
+        {
+          "line": 18,
+          "source": "readonly fixtures: BinFixtures;"
+        },
+        {
+          "line": 20,
+          "source": "mintProvenance(): readonly MintProvenanceLine[];"
+        }
+      ]
+    },
+    {
+      "source": "maya-saas-backend/scripts/widgets-intent-http-proof.ts",
+      "sha256": "bc8ab008bb84bf91fcbad985ead4f34a94c67520316781f56786ddc35afb22dc",
+      "observations": [
+        {
+          "line": 141,
+          "source": "return spawn(process.execPath, ['--enable-source-maps', 'dist/src/main'], {"
+        }
+      ]
+    }
+  ]
+}
