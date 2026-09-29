@@ -84,7 +84,7 @@ describe('Final U scope ledger; typed HTTP proof is WF-READBACK', () => {
       testId: 'WF-U-R1A',
       recordHash: null,
       triggerTraceId: null,
-      stoppedAtGate: '8-R',
+      stoppedAtGate: null,
       gatesRun: null,
       labels: ['[U-proof]'],
       clauses: ['R-1a'],
