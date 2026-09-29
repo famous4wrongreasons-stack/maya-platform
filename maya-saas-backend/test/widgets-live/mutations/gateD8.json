@@ -1,0 +1,57 @@
+[
+  {
+    "id": "D8-M1",
+    "description": "Missing bounds source silently accepted",
+    "file": "src/widgets/input-validation/input-validation.ts",
+    "find": "        if (!source)\n          return refusal(\n            'bound_violation',\n            `field ${field.name} names an unregistered bounds source`,\n          );",
+    "replace": "        if (!source) break;",
+    "killers": [
+      "D8-BOUNDS"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "D8-M2",
+    "description": "Fresh bounds result ignored",
+    "file": "src/widgets/input-validation/input-validation.ts",
+    "find": "!(await source({\n            tenantId: args.tenantId,\n            field,\n            value: value as number | string,\n          }))",
+    "replace": "false",
+    "killers": [
+      "D8-MECHANISM"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "D8-M3",
+    "description": "Unregistered text normalizer silently accepted",
+    "file": "src/widgets/input-validation/input-validation.ts",
+    "find": "        if (!normalizer)\n          return refusal(\n            'use_secure_surface',\n            `field ${field.name} names an unregistered normalizer`,\n          );",
+    "replace": "        if (!normalizer) break;",
+    "killers": [
+      "D8-NORMALIZER"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "D8-M4",
+    "description": "Unsafe text before normalization accepted",
+    "file": "src/widgets/input-validation/input-validation.ts",
+    "find": "const first = safeText(value);\n        if (first === null)\n          return refusal(\n            'use_secure_surface',\n            `field ${field.name} contains secure-surface content`,\n          );",
+    "replace": "const first = value;",
+    "killers": [
+      "D8-SAFE-TEXT"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "D8-M5",
+    "description": "Unsafe normalized text accepted",
+    "file": "src/widgets/input-validation/input-validation.ts",
+    "find": "        if (normalized === null)",
+    "replace": "        if (false && normalized === null)",
+    "killers": [
+      "D8-SAFE-TEXT"
+    ],
+    "expect": "build-killed"
+  }
+]

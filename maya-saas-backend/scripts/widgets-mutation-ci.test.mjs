@@ -56,16 +56,16 @@ function fixture() {
   });
 }
 
-test('38 batteries, 59 jobs: AR-1 covers 453 declarations', () => {
+test('39 batteries, 60 jobs: approved AR and D8 scope covers 458 declarations', () => {
   const p = plan(declared);
-  assert.equal(p.gates.length, 38); assert.equal(p.matrix.include.length, 59);
+  assert.equal(p.gates.length, 39); assert.equal(p.matrix.include.length, 60);
   assert.deepEqual(declared.SB1.mutants.map(m => m.id), Array.from({ length: 10 }, (_, i) => `SB1-M${String(i + 1).padStart(2, '0')}`));
   assert.deepEqual(declared.AB.mutants.map(m => m.id), ['AB-M1', 'AB-M2']);
   assert.deepEqual(declared.SV2.mutants.map(m => m.id), Array.from({ length: 13 }, (_, i) => `SV2-M${i + 1}`));
   assert.deepEqual(declared.SBV.mutants.map(m => m.id), Array.from({ length: 8 }, (_, i) => `SBV-M${i + 1}`));
   assert.deepEqual(declared.WF.mutants.map(m => m.id), ['WF-M1', 'WF-M2', 'WF-M3']);
   const r = assemble(declared, fixture(), head);
-  assert.equal(r.length, 38); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 453);
+  assert.equal(r.length, 39); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 458);
   for (const report of r) {
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
