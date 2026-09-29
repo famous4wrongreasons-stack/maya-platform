@@ -36,6 +36,34 @@ describe('AR-1 signed release policy', () => {
       p.policy.read(c, 'tenant', 'grant', 'operator', new Date()),
     ).toThrow();
   });
+  it('AR1-FORGED rejects a well-formed unsigned CAS substitution even when every other binding is valid', () => {
+    const c = p.command('tenant');
+    c.authorization.payload.expectedVersion = releaseHash(
+      'unsigned but well-formed CAS',
+    );
+    expect(() =>
+      p.policy.read(c, 'tenant', 'grant', 'operator', new Date()),
+    ).toThrow();
+  });
+  it('AR1-NEGATIVE independent reviewer identity cannot alias the approver even with two valid signatures', () => {
+    const q = releaseProof(db),
+      trust = JSON.parse(
+        q.config.getOrThrow<string>('WIDGET_RELEASE_TRUST_JSON'),
+      ) as Record<
+        string,
+        { principalId: string; purpose: string; publicKey: string }
+      >;
+    trust.security.principalId = 'synthetic-owner';
+    q.config.set('WIDGET_RELEASE_TRUST_JSON', JSON.stringify(trust));
+    const c = q.command('tenant');
+    c.authorization = q.signOwner({
+      ...c.authorization.payload,
+      reviewerId: 'synthetic-owner',
+    });
+    expect(() =>
+      q.policy.read(c, 'tenant', 'grant', 'operator', new Date()),
+    ).toThrow('independent_reviewer');
+  });
   it.each(['tenant', 'operator', 'operation'] as const)(
     'AR1-CONTEXT rejects %s substitution',
     (which) => {
@@ -119,16 +147,27 @@ describe('AR-1 signed release policy', () => {
       ).toThrow();
     }
   });
-  it('AR1-PRODUCTION production execution is refused even with trusted signatures', () => {
-    const c = p.command('tenant');
-    p.config.set('NODE_ENV', 'production');
-    try {
-      expect(() =>
-        p.policy.read(c, 'tenant', 'grant', 'operator', new Date()),
-      ).toThrow('production_not_authorized');
-    } finally {
-      p.config.set('NODE_ENV', 'test');
-    }
+  it('AR1-PRODUCTION production execution is refused even with a fully valid staging environment and trusted signatures', () => {
+    const q = releaseProof(db);
+    q.config.set('NODE_ENV', 'production');
+    q.config.set('WIDGET_RELEASE_ENVIRONMENT', 'staging');
+    q.config.set(
+      'DATABASE_URL',
+      'postgresql://proof@127.0.0.1:55729/maya_widget_release_staging_ar1',
+    );
+    const c = q.command('tenant');
+    c.certificate = q.signCertificate({
+      ...c.certificate.payload,
+      environment: 'staging',
+    });
+    c.authorization = q.signOwner({
+      ...c.authorization.payload,
+      environment: 'staging',
+      certificateDigest: releaseHash(c.certificate),
+    });
+    expect(() =>
+      q.policy.read(c, 'tenant', 'grant', 'operator', new Date()),
+    ).toThrow('production_not_authorized');
   });
   it('AR1-READER signed grant expires; wrong tenant and revoked/unsigned rows fail closed', () => {
     const command = p.command('tenant'),
