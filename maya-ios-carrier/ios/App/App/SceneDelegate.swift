@@ -1,6 +1,13 @@
 import UIKit
 import Capacitor
 
+// 🔴 The development-only transport may exist ONLY in a debug build. If anyone ever defines
+// MAYA_DEV_AUTH_SCHEME for a release configuration, the BUILD stops here rather than shipping an
+// app that accepts a callback over a scheme any other app may also claim.
+#if MAYA_DEV_AUTH_SCHEME && !DEBUG
+#error("mayaos:// is a development-only auth transport and must not be compiled into a release build. Release uses the Universal Link at https://mayaos.ru/api/auth/oauth/native/callback, which requires the Associated Domains entitlement.")
+#endif
+
 /// The carrier's ONLY product-adjacent code, and it is deliberately not product code.
 ///
 /// After Telegram's consent the provider sends the browser to
@@ -37,6 +44,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private static let callbackScheme = "https"
     private static let callbackHost = "mayaos.ru"
     private static let callbackPath = "/api/auth/oauth/native/callback"
+    #if MAYA_DEV_AUTH_SCHEME
+    /// DEVELOPMENT ONLY — see the file header. Exactly `mayaos://oauth-callback/`, nothing else.
+    private static let devScheme = "mayaos"
+    private static let devHost = "oauth-callback"
+    #endif
     /// The event the shared shell listens for. It carries opaque strings and no meaning.
     private static let callbackEvent = "maya:oauth-callback"
 
@@ -55,6 +67,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         SceneDelegateProxy.shared.scene(scene, continue: userActivity)
     }
 
+    #if MAYA_DEV_AUTH_SCHEME
+    /// DEVELOPMENT ONLY. A release build has no such method: this does not compile without the flag,
+    /// and the flag is defined by the Debug configuration alone.
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        for context in URLContexts {
+            deliverDevCallback(context.url)
+        }
+        SceneDelegateProxy.shared.scene(scene, openURLContexts: URLContexts)
+    }
+    #endif
+
     // MARK: - the hand-off
 
     /// Refuse anything that is not exactly the associated callback URL, and pass on the three values
@@ -67,22 +90,29 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard components.host?.lowercased() == Self.callbackHost else { return }
         guard components.path == Self.callbackPath else { return }
         guard components.user == nil, components.password == nil, components.port == nil else { return }
-        guard let items = components.queryItems, !items.isEmpty else { return }
+        guard let carried = Self.carried(from: components) else { return }
+        hand(carried)
+    }
 
-        // Exactly the three names, each at most once. A repeated name is how a smuggled second value
-        // rides in behind the first, so a duplicate makes the whole callback invalid rather than
-        // letting either value be picked.
+    /// Exactly the three names, each at most once. A repeated name is how a smuggled second value
+    /// rides in behind the first, so a duplicate makes the whole callback invalid rather than
+    /// letting either value be picked. The backend never emits one without the other, and the shell
+    /// cannot use a callback that names neither an outcome nor the login it belongs to.
+    private static func carried(from components: URLComponents) -> [String: String]? {
+        guard let items = components.queryItems, !items.isEmpty else { return nil }
         var carried: [String: String] = [:]
         for item in items {
-            guard ["state", "code", "error"].contains(item.name) else { return }
-            guard carried[item.name] == nil else { return }
-            guard let value = item.value, !value.isEmpty, value.count <= 4096 else { return }
+            guard ["state", "code", "error"].contains(item.name) else { return nil }
+            guard carried[item.name] == nil else { return nil }
+            guard let value = item.value, !value.isEmpty, value.count <= 4096 else { return nil }
             carried[item.name] = value
         }
-        // The backend never emits one without the other, and the shell cannot use a callback that
-        // names neither an outcome nor the login it belongs to.
-        guard carried["state"] != nil, carried["code"] != nil || carried["error"] != nil else { return }
+        guard carried["state"] != nil, carried["code"] != nil || carried["error"] != nil else { return nil }
+        return carried
+    }
 
+    /// The one hand-off into the shared shell, for both transports.
+    private func hand(_ carried: [String: String]) {
         guard let payload = try? JSONSerialization.data(withJSONObject: carried, options: []),
               let json = String(data: payload, encoding: .utf8) else { return }
         guard let controller = window?.rootViewController as? CAPBridgeViewController,
@@ -95,6 +125,22 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             webView.evaluateJavaScript(script, completionHandler: nil)
         }
     }
+
+    #if MAYA_DEV_AUTH_SCHEME
+    /// DEVELOPMENT ONLY. Accepts exactly `mayaos://oauth-callback/` and nothing else, then hands the
+    /// same three opaque strings to the same shell as the Universal Link does — one landing, one
+    /// completion, one session owner. The checks below are identical to the associated path's; only
+    /// the scheme, host and empty path differ.
+    private func deliverDevCallback(_ url: URL) {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return }
+        guard components.scheme?.lowercased() == Self.devScheme else { return }
+        guard components.host?.lowercased() == Self.devHost else { return }
+        guard components.path.isEmpty || components.path == "/" else { return }
+        guard components.user == nil, components.password == nil, components.port == nil else { return }
+        guard let carried = Self.carried(from: components) else { return }
+        hand(carried)
+    }
+    #endif
 }
 
 private extension String {

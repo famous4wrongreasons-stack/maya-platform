@@ -22,6 +22,24 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<!-- DEVELOPMENT ONLY. $(MAYA_DEV_URL_SCHEME) is `mayaos` in Debug and EMPTY in Release, so a
+	     release build advertises no custom scheme at all. The Swift that would accept one is compiled
+	     only under MAYA_DEV_AUTH_SCHEME, which only Debug defines, and a build-phase check refuses any
+	     non-Debug build whose built Info.plist still names a scheme. Universal Links are the real
+	     transport; this exists because Associated Domains is unavailable to a personal team. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>ru.mayaos.app.devauth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(MAYA_DEV_URL_SCHEME)</string>
+			</array>
+		</dict>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>

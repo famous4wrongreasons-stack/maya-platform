@@ -103,7 +103,37 @@ its own `.htaccess`, which supplies the `application/json` type the extensionles
 otherwise be served without — deliberately NOT in the site's root `.htaccess`, whose sha256 is pinned
 by the R01 relay gate.
 
-### 🔴 Why the custom `mayaos://` scheme is gone
+### The development-only `mayaos://` transport
+
+Associated Domains is not available to a personal Apple team, so a Universal Link cannot be signed
+on one — and the owner needs to run MAYA on their own iPhone now. A custom-scheme transport therefore
+exists **for the Debug configuration alone**, and the separation is enforced three times over:
+
+| | Debug | Release |
+|---|---|---|
+| `MAYA_DEV_URL_SCHEME` | `mayaos` | empty — the built plist carries `CFBundleURLSchemes: [""]` |
+| `SWIFT_ACTIVE_COMPILATION_CONDITIONS` | `DEBUG MAYA_DEV_AUTH_SCHEME` | empty |
+| `scene(_:openURLContexts:)` | compiled | **does not exist** |
+| `CODE_SIGN_ENTITLEMENTS` | none | `App/App.entitlements` (applinks:mayaos.ru) |
+| callback | `mayaos://oauth-callback/` | `https://mayaos.ru/api/auth/oauth/native/callback` |
+
+1. **The code is not there.** The dev handler is inside `#if MAYA_DEV_AUTH_SCHEME`, and only Debug
+   defines it. A release build has no method that can receive a custom-scheme URL.
+2. **`#error` if anyone tries.** Defining the flag for a non-debug configuration stops the build.
+3. **A build phase refuses it.** «Refuse a release build that carries the dev auth scheme» reads the
+   built Info.plist's `CFBundleURLSchemes` and fails any non-Debug build that names one — and fails a
+   release that declares no associated-domains entitlement either, so Release cannot end up with no
+   working callback at all. Proven in both directions: a clean Release build passes it, and a Release
+   build with `MAYA_DEV_URL_SCHEME=mayaos` forced in fails with that message.
+
+Both transports validate the same way and hand the same three opaque strings to the same shell
+through one `hand(_:)`. There is one landing, one completion and one session owner; only the
+doorway differs.
+
+**Before TestFlight, the App Store, or any public iOS release this transport must be gone** — which
+the release gate already guarantees, because such a build cannot be produced while it is present.
+
+### 🔴 Why the custom `mayaos://` scheme is not the final transport
 
 It used to be the callback transport. A custom scheme is not exclusive: any app may declare the same
 one, iOS's tie-break between them is undefined, and because the PKCE verifier lives on the server,
