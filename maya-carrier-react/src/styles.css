@@ -49,3 +49,33 @@ html, body { margin: 0; background: var(--bg); color: var(--text); overscroll-be
   .maya-typewriter-caret { animation: maya-type-caret 0.72s steps(1, end) infinite; }
 }
 @keyframes maya-type-caret { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+
+/* ── the chat's motion, from the canonical source ─────────────────────────────────────────── */
+
+/* app.html:27 — the header's status dot. */
+@keyframes dotBlink { 0%, 45% { opacity: 1; } 55%, 100% { opacity: 0.18; } }
+@media (prefers-reduced-motion: no-preference) {
+  .maya-status-dot { animation: dotBlink 1.6s ease-in-out infinite; }
+}
+
+/* app.html:27 — the thinking dots, verbatim. The dark set is bone, the light set is ink. */
+@keyframes mayaTyping {
+  0%, 64%, 100% { background: rgba(244,240,235,.26); transform: scale(1); }
+  22%           { background: #f4f0eb; transform: scale(1.24); }
+}
+@keyframes mayaTypingLight {
+  0%, 64%, 100% { background: rgba(11,11,12,.22); transform: scale(1); }
+  22%           { background: #0b0b0c; transform: scale(1.24); }
+}
+.maya-typing { display: flex; gap: 7px; align-items: center; }
+.maya-typing span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(244,240,235,.26);
+  animation: mayaTyping 1200ms ease-in-out infinite;
+}
+.maya-typing span:nth-child(2) { animation-delay: 160ms; }
+.maya-typing span:nth-child(3) { animation-delay: 320ms; }
+.maya-typing-light span { background: rgba(11,11,12,.22); animation-name: mayaTypingLight; }
+@media (prefers-reduced-motion: reduce) { .maya-typing span { animation: none; opacity: .5; } }
