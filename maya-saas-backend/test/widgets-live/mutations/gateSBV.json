@@ -1,0 +1,82 @@
+[
+  {
+    "id": "SBV-M1",
+    "file": "src/crm/client-reverification-candidate.service.ts",
+    "find": "!prior.revokedAt ||",
+    "replace": "false ||",
+    "killers": [
+      "RV-PREDECESSOR"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SBV-M2",
+    "file": "src/crm/client-reverification-candidate.service.ts",
+    "find": "prior.clientId !== client.id ||",
+    "replace": "false ||",
+    "killers": [
+      "RV-PREDECESSOR"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SBV-M3",
+    "file": "src/crm/client-reverification-candidate.service.ts",
+    "find": "JSON.stringify(before) !== JSON.stringify(after)",
+    "replace": "false",
+    "killers": [
+      "RV-DRIFT"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SBV-M4",
+    "file": "src/crm/client-reverification-candidate.service.ts",
+    "find": "clients.length !== 1 ||",
+    "replace": "clients.length < 1 ||",
+    "killers": [
+      "RV-CANDIDATE"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SBV-M5",
+    "file": "src/crm/client-reverification-candidate.service.ts",
+    "find": "if (registry.complete !== true)",
+    "replace": "if (false)",
+    "killers": [
+      "RV-CHANNEL"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SBV-M6",
+    "file": "src/crm/client-reverification-candidate.service.ts",
+    "find": "sources.length !== 1",
+    "replace": "sources.length < 1",
+    "killers": [
+      "RV-CHANNEL"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SBV-M7",
+    "file": "src/auth/phone-auth-delivery.service.ts",
+    "find": "provider !== 'smsru' ||",
+    "replace": "false ||",
+    "killers": [
+      "RV-TRANSPORT"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SBV-M8",
+    "file": "src/auth/phone-auth-delivery.service.ts",
+    "find": "this.configService.get<string>('SMSRU_TEST') === 'true'\n    )",
+    "replace": "false\n    )",
+    "killers": [
+      "RV-TRANSPORT"
+    ],
+    "expect": "build-killed"
+  }
+]
