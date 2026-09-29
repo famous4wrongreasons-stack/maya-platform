@@ -550,11 +550,12 @@ export function transcribeFailure(ex: Exchange): TranscribeFailure {
 /** The two authenticated calls of P1, shaped as `shell/ports.ts` `Transport`. */
 export function createTransport(auth: Authorizer, timeouts: Timeouts = { requestMs: REQUEST_TIMEOUT_MS, transcribeMs: TRANSCRIBE_TIMEOUT_MS }) {
   return {
-    /** Body keys exactly `{surface, requestId, messages}`, `surface` the constant 'web' (NT3). */
+    /** Body keys `{surface, requestId, messages}` plus an optional server-issued `conversationId`, `surface` the constant 'web' (NT3). */
     async chat(request: ChatRequest, signal: AbortSignal): Promise<Outcome<ChatProjection, ChatFailure>> {
       const body: ChatRequest = {
         surface: 'web',
         requestId: request.requestId,
+        ...(request.conversationId === undefined ? {} : { conversationId: request.conversationId }),
         messages: request.messages.map((message) => ({ role: message.role, content: message.content })),
       };
       const ex = await authorizedExchange(auth, 'chat', body, signal, timeouts.requestMs);

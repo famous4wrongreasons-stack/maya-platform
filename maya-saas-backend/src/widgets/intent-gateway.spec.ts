@@ -409,6 +409,10 @@ const gatewayFor = (
         bindMint: () => Promise.resolve(),
         canProject: () => Promise.resolve(true),
       },
+      {
+        read: jest.fn().mockResolvedValue([]),
+        append: jest.fn().mockResolvedValue(undefined),
+      },
     ),
   };
 };

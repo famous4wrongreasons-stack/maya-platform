@@ -64,17 +64,30 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
 
     const channel = channelFor(input.surface);
     const conversationId = input.conversationId;
-    const turn = await this.stores.ensureAssistantTurn({
-      tenantId,
-      conversationId,
-      turnIndex: 0,
-      principalProofHash: principal.proofHash,
-      channel,
-      textContent: null,
-      spokenTranscript: null,
-    });
+    const turn =
+      input.userTurn === undefined
+        ? await this.stores.ensureAssistantTurn({
+            tenantId,
+            conversationId,
+            turnIndex: 0,
+            principalProofHash: principal.proofHash,
+            channel,
+            textContent: null,
+            spokenTranscript: null,
+          })
+        : await this.prisma.$transaction((tx) =>
+            TimelineStore.ensureAssistantExecutionTurn(tx, {
+              tenantId,
+              conversationId,
+              parentUserTurnId: input.userTurn!.turnId,
+              principalProofHash: principal.proofHash,
+              channel,
+              executionId: input.executionId,
+            }),
+          );
     // A replay under a different current authority cannot acquire the old turn.
-    if (turn.principalProofHash !== principal.proofHash) return null;
+    if (turn === null || turn.principalProofHash !== principal.proofHash)
+      return null;
 
     return this.prisma.$transaction(async (tx) => {
       await TimelineStore.lockConversation(tx, tenantId, conversationId);

@@ -236,6 +236,10 @@ const real = () =>
       bindMint: () => Promise.resolve(),
       canProject: () => Promise.resolve(true),
     },
+    {
+      read: jest.fn().mockResolvedValue([]),
+      append: jest.fn().mockResolvedValue(undefined),
+    },
   );
 
 // The runner logs each stop at debug level; the recorders stop it on purpose, 240 times.

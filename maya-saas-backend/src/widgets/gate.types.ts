@@ -1,3 +1,4 @@
+import type { UserTurnCorrelation } from './stores/user-turn-binding';
 // K3 — the gate contract.
 //
 // §3.9 fixes fourteen gates and one readback gate in ONE order, and §0.3 fixes the mechanism: "the
@@ -189,6 +190,8 @@ export interface PrincipalView {
  * reach a header, and a credential arriving from the widget is the thing §3.9 Gate 2 forbids.
  */
 export interface GateContext {
+  /** Server-assembled transport correlation. Never capability authority. */
+  readonly userTurnCorrelation?: UserTurnCorrelation;
   /** The hash of the presented token. The token itself is never stored, only compared. */
   readonly intentTokenHash: string;
   readonly tenantId: string;

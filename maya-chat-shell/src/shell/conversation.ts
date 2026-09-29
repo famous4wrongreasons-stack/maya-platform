@@ -162,6 +162,8 @@ interface UserItem {
   readonly text: string;
   readonly modality: TurnModality;
   readonly requestId: string;
+  readonly conversationId?: string;
+  userTurn?: { readonly turnId: string; readonly conversationId: string };
   state: 'sending' | 'sent' | 'failed';
   failure: ChatFailure | null;
   retry: TurnRetry;
@@ -193,7 +195,7 @@ const DISPLAY_CAPPED_ID = 'notice:display_capped';
 const itemView = (item: Item): TimelineItemView => {
   switch (item.kind) {
     case 'user':
-      return { kind: 'user', id: item.id, text: item.text, modality: item.modality, state: item.state, failure: item.failure, retry: item.retry };
+      return { ...(item.userTurn === undefined ? {} : { userTurn: item.userTurn }), kind: 'user', id: item.id, text: item.text, modality: item.modality, state: item.state, failure: item.failure, retry: item.retry };
     case 'assistant':
       return { kind: 'assistant', id: item.id, text: item.text };
     case 'widget':
@@ -210,6 +212,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
   const items: Item[] = [];
   const listeners = new Set<(view: ConversationView) => void>();
   const dropListeners = new Set<(ids: readonly string[], reason: DropReason) => void>();
+  let conversationId: string | undefined;
   let serial = 0;
   let dropped = 0;
   let generation = 0;
@@ -289,6 +292,10 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
     const item = items.find((x): x is UserItem => x.kind === 'user' && x.id === itemId);
     if (item === undefined) return emit();
     if (outcome.ok) {
+      if (outcome.value.userTurn !== undefined) {
+        item.userTurn = outcome.value.userTurn;
+        conversationId = outcome.value.userTurn.conversationId;
+      }
       item.state = 'sent';
       item.failure = null;
       item.retry = NO_RETRY;
@@ -321,7 +328,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
     emit();
     let pending: Promise<Outcome<ChatProjection, ChatFailure>>;
     try {
-      pending = deps.transport.chat({ surface: 'web', requestId: item.requestId, messages }, abort.signal);
+      pending = deps.transport.chat({ surface: 'web', requestId: item.requestId, messages, ...(item.conversationId === undefined ? {} : { conversationId: item.conversationId }) }, abort.signal);
     } catch {
       pending = Promise.resolve({ ok: false, failure: { reason: 'unexpected_response', status: 0 } });
     }
@@ -355,6 +362,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
       text: checked.text,
       modality: origin?.modality === 'spoken' ? 'spoken' : 'typed',
       requestId: newRequestId(),
+      ...(conversationId === undefined ? {} : { conversationId }),
       state: 'sending',
       failure: null,
       retry: NO_RETRY,
@@ -374,6 +382,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
   };
 
   const clear = (): void => {
+    conversationId = undefined;
     generation += 1;
     const abort = inflight?.abort;
     inflight = null;

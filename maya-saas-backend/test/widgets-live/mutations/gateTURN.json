@@ -1,0 +1,135 @@
+[
+  {
+    "id": "TURN-M1",
+    "description": "correlation omits the current actor",
+    "file": "src/widgets/stores/user-turn-binding.ts",
+    "find": "      correlation.actorUserId,",
+    "replace": "      'shared-actor',",
+    "killers": [
+      "TURN-CORRELATION"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "TURN-M2",
+    "description": "correlation omits the tenant",
+    "file": "src/widgets/stores/user-turn-binding.ts",
+    "find": "      'maya.user-turn/1',\n      tenantId,",
+    "replace": "      'maya.user-turn/1',\n      'shared-tenant',",
+    "killers": [
+      "TURN-CORRELATION"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "TURN-M3",
+    "description": "chat and native widget request namespaces collide",
+    "file": "src/widgets/stores/user-turn-binding.ts",
+    "find": "      correlation.kind,",
+    "replace": "      'shared-kind',",
+    "killers": [
+      "TURN-CORRELATION"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "TURN-M4",
+    "description": "duplicate immutable bindings are accepted",
+    "file": "src/widgets/stores/user-turn-binding.ts",
+    "find": "  if (rows.length !== 1)",
+    "replace": "  if (rows.length < 1)",
+    "killers": [
+      "TURN-AUDIT"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "TURN-M5",
+    "description": "audit write escapes the request transaction",
+    "file": "src/widgets/owner-ports/user-turn-audit.adapter.ts",
+    "find": "await this.audit.log(input, tx);",
+    "replace": "await this.audit.log(input);",
+    "killers": [
+      "TURN-AUDIT-TX"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "TURN-M6",
+    "description": "expired USER row is reusable",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "existing.retentionUntil.getTime() <= now.getTime()",
+    "replace": "false",
+    "killers": [
+      "TURN-REPLAY-REFUSE"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "TURN-M7",
+    "description": "changed principal may acquire prior USER identity",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "existing.principalProofHash !== input.principalProofHash ||",
+    "replace": "false ||",
+    "killers": [
+      "TURN-REPLAY-REFUSE"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "TURN-M8",
+    "description": "ordinary ingress skips the physical USER writer",
+    "file": "src/widgets/composition/typed-step0.ts",
+    "find": "const turn = await TimelineStore.appendUserTurn(\n        {\n          id: turnId,\n          tenantId,\n          conversationId,\n          principalProofHash: principal.proofHash,\n          channel: 'pwa',\n          textContent: input.utterance,\n        },\n        tx,\n        now,\n      );",
+    "replace": "const turn = { id: turnId, turnIndex: 0 };",
+    "killers": [
+      "TURN-ORDINARY"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "TURN-M9",
+    "description": "native widget loses request correlation and duplicate taps append again",
+    "file": "src/widgets/intent-gateway.service.ts",
+    "find": "          userTurnCorrelation: {\n            kind: args.chatRequestId === undefined ? 'widget' : 'chat',\n            requestId:\n              args.chatRequestId ??\n              `${args.carrier}:${args.submission.client_nonce}`,\n            actorUserId: args.actor.userId,\n          },\n",
+    "replace": "          userTurnCorrelation: undefined,\n",
+    "killers": [
+      "TURN-WIDGET"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "TURN-M10",
+    "description": "unknown conversation accepted as caller-selected storage authority",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "    if (row === null)\n      throw new ConflictException('conversation_scope_conflict');",
+    "replace": "    void row;",
+    "killers": [
+      "TURN-SCOPE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "TURN-M11",
+    "description": "ordinary correlation not written atomically with the row",
+    "file": "src/widgets/composition/typed-step0.ts",
+    "find": "      if (binding === null)\n        await writeUserTurnBinding",
+    "replace": "      if (false)\n        await writeUserTurnBinding",
+    "killers": [
+      "TURN-ORDINARY",
+      "TURN-ATOMIC"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "TURN-M12",
+    "description": "chat tool results lose persisted parent turn identity",
+    "file": "src/widgets/composition/chat-read.trigger.ts",
+    "find": "input.userTurn === undefined",
+    "replace": "true",
+    "killers": [
+      "TURN-READ"
+    ],
+    "expect": "live-killed"
+  }
+]

@@ -362,6 +362,10 @@ const READ_TIMELINE_CALLERS: readonly SrcPath[] = [TIMELINE_FACADE];
  * is the reason it cannot.
  */
 const STORE_METHOD_ALLOWLIST = new Set([
+  'appendUserTurn',
+  'readUserTurn',
+  'assertConversation',
+  'ensureAssistantExecutionTurn',
   'appendTurn',
   'ensureAssistantTurn',
   'lowerToUserTurn',
@@ -790,8 +794,48 @@ describe('T-ARCH-MODELS — what the lowering may reach (G9-20, G9-21)', () => {
     ];
     expect(files.length).toBeGreaterThan(1);
     for (const file of callClosure(files)) {
-      const offending = NEIGHBOURS.filter((n) => file.startsWith(`${n}/`));
+      // 9.6 reuses H6's canonical JSON utility. These two pure modules expose no owner/data edge.
+      const pureIdentityUtility = [
+        'action-engine/action-engine.identity.ts',
+        'action-engine/action-engine.errors.ts',
+      ].includes(file);
+      const offending = pureIdentityUtility
+        ? []
+        : NEIGHBOURS.filter((n) => file.startsWith(`${n}/`));
       expect([file, offending]).toEqual([file, []]);
+    }
+  });
+
+  it('TURN-CANONICAL-HASH imports only the existing unkeyed canonicaliser, never an Action Engine owner or keyed identity service', () => {
+    for (const file of [
+      'widgets/stores/user-turn-binding.ts',
+      'widgets/stores/timeline.store.ts',
+    ]) {
+      const sf = parseSrc(file);
+      const imports = sf.statements.filter(
+        (n): n is ts.ImportDeclaration =>
+          ts.isImportDeclaration(n) &&
+          ts.isStringLiteral(n.moduleSpecifier) &&
+          n.moduleSpecifier.text.includes('action-engine'),
+      );
+      expect(imports).toHaveLength(1);
+      const clause = imports[0].importClause;
+      expect(clause?.name).toBeUndefined();
+      expect(clause?.namedBindings?.getText(sf)).toBe('{ stableActionJson }');
+      expect(imports[0].moduleSpecifier.getText(sf)).toBe(
+        "'../../action-engine/action-engine.identity'",
+      );
+    }
+    for (const file of [
+      'action-engine/action-engine.identity.ts',
+      'action-engine/action-engine.errors.ts',
+    ]) {
+      expect(prismaOps(parseSrc(file))).toEqual([]);
+      expect(valueImports(file)).toEqual(
+        file.endsWith('identity.ts')
+          ? ['action-engine/action-engine.errors.ts']
+          : [],
+      );
     }
   });
 
@@ -806,7 +850,15 @@ describe('T-ARCH-MODELS — what the lowering may reach (G9-20, G9-21)', () => {
     const sf = parseSrc('widgets/stores/timeline.store.ts');
     const writer = declarationOf(sf, 'lowerToUserTurn');
     expect(writer).not.toBeNull();
-    const body = (writer as ts.MethodDeclaration).body?.getText(sf) ?? '';
+    const shared = declarationOf(sf, 'appendUserTurn') as ts.MethodDeclaration;
+    expect(shared).not.toBeNull();
+    expect(
+      callsOf(parseSource('writer.ts', writer!.getText(sf)), 'appendUserTurn'),
+    ).toBe(1);
+    const body = [
+      (writer as ts.MethodDeclaration).body?.getText(sf),
+      shared.body?.getText(sf),
+    ].join('\n');
     const models = [...delegates()].filter((d) =>
       new RegExp(`\\b${d}\\b`).test(body),
     );
@@ -884,7 +936,7 @@ describe('T-ARCH-TX — Gate 9 writes through the request transaction T (D-1, C1
     const parameters = (lower as ts.SignatureDeclaration).parameters.map((p) =>
       p.name.getText(parseSrc('widgets/lowering/lowering.gate.ts')),
     );
-    expect(parameters.length).toBe(2);
+    expect(parameters).toEqual(['ctx', 'tx', 'audit']);
   });
 });
 

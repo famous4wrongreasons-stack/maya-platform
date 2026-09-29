@@ -685,6 +685,7 @@ const EMISSION_MODULE = 'emission/emission.module.ts#WidgetEmissionModule';
  * (plan §3.5 item 7). U0: none.
  */
 const OWNER_MODULES = [
+  'audit-log/audit-log.module.ts#AuditLogModule',
   // U6-L1 (R6-2): C20's owner, `AiToolPolicyService.assertCanExecute` (C11:4761-4762).
   'ai-tools/ai-tool-policy.module.ts#AiToolPolicyModule',
   // U12b (G12-R3): the canonical READ runtime; the adapter calls execute, never the handler.
@@ -703,6 +704,7 @@ const OWNER_MODULES = [
 ];
 /** DI tokens of `di-tokens.ts` the owner-ports module may provide and export. */
 const BOUND_PORT_TOKENS = [
+  'USER_TURN_AUDIT', // 9.6 opaque correlation only; canonical owner remains AuditLogService.
   'WIDGET_RELEASE_ACCESS', // Approved fixed release profile; no generic owner dispatch.
   'CANONICAL_READ',
   'GATE6_OWNERS',

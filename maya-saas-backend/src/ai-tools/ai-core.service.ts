@@ -529,6 +529,11 @@ export class AiCoreService {
     @Optional() private readonly moduleRef?: ModuleRef,
   ) {}
 
+  private readonly persistedUserTurns = new WeakMap<
+    AiCoreChatDto,
+    { turnId: string; conversationId: string }
+  >();
+
   async chat(user: AuthenticatedUser, dto: AiCoreChatDto) {
     const tenantId = this.requireTenant(user);
     const businessTimezone = await this.resolveBusinessTimezone(tenantId);
@@ -539,6 +544,8 @@ export class AiCoreService {
     const sanitized = this.sanitizeMessages(dto.messages);
     const typedWidget = await this.routeTypedWidget(user, dto);
     if (typedWidget !== null) {
+      if (typedWidget.userTurn !== undefined)
+        this.persistedUserTurns.set(dto, typedWidget.userTurn);
       const brain = this.brainRouter.route(
         user.role,
         this.contextualUserText(sanitized.messages),
@@ -550,6 +557,7 @@ export class AiCoreService {
         action: typedWidget.action,
       });
     }
+    await this.persistOrdinaryUserTurn(user, dto);
     const clientAudience = this.isClientAudience(user, dto.audience);
     // Поверхность мастера: владельцу/менеджеру в режиме мастера инструменты
     // выдаются и исполняются от роли STAFF — личная аналитика вместо кассы
@@ -688,7 +696,11 @@ export class AiCoreService {
                 toolName,
               ),
             },
-            { widgetTrigger: 'T-2a', requestId: dto.requestId },
+            {
+              widgetTrigger: 'T-2a',
+              requestId: dto.requestId,
+              userTurn: this.persistedUserTurns.get(dto),
+            },
           ),
         );
         const status =
@@ -803,7 +815,11 @@ export class AiCoreService {
                 preset.name,
               ),
             },
-            { widgetTrigger: 'T-2a', requestId: dto.requestId },
+            {
+              widgetTrigger: 'T-2a',
+              requestId: dto.requestId,
+              userTurn: this.persistedUserTurns.get(dto),
+            },
           ),
         );
         const status =
@@ -1182,7 +1198,11 @@ export class AiCoreService {
                   decision.toolCall.name,
                 ),
               },
-              { widgetTrigger: 'T-2a', requestId: dto.requestId },
+              {
+                widgetTrigger: 'T-2a',
+                requestId: dto.requestId,
+                userTurn: this.persistedUserTurns.get(dto),
+              },
             ),
           );
         } catch (error) {
@@ -1417,7 +1437,31 @@ export class AiCoreService {
       surface: dto.surface,
       utterance: this.latestUserText(dto.messages),
       requestId: dto.requestId,
+      ...(dto.conversationId === undefined
+        ? {}
+        : { conversationId: dto.conversationId }),
     });
+  }
+
+  private async persistOrdinaryUserTurn(
+    user: AuthenticatedUser,
+    dto: AiCoreChatDto,
+  ): Promise<void> {
+    if (dto.surface !== 'web' || this.moduleRef === undefined) return;
+    const trigger = this.moduleRef.get<AiTypedWidgetTriggerPort>(
+      AI_TYPED_WIDGET_TRIGGER,
+      { strict: false },
+    );
+    const turn = await trigger.persistTypedTurn({
+      actor: user,
+      surface: dto.surface,
+      utterance: this.latestUserText(dto.messages),
+      requestId: dto.requestId,
+      ...(dto.conversationId === undefined
+        ? {}
+        : { conversationId: dto.conversationId }),
+    });
+    if (turn !== null) this.persistedUserTurns.set(dto, turn);
   }
 
   private async handleAssistantCommand(
@@ -1720,6 +1764,9 @@ export class AiCoreService {
       metadata: {
         surface: dto.surface,
         source: completedResponse.source,
+        ...(this.persistedUserTurns.has(dto)
+          ? { user_turn: this.persistedUserTurns.get(dto) }
+          : {}),
         models: [...new Set(decisions.map((decision) => decision.model))],
         model_calls: decisions.length,
         tools_used: toolsUsed.map((tool) => tool.name),
@@ -1753,6 +1800,9 @@ export class AiCoreService {
       .find((tool) => tool.resolution !== undefined)?.resolution;
     return {
       request_id: dto.requestId,
+      ...(this.persistedUserTurns.has(dto)
+        ? { user_turn: this.persistedUserTurns.get(dto) }
+        : {}),
       reply: completedResponse.reply,
       source: completedResponse.source,
       redacted_input: redacted,

@@ -215,6 +215,8 @@ export type WidgetSentence =
 export type TimelineItemView =
   | {
       readonly kind: 'user';
+      /** The local id remains a view key; persistence has one server-owned identity. */
+      readonly userTurn?: { readonly turnId: string; readonly conversationId: string };
       readonly id: string;
       readonly text: string;
       readonly modality: TurnModality;

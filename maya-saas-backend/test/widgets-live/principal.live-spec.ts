@@ -773,8 +773,19 @@ describe('G2-EQ — the transport stage is the typed route’s, row by row [HTTP
   });
 
   /** A response's TRANSPORT-stage classification: what the six global guards did with it. */
-  const stage = (status: number): 'refused' | 'admitted' =>
-    status === 401 || status === 403 ? 'refused' : 'admitted';
+  const stage = (status: number, body: unknown): 'refused' | 'admitted' => {
+    // 9.6 resolves a current conversation principal after the transport guards.
+    // Its explicit fail-closed handler response is not a transport rejection.
+    if (
+      status === 403 &&
+      typeof body === 'object' &&
+      body !== null &&
+      'message' in body &&
+      body.message === 'conversation_principal_unavailable'
+    )
+      return 'admitted';
+    return status === 401 || status === 403 ? 'refused' : 'admitted';
+  };
 
   const both = async (
     token: string | null,
@@ -794,8 +805,11 @@ describe('G2-EQ — the transport stage is the typed route’s, row by row [HTTP
       request(server).post('/api/widgets/intent'),
     ).send(submission(randomUUID(), `g2-eq-token-${randomUUID()}`));
     return {
-      chat: { status: chat.status, stage: stage(chat.status) },
-      intent: { status: intent.status, stage: stage(intent.status) },
+      chat: { status: chat.status, stage: stage(chat.status, chat.body) },
+      intent: {
+        status: intent.status,
+        stage: stage(intent.status, intent.body),
+      },
     };
   };
 
@@ -874,6 +888,10 @@ describe('G2-EQ — the transport stage is the typed route’s, row by row [HTTP
     for (const [label, credential] of rows) {
       const answer = await both(await credential());
       observed[label] = answer;
+      if (label === 'staff-class role with no Staff row') {
+        expect(answer.chat).toEqual({ status: 403, stage: 'admitted' });
+        expect(answer.intent.stage).toBe('admitted');
+      }
       // The stage must be the same on both routes…
       expect([label, answer.intent.stage]).toEqual([label, answer.chat.stage]);
       // …and where the transport chain REFUSED, the status must be the same too: a widget route that

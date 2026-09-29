@@ -1,3 +1,6 @@
+import { AuditLogModule } from '../../audit-log/audit-log.module';
+import { UserTurnAuditAdapter } from './user-turn-audit.adapter';
+import { USER_TURN_AUDIT } from '../di-tokens';
 import { WidgetReleaseAccessAdapter } from './release-access.adapter';
 import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
 import { Module } from '@nestjs/common';
@@ -63,6 +66,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
  */
 @Module({
   imports: [
+    AuditLogModule,
     AiToolPolicyModule,
     AiToolsModule,
     MeasurementModule,
@@ -74,6 +78,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     TenancyModule,
   ],
   providers: [
+    { provide: USER_TURN_AUDIT, useClass: UserTurnAuditAdapter },
     { provide: WIDGET_RELEASE_ACCESS, useClass: WidgetReleaseAccessAdapter },
     CanonicalReadAdapter,
     Gate6OwnersAdapter,
@@ -116,6 +121,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     },
   ],
   exports: [
+    USER_TURN_AUDIT,
     WIDGET_RELEASE_ACCESS,
     CANONICAL_READ,
     GATE6_OWNERS,

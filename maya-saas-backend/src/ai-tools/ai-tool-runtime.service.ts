@@ -124,6 +124,10 @@ export class AiToolRuntimeService {
       readonly suppressWidgetTrigger?: boolean;
       readonly widgetTrigger?: 'T-2a' | 'T-2b';
       readonly requestId?: string | null;
+      readonly userTurn?: {
+        readonly turnId: string;
+        readonly conversationId: string;
+      };
     } = {},
   ) {
     const principal = this.principal(user, dto.surface);
@@ -173,6 +177,7 @@ export class AiToolRuntimeService {
       completed,
       internal.widgetTrigger ?? 'T-2b',
       internal.requestId ?? this.tenantContext.get()?.requestId ?? null,
+      internal.userTurn,
     );
   }
 
@@ -185,6 +190,7 @@ export class AiToolRuntimeService {
     completed: unknown,
     triggerKind: 'T-2a' | 'T-2b',
     requestId: string | null,
+    userTurn?: { readonly turnId: string; readonly conversationId: string },
   ): Promise<unknown> {
     if (
       definition.riskTier !== 'read' ||
@@ -217,9 +223,10 @@ export class AiToolRuntimeService {
       arguments: args,
       inputHash,
       executionId: value.execution_id as string,
-      conversationId: this.readWidgetConversationId(
-        value.execution_id as string,
-      ),
+      ...(userTurn === undefined ? {} : { userTurn }),
+      conversationId:
+        userTurn?.conversationId ??
+        this.readWidgetConversationId(value.execution_id as string),
       result: value.result,
       replayed: value.replayed === true,
       trigger: triggerKind,

@@ -174,7 +174,11 @@ export const projectChat = (body: unknown, requestId: string): ChatProjection | 
   if (echoed === null || echoed !== requestId || reply === null) return null;
   const resolution = projectChatResolution(own(body, 'resolution'));
   if (resolution === INVALID_RESOLUTION) return null;
+  const persisted = own(body, 'user_turn');
+  const uuid = (v: unknown): v is string => typeof v === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(v);
+  if (persisted !== undefined && (!isRecord(persisted) || !uuid(own(persisted, 'turnId')) || !uuid(own(persisted, 'conversationId')))) return null;
   return {
+    ...(persisted === undefined ? {} : { userTurn: { turnId: own(persisted, 'turnId') as string, conversationId: own(persisted, 'conversationId') as string } }),
     request_id: echoed,
     reply,
     action_status: text(own(own(body, 'action'), 'status')),

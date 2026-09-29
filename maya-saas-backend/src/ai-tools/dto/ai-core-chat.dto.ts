@@ -5,6 +5,7 @@ import {
   IsIn,
   IsOptional,
   IsString,
+  IsUUID,
   Matches,
   MaxLength,
   MinLength,
@@ -40,6 +41,11 @@ export class AiCoreChatDto {
   @IsString()
   @Matches(/^[A-Za-z0-9_-]{8,128}$/)
   requestId!: string;
+
+  /** Opaque server-issued conversation reference; the ingress rechecks tenant and current principal. */
+  @IsOptional()
+  @IsUUID()
+  conversationId?: string;
 
   @ArrayMinSize(1)
   @ArrayMaxSize(12)

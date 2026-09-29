@@ -1,3 +1,10 @@
+import { ConflictException } from '@nestjs/common';
+import type { UserTurnAuditPort } from '../owner-ports/user-turn-audit.port';
+import {
+  lockUserTurn,
+  readUserTurnBinding,
+  writeUserTurnBinding,
+} from '../stores/user-turn-binding';
 // ── Gate 9 — lowering: the slot seam ────────────────────────────────────────────────────────────────
 //
 // GATES-PLAN-V11 U9b. Slot 9 renders only server-resolved canonical labels, then performs the first
@@ -17,6 +24,7 @@ import { TimelineStore } from '../stores/timeline.store';
 export const lower = async (
   ctx: GateContext,
   tx: RequestTx | null,
+  audit?: UserTurnAuditPort,
 ): Promise<GateVerdict> => {
   const source = ctx.facts.loweringSource;
   if (source === undefined)
@@ -33,8 +41,40 @@ export const lower = async (
   if (isRenderImpossibility(rendered))
     return superseded('handle_stale', rendered.rule);
 
+  const correlation = ctx.userTurnCorrelation;
+  if (correlation !== undefined && audit === undefined)
+    throw new LoweringConstructionDefect('userTurnAudit');
+  const turnId =
+    correlation === undefined
+      ? undefined
+      : await lockUserTurn(tx, ctx.tenantId, correlation);
+  const binding =
+    correlation === undefined
+      ? null
+      : await readUserTurnBinding(
+          tx,
+          ctx.tenantId,
+          correlation,
+          ctx.principalProofHash,
+          audit!,
+        );
+  if (correlation !== undefined) {
+    if (audit === undefined)
+      throw new LoweringConstructionDefect('userTurnAudit');
+    const prior = await TimelineStore.readUserTurn(tx, ctx.tenantId, turnId!);
+    // Missing half of an atomic binding is a refusal, never authority to recreate history.
+    if (
+      (binding === null) !== (prior === null) ||
+      (binding !== null &&
+        (binding.intentTokenHash !== ctx.intentTokenHash ||
+          binding.conversationId !== source.conversationId))
+    )
+      throw new ConflictException('user_turn_binding_conflict');
+  }
+
   const written = await TimelineStore.lowerToUserTurn(
     {
+      ...(turnId === undefined ? {} : { turnId }),
       tenantId: ctx.tenantId,
       intentTokenHash: ctx.intentTokenHash,
       conversationId: source.conversationId,
@@ -47,6 +87,16 @@ export const lower = async (
   );
   if (written === null)
     return superseded('handle_stale', 'lowering source changed before append');
+
+  if (correlation !== undefined && binding === null) {
+    await writeUserTurnBinding(audit!, tx, ctx.tenantId, correlation, {
+      contract: 'maya.user-turn-binding/1',
+      turnId: written.id,
+      conversationId: source.conversationId,
+      principalProofHash: ctx.principalProofHash,
+      intentTokenHash: ctx.intentTokenHash,
+    });
+  }
 
   return {
     outcome: 'pass',

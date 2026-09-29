@@ -51,11 +51,17 @@ const harness = (rows: readonly unknown[] = [candidate]) => {
     {
       $transaction: (fn: (tx: unknown) => unknown) =>
         fn({
+          $executeRaw: jest.fn().mockResolvedValue(0),
+          auditLog: { findMany: jest.fn().mockResolvedValue([]) },
           widgetIntentRecord: { findMany: jest.fn().mockResolvedValue(rows) },
         }),
     } as never,
     { submit } as never,
     { resolve },
+    {
+      read: jest.fn().mockResolvedValue([]),
+      append: jest.fn().mockResolvedValue(undefined),
+    },
   );
   return { service, submit, resolve };
 };
@@ -77,6 +83,7 @@ describe('P-TYPED — the typed Step 0 carrier', () => {
       tenantId: 'tenant-1',
       actor,
       carrier: 'pwa',
+      chatRequestId: 'request_1234',
       submission: {
         contract: 'maya.widget.intent.submission/1',
         widget_id: candidate.widgetId,

@@ -22,5 +22,9 @@ export interface AiReadWidgetTriggerPort {
     readonly replayed: boolean;
     readonly trigger: 'T-2a' | 'T-2b';
     readonly requestId: string | null;
+    readonly userTurn?: {
+      readonly turnId: string;
+      readonly conversationId: string;
+    };
   }): Promise<AiReadWidgetResolution | null>;
 }

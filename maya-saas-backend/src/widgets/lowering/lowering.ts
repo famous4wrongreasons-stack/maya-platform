@@ -92,7 +92,10 @@ export const isRenderImpossibility = (
 export class LoweringConstructionDefect extends Error {
   constructor(
     readonly missing:
-      'loweringSource' | 'selectedLabels' | 'requestTransaction',
+      | 'loweringSource'
+      | 'selectedLabels'
+      | 'requestTransaction'
+      | 'userTurnAudit',
   ) {
     super(
       missing === 'requestTransaction'

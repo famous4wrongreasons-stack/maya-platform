@@ -1188,6 +1188,10 @@ describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
         bindMint: () => Promise.resolve(),
         canProject: () => Promise.resolve(true),
       },
+      {
+        read: jest.fn().mockResolvedValue([]),
+        append: jest.fn().mockResolvedValue(undefined),
+      },
     );
     const gates = (gateway as unknown as { gates: readonly Gate[] }).gates;
     const slot = gates.find((g) => g.n === '12')!;

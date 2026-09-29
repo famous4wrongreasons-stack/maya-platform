@@ -58,7 +58,7 @@
       },
       {
         "path": "src/net/client.ts",
-        "sha256": "d2b99f569df883dbb8fa6070d241cf1a75b6bbe3f429cdd6213d686a87ca9eec"
+        "sha256": "ef565c39535d73c8e5c756ad795c154d5236c619cb6127a37293a38bc5130b33"
       },
       {
         "path": "src/net/endpoint.ts",
@@ -66,7 +66,7 @@
       },
       {
         "path": "src/net/project.ts",
-        "sha256": "b132f844f229bbb94a2fe702de64c0da4d5bcd9c00a595035a75790ebc2f1aca"
+        "sha256": "3f9795cb5bb3d715adf3d7f0ed6410b74042c3f85e44015510a9c6149d92ceca"
       },
       {
         "path": "src/net/session.ts",
@@ -74,7 +74,7 @@
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "947ef192ec36eaceb58741ee6224087ef71fd450f495e8f41711f623ddbcb9fc"
+        "sha256": "3b85c6e59b7c44d3bdfe38236fb54de4c55abd54491c4e1192d6f7e5dcada25e"
       },
       {
         "path": "src/renderer/cells.ts",
@@ -102,7 +102,7 @@
       },
       {
         "path": "src/shell/conversation.ts",
-        "sha256": "6a3337f90c9e778095605f9693c1e82ebe9f2d8bfc8dc9e25e3042c272461bdd"
+        "sha256": "bcd56967366a5caa9e7b62a6e217c8b0d79a650f1a7907287bf699d89cad905d"
       },
       {
         "path": "src/shell/deeplink.ts",
@@ -114,7 +114,7 @@
       },
       {
         "path": "src/shell/ports.ts",
-        "sha256": "d833388b9b9458f304ccece793f5530035ae530bca06815fb14cf2b43eb003b2"
+        "sha256": "9c5346910f28b385edebd1c342f1252af2d145a8d7713465dbce4dd7c661bc7a"
       },
       {
         "path": "src/shell/shell.ts",
@@ -130,8 +130,8 @@
       }
     ]
   },
-  "bytes": 439255,
-  "digest": "fe6f954c3cec9642610820522ec5585fecfd5523cff8c5d5b0dc73b9989191f8",
+  "bytes": 440859,
+  "digest": "f77a7f8225f25fbae874cb07e9dd8874a1ff05582a8db488726f5cf9f6188a79",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -139,8 +139,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "73c2fd31717659dc78bcca0f24a9a58f9a0d335759c50d1db58594f531dd7b8e",
-    "modulePath": "m/73c2fd31717659dc/",
+    "digest": "db72d7241cbf76d90a83ae2209604f8e435266be9acfeaf5c6abd76065cc8a2a",
+    "modulePath": "m/db72d7241cbf76d9/",
     "files": [
       {
         "path": "entry/main.js",
@@ -194,8 +194,8 @@
       },
       {
         "path": "src/net/client.js",
-        "sha256": "7ba41ccce1a1fca2406d98c1e0c4ab5e00cfa72e83bc293e2776a414b0d8fe1a",
-        "bytes": 20643
+        "sha256": "8a45499053a7476d3eb506ad92387b12b7164adfdd1f37d216b750772ac57eac",
+        "bytes": 20752
       },
       {
         "path": "src/net/endpoint.js",
@@ -204,8 +204,8 @@
       },
       {
         "path": "src/net/project.js",
-        "sha256": "db190645e2a49fe3d7cdfd825f74941a42e3f65debf4523d06f72f8b42155e7d",
-        "bytes": 10250
+        "sha256": "d8f1081a59dec02a7338a4e471a998aba815ceb80348b60b3436254212c74ca7",
+        "bytes": 10735
       },
       {
         "path": "src/net/session.js",
@@ -249,8 +249,8 @@
       },
       {
         "path": "src/shell/conversation.js",
-        "sha256": "8ba613cab5fdc50c8f3e2d2526a77c2357f1a2353ff176b8cff1060ed3a7eedb",
-        "bytes": 11315
+        "sha256": "9ff5740de2bce779bc5a3cf4b8d0604d135f726580ee541ba04d2cb96ebcf88d",
+        "bytes": 11802
       },
       {
         "path": "src/shell/deeplink.js",
@@ -303,7 +303,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "4e47f3851b950e07eccbb7a9169a1dd73cd41d8f3eeef3bc536b4669e04ecf33",
+      "sha256": "d6dee3086144685a82fa7b9a854cbde04720153a99d5fa3cbbdd1689b0cc2890",
       "bytes": 1344
     },
     "assets": [

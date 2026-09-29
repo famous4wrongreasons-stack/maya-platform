@@ -47,6 +47,7 @@ const SRC = path.join(BE, 'src');
  * (plan §3.5 item 7), here AND in k3 check 9. U0: none.
  */
 const OWNER_MODULES: readonly string[] = [
+  'audit-log/audit-log.module.ts#AuditLogModule',
   // U6-L1 (R6-2): C20's owner, `AiToolPolicyService.assertCanExecute` (C11:4761-4762).
   'ai-tools/ai-tool-policy.module.ts#AiToolPolicyModule',
   'ai-tools/ai-tools.module.ts#AiToolsModule',
@@ -93,6 +94,8 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
       'input-schema/input-schema-hash.ts',
       'input-schema/inputs-bytes.ts',
       'routing/handoff-target.signer.ts',
+      'stores/user-turn-binding.ts',
+      'stores/timeline.store.ts',
     ],
   },
   'prisma/prisma.service.ts': {
@@ -240,6 +243,14 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
       'owner-ports/release-access.adapter.ts',
       'owner-ports/release-access.port.ts',
     ],
+  },
+  'audit-log/audit-log.module.ts': {
+    why: '9.6 atomic opaque turn binding through its canonical audit owner',
+    only: ['owner-ports/widget-owner-ports.module.ts'],
+  },
+  'audit-log/audit-log.service.ts': {
+    why: '9.6 correlation references only, never conversation content or authority',
+    only: ['owner-ports/user-turn-audit.adapter.ts'],
   },
   'entitlements/widget-release.contract.ts': {
     why: 'The existing unkeyed release digest for the finite server registry binding',
@@ -1056,6 +1067,8 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       'tenancy/tenant-context.service.ts',
       'ai-tools/ai-tool-policy.service.ts',
       'entitlements/widget-release-access.service.ts',
+      'audit-log/audit-log.module.ts',
+      'audit-log/audit-log.service.ts',
       'entitlements/widget-release.contract.ts',
       'entitlements/entitlements.service.ts',
       'ai-tools/ai-tool-policy.module.ts',
@@ -1188,6 +1201,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       ),
     );
     expect(values.get('BOUND_PORT_TOKENS')).toEqual([
+      'USER_TURN_AUDIT',
       'WIDGET_RELEASE_ACCESS',
       'CANONICAL_READ',
       'GATE6_OWNERS',

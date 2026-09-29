@@ -859,6 +859,7 @@ describe('the stores split (U0, D-6): four sub-stores behind one facade, one ten
       [
         ...SUB_STORES.map(([file]) => file),
         'tenant-scope.ts',
+        'user-turn-binding.ts',
         'widget-stores.service.ts',
       ].sort(),
     );

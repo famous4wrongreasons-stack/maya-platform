@@ -39,7 +39,8 @@ const DTO_KEYS = ['messages', 'requestId', 'surface'];
 /** `AiCoreChatDto` + `AiCoreChatMessageDto`, as the backend's ValidationPipe applies them. */
 const dtoViolations = (body) => {
   const out = [];
-  if (JSON.stringify(Object.keys(body).sort()) !== JSON.stringify(DTO_KEYS)) out.push(`keys ${Object.keys(body)}`);
+  if (JSON.stringify(Object.keys(body).filter((key) => key !== 'conversationId').sort()) !== JSON.stringify(DTO_KEYS)) out.push(`keys ${Object.keys(body)}`);
+  if (body.conversationId !== undefined && (typeof body.conversationId !== 'string' || !/^[a-f0-9-]{36}$/.test(body.conversationId))) out.push('conversationId');
   if (!['native', 'web', 'telegram', 'voice'].includes(body.surface)) out.push('surface');
   if (typeof body.requestId !== 'string' || !/^[A-Za-z0-9_-]{8,128}$/.test(body.requestId)) out.push('requestId');
   if (!Array.isArray(body.messages) || body.messages.length < 1 || body.messages.length > 12) out.push('messages.length');
@@ -505,4 +506,26 @@ test('over the real net client: the long reply and the approval shape end in DTO
   } finally {
     globalThis.fetch = realFetch;
   }
+});
+
+
+test('TURN-ID carries only the server conversation reference, preserves retry identity, and clears it on logout', async () => {
+  const s = setup();
+  s.conversation.submitUserTurn('hello', TYPED);
+  const ref = { turnId: '11111111-1111-4111-a111-111111111111', conversationId: '22222222-2222-4222-a222-222222222222' };
+  s.calls[0].resolve({ ok: true, value: { request_id: s.calls[0].body.requestId, reply: 'hello', action_status: null, resolution: null, userTurn: ref } });
+  await flush();
+  assert.deepEqual(s.items().find((i) => i.kind === 'user').userTurn, ref);
+  s.conversation.submitUserTurn('again', TYPED);
+  assert.equal(s.calls[1].body.conversationId, ref.conversationId);
+  assert.deepEqual(s.calls[1].violations, []);
+  const retrying = s.items().filter((i) => i.kind === 'user').at(-1);
+  await s.fail(1, { reason: 'no_connection' });
+  s.conversation.retry(retrying.id);
+  assert.deepEqual(s.calls[2].body, s.calls[1].body);
+  s.session.set({ signedIn: false });
+  s.session.set(SIGNED_IN);
+  s.conversation.submitUserTurn('new session', TYPED);
+  assert.equal(s.calls[3].body.conversationId, undefined);
+  s.conversation.dispose();
 });

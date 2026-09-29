@@ -6,14 +6,29 @@ export const AI_TYPED_WIDGET_TRIGGER = 'AI_TYPED_WIDGET_TRIGGER';
 
 export interface AiTypedWidgetResult {
   readonly reply: string;
+  readonly userTurn?: {
+    readonly turnId: string;
+    readonly conversationId: string;
+  };
   readonly action: Readonly<Record<string, unknown>> | null;
 }
 
 export interface AiTypedWidgetTriggerPort {
+  persistTypedTurn(input: {
+    readonly actor: Readonly<AuthenticatedUser>;
+    readonly surface: AiToolSurface;
+    readonly utterance: string;
+    readonly requestId: string;
+    readonly conversationId?: string;
+  }): Promise<{
+    readonly turnId: string;
+    readonly conversationId: string;
+  } | null>;
   routeTypedUtterance(input: {
     readonly actor: Readonly<AuthenticatedUser>;
     readonly surface: AiToolSurface;
     readonly utterance: string;
     readonly requestId: string;
+    readonly conversationId?: string;
   }): Promise<AiTypedWidgetResult | null>;
 }

@@ -56,6 +56,8 @@ export interface ChatRequest {
   readonly surface: 'web';
   readonly requestId: string;
   readonly messages: readonly ChatMessage[];
+  /** Opaque server-issued reference; only the backend validates its scope. */
+  readonly conversationId?: string;
 }
 
 /** `POST /ai/transcribe` — JSON form: `data:audio/wav;base64,…` (WAV PCM16 mono 16 kHz). */
@@ -188,6 +190,7 @@ export interface RefreshProjection {
  * (V2-5) — and is null when the response carries no action.
  */
 export interface ChatProjection {
+  readonly userTurn?: { readonly turnId: string; readonly conversationId: string };
   readonly request_id: string;
   readonly reply: string;
   readonly action_status: string | null;

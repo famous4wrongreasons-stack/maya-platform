@@ -1,4 +1,19 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import { TimelineStore } from '../stores/timeline.store';
+import {
+  lockUserTurn,
+  readUserTurnBinding,
+  writeUserTurnBinding,
+  type UserTurnReference,
+} from '../stores/user-turn-binding';
+import type { UserTurnAuditPort } from '../owner-ports/user-turn-audit.port';
+import { USER_TURN_AUDIT } from '../di-tokens';
+import {
+  ConflictException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 
 import type { AiTypedWidgetTriggerPort } from '../../ai-tools/ai-typed-widget-trigger.port';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -30,6 +45,7 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
     private readonly gateway: IntentGatewayService,
     @Inject(PRINCIPAL_RESOLVER)
     private readonly principals: PrincipalResolver,
+    @Inject(USER_TURN_AUDIT) private readonly turnAudit: UserTurnAuditPort,
   ) {}
 
   async routeTypedUtterance(
@@ -46,29 +62,86 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
           principal.authority.userId !== input.actor.userId)
       )
         return null;
+      const correlation = {
+        kind: 'chat' as const,
+        requestId: input.requestId,
+        actorUserId: input.actor.userId,
+      };
+      await lockUserTurn(tx, tenantId, correlation);
+      const binding = await readUserTurnBinding(
+        tx,
+        tenantId,
+        correlation,
+        principal.proofHash,
+        this.turnAudit,
+      );
+      if (binding !== null) {
+        const turn = await TimelineStore.readUserTurn(
+          tx,
+          tenantId,
+          binding.turnId,
+        );
+        if (
+          turn === null ||
+          turn.role !== 'user' ||
+          turn.channel !== 'pwa' ||
+          turn.erasedAt !== null ||
+          turn.retentionUntil.getTime() <= Date.now() ||
+          turn.principalProofHash !== principal.proofHash ||
+          turn.conversationId !== binding.conversationId ||
+          (input.conversationId !== undefined &&
+            input.conversationId !== binding.conversationId) ||
+          (binding.intentTokenHash === null
+            ? turn.textContent !== input.utterance
+            : normaliseUtterance(turn.textContent ?? '') !==
+              normaliseUtterance(input.utterance))
+        )
+          throw new ConflictException('user_turn_replay_conflict');
+        if (binding.intentTokenHash === null) return null;
+      }
       const candidates = await this.typedCandidates(
         tx,
         tenantId,
         principal.proofHash,
         new Date(),
+        input.conversationId,
+        binding?.intentTokenHash ?? undefined,
       );
       const matched = routeUtterance(input.utterance, candidates);
-      return matched === null ? null : matched;
+      // A previously lowered widget request can never fall through to a new ordinary/model route.
+      if (matched === null && binding !== null)
+        return { matched: null, userTurn: binding };
+      return matched === null ? null : { matched, userTurn: binding };
     });
     if (routed === null) return null;
+    if (routed.matched === null)
+      return Object.freeze({
+        reply: 'Этот вариант больше недоступен. Проверьте состояние карточки.',
+        action: Object.freeze({
+          status: 'expired',
+          code: null,
+          stopped_at_gate: '0',
+        }),
+        userTurn: {
+          turnId: routed.userTurn.turnId,
+          conversationId: routed.userTurn.conversationId,
+        },
+      });
+    const matched = routed.matched;
 
     const result = await this.gateway.submit({
-      intentToken: routed.intentToken,
+      intentToken: matched.intentToken,
       tenantId,
       actor: input.actor,
       carrier: 'pwa',
+      chatRequestId: input.requestId,
       submission: {
         contract: WIDGET_INTENT_SUBMISSION_CONTRACT,
-        widget_id: routed.widgetId,
-        intent_token: routed.intentToken,
+        widget_id: matched.widgetId,
+        intent_token: matched.intentToken,
         inputs: typedInputsForUtterance(
-          routed.utteranceTemplate,
-          routed.selectionDomainLabelsJson,
+          matched.utteranceTemplate,
+          matched.selectionDomainLabelsJson,
           input.utterance,
         ),
         client_nonce: `typed_${input.requestId}`.slice(0, 128),
@@ -76,7 +149,38 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
       },
     });
     const code = 'code' in result.verdict ? result.verdict.code : null;
+    // The response reads the committed correlation through its owner. Gate facts remain
+    // internal to their declared readers; no new consumer of loweredTurn is introduced.
+    const committed = await this.prisma.$transaction(async (tx) => {
+      const principal = await this.principals.resolve(tx);
+      if (
+        principal === null ||
+        principal.authority.tenantId !== tenantId ||
+        (principal.authority.userId !== null &&
+          principal.authority.userId !== input.actor.userId)
+      )
+        return null;
+      return readUserTurnBinding(
+        tx,
+        tenantId,
+        {
+          kind: 'chat',
+          requestId: input.requestId,
+          actorUserId: input.actor.userId,
+        },
+        principal.proofHash,
+        this.turnAudit,
+      );
+    });
+    const userTurn =
+      committed === null
+        ? undefined
+        : {
+            turnId: committed.turnId,
+            conversationId: committed.conversationId,
+          };
     return Object.freeze({
+      ...(userTurn === undefined ? {} : { userTurn }),
       reply:
         code === null
           ? 'Готово.'
@@ -89,17 +193,97 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
     });
   }
 
+  async persistTypedTurn(
+    input: Parameters<AiTypedWidgetTriggerPort['persistTypedTurn']>[0],
+  ): Promise<UserTurnReference | null> {
+    const tenantId = input.actor.tenantId;
+    if (tenantId === null || input.surface !== 'web') return null;
+    return this.prisma.$transaction(async (tx) => {
+      const principal = await this.principals.resolve(tx);
+      if (
+        principal === null ||
+        principal.authority.tenantId !== tenantId ||
+        (principal.authority.userId !== null &&
+          principal.authority.userId !== input.actor.userId)
+      )
+        throw new ForbiddenException('conversation_principal_unavailable');
+      const correlation = {
+        kind: 'chat' as const,
+        requestId: input.requestId,
+        actorUserId: input.actor.userId,
+      };
+      const turnId = await lockUserTurn(tx, tenantId, correlation);
+      const binding = await readUserTurnBinding(
+        tx,
+        tenantId,
+        correlation,
+        principal.proofHash,
+        this.turnAudit,
+      );
+      const prior = await TimelineStore.readUserTurn(tx, tenantId, turnId);
+      if (
+        (binding === null) !== (prior === null) ||
+        (binding !== null && binding.intentTokenHash !== null)
+      )
+        throw new ConflictException('user_turn_binding_conflict');
+      const conversationId =
+        binding?.conversationId ?? input.conversationId ?? randomUUID();
+      if (
+        input.conversationId !== undefined &&
+        input.conversationId !== conversationId
+      )
+        throw new ConflictException('conversation_scope_conflict');
+      const now = new Date();
+      await TimelineStore.lockConversation(tx, tenantId, conversationId);
+      if (input.conversationId !== undefined)
+        await TimelineStore.assertConversation(
+          tx,
+          tenantId,
+          conversationId,
+          principal.proofHash,
+          now,
+        );
+      const turn = await TimelineStore.appendUserTurn(
+        {
+          id: turnId,
+          tenantId,
+          conversationId,
+          principalProofHash: principal.proofHash,
+          channel: 'pwa',
+          textContent: input.utterance,
+        },
+        tx,
+        now,
+      );
+      if (binding === null)
+        await writeUserTurnBinding(this.turnAudit, tx, tenantId, correlation, {
+          contract: 'maya.user-turn-binding/1',
+          turnId: turn.id,
+          conversationId,
+          principalProofHash: principal.proofHash,
+          intentTokenHash: null,
+        });
+      return { turnId: turn.id, conversationId };
+    });
+  }
+
   private async typedCandidates(
     tx: RequestTx,
     tenantId: string,
     principalProofHash: string,
     now: Date,
+    conversationId?: string,
+    boundIntentTokenHash?: string,
   ): Promise<readonly TypedRoutingCandidate[]> {
     const rows = await tx.widgetIntentRecord.findMany({
       where: scoped(tenantId, {
         principalProofHash,
-        expiresAt: { gt: now },
-        consumedAt: null,
+        ...(boundIntentTokenHash === undefined
+          ? { expiresAt: { gt: now }, consumedAt: null }
+          : { intentTokenHash: boundIntentTokenHash }),
+        ...(conversationId === undefined
+          ? {}
+          : { emission: { turn: { conversationId } } }),
       }),
       orderBy: [{ issuedAt: 'desc' }, { intentTokenHash: 'asc' }],
       select: {

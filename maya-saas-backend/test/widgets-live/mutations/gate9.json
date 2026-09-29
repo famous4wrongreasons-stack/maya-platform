@@ -103,7 +103,7 @@
     "id": "M9-9",
     "description": "the writer is skipped and a synthetic pass is returned",
     "file": "src/widgets/lowering/lowering.gate.ts",
-    "find": "  const written = await TimelineStore.lowerToUserTurn(\n    {\n      tenantId: ctx.tenantId,\n      intentTokenHash: ctx.intentTokenHash,\n      conversationId: source.conversationId,\n      principalProofHash: ctx.principalProofHash,\n      channel: ctx.carrier,\n      renderedUtterance: rendered.utterance,\n    },\n    tx,\n    ctx.now,\n  );",
+    "find": "  const written = await TimelineStore.lowerToUserTurn(\n    {\n      ...(turnId === undefined ? {} : { turnId }),\n      tenantId: ctx.tenantId,\n      intentTokenHash: ctx.intentTokenHash,\n      conversationId: source.conversationId,\n      principalProofHash: ctx.principalProofHash,\n      channel: ctx.carrier,\n      renderedUtterance: rendered.utterance,\n    },\n    tx,\n    ctx.now,\n  );",
     "replace": "  const written = { id: 'mutant-turn', turnIndex: 0 };",
     "killers": [
       "T9-POS-1"
@@ -136,8 +136,8 @@
     "id": "M9-12",
     "description": "writer token identity is replaced",
     "file": "src/widgets/lowering/lowering.gate.ts",
-    "find": "      intentTokenHash: ctx.intentTokenHash,",
-    "replace": "      intentTokenHash: '0'.repeat(64),",
+    "find": "      intentTokenHash: ctx.intentTokenHash,\n      conversationId: source.conversationId,",
+    "replace": "      intentTokenHash: '0'.repeat(64),\n      conversationId: source.conversationId,",
     "killers": [
       "T9-POS-5"
     ],
@@ -158,8 +158,8 @@
     "id": "M9-14",
     "description": "writer principal proof is replaced",
     "file": "src/widgets/lowering/lowering.gate.ts",
-    "find": "      principalProofHash: ctx.principalProofHash,",
-    "replace": "      principalProofHash: '0'.repeat(64),",
+    "find": "      principalProofHash: ctx.principalProofHash,\n      channel: ctx.carrier,",
+    "replace": "      principalProofHash: '0'.repeat(64),\n      channel: ctx.carrier,",
     "killers": [
       "T9-POS-1"
     ],
@@ -326,7 +326,7 @@
     "id": "M9-29",
     "description": "turn index is always zero",
     "file": "src/widgets/stores/timeline.store.ts",
-    "find": "    const turnIndex = (latest._max.turnIndex ?? -1) + 1;",
+    "find": "    const turnIndex = input.turnIndex ?? (latest?._max.turnIndex ?? -1) + 1;",
     "replace": "    const turnIndex = 0;",
     "killers": [
       "T9-WRITE-1",
@@ -395,8 +395,8 @@
     "id": "M9-35",
     "description": "writer reaches for its own transaction capability instead of remaining transaction-bound",
     "file": "src/widgets/stores/timeline.store.ts",
-    "find": "    await TimelineStore.lockConversation(\n      tx,\n      input.tenantId,\n      input.conversationId,\n    );",
-    "replace": "    const ownTransaction = (tx as unknown as { $transaction?: unknown }).$transaction;\n    if (ownTransaction) throw new Error('own transaction forbidden');\n    await TimelineStore.lockConversation(\n      tx,\n      input.tenantId,\n      input.conversationId,\n    );",
+    "find": "    // PostgreSQL derives the signed bigint; application code defines only the collision-free tuple.\n    await TimelineStore.lockConversation(\n      tx,\n      input.tenantId,\n      input.conversationId,\n    );",
+    "replace": "    // PostgreSQL derives the signed bigint; application code defines only the collision-free tuple.\n    const ownTransaction = (tx as unknown as { $transaction?: unknown }).$transaction;\n    if (ownTransaction) throw new Error('own transaction forbidden');\n    await TimelineStore.lockConversation(\n      tx,\n      input.tenantId,\n      input.conversationId,\n    );",
     "killers": [
       "T-ARCH-TX"
     ],

@@ -24,6 +24,25 @@ export class AuditLogService {
     private readonly tenantContext: TenantContextService,
   ) {}
 
+  /** Narrow current-tenant read for an immutable entity binding; duplicate evidence remains visible to the caller. */
+  async entityEvents(
+    params: {
+      tenantId: string;
+      userId: string;
+      action: string;
+      entityType: string;
+      entityId: string;
+    },
+    tx: Prisma.TransactionClient = this.prisma,
+  ) {
+    const tenantId = this.tenantContext.assertTenantId(params.tenantId);
+    return tx.auditLog.findMany({
+      where: { ...params, tenantId, scope: 'tenant' },
+      select: { metadataJson: true },
+      take: 2,
+    });
+  }
+
   /** Действие внутри арендатора. Принадлежность сверяется с контекстом. */
   async log(
     params: {

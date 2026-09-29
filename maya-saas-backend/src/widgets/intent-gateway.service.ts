@@ -1,3 +1,5 @@
+import type { UserTurnAuditPort } from './owner-ports/user-turn-audit.port';
+import { USER_TURN_AUDIT } from './di-tokens';
 import { WIDGET_RELEASE_ACCESS } from './di-tokens';
 import type { WidgetReleaseAccessPort } from './owner-ports/release-access.port';
 // K3 — the IntentGateway. Step 0 plus the gates, in the one order §3.9 fixes.
@@ -185,6 +187,8 @@ export class IntentGatewayService {
     private readonly successorMinter: SuccessorMinterPort,
     @Inject(WIDGET_RELEASE_ACCESS)
     private readonly releaseAccess: WidgetReleaseAccessPort,
+    @Inject(USER_TURN_AUDIT)
+    private readonly userTurnAudit: UserTurnAuditPort,
   ) {}
 
   /**
@@ -365,7 +369,7 @@ export class IntentGatewayService {
       name: 'Lowering',
       host: 'chat ingress',
       // Seam: `lowering/lowering.gate.ts` (U9b).
-      run: (ctx, tx) => lower(ctx, tx),
+      run: (ctx, tx) => lower(ctx, tx, this.userTurnAudit),
     },
     {
       n: '10',
@@ -454,6 +458,8 @@ export class IntentGatewayService {
     submission: SubmissionShape;
     now?: Date;
     carrier: ChannelId;
+    /** Internal AI ingress only; no widget DTO member maps to this value. */
+    chatRequestId?: string;
   }): Promise<{
     verdict: GateVerdict;
     stoppedAt: string | null;
@@ -499,6 +505,13 @@ export class IntentGatewayService {
         );
 
         const ctx: GateContext = {
+          userTurnCorrelation: {
+            kind: args.chatRequestId === undefined ? 'widget' : 'chat',
+            requestId:
+              args.chatRequestId ??
+              `${args.carrier}:${args.submission.client_nonce}`,
+            actorUserId: args.actor.userId,
+          },
           intentTokenHash,
           tenantId: args.tenantId,
           actor: args.actor,
