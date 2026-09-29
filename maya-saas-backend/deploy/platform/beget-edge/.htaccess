@@ -19,10 +19,19 @@ DirectoryIndex index.html
 </IfModule>
 
 <IfModule mod_headers.c>
-  <FilesMatch "^(app|oauth-callback)\.html$">
+  # 🔴 index.html is the chat-first shell's entry and manifest.webmanifest is its identity.
+  # Both are mutable and both MUST revalidate. Before the 2026-09-29 cutover neither carried any
+  # Cache-Control at all — only ETag and a Last-Modified two months old — so browsers applied
+  # heuristic freshness and would have kept serving the previous page at / for days after it was
+  # replaced. The content-addressed tree under m/<digest>/ is immutable and needs no rule.
+  <FilesMatch "^(index|app|oauth-callback)\.html$">
     Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
     Header set Pragma "no-cache"
   </FilesMatch>
+
+  <Files "manifest.webmanifest">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+  </Files>
 
   <Files "service-worker.js">
     Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"

@@ -1,0 +1,19 @@
+{
+  "appId": "ru.mayaos.app",
+  "appName": "MAYA",
+  "webDir": "../maya-chat-shell/dist/capacitor",
+  "ios": {
+    "contentInset": "never",
+    "scrollEnabled": true,
+    "limitsNavigationsToAppBoundDomains": true
+  },
+  "plugins": {
+    "Keyboard": {
+      "resize": "none"
+    },
+    "StatusBar": {
+      "overlaysWebView": true,
+      "style": "DEFAULT"
+    }
+  }
+}

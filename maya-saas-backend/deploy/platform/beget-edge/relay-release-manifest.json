@@ -170,7 +170,7 @@
     },
     {
       "path": "/home/m/mocine3388/mayaos.ru/public_html/.htaccess",
-      "sha256": "b265cfd8a86708ec88589921091240c1f21f12892870f615747bff2f675b2e98",
+      "sha256": "6b3d7b4640d2fa5869003305afc3ca975f9d45cd355f7e355460064f2185a74c",
       "role": "hosting_config",
       "committedSource": ".htaccess"
     },
