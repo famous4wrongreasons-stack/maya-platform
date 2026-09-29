@@ -85,6 +85,7 @@ export interface MintProvenanceLine {
   readonly request_id: string | null;
   readonly intent_token_hash: string;
   readonly widget_id: string;
+  readonly predecessor_widget_id?: string;
 }
 
 const nonEmpty = (value: unknown): value is string =>
@@ -109,7 +110,9 @@ export function parseMintProvenanceMessage(
     !nonEmpty(v.route) ||
     !(v.request_id === null || nonEmpty(v.request_id)) ||
     !nonEmpty(v.intent_token_hash) ||
-    !nonEmpty(v.widget_id)
+    !nonEmpty(v.widget_id) ||
+    (v.predecessor_widget_id !== undefined &&
+      !nonEmpty(v.predecessor_widget_id))
   )
     return null;
   return Object.freeze({
@@ -119,6 +122,9 @@ export function parseMintProvenanceMessage(
     request_id: v.request_id,
     intent_token_hash: v.intent_token_hash,
     widget_id: v.widget_id,
+    ...(v.predecessor_widget_id === undefined
+      ? {}
+      : { predecessor_widget_id: v.predecessor_widget_id }),
   });
 }
 

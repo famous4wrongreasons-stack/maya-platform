@@ -213,5 +213,25 @@
       "rejects raw or foreign handles"
     ],
     "expect": "build-killed"
+  },
+  {
+    "id": "WR-M22",
+    "file": "src/widgets/emission/emitter.service.ts",
+    "find": "if (supersedesWidgetId !== null)\n      for (const material of emittedTokened)",
+    "replace": "if (false)\n      for (const material of emittedTokened)",
+    "killers": [
+      "WR-CREATE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "WR-M23",
+    "file": "test/widgets-live/support/mint-provenance.ts",
+    "find": ": { predecessor_widget_id: v.predecessor_widget_id }",
+    "replace": ": {}",
+    "killers": [
+      "WR-CREATE"
+    ],
+    "expect": "live-killed"
   }
 ]

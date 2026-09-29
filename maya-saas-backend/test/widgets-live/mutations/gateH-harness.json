@@ -76,7 +76,7 @@
   },
   {
     "id": "R-M2",
-    "description": "the claim's own source files are never scanned for overrides or model stubs (§3.2)",
+    "description": "the claim's own source files are never scanned for overrides or model stubs (\u00a73.2)",
     "edits": [
       {
         "file": "scripts/widgets-evidence-verify.mjs",
@@ -91,7 +91,7 @@
   },
   {
     "id": "R-M3",
-    "description": "the override allowlist admits everything (§3.2: it is closed)",
+    "description": "the override allowlist admits everything (\u00a73.2: it is closed)",
     "edits": [
       {
         "file": "scripts/widgets-evidence-verify.mjs",
@@ -121,7 +121,7 @@
   },
   {
     "id": "R-M5",
-    "description": "V-SYNTH-CLAIM is dropped: a [G-SYNTH] record could be offered as L (§0.5)",
+    "description": "V-SYNTH-CLAIM is dropped: a [G-SYNTH] record could be offered as L (\u00a70.5)",
     "edits": [
       {
         "file": "scripts/widgets-evidence-verify.mjs",
@@ -136,7 +136,7 @@
   },
   {
     "id": "R-M6",
-    "description": "three seal-read columns leave the H4 list, so an E-TAMPER on them would pass (§0.5 L-T)",
+    "description": "three seal-read columns leave the H4 list, so an E-TAMPER on them would pass (\u00a70.5 L-T)",
     "edits": [
       {
         "file": "scripts/widgets-evidence-verify.mjs",
@@ -151,7 +151,7 @@
   },
   {
     "id": "R-M7",
-    "description": "V-GW is dropped: a gateway-level line could carry a claim (§0.5, §3.2)",
+    "description": "V-GW is dropped: a gateway-level line could carry a claim (\u00a70.5, \u00a73.2)",
     "edits": [
       {
         "file": "scripts/widgets-evidence-verify.mjs",
@@ -196,12 +196,12 @@
   },
   {
     "id": "R-M10",
-    "description": "any mint trigger is accepted, production or not (§0.5 L, D-17)",
+    "description": "any mint trigger is accepted, production or not (\u00a70.5 L, D-17)",
     "edits": [
       {
         "file": "scripts/widgets-evidence-verify.mjs",
-        "find": "      if (!PRODUCTION_TRIGGERS.has(mint.trigger))\n",
-        "replace": "      if (false && !PRODUCTION_TRIGGERS.has(mint.trigger))\n"
+        "find": "      if (!qualifiedMint(mint, minted[line.entry], beforeTeardown))\n",
+        "replace": "      if (false && !qualifiedMint(mint, minted[line.entry], beforeTeardown))\n"
       }
     ],
     "killers": [
@@ -211,7 +211,7 @@
   },
   {
     "id": "R-M11",
-    "description": "the headline recompute counts U-state clauses as strict (§0.5: U never does)",
+    "description": "the headline recompute counts U-state clauses as strict (\u00a70.5: U never does)",
     "edits": [
       {
         "file": "../docs/rebuild/evidence/maya-chat-first-ux/gate-audit-check.mjs",
@@ -282,6 +282,26 @@
     ],
     "killers": [
       "HAR-12"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M16",
+    "file": "scripts/widgets-evidence-lineage.mjs",
+    "find": "p.pid === mint.pid && qualifiedMint",
+    "replace": "qualifiedMint",
+    "killers": [
+      "WR-H1"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "R-M17",
+    "file": "scripts/widgets-evidence-lineage.mjs",
+    "find": "!durable.has(mint.intent_token_hash)",
+    "replace": "false",
+    "killers": [
+      "WR-H1"
     ],
     "expect": "live-killed"
   }

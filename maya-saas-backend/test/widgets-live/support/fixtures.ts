@@ -174,7 +174,14 @@ export interface FixturesOptions {
 /** What a BIN case may use: no widget writer (I-HAR). */
 export type BinFixtures = Pick<
   Fixtures,
-  'tenant' | 'user' | 'staff' | 'client' | 'grantFeature' | 'teardown'
+  | 'tenant'
+  | 'user'
+  | 'staff'
+  | 'client'
+  | 'grantFeature'
+  | 'teardown'
+  | 'bookingSource'
+  | 'bookingProofState'
 >;
 
 export class Fixtures {
@@ -198,6 +205,8 @@ export class Fixtures {
       client: this.client.bind(this),
       grantFeature: this.grantFeature.bind(this),
       teardown: this.teardown.bind(this),
+      bookingSource: this.bookingSource.bind(this),
+      bookingProofState: this.bookingProofState.bind(this),
     });
   }
 
@@ -350,6 +359,89 @@ export class Fixtures {
       () => service.link({ proof: token }),
     );
     return { clientId: client.id, linkId: linked.link.id };
+  }
+
+  /** Source facts only: no widget, action-execution or appointment is minted by this fixture. */
+  async bookingSource(tenant: TenantFixture, user: UserFixture): Promise<void> {
+    await this.ctx.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        encryptedName: this.ctx.encryption.encrypt('Release proof client'),
+        phone: `+7999${String(Date.now()).slice(-7)}`,
+      },
+    });
+    await this.client(tenant, user);
+    const service = await this.ctx.prisma.internalService.create({
+      data: {
+        tenantId: tenant.id,
+        name: 'Release proof service',
+        price: 1500,
+        durationMinutes: 30,
+      },
+    });
+    const provider = await this.ctx.prisma.internalProvider.create({
+      data: {
+        tenantId: tenant.id,
+        displayName: 'Release proof provider',
+        active: true,
+        slotIntervalMinutes: 30,
+      },
+    });
+    await this.ctx.prisma.internalProviderService.create({
+      data: {
+        tenantId: tenant.id,
+        providerId: provider.id,
+        serviceId: service.id,
+      },
+    });
+    await this.ctx.prisma.internalAvailabilityRule.createMany({
+      data: Array.from({ length: 7 }, (_, weekday) => ({
+        tenantId: tenant.id,
+        providerId: provider.id,
+        weekday,
+        startMinute: 720,
+        endMinute: 840,
+      })),
+    });
+  }
+
+  /** Read-only observation of the canonical owners' effects in this fixture tenant. */
+  async bookingProofState(tenant: TenantFixture) {
+    return {
+      appointments: await this.ctx.prisma.appointment.findMany({
+        where: { tenantId: tenant.id },
+        select: { status: true, mayaClientId: true },
+      }),
+      executions: await this.ctx.prisma.actionExecution.findMany({
+        where: { tenantId: tenant.id },
+        select: {
+          capability: true,
+          state: true,
+          policyDecision: true,
+          policyDecidedBy: true,
+          normalizedInputContract: true,
+          normalizedInputHash: true,
+          requestIdempotencyKeyHash: true,
+          evidenceRefsJson: true,
+        },
+      }),
+      records: await this.ctx.prisma.widgetIntentRecord.findMany({
+        where: { tenantId: tenant.id },
+        select: {
+          intentTokenHash: true,
+          widgetId: true,
+          effect: true,
+          capabilitySpace: true,
+          capabilityKey: true,
+          consumedAt: true,
+          confirmationOfKind: true,
+          confirmationOfRef: true,
+          confirmationJson: true,
+          producedByIntentTokenHash: true,
+          sourceCapabilityKey: true,
+        },
+      }),
+    };
   }
 
   /**

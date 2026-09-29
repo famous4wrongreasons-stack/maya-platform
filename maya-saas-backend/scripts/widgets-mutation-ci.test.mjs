@@ -56,11 +56,11 @@ function fixture() {
   });
 }
 
-test('32 batteries, 53 jobs: disjoint Gate 6/7/9/10/13 and P-mint partitions cover the same 394 declarations', () => {
+test('32 batteries, 53 jobs: disjoint Gate 6/7/9/10/13 and P-mint partitions cover the same 398 declarations', () => {
   const p = plan(declared);
   assert.equal(p.gates.length, 32); assert.equal(p.matrix.include.length, 53);
   const r = assemble(declared, fixture(), head);
-  assert.equal(r.length, 32); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 394);
+  assert.equal(r.length, 32); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 398);
   for (const report of r) {
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
@@ -111,6 +111,7 @@ const counterfactuals = {
   'surviving mutant': (r) => { r[0].mutants[0].status = 'SURVIVED'; },
   'weakened expectation': (r) => { r[0].mutants[0].expect = r[0].mutants[0].status = 'pending'; },
   'filtered unit tests': (r) => { r[0].restrictions.unit_tests = 'one.spec.ts'; },
+  'filtered unit titles': (r) => { r[0].restrictions.unit_filter = 'one test'; },
   'filtered live tests': (r) => { r[0].restrictions.live_filter = 'one test'; },
   'reduced steps': (r) => { r[0].steps = ['live']; },
   'worker crash': (r) => { r[0].mutants[0].problems = ['SIGSEGV']; },

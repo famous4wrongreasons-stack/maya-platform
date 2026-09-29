@@ -4,7 +4,7 @@
 // WidgetComposerInput and server-resolved principal proof; neither a client nor an LLM can put an
 // effect or target on the wire. There is no token-minting overload without both values.
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 
 import { PrismaService } from '../../prisma/prisma.service';
@@ -476,6 +476,21 @@ export class WidgetEmitterService {
       }),
     ]);
 
+    // Observability only: the already-persisted successor relation supplies provenance.
+    // No request field, admission verdict, entitlement or lifecycle transition is changed.
+    if (supersedesWidgetId !== null)
+      for (const material of emittedTokened)
+        new Logger('WidgetMintProvenance').log(
+          JSON.stringify({
+            contract: 'maya.widget-mint-provenance/1',
+            trigger: 'successor',
+            route: 'POST /api/widgets/intent',
+            request_id: widgetId,
+            intent_token_hash: material.tokenHash,
+            widget_id: widgetId,
+            predecessor_widget_id: supersedesWidgetId,
+          }),
+        );
     return Object.freeze({
       widgetId,
       bodyHash,

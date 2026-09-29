@@ -26,8 +26,8 @@
 //                     more than one (the record is not traced to exactly one mint; D-17 (4))
 //   V-PROV-DB         a record hash (on any line) absent from the database as read before teardown (D-17 (4))
 //   V-PROV-TRIGGER    a claim whose mint line's trigger is not a production trigger of §0.5 L (T-2b, T-2a, T-1, T-3).
-//                     A `successor` mint is refused too: §0.5 admits it only when its predecessor qualifies, and the
-//                     mint line does not name the predecessor, so the skeleton cannot trace it (fail closed; A-W5)
+//                     A successor must name its persisted predecessor widget; every ancestor must be durable,
+//                     uniquely captured at the same entry/process, and end at a production trigger. Cycles refuse.
 //   V-PROV-TRACE      a claim whose `trigger_trace_id` is null or differs from its mint line's `request_id`
 //   V-PROV-PID        a claim whose line was written by another process than the one that captured its mint line
 //   V-PROV-FORGED     a capture point refused a `WidgetMintProvenance` line (a call from outside the application's
@@ -68,6 +68,7 @@
 // `WIDGETS_EVIDENCE_DIR`, and nothing but the harness writers may write it.
 
 import crypto from 'node:crypto';
+import { qualifiedMint } from './widgets-evidence-lineage.mjs';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -163,8 +164,6 @@ export const OVERRIDE_ALLOWLIST = Object.freeze([
 ]);
 const MODEL_TRANSPORT = /\b(AiCoreModelService|AI_CORE_MODEL|ModelTransport|decide)\b|ai-core-model/;
 
-/** §0.5 L: the production triggers a record may be minted from (a successor is traced separately; see V-PROV-TRIGGER). */
-const PRODUCTION_TRIGGERS = new Set(['T-2b', 'T-2a', 'T-1', 'T-3']);
 const L_LABELS = new Set(['[E-MINT]', '[E-HOSTILE]', '[E-DRIFT]']);
 const LT_LABEL = /^\[(?:E-TAMPER:[^\]]+|E-INDEP(?:\(mint\))?)\]$/;
 const U_LABEL = '[U-proof]';
@@ -500,12 +499,12 @@ for (const line of lines) {
       violation('V-PROV-DB', line, `record ${line.record_hash} was not in the database before teardown`);
     if (claimed && mints.length === 1) {
       const [mint] = mints;
-      if (!PRODUCTION_TRIGGERS.has(mint.trigger))
+      if (!qualifiedMint(mint, minted[line.entry], beforeTeardown))
         violation(
           'V-PROV-TRIGGER',
           line,
           mint.trigger === 'successor'
-            ? `record ${line.record_hash} is a successor mint; its predecessor is not named, so the skeleton cannot trace it`
+            ? `record ${line.record_hash} is a successor mint; its persisted predecessor chain does not reach a uniquely captured production mint at the same entry/process`
             : `record ${line.record_hash} was minted by trigger ${JSON.stringify(mint.trigger)}, not a production trigger`,
         );
       if (line.trigger_trace_id === null || line.trigger_trace_id !== mint.request_id)

@@ -1542,6 +1542,46 @@ describe('widgets-live harness', () => {
       expect(verified.status).toBe(0);
     });
 
+    const successorPair = (): Scenario => {
+      const sc = cleanPair();
+      for (const entry of ['HTTP', 'BIN'] as const) {
+        const parent = mintSidecarLine(entry);
+        const line = parent.line as Json;
+        line.widget_id = `parent-${entry}`;
+        line.intent_token_hash = `parent-hash-${entry}`;
+        sc.mint.push(parent);
+        sc.database.push(`parent-hash-${entry}`);
+        const child = sc.mint[entry === 'HTTP' ? 0 : 1].line as Json;
+        child.trigger = 'successor';
+        child.predecessor_widget_id = `parent-${entry}`;
+      }
+      return sc;
+    };
+    it('WR-H1 accepts a successor only through its durable captured predecessor', () => {
+      expect(verifyScenario(successorPair()).report.violations).toEqual([]);
+    });
+    it.each([
+      'missing',
+      'foreign-process',
+      'not-durable',
+      'cycle',
+      'duplicate',
+    ])('WR-H1 rejects a %s predecessor chain', (fault) => {
+      const sc = successorPair();
+      const parent = sc.mint[2];
+      const line = parent.line as Json;
+      if (fault === 'missing') sc.mint.splice(2, 1);
+      if (fault === 'foreign-process') parent.pid = BIN_PID;
+      if (fault === 'not-durable')
+        sc.database = sc.database.filter((x) => x !== 'parent-hash-HTTP');
+      if (fault === 'cycle') {
+        line.trigger = 'successor';
+        line.predecessor_widget_id = 'w-HTTP';
+      }
+      if (fault === 'duplicate') sc.mint.push(parent);
+      expect(verifyScenario(sc).rulesOf('P-1')).toContain('V-PROV-TRIGGER');
+    });
+
     const cases: [string, string, (sc: Scenario) => void, 'P-1' | 'global'][] =
       [
         [
