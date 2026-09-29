@@ -40,7 +40,7 @@ describe('Widget release programme [HTTP] [PostgreSQL]', () => {
       },
     });
     for (const p of proofs) recordJestEvidence(p);
-    expect(proofs).toHaveLength(6);
+    expect(proofs).toHaveLength(7);
   });
   it('SB1-HTTP [HTTP] explicit owner personal context reaches canonical booking with durable actor attribution', async () => {
     const base = await http.listenLoopback();

@@ -320,10 +320,14 @@ describe('AR-1 synthetic certified writer [HTTP] [PostgreSQL]', () => {
         done = true;
         return r;
       });
-    await new Promise((r) => setTimeout(r, 150));
-    expect(done).toBe(false);
-    release();
-    await admission;
+    try {
+      await new Promise((r) => setTimeout(r, 150));
+      expect(done).toBe(false);
+    } finally {
+      release();
+      await admission;
+      await revoke;
+    }
     expect((await revoke).status).toBe(201);
     await expect(
       db.prisma.$transaction((tx) =>

@@ -1,3 +1,9 @@
+import { emittable } from '../../widget-contract/owner-classes';
+import { ActionCapabilityRegistry } from '../../action-engine/action-engine.registry';
+import {
+  MONEY,
+  AE_WIDGET_COMMIT_ALLOWLIST as RUNTIME_ALLOWLIST,
+} from '../authority/ae-commit-allowlist.runtime';
 import fs from 'node:fs';
 import path from 'node:path';
 import { AE_WIDGET_COMMIT_ALLOWLIST } from '../booking/booking-allowlist';
@@ -75,4 +81,13 @@ describe('Final release evidence scope', () => {
       'isReadbackAffirmation: null',
     );
   });
+});
+
+// Programme §4.5 Money: negative evidence may be mutation-only. No financial effects.
+it('AR-FR6D-SCOPE pins every allowlisted capability outside MONEY and the payment emission gap', () => {
+  const registry = new ActionCapabilityRegistry();
+  expect(Object.keys(RUNTIME_ALLOWLIST)).toHaveLength(10);
+  for (const key of Object.keys(RUNTIME_ALLOWLIST))
+    expect(MONEY(registry.get(key))).toBe(false);
+  expect(emittable('PAYMENT_HANDOFF')).toBe(false);
 });
