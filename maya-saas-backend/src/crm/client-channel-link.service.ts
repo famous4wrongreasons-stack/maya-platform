@@ -269,6 +269,45 @@ export class ClientChannelLinkService {
     return this.bindVerified(proof, undefined, tx, true);
   }
 
+  /** V2 coordinator only: never revokes/reactivates an episode. */
+  async bindSuccessorChallengeInTransaction(
+    tx: Tx,
+    proof: VerifiedClientChannelProof,
+  ) {
+    if (
+      proof.method !== 'explicit_verified_challenge' ||
+      proof.provider !== 'maya_user' ||
+      proof.verifier !== 'a18.client-link-challenge.sms.v2' ||
+      !proof.supersedesLinkId
+    )
+      throw new ForbiddenException('Successor challenge proof required');
+    await lockClientChannelIdentity(
+      tx,
+      proof.tenantId,
+      proof.provider,
+      proof.providerSubjectHash,
+    );
+    const tips = await tx.clientChannelLink.findMany({
+      where: {
+        tenantId: proof.tenantId,
+        provider: proof.provider,
+        providerSubjectHash: proof.providerSubjectHash,
+        successors: { none: {} },
+      },
+      take: 2,
+    });
+    if (
+      tips.length !== 1 ||
+      tips[0].id !== proof.supersedesLinkId ||
+      !tips[0].revokedAt ||
+      tips[0].clientId !== proof.clientId
+    )
+      throw new ForbiddenException(
+        'Latest revoked exact Client predecessor required',
+      );
+    return this.bindVerified(proof, undefined, tx);
+  }
+
   async assertClientEligible(tx: Tx, tenantId: string, clientId: string) {
     this.context.assertTenantId(tenantId);
     return this.assertClient(tx, tenantId, clientId);

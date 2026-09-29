@@ -1,3 +1,8 @@
+import { ClientReverificationController } from './client-reverification.controller';
+import { ClientReverificationService } from './client-reverification.service';
+import { ClientReverificationCandidateService } from './client-reverification-candidate.service';
+import { PhoneAuthDeliveryService } from '../auth/phone-auth-delivery.service';
+import { AuthRateLimitRepository } from '../auth/auth-rate-limit.repository';
 import { NativeFeedbackFoundationModule } from '../native-feedback/native-feedback-foundation.module';
 import { NativeFeedbackService } from '../native-feedback/native-feedback.service';
 import { NativeFeedbackController } from '../native-feedback/native-feedback.controller';
@@ -80,6 +85,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     UsersModule,
   ],
   controllers: [
+    ClientReverificationController,
     NativeFeedbackController,
     ConsentSecurityInvalidationController,
     ClientHabitsController,
@@ -95,6 +101,10 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     ShadowIngestionController,
   ],
   providers: [
+    ClientReverificationService,
+    ClientReverificationCandidateService,
+    PhoneAuthDeliveryService,
+    AuthRateLimitRepository,
     NativeFeedbackService,
     NativeFeedbackScheduler,
     ConsentSecurityApprovalService,

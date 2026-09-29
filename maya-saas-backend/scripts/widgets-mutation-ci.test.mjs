@@ -56,14 +56,15 @@ function fixture() {
   });
 }
 
-test('35 batteries, 56 jobs: existing partitions plus SB1/AB/SBV cover all 418 declarations', () => {
+test('36 batteries, 57 jobs: existing partitions plus SB1/AB/SBV/SV2 cover all 430 declarations', () => {
   const p = plan(declared);
-  assert.equal(p.gates.length, 35); assert.equal(p.matrix.include.length, 56);
+  assert.equal(p.gates.length, 36); assert.equal(p.matrix.include.length, 57);
   assert.deepEqual(declared.SB1.mutants.map(m => m.id), Array.from({ length: 10 }, (_, i) => `SB1-M${String(i + 1).padStart(2, '0')}`));
   assert.deepEqual(declared.AB.mutants.map(m => m.id), ['AB-M1', 'AB-M2']);
+  assert.deepEqual(declared.SV2.mutants.map(m => m.id), Array.from({ length: 12 }, (_, i) => `SV2-M${i + 1}`));
   assert.deepEqual(declared.SBV.mutants.map(m => m.id), Array.from({ length: 8 }, (_, i) => `SBV-M${i + 1}`));
   const r = assemble(declared, fixture(), head);
-  assert.equal(r.length, 35); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 418);
+  assert.equal(r.length, 36); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 430);
   for (const report of r) {
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
@@ -187,7 +188,7 @@ test('gate: a baseline control is red on a non-zero step exit, a failed assertio
     for (const c of Object.values(r.neutraliser_controls)) { c.exits[c.steps[0]] = 1; c.failed = ['red on the neutralised copy']; }
     assert.deepEqual(redBaselineControls(r.baseline_controls), []);
   }
-  assert.equal(assemble(declared, receipts, head).length, 35, 'a red neutraliser control is not a red baseline');
+  assert.equal(assemble(declared, receipts, head).length, 36, 'a red neutraliser control is not a red baseline');
 });
 
 test('gate: a red baseline is a distinct shard status and a non-zero exit, and never hides a mismatch', () => {

@@ -10,7 +10,7 @@ import { clientChannelSubjectHash } from './client-channel-subject';
 import { CrmService } from './crm.service';
 
 /** A candidate for a fresh challenge, NEVER a Client authority proof.
- * There is no HTTP route, link writer or challenge consumer in this unit.
+ * The challenge coordinator revalidates this candidate under its identity lock.
  */
 @Injectable()
 export class ClientReverificationCandidateService {
@@ -46,6 +46,10 @@ export class ClientReverificationCandidateService {
     if (JSON.stringify(before) !== JSON.stringify(after))
       throw new ForbiddenException('client_reverification_lineage_changed');
     return Object.freeze({
+      lineageHash: this.encryption.opaqueReference(
+        'sb1.lineage.v2',
+        JSON.stringify(before),
+      ),
       tenantId: before.tenantId,
       userId: before.userId,
       providerSubjectHash: before.providerSubjectHash,
@@ -72,7 +76,27 @@ export class ClientReverificationCandidateService {
     });
   }
 
-  private async lineage(user: AuthenticatedUser) {
+  async assertCurrentInTransaction(
+    tx: Prisma.TransactionClient,
+    user: AuthenticatedUser,
+    candidate: Awaited<
+      ReturnType<ClientReverificationCandidateService['resolve']>
+    >,
+  ) {
+    const current = await this.lineage(user, tx);
+    if (
+      this.encryption.opaqueReference(
+        'sb1.lineage.v2',
+        JSON.stringify(current),
+      ) !== candidate.lineageHash
+    )
+      throw new ForbiddenException('client_reverification_lineage_changed');
+  }
+
+  private async lineage(
+    user: AuthenticatedUser,
+    transaction?: Prisma.TransactionClient,
+  ) {
     if (!user.tenantId || !user.sessionId || !user.membershipId)
       throw new ForbiddenException('tenant_qualified_account_required');
     const tenantId = this.context.assertTenantId(user.tenantId);
@@ -83,7 +107,7 @@ export class ClientReverificationCandidateService {
       'maya_user',
       user.userId,
     );
-    return this.prisma.$transaction(async (tx) => {
+    const work = async (tx: Prisma.TransactionClient) => {
       await lockClientChannelIdentity(tx, tenantId, 'maya_user', subject);
       const [clock] = await tx.$queryRaw<Array<{ now: Date }>>(
         Prisma.sql`SELECT (clock_timestamp() AT TIME ZONE 'UTC')::timestamp(3) AS now`,
@@ -175,6 +199,7 @@ export class ClientReverificationCandidateService {
           externalId: l.externalId,
         })),
       };
-    });
+    };
+    return transaction ? work(transaction) : this.prisma.$transaction(work);
   }
 }

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "SV2-M1",
+    "file": "src/crm/client-link-challenge.service.ts",
+    "find": "!timingSafeEqual(\n          Buffer.from(supplied, 'hex'),\n          Buffer.from(challenge.tokenHash, 'hex'),\n        )",
+    "replace": "false",
+    "killers": [
+      "SV2-U-OTP"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SV2-M2",
+    "file": "src/crm/client-link-challenge.service.ts",
+    "find": "!isDeepStrictEqual(challenge.issuanceEvidenceJson, expected) ||",
+    "replace": "false ||",
+    "killers": [
+      "SV2-U-BINDING"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SV2-M3",
+    "file": "src/crm/client-link-challenge.service.ts",
+    "find": "this.validAt(challenge.expiresAt, await this.clock(tx));",
+    "replace": "/* removed V2 expiry */",
+    "killers": [
+      "SV2-U-EXPIRY"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SV2-M4",
+    "file": "src/crm/client-link-challenge.service.ts",
+    "find": "if (challenge.consumedAt)\n        throw new ConflictException('client_link_challenge_already_consumed');\n      this.validAt(challenge.expiresAt, await this.clock(tx));",
+    "replace": "if (false)\n        throw new ConflictException('client_link_challenge_already_consumed');\n      this.validAt(challenge.expiresAt, await this.clock(tx));",
+    "killers": [
+      "SV2-U-REPLAY"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SV2-M5",
+    "file": "src/crm/client-link-challenge.service.ts",
+    "find": "if (changed.count !== 1)\n        throw new ConflictException('client_link_challenge_consume_failed');\n      await this.successorAudit(",
+    "replace": "if (false)\n        throw new ConflictException('client_link_challenge_consume_failed');\n      await this.successorAudit(",
+    "killers": [
+      "SV2-U-OUTCOME"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SV2-M6",
+    "file": "src/crm/client-link-challenge.service.ts",
+    "find": "if (!result.allowed)",
+    "replace": "if (false)",
+    "killers": [
+      "SV2-U-LIMIT"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SV2-M7",
+    "file": "src/crm/client-link-challenge.service.ts",
+    "find": "await deps.candidates.assertCurrentInTransaction(tx, actor, candidate);\n      const rows",
+    "replace": "/* removed locked candidate revalidation */\n      const rows",
+    "killers": [
+      "SV2-07"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "SV2-M8",
+    "file": "src/crm/client-link-challenge.service.ts",
+    "find": "challenge.policyVersion !== V2.version ||",
+    "replace": "false ||",
+    "killers": [
+      "SV2-U-POLICY"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SV2-M9",
+    "file": "src/crm/client-link-challenge.service.ts",
+    "find": "challenge.clientId !== candidate.clientId ||",
+    "replace": "false ||",
+    "killers": [
+      "SV2-U-POLICY"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SV2-M10",
+    "file": "src/crm/client-link-challenge.service.ts",
+    "find": "challenge.issuanceEvidenceHash !== expectedHash",
+    "replace": "false",
+    "killers": [
+      "SV2-U-POLICY"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SV2-M11",
+    "file": "src/crm/client-link-challenge.service.ts",
+    "find": "actorRole: actor.role,",
+    "replace": "actorRole: 'client',",
+    "killers": [
+      "SV2-U-HAPPY"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SV2-M12",
+    "file": "src/crm/client-link-challenge.service.ts",
+    "find": "supersedesLinkId: candidate.predecessorLinkId,",
+    "replace": "supersedesLinkId: 'other',",
+    "killers": [
+      "SV2-U-HAPPY"
+    ],
+    "expect": "build-killed"
+  }
+]

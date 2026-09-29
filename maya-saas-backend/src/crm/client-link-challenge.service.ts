@@ -1,4 +1,21 @@
-import { createHash, randomBytes } from 'node:crypto';
+import {
+  createHash,
+  randomBytes,
+  randomInt,
+  randomUUID,
+  timingSafeEqual,
+} from 'node:crypto';
+import { isDeepStrictEqual } from 'node:util';
+import type { AuthenticatedUser } from '../common/authenticated-user.interface';
+import type { ClientReverificationCandidateService } from './client-reverification-candidate.service';
+import type { PhoneAuthDeliveryService } from '../auth/phone-auth-delivery.service';
+import type { AuthRateLimitRepository } from '../auth/auth-rate-limit.repository';
+import { AuthRateLimitException } from '../auth/auth-rate-limit.exception';
+import {
+  SUCCESSOR_CHALLENGE_POLICY as V2,
+  successorEvidence,
+  successorEvidenceHash,
+} from './client-link-successor-evidence';
 
 import {
   BadRequestException,
@@ -51,6 +68,12 @@ export interface ClientChannelAuthenticator {
   authenticate(proof: string, tx: Tx): Promise<AuthenticatedClientChannel>;
 }
 
+export interface SuccessorChallengeDependencies {
+  candidates: ClientReverificationCandidateService;
+  delivery: PhoneAuthDeliveryService;
+  limits: AuthRateLimitRepository;
+}
+
 export class ClientLinkChallengeService {
   constructor(
     private readonly prisma: PrismaClient,
@@ -59,6 +82,7 @@ export class ClientLinkChallengeService {
     private readonly links: ClientChannelLinkService,
     private readonly issuer: ClientChallengeIssuerAuthority,
     private readonly channels: ClientChannelAuthenticator,
+    private readonly successor?: SuccessorChallengeDependencies,
   ) {}
 
   async issue(request: unknown) {
@@ -208,6 +232,251 @@ export class ClientLinkChallengeService {
       if (changed.count !== 1)
         throw new ConflictException('client_link_challenge_consume_failed');
       return { challengeId: challenge.id, link: result.link };
+    });
+  }
+
+  /** Subject-bound V2. The OTP is delivered only through the strict existing SMS path. */
+  async issueSuccessor(user: AuthenticatedUser) {
+    const actor = { ...user };
+    const deps = this.successorDependencies();
+    if (!actor.tenantId)
+      throw new ForbiddenException('tenant_qualified_account_required');
+    const tenantId = this.context.assertTenantId(actor.tenantId);
+    if (this.context.get()?.userId !== actor.userId)
+      throw new ForbiddenException('authenticated_account_required');
+    deps.delivery.assertClientVerificationAvailable();
+    await this.successorLimit(actor, 'issue');
+    const candidate = await deps.candidates.resolve(actor);
+    const id = randomUUID();
+    const code = randomInt(0, 1_000_000).toString().padStart(6, '0');
+    const challenge = await this.serializable(async (tx) => {
+      await deps.candidates.assertCurrentInTransaction(tx, actor, candidate);
+      const now = await this.clock(tx);
+      const evidence = successorEvidence(candidate, now, this.encryption);
+      const evidenceHash = successorEvidenceHash(evidence);
+      const row = await tx.clientLinkChallenge.create({
+        data: {
+          id,
+          tenantId,
+          clientId: candidate.clientId,
+          tokenHash: this.successorTokenHash(id, evidenceHash, code),
+          tokenHashVersion: V2.tokenHashVersion,
+          policyVersion: V2.version,
+          issuedAt: now,
+          expiresAt: new Date(now.getTime() + V2.ttlSeconds * 1000),
+          issuanceEvidenceJson: evidence,
+          issuanceEvidenceHash: evidenceHash,
+        },
+      });
+      await this.successorAudit(
+        tx,
+        actor,
+        row.id,
+        'issued',
+        candidate.predecessorLinkId,
+      );
+      return { challengeId: row.id, expiresAt: row.expiresAt };
+    });
+    // Outside retryable transactions: never duplicate external delivery on serialization retry.
+    // Failure leaves an unconsumed, expiring challenge; neither issuance nor delivery grants authority.
+    await deps.delivery.deliverClientVerificationCode({
+      phone: candidate.deliveryPhone,
+      code,
+    });
+    return challenge;
+  }
+
+  async consumeSuccessor(user: AuthenticatedUser, request: unknown) {
+    const actor = { ...user };
+    const input = this.input(request, ['challengeId', 'code']);
+    if (
+      typeof input.challengeId !== 'string' ||
+      !/^[0-9a-f-]{36}$/.test(input.challengeId) ||
+      typeof input.code !== 'string' ||
+      !/^[0-9]{6}$/.test(input.code)
+    )
+      throw new BadRequestException('Challenge id and six-digit OTP required');
+    const challengeId = input.challengeId;
+    const code = input.code;
+    if (!actor.tenantId)
+      throw new ForbiddenException('tenant_qualified_account_required');
+    const tenantId = this.context.assertTenantId(actor.tenantId);
+    if (this.context.get()?.userId !== actor.userId)
+      throw new ForbiddenException('authenticated_account_required');
+    // Durable failed attempts MUST survive a rolled-back verification transaction.
+    await this.successorLimit(actor, 'consume', challengeId);
+    const deps = this.successorDependencies();
+    const candidate = await deps.candidates.resolve(actor);
+    return this.serializable(async (tx) => {
+      await deps.candidates.assertCurrentInTransaction(tx, actor, candidate);
+      const rows = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+        SELECT "id" FROM "ClientLinkChallenge" WHERE "tenantId" = ${tenantId}
+          AND "id" = ${challengeId} FOR UPDATE
+      `);
+      if (rows.length !== 1)
+        throw new ForbiddenException('client_link_challenge_invalid');
+      const challenge = await tx.clientLinkChallenge.findUniqueOrThrow({
+        where: { id_tenantId: { id: challengeId, tenantId } },
+      });
+      if (challenge.consumedAt)
+        throw new ConflictException('client_link_challenge_already_consumed');
+      this.validAt(challenge.expiresAt, await this.clock(tx));
+      const expected = successorEvidence(
+        candidate,
+        challenge.issuedAt,
+        this.encryption,
+      );
+      const expectedHash = successorEvidenceHash(expected);
+      if (
+        challenge.policyVersion !== V2.version ||
+        challenge.tokenHashVersion !== V2.tokenHashVersion ||
+        challenge.expiresAt.getTime() - challenge.issuedAt.getTime() !==
+          V2.ttlSeconds * 1000 ||
+        challenge.clientId !== candidate.clientId ||
+        !isDeepStrictEqual(challenge.issuanceEvidenceJson, expected) ||
+        challenge.issuanceEvidenceHash !== expectedHash
+      )
+        throw new ForbiddenException('client_reverification_binding_changed');
+      const supplied = this.successorTokenHash(challengeId, expectedHash, code);
+      if (
+        !HEX.test(challenge.tokenHash) ||
+        !timingSafeEqual(
+          Buffer.from(supplied, 'hex'),
+          Buffer.from(challenge.tokenHash, 'hex'),
+        )
+      )
+        throw new ForbiddenException('client_link_challenge_invalid');
+      const result = await this.links.bindSuccessorChallengeInTransaction(tx, {
+        tenantId,
+        clientId: candidate.clientId,
+        provider: 'maya_user',
+        providerSubjectHash: candidate.providerSubjectHash,
+        method: 'explicit_verified_challenge',
+        verificationIdentityHash: challenge.tokenHash,
+        verifier: 'a18.client-link-challenge.sms.v2',
+        channelControlProofHash: this.encryption.opaqueReference(
+          'sb1.verified-otp.v2',
+          JSON.stringify([challengeId, expectedHash, challenge.tokenHash]),
+        ),
+        clientAuthorityProofHash: expectedHash,
+        deliveryAddressEncrypted: this.encryption.encrypt(actor.userId),
+        validUntil: challenge.expiresAt,
+        supersedesLinkId: candidate.predecessorLinkId,
+      });
+      const changed = await tx.clientLinkChallenge.updateMany({
+        where: {
+          id: challengeId,
+          tenantId,
+          consumedAt: null,
+          expiresAt: { gt: await this.clock(tx) },
+        },
+        data: {
+          consumedAt: await this.clock(tx),
+          consumedLinkId: result.link.id,
+          consumedProvider: 'maya_user',
+          consumedSubjectHash: candidate.providerSubjectHash,
+        },
+      });
+      if (changed.count !== 1)
+        throw new ConflictException('client_link_challenge_consume_failed');
+      await this.successorAudit(
+        tx,
+        actor,
+        challengeId,
+        'verified',
+        candidate.predecessorLinkId,
+        result.link.id,
+      );
+      return { challengeId, linkId: result.link.id, verified: true as const };
+    });
+  }
+
+  private successorDependencies() {
+    if (!this.successor)
+      throw new ForbiddenException('successor_verifier_unavailable');
+    return this.successor;
+  }
+  private successorTokenHash(id: string, evidenceHash: string, code: string) {
+    return this.encryption.opaqueReference(
+      V2.tokenNamespace,
+      JSON.stringify([id, evidenceHash, code]),
+    );
+  }
+  private async successorLimit(
+    actor: AuthenticatedUser,
+    action: 'issue' | 'consume',
+    challengeId?: string,
+  ) {
+    if (!actor.tenantId)
+      throw new ForbiddenException('tenant_qualified_account_required');
+    const tenantId = this.context.assertTenantId(actor.tenantId);
+    const deps = this.successorDependencies();
+    const subjectHash = this.encryption.opaqueReference(
+      'sb1.otp-limit.v2',
+      JSON.stringify([tenantId, actor.userId]),
+    );
+    const rules = (
+      action === 'issue'
+        ? [
+            { suffix: 'cooldown', maxAttempts: 1, windowSeconds: 60 },
+            { suffix: 'window', maxAttempts: 5, windowSeconds: 600 },
+          ]
+        : [{ suffix: 'window', maxAttempts: 10, windowSeconds: 600 }]
+    ).map((r) => ({
+      action: `client_reverification_${action}`,
+      policyKey: `sb1.otp.v2.${action}.${r.suffix}`,
+      scope: 'identity' as const,
+      subjectHash,
+      tenantId,
+      maxAttempts: r.maxAttempts,
+      windowSeconds: r.windowSeconds,
+    }));
+    if (challengeId)
+      rules.push({
+        action: 'client_reverification_consume',
+        policyKey: 'sb1.otp.v2.consume.challenge',
+        scope: 'identity',
+        tenantId,
+        subjectHash: this.encryption.opaqueReference(
+          'sb1.otp-attempt.v2',
+          JSON.stringify([tenantId, actor.userId, challengeId]),
+        ),
+        maxAttempts: 5,
+        windowSeconds: 600,
+      });
+    const result = await deps.limits.consume(
+      rules,
+      await this.clock(this.prisma),
+    );
+    if (!result.allowed)
+      throw new AuthRateLimitException(result.retryAfterSeconds);
+  }
+  private successorAudit(
+    tx: Tx,
+    actor: AuthenticatedUser,
+    challengeId: string,
+    outcome: string,
+    predecessorLinkId: string,
+    linkId?: string,
+  ) {
+    return tx.auditLog.create({
+      data: {
+        scope: 'tenant',
+        tenantId: actor.tenantId!,
+        userId: actor.userId,
+        action: `client_reverification.${outcome}`,
+        entityType: 'ClientLinkChallenge',
+        entityId: challengeId,
+        metadataJson: {
+          contract: 'sb1.client-reverification.audit.v2',
+          authority_context: 'personal_client',
+          actorSessionId: actor.sessionId,
+          actorMembershipId: actor.membershipId,
+          actorRole: actor.role,
+          predecessorLinkId,
+          ...(linkId ? { linkId } : {}),
+        },
+      },
     });
   }
 
