@@ -171,7 +171,8 @@ export interface FixturesOptions {
   readonly evidence?: EvidenceWriter;
 }
 
-/** What a BIN case may use: no widget writer (I-HAR). */
+/** BIN has no widget minter or general record writer. The one explicit E-TAMPER
+ * operation changes only confirmationJson on an owned, existing COMMIT. */
 export type BinFixtures = Pick<
   Fixtures,
   | 'tenant'
@@ -182,6 +183,7 @@ export type BinFixtures = Pick<
   | 'teardown'
   | 'bookingSource'
   | 'bookingProofState'
+  | 'withReadbackDutyTamper'
 >;
 
 export class Fixtures {
@@ -207,6 +209,7 @@ export class Fixtures {
       teardown: this.teardown.bind(this),
       bookingSource: this.bookingSource.bind(this),
       bookingProofState: this.bookingProofState.bind(this),
+      withReadbackDutyTamper: this.withReadbackDutyTamper.bind(this),
     });
   }
 
@@ -422,6 +425,54 @@ export class Fixtures {
       })),
     });
     return { serviceId: service.id, staffId: provider.id };
+  }
+
+  /** E-TAMPER:confirmationJson only; no mint, arbitrary column or authority override.
+   * The original row is restored even when the assertion fails. Production is
+   * rejected by the same database/tenant boundary as fixture entitlements.
+   */
+  async withReadbackDutyTamper(
+    tenant: TenantFixture,
+    intentTokenHash: string,
+    probe: () => Promise<void>,
+  ): Promise<void> {
+    assertProofDatabase();
+    if (
+      !this.tenants.includes(tenant.id) ||
+      !tenant.slug.startsWith(SLUG_PREFIX)
+    )
+      throw new Error('readback tamper requires an owned proof tenant');
+    const where = { tenantId: tenant.id, intentTokenHash };
+    const record = await this.ctx.prisma.widgetIntentRecord.findFirstOrThrow({
+      where,
+    });
+    const original = record.confirmationJson;
+    if (
+      record.effect !== 'COMMIT' ||
+      record.widgetKind !== 'BOOKING_CONFIRMATION' ||
+      record.consumedAt !== null ||
+      original === null ||
+      Array.isArray(original) ||
+      typeof original !== 'object' ||
+      original.requires_readback !== false
+    )
+      throw new Error('readback tamper requires an unconsumed rich COMMIT');
+    await this.ctx.prisma.widgetIntentRecord.updateMany({
+      where,
+      data: {
+        confirmationJson: { ...original, requires_readback: true },
+      },
+    });
+    try {
+      await probe();
+    } finally {
+      await this.ctx.prisma.widgetIntentRecord.updateMany({
+        where,
+        data: {
+          confirmationJson: original,
+        },
+      });
+    }
   }
 
   /** Read-only observation of the canonical owners' effects in this fixture tenant. */

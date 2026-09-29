@@ -1,0 +1,35 @@
+[
+  {
+    "id": "WF-M1",
+    "description": "Reject the real canonical pairing; the production HTTP create journey must fail.",
+    "file": "src/widgets/authority/propose-pairing.ts",
+    "find": "): boolean => pairingForAe(ae) !== null;",
+    "replace": "): boolean => pairingForAe(ae) === null;",
+    "killers": [
+      "WR-CREATE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "WF-M2",
+    "description": "Ignore readback recomputation on a production-minted COMMIT; the HTTP tamper probe must fail.",
+    "file": "src/widgets/gates/gate8r.ts",
+    "find": "  const recomputed = recomputeRequiresReadback(r);",
+    "replace": "  const recomputed = stored;",
+    "killers": [
+      "WR-CREATE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "WF-M3",
+    "description": "A new spoken confirmation invalidates the current U absence proof.",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "      deliveryChannel: input.routing.answeringChannel,",
+    "replace": "      deliveryChannel: 'realtime-voice',",
+    "killers": [
+      "WF-U-R1A-ABSENCE"
+    ],
+    "expect": "build-killed"
+  }
+]

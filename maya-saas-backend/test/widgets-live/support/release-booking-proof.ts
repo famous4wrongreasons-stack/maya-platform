@@ -1,4 +1,5 @@
-// Shared backend journey: actual HTTP requests only. Source fixtures never write widget/action rows.
+// Shared backend journey: actual HTTP requests; widgets/actions are production-minted.
+// The one declared E-TAMPER probe changes only confirmationJson and restores it.
 import { randomUUID } from 'node:crypto';
 import { CalendarSource, UserRole } from '../../../src/common/domain.enums';
 import type { HttpProofContext } from './http-proof-contract';
@@ -139,6 +140,47 @@ export async function releaseBookingProof(
         (await ctx.fixtures.bookingProofState(tenant)).executions.length === 0,
         'F33/F76 forged metadata has no owner effect',
       );
+      // The E2 recipe expressly permits this one AUDIT_RETAINED column.
+      // A real production-minted COMMIT remains the input; no owner is replaced.
+      const mint = ctx
+        .mintProvenance()
+        .find((m) => m.intent_token_hash === record.intentTokenHash);
+      requireProof(mint, 'readback exact COMMIT mint');
+      await ctx.fixtures.withReadbackDutyTamper(
+        tenant,
+        record.intentTokenHash,
+        async () => {
+          const refusal = await post('/widgets/intent', body);
+          const value = object(refusal.body);
+          requireProof(
+            refusal.status === 200 &&
+              value.outcome === 'refuse' &&
+              value.code === 'readback_mismatch' &&
+              value.stopped_at_gate === '8-R' &&
+              value.gates_run === 9,
+            `readback divergence refused: ${JSON.stringify(value)}`,
+          );
+          const after = await ctx.fixtures.bookingProofState(tenant);
+          requireProof(
+            after.executions.length === 0 &&
+              after.appointments.length === 0 &&
+              after.records.find(
+                (r) => r.intentTokenHash === record.intentTokenHash,
+              )?.consumedAt === null,
+            'readback refusal has no actuation or token consumption',
+          );
+        },
+      );
+      proofs.push({
+        testId: 'WF-READBACK-DIVERGENCE',
+        recordHash: mint.intent_token_hash,
+        triggerTraceId: mint.request_id,
+        stoppedAtGate: '8-R',
+        gatesRun: 9,
+        labels: ['[E-TAMPER:confirmationJson]'],
+        clauses: ['R-1a'],
+        claim: 'L-T',
+      });
       commitBody = body;
     }
     const answer = await post('/widgets/intent', body);
@@ -240,6 +282,12 @@ export async function releaseBookingProof(
     ...commitProof,
     testId: 'WR-COMMIT-ACTION-BOUNDARY',
     clauses: ['G13-I7'],
+  });
+  proofs.push({ ...commitProof, testId: 'WF-PAIRING', clauses: ['G7-FR6b'] });
+  proofs.push({
+    ...commitProof,
+    testId: 'WF-READBACK-POSITIVE',
+    clauses: ['R-1a'],
   });
   return proofs;
 }
