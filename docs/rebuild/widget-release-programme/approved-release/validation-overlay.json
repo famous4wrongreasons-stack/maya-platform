@@ -1,0 +1,11 @@
+{
+  "contract": "maya.validation-only-overlay/1",
+  "proof_source_head": "6bd3de3a",
+  "validation_commit": "b56efb0190bc80ed6c83ec0246f88e3e94dab74d",
+  "reason": "Only stronger raw-SQL writer scanner/counterfactuals and corrected CI inventory count; runtime, fixtures and existing mutant killers are unchanged. Fresh K3/REN and P-render receipts cover this overlay. Not a release-certificate inheritance policy.",
+  "files": {
+    "maya-saas-backend/scripts/k3-gateway-check.mjs": "ae027805d7ffa661aa301e5bb0305c35513cbc845de0402f5133f79f3fd336e5",
+    "maya-saas-backend/scripts/widgets-mutation-ci.test.mjs": "f32aeff2fb1961f68a0386a12271d4a1b777fe91bc9897ca374142d2d9297c56",
+    "maya-saas-backend/src/widgets/rendering/refusal-codes-covered.spec.ts": "a77208e867fb69c59c8a6ef719b20ab0d9cc9e1e40d79516190134c70471dbc6"
+  }
+}

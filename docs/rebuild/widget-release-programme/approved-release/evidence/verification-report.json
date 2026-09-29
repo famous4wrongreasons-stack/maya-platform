@@ -1,0 +1,17 @@
+{
+  "contract": "maya.widgets-evidence-verify/1",
+  "manifest": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/approved-release/evidence-final/evidence-manifest.jsonl",
+  "manifest_sha256": "a034ea4e9d4c73fa0fae935df4c8ba26a99fda7555357c311164e2fd03c400de",
+  "inventory": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/widget-release/docs/rebuild/evidence/maya-chat-first-ux/gate-clause-inventory.json",
+  "lines": 27,
+  "claims": 25,
+  "captured_mints": {
+    "HTTP": 26,
+    "BIN": 18
+  },
+  "refused_mints": 0,
+  "records_before_teardown": 44,
+  "harness_files_scanned": 24,
+  "u_proof_map": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/widget-release/docs/rebuild/widget-release-programme/approved-release/u-proofs.json",
+  "violations": []
+}

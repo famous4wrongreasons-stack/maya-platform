@@ -1,0 +1,153 @@
+{
+  "contract": "maya.approved-widget-release-verification/1",
+  "implementation_head": "b56efb0190bc80ed6c83ec0246f88e3e94dab74d",
+  "production_activation": "NOT_AUTHORIZED",
+  "production_effects": 0,
+  "real_otp": 0,
+  "real_yclients_effects": 0,
+  "schema_migrations": 0,
+  "remote_ci": "NOT_RUN",
+  "complete_release_ci": "STILL_REQUIRED_ON_COMBINED_CANDIDATE",
+  "mutations": {
+    "AR": {
+      "count": 19,
+      "status": "AS-DECLARED",
+      "source_head": "6bd3de3a02f1cbcda019b328527a38c57579d1a7",
+      "sha256": "fb61c6952404f1bdb9a45086cdc2d98228d1ba99af9374765c9553f5db62d391",
+      "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+      "restrictions": {
+        "live_tests": "(widget-release|release-revocation).live-spec.ts",
+        "live_filter": "AR1-|AR-G6-",
+        "unit_tests": "(widget-release-policy|entitlements.service).spec.ts",
+        "unit_filter": "AR1-"
+      }
+    },
+    "D8": {
+      "count": 5,
+      "status": "AS-DECLARED",
+      "source_head": "6bd3de3a02f1cbcda019b328527a38c57579d1a7",
+      "sha256": "2238e0a75a1f643c7054fd41c131fc658aa60e4670978b3344f7a3864d6d4881",
+      "steps": [
+        "unit"
+      ],
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": "closed-release-scope.spec.ts"
+      }
+    },
+    "7": {
+      "count": 38,
+      "status": "AS-DECLARED",
+      "source_head": "6bd3de3a02f1cbcda019b328527a38c57579d1a7",
+      "sha256": "3ae789081eed0f835b9cdca3aa70386d36e23130b0d74dc9f4de595061cbde25",
+      "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+      "restrictions": {
+        "live_tests": "gate7-effect.live-spec.ts",
+        "live_filter": null,
+        "unit_tests": "(gate7|propose-pairing|commit-guard|gate-context.source|gate-antecedents.inv30|r353-readers.source).*spec.ts"
+      }
+    },
+    "P-allowlist": {
+      "count": 3,
+      "status": "AS-DECLARED",
+      "source_head": "6bd3de3a02f1cbcda019b328527a38c57579d1a7",
+      "sha256": "3048e1ae146de1f258766665d25dc2683e3b4cb02eea7d2cc461f48a0de75e79",
+      "steps": [
+        "unit"
+      ],
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": "allowlist-startup.assert.spec.ts"
+      }
+    },
+    "T-tables": {
+      "count": 7,
+      "status": "AS-DECLARED",
+      "source_head": "6bd3de3a02f1cbcda019b328527a38c57579d1a7",
+      "sha256": "dae82728f65d570c490be907f3daa3f2a12f60ec242c7e77336f098d7a8d48f4",
+      "steps": [
+        "unit"
+      ],
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": "(channel-profile|owner-classes).spec.ts"
+      }
+    },
+    "P-render": {
+      "count": 8,
+      "status": "AS-DECLARED",
+      "source_head": "b56efb0190bc80ed6c83ec0246f88e3e94dab74d",
+      "sha256": "adb365eeee9facc7b15dcf513867201756b0247fb59e303c497eac0ae4113d74",
+      "steps": [
+        "unit"
+      ],
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": "(refusal-codes-covered|denial-projection.ratchet|anti-error-lint|intent-submit-args).spec.ts"
+      }
+    }
+  },
+  "tests": {
+    "backend-final": {
+      "suites": 581,
+      "passed": 5509,
+      "skipped": 1,
+      "failed": 0,
+      "sha256": "0d8df44a28781c0a84522d9be0aa0e27e72e958dec2b6bf8df0943ab64feb405"
+    },
+    "widgets": {
+      "suites": 30,
+      "passed": 379,
+      "skipped": 0,
+      "failed": 0,
+      "sha256": "12246375b34de3b7b72a290d2a965e8f56eec356544e9cc22c846ea0538129c7"
+    },
+    "unit-final": {
+      "suites": 3,
+      "passed": 52,
+      "skipped": 0,
+      "failed": 0,
+      "sha256": "650963a928bae6f6daed5ae2be45f7670956af11c42c6af607e9c7dad6cd1fcb"
+    },
+    "proofs": {
+      "suites": 5,
+      "passed": 11,
+      "skipped": 0,
+      "failed": 0,
+      "sha256": "021738977856aa178b65ba3398982568f7d1303f04e305507365399adf0292ae"
+    },
+    "ar-binary": {
+      "suites": 1,
+      "passed": 1,
+      "skipped": 0,
+      "failed": 0,
+      "sha256": "664a69711068df8642f4d6b6db6ea4af3a2acebce38bbe55aa2c63ed1e4c994e"
+    },
+    "writer-ratchet": {
+      "suites": 1,
+      "passed": 13,
+      "skipped": 0,
+      "failed": 0,
+      "sha256": "1d31887725dfbee8eeffa661f110d14a458afa8567ac52c97869acd66c9061cb"
+    }
+  },
+  "mutants_total": 80,
+  "source_provenance": "Full backend and widgets regression ran on the implementation before validation-only additions; supplemental 52 unit checks and 13 writer-ratchet checks cover those additions. Mutation receipt heads and their exact validation overlay are retained. This is not a fresh full-release certificate.",
+  "build_and_typechecks": "PASS: backend build/preflight, runtime typecheck, widgets-live typecheck, scripts typecheck; no runtime bytes changed after the final build.",
+  "structural_checks": {
+    "K3": "10/10 PASS",
+    "mutation_ci_contract": "35/35 PASS; 39 batteries / 60 jobs / 458 declarations",
+    "matrix_admission": "6/6 PASS",
+    "changed_file_lint": "PASS"
+  },
+  "evidence": {
+    "lines": 27,
+    "claims": 25,
+    "violations": [],
+    "manifest_sha256": "a034ea4e9d4c73fa0fae935df4c8ba26a99fda7555357c311164e2fd03c400de"
+  }
+}

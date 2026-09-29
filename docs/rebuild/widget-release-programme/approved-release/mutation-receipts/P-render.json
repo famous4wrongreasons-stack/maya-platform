@@ -1,0 +1,444 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "b56efb0190bc80ed6c83ec0246f88e3e94dab74d",
+  "battery_hashes": {
+    "gateP-render.json": "6ae3b523c2f462936d89e71dc4e5c78e1cc114ae997047ee816f25f30139e932"
+  },
+  "partition": null,
+  "startedAt": "2026-09-29T21:35:33.647Z",
+  "batteries": [
+    "gateP-render.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": [
+    "unit"
+  ],
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": "(refusal-codes-covered|denial-projection.ratchet|anti-error-lint|intent-submit-args).spec.ts"
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-51f75032e4",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-51f75032e4",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "baseline|unit": {
+      "set": null,
+      "steps": [
+        "unit"
+      ],
+      "exits": {
+        "unit": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M1",
+      "files": [
+        "src/widget-contract/reason-table.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "REN-2"
+      ],
+      "kills": [
+        {
+          "killer": "REN-2",
+          "test": "P-RENDER — P10: every canonical denial code has a rendering, and none is an error REN-2 C9_DENIAL_PROJECTION has a row for every code, and no row for a code that is gone",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "REN-2",
+          "test": "P-RENDER — P10: every canonical denial code has a rendering, and none is an error REN-2 the families partition the code space: every code is claimed exactly once",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "REN-2",
+          "test": "P-RENDER — P10: every canonical denial code has a rendering, and none is an error REN-2 a mapped code answers from its own row, not from the default",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 3
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M2",
+      "files": [
+        "src/widget-contract/reason-table.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "REN-1",
+        "REN-4"
+      ],
+      "kills": [
+        {
+          "killer": "REN-1",
+          "test": "P-RENDER — R3.9.3 rendering: the map is total and the grant path is one REN-1 every §3.9 refusal code the contract prints has a LIMITATION_REASON_TABLE row",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "REN-4",
+          "test": "P-RENDER — C4/R3.9.3: a refusal renders as a statement, never as a failure REN-4 the catalogue carries no phrase no row names: a phrase nobody mints is not a phrase",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M3",
+      "files": [
+        "src/widget-contract/reason-table.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "REN-1",
+        "REN-4"
+      ],
+      "kills": [
+        {
+          "killer": "REN-1",
+          "test": "P-RENDER — R3.9.3 rendering: the map is total and the grant path is one REN-1 every row states a reason code equal to its key, and a severity that is never error",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "REN-4",
+          "test": "P-RENDER — C4/R3.9.3: a refusal renders as a statement, never as a failure REN-4 reasonText mints a Phrase for every table key, and none of them reads as a fault",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M4",
+      "files": [
+        "src/widget-contract/reason-table.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "REN-2",
+        "REN-4"
+      ],
+      "kills": [
+        {
+          "killer": "REN-2",
+          "test": "P-RENDER — P10: every canonical denial code has a rendering, and none is an error REN-2 no projection is a failure state, and no severity is error",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "REN-4",
+          "test": "P-RENDER — C4/R3.9.3: a refusal renders as a statement, never as a failure REN-4 no module this unit owns writes an error severity or an error surface token",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M5",
+      "files": [
+        "src/widgets/rendering/reason-text.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "REN-4"
+      ],
+      "kills": [
+        {
+          "killer": "REN-4",
+          "test": "P-RENDER — C4/R3.9.3: a refusal renders as a statement, never as a failure REN-4 reasonText mints a Phrase for every table key, and none of them reads as a fault",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "REN-4",
+          "test": "P-RENDER — C4/R3.9.3: a refusal renders as a statement, never as a failure REN-4 an unknown code still mints a neutral Phrase rather than free text or a throw",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M6",
+      "files": [
+        "prisma/seed.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "REN-6"
+      ],
+      "kills": [
+        {
+          "killer": "REN-6",
+          "test": "P-RENDER — R3.9.3 rendering: the map is total and the grant path is one REN-6 no migration, seed or script creates a widgets.runtime TenantEntitlement",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M7",
+      "files": [
+        "src/widgets/rendering/denial-projection.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "REN-2"
+      ],
+      "kills": [
+        {
+          "killer": "REN-2",
+          "test": "P-RENDER — P10: every canonical denial code has a rendering, and none is an error REN-2 P10(b): an unmapped code degrades to an honest unknown, and never throws",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-render.json",
+      "id": "REN-M8",
+      "files": [
+        "src/orchestration/c9.contract.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "REN-2"
+      ],
+      "kills": [
+        {
+          "killer": "REN-2",
+          "test": "P-RENDER — P10: every canonical denial code has a rendering, and none is an error REN-2 the enumeration sees every c9Deny call site: no call passes a non-literal",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "REN-2",
+          "test": "P-RENDER — P10: every canonical denial code has a rendering, and none is an error REN-2 the contract counts 118 distinct codes, and the source still has exactly those",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "REN-2",
+          "test": "P-RENDER — P10: every canonical denial code has a rendering, and none is an error REN-2 C9_DENIAL_PROJECTION has a row for every code, and no row for a code that is gone",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "REN-2",
+          "test": "P-RENDER — P10: every canonical denial code has a rendering, and none is an error REN-2 the families partition the code space: every code is claimed exactly once",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 4
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-09-29T21:35:45.919Z"
+}

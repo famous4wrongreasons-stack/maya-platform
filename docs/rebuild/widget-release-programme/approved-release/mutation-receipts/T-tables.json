@@ -1,0 +1,424 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "6bd3de3a02f1cbcda019b328527a38c57579d1a7",
+  "battery_hashes": {
+    "gateT-tables.json": "f8d62e09b5bc3e3e904d568755ef6ac6c5a44f7f348487ff4798caf0602bd02f"
+  },
+  "partition": null,
+  "startedAt": "2026-09-29T21:33:26.529Z",
+  "batteries": [
+    "gateT-tables.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": [
+    "unit"
+  ],
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": "(channel-profile|owner-classes).spec.ts"
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-51f75032e4",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-51f75032e4",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "baseline|unit": {
+      "set": null,
+      "steps": [
+        "unit"
+      ],
+      "exits": {
+        "unit": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gateT-tables.json",
+      "id": "TAB-M1",
+      "files": [
+        "src/widgets/carriers/channel-profile.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TAB-2"
+      ],
+      "kills": [
+        {
+          "killer": "TAB-2",
+          "test": "U-TAB — §4.5.3 tiers and carrierAdmits TAB-2 carrierAdmits: the escape is CONTROL, control.widget.dismiss and priority 0, on every tier that lacks CONTROL",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    },
+    {
+      "battery": "gateT-tables.json",
+      "id": "TAB-M2",
+      "files": [
+        "src/widget-contract/tables.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TAB-2",
+        "TAB-9"
+      ],
+      "kills": [
+        {
+          "killer": "TAB-2",
+          "test": "U-TAB — §4.5.3 tiers and carrierAdmits TAB-2 each TIER_EFFECTS cell equals CH1 plus the escape",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "TAB-2",
+          "test": "U-TAB — §4.5.3 tiers and carrierAdmits TAB-2 carrierAdmits: the escape is CONTROL, control.widget.dismiss and priority 0, on every tier that lacks CONTROL",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "TAB-9",
+          "test": "U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the generated effect tables TAB-9 build-tables.mjs regenerates tables.ts with no diff",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 3
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    },
+    {
+      "battery": "gateT-tables.json",
+      "id": "TAB-M3",
+      "files": [
+        "src/widgets/carriers/channel-profile.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TAB-2"
+      ],
+      "kills": [
+        {
+          "killer": "TAB-2",
+          "test": "U-TAB — §4.5.3 tiers and carrierAdmits TAB-2 each TIER_EFFECTS cell equals CH1 plus the escape",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "TAB-2",
+          "test": "U-TAB — §4.5.3 tiers and carrierAdmits TAB-2 carrierAdmits: the escape is CONTROL, control.widget.dismiss and priority 0, on every tier that lacks CONTROL",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "TAB-2",
+          "test": "U-TAB — §4.5.3 tiers and carrierAdmits TAB-2 carrierAdmits: a tier cell is an allowlist, not an ordered ceiling",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "TAB-2",
+          "test": "U-TAB — §4.5.3 tiers and carrierAdmits TAB-2 carrierAdmits: NONE only on RICH_INTERACTIVE (R3.2.3)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 4
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    },
+    {
+      "battery": "gateT-tables.json",
+      "id": "TAB-M4",
+      "files": [
+        "src/widget-contract/tables.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TAB-2",
+        "TAB-9"
+      ],
+      "kills": [
+        {
+          "killer": "TAB-2",
+          "test": "U-TAB — §4.5.3 tiers and carrierAdmits TAB-2 each TIER_EFFECTS cell equals CH1 plus the escape",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "TAB-2",
+          "test": "U-TAB — §4.5.3 tiers and carrierAdmits TAB-2 carrierAdmits: NONE only on RICH_INTERACTIVE (R3.2.3)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "TAB-9",
+          "test": "U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the generated effect tables TAB-9 build-tables.mjs regenerates tables.ts with no diff",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 3
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    },
+    {
+      "battery": "gateT-tables.json",
+      "id": "TAB-M5",
+      "files": [
+        "src/widget-contract/owner-classes.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TAB-5"
+      ],
+      "kills": [
+        {
+          "killer": "TAB-5",
+          "test": "U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the generated effect tables TAB-5 wildcards and brace sets expand over the C9 registry (clients.* is not empty)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "TAB-5",
+          "test": "U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the generated effect tables TAB-5 KIND_OWNER_CLASS and every kind's keys equal §2.4's column, with F79 for SETTINGS_OWNER",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    },
+    {
+      "battery": "gateT-tables.json",
+      "id": "TAB-M6",
+      "files": [
+        "src/widget-contract/owner-classes.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TAB-6"
+      ],
+      "kills": [
+        {
+          "killer": "TAB-6",
+          "test": "U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the generated effect tables TAB-6 emittable(PAYMENT_HANDOFF) is false, and K20 blocks exactly the kinds §2.7 blocks on registration",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    },
+    {
+      "battery": "gateT-tables.json",
+      "id": "TAB-M7",
+      "files": [
+        "src/widget-contract/owner-classes.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TAB-5",
+        "TAB-7"
+      ],
+      "kills": [
+        {
+          "killer": "TAB-5",
+          "test": "U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the generated effect tables TAB-5 catalog.services.read resolves to CATALOG_READ, and to no other owner class",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "TAB-5",
+          "test": "U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the generated effect tables TAB-5 an INHERITED kind resolves to no registry-load key, stays emittable, and is fenced per intent (IR-TAB-2)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "TAB-5",
+          "test": "U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the generated effect tables TAB-5 KIND_OWNER_CLASS and every kind's keys equal §2.4's column, with F79 for SETTINGS_OWNER",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "TAB-7",
+          "test": "U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the generated effect tables TAB-7 allowedKinds is the inverse of ownerClassKeys, compared by value",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 4
+      },
+      "exits": {
+        "plain": {
+          "unit": 1
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-09-29T21:33:38.260Z"
+}
