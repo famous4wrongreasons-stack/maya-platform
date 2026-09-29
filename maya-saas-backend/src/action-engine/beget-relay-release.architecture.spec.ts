@@ -251,7 +251,9 @@ describe('R01 live artifact and release/recovery protection', () => {
     expect(release.validateCommittedSources(release.manifest.entries)).toBe(2);
   });
 
-  it('gates a static shell candidate as strictly as a PHP edge candidate', () => {
+  // Integration-only: consumes the separately built presentation artifact. Backend verification
+  // excludes this labelled check explicitly; the ordinary full test command still requires it.
+  it('[INTEGRATION-ONLY] gates a static shell candidate as strictly as a PHP edge candidate', () => {
     const shell = resolve(root, '../maya-chat-shell/dist/web');
     const result = edge.verifyShellCandidate(shell);
     expect(result).toMatchObject({ files: 37, php: 0, icons: 3 });
