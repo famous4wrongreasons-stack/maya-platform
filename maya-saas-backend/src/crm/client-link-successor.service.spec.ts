@@ -94,9 +94,9 @@ function fixture() {
   };
   const candidates = {
     resolve: jest.fn(() => Promise.resolve(candidate)),
-    assertCurrentInTransaction: jest.fn(() => {
-      return Promise.resolve();
-    }),
+    assertCurrentInTransaction: jest.fn(() =>
+      Promise.resolve(new Date(now.getTime() + 300_000)),
+    ),
   };
   const limits = {
     consume: jest.fn(() =>
@@ -186,6 +186,16 @@ describe('SB-1 V2 coordinator guard proofs', () => {
         }) as unknown,
       }) as unknown,
     });
+  });
+  it('SV2-U-SESSION bounds the proof by the current authenticated session deadline', async () => {
+    const h = fixture();
+    await h.consume();
+    expect(h.links.bindSuccessorChallengeInTransaction).toHaveBeenCalledWith(
+      h.tx,
+      expect.objectContaining({
+        validUntil: new Date(h.now.getTime() + 300_000),
+      }),
+    );
   });
   it('SV2-U-OTP rejects wrong code before link writer', async () => {
     const h = fixture();

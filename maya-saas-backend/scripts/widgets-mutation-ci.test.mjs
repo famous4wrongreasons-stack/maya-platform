@@ -56,15 +56,15 @@ function fixture() {
   });
 }
 
-test('36 batteries, 57 jobs: existing partitions plus SB1/AB/SBV/SV2 cover all 430 declarations', () => {
+test('36 batteries, 57 jobs: existing partitions plus SB1/AB/SBV/SV2 cover all 431 declarations', () => {
   const p = plan(declared);
   assert.equal(p.gates.length, 36); assert.equal(p.matrix.include.length, 57);
   assert.deepEqual(declared.SB1.mutants.map(m => m.id), Array.from({ length: 10 }, (_, i) => `SB1-M${String(i + 1).padStart(2, '0')}`));
   assert.deepEqual(declared.AB.mutants.map(m => m.id), ['AB-M1', 'AB-M2']);
-  assert.deepEqual(declared.SV2.mutants.map(m => m.id), Array.from({ length: 12 }, (_, i) => `SV2-M${i + 1}`));
+  assert.deepEqual(declared.SV2.mutants.map(m => m.id), Array.from({ length: 13 }, (_, i) => `SV2-M${i + 1}`));
   assert.deepEqual(declared.SBV.mutants.map(m => m.id), Array.from({ length: 8 }, (_, i) => `SBV-M${i + 1}`));
   const r = assemble(declared, fixture(), head);
-  assert.equal(r.length, 36); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 430);
+  assert.equal(r.length, 36); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 431);
   for (const report of r) {
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));

@@ -308,7 +308,8 @@ export class ClientLinkChallengeService {
     const deps = this.successorDependencies();
     const candidate = await deps.candidates.resolve(actor);
     return this.serializable(async (tx) => {
-      await deps.candidates.assertCurrentInTransaction(tx, actor, candidate);
+      const authenticatedUntil =
+        await deps.candidates.assertCurrentInTransaction(tx, actor, candidate);
       const rows = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`
         SELECT "id" FROM "ClientLinkChallenge" WHERE "tenantId" = ${tenantId}
           AND "id" = ${challengeId} FOR UPDATE
@@ -360,7 +361,9 @@ export class ClientLinkChallengeService {
         ),
         clientAuthorityProofHash: expectedHash,
         deliveryAddressEncrypted: this.encryption.encrypt(actor.userId),
-        validUntil: challenge.expiresAt,
+        validUntil: new Date(
+          Math.min(challenge.expiresAt.getTime(), authenticatedUntil.getTime()),
+        ),
         supersedesLinkId: candidate.predecessorLinkId,
       });
       const changed = await tx.clientLinkChallenge.updateMany({

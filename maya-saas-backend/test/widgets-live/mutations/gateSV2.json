@@ -62,8 +62,8 @@
   {
     "id": "SV2-M7",
     "file": "src/crm/client-link-challenge.service.ts",
-    "find": "await deps.candidates.assertCurrentInTransaction(tx, actor, candidate);\n      const rows",
-    "replace": "/* removed locked candidate revalidation */\n      const rows",
+    "find": "const authenticatedUntil =\n        await deps.candidates.assertCurrentInTransaction(tx, actor, candidate);\n      const rows",
+    "replace": "const authenticatedUntil = new Date(Date.now() + 600_000);\n      const rows",
     "killers": [
       "SV2-07"
     ],
@@ -116,6 +116,16 @@
     "replace": "supersedesLinkId: 'other',",
     "killers": [
       "SV2-U-HAPPY"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SV2-M13",
+    "file": "src/crm/client-link-challenge.service.ts",
+    "find": "Math.min(challenge.expiresAt.getTime(), authenticatedUntil.getTime())",
+    "replace": "challenge.expiresAt.getTime()",
+    "killers": [
+      "SV2-U-SESSION"
     ],
     "expect": "build-killed"
   }

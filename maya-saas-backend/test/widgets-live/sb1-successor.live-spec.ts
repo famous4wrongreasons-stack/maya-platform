@@ -268,7 +268,7 @@ describe('SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]', () => {
       authority_context: 'personal_client',
     });
     expect(JSON.stringify(row)).not.toContain('+79990000001');
-    expect(JSON.stringify(row.issuanceEvidenceJson)).not.toContain(issued.code);
+    expect(row.issuanceEvidenceJson).not.toHaveProperty('code');
   });
   it('SV2-02 wrong OTP has no link or consumption effect', async () => {
     const h = await fixture();

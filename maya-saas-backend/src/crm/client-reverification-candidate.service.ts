@@ -91,6 +91,13 @@ export class ClientReverificationCandidateService {
       ) !== candidate.lineageHash
     )
       throw new ForbiddenException('client_reverification_lineage_changed');
+    // The coordinator must cap the verified proof at the current session deadline.
+    // This read is inside the caller's serializable identity-locked transaction.
+    const session = await tx.authSession.findUniqueOrThrow({
+      where: { id: user.sessionId },
+      select: { expiresAt: true },
+    });
+    return session.expiresAt;
   }
 
   private async lineage(
