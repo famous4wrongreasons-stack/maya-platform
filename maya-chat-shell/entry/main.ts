@@ -131,7 +131,14 @@ function start(mountRoot: HTMLElement): void {
   };
 
   const newAbort = (): AbortController => new view.AbortController();
-  const net = createNet();
+  // Where Telegram returns a WEB browser: this document's own origin plus the callback file, so no
+  // origin is written into the bundle and the native carrier — whose origin is not http(s) — sends
+  // none, leaving that callback to the server. `navigate` is the only hand-off out of the shell.
+  const origin = view.location.origin;
+  const net = createNet({
+    webCallbackUrl: origin.startsWith('http') ? `${origin}/oauth-callback.html` : null,
+    navigate: (url) => view.location.assign(url),
+  });
   const runtime = createShellRuntime({
     transport: net.transport,
     session: net.session,

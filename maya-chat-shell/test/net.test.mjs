@@ -82,6 +82,9 @@ const gate = () => {
 };
 
 const U = {
+  // The finder is the one GET, and its URL carries the term: `q=му`, percent-encoded by the client.
+  search: '/api/mobile/pwa/search?q=%D0%BC%D1%83',
+  telegramStart: '/api/auth/oauth/telegram/start',
   start: '/api/auth/email/start',
   verify: '/api/auth/email/verify',
   login: '/api/auth/login',
@@ -309,12 +312,25 @@ const signedIn = async (options = {}) => {
 
 // ── 1. the module surface ──────────────────────────────────────────────────────────────────────
 
-test('PATHS holds exactly the nine approved literals; one fetch call site; API_BASE is the one endpoint line', async () => {
+test('PATHS holds exactly the eleven approved literals; one fetch call site; API_BASE is the one endpoint line', async () => {
   const src = read('src/net/client.ts');
   const block = src.match(/const PATHS = \{([\s\S]*?)\} as const;/);
   assert.ok(block, 'const PATHS = {…} as const');
   const values = [...block[1].matchAll(/'([^']*)'/g)].map((m) => m[1]).sort();
-  assert.deepEqual(values, ['/ai/chat', '/ai/transcribe', '/auth/email/start', '/auth/email/verify', '/auth/login', '/auth/logout', '/auth/refresh', '/widgets/intent', '/widgets/resolve']);
+  assert.deepEqual(values, [
+    '/ai/chat',
+    '/ai/transcribe',
+    '/auth/email/start',
+    '/auth/email/verify',
+    '/auth/login',
+    '/auth/logout',
+    '/auth/oauth/telegram/start',
+    '/auth/refresh',
+    '/mobile/pwa/search',
+    '/widgets/intent',
+    '/widgets/resolve',
+  ]);
+  assert.ok(!src.includes('/auth/oauth/telegram/complete'), 'the completion path joins with the unit that receives the callback');
   const { P1_PATHS } = await import('../build.mjs');
   assert.deepEqual(values, [...P1_PATHS].sort());
 
@@ -338,7 +354,7 @@ test('typed methods only: the two widget methods are explicit; no generic reques
     );
   const net = createNet();
   assert.deepEqual(Object.keys(net).sort(), ['session', 'transport']);
-  assert.deepEqual(Object.keys(net.session).sort(), ['signInPassword', 'signOut', 'startEmail', 'subscribe', 'verifyEmail', 'view']);
+  assert.deepEqual(Object.keys(net.session).sort(), ['findBusinesses', 'signInPassword', 'signOut', 'startEmail', 'startTelegram', 'subscribe', 'verifyEmail', 'view']);
   assert.deepEqual(Object.keys(net.transport).sort(), ['chat', 'resolveWidgets', 'transcribe', 'widgetIntent']);
 });
 
@@ -1177,7 +1193,80 @@ test('no storage, no document, no cookie: never touched at runtime, never named 
   }
 });
 
-test('every request of this suite went to one of the nine approved URLs, and all nine were exercised', () => {
+test('the finder: one GET to the allowlisted path, the term percent-encoded, no body and no content type', async () => {
+  serve({
+    [U.search]: json(200, {
+      query: 'му',
+      items: [
+        {
+          tenant_slug: 'muzhskaya-estetika-3',
+          name: 'Мужская Эстетика',
+          city: null,
+          address: 'ул. Лермонтова, 343',
+          logo_url: 'https://assets.example/logo.png',
+          icon_url: null,
+          smart_url: 'https://mayaos.ru/app.html?booking_tenant=muzhskaya-estetika-3',
+        },
+        { name: 'без слага' },
+      ],
+    }),
+  });
+  const net = createNet();
+  const step = await net.session.findBusinesses('  му  ');
+  assert.equal(step.step, 'matches');
+  // The projection keeps three members and names no other: the city, both image URLs and the
+  // smart_url never enter the shell. A row without a slug is dropped rather than half-shown.
+  assert.deepEqual(step.businesses, [{ name: 'Мужская Эстетика', slug: 'muzhskaya-estetika-3', address: 'ул. Лермонтова, 343' }]);
+  const req = calls(U.search).at(0);
+  assert.equal(req.init.method, 'GET');
+  assert.equal(req.raw, null, 'a GET sends no body');
+  assert.equal(req.headers['Content-Type'], undefined, 'no content type, so no preflight');
+  assert.equal(req.headers.Authorization, undefined, 'the finder is public and carries no bearer');
+  assert.equal(req.init.credentials, 'omit');
+  assert.equal(req.init.redirect, 'error');
+});
+
+test('the finder refuses a one-character term before any request, and names the server\'s own minimum', async () => {
+  serve({});
+  const net = createNet();
+  const step = await net.session.findBusinesses('м');
+  assert.deepEqual(step, { step: 'failed', failure: { state: 'term_too_short' } });
+  assert.equal(wire.length, 0, '0 requests');
+});
+
+test('Telegram start: the web body names this page\'s callback, the native body names none, and only Telegram\'s own URL is followed', async () => {
+  const authUrl = 'https://oauth.telegram.org/auth?client_id=1&state=te_abcdefgh';
+  serve({ [U.telegramStart]: [json(200, { ok: true, provider: 'telegram', tenant_slug: 's', auth_url: authUrl, state: 'te_abcdefgh' })] });
+  const went = [];
+  const web = createNet({ webCallbackUrl: 'https://mayaos.ru/oauth-callback.html', navigate: (url) => went.push(url) });
+  assert.deepEqual(await web.session.startTelegram('muzhskaya-estetika-3'), { step: 'handed_off' });
+  assert.deepEqual(calls(U.telegramStart).at(0).body, {
+    tenantSlug: 'muzhskaya-estetika-3',
+    platform: 'web',
+    redirectUri: 'https://mayaos.ru/oauth-callback.html',
+  });
+  assert.deepEqual(went, [authUrl]);
+
+  // The native carrier names no callback: OAUTH_NATIVE_REDIRECT_URI is the server's to choose.
+  serve({ [U.telegramStart]: [json(200, { ok: true, auth_url: authUrl })] });
+  const nativeWent = [];
+  const native = createNet({ webCallbackUrl: null, navigate: (url) => nativeWent.push(url) });
+  assert.deepEqual(await native.session.startTelegram('muzhskaya-estetika-3'), { step: 'handed_off' });
+  assert.deepEqual(calls(U.telegramStart).at(0).body, { tenantSlug: 'muzhskaya-estetika-3', platform: 'ios' });
+  assert.deepEqual(nativeWent, [authUrl]);
+
+  // An auth_url that is NOT Telegram's authorization endpoint is an unexpected response, and the
+  // browser is not sent anywhere: no response can turn this row into a redirect of its choosing.
+  for (const hostile of ['https://oauth.telegram.org.evil.example/auth', 'https://evil.example/auth', 'javascript:alert(1)', '//evil.example/auth']) {
+    serve({ [U.telegramStart]: [json(200, { ok: true, auth_url: hostile })] });
+    const sent = [];
+    const guarded = createNet({ webCallbackUrl: 'https://mayaos.ru/oauth-callback.html', navigate: (url) => sent.push(url) });
+    assert.deepEqual(await guarded.session.startTelegram('s'), { step: 'failed', failure: { state: 'unexpected_response', status: 200 } }, hostile);
+    assert.deepEqual(sent, [], `never followed ${hostile}`);
+  }
+});
+
+test('every request of this suite went to one of the eleven approved URLs, and all eleven were exercised', () => {
   const allowed = Object.values(U).sort();
   assert.deepEqual([...everyUrl].sort(), allowed);
 });

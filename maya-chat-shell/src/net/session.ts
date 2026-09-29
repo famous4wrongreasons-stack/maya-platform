@@ -55,9 +55,9 @@ export interface NetOptions {
   readonly now?: () => number;
   readonly timeouts?: Timeouts;
   /**
-   * Where the provider returns a WEB browser — this document's own origin plus the callback file,
+   * Where the provider returns a WEB browser — this page's own origin plus the callback file,
    * computed by `entry/` from `location`, so no origin is written into the bundle. Null when the
-   * document is not on http(s) — the native carrier — and the server then owns the callback.
+   * page is not on http(s) — the native carrier — and the server then owns the callback.
    */
   readonly webCallbackUrl?: string | null;
   /** Hand this browser to an external URL. `entry/` supplies it; nothing in `net/` touches `location`. */
@@ -237,7 +237,7 @@ export function createNet(options: NetOptions = {}) {
 
     /**
      * Start Telegram for the chosen business and hand the browser over. `navigate` is the last thing
-     * that runs here: on success this document is leaving, so no session is installed on this side.
+     * that runs here: on success this page is leaving, so no session is installed on this side.
      */
     async startTelegram(tenantSlug: string): Promise<TelegramOutcome> {
       const business = tenantSlug.trim();

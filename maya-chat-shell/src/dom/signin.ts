@@ -1,26 +1,36 @@
 // K5 — the signed-out state of the root screen (SHELL-PLAN v2.1 §1.3, §1.4; R2 default, V2-6,
-// V2-16; owner rulings SH-04 and A6).
+// V2-16; owner rulings SH-04 and A6; owner decision 2026-09-29 «OPTION B — TELEGRAM-FIRST»).
 //
-// Sign-in is not a route, not a nav entry and not a hand-off to another login page: it is what the
-// root screen shows while no session exists. Two paths share one email field:
+// The first run asks one question a person can answer — which business is yours — and then offers
+// the one sign-in that works:
 //
-//   code       email → «Получить код» → code → «Войти по коду» → (several businesses) choose one →
-//              the re-verify echoes that business's opaque slug
-//   password   a REQUIRED business address (sent as tenantSlug, V2-6) + email + password
+//   find       «Найдите свой бизнес» → name or city → the matches, each shown as its name and its
+//              address → choose one
+//   Telegram   «Продолжить с Telegram» hands this browser to the provider. The chosen business is
+//              carried as an opaque handle the screen never shows and never asks anyone to type.
+//   password   under «Другой способ входа», for the same chosen business: email and password only.
+//
+// Sign-in by email code is NOT offered. The capability is switched off on the server, and a control
+// that always answers «недоступно» is a worse lie than no control at all; the failure taxonomy for
+// it stays here, because the server may still name those states.
+//
+// Nothing asks for a business ADDRESS, a slug or any other internal handle: the finder supplies it.
+// The address shown beside a match is the salon's street address, which is how a person tells two
+// businesses of the same name apart.
 //
 // Every outcome is a named state (V2-16, K5/G12 "silent login failures 0"): a sentence, polite and
 // never `role="alert"`, with focus moved to the field in error or to the path's first control, and
-// the form keeping what was typed except the password and the code. A rate limit counts down and
-// holds its submitting control until the time is up. A mistyped business address — which the server
-// answers with a 404 — is the same «never says which» state as a wrong password.
+// the form keeping what was typed except the password. A rate limit counts down and holds its
+// submitting control until the time is up.
 //
 // The session lives in memory only (A6): nothing here reads or writes a store, and a reload shows
 // this state again.
 
 import type {
-  BusinessChoice,
+  BusinessMatch,
   Cancel,
   DomFactory,
+  FirstRunFailure,
   Scheduler,
   SessionPort,
   SignedOutReason,
@@ -41,8 +51,8 @@ export interface SignIn {
   readonly cancel: Cancel;
 }
 
-type Path = 'code' | 'password';
-type Phase = 'email' | 'code' | 'business';
+/** The two things that can be held by a countdown: finding a business, and signing in. */
+type Path = 'find' | 'password';
 type Field = Extract<SignInFailure, { readonly state: 'field_invalid' }>['field'];
 
 // ── copy (§1.4 sign-in table) ──────────────────────────────────────────────────────────────────
@@ -59,7 +69,7 @@ export const failureSentence = (failure: SignInFailure): string => {
     case 'code_attempts_exhausted':
       return 'Слишком много попыток ввода кода — запросите новый код';
     case 'email_login_unavailable':
-      return 'Вход по коду сейчас недоступен — войдите по паролю';
+      return 'Вход по коду сейчас недоступен — войдите через Telegram';
     case 'code_invalid':
       return 'Код не подошёл — проверьте и введите ещё раз';
     case 'code_expired':
@@ -67,10 +77,10 @@ export const failureSentence = (failure: SignInFailure): string => {
     case 'email_not_linked':
       return 'Этот email не связан с пользователем выбранного бизнеса';
     case 'credentials_invalid':
-      // Never says which of the three was wrong — also for an address that names no business (404) and
-      // for an account whose business does not accept sign-in now (403, answered before the password
-      // is checked). The second clause keeps that last case truthful without confirming an account.
-      return 'Неверный адрес бизнеса, email или пароль — или вход сейчас недоступен';
+      // Never says which of the two was wrong — also for an account whose business does not accept
+      // sign-in now (403, answered before the password is checked). The second clause keeps that
+      // case truthful without confirming an account.
+      return 'Неверный email или пароль — или вход сейчас недоступен';
     case 'account_unavailable':
       return 'Вход для этой учётной записи сейчас недоступен';
     case 'field_invalid':
@@ -79,6 +89,24 @@ export const failureSentence = (failure: SignInFailure): string => {
       return 'Нет связи — повторить';
     case 'unexpected_response':
       return 'Вход не удался — повторить';
+  }
+};
+
+/** The first run's own outcomes: finding a business, and being handed to Telegram. */
+export const firstRunSentence = (failure: FirstRunFailure): string => {
+  switch (failure.state) {
+    case 'term_too_short':
+      return 'Введите хотя бы два символа';
+    case 'rate_limited':
+      return rateLimitSentence(failure.retryAfterSec);
+    case 'telegram_unavailable':
+      return 'Вход через Telegram сейчас недоступен';
+    case 'business_unavailable':
+      return 'Этот бизнес сейчас не принимает вход';
+    case 'no_connection':
+      return 'Нет связи — повторить';
+    case 'unexpected_response':
+      return 'Не удалось — повторить';
   }
 };
 
@@ -92,7 +120,7 @@ export const fieldSentence = (field: Field): string => {
     case 'code':
       return 'Введите цифры из письма: от 4 до 8';
     case 'business':
-      return 'Введите адрес бизнеса';
+      return 'Выберите бизнес ещё раз';
   }
 };
 
@@ -156,9 +184,9 @@ export function mountSignIn(mount: SignInMount): SignIn {
     countdown.id = id(`${name}-countdown`);
     return { status, countdown };
   };
-  const codeLines = pathLines('code');
+  const findLines = pathLines('find');
   const passwordLines = pathLines('password');
-  const linesOf = (path: Path): PathLines => (path === 'code' ? codeLines : passwordLines);
+  const linesOf = (path: Path): PathLines => (path === 'find' ? findLines : passwordLines);
 
   const field = (name: string, labelText: string, input: HTMLInputElement, hintText: string | null, path: Path): FieldParts => {
     const wrap = factory.create('div');
@@ -188,6 +216,12 @@ export function mountSignIn(mount: SignInMount): SignIn {
   // ── skeleton ──
   const section = factory.create('section');
   section.classList.add('signin');
+
+  // The ribbon: a CSS mark, so no <img> and no <svg> enters the closed tag set.
+  const mark = factory.create('div');
+  mark.classList.add('signin-mark');
+  mark.setAttribute('aria-hidden', 'true');
+
   const heading = factory.create('h2');
   heading.id = id('title');
   heading.classList.add('signin-title');
@@ -197,83 +231,74 @@ export function mountSignIn(mount: SignInMount): SignIn {
 
   const reasonLine = note('signin-reason');
 
-  const email = field('email', 'Email', factory.createInput('email'), null, 'code');
-  email.input.autocomplete = 'email';
-  email.input.inputMode = 'email';
-  email.input.spellcheck = false;
-  email.input.autocapitalize = 'off';
+  // ── find a business ──
+  const findGroup = factory.create('div');
+  findGroup.classList.add('signin-group', 'signin-group--find');
+  findGroup.setAttribute('role', 'group');
+  const findTitle = factory.create('h3');
+  findTitle.id = id('find-title');
+  findTitle.classList.add('signin-group-title');
+  findTitle.textContent = 'Найдите свой бизнес';
+  findGroup.setAttribute('aria-labelledby', findTitle.id);
 
-  // code path
-  const codeGroup = factory.create('div');
-  codeGroup.classList.add('signin-group', 'signin-group--code');
-  codeGroup.setAttribute('role', 'group');
-  const codeTitle = factory.create('h3');
-  codeTitle.id = id('code-title');
-  codeTitle.classList.add('signin-group-title');
-  codeTitle.textContent = 'Вход по коду из письма';
-  codeGroup.setAttribute('aria-labelledby', codeTitle.id);
+  const term = field('term', 'Название или город', factory.createInput('text'), 'Например: Мужская Эстетика', 'find');
+  term.input.autocomplete = 'off';
+  term.input.spellcheck = false;
+  const findButton = button('Найти', 'signin-button--primary');
 
-  const emailStep = factory.create('div');
-  emailStep.classList.add('signin-step');
-  const getCode = button('Получить код', 'signin-button--primary');
-  emailStep.append(note('signin-note', 'Пришлём одноразовый код на этот email.'), getCode);
+  const matchList = factory.create('ul');
+  matchList.classList.add('signin-matches');
 
-  const codeStep = factory.create('div');
-  codeStep.classList.add('signin-step');
-  const sentTo = note('signin-note');
-  const code = field('code', 'Код из письма', factory.createInput('text'), null, 'code');
-  code.input.inputMode = 'numeric';
-  code.input.autocomplete = 'one-time-code';
-  const verify = button('Войти по коду', 'signin-button--primary');
-  const resend = button('Запросить новый код', 'signin-button--secondary');
-  const codeActions = factory.create('div');
-  codeActions.classList.add('signin-actions');
-  codeActions.append(verify, resend);
-  codeStep.append(sentTo, code.wrap, codeActions);
+  const chosenLine = note('signin-chosen');
+  const telegram = button('Продолжить с Telegram', 'signin-button--telegram');
+  const telegramStep = factory.create('div');
+  telegramStep.classList.add('signin-step', 'signin-step--telegram');
+  telegramStep.append(chosenLine, telegram);
 
-  const businessStep = factory.create('div');
-  businessStep.classList.add('signin-step');
-  const businessList = factory.create('ul');
-  businessList.classList.add('signin-businesses');
-  const resendFromBusiness = button('Запросить новый код', 'signin-button--secondary');
-  businessStep.append(note('signin-note', 'Этот email связан с несколькими бизнесами — выберите, в какой войти.'), businessList, resendFromBusiness);
+  const missing = button('Моего бизнеса ещё нет', 'signin-button--quiet');
+  const missingNote = note('signin-note', 'Новый бизнес подключают на сайте MAYA — mayaos.ru. После подключения он появится в поиске.');
+  missingNote.hidden = true;
 
-  codeGroup.append(codeTitle, codeLines.status, codeLines.countdown, emailStep, codeStep, businessStep);
+  findGroup.append(findTitle, findLines.status, findLines.countdown, term.wrap, findButton, matchList, telegramStep, missing, missingNote);
 
-  // password path
+  // ── the other way in ──
+  const otherToggle = button('Другой способ входа', 'signin-button--quiet');
   const passwordGroup = factory.create('div');
   passwordGroup.classList.add('signin-group', 'signin-group--password');
   passwordGroup.setAttribute('role', 'group');
+  passwordGroup.hidden = true;
   const passwordTitle = factory.create('h3');
   passwordTitle.id = id('password-title');
   passwordTitle.classList.add('signin-group-title');
   passwordTitle.textContent = 'Вход по паролю';
   passwordGroup.setAttribute('aria-labelledby', passwordTitle.id);
-  const business = field('business', 'Адрес бизнеса', factory.createInput('text'), 'Короткое имя бизнеса в MAYA — его сообщает администратор', 'password');
-  business.input.autocomplete = 'off';
-  business.input.spellcheck = false;
-  business.input.autocapitalize = 'off';
+  const needBusiness = note('signin-note', 'Сначала найдите свой бизнес выше.');
+  const email = field('email', 'Email', factory.createInput('email'), null, 'password');
+  email.input.autocomplete = 'email';
+  email.input.inputMode = 'email';
+  email.input.spellcheck = false;
+  email.input.autocapitalize = 'off';
   const password = field('password', 'Пароль', factory.createInput('password'), null, 'password');
   password.input.autocomplete = 'current-password';
   const signInWithPassword = button('Войти по паролю', 'signin-button--primary');
-  passwordGroup.append(passwordTitle, passwordLines.status, passwordLines.countdown, business.wrap, password.wrap, signInWithPassword);
+  passwordGroup.append(passwordTitle, passwordLines.status, passwordLines.countdown, needBusiness, email.wrap, password.wrap, signInWithPassword);
 
-  section.append(heading, reasonLine, email.wrap, codeGroup, passwordGroup);
+  section.append(mark, heading, reasonLine, findGroup, otherToggle, passwordGroup);
   mount.container.append(section);
 
   // ── state ──
-  let phase: Phase = 'email';
   let busy = false;
   let disposed = false;
-  let heldCode = '';
-  let businesses: readonly BusinessChoice[] = [];
-  let businessButtons: HTMLButtonElement[] = [];
+  let matches: readonly BusinessMatch[] = [];
+  let matchButtons: HTMLButtonElement[] = [];
+  let chosen: BusinessMatch | null = null;
+  let otherOpen = false;
   /** A running countdown per path; while it runs, that path sends nothing. */
-  let codeLock: Cancel | null = null;
+  let findLock: Cancel | null = null;
   let passwordLock: Cancel | null = null;
-  const lockOf = (path: Path): Cancel | null => (path === 'code' ? codeLock : passwordLock);
+  const lockOf = (path: Path): Cancel | null => (path === 'find' ? findLock : passwordLock);
   const setLock = (path: Path, cancel: Cancel | null): void => {
-    if (path === 'code') codeLock = cancel;
+    if (path === 'find') findLock = cancel;
     else passwordLock = cancel;
   };
 
@@ -289,11 +314,16 @@ export function mountSignIn(mount: SignInMount): SignIn {
   const locked = (path: Path): boolean => lockOf(path) !== null;
 
   const paint = (): void => {
-    emailStep.hidden = phase !== 'email';
-    codeStep.hidden = phase !== 'code';
-    businessStep.hidden = phase !== 'business';
-    const codeHeld = busy || locked('code');
-    for (const b of [getCode, verify, resend, resendFromBusiness, ...businessButtons]) setDisabled(b, codeHeld);
+    telegramStep.hidden = chosen === null;
+    chosenLine.textContent = chosen === null ? '' : `Вы выбрали: ${chosen.name}`;
+    passwordGroup.hidden = !otherOpen;
+    otherToggle.setAttribute('aria-expanded', otherOpen ? 'true' : 'false');
+    needBusiness.hidden = chosen !== null;
+    email.wrap.hidden = chosen === null;
+    password.wrap.hidden = chosen === null;
+    signInWithPassword.hidden = chosen === null;
+    const findHeld = busy || locked('find');
+    for (const b of [findButton, telegram, ...matchButtons]) setDisabled(b, findHeld);
     setDisabled(signInWithPassword, busy || locked('password'));
     if (busy) section.setAttribute('aria-busy', 'true');
     else section.removeAttribute('aria-busy');
@@ -305,41 +335,32 @@ export function mountSignIn(mount: SignInMount): SignIn {
 
   /** A new attempt supersedes every earlier state, except a countdown still running. */
   const clearStates = (): void => {
-    for (const f of [email, code, business, password]) {
+    for (const f of [term, email, password]) {
       f.input.removeAttribute('aria-invalid');
       f.error.hidden = true;
       f.error.textContent = '';
     }
-    for (const path of ['code', 'password'] as const) if (!locked(path)) setStatus(path);
+    for (const path of ['find', 'password'] as const) if (!locked(path)) setStatus(path);
   };
 
-  const partsOf = (name: Field): FieldParts => {
+  /** Only two of the four named fields are on this screen; the rest settle as a status sentence. */
+  const partsOf = (name: Field): FieldParts | null => {
     switch (name) {
       case 'email':
         return email;
       case 'password':
         return password;
       case 'code':
-        return code;
       case 'business':
-        return business;
+        return null;
     }
   };
 
-  const drawBusinesses = (): void => {
-    businessButtons = businesses.map((choice) => {
-      const b = button(choice.name, 'signin-business');
-      const slug = choice.slug;
-      b.addEventListener('click', () => act('code', () => session.verifyEmail(email.input.value, heldCode, slug), 'Входим…'));
-      return b;
-    });
-    businessList.replaceChildren(
-      ...businessButtons.map((b) => {
-        const li = factory.create('li');
-        li.append(b);
-        return li;
-      }),
-    );
+  const retryButton = (again: () => void): HTMLButtonElement => {
+    const b = button('повторить', 'signin-retry');
+    b.setAttribute('aria-label', 'Повторить');
+    b.addEventListener('click', again);
+    return b;
   };
 
   const startCountdown = (path: Path, seconds: number): void => {
@@ -368,122 +389,182 @@ export function mountSignIn(mount: SignInMount): SignIn {
     tick(true);
   };
 
-  const retryButton = (again: () => void): HTMLButtonElement => {
-    const b = button('повторить', 'signin-retry');
-    b.setAttribute('aria-label', 'Повторить вход');
-    b.addEventListener('click', again);
-    return b;
+  const drawMatches = (): void => {
+    matchButtons = matches.map((match) => {
+      const b = button('', 'signin-match');
+      const name = factory.create('span');
+      name.classList.add('signin-match-name');
+      name.textContent = match.name;
+      b.replaceChildren(name);
+      if (match.address !== null) {
+        const where = factory.create('span');
+        where.classList.add('signin-match-address');
+        where.textContent = match.address;
+        b.append(where);
+      }
+      b.addEventListener('click', () => {
+        chosen = match;
+        clearStates();
+        setStatus('find', 'Бизнес выбран.');
+        paint();
+        telegram.focus();
+      });
+      return b;
+    });
+    matchList.replaceChildren(
+      ...matchButtons.map((b) => {
+        const li = factory.create('li');
+        li.append(b);
+        return li;
+      }),
+    );
   };
 
-  /** Settle a failure into its named state; returns where focus goes. */
-  const fail = (failure: SignInFailure, path: Path, again: () => void): HTMLElement => {
-    const passwordKept = failure.state === 'field_invalid' && (failure.field === 'business' || failure.field === 'email');
-    if (path === 'password' && !passwordKept) password.input.value = '';
-    const firstOf = path === 'code' ? email.input : business.input;
+  /** Settle a first-run failure into its named state; returns where focus goes. */
+  const failFirstRun = (failure: FirstRunFailure, again: () => void): HTMLElement => {
     switch (failure.state) {
       case 'rate_limited':
-        startCountdown(path, failure.retryAfterSec);
-        return firstOf;
-      case 'code_attempts_exhausted':
-      case 'code_expired':
-        code.input.value = '';
-        phase = 'code';
-        setStatus(path, failureSentence(failure));
-        return resend;
-      case 'code_invalid':
-        code.input.value = '';
-        phase = 'code';
-        setStatus(path, failureSentence(failure));
-        return code.input;
-      case 'email_login_unavailable':
-        // The remedy is the password path: the sentence stands where focus goes.
-        phase = 'email';
-        setStatus('password', failureSentence(failure));
-        return business.input;
-      case 'email_not_linked':
-        code.input.value = '';
-        phase = 'email';
-        setStatus(path, failureSentence(failure));
+        startCountdown('find', failure.retryAfterSec);
+        return term.input;
+      case 'term_too_short':
+        term.input.setAttribute('aria-invalid', 'true');
+        term.error.textContent = firstRunSentence(failure);
+        term.error.hidden = false;
+        return term.input;
+      case 'business_unavailable':
+        chosen = null;
+        setStatus('find', firstRunSentence(failure));
+        return term.input;
+      case 'telegram_unavailable':
+        setStatus('find', firstRunSentence(failure));
+        return otherToggle;
+      case 'no_connection':
+      case 'unexpected_response': {
+        const retry = retryButton(again);
+        setStatus('find', `${firstRunSentence(failure).replace(' — повторить', '')} — `, retry);
+        return retry;
+      }
+    }
+  };
+
+  /** Settle a sign-in failure into its named state; returns where focus goes. */
+  const failSignIn = (failure: SignInFailure, again: () => void): HTMLElement => {
+    const kept = failure.state === 'field_invalid' && failure.field === 'email';
+    if (!kept) password.input.value = '';
+    switch (failure.state) {
+      case 'rate_limited':
+        startCountdown('password', failure.retryAfterSec);
         return email.input;
-      case 'credentials_invalid':
-        setStatus(path, failureSentence(failure));
-        return business.input;
-      case 'account_unavailable':
-        setStatus(path, failureSentence(failure));
-        return firstOf;
       case 'field_invalid': {
         const parts = partsOf(failure.field);
-        if (failure.field === 'code') {
-          code.input.value = '';
-          phase = 'code';
+        if (parts === null) {
+          setStatus('password', failureSentence(failure));
+          return term.input;
         }
         parts.input.setAttribute('aria-invalid', 'true');
         parts.error.textContent = fieldSentence(failure.field);
         parts.error.hidden = false;
         return parts.input;
       }
-      case 'no_connection': {
-        const retry = retryButton(again);
-        setStatus(path, 'Нет связи — ', retry);
-        return retry;
-      }
+      case 'no_connection':
       case 'unexpected_response': {
         const retry = retryButton(again);
-        setStatus(path, 'Вход не удался — ', retry);
+        setStatus('password', failure.state === 'no_connection' ? 'Нет связи — ' : 'Вход не удался — ', retry);
         return retry;
       }
+      default:
+        setStatus('password', failureSentence(failure));
+        return email.input;
     }
   };
 
   /** One attempt: busy while it runs, then a named state. Nothing is sent while held or busy. */
-  async function act(path: Path, run: () => Promise<SignInStep>, pendingText: string): Promise<void> {
+  async function act(path: Path, run: () => Promise<void>, pendingText: string): Promise<void> {
     if (busy || disposed || locked(path)) return;
-    const again = (): void => void act(path, run, pendingText);
     clearStates();
     busy = true;
     setStatus(path, pendingText);
     paint();
-    let step: SignInStep;
     try {
-      step = await run();
+      await run();
     } catch {
-      step = { step: 'failed', failure: { state: 'no_connection' } };
+      setStatus(path, 'Нет связи — повторить');
     }
     busy = false;
     if (disposed) return;
-    setStatus(path);
-    let focus: HTMLElement | null = null;
-    switch (step.step) {
-      case 'code_sent':
-        phase = 'code';
-        code.input.value = '';
-        sentTo.textContent = `Код отправлен на ${email.input.value.trim()}.`;
-        setStatus(path, 'Код отправлен.');
-        focus = code.input;
-        break;
-      case 'select_business':
-        phase = 'business';
-        heldCode = code.input.value.trim();
-        businesses = step.businesses;
-        drawBusinesses();
-        setStatus(path, 'Выберите бизнес.');
-        focus = businessButtons.at(0) ?? email.input;
-        break;
-      case 'signed_in':
-        setStatus(path, 'Вход выполнен.');
-        break;
-      case 'failed':
-        focus = fail(step.failure, path, again);
-        break;
-    }
     paint();
-    focus?.focus();
   }
 
-  const startCode = (): void => void act('code', () => session.startEmail(email.input.value), 'Отправляем код…');
-  const verifyCode = (): void => void act('code', () => session.verifyEmail(email.input.value, code.input.value, null), 'Проверяем код…');
+  const find = (): void =>
+    void act(
+      'find',
+      async () => {
+        const again = (): void => find();
+        const step = await session.findBusinesses(term.input.value);
+        setStatus('find');
+        let focus: HTMLElement | null = null;
+        if (step.step === 'matches') {
+          matches = step.businesses;
+          chosen = null;
+          drawMatches();
+          if (matches.length === 0) {
+            setStatus('find', 'Ничего не нашлось — попробуйте другое название или город.');
+            focus = term.input;
+          } else {
+            setStatus('find', matches.length === 1 ? 'Нашли один бизнес.' : `Нашли ${matches.length}. Выберите свой.`);
+            focus = matchButtons.at(0) ?? term.input;
+          }
+        } else {
+          focus = failFirstRun(step.failure, again);
+        }
+        paint();
+        focus?.focus();
+      },
+      'Ищем…',
+    );
+
+  const handOff = (): void =>
+    void act(
+      'find',
+      async () => {
+        const again = (): void => handOff();
+        const business = chosen;
+        if (business === null) return;
+        const step = await session.startTelegram(business.slug);
+        if (step.step === 'handed_off') {
+          // The document is already navigating away; the sentence is what a slow network shows.
+          setStatus('find', 'Открываем Telegram…');
+          return;
+        }
+        setStatus('find');
+        const focus = failFirstRun(step.failure, again);
+        paint();
+        focus.focus();
+      },
+      'Готовим вход…',
+    );
+
   const passwordSignIn = (): void =>
-    void act('password', () => session.signInPassword(business.input.value, email.input.value, password.input.value), 'Входим…');
+    void act(
+      'password',
+      async () => {
+        const again = (): void => passwordSignIn();
+        const business = chosen;
+        if (business === null) {
+          setStatus('password', 'Сначала найдите свой бизнес.');
+          term.input.focus();
+          return;
+        }
+        const step: SignInStep = await session.signInPassword(business.slug, email.input.value, password.input.value);
+        setStatus('password');
+        let focus: HTMLElement | null = null;
+        if (step.step === 'signed_in') setStatus('password', 'Вход выполнен.');
+        else if (step.step === 'failed') focus = failSignIn(step.failure, again);
+        paint();
+        focus?.focus();
+      },
+      'Входим…',
+    );
 
   const onEnter = (input: HTMLInputElement, run: () => void): void => {
     input.addEventListener('keydown', (event) => {
@@ -492,15 +573,22 @@ export function mountSignIn(mount: SignInMount): SignIn {
       run();
     });
   };
-  onEnter(email.input, startCode);
-  onEnter(code.input, verifyCode);
-  onEnter(business.input, passwordSignIn);
+  onEnter(term.input, find);
+  onEnter(email.input, passwordSignIn);
   onEnter(password.input, passwordSignIn);
-  getCode.addEventListener('click', startCode);
-  resend.addEventListener('click', startCode);
-  resendFromBusiness.addEventListener('click', startCode);
-  verify.addEventListener('click', verifyCode);
+  findButton.addEventListener('click', find);
+  telegram.addEventListener('click', handOff);
   signInWithPassword.addEventListener('click', passwordSignIn);
+  missing.addEventListener('click', () => {
+    missingNote.hidden = !missingNote.hidden;
+    missing.setAttribute('aria-expanded', missingNote.hidden ? 'false' : 'true');
+  });
+  missing.setAttribute('aria-expanded', 'false');
+  otherToggle.addEventListener('click', () => {
+    otherOpen = !otherOpen;
+    paint();
+    if (otherOpen) (chosen === null ? term.input : email.input).focus();
+  });
 
   paint();
 
@@ -508,7 +596,7 @@ export function mountSignIn(mount: SignInMount): SignIn {
     heading,
     cancel: () => {
       disposed = true;
-      for (const path of ['code', 'password'] as const) {
+      for (const path of ['find', 'password'] as const) {
         lockOf(path)?.();
         setLock(path, null);
       }

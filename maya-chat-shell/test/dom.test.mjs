@@ -22,7 +22,7 @@ import { createNet } from '../src/net/session.ts';
 import { BASE_ROUTES, ROUTES } from '../src/routes/registry.ts';
 import { createWidgetDrawer, drawResult, identityText, mountApp } from '../src/dom/host.ts';
 import { APPROVAL_NOT_HERE, isReplyHref, renderReplyLink, replySegments } from '../src/dom/timeline.ts';
-import { failureSentence, fieldSentence, mountSignIn, signedOutSentence } from '../src/dom/signin.ts';
+import { failureSentence, fieldSentence, firstRunSentence, mountSignIn, signedOutSentence } from '../src/dom/signin.ts';
 import { mountFullscreen } from '../src/dom/fullscreen.ts';
 import { HEADER_CSP, cspSplitProblems } from '../dev/serve.mjs';
 
@@ -65,6 +65,14 @@ function sessionDouble(initial = { signedIn: false, reason: null }) {
       calls.push(['signInPassword', slug, email, password]);
       return answers.signInPassword ? answers.signInPassword(slug, email, password) : { step: 'failed', failure: { state: 'credentials_invalid' } };
     },
+    async findBusinesses(term) {
+      calls.push(['findBusinesses', term]);
+      return answers.findBusinesses ? answers.findBusinesses(term) : { step: 'matches', businesses: MATCHES };
+    },
+    async startTelegram(slug) {
+      calls.push(['startTelegram', slug]);
+      return answers.startTelegram ? answers.startTelegram(slug) : { step: 'handed_off' };
+    },
     async signOut() {
       calls.push(['signOut']);
       set({ signedIn: false, reason: 'signed_out' });
@@ -75,6 +83,36 @@ function sessionDouble(initial = { signedIn: false, reason: null }) {
     for (const l of [...listeners]) l(next);
   };
   return { session, calls, answers, set, signIn: (display = DISPLAY) => set({ signedIn: true, display }) };
+}
+
+/** What the canonical public finder answers in these tests. The slug is never shown, only carried. */
+const MATCHES = [
+  { name: 'Салон «Северный ветер»', slug: 'severny-veter', address: 'ул. Лесная, 8' },
+  { name: 'Студия «Тихая гавань»', slug: 'tikhaya-gavan', address: 'пр. Морской, 2' },
+];
+
+const termField = (dom) => dom.find((el) => el.localName === 'input' && /Название или город/.test(dom.nameOf(el)));
+
+/** The first run, as a person walks it: type a term, find, choose a business. */
+async function chooseBusiness(dom, label = /Северный ветер/) {
+  dom.type(termField(dom), 'се');
+  dom.click(dom.button(/^Найти$/));
+  await flush();
+  dom.click(dom.button(label));
+  await flush();
+}
+
+/** Password sign-in lives behind this disclosure and is never the first thing offered. */
+const openOtherWay = (dom) => dom.click(dom.button(/^Другой способ входа$/));
+
+/** Find, choose, open the other way in, and fill the two fields it asks for. */
+async function toPassword(dom, { email = 'anna@example.test', password = 'mock-password-1' } = {}) {
+  await chooseBusiness(dom);
+  openOtherWay(dom);
+  dom.type(dom.find((el) => el.type === 'email'), email);
+  const field = dom.find((el) => el.type === 'password');
+  dom.type(field, password);
+  return field;
 }
 
 function voiceDouble() {
@@ -165,7 +203,12 @@ test('entry/styles.css: tokens, forced colours, reduced motion, 44 px targets, n
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*animation: none !important;[\s\S]*transition: none !important;/);
   assert.match(css, /--target: 44px;/);
   assert.match(css, /overflow-wrap: anywhere/);
-  assert.ok(!/url\(|@import|https?:/.test(css), 'no external resource');
+  // "Nothing external" means no rule here can make the browser fetch anything. The ribbon mark is an
+  // inline `data:` URI — bytes in this very file — so it is admitted BY SHAPE, and then the original
+  // ban stands over everything that is left. (An SVG names its own gradients with url(#id) and its
+  // own xmlns with an http URL; both are internal to those bytes, not rules of this stylesheet.)
+  const outside = css.replace(/url\("data:image\/svg\+xml,[^"]*"\)/g, 'INLINE_SVG');
+  assert.ok(!/url\(|@import|https?:/.test(outside), 'no external resource');
   assert.ok(!/\bdocument\b/.test(css), 'the K5 one-line count walks entry/');
 });
 
@@ -475,66 +518,104 @@ test('signed out: the root screen is the sign-in state — no composer, no nav, 
   assert.equal(p.dom.find((el) => el.localName === 'nav'), null);
   assert.equal(p.runtime.widgetPort.view().primary, 'shell.root');
   const fields = p.dom.findAll((el) => el.localName === 'input').map((el) => [el.type, p.dom.nameOf(el), p.dom.isVisible(el)]);
-  assert.deepEqual(
-    fields.filter((f) => f[2]).map((f) => f.slice(0, 2)),
-    [
-      ['email', 'Email'],
-      ['text', 'Адрес бизнеса'],
-      ['password', 'Пароль'],
-    ],
-  );
+  // The first run asks ONE question. Email and password belong to the other way in, which is closed,
+  // and nothing on this screen ever asks anyone to type a business handle.
+  assert.deepEqual(fields.filter((f) => f[2]).map((f) => f.slice(0, 2)), [['text', 'Название или город']]);
   assert.equal(p.chats.length, 0);
-  assert.ok(!/VK|ВКонтакте|MAX|Telegram/i.test(p.dom.serialize()), 'no VK/MAX links and no Telegram hand-off');
+  assert.ok(!/VK|ВКонтакте|MAX/i.test(p.dom.serialize()), 'no VK/MAX links');
+  // Owner decision 2026-09-29 (OPTION B — TELEGRAM-FIRST) replaced the earlier «no Telegram hand-off»
+  // rule: Telegram IS the offered way in. What it replaced is asserted below — it is still not a LINK
+  // to a legacy login page, and email is not offered while that capability is switched off.
+  assert.ok(/Продолжить с Telegram/.test(p.dom.serialize()), 'Telegram is the way in');
   assert.equal(p.dom.findAll((el) => el.localName === 'a').length, 0, 'no hand-off link to a legacy login page');
+  const visible = p.dom.visibleText();
+  assert.ok(!/войти по коду|код из письма|получить код/i.test(visible), 'email sign-in is not offered while the capability is off');
+  // Owner constraint: no implementation vocabulary reaches the person.
+  assert.ok(!/slug|слаг|адрес бизнеса|tenant|principal/i.test(visible), `implementation vocabulary: «${visible}»`);
+  assert.match(visible, /Найдите свой бизнес/);
 });
 
-test('password sign-in requires the business address: empty → field state, focus there, 0 requests (V2-6)', async () => {
-  let requests = 0;
-  const savedFetch = globalThis.fetch;
-  globalThis.fetch = async () => {
-    requests += 1;
-    return new Response('{}', { status: 500 });
-  };
-  try {
+test('the business handle comes from the finder, never from a person: password sign-in carries it and no field asks for it (V2-6)', async () => {
+  const dom = createDom();
+  const scheduler = createScheduler(NOW);
+  const s = sessionDouble();
+  mountSignIn({ factory: dom.factory, container: dom.root, session: s.session, scheduler });
+
+  // Before a business is chosen the other way in cannot be used, and it says so rather than
+  // presenting fields that would fail.
+  openOtherWay(dom);
+  assert.equal(dom.find((el) => el.type === 'password' && dom.isVisible(el)), null, 'no password field yet');
+  assert.match(dom.visibleText(), /Сначала найдите свой бизнес/);
+  assert.equal(s.calls.filter((c) => c[0] === 'signInPassword').length, 0, '0 requests');
+
+  // The matches are shown by name AND street address — that is how two of one name are told apart.
+  dom.type(termField(dom), 'се');
+  dom.click(dom.button(/^Найти$/));
+  await flush();
+  assert.deepEqual(s.calls.at(-1), ['findBusinesses', 'се']);
+  const rows = dom.findAll((el) => el.localName === 'button' && el.classList.contains('signin-match')).map((b) => dom.textOf(b));
+  assert.deepEqual(rows, ['Салон «Северный ветер»ул. Лесная, 8', 'Студия «Тихая гавань»пр. Морской, 2']);
+  assert.ok(!/severny-veter|tikhaya-gavan/.test(dom.visibleText()), 'the handle is carried, never shown');
+
+  dom.click(dom.button(/Тихая гавань/));
+  await flush();
+  dom.type(dom.find((el) => el.type === 'email'), 'anna@example.test');
+  const password = dom.find((el) => el.type === 'password');
+  dom.type(password, 'mock-password-1');
+  dom.key(password, 'Enter');
+  await flush();
+  // The chosen row's handle is what reaches the port — V2-6 is satisfied without anyone typing it.
+  assert.deepEqual(s.calls.at(-1), ['signInPassword', 'tikhaya-gavan', 'anna@example.test', 'mock-password-1']);
+});
+
+test('«Продолжить с Telegram» hands off the chosen business, and appears only once one is chosen', async () => {
+  const dom = createDom();
+  const s = sessionDouble();
+  mountSignIn({ factory: dom.factory, container: dom.root, session: s.session, scheduler: createScheduler(NOW) });
+  const telegram = dom.find((el) => el.localName === 'button' && el.classList.contains('signin-button--telegram'));
+  assert.ok(!dom.isVisible(telegram), 'nothing to hand off before a business is chosen');
+  await chooseBusiness(dom);
+  assert.ok(dom.isVisible(telegram), 'the way in appears with the choice');
+  assert.equal(dom.active(), telegram, 'focus lands on it');
+  assert.match(dom.visibleText(), /Вы выбрали: Салон «Северный ветер»/);
+  dom.click(telegram);
+  await flush();
+  assert.deepEqual(s.calls.at(-1), ['startTelegram', 'severny-veter']);
+  assert.equal(dom.findAll((el) => el.getAttribute('role') === 'alert').length, 0);
+});
+
+test('the finder names every outcome: nothing found, too short, no connection — each a sentence and a focused control', async () => {
+  for (const [answer, sentence] of [
+    [{ step: 'matches', businesses: [] }, /Ничего не нашлось/],
+    [{ step: 'failed', failure: { state: 'term_too_short' } }, /Введите хотя бы два символа/],
+    [{ step: 'failed', failure: { state: 'no_connection' } }, /Нет связи/],
+    [{ step: 'failed', failure: { state: 'business_unavailable' } }, /Этот бизнес сейчас не принимает вход/],
+  ]) {
     const dom = createDom();
-    const scheduler = createScheduler(NOW);
-    const net = createNet();
-    mountSignIn({ factory: dom.factory, container: dom.root, session: net.session, scheduler });
-    const email = dom.find((el) => el.type === 'email');
-    const business = dom.find((el) => el.localName === 'input' && dom.nameOf(el) === 'Адрес бизнеса');
-    const password = dom.find((el) => el.type === 'password');
-    dom.type(email, 'anna@example.test');
-    dom.type(password, 'mock-password-1');
-    dom.key(password, 'Enter');
+    const s = sessionDouble();
+    s.answers.findBusinesses = () => answer;
+    mountSignIn({ factory: dom.factory, container: dom.root, session: s.session, scheduler: createScheduler(NOW) });
+    dom.type(termField(dom), 'се');
+    dom.click(dom.button(/^Найти$/));
     await flush();
-    assert.equal(requests, 0);
-    assert.equal(business.getAttribute('aria-invalid'), 'true');
-    assert.equal(dom.active(), business);
-    assert.match(dom.visibleText(), /Введите адрес бизнеса/);
-    assert.equal(password.value, 'mock-password-1', 'a client-side business refusal keeps the password');
-    const described = business.getAttribute('aria-describedby').split(' ');
-    const error = dom.find((el) => described.includes(el.getAttribute('id')) && el.classList.contains('signin-error'));
-    assert.equal(dom.textOf(error), fieldSentence('business'));
-  } finally {
-    globalThis.fetch = savedFetch;
+    assert.match(dom.visibleText(), sentence, JSON.stringify(answer));
+    const active = dom.active();
+    assert.ok(active && ['input', 'button'].includes(active.localName) && dom.isVisible(active), `focus on a visible control (${active?.localName})`);
+    assert.equal(dom.findAll((el) => el.getAttribute('role') === 'alert').length, 0);
   }
 });
 
 test('every sign-in failure is a named state: sentence, focus on a control, no role="alert"; silent login outcomes = 0 (V2-16)', async () => {
+  // The email-code rows left this table with the UI that could reach them: the capability is off, so
+  // the screen offers no control that produces them. The states themselves are still frozen — the
+  // copy table at the end of this test covers every one, and net.test.mjs maps each server body to it.
   const cases = [
     ['password', { state: 'rate_limited', retryAfterSec: 42 }, /Слишком много попыток — повторите через 42 с/],
-    ['code-verify', { state: 'code_attempts_exhausted' }, /Слишком много попыток ввода кода — запросите новый код/],
-    ['code-start', { state: 'email_login_unavailable' }, /Вход по коду сейчас недоступен — войдите по паролю/],
-    ['code-verify', { state: 'code_invalid' }, /Код не подошёл — проверьте и введите ещё раз/],
-    ['code-verify', { state: 'code_expired' }, /Код устарел — запросите новый/],
-    ['code-select', { state: 'email_not_linked' }, /Этот email не связан с пользователем выбранного бизнеса/],
-    ['password', { state: 'credentials_invalid' }, /Неверный адрес бизнеса, email или пароль/],
-    ['code-verify', { state: 'account_unavailable' }, /Вход для этой учётной записи сейчас недоступен/],
+    ['password', { state: 'credentials_invalid' }, /Неверный email или пароль/],
+    ['password', { state: 'account_unavailable' }, /Вход для этой учётной записи сейчас недоступен/],
     ['password', { state: 'field_invalid', field: 'password' }, /Пароль — не короче 8 символов/],
     ['password', { state: 'field_invalid', field: 'email' }, /Введите email полностью/],
-    ['code-verify', { state: 'field_invalid', field: 'code' }, /Введите цифры из письма/],
     ['password', { state: 'no_connection' }, /Нет связи — повторить/],
-    ['code-start', { state: 'no_connection' }, /Нет связи — повторить/],
     ['password', { state: 'unexpected_response', status: 500 }, /Вход не удался — повторить/],
   ];
   let attempts = 0;
@@ -544,33 +625,12 @@ test('every sign-in failure is a named state: sentence, focus on a control, no r
     const scheduler = createScheduler(NOW);
     const s = sessionDouble();
     const fail = { step: 'failed', failure };
-    if (flow === 'password') s.answers.signInPassword = () => fail;
-    if (flow === 'code-start') s.answers.startEmail = () => fail;
-    if (flow === 'code-verify') s.answers.verifyEmail = () => fail;
-    if (flow === 'code-select') {
-      s.answers.verifyEmail = (email, code, slug) =>
-        slug === null ? { step: 'select_business', businesses: [{ name: 'Салон А', slug: 'salon-a' }, { name: 'Салон Б', slug: 'salon-b' }] } : fail;
-    }
+    s.answers.signInPassword = () => fail;
     mountSignIn({ factory: dom.factory, container: dom.root, session: s.session, scheduler });
+    const password = await toPassword(dom);
     const email = dom.find((el) => el.type === 'email');
-    dom.type(email, 'anna@example.test');
     attempts += 1;
-    if (flow === 'password') {
-      dom.type(dom.find((el) => el.localName === 'input' && dom.nameOf(el) === 'Адрес бизнеса'), 'severny-veter');
-      const password = dom.find((el) => el.type === 'password');
-      dom.type(password, 'mock-password-1');
-      dom.key(password, 'Enter');
-    } else {
-      dom.key(email, 'Enter');
-      await flush();
-      if (flow !== 'code-start') {
-        const code = dom.find((el) => dom.isVisible(el) && /Код/.test(dom.nameOf(el)) && el.localName === 'input');
-        dom.type(code, '246810');
-        dom.key(code, 'Enter');
-        await flush();
-        if (flow === 'code-select') dom.click(dom.button(/^Салон Б$/));
-      }
-    }
+    dom.key(password, 'Enter');
     await flush();
     const text = dom.visibleText();
     const ok = sentence.test(text);
@@ -579,8 +639,7 @@ test('every sign-in failure is a named state: sentence, focus on a control, no r
     const active = dom.active();
     assert.ok(active && ['input', 'button', 'textarea'].includes(active.localName) && dom.isVisible(active), `${flow} ${failure.state}: focus on a visible control (${active?.localName})`);
     assert.equal(dom.findAll((el) => el.getAttribute('role') === 'alert').length, 0);
-    const password = dom.find((el) => el.type === 'password');
-    if (flow === 'password' && !(failure.state === 'field_invalid' && failure.field === 'email')) assert.equal(password.value, '', 'the password is not kept');
+    if (!(failure.state === 'field_invalid' && failure.field === 'email')) assert.equal(password.value, '', 'the password is not kept');
     assert.equal(email.value, 'anna@example.test', 'the email is kept');
     if (failure.state === 'field_invalid') assert.ok(dom.findAll((el) => el.getAttribute('aria-invalid') === 'true').length === 1);
   }
@@ -588,6 +647,8 @@ test('every sign-in failure is a named state: sentence, focus on a control, no r
   // the copy table covers every frozen SignInFailure state
   for (const state of ['rate_limited', 'code_attempts_exhausted', 'email_login_unavailable', 'code_invalid', 'code_expired', 'email_not_linked', 'credentials_invalid', 'account_unavailable', 'no_connection', 'unexpected_response'])
     assert.ok(failureSentence({ state, retryAfterSec: 1, status: 500 }).length > 0, state);
+  for (const state of ['term_too_short', 'rate_limited', 'telegram_unavailable', 'business_unavailable', 'no_connection', 'unexpected_response'])
+    assert.ok(firstRunSentence({ state, retryAfterSec: 1, status: 500 }).length > 0, state);
 });
 
 test('the unknown business: /auth/login 404 «Tenant not found», 401 and 403 end in the same «never says which» state (real createNet)', async () => {
@@ -602,24 +663,32 @@ test('the unknown business: /auth/login 404 «Tenant not found», 401 and 403 en
     for (const rel of recordedBodies) {
       const recorded = apiFixture(rel);
       globalThis.fetch = async (url, init) => {
-        bodies.push([String(url), JSON.parse(init.body)]);
+        const at = String(url);
+        if (at.startsWith('/api/mobile/pwa/search'))
+          return new Response(JSON.stringify({ items: [{ tenant_slug: 'no-such-business', name: 'Салон «Северный ветер»', address: 'ул. Лесная, 8' }] }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        bodies.push([at, JSON.parse(init.body)]);
         return new Response(JSON.stringify(recorded.body), { status: recorded.status, headers: { 'Content-Type': 'application/json' } });
       };
       const dom = createDom();
       const net = createNet();
       mountSignIn({ factory: dom.factory, container: dom.root, session: net.session, scheduler: createScheduler(NOW) });
+      // The finder answers from the same stubbed fetch, so the chosen handle is a real round trip.
+      await chooseBusiness(dom);
+      openOtherWay(dom);
       dom.type(dom.find((el) => el.type === 'email'), 'anna@example.test');
-      dom.type(dom.find((el) => el.localName === 'input' && dom.nameOf(el) === 'Адрес бизнеса'), 'no-such-business');
       const password = dom.find((el) => el.type === 'password');
       dom.type(password, 'mock-password-1');
       dom.key(password, 'Enter');
       await flush(30);
       const text = dom.visibleText();
-      assert.match(text, /Неверный адрес бизнеса, email или пароль/, rel);
+      assert.match(text, /Неверный email или пароль/, rel);
       assert.ok(!/Tenant not found|не найден/i.test(text), `${rel}: the response never says which field was wrong`);
-      assert.equal(dom.nameOf(dom.active()), 'Адрес бизнеса');
+      assert.equal(dom.nameOf(dom.active()), 'Email');
       const group = dom.find((el) => el.classList.contains('signin-group--password'));
-      assert.match(dom.textOf(group), /Неверный адрес бизнеса, email или пароль/, 'the state stands in the group where focus is');
+      assert.match(dom.textOf(group), /Неверный email или пароль/, 'the state stands in the group where focus is');
       assert.ok(!/учётной записи|not accepting|not active/i.test(text), `${rel}: no account wording`);
       drawn.push([dom.textOf(group), dom.nameOf(dom.active())]);
     }
@@ -658,6 +727,11 @@ test('session-not-active 401 (a bearer after logout or revocation): one refresh,
   const savedFetch = globalThis.fetch;
   globalThis.fetch = async (url) => {
     const at = new URL(url, 'http://127.0.0.1').pathname;
+    if (at === '/api/mobile/pwa/search')
+      return new Response(JSON.stringify({ items: [{ tenant_slug: 'severny-veter', name: 'Салон «Северный ветер»', address: 'ул. Лесная, 8' }] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
     calls.push(at);
     if (at === '/api/auth/login') return respond('auth/login.201.json');
     if (at === '/api/ai/chat') return respond('auth/errors/session-not-active.401.json');
@@ -678,8 +752,9 @@ test('session-not-active 401 (a bearer after logout or revocation): one refresh,
       newAbort: () => new AbortController(),
     });
     mountApp({ dom: { root: dom.root, factory: dom.factory }, session: net.session, conversation: runtime.conversation, widgets: runtime.widgetPort, voice: null, scheduler });
+    await chooseBusiness(dom);
+    openOtherWay(dom);
     dom.type(dom.find((el) => el.type === 'email'), 'anna@example.test');
-    dom.type(dom.find((el) => el.localName === 'input' && dom.nameOf(el) === 'Адрес бизнеса'), 'severny-veter');
     const password = dom.find((el) => el.type === 'password');
     dom.type(password, 'mock-password-1');
     dom.key(password, 'Enter');
@@ -709,10 +784,7 @@ test('rate limit: the countdown decreases, the submitting control is held until 
   const s = sessionDouble();
   s.answers.signInPassword = () => ({ step: 'failed', failure: { state: 'rate_limited', retryAfterSec: 3 } });
   mountSignIn({ factory: dom.factory, container: dom.root, session: s.session, scheduler });
-  dom.type(dom.find((el) => el.type === 'email'), 'anna@example.test');
-  dom.type(dom.find((el) => el.localName === 'input' && dom.nameOf(el) === 'Адрес бизнеса'), 'severny-veter');
-  const password = dom.find((el) => el.type === 'password');
-  dom.type(password, 'mock-password-1');
+  const password = await toPassword(dom);
   dom.key(password, 'Enter');
   await flush();
   const seconds = () => Number(/через (\d+) с/.exec(dom.visibleText())?.[1] ?? NaN);
@@ -737,31 +809,46 @@ test('rate limit: the countdown decreases, the submitting control is held until 
   assert.equal(submit.getAttribute('aria-disabled'), null);
 });
 
-test('email OTP with select_business: businesses by name, the re-verify echoes the chosen slug, then the signed-in root with identity and a focused composer', async () => {
+test('the first run through the app: the root screen finds a business by name and address, then hands off — the handle is never shown', async () => {
   const p = page({ signedIn: false });
-  p.answers.verifyEmail = (email, code, slug) => {
-    if (slug === null) return { step: 'select_business', businesses: [{ name: 'Салон «Северный ветер»', slug: 'severny-veter' }, { name: 'Студия «Тихая гавань»', slug: 'tikhaya-gavan' }] };
-    p.signIn({ userName: 'Анна Смирнова', tenantName: 'Студия «Тихая гавань»' });
-    return { step: 'signed_in', display: { userName: 'Анна Смирнова', tenantName: 'Студия «Тихая гавань»' } };
+  p.answers.findBusinesses = (term) => ({
+    step: 'matches',
+    businesses: [
+      { name: 'Салон «Северный ветер»', slug: 'severny-veter', address: 'ул. Лесная, 8' },
+      { name: 'Салон «Северный ветер»', slug: 'severny-veter-2', address: 'пр. Морской, 2', term },
+    ],
+  });
+  p.dom.type(termField(p.dom), 'север');
+  p.dom.click(p.dom.button(/^Найти$/));
+  await flush();
+  // Two businesses of the SAME name: the street address is the only thing that tells them apart,
+  // which is why the finder projects it and the row shows it.
+  const rows = p.dom.findAll((el) => el.localName === 'button' && el.classList.contains('signin-match')).map((b) => p.dom.textOf(b));
+  assert.deepEqual(rows, ['Салон «Северный ветер»ул. Лесная, 8', 'Салон «Северный ветер»пр. Морской, 2']);
+  p.dom.click(p.dom.findAll((el) => el.localName === 'button' && el.classList.contains('signin-match')).at(1));
+  await flush();
+  p.dom.click(p.dom.find((el) => el.localName === 'button' && el.classList.contains('signin-button--telegram')));
+  await flush();
+  assert.deepEqual(p.calls.at(-1), ['startTelegram', 'severny-veter-2'], 'the SECOND row\'s handle, as chosen');
+  assert.ok(!/severny-veter/.test(p.dom.visibleText()), 'the handle is carried, never shown');
+  assert.equal(p.chats.length, 0, 'the first run sends no chat turn');
+});
+
+test('after sign-in the root is the signed-in app: identity, a focused composer, and the sign-in state gone', async () => {
+  const p = page({ signedIn: false });
+  p.answers.signInPassword = (slug, email) => {
+    assert.equal(slug, 'severny-veter', 'the handle came from the finder');
+    assert.equal(email, 'anna@example.test');
+    p.signIn({ userName: 'Анна Смирнова', tenantName: 'Салон «Северный ветер»' });
+    return { step: 'signed_in', display: { userName: 'Анна Смирнова', tenantName: 'Салон «Северный ветер»' } };
   };
-  const email = p.dom.find((el) => el.type === 'email');
-  p.dom.type(email, 'anna@example.test');
-  p.dom.key(email, 'Enter');
-  await flush();
-  const code = p.dom.find((el) => el.localName === 'input' && p.dom.isVisible(el) && /код/i.test(p.dom.nameOf(el)));
-  assert.equal(p.dom.active(), code, 'focus moves to the code field');
-  p.dom.type(code, '246810');
-  p.dom.key(code, 'Enter');
-  await flush();
-  const choices = p.dom.findAll((el) => el.localName === 'button' && p.dom.isVisible(el) && /«/.test(p.dom.nameOf(el))).map((b) => p.dom.nameOf(b));
-  assert.deepEqual(choices, ['Салон «Северный ветер»', 'Студия «Тихая гавань»']);
-  p.dom.click(p.dom.button(/^Студия «Тихая гавань»$/));
+  const password = await toPassword(p.dom);
+  p.dom.key(password, 'Enter');
   await flush();
   p.scheduler.flush();
-  assert.deepEqual(p.calls.at(-1), ['verifyEmail', 'anna@example.test', '246810', 'tikhaya-gavan']);
   assert.equal(p.dom.active(), p.composer(), 'cold start: the composer is focused');
   const text = p.dom.visibleText();
-  assert.match(text, /Анна Смирнова · Студия «Тихая гавань»/);
+  assert.match(text, /Анна Смирнова · Салон «Северный ветер»/);
   assert.ok(!ROLE_WORDS.test(text));
   assert.equal(p.dom.find((el) => el.classList.contains('signin')), null, 'the sign-in state is gone');
   assert.equal(identityText({ userName: '', tenantName: null }), 'Вход выполнен');
