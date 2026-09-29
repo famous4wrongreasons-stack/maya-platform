@@ -1,0 +1,1135 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "000ed08f3769f8ec78f634c7c10f4643e2d3fe11",
+  "battery_hashes": {
+    "gateWR.json": "c37acba4c8d7ced80c9d33178f7da969b951da638f138466f2db520f84725971"
+  },
+  "partition": null,
+  "startedAt": "2026-09-29T17:07:22.168Z",
+  "batteries": [
+    "gateWR.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": "(?:^|\\s)(?:WR\\-CREATE|WR\\-L11|WR\\-L12\\ requires|WR\\-L13\\ lock\\-time|WR\\-L13\\ refuses|WR\\-L21|WR\\-L22|WR\\-L7|WR\\-L8|claim\\ and\\ reconciliation|projects\\ canonical\\ services|projects\\ valid\\ availability|reads\\ staff\\ through\\ the\\ existing\\ policy/runtime|rejects\\ raw\\ or\\ foreign\\ handles|requires\\ the\\ inherited\\ service|writeReceipt\\ is\\ idempotent)(?=$|[^A-Za-z0-9_.-])",
+    "unit_tests": "(widgets/stores/widget\\-stores\\.service\\.spec\\.ts|widgets/emission/booking\\-successor\\-boundary\\.spec\\.ts|widgets/owner\\-ports/booking\\-selector\\.adapter\\.spec\\.ts|widgets/booking/booking\\-noun\\-identity\\.spec\\.ts|widgets/routing/effect\\-router\\.service\\.spec\\.ts|widgets/owner\\-ports/booking\\-preview\\.adapter\\.spec\\.ts|widgets/composition/chat\\-read\\.trigger\\.spec\\.ts|widgets/resolve/thread\\-page\\.service\\.spec\\.ts|widgets/booking/booking\\-selector\\.presenter\\.spec\\.ts)",
+    "unit_filter": "(?:^|\\s)(?:WR\\-CREATE|WR\\-L11|WR\\-L12\\ requires|WR\\-L13\\ lock\\-time|WR\\-L13\\ refuses|WR\\-L21|WR\\-L22|WR\\-L7|WR\\-L8|claim\\ and\\ reconciliation|projects\\ canonical\\ services|projects\\ valid\\ availability|reads\\ staff\\ through\\ the\\ existing\\ policy/runtime|rejects\\ raw\\ or\\ foreign\\ handles|requires\\ the\\ inherited\\ service|writeReceipt\\ is\\ idempotent)(?=$|[^A-Za-z0-9_.-])"
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-51f75032e4",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-51f75032e4",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M01",
+      "files": [
+        "src/widgets/owner-ports/booking-selector.adapter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "reads staff through the existing policy/runtime"
+      ],
+      "kills": [
+        {
+          "killer": "reads staff through the existing policy/runtime",
+          "test": "FBE2E-2 — canonical booking selector owner adapter reads staff through the existing policy/runtime and never accepts a raw service id",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M02",
+      "files": [
+        "src/widgets/owner-ports/booking-selector.adapter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L8"
+      ],
+      "kills": [
+        {
+          "killer": "WR-L8",
+          "test": "FBE2E-2 — canonical booking selector owner adapter WR-L8 refuses an unrecognised staff result null instead of certifying an empty complete list",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "WR-L8",
+          "test": "FBE2E-2 — canonical booking selector owner adapter WR-L8 refuses an unrecognised staff result {} instead of certifying an empty complete list",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "WR-L8",
+          "test": "FBE2E-2 — canonical booking selector owner adapter WR-L8 refuses an unrecognised staff result {\"staff\": null} instead of certifying an empty complete list",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "WR-L8",
+          "test": "FBE2E-2 — canonical booking selector owner adapter WR-L8 refuses an unrecognised staff result {\"slots\": [Array]} instead of certifying an empty complete list",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "WR-L8",
+          "test": "FBE2E-2 — canonical booking selector owner adapter WR-L8 refuses an unrecognised staff result \"not a result\" instead of certifying an empty complete list",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 5
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M03",
+      "files": [
+        "src/widgets/booking/booking-selector.presenter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "projects canonical services"
+      ],
+      "kills": [
+        {
+          "killer": "projects canonical services",
+          "test": "FBE2E-2 — booking selector presentation projects canonical services into opaque server-minted choices",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M04",
+      "files": [
+        "src/widgets/booking/booking-selector.presenter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "projects valid availability"
+      ],
+      "kills": [
+        {
+          "killer": "projects valid availability",
+          "test": "FBE2E-2 — booking selector presentation projects valid availability into exact opaque slot refs and refuses malformed facts",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M05",
+      "files": [
+        "src/widgets/booking/booking-selector.presenter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "requires the inherited service"
+      ],
+      "kills": [
+        {
+          "killer": "requires the inherited service",
+          "test": "FBE2E-2 — booking selector presentation requires the inherited service for staff and the inherited staff for slots",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M06",
+      "files": [
+        "src/widgets/resolve/thread-page.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L21"
+      ],
+      "kills": [
+        {
+          "killer": "WR-L21",
+          "test": "P-RESOLVE principal thread page WR-L21 filters invalid stored outcomes and receipt bindings before the wire",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M07",
+      "files": [
+        "src/widgets/resolve/thread-page.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L21"
+      ],
+      "kills": [
+        {
+          "killer": "WR-L21",
+          "test": "P-RESOLVE principal thread page WR-L21 filters invalid stored outcomes and receipt bindings before the wire",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M08",
+      "files": [
+        "src/widgets/resolve/thread-page.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L21"
+      ],
+      "kills": [
+        {
+          "killer": "WR-L21",
+          "test": "P-RESOLVE principal thread page WR-L21 filters invalid stored outcomes and receipt bindings before the wire",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M09",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L7"
+      ],
+      "kills": [
+        {
+          "killer": "WR-L7",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss WR-L7 refuses selector DRAFT when authority-tenant disagrees, before quoting or storing",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M10",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L7"
+      ],
+      "kills": [
+        {
+          "killer": "WR-L7",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss WR-L7 refuses selector DRAFT when authority-user disagrees, before quoting or storing",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M11",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L7"
+      ],
+      "kills": [
+        {
+          "killer": "WR-L7",
+          "test": "U13a — closed Gate 13 spine, claim, receipt and dismiss WR-L7 refuses selector DRAFT when actor-tenant disagrees, before quoting or storing",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M12",
+      "files": [
+        "src/widgets/stores/intent-audit.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "writeReceipt is idempotent",
+        "claim and reconciliation"
+      ],
+      "kills": [
+        {
+          "killer": "writeReceipt is idempotent",
+          "test": "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) writeReceipt is idempotent by tenant/token and never retains an utterance echo",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "claim and reconciliation",
+          "test": "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) claim and reconciliation are tenant-scoped compare-and-set writes",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M13",
+      "files": [
+        "src/widgets/stores/intent-audit.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "writeReceipt is idempotent",
+        "claim and reconciliation"
+      ],
+      "kills": [
+        {
+          "killer": "writeReceipt is idempotent",
+          "test": "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) writeReceipt is idempotent by tenant/token and never retains an utterance echo",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "claim and reconciliation",
+          "test": "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) claim and reconciliation are tenant-scoped compare-and-set writes",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M14",
+      "files": [
+        "src/widgets/stores/intent-audit.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "writeReceipt is idempotent",
+        "WR-L22",
+        "claim and reconciliation"
+      ],
+      "kills": [
+        {
+          "killer": "writeReceipt is idempotent",
+          "test": "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) writeReceipt is idempotent by tenant/token and never retains an utterance echo",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "WR-L22",
+          "test": "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) WR-L22 idempotent retries derive the terminal outcome from the existing durable receipt",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "claim and reconciliation",
+          "test": "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) claim and reconciliation are tenant-scoped compare-and-set writes",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 3
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M15",
+      "files": [
+        "src/widgets/stores/intent-audit.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L22",
+        "claim and reconciliation"
+      ],
+      "kills": [
+        {
+          "killer": "WR-L22",
+          "test": "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) WR-L22 idempotent retries derive the terminal outcome from the existing durable receipt",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "claim and reconciliation",
+          "test": "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) claim and reconciliation are tenant-scoped compare-and-set writes",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M16",
+      "files": [
+        "src/widgets/stores/intent-audit.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "claim and reconciliation"
+      ],
+      "kills": [
+        {
+          "killer": "claim and reconciliation",
+          "test": "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) claim and reconciliation are tenant-scoped compare-and-set writes",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M17",
+      "files": [
+        "src/widgets/composition/chat-read.trigger.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L11"
+      ],
+      "kills": [
+        {
+          "killer": "WR-L11",
+          "test": "P-MT2a ChatReadTriggerService WR-L11 dispatches catalog.services.read to the canonical selector minter",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "WR-L11",
+          "test": "P-MT2a ChatReadTriggerService WR-L11 dispatches catalog.staff.read to the canonical selector minter",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "WR-L11",
+          "test": "P-MT2a ChatReadTriggerService WR-L11 dispatches booking.availability.read to the canonical selector minter",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 3
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M18",
+      "files": [
+        "src/widgets/emission/successor-minter.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L13 refuses"
+      ],
+      "kills": [
+        {
+          "killer": "WR-L13 refuses",
+          "test": "Booking successor principal boundary [BUILD] WR-L13 refuses a foreign principal before minting a selector",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M19",
+      "files": [
+        "src/widgets/emission/successor-minter.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L13 lock-time"
+      ],
+      "kills": [
+        {
+          "killer": "WR-L13 lock-time",
+          "test": "Booking successor principal boundary [BUILD] WR-L13 lock-time principal change cancels the newly minted successor",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M20",
+      "files": [
+        "src/widgets/booking/booking-noun-identity.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L12 requires"
+      ],
+      "kills": [
+        {
+          "killer": "WR-L12 requires",
+          "test": "Canonical booking noun identity [BUILD] WR-L12 requires both the exact noun and its canonical owner",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M21",
+      "files": [
+        "src/widgets/owner-ports/booking-preview.adapter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "rejects raw or foreign handles"
+      ],
+      "kills": [
+        {
+          "killer": "rejects raw or foreign handles",
+          "test": "FBE2E-2 — selected slot to canonical booking preview rejects raw or foreign handles before asking the booking owner",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M22",
+      "files": [
+        "src/widgets/emission/emitter.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "WR-CREATE"
+      ],
+      "kills": [
+        {
+          "killer": "WR-CREATE",
+          "test": "Widget release programme [HTTP] [PostgreSQL] WR-CREATE [E-MINT] DRAFT and COMMIT traverse the canonical owners with a traced production predecessor",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M23",
+      "files": [
+        "test/widgets-live/support/mint-provenance.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "WR-CREATE"
+      ],
+      "kills": [
+        {
+          "killer": "WR-CREATE",
+          "test": "Widget release programme [HTTP] [PostgreSQL] WR-CREATE [E-MINT] DRAFT and COMMIT traverse the canonical owners with a traced production predecessor",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [
+    "gateWR.json#WR-M22",
+    "gateWR.json#WR-M23"
+  ],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-09-29T17:12:32.811Z"
+}
