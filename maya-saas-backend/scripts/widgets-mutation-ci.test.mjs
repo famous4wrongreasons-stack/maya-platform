@@ -189,7 +189,7 @@ test('gate: a baseline control is red on a non-zero step exit, a failed assertio
     for (const c of Object.values(r.neutraliser_controls)) { c.exits[c.steps[0]] = 1; c.failed = ['red on the neutralised copy']; }
     assert.deepEqual(redBaselineControls(r.baseline_controls), []);
   }
-  assert.equal(assemble(declared, receipts, head).length, 37, 'a red neutraliser control is not a red baseline');
+  assert.equal(assemble(declared, receipts, head).length, 39, 'a red neutraliser control is not a red baseline');
 });
 
 test('gate: a red baseline is a distinct shard status and a non-zero exit, and never hides a mismatch', () => {

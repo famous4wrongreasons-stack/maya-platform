@@ -976,7 +976,8 @@ chk(
 // ── 10. `widgets.runtime` is granted by exactly one path (P-RENDER REN-6; §2.6 constraint 8) ──────
 // Check 8 covers the PRODUCT's own grants (no plan, no trial). This covers the REPOSITORY's: a seed
 // or a migration that granted the key would hand the dark runtime to a real tenant without any plan
-// changing, and nothing in check 8 would notice. The one allowlisted path is `Fixtures.grantFeature`,
+// changing, and nothing in check 8 would notice. AR-1 admits only its certified writer;
+// the separate proof exception remains `Fixtures.grantFeature`,
 // which asserts the proof database before it writes, reached only from `test/widgets-live/**` and from
 // the BIN runner's guarded `ctx.fixtures` (I-HAR). This block must not flag its OWN file, so every
 // mention of the builder here is a regex literal or a message string and none of them spells the call
@@ -989,7 +990,7 @@ const BIN_CASES_PREFIX = 'scripts/widgets-http-proof/';
 const BIN_CASE_GUARD = /\.fixtures\s*\.\s*grantFeature\s*\(/;
 const FIXTURES_MODULE_IMPORT = /from\s*'[^']*widgets-live\/support\/fixtures'/;
 const ENTITLEMENT_WRITE =
-  /tenantEntitlement\s*\.\s*(create|createMany|upsert|update|updateMany)|INSERT\s+INTO\s+"?TenantEntitlement"?/i;
+  /tenantEntitlement\s*\.\s*(create|createMany|upsert|update|updateMany)|(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+(?:[\w"]+\s*\.\s*)?"?TenantEntitlement"?/i;
 const grantWalk = (dir) =>
   fs.existsSync(dir)
     ? fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {

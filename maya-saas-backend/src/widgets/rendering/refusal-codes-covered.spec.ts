@@ -206,7 +206,7 @@ describe('P-RENDER — R3.9.3 rendering: the map is total and the grant path is 
 
   const RUNTIME_KEY = 'widgets.runtime';
   const WRITE_TOKEN =
-    /tenantEntitlement\s*\.\s*(create|createMany|upsert|update|updateMany)|INSERT\s+INTO\s+"?TenantEntitlement"?/i;
+    /tenantEntitlement\s*\.\s*(create|createMany|upsert|update|updateMany)|(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+(?:[\w"]+\s*\.\s*)?"?TenantEntitlement"?/i;
   const GRANT_CALL = /grantFeature\s*\(/;
   /**
    * The one grant path, and the only places allowed to reach it. §2.6 constraint 8: granted "only by
@@ -301,6 +301,27 @@ describe('P-RENDER — R3.9.3 rendering: the map is total and the grant path is 
     expect(fixtures).toMatch(/async grantFeature\s*\(/);
     expect(fixtures).toMatch(/assertProofDatabase\(/);
     expect(fixtures).toMatch(/tenantEntitlement\.create/);
+  });
+
+  it.each([
+    'INSERT INTO "TenantEntitlement" VALUES (1)',
+    'UPDATE "TenantEntitlement" SET enabled=true',
+    'UPDATE public."TenantEntitlement" SET enabled=true',
+    'DELETE FROM "TenantEntitlement"',
+  ])('REN-6 refuses raw SQL outside the certified writer: %s', (sql) => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ren6-sql-'));
+    try {
+      fs.mkdirSync(path.join(root, 'prisma'));
+      fs.writeFileSync(path.join(root, 'prisma/rogue.sql'), sql);
+      expect(scanEntitlementGrants(root)).toEqual([
+        {
+          file: 'prisma/rogue.sql',
+          why: 'writes a TenantEntitlement row for widgets.runtime',
+        },
+      ]);
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
   });
 
   it('REN-6 self-test: the scanner fails a planted seed grant and passes the BIN runner call', () => {
