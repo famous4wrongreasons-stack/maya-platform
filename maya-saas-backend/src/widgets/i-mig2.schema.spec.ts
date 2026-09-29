@@ -56,7 +56,7 @@ describe('I-MIG2 migration-2 fold', () => {
     expect(physical.every((line) => /\/\/ A(?:\s|$)/.test(line))).toBe(true);
   });
 
-  it('MIG-4 retains exactly three widget migrations in the 99-migration programme', () => {
+  it('MIG-4 retains three widget migrations plus the explicit approved SB-1 JSON V2 extension', () => {
     const dirs = fs
       .readdirSync(path.join(repo, 'maya-saas-backend/prisma/migrations'), {
         withFileTypes: true,
@@ -64,7 +64,15 @@ describe('I-MIG2 migration-2 fold', () => {
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name);
 
-    expect(dirs).toHaveLength(99);
+    const successor = '20260929190000_client_link_challenge_json_v2';
+    expect(dirs.filter((name) => name === successor)).toEqual([successor]);
+    expect(dirs.filter((name) => name !== successor)).toHaveLength(99);
+    const extension = read(
+      `maya-saas-backend/prisma/migrations/${successor}/migration.sql`,
+    );
+    expect(extension).not.toMatch(
+      /CREATE TABLE|ADD COLUMN|(?:ALTER|CREATE) TABLE "Widget/,
+    );
     expect(dirs.filter((name) => name.includes('widget_layer'))).toEqual([
       '20260916120000_widget_layer_ledgers',
       '20260916120100_widget_layer_runtime',
