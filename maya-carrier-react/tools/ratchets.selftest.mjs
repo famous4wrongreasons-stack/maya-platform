@@ -4,6 +4,58 @@
 // fixture is a rule that may be refusing everything. Both directions, or the row does not count.
 
 import * as R from './ratchets.mjs';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const HERE = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+const SHELL = path.join(HERE, '..', 'maya-chat-shell');
+
+/**
+ * The runtime allowlist, in both directions.
+ *
+ * This rule shipped DEAD: it scanned `codeOnly(text)`, which blanks string bodies, so the specifier
+ * it tried to read was always a run of spaces and it refused nothing — not `src/dom/`, not the DOM
+ * boundary. It had no fixture in either direction, which is exactly how a rule dies unnoticed. The
+ * hash branch had never executed either, so it gets a fixture of its own against a synthetic shell.
+ */
+function runtimeAllowlistCases() {
+  const one = (src) => R.checkRuntimeImports(HERE, SHELL, [['src/probe.ts', src]]);
+  const MUST_REFUSE = [
+    ['the DOM boundary', "import type { DomPort } from '../../maya-chat-shell/src/shell/dom-port.ts';"],
+    ['a non-member (dom/)', "import { h } from '../../maya-chat-shell/src/dom/host.ts';"],
+    ['a non-member, double-quoted', 'import { h } from "../../maya-chat-shell/src/dom/host.ts";'],
+    ['a non-member, dynamic import', "const m = await import('../../maya-chat-shell/src/dom/host.ts');"],
+    ['a non-member, side-effect import', "import '../../maya-chat-shell/src/dom/host.ts';"],
+    ['the voice layer (outside the package)', "import { createCapture } from '../../maya-chat-shell/src/voice/capture.ts';"],
+  ];
+  const MUST_ADMIT = [
+    ['a published member', "import { createNet } from '../../maya-chat-shell/src/net/session.ts';"],
+    ['a published member, type-only', "import type { ConversationView } from '../../maya-chat-shell/src/shell/ports.ts';"],
+    ['a path merely mentioned in a string', "const note = 'maya-chat-shell/src/dom/host.ts is off limits';"],
+    ['a path merely mentioned in a comment', '// maya-chat-shell/src/dom/host.ts is off limits\nconst x = 1;'],
+    ['an ordinary relative import', "import { tokens } from './identity/tokens.ts';"],
+  ];
+  return { one, MUST_REFUSE, MUST_ADMIT };
+}
+
+/** The hash branch, against a synthetic shell whose manifest disagrees with its own bytes. */
+function runtimeDriftCase() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'carrier-drift-'));
+  const shell = path.join(root, 'maya-chat-shell');
+  const carrier = path.join(root, 'maya-carrier-react');
+  fs.mkdirSync(path.join(shell, 'dist'), { recursive: true });
+  fs.mkdirSync(path.join(shell, 'src', 'shell'), { recursive: true });
+  fs.mkdirSync(path.join(carrier, 'src'), { recursive: true });
+  fs.writeFileSync(path.join(shell, 'src', 'shell', 'ports.ts'), 'export type A = 1;\n');
+  fs.writeFileSync(path.join(shell, 'dist', 'manifest.json'), JSON.stringify({
+    runtime: { domBoundary: 'src/shell/dom-port.ts', modules: [{ path: 'src/shell/ports.ts', sha256: 'f'.repeat(64) }] },
+  }));
+  const hits = R.checkRuntimeImports(carrier, shell, [['src/probe.ts', "import type { A } from '../../maya-chat-shell/src/shell/ports.ts';"]]);
+  fs.rmSync(root, { recursive: true, force: true });
+  return hits;
+}
 
 const CASES = [
   // [rule id, source that MUST refuse, source that MUST pass]
@@ -65,6 +117,22 @@ export function selfTest() {
   // the inline-SVG shape must be ADMITTED — it is bytes in the file, not a fetch
   if (!R.checkCss('x.css', INLINE_SVG_CSS).length) { admitted++; console.log('  PASS  admit  no-external-resource       inline data:image/svg+xml'); }
   else { failed++; console.log('  FAIL  admit  no-external-resource       inline SVG wrongly refused'); }
+
+  {
+    const { one, MUST_REFUSE, MUST_ADMIT } = runtimeAllowlistCases();
+    for (const [why, src] of MUST_REFUSE) {
+      if (one(src).length) { refused++; console.log(`  PASS  refuse runtime-allowlist           ${why}`); }
+      else { failed++; console.log(`  FAIL  refuse runtime-allowlist           NOT refused: ${why}`); }
+    }
+    for (const [why, src] of MUST_ADMIT) {
+      const hits = one(src);
+      if (!hits.length) { admitted++; console.log(`  PASS  admit  runtime-allowlist           ${why}`); }
+      else { failed++; console.log(`  FAIL  admit  runtime-allowlist           wrongly refused: ${why} — ${hits[0].message}`); }
+    }
+    const drift = runtimeDriftCase();
+    if (drift.length && /drifted/.test(drift[0].message)) { refused++; console.log('  PASS  refuse runtime-allowlist           a member whose bytes drifted from the published hash'); }
+    else { failed++; console.log('  FAIL  refuse runtime-allowlist           drift NOT refused'); }
+  }
 
   for (const [bad, why] of HTML_CASES) {
     if (R.checkHtml('x.html', bad).length) { refused++; console.log(`  PASS  refuse csp                        ${why}`); }

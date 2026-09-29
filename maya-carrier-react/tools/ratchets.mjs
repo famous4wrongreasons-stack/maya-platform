@@ -33,6 +33,28 @@ const codeOnly = (text) =>
     .replace(/"(?:[^"\\\n]|\\.)*"/g, (m) => '"' + ' '.repeat(Math.max(0, m.length - 2)) + '"')
     .replace(/`(?:[^`\\]|\\.)*`/g, (m) => '`' + m.slice(1, -1).replace(/[^\n]/g, ' ') + '`');
 
+/**
+ * Strip comments but KEEP string literals, length-preserving.
+ *
+ * `codeOnly` blanks string bodies, which is right for every rule that hunts for a NAME — the name
+ * must not be found in prose. It is wrong for the one rule whose subject IS a string literal: an
+ * import specifier. `checkRuntimeImports` used `codeOnly`, so by the time it matched, every
+ * specifier had been blanked to spaces, `spec.includes('maya-chat-shell')` was never true, and the
+ * rule admitted everything — including `src/dom/` and the DOM boundary itself. It had never once
+ * refused. Proved by fixture below; see `runtime-allowlist` in the self-test.
+ */
+const commentsOnly = (text) =>
+  text
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+    .replace(/(^|[^:])\/\/[^\n]*/g, (m) => m.replace(/[^\n]/g, ' '));
+
+/**
+ * Every form by which a module specifier can enter: `from '…'`, a side-effect `import '…'`, a
+ * dynamic `import('…')` and `require('…')`, in either quote style. The old rule read `from '…'`
+ * alone, so a double-quoted or dynamic specifier walked past even once the blanking was fixed.
+ */
+const IMPORT_SPEC = /(?:\bfrom|\bimport|\brequire)\s*\(?\s*(['"])([^'"\n]+)\1/g;
+
 const linesOf = (text) => text.split('\n');
 const lineAt = (text, index) => text.slice(0, index).split('\n').length;
 
@@ -225,8 +247,8 @@ export function checkRuntimeImports(carrierRoot, shellRoot, files) {
   const allowed = new Map(runtime.modules.map((m) => [m.path, m.sha256]));
 
   for (const [rel, text] of files) {
-    for (const m of codeOnly(text).matchAll(/from\s+'([^']+)'/g)) {
-      const spec = m[1];
+    for (const m of commentsOnly(text).matchAll(IMPORT_SPEC)) {
+      const spec = m[2];
       if (!spec.includes('maya-chat-shell')) continue;
       const abs = path.resolve(path.dirname(path.join(carrierRoot, rel)), spec);
       const shellRel = path.relative(shellRoot, abs).split(path.sep).join('/');

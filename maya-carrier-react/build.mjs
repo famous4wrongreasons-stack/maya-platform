@@ -10,7 +10,8 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import os from 'node:os';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 import * as R from './tools/ratchets.mjs';
 
@@ -58,14 +59,32 @@ async function typecheck() {
   const ts = require(path.join(SHELL, '..', 'maya-saas-backend', 'node_modules', 'typescript'));
   const cfgPath = path.join(ROOT, 'tsconfig.json');
   const cfg = ts.parseJsonConfigFileContent(ts.readConfigFile(cfgPath, ts.sys.readFile).config, ts.sys, ROOT);
-  const program = ts.createProgram({ rootNames: cfg.fileNames, options: cfg.options });
-  const diags = ts.getPreEmitDiagnostics(program);
-  if (diags.length) {
-    for (const d of diags.slice(0, 20))
-      console.error('  typecheck  ' + ts.formatDiagnostic(d, { getCanonicalFileName: (f) => f, getCurrentDirectory: () => ROOT, getNewLine: () => '\n' }).trim());
-    throw new R.CarrierRefused(diags.map(() => R.refusal('typecheck', 'src', 0, '', 'typecheck failed')));
+
+  // The moment a carrier file imports a runtime module, the program follows the graph into the
+  // shell's `src/contract.ts`, which ends `} from '#contract';`. That specifier is not on disk and
+  // never was: the shell's own build emits the certified widget-contract declarations into a temp
+  // directory and maps `#contract` at them in memory (maya-chat-shell/build.mjs:476). Without the
+  // same mapping the carrier's typecheck fails on an unresolved module — while esbuild, which
+  // strips `export type … from`, emits a perfectly good bundle. A green bundle would not have been
+  // a green wiring. So the carrier resolves `#contract` exactly as the shell does, from the same
+  // certified source, rather than suppressing the error or stubbing the types.
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'maya-carrier-'));
+  try {
+    const shellBuild = await import(pathToFileURL(path.join(SHELL, 'build.mjs')).href);
+    const contract = shellBuild.emitContract(ts, tmp);
+    const options = { ...cfg.options, paths: { '#contract': [contract.index] } };
+    const program = ts.createProgram({ rootNames: cfg.fileNames, options });
+    const diags = ts.getPreEmitDiagnostics(program);
+    if (diags.length) {
+      for (const d of diags.slice(0, 20))
+        console.error('  typecheck  ' + ts.formatDiagnostic(d, { getCanonicalFileName: (f) => f, getCurrentDirectory: () => ROOT, getNewLine: () => '\n' }).trim());
+      throw new R.CarrierRefused(diags.map(() => R.refusal('typecheck', 'src', 0, '', 'typecheck failed')));
+    }
+    const shellFiles = program.getSourceFiles().filter((f) => f.fileName.includes('maya-chat-shell/src/')).length;
+    console.log(`typecheck: PASS (${cfg.fileNames.length} carrier files + ${shellFiles} runtime modules, contract ${contract.exportCount} exports, ${ts.version})`);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
   }
-  console.log(`typecheck: PASS (${cfg.fileNames.length} files, ${ts.version})`);
 }
 
 const flags = new Set(process.argv.slice(2));
