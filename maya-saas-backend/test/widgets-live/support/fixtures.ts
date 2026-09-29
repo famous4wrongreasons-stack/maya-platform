@@ -443,6 +443,7 @@ export class Fixtures {
         where: { tenantId: tenant.id },
         select: {
           capability: true,
+          sourceType: true,
           state: true,
           policyDecision: true,
           policyDecidedBy: true,

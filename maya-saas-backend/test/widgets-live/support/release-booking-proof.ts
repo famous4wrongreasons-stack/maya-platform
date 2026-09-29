@@ -122,6 +122,23 @@ export async function releaseBookingProof(
         envBody.confirmation_subject === 'create',
         'canonical create subject',
       );
+      // These fields cannot override the server-owned action source or cross
+      // F76 into canonical action input. Refused before any durable execution.
+      for (const extra of [
+        { sourceType: 'agent_task' },
+        { widget_kind: 'BOOKING_CONFIRMATION' },
+        { confirmation_subject: 'cancel' },
+      ]) {
+        const forged = await post('/widgets/intent', { ...body, ...extra });
+        requireProof(
+          forged.status === 400,
+          'F33/F76 caller metadata is refused',
+        );
+      }
+      requireProof(
+        (await ctx.fixtures.bookingProofState(tenant)).executions.length === 0,
+        'F33/F76 forged metadata has no owner effect',
+      );
       commitBody = body;
     }
     const answer = await post('/widgets/intent', body);
@@ -194,7 +211,8 @@ export async function releaseBookingProof(
   );
   const ae = state.executions[0];
   requireProof(
-    ae.capability === 'crm.appointment.create.v1' &&
+    ae.sourceType === 'authenticated_request' &&
+      ae.capability === 'crm.appointment.create.v1' &&
       ae.state === 'SUCCEEDED' &&
       ae.policyDecision === 'ALLOW',
     'canonical AE/policy owner',
@@ -216,5 +234,12 @@ export async function releaseBookingProof(
     (await ctx.fixtures.bookingProofState(tenant)).executions.length === 1,
     'replay creates no second execution',
   );
+  const commitProof = proofs.find((p) => p.testId === 'WR-COMMIT-CREATE');
+  requireProof(commitProof, 'F33/F76 production-minted COMMIT provenance');
+  proofs.push({
+    ...commitProof,
+    testId: 'WR-COMMIT-ACTION-BOUNDARY',
+    clauses: ['G13-I7'],
+  });
   return proofs;
 }

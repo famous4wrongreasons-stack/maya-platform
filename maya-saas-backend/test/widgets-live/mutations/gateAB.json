@@ -1,0 +1,22 @@
+[
+  {
+    "id": "AB-M1",
+    "file": "src/action-engine/action-engine.contract.ts",
+    "find": "export interface TrustedActionExecutionRequestV1 {",
+    "replace": "export interface TrustedActionExecutionRequestV1 {\n  widget_kind?: string;",
+    "killers": [
+      "WR-F76"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "AB-M2",
+    "file": "src/widgets/owner-ports/commit-booking.adapter.ts",
+    "find": "          request.source.type !== 'authenticated_request' ||\n",
+    "replace": "",
+    "killers": [
+      "WR-F33"
+    ],
+    "expect": "build-killed"
+  }
+]

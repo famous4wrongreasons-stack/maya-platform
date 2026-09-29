@@ -153,6 +153,36 @@ describe('U13c booking COMMIT owner port', () => {
     expect(built.create.executionResult).not.toHaveBeenCalled();
   });
 
+  it.each([
+    'agent_task',
+    'scheduler',
+    'webhook',
+    'legacy_bridge',
+    'synthetic_shadow',
+  ])(
+    'WR-F33 refuses a forged %s source even with the correct server key',
+    async (source) => {
+      const built = fixture();
+      built.create.forAccount.mockImplementation(() =>
+        admitWithInvocationReceipt(
+          {
+            source: { type: source },
+            callerIdempotency: {
+              scope: 'maya.widgets.booking.commit.v1',
+              key: 'server-confirmation-key',
+            },
+          } as never,
+          () => Promise.resolve(execution),
+        ),
+      );
+      await expect(built.adapter.commit(input())).resolves.toMatchObject({
+        receiptOutcome: 'REFUSED',
+        actionReceiptRef: null,
+      });
+      expect(built.create.executionResult).not.toHaveBeenCalled();
+    },
+  );
+
   it('N12/B-29 accepts UNKNOWN without inventing a receipt ref and leaves reconciliation to the canonical path', async () => {
     const built = fixture();
     built.create.executionResult.mockResolvedValue({
