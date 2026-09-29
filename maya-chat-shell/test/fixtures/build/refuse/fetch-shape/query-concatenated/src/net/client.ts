@@ -14,5 +14,7 @@ const PATHS = {
   widgetResolve: '/widgets/resolve',
 } as const;
 
-export const chat = (signal: AbortSignal): Promise<Response> => fetch(API_BASE + PATHS.chat, { method: 'POST', signal });
-export const login = (signal: AbortSignal): Promise<Response> => fetch(API_BASE + PATHS.login, { method: 'POST', signal });
+type Endpoint = keyof typeof PATHS;
+
+export const find = (term: string, signal: AbortSignal): Promise<Response> =>
+  fetch(API_BASE + PATHS.businessSearch + '?q=' + encodeURIComponent(term), { method: 'GET', signal });

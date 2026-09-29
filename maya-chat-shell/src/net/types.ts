@@ -91,6 +91,38 @@ export interface BusinessChoice {
   readonly slug: string;
 }
 
+/**
+ * One row of the public business finder (`GET /mobile/pwa/search`). The server also sends a city, a
+ * logo URL, an icon URL and a `smart_url`; none is projected. `slug` is an opaque handle the screen
+ * never shows — it is what the Telegram hand-off is scoped to.
+ */
+export interface BusinessMatch {
+  readonly name: string;
+  readonly slug: string;
+  readonly address: string | null;
+}
+
+export interface BusinessSearchProjection {
+  readonly items: readonly BusinessMatch[];
+}
+
+/** `POST /auth/oauth/telegram/start` → the provider URL the browser is handed. */
+export interface TelegramStartProjection {
+  readonly authUrl: string;
+}
+
+/**
+ * The first-run screen's outcomes: finding a business, and being handed to Telegram. Separate from
+ * `SignInFailure` because nothing here is a credential — no state may hint whether an account exists.
+ */
+export type FirstRunFailure =
+  | { readonly state: 'term_too_short' }
+  | { readonly state: 'rate_limited'; readonly retryAfterSec: number }
+  | { readonly state: 'telegram_unavailable' }
+  | { readonly state: 'business_unavailable' }
+  | { readonly state: 'no_connection' }
+  | { readonly state: 'unexpected_response'; readonly status: number };
+
 export interface EmailStartProjection {
   readonly next_step: 'verify_email_code';
 }

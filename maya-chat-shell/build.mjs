@@ -182,15 +182,21 @@ const TOKEN_PROPERTIES = new Set([
   'tenant_id',
 ]);
 
-/** N-1: the P1 allowlist. `/widgets/*` joins only with the unit that consumes R7-E1/E2 (B3). */
+/**
+ * N-1: the P1 allowlist. `/widgets/*` joins only with the unit that consumes R7-E1/E2 (B3), and
+ * `/auth/oauth/telegram/complete` only with the unit that receives the provider's callback — the
+ * shell starts the hand-off but does not yet land it.
+ */
 export const P1_PATHS = [
   '/auth/email/start',
   '/auth/email/verify',
   '/auth/login',
   '/auth/refresh',
   '/auth/logout',
+  '/auth/oauth/telegram/start',
   '/ai/chat',
   '/ai/transcribe',
+  '/mobile/pwa/search',
   '/widgets/intent',
   '/widgets/resolve',
 ];
@@ -1003,9 +1009,35 @@ export function runGates(ts, program, ctx) {
     const same = objOk && values.length === allow.size && new Set(values).size === values.length && values.every((v) => allow.has(v));
     if (!same)
       out.push(refusal('fetch-shape', 'src/net/client.ts', pathsDecl ? lineOf(pathsDecl) : 0, 'PATHS', `const PATHS must be an object literal whose values are exactly: ${P1_PATHS.join(', ')} (N-1)`));
+    // N-1: the public business finder is a GET that carries its term in the query string, so the URL
+    // is `API_BASE + PATHS.<member>` followed by ONE more term — and that term is admitted only in
+    // this shape: a template opening with '?' whose every substitution is an `encodeURIComponent()`
+    // call, or such a template chosen against '' by a conditional.
+    //
+    // This EXTENDS the allowlist rather than opening it. Every character of the query's literal text
+    // is authored in `client.ts` and read here; every variable part is percent-encoded, so a value
+    // cannot contain '?', '#', '/', '&' or '=' and therefore cannot re-open the path, cannot reach
+    // another origin, and cannot add a parameter that is not written above. The invariant the rule
+    // exists to hold — every request goes to an allowlisted path and nowhere else — is unchanged.
+    // A bare identifier, a concatenation, a `String()` or a raw interpolation is refused.
+    const declaredQuery = (n) => {
+      const q = skipOuter(ts, n);
+      if (ts.isStringLiteral(q) || ts.isNoSubstitutionTemplateLiteral(q)) return q.text === '';
+      if (ts.isConditionalExpression(q)) return declaredQuery(q.whenTrue) && declaredQuery(q.whenFalse);
+      if (!ts.isTemplateExpression(q) || !q.head.text.startsWith('?') || q.templateSpans.length === 0) return false;
+      return q.templateSpans.every((span) => {
+        const e = skipOuter(ts, span.expression);
+        return ts.isCallExpression(e) && ts.isIdentifier(e.expression) && e.expression.text === 'encodeURIComponent' && e.arguments.length === 1;
+      });
+    };
     for (const call of fetchSites) {
-      const a = call.arguments[0] ? skipOuter(ts, call.arguments[0]) : null;
-      let ok = !!a && ts.isBinaryExpression(a) && a.operatorToken.kind === ts.SyntaxKind.PlusToken && ts.isIdentifier(a.left) && a.left.text === 'API_BASE';
+      let a = call.arguments[0] ? skipOuter(ts, call.arguments[0]) : null;
+      let queryOk = true;
+      if (a && ts.isBinaryExpression(a) && a.operatorToken.kind === ts.SyntaxKind.PlusToken && ts.isBinaryExpression(skipOuter(ts, a.left))) {
+        queryOk = declaredQuery(a.right);
+        a = skipOuter(ts, a.left);
+      }
+      let ok = queryOk && !!a && ts.isBinaryExpression(a) && a.operatorToken.kind === ts.SyntaxKind.PlusToken && ts.isIdentifier(a.left) && a.left.text === 'API_BASE';
       if (ok) ok = (aliasTarget(checker.getSymbolAtLocation(a.left))?.declarations ?? []).some((d) => ts.isVariableDeclaration(d) && relOf(d.getSourceFile().fileName) === 'src/net/endpoint.ts');
       if (ok) {
         const r = a.right;
@@ -1014,7 +1046,7 @@ export function runGates(ts, program, ctx) {
         const parts = type.isUnion() ? type.types : [type];
         ok = shapeOk && parts.length > 0 && parts.every((t) => t.isStringLiteral() && allow.has(t.value));
       }
-      if (!ok) out.push(refusal('fetch-shape', 'src/net/client.ts', lineOf(call), 'fetch', 'the fetch URL must be API_BASE + PATHS.<member>, typed as allowlisted path literals (N-1)'));
+      if (!ok) out.push(refusal('fetch-shape', 'src/net/client.ts', lineOf(call), 'fetch', 'the fetch URL must be API_BASE + PATHS.<member>, typed as allowlisted path literals, optionally + a declared query (a template opening "?" whose substitutions are all encodeURIComponent calls) (N-1)'));
     }
   }
   if (present.has('src/net/endpoint.ts')) {

@@ -10,6 +10,8 @@
 
 import type {
   BusinessChoice,
+  BusinessMatch,
+  BusinessSearchProjection,
   ChatProjection,
   ChatWidgetResolution,
   EmailStartProjection,
@@ -18,6 +20,7 @@ import type {
   RefreshProjection,
   SessionGrant,
   SignInDisplay,
+  TelegramStartProjection,
   TranscribeProjection,
   WidgetIntentProjection,
   WidgetResolveProjection,
@@ -48,6 +51,32 @@ export const errorField = (body: unknown): string | null => text(own(own(body, '
 export const errorRetryAfter = (body: unknown): number | null => {
   const seconds = own(own(body, 'error'), 'retry_after_seconds');
   return typeof seconds === 'number' && Number.isFinite(seconds) && seconds > 0 ? Math.ceil(seconds) : null;
+};
+
+// ── the first run ─────────────────────────────────────────────────────────────────
+
+/** `GET /mobile/pwa/search` → name, opaque slug and address. A row missing either name or slug is dropped. */
+export const projectBusinessSearch = (body: unknown): BusinessSearchProjection | null => {
+  const items = own(body, 'items');
+  if (!Array.isArray(items)) return null;
+  const rows: BusinessMatch[] = [];
+  for (const row of items) {
+    const name = filled(own(row, 'name'));
+    const slug = filled(own(row, 'tenant_slug'));
+    if (name !== null && slug !== null) rows.push({ name, slug, address: filled(own(row, 'address')) });
+  }
+  return { items: rows };
+};
+
+/**
+ * `POST /auth/oauth/telegram/start` → `auth_url`, and only when it is Telegram's own authorization
+ * endpoint. The shell navigates to this value, so an origin allowlist is checked HERE rather than
+ * trusted: no response can turn the sign-in row into a redirect to somewhere else.
+ */
+export const projectTelegramStart = (body: unknown): TelegramStartProjection | null => {
+  const authUrl = filled(own(body, 'auth_url'));
+  if (authUrl === null) return null;
+  return authUrl.startsWith('https://oauth.telegram.org/') ? { authUrl } : null;
 };
 
 // ── sign-in and session ────────────────────────────────────────────────────────────────────────

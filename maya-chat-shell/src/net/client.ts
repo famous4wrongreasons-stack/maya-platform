@@ -16,16 +16,19 @@ import {
   errorCode,
   errorField,
   errorRetryAfter,
+  projectBusinessSearch,
   projectChat,
   projectEmailStart,
   projectEmailVerify,
   projectPasswordLogin,
   projectRefresh,
+  projectTelegramStart,
   projectTranscribe,
   projectWidgetIntent,
   projectWidgetResolve,
 } from './project.ts';
 import type {
+  BusinessSearchProjection,
   ChatFailure,
   ChatProjection,
   ChatRequest,
@@ -33,6 +36,7 @@ import type {
   EmailStartRequest,
   EmailVerifyProjection,
   EmailVerifyRequest,
+  FirstRunFailure,
   Outcome,
   PasswordLoginProjection,
   PasswordLoginRequest,
@@ -40,6 +44,7 @@ import type {
   RefreshRequest,
   SignedOutReason,
   SignInFailure,
+  TelegramStartProjection,
   TranscribeFailure,
   TranscribeProjection,
   TranscribeRequest,
@@ -49,6 +54,8 @@ import type {
 } from './types.ts';
 
 const PATHS = {
+  businessSearch: '/mobile/pwa/search',
+  telegramStart: '/auth/oauth/telegram/start',
   emailStart: '/auth/email/start',
   emailVerify: '/auth/email/verify',
   login: '/auth/login',
@@ -78,7 +85,13 @@ type RequestBody =
   | TranscribeRequest
   | WidgetIntentRequest
   | WidgetResolveRequest
+  | TelegramStartRequest
   | Readonly<Record<string, never>>;
+
+/** `StartOauthLoginDto`, web or native. `redirectUri` is omitted for iOS: the server owns that one. */
+type TelegramStartRequest =
+  | { readonly tenantSlug: string; readonly platform: 'ios' }
+  | { readonly tenantSlug: string; readonly platform: 'web'; readonly redirectUri: string };
 
 /** What one request produced, before any endpoint reads it. */
 export type Exchange =
@@ -110,7 +123,7 @@ const parseRetryAfter = (value: string | null): number | null => {
  * The one request site. A caller's abort and the timeout both abort the fetch; they are told apart,
  * because an abort is the shell's own decision and a timeout is a lost connection.
  */
-async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | null, signal: AbortSignal | null, timeoutMs: number): Promise<Exchange> {
+async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | null, signal: AbortSignal | null, timeoutMs: number, search: string | null = null): Promise<Exchange> {
   if (signal !== null && signal.aborted) return { kind: 'aborted' };
   const controller = new AbortController();
   let timedOut = false;
@@ -120,14 +133,17 @@ async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | 
   }, timeoutMs);
   const onAbort = (): void => controller.abort();
   if (signal !== null) signal.addEventListener('abort', onAbort, { once: true });
-  const headers: Readonly<Record<string, string>> =
-    bearer === null ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', Authorization: 'Bearer ' + bearer };
+  // A `search` term makes this a GET that carries the term in the query string, and a GET sends no
+  // body and declares no content type — which also keeps it a simple request, with no preflight.
+  const reading = search !== null;
+  const auth: Readonly<Record<string, string>> = bearer === null ? {} : { Authorization: 'Bearer ' + bearer };
+  const headers: Readonly<Record<string, string>> = reading ? auth : { ...auth, 'Content-Type': 'application/json' };
   const path = PATHS[endpoint];
   try {
-    const response = await fetch(API_BASE + path, {
-      method: 'POST',
+    const response = await fetch(API_BASE + path + (search === null ? '' : `?q=${encodeURIComponent(search)}`), {
+      method: reading ? 'GET' : 'POST',
       headers,
-      body: JSON.stringify(body),
+      body: reading ? null : JSON.stringify(body),
       signal: controller.signal,
       credentials: 'omit',
       cache: 'no-store',
@@ -252,6 +268,67 @@ export async function passwordLogin(request: PasswordLoginRequest, timeoutMs: nu
     return value === null ? fail({ state: 'unexpected_response', status: ex.status }) : { ok: true, value };
   }
   return fail(signInFailure('login', ex));
+}
+
+// ── the first run: find a business, then hand the browser to Telegram ─────────────────────
+
+/** The server's minimum (`public_business_search_invalid`); refused here so a 400 is never spent on it. */
+export const SEARCH_MIN_CHARS = 2;
+
+/** Both first-run endpoints are public, so no outcome may distinguish an account that exists. */
+function firstRunFailure(ex: Exchange): FirstRunFailure {
+  if (ex.kind !== 'response') return { state: 'no_connection' };
+  const code = errorCode(ex.body);
+  switch (ex.status) {
+    case 429:
+      return { state: 'rate_limited', retryAfterSec: retryAfterOf(ex) };
+    case 400:
+      if (code === 'public_business_search_invalid') return { state: 'term_too_short' };
+      return { state: 'unexpected_response', status: ex.status };
+    case 403:
+    case 404:
+      // A business that stopped accepting client access, and one that never existed, are one state.
+      return { state: 'business_unavailable' };
+    case 502:
+      return { state: 'no_connection' };
+    case 503:
+      if (code === 'social_native_callback_unavailable' || code === 'social_login_unavailable' || code === 'social_provider_disabled')
+        return { state: 'telegram_unavailable' };
+      return { state: 'unexpected_response', status: ex.status };
+    default:
+      return { state: 'unexpected_response', status: ex.status };
+  }
+}
+
+type FirstRunResult<T> = Promise<Outcome<T, FirstRunFailure>>;
+
+/** `GET /mobile/pwa/search?q=` — the canonical public finder. No bearer: nothing here is a session. */
+export async function searchBusinesses(term: string, signal: AbortSignal | null = null, timeoutMs: number = REQUEST_TIMEOUT_MS): FirstRunResult<BusinessSearchProjection> {
+  const trimmed = term.trim();
+  if (trimmed.length < SEARCH_MIN_CHARS) return fail({ state: 'term_too_short' });
+  const ex = await exchange('businessSearch', {}, null, signal, timeoutMs, trimmed);
+  if (ex.kind === 'response' && isSuccess(ex.status)) {
+    const value = projectBusinessSearch(ex.body);
+    return value === null ? fail({ state: 'unexpected_response', status: ex.status }) : { ok: true, value };
+  }
+  return fail(firstRunFailure(ex));
+}
+
+/**
+ * `POST /auth/oauth/telegram/start`. The web client must name its own callback and the server
+ * checks it against `OAUTH_ALLOWED_REDIRECT_URIS`; the native client names none, because
+ * `OAUTH_NATIVE_REDIRECT_URI` is the server's to choose. The returned URL is Telegram's own
+ * (`projectTelegramStart` proves it) and the caller navigates to it.
+ */
+export async function telegramStart(tenantSlug: string, webCallbackUrl: string | null, timeoutMs: number = REQUEST_TIMEOUT_MS): FirstRunResult<TelegramStartProjection> {
+  const body: TelegramStartRequest =
+    webCallbackUrl === null ? { tenantSlug, platform: 'ios' } : { tenantSlug, platform: 'web', redirectUri: webCallbackUrl };
+  const ex = await exchange('telegramStart', body, null, null, timeoutMs);
+  if (ex.kind === 'response' && isSuccess(ex.status)) {
+    const value = projectTelegramStart(ex.body);
+    return value === null ? fail({ state: 'unexpected_response', status: ex.status }) : { ok: true, value };
+  }
+  return fail(firstRunFailure(ex));
 }
 
 // ── session upkeep ─────────────────────────────────────────────────────────────────────────────

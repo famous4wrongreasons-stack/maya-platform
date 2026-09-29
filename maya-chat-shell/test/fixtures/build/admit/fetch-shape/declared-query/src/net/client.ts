@@ -16,15 +16,13 @@ const PATHS = {
 
 type Endpoint = keyof typeof PATHS;
 
-const post = (endpoint: Endpoint, body: string, signal: AbortSignal): Promise<Response> =>
-  fetch(API_BASE + PATHS[endpoint], {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body,
+const request = (endpoint: Endpoint, search: string | null, signal: AbortSignal): Promise<Response> =>
+  fetch(API_BASE + PATHS[endpoint] + (search === null ? '' : `?q=${encodeURIComponent(search)}`), {
+    method: search === null ? 'POST' : 'GET',
     signal,
     credentials: 'omit',
     cache: 'no-store',
   });
 
-export const chat = (body: string, signal: AbortSignal): Promise<Response> => post('chat', body, signal);
-export const login = (body: string, signal: AbortSignal): Promise<Response> => post('login', body, signal);
+export const chat = (signal: AbortSignal): Promise<Response> => request('chat', null, signal);
+export const find = (term: string, signal: AbortSignal): Promise<Response> => request('businessSearch', term, signal);

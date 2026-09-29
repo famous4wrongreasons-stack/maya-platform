@@ -22,9 +22,11 @@ import {
   logoutSession,
   passwordLogin,
   refreshSession,
+  searchBusinesses,
+  telegramStart,
 } from './client.ts';
 import type { Authorization, Authorizer, RefreshResult, Timeouts } from './client.ts';
-import type { BusinessChoice, SessionGrant, SignedOutReason, SignInDisplay, SignInFailure } from './types.ts';
+import type { BusinessChoice, BusinessMatch, FirstRunFailure, SessionGrant, SignedOutReason, SignInDisplay, SignInFailure } from './types.ts';
 
 /** A refresh starts when the access token has less than this left. */
 export const REFRESH_LEEWAY_MS = 30_000;
@@ -33,6 +35,13 @@ export const REFRESH_LEEWAY_MS = 30_000;
 export type SessionSnapshot =
   | { readonly signedIn: false; readonly reason: SignedOutReason | null }
   | { readonly signedIn: true; readonly display: SignInDisplay };
+
+/** Structurally `shell/ports.ts` `FinderStep` and `TelegramStep`. */
+export type FinderOutcome =
+  | { readonly step: 'matches'; readonly businesses: readonly BusinessMatch[] }
+  | { readonly step: 'failed'; readonly failure: FirstRunFailure };
+
+export type TelegramOutcome = { readonly step: 'handed_off' } | { readonly step: 'failed'; readonly failure: FirstRunFailure };
 
 /** Structurally `shell/ports.ts` `SignInStep`. */
 export type SignInOutcome =
@@ -45,6 +54,14 @@ export interface NetOptions {
   /** Epoch milliseconds. */
   readonly now?: () => number;
   readonly timeouts?: Timeouts;
+  /**
+   * Where the provider returns a WEB browser — this document's own origin plus the callback file,
+   * computed by `entry/` from `location`, so no origin is written into the bundle. Null when the
+   * document is not on http(s) — the native carrier — and the server then owns the callback.
+   */
+  readonly webCallbackUrl?: string | null;
+  /** Hand this browser to an external URL. `entry/` supplies it; nothing in `net/` touches `location`. */
+  readonly navigate?: (url: string) => void;
 }
 
 interface Grant {
@@ -75,6 +92,8 @@ const failed = (failure: SignInFailure): SignInOutcome => ({ step: 'failed', fai
 
 export function createNet(options: NetOptions = {}) {
   const now = options.now ?? ((): number => Date.now());
+  const webCallbackUrl = options.webCallbackUrl ?? null;
+  const navigate = options.navigate ?? ((): void => undefined);
   const timeouts: Timeouts = options.timeouts ?? { requestMs: REQUEST_TIMEOUT_MS, transcribeMs: TRANSCRIBE_TIMEOUT_MS };
 
   let grant: Grant | null = null;
@@ -208,6 +227,25 @@ export function createNet(options: NetOptions = {}) {
       return () => {
         listeners.delete(own);
       };
+    },
+
+    /** The canonical public finder. A term under two characters is refused before any request. */
+    async findBusinesses(term: string): Promise<FinderOutcome> {
+      const r = await searchBusinesses(term, null, timeouts.requestMs);
+      return r.ok ? { step: 'matches', businesses: r.value.items } : { step: 'failed', failure: r.failure };
+    },
+
+    /**
+     * Start Telegram for the chosen business and hand the browser over. `navigate` is the last thing
+     * that runs here: on success this document is leaving, so no session is installed on this side.
+     */
+    async startTelegram(tenantSlug: string): Promise<TelegramOutcome> {
+      const business = tenantSlug.trim();
+      if (business === '') return { step: 'failed', failure: { state: 'business_unavailable' } };
+      const r = await telegramStart(business, webCallbackUrl, timeouts.requestMs);
+      if (!r.ok) return { step: 'failed', failure: r.failure };
+      navigate(r.value.authUrl);
+      return { step: 'handed_off' };
     },
 
     async startEmail(email: string): Promise<SignInOutcome> {

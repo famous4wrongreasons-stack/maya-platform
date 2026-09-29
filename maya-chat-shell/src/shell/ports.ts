@@ -21,9 +21,11 @@ import type { A11yEnvironment, Cell, InteractiveRefKey, ShellRoute, TerminalLine
 import type { RenderInput, RenderResult } from '../renderer/nodes.ts';
 import type {
   BusinessChoice,
+  BusinessMatch,
   ChatFailure,
   ChatProjection,
   ChatRequest,
+  FirstRunFailure,
   Outcome,
   SignedOutReason,
   SignInDisplay,
@@ -40,7 +42,9 @@ import type {
 // `dom/` may not import `net/types.ts`; the shapes it draws are re-exported here unchanged.
 export type {
   BusinessChoice,
+  BusinessMatch,
   ChatFailure,
+  FirstRunFailure,
   SignedOutReason,
   SignInDisplay,
   SignInFailure,
@@ -161,9 +165,26 @@ export type SignInStep =
   | { readonly step: 'signed_in'; readonly display: SignInDisplay }
   | { readonly step: 'failed'; readonly failure: SignInFailure };
 
+/**
+ * What the first run can answer. Finding a business and being handed to Telegram are not sign-in
+ * steps: no session exists yet either way, and `handed_off` means the browser is leaving.
+ */
+export type FinderStep =
+  | { readonly step: 'matches'; readonly businesses: readonly BusinessMatch[] }
+  | { readonly step: 'failed'; readonly failure: FirstRunFailure };
+
+export type TelegramStep = { readonly step: 'handed_off' } | { readonly step: 'failed'; readonly failure: FirstRunFailure };
+
 export interface SessionPort {
   view(): SessionView;
   subscribe(listener: (view: SessionView) => void): Cancel;
+  /** The canonical public finder. Refuses a term under two characters before any request. */
+  findBusinesses(term: string): Promise<FinderStep>;
+  /**
+   * Hand this browser to Telegram for the chosen business. On success the page is already
+   * navigating away, so no caller may assume it still runs.
+   */
+  startTelegram(tenantSlug: string): Promise<TelegramStep>;
   startEmail(email: string): Promise<SignInStep>;
   /** `tenantSlug` is null on first verify and the chosen `businesses[].slug` on re-verify. */
   verifyEmail(email: string, code: string, tenantSlug: string | null): Promise<SignInStep>;
