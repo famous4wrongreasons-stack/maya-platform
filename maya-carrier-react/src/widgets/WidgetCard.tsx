@@ -109,6 +109,15 @@ export function WidgetCard({
         aria-describedby={result.description === '' ? undefined : describedBy}
         aria-busy={item.pending !== null ? 'true' : undefined}
         style={{
+          // entry/styles.css `.widget`: the article is the flex column that spaces its own
+          // children. The chrome around it — the 20px radius, the `line` edge, the `surf` ground,
+          // 18px of padding — is the owner's card (app.html:16326).
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          minWidth: 0,
+          maxWidth: '100%',
+          overflowWrap: 'anywhere',
           border: '1px solid ' + c.line,
           borderRadius: 20,
           padding: 18,

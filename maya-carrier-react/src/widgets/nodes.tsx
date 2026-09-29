@@ -52,6 +52,12 @@ const nameOf = (name: string, visible: string): string | undefined =>
 
 // ── the owner's card grammar (app.html:16283 onward), as style fragments ───────────────────────
 
+/**
+ * The owner's option row (app.html:16326) — radius 14, `line2` edge, `bg2` ground — with the
+ * shell's flow for its contents: `flex-wrap: wrap; gap: 0.25rem 0.5rem` (entry/styles.css:766).
+ * The wrap matters. A choice carries an arbitrary number of server leaves, and the owner's own row
+ * was flex because it had exactly two; without wrapping, four leaves squeeze into slivers.
+ */
 const optionRow = (c: WidgetTheme) => ({
   width: '100%',
   minHeight: 46,
@@ -61,12 +67,15 @@ const optionRow = (c: WidgetTheme) => ({
   color: c.ink,
   padding: '10px 13px',
   display: 'flex',
-  alignItems: 'center',
-  gap: 10,
+  flexWrap: 'wrap' as const,
+  alignItems: 'baseline',
+  gap: '4px 8px',
   textAlign: 'start' as const,
   cursor: 'pointer',
   font: 'inherit',
   fontSize: 12.5,
+  lineHeight: 1.45,
+  overflowWrap: 'break-word' as const,
 });
 
 const primaryButton = (c: WidgetTheme) => ({
@@ -142,7 +151,7 @@ function Action({ node, ctx, k }: { readonly node: ActionNode; readonly ctx: Dra
         aria-describedby={blocked ? whyId : undefined}
         aria-disabled={blocked || ctx.pending === node.ref ? 'true' : undefined}
         onClick={() => ctx.activate(node.ref)}
-        style={{ ...shape, opacity: blocked ? 0.55 : 1, marginTop: 8 }}
+        style={{ ...shape, opacity: blocked ? 0.55 : 1 }}
       >
         {node.label}
       </button>
@@ -174,7 +183,7 @@ function Choice({ node, ctx, k }: { readonly node: ChoiceNode; readonly ctx: Dra
         aria-label={node.name === '' ? undefined : node.name}
         aria-disabled={ctx.pending === node.ref ? 'true' : undefined}
         onClick={() => ctx.activate(node.ref)}
-        style={{ ...optionRow(c), marginTop: 8 }}
+        style={{ ...optionRow(c) }}
       >
         {inner}
       </button>
@@ -189,7 +198,13 @@ function Choice({ node, ctx, k }: { readonly node: ChoiceNode; readonly ctx: Dra
       tabIndex={0}
       data-ref={node.ref}
       aria-label={node.name === '' ? undefined : node.name}
-      style={{ ...optionRow(c), cursor: 'default', marginTop: 8 }}
+      style={{
+        ...optionRow(c),
+        cursor: 'default',
+        minHeight: 44,
+        background: 'transparent',
+        border: '1px dashed ' + c.line2,
+      }}
     >
       {inner}
     </div>
@@ -212,11 +227,11 @@ function Field({ node, ctx, k }: { readonly node: FieldNode; readonly ctx: DrawC
       aria-label={node.name === '' ? undefined : node.name}
       aria-invalid={node.refused ? 'true' : undefined}
       style={{
-        marginTop: 10,
         padding: '10px 13px',
         borderRadius: 14,
-        border: '1px solid ' + (node.refused ? c.errc : c.line),
-        background: c.surf,
+        minHeight: 44,
+        border: node.refused ? '2px solid ' + c.errc : '1px dashed ' + c.line2,
+        background: 'transparent',
       }}
     >
       {node.help.map((help, i) => (
@@ -249,8 +264,21 @@ function WidgetTable({ node, ctx, k }: { readonly node: TableNode; readonly ctx:
   const cellStyle = { padding: '8px 10px', borderTop: '1px solid ' + c.line, fontSize: 12.5 };
   return (
     // A-10: a wide table scrolls inside its own container, never the page.
-    <div key={k} className="widget-table-scroll" style={{ marginTop: 12, overflowX: 'auto' }}>
-      <table className="widget-table" style={{ width: '100%', borderCollapse: 'collapse', color: c.ink }}>
+    <div
+      key={k}
+      className="widget-table-scroll"
+      style={{ maxWidth: '100%', overflowX: 'auto', overscrollBehaviorX: 'contain' }}
+    >
+      {/*
+        A-10 again: the point of the scroll container is that a wide table SCROLLS. The article sets
+        `overflow-wrap: anywhere`, which inside a table lets the browser shrink columns to fit
+        instead — "Мастер" breaks to "Мас/тер" and nothing ever scrolls. Normal wrapping here, and
+        header cells on one line, so the table takes the width it needs and the container carries it.
+      */}
+      <table
+        className="widget-table"
+        style={{ minWidth: '100%', borderCollapse: 'collapse', color: c.ink, overflowWrap: 'normal' }}
+      >
         <caption
           style={{
             captionSide: 'top',
@@ -271,7 +299,7 @@ function WidgetTable({ node, ctx, k }: { readonly node: TableNode; readonly ctx:
                 key={column.key}
                 scope="col"
                 className={column.align === 'end' ? 'cell--end' : undefined}
-                style={{ ...cellStyle, borderTop: '0', textAlign: column.align, fontWeight: 500, color: c.muted }}
+                style={{ ...cellStyle, borderTop: '0', textAlign: column.align, fontWeight: 500, color: c.muted, whiteSpace: 'nowrap' }}
               >
                 {column.label}
               </th>
@@ -310,7 +338,7 @@ function WidgetTable({ node, ctx, k }: { readonly node: TableNode; readonly ctx:
                     const shared = {
                       ...cellStyle,
                       textAlign: column.align,
-                      ...(isHeader ? { fontWeight: 500 } : null),
+                      ...(isHeader ? { fontWeight: 500, whiteSpace: 'nowrap' as const } : null),
                     };
                     return isHeader ? (
                       <th
@@ -371,20 +399,20 @@ function Block({ node, place, ctx, k }: { readonly node: BlockNode; readonly pla
         className={className + (node.roleHint === null ? '' : ' hint--' + node.roleHint)}
         role="group"
         aria-label={label}
-        style={{ display: 'flex', flexDirection: 'column' }}
+        style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}
       >
         {children}
       </div>
     );
   if (node.block === 'list')
     return (
-      <ul key={k} className={className} aria-label={label} style={{ margin: '8px 0 0', padding: 0, listStyle: 'none' }}>
+      <ul key={k} className={className} aria-label={label} style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {children}
       </ul>
     );
   if (node.block === 'ordered_list')
     return (
-      <ol key={k} className={className} aria-label={label} style={{ margin: '8px 0 0', paddingInlineStart: 20 }}>
+      <ol key={k} className={className} aria-label={label} style={{ margin: 0, paddingInlineStart: 20 }}>
         {children}
       </ol>
     );
@@ -400,7 +428,7 @@ function Block({ node, place, ctx, k }: { readonly node: BlockNode; readonly pla
     );
   // paragraph → <p> only when every child may sit inline, else <div>. host.ts:300
   return node.children.every((child) => INLINE_NODES.has(child.t)) ? (
-    <p key={k} className={className} aria-label={label} style={{ margin: '8px 0 0', fontSize: 13.5, lineHeight: 1.5, color: ctx.c.ink }}>
+    <p key={k} className={className} aria-label={label} style={{ margin: 0, fontSize: 13.5, lineHeight: 1.5, color: ctx.c.ink }}>
       {children}
     </p>
   ) : (
@@ -420,7 +448,7 @@ function Limitation({ node, c, k }: { readonly node: LimitationNode; readonly c:
       key={k}
       className={'widget-limitation widget-limitation--' + node.severity}
       style={{
-        margin: '10px 0 0',
+        margin: 0,
         padding: '10px 13px',
         borderRadius: 14,
         border: '1px solid ' + (loud ? c.errc : c.line),
@@ -443,7 +471,7 @@ export function drawNode(node: RenderNode, place: Place, k: string, ctx: DrawCtx
       return place === 'inline' ? (
         <span key={k}>{node.text}</span>
       ) : (
-        <p key={k} className="widget-text" style={{ margin: '8px 0 0', fontSize: 13.5, lineHeight: 1.5, color: ctx.c.ink }}>
+        <p key={k} className="widget-text" style={{ margin: 0, fontSize: 13.5, lineHeight: 1.5, color: ctx.c.ink }}>
           {node.text}
         </p>
       );
@@ -451,13 +479,13 @@ export function drawNode(node: RenderNode, place: Place, k: string, ctx: DrawCtx
       return place === 'inline' ? (
         <Leaf key={k} leaf={node} c={ctx.c} />
       ) : (
-        <p key={k} className="widget-leaf-line" style={{ margin: '6px 0 0', fontSize: 13.5, lineHeight: 1.5, color: ctx.c.ink }}>
+        <p key={k} className="widget-leaf-line" style={{ margin: 0, fontSize: 13.5, lineHeight: 1.5, color: ctx.c.ink }}>
           <Leaf leaf={node} c={ctx.c} />
         </p>
       );
     case 'heading': {
       const shared = {
-        margin: node.level === 2 ? '0' : '12px 0 0',
+        margin: 0,
         fontSize: node.level === 2 ? 17 : node.level === 3 ? 14 : 12.5,
         lineHeight: 1.3,
         letterSpacing: '-0.01em',

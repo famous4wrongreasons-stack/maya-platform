@@ -1,3 +1,5 @@
 node_modules/
 dist/
 .bundle.mjs
+dev/dist
+dev/results.json
