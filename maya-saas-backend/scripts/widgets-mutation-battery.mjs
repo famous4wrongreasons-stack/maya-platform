@@ -64,7 +64,7 @@
 // 1 otherwise; 2 on a usage error.
 //
 //   node scripts/widgets-mutation-battery.mjs [--gate <id>] [--mutations <dir>] [--steps unit,typecheck,k3,live]
-//        [--live-tests <path>] [--live-filter <name pattern>] [--unit-tests <path>]
+//        [--live-tests <path>] [--live-filter <name pattern>] [--unit-tests <path>] [--unit-filter <name pattern>]
 //        [--partition <index/count>] [--out <report.json>] [--dry-run] [--keep]
 //   A partition requires one --gate; it retains full per-mutant steps/controls and reports
 //   PARTITION-AS-DECLARED. Only widgets-mutation-ci.mjs may assemble a complete CI receipt.
@@ -123,6 +123,7 @@ for (const step of explicitSteps ?? []) if (!STEPS.includes(step)) usage(`unknow
 const liveTests = option('--live-tests');
 const liveFilter = option('--live-filter');
 const unitTests = option('--unit-tests');
+const unitFilter = option('--unit-filter');
 const partitionOption = option('--partition');
 if (partitionOption !== undefined && gate === undefined) usage('--partition requires exactly one --gate');
 
@@ -319,7 +320,7 @@ const report = {
   batteries: batteryFiles,
   neutraliser_sets: Object.keys(neutralisers),
   steps: explicitSteps ?? 'per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)',
-  restrictions: { live_tests: liveTests ?? null, live_filter: liveFilter ?? null, unit_tests: unitTests ?? null },
+  restrictions: { live_tests: liveTests ?? null, live_filter: liveFilter ?? null, unit_tests: unitTests ?? null, ...(unitFilter ? { unit_filter: unitFilter } : {}) },
   mirror: MIRROR_ROOT,
   jest_cache: JEST_CACHE,
   neutraliser_controls: {},
@@ -546,7 +547,7 @@ const runSteps = (edits, steps) => {
   const forceExit = '--forceExit';
   const outcome = {};
   if (steps.includes('unit'))
-    outcome.unit = run(backend, 'npx', ['jest', '--runInBand', forceExit, cache, '--json', `--outputFile=${unitJson}`, ...(unitTests ? [unitTests] : [])]);
+    outcome.unit = run(backend, 'npx', ['jest', '--runInBand', forceExit, cache, '--json', `--outputFile=${unitJson}`, ...(unitFilter ? ['-t', unitFilter] : []), ...(unitTests ? [unitTests] : [])]);
   if (steps.includes('typecheck')) outcome.typecheck = run(backend, 'npm', ['run', '-s', 'typecheck:widgets-live']);
   if (steps.includes('k3')) outcome.k3 = run(backend, process.execPath, ['scripts/k3-gateway-check.mjs']);
   if (steps.includes('live'))
