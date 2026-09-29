@@ -1,3 +1,4 @@
+import { personalClientProof } from './support/personal-client-proof';
 import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
 import {
   bootHttp,
@@ -40,5 +41,23 @@ describe('Widget release programme [HTTP] [PostgreSQL]', () => {
     });
     for (const p of proofs) recordJestEvidence(p);
     expect(proofs).toHaveLength(2);
+  });
+  it('SB1-HTTP [HTTP] explicit owner personal context reaches canonical booking with durable actor attribution', async () => {
+    const base = await http.listenLoopback();
+    await personalClientProof({
+      apiBase: base,
+      fixtures: fx.binView(),
+      mintProvenance: () => http.mintProvenance(),
+      request: async (route, init) => {
+        const r = await fetch(`${base}/api${route}`, init);
+        return { status: r.status, body: (await r.json()) as unknown };
+      },
+      evidence: {
+        enabled: false,
+        record: () => {
+          throw new Error('No widget gate claim');
+        },
+      },
+    });
   });
 });

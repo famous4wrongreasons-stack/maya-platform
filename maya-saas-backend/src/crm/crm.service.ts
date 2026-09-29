@@ -111,6 +111,8 @@ import {
 } from './crm-request.errors';
 
 export type AppointmentActionInvocation = {
+  /** SB-1 server-resolved explicit personal context; never copied from a DTO. */
+  personalContext?: import('../appointments/personal-client-context.service').PersonalClientContext;
   /** Server-resolved channel and canonical target; never copied from a DTO. */
   clientPrincipal?: { linkId: string; appointmentId?: string };
   bookingIntent?: import('../action-engine/client-booking-intent.contract').ClientBookingIntentContext;
@@ -2714,10 +2716,13 @@ export class CrmService {
       targetRef: input.targetRef,
       input: input.input,
       evidenceRefs: input.invocation.clientPrincipal
-        ? clientPrincipalEvidence(
-            input.invocation.clientPrincipal.linkId,
-            input.invocation.clientPrincipal.appointmentId,
-          )
+        ? [
+            ...clientPrincipalEvidence(
+              input.invocation.clientPrincipal.linkId,
+              input.invocation.clientPrincipal.appointmentId,
+            ),
+            ...(input.invocation.personalContext?.evidenceRefs ?? []),
+          ]
         : [],
       callerIdempotency: input.invocation.callerIdempotency,
       ...(input.invocation.bookingIntent

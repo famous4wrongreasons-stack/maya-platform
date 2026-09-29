@@ -126,6 +126,15 @@ export class AppointmentsService {
         source: calendarSource,
         crm_external_id: appointment.crmExternalId,
         start_at: appointment.startAt.toISOString(),
+        ...(invocation.personalContext
+          ? {
+              authority_context: invocation.personalContext.kind,
+              actor_session_id: invocation.personalContext.sessionId,
+              actor_membership_id: invocation.personalContext.membershipId,
+              actor_membership_role: invocation.personalContext.membershipRole,
+              client_channel_link_id: invocation.personalContext.linkId,
+            }
+          : {}),
       },
     });
 

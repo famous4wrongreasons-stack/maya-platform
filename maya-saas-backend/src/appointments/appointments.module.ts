@@ -9,6 +9,8 @@ import { TenantsModule } from '../tenants/tenants.module';
 import { UsersModule } from '../users/users.module';
 import { AvailabilityController } from './availability.controller';
 import { AppointmentsController } from './appointments.controller';
+import { PersonalClientController } from './personal-client.controller';
+import { PersonalClientContextService } from './personal-client-context.service';
 import { AppointmentsService } from './appointments.service';
 import { TenantAppointmentRepository } from './tenant-appointment.repository';
 
@@ -22,8 +24,16 @@ import { TenantAppointmentRepository } from './tenant-appointment.repository';
     InboxModule,
     RecoveryModule,
   ],
-  controllers: [AppointmentsController, AvailabilityController],
-  providers: [AppointmentsService, TenantAppointmentRepository],
+  controllers: [
+    AppointmentsController,
+    AvailabilityController,
+    PersonalClientController,
+  ],
+  providers: [
+    AppointmentsService,
+    TenantAppointmentRepository,
+    PersonalClientContextService,
+  ],
   exports: [AppointmentsService, TenantAppointmentRepository],
 })
 export class AppointmentsModule {}

@@ -362,7 +362,25 @@ export class Fixtures {
   }
 
   /** Source facts only: no widget, action-execution or appointment is minted by this fixture. */
-  async bookingSource(tenant: TenantFixture, user: UserFixture): Promise<void> {
+  async bookingSource(
+    tenant: TenantFixture,
+    user: UserFixture,
+    liveBooking = false,
+  ) {
+    if (liveBooking) {
+      assertProofDatabase(process.env);
+      if (!this.tenants.includes(tenant.id))
+        throw new Error(
+          'Only a synthetic owned proof tenant may enable booking',
+        );
+      await this.ctx.prisma.brandingSettings.create({
+        data: { tenantId: tenant.id, themeJson: { booking: { mode: 'live' } } },
+      });
+      await this.ctx.prisma.tenant.update({
+        where: { id: tenant.id },
+        data: { currentPeriodEnd: new Date('2099-01-01') },
+      });
+    }
     await this.ctx.prisma.user.update({
       where: { id: user.id },
       data: {
@@ -403,11 +421,20 @@ export class Fixtures {
         endMinute: 840,
       })),
     });
+    return { serviceId: service.id, staffId: provider.id };
   }
 
   /** Read-only observation of the canonical owners' effects in this fixture tenant. */
   async bookingProofState(tenant: TenantFixture) {
     return {
+      personalAudits: await this.ctx.prisma.auditLog.findMany({
+        where: { tenantId: tenant.id, action: 'appointment.created' },
+        select: { userId: true, metadataJson: true },
+      }),
+      memberships: await this.ctx.prisma.membership.findMany({
+        where: { tenantId: tenant.id },
+        select: { userId: true, role: true },
+      }),
       appointments: await this.ctx.prisma.appointment.findMany({
         where: { tenantId: tenant.id },
         select: { status: true, mayaClientId: true },

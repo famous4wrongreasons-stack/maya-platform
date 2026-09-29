@@ -73,6 +73,30 @@ export class ClientAppointmentCreateService {
     return link;
   }
 
+  private async resolveSelectedAccount(
+    tenantId: string,
+    userId: string,
+    invocation: AppointmentActionInvocation,
+  ) {
+    const personal = invocation.personalContext;
+    if (this.context.get()?.role === 'tenant_owner' && !personal)
+      throw new ForbiddenException('explicit_personal_client_context_required');
+    if (personal) {
+      if (personal.tenantId !== tenantId || personal.userId !== userId)
+        throw new ForbiddenException('personal_client_context_mismatch');
+      await personal.revalidate();
+    }
+    const link = await this.resolveAccount(tenantId, userId);
+    if (
+      personal &&
+      (personal.linkId !== link.id ||
+        personal.clientId !== link.clientId ||
+        personal.verificationEvidenceHash !== link.verificationEvidenceHash)
+    )
+      throw new ForbiddenException('personal_client_binding_changed');
+    return link;
+  }
+
   async forAccount(
     tenantId: string,
     userId: string,
@@ -82,7 +106,7 @@ export class ClientAppointmentCreateService {
     try {
       return await this.forVerifiedLink(
         tenantId,
-        () => this.resolveAccount(tenantId, userId),
+        () => this.resolveSelectedAccount(tenantId, userId, invocation),
         dto,
         invocation,
       );
@@ -112,7 +136,7 @@ export class ClientAppointmentCreateService {
     try {
       return await this.quoteVerifiedLink(
         tenantId,
-        () => this.resolveAccount(tenantId, userId),
+        () => this.resolveSelectedAccount(tenantId, userId, invocation),
         dto,
         invocation,
       );
@@ -373,6 +397,9 @@ export class ClientAppointmentCreateService {
       notifyBySmsHours: 0,
     };
     const ownedInvocation: AppointmentActionInvocation = {
+      ...(invocation.personalContext
+        ? { personalContext: invocation.personalContext }
+        : {}),
       sourceType: 'authenticated_request',
       sourceRef: `client-channel-link:${link.id}`,
       clientPrincipal: { linkId: link.id },

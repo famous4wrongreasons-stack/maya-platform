@@ -572,3 +572,94 @@ describe('U-OWN read-only create quote', () => {
     expect(h.runtime.executeWithReceipt).not.toHaveBeenCalled();
   });
 });
+
+describe('SB-1 canonical create with personal context', () => {
+  const personal = () => ({
+    kind: 'personal_client' as const,
+    tenantId: 'tenant-1',
+    userId: 'user-1',
+    sessionId: 'session-1',
+    membershipId: 'member-1',
+    membershipRole: 'tenant_owner',
+    linkId: 'link-1',
+    clientId: 'client-1',
+    verificationEvidenceHash: 'evidence',
+    evidenceRefs: [
+      'personal-context:v1:personal_client',
+      'personal-actor-user:v1:user-1',
+      'personal-actor-session:v1:session-1',
+      'personal-actor-membership:v1:member-1',
+      'personal-actor-role:v1:tenant_owner',
+    ],
+    revalidate: jest.fn().mockResolvedValue(undefined),
+  });
+  const ownerRun = <T>(h: ReturnType<typeof setup>, fn: () => T) =>
+    h.context.runAsAuthPrincipal(
+      { tenantId: 'tenant-1', userId: 'user-1', role: 'tenant_owner' },
+      fn,
+    );
+  it('SB1-NOSELECT refuses owner create and quote without an explicit personal context', async () => {
+    const h = setup();
+    await expect(
+      ownerRun(h, () => h.service.forAccount('tenant-1', 'user-1', h.dto)),
+    ).rejects.toThrow('explicit_personal_client_context_required');
+    await expect(
+      ownerRun(h, () => h.service.quoteForAccount('tenant-1', 'user-1', h.dto)),
+    ).rejects.toThrow('explicit_personal_client_context_required');
+    expect(h.prisma.clientChannelLink.findMany).not.toHaveBeenCalled();
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+  });
+  it('SB1-CREATE persists actual actor/context alongside Client authority without owner privileges', async () => {
+    const h = setup();
+    const selected = personal();
+    await ownerRun(h, () =>
+      h.service.forAccount('tenant-1', 'user-1', h.dto, {
+        personalContext: selected,
+      }),
+    );
+    expect(h.plans[0].request.source.actorUserId).toBeUndefined();
+    expect(h.plans[0].request.evidenceRefs).toEqual([
+      'client-authority:v1:link-1',
+      ...selected.evidenceRefs,
+    ]);
+    expect(h.plans[0].input.clientId).toBe('client-1');
+    expect(h.plans[0].input.creationMode).toBe('client');
+    expect(h.rows).toHaveLength(1);
+    expect(selected.revalidate.mock.calls.length).toBeGreaterThanOrEqual(3);
+  });
+  it.each([
+    'tenantId',
+    'userId',
+    'linkId',
+    'clientId',
+    'verificationEvidenceHash',
+  ] as const)('SB1-BOUND refuses a changed selected %s', async (field) => {
+    const h = setup();
+    const selected = personal();
+    selected[field] = 'other';
+    await expect(
+      ownerRun(h, () =>
+        h.service.forAccount('tenant-1', 'user-1', h.dto, {
+          personalContext: selected,
+        }),
+      ),
+    ).rejects.toThrow();
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+  });
+  it('SB1-DISPATCH rechecks revocation immediately before provider dispatch', async () => {
+    const h = setup();
+    const selected = personal();
+    selected.revalidate
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValue(new ForbiddenException('revoked'));
+    await expect(
+      ownerRun(h, () =>
+        h.service.forAccount('tenant-1', 'user-1', h.dto, {
+          personalContext: selected,
+        }),
+      ),
+    ).rejects.toThrow('revoked');
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+  });
+});

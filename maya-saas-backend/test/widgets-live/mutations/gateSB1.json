@@ -1,0 +1,102 @@
+[
+  {
+    "id": "SB1-M01",
+    "file": "src/appointments/personal-client-context.service.ts",
+    "find": "selection !== 'personal_client'",
+    "replace": "false",
+    "killers": [
+      "SB1-SELECTION"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SB1-M02",
+    "file": "src/appointments/personal-client-context.service.ts",
+    "find": "session.revokedAt ||",
+    "replace": "false ||",
+    "killers": [
+      "SB1-SESSION"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SB1-M03",
+    "file": "src/appointments/personal-client-context.service.ts",
+    "find": "membership.role.toString() !== user.role.toString()",
+    "replace": "false",
+    "killers": [
+      "SB1-SESSION"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SB1-M04",
+    "file": "src/appointments/personal-client-context.service.ts",
+    "find": "links.length !== 1 ||",
+    "replace": "links.length < 1 ||",
+    "killers": [
+      "SB1-LINK"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SB1-M05",
+    "file": "src/appointments/personal-client-context.service.ts",
+    "find": "link.revokedAt ||",
+    "replace": "false ||",
+    "killers": [
+      "SB1-LINK"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SB1-M06",
+    "file": "src/appointments/personal-client-context.service.ts",
+    "find": "JSON.stringify(current) !== JSON.stringify(selected)",
+    "replace": "false",
+    "killers": [
+      "SB1-RECHECK"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SB1-M07",
+    "file": "src/appointments/client-appointment-create.service.ts",
+    "find": "this.context.get()?.role === 'tenant_owner' && !personal",
+    "replace": "false",
+    "killers": [
+      "SB1-NOSELECT"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SB1-M08",
+    "file": "src/appointments/client-appointment-create.service.ts",
+    "find": "      await personal.revalidate();",
+    "replace": "      // mutation: stale selected context",
+    "killers": [
+      "SB1-DISPATCH"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SB1-M09",
+    "file": "src/appointments/client-appointment-create.service.ts",
+    "find": "personal.linkId !== link.id ||",
+    "replace": "false ||",
+    "killers": [
+      "SB1-BOUND"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SB1-M10",
+    "file": "src/crm/crm.service.ts",
+    "find": "...(input.invocation.personalContext?.evidenceRefs ?? []),",
+    "replace": "// mutation: lose actual actor context",
+    "killers": [
+      "SB1-CREATE"
+    ],
+    "expect": "build-killed"
+  }
+]
