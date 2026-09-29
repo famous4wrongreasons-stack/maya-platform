@@ -1,0 +1,24 @@
+{
+  "contract": "maya.widget-release-owner-decisions/1",
+  "date": "2026-09-29",
+  "authority": "Explicit owner instruction in this task after preintegration DECISIONS.md",
+  "decisions": {
+    "OD-3": "A",
+    "OD-4": "B",
+    "OD-5": "B",
+    "SB-1": "A"
+  },
+  "scope": {
+    "OD-3": "Accept U separately only with all four proof duties; strict live measure preserved",
+    "OD-4": "G5-f remains U, code-only refusal, no early HandoffTarget",
+    "OD-5": "Owner-shaped output only; no principal-narrowed registration",
+    "SB-1": "Explicit personal-client context distinct from business owner; new verified maya_user binding episode, no resurrection/phone matching/caller-selected Client; tenant/current verification/revocation rechecked; actual actor/context in audit"
+  },
+  "stops": {
+    "G6-6/G13-R8": "Destination receiving authority contract, independent of other booking paths",
+    "9.6": "Integration-owned canonical persisted user-turn writer; no second writer",
+    "AR-1": "No activation; envelope only after remaining evidence/contracts settled"
+  },
+  "production_activation": "FORBIDDEN",
+  "schema_migration_authorized": false
+}
