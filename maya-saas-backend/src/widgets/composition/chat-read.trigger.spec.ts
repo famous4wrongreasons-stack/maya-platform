@@ -218,7 +218,7 @@ describe('P-MT2a ChatReadTriggerService', () => {
           intent_proposals: [],
         },
         source,
-      } as never);
+      });
       await h.service.afterCompletedRead({
         ...input(),
         toolName,

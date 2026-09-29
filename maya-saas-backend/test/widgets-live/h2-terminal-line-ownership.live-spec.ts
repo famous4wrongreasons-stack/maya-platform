@@ -447,7 +447,7 @@ describe('H2 — the confirmation terminal line survives the same widget escape 
           frozenNounsJson: first.frozenNounsJson ?? Prisma.DbNull,
           selectionDomainLabelsJson:
             first.selectionDomainLabelsJson ?? Prisma.DbNull,
-        } as Prisma.WidgetIntentRecordUncheckedCreateInput,
+        },
       });
       await stores.writeReceipt({
         tenantId: tenant.id,
