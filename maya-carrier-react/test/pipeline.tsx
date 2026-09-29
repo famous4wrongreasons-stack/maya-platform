@@ -67,3 +67,17 @@ export {
   wavDataUrl as shellWavDataUrl,
 } from '../../maya-chat-shell/src/voice/wav.ts';
 export { createCapture, MIME_CANDIDATES, CAPTURE_CONSTRAINTS } from '../src/voice/capture.ts';
+
+// The fullscreen detail sheet, rendered without any port.
+import { DetailSheet } from '../src/widgets/DetailSheet.tsx';
+export function detailMarkup(view: unknown, dark = true): string {
+  return renderToStaticMarkup(
+    <DetailSheet
+      view={view as never}
+      t={tokens(dark)}
+      activate={() => undefined}
+      close={() => undefined}
+      focusFallback={() => undefined}
+    />,
+  );
+}

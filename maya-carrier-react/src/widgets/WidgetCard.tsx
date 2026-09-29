@@ -30,10 +30,13 @@ export function WidgetCard({
   item,
   t,
   activate,
+  variant = 'lane',
 }: {
   readonly item: WidgetItemView;
   readonly t: Tokens;
   readonly activate: (itemId: string, ref: InteractiveRefKey) => void;
+  /** In the lane a card is one turn's width; in the fullscreen sheet it is the whole sheet. */
+  readonly variant?: 'lane' | 'sheet';
 }) {
   const result = item.result;
   const c = widgetTheme(t);
@@ -112,7 +115,7 @@ export function WidgetCard({
   }, [result, item.display]);
 
   return (
-    <div style={{ marginTop: 10, maxWidth: 420 }}>
+    <div style={{ marginTop: variant === 'sheet' ? 0 : 10, maxWidth: variant === 'sheet' ? 'none' : 420 }}>
       <article
         ref={cardRef}
         className={
@@ -137,10 +140,10 @@ export function WidgetCard({
           minWidth: 0,
           maxWidth: '100%',
           overflowWrap: 'anywhere',
-          border: '1px solid ' + c.line,
-          borderRadius: 20,
+          borderRadius: variant === 'sheet' ? 0 : 20,
+          border: variant === 'sheet' ? '0' : '1px solid ' + c.line,
           padding: 18,
-          background: c.surf,
+          background: variant === 'sheet' ? 'transparent' : c.surf,
           opacity: item.display === 'stale' ? 0.62 : 1,
         }}
       >

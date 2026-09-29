@@ -95,3 +95,9 @@ html, body { margin: 0; background: var(--bg); color: var(--text); overscroll-be
 .maya-typing span:nth-child(3) { animation-delay: 320ms; }
 .maya-typing-light span { background: rgba(11,11,12,.22); animation-name: mayaTypingLight; }
 @media (prefers-reduced-motion: reduce) { .maya-typing span { animation: none; opacity: .5; } }
+
+/* app.html:27 — the recording dot. */
+@keyframes mePulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+@media (prefers-reduced-motion: no-preference) {
+  .maya-rec-dot { animation: mePulse 1.2s ease-in-out infinite; }
+}

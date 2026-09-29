@@ -321,3 +321,10 @@ export const voiceActionLabel = (state: VoiceState): string => {
       return 'Голосовой ввод недоступен';
   }
 };
+
+/** m:ss. dom/voice-control.ts:100-104. */
+export const formatElapsed = (ms: number): string => {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const seconds = total % 60;
+  return `${Math.floor(total / 60)}:${seconds < 10 ? '0' : ''}${seconds}`;
+};

@@ -19,9 +19,10 @@ import type {
   ConversationView,
   TimelineItemView,
 } from '../../../maya-chat-shell/src/shell/ports.ts';
-import { conversation, voice, widgets } from '../runtime/compose.ts';
+import { conversation, session, voice, widgets } from '../runtime/compose.ts';
 import { usePortView } from '../runtime/useView.ts';
 import { WidgetCard } from '../widgets/WidgetCard.tsx';
+import { FullscreenDetail } from '../widgets/FullscreenDetail.tsx';
 import {
   COLD_START_HINT,
   composerReason,
@@ -32,11 +33,12 @@ import {
   refusalSentence,
   secondsLeft,
   THINKING,
+  formatElapsed,
   voiceActionLabel,
   voiceStatusSentence,
 } from '../runtime/copy.ts';
 import { Backdrop } from '../identity/Backdrop.tsx';
-import { MayaMark, MayaVolumeMark } from '../identity/MayaMark.tsx';
+import { MayaMark, MayaMarkAnimated, MayaVolumeMark } from '../identity/MayaMark.tsx';
 import { MAYA_ACCENT, MAYA_ACCENT_ON, type Tokens } from '../identity/tokens.ts';
 import { ReplyText } from '../reply-link.tsx';
 
@@ -114,11 +116,25 @@ function useCountdownClock(view: ConversationView): number {
 }
 
 /** Shell chrome — a notice, a widget sentence, the cold-start hint. Never model history (P-11). */
-function ChromeLine({ t, text }: { readonly t: Tokens; readonly text: string }) {
+function ChromeLine({
+  t,
+  text,
+  recover,
+}: {
+  readonly t: Tokens;
+  readonly text: string;
+  // Named `recover`, not `action`: the sink rule matches `\baction\s*=`, so even `action ===`
+  // refuses. The shell's own drawer writes `rowAction` for the same reason.
+  readonly recover?: { readonly label: string; readonly onPress: () => void };
+}) {
   return (
     <div
       style={{
         margin: '4px 0 14px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 8,
         fontFamily: READING,
         fontSize: 13,
         lineHeight: '19px',
@@ -127,7 +143,25 @@ function ChromeLine({ t, text }: { readonly t: Tokens; readonly text: string }) 
         color: t.dark ? 'rgba(244,240,235,0.52)' : 'rgba(11,11,12,0.52)',
       }}
     >
-      {text}
+      <span>{text}</span>
+      {recover === undefined ? null : (
+        <button
+          type="button"
+          onClick={recover.onPress}
+          style={{
+            appearance: 'none',
+            border: '0',
+            background: 'transparent',
+            padding: '4px 8px',
+            font: 'inherit',
+            color: MAYA_ACCENT,
+            cursor: 'pointer',
+            textDecoration: 'underline',
+          }}
+        >
+          {recover.label}
+        </button>
+      )}
     </div>
   );
 }
@@ -145,7 +179,20 @@ function Row({
 }) {
   const dark = t.dark;
 
-  if (item.kind === 'notice') return <ChromeLine t={t} text={noticeSentence(item.notice)} />;
+  if (item.kind === 'notice')
+    return (
+      <ChromeLine
+        t={t}
+        text={noticeSentence(item.notice)}
+        // dom/timeline.ts:269-275 — the ONE notice that carries a control, because it is the one
+        // that is otherwise a dead end: the session is real but has no business, so nothing the
+        // person types can work until they sign in again. `SessionPort.signOut` already exists;
+        // no capability is invented here.
+        {...(item.notice === 'tenant_required'
+          ? { recover: { label: 'Выйти', onPress: () => void session.signOut() } }
+          : null)}
+      />
+    );
 
   // A server-authored card. It sits on MAYA's side of the lane and inside MAYA's turn — the card
   // IS the container, which is why MAYA's words still have none.
@@ -321,6 +368,7 @@ export function ChatScreen({
   const listening = voiceView.state === 'listening' || voiceView.state === 'held';
   const micLive = listening || voiceView.state === 'recording';
   const micUsable = voiceView.state === 'idle' || listening;
+  const micEngaged = listening || voiceView.state === 'recording' || voiceView.state === 'arming';
 
   const laneRef = useRef<DivOrNone>(null);
   const composerRef = useRef<TextAreaOrNone>(null);
@@ -533,6 +581,34 @@ export function ChatScreen({
         </div>
 
         {/*
+          app.html:21766-21775 — the voice orb: SMALL and low over the bar, so the conversation
+          stays visible behind it. The canonical condition was hands-free or recording; here it is
+          the states where the person is actually engaged with the microphone.
+        */}
+        {micEngaged ? (
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 'calc(134px + env(safe-area-inset-bottom, 0px))',
+              zIndex: 4,
+              flexShrink: 0,
+              display: 'flex',
+              justifyContent: 'center',
+              padding: '2px 0 10px',
+              pointerEvents: 'none',
+              transition: 'opacity .14s ease, transform .3s cubic-bezier(.4,0,.2,1)',
+            }}
+          >
+            <div style={{ color: t.ink, display: 'flex' }}>
+              <MayaMarkAnimated size={36} mode="listen" state="recording" level={voiceView.level / 3} />
+            </div>
+          </div>
+        ) : null}
+
+        {/*
           dom/timeline.ts:183-187 — ONE status node, mounted always and written into. Mounting it
           with the state it describes is the classic way to have it never announced at all.
         */}
@@ -657,6 +733,56 @@ export function ChatScreen({
                   `readOnly` + `aria-disabled` rather than `disabled`, so the reason stays reachable
                   to a screen reader instead of the control vanishing from the tab order.
                 */}
+                {listening ? (
+                  // app.html:21830-21836 — while listening the field IS the status: a pulsing dot,
+                  // the elapsed time in tabular figures so it does not jitter, and the one hint
+                  // that says how to finish. `level` is the runtime's 0..3, shown as it is sampled.
+                  <div
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      height: 50,
+                    }}
+                  >
+                    <span
+                      className="maya-rec-dot"
+                      aria-hidden="true"
+                      style={{
+                        width: 9,
+                        height: 9,
+                        borderRadius: 999,
+                        background: dark ? '#f4f0eb' : '#18160f',
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontFamily: DISPLAY,
+                        fontSize: 14,
+                        color: t.ink,
+                        fontVariantNumeric: 'tabular-nums',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Слушаю… {formatElapsed(voiceView.elapsedMs)}
+                    </span>
+                    <span
+                      style={{
+                        marginLeft: 'auto',
+                        fontFamily: READING,
+                        fontSize: 10.5,
+                        color: dark ? 'rgba(244,240,235,0.4)' : 'rgba(24,22,15,0.4)',
+                        paddingRight: 6,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      ещё раз — отправить
+                    </span>
+                  </div>
+                ) : null}
                 <label className="vh" htmlFor={noteId + '-input'}>
                   Сообщение для MAYA
                 </label>
@@ -691,10 +817,11 @@ export function ChatScreen({
                     send();
                   }}
                   style={{
-                    flex: 1,
+                    flex: listening ? '0 0 0px' : 1,
                     minWidth: 0,
-                    width: '100%',
+                    width: listening ? 0 : '100%',
                     height: 50,
+                    opacity: listening ? 0 : 1,
                     border: 'none',
                     appearance: 'none',
                     WebkitAppearance: 'none',
@@ -788,6 +915,9 @@ export function ChatScreen({
           </div>
         </div>
       </section>
+
+      {/* The detail sheet lives beside the conversation, not inside its scroller. */}
+      <FullscreenDetail t={t} focusFallback={focusComposer} />
     </div>
   );
 }
