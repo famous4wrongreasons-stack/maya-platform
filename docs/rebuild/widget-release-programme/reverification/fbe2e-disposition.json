@@ -1,0 +1,241 @@
+{
+  "contract": "maya.fbe2e-postdecision-disposition/1",
+  "scope": "Reverification foundation pass; no new whole FBE2E limitation closure.",
+  "limitations": [
+    {
+      "id": "L1",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_EVIDENCE",
+      "disposition": "HTTP tags corrected; targeted MINT-M20 and P-M11 receipts now record HTTP kills. This is not a whole-clause L claim.",
+      "historical_before": "CLOSED"
+    },
+    {
+      "id": "L2",
+      "before": "PARTIAL",
+      "after": "PARTIAL",
+      "classification": "OWNER_DECISION",
+      "disposition": "Add explicit Prisma generation before the contract compiler/checker. Local generate, contract typecheck and 31/31 checker pass. Advisory policy remains unchanged; no fresh remote CI run, and its blocking/acceptance status is still an owner decision.",
+      "historical_before": "OPEN",
+      "current_note": "Contract checker freshly passes 31/31; remote CI and advisory acceptance policy remain unproved/unapproved."
+    },
+    {
+      "id": "L3",
+      "before": "OPEN",
+      "after": "OPEN",
+      "classification": "PRESENTATION_DEPENDENCY",
+      "disposition": "Real shell network transport belongs to Claude. Backend HTTP proof does not close this.",
+      "historical_before": "OPEN"
+    },
+    {
+      "id": "L4",
+      "before": "PARTIAL",
+      "after": "PARTIAL",
+      "classification": "PRESENTATION_DEPENDENCY",
+      "disposition": "WR-BOOKING-CREATE now executes the built backend binary through real HTTP: catalog → service → staff → slot → DRAFT → COMMIT → durable canonical ActionExecution, plus replay refusal. BIN 16/16 passes. Compiled carrier artifact and real carrier network/conversation acceptance remain Claude integration dependencies; no whole FBE2E BIN closure.",
+      "historical_before": "OPEN",
+      "current_note": "Fresh production-binary harness 17/17 includes explicit personal context and the stronger WR source boundary. Carrier artifact/transport remain integration-owned."
+    },
+    {
+      "id": "L5",
+      "before": "OPEN",
+      "after": "OPEN",
+      "classification": "OWNER_DECISION",
+      "disposition": "Fixed tomorrow/tenant-local window ownership and policy must be settled with L24 before a policy-preserving date fix.",
+      "historical_before": "OPEN"
+    },
+    {
+      "id": "L6",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_IMPLEMENTATION",
+      "disposition": "Unknown enabled/consultation/slot availability are NOT_MEASURED/NOT_COLLECTED, without fact refs. No fabricated FREE/true/false. Totals are null without completeness evidence.",
+      "historical_before": "CLOSED"
+    },
+    {
+      "id": "L7",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_IMPLEMENTATION",
+      "disposition": "All three actor/authority/tenant fences restored before quote; selector no longer fabricates A1/no-divergence. Three negative tests and three mutants.",
+      "historical_before": "CLOSED"
+    },
+    {
+      "id": "L8",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_IMPLEMENTATION",
+      "disposition": "PARTIAL, totalCount null, hasMore true, NOT_COLLECTED; malformed list refuses. No second invented COMPLETE fact.",
+      "historical_before": "CLOSED"
+    },
+    {
+      "id": "L9",
+      "before": "OPEN",
+      "after": "OPEN",
+      "classification": "PRESENTATION_DEPENDENCY",
+      "disposition": "Shell child harness does not return its COMMIT gate trace. Existing backend H2 asserts 14 gates but cannot substitute for this path.",
+      "historical_before": "OPEN"
+    },
+    {
+      "id": "L10",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_EVIDENCE",
+      "disposition": "Runner executes a plain live baseline even for exclusively neutralised live mutants; independent neutraliser-only self-test passes.",
+      "historical_before": "CLOSED"
+    },
+    {
+      "id": "L11",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_EVIDENCE",
+      "disposition": "Three selector kinds assert the selector emission path and no generic emit; WR-M17 detects substitution.",
+      "historical_before": "CLOSED"
+    },
+    {
+      "id": "L12",
+      "before": "PARTIAL",
+      "after": "PARTIAL",
+      "classification": "ACCEPTED_LIMITATION",
+      "disposition": "Presenter, selector adapter, noun identity, preview adapter and router now have targeted mutants. The ports file has type declarations, not an executable branch; typecheck covers their use. This is targeted coverage, not exhaustive mutation certification. Fresh WR battery: 23/23 as declared with green controls; its runtime sites are covered, but type-only port additions have no dedicated type mutation. Not relabelled as complete.",
+      "historical_before": "PARTIAL",
+      "current_note": "Fresh WR 23/23 and new AB 2/2 have green controls; still not exhaustive port/type mutation coverage."
+    },
+    {
+      "id": "L13",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_EVIDENCE",
+      "disposition": "Foreign-principal and lock-time-principal-change cases plus WR-M18/M19. BUILD-level recording-store tests, not a new HTTP admission claim.",
+      "historical_before": "CLOSED"
+    },
+    {
+      "id": "L14",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_IMPLEMENTATION",
+      "disposition": "Confirmed publication excludes any different confirmed COMMIT. Same-token immutable retry remains allowed. PostgreSQL injected-record test proves a second receipt cannot substitute the first line.",
+      "historical_before": "CLOSED"
+    },
+    {
+      "id": "L15",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_EVIDENCE",
+      "disposition": "WR-M12/M13/M14 remove ownership, effect/space narrowing and monotonicity respectively; additional WR-M15 tests same-token exception.",
+      "historical_before": "CLOSED"
+    },
+    {
+      "id": "L16",
+      "before": "PARTIAL",
+      "after": "PARTIAL",
+      "classification": "ACCEPTED_LIMITATION",
+      "disposition": "P-mint now has four disjoint shards; full tests/controls retained. Planner and assembler pass. Remote elapsed-time/headroom is unmeasured; no timing guarantee.",
+      "historical_before": "PARTIAL",
+      "current_note": "Planner pins 418 declarations / 35 batteries / 56 CI jobs; 47 lineage/receipt selftests green. No remote timing claim."
+    },
+    {
+      "id": "L17",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_IMPLEMENTATION",
+      "disposition": "Reconciliation receipt query requires its record be tenant-scoped AE COMMIT. PostgreSQL CONTROL-token call returns false; WR-M16 pins it.",
+      "historical_before": "CLOSED"
+    },
+    {
+      "id": "L18",
+      "before": "OPEN",
+      "after": "OPEN",
+      "classification": "PRESENTATION_DEPENDENCY",
+      "disposition": "Same dependency as L9; literal gate count from the shell-owned submission remains absent.",
+      "historical_before": "OPEN"
+    },
+    {
+      "id": "L19",
+      "before": "OPEN",
+      "after": "OPEN",
+      "classification": "PRESENTATION_DEPENDENCY",
+      "disposition": "Receipt-to-chat network/React acceptance belongs to Claude; server thread-page validation is now stronger but does not close this hop.",
+      "historical_before": "OPEN"
+    },
+    {
+      "id": "L20",
+      "before": "PARTIAL",
+      "after": "PARTIAL",
+      "classification": "PRODUCTION_EFFECT_PROOF",
+      "disposition": "Nearest-availability unknown branch and unknown cells now asserted and mutation-tested. Actual Action Engine uncertainty/fault-produced UNKNOWN is still not proven by the supplied-verdict trace.",
+      "historical_before": "PARTIAL"
+    },
+    {
+      "id": "L21",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_IMPLEMENTATION",
+      "disposition": "Server thread reader enforces seven terminal outcomes and nonempty receipt iff CONFIRMED; malformed storage is filtered before the wire. WR-M06/M07/M08.",
+      "historical_before": "CLOSED"
+    },
+    {
+      "id": "L22",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_EVIDENCE",
+      "disposition": "Recording double keys existing receipts by upsert identity and checks empty update. Test explicitly proves immutable retry, not rejection of caller-shaped input on a first write.",
+      "historical_before": "CLOSED"
+    },
+    {
+      "id": "L23",
+      "before": "OPEN",
+      "after": "OPEN",
+      "classification": "PRESENTATION_DEPENDENCY",
+      "disposition": "Shell network ratchet is Claude-owned.",
+      "historical_before": "OPEN"
+    },
+    {
+      "id": "L24",
+      "before": "OPEN",
+      "after": "OPEN",
+      "classification": "OWNER_DECISION",
+      "disposition": "Specify canonical date/window/timezone policy owner; no tenant policy invented in widgets.",
+      "historical_before": "OPEN"
+    },
+    {
+      "id": "L25",
+      "before": "OPEN",
+      "after": "OPEN",
+      "classification": "OWNER_DECISION",
+      "disposition": "Tap-as-delivered/rendered semantics need a lifecycle ruling; existing fences unchanged.",
+      "historical_before": "OPEN"
+    },
+    {
+      "id": "L26",
+      "before": "PARTIAL",
+      "after": "PARTIAL",
+      "classification": "OWNER_DECISION",
+      "disposition": "The new current-audit consumer refuses red/missing controls, non-green mutation receipts, wrong code targets, changed declaration/manifest bytes and unpaired claims. 13 counterfactual tests pass. Historical builder and already recorded admissions stay unchanged pending the owner historical-evidence ruling.",
+      "historical_before": "OPEN",
+      "current_note": "Current decision/boundary admission adds rejection tests (32 combined audit tests). Approval of U-class does not retroactively approve red/missing historical controls."
+    },
+    {
+      "id": "L27",
+      "before": "OPEN",
+      "after": "OPEN",
+      "classification": "PRESENTATION_DEPENDENCY",
+      "disposition": "Conversation append deduplication is Claude-owned.",
+      "historical_before": "OPEN",
+      "current_note": "Owner reserves clause 9.6 for one canonical persisted user-turn identity at integration. No second writer."
+    },
+    {
+      "id": "L28",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_EVIDENCE",
+      "disposition": "HTTP dismiss before COMMIT now executed: terminal storage null/page lines empty, control dismissed, ActionExecution count zero.",
+      "historical_before": "CLOSED"
+    }
+  ],
+  "counts": {
+    "CLOSED": 13,
+    "PARTIAL": 6,
+    "OPEN": 9
+  }
+}

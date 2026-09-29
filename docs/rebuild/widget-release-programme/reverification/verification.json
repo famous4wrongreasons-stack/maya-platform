@@ -1,0 +1,327 @@
+{
+  "contract": "maya.sb1-reverification-foundation-verification/1",
+  "observed_at": "2026-09-29T18:56:52.362741+00:00",
+  "source_head": "dc783dbf58118aeb38e2d1982fc1331793997cbe",
+  "tests": {
+    "unit": {
+      "success": true,
+      "numPassedTestSuites": 3,
+      "numPassedTests": 45,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "backend": {
+      "success": true,
+      "numPassedTestSuites": 576,
+      "numPassedTests": 5434,
+      "numFailedTests": 0,
+      "numPendingTests": 1
+    },
+    "widgets": {
+      "success": true,
+      "numPassedTestSuites": 25,
+      "numPassedTests": 349,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "http": {
+      "success": true,
+      "numPassedTestSuites": 2,
+      "numPassedTests": 8,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    }
+  },
+  "binary": {
+    "status": "PASS",
+    "cases": 17,
+    "failed": 0
+  },
+  "evidence": {
+    "contract": "maya.widgets-evidence-verify/1",
+    "manifest": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/sb1-reverification/evidence/evidence-manifest.jsonl",
+    "manifest_sha256": "132a49017037e10e9bf250845d8e3768353c669700267d1bf5a861ef70f7d81a",
+    "inventory": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/widget-release/docs/rebuild/evidence/maya-chat-first-ux/gate-clause-inventory.json",
+    "lines": 15,
+    "claims": 13,
+    "captured_mints": {
+      "HTTP": 18,
+      "BIN": 10
+    },
+    "refused_mints": 0,
+    "records_before_teardown": 28,
+    "harness_files_scanned": 22,
+    "u_proof_map": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/widget-release/docs/rebuild/evidence/maya-chat-first-ux/wave5/e1-u-proofs.json",
+    "violations": []
+  },
+  "build": "PASS",
+  "typecheck_application": "PASS",
+  "typecheck_scripts": "PASS",
+  "typecheck_live": "PASS",
+  "lint": "PASS",
+  "audit_selftests": {
+    "passed": 32,
+    "failed": 0
+  },
+  "receipt_tool_selftests": {
+    "passed": 47,
+    "failed": 0
+  },
+  "mutations": {
+    "freshly_exercised": 54,
+    "statuses": {
+      "build-killed": 31,
+      "live-killed": 23
+    },
+    "reports": [
+      {
+        "source_head": "dc783dbf58118aeb38e2d1982fc1331793997cbe",
+        "batteries": [
+          "gateAB.json"
+        ],
+        "status": "AS-DECLARED",
+        "restrictions": {
+          "live_tests": null,
+          "live_filter": null,
+          "unit_tests": "widgets/(routing/g13-action-boundary.architecture|owner-ports/commit-booking.adapter).spec.ts",
+          "unit_filter": "WR-F33|WR-F76"
+        },
+        "baseline_red": [],
+        "mutants": 2
+      },
+      {
+        "source_head": "dc783dbf58118aeb38e2d1982fc1331793997cbe",
+        "batteries": [
+          "gateH-harness.json"
+        ],
+        "status": "AS-DECLARED",
+        "restrictions": {
+          "live_tests": null,
+          "live_filter": "(?:^|\\s)(?:HAR\\-10|HAR\\-12|HAR\\-13|HAR\\-14|HAR\\-3\\ \\[GW\\]|HAR\\-5|HAR\\-9\\ \\[GW\\]|WR\\-H1)(?=$|[^A-Za-z0-9_.-])",
+          "unit_tests": "widgets/",
+          "unit_filter": "(?:^|\\s)(?:HAR\\-10|HAR\\-12|HAR\\-13|HAR\\-14|HAR\\-3\\ \\[GW\\]|HAR\\-5|HAR\\-9\\ \\[GW\\]|WR\\-H1)(?=$|[^A-Za-z0-9_.-])"
+        },
+        "baseline_red": [],
+        "mutants": 21
+      },
+      {
+        "source_head": "dc783dbf58118aeb38e2d1982fc1331793997cbe",
+        "batteries": [
+          "gateSBV.json"
+        ],
+        "status": "AS-DECLARED",
+        "restrictions": {
+          "live_tests": null,
+          "live_filter": null,
+          "unit_tests": "(auth/client-verification-delivery|crm/client-reverification-candidate.service).spec.ts",
+          "unit_filter": "RV-"
+        },
+        "baseline_red": [],
+        "mutants": 8
+      },
+      {
+        "source_head": "dc783dbf58118aeb38e2d1982fc1331793997cbe",
+        "batteries": [
+          "gateWR.json"
+        ],
+        "status": "AS-DECLARED",
+        "restrictions": {
+          "live_tests": null,
+          "live_filter": "(?:^|\\s)(?:WR\\-CREATE|WR\\-L11|WR\\-L12\\ requires|WR\\-L13\\ lock\\-time|WR\\-L13\\ refuses|WR\\-L21|WR\\-L22|WR\\-L7|WR\\-L8|claim\\ and\\ reconciliation|projects\\ canonical\\ services|projects\\ valid\\ availability|reads\\ staff\\ through\\ the\\ existing\\ policy/runtime|rejects\\ raw\\ or\\ foreign\\ handles|requires\\ the\\ inherited\\ service|writeReceipt\\ is\\ idempotent)(?=$|[^A-Za-z0-9_.-])",
+          "unit_tests": "(widgets/stores/widget\\-stores\\.service\\.spec\\.ts|widgets/emission/booking\\-successor\\-boundary\\.spec\\.ts|widgets/owner\\-ports/booking\\-selector\\.adapter\\.spec\\.ts|widgets/booking/booking\\-noun\\-identity\\.spec\\.ts|widgets/routing/effect\\-router\\.service\\.spec\\.ts|widgets/owner\\-ports/booking\\-preview\\.adapter\\.spec\\.ts|widgets/composition/chat\\-read\\.trigger\\.spec\\.ts|widgets/resolve/thread\\-page\\.service\\.spec\\.ts|widgets/booking/booking\\-selector\\.presenter\\.spec\\.ts)",
+          "unit_filter": "(?:^|\\s)(?:WR\\-CREATE|WR\\-L11|WR\\-L12\\ requires|WR\\-L13\\ lock\\-time|WR\\-L13\\ refuses|WR\\-L21|WR\\-L22|WR\\-L7|WR\\-L8|claim\\ and\\ reconciliation|projects\\ canonical\\ services|projects\\ valid\\ availability|reads\\ staff\\ through\\ the\\ existing\\ policy/runtime|rejects\\ raw\\ or\\ foreign\\ handles|requires\\ the\\ inherited\\ service|writeReceipt\\ is\\ idempotent)(?=$|[^A-Za-z0-9_.-])"
+        },
+        "baseline_red": [],
+        "mutants": 23
+      }
+    ],
+    "declarations": 418,
+    "batteries": 35,
+    "planned_jobs": 56,
+    "not_rerun_here": 364,
+    "whole_unfiltered_ci_certificate": false
+  },
+  "integration_only": {
+    "status": "BLOCKED",
+    "backend_failure": false,
+    "reason": "Missing authorized maya-chat-shell/dist/web artifact",
+    "result": {
+      "success": false,
+      "numPassedTestSuites": 0,
+      "numPassedTests": 0,
+      "numFailedTests": 1,
+      "numPendingTests": 12
+    },
+    "assertion_unchanged": true
+  },
+  "remote_ci": "NOT RUN",
+  "current_clause_counts": {
+    "gates": 15,
+    "clauses": 165,
+    "byState": {
+      "L-T": 4,
+      "L": 126,
+      "U": 17,
+      "false": 18
+    }
+  },
+  "classifications": {
+    "OWNER_DECISION_REQUIRED": 6,
+    "EVIDENCE_MISSING": 11,
+    "IMPLEMENTATION_MISSING": 1
+  },
+  "self_booking_contract": "BLOCKED",
+  "new_verified_binding_path": "BLOCKED",
+  "persistent_correlation_decision": "PENDING",
+  "new_models": 0,
+  "new_columns": 0,
+  "new_json_members_proposed": 4,
+  "successor_proof_cases": "NOT IMPLEMENTED — see REQUESTED-PROOF-STATUS.md",
+  "safe_to_integrate": false,
+  "production_effects": 0,
+  "real_otp_sent": 0,
+  "real_yclients_effects": 0,
+  "schema_migrations": 0,
+  "raw_receipts": {
+    "audit-tests.log": {
+      "sha256": "26c136ace272e847467e69dea06fe5ff02e087fa4a08fafccd551c8645d82c9a",
+      "bytes": 1939
+    },
+    "backend.json": {
+      "sha256": "fb8331f33edad3d9a5dcd9e4b62bd66a94684b88a923496084670a6e1b794ecc",
+      "bytes": 2759457
+    },
+    "backend.log": {
+      "sha256": "13379f557484ae7845d841ca5dcd9e04796a0a4be3920cb45dc7b0ba5521df56",
+      "bytes": 953883
+    },
+    "bin.log": {
+      "sha256": "1100f8523d75df8543665ee9c152490f1ab87f85ca809c3d82fb06cce2d11e8f",
+      "bytes": 3446
+    },
+    "build.log": {
+      "sha256": "b74e5c60033b62edf5aa47fcace858704866272bf6c05a53d7b76d4f3abdaf15",
+      "bytes": 158
+    },
+    "current-gates.json": {
+      "sha256": "193d0c649cfa574f51402bf2ce3b0080a865c20453c354fcd9061eb474cd2215",
+      "bytes": 326
+    },
+    "evidence-verify.log": {
+      "sha256": "d32a89986e5571ada90eb74d37cbdc3d95418043172815201778909b3de0ab58",
+      "bytes": 901
+    },
+    "http.json": {
+      "sha256": "a535a21d432574e5dae32f04c8fa6eefb71ede0f3e05ae666e56b744b7df3fa5",
+      "bytes": 5456
+    },
+    "http.log": {
+      "sha256": "8b8354f3de6526f25bb88022d571261d4a224fb41ab7c84f93325dda3292277b",
+      "bytes": 2133
+    },
+    "integration.json": {
+      "sha256": "2efb958f7b3f301c8cd383e9eacd18b51fa4dea2c878b4494fc9ce88d163adca",
+      "bytes": 12106
+    },
+    "integration.log": {
+      "sha256": "5a96560e0f6c9792738862ac0a97ec4777b5d166b56a4aa02e2c3e15d5a8445c",
+      "bytes": 1662
+    },
+    "lint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "live-progress.log": {
+      "sha256": "ff36e6c401112ab2a32b7f4bd4aa2bf2a574945180ae5250a301d6de3edb47df",
+      "bytes": 121
+    },
+    "mutations/AB.json": {
+      "sha256": "05bdd1b111cb83271ee720b6f31ead7af1a939422c0f61b3084c527b23886373",
+      "bytes": 5273
+    },
+    "mutations/AB.log": {
+      "sha256": "05bdd1b111cb83271ee720b6f31ead7af1a939422c0f61b3084c527b23886373",
+      "bytes": 5273
+    },
+    "mutations/H-harness.json": {
+      "sha256": "d65139942084c459813480d684bd59148230cacd499baa27517d481366f6bf1e",
+      "bytes": 34182
+    },
+    "mutations/H-harness.log": {
+      "sha256": "d65139942084c459813480d684bd59148230cacd499baa27517d481366f6bf1e",
+      "bytes": 34182
+    },
+    "mutations/SBV.json": {
+      "sha256": "cb3f1eb558f1290b36ac2df5fa0f80edd416ac8adc57647cad5754481edac77b",
+      "bytes": 11240
+    },
+    "mutations/SBV.log": {
+      "sha256": "cb3f1eb558f1290b36ac2df5fa0f80edd416ac8adc57647cad5754481edac77b",
+      "bytes": 11240
+    },
+    "mutations/WR.json": {
+      "sha256": "bd140b694ab2ff9d038ef9e62d98945d75ec4379805e4c5a6abc39bc1398a936",
+      "bytes": 31264
+    },
+    "mutations/WR.log": {
+      "sha256": "bd140b694ab2ff9d038ef9e62d98945d75ec4379805e4c5a6abc39bc1398a936",
+      "bytes": 31264
+    },
+    "mutations.log": {
+      "sha256": "04fe151b4abff3695680a73cd8cd9744abd77dcfbd2c74a2cbfbf00f1e7011e6",
+      "bytes": 360
+    },
+    "ownership-current.json": {
+      "sha256": "59a1227b8b066a33f15c8bb8cdef130bb5e84ef536678df520131a302ed2704a",
+      "bytes": 9991
+    },
+    "postgres.log": {
+      "sha256": "d43ed52010f42290337bbb85eeb970d9a78157fb3393933ce1e0767ca83b4e9b",
+      "bytes": 18620
+    },
+    "proof-db-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    "receipt-tools.log": {
+      "sha256": "2f8562a03ba3585063e5b30a9b967de7b4b670221113fec7d39ca615cae10de0",
+      "bytes": 3048
+    },
+    "runtime-audit.log": {
+      "sha256": "dd1daf320c9acf68994a3571ddcd87580aba798377ca68c2b23e3111def178de",
+      "bytes": 336
+    },
+    "schema-representation-proof.log": {
+      "sha256": "f88b42dff4d1c1c523b9042e390c6bf115cb097cb1d059a0eca56ea91fe6632d",
+      "bytes": 1583
+    },
+    "typecheck-live.log": {
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "bytes": 128
+    },
+    "typecheck-scripts.log": {
+      "sha256": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+      "bytes": 113
+    },
+    "typecheck.log": {
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "bytes": 103
+    },
+    "unit.json": {
+      "sha256": "b9a8e099a0988c2efd82a2e6b9c1fb0b7c7c0ff7baa98fe0335d9c4302c93cb4",
+      "bytes": 21557
+    },
+    "unit.log": {
+      "sha256": "66ccf5b505e6b120c6fbd51f5e5b183b99c3ae6f194baa3ab54c30549dbfac65",
+      "bytes": 368
+    },
+    "widgets.json": {
+      "sha256": "456c8cf7a8dd911f8526283d1c29bf376a453aea905815f183c6cf51d3a9702c",
+      "bytes": 203024
+    },
+    "widgets.log": {
+      "sha256": "53226cb8e8814198989147ad952af96c39d6adb838bcb554d9b8a79dee5f6c52",
+      "bytes": 20650
+    }
+  }
+}

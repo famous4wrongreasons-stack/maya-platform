@@ -90,6 +90,9 @@ function main() {
   const disposition = JSON.parse(fs.readFileSync(path.join(here, '../preintegration/clause-disposition.json')));
   const audit = applyDecisions(raw, JSON.parse(decisionsBytes), disposition);
   const option = name => process.argv[process.argv.indexOf(name) + 1];
+  // A later pass can retain a distinct snapshot without rewriting this packet.
+  const output = process.argv.includes('--out-dir') ? path.resolve(option('--out-dir')) : here;
+  assert.ok(fs.statSync(output).isDirectory(), 'Output directory must exist');
   if (process.argv.includes('--boundary-evidence')) {
     for (const flag of ['--boundary-report', '--source-head']) assert.ok(process.argv.includes(flag));
     const root = path.resolve(here, '../../../..'); const backend = path.join(root, 'maya-saas-backend');
@@ -133,14 +136,14 @@ function main() {
   }
   audit.builder.owner_decision_overlay = { source_audit_sha256: hash(bytes), owner_decisions_sha256: hash(decisionsBytes) };
   assert.deepEqual(check({ ...load(), audit }), []);
-  fs.writeFileSync(path.join(here, 'current-audit.json'), JSON.stringify(audit, null, 2) + '\n');
+  fs.writeFileSync(path.join(output, 'current-audit.json'), JSON.stringify(audit, null, 2) + '\n');
   const matrix = ['# Complete clause matrix after owner decisions', '', audit.headline, '',
     'Every one of the 165 clauses is listed. No false clause is promoted by an owner scope decision. Historical provenance is retained; the current builder identifies separately refreshed HTTP/BIN claims.', '',
     '| Gate | Clause | State | Acceptance / remaining classification | Contract duty |', '|---|---|---|---|---|'];
   const escape = s => String(s).replaceAll('|', '\\|').replaceAll('\n', ' ');
   for (const g of audit.gates) for (const [id, c] of Object.entries(g.clauses))
     matrix.push(`| ${g.n} | ${id} | ${c.state} | ${escape(c.current_classification ?? c.acceptance?.class ?? 'LIVE')} | ${escape(c.text)} |`);
-  fs.writeFileSync(path.join(here, 'CLAUSE-MATRIX.md'), matrix.join('\n') + '\n');
+  fs.writeFileSync(path.join(output, 'CLAUSE-MATRIX.md'), matrix.join('\n') + '\n');
   console.log(JSON.stringify({ counts: audit.counts, headline: audit.headline, classifications: audit.current_false_classification, activation: 'FORBIDDEN' }));
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();

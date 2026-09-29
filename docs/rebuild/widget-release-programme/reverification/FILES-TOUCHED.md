@@ -1,0 +1,30 @@
+# Files touched in this pass
+
+- docs/rebuild/widget-release-programme/postdecision/recompute.mjs
+- docs/rebuild/widget-release-programme/reverification/CHECKPOINT.md
+- docs/rebuild/widget-release-programme/reverification/CLAUSE-MATRIX.md
+- docs/rebuild/widget-release-programme/reverification/OWNER-DECISION.md
+- docs/rebuild/widget-release-programme/reverification/README.md
+- docs/rebuild/widget-release-programme/reverification/REQUESTED-PROOF-STATUS.md
+- docs/rebuild/widget-release-programme/reverification/SCHEMA-DECISION.md
+- docs/rebuild/widget-release-programme/reverification/clause-disposition.json
+- docs/rebuild/widget-release-programme/reverification/current-audit.json
+- docs/rebuild/widget-release-programme/reverification/evidence/database-before-teardown.jsonl
+- docs/rebuild/widget-release-programme/reverification/evidence/evidence-manifest.jsonl
+- docs/rebuild/widget-release-programme/reverification/evidence/mint-provenance.jsonl
+- docs/rebuild/widget-release-programme/reverification/evidence/verification-report.json
+- docs/rebuild/widget-release-programme/reverification/fbe2e-disposition.json
+- docs/rebuild/widget-release-programme/reverification/mutation-receipts/AB.json
+- docs/rebuild/widget-release-programme/reverification/mutation-receipts/H-harness.json
+- docs/rebuild/widget-release-programme/reverification/mutation-receipts/SBV.json
+- docs/rebuild/widget-release-programme/reverification/mutation-receipts/WR.json
+- docs/rebuild/widget-release-programme/reverification/ownership-proof.json
+- docs/rebuild/widget-release-programme/reverification/runtime-audit.json
+- docs/rebuild/widget-release-programme/reverification/schema-representation-proof.sql
+- docs/rebuild/widget-release-programme/reverification/verification.json
+- maya-saas-backend/scripts/widgets-mutation-ci.test.mjs
+- maya-saas-backend/src/auth/client-verification-delivery.spec.ts
+- maya-saas-backend/src/auth/phone-auth-delivery.service.ts
+- maya-saas-backend/src/crm/client-reverification-candidate.service.spec.ts
+- maya-saas-backend/src/crm/client-reverification-candidate.service.ts
+- maya-saas-backend/test/widgets-live/mutations/gateSBV.json
