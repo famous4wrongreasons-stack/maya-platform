@@ -113,6 +113,12 @@ const SPECIAL_MODULES = {
  * timers and fetch — they are headless, not pure.
  */
 const NO_DOM_LAYERS = ['shell', 'net'];
+/**
+ * 3(m): the layers that constitute the headless runtime package the React presentation carrier
+ * consumes. It is the union of the two typechecked-without-DOM sets plus `contract`, which is types
+ * only. `dom/` and `entry/` are the presentation and are deliberately absent.
+ */
+const RUNTIME_LAYERS = ['contract', 'integrity', 'net', 'renderer', 'routes', 'shell'];
 /** The one file in those layers that may name a DOM type, because it IS the DOM boundary. */
 const DOM_BOUNDARY = 'src/shell/dom-port.ts';
 
@@ -1316,9 +1322,30 @@ export function runBuild(ts, { root = ROOT, tmp, target = 'web', typecheckOnly =
     parts.push('');
   }
   const joined = parts.join('\n');
+  // M2 — the runtime package boundary, machine-readable and DERIVED, never hand-listed.
+  //
+  // The React presentation carrier is a separate build. This block is the contract between the two:
+  // it names every module that constitutes the headless runtime, with its hash, so the carrier's own
+  // build can assert it imports nothing else and that what it imported has not drifted.
+  //
+  // `dom-port.ts` is excluded by name: it lives in shell/ but IS the DOM boundary, and a carrier
+  // that imported it would be importing the thing the split exists to isolate.
+  const runtimeModules = all
+    .filter((rel) => RUNTIME_LAYERS.includes(layerOf(rel)) && rel !== DOM_BOUNDARY)
+    .map((rel) => ({ path: rel, sha256: sha256(fs.readFileSync(path.join(root, rel))) }));
+  if (!runtimeModules.length) throw new BuildRefused([refusal('layer', 'dist/manifest.json', 0, 'runtime', 'the runtime package is empty (3(m))')]);
+  if (runtimeModules.some((m) => m.path === DOM_BOUNDARY))
+    throw new BuildRefused([refusal('layer', DOM_BOUNDARY, 0, 'runtime', `${DOM_BOUNDARY} is the DOM boundary and may not be part of the runtime package (3(m))`)]);
+
   const manifest = {
     name: 'maya-chat-shell',
     sources: all,
+    runtime: {
+      package: '@maya/runtime',
+      layers: [...RUNTIME_LAYERS],
+      domBoundary: DOM_BOUNDARY,
+      modules: runtimeModules,
+    },
     bytes: Buffer.byteLength(joined, 'utf8'),
     digest: sha256(Buffer.from(joined, 'utf8')),
     toolchain: { typescript: ts.version, target: 'ES2022', module: 'ESNext', moduleResolution: 'Bundler' },

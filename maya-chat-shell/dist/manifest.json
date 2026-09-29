@@ -36,6 +36,100 @@
     "src/voice/capture.ts",
     "src/voice/wav.ts"
   ],
+  "runtime": {
+    "package": "@maya/runtime",
+    "layers": [
+      "contract",
+      "integrity",
+      "net",
+      "renderer",
+      "routes",
+      "shell"
+    ],
+    "domBoundary": "src/shell/dom-port.ts",
+    "modules": [
+      {
+        "path": "src/contract.ts",
+        "sha256": "ab47c0104d43b1d4bcee620f64211d770c751b14c5dfe9cd544f499497a05d8a"
+      },
+      {
+        "path": "src/integrity/h7.ts",
+        "sha256": "b89f2493a7073b757a8e10368d7b780ec6b5e680c1e26aff0eb118f0391647a1"
+      },
+      {
+        "path": "src/net/client.ts",
+        "sha256": "d2b99f569df883dbb8fa6070d241cf1a75b6bbe3f429cdd6213d686a87ca9eec"
+      },
+      {
+        "path": "src/net/endpoint.ts",
+        "sha256": "fa3b17f2bf7e63e073a97a0130766f6735437719004094d0bbc051416a86da7c"
+      },
+      {
+        "path": "src/net/project.ts",
+        "sha256": "b132f844f229bbb94a2fe702de64c0da4d5bcd9c00a595035a75790ebc2f1aca"
+      },
+      {
+        "path": "src/net/session.ts",
+        "sha256": "1a692633376930452ea533e934ea7ce7baa1e41c2bc0c11163a14a6cbf5240d1"
+      },
+      {
+        "path": "src/net/types.ts",
+        "sha256": "947ef192ec36eaceb58741ee6224087ef71fd450f495e8f41711f623ddbcb9fc"
+      },
+      {
+        "path": "src/renderer/cells.ts",
+        "sha256": "d6c133cbbc4c32e63f6382aa7ba23d7cdf49c6fc0c9da0c2f9e3e4984468a3a1"
+      },
+      {
+        "path": "src/renderer/kinds.ts",
+        "sha256": "bd3e7cd9eeacce14d1965293dbdf76dc59a5c065d548f4ddcb99208673dc5ca2"
+      },
+      {
+        "path": "src/renderer/nodes.ts",
+        "sha256": "b649d1d5e1f448c6748a41e4179b6b37db0ae7818cdcba78bee27227b5f1f8b8"
+      },
+      {
+        "path": "src/renderer/render.ts",
+        "sha256": "6e69e79a7e5fb9a07428898cc793b622c3c67341e65bf9432de820eb16847f16"
+      },
+      {
+        "path": "src/renderer/tables.ts",
+        "sha256": "81ea4d6bcedb8bfe33fdfbb31ea0fdb5461d8a30a8ccfc92bda5af720812cdfc"
+      },
+      {
+        "path": "src/routes/registry.ts",
+        "sha256": "fa674d9c64c62fdb6ecbb3f1755bde008bc23839e25987d40cdf42a7afa0b715"
+      },
+      {
+        "path": "src/shell/conversation.ts",
+        "sha256": "6a3337f90c9e778095605f9693c1e82ebe9f2d8bfc8dc9e25e3042c272461bdd"
+      },
+      {
+        "path": "src/shell/deeplink.ts",
+        "sha256": "7240916a6fc93bb0a2813826d48539743e791a2662b20e62650ac8e6030fddd4"
+      },
+      {
+        "path": "src/shell/intents.ts",
+        "sha256": "8137fc8415f0a53771ddc62465fcd8ac902583b887df2e6bc42a2b8a4db04a9c"
+      },
+      {
+        "path": "src/shell/ports.ts",
+        "sha256": "d833388b9b9458f304ccece793f5530035ae530bca06815fb14cf2b43eb003b2"
+      },
+      {
+        "path": "src/shell/shell.ts",
+        "sha256": "dacbcf81791d77496ff09030ed5ced3b30c2ca2e41d45ca77a27d6280f195fd9"
+      },
+      {
+        "path": "src/shell/view.ts",
+        "sha256": "9dd89e827d2a0c8b0c691717fad92c7f302896bab9c427e56f03f591b752ce18"
+      },
+      {
+        "path": "src/shell/voice-state.ts",
+        "sha256": "b3f9a871c60ae31b099980f01f3c19ea66e1ad4ecdda1d70ab684baeb2fa0960"
+      }
+    ]
+  },
   "bytes": 439255,
   "digest": "fe6f954c3cec9642610820522ec5585fecfd5523cff8c5d5b0dc73b9989191f8",
   "toolchain": {
