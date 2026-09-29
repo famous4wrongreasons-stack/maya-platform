@@ -19,7 +19,8 @@
   --accent: #0a84ff;
   --accent-text: #ffffff;
   --focus: #0a84ff;
-  --user-bubble: rgba(24, 22, 15, 0.045);
+  /* The approved bubble is its own value, not a tint of the ink: #ECEAE5 light, #2A2A2C dark. */
+  --user-bubble: #eceae5;
   --notice: #efeae1;
   --danger-line: #8a3b12;
   --radius: 0.75rem;
@@ -50,7 +51,7 @@
     --accent: #0a84ff;
     --accent-text: #ffffff;
     --focus: #0a84ff;
-    --user-bubble: rgba(244, 240, 235, 0.05);
+    --user-bubble: #2a2a2c;
     --notice: #0b0b0c;
     --danger-line: #f0b48c;
   }
@@ -220,7 +221,8 @@ textarea {
   padding: 0.75rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  /* The approved rhythm between messages is 14px, not the 12px --gap the rest of the shell uses. */
+  gap: 0.875rem;
 }
 
 .timeline-status {
@@ -250,10 +252,17 @@ textarea {
  * user's words stay in the shell's own face, a size smaller and tighter, so the two voices are
  * told apart by type rather than by colour. It is the cheapest strong signal a chat product has,
  * and it costs no font file. */
+/* The approved chat speaks in ONE bubble, not two. What the person said is held in a rounded
+ * container at the right; what MAYA said is not held in anything at all — the preserved source is
+ * explicit, her branch sets width 100% and padding 0 with no background, border or radius. That
+ * asymmetry is most of the screen's character: her words ARE the page, and the person's words are
+ * the thing placed on it. 20px radius and 10px/15px padding are the approved numbers. */
 .turn--user {
   align-self: flex-end;
   background: var(--user-bubble);
-  max-width: min(100%, 36rem);
+  max-width: min(78%, 36rem);
+  border-radius: 1.25rem;
+  padding: 0.625rem 0.9375rem;
 }
 
 .turn--user .turn-text {
@@ -261,11 +270,15 @@ textarea {
   line-height: 1.375rem;
 }
 
+/* No container. Full lane, on the page's own background. */
 .turn--maya {
-  align-self: flex-start;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  max-width: min(100%, 40rem);
+  align-self: stretch;
+  width: 100%;
+  max-width: 100%;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
 }
 
 .turn--maya .turn-text {
@@ -341,9 +354,13 @@ textarea {
    * drag the textarea taller than the visible area, and «Отправить» goes under the keyboard. */
   max-height: min(40vh, calc(0.4 * var(--maya-visible-height, 100dvh)));
   resize: vertical;
-  padding: 0.5rem 0.75rem;
+  /* The approved composer is one pill at radius 26 and 52px tall, not a rectangle at 12. The element
+   * stays a textarea: the keyboard-inset and text-scale contracts are written against it, and the
+   * approved single-line input cannot satisfy them. */
+  padding: 0.75rem 1.0625rem;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 1.625rem;
+  min-height: 3.25rem;
   background: var(--surface);
 }
 
@@ -402,6 +419,26 @@ textarea {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--accent-text);
+}
+
+/* The approved send and microphone are both solid accent rounds. The accent belongs to exactly
+ * three controls — the Telegram row, the microphone and send — and the microphone is the one this
+ * stylesheet's own token comment already reserved it for while painting it a plain surface.
+ * They are stadiums rather than the approved 36px circles because every visible control here is
+ * MEASURED at a 44px minimum, at a 2x text scale, on a 320px phone. The words they carry are what
+ * makes them reachable by name, and those names are pinned by the verifier, so they stay. */
+.composer-send,
+.voice-mic,
+.voice-send,
+.voice-cancel {
+  border-radius: 999px;
+}
+
+.voice-mic {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
 }
 
 [aria-disabled="true"].composer-send,

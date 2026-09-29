@@ -35,8 +35,8 @@
     "src/voice/capture.ts",
     "src/voice/wav.ts"
   ],
-  "bytes": 435939,
-  "digest": "b82f97b921f1a57a82731bc24e97bec29345ab15f24c4990faef230b87725f10",
+  "bytes": 437771,
+  "digest": "e07f9ebc4cd4d190939bccce7be283a20ff71f1b0f3b487765586cd609a58284",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -44,8 +44,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "d427b1aa1c976ddf4e5f62a76e62647f4f97253331cb3eb903999e7507dd066b",
-    "modulePath": "m/d427b1aa1c976ddf/",
+    "digest": "fbb827ac775afc218b1f5995cc98765a234f3b1483b54488db3eaf1bfda22f01",
+    "modulePath": "m/fbb827ac775afc21/",
     "files": [
       {
         "path": "entry/main.js",
@@ -199,11 +199,11 @@
       }
     ],
     "styles": {
-      "sha256": "4f3f045b16576bd9407aecea7bacaef4eac2fe35aab9086ebb189ab280da1687",
-      "bytes": 27293
+      "sha256": "f0e73356b508c4c281ab8e80498736d24d36423b7a73a476675e336e80e147d8",
+      "bytes": 29125
     },
     "index": {
-      "sha256": "b8e32893900ccf66de68ebbd9f82bfeb2915806eb337f91144d94355bd4856cc",
+      "sha256": "e54bb67ffbac7d0b155b1fd4a5408806a86d51e96b35bfbea21219cb659c786b",
       "bytes": 1344
     },
     "assets": [
