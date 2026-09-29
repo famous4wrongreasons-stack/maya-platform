@@ -40,16 +40,26 @@ does not need to create its own Telegram bot or Yandex application.
 - Provider credentials live only in `/etc/maya-saas/live-widgets.env` on the
   platform server and must never be committed to Git.
 
-🔴 **Owner action outstanding — shared platform login.** Telegram's allow-list still permits only
-the retired acceptance addresses, which no longer resolve to us:
+Telegram login is configured **entirely by the bot's domain**, and by nothing else.
 
-- redirect URI: `https://maya.111.88.148.206.nip.io/oauth-callback.html` — **dead**
-- redirect URI: `https://maya.111.88.148.206.nip.io/api/auth/oauth/native/callback` — **dead**
-- trusted origin: `https://maya.111.88.148.206.nip.io` — **dead**
+`@mayaos_login_bot` → Bot Settings → Domain → `mayaos.ru`. That is the whole provider-side surface.
+This platform uses Telegram's **OIDC** (`oauth.telegram.org/auth` + `/token`, `id_token` verified
+against JWKS), not the Login Widget, and Telegram validates `redirect_uri` against the bot's domain
+rather than against a registered path list.
 
-Until they are replaced in the Telegram bot's settings with the final production addresses below,
-Telegram login cannot complete. Nothing in this repository can change a provider allow-list; it is a
-change in the provider's own console.
+Proven by construction on 2026-09-29: two callbacks on `mayaos.ru` that had never been registered
+anywhere were both accepted and served the consent page, while the identical request against another
+domain — and against the retired acceptance host — returned `redirect_uri required`.
+
+So the two callbacks need no registration; they only have to stay on `mayaos.ru`:
+
+- web: `https://mayaos.ru/oauth-callback.html`
+- native: `https://mayaos.ru/api/auth/oauth/native/callback`
+
+An earlier revision of this file listed "redirect URI" and "trusted origin" as provider fields to
+change. @BotFather exposes no such fields — that text described the Login Widget, which this
+platform does not use. `api.mayaos.ru` is deliberately not a redirect target: it is the backend host
+the `mayaos.ru/api` relay forwards to.
 
 The existing `malesthetic.pro` OAuth configuration and salon Telegram bot are
 separate tenant infrastructure and are not modified by this platform setup.
