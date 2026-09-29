@@ -146,6 +146,87 @@ for (const f of WITH_REFS) {
   });
 }
 
+// ── 4. M7 — the booking surface, fixture-only ──────────────────────────────────────────────────
+//
+// The four canonical booking kinds, plus the terminal state. Nothing is activated and the
+// widgets.runtime entitlement is not read: these are sealed envelopes rendered to a string.
+//
+// The property that matters is FAIL-CLOSED. When integrity or expiry says the card is no longer
+// trustworthy, the renderer answers with frozen prose, and the one thing presentation must never do
+// is keep offering the commit. So: across the WHOLE corpus, no COMMIT may survive a non-valid
+// verdict — asserted per fixture and once over the corpus, because a per-fixture check alone would
+// pass if a whole fixture silently stopped being rendered.
+
+const BOOKING_KINDS = new Set(['SERVICE_SELECTOR', 'STAFF_SELECTOR', 'TIME_SLOT_SELECTOR', 'BOOKING_CONFIRMATION']);
+
+/** The effects of the actions actually drawn, in reading order. */
+const drawnEffects = (result) => {
+  const out = [];
+  const visit = (node) => {
+    if (node.t === 'action') out.push(node.effect);
+    for (const child of node.children ?? []) visit(child);
+    if (node.t === 'table')
+      for (const group of node.groups) for (const row of group.rows) for (const a of row.actions) visit(a);
+  };
+  for (const node of result.nodes) visit(node);
+  return out;
+};
+
+for (const f of INDEX.fixtures.filter((x) => BOOKING_KINDS.has(x.kind))) {
+  test(`M7 ${f.kind} — ${f.id}`, () => {
+    const { item, result } = itemOf(f);
+    const facts = factsOf(markupOf(item));
+    assert.deepEqual(facts.drawnRefs, [...result.readingOrder], 'reading order');
+    assert.equal(result.mode, f.expect.mode, 'mode');
+
+    const effects = drawnEffects(result);
+    const trustworthy = f.expect.verdict === 'valid' && result.mode !== 'frozen_prose';
+    if (trustworthy) return;
+
+    // Frozen: text_equivalent plus AT MOST the one server REFINE. Never a commit, never a draft.
+    assert.ok(!effects.includes('COMMIT'), `${f.id}: a COMMIT survived a non-valid verdict`);
+    assert.ok(!effects.includes('DRAFT'), `${f.id}: a DRAFT survived a non-valid verdict`);
+    assert.ok(effects.length <= 1, `${f.id}: more than one control in frozen prose`);
+    for (const effect of effects) assert.equal(effect, 'REFINE', `${f.id}: the survivor must be a REFINE`);
+    // And it is not an error surface.
+    assert.equal(facts.alerts.length, 0, 'frozen is not an error banner');
+  });
+}
+
+test('M7 — no COMMIT survives a non-valid verdict, anywhere in the corpus', () => {
+  const offenders = [];
+  let checked = 0;
+  for (const f of INDEX.fixtures) {
+    const { result } = itemOf(f);
+    if (f.expect.verdict === 'valid' && result.mode !== 'frozen_prose') continue;
+    checked += 1;
+    if (drawnEffects(result).some((e) => e === 'COMMIT' || e === 'DRAFT')) offenders.push(f.id);
+  }
+  assert.ok(checked >= 6, `the sweep must actually examine the untrusted fixtures (saw ${checked})`);
+  assert.deepEqual(offenders, []);
+});
+
+test('M7 — a superseded predecessor offers nothing at all', () => {
+  const f = INDEX.fixtures.find((x) => x.id === 'slots-superseded-predecessor');
+  assert.ok(f, 'the superseded-predecessor fixture exists');
+  const { item, result } = itemOf(f);
+  assert.equal(result.readingOrder.length, 0, 'no interactive refs');
+  assert.equal(factsOf(markupOf(item)).drawnRefs.length, 0, 'and none drawn');
+});
+
+test('M7 — a terminal card is drawn whole, marked terminal, and carries no control', () => {
+  const f = INDEX.fixtures.find((x) => x.id === 'approval-consumed');
+  assert.ok(f, 'the consumed-approval fixture exists');
+  const { item, result } = itemOf(f, { display: 'terminal' });
+  const facts = factsOf(markupOf(item));
+  assert.ok(facts.article.attrs.class.includes('widget--terminal'), 'the display is on the article');
+  assert.equal(facts.drawnRefs.length, 0, 'a consumed approval offers nothing');
+  assert.equal(result.mode, 'frozen_prose');
+  // Whole, not collapsed: the heading AND the server's prose are still there.
+  assert.ok(textOf(facts.article).includes(result.textEquivalent.headline));
+  assert.ok(textOf(facts.article).length > result.textEquivalent.headline.length, 'more than the headline');
+});
+
 // ── 3. the checker, proved in the other direction ──────────────────────────────────────────────
 //
 // Four perturbations of correct markup. Each is a mistake a plausible drawer makes; each MUST be
