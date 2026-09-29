@@ -226,6 +226,12 @@ export class IntentAuditStore {
         intentTokenHash: input.intentTokenHash,
         outcome: 'ACCEPTED',
         actionReceiptRef: null,
+        record: {
+          is: scoped(input.tenantId, {
+            effect: 'COMMIT',
+            capabilitySpace: 'AE',
+          }),
+        },
       }),
       select: { id: true, widgetId: true },
     });
@@ -245,7 +251,7 @@ export class IntentAuditStore {
         kind: 'BOOKING_CONFIRMATION',
         erasedAt: null,
         // The same ownership predicate: reconciliation publishes the line of the intent it filled in.
-        // It always publishes CONFIRMED, which is the one line that never downgrades another.
+        // A different COMMIT must not replace an already confirmed historical line.
         intentRecords: ownedBy(input.tenantId, input.intentTokenHash, true),
       }),
       data: {
@@ -267,9 +273,9 @@ export class IntentAuditStore {
  * `some` is the identification: the emission must hold the very record this token named, and that
  * record must be the confirmation's Action-Engine COMMIT. A CONTROL escape, a REFINE, a DRAFT or a
  * token whose record is gone matches nothing, so nothing is written — the fail-closed direction.
- * `none` is the monotonicity: unless the line being published is itself CONFIRMED, no COMMIT of that
- * emission may already hold the canonical action receipt, because that receipt is what CONFIRMED is
- * made of and no later line may take it back.
+ * `none` preserves the first confirmed receipt. Non-confirmed writes exclude every confirmed
+ * COMMIT; confirmed writes exclude every OTHER confirmed COMMIT, allowing only idempotent repair
+ * from the same immutable receipt.
  */
 const ownedBy = (
   tenantId: string,
@@ -281,19 +287,20 @@ const ownedBy = (
     effect: 'COMMIT',
     capabilitySpace: 'AE',
   }),
-  ...(publishesConfirmed
-    ? {}
-    : {
-        none: scoped(tenantId, {
-          effect: 'COMMIT',
-          receipts: {
-            some: scoped(tenantId, {
-              outcome: 'ACCEPTED',
-              actionReceiptRef: { not: null },
-            }),
-          },
-        }),
+  none: scoped(tenantId, {
+    effect: 'COMMIT',
+    // A retry may re-publish its own immutable receipt. Another COMMIT on the
+    // same emission must never replace the first confirmed historical line.
+    ...(publishesConfirmed
+      ? { intentTokenHash: { not: intentTokenHash } }
+      : {}),
+    receipts: {
+      some: scoped(tenantId, {
+        outcome: 'ACCEPTED',
+        actionReceiptRef: { not: null },
       }),
+    },
+  }),
 });
 
 const terminalLine = (receipt: {

@@ -14,7 +14,9 @@
 // the last submission is new — the same confirmation's escape token, pressed after a successful
 // COMMIT, exactly as the production renderer's Dismiss button submits it.
 
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
+import { Prisma } from '@prisma/client';
+import { WidgetStoresService } from '../../src/widgets/stores/widget-stores.service';
 
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
 import { WIDGET_INTENT_SUBMISSION_CONTRACT } from '../../src/widgets/dto/submit-intent.dto';
@@ -70,7 +72,7 @@ const selectionFieldOf = (selected: Intent): string | null => {
   return text(first.name, 'input schema field name');
 };
 
-describe('H2 — the confirmation terminal line survives the same widget escape [HTTP, PostgreSQL]', () => {
+describe('H2 — the confirmation terminal line survives the same widget escape [HTTP] [PostgreSQL]', () => {
   let db: FixtureContext;
   let http: HttpHarness;
   let fx: Fixtures;
@@ -200,189 +202,283 @@ describe('H2 — the confirmation terminal line survives the same widget escape 
     return found.terminal_lines;
   };
 
-  it('the escape submitted after a successful COMMIT leaves CONFIRMED and its action receipt intact', async () => {
-    const tenant: TenantFixture = await fx.tenant(
-      'H2 terminal line',
-      CalendarSource.INTERNAL,
-    );
-    const user = await fx.user(tenant, UserRole.CLIENT);
-    await db.prisma.user.update({
-      where: { id: user.id },
-      data: {
-        encryptedName: db.encryption.encrypt('H2 Client'),
-        phone: `+7999${String(Date.now()).slice(-7)}`,
-      },
-    });
-    const client = await fx.client(tenant, user);
-    await fx.grantFeature(tenant, 'widgets.runtime');
-    await fx.grantFeature(tenant, 'ai.consultant');
-    await fx.grantFeature(tenant, 'booking');
-    await fx.grantFeature(tenant, 'booking.customer_app');
-    await fx.grantFeature(tenant, 'crm.integration');
-    const service = await db.prisma.internalService.create({
-      data: {
-        tenantId: tenant.id,
-        name: 'H2 Service',
-        price: 1500,
-        durationMinutes: 30,
-      },
-    });
-    const provider = await db.prisma.internalProvider.create({
-      data: {
-        tenantId: tenant.id,
-        displayName: 'H2 Provider',
-        active: true,
-        slotIntervalMinutes: 30,
-      },
-    });
-    await db.prisma.internalProviderService.create({
-      data: {
-        tenantId: tenant.id,
-        providerId: provider.id,
-        serviceId: service.id,
-      },
-    });
-    // 10:00–13:00 local on every weekday: six bookable slots. The selector owner reads availability
-    // for tomorrow, so a midday window always clears the industry preset's minimum notice whatever
-    // the hour of the run — a window at midnight (E2's 00:00–02:00 fixture) does not, and a whole-day
-    // window mints an oversize envelope. This defect has nothing to do with either.
-    await db.prisma.internalAvailabilityRule.createMany({
-      data: Array.from({ length: 7 }, (_, weekday) => ({
-        tenantId: tenant.id,
-        providerId: provider.id,
-        weekday,
-        startMinute: 600,
-        endMinute: 780,
-      })),
-    });
-    const accessToken = await http.login(
-      tenant.slug,
-      user.email,
-      user.password,
-    );
+  it.each([true, false])(
+    'WR-H2 escape preserves the receipt boundary (committed=%s)',
+    async (shouldCommit) => {
+      const tenant: TenantFixture = await fx.tenant(
+        'H2 terminal line',
+        CalendarSource.INTERNAL,
+      );
+      const user = await fx.user(tenant, UserRole.CLIENT);
+      await db.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          encryptedName: db.encryption.encrypt('H2 Client'),
+          phone: `+7999${String(Date.now()).slice(-7)}`,
+        },
+      });
+      const client = await fx.client(tenant, user);
+      await fx.grantFeature(tenant, 'widgets.runtime');
+      await fx.grantFeature(tenant, 'ai.consultant');
+      await fx.grantFeature(tenant, 'booking');
+      await fx.grantFeature(tenant, 'booking.customer_app');
+      await fx.grantFeature(tenant, 'crm.integration');
+      const service = await db.prisma.internalService.create({
+        data: {
+          tenantId: tenant.id,
+          name: 'H2 Service',
+          price: 1500,
+          durationMinutes: 30,
+        },
+      });
+      const provider = await db.prisma.internalProvider.create({
+        data: {
+          tenantId: tenant.id,
+          displayName: 'H2 Provider',
+          active: true,
+          slotIntervalMinutes: 30,
+        },
+      });
+      await db.prisma.internalProviderService.create({
+        data: {
+          tenantId: tenant.id,
+          providerId: provider.id,
+          serviceId: service.id,
+        },
+      });
+      // 10:00–13:00 local on every weekday: six bookable slots. The selector owner reads availability
+      // for tomorrow, so a midday window always clears the industry preset's minimum notice whatever
+      // the hour of the run — a window at midnight (E2's 00:00–02:00 fixture) does not, and a whole-day
+      // window mints an oversize envelope. This defect has nothing to do with either.
+      await db.prisma.internalAvailabilityRule.createMany({
+        data: Array.from({ length: 7 }, (_, weekday) => ({
+          tenantId: tenant.id,
+          providerId: provider.id,
+          weekday,
+          startMinute: 600,
+          endMinute: 780,
+        })),
+      });
+      const accessToken = await http.login(
+        tenant.slug,
+        user.email,
+        user.password,
+      );
 
-    // The production read tool mints the first selector; the shell may send only a drawn option id.
-    const catalog = await http.executeTool(
-      accessToken,
-      'catalog.services.read',
-      { arguments: {}, surface: 'web' },
-      `h2-${randomUUID()}`,
-    );
-    expect([200, 201]).toContain(catalog.status);
-    const selector = object(
-      object(
+      // The production read tool mints the first selector; the shell may send only a drawn option id.
+      const catalog = await http.executeTool(
+        accessToken,
+        'catalog.services.read',
+        { arguments: {}, surface: 'web' },
+        `h2-${randomUUID()}`,
+      );
+      expect([200, 201]).toContain(catalog.status);
+      const selector = object(
         object(
-          object(catalog.body, 'catalog execution').resolution,
-          'catalog resolution',
-        ).receipt,
-        'catalog receipt',
-      ).envelope,
-      'service selector envelope',
-    ) as Envelope;
-    expect(selector).toMatchObject({ kind: 'SERVICE_SELECTOR' });
+          object(
+            object(catalog.body, 'catalog execution').resolution,
+            'catalog resolution',
+          ).receipt,
+          'catalog receipt',
+        ).envelope,
+        'service selector envelope',
+      ) as Envelope;
+      expect(selector).toMatchObject({ kind: 'SERVICE_SELECTOR' });
 
-    const staffSelector = await step({
-      accessToken,
-      envelope: selector,
-      effect: 'REFINE',
-      option: firstOption(selector, 'service'),
-      label: 'service',
-    });
-    expect(staffSelector).toMatchObject({ kind: 'STAFF_SELECTOR' });
-    const slotSelector = await step({
-      accessToken,
-      envelope: staffSelector,
-      effect: 'REFINE',
-      option: firstOption(staffSelector, 'staff'),
-      label: 'staff',
-    });
-    expect(slotSelector).toMatchObject({ kind: 'TIME_SLOT_SELECTOR' });
-    const confirmation = await step({
-      accessToken,
-      envelope: slotSelector,
-      effect: 'DRAFT',
-      option: firstSlot(slotSelector),
-      label: 'slot',
-    });
-    expect(confirmation).toMatchObject({ kind: 'BOOKING_CONFIRMATION' });
-    const confirmationId = widgetIdOf(confirmation);
+      const staffSelector = await step({
+        accessToken,
+        envelope: selector,
+        effect: 'REFINE',
+        option: firstOption(selector, 'service'),
+        label: 'service',
+      });
+      expect(staffSelector).toMatchObject({ kind: 'STAFF_SELECTOR' });
+      const slotSelector = await step({
+        accessToken,
+        envelope: staffSelector,
+        effect: 'REFINE',
+        option: firstOption(staffSelector, 'staff'),
+        label: 'staff',
+      });
+      expect(slotSelector).toMatchObject({ kind: 'TIME_SLOT_SELECTOR' });
+      const confirmation = await step({
+        accessToken,
+        envelope: slotSelector,
+        effect: 'DRAFT',
+        option: firstSlot(slotSelector),
+        label: 'slot',
+      });
+      expect(confirmation).toMatchObject({ kind: 'BOOKING_CONFIRMATION' });
+      const confirmationId = widgetIdOf(confirmation);
 
-    // The two buttons the production renderer draws on this one confirmation.
-    const commit = intentOf(confirmation, 'COMMIT');
-    const escape = intentOf(confirmation, 'CONTROL');
-    expect(escape).toMatchObject({ role: 'escape' });
-    expect(text(commit.intent_token, 'commit token')).not.toBe(
-      text(escape.intent_token, 'escape token'),
-    );
+      // The two buttons the production renderer draws on this one confirmation.
+      const commit = intentOf(confirmation, 'COMMIT');
+      const escape = intentOf(confirmation, 'CONTROL');
+      expect(escape).toMatchObject({ role: 'escape' });
+      expect(text(commit.intent_token, 'commit token')).not.toBe(
+        text(escape.intent_token, 'escape token'),
+      );
 
-    const committed = await submit(accessToken, confirmation, commit, 'commit');
-    expect(committed).toMatchObject({
-      receipt_outcome: 'ACCEPTED',
-      gates_run: 14,
-      stopped_at_gate: '13',
-    });
-    expect(committed.owner_decision).toMatchObject({ state: 'SUCCEEDED' });
+      if (!shouldCommit) {
+        const dismissed = await submit(
+          accessToken,
+          confirmation,
+          escape,
+          'uncommitted-escape',
+        );
+        expect(dismissed.resolved_widget).toMatchObject({
+          control: 'dismissed',
+        });
+        expect(await storedTerminalLines(tenant.id, confirmationId)).toEqual(
+          null,
+        );
+        expect(await pageTerminalLines(accessToken, confirmationId)).toEqual(
+          [],
+        );
+        expect(
+          await db.prisma.actionExecution.count({
+            where: { tenantId: tenant.id },
+          }),
+        ).toBe(0);
+        return;
+      }
 
-    const adjudicated = await db.prisma.widgetIntentReceipt.findFirstOrThrow({
-      where: {
+      const committed = await submit(
+        accessToken,
+        confirmation,
+        commit,
+        'commit',
+      );
+      expect(committed).toMatchObject({
+        receipt_outcome: 'ACCEPTED',
+        gates_run: 14,
+        stopped_at_gate: '13',
+      });
+      expect(committed.owner_decision).toMatchObject({ state: 'SUCCEEDED' });
+
+      const adjudicated = await db.prisma.widgetIntentReceipt.findFirstOrThrow({
+        where: {
+          tenantId: tenant.id,
+          widgetId: confirmationId,
+          outcome: 'ACCEPTED',
+          actionReceiptRef: { not: null },
+        },
+        select: { actionReceiptRef: true },
+      });
+      const confirmedLine = [
+        {
+          outcome: 'CONFIRMED',
+          text: 'Запись подтверждена.',
+          action_receipt_ref: adjudicated.actionReceiptRef,
+        },
+      ];
+      expect(await storedTerminalLines(tenant.id, confirmationId)).toEqual(
+        confirmedLine,
+      );
+      expect(await pageTerminalLines(accessToken, confirmationId)).toEqual(
+        confirmedLine,
+      );
+
+      // The escape §4 requires on every tier, on the SAME widget, after the COMMIT settled.
+      const dismissed = await submit(
+        accessToken,
+        confirmation,
+        escape,
+        'escape',
+      );
+      // The escape's own effect is unchanged: it is still admitted and still resolves the control.
+      expect(dismissed).toMatchObject({ receipt_outcome: 'ACCEPTED' });
+      expect(dismissed.resolved_widget).toMatchObject({ control: 'dismissed' });
+
+      // ...and it adjudicated only itself. The COMMIT's line is the COMMIT's.
+      expect(await storedTerminalLines(tenant.id, confirmationId)).toEqual(
+        confirmedLine,
+      );
+      expect(await pageTerminalLines(accessToken, confirmationId)).toEqual(
+        confirmedLine,
+      );
+
+      // Both adjudications are durable and unchanged; the business fact never moved.
+      const receipts = await db.prisma.widgetIntentReceipt.findMany({
+        where: { tenantId: tenant.id, widgetId: confirmationId },
+        orderBy: { submittedAt: 'asc' },
+        select: { outcome: true, actionReceiptRef: true },
+      });
+      expect(receipts).toEqual([
+        { outcome: 'ACCEPTED', actionReceiptRef: adjudicated.actionReceiptRef },
+        { outcome: 'ACCEPTED', actionReceiptRef: null },
+      ]);
+      // [RI] Persistence boundary only: a deliberately injected second COMMIT.
+      // This record is never submitted to HTTP and is not a production-mint claim.
+      const stores = http.app.get(WidgetStoresService);
+      const controlRecord = await db.prisma.widgetIntentRecord.findFirstOrThrow(
+        {
+          where: {
+            tenantId: tenant.id,
+            widgetId: confirmationId,
+            effect: 'CONTROL',
+          },
+        },
+      );
+      expect(
+        await stores.reconcileAcceptedReceipt({
+          tenantId: tenant.id,
+          intentTokenHash: controlRecord.intentTokenHash,
+          actionReceiptRef: 'injected-control-reference',
+        }),
+      ).toBe(false);
+      const first = await db.prisma.widgetIntentRecord.findFirstOrThrow({
+        where: {
+          tenantId: tenant.id,
+          widgetId: confirmationId,
+          effect: 'COMMIT',
+        },
+      });
+      const secondHash = createHash('sha256')
+        .update(randomUUID())
+        .digest('hex');
+      await db.prisma.widgetIntentRecord.create({
+        data: {
+          ...first,
+          id: randomUUID(),
+          intentTokenHash: secondHash,
+          targetJson: first.targetJson ?? Prisma.DbNull,
+          confirmationJson: first.confirmationJson ?? Prisma.DbNull,
+          frozenNounsJson: first.frozenNounsJson ?? Prisma.DbNull,
+          selectionDomainLabelsJson:
+            first.selectionDomainLabelsJson ?? Prisma.DbNull,
+        } as Prisma.WidgetIntentRecordUncheckedCreateInput,
+      });
+      await stores.writeReceipt({
         tenantId: tenant.id,
         widgetId: confirmationId,
+        intentTokenHash: secondHash,
         outcome: 'ACCEPTED',
-        actionReceiptRef: { not: null },
-      },
-      select: { actionReceiptRef: true },
-    });
-    const confirmedLine = [
-      {
-        outcome: 'CONFIRMED',
-        text: 'Запись подтверждена.',
-        action_receipt_ref: adjudicated.actionReceiptRef,
-      },
-    ];
-    expect(await storedTerminalLines(tenant.id, confirmationId)).toEqual(
-      confirmedLine,
-    );
-    expect(await pageTerminalLines(accessToken, confirmationId)).toEqual(
-      confirmedLine,
-    );
+        answeringChannel: 'pwa',
+        actionReceiptRef: 'injected-second-reference',
+      });
+      expect(await storedTerminalLines(tenant.id, confirmationId)).toEqual(
+        confirmedLine,
+      );
+      expect(await pageTerminalLines(accessToken, confirmationId)).toEqual(
+        confirmedLine,
+      );
 
-    // The escape §4 requires on every tier, on the SAME widget, after the COMMIT settled.
-    const dismissed = await submit(accessToken, confirmation, escape, 'escape');
-    // The escape's own effect is unchanged: it is still admitted and still resolves the control.
-    expect(dismissed).toMatchObject({ receipt_outcome: 'ACCEPTED' });
-    expect(dismissed.resolved_widget).toMatchObject({ control: 'dismissed' });
-
-    // ...and it adjudicated only itself. The COMMIT's line is the COMMIT's.
-    expect(await storedTerminalLines(tenant.id, confirmationId)).toEqual(
-      confirmedLine,
-    );
-    expect(await pageTerminalLines(accessToken, confirmationId)).toEqual(
-      confirmedLine,
-    );
-
-    // Both adjudications are durable and unchanged; the business fact never moved.
-    const receipts = await db.prisma.widgetIntentReceipt.findMany({
-      where: { tenantId: tenant.id, widgetId: confirmationId },
-      orderBy: { submittedAt: 'asc' },
-      select: { outcome: true, actionReceiptRef: true },
-    });
-    expect(receipts).toEqual([
-      { outcome: 'ACCEPTED', actionReceiptRef: adjudicated.actionReceiptRef },
-      { outcome: 'ACCEPTED', actionReceiptRef: null },
-    ]);
-    await expect(
-      db.prisma.appointment.findFirstOrThrow({
-        where: { tenantId: tenant.id, mayaClientId: client.clientId },
-        select: { status: true },
-      }),
-    ).resolves.toEqual({ status: 'confirmed' });
-    expect(
-      await db.prisma.actionExecution.findMany({
-        where: { tenantId: tenant.id },
-        select: { capability: true, state: true },
-      }),
-    ).toEqual([
-      { capability: 'crm.appointment.create.v1', state: 'SUCCEEDED' },
-    ]);
-  }, 300_000);
+      await expect(
+        db.prisma.appointment.findFirstOrThrow({
+          where: { tenantId: tenant.id, mayaClientId: client.clientId },
+          select: { status: true },
+        }),
+      ).resolves.toEqual({ status: 'confirmed' });
+      expect(
+        await db.prisma.actionExecution.findMany({
+          where: { tenantId: tenant.id },
+          select: { capability: true, state: true },
+        }),
+      ).toEqual([
+        { capability: 'crm.appointment.create.v1', state: 'SUCCEEDED' },
+      ]);
+    },
+    300_000,
+  );
 });

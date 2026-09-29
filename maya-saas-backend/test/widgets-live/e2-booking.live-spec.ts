@@ -175,7 +175,7 @@ const runShellBookingFlow = async (input: {
     child.stdin.end(JSON.stringify(input));
   });
 
-describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP, PostgreSQL]', () => {
+describe('E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP] [PostgreSQL]', () => {
   let db: FixtureContext;
   let http: HttpHarness;
   let fx: Fixtures;

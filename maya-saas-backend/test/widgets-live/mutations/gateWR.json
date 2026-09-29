@@ -7,10 +7,7 @@
     "killers": [
       "reads staff through the existing policy/runtime"
     ],
-    "expect": "build-killed",
-    "steps": [
-      "unit"
-    ]
+    "expect": "build-killed"
   },
   {
     "id": "WR-M02",
@@ -20,10 +17,7 @@
     "killers": [
       "WR-L8"
     ],
-    "expect": "build-killed",
-    "steps": [
-      "unit"
-    ]
+    "expect": "build-killed"
   },
   {
     "id": "WR-M03",
@@ -33,10 +27,7 @@
     "killers": [
       "projects canonical services"
     ],
-    "expect": "build-killed",
-    "steps": [
-      "unit"
-    ]
+    "expect": "build-killed"
   },
   {
     "id": "WR-M04",
@@ -46,10 +37,7 @@
     "killers": [
       "projects valid availability"
     ],
-    "expect": "build-killed",
-    "steps": [
-      "unit"
-    ]
+    "expect": "build-killed"
   },
   {
     "id": "WR-M05",
@@ -59,10 +47,7 @@
     "killers": [
       "requires the inherited service"
     ],
-    "expect": "build-killed",
-    "steps": [
-      "unit"
-    ]
+    "expect": "build-killed"
   },
   {
     "id": "WR-M06",
@@ -72,10 +57,7 @@
     "killers": [
       "WR-L21"
     ],
-    "expect": "build-killed",
-    "steps": [
-      "unit"
-    ]
+    "expect": "build-killed"
   },
   {
     "id": "WR-M07",
@@ -85,10 +67,7 @@
     "killers": [
       "WR-L21"
     ],
-    "expect": "build-killed",
-    "steps": [
-      "unit"
-    ]
+    "expect": "build-killed"
   },
   {
     "id": "WR-M08",
@@ -98,10 +77,7 @@
     "killers": [
       "WR-L21"
     ],
-    "expect": "build-killed",
-    "steps": [
-      "unit"
-    ]
+    "expect": "build-killed"
   },
   {
     "id": "WR-M09",
@@ -111,10 +87,7 @@
     "killers": [
       "WR-L7"
     ],
-    "expect": "build-killed",
-    "steps": [
-      "unit"
-    ]
+    "expect": "build-killed"
   },
   {
     "id": "WR-M10",
@@ -124,10 +97,7 @@
     "killers": [
       "WR-L7"
     ],
-    "expect": "build-killed",
-    "steps": [
-      "unit"
-    ]
+    "expect": "build-killed"
   },
   {
     "id": "WR-M11",
@@ -137,9 +107,61 @@
     "killers": [
       "WR-L7"
     ],
-    "expect": "build-killed",
-    "steps": [
-      "unit"
-    ]
+    "expect": "build-killed"
+  },
+  {
+    "id": "WR-M12",
+    "file": "src/widgets/stores/intent-audit.store.ts",
+    "find": "  some: scoped(tenantId, {\n    intentTokenHash,\n    effect: 'COMMIT',\n    capabilitySpace: 'AE',\n  }),",
+    "replace": "",
+    "killers": [
+      "writeReceipt is idempotent",
+      "claim and reconciliation"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "WR-M13",
+    "file": "src/widgets/stores/intent-audit.store.ts",
+    "find": "  some: scoped(tenantId, {\n    intentTokenHash,\n    effect: 'COMMIT',\n    capabilitySpace: 'AE',\n  }),",
+    "replace": "  some: scoped(tenantId, { intentTokenHash }),",
+    "killers": [
+      "writeReceipt is idempotent",
+      "claim and reconciliation"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "WR-M14",
+    "file": "src/widgets/stores/intent-audit.store.ts",
+    "find": "  none: scoped(tenantId, {\n    effect: 'COMMIT',\n    // A retry may re-publish its own immutable receipt. Another COMMIT on the\n    // same emission must never replace the first confirmed historical line.\n    ...(publishesConfirmed\n      ? { intentTokenHash: { not: intentTokenHash } }\n      : {}),\n    receipts: {\n      some: scoped(tenantId, {\n        outcome: 'ACCEPTED',\n        actionReceiptRef: { not: null },\n      }),\n    },\n  }),",
+    "replace": "",
+    "killers": [
+      "writeReceipt is idempotent",
+      "WR-L22",
+      "claim and reconciliation"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "WR-M15",
+    "file": "src/widgets/stores/intent-audit.store.ts",
+    "find": "? { intentTokenHash: { not: intentTokenHash } }",
+    "replace": "? {}",
+    "killers": [
+      "WR-L22",
+      "claim and reconciliation"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "WR-M16",
+    "file": "src/widgets/stores/intent-audit.store.ts",
+    "find": "        record: {\n          is: scoped(input.tenantId, {\n            effect: 'COMMIT',\n            capabilitySpace: 'AE',\n          }),\n        },",
+    "replace": "",
+    "killers": [
+      "claim and reconciliation"
+    ],
+    "expect": "build-killed"
   }
 ]

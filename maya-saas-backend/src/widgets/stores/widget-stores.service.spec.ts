@@ -359,7 +359,7 @@ describe('WidgetStoresService — every existing method sends what it sent befor
       });
     });
 
-    it('derives the terminal outcome from the durable receipt, never from the submitted claim', async () => {
+    it('WR-L22 idempotent retries derive the terminal outcome from the existing durable receipt', async () => {
       const replies = [
         {
           id: 'receipt-success',
@@ -374,11 +374,22 @@ describe('WidgetStoresService — every existing method sends what it sent befor
           actionReceiptRef: null,
         },
       ];
-      const { stores, calls } = storesOver(undefined, (model, op) =>
-        model === 'widgetIntentReceipt' && op === 'upsert'
-          ? replies.shift()
-          : { count: 1 },
-      );
+      const persisted = new Map([
+        ['h-1', replies[0]],
+        ['h-2', replies[1]],
+      ]);
+      const { stores, calls } = storesOver(undefined, (model, op, args) => {
+        if (model !== 'widgetIntentReceipt' || op !== 'upsert')
+          return { count: 1 };
+        const query = args as {
+          where: { tenantId_intentTokenHash: { intentTokenHash: string } };
+          update: object;
+        };
+        expect(query.update).toEqual({});
+        return persisted.get(
+          query.where.tenantId_intentTokenHash.intentTokenHash,
+        );
+      });
 
       // Deliberately contradictory caller fields are ignored by the idempotent upsert result.
       // The already-durable canonical receipt is the only source of the conversation outcome.
@@ -395,7 +406,7 @@ describe('WidgetStoresService — every existing method sends what it sent befor
         intentTokenHash: 'h-2',
         outcome: 'ACCEPTED',
         answeringChannel: 'pwa',
-        actionReceiptRef: 'client-claim-cannot-confirm',
+        actionReceiptRef: 'retry-does-not-rewrite-existing-receipt',
       });
 
       expect(calls[1].args).toMatchObject({
@@ -415,12 +426,12 @@ describe('WidgetStoresService — every existing method sends what it sent befor
           ],
         },
       });
-      // Monotonicity, at the same granularity: CONFIRMED is published unconditionally, because it is
-      // the line that cannot take another back. Every line that is not CONFIRMED carries the guard.
+      // Every outcome is guarded. The same immutable COMMIT may repair its own line;
+      // a different confirmed COMMIT must not substitute another receipt.
       expect(
         (calls[1].args as { where: { intentRecords: object } }).where
           .intentRecords,
-      ).not.toHaveProperty('none');
+      ).toHaveProperty('none.intentTokenHash.not', 'h-1');
       expect(
         (calls[3].args as { where: { intentRecords: object } }).where
           .intentRecords,
@@ -470,6 +481,13 @@ describe('WidgetStoresService — every existing method sends what it sent befor
               intentTokenHash: 'h-1',
               outcome: 'ACCEPTED',
               actionReceiptRef: null,
+              record: {
+                is: {
+                  effect: 'COMMIT',
+                  capabilitySpace: 'AE',
+                  tenantId: 't-1',
+                },
+              },
               tenantId: 't-1',
             },
             select: { id: true, widgetId: true },
@@ -497,12 +515,24 @@ describe('WidgetStoresService — every existing method sends what it sent befor
               kind: 'BOOKING_CONFIRMATION',
               erasedAt: null,
               // Reconciliation publishes the line of the intent whose receipt it filled in, under the
-              // same ownership predicate; CONFIRMED needs no monotonicity guard.
+              // same ownership predicate, including confirmed-substitution protection.
               intentRecords: {
                 some: {
                   intentTokenHash: 'h-1',
                   effect: 'COMMIT',
                   capabilitySpace: 'AE',
+                  tenantId: 't-1',
+                },
+                none: {
+                  effect: 'COMMIT',
+                  intentTokenHash: { not: 'h-1' },
+                  receipts: {
+                    some: {
+                      outcome: 'ACCEPTED',
+                      actionReceiptRef: { not: null },
+                      tenantId: 't-1',
+                    },
+                  },
                   tenantId: 't-1',
                 },
               },
