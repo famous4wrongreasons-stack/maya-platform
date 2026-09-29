@@ -1,0 +1,431 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "c94c751ca58342fc7ebf6f83cdec7bc16dd6c3ee",
+  "battery_hashes": {
+    "gateSBV.json": "0958974fb08088ac63905848e3aad0f55e2d8bd55b56524277433e8268ba7e71"
+  },
+  "partition": null,
+  "startedAt": "2026-09-29T19:35:50.509Z",
+  "batteries": [
+    "gateSBV.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": "(auth/client-verification-delivery|crm/client-reverification-candidate.service).spec.ts",
+    "unit_filter": "RV-"
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-51f75032e4",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-51f75032e4",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gateSBV.json",
+      "id": "SBV-M1",
+      "files": [
+        "src/crm/client-reverification-candidate.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "RV-PREDECESSOR"
+      ],
+      "kills": [
+        {
+          "killer": "RV-PREDECESSOR",
+          "test": "SB-1 re-verification candidate (not authority) RV-PREDECESSOR refuses active predecessor",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSBV.json",
+      "id": "SBV-M2",
+      "files": [
+        "src/crm/client-reverification-candidate.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "RV-PREDECESSOR"
+      ],
+      "kills": [
+        {
+          "killer": "RV-PREDECESSOR",
+          "test": "SB-1 re-verification candidate (not authority) RV-PREDECESSOR refuses other Client predecessor",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSBV.json",
+      "id": "SBV-M3",
+      "files": [
+        "src/crm/client-reverification-candidate.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "RV-DRIFT"
+      ],
+      "kills": [
+        {
+          "killer": "RV-DRIFT",
+          "test": "SB-1 re-verification candidate (not authority) RV-DRIFT refuses predecessor changed during provider read",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "RV-DRIFT",
+          "test": "SB-1 re-verification candidate (not authority) RV-DRIFT refuses CRM source changed during provider read",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "RV-DRIFT",
+          "test": "SB-1 re-verification candidate (not authority) RV-DRIFT refuses candidate changed during provider read",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 3
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSBV.json",
+      "id": "SBV-M4",
+      "files": [
+        "src/crm/client-reverification-candidate.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "RV-CANDIDATE"
+      ],
+      "kills": [
+        {
+          "killer": "RV-CANDIDATE",
+          "test": "SB-1 re-verification candidate (not authority) RV-CANDIDATE refuses multiple candidate",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSBV.json",
+      "id": "SBV-M5",
+      "files": [
+        "src/crm/client-reverification-candidate.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "RV-CHANNEL"
+      ],
+      "kills": [
+        {
+          "killer": "RV-CHANNEL",
+          "test": "SB-1 re-verification candidate (not authority) RV-CHANNEL refuses incomplete canonical channel without User.phone fallback",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSBV.json",
+      "id": "SBV-M6",
+      "files": [
+        "src/crm/client-reverification-candidate.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "RV-CHANNEL"
+      ],
+      "kills": [
+        {
+          "killer": "RV-CHANNEL",
+          "test": "SB-1 re-verification candidate (not authority) RV-CHANNEL refuses ambiguous source canonical channel without User.phone fallback",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSBV.json",
+      "id": "SBV-M7",
+      "files": [
+        "src/auth/phone-auth-delivery.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "RV-TRANSPORT"
+      ],
+      "kills": [
+        {
+          "killer": "RV-TRANSPORT",
+          "test": "SB-1 existing SMS transport strict adapter RV-TRANSPORT refuses debug/test/missing paths before sending: {\"PHONE_AUTH_DEBUG\":\"true\"}",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "RV-TRANSPORT",
+          "test": "SB-1 existing SMS transport strict adapter RV-TRANSPORT refuses debug/test/missing paths before sending: {\"PHONE_AUTH_PROVIDER\":\"debug\"}",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "RV-TRANSPORT",
+          "test": "SB-1 existing SMS transport strict adapter RV-TRANSPORT refuses debug/test/missing paths before sending: {\"NODE_ENV\":\"test\"}",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 3
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSBV.json",
+      "id": "SBV-M8",
+      "files": [
+        "src/auth/phone-auth-delivery.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "RV-TRANSPORT"
+      ],
+      "kills": [
+        {
+          "killer": "RV-TRANSPORT",
+          "test": "SB-1 existing SMS transport strict adapter RV-TRANSPORT refuses debug/test/missing paths before sending: {\"SMSRU_TEST\":\"true\"}",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-09-29T19:37:39.655Z"
+}

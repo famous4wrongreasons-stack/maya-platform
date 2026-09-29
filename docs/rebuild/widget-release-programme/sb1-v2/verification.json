@@ -1,0 +1,201 @@
+{
+  "contract": "maya.sb1-json-v2-checkpoint/1",
+  "source_head": "c94c751ca58342fc7ebf6f83cdec7bc16dd6c3ee",
+  "identity_runtime_source_head": "eb200c98f5e9ca47ec5b3eca9b541a2f9512b81b",
+  "identity_proof_only_delta": [
+    "maya-saas-backend/src/widgets/i-mig2.schema.spec.ts"
+  ],
+  "self_booking_contract": "IMPLEMENTED",
+  "new_verified_binding_path": "READY",
+  "json_v2": "PASS",
+  "successor_proofs": "12/12",
+  "production_user_reverified": false,
+  "test_summaries": {
+    "backend": {
+      "numPassedTestSuites": 578,
+      "numFailedTestSuites": 0,
+      "numPassedTests": 5458,
+      "numFailedTests": 0,
+      "numPendingTests": 1,
+      "numTotalTests": 5459,
+      "success": true
+    },
+    "widgets": {
+      "numPassedTestSuites": 26,
+      "numFailedTestSuites": 0,
+      "numPassedTests": 368,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTotalTests": 368,
+      "success": true
+    },
+    "http": {
+      "numPassedTestSuites": 2,
+      "numFailedTestSuites": 0,
+      "numPassedTests": 8,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTotalTests": 8,
+      "success": true
+    }
+  },
+  "bin": {
+    "cases": 17,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "mutations": {
+    "AB": {
+      "source_head": "c94c751ca58342fc7ebf6f83cdec7bc16dd6c3ee",
+      "mutants": 2,
+      "status": "AS-DECLARED",
+      "mismatches": 0,
+      "baseline_red": [],
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": "widgets/(routing/g13-action-boundary.architecture|owner-ports/commit-booking.adapter).spec.ts",
+        "unit_filter": "WR-F33|WR-F76"
+      }
+    },
+    "H-harness": {
+      "source_head": "c94c751ca58342fc7ebf6f83cdec7bc16dd6c3ee",
+      "mutants": 21,
+      "status": "AS-DECLARED",
+      "mismatches": 0,
+      "baseline_red": [],
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": "(?:^|\\s)(?:HAR\\-10|HAR\\-12|HAR\\-13|HAR\\-14|HAR\\-3\\ \\[GW\\]|HAR\\-5|HAR\\-9\\ \\[GW\\]|WR\\-H1)(?=$|[^A-Za-z0-9_.-])",
+        "unit_tests": "widgets/",
+        "unit_filter": "(?:^|\\s)(?:HAR\\-10|HAR\\-12|HAR\\-13|HAR\\-14|HAR\\-3\\ \\[GW\\]|HAR\\-5|HAR\\-9\\ \\[GW\\]|WR\\-H1)(?=$|[^A-Za-z0-9_.-])"
+      }
+    },
+    "SB1": {
+      "source_head": "c94c751ca58342fc7ebf6f83cdec7bc16dd6c3ee",
+      "mutants": 10,
+      "status": "AS-DECLARED",
+      "mismatches": 0,
+      "baseline_red": [],
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": "appointments/(personal-client-context.service|client-appointment-create.service).spec.ts",
+        "unit_filter": "SB1-"
+      }
+    },
+    "SBV": {
+      "source_head": "c94c751ca58342fc7ebf6f83cdec7bc16dd6c3ee",
+      "mutants": 8,
+      "status": "AS-DECLARED",
+      "mismatches": 0,
+      "baseline_red": [],
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": "(auth/client-verification-delivery|crm/client-reverification-candidate.service).spec.ts",
+        "unit_filter": "RV-"
+      }
+    },
+    "SV2": {
+      "source_head": "eb200c98f5e9ca47ec5b3eca9b541a2f9512b81b",
+      "mutants": 13,
+      "status": "AS-DECLARED",
+      "mismatches": 0,
+      "baseline_red": [],
+      "restrictions": {
+        "live_tests": "sb1-successor.live-spec.ts",
+        "live_filter": "SV2-",
+        "unit_tests": "(crm/client-link-successor.service|action-engine/client-link-successor.architecture).spec.ts",
+        "unit_filter": "SV2-"
+      }
+    },
+    "WR": {
+      "source_head": "c94c751ca58342fc7ebf6f83cdec7bc16dd6c3ee",
+      "mutants": 23,
+      "status": "AS-DECLARED",
+      "mismatches": 0,
+      "baseline_red": [],
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": "(?:^|\\s)(?:WR\\-CREATE|WR\\-L11|WR\\-L12\\ requires|WR\\-L13\\ lock\\-time|WR\\-L13\\ refuses|WR\\-L21|WR\\-L22|WR\\-L7|WR\\-L8|claim\\ and\\ reconciliation|projects\\ canonical\\ services|projects\\ valid\\ availability|reads\\ staff\\ through\\ the\\ existing\\ policy/runtime|rejects\\ raw\\ or\\ foreign\\ handles|requires\\ the\\ inherited\\ service|writeReceipt\\ is\\ idempotent)(?=$|[^A-Za-z0-9_.-])",
+        "unit_tests": "(widgets/stores/widget\\-stores\\.service\\.spec\\.ts|widgets/emission/booking\\-successor\\-boundary\\.spec\\.ts|widgets/owner\\-ports/booking\\-selector\\.adapter\\.spec\\.ts|widgets/booking/booking\\-noun\\-identity\\.spec\\.ts|widgets/routing/effect\\-router\\.service\\.spec\\.ts|widgets/owner\\-ports/booking\\-preview\\.adapter\\.spec\\.ts|widgets/composition/chat\\-read\\.trigger\\.spec\\.ts|widgets/resolve/thread\\-page\\.service\\.spec\\.ts|widgets/booking/booking\\-selector\\.presenter\\.spec\\.ts)",
+        "unit_filter": "(?:^|\\s)(?:WR\\-CREATE|WR\\-L11|WR\\-L12\\ requires|WR\\-L13\\ lock\\-time|WR\\-L13\\ refuses|WR\\-L21|WR\\-L22|WR\\-L7|WR\\-L8|claim\\ and\\ reconciliation|projects\\ canonical\\ services|projects\\ valid\\ availability|reads\\ staff\\ through\\ the\\ existing\\ policy/runtime|rejects\\ raw\\ or\\ foreign\\ handles|requires\\ the\\ inherited\\ service|writeReceipt\\ is\\ idempotent)(?=$|[^A-Za-z0-9_.-])"
+      }
+    }
+  },
+  "fresh_mutants": 77,
+  "inventory": {
+    "batteries": 36,
+    "declarations": 431,
+    "ci_jobs": 57
+  },
+  "receipt_selftests": 47,
+  "audit_selftests": 32,
+  "schema": {
+    "columns": [
+      "id",
+      "tenantId",
+      "clientId",
+      "tokenHash",
+      "tokenHashVersion",
+      "policyVersion",
+      "issuedAt",
+      "expiresAt",
+      "issuanceEvidenceJson",
+      "issuanceEvidenceHash",
+      "consumedAt",
+      "consumedLinkId",
+      "consumedProvider",
+      "consumedSubjectHash"
+    ],
+    "triggers": [
+      "ClientLinkChallenge_lifecycle_guard",
+      "ClientLinkChallenge_outcome_guard",
+      "ClientLinkChallenge_v2_guard"
+    ],
+    "applied_migrations": 100,
+    "pending_or_failed_migrations": 0
+  },
+  "application_live_script_typechecks": "PASS",
+  "build": "PASS",
+  "changed_source_lint": "PASS",
+  "contract_checker": {
+    "passed": 31,
+    "total": 31,
+    "pending_later_package": 4
+  },
+  "remote_ci": "NOT RUN; no new full remote CI certificate",
+  "integration_only_check": {
+    "status": "BLOCKED",
+    "reason": "maya-chat-shell/dist/web is absent in the isolated checkout",
+    "source_unchanged": true
+  },
+  "widget_false_before_programme": 31,
+  "widget_false_before_this_pass": 18,
+  "widget_false_after": 18,
+  "classifications": {
+    "OWNER_DECISION_REQUIRED": 6,
+    "EVIDENCE_MISSING": 11,
+    "IMPLEMENTATION_MISSING": 1
+  },
+  "fbe2e": {
+    "CLOSED": 13,
+    "PARTIAL": 6,
+    "OPEN": 9
+  },
+  "od_decisions": {
+    "OD-3": "APPROVED A",
+    "OD-4": "APPROVED B",
+    "OD-5": "APPROVED B"
+  },
+  "AR-1": "NOT READY / STOP",
+  "9.6": "INTEGRATION-OWNED / BLOCKED",
+  "claude_path_overlap": 0,
+  "production_effects": 0,
+  "real_otp_sent": 0,
+  "real_yclients_effects": 0,
+  "schema_application": "guard-only V2 DDL applied to two isolated synthetic proof databases; no production application",
+  "safe_to_integrate": "NO",
+  "superseded_diagnostics": "The initial full regression exposed the 99/100 migration-count ratchet. Its exact approved exception is fixed in c94c751c; final full backend run is green. Intermediate runs are not counted as final certification."
+}

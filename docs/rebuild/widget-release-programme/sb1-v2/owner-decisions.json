@@ -1,0 +1,19 @@
+{
+  "contract": "maya.widget-release-owner-decisions/2",
+  "date": "2026-09-29",
+  "authority": "Explicit owner instructions in this task: SCHEMA DECISION — APPROVE JSON V2",
+  "decisions": {"OD-3": "A", "OD-4": "B", "OD-5": "B", "SB-1": "A", "SB-1-REVERIFICATION": "B", "SB-1-JSON": "V2"},
+  "schema": {
+    "persistence": "Existing ClientLinkChallenge.issuanceEvidenceJson",
+    "required_immutable_v2_fields": ["mayaUserId", "mayaSubjectHash", "verificationChannel", "predecessorLinkId"],
+    "new_tables": false,
+    "new_sql_columns": false,
+    "historical_v1_rewrite": false,
+    "local_guard_migration_authorized": true,
+    "production_migration_authorized": false
+  },
+  "verifier": "Existing SMS.ru adapter, strict delivery entry, fresh single-use channel-control OTP; exact Client/channel resolved server-side",
+  "prohibited": ["phone-equality authority", "caller-selected Client/predecessor/channel authority", "revoked episode mutation/reactivation", "real OTP send in this task", "production writes", "real YCLIENTS effects", "Claude merge/edits", "Chapter 10"],
+  "stops": {"G6-6/G13-R8": "Destination receiving authority contract", "9.6": "Integration-owned one canonical persisted user-turn identity", "AR-1": "No activation; envelope only after remaining evidence/contracts are settled"},
+  "production_activation": "FORBIDDEN"
+}
