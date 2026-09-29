@@ -1,10 +1,12 @@
+import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
+import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
 // P-MINT — the single compose → type → fit → seal → record pipeline.
 //
 // Effect and target semantics come only from `intent-template.registry.ts`. The request carries a
 // WidgetComposerInput and server-resolved principal proof; neither a client nor an LLM can put an
 // effect or target on the wire. There is no token-minting overload without both values.
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 
 import { PrismaService } from '../../prisma/prisma.service';
@@ -118,6 +120,8 @@ export class WidgetEmitterService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly seals: SealService,
+    @Inject(WIDGET_RELEASE_ACCESS)
+    private readonly releaseAccess: WidgetReleaseAccessPort,
   ) {}
 
   /**
@@ -411,26 +415,26 @@ export class WidgetEmitterService {
         tokenHash: string;
       } => material.token !== null && material.tokenHash !== null,
     );
-    const recordWrites = emittedTokened.map((material) =>
-      this.prisma.widgetIntentRecord.create({
-        data: intentRecordData({
-          material,
-          input,
-          tenantId: request.tenantId,
-          widgetId,
-          principalProofHash: principal.proofHash,
-          bodyHash,
-          body,
-          issuedAt,
-          retainedLocalBusinessDate,
-          revisionId: request.runWitness?.revisionId ?? null,
-          c9Domain: request.runWitness?.c9Domain ?? null,
-          bookingLinkage: booking,
-        }) as never,
-      }),
-    );
-    await this.prisma.$transaction([
-      this.prisma.widgetEmission.create({
+    const recordFacts = emittedTokened.map((material) => ({
+      template: material.proposal.intent_template_key,
+      record: intentRecordData({
+        material,
+        input,
+        tenantId: request.tenantId,
+        widgetId,
+        principalProofHash: principal.proofHash,
+        bodyHash,
+        body,
+        issuedAt,
+        retainedLocalBusinessDate,
+        revisionId: request.runWitness?.revisionId ?? null,
+        c9Domain: request.runWitness?.c9Domain ?? null,
+        bookingLinkage: booking,
+      }) as never,
+    }));
+    await this.prisma.$transaction(async (tx) => {
+      await this.releaseAccess.bindMint(request.tenantId, recordFacts, tx);
+      await tx.widgetEmission.create({
         data: {
           tenantId: request.tenantId,
           widgetId,
@@ -454,9 +458,10 @@ export class WidgetEmitterService {
             ? {}
             : { textEquivalentJson: successor.textEquivalent as never }),
         },
-      }),
-      ...recordWrites,
-      this.prisma.widgetRenderReceipt.create({
+      });
+      for (const row of recordFacts)
+        await tx.widgetIntentRecord.create({ data: row.record });
+      await tx.widgetRenderReceipt.create({
         data: {
           tenantId: request.tenantId,
           widgetId,
@@ -473,8 +478,8 @@ export class WidgetEmitterService {
           composedEnvelopeJson: envelopeForSeal as never,
           emittedEnvelopeJson: envelopeForSeal as never,
         },
-      }),
-    ]);
+      });
+    });
 
     // Observability only: the already-persisted successor relation supplies provenance.
     // No request field, admission verdict, entitlement or lifecycle transition is changed.

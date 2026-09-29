@@ -665,16 +665,20 @@ describe('P-PRINCIPAL — the wired pipeline [merge-step exits, D-18]', () => {
     expect(
       operations.filter((op) => op.startsWith('WidgetIntentRecord')),
     ).toEqual(['WidgetIntentRecord.findFirst', 'WidgetIntentRecord.findFirst']);
-    expect(operations.slice(-3)).toEqual([
+    expect(operations.slice(-6)).toEqual([
       'WidgetIntentRecord.findFirst',
       'WidgetEmission.findFirst',
       'WidgetRenderReceipt.findFirst',
+      // Exact new release admission: shared lock, database clock, signed state.
+      'null.$queryRaw',
+      'null.$queryRaw',
+      'TenantEntitlement.findUnique',
     ]);
     // IR-P-FLIP: the implementer's version expected `Membership.queryRaw`. The recorder classifies a
     // raw statement with `model: null` (it is SQL, not a delegate call), so the two `FOR SHARE` reads
-    // — K1's membership/user read in `C9Authority.current` and B-02's role read — are counted by the
+    // — K1's membership/user read in `C9Authority.current` and B-02's role read — plus the release admission shared lock are counted by the
     // property that matters instead: they take LOCKS and write nothing (D-12).
-    expect(recorded.filter((op) => op.lock).length).toBe(2);
+    expect(recorded.filter((op) => op.lock).length).toBe(3);
     expect(recorded.some((op) => op.write)).toBe(false);
   });
 

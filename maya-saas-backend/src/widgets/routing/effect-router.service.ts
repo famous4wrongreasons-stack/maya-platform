@@ -1,3 +1,5 @@
+import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
+import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
 import { Inject, Injectable } from '@nestjs/common';
 
 import type { EffectClass } from '../../widget-contract/intent';
@@ -111,6 +113,8 @@ export class EffectRouterService {
     @Inject(NAVIGATE_WIDGET_MINTER)
     private readonly emitter: NavigateWidgetMinterPort,
     private readonly threadPage: WidgetThreadPageService,
+    @Inject(WIDGET_RELEASE_ACCESS)
+    private readonly releaseAccess: WidgetReleaseAccessPort,
   ) {}
 
   async route(
@@ -123,6 +127,11 @@ export class EffectRouterService {
 
     if (record.effect === 'NONE' || !isRoutableEffect(record.effect))
       return { outcome: 'refuse', code: 'effect_not_admissible' };
+
+    // A direct/internal dispatch cannot bypass the same current signed release owner.
+    // This happens before destination resolution (which can sign), claim or owner invocation.
+    if (!(await this.releaseAccess.admits(ctx.tenantId, record)))
+      return { outcome: 'refuse', code: 'insufficient_authority' };
 
     // AMB-54: resolve the destination first. A missing owner must not consume the token.
     const destination = this.destination(ctx, record.effect, resolvedNouns);

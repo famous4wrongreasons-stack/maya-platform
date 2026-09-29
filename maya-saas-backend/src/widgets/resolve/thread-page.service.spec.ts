@@ -50,7 +50,11 @@ const make = (
     }),
   };
   return {
-    service: new WidgetThreadPageService(prisma, principals, seals),
+    service: new WidgetThreadPageService(prisma, principals, seals, {
+      admits: () => Promise.resolve(true),
+      bindMint: () => Promise.resolve(),
+      canProject: () => Promise.resolve(true),
+    }),
     tx,
     findMany,
     seals,

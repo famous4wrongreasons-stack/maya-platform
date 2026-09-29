@@ -275,7 +275,7 @@ describe('Gate 11 — the witness lane refuses while it is unbound, and its twin
         label,
         locks: recorded.filter((op) => op.lock).length,
         wrote: recorded.some((op) => op.write),
-      }).toEqual({ label, locks: 2, wrote: false });
+      }).toEqual({ label, locks: 3, wrote: false });
     }
   }, 60_000);
 

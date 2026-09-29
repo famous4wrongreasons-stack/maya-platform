@@ -13,7 +13,11 @@ const request = () => ({
   now: new Date('2026-09-29T12:00:00Z'),
 });
 
-const fixture = (initialProof = proof, currentProof = proof) => {
+const fixture = (
+  initialProof = proof,
+  currentProof = proof,
+  projectable = true,
+) => {
   const previous = {
     widgetId: 'prior',
     turnId: 'turn',
@@ -80,6 +84,11 @@ const fixture = (initialProof = proof, currentProof = proof) => {
     service: new SuccessorMinterService(
       prisma as never,
       { emitBookingSelector } as never,
+      {
+        admits: () => Promise.resolve(true),
+        bindMint: async () => {},
+        canProject: () => Promise.resolve(projectable),
+      },
     ),
     emitBookingSelector,
     closed,
@@ -88,6 +97,14 @@ const fixture = (initialProof = proof, currentProof = proof) => {
 };
 
 describe('Booking successor principal boundary [BUILD]', () => {
+  it('PROFILE-SELECTOR refuses a successor whose predecessor release admission was withdrawn', async () => {
+    const f = fixture(proof, proof, false);
+    await expect(
+      f.service.mintBookingSelector(request() as never),
+    ).resolves.toBeNull();
+    expect(f.emitBookingSelector).not.toHaveBeenCalled();
+    expect(f.closed).not.toHaveBeenCalled();
+  });
   it('WR-L13 refuses a foreign principal before minting a selector', async () => {
     const f = fixture('b'.repeat(64));
     await expect(

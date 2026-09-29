@@ -404,6 +404,11 @@ const gatewayFor = (
       effectRouter as never,
       stores,
       { mint: () => Promise.resolve(null) },
+      {
+        admits: () => Promise.resolve(true),
+        bindMint: () => Promise.resolve(),
+        canProject: () => Promise.resolve(true),
+      },
     ),
   };
 };

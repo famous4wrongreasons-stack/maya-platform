@@ -489,13 +489,52 @@ export class Fixtures {
       !tenant.slug.startsWith(SLUG_PREFIX)
     )
       throw new Error('revocation race requires an owned proof tenant');
+    // A local, tenant-bound scheduling barrier on the real claim write. The new
+    // profile fences run before this point; the canonical admission must still
+    // independently refuse a revoke committed after those fences. No owner/result
+    // is mocked. DDL is proof-only and removed in finally; no migration is authored.
+    const name = `wl_claim_${randomUUID().replaceAll('-', '')}`;
+    const barrier = `widgets-proof-claim:${name}`;
+    const quote = (value: string) => "'" + value.replaceAll("'", "''") + "'";
+    await this.ctx.prisma
+      .$executeRawUnsafe(`CREATE FUNCTION "${name}"() RETURNS trigger LANGUAGE plpgsql AS $proof$
+      BEGIN
+        IF NEW."tenantId"::text = TG_ARGV[0] AND NEW."effect" = 'COMMIT'
+           AND OLD."consumedAt" IS NULL AND NEW."consumedAt" IS NOT NULL THEN
+          PERFORM pg_advisory_xact_lock(hashtextextended(TG_ARGV[1], 0));
+        END IF;
+        RETURN NEW;
+      END
+    $proof$`);
     let pending: Promise<T> | undefined;
     try {
+      await this.ctx.prisma
+        .$executeRawUnsafe(`CREATE TRIGGER "${name}" BEFORE UPDATE OF "consumedAt" ON "WidgetIntentRecord"
+        FOR EACH ROW EXECUTE FUNCTION "${name}"(${quote(tenant.id)}, ${quote(barrier)})`);
       await this.ctx.prisma.$transaction(
         async (tx) => {
           const [connection] = await tx.$queryRaw<
             Array<{ pid: number }>
           >`SELECT pg_backend_pid() AS pid`;
+          await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${barrier}, 0))::text`;
+          pending = probe();
+          const deadline = Date.now() + 8000;
+          let reachedClaim = false;
+          while (Date.now() < deadline) {
+            await tx.$queryRaw`SELECT pg_stat_clear_snapshot()::text`;
+            const waiting = await tx.$queryRaw<
+              Array<{ pid: number }>
+            >`SELECT pid FROM pg_stat_activity WHERE wait_event_type='Lock' AND query LIKE '%WidgetIntentRecord%' AND ${connection.pid}=ANY(pg_blocking_pids(pid))`;
+            if (waiting.length) {
+              reachedClaim = true;
+              break;
+            }
+            await new Promise((r) => setTimeout(r, 20));
+          }
+          if (!reachedClaim)
+            throw new Error(
+              'real COMMIT never reached the post-profile claim barrier',
+            );
           await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'widget-release:tenant:' + tenant.id},0))::text`;
           await tx.tenantEntitlement.update({
             where: {
@@ -506,28 +545,22 @@ export class Fixtures {
             },
             data: { enabled: false },
           });
-          pending = probe();
-          const deadline = Date.now() + 8000;
-          while (Date.now() < deadline) {
-            await tx.$queryRaw`SELECT pg_stat_clear_snapshot()::text`;
-            const waiting = await tx.$queryRaw<
-              Array<{ pid: number }>
-            >`SELECT pid FROM pg_stat_activity WHERE wait_event_type='Lock' AND query LIKE '%/* widget release admission */%' AND ${connection.pid}=ANY(pg_blocking_pids(pid))`;
-            if (waiting.length) return;
-            await new Promise((r) => setTimeout(r, 20));
-          }
-          throw new Error(
-            'real COMMIT never reached canonical admission lock after Gate 6',
-          );
         },
         { timeout: 12000 },
       );
+      if (!pending) throw new Error('revocation race did not submit');
+      return await pending;
     } catch (error) {
       await pending?.catch(() => undefined);
       throw error;
+    } finally {
+      await this.ctx.prisma.$executeRawUnsafe(
+        `DROP TRIGGER IF EXISTS "${name}" ON "WidgetIntentRecord"`,
+      );
+      await this.ctx.prisma.$executeRawUnsafe(
+        `DROP FUNCTION IF EXISTS "${name}"()`,
+      );
     }
-    if (!pending) throw new Error('revocation race did not submit');
-    return pending;
   }
 
   /** Read-only observation of the canonical owners' effects in this fixture tenant. */
@@ -592,6 +625,14 @@ export class Fixtures {
       throw new Error(
         'widgets-live grants a feature only to a tenant it created',
       );
+    const prior = await this.ctx.prisma.tenantEntitlement.findUnique({
+      where: { tenantId_featureKey: { tenantId: tenant.id, featureKey } },
+    });
+    if (
+      prior?.enabled &&
+      prior.reason === 'widgets-live proof-database fixture'
+    )
+      return;
     const definition = MAYA_FEATURE_REGISTRY[featureKey];
     await this.ctx.prisma.feature.upsert({
       where: { key: featureKey },
@@ -699,6 +740,19 @@ export class Fixtures {
     now?: Date;
   }): Promise<WidgetFixture> {
     const writers = this.requireWriters('widget');
+    // G-SYNTH mechanism records require a historical admitted mint too. This fixture
+    // is never production-source evidence. Do not overwrite an explicit release state.
+    const release = await this.ctx.prisma.tenantEntitlement.findUnique({
+      where: {
+        tenantId_featureKey: {
+          tenantId: input.tenant.id,
+          featureKey: 'widgets.runtime',
+        },
+      },
+    });
+    if (release === null)
+      await this.grantFeature(input.tenant, 'widgets.runtime');
+
     const conversationId = randomUUID();
     const principal = await this.principalView(input.actor);
     const proof = principal.proofHash;

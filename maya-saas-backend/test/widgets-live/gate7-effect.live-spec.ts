@@ -132,6 +132,7 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
   });
   beforeEach(async () => {
     tenant = await fx.tenant('U7a');
+    await fx.grantFeature(tenant, 'widgets.runtime');
     user = await fx.user(tenant, UserRole.ADMINISTRATOR);
     actor = await fx.actor(tenant, user);
   });
@@ -270,7 +271,7 @@ describe('Gate 7 — effect admissibility runs on the live path and refuses (C11
     });
     expect({ scope, locks: a.locks, wrote: a.wrote }).toEqual({
       scope,
-      locks: 2,
+      locks: 3,
       wrote: false,
     });
   };

@@ -1,3 +1,5 @@
+import { WidgetReleaseAccessAdapter } from './release-access.adapter';
+import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
 import { Module } from '@nestjs/common';
 
 import { AiToolPolicyModule } from '../../ai-tools/ai-tool-policy.module';
@@ -72,6 +74,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     TenancyModule,
   ],
   providers: [
+    { provide: WIDGET_RELEASE_ACCESS, useClass: WidgetReleaseAccessAdapter },
     CanonicalReadAdapter,
     Gate6OwnersAdapter,
     { provide: PRINCIPAL_RESOLVER, useClass: PrincipalAdapter },
@@ -113,6 +116,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     },
   ],
   exports: [
+    WIDGET_RELEASE_ACCESS,
     CANONICAL_READ,
     GATE6_OWNERS,
     PRINCIPAL_RESOLVER,

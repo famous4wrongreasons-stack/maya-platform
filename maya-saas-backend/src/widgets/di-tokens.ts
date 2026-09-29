@@ -83,3 +83,6 @@ export const TENANT_SCOPE = 'TENANT_SCOPE';
 
 /** U12b: the projector's single read-only edge to canonical owners. */
 export const CANONICAL_READ = 'CANONICAL_READ';
+
+/** Signed release scope; server-owned and distinct from the advisory presentation profile_id. */
+export const WIDGET_RELEASE_ACCESS = 'WIDGET_RELEASE_ACCESS';

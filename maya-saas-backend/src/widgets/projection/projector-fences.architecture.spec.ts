@@ -1183,6 +1183,11 @@ describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
       undefined as never,
       undefined as never,
       { mint: () => Promise.resolve(null) },
+      {
+        admits: () => Promise.resolve(true),
+        bindMint: () => Promise.resolve(),
+        canProject: () => Promise.resolve(true),
+      },
     );
     const gates = (gateway as unknown as { gates: readonly Gate[] }).gates;
     const slot = gates.find((g) => g.n === '12')!;

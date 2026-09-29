@@ -1,11 +1,14 @@
+import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
+import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
 // P-G15b / R3.9.4 — the widget-store-only successor minter.
 //
 // It reads two content members of the refused predecessor: its frozen text equivalent and the
-// source capability stored in envelope provenance. It reaches no projector and no canonical owner.
+// source capability stored in envelope provenance. It reaches no projector or business owner;
+// the existing release-policy owner only checks current admission for stored controls.
 // The gateway has already established the live principal; this service re-checks the exact stored
 // record and refuses closed when erasure, ownership or registry state no longer supports a remedy.
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import {
   C9_CAPABILITIES,
@@ -61,6 +64,8 @@ export class SuccessorMinterService implements SuccessorMinterPort {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emitter: WidgetEmitterService,
+    @Inject(WIDGET_RELEASE_ACCESS)
+    private readonly releaseAccess: WidgetReleaseAccessPort,
   ) {}
 
   async mint(
@@ -98,6 +103,13 @@ export class SuccessorMinterService implements SuccessorMinterPort {
       },
     });
     if (predecessor === null) return null;
+    if (
+      !(await this.releaseAccess.canProject(
+        request.tenantId,
+        predecessor.widgetId,
+      ))
+    )
+      return null;
     const terms = successorTerms(predecessor, request);
     if (terms === null) return null;
     if (
@@ -294,6 +306,13 @@ export class SuccessorMinterService implements SuccessorMinterPort {
     if (predecessor === null || !bookingSuccessorTerms(predecessor, request))
       return null;
     if (
+      !(await this.releaseAccess.canProject(
+        request.tenantId,
+        predecessor.widgetId,
+      ))
+    )
+      return null;
+    if (
       predecessor.lifecycleState === 'SUPERSEDED' &&
       predecessor.supersededByWidgetId !== null
     )
@@ -452,6 +471,11 @@ export class SuccessorMinterService implements SuccessorMinterPort {
     const envelope = asObject(
       linked?.renderReceipts[0]?.emittedEnvelopeJson ?? null,
     );
+    if (
+      linked !== null &&
+      !(await this.releaseAccess.canProject(tenantId, linked.widgetId))
+    )
+      return null;
     return linked === null || envelope === null
       ? null
       : Object.freeze({ widgetId: linked.widgetId, envelope });

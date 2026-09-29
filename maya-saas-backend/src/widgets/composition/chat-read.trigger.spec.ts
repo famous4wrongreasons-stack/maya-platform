@@ -55,7 +55,11 @@ const input = () => ({
 });
 
 describe('P-MT2a ChatReadTriggerService', () => {
-  const harness = (entitled = true, previous: unknown = null) => {
+  const harness = (
+    entitled = true,
+    previous: unknown = null,
+    projectable = true,
+  ) => {
     const tx = {
       $executeRaw: jest.fn().mockResolvedValue(undefined),
       widgetEmission: { findFirst: jest.fn().mockResolvedValue(previous) },
@@ -115,6 +119,11 @@ describe('P-MT2a ChatReadTriggerService', () => {
         emitter,
         gate6,
         principals,
+        {
+          admits: () => Promise.resolve(true),
+          bindMint: async () => {},
+          canProject: () => Promise.resolve(projectable),
+        },
       ),
       tx,
       ensureAssistantTurn,
@@ -156,6 +165,23 @@ describe('P-MT2a ChatReadTriggerService', () => {
       value: '2026-09-24',
       provenance: 'server_validated',
     });
+  });
+
+  it('PROFILE-CACHE refuses a cached read envelope after its release admission is withdrawn', async () => {
+    const h = harness(
+      true,
+      {
+        widgetId: '44444444-4444-4444-8444-444444444444',
+        envelopeSeal: 'e'.repeat(64),
+        renderReceipts: [
+          { emittedEnvelopeJson: { contract: 'maya.widget.envelope/1' } },
+        ],
+      },
+      false,
+    );
+    await expect(h.service.afterCompletedRead(input())).resolves.toBeNull();
+    expect(h.ensureAssistantTurn).toHaveBeenCalledTimes(1);
+    expect(h.emit).not.toHaveBeenCalled();
   });
 
   it('writes nothing and leaves the canonical response unchanged when widgets.runtime is absent', async () => {

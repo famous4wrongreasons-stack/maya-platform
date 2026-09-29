@@ -1,0 +1,62 @@
+[
+  {
+    "id": "PI-M01",
+    "file": "src/widgets/intent-gateway.service.ts",
+    "find": "(await this.releaseAccess.admits(ctx.tenantId, ctx.record, tx))",
+    "replace": "true",
+    "killers": [
+      "PROFILE-INGRESS"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "PI-M02",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "if (!(await this.releaseAccess.admits(ctx.tenantId, record)))",
+    "replace": "if (false)",
+    "killers": [
+      "PROFILE-INGRESS"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "PI-M03",
+    "file": "src/widgets/emission/emitter.service.ts",
+    "find": "await this.releaseAccess.bindMint(request.tenantId, recordFacts, tx);",
+    "replace": "void recordFacts;",
+    "killers": [
+      "PROFILE-EGRESS"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "PI-M04",
+    "file": "src/widgets/resolve/thread-page.service.ts",
+    "find": "if (!(await this.releaseAccess.admits(tenantId, record, tx)))",
+    "replace": "if (false)",
+    "killers": [
+      "PROFILE-EGRESS"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "PI-M05",
+    "file": "src/widgets/resolve/thread-page.service.ts",
+    "find": "if (!(await this.releaseAccess.admits(input.tenantId, record, tx)))",
+    "replace": "if (false)",
+    "killers": [
+      "PROFILE-EGRESS"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "PI-M10",
+    "file": "src/entitlements/widget-release-access.service.ts",
+    "find": "await tx.$queryRaw`SELECT /* widget release admission */ pg_advisory_xact_lock_shared(hashtextextended(${'widget-release:tenant:' + tenantId}, 0))::text`;",
+    "replace": "void tenantId;",
+    "killers": [
+      "PROFILE-LOCK"
+    ],
+    "expect": "live-killed"
+  }
+]

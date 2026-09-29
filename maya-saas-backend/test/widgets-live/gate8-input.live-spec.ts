@@ -254,7 +254,7 @@ describe('Gate 8 — input validation, the null-schema lane [U8a]', () => {
         'WidgetIntentRecord.findFirst',
         'WidgetIntentRecord.findFirst',
       ]);
-      expect(principalReads(scope)).toEqual({ locks: 2, wrote: false });
+      expect(principalReads(scope)).toEqual({ locks: 3, wrote: false });
       // T-INV24's half for the PASS: the lane writes nothing either. The first durable write is Gate 9's.
       expect(
         await noWriteViolations(

@@ -1,3 +1,5 @@
+import { WIDGET_RELEASE_ACCESS } from './di-tokens';
+import type { WidgetReleaseAccessPort } from './owner-ports/release-access.port';
 // K3 — the IntentGateway. Step 0 plus the gates, in the one order §3.9 fixes.
 //
 // The whole package turns on a single structural claim: BUTTON -> ENDPOINT must be UNREPRESENTABLE,
@@ -181,6 +183,8 @@ export class IntentGatewayService {
     private readonly gate10Store: TransactionalGate10Store,
     @Inject(SUCCESSOR_MINTER)
     private readonly successorMinter: SuccessorMinterPort,
+    @Inject(WIDGET_RELEASE_ACCESS)
+    private readonly releaseAccess: WidgetReleaseAccessPort,
   ) {}
 
   /**
@@ -304,7 +308,16 @@ export class IntentGatewayService {
       // 7399) and C11:1836 place that evaluation "in its HANDOFF destination branch only", which is
       // where `gate6` runs F48's generated predicate — so the front-door call this slot used to make
       // over EVERY effect is gone with `gateSensitiveDest` itself (R6-1b).
-      run: (ctx) => gate6(ctx, this.gate6Owners),
+      run: async (ctx, tx) => {
+        const verdict = await gate6(ctx, this.gate6Owners);
+        if (verdict.outcome !== 'pass') return verdict;
+        if (tx === null)
+          throw new Error('Gate 6 requires the request transaction');
+        return ctx.record !== null &&
+          (await this.releaseAccess.admits(ctx.tenantId, ctx.record, tx))
+          ? PASS
+          : { outcome: 'refuse', code: 'insufficient_authority' };
+      },
     },
     {
       n: '7',
@@ -572,6 +585,7 @@ export class IntentGatewayService {
     } catch {
       return null;
     }
+    if (!(await this.releaseAccess.admits(tenantId, record))) return null;
     const successor = await this.successorMinter.mint({
       tenantId,
       predecessorWidgetId: record.widgetId,

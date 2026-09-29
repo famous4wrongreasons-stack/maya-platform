@@ -50,7 +50,7 @@ class FakePrisma {
   };
   // The real $transaction takes an array of promises; the double just resolves them, which is
   // enough to prove both writes are issued together rather than one at a time.
-  $transaction = (ops: unknown[]) => Promise.resolve(ops);
+  $transaction = (work: (tx: FakePrisma) => Promise<unknown>) => work(this);
 }
 
 const make = () => {
@@ -76,7 +76,11 @@ const make = () => {
   };
   return {
     prisma,
-    emitter: new WidgetEmitterService(prisma as never, seals as never),
+    emitter: new WidgetEmitterService(prisma as never, seals as never, {
+      admits: () => Promise.resolve(true),
+      bindMint: () => Promise.resolve(),
+      canProject: () => Promise.resolve(true),
+    }),
   };
 };
 

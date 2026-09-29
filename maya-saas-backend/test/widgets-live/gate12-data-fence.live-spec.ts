@@ -254,6 +254,15 @@ async function runL00<C>(
   expect(s.actor.role).toBe(UserRole.STAFF);
 
   if (grantRuntime) {
+    // Mint was historical and admitted; withdraw the fixture grant before the dark-route probe.
+    await ctx.prisma.tenantEntitlement.delete({
+      where: {
+        tenantId_featureKey: {
+          tenantId: tenant.id,
+          featureKey: 'widgets.runtime',
+        },
+      },
+    });
     // The route is dark until the tenant holds `widgets.runtime`: FeatureGuard refuses before the gateway.
     const dark = await level.submit(
       a.credential,
@@ -317,6 +326,12 @@ async function runL00<C>(
         // is touched at all, which is this guard's whole subject. P-G15a adds the first read: Gate 1
         // derives the seal from transaction-scoped stored terms before the gateway's union record read.
         const ops = level.operations(scope);
+        // The release owner adds exactly one current-state read after Gate 6;
+        // a foreign-principal refusal still reaches none of it.
+        expect(
+          ops.filter((op) => op === 'TenantEntitlement.findUnique'),
+        ).toHaveLength(submitter === owner ? 1 : 0);
+
         expect({
           scope,
           records: ops.filter((op) => op.startsWith('WidgetIntentRecord')),
@@ -347,6 +362,7 @@ async function runL00<C>(
                 'WidgetEmission.findFirst',
                 'WidgetRenderReceipt.findFirst',
                 'null.$queryRaw',
+                'TenantEntitlement.findUnique',
               ].includes(op),
           ),
         }).toEqual({ scope, foreign: [] });

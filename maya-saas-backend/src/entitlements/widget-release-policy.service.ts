@@ -1,3 +1,10 @@
+import {
+  profileCertificate,
+  PROFILE_CERT,
+  NO_HANDOFF_PROFILE,
+  PROFILE_DIGEST,
+  type ProfileCertificate,
+} from './widget-release-profile.contract';
 import { widgetProofEnvironment } from './widget-release-environment';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -22,6 +29,13 @@ import {
   type ReleaseCommand,
   type Signed,
 } from './widget-release.contract';
+
+export interface VerifiedReleaseView {
+  readonly scope: 'full165.closed-input' | typeof NO_HANDOFF_PROFILE;
+  readonly version: string;
+  readonly certificateDigest: string;
+  readonly profileDigest: string | null;
+}
 
 type TrustKey = {
   principalId: string;
@@ -143,7 +157,7 @@ export class WidgetReleasePolicy {
       instant(a.expiresAt) <= now.getTime()
     )
       releaseDeny('authorization_expired');
-    let c: ReleaseCertificate | undefined;
+    let c: ReleaseCertificate | ProfileCertificate | undefined;
     if (operation === 'grant') {
       c = this.checkCertificate(input.certificate, a, now);
       if (
@@ -164,7 +178,10 @@ export class WidgetReleasePolicy {
     const { payload: c, principalId } = this.signed(
       value,
       'security',
-      certificate,
+      (value) =>
+        object(value).contract === PROFILE_CERT
+          ? profileCertificate(value)
+          : certificate(value),
     );
     if (
       principalId !== a.reviewerId ||
@@ -188,6 +205,13 @@ export class WidgetReleasePolicy {
     return c;
   }
   allows(tenantId: string, row: ReleaseOverride, now: Date): boolean {
+    return this.view(tenantId, row, now) !== null;
+  }
+  view(
+    tenantId: string,
+    row: ReleaseOverride,
+    now: Date,
+  ): VerifiedReleaseView | null {
     // Preserve the sole pre-existing proof fixture exception; never a production override.
     try {
       if (
@@ -195,7 +219,12 @@ export class WidgetReleasePolicy {
         row.reason === 'widgets-live proof-database fixture' &&
         row.configJson == null
       )
-        return true;
+        return Object.freeze({
+          scope: 'full165.closed-input',
+          version: 'proof-fixture',
+          certificateDigest: 'proof-fixture',
+          profileDigest: null,
+        });
       const state = object(row.configJson);
       if (
         state.contract !== RELEASE_STATE ||
@@ -203,7 +232,7 @@ export class WidgetReleasePolicy {
         !row.enabled ||
         !row.expiresAt
       )
-        return false;
+        return null;
       const command = object(state.command);
       const signed = this.signed(command.authorization, 'owner', authorization),
         a = signed.payload;
@@ -213,7 +242,7 @@ export class WidgetReleasePolicy {
         a.approverId !== signed.principalId ||
         a.environment !== this.environment()
       )
-        return false;
+        return null;
       if (
         instant(state.appliedAt) < instant(a.notBefore) ||
         instant(state.appliedAt) >= instant(a.expiresAt) ||
@@ -221,12 +250,17 @@ export class WidgetReleasePolicy {
         row.expiresAt.toISOString() !== a.grantExpiresAt ||
         row.expiresAt <= now
       )
-        return false;
-      this.checkCertificate(command.certificate, a, now);
+        return null;
+      const cert = this.checkCertificate(command.certificate, a, now);
       digest(state.version);
-      return true;
+      return Object.freeze({
+        scope: cert.scope,
+        version: state.version,
+        certificateDigest: a.certificateDigest,
+        profileDigest: cert.contract === PROFILE_CERT ? PROFILE_DIGEST : null,
+      });
     } catch {
-      return false;
+      return null;
     }
   }
 }

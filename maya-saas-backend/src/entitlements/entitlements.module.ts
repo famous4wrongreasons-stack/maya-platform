@@ -1,3 +1,4 @@
+import { WidgetReleaseAccessService } from './widget-release-access.service';
 import { AuditLogModule } from '../audit-log/audit-log.module';
 import { WidgetReleaseController } from './widget-release.controller';
 import { WidgetReleasePolicy } from './widget-release-policy.service';
@@ -18,7 +19,13 @@ import { FeaturesController } from './features.controller';
     FeatureGuard,
     WidgetReleasePolicy,
     WidgetReleaseService,
+    WidgetReleaseAccessService,
   ],
-  exports: [EntitlementsService, FeatureRegistryService, FeatureGuard],
+  exports: [
+    EntitlementsService,
+    FeatureRegistryService,
+    FeatureGuard,
+    WidgetReleaseAccessService,
+  ],
 })
 export class EntitlementsModule {}

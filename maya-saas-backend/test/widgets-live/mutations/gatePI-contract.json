@@ -1,0 +1,162 @@
+[
+  {
+    "id": "PI-M06",
+    "file": "src/widgets/composition/chat-read.trigger.ts",
+    "find": "!(await this.releaseAccess.canProject(\n            tenantId,\n            previous.widgetId,\n            tx,\n          ))",
+    "replace": "false",
+    "killers": [
+      "PROFILE-CACHE"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PI-M07",
+    "file": "src/widgets/emission/successor-minter.service.ts",
+    "find": "    if (\n      !(await this.releaseAccess.canProject(\n        request.tenantId,\n        predecessor.widgetId,\n      ))\n    )\n      return null;\n    const terms",
+    "replace": "    const terms",
+    "killers": [
+      "PROFILE-PREDECESSOR"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PI-M08",
+    "file": "src/widgets/emission/successor-minter.service.ts",
+    "find": "if (predecessor === null || !bookingSuccessorTerms(predecessor, request))\n      return null;\n    if (\n      !(await this.releaseAccess.canProject(\n        request.tenantId,\n        predecessor.widgetId,\n      ))\n    )\n      return null;",
+    "replace": "if (predecessor === null || !bookingSuccessorTerms(predecessor, request))\n      return null;",
+    "killers": [
+      "PROFILE-SELECTOR"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PI-M09",
+    "file": "src/widgets/emission/successor-minter.service.ts",
+    "find": "!(await this.releaseAccess.canProject(tenantId, linked.widgetId))",
+    "replace": "false",
+    "killers": [
+      "PROFILE-LINKED"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PI-M11",
+    "file": "src/entitlements/widget-release-access.service.ts",
+    "find": "if (registryDigest !== PROFILE_REGISTRY_DIGEST)\n      releaseDeny('registry_binding');",
+    "replace": "void registryDigest;",
+    "killers": [
+      "refuses"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PI-M12",
+    "file": "src/entitlements/widget-release-access.service.ts",
+    "find": "b.version === view.version",
+    "replace": "true",
+    "killers": [
+      "refuses old-profile tokens"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PI-M13",
+    "file": "src/entitlements/widget-release-access.service.ts",
+    "find": "b.certificateDigest === view.certificateDigest",
+    "replace": "true",
+    "killers": [
+      "refuses changed durable binding:"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PI-M14",
+    "file": "src/entitlements/widget-release-access.service.ts",
+    "find": "b.profileDigest === PROFILE_DIGEST",
+    "replace": "true",
+    "killers": [
+      "refuses changed durable binding:"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PI-M15",
+    "file": "src/entitlements/widget-release-access.service.ts",
+    "find": "b.factsDigest === bindingHash(record)",
+    "replace": "true",
+    "killers": [
+      "refuses sealed fact substitution:"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PI-M16",
+    "file": "src/entitlements/widget-release-access.service.ts",
+    "find": "if (rows.length !== 1) return false;",
+    "replace": "if (rows.length === 0) return false;",
+    "killers": [
+      "refuses missing and ambiguous bindings"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PI-M17",
+    "file": "src/entitlements/widget-release-access.service.ts",
+    "find": "!this.allowed(row.template, row.record)",
+    "replace": "false",
+    "killers": [
+      "PROFILE-TUPLE"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PI-M18",
+    "file": "src/entitlements/widget-release-profile.contract.ts",
+    "find": "validateReleaseClause(r);",
+    "replace": "void r;",
+    "killers": [
+      "does not exclude"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PI-M19",
+    "file": "src/entitlements/widget-release-profile.contract.ts",
+    "find": "if (r.state !== 'STOP') releaseDeny('handoff_stop');",
+    "replace": "void r.state;",
+    "killers": [
+      "refuses caller exclusions"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PI-M20",
+    "file": "src/entitlements/widget-release-profile.contract.ts",
+    "find": "if (v.globalAuditDigest !== releaseHash(v.matrix))",
+    "replace": "if (false)",
+    "killers": [
+      "PROFILE-AUDIT"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PI-M21",
+    "file": "src/entitlements/widget-release-profile.contract.ts",
+    "find": "v.profileDigest !== PROFILE_DIGEST",
+    "replace": "false",
+    "killers": [
+      "refuses missing or forged"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PI-M22",
+    "file": "src/entitlements/widget-release-profile.contract.ts",
+    "find": "v.registryDigest !== PROFILE_REGISTRY_DIGEST",
+    "replace": "false",
+    "killers": [
+      "refuses missing or forged"
+    ],
+    "expect": "build-killed"
+  }
+]

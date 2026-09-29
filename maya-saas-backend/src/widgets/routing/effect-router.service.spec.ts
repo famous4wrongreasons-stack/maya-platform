@@ -162,6 +162,11 @@ const fixture = () => {
       projector as never,
       emitter,
       threadPage as never,
+      {
+        admits: () => Promise.resolve(true),
+        bindMint: () => Promise.resolve(),
+        canProject: () => Promise.resolve(true),
+      },
     ),
   };
 };

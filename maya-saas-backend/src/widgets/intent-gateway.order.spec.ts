@@ -231,6 +231,11 @@ const real = () =>
     undefined as never,
     undefined as never,
     { mint: () => Promise.resolve(null) },
+    {
+      admits: () => Promise.resolve(true),
+      bindMint: () => Promise.resolve(),
+      canProject: () => Promise.resolve(true),
+    },
   );
 
 // The runner logs each stop at debug level; the recorders stop it on purpose, 240 times.

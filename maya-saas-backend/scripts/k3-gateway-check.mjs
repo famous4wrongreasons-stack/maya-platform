@@ -703,6 +703,7 @@ const OWNER_MODULES = [
 ];
 /** DI tokens of `di-tokens.ts` the owner-ports module may provide and export. */
 const BOUND_PORT_TOKENS = [
+  'WIDGET_RELEASE_ACCESS', // Approved fixed release profile; no generic owner dispatch.
   'CANONICAL_READ',
   'GATE6_OWNERS',
   'PRINCIPAL_RESOLVER',

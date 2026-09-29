@@ -57,6 +57,7 @@ describe('P-MINT — canonical writer [GW, PostgreSQL]', () => {
 
   const setup = async (marker: string) => {
     const tenant = await fx.tenant(marker);
+    await fx.grantFeature(tenant, 'widgets.runtime');
     const user = await fx.user(tenant, UserRole.ADMINISTRATOR);
     await fx.staff(tenant, user, marker);
     const actor = await fx.actor(tenant, user);

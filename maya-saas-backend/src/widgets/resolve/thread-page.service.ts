@@ -1,3 +1,5 @@
+import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
+import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
 import { Inject, Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../../prisma/prisma.service';
@@ -30,6 +32,8 @@ export class WidgetThreadPageService {
     private readonly principals: PrincipalResolver,
     @Inject(SEAL_VERIFIER)
     private readonly seals: SealVerifier,
+    @Inject(WIDGET_RELEASE_ACCESS)
+    private readonly releaseAccess: WidgetReleaseAccessPort,
   ) {}
 
   async read(request: ThreadPageRequest): Promise<readonly HistorisedWidget[]> {
@@ -68,8 +72,7 @@ export class WidgetThreadPageService {
           intentRecords: {
             where: { principalProofHash: principal.proofHash },
             orderBy: { issuedAt: 'asc' },
-            take: 1,
-            select: { intentTokenHash: true },
+            select: RELEASE_RECORD_SELECT,
           },
           renderReceipts: {
             where: { erasedAt: null },
@@ -92,6 +95,13 @@ export class WidgetThreadPageService {
           continue;
         const seal = await this.seals.verify(tokenHash, { tenantId }, tx);
         if (!seal.ok) continue;
+        // Absence is the existing unavailable projection. Never rewrite a frozen envelope
+        // or fabricate a booking terminal line to withdraw an excluded/stale control.
+        let available = true;
+        for (const record of row.intentRecords)
+          if (!(await this.releaseAccess.admits(tenantId, record, tx)))
+            available = false;
+        if (!available) continue;
         page.push({
           envelope: envelope as unknown as HistorisedWidget['envelope'],
           terminal_lines: terminalLines(row.terminalLinesJson),
@@ -129,8 +139,7 @@ export class WidgetThreadPageService {
           intentRecords: {
             where: { principalProofHash: input.principalProofHash },
             orderBy: { issuedAt: 'asc' },
-            take: 1,
-            select: { intentTokenHash: true },
+            select: RELEASE_RECORD_SELECT,
           },
           renderReceipts: {
             where: { erasedAt: null },
@@ -150,6 +159,9 @@ export class WidgetThreadPageService {
         tx,
       );
       if (!seal.ok) return null;
+      for (const record of row.intentRecords)
+        if (!(await this.releaseAccess.admits(input.tenantId, record, tx)))
+          return null;
       return Object.freeze({
         conversationId: row.turn.conversationId,
         turnId: row.turnId,
@@ -187,3 +199,21 @@ const isTerminalLine = (value: unknown): value is TerminalLine => {
 
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/** Authority facts only; include every intent so an allowed first control cannot mask HANDOFF. */
+const RELEASE_RECORD_SELECT = {
+  tenantId: true,
+  widgetId: true,
+  intentTokenHash: true,
+  effect: true,
+  widgetKind: true,
+  bodyHash: true,
+  principalProofHash: true,
+  capabilitySpace: true,
+  capabilityKey: true,
+  sourceCapabilitySpace: true,
+  sourceCapabilityKey: true,
+  targetJson: true,
+  inputSchemaHash: true,
+  selectionDomain: true,
+} as const;

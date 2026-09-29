@@ -1,3 +1,4 @@
+import { NO_HANDOFF_PROFILE } from './widget-release-profile.contract';
 import { ConflictException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { Prisma, TenantEntitlement } from '@prisma/client';
@@ -51,12 +52,19 @@ export class WidgetReleaseService {
         },
       });
       const now = await this.now(tx);
+      const view = row === null ? null : this.policy.view(tenantId, row, now);
       return {
         tenantId,
         featureKey: RELEASE_FEATURE,
         version: entitlementVersion(row),
-        enabled:
-          row !== null && row.enabled && this.policy.allows(tenantId, row, now),
+        enabled: row !== null && row.enabled && view !== null,
+        ...(view?.scope === NO_HANDOFF_PROFILE
+          ? {
+              scope: view.scope,
+              certification: 'CERTIFIED_FOR_PROFILE',
+              fullContractCertified: false,
+            }
+          : {}),
         expiresAt: row?.expiresAt?.toISOString() ?? null,
         candidateSha: row?.configJson
           ? (object(row.configJson).candidateSha ?? null)

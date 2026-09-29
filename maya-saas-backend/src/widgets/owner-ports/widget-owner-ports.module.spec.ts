@@ -1,3 +1,4 @@
+import { WidgetReleaseAccessAdapter } from './release-access.adapter';
 // D-6 module topology: what the boundary carries, named one binding at a time.
 //
 // "A module that exists is not a gate that is enforced." So this holds the EXACT state, not just the
@@ -98,6 +99,10 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       TenancyModule,
     ]);
     expect(meta(MODULE_METADATA.PROVIDERS, WidgetOwnerPortsModule)).toEqual([
+      {
+        provide: DI_TOKENS.WIDGET_RELEASE_ACCESS,
+        useClass: WidgetReleaseAccessAdapter,
+      },
       CanonicalReadAdapter,
       Gate6OwnersAdapter,
       { provide: DI_TOKENS.PRINCIPAL_RESOLVER, useClass: PrincipalAdapter },
@@ -139,6 +144,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       expect.objectContaining({ provide: DI_TOKENS.NOUN_RESOLUTION_PORTS }),
     ]);
     expect(meta(MODULE_METADATA.EXPORTS, WidgetOwnerPortsModule)).toEqual([
+      DI_TOKENS.WIDGET_RELEASE_ACCESS,
       DI_TOKENS.CANONICAL_READ,
       DI_TOKENS.GATE6_OWNERS,
       DI_TOKENS.PRINCIPAL_RESOLVER,
@@ -183,6 +189,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
     // Every token bound so far. A token leaves this list only by being bound, in the commit that binds
     // it: that is what keeps "unbound" from drifting into "nobody checked".
     const BOUND: readonly string[] = [
+      DI_TOKENS.WIDGET_RELEASE_ACCESS,
       DI_TOKENS.CANONICAL_READ,
       DI_TOKENS.GATE6_OWNERS,
       DI_TOKENS.PRINCIPAL_RESOLVER,

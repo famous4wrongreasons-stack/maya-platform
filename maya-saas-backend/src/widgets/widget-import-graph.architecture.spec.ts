@@ -234,6 +234,17 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
     why: "C20's owner: AiToolPolicyService.assertCanExecute, the 47 (C11:4761)",
     only: ['owner-ports/gate6.owners.provider.ts'],
   },
+  'entitlements/widget-release-access.service.ts': {
+    why: 'Approved no-handoff release admission and immutable audit binding, exclusively through the owner port',
+    only: [
+      'owner-ports/release-access.adapter.ts',
+      'owner-ports/release-access.port.ts',
+    ],
+  },
+  'entitlements/widget-release.contract.ts': {
+    why: 'The existing unkeyed release digest for the finite server registry binding',
+    only: ['owner-ports/release-access.adapter.ts'],
+  },
   'entitlements/entitlements.service.ts': {
     why: "(e)'s owner plus AR-1 atomic revoke/admission serialization at the canonical COMMIT port",
     only: [
@@ -960,7 +971,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       BOUNDARY,
       EMISSION_MODULE,
     ]);
-    expect(a.modules.get(EMISSION_MODULE)).toEqual([]);
+    expect(a.modules.get(EMISSION_MODULE)).toEqual([BOUNDARY]);
     // P-PRINCIPAL binds the first port through the boundary: the two owner modules it needs, and no
     // more. The list is the same one `OWNER_MODULES` enumerates, read from the module itself.
     expect(a.modules.get(BOUNDARY)).toEqual([...OWNER_MODULES]);
@@ -1044,6 +1055,8 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       'tenancy/tenancy.module.ts',
       'tenancy/tenant-context.service.ts',
       'ai-tools/ai-tool-policy.service.ts',
+      'entitlements/widget-release-access.service.ts',
+      'entitlements/widget-release.contract.ts',
       'entitlements/entitlements.service.ts',
       'ai-tools/ai-tool-policy.module.ts',
       'entitlements/entitlements.module.ts',
@@ -1175,6 +1188,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       ),
     );
     expect(values.get('BOUND_PORT_TOKENS')).toEqual([
+      'WIDGET_RELEASE_ACCESS',
       'CANONICAL_READ',
       'GATE6_OWNERS',
       'PRINCIPAL_RESOLVER',

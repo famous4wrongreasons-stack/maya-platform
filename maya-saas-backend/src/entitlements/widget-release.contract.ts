@@ -1,3 +1,4 @@
+import type { ProfileCertificate } from './widget-release-profile.contract';
 import { createHash } from 'node:crypto';
 import { ForbiddenException } from '@nestjs/common';
 import { WIDGET_RELEASE_CLAUSES } from './widget-release-clauses';
@@ -61,7 +62,7 @@ export interface ReleaseCertificate {
 }
 export interface ReleaseCommand {
   authorization: Signed<ReleaseAuthorization>;
-  certificate?: Signed<ReleaseCertificate>;
+  certificate?: Signed<ReleaseCertificate | ProfileCertificate>;
 }
 export interface ReleaseReceipt {
   contract: 'maya.widget-release-receipt/1';
@@ -204,6 +205,28 @@ export function certificate(value: unknown): ReleaseCertificate {
     !['synthetic', 'staging'].includes(String(v.environment))
   )
     releaseDeny('certificate');
+  releaseCertificateHeader(v);
+  if (
+    !Array.isArray(v.matrix) ||
+    v.matrix.length !== WIDGET_RELEASE_CLAUSES.length
+  )
+    releaseDeny('threshold');
+  const rows = v.matrix as unknown[];
+  if (
+    rows
+      .map((x) => object(x).id)
+      .sort()
+      .join('|') !== [...WIDGET_RELEASE_CLAUSES].sort().join('|')
+  )
+    releaseDeny('threshold');
+  for (const row of rows) validateReleaseClause(object(row));
+  return v as unknown as ReleaseCertificate;
+}
+
+/** Shared shape checks only; neither function grants or changes a threshold. */
+export function releaseCertificateHeader(v: Record<string, unknown>): void {
+  if (!['synthetic', 'staging'].includes(String(v.environment)))
+    releaseDeny('certificate');
   if (
     typeof v.candidateSha !== 'string' ||
     !/^[a-f0-9]{40}$/.test(v.candidateSha)
@@ -224,34 +247,20 @@ export function certificate(value: unknown): ReleaseCertificate {
     instant(v.expiresAt) - instant(v.issuedAt) > MAX_RELEASE_MS
   )
     releaseDeny('certificate_window');
-  if (
-    !Array.isArray(v.matrix) ||
-    v.matrix.length !== WIDGET_RELEASE_CLAUSES.length
-  )
-    releaseDeny('threshold');
-  const rows = v.matrix as unknown[];
-  if (
-    rows
-      .map((x) => object(x).id)
-      .sort()
-      .join('|') !== [...WIDGET_RELEASE_CLAUSES].sort().join('|')
-  )
-    releaseDeny('threshold');
-  for (const row of rows) {
-    const r = object(row);
-    exact(
-      r,
-      r.state === 'U'
-        ? ['id', 'state', 'evidenceDigest', 'u']
-        : ['id', 'state', 'evidenceDigest'],
-    );
-    if (!['L', 'L-T', 'U'].includes(String(r.state))) releaseDeny('threshold');
-    digest(r.evidenceDigest);
-    if (r.state === 'U')
-      for (const d of Object.values(
-        exact(r.u, ['decisionDigest', 'absence', 'refusal', 'mechanism']),
-      ))
-        digest(d);
-  }
-  return v as unknown as ReleaseCertificate;
+}
+
+export function validateReleaseClause(r: Record<string, unknown>): void {
+  exact(
+    r,
+    r.state === 'U'
+      ? ['id', 'state', 'evidenceDigest', 'u']
+      : ['id', 'state', 'evidenceDigest'],
+  );
+  if (!['L', 'L-T', 'U'].includes(String(r.state))) releaseDeny('threshold');
+  digest(r.evidenceDigest);
+  if (r.state === 'U')
+    for (const d of Object.values(
+      exact(r.u, ['decisionDigest', 'absence', 'refusal', 'mechanism']),
+    ))
+      digest(d);
 }

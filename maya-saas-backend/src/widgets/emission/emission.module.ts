@@ -1,3 +1,4 @@
+import { WidgetOwnerPortsModule } from '../owner-ports/widget-owner-ports.module';
 import { Module } from '@nestjs/common';
 
 import {
@@ -16,6 +17,7 @@ import { BookingConfirmationMinterService } from './booking-confirmation-minter.
 
 /** B-22: minting and seal-key custody share one module; the gateway receives only the verifier port. */
 @Module({
+  imports: [WidgetOwnerPortsModule],
   providers: [
     WidgetEmitterService,
     SealService,

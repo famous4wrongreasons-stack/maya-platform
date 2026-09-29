@@ -32,6 +32,7 @@ export async function releaseBookingProof(
       body: unknown,
     ) => Promise<{ status: number; body: unknown }>;
   }) => Promise<Omit<EvidenceLineInput, 'entry' | 'source'>[]>,
+  authorizeWidgetRuntime?: (tenant: TenantFixture) => Promise<void>,
 ): Promise<Omit<EvidenceLineInput, 'entry' | 'source'>[]> {
   const tenant = await ctx.fixtures.tenant(
     'Release booking proof',
@@ -46,7 +47,9 @@ export async function releaseBookingProof(
     'booking.customer_app',
     'crm.integration',
   ] as const)
-    await ctx.fixtures.grantFeature(tenant, feature);
+    if (feature === 'widgets.runtime' && authorizeWidgetRuntime)
+      await authorizeWidgetRuntime(tenant);
+    else await ctx.fixtures.grantFeature(tenant, feature);
   const login = await ctx.request('/auth/login', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

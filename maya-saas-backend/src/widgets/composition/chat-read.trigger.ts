@@ -1,3 +1,5 @@
+import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
+import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import type { AiReadWidgetTriggerPort } from '../../ai-tools/ai-read-widget-trigger.port';
@@ -33,6 +35,8 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
     private readonly emitter: WidgetEmitterService,
     @Inject(GATE6_OWNERS) private readonly gate6: Gate6Owners,
     @Inject(PRINCIPAL_RESOLVER) private readonly principals: PrincipalResolver,
+    @Inject(WIDGET_RELEASE_ACCESS)
+    private readonly releaseAccess: WidgetReleaseAccessPort,
   ) {}
 
   async afterCompletedRead(
@@ -94,6 +98,14 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
         },
       });
       if (previous !== null) {
+        if (
+          !(await this.releaseAccess.canProject(
+            tenantId,
+            previous.widgetId,
+            tx,
+          ))
+        )
+          return null;
         const envelope = previous.renderReceipts[0]?.emittedEnvelopeJson;
         if (!isRecord(envelope)) return null;
         return resolution(previous.widgetId, previous.envelopeSeal, envelope);
