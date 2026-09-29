@@ -163,5 +163,55 @@
       "claim and reconciliation"
     ],
     "expect": "build-killed"
+  },
+  {
+    "id": "WR-M17",
+    "file": "src/widgets/composition/chat-read.trigger.ts",
+    "find": "? await this.emitter.emitBookingSelector(mintRequest, {\n              source: input.result,\n            })",
+    "replace": "? await this.emitter.emit(mintRequest)",
+    "killers": [
+      "WR-L11"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "WR-M18",
+    "file": "src/widgets/emission/successor-minter.service.ts",
+    "find": "digestEquals(record.principalProofHash, request.principal.proofHash) &&",
+    "replace": "true &&",
+    "killers": [
+      "WR-L13 refuses"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "WR-M19",
+    "file": "src/widgets/emission/successor-minter.service.ts",
+    "find": "        const closed = await tx.widgetEmission.updateMany({\n          where: {\n            tenantId: request.tenantId,\n            widgetId: predecessor.widgetId,\n            lifecycleState: 'LIVE',\n            supersededByWidgetId: null,\n            erasedAt: null,\n            intentRecords: {\n              some: {\n                intentTokenHash: request.predecessorIntentTokenHash,\n                principalProofHash: request.principal.proofHash,\n                erasedAt: null,\n              },\n            },\n          },\n",
+    "replace": "        const closed = await tx.widgetEmission.updateMany({\n          where: {\n            tenantId: request.tenantId,\n            widgetId: predecessor.widgetId,\n            lifecycleState: 'LIVE',\n            supersededByWidgetId: null,\n            erasedAt: null,\n            intentRecords: {\n              some: {\n                intentTokenHash: request.predecessorIntentTokenHash,\n                erasedAt: null,\n              },\n            },\n          },\n",
+    "killers": [
+      "WR-L13 lock-time"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "WR-M20",
+    "file": "src/widgets/booking/booking-noun-identity.ts",
+    "find": "value.noun === noun && value.ownerKind === BOOKING_NOUN_OWNERS[noun]",
+    "replace": "value.noun === noun",
+    "killers": [
+      "WR-L12 requires"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "WR-M21",
+    "file": "src/widgets/owner-ports/booking-preview.adapter.ts",
+    "find": "value.tenantId !== input.routing.tenantId ||",
+    "replace": "false ||",
+    "killers": [
+      "rejects raw or foreign handles"
+    ],
+    "expect": "build-killed"
   }
 ]

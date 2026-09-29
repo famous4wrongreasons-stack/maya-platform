@@ -56,11 +56,11 @@ function fixture() {
   });
 }
 
-test('31 batteries, 47 jobs: disjoint Gate 6/7/9/10/13 and P-mint partitions cover the same 373 declarations', () => {
+test('32 batteries, 53 jobs: disjoint Gate 6/7/9/10/13 and P-mint partitions cover the same 394 declarations', () => {
   const p = plan(declared);
-  assert.equal(p.gates.length, 31); assert.equal(p.matrix.include.length, 47);
+  assert.equal(p.gates.length, 32); assert.equal(p.matrix.include.length, 53);
   const r = assemble(declared, fixture(), head);
-  assert.equal(r.length, 31); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 373);
+  assert.equal(r.length, 32); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 394);
   for (const report of r) {
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
@@ -68,7 +68,7 @@ test('31 batteries, 47 jobs: disjoint Gate 6/7/9/10/13 and P-mint partitions cov
 });
 
 test('runner dry-run independently executes the same disjoint partition selection', () => {
-  for (const [gate, count] of [['6', 4], ['7', 4], ['9', 4], ['10', 4], ['13', 4], ['P-mint', 2]]) {
+  for (const [gate, count] of [['6', 4], ['7', 4], ['9', 4], ['10', 4], ['13', 4], ['P-mint', 4], ['WR', 4]]) {
     const seen = [];
     for (let index = 1; index <= count; index++) {
       const child = spawnSync(process.execPath, ['scripts/widgets-mutation-battery.mjs', '--gate', gate, '--partition', `${index}/${count}`, '--dry-run'], { cwd: backend, encoding: 'utf8' });
@@ -183,7 +183,7 @@ test('gate: a baseline control is red on a non-zero step exit, a failed assertio
     for (const c of Object.values(r.neutraliser_controls)) { c.exits[c.steps[0]] = 1; c.failed = ['red on the neutralised copy']; }
     assert.deepEqual(redBaselineControls(r.baseline_controls), []);
   }
-  assert.equal(assemble(declared, receipts, head).length, 31, 'a red neutraliser control is not a red baseline');
+  assert.equal(assemble(declared, receipts, head).length, 32, 'a red neutraliser control is not a red baseline');
 });
 
 test('gate: a red baseline is a distinct shard status and a non-zero exit, and never hides a mismatch', () => {

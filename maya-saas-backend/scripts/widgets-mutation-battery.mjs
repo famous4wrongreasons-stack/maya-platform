@@ -590,6 +590,11 @@ const controlFor = (set, steps) => {
   return controls.get(key);
 };
 
+// Even a shard with ONLY neutralised live mutants needs a green unmutated
+// live reference. A deliberately red neutraliser is not such a reference (L10).
+if (mutants.some((m) => !m.equivalent && m.steps.includes('live')))
+  controlFor(null, ['live']);
+
 let mismatches = 0;
 for (const m of mutants) {
   if (typeof m.equivalent === 'string') {
@@ -896,6 +901,20 @@ function selfTest() {
     knownGate.status === 0,
     `exit ${knownGate.status}`,
   );
+
+  const neutralOnly = spawnSync(process.execPath, [path.join(HERE, 'widgets-mutation-battery.mjs'),
+    '--mutations', dir, '--gate', 'H-selftest', '--partition', '1/3',
+    '--live-tests', 'test/widgets-live/harness.live-spec.ts', '--live-filter', 'HAR-11 probe',
+    '--out', reportFile], { cwd: BACKEND, encoding: 'utf8', env: process.env, maxBuffer: 256 * 1024 * 1024 });
+  let neutralReport = null;
+  try { neutralReport = JSON.parse(fs.readFileSync(reportFile, 'utf8')); }
+  catch { /* the assertion below refuses a missing receipt */ }
+  finally { fs.rmSync(reportFile, { force: true }); }
+  expectThat('L10 neutraliser-only shard retains a green plain live baseline',
+    neutralOnly.status === 0 && neutralReport?.baseline_controls?.['baseline|live']?.exits?.live === 0 &&
+    neutralReport?.baseline_controls?.['baseline|live']?.failed?.length === 0 &&
+    neutralReport?.mutants?.length === 1 && neutralReport.mutants[0].id === 'H11-M1',
+    `exit ${neutralOnly.status}`);
 
   for (const c of checks) process.stdout.write(`${c.ok ? 'ok  ' : 'BAD '} ${c.id} (${c.detail})\n`);
   const bad = checks.filter((c) => !c.ok).length;

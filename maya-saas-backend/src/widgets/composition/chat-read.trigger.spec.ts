@@ -90,7 +90,14 @@ describe('P-MT2a ChatReadTriggerService', () => {
       intentTokenHashes: ['d'.repeat(64)],
       envelope: { contract: 'maya.widget.envelope/1' },
     });
+    const emitBookingSelector = jest.fn().mockResolvedValue({
+      widgetId: '33333333-3333-4333-8333-333333333333',
+      envelopeSeal: 'c'.repeat(64),
+      intentTokenHashes: ['d'.repeat(64)],
+      envelope: { contract: 'maya.widget.envelope/1' },
+    });
     const emitter = {
+      emitBookingSelector,
       emit,
     } as unknown as WidgetEmitterService;
     const gate6 = {
@@ -113,6 +120,7 @@ describe('P-MT2a ChatReadTriggerService', () => {
       ensureAssistantTurn,
       composeCompletedRead,
       emit,
+      emitBookingSelector,
       resolvePrincipal,
     };
   };
@@ -193,4 +201,34 @@ describe('P-MT2a ChatReadTriggerService', () => {
     ).rejects.toThrow('local_business_date_invalid');
     expect(h.emit).not.toHaveBeenCalled();
   });
+  it.each([
+    ['catalog.services.read', 'SERVICE_SELECTOR'],
+    ['catalog.staff.read', 'STAFF_SELECTOR'],
+    ['booking.availability.read', 'TIME_SLOT_SELECTOR'],
+  ])(
+    'WR-L11 dispatches %s to the canonical selector minter',
+    async (toolName, kind) => {
+      const h = harness();
+      const source = { services: [], staff: [], slots: [] };
+      h.composeCompletedRead.mockReturnValue({
+        kind: 'composer_input',
+        input: {
+          kind_proposal: kind,
+          capability: toolName,
+          intent_proposals: [],
+        },
+        source,
+      } as never);
+      await h.service.afterCompletedRead({
+        ...input(),
+        toolName,
+        result: source,
+      });
+      expect(h.emitBookingSelector).toHaveBeenCalledWith(
+        expect.objectContaining({ kind }),
+        { source },
+      );
+      expect(h.emit).not.toHaveBeenCalled();
+    },
+  );
 });
