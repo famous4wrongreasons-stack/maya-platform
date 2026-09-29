@@ -22,6 +22,7 @@ import {
   projectEmailVerify,
   projectPasswordLogin,
   projectRefresh,
+  projectTelegramComplete,
   projectTelegramStart,
   projectTranscribe,
   projectWidgetIntent,
@@ -44,6 +45,7 @@ import type {
   RefreshRequest,
   SignedOutReason,
   SignInFailure,
+  TelegramCompleteProjection,
   TelegramStartProjection,
   TranscribeFailure,
   TranscribeProjection,
@@ -56,6 +58,7 @@ import type {
 const PATHS = {
   businessSearch: '/mobile/pwa/search',
   telegramStart: '/auth/oauth/telegram/start',
+  telegramComplete: '/auth/oauth/telegram/complete',
   emailStart: '/auth/email/start',
   emailVerify: '/auth/email/verify',
   login: '/auth/login',
@@ -86,7 +89,14 @@ type RequestBody =
   | WidgetIntentRequest
   | WidgetResolveRequest
   | TelegramStartRequest
+  | TelegramCompleteRequest
   | Readonly<Record<string, never>>;
+
+/** `CompleteOauthLoginDto`, minus `branchId`: the shell has no branch to name and never invents one. */
+interface TelegramCompleteRequest {
+  readonly state: string;
+  readonly code: string;
+}
 
 /** `StartOauthLoginDto`, web or native. `redirectUri` is omitted for iOS: the server owns that one. */
 type TelegramStartRequest =
@@ -284,15 +294,35 @@ function firstRunFailure(ex: Exchange): FirstRunFailure {
       return { state: 'rate_limited', retryAfterSec: retryAfterOf(ex) };
     case 400:
       if (code === 'public_business_search_invalid') return { state: 'term_too_short' };
+      // `social_state_invalid` covers all four ways the server can no longer honour a login: never
+      // issued, wrong provider, expired, or ALREADY CONSUMED. The last is the server's own replay
+      // refusal — `claimFlowState` is a conditional update, so a second completion of one login
+      // loses the race by construction and arrives here.
+      // `social_exchange_failed` / `social_token_invalid`: the provider would not honour the code.
+      // Every one of these restarts the login, because the state was spent before the exchange ran.
+      if (code === 'social_state_invalid' || code === 'social_exchange_failed' || code === 'social_token_invalid') return { state: 'login_expired' };
       return { state: 'unexpected_response', status: ex.status };
+    case 401:
+      if (code === 'crm_staff_access_disabled') return { state: 'account_unavailable' };
+      // The provider would not exchange the code. Nothing here can be retried; the login restarts.
+      return { state: 'login_expired' };
     case 403:
+      if (code === 'social_phone_required') return { state: 'phone_required' };
+      if (code === 'self_registration_disabled' || code === 'trial_client_registration_disabled' || code === 'platform_tenant_not_bookable')
+        return { state: 'registration_closed' };
+      return { state: 'business_unavailable' };
+    case 409:
+      // `social_identity_conflict`, `social_business_link_required`, `social_business_access_suspended`:
+      // all three mean this identity cannot become a session here, and telling them apart would
+      // confirm which accounts exist.
+      return { state: 'account_unavailable' };
     case 404:
       // A business that stopped accepting client access, and one that never existed, are one state.
       return { state: 'business_unavailable' };
     case 502:
       return { state: 'no_connection' };
     case 503:
-      if (code === 'social_native_callback_unavailable' || code === 'social_login_unavailable' || code === 'social_provider_disabled')
+      if (code === 'social_native_callback_unavailable' || code === 'social_login_unavailable' || code === 'social_provider_disabled' || code === 'social_provider_unavailable')
         return { state: 'telegram_unavailable' };
       return { state: 'unexpected_response', status: ex.status };
     default:
@@ -326,6 +356,21 @@ export async function telegramStart(tenantSlug: string, webCallbackUrl: string |
   const ex = await exchange('telegramStart', body, null, null, timeoutMs);
   if (ex.kind === 'response' && isSuccess(ex.status)) {
     const value = projectTelegramStart(ex.body);
+    return value === null ? fail({ state: 'unexpected_response', status: ex.status }) : { ok: true, value };
+  }
+  return fail(firstRunFailure(ex));
+}
+
+/**
+ * `POST /auth/oauth/telegram/complete`, body exactly `{state, code}`. The tenant is NOT sent and
+ * cannot be: the server reads it from the flow the state names (`flow.tenant.id`), so no client —
+ * honest or otherwise — can land a session in a business other than the one the login was started
+ * for. This is the whole of the client's part in completing a login.
+ */
+export async function telegramComplete(state: string, code: string, timeoutMs: number = REQUEST_TIMEOUT_MS): FirstRunResult<TelegramCompleteProjection> {
+  const ex = await exchange('telegramComplete', { state, code }, null, null, timeoutMs);
+  if (ex.kind === 'response' && isSuccess(ex.status)) {
+    const value = projectTelegramComplete(ex.body);
     return value === null ? fail({ state: 'unexpected_response', status: ex.status }) : { ok: true, value };
   }
   return fail(firstRunFailure(ex));

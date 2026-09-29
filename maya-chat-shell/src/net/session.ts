@@ -23,10 +23,11 @@ import {
   passwordLogin,
   refreshSession,
   searchBusinesses,
+  telegramComplete,
   telegramStart,
 } from './client.ts';
 import type { Authorization, Authorizer, RefreshResult, Timeouts } from './client.ts';
-import type { BusinessChoice, BusinessMatch, FirstRunFailure, SessionGrant, SignedOutReason, SignInDisplay, SignInFailure } from './types.ts';
+import type { BusinessChoice, BusinessMatch, FirstRunFailure, SessionGrant, SignedOutReason, SignInDisplay, SignInFailure, TelegramCallback } from './types.ts';
 
 /** A refresh starts when the access token has less than this left. */
 export const REFRESH_LEEWAY_MS = 30_000;
@@ -42,6 +43,82 @@ export type FinderOutcome =
   | { readonly step: 'failed'; readonly failure: FirstRunFailure };
 
 export type TelegramOutcome = { readonly step: 'handed_off' } | { readonly step: 'failed'; readonly failure: FirstRunFailure };
+
+/**
+ * Structurally `shell/ports.ts` `TelegramLanding`. The landing is a state of being SIGNED OUT — it
+ * ends either in a session or in a sentence — so it is watched separately from the session view,
+ * which says only whether there is one.
+ */
+export type TelegramLanding =
+  | { readonly state: 'none' }
+  | { readonly state: 'running' }
+  | { readonly state: 'failed'; readonly failure: FirstRunFailure };
+
+/** Whether the completed login was this identity's first in that business. */
+export type TelegramLandingOutcome =
+  | { readonly step: 'signed_in'; readonly display: SignInDisplay; readonly isNewUser: boolean }
+  | { readonly step: 'failed'; readonly failure: FirstRunFailure };
+
+/**
+ * The WEB carrier hands over this page's fragment verbatim, because a fragment is the one part of a
+ * URL no browser sends to a server — and until the server spends it, `state` + `code` together are
+ * enough for anyone holding them to mint the session, since the PKCE verifier for this flow lives
+ * server-side rather than here.
+ *
+ * Only the four names are read, each at most once: a repeated name is how a second value rides in
+ * behind the first, so a duplicate voids the whole callback rather than letting either be chosen.
+ * Without the `oauth=telegram` mark this is somebody's route fragment and not a callback at all.
+ */
+const parseFragment = (fragment: string): TelegramCallback | null => {
+  const raw = fragment.startsWith('#') ? fragment.slice(1) : fragment;
+  if (raw.length === 0 || raw.length > 4_096) return null;
+  let marked = false;
+  let state: string | null = null;
+  let code: string | null = null;
+  let error: string | null = null;
+  for (const pair of raw.split('&')) {
+    const at = pair.indexOf('=');
+    if (at <= 0) continue;
+    const key = pair.slice(0, at);
+    let value: string;
+    try {
+      value = decodeURIComponent(pair.slice(at + 1));
+    } catch {
+      // A malformed escape is a malformed callback, not a callback with one bad field.
+      return null;
+    }
+    if (key === 'oauth') {
+      if (marked || value !== 'telegram') return null;
+      marked = true;
+    } else if (key === 'state') {
+      if (state !== null) return null;
+      state = value;
+    } else if (key === 'code') {
+      if (code !== null) return null;
+      code = value;
+    } else if (key === 'error') {
+      if (error !== null) return null;
+      error = value;
+    }
+  }
+  if (!marked || state === null || state === '') return null;
+  return { state, code: code === '' ? null : code, error: error === '' ? null : error };
+};
+
+/** A callback is three opaque strings; anything else shaped is not a callback at all. */
+const readCallback = (value: unknown): TelegramCallback | null => {
+  if (typeof value === 'string') return parseFragment(value);
+  if (typeof value !== 'object' || value === null) return null;
+  const state: unknown = (value as { state?: unknown }).state;
+  const code: unknown = (value as { code?: unknown }).code;
+  const error: unknown = (value as { error?: unknown }).error;
+  if (typeof state !== 'string' || state === '') return null;
+  return {
+    state,
+    code: typeof code === 'string' && code !== '' ? code : null,
+    error: typeof error === 'string' && error !== '' ? error : null,
+  };
+};
 
 /** Structurally `shell/ports.ts` `SignInStep`. */
 export type SignInOutcome =
@@ -103,8 +180,35 @@ export function createNet(options: NetOptions = {}) {
   /** The serial of the current sign-in's first grant. */
   let epochFirstSerial = 0;
   let flight: RefreshFlight | null = null;
+  /**
+   * The `state` of the login THIS app started, held in memory only (A6) and spent on first use.
+   *
+   * It is the entire defence against a callback nobody here asked for. On iOS anything can open
+   * `mayaos://oauth-callback?state=…&code=…`; an attacker who runs a Telegram login of their OWN
+   * has a genuine state and code, and delivering that pair to this phone would — without this check
+   * — sign the owner into the ATTACKER'S account, where everything they then did would be visible
+   * to the attacker. The server cannot catch that: the pair is real. Only the client knows whether
+   * it asked. A callback arriving after a restart therefore finds nothing pending and is refused,
+   * which is correct rather than unfortunate.
+   */
+  let pendingTelegram: string | null = null;
+  let landing: TelegramLanding = { state: 'none' };
+  const landingListeners = new Set<(view: TelegramLanding) => void>();
   let snapshot: SessionSnapshot = { signedIn: false, reason: null };
   const listeners = new Set<(view: SessionSnapshot) => void>();
+
+  const setLanding = (next: TelegramLanding): void => {
+    landing = next;
+    for (const listener of [...landingListeners]) {
+      try {
+        listener(next);
+      } catch (error) {
+        setTimeout(() => {
+          throw error;
+        }, 0);
+      }
+    }
+  };
 
   const notify = (): void => {
     snapshot = grant === null ? { signedIn: false, reason } : { signedIn: true, display: grant.display };
@@ -244,8 +348,49 @@ export function createNet(options: NetOptions = {}) {
       if (business === '') return { step: 'failed', failure: { state: 'business_unavailable' } };
       const r = await telegramStart(business, webCallbackUrl, timeouts.requestMs);
       if (!r.ok) return { step: 'failed', failure: r.failure };
+      // Recorded BEFORE the browser goes anywhere: on iOS the provider's page opens outside this
+      // web view and the callback can arrive the moment it closes.
+      pendingTelegram = r.value.state;
+      setLanding({ state: 'none' });
       navigate(r.value.authUrl);
       return { step: 'handed_off' };
+    },
+
+    /** The landing's own state, for the screen that has to show it. */
+    landing: (): TelegramLanding => landing,
+    onLanding(listener: (view: TelegramLanding) => void): () => void {
+      const own = (view: TelegramLanding): void => listener(view);
+      landingListeners.add(own);
+      return () => {
+        landingListeners.delete(own);
+      };
+    },
+
+    /**
+     * Land the provider's callback: the ONE place a Telegram login becomes a session, for the web
+     * and the native carrier alike. Whatever carried the callback here — a deep link the carrier
+     * validated, or this page's own URL — it is the same three strings and the same path from here.
+     */
+    async completeTelegram(payload: unknown): Promise<TelegramLandingOutcome> {
+      const callback = readCallback(payload);
+      const expected = pendingTelegram;
+      // Spent on sight, before anything can fail: whatever happens next, a second delivery of the
+      // same callback finds nothing pending. The server refuses a replay too (`claimFlowState` is a
+      // conditional update); this refuses it without spending a request.
+      pendingTelegram = null;
+      const refuse = (failure: FirstRunFailure): TelegramLandingOutcome => {
+        setLanding({ state: 'failed', failure });
+        return { step: 'failed', failure };
+      };
+      if (callback === null || expected === null || callback.state !== expected) return refuse({ state: 'callback_unsolicited' });
+      // The provider's own refusal is not an error of ours, and it has its own sentence.
+      if (callback.code === null) return refuse({ state: 'telegram_declined' });
+      setLanding({ state: 'running' });
+      const r = await telegramComplete(expected, callback.code, timeouts.requestMs);
+      if (!r.ok) return refuse(r.failure);
+      signIn(r.value.grant, r.value.display);
+      setLanding({ state: 'none' });
+      return { step: 'signed_in', display: r.value.display, isNewUser: r.value.isNewUser };
     },
 
     async startEmail(email: string): Promise<SignInOutcome> {

@@ -50,6 +50,12 @@ function sessionDouble(initial = { signedIn: false, reason: null }) {
   const listeners = new Set();
   const calls = [];
   const answers = {};
+  let landing = { state: 'none' };
+  const landingListeners = new Set();
+  const setLanding = (next) => {
+    landing = next;
+    for (const l of [...landingListeners]) l(next);
+  };
   const session = {
     view: () => view,
     subscribe: (l) => (listeners.add(l), () => listeners.delete(l)),
@@ -73,6 +79,15 @@ function sessionDouble(initial = { signedIn: false, reason: null }) {
       calls.push(['startTelegram', slug]);
       return answers.startTelegram ? answers.startTelegram(slug) : { step: 'handed_off' };
     },
+    landing: () => landing,
+    onLanding(listener) {
+      landingListeners.add(listener);
+      return () => landingListeners.delete(listener);
+    },
+    async completeTelegram(payload) {
+      calls.push(['completeTelegram', payload]);
+      return answers.completeTelegram ? answers.completeTelegram(payload) : { step: 'failed', failure: { state: 'callback_unsolicited' } };
+    },
     async signOut() {
       calls.push(['signOut']);
       set({ signedIn: false, reason: 'signed_out' });
@@ -82,7 +97,7 @@ function sessionDouble(initial = { signedIn: false, reason: null }) {
     view = next;
     for (const l of [...listeners]) l(next);
   };
-  return { session, calls, answers, set, signIn: (display = DISPLAY) => set({ signedIn: true, display }) };
+  return { session, calls, answers, set, setLanding, signIn: (display = DISPLAY) => set({ signedIn: true, display }) };
 }
 
 /** What the canonical public finder answers in these tests. The slug is never shown, only carried. */
@@ -859,6 +874,38 @@ test('after sign-in the root is the signed-in app: identity, a focused composer,
   assert.ok(!ROLE_WORDS.test(text));
   assert.equal(p.dom.find((el) => el.classList.contains('signin')), null, 'the sign-in state is gone');
   assert.equal(identityText({ userName: '', tenantName: null }), 'Вход выполнен');
+});
+
+test('the landing is visible: it says it is finishing, and every way it can fail is a sentence on a control', async () => {
+  const dom = createDom();
+  const s = sessionDouble();
+  mountSignIn({ factory: dom.factory, container: dom.root, session: s.session, scheduler: createScheduler(NOW) });
+  await chooseBusiness(dom);
+
+  // Back from Telegram, the request in flight. The person must not be looking at a screen that
+  // pretends nothing is happening — they left, they came back, and something is being decided.
+  s.setLanding({ state: 'running' });
+  assert.match(dom.visibleText(), /\u0417\u0430\u0432\u0435\u0440\u0448\u0430\u0435\u043c \u0432\u0445\u043e\u0434/);
+  assert.equal(dom.button(/^\u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u044c \u0441 Telegram$/).getAttribute('aria-disabled'), 'true', 'held while it runs');
+
+  for (const [failure, sentence] of [
+    [{ state: 'callback_unsolicited' }, /\u042d\u0442\u043e\u0442 \u0432\u0445\u043e\u0434 \u043d\u0430\u0447\u0430\u043b\u0438 \u043d\u0435 \u0437\u0434\u0435\u0441\u044c/],
+    [{ state: 'login_expired' }, /\u0412\u0445\u043e\u0434 \u0443\u0441\u0442\u0430\u0440\u0435\u043b/],
+    [{ state: 'telegram_declined' }, /\u0412\u0445\u043e\u0434 \u0447\u0435\u0440\u0435\u0437 Telegram \u043e\u0442\u043c\u0435\u043d\u0451\u043d/],
+    [{ state: 'phone_required' }, /\u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 Telegram \u043f\u0435\u0440\u0435\u0434\u0430\u0442\u044c \u043d\u043e\u043c\u0435\u0440/],
+    [{ state: 'registration_closed' }, /\u043d\u0435 \u043f\u0440\u0438\u043d\u0438\u043c\u0430\u0435\u0442 \u043d\u043e\u0432\u044b\u0445 \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u0435\u0439/],
+    [{ state: 'account_unavailable' }, /\u0412\u0445\u043e\u0434 \u0434\u043b\u044f \u044d\u0442\u043e\u0439 \u0443\u0447\u0451\u0442\u043d\u043e\u0439 \u0437\u0430\u043f\u0438\u0441\u0438/],
+  ]) {
+    s.setLanding({ state: 'failed', failure });
+    const text = dom.visibleText();
+    assert.match(text, sentence, JSON.stringify(failure));
+    const active = dom.active();
+    assert.ok(active && ['input', 'button'].includes(active.localName) && dom.isVisible(active), `${failure.state}: focus on a visible control`);
+    assert.equal(dom.findAll((el) => el.getAttribute('role') === 'alert').length, 0, 'never role=alert');
+    // The login has to start again, and the control that starts it is where focus went.
+    assert.equal(dom.button(/^\u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u044c \u0441 Telegram$/).getAttribute('aria-disabled'), null, 'released');
+  }
+  assert.ok(!/state|code|te_|oauth/i.test(dom.visibleText()), 'no callback value is ever drawn');
 });
 
 test('a session that ends shows the signed-out state with its reason and focus on its heading; nothing typed survives', async () => {

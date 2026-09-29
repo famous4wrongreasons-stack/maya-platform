@@ -183,9 +183,9 @@ const TOKEN_PROPERTIES = new Set([
 ]);
 
 /**
- * N-1: the P1 allowlist. `/widgets/*` joins only with the unit that consumes R7-E1/E2 (B3), and
- * `/auth/oauth/telegram/complete` only with the unit that receives the provider's callback — the
- * shell starts the hand-off but does not yet land it.
+ * N-1: the P1 allowlist. `/widgets/*` joins only with the unit that consumes R7-E1/E2 (B3).
+ * `/auth/oauth/telegram/complete` joined when the landing unit arrived: the shell now both starts
+ * the hand-off and lands it.
  */
 export const P1_PATHS = [
   '/auth/email/start',
@@ -194,6 +194,7 @@ export const P1_PATHS = [
   '/auth/refresh',
   '/auth/logout',
   '/auth/oauth/telegram/start',
+  '/auth/oauth/telegram/complete',
   '/ai/chat',
   '/ai/transcribe',
   '/mobile/pwa/search',

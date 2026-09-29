@@ -35,8 +35,8 @@
     "src/voice/capture.ts",
     "src/voice/wav.ts"
   ],
-  "bytes": 417565,
-  "digest": "b55c123c062d9e2ce82cc30a690d7a781c74285c178acd27ad0ef82b5f2fb7d6",
+  "bytes": 435939,
+  "digest": "b82f97b921f1a57a82731bc24e97bec29345ab15f24c4990faef230b87725f10",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -44,13 +44,13 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "2fbb30155ca603cd6ff8c3cd44f86ec9846366150beb1a787c3aad9278a489d1",
-    "modulePath": "m/2fbb30155ca603cd/",
+    "digest": "d427b1aa1c976ddf4e5f62a76e62647f4f97253331cb3eb903999e7507dd066b",
+    "modulePath": "m/d427b1aa1c976ddf/",
     "files": [
       {
         "path": "entry/main.js",
-        "sha256": "ec76872c87efcf3e374e1c378582f5a7ef4974f493b88d6c12489c9c14e5ac93",
-        "bytes": 6430
+        "sha256": "c286ecbb5bed2b1bfa1c25f9b3e25e507c6380ce78085440a176836170a4cc3a",
+        "bytes": 6984
       },
       {
         "path": "src/contract.js",
@@ -79,8 +79,8 @@
       },
       {
         "path": "src/dom/signin.js",
-        "sha256": "51962009535ca884d3edf337c2f7fa210596e422d3cc6d5f0942ba1339e14707",
-        "bytes": 20181
+        "sha256": "fd34f1fdb93d15f2c1bdda4cf81734c9461cb4b41303cd3d3414f034c9f02855",
+        "bytes": 21952
       },
       {
         "path": "src/dom/timeline.js",
@@ -99,8 +99,8 @@
       },
       {
         "path": "src/net/client.js",
-        "sha256": "2158bbd83a0ce92c0e8a04fddb249e4221d630bd201038839e7f7408df6421d8",
-        "bytes": 19292
+        "sha256": "7ba41ccce1a1fca2406d98c1e0c4ab5e00cfa72e83bc293e2776a414b0d8fe1a",
+        "bytes": 20643
       },
       {
         "path": "src/net/endpoint.js",
@@ -109,13 +109,13 @@
       },
       {
         "path": "src/net/project.js",
-        "sha256": "d727df84528ac5eb26e35625501e5feb63d6faa90272c1e59984999df8d36246",
-        "bytes": 9929
+        "sha256": "db190645e2a49fe3d7cdfd825f74941a42e3f65debf4523d06f72f8b42155e7d",
+        "bytes": 10250
       },
       {
         "path": "src/net/session.js",
-        "sha256": "89f47571582b756957d261dcce942665f2c469646af77b871f4d766c6cc60990",
-        "bytes": 9057
+        "sha256": "952bd62d40e19288d6ca60f7bd74b599b86480098bf74c97c48a6c255edb5a1b",
+        "bytes": 12679
       },
       {
         "path": "src/net/types.js",
@@ -203,7 +203,7 @@
       "bytes": 27293
     },
     "index": {
-      "sha256": "d6bc1c53ac625f5c2b02ceae2e159c15279555de2b71b4e7a66fc2dd9db58ce9",
+      "sha256": "b8e32893900ccf66de68ebbd9f82bfeb2915806eb337f91144d94355bd4856cc",
       "bytes": 1344
     },
     "assets": [

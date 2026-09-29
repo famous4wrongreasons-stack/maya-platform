@@ -36,6 +36,7 @@ import type {
   SignedOutReason,
   SignInFailure,
   SignInStep,
+  TelegramLanding,
 } from '../shell/ports.ts';
 
 export interface SignInMount {
@@ -103,6 +104,19 @@ export const firstRunSentence = (failure: FirstRunFailure): string => {
       return 'Вход через Telegram сейчас недоступен';
     case 'business_unavailable':
       return 'Этот бизнес сейчас не принимает вход';
+    case 'callback_unsolicited':
+      // Says what to do without describing the attack, and without implying the person did wrong.
+      return 'Этот вход начали не здесь — начните заново';
+    case 'login_expired':
+      return 'Вход устарел — начните заново';
+    case 'telegram_declined':
+      return 'Вход через Telegram отменён';
+    case 'account_unavailable':
+      return 'Вход для этой учётной записи сейчас недоступен';
+    case 'phone_required':
+      return 'Разрешите Telegram передать номер телефона и попробуйте снова';
+    case 'registration_closed':
+      return 'Этот бизнес сейчас не принимает новых пользователей';
     case 'no_connection':
       return 'Нет связи — повторить';
     case 'unexpected_response':
@@ -438,6 +452,16 @@ export function mountSignIn(mount: SignInMount): SignIn {
       case 'telegram_unavailable':
         setStatus('find', firstRunSentence(failure));
         return otherToggle;
+      case 'account_unavailable':
+      case 'phone_required':
+      case 'registration_closed':
+      case 'callback_unsolicited':
+      case 'login_expired':
+      case 'telegram_declined':
+        // The login has to start again. Focus goes where starting it again begins: the hand-off if
+        // the business is still chosen, the search if it is not.
+        setStatus('find', firstRunSentence(failure));
+        return chosen === null ? term.input : telegram;
       case 'no_connection':
       case 'unexpected_response': {
         const retry = retryButton(again);
@@ -590,12 +614,40 @@ export function mountSignIn(mount: SignInMount): SignIn {
     if (otherOpen) (chosen === null ? term.input : email.input).focus();
   });
 
+  /**
+   * A callback has come back from the provider. The screen shows it because the alternative is a
+   * login that fails in silence: the person left for Telegram, came back, and must be told either
+   * that they are in or exactly what to do next. On the web this may already be running when the
+   * screen mounts — the callback is in the page's own URL at boot — so the current state is read
+   * once here rather than waited for.
+   */
+  const showLanding = (view: TelegramLanding): void => {
+    if (disposed) return;
+    if (view.state === 'running') {
+      busy = true;
+      setStatus('find', 'Завершаем вход…');
+      paint();
+      return;
+    }
+    busy = false;
+    if (view.state === 'failed') {
+      const focus = failFirstRun(view.failure, () => undefined);
+      paint();
+      focus.focus();
+      return;
+    }
+    paint();
+  };
+  const offLanding = session.onLanding(showLanding);
+  showLanding(session.landing());
+
   paint();
 
   return {
     heading,
     cancel: () => {
       disposed = true;
+      offLanding();
       for (const path of ['find', 'password'] as const) {
         lockOf(path)?.();
         setLock(path, null);

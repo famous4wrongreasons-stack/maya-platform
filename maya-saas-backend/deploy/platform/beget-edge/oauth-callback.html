@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Nothing is fetched and nothing is posted: the whole page is the script below. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<!-- The page is reached with ?code= in its own URL. No request may carry that onward as a Referer,
+     which is why this page has no stylesheet, no font, no icon and no image: the previous version
+     linked /app/fonts.css and leaked the authorization code to that request every single time. -->
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<title>MAYA</title>
+<style>
+  :root { color-scheme: light dark; --bg: #f4f0eb; --text: #18160f; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #000000; --text: #f4f0eb; } }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); }
+  body { display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+         font: 400 1.0625rem/1.5625rem -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif; }
+  p { margin: 0; max-width: 24rem; text-align: center; }
+</style>
+</head>
+<body>
+<p id="m">Возвращаемся в MAYA…</p>
+<noscript><p>Для входа нужен включённый JavaScript. Откройте MAYA и начните вход заново.</p></noscript>
+<script>
+/* MAYA — the web half of the Telegram OIDC landing.
+ *
+ * This page exists to move the provider's answer out of the QUERY and into the FRAGMENT, and then
+ * to get out of the way. It reads nothing else, stores nothing, and decides nothing: the shell owns
+ * the whole of the login and refuses anything that does not name the login it started itself.
+ *
+ * Why the fragment. The PKCE verifier for this flow lives on the server, so until the server spends
+ * it, `state` + `code` together are a bearer credential for a session. A fragment is the one part of
+ * a URL that no browser ever sends to any server, so from here on the pair is never in a request
+ * line, a proxy log or a Referer. The shell clears it the instant it reads it.
+ *
+ * `location.replace`, not `href`: the code-bearing URL must not stay in session history behind a
+ * Back button.
+ */
+(function () {
+  'use strict';
+  var out = document.getElementById('m');
+  var say = function (text) { out.textContent = text; };
+  try {
+    var q = new URLSearchParams(location.search);
+    var state = q.get('state') || '';
+    var code = q.get('code') || '';
+    var error = q.get('error') || '';
+    /* The server's own shape for a state it minted (social-auth.service.ts). Anything else was not
+       issued here, and forwarding it would only make the shell refuse it one step later. */
+    if (!/^(?:ya|te)_[A-Za-z0-9_-]{8,128}$/.test(state) || (code === '' && error === '')) {
+      say('Ссылка входа не распознана — откройте MAYA и начните вход заново.');
+      return;
+    }
+    var parts = ['oauth=telegram', 'state=' + encodeURIComponent(state)];
+    parts.push(code !== '' ? 'code=' + encodeURIComponent(code) : 'error=' + encodeURIComponent(error));
+    location.replace('/#' + parts.join('&'));
+  } catch (e) {
+    say('Не удалось вернуться в MAYA — откройте приложение и начните вход заново.');
+  }
+})();
+</script>
+</body>
+</html>

@@ -175,6 +175,19 @@ export type FinderStep =
 
 export type TelegramStep = { readonly step: 'handed_off' } | { readonly step: 'failed'; readonly failure: FirstRunFailure };
 
+/**
+ * The landing: what is happening to a provider callback the shell has been handed. It is a state of
+ * being SIGNED OUT, watched separately from `SessionView`, which says only whether a session exists.
+ */
+export type TelegramLanding =
+  | { readonly state: 'none' }
+  | { readonly state: 'running' }
+  | { readonly state: 'failed'; readonly failure: FirstRunFailure };
+
+export type TelegramLandingStep =
+  | { readonly step: 'signed_in'; readonly display: SignInDisplay; readonly isNewUser: boolean }
+  | { readonly step: 'failed'; readonly failure: FirstRunFailure };
+
 export interface SessionPort {
   view(): SessionView;
   subscribe(listener: (view: SessionView) => void): Cancel;
@@ -185,6 +198,15 @@ export interface SessionPort {
    * navigating away, so no caller may assume it still runs.
    */
   startTelegram(tenantSlug: string): Promise<TelegramStep>;
+  /** What the landing is doing now, for the screen that has to show it. */
+  landing(): TelegramLanding;
+  onLanding(listener: (view: TelegramLanding) => void): Cancel;
+  /**
+   * Land a provider callback. `entry/` hands over whatever the carrier delivered, unread: this
+   * refuses anything that is not three opaque strings, and anything that does not name the login
+   * THIS app started. It is the one place a Telegram login becomes a session, on every carrier.
+   */
+  completeTelegram(payload: unknown): Promise<TelegramLandingStep>;
   startEmail(email: string): Promise<SignInStep>;
   /** `tenantSlug` is null on first verify and the chosen `businesses[].slug` on re-verify. */
   verifyEmail(email: string, code: string, tenantSlug: string | null): Promise<SignInStep>;

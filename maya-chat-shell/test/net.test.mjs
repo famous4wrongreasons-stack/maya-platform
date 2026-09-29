@@ -85,6 +85,7 @@ const U = {
   // The finder is the one GET, and its URL carries the term: `q=му`, percent-encoded by the client.
   search: '/api/mobile/pwa/search?q=%D0%BC%D1%83',
   telegramStart: '/api/auth/oauth/telegram/start',
+  telegramComplete: '/api/auth/oauth/telegram/complete',
   start: '/api/auth/email/start',
   verify: '/api/auth/email/verify',
   login: '/api/auth/login',
@@ -312,7 +313,7 @@ const signedIn = async (options = {}) => {
 
 // ── 1. the module surface ──────────────────────────────────────────────────────────────────────
 
-test('PATHS holds exactly the eleven approved literals; one fetch call site; API_BASE is the one endpoint line', async () => {
+test('PATHS holds exactly the twelve approved literals; one fetch call site; API_BASE is the one endpoint line', async () => {
   const src = read('src/net/client.ts');
   const block = src.match(/const PATHS = \{([\s\S]*?)\} as const;/);
   assert.ok(block, 'const PATHS = {…} as const');
@@ -324,13 +325,13 @@ test('PATHS holds exactly the eleven approved literals; one fetch call site; API
     '/auth/email/verify',
     '/auth/login',
     '/auth/logout',
+    '/auth/oauth/telegram/complete',
     '/auth/oauth/telegram/start',
     '/auth/refresh',
     '/mobile/pwa/search',
     '/widgets/intent',
     '/widgets/resolve',
   ]);
-  assert.ok(!src.includes('/auth/oauth/telegram/complete'), 'the completion path joins with the unit that receives the callback');
   const { P1_PATHS } = await import('../build.mjs');
   assert.deepEqual(values, [...P1_PATHS].sort());
 
@@ -354,7 +355,7 @@ test('typed methods only: the two widget methods are explicit; no generic reques
     );
   const net = createNet();
   assert.deepEqual(Object.keys(net).sort(), ['session', 'transport']);
-  assert.deepEqual(Object.keys(net.session).sort(), ['findBusinesses', 'signInPassword', 'signOut', 'startEmail', 'startTelegram', 'subscribe', 'verifyEmail', 'view']);
+  assert.deepEqual(Object.keys(net.session).sort(), ['completeTelegram', 'findBusinesses', 'landing', 'onLanding', 'signInPassword', 'signOut', 'startEmail', 'startTelegram', 'subscribe', 'verifyEmail', 'view']);
   assert.deepEqual(Object.keys(net.transport).sort(), ['chat', 'resolveWidgets', 'transcribe', 'widgetIntent']);
 });
 
@@ -1248,7 +1249,7 @@ test('Telegram start: the web body names this page\'s callback, the native body 
   assert.deepEqual(went, [authUrl]);
 
   // The native carrier names no callback: OAUTH_NATIVE_REDIRECT_URI is the server's to choose.
-  serve({ [U.telegramStart]: [json(200, { ok: true, auth_url: authUrl })] });
+  serve({ [U.telegramStart]: [json(200, { ok: true, auth_url: authUrl, state: 'te_abcdefgh' })] });
   const nativeWent = [];
   const native = createNet({ webCallbackUrl: null, navigate: (url) => nativeWent.push(url) });
   assert.deepEqual(await native.session.startTelegram('muzhskaya-estetika-3'), { step: 'handed_off' });
@@ -1258,7 +1259,7 @@ test('Telegram start: the web body names this page\'s callback, the native body 
   // An auth_url that is NOT Telegram's authorization endpoint is an unexpected response, and the
   // browser is not sent anywhere: no response can turn this row into a redirect of its choosing.
   for (const hostile of ['https://oauth.telegram.org.evil.example/auth', 'https://evil.example/auth', 'javascript:alert(1)', '//evil.example/auth']) {
-    serve({ [U.telegramStart]: [json(200, { ok: true, auth_url: hostile })] });
+    serve({ [U.telegramStart]: [json(200, { ok: true, auth_url: hostile, state: 'te_abcdefgh' })] });
     const sent = [];
     const guarded = createNet({ webCallbackUrl: 'https://mayaos.ru/oauth-callback.html', navigate: (url) => sent.push(url) });
     assert.deepEqual(await guarded.session.startTelegram('s'), { step: 'failed', failure: { state: 'unexpected_response', status: 200 } }, hostile);
@@ -1266,7 +1267,160 @@ test('Telegram start: the web body names this page\'s callback, the native body 
   }
 });
 
-test('every request of this suite went to one of the eleven approved URLs, and all eleven were exercised', () => {
+// ── the Telegram landing ───────────────────────────────────────────────────────────────────────
+
+const AUTH_URL = 'https://oauth.telegram.org/auth?client_id=1&state=te_abcdefgh';
+const STATE = 'te_abcdefgh';
+
+/**
+ * A completion body IS the login body plus two keys — the server spreads the same issueSession()
+ * and the same serializeUser() — so this composes LOGIN_OK rather than inventing a second shape.
+ * If the two ever diverge on the wire, these tests fail with the password-login ones.
+ */
+const completeBody = (extra = {}) => ({ ...LOGIN_OK, is_new_user: false, provider: 'telegram', ...extra });
+
+/** Start a real login so the session holds the state a callback must name. */
+const started = async (navigate = []) => {
+  serve({ [U.telegramStart]: [json(200, { ok: true, provider: 'telegram', auth_url: AUTH_URL, state: STATE })] });
+  const net = createNet({ webCallbackUrl: 'https://mayaos.ru/oauth-callback.html', navigate: (url) => navigate.push(url) });
+  assert.deepEqual(await net.session.startTelegram('muzhskaya-estetika-3'), { step: 'handed_off' });
+  return net;
+};
+
+test('the landing signs in: body exactly {state, code}, the login projection reused verbatim, is_new_user carried', async () => {
+  const net = await started();
+  serve({ [U.telegramComplete]: [json(201, completeBody({ is_new_user: true }))] });
+  const step = await net.session.completeTelegram({ state: STATE, code: 'tg-code-0001' });
+  assert.equal(step.step, 'signed_in');
+  assert.equal(step.isNewUser, true, 'first sign-in of this identity into this business');
+  assert.deepEqual(step.display, { userName: 'Стас', tenantName: 'Мужская Эстетика' });
+  // The tenant is NEVER sent: the server reads it from the flow the state names, so no client can
+  // land a session in a business other than the one the login was started for.
+  assert.deepEqual(calls(U.telegramComplete).at(0).body, { state: STATE, code: 'tg-code-0001' });
+  assert.equal(net.session.view().signedIn, true);
+  assert.deepEqual(net.session.landing(), { state: 'none' });
+});
+
+test('a callback nobody here asked for is refused before any request — the whole defence against a delivered pair', async () => {
+  // No login was started, so there is nothing for the callback to name.
+  serve({});
+  const cold = createNet();
+  assert.deepEqual(await cold.session.completeTelegram({ state: STATE, code: 'tg-code-0001' }), {
+    step: 'failed',
+    failure: { state: 'callback_unsolicited' },
+  });
+  assert.equal(wire.length, 0, '0 requests');
+  assert.equal(cold.session.view().signedIn, false);
+
+  // A login WAS started, but the callback names a different one. Same refusal, still 0 requests:
+  // this is exactly the attack where somebody hands over a state+code pair of their own.
+  const net = await started();
+  serve({});
+  assert.deepEqual(await net.session.completeTelegram({ state: 'te_zzzzzzzz', code: 'tg-code-0001' }), {
+    step: 'failed',
+    failure: { state: 'callback_unsolicited' },
+  });
+  assert.equal(wire.length, 0, '0 requests');
+  assert.equal(net.session.view().signedIn, false);
+});
+
+test('one login, one landing: the second delivery of the same callback is refused without spending a request', async () => {
+  const net = await started();
+  serve({ [U.telegramComplete]: [json(201, completeBody())] });
+  assert.equal((await net.session.completeTelegram({ state: STATE, code: 'tg-code-0001' })).step, 'signed_in');
+  assert.equal(calls(U.telegramComplete).length, 1);
+  serve({});
+  assert.deepEqual(await net.session.completeTelegram({ state: STATE, code: 'tg-code-0001' }), {
+    step: 'failed',
+    failure: { state: 'callback_unsolicited' },
+  });
+  assert.equal(wire.length, 0, 'the state was spent on first use, so the replay costs nothing');
+});
+
+test('the two carriers land the same callback: an object from the native shim, this page’s fragment on the web', async () => {
+  for (const payload of [
+    { state: STATE, code: 'tg-code-0001' },
+    `#oauth=telegram&state=${STATE}&code=tg-code-0001`,
+    `oauth=telegram&state=${STATE}&code=tg-code-0001`,
+  ]) {
+    const net = await started();
+    serve({ [U.telegramComplete]: [json(201, completeBody())] });
+    assert.equal((await net.session.completeTelegram(payload)).step, 'signed_in', JSON.stringify(payload));
+    assert.deepEqual(calls(U.telegramComplete).at(0).body, { state: STATE, code: 'tg-code-0001' });
+  }
+});
+
+test('a fragment that is not exactly a callback is not one: no mark, a repeated key, a bad escape, a route', async () => {
+  for (const fragment of [
+    `#state=${STATE}&code=c`, // no oauth=telegram mark: somebody's route, not a callback
+    `#oauth=telegram&state=${STATE}&code=a&code=b`, // a second value smuggled behind the first
+    `#oauth=telegram&state=${STATE}&code=%E0%A4%A`, // a malformed escape voids the whole callback
+    `#oauth=yandex&state=${STATE}&code=c`,
+    '#r=shell.root',
+    '#',
+  ]) {
+    const net = await started();
+    serve({});
+    assert.deepEqual(
+      await net.session.completeTelegram(fragment),
+      { step: 'failed', failure: { state: 'callback_unsolicited' } },
+      fragment,
+    );
+    assert.equal(wire.length, 0, `0 requests for ${fragment}`);
+  }
+});
+
+test('the provider said no: error=access_denied is its own state and sends nothing', async () => {
+  const net = await started();
+  serve({});
+  assert.deepEqual(await net.session.completeTelegram({ state: STATE, error: 'access_denied' }), {
+    step: 'failed',
+    failure: { state: 'telegram_declined' },
+  });
+  assert.equal(wire.length, 0);
+  assert.deepEqual(net.session.landing(), { state: 'failed', failure: { state: 'telegram_declined' } });
+});
+
+test('every completion failure the server can answer is a named state, and each one restarts the login', async () => {
+  const rows = [
+    [400, { message: 'x', error: { code: 'social_state_invalid' } }, { state: 'login_expired' }],
+    [400, { message: 'x', error: { code: 'social_exchange_failed' } }, { state: 'login_expired' }],
+    [400, { message: 'x', error: { code: 'social_token_invalid' } }, { state: 'login_expired' }],
+    [401, { message: 'x', error: { code: 'crm_staff_access_disabled' } }, { state: 'account_unavailable' }],
+    [403, { message: 'x', error: { code: 'social_phone_required' } }, { state: 'phone_required' }],
+    [403, { message: 'x', error: { code: 'self_registration_disabled' } }, { state: 'registration_closed' }],
+    [403, { message: 'x', error: { code: 'subscription_required' } }, { state: 'business_unavailable' }],
+    [409, { message: 'x', error: { code: 'social_identity_conflict' } }, { state: 'account_unavailable' }],
+    [503, { message: 'x', error: { code: 'social_provider_unavailable' } }, { state: 'telegram_unavailable' }],
+    [429, { message: 'x', error: { code: 'auth_rate_limited', retry_after_seconds: 30 } }, { state: 'rate_limited', retryAfterSec: 30 }],
+    [500, { message: 'x' }, { state: 'unexpected_response', status: 500 }],
+  ];
+  for (const [status, body, failure] of rows) {
+    const net = await started();
+    serve({ [U.telegramComplete]: [json(status, body)] });
+    assert.deepEqual(await net.session.completeTelegram({ state: STATE, code: 'c' }), { step: 'failed', failure }, String(status));
+    assert.equal(net.session.view().signedIn, false);
+    // The state was spent before the server ever exchanged the code, so nothing here may be retried:
+    // a second attempt with the same callback is refused locally and the login must start again.
+    serve({});
+    assert.deepEqual(await net.session.completeTelegram({ state: STATE, code: 'c' }), {
+      step: 'failed',
+      failure: { state: 'callback_unsolicited' },
+    });
+  }
+});
+
+test('a 2xx that is not a login does not sign anyone in', async () => {
+  for (const body of [{}, { access_token: 'a' }, { ...completeBody(), user: null }]) {
+    const net = await started();
+    serve({ [U.telegramComplete]: [json(201, body)] });
+    const step = await net.session.completeTelegram({ state: STATE, code: 'c' });
+    assert.deepEqual(step, { step: 'failed', failure: { state: 'unexpected_response', status: 201 } }, JSON.stringify(body));
+    assert.equal(net.session.view().signedIn, false);
+  }
+});
+
+test('every request of this suite went to one of the twelve approved URLs, and all twelve were exercised', () => {
   const allowed = Object.values(U).sort();
   assert.deepEqual([...everyUrl].sort(), allowed);
 });

@@ -29,6 +29,13 @@ const DOM_TAGS: ReadonlySet<string> = new Set<DomTag>([
 ]);
 const INPUT_TYPES: ReadonlySet<string> = new Set<DomInputType>(['text', 'email', 'password']);
 
+/** The event the native carrier dispatches once it has checked the deep link's shape. */
+const OAUTH_EVENT = 'maya:oauth-callback';
+/** What marks this page's fragment as a provider callback rather than a route. */
+const OAUTH_MARK = 'oauth=telegram';
+/** The page the provider returns a WEB browser to. It carries the callback into the fragment. */
+const WEB_CALLBACK_FILE = 'oauth-callback.html';
+
 const root = document.getElementById('maya');
 if (root !== null) start(root);
 
@@ -93,7 +100,13 @@ function start(mountRoot: HTMLElement): void {
   const forcedColors = view.matchMedia('(forced-colors: active)');
   const coarsePointer = view.matchMedia('(pointer: coarse)');
   const finePointer = view.matchMedia('(pointer: fine)');
-  const fragment = view.location.hash;
+  // 🔴 The load-time fragment, and whether it is a provider callback rather than a route. The order
+  // is load-bearing: an authorization code is far longer than the router's MAX_FRAGMENT_CHARS, so
+  // handing a callback to the router would raise a «link refused» notice for something that was
+  // never a link — and would do it while the sign-in it belongs to is still in flight.
+  const rawFragment = view.location.hash;
+  const oauthLanded = rawFragment.includes(OAUTH_MARK);
+  const fragment = oauthLanded ? '' : rawFragment;
   const textScale = (): number => {
     const px = Number.parseFloat(view.getComputedStyle(page.documentElement).fontSize);
     return Number.isFinite(px) && px > 0 ? Math.min(3, Math.max(1, Math.round((px / 16) * 100) / 100)) : 1;
@@ -136,9 +149,32 @@ function start(mountRoot: HTMLElement): void {
   // none, leaving that callback to the server. `navigate` is the only hand-off out of the shell.
   const origin = view.location.origin;
   const net = createNet({
-    webCallbackUrl: origin.startsWith('http') ? `${origin}/oauth-callback.html` : null,
+    webCallbackUrl: origin.startsWith('http') ? `${origin}/${WEB_CALLBACK_FILE}` : null,
     navigate: (url) => view.location.assign(url),
   });
+
+  // ── landing the provider's callback ──────────────────────────────────────────────────────────
+  //
+  // It reaches the shell two ways and ends in one place. On iOS the carrier receives the deep link,
+  // checks its shape, and dispatches it as an event; on the web the callback page puts it in THIS
+  // page's fragment. Neither is interpreted here: both are handed to the session unread, and the
+  // session refuses anything that does not name the login this app itself started.
+  //
+  // The fragment, not the query, because the PKCE verifier for this flow lives on the server: until
+  // it is spent, `state` + `code` together are enough for anyone to mint the session. A fragment is
+  // never sent to any server, so it cannot be sitting in an access log; it is also cleared the
+  // instant it is read, so a reload cannot replay it.
+  const land = (payload: unknown): void => void net.session.completeTelegram(payload);
+  view.addEventListener(OAUTH_EVENT, (event) => {
+    land((event as CustomEvent<unknown>).detail);
+  });
+  if (oauthLanded) {
+    // Cleared before it is even read, so a reload cannot replay it and it never enters a history
+    // entry anyone can go back to — /complete is single-use, so a reload that still carried the
+    // callback would burn the login and show a failure for something that had already worked.
+    view.history.replaceState(null, '', view.location.pathname + view.location.search);
+    land(rawFragment);
+  }
   const runtime = createShellRuntime({
     transport: net.transport,
     session: net.session,

@@ -20,6 +20,7 @@ import type {
   RefreshProjection,
   SessionGrant,
   SignInDisplay,
+  TelegramCompleteProjection,
   TelegramStartProjection,
   TranscribeProjection,
   WidgetIntentProjection,
@@ -75,8 +76,21 @@ export const projectBusinessSearch = (body: unknown): BusinessSearchProjection |
  */
 export const projectTelegramStart = (body: unknown): TelegramStartProjection | null => {
   const authUrl = filled(own(body, 'auth_url'));
-  if (authUrl === null) return null;
-  return authUrl.startsWith('https://oauth.telegram.org/') ? { authUrl } : null;
+  const state = filled(own(body, 'state'));
+  if (authUrl === null || state === null) return null;
+  return authUrl.startsWith('https://oauth.telegram.org/') ? { authUrl, state } : null;
+};
+
+/**
+ * `POST /auth/oauth/telegram/complete`. The response is the login response, so this composes the
+ * password path's projection rather than repeating it — one shape, one reader, and a change to the
+ * session's wire form cannot drift between the two ways in. `is_new_user` must be a true boolean:
+ * anything else reads as an existing user, which is the claim that assumes less.
+ */
+export const projectTelegramComplete = (body: unknown): TelegramCompleteProjection | null => {
+  const login = projectPasswordLogin(body);
+  if (login === null) return null;
+  return { grant: login.grant, display: login.display, isNewUser: own(body, 'is_new_user') === true };
 };
 
 // ── sign-in and session ────────────────────────────────────────────────────────────────────────

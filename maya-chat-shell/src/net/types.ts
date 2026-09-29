@@ -106,9 +106,36 @@ export interface BusinessSearchProjection {
   readonly items: readonly BusinessMatch[];
 }
 
-/** `POST /auth/oauth/telegram/start` → the provider URL the browser is handed. */
+/**
+ * `POST /auth/oauth/telegram/start` → the provider URL the browser is handed, and the `state` that
+ * names this login. The state is kept because it is the ONLY thing that proves a callback arriving
+ * later belongs to a login this app started: without it a callback delivered by anything else would
+ * be indistinguishable from the real one, and would sign this person into somebody else's account.
+ */
 export interface TelegramStartProjection {
   readonly authUrl: string;
+  readonly state: string;
+}
+
+/**
+ * What the provider handed back, as it arrives — three opaque strings and nothing interpreted.
+ * `code` and `error` are exclusive: the provider sends one or the other.
+ */
+export interface TelegramCallback {
+  readonly state: string;
+  readonly code: string | null;
+  readonly error: string | null;
+}
+
+/**
+ * `POST /auth/oauth/telegram/complete`. The body is the login response the password path already
+ * returns — same tokens, same nested `user.tenant` — so it is read by the SAME projection, and
+ * `is_new_user` is the server's own answer to whether this identity had signed in here before.
+ */
+export interface TelegramCompleteProjection {
+  readonly grant: SessionGrant;
+  readonly display: SignInDisplay;
+  readonly isNewUser: boolean;
 }
 
 /**
@@ -120,6 +147,21 @@ export type FirstRunFailure =
   | { readonly state: 'rate_limited'; readonly retryAfterSec: number }
   | { readonly state: 'telegram_unavailable' }
   | { readonly state: 'business_unavailable' }
+  // A callback that names no login this app started, or that names one already spent. Refused
+  // before any request: this is the client's half of the state check, and the whole of the defence
+  // against a callback somebody else delivered.
+  | { readonly state: 'callback_unsolicited' }
+  // The server no longer holds this login: never issued, expired, or already completed once.
+  | { readonly state: 'login_expired' }
+  // The person said no on the provider's own screen.
+  | { readonly state: 'telegram_declined' }
+  // The identity is known but cannot be used here: revoked staff access, or an identity already
+  // bound elsewhere. Deliberately one state — naming which would confirm an account exists.
+  | { readonly state: 'account_unavailable' }
+  // The provider returned no phone number, which this business requires to know who arrived.
+  | { readonly state: 'phone_required' }
+  // A real identity, but this business is not taking new people right now.
+  | { readonly state: 'registration_closed' }
   | { readonly state: 'no_connection' }
   | { readonly state: 'unexpected_response'; readonly status: number };
 

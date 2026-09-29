@@ -80,7 +80,12 @@ test('through the runtime (§2.7 step 12): 0 requests, no dialog, no screen, and
     const counts = { chat: 0, submit: 0, push: 0 };
     const runtime = createShellRuntime({
       transport: { chat: () => ((counts.chat += 1), new Promise(() => undefined)) },
-      session: { view: () => ({ signedIn: false, reason: null }), subscribe: () => () => undefined },
+      session: {
+        view: () => ({ signedIn: false, reason: null }),
+        subscribe: () => () => undefined,
+        landing: () => ({ state: 'none' }),
+        onLanding: () => () => undefined,
+      },
       render,
       environment: { a11y: () => ({}), onA11yChange: () => () => undefined, fragment: () => fragment },
       scheduler: { now: () => 0, after: () => () => undefined },
