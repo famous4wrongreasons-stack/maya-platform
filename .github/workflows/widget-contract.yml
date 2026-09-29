@@ -32,6 +32,9 @@ jobs:
           cache: npm
           cache-dependency-path: maya-saas-backend/package-lock.json
       - run: npm ci
+      - name: Generate the canonical Prisma client before contract compilation
+        run: npm run prisma:generate
+        continue-on-error: true
       - name: The certified contract compiles
         run: npx tsc --noEmit --project tsconfig.widget-contract.json
         continue-on-error: true
