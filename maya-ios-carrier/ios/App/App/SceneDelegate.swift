@@ -3,12 +3,22 @@ import Capacitor
 
 /// The carrier's ONLY product-adjacent code, and it is deliberately not product code.
 ///
-/// After Telegram's consent the backend redirects to `mayaos://oauth-callback/?state=…&code=…`
-/// (or `…&error=…`). iOS hands that URL to this scene. This file checks the URL's SHAPE, lifts the
-/// three opaque values out of it, and hands them to the shared shell, which owns the whole of the
-/// login. It does not know what a state is, cannot tell a real code from a fabricated one, never
-/// reads or writes a session, and never decides that anybody is signed in. Every such decision
-/// belongs to `maya-chat-shell`, once, for both carriers.
+/// After Telegram's consent the provider sends the browser to
+/// `https://mayaos.ru/api/auth/oauth/native/callback?state=…&code=…`. That path is claimed by this
+/// app as a **Universal Link**, so iOS opens MAYA on it instead of letting the request go out. This
+/// file checks the URL's SHAPE, lifts the three opaque values out of it, and hands them to the
+/// shared shell, which owns the whole of the login. It does not know what a state is, cannot tell a
+/// real code from a fabricated one, never reads or writes a session, and never decides that anybody
+/// is signed in. Every such decision belongs to `maya-chat-shell`, once, for both carriers.
+///
+/// **Universal Links, and only Universal Links.** The app previously also claimed a custom
+/// `mayaos://` scheme, and the backend still redirects to it when the link is not intercepted. A
+/// custom scheme is not exclusive — any app may declare the same one, iOS's tie-break is undefined,
+/// and since the PKCE verifier lives on the server, `state` + `code` together are a bearer
+/// credential for a session. An `applinks:` association is bound to the domain by a file only that
+/// domain can serve, so it cannot be claimed by another app. The scheme is gone from `Info.plist`,
+/// and there is no fallback to it here: if the association ever fails, this app is simply not
+/// opened, which is a failure somebody can see rather than one that quietly works anyway.
 ///
 /// Why the shell is still loaded when this arrives: Capacitor's own navigation policy
 /// (`WebViewDelegationHandler.decidePolicyFor`) CANCELS a top-level navigation to a non-application
@@ -23,9 +33,10 @@ import Capacitor
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
-    /// The shape the backend emits, and nothing else.
-    private static let callbackScheme = "mayaos"
-    private static let callbackHost = "oauth-callback"
+    /// The one URL this app is associated with, spelled out so nothing else can be mistaken for it.
+    private static let callbackScheme = "https"
+    private static let callbackHost = "mayaos.ru"
+    private static let callbackPath = "/api/auth/oauth/native/callback"
     /// The event the shared shell listens for. It carries opaque strings and no meaning.
     private static let callbackEvent = "maya:oauth-callback"
 
@@ -39,27 +50,22 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
     }
 
-    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        for context in URLContexts {
-            deliverCallback(context.url)
-        }
-        SceneDelegateProxy.shared.scene(scene, openURLContexts: URLContexts)
-    }
-
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        deliverCallback(userActivity)
         SceneDelegateProxy.shared.scene(scene, continue: userActivity)
     }
 
     // MARK: - the hand-off
 
-    /// Refuse anything that is not exactly `mayaos://oauth-callback[/]` and pass on the three values
-    /// the flow can carry. Any other scheme, host, path or parameter is dropped without a trace in
-    /// the web layer: a URL that is not this shape never reaches the shell at all.
-    private func deliverCallback(_ url: URL) {
+    /// Refuse anything that is not exactly the associated callback URL, and pass on the three values
+    /// the flow can carry. Anything else never reaches the shell at all.
+    private func deliverCallback(_ userActivity: NSUserActivity) {
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb else { return }
+        guard let url = userActivity.webpageURL else { return }
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return }
         guard components.scheme?.lowercased() == Self.callbackScheme else { return }
         guard components.host?.lowercased() == Self.callbackHost else { return }
-        guard components.path.isEmpty || components.path == "/" else { return }
+        guard components.path == Self.callbackPath else { return }
         guard components.user == nil, components.password == nil, components.port == nil else { return }
         guard let items = components.queryItems, !items.isEmpty else { return }
 

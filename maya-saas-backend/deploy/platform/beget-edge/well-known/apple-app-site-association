@@ -1,0 +1,18 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "YCL5U4L56W.ru.mayaos.app",
+        "appIDs": ["YCL5U4L56W.ru.mayaos.app"],
+        "paths": ["/api/auth/oauth/native/callback"],
+        "components": [
+          {
+            "/": "/api/auth/oauth/native/callback",
+            "comment": "The Telegram OIDC callback, and nothing else on this domain."
+          }
+        ]
+      }
+    ]
+  }
+}

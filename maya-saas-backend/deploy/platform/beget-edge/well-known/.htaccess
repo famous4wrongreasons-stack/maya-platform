@@ -1,0 +1,19 @@
+# The Apple App Site Association file, and only it, lives in this directory.
+#
+# Apple requires it over https, with no redirect, with no authentication, and with a Content-Type of
+# application/json. The file has no extension, so neither nginx nor Apache infers a type for it —
+# measured on 2026-09-29, the response carried NO Content-Type header at all, which with the
+# `nosniff` this site sets is a type the fetcher cannot repair. ForceType supplies it.
+#
+# This lives here rather than in the site's root .htaccess on purpose: that file's sha256 is pinned
+# in relay-release-manifest.json and asserted by the R01 relay gate, and an un-re-pinned edit to it
+# blocks the next backend deploy. Nothing in this directory is pinned.
+<IfModule mod_mime.c>
+  ForceType application/json
+</IfModule>
+
+# Apple's CDN re-fetches periodically; an hour is short enough to correct a mistake quickly and long
+# enough not to matter. It must stay publicly fetchable with no auth of any kind.
+<IfModule mod_headers.c>
+  Header set Cache-Control "public, max-age=3600"
+</IfModule>
