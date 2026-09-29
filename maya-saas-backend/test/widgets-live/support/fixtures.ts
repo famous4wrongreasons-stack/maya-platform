@@ -185,6 +185,7 @@ export type BinFixtures = Pick<
   | 'bookingProofState'
   | 'withReadbackDutyTamper'
   | 'withWidgetRevocationRace'
+  | 'userTurnProofState'
 >;
 
 export class Fixtures {
@@ -212,6 +213,7 @@ export class Fixtures {
       bookingProofState: this.bookingProofState.bind(this),
       withReadbackDutyTamper: this.withReadbackDutyTamper.bind(this),
       withWidgetRevocationRace: this.withWidgetRevocationRace.bind(this),
+      userTurnProofState: this.userTurnProofState.bind(this),
     });
   }
 
@@ -561,6 +563,31 @@ export class Fixtures {
         `DROP FUNCTION IF EXISTS "${name}"()`,
       );
     }
+  }
+
+  /** Read-only observation; no model writer or caller-selected tenant is exposed to BIN cases. */
+  async userTurnProofState(tenant: TenantFixture) {
+    if (!this.tenants.includes(tenant.id))
+      throw new Error('user turn observation requires an owned proof tenant');
+    return {
+      turns: await this.ctx.prisma.widgetTimelineTurn.findMany({
+        where: { tenantId: tenant.id, role: 'user' },
+        select: {
+          id: true,
+          conversationId: true,
+          role: true,
+          channel: true,
+          textContent: true,
+          principalProofHash: true,
+          turnIndex: true,
+          erasedAt: true,
+        },
+      }),
+      bindings: await this.ctx.prisma.auditLog.findMany({
+        where: { tenantId: tenant.id, action: 'chat.user_turn_bound' },
+        select: { userId: true, entityId: true, metadataJson: true },
+      }),
+    };
   }
 
   /** Read-only observation of the canonical owners' effects in this fixture tenant. */

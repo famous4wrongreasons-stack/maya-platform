@@ -83,7 +83,8 @@
     "find": "const turn = await TimelineStore.appendUserTurn(\n        {\n          id: turnId,\n          tenantId,\n          conversationId,\n          principalProofHash: principal.proofHash,\n          channel: 'pwa',\n          textContent: input.utterance,\n        },\n        tx,\n        now,\n      );",
     "replace": "const turn = { id: turnId, turnIndex: 0 };",
     "killers": [
-      "TURN-ORDINARY"
+      "TURN-ORDINARY",
+      "TURN-CANONICAL"
     ],
     "expect": "live-killed"
   },
@@ -94,7 +95,8 @@
     "find": "          userTurnCorrelation: {\n            kind: args.chatRequestId === undefined ? 'widget' : 'chat',\n            requestId:\n              args.chatRequestId ??\n              `${args.carrier}:${args.submission.client_nonce}`,\n            actorUserId: args.actor.userId,\n          },\n",
     "replace": "          userTurnCorrelation: undefined,\n",
     "killers": [
-      "TURN-WIDGET"
+      "TURN-WIDGET",
+      "TURN-CANONICAL"
     ],
     "expect": "live-killed"
   },
@@ -117,7 +119,8 @@
     "replace": "      if (false)\n        await writeUserTurnBinding",
     "killers": [
       "TURN-ORDINARY",
-      "TURN-ATOMIC"
+      "TURN-ATOMIC",
+      "TURN-CANONICAL"
     ],
     "expect": "live-killed"
   },
