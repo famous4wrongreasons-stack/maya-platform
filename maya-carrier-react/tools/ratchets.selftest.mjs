@@ -104,6 +104,30 @@ const HTML_CASES = [
   [`<html><body></body></html>`, 'no CSP at all'],
 ];
 
+/** The voice boundary, in both directions. The real capture file is the strongest admit case. */
+function voiceBoundaryCases() {
+  const CAP = R.CAPTURE_FILE;
+  const armed = `async arm(proof: GestureProof): Promise<Armed> {\n  const s = await navigator.mediaDevices.getUserMedia(C);\n  return s;\n}`;
+  const MUST_REFUSE = [
+    ['a capture API in an ordinary component', [['src/chat/ChatScreen.tsx', `const s = await navigator.mediaDevices.getUserMedia({});`]]],
+    ['MediaRecorder outside the capture file', [['src/widgets/WidgetCard.tsx', `const r = new MediaRecorder(stream);`]]],
+    ['AudioContext outside the capture file', [['src/App.tsx', `const ctx = new AudioContext();`]]],
+    ['the microphone at top level', [[CAP, `const s = navigator.mediaDevices.getUserMedia(C);`]]],
+    ['the microphone behind no gesture', [[CAP, `async function start(options: Options) {\n  return navigator.mediaDevices.getUserMedia(C);\n}`]]],
+    ['two microphone sites', [[CAP, `${armed}\nasync function again(proof: GestureProof) { return navigator.mediaDevices.getUserMedia(C); }`]]],
+    ['logging in the capture layer', [[CAP, `${armed}\nconsole.log('armed');`]]],
+    ['a network call in the capture layer', [[CAP, `${armed}\nawait fetch('/api/ai/transcribe');`]]],
+    ['an object URL in the capture layer', [[CAP, `${armed}\nconst u = URL.createObjectURL(blob);`]]],
+    ['postMessage in the capture layer', [[CAP, `${armed}\nworker.postMessage(clip);`]]],
+  ];
+  const MUST_ADMIT = [
+    ['the microphone inside a GestureProof-taking function', [[CAP, armed]]],
+    ['an ordinary component', [['src/App.tsx', `const t = tokens(true);`]]],
+    ['the capture API named only in a comment', [['src/App.tsx', `// getUserMedia lives in the voice layer\nconst x = 1;`]]],
+  ];
+  return { MUST_REFUSE, MUST_ADMIT };
+}
+
 export function selfTest() {
   let refused = 0, admitted = 0, failed = 0;
   const scan = (src) => [...R.scanNames('f.tsx', src), ...R.scanJsx('f.tsx', src)];
@@ -141,6 +165,26 @@ export function selfTest() {
     const drift = runtimeDriftCase();
     if (drift.length && /drifted/.test(drift[0].message)) { refused++; console.log('  PASS  refuse runtime-allowlist           a member whose bytes drifted from the published hash'); }
     else { failed++; console.log('  FAIL  refuse runtime-allowlist           drift NOT refused'); }
+  }
+
+  {
+    const { MUST_REFUSE, MUST_ADMIT } = voiceBoundaryCases();
+    for (const [why, files] of MUST_REFUSE) {
+      if (R.checkVoiceBoundary(files).length) { refused++; console.log(`  PASS  refuse voice-boundary              ${why}`); }
+      else { failed++; console.log(`  FAIL  refuse voice-boundary              NOT refused: ${why}`); }
+    }
+    for (const [why, files] of MUST_ADMIT) {
+      const hits = R.checkVoiceBoundary(files);
+      if (!hits.length) { admitted++; console.log(`  PASS  admit  voice-boundary              ${why}`); }
+      else { failed++; console.log(`  FAIL  admit  voice-boundary              wrongly refused: ${why} — ${hits[0].message}`); }
+    }
+    // The real file on disk must pass its own rule.
+    const capturePath = path.join(HERE, R.CAPTURE_FILE);
+    if (fs.existsSync(capturePath)) {
+      const hits = R.checkVoiceBoundary([[R.CAPTURE_FILE, fs.readFileSync(capturePath, 'utf8')]]);
+      if (!hits.length) { admitted++; console.log('  PASS  admit  voice-boundary              the real src/voice/capture.ts'); }
+      else { failed++; console.log(`  FAIL  admit  voice-boundary              the real capture file was refused: ${hits[0].message}`); }
+    }
   }
 
   for (const [bad, why] of HTML_CASES) {

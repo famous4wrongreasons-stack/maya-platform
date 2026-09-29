@@ -15,6 +15,9 @@
 import type {
   NoticeKind,
   TurnRetry,
+  VoiceNotice,
+  VoiceState,
+  VoiceView,
   WidgetSentence,
 } from '../../../maya-chat-shell/src/shell/ports.ts';
 import type {
@@ -252,5 +255,69 @@ export const signedOutSentence = (reason: SignedOutReason | null): string | null
     case 'refresh_token_invalid':
     case 'session_revoked':
       return 'Сессия завершена — войдите снова.';
+  }
+};
+
+// ── voice, from dom/voice-control.ts ───────────────────────────────────────────────────────────
+
+/** dom/voice-control.ts:64-77 */
+export const voiceNoticeSentence = (notice: VoiceNotice): string => {
+  switch (notice) {
+    case 'not_recognized':
+      return 'Не расслышала — повторите или напишите сообщение';
+    case 'audio_rejected':
+      return 'Запись не принята — попробуйте ещё раз или напишите сообщение';
+    case 'too_short':
+      return 'Запись слишком короткая — ничего не отправлено';
+    case 'no_connection':
+      return 'Нет связи — запись не распознана, повторите или напишите сообщение';
+    case 'locked_for_step':
+      return 'Здесь лучше написать текстом — голос для этого шага выключен';
+  }
+};
+
+/**
+ * The one polite announcement for a view. dom/voice-control.ts:79-97.
+ *
+ * 🔴 `unavailable` is the exception to re-typing: its sentence is a Cell whose `.label` the RUNTIME
+ * mints, and it is rendered verbatim. A carrier-authored substitute would be the presentation
+ * explaining a state it does not own.
+ */
+export const voiceStatusSentence = (view: VoiceView): string => {
+  switch (view.state) {
+    case 'idle':
+      return view.notice === null ? '' : voiceNoticeSentence(view.notice);
+    case 'arming':
+      return 'Жду разрешения на микрофон';
+    case 'listening':
+      return 'Слушаю — ничего не отправляется';
+    case 'held':
+      return 'Прошло 20 секунд — запись остановлена и не отправлена';
+    case 'recording':
+      return 'Отправляю запись на распознавание';
+    case 'transcribing':
+      return 'Распознаю…';
+    case 'unavailable':
+      return view.unavailable === null ? '' : view.unavailable.label;
+  }
+};
+
+/** What the mic control does next, in words. Idle and unavailable have no in-progress indicator. */
+export const voiceActionLabel = (state: VoiceState): string => {
+  switch (state) {
+    case 'idle':
+      return 'Сказать голосом';
+    case 'arming':
+      return 'Жду микрофон';
+    case 'listening':
+      return 'Отправить запись';
+    case 'held':
+      return 'Отправить запись';
+    case 'recording':
+      return 'Отправляю запись';
+    case 'transcribing':
+      return 'Распознаю';
+    case 'unavailable':
+      return 'Голосовой ввод недоступен';
   }
 };

@@ -53,3 +53,17 @@ export {
 export function replyMarkup(reply: string): string {
   return renderToStaticMarkup(<ReplyTextLocal reply={reply} accent="#0A84FF" />);
 }
+
+// The carrier's voice encoder and capture port, beside the shell's originals.
+export {
+  encodeWavPcm16Mono16k,
+  wavDataUrl,
+  base64Encode,
+  WAV_HEADER_BYTES,
+  WAV_SAMPLE_RATE,
+} from '../src/voice/wav.ts';
+export {
+  encodeWavPcm16Mono16k as shellEncodeWav,
+  wavDataUrl as shellWavDataUrl,
+} from '../../maya-chat-shell/src/voice/wav.ts';
+export { createCapture, MIME_CANDIDATES, CAPTURE_CONSTRAINTS } from '../src/voice/capture.ts';

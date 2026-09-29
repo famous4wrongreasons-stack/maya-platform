@@ -19,7 +19,8 @@ import type {
   ConversationView,
   TimelineItemView,
 } from '../../../maya-chat-shell/src/shell/ports.ts';
-import { conversation, widgets } from '../runtime/compose.ts';
+import { conversation, voice, widgets } from '../runtime/compose.ts';
+import { usePortView } from '../runtime/useView.ts';
 import { WidgetCard } from '../widgets/WidgetCard.tsx';
 import {
   COLD_START_HINT,
@@ -31,6 +32,8 @@ import {
   refusalSentence,
   secondsLeft,
   THINKING,
+  voiceActionLabel,
+  voiceStatusSentence,
 } from '../runtime/copy.ts';
 import { Backdrop } from '../identity/Backdrop.tsx';
 import { MayaMark, MayaVolumeMark } from '../identity/MayaMark.tsx';
@@ -314,6 +317,10 @@ export function ChatScreen({
     composerRef.current?.focus();
   }, []);
   const now = useCountdownClock(view);
+  const voiceView = usePortView(voice);
+  const listening = voiceView.state === 'listening' || voiceView.state === 'held';
+  const micLive = listening || voiceView.state === 'recording';
+  const micUsable = voiceView.state === 'idle' || listening;
 
   const laneRef = useRef<DivOrNone>(null);
   const composerRef = useRef<TextAreaOrNone>(null);
@@ -533,6 +540,11 @@ export function ChatScreen({
           {view.inFlight ? THINKING : ''}
         </p>
 
+        {/* The voice machine's own polite announcement; `unavailable` echoes the runtime's Cell. */}
+        <p className="vh" role="status">
+          {voiceStatusSentence(voiceView)}
+        </p>
+
         {/* app.html:21759-21762 — the footer overlays the lane; only the pill takes pointer events. */}
         <div
           style={{
@@ -700,16 +712,30 @@ export function ChatScreen({
                 />
 
                 {/*
-                  app.html:21855 — a round blue ground, the same asymmetric MAYA wave, in white.
-                  🔴 Announced unavailable rather than inert: the voice machine needs a CapturePort,
-                  whose only implementation is outside the published runtime package. A button that
-                  looks live and does nothing is worse than one that says so.
+                  app.html:21855 — a round blue ground, the same asymmetric MAYA wave, in white; the
+                  ground inverts while recording, as it did canonically. One control: tap to record,
+                  tap again to send, exactly the owner's «Нажмите — запись, ещё раз — отправить».
+
+                  The proof is minted from the NATIVE event and freshly, every time. React's
+                  SyntheticEvent has a different timeStamp basis, and the runtime spends a proof by
+                  object identity — a memoised one silently does nothing the second time.
                 */}
                 <button
                   type="button"
-                  aria-disabled="true"
-                  aria-label="Голосовой ввод недоступен в этой версии"
-                  title="Голосовой ввод недоступен в этой версии"
+                  aria-disabled={micUsable ? undefined : 'true'}
+                  aria-label={voiceActionLabel(voiceView.state)}
+                  title={voiceActionLabel(voiceView.state)}
+                  onClick={(event) => {
+                    const native = event.nativeEvent;
+                    if (!micUsable || native.isTrusted !== true) return;
+                    const proof = {
+                      isTrusted: true as const,
+                      type: 'click' as const,
+                      timeStamp: native.timeStamp,
+                    };
+                    if (voiceView.state === 'idle') voice.arm(proof);
+                    else voice.send(proof);
+                  }}
                   style={{
                     width: 36,
                     height: 36,
@@ -720,11 +746,13 @@ export function ChatScreen({
                     justifyContent: 'center',
                     border: '0',
                     padding: 0,
-                    background: MAYA_ACCENT,
-                    color: MAYA_ACCENT_ON,
-                    opacity: 0.38,
-                    cursor: 'default',
+                    background: micLive ? t.ink : MAYA_ACCENT,
+                    color: micLive ? t.bg : MAYA_ACCENT_ON,
+                    opacity: micUsable ? 1 : 0.38,
+                    cursor: micUsable ? 'pointer' : 'default',
                     touchAction: 'none',
+                    transform: micLive ? 'scale(1.1)' : 'scale(1)',
+                    transition: 'transform .16s ease, background .16s ease',
                   }}
                 >
                   <MayaVolumeMark size={18} />

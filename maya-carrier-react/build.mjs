@@ -39,6 +39,7 @@ export function gate(root = ROOT, shell = SHELL) {
     refusals.push(...R.scanJsx(rel, text, { hrefAllowed: rel === HREF_OWNER }));
   }
   refusals.push(...R.checkRuntimeImports(root, shell, files));
+  refusals.push(...R.checkVoiceBoundary(files));
   const css = path.join(root, 'src', 'styles.css');
   if (fs.existsSync(css)) refusals.push(...R.checkCss('src/styles.css', fs.readFileSync(css, 'utf8')));
   const html = path.join(root, 'index.html');
