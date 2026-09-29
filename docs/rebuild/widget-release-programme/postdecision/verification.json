@@ -1,0 +1,462 @@
+{
+  "contract": "maya.widget-release-postdecision-verification/1",
+  "observed_at": "2026-09-29T18:30:02.896756+00:00",
+  "branch": "codex/widget-release-programme-20260929",
+  "pass_start_head": "d7eaf17c153929bbf01f86aae13753bacd955e84",
+  "runtime_source_head": "a46b228bcc2c8912f2b25d194944be7ea0dee365",
+  "evidence_source_head": "b2a8c8a2bd0ab34ed18456536086ae04ace73f9c",
+  "application_runtime_identical": true,
+  "test_only_delta_after_full_backend_run": [
+    "maya-saas-backend/scripts/widgets-mutation-ci.test.mjs",
+    "maya-saas-backend/src/widgets/owner-ports/commit-booking.adapter.spec.ts",
+    "maya-saas-backend/src/widgets/routing/g13-action-boundary.architecture.spec.ts",
+    "maya-saas-backend/test/widgets-live/mutations/gateAB.json",
+    "maya-saas-backend/test/widgets-live/support/fixtures.ts",
+    "maya-saas-backend/test/widgets-live/support/release-booking-proof.ts",
+    "maya-saas-backend/test/widgets-live/wr-release.live-spec.ts"
+  ],
+  "tests": {
+    "backend": {
+      "success": true,
+      "numPassedTestSuites": 573,
+      "numPassedTests": 5387,
+      "numFailedTests": 0,
+      "numPendingTests": 1
+    },
+    "widgets": {
+      "success": true,
+      "numPassedTestSuites": 25,
+      "numPassedTests": 349,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "sb1-unit": {
+      "success": true,
+      "numPassedTestSuites": 2,
+      "numPassedTests": 66,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "boundary-unit": {
+      "success": true,
+      "numPassedTestSuites": 2,
+      "numPassedTests": 12,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "sb1-http": {
+      "success": true,
+      "numPassedTestSuites": 1,
+      "numPassedTests": 2,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "boundary-http": {
+      "success": true,
+      "numPassedTestSuites": 1,
+      "numPassedTests": 2,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "boundary-e1-http": {
+      "success": true,
+      "numPassedTestSuites": 1,
+      "numPassedTests": 6,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    }
+  },
+  "binary": {
+    "cases": 17,
+    "status": "PASS",
+    "failed": 0,
+    "health": 200
+  },
+  "audit_selftests": {
+    "passed": 32,
+    "failed": 0
+  },
+  "evidence_tool_selftests": {
+    "passed": 47,
+    "failed": 0
+  },
+  "build": "PASS",
+  "typecheck_application": "PASS",
+  "typecheck_widgets_live": "PASS",
+  "typecheck_scripts": "PASS",
+  "changed_typescript_lint": "PASS",
+  "contract_checker": {
+    "passed": 31,
+    "pending": 4
+  },
+  "backend_runtime_note": "Full backend run used Node 22.23.2. Initial Node 24 process crashed with exit 139 and is not a passing run. Only seven explicitly listed test/evidence files changed since the full run; boundary unit tests and planner tests independently passed after those additions.",
+  "integration_only": {
+    "status": "INTEGRATION-ONLY CHECK — BLOCKED",
+    "missing": "maya-chat-shell/dist/web",
+    "backend_failure": false,
+    "result": {
+      "success": false,
+      "numPassedTestSuites": 0,
+      "numPassedTests": 0,
+      "numFailedTests": 1,
+      "numPendingTests": 12
+    },
+    "source_assertions_preserved": true,
+    "claude_artifact_copied": false
+  },
+  "mutations": {
+    "declared_total": 410,
+    "batteries": 34,
+    "planned_jobs": 55,
+    "freshly_exercised": 56,
+    "statuses": {
+      "build-killed": 33,
+      "live-killed": 23
+    },
+    "unexpected": 0,
+    "red_baselines": 0,
+    "restricted": true,
+    "full_ci_certificate": false,
+    "reports": [
+      {
+        "source_head": "b2a8c8a2bd0ab34ed18456536086ae04ace73f9c",
+        "batteries": [
+          "gateAB.json"
+        ],
+        "status": "AS-DECLARED",
+        "restrictions": {
+          "live_tests": null,
+          "live_filter": null,
+          "unit_tests": "widgets/(routing/g13-action-boundary.architecture|owner-ports/commit-booking.adapter).spec.ts",
+          "unit_filter": "WR-F33|WR-F76"
+        },
+        "baseline_red": [],
+        "mutants": 2
+      },
+      {
+        "source_head": "a46b228bcc2c8912f2b25d194944be7ea0dee365",
+        "batteries": [
+          "gateH-harness.json"
+        ],
+        "status": "AS-DECLARED",
+        "restrictions": {
+          "live_tests": null,
+          "live_filter": "(?:^|\\s)(?:HAR\\-10|HAR\\-12|HAR\\-13|HAR\\-14|HAR\\-3\\ \\[GW\\]|HAR\\-5|HAR\\-9\\ \\[GW\\]|WR\\-H1)(?=$|[^A-Za-z0-9_.-])",
+          "unit_tests": "widgets/",
+          "unit_filter": "(?:^|\\s)(?:HAR\\-10|HAR\\-12|HAR\\-13|HAR\\-14|HAR\\-3\\ \\[GW\\]|HAR\\-5|HAR\\-9\\ \\[GW\\]|WR\\-H1)(?=$|[^A-Za-z0-9_.-])"
+        },
+        "baseline_red": [],
+        "mutants": 21
+      },
+      {
+        "source_head": "a46b228bcc2c8912f2b25d194944be7ea0dee365",
+        "batteries": [
+          "gateSB1.json"
+        ],
+        "status": "AS-DECLARED",
+        "restrictions": {
+          "live_tests": null,
+          "live_filter": null,
+          "unit_tests": "appointments/(personal-client-context.service|client-appointment-create.service).spec.ts",
+          "unit_filter": "SB1-"
+        },
+        "baseline_red": [],
+        "mutants": 10
+      },
+      {
+        "source_head": "a46b228bcc2c8912f2b25d194944be7ea0dee365",
+        "batteries": [
+          "gateWR.json"
+        ],
+        "status": "AS-DECLARED",
+        "restrictions": {
+          "live_tests": null,
+          "live_filter": "(?:^|\\s)(?:WR\\-CREATE|WR\\-L11|WR\\-L12\\ requires|WR\\-L13\\ lock\\-time|WR\\-L13\\ refuses|WR\\-L21|WR\\-L22|WR\\-L7|WR\\-L8|claim\\ and\\ reconciliation|projects\\ canonical\\ services|projects\\ valid\\ availability|reads\\ staff\\ through\\ the\\ existing\\ policy/runtime|rejects\\ raw\\ or\\ foreign\\ handles|requires\\ the\\ inherited\\ service|writeReceipt\\ is\\ idempotent)(?=$|[^A-Za-z0-9_.-])",
+          "unit_tests": "(widgets/stores/widget\\-stores\\.service\\.spec\\.ts|widgets/emission/booking\\-successor\\-boundary\\.spec\\.ts|widgets/owner\\-ports/booking\\-selector\\.adapter\\.spec\\.ts|widgets/booking/booking\\-noun\\-identity\\.spec\\.ts|widgets/routing/effect\\-router\\.service\\.spec\\.ts|widgets/owner\\-ports/booking\\-preview\\.adapter\\.spec\\.ts|widgets/composition/chat\\-read\\.trigger\\.spec\\.ts|widgets/resolve/thread\\-page\\.service\\.spec\\.ts|widgets/booking/booking\\-selector\\.presenter\\.spec\\.ts)",
+          "unit_filter": "(?:^|\\s)(?:WR\\-CREATE|WR\\-L11|WR\\-L12\\ requires|WR\\-L13\\ lock\\-time|WR\\-L13\\ refuses|WR\\-L21|WR\\-L22|WR\\-L7|WR\\-L8|claim\\ and\\ reconciliation|projects\\ canonical\\ services|projects\\ valid\\ availability|reads\\ staff\\ through\\ the\\ existing\\ policy/runtime|rejects\\ raw\\ or\\ foreign\\ handles|requires\\ the\\ inherited\\ service|writeReceipt\\ is\\ idempotent)(?=$|[^A-Za-z0-9_.-])"
+        },
+        "baseline_red": [],
+        "mutants": 23
+      }
+    ],
+    "not_rerun_this_pass": 354,
+    "remaining_gate6_pending": [
+      "M17b",
+      "M18b"
+    ],
+    "historical_receipts": "../preintegration/verification.json; not a fresh 410-mutant run"
+  },
+  "remote_ci": "NOT RUN — no fresh CI receipt claimed",
+  "clause_counts": {
+    "gates": 15,
+    "clauses": 165,
+    "byState": {
+      "L-T": 4,
+      "L": 126,
+      "U": 17,
+      "false": 18
+    }
+  },
+  "current_false_classification": {
+    "OWNER_DECISION_REQUIRED": 6,
+    "EVIDENCE_MISSING": 11,
+    "IMPLEMENTATION_MISSING": 1
+  },
+  "fbe2e": {
+    "CLOSED": 13,
+    "PARTIAL": 6,
+    "OPEN": 9
+  },
+  "self_booking": {
+    "context_consumer": "IMPLEMENTED",
+    "new_verified_binding": "BLOCKED",
+    "end_to_end_contract": "BLOCKED",
+    "production_identity_observation": "Retained read-only 2026-09-29T16:56:28.580Z snapshot; no reread/write in this pass"
+  },
+  "safety": {
+    "production_effects": 0,
+    "real_yclients_effects": 0,
+    "schema_migrations": 0,
+    "merge_claude": false,
+    "runtime_activation": false,
+    "chapter10": false
+  },
+  "raw_receipts": {
+    "audit-tests.log": {
+      "sha256": "aa1593d1d7cd83db7da25da7337bbed1283cc9d7294e1fe57ccf57f604a921b3",
+      "bytes": 1939
+    },
+    "backend-node24-crash.log": {
+      "sha256": "0f8b30dfcf6437e1597db38ced43580ec1516f7540a255a1c2b858e920dba8d5",
+      "bytes": 913961
+    },
+    "backend-progress.log": {
+      "sha256": "5a195a0b8c653a62b3151a1b99566aafa33b02cec07a0acfdf11c41b3fa0eac5",
+      "bytes": 961791
+    },
+    "backend.json": {
+      "sha256": "2196983fd3fd37ef86454728253837858676dc9da4e330dcbc87ed67d81c3262",
+      "bytes": 2737329
+    },
+    "backend.log": {
+      "sha256": "98e4513d8ce5f85281e25dbc06f778d3f0e7b93dcd035857b522c53504acd5a5",
+      "bytes": 962537
+    },
+    "bin.log": {
+      "sha256": "f5c31c86a88a8dbf25bf0b9342cf99b176fd0f574414736b01a24a7435707ad8",
+      "bytes": 3440
+    },
+    "boundary-bin.log": {
+      "sha256": "5c543af333c9e36d22295bc073070f239527ca3d7430edd9f459572e1e53e347",
+      "bytes": 3449
+    },
+    "boundary-e1-http.json": {
+      "sha256": "e45d88f781ba5d544e984cd65b65f4c4235611958f61c7f919a22814e6ff3e81",
+      "bytes": 4096
+    },
+    "boundary-e1-http.log": {
+      "sha256": "815e98c8776147256989ba87f1a5fa06341f881f1f192b39e7888539bcb71f7d",
+      "bytes": 953
+    },
+    "boundary-format.log": {
+      "sha256": "d771468a10081df7a0db662e0881d628fd70ceeab2e78be790881e167b70945f",
+      "bytes": 235
+    },
+    "boundary-http.json": {
+      "sha256": "806219927ef4e2404624c367bb58b8cc14ea24717ede3c28b91bcd218d9b0cf5",
+      "bytes": 1912
+    },
+    "boundary-http.log": {
+      "sha256": "73753c1a278afc6f7a8d5ef0eb48e3349a1a87113c3b218ad66f2b1a9bf0a3e0",
+      "bytes": 1247
+    },
+    "boundary-lint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "boundary-typecheck.log": {
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "bytes": 128
+    },
+    "boundary-unit.json": {
+      "sha256": "62a1c4b94d38e08db7a3086b63e1d953780adc4b3f6a7fb304d1dee7d825d994",
+      "bytes": 6864
+    },
+    "boundary-unit.log": {
+      "sha256": "cac7dd1665fc47fe8d93c44b3cee569f1323f4d22830efd38d129c8d09ce0597",
+      "bytes": 340
+    },
+    "boundary-verify.log": {
+      "sha256": "5ce4d2e33803b98d04cca210cb67a44f72897781fecc7e83e34ca414d9edcff2",
+      "bytes": 904
+    },
+    "build.log": {
+      "sha256": "b74e5c60033b62edf5aa47fcace858704866272bf6c05a53d7b76d4f3abdaf15",
+      "bytes": 158
+    },
+    "contract-check.log": {
+      "sha256": "8cea154a4d1f6fd9c3f55f60c0d5ab772fcd9c352150cb0f2bcf77742a09f567",
+      "bytes": 6018
+    },
+    "evidence-tool-tests.log": {
+      "sha256": "eb2fa6a8397ea5c7e816a686335635ee079f1bc564e63c0f06dbc6fcf1c8be00",
+      "bytes": 3052
+    },
+    "evidence-verify.log": {
+      "sha256": "b88e7bc9fd1fe4b7c3e69f594b0df816796aacd5b4c2c3f93fbf490279ee788a",
+      "bytes": 895
+    },
+    "final-typecheck-scripts.log": {
+      "sha256": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+      "bytes": 113
+    },
+    "gates-after-boundary.json": {
+      "sha256": "193d0c649cfa574f51402bf2ce3b0080a865c20453c354fcd9061eb474cd2215",
+      "bytes": 326
+    },
+    "gates-after-runtime.json": {
+      "sha256": "6bb06fa20f3a63b8f9b691fb2bddef68eaf0e80f80596cbbd65db4db3866899e",
+      "bytes": 326
+    },
+    "gates-after-sb1.json": {
+      "sha256": "6bb06fa20f3a63b8f9b691fb2bddef68eaf0e80f80596cbbd65db4db3866899e",
+      "bytes": 326
+    },
+    "http-evidence.json": {
+      "sha256": "4fe3dbbd469ffb5cebdbc118aafda950412cadc49d9434adc7c36c2187170b8b",
+      "bytes": 5456
+    },
+    "http-evidence.log": {
+      "sha256": "003f404fa5e76b804b997378d34be1b1f3ff918c00ecd6965cfdf2de38ce9eaa",
+      "bytes": 1866
+    },
+    "integration.json": {
+      "sha256": "a898bc263fc0c13369b553101c431c296ef08c2429378f6b600668208329b3e4",
+      "bytes": 12106
+    },
+    "integration.log": {
+      "sha256": "b44fc7f82dcebbc0f940988de428c1ad1f3796b76e1df01057dcd34a1b743a53",
+      "bytes": 1650
+    },
+    "lint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "mutations/AB.json": {
+      "sha256": "3710de83bbc7b71b9aa215dd8b38da2942b1e0e7946fdab36619af2e2ffc4ae4",
+      "bytes": 5273
+    },
+    "mutations/AB.log": {
+      "sha256": "3710de83bbc7b71b9aa215dd8b38da2942b1e0e7946fdab36619af2e2ffc4ae4",
+      "bytes": 5273
+    },
+    "mutations/H-harness.json": {
+      "sha256": "a9302d80064c5039eb29c59b64ad3d5b15672762f2a0f475b23ff5082407bd4f",
+      "bytes": 34182
+    },
+    "mutations/H-harness.log": {
+      "sha256": "a9302d80064c5039eb29c59b64ad3d5b15672762f2a0f475b23ff5082407bd4f",
+      "bytes": 34182
+    },
+    "mutations/SB1.json": {
+      "sha256": "6c35268c7888953662f901889df6d27bdcad87895672d41506afe00afa92b0ff",
+      "bytes": 13423
+    },
+    "mutations/SB1.log": {
+      "sha256": "6c35268c7888953662f901889df6d27bdcad87895672d41506afe00afa92b0ff",
+      "bytes": 13423
+    },
+    "mutations/WR.json": {
+      "sha256": "bcd9d1bfb7db68e595dc25aedc4efdb1091c91750b3dafa81d72e456752112cd",
+      "bytes": 31264
+    },
+    "mutations/WR.log": {
+      "sha256": "bcd9d1bfb7db68e595dc25aedc4efdb1091c91750b3dafa81d72e456752112cd",
+      "bytes": 31264
+    },
+    "mutations.log": {
+      "sha256": "a8c6af86babf26d71b57cc726fb2c85e3ae2c09a78cd7f33e95556714fbedc2f",
+      "bytes": 272
+    },
+    "ownership-after-boundary.json": {
+      "sha256": "e0d6f694d613c926159bf17ff51c39220d9b0bd9995db646b5008bed0119c813",
+      "bytes": 7559
+    },
+    "ownership-after-runtime.json": {
+      "sha256": "1f2eecb4e58150236a45b832e2cb8ac1b36226dab18b8c22edaca0b1d2b998ee",
+      "bytes": 6856
+    },
+    "ownership-before-boundary.json": {
+      "sha256": "275a9eabbd32680fb147f0e33fa46a3ef4f10d990bfb3670f9ab0b14e80a6980",
+      "bytes": 7559
+    },
+    "ownership-before-runtime.json": {
+      "sha256": "d1015b0edd483a5c27afdd6d4bc665183145a3e6d347b6d019d2e515964644b2",
+      "bytes": 6603
+    },
+    "ownership-pre-final.json": {
+      "sha256": "67384cf736b3145d4bba312cc6303c4def57c47ce412bd6fd101ee43a0f72243",
+      "bytes": 7559
+    },
+    "packaged-audit-tests.log": {
+      "sha256": "88addc83e7bd648026ee79c9218dc8343094bb22f1d93b082847bdf044ba177c",
+      "bytes": 1938
+    },
+    "packaged-recompute.json": {
+      "sha256": "193d0c649cfa574f51402bf2ce3b0080a865c20453c354fcd9061eb474cd2215",
+      "bytes": 326
+    },
+    "postgres.log": {
+      "sha256": "cbbd97c1d98e8d30714ac2edd3cea9b0e9207261d29dc317bc3f81a7535f3705",
+      "bytes": 20276
+    },
+    "proof-db-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    "recompute-tests.log": {
+      "sha256": "eeb4f6315659587873c41e7cf55e3e091de990a4bdb9bee365b651bf5261343d",
+      "bytes": 676
+    },
+    "runtime-audit.log": {
+      "sha256": "dd1daf320c9acf68994a3571ddcd87580aba798377ca68c2b23e3111def178de",
+      "bytes": 336
+    },
+    "sb1-http.json": {
+      "sha256": "bc7f87022f92df31b0c73f42844cf9e5754ec6004dc60cc836cca918004899bb",
+      "bytes": 1912
+    },
+    "sb1-http.log": {
+      "sha256": "b93f1e92bc85fd9e2bafcf2a73fb43fb19aadc5d429b7b6d80bdcda930b2fba8",
+      "bytes": 1241
+    },
+    "sb1-unit.json": {
+      "sha256": "1f99e3168c90cc03a4fcff8e6599620406f1651c23216a27218eed5a436f7cb4",
+      "bytes": 30714
+    },
+    "sb1-unit.log": {
+      "sha256": "136bed225fb424894f72523de8bc0701d6d25fae22884cb7929050334594c698",
+      "bytes": 335
+    },
+    "typecheck-live.log": {
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "bytes": 128
+    },
+    "typecheck-scripts.log": {
+      "sha256": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+      "bytes": 113
+    },
+    "typecheck.log": {
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "bytes": 103
+    },
+    "widgets.json": {
+      "sha256": "05021f2eb342aefbca1003a7c4e833e9b5a2f8427fe695d32e3159b717f4e12c",
+      "bytes": 203005
+    },
+    "widgets.log": {
+      "sha256": "10ccf18d530e8789eff30d3b51aff1682b5eee8414e65b83e87d111741e7ba8e",
+      "bytes": 20631
+    }
+  }
+}

@@ -1,0 +1,524 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "a46b228bcc2c8912f2b25d194944be7ea0dee365",
+  "battery_hashes": {
+    "gateSB1.json": "85894e560d6f03c5d7d081c02696f86e14cfeae69d0bb7b3faf560e6ae00ac67"
+  },
+  "partition": null,
+  "startedAt": "2026-09-29T18:10:05.714Z",
+  "batteries": [
+    "gateSB1.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": "appointments/(personal-client-context.service|client-appointment-create.service).spec.ts",
+    "unit_filter": "SB1-"
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-51f75032e4",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-51f75032e4",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gateSB1.json",
+      "id": "SB1-M01",
+      "files": [
+        "src/appointments/personal-client-context.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-SELECTION"
+      ],
+      "kills": [
+        {
+          "killer": "SB1-SELECTION",
+          "test": "SB-1 explicit personal Client authority SB1-SELECTION refuses an implicit/caller-shaped choice undefined",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "SB1-SELECTION",
+          "test": "SB-1 explicit personal Client authority SB1-SELECTION refuses an implicit/caller-shaped choice \"business_owner\"",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "SB1-SELECTION",
+          "test": "SB-1 explicit personal Client authority SB1-SELECTION refuses an implicit/caller-shaped choice \"client\"",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "SB1-SELECTION",
+          "test": "SB-1 explicit personal Client authority SB1-SELECTION refuses an implicit/caller-shaped choice {\"clientId\": \"client-a\"}",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 4
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSB1.json",
+      "id": "SB1-M02",
+      "files": [
+        "src/appointments/personal-client-context.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-SESSION"
+      ],
+      "kills": [
+        {
+          "killer": "SB1-SESSION",
+          "test": "SB-1 explicit personal Client authority SB1-SESSION refuses stale session or membership: revoked",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSB1.json",
+      "id": "SB1-M03",
+      "files": [
+        "src/appointments/personal-client-context.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-SESSION"
+      ],
+      "kills": [
+        {
+          "killer": "SB1-SESSION",
+          "test": "SB-1 explicit personal Client authority SB1-SESSION refuses stale session or membership: role",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSB1.json",
+      "id": "SB1-M04",
+      "files": [
+        "src/appointments/personal-client-context.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-LINK"
+      ],
+      "kills": [
+        {
+          "killer": "SB1-LINK",
+          "test": "SB-1 explicit personal Client authority SB1-LINK refuses missing or noncurrent binding: ambiguous",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSB1.json",
+      "id": "SB1-M05",
+      "files": [
+        "src/appointments/personal-client-context.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-LINK"
+      ],
+      "kills": [
+        {
+          "killer": "SB1-LINK",
+          "test": "SB-1 explicit personal Client authority SB1-LINK refuses missing or noncurrent binding: revoked",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSB1.json",
+      "id": "SB1-M06",
+      "files": [
+        "src/appointments/personal-client-context.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-RECHECK"
+      ],
+      "kills": [
+        {
+          "killer": "SB1-RECHECK",
+          "test": "SB-1 explicit personal Client authority SB1-RECHECK refuses changes after selection: link",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "SB1-RECHECK",
+          "test": "SB-1 explicit personal Client authority SB1-RECHECK refuses changes after selection: client",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "SB1-RECHECK",
+          "test": "SB-1 explicit personal Client authority SB1-RECHECK refuses changes after selection: evidence",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 3
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSB1.json",
+      "id": "SB1-M07",
+      "files": [
+        "src/appointments/client-appointment-create.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-NOSELECT"
+      ],
+      "kills": [
+        {
+          "killer": "SB1-NOSELECT",
+          "test": "SB-1 canonical create with personal context SB1-NOSELECT refuses owner create and quote without an explicit personal context",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSB1.json",
+      "id": "SB1-M08",
+      "files": [
+        "src/appointments/client-appointment-create.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-DISPATCH"
+      ],
+      "kills": [
+        {
+          "killer": "SB1-DISPATCH",
+          "test": "SB-1 canonical create with personal context SB1-DISPATCH rechecks revocation immediately before provider dispatch",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSB1.json",
+      "id": "SB1-M09",
+      "files": [
+        "src/appointments/client-appointment-create.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-BOUND"
+      ],
+      "kills": [
+        {
+          "killer": "SB1-BOUND",
+          "test": "SB-1 canonical create with personal context SB1-BOUND refuses a changed selected linkId",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateSB1.json",
+      "id": "SB1-M10",
+      "files": [
+        "src/crm/crm.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-CREATE"
+      ],
+      "kills": [
+        {
+          "killer": "SB1-CREATE",
+          "test": "SB-1 canonical create with personal context SB1-CREATE persists actual actor/context alongside Client authority without owner privileges",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-09-29T18:11:59.543Z"
+}

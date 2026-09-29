@@ -9,4 +9,4 @@ This addendum supersedes the OPEN status in the historical pre-integration packe
 
 G6-6/G13-R8 remain STOP pending a destination-owner receiving contract. They do not govern ordinary canonical booking creates. 9.6 remains integration-owned: one persisted user-turn identity, no mirror writer. AR-1 remains STOP pending release contracts/evidence and its explicit activation envelope.
 
-The decisions change acceptance scope, not clause execution evidence. The existing 19 false clauses remain false until separately proved or implemented. Historical audits, receipts and the earlier decision packet are retained.
+The decisions change acceptance scope, not clause execution evidence. The pass started with 19 false clauses; executable G13-I7 evidence separately closes one, leaving 18. Historical audits, receipts and the earlier decision packet are retained.
