@@ -20,6 +20,8 @@
 import { createNet } from '../../../maya-chat-shell/src/net/session.ts';
 import { createShellRuntime } from '../../../maya-chat-shell/src/shell/shell.ts';
 import { createLiveSubmission } from '../../../maya-chat-shell/src/shell/intents.ts';
+import { createVoiceControl } from '../../../maya-chat-shell/src/shell/voice-state.ts';
+import { createCapture } from '../voice/capture.ts';
 import { render } from '../../../maya-chat-shell/src/renderer/render.ts';
 import type {
   Cancel,
@@ -160,17 +162,29 @@ const runtime = createShellRuntime({
   newAbort,
 });
 
-// ── FACTORY 3 — voice ──────────────────────────────────────────────────────────────────────────
+// ── FACTORY 3 — voice (entry/main.ts:195-205) ─────────────────────────────────────────────────
 //
-// 🔴 Not built, and not faked. `createVoiceControl` is inside the published runtime package, but its
-// required `CapturePort` has exactly one implementation — `createCapture` in src/voice/capture.ts —
-// and the `voice` layer is deliberately OUTSIDE `RUNTIME_LAYERS`, because it needs MediaRecorder and
-// AudioContext. So the carrier cannot import it. Writing a carrier-local CapturePort would put
-// getUserMedia/MediaRecorder on the presentation side of the line the ruling draws. The shell's own
-// contract already covers this case: `AppMount.voice` is `VoiceControlPort | null` and the comment
-// at dom/host.ts:533 says the composer stays equally complete without it (V11/A-20). The microphone
-// therefore renders and announces itself unavailable rather than silently doing nothing.
-export const voice = null;
+// The machine is the published runtime's; only the CapturePort is the carrier's, because the voice
+// layer is deliberately outside @maya/runtime — it is the one thing that must touch getUserMedia,
+// MediaRecorder and AudioContext. See src/voice/capture.ts for why that is a capability and not an
+// authority, and tools/ratchets.mjs for the two rules that came with it.
+//
+// `lockSources` passes the REAL vault envelopes. Substituting `() => []` — the P1 default — would
+// silently disable the V6 lock that refuses to open the microphone while a card on screen holds
+// personal data, and nothing would report it.
+const voiceMachine = createVoiceControl({
+  capture: createCapture({ secureContext: window.isSecureContext }),
+  transport: net.transport,
+  conversation: runtime.conversation,
+  scheduler,
+  newAbort,
+  lockSources: () => runtime.widgets.lockSources(),
+  environment,
+  session: net.session,
+  widgets: runtime.widgetPort,
+});
+
+export const voice = voiceMachine;
 
 export const session = net.session;
 export const conversation = runtime.conversation;
@@ -183,5 +197,6 @@ export const widgets = runtime.widgetPort;
 export const landFragment = (): void => void runtime.landFragment();
 
 export const dispose = (): void => {
+  voiceMachine.dispose();
   runtime.dispose();
 };

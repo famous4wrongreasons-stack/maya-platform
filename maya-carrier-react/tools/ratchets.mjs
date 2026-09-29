@@ -97,6 +97,26 @@ export const NAME_RULES = [
     members: [],
   },
   {
+    id: 'no-outcome-invention',
+    property:
+      'A business outcome is the server\u2019s word, not the client\u2019s. The runtime reads exactly one field of a TerminalLine — its server-minted `text`, appended as an ordinary assistant turn — and reads neither `outcome` nor `action_receipt_ref`; `TimelineItemView` has no member that could carry either. So there is no honest way for presentation to learn that something was CONFIRMED, and a component naming these has either invented an outcome or reached past the projection for one.',
+    // NOT banned, on purpose: `SUPERSEDED` and `CANCELLED` are also LifecycleState members, and
+    // `RenderResult.lifecycle.state` legitimately carries them to a drawer.
+    names: [
+      'action_receipt_ref',
+      'terminal_lines',
+      'reread_intent',
+      'TerminalLine',
+      'TerminalOutcome',
+      'CONFIRMED',
+      'NOT_CONFIRMED',
+      'EXPIRED_UNUSED',
+      'DELIVERED_ONLY',
+    ],
+    members: [],
+    alsoInStrings: true,
+  },
+  {
     id: 'no-legacy-transport',
     property: 'The legacy salon proxy and every direct CRM URL. Business effect leaves through the canonical backend or not at all.',
     names: ['api-proxy', 'CHAT_PROXY', 'BF_PROXY', 'SS_PROXY', 'CM_PROXY', '__ME_SAAS_CTX', '__meSaasAuthedFetch'],
@@ -277,6 +297,83 @@ export function scanJsx(rel, text, { hrefAllowed = false } = {}) {
   for (const m of text.matchAll(/url\((?!["']?(?:data:image\/svg\+xml,|%23|#))/g))
     out.push(refusal('style-url', rel, lineAt(text, m.index), 'url(',
       'a style-borne URL is the exfiltration vector the inline-style ban existed to stop; only an inline data:image/svg+xml is admitted'));
+  return out;
+}
+
+// ── the voice boundary ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Two rules the shell enforced over its own `voice` layer with an AST walk (test/voice.test.mjs:
+ * 901-922 and 1477-1506). The layer now lives in the carrier, so the rules live here — a guarantee
+ * that moves without its ratchet is a guarantee that quietly stops holding.
+ *
+ *   no-second-microphone — `getUserMedia` may appear EXACTLY ONCE in the whole carrier, in
+ *     src/voice/capture.ts, inside a function that takes a GestureProof. No other file may name any
+ *     capture API at all. One microphone site, behind one gesture check, or none.
+ *   voice-hygiene — the capture layer names no network, no storage, no logging, no playback, no
+ *     object URL, no postMessage and no ScriptProcessorNode. It records and encodes; anything else
+ *     it could reach for would be a second path out of the device for audio.
+ */
+export const CAPTURE_FILE = 'src/voice/capture.ts';
+export const CAPTURE_NAMES = ['getUserMedia', 'MediaRecorder', 'AudioContext', 'OfflineAudioContext', 'mediaDevices'];
+const VOICE_HYGIENE = [
+  'console', 'localStorage', 'sessionStorage', 'indexedDB', 'createObjectURL', 'speechSynthesis',
+  'WebSocket', 'EventSource', 'XMLHttpRequest', 'sendBeacon', 'postMessage', 'ScriptProcessorNode',
+  'createScriptProcessor',
+];
+
+/** The innermost function whose body contains `at`, with its parameter text. */
+const enclosingSignature = (code, at) => {
+  let best = null;
+  for (const m of code.matchAll(/(?:async\s+)?(?:function\s+)?([A-Za-z_$][\w$]*)\s*\(([^()]*)\)\s*(?::[^={;]*)?(?:=>\s*)?\{/g)) {
+    const open = code.indexOf('{', m.index + m[0].length - 1);
+    if (open < 0) continue;
+    let depth = 0;
+    let end = -1;
+    for (let i = open; i < code.length; i += 1) {
+      if (code[i] === '{') depth += 1;
+      else if (code[i] === '}') {
+        depth -= 1;
+        if (depth === 0) {
+          end = i;
+          break;
+        }
+      }
+    }
+    if (open <= at && at <= end) best = { name: m[1], params: m[2] };
+  }
+  return best;
+};
+
+export function checkVoiceBoundary(files) {
+  const out = [];
+  let sites = 0;
+  for (const [rel, text] of files) {
+    const code = codeOnly(text);
+    if (rel !== CAPTURE_FILE) {
+      for (const name of CAPTURE_NAMES)
+        for (const m of code.matchAll(new RegExp(`\\b${name}\\b`, 'g')))
+          out.push(refusal('no-second-microphone', rel, lineAt(code, m.index), name,
+            `only ${CAPTURE_FILE} may name a capture API; a second microphone site is a second way audio leaves the device`));
+      continue;
+    }
+    for (const name of VOICE_HYGIENE)
+      for (const m of code.matchAll(new RegExp(`\\b${name}\\b`, 'g')))
+        out.push(refusal('voice-hygiene', rel, lineAt(code, m.index), name,
+          'the capture layer records and encodes; a network, storage, logging or playback name here is another path out for audio'));
+    for (const m of code.matchAll(/fetch\s*\(/g))
+      out.push(refusal('voice-hygiene', rel, lineAt(code, m.index), 'fetch', 'as above'));
+    for (const m of code.matchAll(/\bgetUserMedia\b/g)) {
+      sites += 1;
+      const sig = enclosingSignature(code, m.index);
+      if (sig === null || !sig.params.includes('GestureProof'))
+        out.push(refusal('no-second-microphone', rel, lineAt(code, m.index), 'getUserMedia',
+          `the microphone opens only inside a function that takes a GestureProof (found: ${sig === null ? 'top level' : sig.name + '(' + sig.params + ')'})`));
+    }
+  }
+  if (sites > 1)
+    out.push(refusal('no-second-microphone', CAPTURE_FILE, 0, 'getUserMedia',
+      `getUserMedia must appear exactly once in the carrier; found ${sites}`));
   return out;
 }
 

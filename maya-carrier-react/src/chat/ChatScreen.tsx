@@ -14,24 +14,33 @@
 //     and nothing here draws a tick from it — the turn's fate arrives as `state` in the next view;
 //   * assistant text has exactly two writers, both server-side. There is no optimistic bubble.
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type {
   ConversationView,
   TimelineItemView,
 } from '../../../maya-chat-shell/src/shell/ports.ts';
-import { conversation } from '../runtime/compose.ts';
+import { conversation, session, voice, widgets } from '../runtime/compose.ts';
+import { usePortView } from '../runtime/useView.ts';
+import { WidgetCard } from '../widgets/WidgetCard.tsx';
+import { FullscreenDetail } from '../widgets/FullscreenDetail.tsx';
 import {
   COLD_START_HINT,
   composerReason,
   failureBase,
   NEW_TURN_NOTE,
+  COMPOSER_LIMIT,
   noticeSentence,
+  refusalSentence,
   secondsLeft,
-  widgetSentence,
+  THINKING,
+  formatElapsed,
+  voiceActionLabel,
+  voiceStatusSentence,
 } from '../runtime/copy.ts';
 import { Backdrop } from '../identity/Backdrop.tsx';
-import { MayaMark, MayaVolumeMark } from '../identity/MayaMark.tsx';
+import { MayaMark, MayaMarkAnimated, MayaVolumeMark } from '../identity/MayaMark.tsx';
 import { MAYA_ACCENT, MAYA_ACCENT_ON, type Tokens } from '../identity/tokens.ts';
+import { ReplyText } from '../reply-link.tsx';
 
 /** The reading face MAYA's own words are set in (app.html:21307). */
 const READING = '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
@@ -53,14 +62,25 @@ const STICK_TO_END_PX = 96;
  * pattern and refuses the build. An uppercase alias is unambiguous to both readers.
  */
 type ItemId = string | null;
+type DivOrNone = HTMLDivElement | null;
+type TextAreaOrNone = HTMLTextAreaElement | null;
+type ElementOrNone = HTMLElement | null;
+/** Why a submit was refused before anything left the device, or none. */
+type Refusal = 'empty' | 'too_long' | 'in_flight' | 'composer_disabled' | null;
 
-/** app.html:21254 — the thinking state, docked above the composer, never inside the lane. */
+/**
+ * app.html:21254 — the thinking state, docked above the composer, never inside the lane.
+ *
+ * Decoration only. dom/timeline.ts keeps ONE permanently-mounted `role="status"` node and writes
+ * into it; a status region created and destroyed with the state it describes is announced
+ * unreliably, and two of them announce twice. So the dots are `aria-hidden` and the sentence lives
+ * in the permanent node below the lane.
+ */
 function TypingDots({ dark }: { readonly dark: boolean }) {
   return (
     <div
       className={'maya-typing' + (dark ? '' : ' maya-typing-light')}
-      role="status"
-      aria-label="Maya печатает"
+      aria-hidden="true"
       style={{ padding: '4px 2px' }}
     >
       <span aria-hidden="true" />
@@ -96,11 +116,25 @@ function useCountdownClock(view: ConversationView): number {
 }
 
 /** Shell chrome — a notice, a widget sentence, the cold-start hint. Never model history (P-11). */
-function ChromeLine({ t, text }: { readonly t: Tokens; readonly text: string }) {
+function ChromeLine({
+  t,
+  text,
+  recover,
+}: {
+  readonly t: Tokens;
+  readonly text: string;
+  // Named `recover`, not `action`: the sink rule matches `\baction\s*=`, so even `action ===`
+  // refuses. The shell's own drawer writes `rowAction` for the same reason.
+  readonly recover?: { readonly label: string; readonly onPress: () => void };
+}) {
   return (
     <div
       style={{
         margin: '4px 0 14px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 8,
         fontFamily: READING,
         fontSize: 13,
         lineHeight: '19px',
@@ -109,7 +143,25 @@ function ChromeLine({ t, text }: { readonly t: Tokens; readonly text: string }) 
         color: t.dark ? 'rgba(244,240,235,0.52)' : 'rgba(11,11,12,0.52)',
       }}
     >
-      {text}
+      <span>{text}</span>
+      {recover === undefined ? null : (
+        <button
+          type="button"
+          onClick={recover.onPress}
+          style={{
+            appearance: 'none',
+            border: '0',
+            background: 'transparent',
+            padding: '4px 8px',
+            font: 'inherit',
+            color: MAYA_ACCENT,
+            cursor: 'pointer',
+            textDecoration: 'underline',
+          }}
+        >
+          {recover.label}
+        </button>
+      )}
     </div>
   );
 }
@@ -118,29 +170,52 @@ function Row({
   item,
   t,
   now,
+  focusComposer,
 }: {
   readonly item: TimelineItemView;
   readonly t: Tokens;
   readonly now: number;
+  readonly focusComposer: () => void;
 }) {
   const dark = t.dark;
 
-  if (item.kind === 'notice') return <ChromeLine t={t} text={noticeSentence(item.notice)} />;
-
-  // 🔴 A widget item carries a sealed `RenderResult` that only the headless renderer's React drawer
-  // can draw, and that drawer is the next unit. It is NOT silently dropped here: a server-authored
-  // card that vanished without a word would be the presentation deciding the person did not need to
-  // see it. Its own sentence is shown when the runtime supplied one.
-  if (item.kind === 'widget')
+  if (item.kind === 'notice')
     return (
       <ChromeLine
         t={t}
-        text={
-          item.sentence === null
-            ? 'Карточку пока нельзя показать в этой версии.'
-            : widgetSentence(item.sentence)
-        }
+        text={noticeSentence(item.notice)}
+        // dom/timeline.ts:269-275 — the ONE notice that carries a control, because it is the one
+        // that is otherwise a dead end: the session is real but has no business, so nothing the
+        // person types can work until they sign in again. `SessionPort.signOut` already exists;
+        // no capability is invented here.
+        {...(item.notice === 'tenant_required'
+          ? { recover: { label: 'Выйти', onPress: () => void session.signOut() } }
+          : null)}
       />
+    );
+
+  // A server-authored card. It sits on MAYA's side of the lane and inside MAYA's turn — the card
+  // IS the container, which is why MAYA's words still have none.
+  //
+  // `widgets.activate(id, ref)` returns void on purpose: the outcome is discarded at the port. What
+  // happened arrives as the next view.
+  if (item.kind === 'widget')
+    return (
+      <div
+        style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'flex-start',
+          gap: 7,
+          marginBottom: 14,
+          minWidth: 0,
+        }}
+      >
+        <div style={{ width: '100%', minWidth: 0, flex: '1 1 100%' }}>
+          <WidgetCard item={item} t={t} activate={widgets.activate} />
+        </div>
+      </div>
     );
 
   const user = item.kind === 'user';
@@ -200,7 +275,18 @@ function Row({
               overflowWrap: 'anywhere',
             }}
           >
-            {item.text}
+            {/* Without a speaker, a screen reader hears one undifferentiated stream of turns. */}
+            <span className="vh">{user ? 'Вы: ' : 'MAYA: '}</span>
+            {/* Only MAYA's words are scanned for targets; the person's own text is never linkified. */}
+            {user ? item.text : <ReplyText reply={item.text} accent={MAYA_ACCENT} />}
+            {item.kind === 'user' && item.modality === 'spoken' ? (
+              <>
+                {' '}
+                <span role="img" aria-label="голосом">
+                  ◉
+                </span>
+              </>
+            ) : null}
           </div>
         </div>
 
@@ -224,7 +310,12 @@ function Row({
                 <button
                   type="button"
                   aria-label="Повторить отправку"
-                  onClick={() => conversation.retry(item.id)}
+                  onClick={() => {
+                    conversation.retry(item.id);
+                    // The button is replaced by a sending state the moment this runs; without
+                    // moving focus deliberately it lands on <body> and a keyboard user is lost.
+                    focusComposer();
+                  }}
                   style={{
                     appearance: 'none',
                     border: '0',
@@ -264,10 +355,24 @@ export function ChatScreen({
 }) {
   const dark = t.dark;
   const [draft, setDraft] = useState('');
+  const [refused, setRefused] = useState<Refusal>(null);
   const hasDraft = draft.trim().length > 0;
-  const now = useCountdownClock(view);
+  const noteId = useId();
+  const tooLong = draft.length > COMPOSER_LIMIT;
 
-  const laneRef = useRef<HTMLDivElement | null>(null);
+  const focusComposer = useCallback(() => {
+    composerRef.current?.focus();
+  }, []);
+  const now = useCountdownClock(view);
+  const voiceView = usePortView(voice);
+  const listening = voiceView.state === 'listening' || voiceView.state === 'held';
+  const micLive = listening || voiceView.state === 'recording';
+  const micUsable = voiceView.state === 'idle' || listening;
+  const micEngaged = listening || voiceView.state === 'recording' || voiceView.state === 'arming';
+
+  const laneRef = useRef<DivOrNone>(null);
+  const composerRef = useRef<TextAreaOrNone>(null);
+  const focusedRef = useRef<ElementOrNone>(null);
   const stickRef = useRef(true);
   const newestUserRef = useRef<ItemId>(null);
   const awaitingRef = useRef<{ itemId: string; text: string } | null>(null);
@@ -279,10 +384,17 @@ export function ChatScreen({
     // Cosmetic only. The authority is the runtime's own refusal set — `empty`, `too_long`,
     // `in_flight`, `composer_disabled` — decided inside submitUserTurn against state this screen
     // cannot see. Keeping only this check would allow a double-send whenever the snapshot is stale.
-    if (!view.composer.enabled || view.inFlight || text.trim().length === 0) return;
+    if (!view.composer.enabled || view.inFlight) return;
     const outcome = conversation.submitUserTurn(text, { modality: 'typed' });
-    // `accepted: true` means QUEUED. Nothing is drawn from it.
-    if (outcome.accepted) awaitingRef.current = { itemId: outcome.itemId, text };
+    // `accepted: true` means QUEUED. Nothing is drawn from it. A refusal is the runtime telling the
+    // person why nothing left the device — dropping it on the floor, as this did before, makes a
+    // pressed Send look like a message that vanished.
+    if (outcome.accepted) {
+      setRefused(null);
+      awaitingRef.current = { itemId: outcome.itemId, text };
+      return;
+    }
+    setRefused(outcome.refusal);
   }, [draft, view]);
 
   // dom/composer.ts:141-150 — the draft clears when the turn is SENT, not when it is submitted, and
@@ -318,6 +430,19 @@ export function ChatScreen({
     if (ownTurn || stickRef.current) lane.scrollTop = lane.scrollHeight;
   }, [view]);
 
+  // dom/timeline.ts captures the focused element before it redraws and restores it after. React
+  // reconciliation will not: when the element holding focus is removed — a retry button becoming a
+  // sending state, a widget collapsing — focus silently falls to <body>. Catch that and put it
+  // somewhere deliberate.
+  useLayoutEffect(() => {
+    const previous = focusedRef.current;
+    const active = document.activeElement;
+    focusedRef.current = active instanceof HTMLElement ? active : null;
+    if (previous === null || document.contains(previous)) return;
+    const frame = window.requestAnimationFrame(focusComposer);
+    return () => window.cancelAnimationFrame(frame);
+  }, [view, focusComposer]);
+
   const onLaneScroll = useCallback(() => {
     const lane = laneRef.current;
     if (lane === null) return;
@@ -330,7 +455,8 @@ export function ChatScreen({
         <Backdrop t={t} />
       </div>
 
-      <div
+      <section
+        aria-label="Разговор с MAYA"
         style={{
           position: 'absolute',
           top: 0,
@@ -428,9 +554,18 @@ export function ChatScreen({
         </div>
 
         {/* app.html:21647-21658 — the one scroller. 84px clears the header, 212px the composer. */}
+        {/*
+          dom/timeline.ts:177-181 — the lane IS the live region: one permanent polite log with a
+          name. Without it an assistant reply is never announced, and the region cannot be reached
+          by landmark navigation. A widget's own aria-live nests inside and overrides it, which is
+          how a blocking limitation still announces assertively inside a polite log.
+        */}
         <div
           ref={laneRef}
           onScroll={onLaneScroll}
+          role="log"
+          aria-live="polite"
+          aria-label="Сообщения"
           style={{
             flex: 1,
             overflow: 'auto',
@@ -441,9 +576,50 @@ export function ChatScreen({
         >
           {view.items.length === 0 ? <ChromeLine t={t} text={COLD_START_HINT} /> : null}
           {view.items.map((item) => (
-            <Row key={item.id} item={item} t={t} now={now} />
+            <Row key={item.id} item={item} t={t} now={now} focusComposer={focusComposer} />
           ))}
         </div>
+
+        {/*
+          app.html:21766-21775 — the voice orb: SMALL and low over the bar, so the conversation
+          stays visible behind it. The canonical condition was hands-free or recording; here it is
+          the states where the person is actually engaged with the microphone.
+        */}
+        {micEngaged ? (
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 'calc(134px + env(safe-area-inset-bottom, 0px))',
+              zIndex: 4,
+              flexShrink: 0,
+              display: 'flex',
+              justifyContent: 'center',
+              padding: '2px 0 10px',
+              pointerEvents: 'none',
+              transition: 'opacity .14s ease, transform .3s cubic-bezier(.4,0,.2,1)',
+            }}
+          >
+            <div style={{ color: t.ink, display: 'flex' }}>
+              <MayaMarkAnimated size={36} mode="listen" state="recording" level={voiceView.level / 3} />
+            </div>
+          </div>
+        ) : null}
+
+        {/*
+          dom/timeline.ts:183-187 — ONE status node, mounted always and written into. Mounting it
+          with the state it describes is the classic way to have it never announced at all.
+        */}
+        <p className="vh" role="status">
+          {view.inFlight ? THINKING : ''}
+        </p>
+
+        {/* The voice machine's own polite announcement; `unavailable` echoes the runtime's Cell. */}
+        <p className="vh" role="status">
+          {voiceStatusSentence(voiceView)}
+        </p>
 
         {/* app.html:21759-21762 — the footer overlays the lane; only the pill takes pointer events. */}
         <div
@@ -508,6 +684,25 @@ export function ChatScreen({
               }}
             />
 
+            {refused === null || refusalSentence(refused) === null ? null : (
+              <p
+                id={noteId}
+                role="status"
+                style={{
+                  position: 'relative',
+                  zIndex: 1,
+                  margin: 0,
+                  padding: '0 6px',
+                  fontFamily: READING,
+                  fontSize: 12,
+                  lineHeight: '17px',
+                  color: dark ? 'rgba(244,240,235,0.68)' : 'rgba(11,11,12,0.68)',
+                }}
+              >
+                {refused === null ? '' : refusalSentence(refused)}
+              </p>
+            )}
+
             <div style={{ position: 'relative', zIndex: 1, width: '100%', height: 52 }}>
               <div
                 style={{
@@ -538,31 +733,95 @@ export function ChatScreen({
                   `readOnly` + `aria-disabled` rather than `disabled`, so the reason stays reachable
                   to a screen reader instead of the control vanishing from the tab order.
                 */}
+                {listening ? (
+                  // app.html:21830-21836 — while listening the field IS the status: a pulsing dot,
+                  // the elapsed time in tabular figures so it does not jitter, and the one hint
+                  // that says how to finish. `level` is the runtime's 0..3, shown as it is sampled.
+                  <div
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      height: 50,
+                    }}
+                  >
+                    <span
+                      className="maya-rec-dot"
+                      aria-hidden="true"
+                      style={{
+                        width: 9,
+                        height: 9,
+                        borderRadius: 999,
+                        background: dark ? '#f4f0eb' : '#18160f',
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontFamily: DISPLAY,
+                        fontSize: 14,
+                        color: t.ink,
+                        fontVariantNumeric: 'tabular-nums',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Слушаю… {formatElapsed(voiceView.elapsedMs)}
+                    </span>
+                    <span
+                      style={{
+                        marginLeft: 'auto',
+                        fontFamily: READING,
+                        fontSize: 10.5,
+                        color: dark ? 'rgba(244,240,235,0.4)' : 'rgba(24,22,15,0.4)',
+                        paddingRight: 6,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      ещё раз — отправить
+                    </span>
+                  </div>
+                ) : null}
+                <label className="vh" htmlFor={noteId + '-input'}>
+                  Сообщение для MAYA
+                </label>
                 <textarea
+                  id={noteId + '-input'}
+                  ref={composerRef}
                   rows={1}
                   value={draft}
                   readOnly={!view.composer.enabled}
                   aria-disabled={!view.composer.enabled}
-                  aria-label="Сообщение Maya"
+                  aria-describedby={refused === null ? undefined : noteId}
+                  aria-invalid={tooLong ? 'true' : undefined}
                   placeholder={
                     view.composer.enabled ? 'Сообщение Maya…' : composerReason(view.composer.reason)
                   }
                   autoComplete="off"
                   enterKeyHint="send"
-                  onChange={(event) => setDraft(event.target.value)}
+                  onChange={(event) => {
+                    setDraft(event.target.value);
+                    setRefused(null);
+                  }}
                   onKeyDown={(event) => {
                     // dom/composer.ts:171 — BOTH IME guards. An Enter during composition is the IME
                     // accepting a candidate, not the person sending.
                     if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
-                    if (event.key !== 'Enter' || event.shiftKey) return;
+                    if (event.key !== 'Enter') return;
+                    // Canonically this was an <input>, so a newline was never possible. The pill is
+                    // a fixed 52px with overflow hidden, so a Shift+Enter newline would be typed
+                    // into a box that cannot show it. Enter sends, with or without a modifier.
                     event.preventDefault();
+                    if (event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return;
                     send();
                   }}
                   style={{
-                    flex: 1,
+                    flex: listening ? '0 0 0px' : 1,
                     minWidth: 0,
-                    width: '100%',
+                    width: listening ? 0 : '100%',
                     height: 50,
+                    opacity: listening ? 0 : 1,
                     border: 'none',
                     appearance: 'none',
                     WebkitAppearance: 'none',
@@ -580,16 +839,30 @@ export function ChatScreen({
                 />
 
                 {/*
-                  app.html:21855 — a round blue ground, the same asymmetric MAYA wave, in white.
-                  🔴 Announced unavailable rather than inert: the voice machine needs a CapturePort,
-                  whose only implementation is outside the published runtime package. A button that
-                  looks live and does nothing is worse than one that says so.
+                  app.html:21855 — a round blue ground, the same asymmetric MAYA wave, in white; the
+                  ground inverts while recording, as it did canonically. One control: tap to record,
+                  tap again to send, exactly the owner's «Нажмите — запись, ещё раз — отправить».
+
+                  The proof is minted from the NATIVE event and freshly, every time. React's
+                  SyntheticEvent has a different timeStamp basis, and the runtime spends a proof by
+                  object identity — a memoised one silently does nothing the second time.
                 */}
                 <button
                   type="button"
-                  aria-disabled="true"
-                  aria-label="Голосовой ввод недоступен в этой версии"
-                  title="Голосовой ввод недоступен в этой версии"
+                  aria-disabled={micUsable ? undefined : 'true'}
+                  aria-label={voiceActionLabel(voiceView.state)}
+                  title={voiceActionLabel(voiceView.state)}
+                  onClick={(event) => {
+                    const native = event.nativeEvent;
+                    if (!micUsable || native.isTrusted !== true) return;
+                    const proof = {
+                      isTrusted: true as const,
+                      type: 'click' as const,
+                      timeStamp: native.timeStamp,
+                    };
+                    if (voiceView.state === 'idle') voice.arm(proof);
+                    else voice.send(proof);
+                  }}
                   style={{
                     width: 36,
                     height: 36,
@@ -600,11 +873,13 @@ export function ChatScreen({
                     justifyContent: 'center',
                     border: '0',
                     padding: 0,
-                    background: MAYA_ACCENT,
-                    color: MAYA_ACCENT_ON,
-                    opacity: 0.38,
-                    cursor: 'default',
+                    background: micLive ? t.ink : MAYA_ACCENT,
+                    color: micLive ? t.bg : MAYA_ACCENT_ON,
+                    opacity: micUsable ? 1 : 0.38,
+                    cursor: micUsable ? 'pointer' : 'default',
                     touchAction: 'none',
+                    transform: micLive ? 'scale(1.1)' : 'scale(1)',
+                    transition: 'transform .16s ease, background .16s ease',
                   }}
                 >
                   <MayaVolumeMark size={18} />
@@ -639,7 +914,10 @@ export function ChatScreen({
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* The detail sheet lives beside the conversation, not inside its scroller. */}
+      <FullscreenDetail t={t} focusFallback={focusComposer} />
     </div>
   );
 }

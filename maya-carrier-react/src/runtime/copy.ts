@@ -15,6 +15,9 @@
 import type {
   NoticeKind,
   TurnRetry,
+  VoiceNotice,
+  VoiceState,
+  VoiceView,
   WidgetSentence,
 } from '../../../maya-chat-shell/src/shell/ports.ts';
 import type {
@@ -85,33 +88,63 @@ export const failureBase = (failure: ChatFailure): string => {
   }
 };
 
-/** Why a widget carries a neutral sentence instead of a state change (D9). */
+/**
+ * Why a widget carries a neutral sentence instead of a state change (D9). dom/host.ts:526-538.
+ *
+ * `activation_unavailable` and `activation_forbidden` share ONE sentence on purpose. Splitting them
+ * would tell the person which of the two happened — that is, whether the action exists and is
+ * merely unavailable, or exists and is closed TO THEM. That distinction is authorization state, and
+ * presentation saying it out loud is a disclosure the runtime deliberately does not make.
+ */
 export const widgetSentence = (sentence: WidgetSentence): string => {
   switch (sentence) {
     case 'activation_unavailable':
-      return 'Это действие сейчас недоступно.';
     case 'activation_forbidden':
-      return 'Это действие сейчас закрыто.';
+      return 'Это действие сейчас недоступно';
     case 'no_connection':
-      return 'Нет связи.';
+      return 'Нет связи — действие не выполнено';
     case 'route_refused':
-      return 'Этот переход здесь недоступен.';
+      return 'Этот переход здесь недоступен';
     case 'expired_not_resolved':
-      return 'Карточка устарела.';
+      return 'Карточка устарела — показана сводка';
   }
 };
 
-/** Why the composer will not send. The runtime decides this; the carrier only words it. */
+/** Why the composer will not send (§1.4). The runtime decides this; the carrier only words it. */
 export const composerReason = (
   reason: 'subscription_required' | 'tenant_required' | 'signed_out',
 ): string => {
   switch (reason) {
+    case 'subscription_required':
+      return 'Отправка недоступна: разговор с MAYA не подключён для этого бизнеса';
+    case 'tenant_required':
+      return 'Для разговора с MAYA нужен вход в бизнес';
     case 'signed_out':
       return 'Войдите, чтобы написать MAYA';
-    case 'subscription_required':
-      return 'Нужна активная подписка';
-    case 'tenant_required':
-      return 'Нужен вход в бизнес';
+  }
+};
+
+/** dom/composer.ts:25 — the runtime decides `too_long` on the NFC-trimmed length. */
+export const COMPOSER_LIMIT = 2_000;
+
+/**
+ * Why a submit was refused before anything left the device. dom/composer.ts:158-166.
+ *
+ * `in_flight` and `composer_disabled` have no sentence in the shell either: the first is answered by
+ * the send control already reading as unavailable, the second by `composerReason`. Saying something
+ * extra would be the carrier inventing a second explanation for a state the runtime already words.
+ */
+export const refusalSentence = (
+  refusal: 'empty' | 'too_long' | 'in_flight' | 'composer_disabled',
+): string | null => {
+  switch (refusal) {
+    case 'empty':
+      return 'Напишите сообщение';
+    case 'too_long':
+      return `Сообщение длиннее ${COMPOSER_LIMIT} символов — сократите его`;
+    case 'in_flight':
+    case 'composer_disabled':
+      return null;
   }
 };
 
@@ -223,4 +256,75 @@ export const signedOutSentence = (reason: SignedOutReason | null): string | null
     case 'session_revoked':
       return 'Сессия завершена — войдите снова.';
   }
+};
+
+// ── voice, from dom/voice-control.ts ───────────────────────────────────────────────────────────
+
+/** dom/voice-control.ts:64-77 */
+export const voiceNoticeSentence = (notice: VoiceNotice): string => {
+  switch (notice) {
+    case 'not_recognized':
+      return 'Не расслышала — повторите или напишите сообщение';
+    case 'audio_rejected':
+      return 'Запись не принята — попробуйте ещё раз или напишите сообщение';
+    case 'too_short':
+      return 'Запись слишком короткая — ничего не отправлено';
+    case 'no_connection':
+      return 'Нет связи — запись не распознана, повторите или напишите сообщение';
+    case 'locked_for_step':
+      return 'Здесь лучше написать текстом — голос для этого шага выключен';
+  }
+};
+
+/**
+ * The one polite announcement for a view. dom/voice-control.ts:79-97.
+ *
+ * 🔴 `unavailable` is the exception to re-typing: its sentence is a Cell whose `.label` the RUNTIME
+ * mints, and it is rendered verbatim. A carrier-authored substitute would be the presentation
+ * explaining a state it does not own.
+ */
+export const voiceStatusSentence = (view: VoiceView): string => {
+  switch (view.state) {
+    case 'idle':
+      return view.notice === null ? '' : voiceNoticeSentence(view.notice);
+    case 'arming':
+      return 'Жду разрешения на микрофон';
+    case 'listening':
+      return 'Слушаю — ничего не отправляется';
+    case 'held':
+      return 'Прошло 20 секунд — запись остановлена и не отправлена';
+    case 'recording':
+      return 'Отправляю запись на распознавание';
+    case 'transcribing':
+      return 'Распознаю…';
+    case 'unavailable':
+      return view.unavailable === null ? '' : view.unavailable.label;
+  }
+};
+
+/** What the mic control does next, in words. Idle and unavailable have no in-progress indicator. */
+export const voiceActionLabel = (state: VoiceState): string => {
+  switch (state) {
+    case 'idle':
+      return 'Сказать голосом';
+    case 'arming':
+      return 'Жду микрофон';
+    case 'listening':
+      return 'Отправить запись';
+    case 'held':
+      return 'Отправить запись';
+    case 'recording':
+      return 'Отправляю запись';
+    case 'transcribing':
+      return 'Распознаю';
+    case 'unavailable':
+      return 'Голосовой ввод недоступен';
+  }
+};
+
+/** m:ss. dom/voice-control.ts:100-104. */
+export const formatElapsed = (ms: number): string => {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const seconds = total % 60;
+  return `${Math.floor(total / 60)}:${seconds < 10 ? '0' : ''}${seconds}`;
 };
