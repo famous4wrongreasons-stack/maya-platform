@@ -107,17 +107,41 @@ export const widgetSentence = (sentence: WidgetSentence): string => {
   }
 };
 
-/** Why the composer will not send. The runtime decides this; the carrier only words it. */
+/** Why the composer will not send (§1.4). The runtime decides this; the carrier only words it. */
 export const composerReason = (
   reason: 'subscription_required' | 'tenant_required' | 'signed_out',
 ): string => {
   switch (reason) {
+    case 'subscription_required':
+      return 'Отправка недоступна: разговор с MAYA не подключён для этого бизнеса';
+    case 'tenant_required':
+      return 'Для разговора с MAYA нужен вход в бизнес';
     case 'signed_out':
       return 'Войдите, чтобы написать MAYA';
-    case 'subscription_required':
-      return 'Нужна активная подписка';
-    case 'tenant_required':
-      return 'Нужен вход в бизнес';
+  }
+};
+
+/** dom/composer.ts:25 — the runtime decides `too_long` on the NFC-trimmed length. */
+export const COMPOSER_LIMIT = 2_000;
+
+/**
+ * Why a submit was refused before anything left the device. dom/composer.ts:158-166.
+ *
+ * `in_flight` and `composer_disabled` have no sentence in the shell either: the first is answered by
+ * the send control already reading as unavailable, the second by `composerReason`. Saying something
+ * extra would be the carrier inventing a second explanation for a state the runtime already words.
+ */
+export const refusalSentence = (
+  refusal: 'empty' | 'too_long' | 'in_flight' | 'composer_disabled',
+): string | null => {
+  switch (refusal) {
+    case 'empty':
+      return 'Напишите сообщение';
+    case 'too_long':
+      return `Сообщение длиннее ${COMPOSER_LIMIT} символов — сократите его`;
+    case 'in_flight':
+    case 'composer_disabled':
+      return null;
   }
 };
 

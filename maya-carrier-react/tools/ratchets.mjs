@@ -97,6 +97,26 @@ export const NAME_RULES = [
     members: [],
   },
   {
+    id: 'no-outcome-invention',
+    property:
+      'A business outcome is the server\u2019s word, not the client\u2019s. The runtime reads exactly one field of a TerminalLine — its server-minted `text`, appended as an ordinary assistant turn — and reads neither `outcome` nor `action_receipt_ref`; `TimelineItemView` has no member that could carry either. So there is no honest way for presentation to learn that something was CONFIRMED, and a component naming these has either invented an outcome or reached past the projection for one.',
+    // NOT banned, on purpose: `SUPERSEDED` and `CANCELLED` are also LifecycleState members, and
+    // `RenderResult.lifecycle.state` legitimately carries them to a drawer.
+    names: [
+      'action_receipt_ref',
+      'terminal_lines',
+      'reread_intent',
+      'TerminalLine',
+      'TerminalOutcome',
+      'CONFIRMED',
+      'NOT_CONFIRMED',
+      'EXPIRED_UNUSED',
+      'DELIVERED_ONLY',
+    ],
+    members: [],
+    alsoInStrings: true,
+  },
+  {
     id: 'no-legacy-transport',
     property: 'The legacy salon proxy and every direct CRM URL. Business effect leaves through the canonical backend or not at all.',
     names: ['api-proxy', 'CHAT_PROXY', 'BF_PROXY', 'SS_PROXY', 'CM_PROXY', '__ME_SAAS_CTX', '__meSaasAuthedFetch'],

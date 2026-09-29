@@ -41,3 +41,15 @@ export function markupOf(item: unknown, dark = true): string {
 }
 
 export { project, verify, render };
+
+// The carrier's sole href owner, and the shell's original, side by side. The test compares them.
+export { isReplyHref, replySegments } from '../src/reply-link.tsx';
+import { ReplyText as ReplyTextLocal } from '../src/reply-link.tsx';
+export {
+  isReplyHref as shellIsReplyHref,
+  replySegments as shellReplySegments,
+} from '../../maya-chat-shell/src/dom/timeline.ts';
+
+export function replyMarkup(reply: string): string {
+  return renderToStaticMarkup(<ReplyTextLocal reply={reply} accent="#0A84FF" />);
+}

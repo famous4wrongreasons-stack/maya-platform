@@ -12,7 +12,7 @@
     "check": "node build.mjs --typecheck",
     "typecheck": "node build.mjs --typecheck",
     "serve": "node tools/serve.mjs",
-    "test": "node test/build-harness.mjs && node --test test/parity.test.mjs"
+    "test": "node test/build-harness.mjs && node --test test/parity.test.mjs test/reply-link.test.mjs"
   },
   "dependencies": {
     "react": "19.2.8",

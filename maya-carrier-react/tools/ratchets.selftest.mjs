@@ -69,6 +69,11 @@ const CASES = [
   ['no-capability-decision', `if (isOwner(user)) show();`, `if (view.canClear) show();`],
   ['no-capability-decision', `const r = useRole();`, `const r = props.display;`],
   ['no-legacy-transport', `const P = 'https://malesthetic.pro/app/api-proxy.php';`, `const P = '/api';`],
+  ['no-outcome-invention', `if (line.outcome === 'CONFIRMED') tick();`, `if (item.display === 'terminal') quiet();`],
+  ['no-outcome-invention', `show(receipt.action_receipt_ref);`, `show(item.sentence);`],
+  ['no-outcome-invention', `const lines: TerminalLine[] = [];`, `const lines: string[] = [];`],
+  // Admitted on purpose: these two are LifecycleState members the RenderResult really carries.
+  ['no-outcome-invention', `const o = 'EXPIRED_UNUSED';`, `if (result.lifecycle.state === 'SUPERSEDED') collapse();`],
   ['no-network-in-presentation', `await fetch('/api/ai/chat');`, `await port.submitUserTurn(text);`],
   ['no-network-in-presentation', `new WebSocket('wss://x');`, `const w = null;`],
   ['closed-tag-set', `<img src="a.png" />`, `<div className="a" />`],

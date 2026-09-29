@@ -14,7 +14,7 @@
 //     and nothing here draws a tick from it — the turn's fate arrives as `state` in the next view;
 //   * assistant text has exactly two writers, both server-side. There is no optimistic bubble.
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type {
   ConversationView,
   TimelineItemView,
@@ -26,12 +26,16 @@ import {
   composerReason,
   failureBase,
   NEW_TURN_NOTE,
+  COMPOSER_LIMIT,
   noticeSentence,
+  refusalSentence,
   secondsLeft,
+  THINKING,
 } from '../runtime/copy.ts';
 import { Backdrop } from '../identity/Backdrop.tsx';
 import { MayaMark, MayaVolumeMark } from '../identity/MayaMark.tsx';
 import { MAYA_ACCENT, MAYA_ACCENT_ON, type Tokens } from '../identity/tokens.ts';
+import { ReplyText } from '../reply-link.tsx';
 
 /** The reading face MAYA's own words are set in (app.html:21307). */
 const READING = '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
@@ -53,14 +57,25 @@ const STICK_TO_END_PX = 96;
  * pattern and refuses the build. An uppercase alias is unambiguous to both readers.
  */
 type ItemId = string | null;
+type DivOrNone = HTMLDivElement | null;
+type TextAreaOrNone = HTMLTextAreaElement | null;
+type ElementOrNone = HTMLElement | null;
+/** Why a submit was refused before anything left the device, or none. */
+type Refusal = 'empty' | 'too_long' | 'in_flight' | 'composer_disabled' | null;
 
-/** app.html:21254 — the thinking state, docked above the composer, never inside the lane. */
+/**
+ * app.html:21254 — the thinking state, docked above the composer, never inside the lane.
+ *
+ * Decoration only. dom/timeline.ts keeps ONE permanently-mounted `role="status"` node and writes
+ * into it; a status region created and destroyed with the state it describes is announced
+ * unreliably, and two of them announce twice. So the dots are `aria-hidden` and the sentence lives
+ * in the permanent node below the lane.
+ */
 function TypingDots({ dark }: { readonly dark: boolean }) {
   return (
     <div
       className={'maya-typing' + (dark ? '' : ' maya-typing-light')}
-      role="status"
-      aria-label="Maya печатает"
+      aria-hidden="true"
       style={{ padding: '4px 2px' }}
     >
       <span aria-hidden="true" />
@@ -118,10 +133,12 @@ function Row({
   item,
   t,
   now,
+  focusComposer,
 }: {
   readonly item: TimelineItemView;
   readonly t: Tokens;
   readonly now: number;
+  readonly focusComposer: () => void;
 }) {
   const dark = t.dark;
 
@@ -208,7 +225,18 @@ function Row({
               overflowWrap: 'anywhere',
             }}
           >
-            {item.text}
+            {/* Without a speaker, a screen reader hears one undifferentiated stream of turns. */}
+            <span className="vh">{user ? 'Вы: ' : 'MAYA: '}</span>
+            {/* Only MAYA's words are scanned for targets; the person's own text is never linkified. */}
+            {user ? item.text : <ReplyText reply={item.text} accent={MAYA_ACCENT} />}
+            {item.kind === 'user' && item.modality === 'spoken' ? (
+              <>
+                {' '}
+                <span role="img" aria-label="голосом">
+                  ◉
+                </span>
+              </>
+            ) : null}
           </div>
         </div>
 
@@ -232,7 +260,12 @@ function Row({
                 <button
                   type="button"
                   aria-label="Повторить отправку"
-                  onClick={() => conversation.retry(item.id)}
+                  onClick={() => {
+                    conversation.retry(item.id);
+                    // The button is replaced by a sending state the moment this runs; without
+                    // moving focus deliberately it lands on <body> and a keyboard user is lost.
+                    focusComposer();
+                  }}
                   style={{
                     appearance: 'none',
                     border: '0',
@@ -272,10 +305,19 @@ export function ChatScreen({
 }) {
   const dark = t.dark;
   const [draft, setDraft] = useState('');
+  const [refused, setRefused] = useState<Refusal>(null);
   const hasDraft = draft.trim().length > 0;
+  const noteId = useId();
+  const tooLong = draft.length > COMPOSER_LIMIT;
+
+  const focusComposer = useCallback(() => {
+    composerRef.current?.focus();
+  }, []);
   const now = useCountdownClock(view);
 
-  const laneRef = useRef<HTMLDivElement | null>(null);
+  const laneRef = useRef<DivOrNone>(null);
+  const composerRef = useRef<TextAreaOrNone>(null);
+  const focusedRef = useRef<ElementOrNone>(null);
   const stickRef = useRef(true);
   const newestUserRef = useRef<ItemId>(null);
   const awaitingRef = useRef<{ itemId: string; text: string } | null>(null);
@@ -287,10 +329,17 @@ export function ChatScreen({
     // Cosmetic only. The authority is the runtime's own refusal set — `empty`, `too_long`,
     // `in_flight`, `composer_disabled` — decided inside submitUserTurn against state this screen
     // cannot see. Keeping only this check would allow a double-send whenever the snapshot is stale.
-    if (!view.composer.enabled || view.inFlight || text.trim().length === 0) return;
+    if (!view.composer.enabled || view.inFlight) return;
     const outcome = conversation.submitUserTurn(text, { modality: 'typed' });
-    // `accepted: true` means QUEUED. Nothing is drawn from it.
-    if (outcome.accepted) awaitingRef.current = { itemId: outcome.itemId, text };
+    // `accepted: true` means QUEUED. Nothing is drawn from it. A refusal is the runtime telling the
+    // person why nothing left the device — dropping it on the floor, as this did before, makes a
+    // pressed Send look like a message that vanished.
+    if (outcome.accepted) {
+      setRefused(null);
+      awaitingRef.current = { itemId: outcome.itemId, text };
+      return;
+    }
+    setRefused(outcome.refusal);
   }, [draft, view]);
 
   // dom/composer.ts:141-150 — the draft clears when the turn is SENT, not when it is submitted, and
@@ -326,6 +375,19 @@ export function ChatScreen({
     if (ownTurn || stickRef.current) lane.scrollTop = lane.scrollHeight;
   }, [view]);
 
+  // dom/timeline.ts captures the focused element before it redraws and restores it after. React
+  // reconciliation will not: when the element holding focus is removed — a retry button becoming a
+  // sending state, a widget collapsing — focus silently falls to <body>. Catch that and put it
+  // somewhere deliberate.
+  useLayoutEffect(() => {
+    const previous = focusedRef.current;
+    const active = document.activeElement;
+    focusedRef.current = active instanceof HTMLElement ? active : null;
+    if (previous === null || document.contains(previous)) return;
+    const frame = window.requestAnimationFrame(focusComposer);
+    return () => window.cancelAnimationFrame(frame);
+  }, [view, focusComposer]);
+
   const onLaneScroll = useCallback(() => {
     const lane = laneRef.current;
     if (lane === null) return;
@@ -338,7 +400,8 @@ export function ChatScreen({
         <Backdrop t={t} />
       </div>
 
-      <div
+      <section
+        aria-label="Разговор с MAYA"
         style={{
           position: 'absolute',
           top: 0,
@@ -436,9 +499,18 @@ export function ChatScreen({
         </div>
 
         {/* app.html:21647-21658 — the one scroller. 84px clears the header, 212px the composer. */}
+        {/*
+          dom/timeline.ts:177-181 — the lane IS the live region: one permanent polite log with a
+          name. Without it an assistant reply is never announced, and the region cannot be reached
+          by landmark navigation. A widget's own aria-live nests inside and overrides it, which is
+          how a blocking limitation still announces assertively inside a polite log.
+        */}
         <div
           ref={laneRef}
           onScroll={onLaneScroll}
+          role="log"
+          aria-live="polite"
+          aria-label="Сообщения"
           style={{
             flex: 1,
             overflow: 'auto',
@@ -449,9 +521,17 @@ export function ChatScreen({
         >
           {view.items.length === 0 ? <ChromeLine t={t} text={COLD_START_HINT} /> : null}
           {view.items.map((item) => (
-            <Row key={item.id} item={item} t={t} now={now} />
+            <Row key={item.id} item={item} t={t} now={now} focusComposer={focusComposer} />
           ))}
         </div>
+
+        {/*
+          dom/timeline.ts:183-187 — ONE status node, mounted always and written into. Mounting it
+          with the state it describes is the classic way to have it never announced at all.
+        */}
+        <p className="vh" role="status">
+          {view.inFlight ? THINKING : ''}
+        </p>
 
         {/* app.html:21759-21762 — the footer overlays the lane; only the pill takes pointer events. */}
         <div
@@ -516,6 +596,25 @@ export function ChatScreen({
               }}
             />
 
+            {refused === null || refusalSentence(refused) === null ? null : (
+              <p
+                id={noteId}
+                role="status"
+                style={{
+                  position: 'relative',
+                  zIndex: 1,
+                  margin: 0,
+                  padding: '0 6px',
+                  fontFamily: READING,
+                  fontSize: 12,
+                  lineHeight: '17px',
+                  color: dark ? 'rgba(244,240,235,0.68)' : 'rgba(11,11,12,0.68)',
+                }}
+              >
+                {refused === null ? '' : refusalSentence(refused)}
+              </p>
+            )}
+
             <div style={{ position: 'relative', zIndex: 1, width: '100%', height: 52 }}>
               <div
                 style={{
@@ -546,24 +645,37 @@ export function ChatScreen({
                   `readOnly` + `aria-disabled` rather than `disabled`, so the reason stays reachable
                   to a screen reader instead of the control vanishing from the tab order.
                 */}
+                <label className="vh" htmlFor={noteId + '-input'}>
+                  Сообщение для MAYA
+                </label>
                 <textarea
+                  id={noteId + '-input'}
+                  ref={composerRef}
                   rows={1}
                   value={draft}
                   readOnly={!view.composer.enabled}
                   aria-disabled={!view.composer.enabled}
-                  aria-label="Сообщение Maya"
+                  aria-describedby={refused === null ? undefined : noteId}
+                  aria-invalid={tooLong ? 'true' : undefined}
                   placeholder={
                     view.composer.enabled ? 'Сообщение Maya…' : composerReason(view.composer.reason)
                   }
                   autoComplete="off"
                   enterKeyHint="send"
-                  onChange={(event) => setDraft(event.target.value)}
+                  onChange={(event) => {
+                    setDraft(event.target.value);
+                    setRefused(null);
+                  }}
                   onKeyDown={(event) => {
                     // dom/composer.ts:171 — BOTH IME guards. An Enter during composition is the IME
                     // accepting a candidate, not the person sending.
                     if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
-                    if (event.key !== 'Enter' || event.shiftKey) return;
+                    if (event.key !== 'Enter') return;
+                    // Canonically this was an <input>, so a newline was never possible. The pill is
+                    // a fixed 52px with overflow hidden, so a Shift+Enter newline would be typed
+                    // into a box that cannot show it. Enter sends, with or without a modifier.
                     event.preventDefault();
+                    if (event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return;
                     send();
                   }}
                   style={{
@@ -647,7 +759,7 @@ export function ChatScreen({
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
