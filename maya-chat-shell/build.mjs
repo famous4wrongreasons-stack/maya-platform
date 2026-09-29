@@ -1970,7 +1970,10 @@ export function pwaContractTest(root = ROOT) {
   withIndex('a head without apple-mobile-web-app-capable is refused', 'apple-mobile-web-app-capable', (h) => h.replace(/<meta name="apple-mobile-web-app-capable"[^>]*>\n/, ''));
   withIndex('an unknown status bar style is refused', 'status-bar-style must appear exactly once with one of', (h) => h.replace(/content="(default|black|black-translucent)">/, 'content="translucent">'));
   withIndex('a single unscoped theme-color is refused', 'exactly two theme-color metas', (h) => h.replace(/<meta name="theme-color"[^>]*>\n<meta name="theme-color"[^>]*>\n/, '<meta name="theme-color" content="#f6f5f2">\n'));
-  withIndex('a theme-color that is not the dark token is refused', 'dark --bg is', (h) => h.replace(/(<meta name="theme-color" media="\(prefers-color-scheme: dark\)" content=")[^"]*/, '$1#000000'));
+  // The wrong value has to be wrong. It used to be #000000, which stopped mutating anything the day
+  // the dark --bg became #000000 — a mutation that does not mutate proves the rule is checked when it
+  // proves nothing at all. #123456 is no scheme's token and never will be.
+  withIndex('a theme-color that is not the dark token is refused', 'dark --bg is', (h) => h.replace(/(<meta name="theme-color" media="\(prefers-color-scheme: dark\)" content=")[^"]*/, '$1#123456'));
   withIndex('a page that registers a service worker is refused', 'names a service worker', (h) => h.replace('</head>', '<link rel="serviceworker" href="./sw.js">\n</head>'));
 
   // ── the bypasses a literal count admitted: a second tag in the same ROLE, in another spelling ──

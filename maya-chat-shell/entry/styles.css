@@ -5,22 +5,29 @@
  * at least 44 x 44 CSS px. No external resource of any kind. */
 
 :root {
-  --bg: #f6f5f2;
-  --surface: #ffffff;
-  --surface-muted: #eeece7;
-  --text: #1c1b19;
-  --text-muted: #5b5850;
-  --border: #d6d2c8;
-  --accent: #1d4ed8;
+  /* The approved MAYA palette, direction `aurora` — the one the phone-proven app runs.
+   * Recovered from the preserved native tree, not re-invented: warm bone paper, near-black ink,
+   * hairline borders as alpha rather than a solid grey, and one saturated colour in the whole
+   * system. `--accent` is reserved for the Telegram row, the microphone and send; content never
+   * wears it. */
+  --bg: #f4f0eb;
+  --surface: #fffdf9;
+  --surface-muted: #efeae1;
+  --text: #18160f;
+  --text-muted: rgba(24, 22, 15, 0.55);
+  --border: rgba(24, 22, 15, 0.1);
+  --accent: #0a84ff;
   --accent-text: #ffffff;
-  --focus: #1d4ed8;
-  --user-bubble: #e4eaf8;
-  --notice: #f3eedf;
+  --focus: #0a84ff;
+  --user-bubble: rgba(24, 22, 15, 0.045);
+  --notice: #efeae1;
   --danger-line: #8a3b12;
   --radius: 0.75rem;
   --gap: 0.75rem;
   --target: 44px;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* The platform's own reading face, for MAYA's prose only. No file is fetched for it. */
+  --font-reading: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
   /* The device's own unsafe edges — notch or status bar, home indicator, landscape cheeks — read once
    * here so every fixed and full-height surface pads from the same four numbers. `viewport-fit=cover`
    * in entry/index.html is what makes them non-zero in a standalone window (§1.11, A-10). */
@@ -33,17 +40,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #121315;
-    --surface: #1b1d20;
-    --surface-muted: #24272b;
-    --text: #ecebe7;
-    --text-muted: #b3b0a8;
-    --border: #3a3e44;
-    --accent: #8fb3ff;
-    --accent-text: #0d1117;
-    --focus: #8fb3ff;
-    --user-bubble: #22304a;
-    --notice: #2d2a20;
+    /* True black, not charcoal: the approved dark direction. */
+    --bg: #000000;
+    --surface: #0f0f11;
+    --surface-muted: #0b0b0c;
+    --text: #f4f0eb;
+    --text-muted: rgba(244, 240, 235, 0.55);
+    --border: rgba(244, 240, 235, 0.12);
+    --accent: #0a84ff;
+    --accent-text: #ffffff;
+    --focus: #0a84ff;
+    --user-bubble: rgba(244, 240, 235, 0.05);
+    --notice: #0b0b0c;
     --danger-line: #f0b48c;
   }
 }
@@ -235,10 +243,22 @@ textarea {
   word-break: break-word;
 }
 
+/* 🔴 The approved voice split, recovered from the native build.
+ *
+ * MAYA's own words are set in the PLATFORM face at reading size — on an iPhone that is San
+ * Francisco — so long assistant prose reads like native text rather than like a web page. The
+ * user's words stay in the shell's own face, a size smaller and tighter, so the two voices are
+ * told apart by type rather than by colour. It is the cheapest strong signal a chat product has,
+ * and it costs no font file. */
 .turn--user {
   align-self: flex-end;
   background: var(--user-bubble);
   max-width: min(100%, 36rem);
+}
+
+.turn--user .turn-text {
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
 }
 
 .turn--maya {
@@ -246,6 +266,13 @@ textarea {
   background: var(--surface);
   border: 1px solid var(--border);
   max-width: min(100%, 40rem);
+}
+
+.turn--maya .turn-text {
+  font-family: var(--font-reading);
+  font-size: 1.0625rem;
+  line-height: 1.5625rem;
+  letter-spacing: -0.01em;
 }
 
 .turn--sending {

@@ -35,8 +35,8 @@
     "src/voice/capture.ts",
     "src/voice/wav.ts"
   ],
-  "bytes": 399291,
-  "digest": "fe2a8c9d52a4291ca1459475ad63670ac023b10ec355653bc3512b8945eb1199",
+  "bytes": 400760,
+  "digest": "1a7076c870c6dff153826565f17a82f3293c3e3d7f8bfee38e5fb0df95632876",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -44,8 +44,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "d49934adca496b6cf20ad46efad2a4e752c0eb443c81bfa75fc2a6bdee4ab3cc",
-    "modulePath": "m/d49934adca496b6c/",
+    "digest": "f35a28aef062a7198320f5232d8cdb84872b9ea663e08dd9bd15980570792627",
+    "modulePath": "m/f35a28aef062a719/",
     "files": [
       {
         "path": "entry/main.js",
@@ -199,37 +199,37 @@
       }
     ],
     "styles": {
-      "sha256": "83b8bb8f7cfc1e13da8d48c34d519d6f325b0304942adf9044fde60fff633265",
-      "bytes": 22401
+      "sha256": "d4905bcc54d5890dbd52792a60d1d6e763d3c15d3ab86a09e0a4615032e31404",
+      "bytes": 23870
     },
     "index": {
-      "sha256": "a4311e7d8ef88cb60993251326bb64fc4e3794cc9a55acbde02c321cd60ad48c",
+      "sha256": "e580b860854beb6763c4afa33e913fdec405bbe081b9fb41147bb39f5a96fe5f",
       "bytes": 1325
     },
     "assets": [
       {
         "path": "icons/maya-192.png",
-        "sha256": "637b5057ffa74db89bf170450c27b8b31233de3c0c8fcb51ffb33c239301b7cc",
+        "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551",
         "bytes": 1970
       },
       {
         "path": "icons/maya-512-maskable.png",
-        "sha256": "37dae9c45b1dba43a2a4c04c8b24ec1a0b72c0e36ef94256e4b02215bdab2ae2",
+        "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be",
         "bytes": 4476
       },
       {
         "path": "icons/maya-512.png",
-        "sha256": "9f6d69b4aa900d81d6aeba93b277f8e0bf16b39f2dcf8bf445d1fd13d64927fb",
+        "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a",
         "bytes": 5951
       },
       {
         "path": "icons/maya-apple-180.png",
-        "sha256": "8ee4557f95e81ddc21b72b0f82c4cdc25f3b02547321fbcb06615b9d5030e84e",
+        "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1",
         "bytes": 1977
       },
       {
         "path": "manifest.webmanifest",
-        "sha256": "40a32311bba22066b544639618332d89d91e8e50d2b874f62af691fe2d4790bd",
+        "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e",
         "bytes": 670
       }
     ]

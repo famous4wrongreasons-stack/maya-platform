@@ -35,8 +35,8 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = path.join(HERE, 'icons');
 
 /** The two stylesheet tokens the mark is built from: light `--accent` field, light `--bg` glyph. */
-export const FIELD = [0x1d, 0x4e, 0xd8];
-export const MARK = [0xf6, 0xf5, 0xf2];
+export const FIELD = [0x0a, 0x84, 0xff];
+export const MARK = [0xf4, 0xf0, 0xeb];
 
 /** The set. `glyph` is the side of the mark's box as a fraction of the icon, centred. */
 export const ICONS = [
