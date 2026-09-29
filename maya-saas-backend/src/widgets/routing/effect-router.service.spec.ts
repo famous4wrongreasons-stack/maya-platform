@@ -825,4 +825,39 @@ describe('U13a — closed Gate 13 spine, claim, receipt and dismiss', () => {
     ).resolves.toBe(true);
     expect(stores.reconcileAcceptedReceipt).toHaveBeenCalledTimes(1);
   });
+  it.each(['authority-tenant', 'authority-user', 'actor-tenant'])(
+    'WR-L7 refuses selector DRAFT when %s disagrees, before quoting or storing',
+    async (mismatch) => {
+      const { router, bookingPropose, bookingMinter, stores } = fixture();
+      const principal = { ...PRINCIPAL, authority: { ...PRINCIPAL.authority } };
+      if (mismatch === 'authority-tenant')
+        principal.authority.tenantId = 'foreign';
+      if (mismatch === 'authority-user') principal.authority.userId = 'foreign';
+      const input = ctx(
+        rec({
+          effect: 'DRAFT',
+          widgetKind: 'TIME_SLOT_SELECTOR',
+          capabilitySpace: 'C9',
+          capabilityKey: 'appointments.own.create',
+          frozenNounsJson: { service: 'opaque-service', staff: 'opaque-staff' },
+        }),
+        {
+          principal,
+          facts: {
+            validatedInputs: {
+              closed: new Map([['slot_ref', ['opaque-slot']]]),
+            },
+          },
+        },
+      );
+      if (mismatch === 'actor-tenant')
+        input.actor = { ...input.actor, tenantId: 'foreign' };
+      await expect(routeEffect(router, input)).resolves.toMatchObject({
+        route: { receipt_outcome: 'REFUSED' },
+      });
+      expect(bookingPropose.proposeCreateSelection).not.toHaveBeenCalled();
+      expect(bookingMinter.mint).not.toHaveBeenCalled();
+      expect(stores.putDraft).not.toHaveBeenCalled();
+    },
+  );
 });

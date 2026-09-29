@@ -36,12 +36,25 @@ describe('FBE2E-2 — booking selector presentation', () => {
     expect(presented?.body).toMatchObject({
       select: 'single',
       shown_count: 1,
+      total_count: null,
       options: [
         {
           option_id: 'tenant-a:service:catalog_service:service-1',
           service_ref: 'tenant-a:service:catalog_service:service-1',
           label: { value: 'Haircut' },
           intent_ref: 'i1',
+          enabled: {
+            state: 'NOT_MEASURED',
+            value: null,
+            reason_code: 'NOT_COLLECTED',
+            fact_ref: null,
+          },
+          requires_consultation: {
+            state: 'NOT_MEASURED',
+            value: null,
+            reason_code: 'NOT_COLLECTED',
+            fact_ref: null,
+          },
         },
       ],
     });
@@ -72,10 +85,24 @@ describe('FBE2E-2 — booking selector presentation', () => {
     expect(staff?.body).toMatchObject({
       for_service_refs: ['opaque-service'],
       shown_count: 1,
+      total_count: null,
       options: [
         {
           staff_ref: 'tenant-a:staff:catalog_staff:staff-1',
           label: { value: 'Alice' },
+          enabled: {
+            state: 'NOT_MEASURED',
+            value: null,
+            reason_code: 'NOT_COLLECTED',
+            fact_ref: null,
+          },
+          nearest_availability: {
+            state: 'NOT_MEASURED',
+            value: null,
+            reason_code: 'NOT_COLLECTED',
+            fact_ref: null,
+            unit: 'datetime',
+          },
         },
       ],
     });
@@ -120,6 +147,7 @@ describe('FBE2E-2 — booking selector presentation', () => {
     expect(presented?.body).toMatchObject({
       timezone: 'UTC',
       shown_count: 1,
+      total_count: null,
       groups: [
         {
           slots: [
@@ -133,7 +161,12 @@ describe('FBE2E-2 — booking selector presentation', () => {
                 ) as string,
               }),
               staff_ref: 'opaque-staff',
-              availability: { value: 'FREE' },
+              availability: {
+                state: 'NOT_MEASURED',
+                value: null,
+                reason_code: 'NOT_COLLECTED',
+                fact_ref: null,
+              },
             },
           ],
         },

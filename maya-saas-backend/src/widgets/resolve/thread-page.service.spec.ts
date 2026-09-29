@@ -150,4 +150,45 @@ describe('P-RESOLVE principal thread page', () => {
     ).resolves.not.toHaveLength(0);
     await expect(validate(tooLarge)).resolves.not.toHaveLength(0);
   });
+  it('WR-L21 filters invalid stored outcomes and receipt bindings before the wire', async () => {
+    const { service, findMany } = make();
+    const valid = [
+      ...[
+        'SUBMITTED',
+        'NOT_CONFIRMED',
+        'EXPIRED_UNUSED',
+        'SUPERSEDED',
+        'CANCELLED',
+        'DELIVERED_ONLY',
+      ].map((outcome) => ({
+        outcome,
+        text: 'Server line',
+        action_receipt_ref: null,
+      })),
+      {
+        outcome: 'CONFIRMED',
+        text: 'Server line',
+        action_receipt_ref: 'ae-receipt',
+      },
+    ];
+    const invalid = [
+      { outcome: 'invented', text: 'x', action_receipt_ref: null },
+      { outcome: 'CONFIRMED', text: 'x', action_receipt_ref: null },
+      { outcome: 'CONFIRMED', text: 'x', action_receipt_ref: '' },
+      { outcome: 'CONFIRMED', text: 'x', action_receipt_ref: '  ' },
+      { outcome: 'SUBMITTED', text: 'x', action_receipt_ref: 'ae-receipt' },
+      { outcome: 'SUBMITTED', text: 'x' },
+      { outcome: 'CONFIRMED', text: 12, action_receipt_ref: 'ae-receipt' },
+    ];
+    findMany.mockResolvedValue([
+      {
+        terminalLinesJson: [...invalid, ...valid],
+        intentRecords: [{ intentTokenHash: 'a'.repeat(64) }],
+        renderReceipts: [{ emittedEnvelopeJson: envelope }],
+      },
+    ] as never);
+    await expect(service.read({ limit: 20 })).resolves.toEqual([
+      { envelope, terminal_lines: valid, reread_intent: null },
+    ]);
+  });
 });

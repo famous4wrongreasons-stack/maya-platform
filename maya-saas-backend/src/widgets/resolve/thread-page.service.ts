@@ -165,15 +165,25 @@ const terminalLines = (value: unknown): TerminalLine[] => {
   return value.filter(isTerminalLine);
 };
 
-const isTerminalLine = (value: unknown): value is TerminalLine =>
-  typeof value === 'object' &&
-  value !== null &&
-  typeof (value as { outcome?: unknown }).outcome === 'string' &&
-  typeof (value as { text?: unknown }).text === 'string' &&
-  (((value as { action_receipt_ref?: unknown }).action_receipt_ref ?? null) ===
-    null ||
-    typeof (value as { action_receipt_ref?: unknown }).action_receipt_ref ===
-      'string');
+const isTerminalLine = (value: unknown): value is TerminalLine => {
+  if (!isRecord(value) || typeof value.text !== 'string') return false;
+  const outcomes: readonly TerminalLine['outcome'][] = [
+    'SUBMITTED',
+    'CONFIRMED',
+    'NOT_CONFIRMED',
+    'EXPIRED_UNUSED',
+    'SUPERSEDED',
+    'CANCELLED',
+    'DELIVERED_ONLY',
+  ];
+  if (!outcomes.includes(value.outcome as TerminalLine['outcome']))
+    return false;
+  // Contract §4.2: a canonical action reference is present iff CONFIRMED.
+  return value.outcome === 'CONFIRMED'
+    ? typeof value.action_receipt_ref === 'string' &&
+        value.action_receipt_ref.trim().length > 0
+    : value.action_receipt_ref === null;
+};
 
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);

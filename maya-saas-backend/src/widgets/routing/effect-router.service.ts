@@ -450,7 +450,15 @@ export class EffectRouterService {
       'service',
       'staff',
     ]);
-    if (slot === null || inherited === null || ctx.principal === null)
+    const authority = ctx.principal?.authority;
+    if (
+      slot === null ||
+      inherited === null ||
+      ctx.principal === null ||
+      authority?.tenantId !== ctx.tenantId ||
+      authority.userId !== ctx.actor.userId ||
+      ctx.actor.tenantId !== ctx.tenantId
+    )
       return admitted({
         receiptOutcome: 'REFUSED',
         refusalCode: 'effect_not_admissible',
@@ -471,19 +479,21 @@ export class EffectRouterService {
         routing: input,
         actorUserId: ctx.actor.userId,
         principal: ctx.principal,
-        resolvedNouns: {
-          row: 'A1',
-          diverged: false,
-          diff: [],
-          values: proposed.values,
-        },
+        // These values were opened by the booking owner; Gate 11 deferred this
+        // read. Do not claim an A1 row or a divergence verdict that never ran.
+        resolvedNouns: { values: proposed.values },
       },
       proposed.outcome,
     );
   }
 
   private async completeBookingPreview(
-    input: import('./effect-router.ports').ActuatingRoutingInput,
+    input: Pick<
+      import('./effect-router.ports').ActuatingRoutingInput,
+      'routing' | 'actorUserId' | 'principal'
+    > & {
+      resolvedNouns: Pick<ResolvedNouns, 'values'>;
+    },
     outcome: EffectRouteOutcome,
   ): Promise<EffectRouteOutcome> {
     const preview = bookingPreviewOf(outcome.ownerDecision);

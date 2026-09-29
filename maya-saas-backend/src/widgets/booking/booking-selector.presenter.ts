@@ -42,6 +42,16 @@ const known = <T>(value: T, label = String(value)): Cell<T> => ({
   evidence_refs: [],
   next_intent_ref: null,
 });
+const unknownCell = <T>(): Cell<T> => ({
+  state: 'NOT_MEASURED',
+  value: null,
+  label: 'Not measured',
+  reason_code: 'NOT_COLLECTED',
+  fact_ref: null,
+  as_of: null,
+  evidence_refs: [],
+  next_intent_ref: null,
+});
 const unknownMeasure = (key: string, unit: Measure['unit']): Measure => ({
   ...known<null>(null, 'Not measured'),
   state: 'NOT_MEASURED',
@@ -120,7 +130,7 @@ const presentServices = (
       measures: [],
       media: null,
       intent_ref: 'i1',
-      enabled: known(true, name),
+      enabled: unknownCell<boolean>(),
       duration: measure(
         'booking.duration',
         duration,
@@ -134,7 +144,7 @@ const presentServices = (
         `${price} ${currency}`,
         currency,
       ),
-      requires_consultation: known(false, 'No consultation required'),
+      requires_consultation: unknownCell<boolean>(),
       combinable_with: [],
     });
   }
@@ -148,7 +158,7 @@ const presentServices = (
       options,
       total_preview: null,
       shown_count: options.length,
-      total_count: options.length,
+      total_count: null,
       more_intent: null,
     },
   };
@@ -182,7 +192,7 @@ const presentStaff = (
       measures: [],
       media: null,
       intent_ref: 'i1',
-      enabled: known(true, name),
+      enabled: unknownCell<boolean>(),
       role_label: known(role),
       nearest_availability: unknownMeasure(
         'booking.nearest_availability',
@@ -200,7 +210,7 @@ const presentStaff = (
       options,
       any_staff_option: null,
       shown_count: options.length,
-      total_count: options.length,
+      total_count: null,
       more_intent: null,
     },
   };
@@ -246,7 +256,7 @@ const presentSlots = (
       ),
       staff_ref: staff,
       price: null,
-      availability: known('FREE', 'Available'),
+      availability: unknownCell<'FREE' | 'TAKEN'>(),
       intent_ref: 'i1',
     });
   }
@@ -267,7 +277,7 @@ const presentSlots = (
         },
       ],
       shown_count: rendered.length,
-      total_count: rendered.length,
+      total_count: null,
       more_intent: null,
       widen_window_intent: null,
       none_fit_intent: 'i1',

@@ -72,6 +72,15 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
       }),
     ).resolves.toMatchObject({
       nextKind: 'STAFF_SELECTOR',
+      fact: {
+        completeness: {
+          status: 'PARTIAL',
+          returnedCount: 1,
+          totalCount: null,
+          hasMore: true,
+          reasonCodes: ['NOT_COLLECTED'],
+        },
+      },
       capabilityKey: 'catalog.staff.read',
       source: { staff: [{ id: 'staff-1', name: 'Alice' }] },
       inheritedHandles: { service },
@@ -174,4 +183,20 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
       }),
     ).resolves.toBeNull();
   });
+  it.each([null, {}, { staff: null }, { slots: [] }, 'not a result'])(
+    'WR-L8 refuses an unrecognised staff result %p instead of certifying an empty complete list',
+    async (result) => {
+      const runtime = {
+        execute: jest.fn().mockResolvedValue({ status: 'completed', result }),
+      };
+      await expect(
+        new BookingSelectorAdapter(runtime as never).advance({
+          routing: routing as never,
+          actor: actor as never,
+          step: 'service',
+          handles: { service: handle(TENANT, 'service', 'service-1') },
+        }),
+      ).resolves.toBeNull();
+    },
+  );
 });

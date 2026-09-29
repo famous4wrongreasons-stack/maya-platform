@@ -1,0 +1,145 @@
+[
+  {
+    "id": "WR-M01",
+    "file": "src/widgets/owner-ports/booking-selector.adapter.ts",
+    "find": "status: 'PARTIAL' as const",
+    "replace": "status: 'COMPLETE' as const",
+    "killers": [
+      "reads staff through the existing policy/runtime"
+    ],
+    "expect": "build-killed",
+    "steps": [
+      "unit"
+    ]
+  },
+  {
+    "id": "WR-M02",
+    "file": "src/widgets/owner-ports/booking-selector.adapter.ts",
+    "find": "if (!Array.isArray(rows)) return null;",
+    "replace": "if (false) return null;",
+    "killers": [
+      "WR-L8"
+    ],
+    "expect": "build-killed",
+    "steps": [
+      "unit"
+    ]
+  },
+  {
+    "id": "WR-M03",
+    "file": "src/widgets/booking/booking-selector.presenter.ts",
+    "find": "requires_consultation: unknownCell<boolean>()",
+    "replace": "requires_consultation: known(false, 'No consultation required')",
+    "killers": [
+      "projects canonical services"
+    ],
+    "expect": "build-killed",
+    "steps": [
+      "unit"
+    ]
+  },
+  {
+    "id": "WR-M04",
+    "file": "src/widgets/booking/booking-selector.presenter.ts",
+    "find": "availability: unknownCell<'FREE' | 'TAKEN'>()",
+    "replace": "availability: known('FREE' as const, 'Available')",
+    "killers": [
+      "projects valid availability"
+    ],
+    "expect": "build-killed",
+    "steps": [
+      "unit"
+    ]
+  },
+  {
+    "id": "WR-M05",
+    "file": "src/widgets/booking/booking-selector.presenter.ts",
+    "find": "state: 'NOT_MEASURED',\n  reason_code: 'NOT_COLLECTED',",
+    "replace": "state: 'KNOWN',\n  reason_code: null,",
+    "killers": [
+      "requires the inherited service"
+    ],
+    "expect": "build-killed",
+    "steps": [
+      "unit"
+    ]
+  },
+  {
+    "id": "WR-M06",
+    "file": "src/widgets/resolve/thread-page.service.ts",
+    "find": "if (!outcomes.includes(value.outcome as TerminalLine['outcome']))",
+    "replace": "if (false)",
+    "killers": [
+      "WR-L21"
+    ],
+    "expect": "build-killed",
+    "steps": [
+      "unit"
+    ]
+  },
+  {
+    "id": "WR-M07",
+    "file": "src/widgets/resolve/thread-page.service.ts",
+    "find": "value.action_receipt_ref.trim().length > 0",
+    "replace": "true",
+    "killers": [
+      "WR-L21"
+    ],
+    "expect": "build-killed",
+    "steps": [
+      "unit"
+    ]
+  },
+  {
+    "id": "WR-M08",
+    "file": "src/widgets/resolve/thread-page.service.ts",
+    "find": "value.action_receipt_ref === null;",
+    "replace": "true;",
+    "killers": [
+      "WR-L21"
+    ],
+    "expect": "build-killed",
+    "steps": [
+      "unit"
+    ]
+  },
+  {
+    "id": "WR-M09",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "authority?.tenantId !== ctx.tenantId ||",
+    "replace": "false ||",
+    "killers": [
+      "WR-L7"
+    ],
+    "expect": "build-killed",
+    "steps": [
+      "unit"
+    ]
+  },
+  {
+    "id": "WR-M10",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "authority.userId !== ctx.actor.userId ||",
+    "replace": "false ||",
+    "killers": [
+      "WR-L7"
+    ],
+    "expect": "build-killed",
+    "steps": [
+      "unit"
+    ]
+  },
+  {
+    "id": "WR-M11",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "ctx.actor.tenantId !== ctx.tenantId",
+    "replace": "false",
+    "killers": [
+      "WR-L7"
+    ],
+    "expect": "build-killed",
+    "steps": [
+      "unit"
+    ]
+  }
+]

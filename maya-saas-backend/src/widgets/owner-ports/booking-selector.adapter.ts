@@ -16,14 +16,14 @@ const fact = (
   as_of: at.toISOString(),
   evidence_refs: [],
   completeness: {
-    status: 'COMPLETE' as const,
+    status: 'PARTIAL' as const,
     requestedScopeHash: scope,
     returnedCount,
-    totalCount: returnedCount,
-    hasMore: false,
+    totalCount: null,
+    hasMore: true,
     cursorRef: null,
     truncated: false,
-    reasonCodes: [],
+    reasonCodes: ['NOT_COLLECTED'],
   },
 });
 
@@ -77,13 +77,15 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
     )
       return null;
     const source = execution.result;
-    const returned = isRecord(source)
-      ? input.step === 'service' && Array.isArray(source.staff)
-        ? source.staff.length
-        : input.step === 'staff' && Array.isArray(source.slots)
-          ? source.slots.length
-          : 0
-      : 0;
+    // The runtime returns a list, not evidence that the list is exhaustive.
+    // Unrecognised payloads must not masquerade as a measured empty list.
+    const rows = isRecord(source)
+      ? input.step === 'service'
+        ? source.staff
+        : source.slots
+      : null;
+    if (!Array.isArray(rows)) return null;
+    const returned = rows.length;
     return {
       nextKind:
         input.step === 'service'
