@@ -3,6 +3,7 @@
 import { randomUUID } from 'node:crypto';
 import { CalendarSource, UserRole } from '../../../src/common/domain.enums';
 import type { HttpProofContext } from './http-proof-contract';
+import type { TenantFixture } from './fixtures';
 import type { EvidenceLineInput } from './evidence';
 export const requireProof: (ok: unknown, message: string) => asserts ok = (
   ok,
@@ -23,6 +24,14 @@ const array = (v: unknown): Record<string, unknown>[] => {
 };
 export async function releaseBookingProof(
   ctx: HttpProofContext,
+  atCommit?: (input: {
+    tenant: TenantFixture;
+    body: Record<string, unknown>;
+    post: (
+      route: string,
+      body: unknown,
+    ) => Promise<{ status: number; body: unknown }>;
+  }) => Promise<Omit<EvidenceLineInput, 'entry' | 'source'>[]>,
 ): Promise<Omit<EvidenceLineInput, 'entry' | 'source'>[]> {
   const tenant = await ctx.fixtures.tenant(
     'Release booking proof',
@@ -123,6 +132,7 @@ export async function releaseBookingProof(
         envBody.confirmation_subject === 'create',
         'canonical create subject',
       );
+      if (atCommit) return atCommit({ tenant, body, post });
       // These fields cannot override the server-owned action source or cross
       // F76 into canonical action input. Refused before any durable execution.
       for (const extra of [

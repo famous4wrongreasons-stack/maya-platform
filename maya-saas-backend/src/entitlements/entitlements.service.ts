@@ -1,3 +1,5 @@
+import type { Prisma } from '@prisma/client';
+import { WidgetReleasePolicy } from './widget-release-policy.service';
 import {
   ForbiddenException,
   Injectable,
@@ -46,6 +48,7 @@ export class EntitlementsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly registry: FeatureRegistryService,
+    private readonly widgetRelease: WidgetReleasePolicy = new WidgetReleasePolicy(),
   ) {}
 
   async getEffectiveEntitlements(
@@ -98,8 +101,9 @@ export class EntitlementsService {
   private async resolveEffectiveEntitlements(
     tenantId: string,
     evaluatedAt: Date,
+    reader: Prisma.TransactionClient = this.prisma,
   ): Promise<EffectiveEntitlementResolution> {
-    const tenant = await this.prisma.tenant.findUnique({
+    const tenant = await reader.tenant.findUnique({
       where: { id: tenantId },
       include: {
         plan: {
@@ -123,7 +127,7 @@ export class EntitlementsService {
     const effective = new Map<MayaFeatureKey, boolean>();
 
     for (const featureKey of expandFeatureKeys(normalizedPlanKeys)) {
-      effective.set(featureKey, true);
+      if (featureKey !== 'widgets.runtime') effective.set(featureKey, true);
     }
 
     const now = evaluatedAt.getTime();
@@ -144,6 +148,12 @@ export class EntitlementsService {
     }
 
     for (const override of tenant.entitlements) {
+      if (
+        override.featureKey === 'widgets.runtime' &&
+        override.enabled &&
+        !this.widgetRelease.allows(tenantId, override, evaluatedAt)
+      )
+        continue;
       if (
         !isMayaFeatureKey(override.featureKey) ||
         (override.expiresAt && override.expiresAt.getTime() <= now)
@@ -178,6 +188,39 @@ export class EntitlementsService {
           (left, right) => left.getTime() - right.getTime(),
         )[0] ?? null,
     };
+  }
+
+  async withWidgetRuntimeAdmission<T>(
+    tenantId: string,
+    persist: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return this.prisma.$transaction(
+      async (tx) => {
+        await this.assertWidgetRuntimeAdmission(tenantId, tx);
+        return persist(tx);
+      },
+      { isolationLevel: 'ReadCommitted', maxWait: 5000, timeout: 15000 },
+    );
+  }
+
+  /** Revoke serializes against canonical Action Engine admission, not an HTTP snapshot. */
+  async assertWidgetRuntimeAdmission(
+    tenantId: string,
+    tx: Prisma.TransactionClient,
+  ): Promise<void> {
+    await tx.$queryRaw`SELECT /* widget release admission */ pg_advisory_xact_lock_shared(hashtextextended(${'widget-release:tenant:' + tenantId}, 0))::text`;
+    const [clock] = await tx.$queryRaw<
+      Array<{ now: Date }>
+    >`SELECT (clock_timestamp() AT TIME ZONE 'UTC')::timestamp(3) AS now`;
+    const effective = await this.resolveEffectiveEntitlements(
+      tenantId,
+      clock.now,
+      tx,
+    );
+    if (effective.features['widgets.runtime'] !== true)
+      throw new ForbiddenException(
+        'widget entitlement denied at canonical admission',
+      );
   }
 
   async hasFeature(

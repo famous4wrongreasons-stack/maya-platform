@@ -56,15 +56,20 @@ export class AuditLogService {
    * снаружи. Арендатора у такого действия нет — и выдумывать его нельзя, иначе
    * платформенная запись окажется в истории чужого салона.
    */
-  async logPlatformAction(params: {
-    userId?: string | null;
-    action: string;
-    entityType: string;
-    entityId: string;
-    metadata?: Record<string, unknown>;
-  }) {
-    return this.prisma.auditLog.create({
+  async logPlatformAction(
+    params: {
+      id?: string;
+      userId?: string | null;
+      action: string;
+      entityType: string;
+      entityId: string;
+      metadata?: Record<string, unknown>;
+    },
+    tx: Prisma.TransactionClient = this.prisma,
+  ) {
+    return tx.auditLog.create({
       data: {
+        ...(params.id ? { id: params.id } : {}),
         scope: 'platform',
         tenantId: null,
         userId: params.userId ?? null,

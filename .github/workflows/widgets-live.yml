@@ -88,3 +88,4 @@ jobs:
       - run: npm run test:widgets:live
       - run: npm run build
       - run: npm run test:widgets:http
+      - run: npm run test:widgets:release-binary

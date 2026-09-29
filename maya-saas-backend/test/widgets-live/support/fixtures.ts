@@ -184,6 +184,7 @@ export type BinFixtures = Pick<
   | 'bookingSource'
   | 'bookingProofState'
   | 'withReadbackDutyTamper'
+  | 'withWidgetRevocationRace'
 >;
 
 export class Fixtures {
@@ -210,6 +211,7 @@ export class Fixtures {
       bookingSource: this.bookingSource.bind(this),
       bookingProofState: this.bookingProofState.bind(this),
       withReadbackDutyTamper: this.withReadbackDutyTamper.bind(this),
+      withWidgetRevocationRace: this.withWidgetRevocationRace.bind(this),
     });
   }
 
@@ -473,6 +475,59 @@ export class Fixtures {
         },
       });
     }
+  }
+
+  /** U13c controlled race: a real entitlement revoke commits after Gate 6 and before
+   * canonical admission. Only this fixture's proof tenant; no widget/owner substitution. */
+  async withWidgetRevocationRace<T>(
+    tenant: TenantFixture,
+    probe: () => Promise<T>,
+  ): Promise<T> {
+    assertProofDatabase();
+    if (
+      !this.tenants.includes(tenant.id) ||
+      !tenant.slug.startsWith(SLUG_PREFIX)
+    )
+      throw new Error('revocation race requires an owned proof tenant');
+    let pending: Promise<T> | undefined;
+    try {
+      await this.ctx.prisma.$transaction(
+        async (tx) => {
+          const [connection] = await tx.$queryRaw<
+            Array<{ pid: number }>
+          >`SELECT pg_backend_pid() AS pid`;
+          await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'widget-release:tenant:' + tenant.id},0))::text`;
+          await tx.tenantEntitlement.update({
+            where: {
+              tenantId_featureKey: {
+                tenantId: tenant.id,
+                featureKey: 'widgets.runtime',
+              },
+            },
+            data: { enabled: false },
+          });
+          pending = probe();
+          const deadline = Date.now() + 8000;
+          while (Date.now() < deadline) {
+            await tx.$queryRaw`SELECT pg_stat_clear_snapshot()::text`;
+            const waiting = await tx.$queryRaw<
+              Array<{ pid: number }>
+            >`SELECT pid FROM pg_stat_activity WHERE wait_event_type='Lock' AND query LIKE '%/* widget release admission */%' AND ${connection.pid}=ANY(pg_blocking_pids(pid))`;
+            if (waiting.length) return;
+            await new Promise((r) => setTimeout(r, 20));
+          }
+          throw new Error(
+            'real COMMIT never reached canonical admission lock after Gate 6',
+          );
+        },
+        { timeout: 12000 },
+      );
+    } catch (error) {
+      await pending?.catch(() => undefined);
+      throw error;
+    }
+    if (!pending) throw new Error('revocation race did not submit');
+    return pending;
   }
 
   /** Read-only observation of the canonical owners' effects in this fixture tenant. */

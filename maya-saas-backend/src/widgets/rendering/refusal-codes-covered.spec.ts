@@ -250,7 +250,7 @@ describe('P-RENDER — R3.9.3 rendering: the map is total and the grant path is 
   const scanEntitlementGrants = (root: string): Violation[] => {
     const rel = (p: string) => path.relative(root, p).split(path.sep).join('/');
     const violations: Violation[] = [];
-    const writeScopes = ['prisma', 'scripts'];
+    const writeScopes = ['prisma', 'scripts', 'src'];
     const callScopes = ['prisma', 'scripts', 'src', 'test'];
     for (const scope of new Set([...writeScopes, ...callScopes]))
       for (const file of walk(path.join(root, scope))) {
@@ -261,17 +261,18 @@ describe('P-RENDER — R3.9.3 rendering: the map is total and the grant path is 
         } catch {
           continue; // a binary or unreadable artefact grants nothing
         }
-        if (!text.includes(RUNTIME_KEY)) continue;
         if (
           writeScopes.includes(scope) &&
+          !key.endsWith('.spec.ts') &&
           WRITE_TOKEN.test(text) &&
-          key !== GRANT_SOURCE
+          key !== GRANT_SOURCE &&
+          key !== 'src/entitlements/widget-release.service.ts'
         )
           violations.push({
             file: key,
             why: 'writes a TenantEntitlement row for widgets.runtime',
           });
-        if (!GRANT_CALL.test(text)) continue;
+        if (!text.includes(RUNTIME_KEY) || !GRANT_CALL.test(text)) continue;
         const allowed =
           CALLER_PREFIXES.some((p) => key.startsWith(p)) || key === CALLER_FILE;
         if (!allowed)
@@ -295,7 +296,7 @@ describe('P-RENDER — R3.9.3 rendering: the map is total and the grant path is 
     expect(scanEntitlementGrants(BE)).toEqual([]);
   });
 
-  it('REN-6 the one grant path exists, asserts the proof database, and is the only writer', () => {
+  it('REN-6 the proof fixture stays guarded alongside the single AR-1 certified writer', () => {
     const fixtures = fs.readFileSync(path.join(BE, GRANT_SOURCE), 'utf8');
     expect(fixtures).toMatch(/async grantFeature\s*\(/);
     expect(fixtures).toMatch(/assertProofDatabase\(/);

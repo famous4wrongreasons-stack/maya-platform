@@ -1,3 +1,4 @@
+import { EntitlementsService } from '../../entitlements/entitlements.service';
 import { Injectable } from '@nestjs/common';
 
 import {
@@ -35,6 +36,7 @@ export class CommitBookingAdapter implements CommitBookingOwnerPort {
     private readonly create: ClientAppointmentCreateService,
     private readonly cancel: ClientAppointmentCancelService,
     private readonly reschedule: ClientAppointmentRescheduleService,
+    private readonly entitlements: EntitlementsService,
   ) {}
 
   async commit(input: ActuatingRoutingInput): Promise<EffectRouteOutcome> {
@@ -60,7 +62,18 @@ export class CommitBookingAdapter implements CommitBookingOwnerPort {
           request.callerIdempotency?.key !== expectedKey
         )
           throw new Error('WIDGET_CANONICAL_INVOCATION_MISMATCH');
-        const execution = await persist(request, transaction);
+        const execution = transaction
+          ? await (async () => {
+              await this.entitlements.assertWidgetRuntimeAdmission(
+                input.routing.tenantId,
+                transaction,
+              );
+              return persist(request, transaction);
+            })()
+          : await this.entitlements.withWidgetRuntimeAdmission(
+              input.routing.tenantId,
+              (tx) => persist(request, tx),
+            );
         executionId = execution.id;
         return execution;
       },

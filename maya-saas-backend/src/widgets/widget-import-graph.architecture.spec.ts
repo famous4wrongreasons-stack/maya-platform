@@ -235,8 +235,11 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
     only: ['owner-ports/gate6.owners.provider.ts'],
   },
   'entitlements/entitlements.service.ts': {
-    why: "(e)'s owner: EntitlementsService grants requiredFeatures (C11:4755)",
-    only: ['owner-ports/gate6.owners.provider.ts'],
+    why: "(e)'s owner plus AR-1 atomic revoke/admission serialization at the canonical COMMIT port",
+    only: [
+      'owner-ports/gate6.owners.provider.ts',
+      'owner-ports/commit-booking.adapter.ts',
+    ],
   },
   'ai-tools/ai-tool-policy.module.ts': {
     why: "C20's owner module, so the boundary can resolve GATE6_OWNERS (R6-2)",

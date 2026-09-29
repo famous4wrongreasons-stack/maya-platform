@@ -18,6 +18,8 @@ export interface HttpProofContext {
   readonly fixtures: BinFixtures;
   readonly evidence: BinEvidence;
   mintProvenance(): readonly MintProvenanceLine[];
+  /** Captured from the real service or binary stdout; cases cannot increment it. */
+  gate14DisagreementCount?: () => number;
 }
 
 export interface WidgetsHttpProofCase {

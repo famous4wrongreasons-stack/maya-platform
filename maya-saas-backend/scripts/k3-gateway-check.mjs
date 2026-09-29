@@ -633,6 +633,7 @@ const registrySrc = fs.readFileSync(path.join(BE, 'src/entitlements/feature-regi
 const entitlementsSrc = fs.readFileSync(path.join(BE, 'src/entitlements/entitlements.service.ts'), 'utf8');
 const runtimePlanned = /'widgets\.runtime':\s*defineReadiness\('planned'/.test(catalog);
 const trialExcludesPlanned =
+  /featureKey !== 'widgets\.runtime'/.test(registrySrc) &&
   /trialGrantable\([^)]*\)[^{]*\{[\s\S]*?implementationStatus !== 'planned'/.test(registrySrc) &&
   /this\.registry\.trialGrantable\(featureKey\)/.test(entitlementsSrc) &&
   !/this\.registry\.platformAvailable\(featureKey\)/.test(entitlementsSrc);
@@ -981,6 +982,7 @@ chk(
 // mention of the builder here is a regex literal or a message string and none of them spells the call
 // with its opening parenthesis — writing that spelling in a comment is enough to make this check fail.
 const GRANT_SOURCE = 'test/widgets-live/support/fixtures.ts';
+const CERTIFIED_WRITER = 'src/entitlements/widget-release.service.ts';
 const GRANT_CALLER_PREFIXES = ['test/widgets-live/', 'scripts/widgets-http-proof/'];
 const GRANT_CALLER_FILE = 'scripts/widgets-intent-http-proof.ts';
 const BIN_CASES_PREFIX = 'scripts/widgets-http-proof/';
@@ -1001,22 +1003,21 @@ for (const scope of ['prisma', 'scripts', 'src', 'test'])
   for (const f of grantWalk(path.join(BE, scope))) {
     let text;
     try { text = fs.readFileSync(f, 'utf8'); } catch { continue; }
-    if (!text.includes('widgets.runtime')) continue;
     const key = path.relative(BE, f).split(path.sep).join('/');
-    if ((scope === 'prisma' || scope === 'scripts') && ENTITLEMENT_WRITE.test(text) && key !== GRANT_SOURCE)
+    if (['prisma','scripts','src'].includes(scope) && !key.endsWith('.spec.ts') && ENTITLEMENT_WRITE.test(text) && key !== GRANT_SOURCE && key !== CERTIFIED_WRITER)
       grantBreaks.push(`${key} writes a TenantEntitlement row for widgets.runtime`);
-    if (!/grantFeature\s*\(/.test(text)) continue;
+    if (!text.includes('widgets.runtime') || !/grantFeature\s*\(/.test(text)) continue;
     if (!GRANT_CALLER_PREFIXES.some((p) => key.startsWith(p)) && key !== GRANT_CALLER_FILE)
       grantBreaks.push(`${key} reaches Fixtures.grantFeature for widgets.runtime outside the allowlist`);
     else if (key.startsWith(BIN_CASES_PREFIX) && (!BIN_CASE_GUARD.test(text) || FIXTURES_MODULE_IMPORT.test(text)))
       grantBreaks.push(`${key} reaches the grant other than through the BIN runner's guarded ctx.fixtures`);
   }
 chk(
-  'widgets.runtime is granted by one path: Fixtures.grantFeature on the guarded proof DB, and by no migration, seed or script',
-  grantBreaks.length === 0 && fs.existsSync(path.join(BE, GRANT_SOURCE)),
+  'widgets.runtime has one certified writer plus the existing guarded proof fixture; no ad-hoc writer',
+  grantBreaks.length === 0 && fs.existsSync(path.join(BE, GRANT_SOURCE)) && fs.existsSync(path.join(BE,CERTIFIED_WRITER)) && fs.readFileSync(path.join(BE,CERTIFIED_WRITER),'utf8').includes('this.policy.read(') && fs.readFileSync(path.join(BE,'src/entitlements/widget-release-policy.service.ts'),'utf8').includes('production_not_authorized'),
   grantBreaks.length
     ? `GRANT: ${[...new Set(grantBreaks)].join('; ')}`
-    : `no migration, seed or script grants it; the one path is ${GRANT_SOURCE}, reached from ${GRANT_CALLER_PREFIXES.map((p) => `${p}**`).join(', ')} and ${GRANT_CALLER_FILE}`,
+    : `certified writer ${CERTIFIED_WRITER}, production still refused; guarded fixture ${GRANT_SOURCE}, reached from ${GRANT_CALLER_PREFIXES.map((p) => `${p}**`).join(', ')} and ${GRANT_CALLER_FILE}`,
 );
 
 for (const c of out) console.log(`${c.ok ? 'PASS' : 'FAIL'}  ${c.n}\n        ${c.ev}`);

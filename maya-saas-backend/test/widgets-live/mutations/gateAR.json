@@ -1,0 +1,211 @@
+[
+  {
+    "id": "AR-M1",
+    "description": "Forged authorization bypass",
+    "file": "src/entitlements/widget-release-policy.service.ts",
+    "find": "!verify(null, bytes, publicKey, Buffer.from(v.signature, 'base64url'))",
+    "replace": "false",
+    "killers": [
+      "AR1-FORGED"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "AR-M2",
+    "description": "Target tenant binding bypass",
+    "file": "src/entitlements/widget-release-policy.service.ts",
+    "find": "a.environment !== this.environment() ||\n      a.tenantId !== tenantId ||",
+    "replace": "a.environment !== this.environment() ||\n      false ||",
+    "killers": [
+      "AR1-CONTEXT"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "AR-M3",
+    "description": "Authorization expiry bypass",
+    "file": "src/entitlements/widget-release-policy.service.ts",
+    "find": "instant(a.expiresAt) <= now.getTime()",
+    "replace": "false",
+    "killers": [
+      "AR1-NEGATIVE"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "AR-M4",
+    "description": "Running candidate binding bypass",
+    "file": "src/entitlements/widget-release-policy.service.ts",
+    "find": "a.candidateSha !==\n        this.config.get<string>('WIDGET_RELEASE_CANDIDATE_SHA') ||\n      a.buildDigest !== this.buildDigest()",
+    "replace": "false",
+    "killers": [
+      "AR1-RUNNING"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "AR-M5",
+    "description": "Threshold false accepted",
+    "file": "src/entitlements/widget-release.contract.ts",
+    "find": "if (!['L', 'L-T', 'U'].includes(String(r.state))) releaseDeny('threshold');",
+    "replace": "if (false) releaseDeny('threshold');",
+    "killers": [
+      "AR1-THRESHOLD"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "AR-M6",
+    "description": "Independent reviewer bypass",
+    "file": "src/entitlements/widget-release.contract.ts",
+    "find": "v.reviewerId === v.approverId || v.reviewerId === v.operatorId",
+    "replace": "false",
+    "killers": [
+      "AR1-NEGATIVE"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "AR-M7",
+    "description": "Production execution fence bypass",
+    "file": "src/entitlements/widget-release-policy.service.ts",
+    "find": "if (this.config.get<string>('NODE_ENV') === 'production')",
+    "replace": "if (false)",
+    "killers": [
+      "AR1-PRODUCTION"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "AR-M8",
+    "description": "Trial expansion bypass",
+    "file": "src/entitlements/feature-registry.service.ts",
+    "find": "featureKey !== 'widgets.runtime' &&",
+    "replace": "true &&",
+    "killers": [
+      "AR1-TRIAL"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "AR-M9",
+    "description": "Plan expansion bypass",
+    "file": "src/entitlements/entitlements.service.ts",
+    "find": "if (featureKey !== 'widgets.runtime') effective.set(featureKey, true);",
+    "replace": "effective.set(featureKey, true);",
+    "killers": [
+      "AR1-PLAN"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "AR-M10",
+    "description": "Unsigned override bypass",
+    "file": "src/entitlements/entitlements.service.ts",
+    "find": "override.featureKey === 'widgets.runtime' &&",
+    "replace": "false &&",
+    "killers": [
+      "AR1-UNSIGNED"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "AR-M11",
+    "description": "Stale CAS bypass",
+    "file": "src/entitlements/widget-release.service.ts",
+    "find": "if (previousVersion !== a.expectedVersion)",
+    "replace": "if (false && previousVersion !== a.expectedVersion)",
+    "killers": [
+      "AR1-STALE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "AR-M12",
+    "description": "Replay receipt removed",
+    "file": "src/entitlements/widget-release.service.ts",
+    "find": "if (prior) {",
+    "replace": "if (false && prior) {",
+    "killers": [
+      "AR1-CONCURRENT"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "AR-M13",
+    "description": "Rebound authorization accepted",
+    "file": "src/entitlements/widget-release.service.ts",
+    "find": "metadata.authorizationHash !== proof.authorizationHash",
+    "replace": "false",
+    "killers": [
+      "AR1-ADVERSARIAL"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "AR-M14",
+    "description": "Audit moved out of entitlement transaction",
+    "file": "src/entitlements/widget-release.service.ts",
+    "find": "          tx,\n        );",
+    "replace": "          this.prisma,\n        );",
+    "killers": [
+      "AR1-AUDIT"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "AR-M15",
+    "description": "Revoke remains enabled",
+    "file": "src/entitlements/widget-release.service.ts",
+    "find": "enabled: operation === 'grant',",
+    "replace": "enabled: true,",
+    "killers": [
+      "AR1-LIFECYCLE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "AR-M16",
+    "description": "Reader ignores expired grant and certificate",
+    "file": "src/entitlements/widget-release-policy.service.ts",
+    "find": "row.expiresAt <= now",
+    "replace": "false",
+    "killers": [
+      "AR1-EXPIRY"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "AR-M17",
+    "description": "Revoke no longer serializes with canonical admission",
+    "file": "src/entitlements/widget-release.service.ts",
+    "find": "        await lockWidgetRelease(tx, tenantId);",
+    "replace": "        void tenantId;",
+    "killers": [
+      "AR1-REVOKE-WAIT"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "AR-M18",
+    "description": "Metric erased",
+    "file": "src/widgets/routing/gate14-disagreement.metric.ts",
+    "find": "    this.counts.set(reason, (this.counts.get(reason) ?? 0) + 1);",
+    "replace": "    this.counts.set(reason, this.counts.get(reason) ?? 0);",
+    "killers": [
+      "AR-G6-REVOCATION"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "AR-M19",
+    "description": "Canonical admission bypass",
+    "file": "src/entitlements/entitlements.service.ts",
+    "find": "if (effective.features['widgets.runtime'] !== true)",
+    "replace": "if (false && effective.features['widgets.runtime'] !== true)",
+    "killers": [
+      "AR-G6-REVOCATION"
+    ],
+    "expect": "live-killed"
+  }
+]

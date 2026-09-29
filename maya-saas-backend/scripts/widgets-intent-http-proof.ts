@@ -222,10 +222,17 @@ async function main(): Promise<void> {
   const tail: string[] = [];
   const captured: MintProvenanceLine[] = [];
   let malformed = 0;
+  let gate14Disagreements = 0;
   const stdout = new LineSplitter();
   const keep = (line: string) => {
     tail.push(line);
     if (tail.length > 80) tail.shift();
+    if (line.includes('[WidgetGate14Disagreement]')) {
+      const match = line.match(
+        /\{"metric":"widget_gate6_gate14_disagreement","reason":"entitlement_denied","count":(\d+)\}/,
+      );
+      if (match) gate14Disagreements = Number(match[1]);
+    }
     const parsed = capture.line(line);
     if (parsed === 'malformed') {
       malformed += 1;
@@ -282,6 +289,7 @@ async function main(): Promise<void> {
             evidence.record({ ...line, entry: 'BIN', source }),
         }),
         mintProvenance: () => [...captured],
+        gate14DisagreementCount: () => gate14Disagreements,
       };
       try {
         await resetLoopbackLoginPreflight(context.prisma);

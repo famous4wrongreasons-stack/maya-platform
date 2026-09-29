@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 export const GATE14_RERESOLUTION_REASONS = Object.freeze([
   'role_denied',
@@ -15,11 +15,19 @@ export type Gate14ReresolutionReason =
 /** AMB-G6-7: observability only. The Gate 14 answer always remains authoritative. */
 @Injectable()
 export class Gate14DisagreementMetric {
+  private readonly logger = new Logger('WidgetGate14Disagreement');
   private readonly counts = new Map<Gate14ReresolutionReason, number>();
 
   increment(reason: string): void {
     if (!isGate14ReresolutionReason(reason)) return;
     this.counts.set(reason, (this.counts.get(reason) ?? 0) + 1);
+    this.logger.log(
+      JSON.stringify({
+        metric: 'widget_gate6_gate14_disagreement',
+        reason,
+        count: this.value(reason),
+      }),
+    );
   }
 
   value(reason?: Gate14ReresolutionReason): number {

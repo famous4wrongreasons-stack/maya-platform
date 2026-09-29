@@ -1,3 +1,4 @@
+import type { EntitlementsService } from '../../entitlements/entitlements.service';
 import type { ActionExecution } from '@prisma/client';
 
 import { admitWithInvocationReceipt } from '../../action-engine/action-invocation-receipt.context';
@@ -61,6 +62,7 @@ const fixture = () => {
         callerIdempotency: invocation.callerIdempotency,
       } as never,
       () => Promise.resolve(execution),
+      {} as never,
     );
   };
   create.forAccount.mockImplementation(canonicalInvocation);
@@ -75,6 +77,9 @@ const fixture = () => {
       create as unknown as ClientAppointmentCreateService,
       cancel as unknown as ClientAppointmentCancelService,
       reschedule as unknown as ClientAppointmentRescheduleService,
+      {
+        assertWidgetRuntimeAdmission: jest.fn().mockResolvedValue(undefined),
+      } as unknown as EntitlementsService,
     ),
   };
 };

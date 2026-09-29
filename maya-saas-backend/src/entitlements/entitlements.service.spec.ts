@@ -119,7 +119,7 @@ describe('EntitlementsService', () => {
     expect(result.featureKeys).not.toContain('widgets.runtime');
   });
 
-  it('still grants the widget runtime to a tenant it is deliberately switched on for', async () => {
+  it('AR1-UNSIGNED refuses a widget override without certified release evidence', async () => {
     const service = buildService({
       id: 'tenant-a',
       status: 'active',
@@ -134,7 +134,22 @@ describe('EntitlementsService', () => {
 
     const result = await service.getEffectiveEntitlements('tenant-a');
 
-    expect(result.features['widgets.runtime']).toBe(true);
+    expect(result.features['widgets.runtime']).toBeUndefined();
+  });
+
+  it('AR1-PLAN refuses widgets even if a plan row is accidentally populated', async () => {
+    const service = buildService({
+      id: 'tenant-a',
+      status: 'active',
+      planId: 'plan-a',
+      plan: {
+        entitlements: [{ featureKey: 'widgets.runtime', enabled: true }],
+      },
+      entitlements: [],
+    });
+    expect(
+      (await service.getEffectiveEntitlements('tenant-a')).featureKeys,
+    ).not.toContain('widgets.runtime');
   });
 
   it('does not extend full access after the verified trial expires', async () => {

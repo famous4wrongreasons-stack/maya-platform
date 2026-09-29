@@ -63,6 +63,7 @@ export class FeatureRegistryService {
    */
   trialGrantable(featureKey: MayaFeatureKey): boolean {
     return (
+      featureKey !== 'widgets.runtime' &&
       this.platformAvailable(featureKey) &&
       MAYA_FEATURE_READINESS[featureKey].implementationStatus !== 'planned'
     );
