@@ -23,7 +23,10 @@ const CASES = [
   ['closed-tag-set', `<svg><path /></svg>`, `<span />`],
   ['closed-tag-set', `<form onSubmit={f} />`, `<button type="button" />`],
   ['request-sink', `<a href={url}>x</a>`, `<a>x</a>`],
-  ['no-inline-style', `<div style={{ color: 'red' }} />`, `<div className="red" />`],
+  ['inline-style-shape', `<div style={theme.box} />`, `<div style={{ color: 'red' }} />`],
+  ['style-url', `<div style={{ backgroundImage: 'url(https://x/y.png)' }} />`, `<div style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg%3E%3C/svg%3E")' }} />`],
+  ['closed-tag-set', `React.createElement('img', { src: 'x' })`, `React.createElement('div', null)`],
+  ['style-url', `<div style={{ background: "url('//evil/x')" }} />`, `<div style={{ filter: "url(%23n)" }} />`],
 ];
 
 const CSS_CASES = [

@@ -15,3 +15,37 @@ html, body { margin: 0; background: var(--bg); color: var(--text); overscroll-be
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ── the identity's motion, from the canonical source ─────────────────────────────────────── */
+
+/* maya-identity.js: canvas.animate([{opacity:.82},{opacity:1},{opacity:.82}], {duration:2400}). */
+@keyframes maya-breath {
+  0%   { opacity: 0.82; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.82; }
+}
+
+.maya-mark {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .maya-mark--breathing { animation: maya-breath 2400ms ease-in-out infinite; }
+}
+
+/* app.html:47 — the typewriter caret, verbatim. */
+.maya-typewriter-caret {
+  display: inline-block;
+  width: 1.5px;
+  height: 1.02em;
+  margin-left: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  vertical-align: -0.12em;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .maya-typewriter-caret { animation: maya-type-caret 0.72s steps(1, end) infinite; }
+}
+@keyframes maya-type-caret { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }

@@ -154,10 +154,16 @@ const REQUEST_SINKS = ['src', 'srcSet', 'href', 'action', 'formAction', 'poster'
 export function scanJsx(rel, text, { hrefAllowed = false } = {}) {
   const out = [];
   const code = codeOnly(text);
-  for (const m of code.matchAll(/<([a-z][a-zA-Z0-9-]*)[\s/>]/g)) {
+  // Both spellings. The owner's canonical source is pre-compiled React.createElement, and a
+  // component that used it instead of JSX would otherwise walk straight through the closed set.
+  const tagSites = [
+    ...code.matchAll(/<([a-z][a-zA-Z0-9-]*)[\s/>]/g),
+    ...text.matchAll(/createElement\(\s*['"]([a-z][a-zA-Z0-9-]*)['"]/g),
+  ];
+  for (const m of tagSites) {
     const tag = m[1];
     if (!CLOSED_TAGS.has(tag))
-      out.push(refusal('closed-tag-set', rel, lineAt(code, m.index), tag,
+      out.push(refusal('closed-tag-set', rel, lineAt(text, m.index), tag,
         `<${tag}> is outside the closed set. The exclusions are a capability-denial list: img/video/audio/object/embed/iframe are outbound-request sinks, form navigates, svg/math carry their own script surface.`));
   }
   for (const sink of REQUEST_SINKS) {
@@ -167,9 +173,38 @@ export function scanJsx(rel, text, { hrefAllowed = false } = {}) {
       out.push(refusal('request-sink', rel, lineAt(code, m.index), sink,
         'A server-supplied string reaching a request sink is exfiltration. One allowlisted module writes href, scheme-checked.'));
   }
-  for (const m of code.matchAll(/\bstyle\s*=\s*\{/g))
-    out.push(refusal('no-inline-style', rel, lineAt(code, m.index), 'style',
-      'An attacker-influenced style string is an exfiltration and clickjacking sink; style-src-attr none blocks it at runtime and this stops it being written at all.'));
+  // 🔴 CONSTRAINT RELAXED, deliberately, and narrowed rather than dropped.
+  //
+  // WHY THE BAN EXISTED: the minimal renderer forbade `style` in dom/ because an attacker-influenced
+  // style is an exfiltration sink (`background:url(<attacker>)`) and a clickjacking sink
+  // (`position:fixed;opacity:0`), and because a markup `style=` attribute needs 'unsafe-inline'.
+  //
+  // WHY IT CANNOT STAND AS WRITTEN: the owner's canonical design is authored ENTIRELY in inline
+  // style objects — 3,461 of them against 15 className sites. Banning them outright would force
+  // every component to be re-authored as CSS, which is precisely the "new CSS по мотивам" the owner
+  // forbade. The ban would not protect the property; it would destroy the source of truth.
+  //
+  // WHAT REPLACES IT, and it keeps the property: an inline style must be an OBJECT LITERAL, so its
+  // every value is reviewable at the call site; a whole object arriving through an identifier is
+  // refused, because that is the unreviewable form; and no style object may contain `url(` unless it
+  // is an inline `data:image/svg+xml` — bytes in the file, never a fetch. The CSP property is
+  // untouched: React writes CSSOM properties, not a `style=` attribute, so `style-src-attr 'none'`
+  // still holds and is still asserted on the emitted page.
+  for (const m of code.matchAll(/\bstyle\s*=\s*\{/g)) {
+    const at = m.index + m[0].length;
+    if (code[at] !== '{')
+      out.push(refusal('inline-style-shape', rel, lineAt(code, m.index), 'style',
+        'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'));
+  }
+  // `url(` is read from the ORIGINAL text: codeOnly() blanks string bodies, and a style URL lives
+  // inside one. Two forms are admitted, and both by shape rather than by trust:
+  //   * an inline `data:image/svg+xml` — bytes in this file, never a fetch;
+  //   * a FRAGMENT reference, `url(#id)` or its encoded `url(%23id)` — an SVG names its own filters
+  //     and gradients that way, and a fragment points inside the same document, so it cannot issue
+  //     a request. (The shell's stylesheet test needed the same correction, for the same reason.)
+  for (const m of text.matchAll(/url\((?!["']?(?:data:image\/svg\+xml,|%23|#))/g))
+    out.push(refusal('style-url', rel, lineAt(text, m.index), 'url(',
+      'a style-borne URL is the exfiltration vector the inline-style ban existed to stop; only an inline data:image/svg+xml is admitted'));
   return out;
 }
 
