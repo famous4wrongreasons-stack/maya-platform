@@ -178,6 +178,13 @@ test('entry/index.html: meta CSP without frame-ancestors (D10), data: favicon, d
   assert.match(html, /<link rel="icon" href="data:,">/, 'the favicon is a data link: no /favicon.ico request, no console error');
   assert.equal((html.match(/<script\b/g) ?? []).length, 1);
   assert.match(html, /<script type="module" src="\.\/m\/<webDigest16>\/entry\/main\.js"><\/script>/);
+  // 🔴 The stylesheet must carry the digest too. The JS is content-addressed under m/<digest>/, but
+  // styles.css sits at a FIXED path — and on the production host nginx serves static files itself,
+  // never reaching Apache, so no .htaccess rule can shorten its cache. Measured on 2026-09-29:
+  // `cache-control: max-age=604800` on styles.css, and a browser that had visited before ran the new
+  // markup against a seven-day-old stylesheet. The digest is computed over the modules AND the
+  // stylesheet, so this query changes whenever either does.
+  assert.match(html, /<link rel="stylesheet" href="\.\/styles\.css\?v=<webDigest16>">/);
   assert.match(html, /<main id="maya"/);
   assert.match(html, /<noscript>/);
   assert.ok(!/document\.(body|getElementById|querySelector)/.test(html), 'the page text names no host acquisition');

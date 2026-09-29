@@ -244,7 +244,7 @@ export function mountSignIn(mount: SignInMount): SignIn {
   const term = field('term', 'Название или город', factory.createInput('text'), 'Например: Мужская Эстетика', 'find');
   term.input.autocomplete = 'off';
   term.input.spellcheck = false;
-  const findButton = button('Найти', 'signin-button--primary');
+  const findButton = button('Найти', 'signin-button--submit');
 
   const matchList = factory.create('ul');
   matchList.classList.add('signin-matches');
@@ -280,7 +280,7 @@ export function mountSignIn(mount: SignInMount): SignIn {
   email.input.autocapitalize = 'off';
   const password = field('password', 'Пароль', factory.createInput('password'), null, 'password');
   password.input.autocomplete = 'current-password';
-  const signInWithPassword = button('Войти по паролю', 'signin-button--primary');
+  const signInWithPassword = button('Войти по паролю', 'signin-button--submit');
   passwordGroup.append(passwordTitle, passwordLines.status, passwordLines.countdown, needBusiness, email.wrap, password.wrap, signInWithPassword);
 
   section.append(mark, heading, reasonLine, findGroup, otherToggle, passwordGroup);

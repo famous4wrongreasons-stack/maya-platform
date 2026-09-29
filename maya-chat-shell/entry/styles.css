@@ -663,6 +663,12 @@ textarea {
   font-weight: 600;
 }
 
+/* The submits are ordinary surfaces. The accent is spoken for — the Telegram row, the microphone
+ * and send — and a second blue button on the same screen would dilute the one that matters. */
+.signin-button--submit {
+  font-weight: 600;
+}
+
 /* The one accent control on this screen. */
 .signin-button--telegram {
   background: var(--accent);
