@@ -256,7 +256,9 @@ describe('R01 live artifact and release/recovery protection', () => {
   it('[INTEGRATION-ONLY] gates a static shell candidate as strictly as a PHP edge candidate', () => {
     const shell = resolve(root, '../maya-chat-shell/dist/web');
     const result = edge.verifyShellCandidate(shell);
-    expect(result).toMatchObject({ files: 37, php: 0, icons: 3 });
+    // e437e114 split the runtime DOM boundary into shell/dom-port.js. The approved artifact
+    // therefore has 38 files; keep the census exact instead of accepting arbitrary extra files.
+    expect(result).toMatchObject({ files: 38, php: 0, icons: 3 });
     // A shell that claims the legacy install id would update the owner's existing PWA.
     expect(result.id).toBe('/maya-chat-shell/');
     expect(() =>
