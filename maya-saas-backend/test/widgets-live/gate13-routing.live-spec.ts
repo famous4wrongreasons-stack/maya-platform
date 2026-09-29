@@ -352,7 +352,21 @@ describe('Gate 13 — PostgreSQL claim, receipt and CONTROL routing (U13a)', () 
 
   it('B-29 [U] reconciles the same ACCEPTED receipt once instead of creating a second adjudication', async () => {
     const built = await control('B-29');
-    await routeEffect(built.context);
+    // [U] Supplied UNKNOWN verdict on an AE COMMIT. CONTROL never earns a
+    // canonical action receipt (AMB-56); no provider uncertainty is claimed here.
+    await fx.synthetic(built.widget, {
+      effect: 'COMMIT',
+      capabilitySpace: 'AE',
+      capabilityKey: 'crm.appointment.create.v1',
+    });
+    await gw.stores.writeReceipt({
+      tenantId: built.tenant.id,
+      widgetId: built.widget.widgetId,
+      intentTokenHash: built.widget.intentTokenHash,
+      outcome: 'ACCEPTED',
+      answeringChannel: 'pwa',
+      actionReceiptRef: null,
+    });
     await expect(
       router.reconcileAcceptedReceipt({
         tenantId: built.tenant.id,
