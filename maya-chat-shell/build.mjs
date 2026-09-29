@@ -88,6 +88,7 @@ const SPECIAL_MODULES = {
   'src/renderer/nodes.ts': 'renderer/nodes',
   'src/net/types.ts': 'net/types',
   'src/shell/ports.ts': 'shell/ports',
+  'src/shell/dom-port.ts': 'shell/dom-port',
 };
 
 /**
@@ -95,6 +96,26 @@ const SPECIAL_MODULES = {
  * `{ type X }` keeps a side-effect import under verbatimModuleSyntax).
  * Same-layer edges are admitted for every layer; they cannot cross a boundary.
  */
+/**
+ * 3(h): the layers type-checked a SECOND time with `lib: ES2022` and NO DOM lib, so a DOM type
+ * cannot re-enter them. This is the ratchet that keeps the runtime headless — and it is the one the
+ * React presentation carrier will depend on, because once the view layer is React the only thing
+ * standing between `document` and the runtime is this list.
+ *
+ * `voice/` is deliberately NOT here: `MediaRecorder`, `AudioContext` and `MediaStream` are DOM-lib
+ * types it legitimately needs. `dom/` and `entry/` are the presentation and own the document.
+ *
+ * `tsconfig.pure.json` holds the same set; step 3(h) asserts the two agree, because the tsconfig is
+ * what a person running tsc by hand reads and a silent disagreement would make that reading a lie.
+ *
+ * NOT to be confused with PURE_LAYERS above, which is a different and stricter rule: those layers
+ * may touch NO host global and no clock at all. `shell/` and `net/` legitimately use crypto,
+ * timers and fetch — they are headless, not pure.
+ */
+const NO_DOM_LAYERS = ['shell', 'net'];
+/** The one file in those layers that may name a DOM type, because it IS the DOM boundary. */
+const DOM_BOUNDARY = 'src/shell/dom-port.ts';
+
 const IMPORT_ALLOW = {
   routes: { routes: 'any', contract: 'type' },
   integrity: { integrity: 'any', contract: 'type' },
@@ -110,7 +131,7 @@ const IMPORT_ALLOW = {
   },
   net: { net: 'any', 'net/types': 'any', contract: 'type' },
   voice: { voice: 'any', 'shell/ports': 'type' },
-  dom: { dom: 'any', 'renderer/nodes': 'type', routes: 'any', 'shell/ports': 'type' },
+  dom: { dom: 'any', 'renderer/nodes': 'type', routes: 'any', 'shell/ports': 'type', 'shell/dom-port': 'type' },
   entry: '*',
   contract: {},
 };
@@ -1181,9 +1202,27 @@ export function runBuild(ts, { root = ROOT, tmp, target = 'web', typecheckOnly =
   log.push(baselineLine);
 
   // 3(h) the no-DOM typecheck of the pure layers
-  const pureFiles = tsFiles.filter((r) => ['routes', 'renderer', 'integrity'].includes(layerOf(r)));
+  const pureFiles = tsFiles.filter((r) => PURE_LAYERS.has(layerOf(r)) && layerOf(r) !== 'contract');
   if (pureFiles.length) {
     const pureOptions = shellOptions(readTsconfig(ts, root, 'tsconfig.pure.json').options, contract);
+    // The tsconfig is what a person running tsc by hand reads; a silent disagreement with
+    // NO_DOM_LAYERS would make that reading a lie, so the two are compared rather than assumed.
+    const declaredPure = (JSON.parse(fs.readFileSync(path.join(root, 'tsconfig.headless.json'), 'utf8')).include ?? [])
+      .map((g) => /^src\/([^/]+)\//.exec(g)?.[1])
+      .filter((x) => typeof x === 'string')
+      .sort();
+    if (declaredPure.join(',') !== [...NO_DOM_LAYERS].sort().join(','))
+      refusals.push(refusal('pure-typecheck', 'tsconfig.headless.json', 0, 'include', `tsconfig.headless.json includes ${declaredPure.join(', ') || '(none)'} but the build checks ${[...NO_DOM_LAYERS].sort().join(', ')} (3(h))`));
+
+    // 3(h) part two — the HEADLESS pass. `shell/` and `net/` are checked with ES2022 + WebWorker:
+    // every platform global they legitimately use (fetch, AbortSignal, crypto, timers) is present,
+    // and no DOM UI type is. A `HTMLElement` anywhere in the runtime is a build error from here on.
+    const headlessFiles = tsFiles.filter((r) => NO_DOM_LAYERS.includes(layerOf(r)) && r !== DOM_BOUNDARY);
+    if (headlessFiles.length) {
+      const headlessOptions = shellOptions(readTsconfig(ts, root, 'tsconfig.headless.json').options, contract);
+      const headlessProgram = ts.createProgram({ rootNames: headlessFiles.map((r) => path.join(root, r)), options: headlessOptions, host: makeHost(ts, headlessOptions, shared, null) });
+      refusals.push(...diagnosticsToRefusals(ts, 'pure-typecheck', root, ts.getPreEmitDiagnostics(headlessProgram)));
+    }
     const pureProgram = ts.createProgram({ rootNames: pureFiles.map((r) => path.join(root, r)), options: pureOptions, host: makeHost(ts, pureOptions, shared, null) });
     refusals.push(...diagnosticsToRefusals(ts, 'pure-typecheck', root, ts.getPreEmitDiagnostics(pureProgram)));
   }
@@ -1908,7 +1947,7 @@ export function runFixture(ts, contract, fixture, shared) {
   const refusals = gate.refusals.filter((r) => !SUPPORT_FILES.includes(r.file) || fixture.files.has(r.file));
   if (fixture.typecheck === 'pure') {
     const pureOptions = shellOptions(readTsconfig(ts, ROOT, 'tsconfig.pure.json').options, contract);
-    const pureFiles = fixtureTs.filter((r) => ['routes', 'renderer', 'integrity'].includes(layerOf(r)));
+    const pureFiles = fixtureTs.filter((r) => PURE_LAYERS.has(layerOf(r)) && layerOf(r) !== 'contract');
     const pp = ts.createProgram({ rootNames: pureFiles.map((r) => path.join(vroot, r)), options: pureOptions, host: makeHost(ts, pureOptions, shared, { root: vroot, files: vfiles }) });
     refusals.push(...diagnosticsToRefusals(ts, 'pure-typecheck', vroot, ts.getPreEmitDiagnostics(pp)).filter((r) => fixture.files.has(r.file)));
   }

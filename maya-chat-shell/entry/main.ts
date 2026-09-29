@@ -16,7 +16,14 @@ import type { A11yEnvironment } from '../src/contract.ts';
 import { mountApp } from '../src/dom/host.ts';
 import { createNet } from '../src/net/session.ts';
 import { render } from '../src/renderer/render.ts';
-import type { Cancel, DomFactory, DomInputType, DomTag, EnvironmentProbe, HistoryPort, Scheduler, ViewportPort } from '../src/shell/ports.ts';
+import type {
+  Cancel,
+  EnvironmentProbe,
+  HistoryPort,
+  Scheduler,
+  ViewportPort,
+} from '../src/shell/ports.ts';
+import type { DomFactory, DomInputType, DomTag } from '../src/shell/dom-port.ts';
 import { createShellRuntime } from '../src/shell/shell.ts';
 import { createLiveSubmission } from '../src/shell/intents.ts';
 import { createVoiceControl } from '../src/shell/voice-state.ts';

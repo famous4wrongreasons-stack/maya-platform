@@ -27,6 +27,7 @@
     "src/routes/registry.ts",
     "src/shell/conversation.ts",
     "src/shell/deeplink.ts",
+    "src/shell/dom-port.ts",
     "src/shell/intents.ts",
     "src/shell/ports.ts",
     "src/shell/shell.ts",
@@ -35,8 +36,8 @@
     "src/voice/capture.ts",
     "src/voice/wav.ts"
   ],
-  "bytes": 437771,
-  "digest": "e07f9ebc4cd4d190939bccce7be283a20ff71f1b0f3b487765586cd609a58284",
+  "bytes": 439255,
+  "digest": "fe6f954c3cec9642610820522ec5585fecfd5523cff8c5d5b0dc73b9989191f8",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -44,8 +45,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "fbb827ac775afc218b1f5995cc98765a234f3b1483b54488db3eaf1bfda22f01",
-    "modulePath": "m/fbb827ac775afc21/",
+    "digest": "73c2fd31717659dc78bcca0f24a9a58f9a0d335759c50d1db58594f531dd7b8e",
+    "modulePath": "m/73c2fd31717659dc/",
     "files": [
       {
         "path": "entry/main.js",
@@ -163,6 +164,11 @@
         "bytes": 2012
       },
       {
+        "path": "src/shell/dom-port.js",
+        "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "bytes": 11
+      },
+      {
         "path": "src/shell/intents.js",
         "sha256": "d5f644382912b3fa7db13ed2478b7f0387bf60951c8c6bd4b53c5ea3cb050f46",
         "bytes": 19089
@@ -203,7 +209,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "e54bb67ffbac7d0b155b1fd4a5408806a86d51e96b35bfbea21219cb659c786b",
+      "sha256": "4e47f3851b950e07eccbb7a9169a1dd73cd41d8f3eeef3bc536b4669e04ecf33",
       "bytes": 1344
     },
     "assets": [

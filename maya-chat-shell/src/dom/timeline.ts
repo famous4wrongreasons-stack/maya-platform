@@ -17,12 +17,12 @@ import type {
   ChatFailure,
   ConversationPort,
   ConversationView,
-  DomFactory,
   NoticeKind,
   Scheduler,
   TimelineItemView,
   TurnRetry,
 } from '../shell/ports.ts';
+import type { DomFactory } from '../shell/dom-port.ts';
 import type { WidgetDrawer } from './host.ts';
 
 type UserItem = Extract<TimelineItemView, { readonly kind: 'user' }>;

@@ -29,15 +29,15 @@
 import type {
   BusinessMatch,
   Cancel,
-  DomFactory,
   FirstRunFailure,
   Scheduler,
   SessionPort,
-  SignedOutReason,
   SignInFailure,
   SignInStep,
+  SignedOutReason,
   TelegramLanding,
 } from '../shell/ports.ts';
+import type { DomFactory } from '../shell/dom-port.ts';
 
 export interface SignInMount {
   readonly factory: DomFactory;

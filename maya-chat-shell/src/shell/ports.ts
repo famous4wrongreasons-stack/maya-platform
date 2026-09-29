@@ -12,7 +12,7 @@
 //   VoiceControlPort   dom   -> shell    the voice hook's state machine
 //   CapturePort        shell -> voice    the one capture module
 //   RenderFn           shell -> renderer the pure renderer, injected (the shell may not import it)
-//   DomPort            entry -> dom      the mount root and the closed element factory
+//   DomPort            entry -> dom      the mount root and the closed element factory (dom-port.ts)
 //   Scheduler, HistoryPort, ViewportPort, EnvironmentProbe   entry -> dom / shell
 //
 // Types only; this module emits no runtime bytes.
@@ -53,59 +53,6 @@ export type {
 
 /** Undo a registration or a timer. Idempotent. */
 export type Cancel = () => void;
-
-// ── the element factory (N-3, V2-15) ───────────────────────────────────────────────────────────
-
-/**
- * The CLOSED tag set. No element that can initiate a request by itself is a member: no `img`,
- * `picture`, `source`, `video`, `audio`, `iframe`, `frame`, `object`, `embed`, `form`, `link`,
- * `script`, `style`, `base`, `meta`, `svg` or `math`. A non-member tag is a type error.
- */
-export type DomTag =
-  | 'div'
-  | 'span'
-  | 'p'
-  | 'section'
-  | 'article'
-  | 'header'
-  | 'footer'
-  | 'h2'
-  | 'h3'
-  | 'h4'
-  | 'ul'
-  | 'ol'
-  | 'li'
-  | 'button'
-  | 'textarea'
-  | 'label'
-  | 'nav'
-  | 'main'
-  | 'dialog'
-  | 'table'
-  | 'caption'
-  | 'thead'
-  | 'tbody'
-  | 'tr'
-  | 'th'
-  | 'td'
-  | 'time'
-  | 'output'
-  | 'a';
-
-/** Inputs exist for the sign-in fields only — never `image`, `file` or `submit`. */
-export type DomInputType = 'text' | 'email' | 'password';
-
-export interface DomFactory {
-  create<T extends DomTag>(tag: T): HTMLElementTagNameMap[T];
-  createInput(type: DomInputType): HTMLInputElement;
-  text(value: string): Text;
-}
-
-/** What `entry/` hands every `dom/` module: the one mount root and the factory. Nothing else. */
-export interface DomPort {
-  readonly root: HTMLElement;
-  readonly factory: DomFactory;
-}
 
 // ── time, history, viewport, environment ───────────────────────────────────────────────────────
 

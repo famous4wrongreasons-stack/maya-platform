@@ -205,11 +205,15 @@ test('entry/index.html: meta CSP without frame-ancestors (D10), data: favicon, d
   assert.ok(!/document\.(body|getElementById|querySelector)/.test(html), 'the page text names no host acquisition');
 });
 
-test('entry/main.ts: `document` on exactly one code line — the one host acquisition — and the closed tag set equals ports.ts DomTag', () => {
+test('entry/main.ts: `document` on exactly one code line — the one host acquisition — and the closed tag set equals dom-port.ts DomTag', () => {
   const main = fs.readFileSync(path.join(SH, 'entry', 'main.ts'), 'utf8');
   const codeLines = main.split('\n').filter((l) => /\bdocument\b/.test(l) && !/^\s*(\/\/|\/?\*)/.test(l));
   assert.deepEqual(codeLines, ["const root = document.getElementById('maya');"]);
-  const ports = fs.readFileSync(path.join(SH, 'src', 'shell', 'ports.ts'), 'utf8');
+  // DomTag moved to src/shell/dom-port.ts when the ports split, so that `shell/` and `net/` could be
+  // type-checked with no DOM lib at all — the ratchet the React presentation carrier rests on.
+  const ports = fs.readFileSync(path.join(SH, 'src', 'shell', 'dom-port.ts'), 'utf8');
+  assert.ok(!/^export (type|interface) (DomTag|DomInputType|DomFactory|DomPort)\b/m.test(fs.readFileSync(path.join(SH, 'src', 'shell', 'ports.ts'), 'utf8')),
+    'ports.ts DECLARES no DOM-typed member — that is what makes the headless typecheck possible (a doc comment naming one is fine)');
   const union = /export type DomTag =([^;]+);/.exec(ports)[1].match(/'([a-z0-9]+)'/g).map((s) => s.slice(1, -1)).sort();
   const set = /const DOM_TAGS[^=]*= new Set<DomTag>\(\[([^\]]+)\]/.exec(main)[1].match(/'([a-z0-9]+)'/g).map((s) => s.slice(1, -1)).sort();
   assert.deepEqual(set, union);

@@ -8,7 +8,8 @@
 // history port entry/ built, which records no address.
 
 import type { InteractiveRefKey, RenderResult } from '../renderer/nodes.ts';
-import type { Cancel, DomFactory, FullscreenView, Scheduler, WidgetPort } from '../shell/ports.ts';
+import type { Cancel, FullscreenView, Scheduler, WidgetPort } from '../shell/ports.ts';
+import type { DomFactory } from '../shell/dom-port.ts';
 import type { DrawnResult } from './host.ts';
 
 export const OPENING = 'Открываю…';

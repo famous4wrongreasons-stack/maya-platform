@@ -19,13 +19,13 @@ import type {
   Cancel,
   ConversationPort,
   ConversationView,
-  DomFactory,
   GestureProof,
   VoiceControlPort,
   VoiceNotice,
   VoiceState,
   VoiceView,
 } from '../shell/ports.ts';
+import type { DomFactory } from '../shell/dom-port.ts';
 
 export interface VoiceControlMount {
   readonly factory: DomFactory;

@@ -13,7 +13,14 @@
 //     read-only, never a `disabled` attribute that would throw focus away.
 //   * `prefill(text)` fills the composer and never sends (the D4 B capability-index port).
 
-import type { Cancel, ComposerState, ConversationPort, ConversationView, DomFactory, TurnOrigin } from '../shell/ports.ts';
+import type {
+  Cancel,
+  ComposerState,
+  ConversationPort,
+  ConversationView,
+  TurnOrigin,
+} from '../shell/ports.ts';
+import type { DomFactory } from '../shell/dom-port.ts';
 
 export const COMPOSER_LIMIT = 2_000;
 /** The counter appears near the limit (§1.8), not before. */

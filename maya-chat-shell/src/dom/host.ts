@@ -32,8 +32,6 @@ import type {
 import type {
   Cancel,
   ConversationPort,
-  DomFactory,
-  DomPort,
   Scheduler,
   SessionPort,
   SessionView,
@@ -42,6 +40,7 @@ import type {
   VoiceControlPort,
   WidgetPort,
 } from '../shell/ports.ts';
+import type { DomFactory, DomPort } from '../shell/dom-port.ts';
 import { mountComposer, type Composer } from './composer.ts';
 import { mountFullscreen } from './fullscreen.ts';
 import { mountNav, mountRoutePanel } from './nav.ts';

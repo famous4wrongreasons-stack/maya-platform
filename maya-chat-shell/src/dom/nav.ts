@@ -9,7 +9,8 @@
 // to the conversation. `shell.account` also hosts «Выйти». No link and no hand-off anywhere.
 
 import { BASE_ROUTES, resolveRoute } from '../routes/registry.ts';
-import type { Cancel, DomFactory, PrimaryRoute, WidgetPort } from '../shell/ports.ts';
+import type { Cancel, PrimaryRoute, WidgetPort } from '../shell/ports.ts';
+import type { DomFactory } from '../shell/dom-port.ts';
 
 export const NAV_LABEL = 'Основная навигация';
 export const NOT_AVAILABLE_YET = 'Этот раздел пока недоступен здесь — вернитесь к разговору.';
