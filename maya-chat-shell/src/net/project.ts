@@ -271,14 +271,23 @@ export const projectWidgetIntent = (body: unknown): WidgetIntentProjection | nul
   const code = own(body, 'code');
   const next = own(body, 'next_envelope');
   const receipt = own(body, 'receipt_outcome');
+  const resolved = own(body, 'resolved_widget');
   if (typeof outcome !== 'string' || !INTENT_OUTCOMES.has(outcome)) return null;
   if (code !== null && typeof code !== 'string') return null;
   if (next !== null && !isIngestibleEnvelope(next)) return null;
   if (receipt !== null && (typeof receipt !== 'string' || !RECEIPT_OUTCOMES.has(receipt))) return null;
+  // NS-1: `resolved_widget` was not projected at all, so a parent return arrived as an ordinary
+  // ACCEPTED and the open detail stayed on screen with no canonical parent to restore.
+  //
+  // It is projected here under exactly the guard `next_envelope` uses, and ONLY in its envelope
+  // shape. The server's other two shapes — a signed HANDOFF target and a control acknowledgement —
+  // are not envelopes, so they project to null rather than rejecting the response: HANDOFF stays
+  // exactly where it is, and an ordinary CONTROL dismissal keeps its existing path.
   return {
     outcome: outcome as WidgetIntentProjection['outcome'],
     code: code as string | null,
     next_envelope: next as WidgetIntentProjection['next_envelope'],
+    resolved_widget: (isIngestibleEnvelope(resolved) ? resolved : null) as WidgetIntentProjection['resolved_widget'],
     receipt_outcome: receipt as WidgetIntentProjection['receipt_outcome'],
   };
 };
