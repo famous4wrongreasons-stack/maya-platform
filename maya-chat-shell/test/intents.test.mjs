@@ -196,7 +196,14 @@ test('FBE2E-1: a drawn selector can submit only one server-declared option/ref v
   assert.equal(inputsForActivation(base, 'intent:i1'), undefined);
   assert.equal(inputsForActivation(base, 'option:'), undefined);
   assert.equal(inputsForActivation({ ...base, input_schema: null }, 'intent:i1'), null);
-  assert.equal(inputsForActivation({ ...base, input_schema: null }, 'option:opaque'), undefined);
+  // I-SRC-1: a no-input intent now sends `null` inputs from ANY drawn control, not only from an
+  // `intent:` button. This assertion previously required `undefined` — i.e. a refusal — and that
+  // refusal is the defect: a SCHEDULE entry retaining a cancellation proposal was rejected before
+  // HTTP, so the canonical owner never saw it. With no schema there is no field to echo, so the
+  // ref carries no data; its identity was already proved by the reading order and `intentRefFor`.
+  assert.equal(inputsForActivation({ ...base, input_schema: null }, 'option:opaque'), null);
+  assert.equal(inputsForActivation({ ...base, input_schema: null }, 'entry:opaque-appointment'), null);
+  assert.equal(inputsForActivation({ ...base, input_schema: null }, 'row:r-1'), null);
   assert.equal(
     inputsForActivation(
       { ...base, input_schema: { ...base.input_schema, fields: [...base.input_schema.fields, base.input_schema.fields[0]] } },
@@ -625,4 +632,96 @@ test('intentRefFor: an action names its intent; a choice names the intent it sel
   const option = intentRefFor(result.nodes, 'option:o-cut');
   assert.ok(option !== null && envelope('kind-choice').intents.some((i) => i.intent_ref === option));
   assert.equal(intentRefFor(result.nodes, 'intent:nope'), null);
+});
+
+// ── I-SRC-1: cancel from the canonical SCHEDULE entry ─────────────────────────────────────────
+//
+// BS-1 emits one personal appointment whose ENTRY retains the exact cancellation proposal, while
+// the body-level action is the reschedule. Activating the entry must therefore reach the
+// submission boundary; the runtime refused it before HTTP, so the canonical owner never saw it.
+
+/** A SCHEDULE whose entry selects a no-input intent, as the personal-schedule presenter emits. */
+const personalSchedule = () => {
+  const env = envelope('kind-schedule');
+  // One lane, one entry; the entry retains the cancel proposal, the body action is the other one.
+  env.body.lanes = [env.body.lanes[0]];
+  env.body.entries = [{ ...env.body.entries[0], lane_id: env.body.lanes[0].lane_id, detail_intent: 'i2' }];
+  env.body.detail_intent = 'i1';
+  // i2 is the retained cancellation proposal: a no-input REFINE.
+  const i2 = env.intents.find((i) => i.intent_ref === 'i2');
+  i2.input_schema = null;
+  i2.effect = 'REFINE';
+  env.presentation.a11y.reading_order = [
+    { k: 'entry', id: env.body.entries[0].entry_ref },
+    { k: 'intent', id: 'i1' },
+    { k: 'intent', id: 'i2' },
+    { k: 'intent', id: 'i3' },
+  ];
+  return reseal(env);
+};
+
+test('I-SRC-1 — activating the SCHEDULE entry reaches the submission boundary', async () => {
+  const s = setup();
+  const env = personalSchedule();
+  const { itemId } = s.runtime.widgets.ingest(env);
+  const ref = `entry:${env.body.entries[0].entry_ref}`;
+  // The entry really is drawn, and the server's own mapping points it at the retained proposal.
+  assert.ok(s.item(itemId).result.readingOrder.includes(ref), 'the entry is drawn');
+
+  await s.runtime.widgets.activate(itemId, ref);
+
+  assert.equal(s.submissions.length, 1, 'the activation reached the submission port');
+  const sent = s.submissions[0].submission;
+  assert.equal(sent.widget_id, env.widget_id);
+  assert.equal(sent.inputs, null, 'a no-input intent echoes nothing from the ref');
+  assert.equal(typeof sent.intent_token, 'string');
+  assert.ok(sent.intent_token.length > 0, 'the token came from the vault, not from the ref');
+  // The ref's own text must not appear anywhere in what was sent.
+  assert.ok(!JSON.stringify(sent.inputs ?? {}).includes(env.body.entries[0].entry_ref));
+});
+
+test('I-SRC-1 — a ref the server did not map to an intent is REFUSED, and never sent', async () => {
+  const s = setup();
+  const env = personalSchedule();
+  // The same entry, but the server maps it to nothing: reachable, never activatable.
+  env.body.entries[0].detail_intent = null;
+  const { itemId } = s.runtime.widgets.ingest(reseal(env));
+  const ref = `entry:${env.body.entries[0].entry_ref}`;
+
+  const outcome = await s.runtime.widgets.activate(itemId, ref);
+
+  assert.equal(outcome.outcome, 'sentence');
+  assert.equal(outcome.sentence, 'activation_unavailable');
+  assert.equal(s.submissions.length, 0, 'nothing reached the submission port');
+});
+
+test('I-SRC-1 — a ref outside the sealed reading order is REFUSED before anything else', async () => {
+  const s = setup();
+  const env = personalSchedule();
+  const { itemId } = s.runtime.widgets.ingest(env);
+
+  // A forged entry handle, and a real handle from no envelope at all.
+  for (const ref of ['entry:forged-appointment-handle', `entry:${env.body.entries[0].entry_ref}x`]) {
+    const outcome = await s.runtime.widgets.activate(itemId, ref);
+    assert.equal(outcome.outcome, 'ignored', ref);
+    assert.equal(outcome.reason, 'not_drawn', ref);
+  }
+  assert.equal(s.submissions.length, 0, 'nothing reached the submission port');
+});
+
+test('I-SRC-1 — the fix did not make a schema-bearing intent accept an entry ref', async () => {
+  const s = setup();
+  const env = personalSchedule();
+  // The retained proposal now declares a closed input schema; an `entry:` ref may not fill it,
+  // because only `option:`/`slot:` refs may echo a value.
+  const i2 = env.intents.find((i) => i.intent_ref === 'i2');
+  i2.input_schema = {
+    fields: [{ name: 'choice', kind: 'enum', required: true, selection_min: 1, selection_max: 1, options: [] }],
+  };
+  const { itemId } = s.runtime.widgets.ingest(reseal(env));
+
+  const outcome = await s.runtime.widgets.activate(itemId, `entry:${env.body.entries[0].entry_ref}`);
+
+  assert.equal(outcome.outcome, 'sentence');
+  assert.equal(s.submissions.length, 0, 'a value-bearing schema still refuses an entry ref');
 });

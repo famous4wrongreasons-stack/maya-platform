@@ -110,7 +110,7 @@
       },
       {
         "path": "src/shell/intents.ts",
-        "sha256": "8137fc8415f0a53771ddc62465fcd8ac902583b887df2e6bc42a2b8a4db04a9c"
+        "sha256": "dcda58fc44c2898763541344999661e5c42094e444594d506aa2b0a9439bd950"
       },
       {
         "path": "src/shell/ports.ts",
@@ -130,8 +130,8 @@
       }
     ]
   },
-  "bytes": 440859,
-  "digest": "f77a7f8225f25fbae874cb07e9dd8874a1ff05582a8db488726f5cf9f6188a79",
+  "bytes": 441692,
+  "digest": "90adc07408a82bc19779aee088e21fb7b3d958b83882fb4f46f3f36895c1c00e",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -139,8 +139,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "db72d7241cbf76d90a83ae2209604f8e435266be9acfeaf5c6abd76065cc8a2a",
-    "modulePath": "m/db72d7241cbf76d9/",
+    "digest": "3cae86b6ba23c77979d0c47434a74081851acdfed11dabc9b00c616788e6d111",
+    "modulePath": "m/3cae86b6ba23c779/",
     "files": [
       {
         "path": "entry/main.js",
@@ -264,8 +264,8 @@
       },
       {
         "path": "src/shell/intents.js",
-        "sha256": "d5f644382912b3fa7db13ed2478b7f0387bf60951c8c6bd4b53c5ea3cb050f46",
-        "bytes": 19089
+        "sha256": "7bbc51edb2996c029d02ca2236f606eaad1695ce8ee45f00d49efad8ceb45f74",
+        "bytes": 19049
       },
       {
         "path": "src/shell/ports.js",
@@ -303,7 +303,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "d6dee3086144685a82fa7b9a854cbde04720153a99d5fa3cbbdd1689b0cc2890",
+      "sha256": "6182516d6fc63c447146e0ac00ca328e5644d5f17eeafe04b65b5f1ee8762700",
       "bytes": 1344
     },
     "assets": [
