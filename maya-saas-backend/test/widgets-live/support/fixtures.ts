@@ -603,7 +603,7 @@ export class Fixtures {
       }),
       appointments: await this.ctx.prisma.appointment.findMany({
         where: { tenantId: tenant.id },
-        select: { status: true, mayaClientId: true },
+        select: { id: true, startAt: true, status: true, mayaClientId: true },
       }),
       executions: await this.ctx.prisma.actionExecution.findMany({
         where: { tenantId: tenant.id },

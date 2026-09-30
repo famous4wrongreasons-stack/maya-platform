@@ -1,3 +1,4 @@
+import { envelopeBodyHash } from '../emission/envelope.factory';
 import { validate } from 'class-validator';
 
 import { ResolveWidgetDto } from '../dto/resolve-widget.dto';
@@ -10,6 +11,10 @@ const principal = {
 
 const envelope = {
   contract: 'maya.widget.envelope/1',
+  body: {},
+  intents: [],
+  integrity: { cell_index_digest: 'proof' },
+  render: { render_tier: 'RICH_INTERACTIVE' },
   widget_id: '00000000-0000-4000-8000-000000000001',
 };
 
@@ -89,6 +94,8 @@ describe('P-RESOLVE principal thread page', () => {
   it('resolves one stored envelope only through the current tenant/proof and a valid seal', async () => {
     const { service, tx, seals } = make();
     tx.widgetEmission.findFirst.mockResolvedValueOnce({
+      bodyHash: envelopeBodyHash(envelope),
+      bodyJson: envelope.body,
       turnId: 'turn-1',
       deliveryChannel: 'pwa',
       turn: { conversationId: 'conversation-1' },

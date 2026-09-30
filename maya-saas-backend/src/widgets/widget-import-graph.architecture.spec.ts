@@ -47,6 +47,7 @@ const SRC = path.join(BE, 'src');
  * (plan §3.5 item 7), here AND in k3 check 9. U0: none.
  */
 const OWNER_MODULES: readonly string[] = [
+  'appointments/appointments.module.ts#AppointmentsModule', // BS-1 personal context owner.
   'audit-log/audit-log.module.ts#AuditLogModule',
   // U6-L1 (R6-2): C20's owner, `AiToolPolicyService.assertCanExecute` (C11:4761-4762).
   'ai-tools/ai-tool-policy.module.ts#AiToolPolicyModule',
@@ -182,6 +183,14 @@ const PACKAGES: Readonly<Record<string, Allowed>> = {
 
 /** Non-widget modules only the boundary files may import: owner services and adapters. */
 const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
+  'appointments/appointments.module.ts': {
+    why: 'BS-1 verified personal context owner module',
+    only: ['owner-ports/widget-owner-ports.module.ts'],
+  },
+  'appointments/personal-client-context.service.ts': {
+    why: 'BS-1 current exact personal Client binding',
+    only: ['owner-ports/personal-schedule.adapter.ts'],
+  },
   'ai-tools/ai-tools.module.ts': {
     why: 'U12b canonical capability-read owner module',
     only: ['owner-ports/widget-owner-ports.module.ts'],
@@ -191,6 +200,7 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
     only: [
       'owner-ports/canonical-read.provider.ts',
       'owner-ports/booking-selector.adapter.ts',
+      'owner-ports/personal-schedule.adapter.ts',
     ],
   },
   'measurement/measurement.module.ts': {
@@ -305,7 +315,10 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
   },
   'crm/client-appointment-read.service.ts': {
     why: 'U11b canonical Client appointment read owner',
-    only: ['owner-ports/noun-client-appointment-read.adapter.ts'],
+    only: [
+      'owner-ports/noun-client-appointment-read.adapter.ts',
+      'owner-ports/personal-schedule.adapter.ts',
+    ],
   },
   'marketing/canonical-bulk.service.ts': {
     why: 'U13c canonical B35 approval request and decision owner',
@@ -1054,6 +1067,8 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       ),
     ).toBe(true);
     expect(Object.keys(OWNER_PORT_MODULES)).toEqual([
+      'appointments/appointments.module.ts',
+      'appointments/personal-client-context.service.ts',
       'ai-tools/ai-tools.module.ts',
       'ai-tools/ai-tool-runtime.service.ts',
       'measurement/measurement.module.ts',
@@ -1201,6 +1216,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       ),
     );
     expect(values.get('BOUND_PORT_TOKENS')).toEqual([
+      'PERSONAL_SCHEDULE_SOURCE',
       'USER_TURN_AUDIT',
       'WIDGET_RELEASE_ACCESS',
       'CANONICAL_READ',

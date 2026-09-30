@@ -1,4 +1,5 @@
 import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
+import { presentJournalSchedule } from '../composition/journal-schedule.presenter';
 import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
 import { Inject, Injectable } from '@nestjs/common';
 
@@ -221,6 +222,22 @@ export class EffectRouterService {
 
     if (target.class === 'w')
       return async () => {
+        if (input.record.sourceCapabilityKey === 'operations.journal.read') {
+          const child = await this.threadPage.resolveForNavigate({
+            tenantId: input.tenantId,
+            widgetId: input.record.widgetId,
+            principalProofHash: principal.proofHash,
+          });
+          const correlation = child?.envelope.correlation;
+          if (
+            !isRecord(correlation) ||
+            correlation.parent_widget_id !== target.ref
+          )
+            return admitted({
+              receiptOutcome: 'REFUSED',
+              refusalCode: 'effect_not_admissible',
+            });
+        }
         const stored = await this.threadPage.resolveForNavigate({
           tenantId: input.tenantId,
           widgetId: target.ref,
@@ -245,6 +262,29 @@ export class EffectRouterService {
           receiptOutcome: 'REFUSED',
           refusalCode: 'effect_not_admissible',
         });
+      if (input.record.sourceCapabilityKey === 'operations.journal.read') {
+        const provenance = source.envelope.provenance;
+        const body = source.envelope.body;
+        const range = isRecord(body) ? body.range : null;
+        const date = input.record.retainedLocalBusinessDate;
+        // Validate retained query integrity against the sealed source; never derive a query
+        // from historical display text or use it as a substitute for the retained scalar.
+        if (
+          input.record.sourceCapabilitySpace !== 'C9' ||
+          target.class !== 'detail' ||
+          target.ref !== 'fs.calendar' ||
+          date === null ||
+          !isRecord(provenance) ||
+          provenance.source_capability !== 'operations.journal.read' ||
+          !isRecord(range) ||
+          typeof range.from !== 'string' ||
+          !range.from.startsWith(date + 'T')
+        )
+          return admitted({
+            receiptOutcome: 'REFUSED',
+            refusalCode: 'effect_not_admissible',
+          });
+      }
       const projected = await this.projector.composeNavigate(
         projectionPlan(ctx, input.record),
       );
@@ -255,22 +295,74 @@ export class EffectRouterService {
           resolvedWidget:
             projected.kind === 'degraded' ? { degraded: projected.why } : null,
         });
-      const minted = await this.emitter.emit(
-        {
-          tenantId: input.tenantId,
-          conversationId: source.conversationId,
-          turnId: source.turnId,
-          kind: projected.input.kind_proposal,
-          principalProofHash: principal.proofHash,
-          deliveryChannel: input.answeringChannel,
-          body: { ...projected.source },
-          ttlSeconds: 600,
-          freshnessClass: 'live',
-          composerInput: projected.input,
-          principal,
+      const journal =
+        input.record.sourceCapabilitySpace === 'C9' &&
+        input.record.sourceCapabilityKey === 'operations.journal.read';
+      const date = input.record.retainedLocalBusinessDate;
+      // Composer provenance is not AdmissionFacts; keep its typed container explicit.
+      const composerFactsKey: keyof typeof projected.input = 'facts';
+      const body =
+        journal && date !== null
+          ? presentJournalSchedule(
+              projected.source,
+              projected.input[composerFactsKey][0],
+              date,
+            )
+          : journal
+            ? null
+            : projected.source;
+      if (body === null)
+        return admitted({
+          receiptOutcome: 'REFUSED',
+          refusalCode: 'effect_not_admissible',
+        });
+      const request = {
+        tenantId: input.tenantId,
+        conversationId: source.conversationId,
+        turnId: source.turnId,
+        kind: projected.input.kind_proposal,
+        principalProofHash: principal.proofHash,
+        deliveryChannel: input.answeringChannel,
+        body: {
+          ...body,
+          ...(journal
+            ? {
+                detail_intent: `i${projected.input.intent_proposals.length + 1}`,
+              }
+            : {}),
         },
-        input.now,
-      );
+        ttlSeconds: 600,
+        freshnessClass: 'live' as const,
+        composerInput: journal
+          ? {
+              ...projected.input,
+              intent_proposals: [
+                ...projected.input.intent_proposals,
+                {
+                  intent_template_key: 'navigate.journal.parent@1',
+                  role: 'secondary' as const,
+                },
+              ],
+            }
+          : projected.input,
+        principal,
+        ...(journal && date !== null
+          ? {
+              retainedQueryScalar: {
+                type: 'local_business_date' as const,
+                value: date,
+                provenance: 'server_validated' as const,
+              },
+            }
+          : {}),
+      };
+      const minted = journal
+        ? await this.emitter.emitJournalDetail(
+            request,
+            input.record.widgetId,
+            input.now,
+          )
+        : await this.emitter.emit(request, input.now);
       return admitted({ nextEnvelope: minted.envelope });
     };
   }

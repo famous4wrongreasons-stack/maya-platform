@@ -1329,11 +1329,12 @@ describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
     expect(ROWS_DEFERRED_BY).toEqual(
       expect.arrayContaining([expect.stringContaining('OD-5')]),
     );
-    expect(PROJECTOR_REGISTRY).toHaveLength(7);
+    expect(PROJECTOR_REGISTRY).toHaveLength(8);
     expect(PROJECTOR_REGISTRY.map((row) => row.subject_key)).toEqual([
       'C9:catalog.services.read',
       'C9:catalog.staff.read',
       'C9:booking.availability.read',
+      'C9:appointments.own.list',
       'C9:company.business-hours.read',
       'C9:operations.journal.read',
       'C9:c9.no_action',

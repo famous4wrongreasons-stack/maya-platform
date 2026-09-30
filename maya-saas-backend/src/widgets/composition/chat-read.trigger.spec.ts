@@ -124,6 +124,7 @@ describe('P-MT2a ChatReadTriggerService', () => {
           bindMint: async () => {},
           canProject: () => Promise.resolve(projectable),
         },
+        { resolve: () => Promise.resolve(null) },
       ),
       tx,
       ensureAssistantTurn,

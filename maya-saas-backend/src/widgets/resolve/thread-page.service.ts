@@ -10,6 +10,8 @@ import type {
 import type { PrincipalResolver } from '../authority/principal-view';
 import { PRINCIPAL_RESOLVER, SEAL_VERIFIER } from '../di-tokens';
 import type { SealVerifier } from '../emission/seal-verifier.service';
+import { envelopeBodyHash } from '../emission/envelope.factory';
+import { stableActionJson } from '../authority/contract-bindings';
 
 export interface ThreadPageRequest {
   readonly before?: string;
@@ -128,11 +130,15 @@ export class WidgetThreadPageService {
           tenantId: input.tenantId,
           widgetId: input.widgetId,
           erasedAt: null,
+          expiresAt: { gt: new Date() },
+          retentionUntil: { gt: new Date() },
           intentRecords: {
             some: { principalProofHash: input.principalProofHash },
           },
         },
         select: {
+          bodyHash: true,
+          bodyJson: true,
           turnId: true,
           deliveryChannel: true,
           turn: { select: { conversationId: true } },
@@ -153,6 +159,15 @@ export class WidgetThreadPageService {
       const envelope = row?.renderReceipts[0]?.emittedEnvelopeJson;
       if (row === null || tokenHash === undefined || !isRecord(envelope))
         return null;
+      try {
+        if (
+          envelopeBodyHash(envelope) !== row.bodyHash ||
+          stableActionJson(envelope.body) !== stableActionJson(row.bodyJson)
+        )
+          return null;
+      } catch {
+        return null;
+      }
       const seal = await this.seals.verify(
         tokenHash,
         { tenantId: input.tenantId },

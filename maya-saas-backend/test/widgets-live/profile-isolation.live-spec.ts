@@ -1,3 +1,5 @@
+import { personalSource } from '../../scripts/widgets-http-proof/gateBS.cases';
+import { journalSource } from '../../scripts/widgets-http-proof/gateNS.cases';
 import { releaseBookingProof } from './support/release-booking-proof';
 import request from 'supertest';
 import { ConfigService } from '@nestjs/config';
@@ -495,4 +497,35 @@ describe('PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate]',
     );
     expect(proofs).toHaveLength(7);
   });
+  it.each([
+    ['NS', journalSource],
+    ['BS', personalSource],
+  ] as const)(
+    'PROFILE-SOURCE %s admits only the exact new source under a signed restricted grant',
+    async (_name, proof) => {
+      const f = await fixture();
+      const base = await http.listenLoopback();
+      await proof(
+        {
+          apiBase: base,
+          fixtures: fx.binView(),
+          mintProvenance: () => http.mintProvenance(),
+          request: async (route, init) => {
+            const r = await fetch(`${base}/api${route}`, init);
+            return { status: r.status, body: (await r.json()) as unknown };
+          },
+          evidence: { enabled: false, record: () => false },
+        },
+        async (tenant) => {
+          tenants.push(tenant.id);
+          const c = profileCommand(f.p, tenant.id);
+          const response = await request(http.app.getHttpServer())
+            .post(`/api/platform/widget-release/${tenant.id}/grant`)
+            .set('Authorization', 'Bearer ' + f.operatorToken)
+            .send(c);
+          expect(response.status).toBe(201);
+        },
+      );
+    },
+  );
 });

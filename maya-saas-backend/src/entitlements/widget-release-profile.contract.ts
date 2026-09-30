@@ -16,7 +16,7 @@ export const NO_HANDOFF_PROFILE = 'closed-input.no-handoff@1' as const;
 export const PROFILE_CERT =
   'maya.widget-release-profile-certificate/2' as const;
 export const PROFILE_REGISTRY_DIGEST =
-  'afd195773728fc99ce6a985adb3cc5a5c6ac9c646720ce73f957c9f0331b1716';
+  '21ffeb2426d9629e8e9110bbecdbdc7b45c0869e70f9395024e0fa728418a49a';
 export const PROFILE_MANIFEST = Object.freeze({
   id: NO_HANDOFF_PROFILE,
   registryDigest: PROFILE_REGISTRY_DIGEST,
@@ -27,6 +27,8 @@ export const PROFILE_MANIFEST = Object.freeze({
     'none.passive@1',
     'navigate.account@1',
     'navigate.schedule@1',
+    'navigate.journal.detail@1',
+    'navigate.journal.parent@1',
     'refine.measurement@1',
     'refine.measurement.period@1',
     'refine.journal.date@1',

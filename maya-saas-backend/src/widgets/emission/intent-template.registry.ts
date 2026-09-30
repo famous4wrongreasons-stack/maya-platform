@@ -30,6 +30,8 @@ export type IntentTemplateKey =
   | 'none.passive@1'
   | 'navigate.account@1'
   | 'navigate.schedule@1'
+  | 'navigate.journal.detail@1'
+  | 'navigate.journal.parent@1'
   | 'refine.measurement@1'
   | 'refine.measurement.period@1'
   | 'refine.journal.date@1'
@@ -203,6 +205,47 @@ export const INTENT_TEMPLATE_REGISTRY: Readonly<
     label: 'Open schedule',
     utteranceTemplate: 'Open schedule',
     speechAliases: ['open schedule', 'show schedule'],
+    allowedArgumentHandles: [],
+    sourceSubject: false,
+  }),
+  'navigate.journal.detail@1': row({
+    key: 'navigate.journal.detail@1',
+    version: 1,
+    effect: 'NAVIGATE',
+    kinds: ['SCHEDULE'],
+    roles: ['primary'],
+    subject: null,
+    target: { class: 'detail', ref: 'fs.calendar' },
+    inputSchema: null,
+    selectionDomain: {},
+    selectionDomainLabels: {},
+    priority: 1,
+    singleUse: false,
+    ttlSeconds: 600,
+    label: 'Open journal detail',
+    utteranceTemplate: 'Open journal detail',
+    speechAliases: ['open journal detail'],
+    allowedArgumentHandles: [],
+    sourceSubject: false,
+  }),
+  'navigate.journal.parent@1': row({
+    key: 'navigate.journal.parent@1',
+    version: 1,
+    effect: 'NAVIGATE',
+    kinds: ['SCHEDULE'],
+    roles: ['secondary'],
+    subject: null,
+    // Fixed binding marker, resolved only by the dedicated verified-parent minter.
+    target: { class: 'w', ref: 'retained.journal.parent' },
+    inputSchema: null,
+    selectionDomain: {},
+    selectionDomainLabels: {},
+    priority: 1,
+    singleUse: false,
+    ttlSeconds: 600,
+    label: 'Return to journal',
+    utteranceTemplate: 'Return to journal',
+    speechAliases: ['return to journal'],
     allowedArgumentHandles: [],
     sourceSubject: false,
   }),
@@ -389,6 +432,8 @@ export const resolveIntentTemplate = (args: {
   readonly deliveryChannel: string;
   /** Present only on the R3.9.4 server-owned successor path. */
   readonly successorSourceCapability?: CapabilityRef;
+  /** Dedicated journal detail lane only, never a proposal/request field. */
+  readonly journalParentWidgetId?: string;
 }): ResolvedIntentTemplate => {
   const { proposal, widgetKind, deliveryChannel } = args;
   if (
@@ -437,12 +482,23 @@ export const resolveIntentTemplate = (args: {
   if (!template.sourceSubject && args.successorSourceCapability !== undefined)
     throw new IntentTemplateRefusal('server_source_on_non_successor_template');
 
-  const resolvedTemplate: IntentTemplateRow = template.sourceSubject
-    ? Object.freeze({
-        ...template,
-        subject: args.successorSourceCapability ?? null,
-      })
-    : template;
+  if (
+    template.key === 'navigate.journal.parent@1' &&
+    !args.journalParentWidgetId
+  )
+    throw new IntentTemplateRefusal('journal_parent_context_required');
+  const resolvedTemplate: IntentTemplateRow =
+    template.key === 'navigate.journal.parent@1'
+      ? Object.freeze({
+          ...template,
+          target: { class: 'w' as const, ref: args.journalParentWidgetId! },
+        })
+      : template.sourceSubject
+        ? Object.freeze({
+            ...template,
+            subject: args.successorSourceCapability ?? null,
+          })
+        : template;
 
   const expectedCapability =
     resolvedTemplate.effect === 'HANDOFF'

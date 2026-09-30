@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { cases } from '../../scripts/widgets-http-proof/gateTURN.cases';
+import { cases } from '../../scripts/widgets-http-proof/gateNS.cases';
 import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
 import {
   bootHttp,
@@ -9,7 +9,7 @@ import {
 import { recordJestEvidence } from './support/evidence';
 import type { Fixtures } from './support/fixtures';
 
-describe('9.6 canonical source evidence', () => {
+describe('NS-1 canonical source evidence', () => {
   let db: FixtureContext, http: HttpHarness, fx: Fixtures;
   beforeAll(async () => {
     db = await bootFixtureContext();
@@ -21,7 +21,7 @@ describe('9.6 canonical source evidence', () => {
     await http?.close();
     await db?.close();
   });
-  it('TURN-CANONICAL [HTTP] [E-MINT] ordinary typed, widget typed and native tap persist byte-identical USER content through the same writer', async () => {
+  it('NS-SOURCE [HTTP] [E-MINT] production journal detail rereads exact retained date and resolves exact parent', async () => {
     await cases[0].run({
       apiBase: 'http://127.0.0.1/api',
       fixtures: fx.binView(),

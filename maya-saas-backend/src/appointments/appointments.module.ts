@@ -34,6 +34,10 @@ import { TenantAppointmentRepository } from './tenant-appointment.repository';
     TenantAppointmentRepository,
     PersonalClientContextService,
   ],
-  exports: [AppointmentsService, TenantAppointmentRepository],
+  exports: [
+    AppointmentsService,
+    TenantAppointmentRepository,
+    PersonalClientContextService,
+  ],
 })
 export class AppointmentsModule {}

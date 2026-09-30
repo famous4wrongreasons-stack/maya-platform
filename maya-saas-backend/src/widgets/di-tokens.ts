@@ -88,3 +88,6 @@ export const CANONICAL_READ = 'CANONICAL_READ';
 export const WIDGET_RELEASE_ACCESS = 'WIDGET_RELEASE_ACCESS';
 
 export const USER_TURN_AUDIT = 'USER_TURN_AUDIT';
+
+/** BS-1 exact verified personal appointment source. */
+export const PERSONAL_SCHEDULE_SOURCE = 'PERSONAL_SCHEDULE_SOURCE';

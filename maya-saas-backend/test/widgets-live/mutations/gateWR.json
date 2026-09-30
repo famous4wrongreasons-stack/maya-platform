@@ -167,7 +167,7 @@
   {
     "id": "WR-M17",
     "file": "src/widgets/composition/chat-read.trigger.ts",
-    "find": "? await this.emitter.emitBookingSelector(mintRequest, {\n              source: input.result,\n            })",
+    "find": "? await this.emitter.emitBookingSelector(mintRequest, {\n                source: input.result,\n              })",
     "replace": "? await this.emitter.emit(mintRequest)",
     "killers": [
       "WR-L11"

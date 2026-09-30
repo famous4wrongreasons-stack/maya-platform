@@ -1,3 +1,5 @@
+import { presentPersonalSchedule } from '../booking/personal-schedule.presenter';
+import type { PersonalScheduleSource } from '../owner-ports/personal-schedule.port';
 import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
 import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
 // P-MINT — the single compose → type → fit → seal → record pipeline.
@@ -133,6 +135,57 @@ export class WidgetEmitterService {
     return this.emitInternal(request, now, null, null, null);
   }
 
+  /** BS-1: canonical personal read and handle production, never a caller-selected Client/id. */
+  async emitPersonalSchedule(
+    request: MintRequest,
+    source: PersonalScheduleSource,
+    now = new Date(),
+  ): Promise<SealedEmission> {
+    if (
+      request.kind !== 'SCHEDULE' ||
+      request.composerInput.capability !== 'appointments.own.list'
+    )
+      throw new IntentTemplateRefusal('personal_schedule_source_required');
+    await source.revalidate();
+    const presented = presentPersonalSchedule(
+      request.tenantId,
+      source,
+      (identity) => this.seals.mintNounHandles([identity])[identity.noun],
+    );
+    return this.emitInternal(
+      {
+        ...request,
+        body: presented.body as unknown as Record<string, unknown>,
+        piiClass: 'client_identified',
+        composerInput: {
+          ...request.composerInput,
+          intent_proposals: presented.proposals,
+        },
+      },
+      now,
+      null,
+      null,
+      null,
+      null,
+      source,
+    );
+  }
+
+  /** NS-1: only a freshly re-read journal detail may bind its exact retained parent. */
+  async emitJournalDetail(
+    request: MintRequest,
+    parentWidgetId: string,
+    now = new Date(),
+  ): Promise<SealedEmission> {
+    if (
+      request.kind !== 'SCHEDULE' ||
+      request.composerInput.capability !== 'operations.journal.read' ||
+      request.composerInput.correlation_refs.parent_id !== parentWidgetId
+    )
+      throw new IntentTemplateRefusal('journal_parent_source_mismatch');
+    return this.emitInternal(request, now, null, null, null, parentWidgetId);
+  }
+
   /** FBE2E-2: server-owned canonical facts become a strict selector and closed-domain intent. */
   async emitBookingSelector(
     request: MintRequest,
@@ -248,8 +301,15 @@ export class WidgetEmitterService {
     successor: SuccessorEmissionContext | null,
     booking: BookingConfirmationEmissionContext | null,
     supersedesWidgetId: string | null,
+    journalParentWidgetId: string | null = null,
+    personalSchedule: PersonalScheduleSource | null = null,
   ): Promise<SealedEmission> {
     const input = request.composerInput;
+    if (
+      input.capability === 'appointments.own.list' &&
+      personalSchedule === null
+    )
+      throw new IntentTemplateRefusal('personal_schedule_context_required');
     const principal = request.principal;
     if (
       principal.authority.tenantId !== request.tenantId ||
@@ -261,6 +321,17 @@ export class WidgetEmitterService {
       throw new IntentTemplateRefusal('request_kind_mismatch');
 
     const retainedLocalBusinessDate = this.retainedJournalDate(request);
+
+    if (
+      input.intent_proposals.some((p) =>
+        p.intent_template_key.startsWith('navigate.journal.'),
+      ) &&
+      (request.kind !== 'SCHEDULE' ||
+        input.capability !== 'operations.journal.read' ||
+        input.source.from !== 'capability_envelope' ||
+        input.source.capability !== 'operations.journal.read')
+    )
+      throw new IntentTemplateRefusal('journal_navigation_source_required');
 
     const resolved = input.intent_proposals.map((proposal) => {
       const bookingKey =
@@ -300,6 +371,9 @@ export class WidgetEmitterService {
               proposal,
               widgetKind: input.kind_proposal,
               deliveryChannel: request.deliveryChannel,
+              ...(journalParentWidgetId === null
+                ? {}
+                : { journalParentWidgetId }),
               ...(successor === null
                 ? {}
                 : { successorSourceCapability: successor.sourceCapability }),
@@ -433,6 +507,41 @@ export class WidgetEmitterService {
       }) as never,
     }));
     await this.prisma.$transaction(async (tx) => {
+      if (journalParentWidgetId !== null) {
+        const parent = await tx.widgetEmission.findFirst({
+          where: {
+            tenantId: request.tenantId,
+            widgetId: journalParentWidgetId,
+            erasedAt: null,
+            expiresAt: { gt: now },
+            retentionUntil: { gt: now },
+            turn: {
+              principalProofHash: principal.proofHash,
+              conversationId: request.conversationId,
+            },
+            intentRecords: {
+              some: {
+                principalProofHash: principal.proofHash,
+                effect: 'NAVIGATE',
+                sourceCapabilitySpace: 'C9',
+                sourceCapabilityKey: 'operations.journal.read',
+                retainedLocalBusinessDate,
+              },
+            },
+          },
+        });
+        if (
+          parent === null ||
+          !(await this.verifySeal(request.tenantId, journalParentWidgetId)) ||
+          !(await this.releaseAccess.canProject(
+            request.tenantId,
+            journalParentWidgetId,
+            tx,
+          ))
+        )
+          throw new IntentTemplateRefusal('journal_parent_unavailable');
+      }
+      if (personalSchedule !== null) await personalSchedule.revalidate();
       await this.releaseAccess.bindMint(request.tenantId, recordFacts, tx);
       await tx.widgetEmission.create({
         data: {
@@ -519,7 +628,9 @@ export class WidgetEmitterService {
       request.kind !== 'SCHEDULE' ||
       request.composerInput.capability !== 'operations.journal.read' ||
       !request.composerInput.intent_proposals.some(
-        (proposal) => proposal.intent_template_key === 'refine.journal.date@1',
+        (proposal) =>
+          proposal.intent_template_key === 'refine.journal.date@1' ||
+          proposal.intent_template_key === 'navigate.journal.detail@1',
       )
     )
       throw new IntentTemplateRefusal('retained_query_scalar_not_permitted');

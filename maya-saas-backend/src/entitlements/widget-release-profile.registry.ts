@@ -61,6 +61,28 @@ const snapshot = {
       inputSchemaHash: null,
       sourceSubject: false,
     },
+    'navigate.journal.detail@1': {
+      effect: 'NAVIGATE',
+      kinds: ['SCHEDULE'],
+      subject: null,
+      target: {
+        class: 'detail',
+        ref: 'fs.calendar',
+      },
+      inputSchemaHash: null,
+      sourceSubject: false,
+    },
+    'navigate.journal.parent@1': {
+      effect: 'NAVIGATE',
+      kinds: ['SCHEDULE'],
+      subject: null,
+      target: {
+        class: 'w',
+        ref: 'retained.journal.parent',
+      },
+      inputSchemaHash: null,
+      sourceSubject: false,
+    },
     'refine.measurement@1': {
       effect: 'REFINE',
       kinds: ['METRIC'],

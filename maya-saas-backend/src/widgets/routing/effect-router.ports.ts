@@ -21,6 +21,11 @@ export const EFFECT_ROUTE_AUDIT = 'EFFECT_ROUTE_AUDIT';
  */
 export interface NavigateWidgetMinterPort {
   emit(request: MintRequest, now?: Date): Promise<SealedEmission>;
+  emitJournalDetail(
+    request: MintRequest,
+    parentWidgetId: string,
+    now?: Date,
+  ): Promise<SealedEmission>;
 }
 
 export interface EffectRouteAuditPort {

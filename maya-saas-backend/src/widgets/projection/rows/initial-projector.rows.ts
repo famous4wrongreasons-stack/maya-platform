@@ -50,6 +50,20 @@ export const INITIAL_PROJECTOR_ROWS: readonly ProjectorRow[] = Object.freeze([
     unblocked_by: 'U12b / G12-R1a / G12-R3',
   }),
   Object.freeze({
+    projector_id: 'appointments.own.list@1',
+    tapped_kind: 'SCHEDULE',
+    subject_key: 'C9:appointments.own.list',
+    result_kind: 'SCHEDULE',
+    source_kind: 'capability_read',
+    composition: 'canonical_read',
+    required_fields: Object.freeze(['appointments']),
+    slots: Object.freeze({}),
+    arguments: Object.freeze({}),
+    completeness: Object.freeze({ total_field: null, exhausted_field: null }),
+    intent_proposals: Object.freeze([]),
+    unblocked_by: 'BS-1 Option A — exact verified personal Client',
+  }),
+  Object.freeze({
     projector_id: 'company.business-hours.read@1',
     tapped_kind: 'SCHEDULE',
     subject_key: 'C9:company.business-hours.read',
@@ -83,12 +97,16 @@ export const INITIAL_PROJECTOR_ROWS: readonly ProjectorRow[] = Object.freeze([
     completeness: Object.freeze({ total_field: null, exhausted_field: null }),
     intent_proposals: Object.freeze([
       Object.freeze({
+        intent_template_key: 'navigate.journal.detail@1',
+        role: 'primary',
+      }),
+      Object.freeze({
         intent_template_key: 'refine.journal.date@1',
         capability: Object.freeze({
           space: 'C9',
           key: 'operations.journal.read',
         }),
-        role: 'primary',
+        role: 'secondary',
       }),
       Object.freeze({
         intent_template_key: 'control.dismiss@1',

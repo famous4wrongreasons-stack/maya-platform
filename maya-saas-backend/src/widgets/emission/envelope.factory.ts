@@ -500,7 +500,17 @@ export const buildEnvelopeWithoutSeal = (args: {
         live_region: args.kind === 'PROGRESS' ? 'polite' : 'off',
         accessible_names: interactive.names,
       },
-      fullscreen_detail: null,
+      fullscreen_detail:
+        args.kind === 'SCHEDULE' &&
+        args.input.capability === 'operations.journal.read' &&
+        args.intents.some(
+          (intent) =>
+            intent.effect === 'NAVIGATE' &&
+            intent.target?.class === 'detail' &&
+            intent.target.ref === 'fs.calendar',
+        )
+          ? { route_key: 'fs.calendar', reason: 'exceeds_chat_density' }
+          : null,
     },
     render: {
       contract: 'maya.render.receipt/1',

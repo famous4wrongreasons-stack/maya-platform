@@ -132,6 +132,7 @@ const OWNER_KEY_ROWS: Readonly<Record<WidgetKind, OwnerKeyRow>> = Object.freeze(
       'appointments.own.{create,reschedule,cancel}',
     ]),
     SCHEDULE: row('SCHEDULE_READ', [
+      'appointments.own.list', // BS-1 Option A: verified personal-client source only.
       'staff.schedule.read',
       'staff.schedule.own.read',
       'operations.journal.read',

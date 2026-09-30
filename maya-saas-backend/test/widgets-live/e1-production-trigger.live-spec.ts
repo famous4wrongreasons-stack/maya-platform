@@ -119,7 +119,9 @@ describe('E1 — production-triggered evidence records', () => {
     const envelope = record(receipt.envelope);
     const intents = envelope.intents;
     expect(Array.isArray(intents)).toBe(true);
-    const first = record((intents as unknown[])[0]);
+    const first = record(
+      (intents as unknown[]).find((v) => record(v).effect === 'REFINE'),
+    );
     expect(first.effect).toBe('REFINE');
     expect(typeof first.intent_token).toBe('string');
     const mint = http

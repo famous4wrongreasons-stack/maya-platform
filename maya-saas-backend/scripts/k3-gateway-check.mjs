@@ -685,6 +685,7 @@ const EMISSION_MODULE = 'emission/emission.module.ts#WidgetEmissionModule';
  * (plan §3.5 item 7). U0: none.
  */
 const OWNER_MODULES = [
+  'appointments/appointments.module.ts#AppointmentsModule', // BS-1 personal context owner.
   'audit-log/audit-log.module.ts#AuditLogModule',
   // U6-L1 (R6-2): C20's owner, `AiToolPolicyService.assertCanExecute` (C11:4761-4762).
   'ai-tools/ai-tool-policy.module.ts#AiToolPolicyModule',
@@ -704,6 +705,7 @@ const OWNER_MODULES = [
 ];
 /** DI tokens of `di-tokens.ts` the owner-ports module may provide and export. */
 const BOUND_PORT_TOKENS = [
+  'PERSONAL_SCHEDULE_SOURCE', // BS-1 canonical personal source only.
   'USER_TURN_AUDIT', // 9.6 opaque correlation only; canonical owner remains AuditLogService.
   'WIDGET_RELEASE_ACCESS', // Approved fixed release profile; no generic owner dispatch.
   'CANONICAL_READ',

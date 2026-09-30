@@ -1,0 +1,52 @@
+[
+  {
+    "id": "NS-M01",
+    "file": "src/widgets/projection/rows/initial-projector.rows.ts",
+    "find": "intent_template_key: 'navigate.journal.detail@1'",
+    "replace": "intent_template_key: 'navigate.schedule@1'",
+    "killers": [
+      "NS-SOURCE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "NS-M02",
+    "file": "src/widgets/routing/effect-router.service.ts",
+    "find": "!range.from.startsWith(date + 'T')",
+    "replace": "false",
+    "killers": [
+      "NS-REFUSE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "NS-M03",
+    "file": "src/widgets/resolve/thread-page.service.ts",
+    "find": "widgetId: input.widgetId,\n          erasedAt: null,",
+    "replace": "widgetId: input.widgetId,",
+    "killers": [
+      "NS-PARENT"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "NS-M04",
+    "file": "src/widgets/resolve/thread-page.service.ts",
+    "find": "stableActionJson(envelope.body) !== stableActionJson(row.bodyJson)",
+    "replace": "false",
+    "killers": [
+      "NS-REFUSE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "NS-M05",
+    "file": "src/widgets/emission/intent-template.registry.ts",
+    "find": "ref: args.journalParentWidgetId!",
+    "replace": "ref: '00000000-0000-4000-8000-000000000001'",
+    "killers": [
+      "NS-SOURCE"
+    ],
+    "expect": "live-killed"
+  }
+]

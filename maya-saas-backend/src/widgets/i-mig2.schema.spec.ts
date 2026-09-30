@@ -56,7 +56,7 @@ describe('I-MIG2 migration-2 fold', () => {
     expect(physical.every((line) => /\/\/ A(?:\s|$)/.test(line))).toBe(true);
   });
 
-  it('MIG-4 retains three widget migrations plus the explicit approved SB-1 JSON V2 extension', () => {
+  it('MIG-4 retains the baseline migrations plus exact approved SB-1 JSON V2 and NS-1 CHECK extensions', () => {
     const dirs = fs
       .readdirSync(path.join(repo, 'maya-saas-backend/prisma/migrations'), {
         withFileTypes: true,
@@ -66,7 +66,19 @@ describe('I-MIG2 migration-2 fold', () => {
 
     const successor = '20260929190000_client_link_challenge_json_v2';
     expect(dirs.filter((name) => name === successor)).toEqual([successor]);
-    expect(dirs.filter((name) => name !== successor)).toHaveLength(99);
+    const navigation = '20260930120000_journal_detail_retained_date';
+    expect(dirs.filter((name) => name === navigation)).toEqual([navigation]);
+    expect(
+      dirs.filter((name) => name !== successor && name !== navigation),
+    ).toHaveLength(99);
+    const nav = read(
+      `maya-saas-backend/prisma/migrations/${navigation}/migration.sql`,
+    );
+    expect(nav).not.toMatch(/CREATE TABLE|ADD COLUMN|DROP TABLE|DROP COLUMN/);
+    expect(nav.match(/ALTER TABLE/g)).toHaveLength(2);
+    expect(nav).toContain('WidgetIntentRecord_journal_date_scope_check');
+    expect(nav).toContain('fs.calendar');
+    expect(nav).toContain('operations.journal.read');
     const extension = read(
       `maya-saas-backend/prisma/migrations/${successor}/migration.sql`,
     );

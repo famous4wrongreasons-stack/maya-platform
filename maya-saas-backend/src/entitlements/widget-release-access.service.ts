@@ -173,9 +173,18 @@ export class WidgetReleaseAccessService {
       tuple.effect !== record.effect ||
       !(tuple.kinds as readonly string[]).includes(record.widgetKind) ||
       tuple.inputSchemaHash !== record.inputSchemaHash ||
-      releaseHash(tuple.target) !== releaseHash(record.targetJson)
+      !this.targetAllowed(template, tuple.target, record)
     )
       return false;
+    if (
+      template === 'navigate.journal.detail@1' ||
+      template === 'navigate.journal.parent@1'
+    )
+      if (
+        record.sourceCapabilitySpace !== 'C9' ||
+        record.sourceCapabilityKey !== 'operations.journal.read'
+      )
+        return false;
     if (tuple.sourceSubject)
       return (
         record.capabilitySpace === 'C9' &&
@@ -187,6 +196,32 @@ export class WidgetReleaseAccessService {
     return (
       (tuple.subject?.space ?? null) === record.capabilitySpace &&
       (tuple.subject?.key ?? null) === record.capabilityKey
+    );
+  }
+
+  private targetAllowed(
+    template: string,
+    target: unknown,
+    record: ReleaseIntentFacts,
+  ): boolean {
+    if (template !== 'navigate.journal.parent@1')
+      return releaseHash(target) === releaseHash(record.targetJson);
+    // Only this fixed template binds a server-resolved retained parent. The exact ref is
+    // included in the immutable grant-generation emission binding, never a caller exclusion.
+    const value = record.targetJson as {
+      class?: unknown;
+      ref?: unknown;
+    } | null;
+    return (
+      value !== null &&
+      typeof value === 'object' &&
+      Object.keys(value).sort().join(',') === 'class,ref' &&
+      value.class === 'w' &&
+      typeof value.ref === 'string' &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        value.ref,
+      ) &&
+      value.ref !== record.widgetId
     );
   }
 }

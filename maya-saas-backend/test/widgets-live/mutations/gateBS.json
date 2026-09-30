@@ -1,0 +1,52 @@
+[
+  {
+    "id": "BS-M01",
+    "file": "src/widgets/owner-ports/personal-schedule.adapter.ts",
+    "find": "const personal = await this.contexts.select(actor, 'personal_client');",
+    "replace": "const personal = { revalidate: () => Promise.resolve() };",
+    "killers": [
+      "BS-REVOKED"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "BS-M02",
+    "file": "src/widgets/owner-ports/personal-schedule.adapter.ts",
+    "find": "ids.has(v.id)",
+    "replace": "true",
+    "killers": [
+      "BS-IDENTITY"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "BS-M03",
+    "file": "src/widgets/owner-ports/personal-schedule.adapter.ts",
+    "find": "v.id === row.id",
+    "replace": "true",
+    "killers": [
+      "BS-CHANGED"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "BS-M04",
+    "file": "src/widgets/booking/personal-schedule.presenter.ts",
+    "find": "ownerRef: source.appointmentId,",
+    "replace": "ownerRef: 'foreign-appointment',",
+    "killers": [
+      "BS-SOURCE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "BS-M05",
+    "file": "src/widgets/owner-ports/personal-schedule.adapter.ts",
+    "find": "s.staff_id === row.staff_external_id &&",
+    "replace": "true &&",
+    "killers": [
+      "BS-AVAILABILITY"
+    ],
+    "expect": "build-killed"
+  }
+]

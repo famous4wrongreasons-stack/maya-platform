@@ -1,3 +1,6 @@
+import { AppointmentsModule } from '../../appointments/appointments.module';
+import { PersonalScheduleAdapter } from './personal-schedule.adapter';
+import { PERSONAL_SCHEDULE_SOURCE } from '../di-tokens';
 import { AuditLogModule } from '../../audit-log/audit-log.module';
 import { UserTurnAuditAdapter } from './user-turn-audit.adapter';
 import { USER_TURN_AUDIT } from '../di-tokens';
@@ -66,6 +69,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
  */
 @Module({
   imports: [
+    AppointmentsModule,
     AuditLogModule,
     AiToolPolicyModule,
     AiToolsModule,
@@ -78,6 +82,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     TenancyModule,
   ],
   providers: [
+    { provide: PERSONAL_SCHEDULE_SOURCE, useClass: PersonalScheduleAdapter },
     { provide: USER_TURN_AUDIT, useClass: UserTurnAuditAdapter },
     { provide: WIDGET_RELEASE_ACCESS, useClass: WidgetReleaseAccessAdapter },
     CanonicalReadAdapter,
@@ -121,6 +126,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     },
   ],
   exports: [
+    PERSONAL_SCHEDULE_SOURCE,
     USER_TURN_AUDIT,
     WIDGET_RELEASE_ACCESS,
     CANONICAL_READ,

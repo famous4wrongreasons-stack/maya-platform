@@ -1,3 +1,5 @@
+import { PERSONAL_SCHEDULE_SOURCE } from '../di-tokens';
+import type { PersonalSchedulePort } from '../owner-ports/personal-schedule.port';
 import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
 import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
 import { Inject, Injectable, Logger } from '@nestjs/common';
@@ -37,6 +39,8 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
     @Inject(PRINCIPAL_RESOLVER) private readonly principals: PrincipalResolver,
     @Inject(WIDGET_RELEASE_ACCESS)
     private readonly releaseAccess: WidgetReleaseAccessPort,
+    @Inject(PERSONAL_SCHEDULE_SOURCE)
+    private readonly personalSchedules: PersonalSchedulePort,
   ) {}
 
   async afterCompletedRead(
@@ -182,14 +186,22 @@ export class ChatReadTriggerService implements AiReadWidgetTriggerPort {
             }
           : {}),
       };
+      const personalSource =
+        input.toolName === 'appointments.own.list'
+          ? await this.personalSchedules.resolve(input.actor, input.result)
+          : null;
+      if (input.toolName === 'appointments.own.list' && personalSource === null)
+        return null;
       const minted =
-        row.result_kind === 'SERVICE_SELECTOR' ||
-        row.result_kind === 'STAFF_SELECTOR' ||
-        row.result_kind === 'TIME_SLOT_SELECTOR'
-          ? await this.emitter.emitBookingSelector(mintRequest, {
-              source: input.result,
-            })
-          : await this.emitter.emit(mintRequest);
+        personalSource !== null
+          ? await this.emitter.emitPersonalSchedule(mintRequest, personalSource)
+          : row.result_kind === 'SERVICE_SELECTOR' ||
+              row.result_kind === 'STAFF_SELECTOR' ||
+              row.result_kind === 'TIME_SLOT_SELECTOR'
+            ? await this.emitter.emitBookingSelector(mintRequest, {
+                source: input.result,
+              })
+            : await this.emitter.emit(mintRequest);
       for (const tokenHash of minted.intentTokenHashes)
         provenance.log(
           JSON.stringify({

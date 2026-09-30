@@ -299,6 +299,8 @@ describe('U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the ge
       const patterns = tokens
         .filter(isKey)
         .filter((t) => !(NOT_OWNER_KEYS[kind] ?? []).includes(t));
+      // BS-1 adds one exact personal source; the historical full contract table remains intact.
+      if (kind === 'SCHEDULE') patterns.push('appointments.own.list');
       let expected: string[];
       if (ownerClass === 'NONE') expected = [];
       else if (ownerClass === 'INHERITED')

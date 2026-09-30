@@ -253,6 +253,7 @@ describe('U12b [GW G-SYNTH] registered projector rows', () => {
       ['C9:catalog.services.read', {}],
       ['C9:catalog.staff.read', {}],
       ['C9:booking.availability.read', {}],
+      ['C9:appointments.own.list', {}],
       ['C9:company.business-hours.read', {}],
       [
         'C9:operations.journal.read',

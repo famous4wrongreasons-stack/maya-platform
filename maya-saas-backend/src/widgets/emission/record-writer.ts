@@ -246,9 +246,16 @@ export const intentRecordData = (args: {
     selectedLabels: [],
     selectionDomainLabelsJson: args.material.selectionDomainLabels,
     retainedLocalBusinessDate:
-      intent.effect === 'REFINE' &&
-      cap?.space === 'C9' &&
-      cap.key === 'operations.journal.read'
+      (intent.effect === 'REFINE' &&
+        cap?.space === 'C9' &&
+        cap.key === 'operations.journal.read') ||
+      (args.material.proposal.intent_template_key ===
+        'navigate.journal.detail@1' &&
+        intent.effect === 'NAVIGATE' &&
+        args.input.kind_proposal === 'SCHEDULE' &&
+        args.input.capability === 'operations.journal.read' &&
+        intent.target?.class === 'detail' &&
+        intent.target.ref === 'fs.calendar')
         ? (args.retainedLocalBusinessDate ?? null)
         : null,
     spokenTranscript: null,
