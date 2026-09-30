@@ -1,5 +1,16 @@
 [
   {
+    "id": "H-LOOPBACK-1",
+    "description": "the HTTP harness binds a wildcard listener that can be shadowed by another IPv4 loopback process",
+    "file": "test/widgets-live/support/http-bootstrap.ts",
+    "find": "  await app.listen(0, '127.0.0.1');",
+    "replace": "  await app.listen(0, '::');",
+    "killers": [
+      "HAR-LOOPBACK"
+    ],
+    "expect": "live-killed"
+  },
+  {
     "id": "H-M1",
     "description": "the recorder counts a lock as a durable write (D-12)",
     "edits": [

@@ -24,6 +24,7 @@ import { ConsoleLogger } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import { Test, type TestingModule } from '@nestjs/testing';
+import type { Server } from 'node:http';
 import request from 'supertest';
 
 import { AppModule } from '../../../src/app.module';
@@ -52,7 +53,7 @@ export interface HttpResponse {
 export interface HttpHarness {
   readonly app: NestExpressApplication;
   readonly recorder: WriteRecorder;
-  /** Bind the already initialized application to an ephemeral loopback port for the real shell process. */
+  /** Return the ready, owned loopback listener shared with the real shell process. */
   listenLoopback(): Promise<string>;
   /** `POST /api/auth/login` for a tenant user; returns the access token. */
   login(tenantSlug: string, email: string, password: string): Promise<string>;
@@ -149,22 +150,19 @@ export async function bootHttp(
       recorder.within(GATEWAY_SCOPE, () => submit(args)),
     );
 
-  const server = app.getHttpServer() as Parameters<typeof request>[0];
-  let loopbackUrl: string | null = null;
+  const server = app.getHttpServer() as Server;
+  // Own one ready IPv4 listener before Supertest sees the server. Its implicit
+  // listen(0) uses a wildcard address that can be shadowed by an existing IPv4
+  // loopback listener on Darwin, sending a test request to another process.
+  await app.listen(0, '127.0.0.1');
+  const address = server.address();
+  if (typeof address !== 'object' || address === null)
+    throw new Error('widgets-live loopback listener returned no TCP address');
+  const loopbackUrl = `http://127.0.0.1:${address.port}`;
   return {
     app,
     recorder,
-    listenLoopback: async () => {
-      if (loopbackUrl !== null) return loopbackUrl;
-      await app.listen(0, '127.0.0.1');
-      const address = app.getHttpServer().address();
-      if (typeof address !== 'object' || address === null)
-        throw new Error(
-          'widgets-live loopback listener returned no TCP address',
-        );
-      loopbackUrl = `http://127.0.0.1:${address.port}`;
-      return loopbackUrl;
-    },
+    listenLoopback: async () => loopbackUrl,
     login: async (tenantSlug, email, password) => {
       await recorder.within(LOGIN_RATE_LIMIT_SCOPE, () =>
         resetLoopbackLoginPreflight(app.get(PrismaService)),
