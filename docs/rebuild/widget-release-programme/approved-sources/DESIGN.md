@@ -18,7 +18,7 @@ Detail dispatch resolves the retained, unerased source under the current princip
 
 `navigate.journal.parent@1` can be minted only by the dedicated journal-detail path. It references the exact retained parent in the same tenant/principal/conversation/current release. Mint verifies the parent's retention, seal, source and grant; return resolves it again and checks the child's parent correlation. Arbitrary w targets cannot be minted through this template. The parent return action is the detail body's visible action.
 
-The additive migration changes only `widget_intent_retained_date_refine_journal_check`: the original REFINE branch is preserved verbatim, and one exact no-input NAVIGATE branch is added. No new table/column. Production application is forbidden.
+The additive migration changes only `WidgetIntentRecord_journal_date_scope_check`: the original REFINE branch is preserved verbatim, and one exact no-input NAVIGATE branch is added. No new table/column. Production application is forbidden.
 
 ## Profile and evidence
 
