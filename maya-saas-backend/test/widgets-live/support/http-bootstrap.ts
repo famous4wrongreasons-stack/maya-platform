@@ -150,7 +150,7 @@ export async function bootHttp(
       recorder.within(GATEWAY_SCOPE, () => submit(args)),
     );
 
-  const server = app.getHttpServer() as Server;
+  const server: Server = app.getHttpServer();
   // Own one ready IPv4 listener before Supertest sees the server. Its implicit
   // listen(0) uses a wildcard address that can be shadowed by an existing IPv4
   // loopback listener on Darwin, sending a test request to another process.
@@ -162,7 +162,7 @@ export async function bootHttp(
   return {
     app,
     recorder,
-    listenLoopback: async () => loopbackUrl,
+    listenLoopback: () => Promise.resolve(loopbackUrl),
     login: async (tenantSlug, email, password) => {
       await recorder.within(LOGIN_RATE_LIMIT_SCOPE, () =>
         resetLoopbackLoginPreflight(app.get(PrismaService)),

@@ -5,7 +5,7 @@ import { bootHttp } from './support/http-bootstrap';
 describe('HTTP harness listener ownership', () => {
   it('HAR-LOOPBACK owns one ready IPv4 listener across requests and closes it at teardown', async () => {
     const http = await bootHttp();
-    const server = http.app.getHttpServer() as Server;
+    const server: Server = http.app.getHttpServer();
     let requests = 0;
     server.on('request', () => requests++);
     try {
