@@ -20,7 +20,7 @@
 // again, and an opened detail closes. Every activation of a drawn control ends in a state change or a
 // sentence — silent outcomes are 0. The receipt consumer arrives with R7-E1 and B3, not here.
 
-import type { InteractiveRefKey, WidgetEnvelope, WidgetIntent, WidgetIntentSubmission } from '../contract.ts';
+import type { InteractiveRefKey, TerminalLine, WidgetEnvelope, WidgetIntent, WidgetIntentSubmission } from '../contract.ts';
 import { parseInstant, verify } from '../integrity/h7.ts';
 import type { EnvelopeView, IntegrityVerdict, RenderNode, RenderResult } from '../renderer/nodes.ts';
 import { resolveTarget } from '../routes/registry.ts';
@@ -245,6 +245,32 @@ export const intentRefFor = (nodes: readonly RenderNode[], key: InteractiveRefKe
 
 const isUsable = (intent: WidgetIntent): boolean => intent.enabled?.state === 'KNOWN' && intent.enabled.value === true;
 
+/**
+ * L27: which canonical terminal outcome a line IS — server-authored, never the sentence it carries.
+ *
+ * `/widgets/resolve` answers with the widget's CURRENT terminal set, not with what changed since the
+ * last read, so every settled submission on a widget re-delivers the outcomes already published. The
+ * contract gives two members to tell them apart with, and they are the only two this reads:
+ *
+ *   - `action_receipt_ref` is present IFF the outcome is CONFIRMED (§4.2) and is the ONLY pointer to
+ *     a business fact (§4.3). So a receipt identifies the outcome ACROSS widgets, not within one: a
+ *     successor emission that carries its predecessor's confirmation is carrying the same booking,
+ *     and the person is told about that booking once. Two CONFIRMED lines are the same outcome
+ *     exactly when they name the same receipt — whatever either sentence says, and whichever of them
+ *     the server minted later.
+ *   - the other six outcomes are terminal conditions OF THE WIDGET, not of a business record, and
+ *     carry no reference by contract. They are therefore identified WITH the widget: two cards may
+ *     each expire, and each expiry is its own true statement. `EXPIRED_UNUSED` twice for one widget
+ *     is that one expiry, read twice.
+ *
+ * The outcome class is drawn from a closed set of upper-case words, so the first separator always
+ * divides the key. Nothing here reads `text`.
+ */
+const outcomeKey = (widgetId: string, line: TerminalLine): string =>
+  line.outcome === 'CONFIRMED' && typeof line.action_receipt_ref === 'string' && line.action_receipt_ref.length > 0
+    ? `receipt:${line.action_receipt_ref}`
+    : `${line.outcome}:${widgetId}`;
+
 const sentenceFor = (outcome: SubmissionOutcome): WidgetSentence => {
   switch (outcome.status) {
     case 'forbidden':
@@ -300,6 +326,20 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
   const entries = new Map<string, Entry>();
   /** Every emission this conversation has drawn or replaced; a repeat renders nothing (P-25, L7). */
   const seen = new Set<string>();
+  /**
+   * L27: the canonical terminal outcomes this conversation is already showing.
+   *
+   * It has `seen`'s lifetime, deliberately, and is forgotten in both places `seen` is — the
+   * 'cleared' drop and `dispose()`. A cleared conversation is a different conversation.
+   *
+   * It is NOT forgotten when the display cap drops the line, and that branch is reachable rather
+   * than theoretical: a detail entry has no timeline item, so the cap never releases it, and its
+   * own line can be evicted while the card is still on screen and still submitting. The outcome is
+   * then carried by the card, which is terminal; the cap's own loss is already disclosed by the
+   * `display_capped` notice and the dropped count. Writing the confirmation again at the bottom
+   * would not recover it — it would assert an old fact as a new one.
+   */
+  const published = new Set<string>();
   let serial = 0;
   let counters = { activations: 0, stateChanges: 0, sentences: 0, submissions: 0 };
 
@@ -669,7 +709,27 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       return { outcome: 'dismissed' };
     }
     if (outcome.status === 'settled') {
-      for (const line of outcome.lines) deps.timeline.appendServerLine(line.text);
+      // L27: one canonical terminal outcome, at most one of it in the conversation.
+      //
+      // The lines are the whole current terminal set of the widget this submission named, so after a
+      // COMMIT is confirmed every later settled submission on that card — the dismiss escape above
+      // all — hands back the confirmation that is already on screen. Only outcomes this conversation
+      // is not already showing are written. Everything else about the branch is untouched: the
+      // widget still goes terminal, still republishes, still counts its state change. A dismiss may
+      // close the card; it may not tell the person a second time that the booking was made.
+      for (const line of outcome.lines) {
+        // Blank is the one thing the writer itself declines to show, so it is not represented and is
+        // not recorded as represented.
+        if (line.text.trim().length === 0) continue;
+        // `settled` carries the lines but not whose they are: `createLiveSubmission` selected them
+        // by `submission.widget_id`, and the emission guard above has already returned if this
+        // entry's envelope changed while the submission ran — so the submitted id is the id these
+        // lines are about.
+        const key = outcomeKey(submission.widget_id, line);
+        if (published.has(key)) continue;
+        published.add(key);
+        deps.timeline.appendServerLine(line.text);
+      }
       entry.display = 'terminal';
       entry.sentence = null;
       publish(entry);
@@ -696,7 +756,10 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
   const offDropped = deps.timeline.onDropped((ids, reason) => {
     for (const id of ids) release(id);
     // A cleared conversation (sign-out) is a new one: what it receives next is drawn afresh.
-    if (reason === 'cleared') seen.clear();
+    if (reason === 'cleared') {
+      seen.clear();
+      published.clear();
+    }
   });
 
   return {
@@ -718,6 +781,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       for (const id of [...entries.keys()]) release(id);
       vault.clear();
       seen.clear();
+      published.clear();
       detailOpeners.clear();
     },
   };

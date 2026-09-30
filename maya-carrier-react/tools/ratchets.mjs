@@ -99,7 +99,7 @@ export const NAME_RULES = [
   {
     id: 'no-outcome-invention',
     property:
-      'A business outcome is the server\u2019s word, not the client\u2019s. The runtime reads exactly one field of a TerminalLine — its server-minted `text`, appended as an ordinary assistant turn — and reads neither `outcome` nor `action_receipt_ref`; `TimelineItemView` has no member that could carry either. So there is no honest way for presentation to learn that something was CONFIRMED, and a component naming these has either invented an outcome or reached past the projection for one.',
+      'A business outcome is the server\u2019s word, not the client\u2019s. Presentation receives exactly one field of a TerminalLine — its server-minted `text`, appended as an ordinary assistant turn — and `TimelineItemView` has no member that could carry an outcome or a receipt reference. (The widget store reads the other two, and only to tell one canonical outcome from another before it publishes one: `shell/intents.ts` `outcomeKey`. Nothing it reads reaches this side of the port.) So there is no honest way for presentation to learn that something was CONFIRMED, and a component naming these has either invented an outcome or reached past the projection for one.',
     // NOT banned, on purpose: `SUPERSEDED` and `CANCELLED` are also LifecycleState members, and
     // `RenderResult.lifecycle.state` legitimately carries them to a drawer.
     names: [
