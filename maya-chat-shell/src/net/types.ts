@@ -216,6 +216,12 @@ export interface WidgetIntentProjection {
   readonly outcome: 'terminate' | 'refuse' | 'expired' | 'superseded';
   readonly code: string | null;
   readonly next_envelope: WidgetEnvelope | null;
+  /**
+   * NS-1: the widget the server RE-RESOLVED for this intent, and the only admissible source of a
+   * parent return. Server-side this member is a union — a re-resolved envelope, a signed HANDOFF
+   * target, or a control acknowledgement — and only the envelope shape crosses this boundary.
+   */
+  readonly resolved_widget: WidgetEnvelope | null;
   readonly receipt_outcome: 'ACCEPTED' | 'REFUSED' | 'NEEDS_CONFIRMATION' | 'NEEDS_VERIFICATION' | null;
 }
 
