@@ -250,7 +250,18 @@ export const inputsForActivation = (
   intent: WidgetIntent,
   ref: InteractiveRefKey,
 ): WidgetIntentSubmission['inputs'] | undefined => {
-  if (intent.input_schema === null) return ref.startsWith('intent:') ? null : undefined;
+  // An intent with no schema sends no inputs, whichever control selected it.
+  //
+  // This used to admit only `intent:` refs, which silently refused every no-input intent a BODY
+  // element selects — a SCHEDULE entry that retains a cancellation proposal being the case that
+  // found it. The refusal happened before HTTP, so the canonical owner never saw the activation.
+  //
+  // Nothing widens here. With no schema there is no field to echo, so the ref contributes no DATA
+  // at all — only its identity, and that was already established twice before this line: the ref
+  // must be in the sealed `readingOrder` (`drawn.includes(ref)`), and `intentRefFor` must find the
+  // server's own mapping from that ref to this intent. The token still comes from the vault keyed
+  // by (item, intent_ref), and the server still decides which control selects which intent.
+  if (intent.input_schema === null) return null;
   const fields = intent.input_schema.fields;
   if (fields.length !== 1) return undefined;
   const field = fields[0];
