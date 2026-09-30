@@ -158,6 +158,7 @@ test('FBE2E-1: live submission uses only widget intent/resolve and returns the a
   assert.deepEqual(await port.submit(submission, new AbortController().signal), {
     status: 'advanced',
     envelope: successor,
+    accepted: false,
   });
   assert.deepEqual(calls, [['intent', submission]]);
 
@@ -215,7 +216,7 @@ test('FBE2E-1: a drawn selector can submit only one server-declared option/ref v
 
 test('FBE2E-1/3: successor replaces the selector and only a server terminal receipt enters conversation', async () => {
   const successor = envelope('slots-superseded-successor');
-  const advanced = setup({ submission: { submit: async () => ({ status: 'advanced', envelope: successor }) } });
+  const advanced = setup({ submission: { submit: async () => ({ status: 'advanced', envelope: successor, accepted: false }) } });
   const predecessor = advanced.runtime.widgets.ingest(
     reseal({ ...structuredClone(envelope('slots-superseded-predecessor')), lifecycle: { ...envelope('slots-superseded-predecessor').lifecycle, state: 'LIVE' } }),
   );
@@ -724,4 +725,174 @@ test('I-SRC-1 — the fix did not make a schema-bearing intent accept an entry r
 
   assert.equal(outcome.outcome, 'sentence');
   assert.equal(s.submissions.length, 0, 'a value-bearing schema still refuses an entry ref');
+});
+
+// I-SRC-1: accepted NAVIGATE detail is a fullscreen result, never a timeline successor.
+const detailPair = () => {
+  const source = envelope('kind-schedule');
+  const detail = structuredClone(source);
+  detail.widget_id = '01M2Q9G7M0AAAAAAAAAAAAAAAA';
+  detail.correlation.parent_widget_id = source.widget_id;
+  return { source, detail: reseal(detail) };
+};
+
+test('I-SRC-1 NAVIGATE: live fs.calendar response resolves PROGRESS to fullscreen, without a timeline insertion or history bounce', async () => {
+  const { source, detail } = detailPair();
+  let reply;
+  let calls = 0;
+  const s = setup({ submission: createLiveSubmission({
+    widgetIntent: async () => { calls += 1; return new Promise((resolve) => { reply = resolve; }); },
+    resolveWidgets: async () => { throw new Error('detail must not query terminal receipts'); },
+  }) });
+  const { itemId } = s.runtime.widgets.ingest(source);
+  const before = s.items().map((item) => item.id);
+  const heldBefore = s.runtime.widgets.heldTokens();
+  const phases = [];
+  s.runtime.shell.subscribe((v) => phases.push(v.fullscreen?.phase ?? null));
+  const running = s.runtime.widgets.activate(itemId, 'intent:i1');
+  assert.equal(s.runtime.shell.view().fullscreen.phase, 'progress');
+  reply({ ok: true, value: { outcome: 'terminate', code: null, next_envelope: detail, receipt_outcome: 'ACCEPTED' } });
+  assert.deepEqual(await running, { outcome: 'dismissed' });
+  assert.equal(calls, 1);
+  const open = s.runtime.shell.view().fullscreen;
+  assert.equal(open.phase, 'open');
+  assert.equal(open.result.density, 'SHEET');
+  assert.deepEqual(s.items().map((item) => item.id), before, 'detail adds zero timeline items');
+  assert.equal(s.item(itemId).display, 'live', 'the opener stops being pending');
+  assert.equal(s.item(itemId).pending, null);
+  assert.deepEqual(phases, ['progress', 'open'], 'PROGRESS resolves, never closes/reopens history');
+  assert.deepEqual(s.runtime.shell.state().opener, { itemId, ref: 'intent:i1' }, 'same focus return owner');
+  assert.equal(s.history.pushes, 1);
+  assert.equal(s.history.backs, 0);
+  s.runtime.widgetPort.closeDetail();
+  assert.equal(s.runtime.shell.view().fullscreen, null);
+  assert.equal(s.runtime.widgets.heldTokens(), heldBefore, 'only detail tokens are released');
+  assert.deepEqual(phases, ['progress', 'open', null]);
+  assert.equal(s.history.backs, 1);
+  s.runtime.widgetPort.closeDetail();
+  assert.equal(s.history.backs, 1, 'close remains idempotent');
+  s.runtime.dispose();
+});
+
+for (const [name, mutate] of [
+  ['undeclared route', (s) => { s.presentation.fullscreen_detail = null; }],
+  ['forged route', (s) => { s.intents[0].target.ref = 'fs.booking'; }],
+  ['unknown route', (s) => { s.intents[0].target.ref = 'fs.unknown'; s.presentation.fullscreen_detail.route_key = 'fs.unknown'; }],
+]) test(`I-SRC-1 NAVIGATE: ${name} is route_refused before transport`, async () => {
+  const { source, detail } = detailPair();
+  mutate(source);
+  let calls = 0;
+  const s = setup({ submission: { submit: async () => { calls += 1; return { status: 'advanced', envelope: detail, accepted: true }; } } });
+  const { itemId } = s.runtime.widgets.ingest(reseal(source));
+  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'sentence', sentence: 'route_refused', submitted: false });
+  assert.equal(calls, 0);
+  assert.equal(s.runtime.shell.view().fullscreen, null);
+  assert.equal(s.items().length, 1);
+  s.runtime.dispose();
+});
+
+for (const [name, mutate, seal = true] of [
+  ['substituted parent', (d) => { d.correlation.parent_widget_id = 'unrelated-widget'; }],
+  ['missing parent', (d) => { d.correlation.parent_widget_id = null; }],
+  ['same widget', (d, s) => { d.widget_id = s.widget_id; }],
+  ['wrong tenant', (d) => { d.tenant_id = 'other-tenant'; }],
+  ['wrong principal', (d) => { d.integrity.principal_proof_hash = 'a'.repeat(64); }],
+  ['wrong turn', (d) => { d.correlation.turn_id = 'other-turn'; }],
+  ['wrong profile', (d) => { d.render.profile_id = 'other-profile'; }],
+  ['wrong profile version', (d) => { d.render.profile_version += 1; }],
+  ['substituted route', (d) => { d.presentation.fullscreen_detail.route_key = 'fs.booking'; }],
+  ['missing returned route', (d) => { d.presentation.fullscreen_detail = null; }],
+  ['tampered detail', (d) => { d.presentation.text_equivalent.headline = 'Substituted body'; }, false],
+  ['expired detail', (d) => { d.lifecycle.expires_at = INDEX.now; }],
+  ['terminal detail', (d) => { d.lifecycle.state = 'CONSUMED'; }],
+]) test(`I-SRC-1 NAVIGATE: ${name} is refused without fullscreen or timeline pollution`, async () => {
+  const { source, detail } = detailPair();
+  mutate(detail, source);
+  if (seal) reseal(detail);
+  const s = setup({ submission: { submit: async () => ({ status: 'advanced', envelope: detail, accepted: true }) } });
+  const { itemId } = s.runtime.widgets.ingest(source);
+  const heldBefore = s.runtime.widgets.heldTokens();
+  const phases = [];
+  s.runtime.shell.subscribe((v) => phases.push(v.fullscreen?.phase ?? null));
+  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'sentence', sentence: 'route_refused', submitted: true });
+  assert.deepEqual(phases, ['progress', null]);
+  assert.equal(s.runtime.shell.view().fullscreen, null);
+  assert.equal(s.items().length, 1);
+  assert.equal(s.runtime.widgets.heldTokens(), heldBefore, 'refused response never enters the vault');
+  assert.equal(s.item(itemId).pending, null);
+  s.runtime.dispose();
+});
+
+for (const code of ['widget_principal_mismatch', 'tenant_mismatch']) {
+  test(`I-SRC-1 NAVIGATE: canonical server ${code} refusal never opens a detail`, async () => {
+    const { source } = detailPair();
+    const s = setup({ submission: createLiveSubmission({
+      widgetIntent: async () => ({ ok: true, value: { outcome: 'terminate', code, next_envelope: null, receipt_outcome: 'REFUSED' } }),
+      resolveWidgets: async () => { throw new Error('refusal must not resolve a body'); },
+    }) });
+    const { itemId } = s.runtime.widgets.ingest(source);
+    assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'sentence', sentence: 'activation_forbidden', submitted: true });
+    assert.equal(s.runtime.shell.view().fullscreen, null);
+    assert.equal(s.items().length, 1);
+    s.runtime.dispose();
+  });
+}
+
+for (const action of ['close', 'back', 'navigate', 'sign-out', 'another-detail']) {
+  test(`I-SRC-1 NAVIGATE: ${action} while pending prevents a late response from taking chrome ownership`, async () => {
+    const { source, detail } = detailPair();
+    let reply;
+    const s = setup({ submission: { submit: () => new Promise((r) => { reply = r; }) } });
+    const { itemId } = s.runtime.widgets.ingest(source);
+    const running = s.runtime.widgets.activate(itemId, 'intent:i1');
+    if (action === 'close') s.runtime.widgetPort.closeDetail();
+    if (action === 'back') s.history.onBack();
+    if (action === 'navigate') s.runtime.shell.navigate('shell.privacy');
+    if (action === 'sign-out') s.signOut();
+    if (action === 'another-detail') {
+      const other = envelope('kind-report');
+      const otherItem = s.runtime.widgets.ingest(other);
+      s.runtime.shell.openProgress({ itemId: otherItem.itemId, ref: 'intent:i1' });
+    }
+    const before = s.runtime.shell.view().fullscreen;
+    const beforeIds = s.items().map((item) => item.id);
+    reply({ status: 'advanced', envelope: detail, accepted: true });
+    await running;
+    assert.deepEqual(s.runtime.shell.view().fullscreen, before, 'late response cannot reopen or replace the current chrome');
+    assert.deepEqual(s.items().map((item) => item.id), beforeIds, 'no fallback to timeline');
+    s.runtime.dispose();
+  });
+}
+
+test('I-SRC-1 NAVIGATE: ordinary non-detail advanced response keeps timeline semantics even with fs.calendar in its payload', async () => {
+  const { source, detail } = detailPair();
+  source.intents[0].effect = 'REFINE';
+  source.intents[0].target = null;
+  reseal(source);
+  const s = setup({ submission: { submit: async () => ({ status: 'advanced', envelope: detail, accepted: true }) } });
+  const { itemId } = s.runtime.widgets.ingest(source);
+  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'dismissed' });
+  assert.equal(s.runtime.shell.view().fullscreen, null);
+  assert.equal(s.items().length, 2, 'ordinary successor still appends');
+  assert.equal(s.history.pushes, 0, 'payload kind/route alone never opens fullscreen');
+  s.runtime.dispose();
+});
+
+for (const [name, outcome, code, receipt_outcome] of [
+  ['refused principal even with an attached envelope', 'refuse', 'widget_principal_mismatch', 'REFUSED'],
+  ['refused tenant even with an attached envelope', 'terminate', 'tenant_mismatch', 'REFUSED'],
+  ['missing acceptance', 'terminate', null, null],
+  ['verification required', 'terminate', null, 'NEEDS_VERIFICATION'],
+  ['expired successor', 'expired', null, 'ACCEPTED'],
+]) test(`I-SRC-1 NAVIGATE: ${name} cannot open fullscreen`, async () => {
+  const { source, detail } = detailPair();
+  const s = setup({ submission: createLiveSubmission({
+    widgetIntent: async () => ({ ok: true, value: { outcome, code, next_envelope: detail, receipt_outcome } }),
+    resolveWidgets: async () => { throw new Error('successor must not query receipts'); },
+  }) });
+  const { itemId } = s.runtime.widgets.ingest(source);
+  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'sentence', sentence: 'route_refused', submitted: true });
+  assert.equal(s.runtime.shell.view().fullscreen, null);
+  assert.equal(s.items().length, 1);
+  s.runtime.dispose();
 });

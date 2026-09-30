@@ -167,7 +167,8 @@ export interface SessionPort {
  * then no receipt shape exists in the shell.
  */
 export type SubmissionOutcome =
-  | { readonly status: 'advanced'; readonly envelope: WidgetEnvelope }
+  // Safe stale successors may still advance the timeline; fullscreen requires an accepted reply.
+  | { readonly status: 'advanced'; readonly envelope: WidgetEnvelope; readonly accepted: boolean }
   | { readonly status: 'settled'; readonly lines: readonly TerminalLine[] }
   | { readonly status: 'accepted' }
   | { readonly status: 'unavailable' }

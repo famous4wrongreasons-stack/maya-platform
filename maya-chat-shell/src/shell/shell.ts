@@ -100,6 +100,8 @@ export interface DetailSource {
 /** What `shell/intents.ts` may do to the chrome. */
 export interface ShellChrome {
   openProgress(opener: DetailOpener): void;
+  /** Resolve only this opener's still-pending detail; never reopen dismissed or replaced chrome. */
+  resolveDetail(envelope: WidgetEnvelope, opener: DetailOpener): PresentOutcome;
   /** Redraw the open detail (an environment change); ignored unless `itemId` is the one open. */
   updateDetail(itemId: string, result: RenderResult): void;
   closeDetail(): void;
@@ -172,6 +174,16 @@ export const createShell = (deps: ShellDeps): ShellController => {
     }
   };
 
+  const presentDetail = (envelope: WidgetEnvelope, opener: DetailOpener): PresentOutcome => {
+    if (source === null) return { presented: false, reason: 'no_source' };
+    if (opener === null || typeof opener !== 'object' || !source.hasTimelineItem(opener.itemId)) return { presented: false, reason: 'no_opener' };
+    const opened = source.openDetail(envelope, opener);
+    if (opened === null) return { presented: false, reason: 'refused' };
+    ensureHistoryEntry();
+    set(openState(state, opener, opened.itemId, opened.result));
+    return { presented: true, itemId: opened.itemId };
+  };
+
   const offBack = deps.history.onBack(() => {
     if (!pushed) return;
     // The browser already popped the entry; closing must not pop another one.
@@ -228,14 +240,12 @@ export const createShell = (deps: ShellDeps): ShellController => {
       const shown = state.fullscreen;
       if (shown?.phase === 'progress' && shown.itemId === itemId) closeDetail();
     },
-    presentDetail(envelope, opener) {
-      if (source === null) return { presented: false, reason: 'no_source' };
-      if (opener === null || typeof opener !== 'object' || !source.hasTimelineItem(opener.itemId)) return { presented: false, reason: 'no_opener' };
-      const opened = source.openDetail(envelope, opener);
-      if (opened === null) return { presented: false, reason: 'refused' };
-      ensureHistoryEntry();
-      set(openState(state, opener, opened.itemId, opened.result));
-      return { presented: true, itemId: opened.itemId };
+    presentDetail,
+    resolveDetail(envelope, opener) {
+      if (state.fullscreen?.phase !== 'progress' || state.opener?.itemId !== opener.itemId || state.opener.ref !== opener.ref) {
+        return { presented: false, reason: 'no_opener' };
+      }
+      return presentDetail(envelope, opener);
     },
     connect(next) {
       source = next;

@@ -97,7 +97,11 @@ export const createLiveSubmission = (
       if (sent.failure.reason === 'server_error') return { status: 'server_error' };
       return { status: 'unexpected_response' };
     }
-    if (sent.value.next_envelope !== null) return { status: 'advanced', envelope: sent.value.next_envelope };
+    if (sent.value.next_envelope !== null) return {
+      status: 'advanced',
+      envelope: sent.value.next_envelope,
+      accepted: sent.value.outcome === 'terminate' && sent.value.code === null && sent.value.receipt_outcome === 'ACCEPTED',
+    };
     if (sent.value.outcome !== 'terminate' || sent.value.receipt_outcome !== 'ACCEPTED') {
       return { status: 'forbidden' };
     }
@@ -477,6 +481,24 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     }
   };
 
+  /** Response correlation only; current authority and keyed seals remain the server's checks. */
+  const isBoundDetail = (entry: Entry, intent: WidgetIntent, next: WidgetEnvelope): boolean => {
+    const source = entry.envelope;
+    return intent.effect === 'NAVIGATE' && intent.target?.class === 'detail'
+      && typeof source.tenant_id === 'string' && source.tenant_id.length > 0
+      && typeof source.integrity.principal_proof_hash === 'string' && source.integrity.principal_proof_hash.length > 0
+      && next.tenant_id === source.tenant_id
+      && next.integrity?.principal_proof_hash === source.integrity.principal_proof_hash
+      && typeof next.widget_id === 'string' && next.widget_id.length > 0 && next.widget_id !== source.widget_id
+      && next.correlation?.parent_widget_id === source.widget_id
+      && next.correlation.turn_id === source.correlation.turn_id
+      && next.render?.profile_id === source.render.profile_id
+      && next.render.profile_version === source.render.profile_version
+      && next.presentation?.fullscreen_detail?.route_key === intent.target.ref
+      && verdictOf(source) === 'valid' && verdictOf(next) === 'valid'
+      && LIVE_STATES.has(next.lifecycle.state);
+  };
+
   const activate = async (itemId: string, ref: InteractiveRefKey): Promise<ActivationOutcome> => {
     const entry = entries.get(itemId);
     if (entry === undefined) return { outcome: 'ignored', reason: 'unknown_item' };
@@ -535,15 +557,29 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       outcome = { status: 'unexpected_response' };
     }
 
-    if (route === 'opens_detail') deps.chrome.closeProgress(entry.itemId);
     // The item left, or its emission was replaced, while the submission ran: that change is what
     // the screen shows, and there is nothing left to put a sentence on.
     if (entries.get(entry.itemId) !== entry || entry.emission !== emission || entry.inflight !== abort) {
+      if (route === 'opens_detail') deps.chrome.closeProgress(entry.itemId);
       counters = { ...counters, stateChanges: counters.stateChanges + 1 };
       return { outcome: 'ignored', reason: 'unknown_item' };
     }
     entry.inflight = null;
     entry.pending = null;
+    if (route === 'opens_detail' && outcome.status === 'advanced') {
+      // Only the accepted server-declared detail path resolves PROGRESS into OPEN. Keeping the
+      // same chrome owner preserves its history entry and focus return; ordinary successors
+      // retain the timeline branch below. A substituted or late detail never falls through there.
+      if (outcome.accepted !== true || !isBoundDetail(entry, intent, outcome.envelope)
+        || !deps.chrome.resolveDetail(outcome.envelope, { itemId: entry.itemId, ref }).presented) {
+        deps.chrome.closeProgress(entry.itemId);
+        return endInSentence(entry, 'route_refused', true);
+      }
+      publish(entry);
+      counters = { ...counters, stateChanges: counters.stateChanges + 1 };
+      return { outcome: 'dismissed' };
+    }
+    if (route === 'opens_detail') deps.chrome.closeProgress(entry.itemId);
     if (outcome.status === 'advanced') {
       const ingested = ingest(outcome.envelope);
       if (ingested.ingested === 'duplicate') return endInSentence(entry, 'activation_unavailable', true);

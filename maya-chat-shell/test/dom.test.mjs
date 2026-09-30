@@ -136,7 +136,7 @@ function voiceDouble() {
 }
 
 /** The page: dom double + real shell runtime + counting network doubles + mountApp. */
-function page({ signedIn = true, voice = true, chat = null, fragment = '' } = {}) {
+function page({ signedIn = true, voice = true, chat = null, fragment = '', submission = undefined } = {}) {
   const dom = createDom();
   const scheduler = createScheduler(NOW);
   const s = sessionDouble(signedIn ? { signedIn: true, display: DISPLAY } : { signedIn: false, reason: null });
@@ -155,6 +155,7 @@ function page({ signedIn = true, voice = true, chat = null, fragment = '' } = {}
   let ids = 0;
   const runtime = createShellRuntime({
     transport,
+    submission,
     session: s.session,
     render,
     environment: { a11y: () => A11Y, onA11yChange: () => () => undefined, fragment: () => fragment },
@@ -1426,3 +1427,41 @@ test('the real shell: NAVIGATE(detail) opens PROGRESS in the dialog, the P1 bind
   assert.deepEqual([p.history.pushes, p.history.backs], [1, 1], 'Back entry pushed and popped; no address');
   assert.equal(p.chats.length, 0);
 });
+
+for (const closing of ['Escape', 'closeDetail', 'Back']) {
+  test(`I-SRC-1 NAVIGATE DOM: accepted detail keeps one dialog; ${closing} returns focus to the original timeline control`, async () => {
+    const source = envelopeOf('kind-schedule');
+    const detail = structuredClone(source);
+    detail.widget_id = '01M2Q9G7M0AAAAAAAAAAAAAAAA';
+    detail.correlation.parent_widget_id = source.widget_id;
+    let reply;
+    const p = page({ voice: false, submission: { submit: () => new Promise((r) => { reply = r; }) } });
+    p.runtime.widgets.ingest(source);
+    p.scheduler.flush();
+    const control = p.dom.find((el) => el.getAttribute('data-ref') === 'intent:i1', p.log());
+    control.focus();
+    p.dom.click(control);
+    p.scheduler.flush();
+    const dialog = p.dom.modal();
+    assert.ok(dialog && dialog.contains(p.dom.active()));
+    reply({ status: 'advanced', envelope: detail, accepted: true });
+    await flush();
+    p.scheduler.flush();
+    assert.equal(p.runtime.shell.view().fullscreen.phase, 'open');
+    assert.equal(p.dom.modal(), dialog, 'PROGRESS resolves inside the same open dialog');
+    assert.ok(dialog.contains(p.dom.active()));
+    assert.equal(p.runtime.conversation.view().items.filter((i) => i.kind === 'widget').length, 1);
+    assert.deepEqual([p.history.pushes, p.history.backs], [1, 0]);
+    if (closing === 'Escape') p.dom.key(p.dom.active(), 'Escape');
+    if (closing === 'closeDetail') p.runtime.widgetPort.closeDetail();
+    if (closing === 'Back') p.history.listener();
+    p.scheduler.flush();
+    assert.equal(p.runtime.shell.view().fullscreen, null);
+    assert.equal(p.dom.modal(), null);
+    const opener = p.dom.find((el) => el.getAttribute('data-ref') === 'intent:i1', p.log());
+    assert.equal(p.dom.active(), opener, 'the ref survives the pending-to-live redraw');
+    assert.equal(p.history.backs, closing === 'Back' ? 0 : 1, 'browser Back must not be popped twice');
+    p.cancel();
+    p.runtime.dispose();
+  });
+}
