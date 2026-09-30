@@ -66,7 +66,7 @@
       },
       {
         "path": "src/net/project.ts",
-        "sha256": "3f9795cb5bb3d715adf3d7f0ed6410b74042c3f85e44015510a9c6149d92ceca"
+        "sha256": "03b8ad3ad1455721c27b8e0d801733facffde822a6e4b01243753049b6b733d0"
       },
       {
         "path": "src/net/session.ts",
@@ -74,7 +74,7 @@
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "3b85c6e59b7c44d3bdfe38236fb54de4c55abd54491c4e1192d6f7e5dcada25e"
+        "sha256": "ffa148efbe00d6a7a72ebc7fda8772dd443860588f4606b81bdc4015fb7d68cb"
       },
       {
         "path": "src/renderer/cells.ts",
@@ -110,11 +110,11 @@
       },
       {
         "path": "src/shell/intents.ts",
-        "sha256": "2fc9ccdf1ce7c5d6d2775502f2d15cf8bd482cf5654763193e1f85266534b223"
+        "sha256": "333bbcc0da51c62307c20d5c2339990c1dabf5d37851f2e2fb73e26f4402a5c1"
       },
       {
         "path": "src/shell/ports.ts",
-        "sha256": "27043f647b90845e7dc69e51fbf674ff876732e094af62454bd685b2a6f72b5d"
+        "sha256": "63c5feca46ce603bf608d9cd0cd5bc249fcf62a1cae23387f335b2e4e17398a6"
       },
       {
         "path": "src/shell/shell.ts",
@@ -130,8 +130,8 @@
       }
     ]
   },
-  "bytes": 444582,
-  "digest": "88436be72d3cd7f537f3dfc50cfc5e0a62df21621fefbb029f135c5ec9643886",
+  "bytes": 450415,
+  "digest": "34272ad4c1ef00d6921b67b158bbbec5ac2dee0e78b37992e58b0d13e4cea685",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -139,8 +139,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "ee3b4e564882af58ef930aaedd0ca9313021272e9912125cf4b5b4f6f5dce821",
-    "modulePath": "m/ee3b4e564882af58/",
+    "digest": "edbc51a45aef6034c9f3901f758c386b7a4aded87dbcde59842e6dacf262bbad",
+    "modulePath": "m/edbc51a45aef6034/",
     "files": [
       {
         "path": "entry/main.js",
@@ -204,8 +204,8 @@
       },
       {
         "path": "src/net/project.js",
-        "sha256": "d8f1081a59dec02a7338a4e471a998aba815ceb80348b60b3436254212c74ca7",
-        "bytes": 10735
+        "sha256": "11f31fcb445b52c3152de90fc47d2cca18a4d520ab2f5fb4778bf645d003743c",
+        "bytes": 10863
       },
       {
         "path": "src/net/session.js",
@@ -264,8 +264,8 @@
       },
       {
         "path": "src/shell/intents.js",
-        "sha256": "f322a77e7ed8aa62d3f0adba705fbb47b0ada04f6383078e6ea6f72e869e06bf",
-        "bytes": 21058
+        "sha256": "d45f9a129b401ed434084d231cb3b4d5b157d349d8846753a22a420ddd8b1509",
+        "bytes": 23670
       },
       {
         "path": "src/shell/ports.js",
@@ -303,7 +303,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "7a3ba7fa9483eccb0cb3e73b22af226bcb7498e6e9115d3ad846d0214047542b",
+      "sha256": "474587caf92192e007914cbf0a7b8b328065819db35139f5d180304ba995249d",
       "bytes": 1344
     },
     "assets": [

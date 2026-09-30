@@ -896,3 +896,233 @@ for (const [name, outcome, code, receipt_outcome] of [
   assert.equal(s.items().length, 1);
   s.runtime.dispose();
 });
+
+// ── NS-1: detail → canonical parent return ─────────────────────────────────────────────────────
+//
+// A journal detail draws a return control. Its intent is a NAVIGATE to a server-re-resolved widget
+// (class 'w'), so the client names no route and no parent: the server answers ACCEPTED and attaches
+// the canonical parent as `resolved_widget`. That envelope — and nothing else — becomes the timeline
+// item again, in place, and the detail closes through the controller that opened it.
+//
+// Nothing here may be reconstructed from the text already on screen, from the item the caller sent,
+// from the current date, or from anything cached. Every case below that is not the server's own
+// parent, bound to this detail, is refused with no restoration at all.
+
+const RETURNED_HEADLINE = 'Журнал · родитель от сервера';
+
+/** source → the detail it opens → the parent the server re-resolves for the detail's return. */
+const returnTrio = ({ detail: mutateDetail, parent: mutateParent, sealParent = true } = {}) => {
+  const { source, detail } = detailPair();
+  // The return control: re-resolved server-side, so `targetRefusal` sends it and decides nothing.
+  detail.intents[0].target = { class: 'w', ref: 'w.journal.parent' };
+  mutateDetail?.(detail, source);
+  reseal(detail);
+  const parent = structuredClone(source);
+  parent.presentation.text_equivalent.headline = RETURNED_HEADLINE;
+  mutateParent?.(parent, source, detail);
+  if (sealParent) reseal(parent);
+  return { source, detail, parent };
+};
+
+/** One live submission for both legs: the detail opens, then the detail's own widget returns. */
+const returnSubmission = (detail, reply) => {
+  const sent = [];
+  const port = createLiveSubmission({
+    widgetIntent: async (submission) => {
+      sent.push(submission);
+      return { ok: true, value: submission.widget_id === detail.widget_id
+        ? { outcome: 'terminate', code: null, next_envelope: null, resolved_widget: null, receipt_outcome: 'ACCEPTED', ...reply }
+        : { outcome: 'terminate', code: null, next_envelope: detail, resolved_widget: null, receipt_outcome: 'ACCEPTED' } };
+    },
+    resolveWidgets: async () => { throw new Error('a parent return must not query terminal receipts'); },
+  });
+  return { port, sent };
+};
+
+/** Drive the first leg: ingest the source, open its detail, and hand back both ids. */
+const openDetailFrom = async (s, source) => {
+  const { itemId } = s.runtime.widgets.ingest(source);
+  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'dismissed' });
+  const open = s.runtime.shell.view().fullscreen;
+  assert.equal(open?.phase, 'open', 'the detail is on screen before the return');
+  return { itemId, detailItemId: open.itemId };
+};
+
+test('NS-1: parent → detail → parent, where the parent on the timeline is the server-returned `resolved_widget`', async () => {
+  const { source, detail, parent } = returnTrio();
+  const { port, sent } = returnSubmission(detail, { resolved_widget: parent });
+  const s = setup({ submission: port });
+  const held = s.runtime.widgets.heldTokens();
+  const phases = [];
+  s.runtime.shell.subscribe((v) => phases.push(v.fullscreen?.phase ?? null));
+
+  const { itemId, detailItemId } = await openDetailFrom(s, source);
+  const shownBefore = s.item(itemId).result.textEquivalent.headline;
+  assert.notEqual(shownBefore, RETURNED_HEADLINE, 'the parent on screen is not yet the returned one');
+
+  assert.deepEqual(await s.runtime.widgets.activate(detailItemId, 'intent:i1'), { outcome: 'dismissed' });
+
+  // The parent that came back is the server's, byte for byte — not the one already on screen.
+  const restored = s.item(itemId).result;
+  assert.deepEqual(restored.textEquivalent, parent.presentation.text_equivalent);
+  assert.equal(restored.textEquivalent.headline, RETURNED_HEADLINE);
+  assert.equal(s.item(itemId).display, 'live');
+  assert.equal(s.item(itemId).pending, null);
+  assert.equal(s.item(itemId).sentence, null);
+
+  // The old fullscreen detail does not remain open, and it closed through its own controller.
+  assert.equal(s.runtime.shell.view().fullscreen, null);
+  assert.equal(s.runtime.shell.state().opener, null);
+  assert.equal(phases.at(-1), null, 'the last thing the chrome did was close');
+  assert.equal(phases.filter((p) => p === 'progress').length, 1, 'the return never opened a second PROGRESS');
+  assert.equal(phases.filter((p) => p === null).length, 1, 'and the detail closed exactly once');
+  assert.equal(s.history.pushes, 1);
+  assert.equal(s.history.backs, 1, 'the detail popped its own history entry');
+  assert.deepEqual(await s.runtime.widgets.activate(detailItemId, 'intent:i1'), { outcome: 'ignored', reason: 'unknown_item' }, 'the detail entry is released');
+
+  // One journal in the lane: the parent came back in place, never as a second item.
+  assert.deepEqual(s.items().map((i) => i.id), [itemId]);
+  assert.equal(s.runtime.widgets.heldTokens(), held + 3, 'the returned parent re-vaults its own tokens; the detail drops its own');
+  assert.equal(sent.length, 2, 'one submission opened the detail, one returned the parent');
+  assert.equal(sent[1].widget_id, detail.widget_id, 'the return was sent by the detail, for the detail');
+  assert.equal(s.counts.chat, 0);
+  s.runtime.dispose();
+});
+
+test('NS-1: a return with no `resolved_widget` fails closed — nothing is reconstructed and no parent is restored', async () => {
+  const { source, detail } = returnTrio();
+  // ACCEPTED, with the member absent exactly as a server that re-resolved nothing would send it.
+  const { port } = returnSubmission(detail, { resolved_widget: null });
+  const s = setup({ submission: port });
+  const { itemId, detailItemId } = await openDetailFrom(s, source);
+  const before = s.item(itemId).result.textEquivalent;
+
+  // The thread-page reread is what an accepted-with-nothing-attached reply does, and it throws here:
+  // reaching it at all proves the return path was not taken, and the catch keeps this a sentence.
+  const out = await s.runtime.widgets.activate(detailItemId, 'intent:i1');
+  assert.equal(out.outcome, 'sentence');
+  assert.equal(out.submitted, true);
+  assert.deepEqual(s.item(itemId).result.textEquivalent, before, 'the parent on screen is untouched');
+  assert.notEqual(s.item(itemId).result.textEquivalent.headline, RETURNED_HEADLINE);
+  assert.deepEqual(s.items().map((i) => i.id), [itemId], 'no invented parent joins the timeline');
+  s.runtime.dispose();
+});
+
+for (const [name, mutate] of [
+  ['substituted parent widget', { parent: (p) => { p.widget_id = '01M2Q9G7M0BBBBBBBBBBBBBBBB'; } }],
+  ['the detail itself returned as its own parent', { parent: (p, source, detail) => { p.widget_id = detail.widget_id; } }],
+  ['wrong tenant', { parent: (p) => { p.tenant_id = 'other-tenant'; } }],
+  ['wrong principal', { parent: (p) => { p.integrity.principal_proof_hash = 'a'.repeat(64); } }],
+  ['wrong turn', { parent: (p) => { p.correlation.turn_id = 'other-turn'; } }],
+  ['wrong profile', { parent: (p) => { p.render.profile_id = 'other-profile'; } }],
+  ['wrong profile version', { parent: (p) => { p.render.profile_version += 1; } }],
+  ['tampered parent body', { parent: (p) => { p.presentation.text_equivalent.headline = 'Подменённый журнал'; }, sealParent: false }],
+  ['stale parent: expired', { parent: (p) => { p.lifecycle.expires_at = INDEX.now; } }],
+  ['stale parent: superseded', { parent: (p) => { p.lifecycle.state = 'SUPERSEDED'; } }],
+  ['stale parent: consumed', { parent: (p) => { p.lifecycle.state = 'CONSUMED'; } }],
+]) test(`NS-1: ${name} is refused, with the detail closed and no parent restored`, async () => {
+  const { source, detail, parent } = returnTrio(mutate);
+  const { port } = returnSubmission(detail, { resolved_widget: parent });
+  const s = setup({ submission: port });
+  const { itemId, detailItemId } = await openDetailFrom(s, source);
+  const before = s.item(itemId).result.textEquivalent;
+
+  assert.deepEqual(
+    await s.runtime.widgets.activate(detailItemId, 'intent:i1'),
+    { outcome: 'sentence', sentence: 'route_refused', submitted: true },
+  );
+  assert.equal(s.runtime.shell.view().fullscreen, null, 'a refused return still closes the detail it came from');
+  assert.equal(s.item(itemId).sentence, 'route_refused', 'the opener carries the sentence');
+  assert.deepEqual(s.item(itemId).result.textEquivalent, before, 'the refused envelope never reaches the screen');
+  assert.notEqual(s.item(itemId).result.textEquivalent.headline, RETURNED_HEADLINE);
+  assert.deepEqual(s.items().map((i) => i.id), [itemId]);
+  s.runtime.dispose();
+});
+
+test('NS-1: a parent return is admitted only from an open detail, and only for a NAVIGATE to a re-resolved widget', async () => {
+  // Same accepted reply, same canonical parent — but sent by a timeline item, not by its detail.
+  const { source, parent } = returnTrio();
+  const timeline = structuredClone(source);
+  timeline.intents[0].target = { class: 'w', ref: 'w.journal.parent' };
+  reseal(timeline);
+  const s = setup({ submission: createLiveSubmission({
+    widgetIntent: async () => ({ ok: true, value: { outcome: 'terminate', code: null, next_envelope: null, resolved_widget: parent, receipt_outcome: 'ACCEPTED' } }),
+    resolveWidgets: async () => { throw new Error('unreached'); },
+  }) });
+  const { itemId } = s.runtime.widgets.ingest(timeline);
+  const out = await s.runtime.widgets.activate(itemId, 'intent:i1');
+  assert.deepEqual(out, { outcome: 'sentence', sentence: 'route_refused', submitted: true });
+  assert.equal(s.runtime.shell.view().fullscreen, null);
+  assert.deepEqual(s.items().map((i) => i.id), [itemId], 'a returned parent never appends, wherever it arrives');
+  assert.notEqual(s.item(itemId).result.textEquivalent.headline, RETURNED_HEADLINE, 'and never replaces the item that asked');
+  s.runtime.dispose();
+
+  // Inside the detail, a REFINE carrying the same parent is not a navigation and returns nothing.
+  const r = returnTrio({ detail: (d) => { d.intents[0].effect = 'REFINE'; d.intents[0].target = null; } });
+  const { port } = returnSubmission(r.detail, { resolved_widget: r.parent });
+  const t = setup({ submission: port });
+  const opened = await openDetailFrom(t, r.source);
+  const before = t.item(opened.itemId).result.textEquivalent;
+  const refine = await t.runtime.widgets.activate(opened.detailItemId, 'intent:i1');
+  assert.equal(refine.outcome, 'sentence', 'the reread is reached, so no return was taken');
+  assert.deepEqual(t.item(opened.itemId).result.textEquivalent, before);
+  t.runtime.dispose();
+});
+
+test('NS-1: ordinary ACCEPTED responses are unchanged — the reread still settles, and a successor still advances', async () => {
+  // 1. ACCEPTED with nothing re-resolved: the bounded thread-page reread, exactly as before.
+  const source = envelope('kind-schedule');
+  source.intents[0].effect = 'REFINE';
+  source.intents[0].target = null;
+  reseal(source);
+  const lines = [{ outcome: 'CANCELLED', text: 'Запись отменена.', action_receipt_ref: 'ae-9' }];
+  const s = setup({ submission: createLiveSubmission({
+    widgetIntent: async () => ({ ok: true, value: { outcome: 'terminate', code: null, next_envelope: null, resolved_widget: null, receipt_outcome: 'ACCEPTED' } }),
+    resolveWidgets: async () => ({ ok: true, value: { tenant_bound: true, widgets: [{ envelope: source, terminal_lines: lines, reread_intent: null }] } }),
+  }) });
+  const { itemId } = s.runtime.widgets.ingest(source);
+  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'dismissed' });
+  assert.equal(s.item(itemId).display, 'terminal');
+  assert.ok(s.items().some((i) => i.kind === 'assistant' && i.text === 'Запись отменена.'), 'the server line was appended');
+  assert.equal(s.runtime.shell.view().fullscreen, null);
+  s.runtime.dispose();
+
+  // 2. A successor and a re-resolved widget in one reply: `next_envelope` still wins, so an
+  //    ordinary advance keeps the timeline it always had and no chrome is taken.
+  const { source: src2, detail, parent } = returnTrio();
+  const successor = structuredClone(detail);
+  successor.correlation.parent_widget_id = src2.widget_id;
+  reseal(successor);
+  const plain = structuredClone(src2);
+  plain.intents[0].effect = 'REFINE';
+  plain.intents[0].target = null;
+  reseal(plain);
+  const t = setup({ submission: createLiveSubmission({
+    widgetIntent: async () => ({ ok: true, value: { outcome: 'terminate', code: null, next_envelope: successor, resolved_widget: parent, receipt_outcome: 'ACCEPTED' } }),
+    resolveWidgets: async () => { throw new Error('a successor must not query receipts'); },
+  }) });
+  const first = t.runtime.widgets.ingest(plain);
+  assert.deepEqual(await t.runtime.widgets.activate(first.itemId, 'intent:i1'), { outcome: 'dismissed' });
+  assert.equal(t.items().length, 2, 'the successor appends');
+  assert.equal(t.runtime.shell.view().fullscreen, null);
+  assert.notEqual(t.item(first.itemId).result.textEquivalent.headline, RETURNED_HEADLINE, 'the attached widget never replaced the opener');
+  t.runtime.dispose();
+
+  // 3. A reply that does not carry the member AT ALL — every reply before this release, and any
+  //    transport that omits it. Absent must read as "nothing re-resolved", not as a return of
+  //    nothing: this is the case that a `!== null` test admitted, from inside an open detail.
+  const r = returnTrio();
+  let reread = 0;
+  const u = setup({ submission: createLiveSubmission({
+    widgetIntent: async (submission) => ({ ok: true, value: submission.widget_id === r.detail.widget_id
+      ? { outcome: 'terminate', code: null, next_envelope: null, receipt_outcome: 'ACCEPTED' }
+      : { outcome: 'terminate', code: null, next_envelope: r.detail, receipt_outcome: 'ACCEPTED' } }),
+    resolveWidgets: async () => (reread += 1, { ok: true, value: { tenant_bound: true, widgets: [] } }),
+  }) });
+  const opened = await openDetailFrom(u, r.source);
+  const before = u.item(opened.itemId).result.textEquivalent;
+  assert.deepEqual(await u.runtime.widgets.activate(opened.detailItemId, 'intent:i1'), { outcome: 'dismissed' });
+  assert.equal(reread, 1, 'the bounded reread is what an acknowledgement still does');
+  assert.deepEqual(u.item(opened.itemId).result.textEquivalent, before, 'and no parent was restored from an absent member');
+  u.runtime.dispose();
+});

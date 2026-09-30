@@ -169,6 +169,8 @@ export interface SessionPort {
 export type SubmissionOutcome =
   // Safe stale successors may still advance the timeline; fullscreen requires an accepted reply.
   | { readonly status: 'advanced'; readonly envelope: WidgetEnvelope; readonly accepted: boolean }
+  /** NS-1: an accepted re-resolve. The envelope is the server's `resolved_widget`, nothing else. */
+  | { readonly status: 'returned'; readonly envelope: WidgetEnvelope }
   | { readonly status: 'settled'; readonly lines: readonly TerminalLine[] }
   | { readonly status: 'accepted' }
   | { readonly status: 'unavailable' }

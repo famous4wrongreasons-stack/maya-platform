@@ -382,7 +382,7 @@ test('widget transport sends only typed bodies and retains only authorized respo
   const intent = await net.transport.widgetIntent(submission, new AbortController().signal);
   assert.deepEqual(intent, {
     ok: true,
-    value: { outcome: 'terminate', code: null, next_envelope: null, receipt_outcome: 'ACCEPTED' },
+    value: { outcome: 'terminate', code: null, next_envelope: null, resolved_widget: null, receipt_outcome: 'ACCEPTED' },
   });
   assert.deepEqual(calls(U.widgetIntent)[0].body, submission);
 
@@ -402,6 +402,52 @@ test('widget transport sends only typed bodies and retains only authorized respo
   assert.deepEqual(calls(U.widgetResolve)[0].body, {
     thread_page: { limit: 20, before: 'opaque-cursor' },
   });
+});
+
+// ── NS-1: the canonical parent return crosses the projection ───────────────────────────────────
+//
+// `resolved_widget` is the widget the server RE-RESOLVED for an intent — for a journal detail's
+// return control, the canonical parent. Until this was projected it was dropped at the boundary,
+// so the runtime saw an ordinary ACCEPTED, had no parent to restore, and left the detail open.
+
+test('NS-1: `resolved_widget` survives projection in its envelope shape only; every other shape is null, never a rejection', async () => {
+  const { net } = await signedIn();
+  const parent = JSON.parse(read(path.join('dev', 'fixtures', 'envelopes', 'h7', 'invariant', 'kind-schedule.json')));
+  const submission = {
+    contract: 'maya.widget.intent.submission/1',
+    widget_id: 'widget-00000002',
+    intent_token: 'opaque-intent-token',
+    inputs: null,
+    client_nonce: 'client-00000002',
+    profile_id: 'profile-owner-web',
+  };
+  const sent = async (body) => {
+    serve({ [U.widgetIntent]: json(200, { contract: 'maya.widget.intent/1', outcome: 'terminate', code: null, next_envelope: null, receipt_outcome: 'ACCEPTED', ...body }) });
+    return net.transport.widgetIntent(submission, new AbortController().signal);
+  };
+
+  const returned = await sent({ resolved_widget: parent });
+  assert.equal(returned.ok, true);
+  assert.deepEqual(returned.value.resolved_widget, parent, 'the canonical parent crosses byte-for-byte');
+  assert.equal(returned.value.next_envelope, null, 'a parent return is not a successor');
+
+  // The server's other two shapes for this member are not envelopes. They project to null so that
+  // HANDOFF and an ordinary control acknowledgement keep the paths they already have — projecting
+  // null is not the same as refusing the response, and the reply itself stays usable.
+  for (const [name, shape] of [
+    ['absent', undefined],
+    ['explicit null', null],
+    ['signed handoff target', { handoff_url: 'https://mayaos.ru/pay', signature: 'sig' }],
+    ['control acknowledgement', { acknowledged: true }],
+    ['a string', 'w.journal.parent'],
+    ['an envelope-shaped stub', { widget_id: '01M2Q9G7M0PRZRDD5BA6SJKV8K' }],
+    ['a non-string widget_id', { ...parent, widget_id: 42 }],
+  ]) {
+    const r = await sent(shape === undefined ? {} : { resolved_widget: shape });
+    assert.equal(r.ok, true, `${name}: the response is still usable`);
+    assert.equal(r.value.resolved_widget, null, `${name}: projects to null`);
+    assert.equal(r.value.receipt_outcome, 'ACCEPTED', `${name}: the rest of the reply is untouched`);
+  }
 });
 
 // ── 2. projections fed the verified full responses (D12c) ──────────────────────────────────────

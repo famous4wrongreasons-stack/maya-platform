@@ -105,6 +105,19 @@ export const createLiveSubmission = (
     if (sent.value.outcome !== 'terminate' || sent.value.receipt_outcome !== 'ACCEPTED') {
       return { status: 'forbidden' };
     }
+    // NS-1: an ACCEPTED reply that carries a re-resolved widget is a RETURN, not a plain
+    // acknowledgement. Requiring `code === null` as well keeps it to the same acceptance the
+    // detail path already demands; anything else falls through to the thread page below, so an
+    // ordinary non-navigation ACCEPTED response behaves exactly as before.
+    //
+    // The test is for an OBJECT, not for `!== null`. A member this port never saw — any transport
+    // that omits it, which is every reply before this release — reads as `undefined`, and `!== null`
+    // admitted it: an ordinary acknowledgement became a return carrying nothing, and the binding
+    // below would have been asked to read a parent off it. Absent and null are the same answer here.
+    const resolved = sent.value.resolved_widget;
+    if (sent.value.code === null && typeof resolved === 'object' && resolved !== null) {
+      return { status: 'returned', envelope: resolved };
+    }
     const page = await transport.resolveWidgets({ thread_page: { limit: 20 } }, signal);
     if (!page.ok) return { status: 'accepted' };
     const current = page.value.widgets.find((widget) => widget.envelope.widget_id === submission.widget_id);
@@ -243,8 +256,11 @@ const sentenceFor = (outcome: SubmissionOutcome): WidgetSentence => {
     case 'unexpected_response':
       return 'activation_unavailable';
     case 'advanced':
+    case 'returned':
     case 'settled':
     case 'accepted':
+      // These four are handled where they happen; reaching the sentence table means the caller
+      // could not use the result, which is indistinguishable to the reader from unavailable.
       return 'activation_unavailable';
   }
 };
@@ -499,6 +515,58 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       && LIVE_STATES.has(next.lifecycle.state);
   };
 
+  /**
+   * NS-1: may this returned widget be the parent of this open detail?
+   *
+   * The identity comes from the CHILD's own sealed `correlation.parent_widget_id` and from the
+   * opener the shell is already holding — never from display text, the caller's ref, the clock or
+   * anything cached about presentation. Everything else mirrors `isBoundDetail`, so the return is
+   * bound exactly as tightly as the open was: same tenant, same principal proof, same turn, same
+   * release profile and version, both sides integral, and the parent still live.
+   */
+  const isBoundParent = (detail: Entry, intent: WidgetIntent, opener: Entry, returned: WidgetEnvelope): boolean => {
+    const child = detail.envelope;
+    const parentId = child.correlation?.parent_widget_id;
+    return detail.place === 'detail'
+      && intent.effect === 'NAVIGATE' && intent.target?.class === 'w'
+      && typeof child.tenant_id === 'string' && child.tenant_id.length > 0
+      && typeof child.integrity.principal_proof_hash === 'string' && child.integrity.principal_proof_hash.length > 0
+      && returned.tenant_id === child.tenant_id
+      && returned.integrity?.principal_proof_hash === child.integrity.principal_proof_hash
+      && typeof parentId === 'string' && parentId.length > 0
+      && returned.widget_id === parentId
+      && opener.envelope.widget_id === parentId
+      && returned.correlation?.turn_id === child.correlation.turn_id
+      && returned.render?.profile_id === child.render.profile_id
+      && returned.render.profile_version === child.render.profile_version
+      && verdictOf(child) === 'valid' && verdictOf(returned) === 'valid'
+      && LIVE_STATES.has(returned.lifecycle?.state);
+  };
+
+  /**
+   * Put the server's canonical parent back on the timeline item that is already there.
+   *
+   * In place, deliberately: `ingest` is keyed on `seen`, so the parent would come back as a
+   * duplicate, and a second item would be a second journal in the lane. This is the same update
+   * `ingest` performs for a superseding emission — one item, one position, one new emission.
+   */
+  const restoreParent = (opener: Entry, envelope: WidgetEnvelope): void => {
+    cancelWork(opener);
+    const next = prepare(opener.itemId, envelope, 'timeline');
+    Object.assign(opener, {
+      envelope,
+      view: next.view,
+      verdict: next.verdict,
+      result: next.result,
+      display: next.display,
+      sentence: next.sentence,
+      emission: opener.emission + 1,
+    });
+    if (opener.display === 'collapsed') vault.drop(opener.itemId);
+    scheduleExpiry(opener);
+    deps.timeline.replaceWidget(itemView(opener));
+  };
+
   const activate = async (itemId: string, ref: InteractiveRefKey): Promise<ActivationOutcome> => {
     const entry = entries.get(itemId);
     if (entry === undefined) return { outcome: 'ignored', reason: 'unknown_item' };
@@ -580,6 +648,20 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       return { outcome: 'dismissed' };
     }
     if (route === 'opens_detail') deps.chrome.closeProgress(entry.itemId);
+    if (outcome.status === 'returned') {
+      // The parent comes only from `resolved_widget`, and only for the detail that asked.
+      const opener = entries.get(detailOpeners.get(entry.itemId) ?? '');
+      if (opener === undefined || entries.get(opener.itemId) !== opener
+        || !isBoundParent(entry, intent, opener, outcome.envelope)) {
+        return endInSentence(entry, 'route_refused', true);
+      }
+      restoreParent(opener, outcome.envelope);
+      // Through the existing controller, so the history entry and focus return are the ones the
+      // detail was opened with.
+      deps.chrome.closeDetail();
+      counters = { ...counters, stateChanges: counters.stateChanges + 1 };
+      return { outcome: 'dismissed' };
+    }
     if (outcome.status === 'advanced') {
       const ingested = ingest(outcome.envelope);
       if (ingested.ingested === 'duplicate') return endInSentence(entry, 'activation_unavailable', true);
