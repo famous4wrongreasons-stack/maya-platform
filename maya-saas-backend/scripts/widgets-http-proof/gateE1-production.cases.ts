@@ -87,11 +87,19 @@ export const cases: WidgetsHttpProofCase[] = [
       const receipt = object(resolution.receipt, 'receipt');
       const envelope = object(receipt.envelope, 'envelope');
       check(Array.isArray(envelope.intents), 'envelope has no intents');
-      const intent = object((envelope.intents as unknown[])[0], 'first intent');
-      check(intent.effect === 'REFINE', 'first intent is not REFINE');
+      const intent = object(
+        (envelope.intents as unknown[]).find(
+          (v) => object(v, 'intent').effect === 'REFINE',
+        ),
+        'journal REFINE intent',
+      );
+      check(
+        intent.effect === 'REFINE',
+        'preserved journal REFINE intent missing',
+      );
       check(
         typeof intent.intent_token === 'string',
-        'first intent has no token',
+        'journal REFINE intent has no token',
       );
       const minted = ctx
         .mintProvenance()

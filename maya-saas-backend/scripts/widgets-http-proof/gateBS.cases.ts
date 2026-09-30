@@ -152,6 +152,37 @@ export async function personalSource(
     );
     const executed = await submit(confirmation, commit);
     assert.equal(object(executed.owner_decision).state, 'SUCCEEDED');
+    const committedState = await ctx.fixtures.bookingProofState(tenant);
+    const producer = committedState.records.find(
+      (r) => r.intentTokenHash === tokenHash,
+    );
+    const commitHash = createHash('sha256')
+      .update(commit.intent_token as string)
+      .digest('hex');
+    const committed = committedState.records.find(
+      (r) => r.intentTokenHash === commitHash,
+    );
+    assert(producer && committed);
+    assert.notEqual(producer.consumedAt, null);
+    assert.notEqual(committed.consumedAt, null);
+    assert.equal(committed.producedByIntentTokenHash, producer.intentTokenHash);
+    assert.notEqual(committed.confirmationOfKind, 'draft');
+    assert.equal(committed.confirmationOfRef, before.appointments[0].id);
+    assert.equal(committed.capabilityKey, `crm.appointment.${operation}.v1`);
+    const replay = await post('/widgets/intent', {
+      contract: 'maya.widget.intent.submission/1',
+      widget_id: confirmation.widget_id,
+      intent_token: commit.intent_token,
+      inputs: null,
+      client_nonce: randomUUID(),
+      profile_id: 'pwa.v1',
+    });
+    assert.equal(replay.status, 200);
+    assert.notEqual(object(replay.body).receipt_outcome, 'ACCEPTED');
+    assert.equal(
+      (await ctx.fixtures.bookingProofState(tenant)).executions.length,
+      committedState.executions.length,
+    );
     if (operation === 'reschedule') {
       const changed = await ctx.fixtures.bookingProofState(tenant);
       assert.equal(changed.appointments[0].id, before.appointments[0].id);
