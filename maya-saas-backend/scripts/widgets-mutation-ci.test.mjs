@@ -56,7 +56,7 @@ function fixture() {
   });
 }
 
-test('44 batteries, 65 jobs: profile, turn and approved source scope covers 502 declarations', () => {
+test('44 batteries, 65 jobs: approved scope and listener regression cover 503 declarations', () => {
   const p = plan(declared);
   assert.equal(p.gates.length, 44); assert.equal(p.matrix.include.length, 65);
   assert.deepEqual(declared.SB1.mutants.map(m => m.id), Array.from({ length: 10 }, (_, i) => `SB1-M${String(i + 1).padStart(2, '0')}`));
@@ -64,8 +64,9 @@ test('44 batteries, 65 jobs: profile, turn and approved source scope covers 502 
   assert.deepEqual(declared.SV2.mutants.map(m => m.id), Array.from({ length: 13 }, (_, i) => `SV2-M${i + 1}`));
   assert.deepEqual(declared.SBV.mutants.map(m => m.id), Array.from({ length: 8 }, (_, i) => `SBV-M${i + 1}`));
   assert.deepEqual(declared.WF.mutants.map(m => m.id), ['WF-M1', 'WF-M2', 'WF-M3']);
+  assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-LOOPBACK-1').length, 1);
   const r = assemble(declared, fixture(), head);
-  assert.equal(r.length, 44); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 502);
+  assert.equal(r.length, 44); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 503);
   for (const report of r) {
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
