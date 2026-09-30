@@ -27,7 +27,8 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');
-    await app.init();
+    await app.listen(0, '127.0.0.1');
+    expect(await app.getUrl()).toMatch(/^http:\/\/127\.0\.0\.1:\d+$/);
   });
 
   it('/api/health (GET)', () => {
