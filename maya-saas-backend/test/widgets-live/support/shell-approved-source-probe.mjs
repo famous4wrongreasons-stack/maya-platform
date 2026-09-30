@@ -4,6 +4,7 @@
 // printed; stdout contains only the observable shell result used by the live PostgreSQL proof.
 
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { resultOf, markupOf } from '../../../../maya-carrier-react/test/.bundle.mjs';
 import { render } from '../../../../maya-chat-shell/src/renderer/render.ts';
 import {
@@ -63,6 +64,21 @@ const failure = (status) =>
 
 const input = await readInput();
 const responses = [];
+// Evidence only: the exact synthetic server payload, with spendable tokens hashed.
+// These copies never enter the runtime, renderer, transport or authority path.
+const digest = (value) => createHash('sha256').update(value).digest('hex');
+const snapshot = (value) => ({
+  rawJsonSha256: digest(JSON.stringify(value)),
+  value: JSON.parse(JSON.stringify(value, (key, member) =>
+    typeof member === 'string' && /token|password|authorization/i.test(key) && !/hash/i.test(key)
+      ? `[redacted:sha256:${digest(member)}]`
+      : member)),
+});
+const exchanges = [];
+const renderCalls = [];
+const submissionOutcomes = [];
+const activationOutcomes = [];
+const fullscreenTransitions = [];
 const transport = {
   async widgetIntent(request) {
     const response = await post(
@@ -73,6 +89,12 @@ const transport = {
     );
     responses.push(response.body);
     const value = projectWidgetIntent(response.body);
+    exchanges.push({
+      status: response.status,
+      request: snapshot(request),
+      response: snapshot(response.body),
+      projection: snapshot(value),
+    });
     return (response.status === 200 || response.status === 201) &&
       value !== null
       ? { ok: true, value }
@@ -91,6 +113,7 @@ const transport = {
       : failure(response.status);
   },
 };
+const liveSubmission = createLiveSubmission(transport);
 
 const runtime = createShellRuntime({
   transport: {
@@ -103,7 +126,16 @@ const runtime = createShellRuntime({
     }),
     subscribe: () => () => undefined,
   },
-  render,
+  render: (args) => {
+    const result = render(args);
+    renderCalls.push({
+      verdict: args.verdict,
+      density: args.density,
+      presentation: args.view.presentation,
+      readingOrder: result.readingOrder,
+    });
+    return result;
+  },
   environment: {
     a11y: () => ({
       reduced_motion: false,
@@ -129,8 +161,20 @@ const runtime = createShellRuntime({
     onBack: () => () => undefined,
   },
   newAbort: () => new AbortController(),
-  submission: createLiveSubmission(transport),
+  submission: {
+    async submit(request, signal) {
+      const outcome = await liveSubmission.submit(request, signal);
+      submissionOutcomes.push({ status: outcome.status, widgetId: outcome.envelope?.widget_id ?? null });
+      return outcome;
+    },
+  },
   newId: () => crypto.randomUUID(),
+});
+const offShell = runtime.shell.subscribe((view) => {
+  fullscreenTransitions.push(view.fullscreen === null ? null : {
+    phase: view.fullscreen.phase,
+    itemId: view.fullscreen.itemId,
+  });
 });
 
 try {
@@ -146,6 +190,7 @@ try {
   };
   const activate = async (itemId, ref) => {
     const outcome = await runtime.widgets.activate(itemId,ref);
+    activationOutcomes.push({itemId, ref, outcome});
     assert.equal(outcome.outcome,'dismissed',JSON.stringify(outcome));
     return responses.at(-1);
   };
@@ -153,10 +198,23 @@ try {
   let envelope = input.envelope;
   let itemId = load(envelope);
   if (input.mode === 'journal') {
+    const beforeItems = runtime.conversation.view().items.map(({ id, kind }) => ({ id, kind }));
     const result = await activate(itemId, `intent:${envelope.body.detail_intent}`);
     assert.equal(result.next_envelope.kind,'SCHEDULE');
     assert.equal(result.next_envelope.body.range.from.slice(0,10),'2026-09-24');
-    process.stdout.write(JSON.stringify({mode:input.mode,backendDetail:true,fullscreen:runtime.shell.view().fullscreen,refs,counters:runtime.widgets.counters()}));
+    process.stdout.write(JSON.stringify({
+      mode:input.mode,backendDetail:true,fullscreen:runtime.shell.view().fullscreen,refs,counters:runtime.widgets.counters(),
+      diagnostic: {
+        initialEnvelope: snapshot(envelope),
+        exchanges,
+        renderCalls,
+        submissionOutcomes,
+        activationOutcomes,
+        fullscreenTransitions,
+        timelineBefore: beforeItems,
+        timelineAfter: runtime.conversation.view().items.map(({ id, kind }) => ({ id, kind })),
+      },
+    }));
   } else {
     for (const kind of ['service','staff','slot','commit']) {
       const ref = kind==='commit' ? `intent:${intent(envelope,'COMMIT').intent_ref}`
@@ -183,4 +241,4 @@ try {
   }
 } catch (error) {
   process.stdout.write(JSON.stringify({mode:input.mode,pass:false,error:String(error),counters:runtime.widgets.counters()}));
-} finally { runtime.dispose(); }
+} finally { offShell(); runtime.dispose(); }
