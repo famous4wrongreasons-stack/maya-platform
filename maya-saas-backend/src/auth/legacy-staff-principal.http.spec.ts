@@ -152,7 +152,8 @@ describe('R02 canonical principal through actual Nest JWT/tenant/role guards', (
     app.use((_req: unknown, _res: unknown, next: () => void) =>
       context.run('r02-http-test', next),
     );
-    await app.init();
+    // Supertest must use an owned IPv4 listener, not an implicit wildcard port.
+    await app.listen(0, '127.0.0.1');
   });
   afterAll(async () => {
     await app?.close();
@@ -191,6 +192,16 @@ describe('R02 canonical principal through actual Nest JWT/tenant/role guards', (
     if (credential) call.set('Authorization', 'Bearer ' + credential);
     return call.send(body);
   };
+
+  it('R02-LOOPBACK owns one ready IPv4 listener across requests', async () => {
+    const server: Server = app.getHttpServer();
+    const address = server.address();
+    expect(address).toMatchObject({ address: '127.0.0.1', family: 'IPv4' });
+    await read(token()).expect(201);
+    await read().expect(401);
+    expect(server.listening).toBe(true);
+    expect(server.address()).toEqual(address);
+  });
 
   it('requires a real signed session; raw channel identity is not authentication', async () => {
     await read().expect(401);

@@ -11,6 +11,48 @@
     "expect": "live-killed"
   },
   {
+    "id": "H-R02-LOOPBACK-1",
+    "edits": [
+      {
+        "file": "src/auth/legacy-staff-principal.http.spec.ts",
+        "find": "await app.listen(0, '127.0.0.1');",
+        "replace": "await app.init();"
+      }
+    ],
+    "killers": [
+      "R02-LOOPBACK"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "H-ADMIN-LOOPBACK-1",
+    "edits": [
+      {
+        "file": "src/admin/admin.controller.spec.ts",
+        "find": "await app.listen(0, '127.0.0.1');",
+        "replace": "await app.init();"
+      }
+    ],
+    "killers": [
+      "accepts a logo in the multipart field"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "H-BOOT-LOOPBACK-1",
+    "edits": [
+      {
+        "file": "src/bootstrap/configure-http-app.spec.ts",
+        "find": "await app.listen(0, '127.0.0.1');",
+        "replace": "await app.init();"
+      }
+    ],
+    "killers": [
+      "a route is served under /api, and not without it"
+    ],
+    "expect": "build-killed"
+  },
+  {
     "id": "H-M1",
     "description": "the recorder counts a lock as a durable write (D-12)",
     "edits": [

@@ -81,7 +81,8 @@ describe('configureHttpApp — the parsers, the api prefix and the validation pi
       logger: false,
     });
     configureHttpApp(app);
-    await app.init();
+    await app.listen(0, '127.0.0.1');
+    expect(await app.getUrl()).toMatch(/^http:\/\/127\.0\.0\.1:\d+$/);
   });
 
   afterAll(async () => {
