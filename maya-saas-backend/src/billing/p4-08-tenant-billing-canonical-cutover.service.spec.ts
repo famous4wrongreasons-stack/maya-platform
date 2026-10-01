@@ -131,6 +131,20 @@ function harness() {
 }
 
 describe('P408TenantBillingCanonicalCutoverService', () => {
+  // These scenarios use fixed billing windows; wall-clock passage must not change them.
+  beforeEach(() => {
+    jest.useFakeTimers({ now: NOW });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('P408-HARNESS-CLOCK anchors implicit billing reads to the fixture clock', () => {
+    expect(new Date()).toEqual(NOW);
+    expect(Date.now()).toBe(NOW.getTime());
+  });
+
   it('derives checkout amount/currency/policy and sends one canonical action', async () => {
     const h = harness();
     await expect(

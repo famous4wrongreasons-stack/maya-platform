@@ -53,6 +53,17 @@
     "expect": "build-killed"
   },
   {
+    "id": "H-P408-CLOCK-1",
+    "description": "billing fixtures lose their fixed clock and change meaning when the active window expires",
+    "file": "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
+    "find": "jest.useFakeTimers({ now: NOW });",
+    "replace": "jest.useRealTimers();",
+    "killers": [
+      "P408-HARNESS-CLOCK"
+    ],
+    "expect": "build-killed"
+  },
+  {
     "id": "H-M1",
     "description": "the recorder counts a lock as a durable write (D-12)",
     "edits": [
