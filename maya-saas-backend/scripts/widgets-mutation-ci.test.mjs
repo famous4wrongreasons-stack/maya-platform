@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
+import ts from 'typescript';
 import {
   assemble,
   DEFAULT_STEPS,
@@ -75,6 +77,27 @@ test('44 batteries, 65 jobs: approved scope, listener and clock regressions cove
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
   }
+});
+
+test('M9-28 changes the canonical USER index lookup, never a similar assistant query', () => {
+  const mutant = declared['9'].mutants.find(m => m.id === 'M9-28');
+  assert.equal(mutant.file, 'src/widgets/stores/timeline.store.ts');
+  assert.equal(mutant.expect, 'build-killed');
+  assert.deepEqual(mutant.killers, ['T9-WRITE-1']);
+  const source = fs.readFileSync(path.join(backend, mutant.file), 'utf8');
+  const parsed = ts.createSourceFile(mutant.file, source, ts.ScriptTarget.Latest, true);
+  const store = parsed.statements.find(n => ts.isClassDeclaration(n) && n.name?.text === 'TimelineStore');
+  const writer = store?.members.find(n => ts.isMethodDeclaration(n) && n.name?.getText(parsed) === 'appendUserTurn');
+  assert.ok(writer?.body, 'the canonical USER writer must exist');
+  const at = source.indexOf(mutant.find);
+  assert.ok(at >= 0 && source.indexOf(mutant.find, at + 1) === -1, 'the edit must have one exact target');
+  assert.ok(at >= writer.body.getStart(parsed) && at + mutant.find.length <= writer.body.end,
+    'M9-28 must edit appendUserTurn; a matching assistant query is the wrong mutation');
+  const changed = source.replace(mutant.find, () => mutant.replace);
+  assert.equal(changed.slice(0, writer.body.getStart(parsed)), source.slice(0, writer.body.getStart(parsed)));
+  const sizeDelta = mutant.replace.length - mutant.find.length;
+  assert.equal(changed.slice(writer.body.end + sizeDelta), source.slice(writer.body.end),
+    'the mutation must leave all other methods unchanged');
 });
 
 test('runner dry-run independently executes the same disjoint partition selection', () => {
