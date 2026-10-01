@@ -158,6 +158,10 @@ export function assemble(declared, receipts, head, requested = '') {
       const selected = partition?.selected ?? battery.mutants;
       exact(r.mutants.map((m) => m.id), selected.map((m) => m.id), `${job.slot}: wrong/missing/duplicate mutants`);
       const expectedBaseline = new Set(); const expectedNeutralisers = new Set();
+      // Match the runner's mandatory unmutated live reference. A neutraliser's
+      // deliberately red control cannot establish that the original was green.
+      if (selected.some(m => typeof m.equivalent !== 'string' && defaultSteps(m).includes('live')))
+        expectedBaseline.add(controlKey(null, ['live']));
       for (const [i, m] of r.mutants.entries()) {
         const source = selected[i];
         exact(m.battery, battery.file, `${m.id}: battery`);
@@ -197,6 +201,18 @@ export function assemble(declared, receipts, head, requested = '') {
         }
       }
       exact(sortedKeys(r.baseline_controls), [...expectedBaseline].sort(), `${job.slot}: baseline coverage`);
+      // Validate the whole measurement, including the standalone live control
+      // that no plain killer may reference in a neutralised-only partition.
+      for (const key of expectedBaseline) {
+        const c = r.baseline_controls[key];
+        const steps = key.slice('baseline|'.length).split(',');
+        exact(c.set, null, `${job.slot}: ${key} is not an unmutated reference`);
+        exact(c.steps, steps, `${job.slot}: ${key} steps`);
+        exact(sortedKeys(c.exits), [...steps].sort(), `${job.slot}: ${key} incomplete control`);
+        for (const step of steps) exact(c.exits[step], 0, `${job.slot}: ${key} baseline red`);
+        exact(c.failed, [], `${job.slot}: ${key} baseline assertions`);
+        exact(c.problems, [], `${job.slot}: ${key} control crash`);
+      }
       exact(sortedKeys(r.neutraliser_controls), [...expectedNeutralisers].sort(), `${job.slot}: neutraliser coverage`);
       for (const [key, c] of Object.entries(r.baseline_controls)) baseline[`${job.slot}:${key}`] = c;
       for (const [key, c] of Object.entries(r.neutraliser_controls)) neutralisers[`${job.slot}:${key}`] = c;

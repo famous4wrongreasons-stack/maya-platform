@@ -32,6 +32,11 @@ function fixture() {
       }
       const status = m.expect ?? 'live-killed';
       const steps = status === 'build-killed' ? ['unit', 'typecheck', 'k3'] : ['live'];
+      // The runner always measures an unmutated live reference, including when
+      // every live killer in a partition uses a deliberately red neutraliser.
+      if (steps.includes('live')) baseline['baseline|live'] = {
+        set: null, steps: ['live'], exits: { live: 0 }, failed: [], problems: [],
+      };
       const killers = m.killers.map((k) => typeof k === 'string' ? { test: k, neutralisers: null } : k);
       const sets = [...new Set(killers.map((k) => k.neutralisers))];
       const exits = {};
@@ -78,6 +83,32 @@ test('44 batteries, 65 jobs: approved scope and harness regressions cover 509 de
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
   }
+});
+
+test('assembly accepts the mandatory plain live reference of a neutralised-only live battery', () => {
+  const receipts = fixture().filter(r => r.batteries[0] === 'gate4.json');
+  const live = receipts[0].mutants.filter(m => m.steps.includes('live'));
+  assert.ok(live.length > 0);
+  assert.ok(live.every(m => !Object.hasOwn(m.exits, 'plain')));
+  const report = assemble(declared, receipts, head, '4')[0];
+  assert.equal(report.baseline_controls['4:baseline|live'].exits.live, 0);
+  assert.ok(Object.keys(report.neutraliser_controls).length > 0);
+});
+
+for (const [name, alter] of Object.entries({
+  missing: r => { delete r.baseline_controls['baseline|live']; },
+  'missing exit': r => { r.baseline_controls['baseline|live'].exits = {}; },
+  'missing steps': r => { r.baseline_controls['baseline|live'].steps = []; },
+  'neutraliser substituted': r => { r.baseline_controls['baseline|live'].set = 'N4'; },
+  'missing assertion list': r => { delete r.baseline_controls['baseline|live'].failed; },
+  'missing problems list': r => { delete r.baseline_controls['baseline|live'].problems; },
+  'red exit': r => { r.baseline_controls['baseline|live'].exits.live = 1; },
+  'failed assertion': r => { r.baseline_controls['baseline|live'].failed = ['unmutated live failure']; },
+  'extra control': r => { r.baseline_controls['baseline|invented'] = structuredClone(r.baseline_controls['baseline|live']); },
+})) test(`mandatory neutralised-live reference fails closed: ${name}`, () => {
+  const receipts = fixture().filter(r => r.batteries[0] === 'gate4.json');
+  alter(receipts[0]);
+  assert.throws(() => assemble(declared, receipts, head, '4'));
 });
 
 const timelineMutationOwners = [
