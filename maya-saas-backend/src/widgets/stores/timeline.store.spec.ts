@@ -113,3 +113,82 @@ describe('TimelineStore.lowerToUserTurn — Gate 9 transaction writer', () => {
     expect(turnCalls[0]?.[0].data.textContent).toBe(renderedUtterance);
   });
 });
+
+describe('TimelineStore.ensureAssistantExecutionTurn — conversation index', () => {
+  it('TURN-ASSISTANT-INDEX ignores larger indices in another tenant or conversation', async () => {
+    const parent = {
+      id: 'parent-user',
+      tenantId: INPUT.tenantId,
+      conversationId: INPUT.conversationId,
+      turnIndex: 4,
+      role: 'user',
+      principalProofHash: INPUT.principalProofHash,
+      channel: 'pwa',
+      textContent: 'Покажи показатели',
+      spokenTranscript: null,
+      erasedAt: null,
+      retentionUntil: new Date('2027-03-19T00:00:00.000Z'),
+    };
+    const rows = [
+      parent,
+      {
+        ...parent,
+        id: 'other-conversation',
+        conversationId: 'other',
+        turnIndex: 100,
+      },
+      { ...parent, id: 'other-tenant', tenantId: 'tenant-b', turnIndex: 200 },
+    ];
+    type Where = { tenantId?: string; conversationId?: string; id?: string };
+    const matching = (where: Where) =>
+      rows.filter((row) =>
+        Object.entries(where).every(
+          ([key, value]) => row[key as keyof Where] === value,
+        ),
+      );
+    const tx = {
+      $executeRaw: jest.fn().mockResolvedValue(1),
+      widgetTimelineTurn: {
+        findFirst: jest.fn(({ where }: { where: Where }) =>
+          Promise.resolve(matching(where)[0] ?? null),
+        ),
+        aggregate: jest.fn(({ where }: { where: Where }) =>
+          Promise.resolve({
+            _max: {
+              turnIndex: Math.max(
+                ...matching(where).map((row) => row.turnIndex),
+              ),
+            },
+          }),
+        ),
+        create: jest.fn(({ data }: { data: typeof parent }) =>
+          Promise.resolve({
+            id: data.id,
+            principalProofHash: data.principalProofHash,
+          }),
+        ),
+      },
+    };
+    await TimelineStore.ensureAssistantExecutionTurn(
+      tx as unknown as RequestTx,
+      {
+        tenantId: INPUT.tenantId,
+        conversationId: INPUT.conversationId,
+        parentUserTurnId: parent.id,
+        principalProofHash: INPUT.principalProofHash,
+        channel: 'pwa',
+        executionId: 'execution-own',
+      },
+      NOW,
+    );
+    expect(tx.widgetTimelineTurn.create).toHaveBeenCalledTimes(1);
+    const written = tx.widgetTimelineTurn.create.mock.calls[0]?.[0].data;
+    expect(written).toMatchObject({
+      tenantId: INPUT.tenantId,
+      conversationId: INPUT.conversationId,
+      turnIndex: 5,
+      role: 'assistant',
+      principalProofHash: INPUT.principalProofHash,
+    });
+  });
+});

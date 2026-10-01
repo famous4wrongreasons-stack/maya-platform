@@ -5,9 +5,7 @@
     "file": "src/widgets/stores/user-turn-binding.ts",
     "find": "      correlation.actorUserId,",
     "replace": "      'shared-actor',",
-    "killers": [
-      "TURN-CORRELATION"
-    ],
+    "killers": ["TURN-CORRELATION"],
     "expect": "build-killed"
   },
   {
@@ -16,9 +14,7 @@
     "file": "src/widgets/stores/user-turn-binding.ts",
     "find": "      'maya.user-turn/1',\n      tenantId,",
     "replace": "      'maya.user-turn/1',\n      'shared-tenant',",
-    "killers": [
-      "TURN-CORRELATION"
-    ],
+    "killers": ["TURN-CORRELATION"],
     "expect": "build-killed"
   },
   {
@@ -27,9 +23,7 @@
     "file": "src/widgets/stores/user-turn-binding.ts",
     "find": "      correlation.kind,",
     "replace": "      'shared-kind',",
-    "killers": [
-      "TURN-CORRELATION"
-    ],
+    "killers": ["TURN-CORRELATION"],
     "expect": "build-killed"
   },
   {
@@ -38,9 +32,7 @@
     "file": "src/widgets/stores/user-turn-binding.ts",
     "find": "  if (rows.length !== 1)",
     "replace": "  if (rows.length < 1)",
-    "killers": [
-      "TURN-AUDIT"
-    ],
+    "killers": ["TURN-AUDIT"],
     "expect": "build-killed"
   },
   {
@@ -49,9 +41,7 @@
     "file": "src/widgets/owner-ports/user-turn-audit.adapter.ts",
     "find": "await this.audit.log(input, tx);",
     "replace": "await this.audit.log(input);",
-    "killers": [
-      "TURN-AUDIT-TX"
-    ],
+    "killers": ["TURN-AUDIT-TX"],
     "expect": "build-killed"
   },
   {
@@ -60,9 +50,7 @@
     "file": "src/widgets/stores/timeline.store.ts",
     "find": "existing.retentionUntil.getTime() <= now.getTime()",
     "replace": "false",
-    "killers": [
-      "TURN-REPLAY-REFUSE"
-    ],
+    "killers": ["TURN-REPLAY-REFUSE"],
     "expect": "build-killed"
   },
   {
@@ -71,9 +59,7 @@
     "file": "src/widgets/stores/timeline.store.ts",
     "find": "existing.principalProofHash !== input.principalProofHash ||",
     "replace": "false ||",
-    "killers": [
-      "TURN-REPLAY-REFUSE"
-    ],
+    "killers": ["TURN-REPLAY-REFUSE"],
     "expect": "build-killed"
   },
   {
@@ -82,10 +68,7 @@
     "file": "src/widgets/composition/typed-step0.ts",
     "find": "const turn = await TimelineStore.appendUserTurn(\n        {\n          id: turnId,\n          tenantId,\n          conversationId,\n          principalProofHash: principal.proofHash,\n          channel: 'pwa',\n          textContent: input.utterance,\n        },\n        tx,\n        now,\n      );",
     "replace": "const turn = { id: turnId, turnIndex: 0 };",
-    "killers": [
-      "TURN-ORDINARY",
-      "TURN-CANONICAL"
-    ],
+    "killers": ["TURN-ORDINARY", "TURN-CANONICAL"],
     "expect": "live-killed"
   },
   {
@@ -94,10 +77,7 @@
     "file": "src/widgets/intent-gateway.service.ts",
     "find": "          userTurnCorrelation: {\n            kind: args.chatRequestId === undefined ? 'widget' : 'chat',\n            requestId:\n              args.chatRequestId ??\n              `${args.carrier}:${args.submission.client_nonce}`,\n            actorUserId: args.actor.userId,\n          },\n",
     "replace": "          userTurnCorrelation: undefined,\n",
-    "killers": [
-      "TURN-WIDGET",
-      "TURN-CANONICAL"
-    ],
+    "killers": ["TURN-WIDGET", "TURN-CANONICAL"],
     "expect": "live-killed"
   },
   {
@@ -106,9 +86,7 @@
     "file": "src/widgets/stores/timeline.store.ts",
     "find": "    if (row === null)\n      throw new ConflictException('conversation_scope_conflict');",
     "replace": "    void row;",
-    "killers": [
-      "TURN-SCOPE"
-    ],
+    "killers": ["TURN-SCOPE"],
     "expect": "live-killed"
   },
   {
@@ -117,11 +95,7 @@
     "file": "src/widgets/composition/typed-step0.ts",
     "find": "      if (binding === null)\n        await writeUserTurnBinding",
     "replace": "      if (false)\n        await writeUserTurnBinding",
-    "killers": [
-      "TURN-ORDINARY",
-      "TURN-ATOMIC",
-      "TURN-CANONICAL"
-    ],
+    "killers": ["TURN-ORDINARY", "TURN-ATOMIC", "TURN-CANONICAL"],
     "expect": "live-killed"
   },
   {
@@ -130,9 +104,25 @@
     "file": "src/widgets/composition/chat-read.trigger.ts",
     "find": "input.userTurn === undefined",
     "replace": "true",
-    "killers": [
-      "TURN-READ"
-    ],
+    "killers": ["TURN-READ"],
     "expect": "live-killed"
+  },
+  {
+    "id": "TURN-M13",
+    "description": "assistant turn index lookup loses tenant qualification",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "    const latest = await tx.widgetTimelineTurn.aggregate({\n      where: scoped(input.tenantId, { conversationId: input.conversationId }),\n      _max: { turnIndex: true },\n    });",
+    "replace": "    const latest = await tx.widgetTimelineTurn.aggregate({\n      where: { conversationId: input.conversationId },\n      _max: { turnIndex: true },\n    });",
+    "killers": ["TURN-ASSISTANT-INDEX"],
+    "expect": "build-killed"
+  },
+  {
+    "id": "TURN-M14",
+    "description": "assistant turn index lookup loses conversation qualification",
+    "file": "src/widgets/stores/timeline.store.ts",
+    "find": "    const latest = await tx.widgetTimelineTurn.aggregate({\n      where: scoped(input.tenantId, { conversationId: input.conversationId }),\n      _max: { turnIndex: true },\n    });",
+    "replace": "    const latest = await tx.widgetTimelineTurn.aggregate({\n      where: scoped(input.tenantId, {}),\n      _max: { turnIndex: true },\n    });",
+    "killers": ["TURN-ASSISTANT-INDEX"],
+    "expect": "build-killed"
   }
 ]

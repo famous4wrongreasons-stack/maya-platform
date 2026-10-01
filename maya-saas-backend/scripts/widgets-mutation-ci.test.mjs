@@ -58,7 +58,7 @@ function fixture() {
   });
 }
 
-test('44 batteries, 65 jobs: approved scope, listener and clock regressions cover 507 declarations', () => {
+test('44 batteries, 65 jobs: approved scope and harness regressions cover 509 declarations', () => {
   const p = plan(declared);
   assert.equal(p.gates.length, 44); assert.equal(p.matrix.include.length, 65);
   assert.deepEqual(declared.SB1.mutants.map(m => m.id), Array.from({ length: 10 }, (_, i) => `SB1-M${String(i + 1).padStart(2, '0')}`));
@@ -66,33 +66,38 @@ test('44 batteries, 65 jobs: approved scope, listener and clock regressions cove
   assert.deepEqual(declared.SV2.mutants.map(m => m.id), Array.from({ length: 13 }, (_, i) => `SV2-M${i + 1}`));
   assert.deepEqual(declared.SBV.mutants.map(m => m.id), Array.from({ length: 8 }, (_, i) => `SBV-M${i + 1}`));
   assert.deepEqual(declared.WF.mutants.map(m => m.id), ['WF-M1', 'WF-M2', 'WF-M3']);
+  assert.deepEqual(declared.TURN.mutants.map(m => m.id), Array.from({ length: 14 }, (_, i) => `TURN-M${i + 1}`));
   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-LOOPBACK-1').length, 1);
   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-R02-LOOPBACK-1').length, 1);
   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-ADMIN-LOOPBACK-1').length, 1);
   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-BOOT-LOOPBACK-1').length, 1);
   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-P408-CLOCK-1').length, 1);
   const r = assemble(declared, fixture(), head);
-  assert.equal(r.length, 44); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 507);
+  assert.equal(r.length, 44); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 509);
   for (const report of r) {
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
   }
 });
 
-for (const id of Array.from({ length: 7 }, (_, i) => `M9-${i + 27}`)) test(`${id} changes the canonical USER writer, never a similar assistant query`, () => {
-  const mutant = declared['9'].mutants.find(m => m.id === id);
+const timelineMutationOwners = [
+  ...Array.from({ length: 7 }, (_, i) => ({ gate: '9', id: `M9-${i + 27}`, method: 'appendUserTurn', killer: 'T9-WRITE-1' })),
+  ...['TURN-M13', 'TURN-M14'].map(id => ({ gate: 'TURN', id, method: 'ensureAssistantExecutionTurn', killer: 'TURN-ASSISTANT-INDEX' })),
+];
+for (const { gate, id, method, killer } of timelineMutationOwners) test(`${id} changes only its declared timeline writer ${method}`, () => {
+  const mutant = declared[gate].mutants.find(m => m.id === id);
   assert.equal(mutant.file, 'src/widgets/stores/timeline.store.ts');
   assert.equal(mutant.expect, id === 'M9-30' ? 'live-killed' : 'build-killed');
-  assert.ok(mutant.killers.includes('T9-WRITE-1'));
+  assert.ok(mutant.killers.includes(killer));
   const source = fs.readFileSync(path.join(backend, mutant.file), 'utf8');
   const parsed = ts.createSourceFile(mutant.file, source, ts.ScriptTarget.Latest, true);
   const store = parsed.statements.find(n => ts.isClassDeclaration(n) && n.name?.text === 'TimelineStore');
-  const writer = store?.members.find(n => ts.isMethodDeclaration(n) && n.name?.getText(parsed) === 'appendUserTurn');
-  assert.ok(writer?.body, 'the canonical USER writer must exist');
+  const writer = store?.members.find(n => ts.isMethodDeclaration(n) && n.name?.getText(parsed) === method);
+  assert.ok(writer?.body, 'the declared timeline writer must exist');
   const at = source.indexOf(mutant.find);
   assert.ok(at >= 0 && source.indexOf(mutant.find, at + 1) === -1, 'the edit must have one exact target');
   assert.ok(at >= writer.body.getStart(parsed) && at + mutant.find.length <= writer.body.end,
-    `${id} must edit appendUserTurn; a matching assistant query is the wrong mutation`);
+    `${id} must edit ${method}; a matching query in another writer is the wrong mutation`);
   const changed = source.replace(mutant.find, () => mutant.replace);
   assert.equal(changed.slice(0, writer.body.getStart(parsed)), source.slice(0, writer.body.getStart(parsed)));
   const sizeDelta = mutant.replace.length - mutant.find.length;
