@@ -79,11 +79,11 @@ test('44 batteries, 65 jobs: approved scope, listener and clock regressions cove
   }
 });
 
-test('M9-28 changes the canonical USER index lookup, never a similar assistant query', () => {
-  const mutant = declared['9'].mutants.find(m => m.id === 'M9-28');
+for (const id of Array.from({ length: 7 }, (_, i) => `M9-${i + 27}`)) test(`${id} changes the canonical USER writer, never a similar assistant query`, () => {
+  const mutant = declared['9'].mutants.find(m => m.id === id);
   assert.equal(mutant.file, 'src/widgets/stores/timeline.store.ts');
-  assert.equal(mutant.expect, 'build-killed');
-  assert.deepEqual(mutant.killers, ['T9-WRITE-1']);
+  assert.equal(mutant.expect, id === 'M9-30' ? 'live-killed' : 'build-killed');
+  assert.ok(mutant.killers.includes('T9-WRITE-1'));
   const source = fs.readFileSync(path.join(backend, mutant.file), 'utf8');
   const parsed = ts.createSourceFile(mutant.file, source, ts.ScriptTarget.Latest, true);
   const store = parsed.statements.find(n => ts.isClassDeclaration(n) && n.name?.text === 'TimelineStore');
@@ -92,7 +92,7 @@ test('M9-28 changes the canonical USER index lookup, never a similar assistant q
   const at = source.indexOf(mutant.find);
   assert.ok(at >= 0 && source.indexOf(mutant.find, at + 1) === -1, 'the edit must have one exact target');
   assert.ok(at >= writer.body.getStart(parsed) && at + mutant.find.length <= writer.body.end,
-    'M9-28 must edit appendUserTurn; a matching assistant query is the wrong mutation');
+    `${id} must edit appendUserTurn; a matching assistant query is the wrong mutation`);
   const changed = source.replace(mutant.find, () => mutant.replace);
   assert.equal(changed.slice(0, writer.body.getStart(parsed)), source.slice(0, writer.body.getStart(parsed)));
   const sizeDelta = mutant.replace.length - mutant.find.length;

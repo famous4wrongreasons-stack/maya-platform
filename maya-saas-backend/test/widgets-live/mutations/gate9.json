@@ -304,8 +304,8 @@
     "id": "M9-27",
     "description": "turn index lookup loses tenant qualification",
     "file": "src/widgets/stores/timeline.store.ts",
-    "find": "      where: scoped(input.tenantId, { conversationId: input.conversationId }),",
-    "replace": "      where: { conversationId: input.conversationId },",
+    "find": "        ? await timeline.aggregate({\n            where: scoped(input.tenantId, {\n              conversationId: input.conversationId,\n            }),\n            _max: { turnIndex: true },\n          })",
+    "replace": "        ? await timeline.aggregate({\n            where: { conversationId: input.conversationId },\n            _max: { turnIndex: true },\n          })",
     "killers": [
       "T9-WRITE-1"
     ],
