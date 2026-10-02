@@ -48,6 +48,7 @@ describe('FBE2E-2 — selected slot to canonical booking preview', () => {
     const create = {
       quoteForAccount: jest.fn().mockResolvedValue({
         start: '2026-10-02T10:00:00.000Z',
+        timezone: 'UTC',
         services: [
           {
             id: 'service-1',

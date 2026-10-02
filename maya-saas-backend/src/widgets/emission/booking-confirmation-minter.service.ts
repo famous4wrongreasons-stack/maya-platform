@@ -121,7 +121,7 @@ export class BookingConfirmationMinterService implements BookingConfirmationMint
         key: 'booking.when',
         value: p.when,
         unit: 'datetime',
-        formatted: p.when,
+        formatted: p.whenFormatted ?? p.when,
       }),
       when_previous:
         p.whenPrevious === null

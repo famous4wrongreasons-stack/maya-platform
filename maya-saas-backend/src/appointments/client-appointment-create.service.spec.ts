@@ -36,6 +36,9 @@ function setup() {
     crmLinks: [] as Array<{ provider: string; externalId: string }>,
   };
   const prisma = {
+    internalProvider: {
+      findFirst: jest.fn().mockResolvedValue({ branch: null }),
+    },
     crmIntegration: {
       findUnique: jest.fn().mockResolvedValue({
         provider: 'yclients',

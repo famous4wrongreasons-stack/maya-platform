@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { AiToolRuntimeService } from '../../ai-tools/ai-tool-runtime.service';
+import { AvailabilityCalendarService } from '../../crm/availability-calendar.service';
 import { openWidgetNounHandle } from '../emission/seal.service';
 import type { BookingSelectorOwnerPort } from '../routing/effect-router.ports';
 import { isBookingNounIdentity } from '../booking/booking-noun-identity';
@@ -29,7 +30,10 @@ const fact = (
 
 @Injectable()
 export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
-  constructor(private readonly runtime: AiToolRuntimeService) {}
+  constructor(
+    private readonly runtime: AiToolRuntimeService,
+    private readonly availability: AvailabilityCalendarService,
+  ) {}
 
   async advance(input: Parameters<BookingSelectorOwnerPort['advance']>[0]) {
     const opened = new Map<string, string>();
@@ -45,6 +49,19 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
       opened.set(noun, value.ownerRef);
     }
     if (input.actor.tenantId !== input.routing.tenantId) return null;
+    if (
+      input.step === 'staff' &&
+      (!opened.get('service') || !opened.get('staff'))
+    )
+      return null;
+    const day =
+      input.step === 'staff'
+        ? await this.availability.nextAvailabilityDay(
+            input.routing.tenantId,
+            opened.get('staff')!,
+            input.routing.now,
+          )
+        : null;
     const name: 'catalog.staff.read' | 'booking.availability.read' =
       input.step === 'service'
         ? 'catalog.staff.read'
@@ -53,11 +70,10 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
       input.step === 'service'
         ? {}
         : {
-            date: new Date(
-              input.routing.now.getTime() + 86_400_000,
-            ).toISOString(),
+            date: day!.date,
             service_ids: [opened.get('service')],
             staff_id: opened.get('staff'),
+            ...(day!.branchId ? { branch_id: day!.branchId } : {}),
           };
     if (
       input.step === 'staff' &&
@@ -92,7 +108,13 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
           ? ('STAFF_SELECTOR' as const)
           : ('TIME_SLOT_SELECTOR' as const),
       capabilityKey: name,
-      source,
+      source: day
+        ? {
+            ...(source as Record<string, unknown>),
+            timezone: day.timezone,
+            local_date: day.date,
+          }
+        : source,
       fact: fact(
         name,
         input.routing.record.requestedScopeHash,

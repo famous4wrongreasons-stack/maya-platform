@@ -1,6 +1,12 @@
 import { SealService } from '../emission/seal.service';
 import { BookingSelectorAdapter } from './booking-selector.adapter';
 
+const availability = {
+  nextAvailabilityDay: jest
+    .fn()
+    .mockResolvedValue({ date: '2026-10-02', timezone: 'UTC', branchId: null }),
+};
+
 const NOW = new Date('2026-10-01T09:00:00.000Z');
 const TENANT = '00000000-0000-4000-8000-000000000001';
 const OTHER_TENANT = '00000000-0000-4000-8000-000000000002';
@@ -61,7 +67,10 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
         result: { staff: [{ id: 'staff-1', name: 'Alice' }] },
       }),
     };
-    const adapter = new BookingSelectorAdapter(runtime as never);
+    const adapter = new BookingSelectorAdapter(
+      runtime as never,
+      availability as never,
+    );
     const service = handle(TENANT, 'service', 'service-1');
     await expect(
       adapter.advance({
@@ -116,7 +125,10 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
         },
       }),
     };
-    const adapter = new BookingSelectorAdapter(runtime as never);
+    const adapter = new BookingSelectorAdapter(
+      runtime as never,
+      availability as never,
+    );
     const service = handle(TENANT, 'service', 'service-1');
     const staff = handle(TENANT, 'staff', 'staff-1');
     await expect(
@@ -136,7 +148,7 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
       'booking.availability.read',
       {
         arguments: {
-          date: '2026-10-02T09:00:00.000Z',
+          date: '2026-10-02',
           service_ids: ['service-1'],
           staff_id: 'staff-1',
         },
@@ -163,7 +175,10 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
         .fn()
         .mockResolvedValue({ status: 'failed', result: { staff: [] } }),
     };
-    const adapter = new BookingSelectorAdapter(runtime as never);
+    const adapter = new BookingSelectorAdapter(
+      runtime as never,
+      availability as never,
+    );
     const service = handle(TENANT, 'service', 'service-1');
     await expect(
       adapter.advance({
@@ -190,7 +205,10 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
         execute: jest.fn().mockResolvedValue({ status: 'completed', result }),
       };
       await expect(
-        new BookingSelectorAdapter(runtime as never).advance({
+        new BookingSelectorAdapter(
+          runtime as never,
+          availability as never,
+        ).advance({
           routing: routing as never,
           actor: actor as never,
           step: 'service',

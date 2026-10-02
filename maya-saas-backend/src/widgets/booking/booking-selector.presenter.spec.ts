@@ -130,6 +130,7 @@ describe('FBE2E-2 — booking selector presentation', () => {
       tenantId: 'tenant-a',
       kind: 'TIME_SLOT_SELECTOR',
       source: {
+        timezone: 'UTC',
         slots: [
           {
             start: '2026-10-01T10:00:00.000Z',

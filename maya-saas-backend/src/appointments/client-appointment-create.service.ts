@@ -240,10 +240,12 @@ export class ClientAppointmentCreateService {
     const timezone =
       bound && bound.descriptor.branchId === (dto.branchId ?? null)
         ? bound.resolutionContext.timezone
-        : resolveSalonTimezone({
-            branchTimezone: branch?.timezone,
-            tenantTimezone: tenant?.defaultTimezone,
-          });
+        : source === 'internal' && !branch
+          ? (await this.crm.availabilityContext(tenantId, dto.staffId)).timezone
+          : resolveSalonTimezone({
+              branchTimezone: branch?.timezone,
+              tenantTimezone: tenant?.defaultTimezone,
+            });
     const localStart = normalizeRequestedStart(dto.start, timezone);
     const start = canonicalAppointmentInstant(localStart, timezone);
 

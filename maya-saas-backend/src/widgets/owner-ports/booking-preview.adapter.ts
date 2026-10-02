@@ -127,6 +127,12 @@ export class BookingPreviewAdapter
         appointmentRef: null,
         producingIntentTokenHash: null,
         when: quoted.start,
+        whenFormatted:
+          new Intl.DateTimeFormat('ru-RU', {
+            timeZone: quoted.timezone,
+            dateStyle: 'medium',
+            timeStyle: 'short',
+          }).format(new Date(quoted.start)) + ` (${quoted.timezone})`,
         whenPrevious: null,
         serviceLabel: service.name,
         staffLabel: staffId,
@@ -205,6 +211,12 @@ export class BookingPreviewAdapter
           appointmentRef: null,
           producingIntentTokenHash: null,
           when: quoted.start,
+          whenFormatted:
+            new Intl.DateTimeFormat('ru-RU', {
+              timeZone: quoted.timezone,
+              dateStyle: 'medium',
+              timeStyle: 'short',
+            }).format(new Date(quoted.start)) + ` (${quoted.timezone})`,
           whenPrevious: null,
           serviceLabel: service.name,
           staffLabel: staffId,

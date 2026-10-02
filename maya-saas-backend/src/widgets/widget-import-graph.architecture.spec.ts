@@ -88,6 +88,7 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
     why: "H4/H6: the platform's one keyed-HMAC discipline (`ActionIdentityService.hmac`) and its one canonicaliser (`stableActionJson`); a plain class and a pure function over static code, constructed as values, no DI (D-6 registries)",
     only: [
       'emission/seal.service.ts',
+      'emission/envelope.factory.ts', // L5/L24 H1 uses the H6 canonical codec; no parallel sort.
       // U8b-c (IR-8C-1): the input-schema codec reaches the UNKEYED half of the same discipline.
       // H6 admits no canonicalisation scheme other than `stableActionJson`, and §2.2 rule 3 forbids a
       // local copy of a shared codec — so the three pure files import it rather than restating it.
@@ -280,6 +281,10 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
   'entitlements/entitlements.module.ts': {
     why: "(e)'s owner module, so the boundary can resolve GATE6_OWNERS (R6-2)",
     only: ['owner-ports/widget-owner-ports.module.ts'],
+  },
+  'crm/availability-calendar.service.ts': {
+    why: 'L5/L24 canonical availability calendar owner; no widget-authored timezone',
+    only: ['owner-ports/booking-selector.adapter.ts'],
   },
   'crm/crm.module.ts': {
     why: 'U11b canonical appointment noun owner module and U13c booking commit owners',
@@ -1088,6 +1093,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       'entitlements/entitlements.service.ts',
       'ai-tools/ai-tool-policy.module.ts',
       'entitlements/entitlements.module.ts',
+      'crm/availability-calendar.service.ts',
       'crm/crm.module.ts',
       'marketing/marketing.module.ts',
       'appointments/client-appointment-create.service.ts',

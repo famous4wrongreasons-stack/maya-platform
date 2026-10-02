@@ -49,6 +49,16 @@ function partsInTimezone(value: Date, timezone: string): DateTimeParts {
   };
 }
 
+/** L5/L24: arithmetic on a local calendar date, never elapsed 24-hour time. */
+export function nextAppointmentDay(now: Date, timezone: string): string {
+  const p = partsInTimezone(now, timezone);
+  return new Date(
+    Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day) + 1),
+  )
+    .toISOString()
+    .slice(0, 10);
+}
+
 function assertCalendarDate(year: number, month: number, day: number): void {
   const probe = new Date(Date.UTC(year, month - 1, day));
 

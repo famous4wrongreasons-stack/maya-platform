@@ -221,6 +221,18 @@ const presentSlots = (
 ): PresentedSelector | null => {
   const staff = input.inherited?.staff;
   if (!staff) return null;
+  const timezone = str(record(input.source)?.timezone);
+  if (!timezone) return null;
+  let formatter: Intl.DateTimeFormat;
+  try {
+    formatter = new Intl.DateTimeFormat('ru-RU', {
+      timeZone: timezone,
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+  } catch {
+    return null;
+  }
   const slots = list(record(input.source)?.slots);
   const rendered: TimeSlotSelectorBody['groups'][number]['slots'] = [];
   for (const slot of slots) {
@@ -247,7 +259,12 @@ const presentSlots = (
     });
     rendered.push({
       slot_ref: handle,
-      start: measure('booking.slot.start', start, 'datetime', start),
+      start: measure(
+        'booking.slot.start',
+        start,
+        'datetime',
+        `${formatter.format(new Date(start))} (${timezone})`,
+      ),
       duration: measure(
         'booking.slot.duration',
         minutes,
@@ -266,7 +283,7 @@ const presentSlots = (
     kind: 'TIME_SLOT_SELECTOR',
     body: {
       prompt: phrase('Choose a time'),
-      timezone: 'UTC',
+      timezone,
       window: { from: starts[0], to: starts[starts.length - 1] },
       grouping: 'flat',
       groups: [

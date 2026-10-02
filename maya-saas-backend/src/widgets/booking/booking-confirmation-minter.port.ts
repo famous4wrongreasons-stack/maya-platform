@@ -11,6 +11,7 @@ export interface BookingConfirmationPreview {
   readonly appointmentRef: string | null;
   readonly producingIntentTokenHash: string | null;
   readonly when: string;
+  readonly whenFormatted?: string;
   readonly whenPrevious: string | null;
   readonly serviceLabel: string;
   readonly staffLabel: string;

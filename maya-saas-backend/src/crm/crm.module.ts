@@ -1,3 +1,4 @@
+import { AvailabilityCalendarService } from './availability-calendar.service';
 import { ClientReverificationController } from './client-reverification.controller';
 import { ClientReverificationService } from './client-reverification.service';
 import { ClientReverificationCandidateService } from './client-reverification-candidate.service';
@@ -101,6 +102,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     ShadowIngestionController,
   ],
   providers: [
+    AvailabilityCalendarService,
     ClientReverificationService,
     ClientReverificationCandidateService,
     PhoneAuthDeliveryService,
@@ -192,6 +194,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     ShadowIngestionService,
   ],
   exports: [
+    AvailabilityCalendarService,
     ClientWantedSlotService,
     ClientAppointmentCreateService,
     ClientLoyaltyReadService,

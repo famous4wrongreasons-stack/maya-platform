@@ -1,3 +1,4 @@
+import { resolveAvailabilityCalendar } from './availability-calendar.service';
 import { createHash } from 'node:crypto';
 import { clientPrincipalEvidence } from '../action-engine/client-action-principal.contract';
 
@@ -906,6 +907,16 @@ export class CrmService {
     return this.loadTeamMembers(adapter, scopedTenantId);
   }
 
+  /** The availability owner resolves the selected calendar, not the widget. */
+  async availabilityContext(tenantId: string, staffId: string) {
+    return resolveAvailabilityCalendar(
+      this.prisma,
+      this.tenantContext,
+      tenantId,
+      staffId,
+    );
+  }
+
   async getAvailableSlots(
     tenantId: string,
     query: {
@@ -1298,7 +1309,10 @@ export class CrmService {
             : null;
           if (request.branchId && !branch)
             throw new BadRequestException('Branch not found for this tenant');
-          const timezone = await this.bookingTimezone(tenantId, branch);
+          const timezone = branch
+            ? await this.bookingTimezone(tenantId, branch)
+            : (await this.availabilityContext(tenantId, request.staffId))
+                .timezone;
           const localStart = formatDateTimeInTimeZone(request.start, timezone);
           const slots = await this.internalCalendarService.getAvailableSlots({
             tenantId,

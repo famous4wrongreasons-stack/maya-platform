@@ -9,7 +9,9 @@ import type {
   InteractiveRef,
   InteractiveRefKey,
 } from '../../widget-contract/lifecycle';
-import { stableActionJson } from '../authority/contract-bindings';
+// H6/H7: the canonical identity owner also defines the carrier's hash bytes.
+// A local code-unit sort disagreed on slot accessible-name keys for fractional offsets.
+import { stableActionJson } from '../../action-engine/action-engine.identity';
 import type { PrincipalView } from '../gate.types';
 import { sha256Hex } from '../token.util';
 import type { FitResult } from '../carriers/fitter';
