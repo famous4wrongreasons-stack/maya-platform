@@ -64,7 +64,7 @@ async function carrier(
       envelope,
       now,
       formatted,
-      canonical: stableActionJson(envelopeBodyHashTerms(envelope as never)),
+      canonical: stableActionJson(envelopeBodyHashTerms(envelope)),
     }),
   );
   await done;

@@ -707,6 +707,7 @@ const OWNER_MODULES = [
 const BOUND_PORT_TOKENS = [
   'PERSONAL_SCHEDULE_SOURCE', // BS-1 canonical personal source only.
   'USER_TURN_AUDIT', // 9.6 opaque correlation only; canonical owner remains AuditLogService.
+  'SELECTOR_OBSERVATION_AUDIT', // L25 literal lifecycle observations only; no capability authority.
   'WIDGET_RELEASE_ACCESS', // Approved fixed release profile; no generic owner dispatch.
   'CANONICAL_READ',
   'GATE6_OWNERS',

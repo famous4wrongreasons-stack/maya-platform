@@ -34,8 +34,8 @@ export class SelectorDeliveryInterceptor implements NestInterceptor {
           )
             await this.lifecycle.delivered({
               widget_id: row.widget_id,
-              body_hash: integrity!.body_hash as string,
-              envelope_seal: integrity!.envelope_seal as string,
+              body_hash: integrity.body_hash,
+              envelope_seal: integrity.envelope_seal,
             });
           // Only the canonical response containers that carry widget envelopes.
           for (const key of [

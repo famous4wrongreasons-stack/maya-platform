@@ -1,3 +1,4 @@
+import { PrismaService } from '../prisma/prisma.service';
 import { AvailabilityCalendarService } from './availability-calendar.service';
 import {
   canonicalAppointmentInstant,
@@ -55,7 +56,9 @@ describe('L5/L24 canonical one-day availability', () => {
                 slot_ref: 'slot-handle',
                 start: {
                   value: instant,
-                  formatted: expect.stringContaining(`10:00 (${timezone})`),
+                  formatted: expect.stringContaining(
+                    `10:00 (${timezone})`,
+                  ) as unknown,
                 },
               },
             ],
@@ -71,12 +74,10 @@ describe('L5/L24 canonical one-day availability', () => {
       const context = new TenantContextService();
       const prisma = {
         tenant: {
-          findUnique: jest
-            .fn()
-            .mockResolvedValue({
-              defaultTimezone: 'America/Los_Angeles',
-              calendarSource: 'internal',
-            }),
+          findUnique: jest.fn().mockResolvedValue({
+            defaultTimezone: 'America/Los_Angeles',
+            calendarSource: 'internal',
+          }),
         },
         internalProvider: {
           findFirst: jest.fn().mockResolvedValue({
@@ -84,15 +85,9 @@ describe('L5/L24 canonical one-day availability', () => {
           }),
         },
       };
-      const owner = Object.assign(
-        Object.create(
-          AvailabilityCalendarService.prototype,
-        ) as AvailabilityCalendarService,
-        {
-          prisma,
-          tenantContext: context,
-          getCalendarSource: () => Promise.resolve('internal'),
-        },
+      const owner = new AvailabilityCalendarService(
+        prisma as unknown as PrismaService,
+        context,
       );
       const result = await context.runAsAuthPrincipal(
         { tenantId: 'tenant', userId: 'user', role: 'client' },

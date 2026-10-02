@@ -50,7 +50,7 @@ export async function submit(
     contract: WIDGET_INTENT_SUBMISSION_CONTRACT,
     widget_id: e.widget_id,
     intent_token: i.intent_token,
-    inputs: field ? { [String(field)]: option } : null,
+    inputs: typeof field === 'string' ? { [field]: option } : null,
     client_nonce: randomUUID(),
     profile_id: 'pwa.default',
   });

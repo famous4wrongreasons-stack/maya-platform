@@ -63,6 +63,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - run: npm ci
+      - run: npm run prisma:generate
       - name: Verify scheduling and fail-closed receipt assembly
         run: node --test scripts/widgets-mutation-ci.test.mjs
       - id: plan
@@ -136,6 +138,10 @@ jobs:
       - run: npm ci
       - run: npm run prisma:generate
       - run: npx prisma migrate deploy
+      - name: Build the canonical React pipeline used by L5/L24 live proofs
+        run: |
+          npm ci --prefix ../maya-carrier-react
+          node ../maya-carrier-react/test/build-harness.mjs
       - name: Run the battery shard
         env:
           SHARD: ${{ matrix.gate }}

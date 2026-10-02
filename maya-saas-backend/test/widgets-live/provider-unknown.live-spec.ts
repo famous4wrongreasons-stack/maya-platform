@@ -54,28 +54,30 @@ describe('L20 real lost-response fault → canonical UNKNOWN [HTTP] [test provid
     await ledger.query(
       `CREATE TABLE ${schema}.bookings (id bigserial primary key, payload jsonb not null)`,
     );
-    server = createServer(async (request, response) => {
-      try {
-        if (request.method === 'POST' && request.url === '/bookings') {
-          let raw = '';
-          for await (const part of request) raw += String(part);
-          const body: unknown = JSON.parse(raw);
-          dispatches++;
-          await ledger.query(
-            `INSERT INTO ${schema}.bookings(payload) VALUES ($1::jsonb)`,
-            [JSON.stringify(body)],
-          );
-          // COMMIT completed; the connection is lost BEFORE any response bytes.
-          request.socket.destroy();
-          return;
+    server = createServer((request, response) => {
+      void (async () => {
+        try {
+          if (request.method === 'POST' && request.url === '/bookings') {
+            let raw = '';
+            for await (const part of request) raw += String(part);
+            const body: unknown = JSON.parse(raw);
+            dispatches++;
+            await ledger.query(
+              `INSERT INTO ${schema}.bookings(payload) VALUES ($1::jsonb)`,
+              [JSON.stringify(body)],
+            );
+            // COMMIT completed; the connection is lost BEFORE any response bytes.
+            request.socket.destroy();
+            return;
+          }
+          reconciliations++;
+          // Actual provider read fault, not an empty result or a supplied Action Engine verdict.
+          response.writeHead(503, { 'content-type': 'application/json' });
+          response.end('{"error":"controlled_read_unavailable"}');
+        } catch (error) {
+          response.destroy(error as Error);
         }
-        reconciliations++;
-        // Actual provider read fault, not an empty result or a supplied Action Engine verdict.
-        response.writeHead(503, { 'content-type': 'application/json' });
-        response.end('{"error":"controlled_read_unavailable"}');
-      } catch (error) {
-        response.destroy(error as Error);
-      }
+      })();
     });
     await new Promise<void>((resolve) =>
       server.listen(0, '127.0.0.1', resolve),

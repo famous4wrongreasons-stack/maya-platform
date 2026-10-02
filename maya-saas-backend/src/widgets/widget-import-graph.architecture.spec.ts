@@ -1236,6 +1236,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
     expect(values.get('BOUND_PORT_TOKENS')).toEqual([
       'PERSONAL_SCHEDULE_SOURCE',
       'USER_TURN_AUDIT',
+      'SELECTOR_OBSERVATION_AUDIT',
       'WIDGET_RELEASE_ACCESS',
       'CANONICAL_READ',
       'GATE6_OWNERS',

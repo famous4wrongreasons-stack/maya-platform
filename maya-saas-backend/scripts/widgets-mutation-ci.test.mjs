@@ -29,7 +29,8 @@ test('L2 release admission refuses a broken real contract and admits its restore
   try {
     for (const item of fs.readdirSync(backend)) {
       if (item === 'src' || item === 'scripts') continue;
-      fs.symlinkSync(path.join(backend, item), path.join(copy, item));
+      if (item === 'tsconfig.build.json') fs.copyFileSync(path.join(backend, item), path.join(copy, item));
+      else fs.symlinkSync(path.join(backend, item), path.join(copy, item));
     }
     for (const dir of ['src', 'scripts']) {
       fs.mkdirSync(path.join(copy, dir));
@@ -45,6 +46,14 @@ test('L2 release admission refuses a broken real contract and admits its restore
     fs.writeFileSync(target, original + '\nconst l2BrokenContract: never = "must refuse";\n');
     assert.throws(() => admitRelease(declared, fixture(), head, copy), /Command failed/);
     fs.writeFileSync(target, original);
+    assert.equal(admitRelease(declared, fixture(), head, copy).length, Object.keys(declared).length);
+    const buildPath = path.join(copy, 'tsconfig.build.json');
+    const buildBytes = fs.readFileSync(buildPath, 'utf8');
+    const brokenBuild = JSON.parse(buildBytes);
+    brokenBuild.exclude = brokenBuild.exclude.filter(x => x !== 'src/widget-contract');
+    fs.writeFileSync(buildPath, JSON.stringify(brokenBuild));
+    assert.throws(() => admitRelease(declared, fixture(), head, copy), /build-exclusion fence missing/);
+    fs.writeFileSync(buildPath, buildBytes);
     assert.equal(admitRelease(declared, fixture(), head, copy).length, Object.keys(declared).length);
     const workflow = fs.readFileSync(path.resolve(backend, '../.github/workflows/widget-contract.yml'), 'utf8');
     assert.doesNotMatch(workflow, /continue-on-error:/);
@@ -96,9 +105,10 @@ function fixture() {
   });
 }
 
-test('44 batteries, 65 jobs: approved scope and harness regressions cover 509 declarations', () => {
+test('45 batteries, 66 jobs: final FBE2E decisions cover 524 declarations', () => {
   const p = plan(declared);
-  assert.equal(p.gates.length, 44); assert.equal(p.matrix.include.length, 65);
+  assert.equal(p.gates.length, 45); assert.equal(p.matrix.include.length, 66);
+  assert.equal(declared.FB.mutants.length, 15);
   assert.deepEqual(declared.SB1.mutants.map(m => m.id), Array.from({ length: 10 }, (_, i) => `SB1-M${String(i + 1).padStart(2, '0')}`));
   assert.deepEqual(declared.AB.mutants.map(m => m.id), ['AB-M1', 'AB-M2']);
   assert.deepEqual(declared.SV2.mutants.map(m => m.id), Array.from({ length: 13 }, (_, i) => `SV2-M${i + 1}`));
@@ -111,7 +121,7 @@ test('44 batteries, 65 jobs: approved scope and harness regressions cover 509 de
   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-BOOT-LOOPBACK-1').length, 1);
   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-P408-CLOCK-1').length, 1);
   const r = assemble(declared, fixture(), head);
-  assert.equal(r.length, 44); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 509);
+  assert.equal(r.length, 45); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 524);
   for (const report of r) {
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
@@ -289,7 +299,7 @@ test('gate: a baseline control is red on a non-zero step exit, a failed assertio
     for (const c of Object.values(r.neutraliser_controls)) { c.exits[c.steps[0]] = 1; c.failed = ['red on the neutralised copy']; }
     assert.deepEqual(redBaselineControls(r.baseline_controls), []);
   }
-  assert.equal(assemble(declared, receipts, head).length, 44, 'a red neutraliser control is not a red baseline');
+  assert.equal(assemble(declared, receipts, head).length, 45, 'a red neutraliser control is not a red baseline');
 });
 
 test('gate: a red baseline is a distinct shard status and a non-zero exit, and never hides a mismatch', () => {

@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
-import { CalendarSource } from '../common/domain.enums';
 import { nextAppointmentDay } from './appointment-time.utils';
 import { isUsableTimezone } from '../tenants/salon-timezone';
 
@@ -22,7 +21,7 @@ export async function resolveAvailabilityCalendar(
     select: { defaultTimezone: true, calendarSource: true },
   });
   if (!tenant) throw new NotFoundException('Tenant not found');
-  const internal = tenant.calendarSource === CalendarSource.INTERNAL;
+  const internal = tenant.calendarSource === 'internal';
   const provider = internal
     ? await prisma.internalProvider.findFirst({
         where: { id: staffId, tenantId: scopedTenantId, active: true },

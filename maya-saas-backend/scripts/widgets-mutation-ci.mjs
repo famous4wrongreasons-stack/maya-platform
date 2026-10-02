@@ -242,6 +242,8 @@ export function assemble(declared, receipts, head, requested = '') {
 // L2/L26: the only release-admission entry. `assemble` remains useful for
 // diagnostic subsets; neither manual gate audits nor a subset certify a release.
 export function admitRelease(declared, receipts, head, backend) {
+  const build = JSON.parse(fs.readFileSync(path.join(backend, 'tsconfig.build.json'), 'utf8'));
+  assert(build.exclude?.includes('src/widget-contract'), 'contract build-exclusion fence missing');
   execFileSync(process.execPath, ['node_modules/typescript/bin/tsc', '--noEmit',
     '--project', 'tsconfig.widget-contract.json', '--incremental', 'false'], { cwd: backend, stdio: 'pipe' });
   execFileSync(process.execPath, ['scripts/widget-contract-check.mjs'], { cwd: backend, stdio: 'pipe' });

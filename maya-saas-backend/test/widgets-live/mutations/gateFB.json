@@ -1,0 +1,152 @@
+[
+  {
+    "id": "FB-DAY-UTC",
+    "file": "src/crm/appointment-time.utils.ts",
+    "find": "const p = partsInTimezone(now, timezone);",
+    "replace": "const p = partsInTimezone(now, 'UTC');",
+    "killers": [
+      "L5-PIPELINE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FB-DAY-ELAPSED",
+    "file": "src/crm/appointment-time.utils.ts",
+    "find": "Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day) + 1)",
+    "replace": "now.getTime() + 86400000",
+    "killers": [
+      "L5-PIPELINE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FB-DAY-BRANCH",
+    "file": "src/crm/availability-calendar.service.ts",
+    "find": "const timezone = provider?.branch?.timezone ?? tenant.defaultTimezone;",
+    "replace": "const timezone = tenant.defaultTimezone;",
+    "killers": [
+      "L5-PIPELINE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FB-DAY-DISPLAY",
+    "file": "src/widgets/booking/booking-selector.presenter.ts",
+    "find": "timeZone: timezone,",
+    "replace": "timeZone: 'UTC',",
+    "killers": [
+      "L5-PIPELINE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FB-DAY-CONFIRM",
+    "file": "src/widgets/emission/booking-confirmation-minter.service.ts",
+    "find": "formatted: p.whenFormatted ?? p.when,",
+    "replace": "formatted: p.when,",
+    "killers": [
+      "L5-PIPELINE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FB-H1-CODEC",
+    "file": "src/widgets/emission/envelope.factory.ts",
+    "find": "import { stableActionJson } from '../../action-engine/action-engine.identity';",
+    "replace": "import { stableActionJson } from '../authority/contract-bindings';",
+    "killers": [
+      "L5-H1"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "FB-UNKNOWN",
+    "file": "src/crm/crm.service.ts",
+    "find": "kind: 'unknown',\n            outcomeCode: 'crm_provider_outcome_unknown',",
+    "replace": "kind: 'definitive',\n            outcomeCode: 'crm_provider_outcome_unknown',",
+    "killers": [
+      "L20-LOST-RESPONSE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FB-DELIVERY-ONLY",
+    "file": "src/widgets/rendering/selector-lifecycle.service.ts",
+    "find": "return this.transition(evidence, 'MINTED', 'DELIVERED');",
+    "replace": "return this.transition(evidence, 'MINTED', 'LIVE');",
+    "killers": [
+      "L25-OBSERVED"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FB-RENDER-STATE",
+    "file": "src/widgets/rendering/selector-lifecycle.service.ts",
+    "find": "return this.transition(evidence, 'DELIVERED', 'LIVE');",
+    "replace": "return this.transition(evidence, 'MINTED', 'LIVE');",
+    "killers": [
+      "L25-OBSERVED"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FB-REPLAY",
+    "file": "src/widgets/rendering/selector-lifecycle.service.ts",
+    "find": "return this.audit.exists(observation(to), tx);",
+    "replace": "return true;",
+    "killers": [
+      "L25-MISSING"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FB-DELIVERY-AUDIT",
+    "file": "src/widgets/rendering/selector-lifecycle.service.ts",
+    "find": "!(await this.audit.exists(observation('DELIVERED'), tx))",
+    "replace": "false",
+    "killers": [
+      "L25-MISSING"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FB-RENDER-AUDIT",
+    "file": "src/widgets/rendering/selector-lifecycle.service.ts",
+    "find": "await this.audit.append(observation(to), tx);",
+    "replace": "/* mutation: omit observation */",
+    "killers": [
+      "L25-CONCURRENT"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FB-AUDIT-ATOMIC",
+    "file": "src/widgets/owner-ports/selector-observation-audit.adapter.ts",
+    "find": "{ ...this.identity(o), metadata: this.metadata(o) },\n      tx,",
+    "replace": "{ ...this.identity(o), metadata: this.metadata(o) },\n      undefined,",
+    "killers": [
+      "L25-ATOMIC"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FB-TAP-CANNOT-RENDER",
+    "file": "src/widgets/gates/gate7.ts",
+    "find": "r.emissionLifecycleState !== 'LIVE'",
+    "replace": "false",
+    "killers": [
+      "L25-OBSERVED"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FB-DRAWER-OBSERVATION",
+    "file": "../maya-chat-shell/src/dom/host.ts",
+    "find": "deps.widgets.rendered(item.id);",
+    "replace": "void item.id;",
+    "killers": [
+      "BOOK-1…BOOK-6"
+    ],
+    "expect": "live-killed"
+  }
+]
