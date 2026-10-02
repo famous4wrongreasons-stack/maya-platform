@@ -17,7 +17,7 @@ name: Widgets Mutation
 # The env block is platform-ci.yml's literals plus the declared widgets-live extras
 # (`test/widgets-live/support/environment.ts`, IR-H1); `harness.live-spec.ts` (HAR-4) asserts it.
 #
-# Not a required check. Making it one is a repository-settings decision for the owner.
+# L2: complete fresh release admission is mandatory; partial diagnostic batteries cannot admit a release.
 on:
   # workflow_dispatch cannot discover a workflow absent from the default branch.
   # A real canonical-branch push receipt is mandatory for Wave 1 closure.
@@ -174,10 +174,14 @@ jobs:
           pattern: widgets-mutation-part-${{ github.sha }}-*
           path: mutation-parts
           merge-multiple: true
-      - name: Verify complete unrestricted declaration coverage
+      - name: Install release-contract checkers
+        run: npm ci --prefix maya-saas-backend
+      - name: Generate the canonical client for release-contract checks
+        run: npm run prisma:generate --prefix maya-saas-backend
+      - name: Verify blocking contract and complete fresh declaration coverage
         env:
           REQUESTED_GATES: ${{ inputs.gates }}
-        run: node maya-saas-backend/scripts/widgets-mutation-ci.mjs assemble mutation-parts mutation-receipt "$GITHUB_SHA" "${REQUESTED_GATES:-}"
+        run: node maya-saas-backend/scripts/widgets-mutation-ci.mjs release mutation-parts mutation-receipt "$GITHUB_SHA" "${REQUESTED_GATES:-}"
       - uses: actions/upload-artifact@v4
         with:
           name: widgets-mutation-complete-${{ github.sha }}

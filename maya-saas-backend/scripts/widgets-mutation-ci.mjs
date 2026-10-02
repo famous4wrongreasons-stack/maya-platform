@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 export const DEFAULT_STEPS = 'per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)';
 const digest = (text) => crypto.createHash('sha256').update(text).digest('hex');
@@ -123,6 +124,9 @@ const controlKey = (set, steps) => `${set ?? 'baseline'}|${steps.join(',')}`;
 export function assemble(declared, receipts, head, requested = '') {
   assert(/^[0-9a-f]{40}$/.test(head), 'exact source HEAD required');
   const expected = plan(declared, requested);
+  for (const receipt of receipts)
+    assert(receipt.archival_only !== true && receipt.release_admissible !== false,
+      'archival/unverified evidence is inadmissible for release');
   exact(receipts.length, expected.matrix.include.length, 'missing or extra partition receipt');
   const result = [];
   const used = new Set();
@@ -235,6 +239,17 @@ export function assemble(declared, receipts, head, requested = '') {
   return result;
 }
 
+// L2/L26: the only release-admission entry. `assemble` remains useful for
+// diagnostic subsets; neither manual gate audits nor a subset certify a release.
+export function admitRelease(declared, receipts, head, backend) {
+  execFileSync(process.execPath, ['node_modules/typescript/bin/tsc', '--noEmit',
+    '--project', 'tsconfig.widget-contract.json', '--incremental', 'false'], { cwd: backend, stdio: 'pipe' });
+  execFileSync(process.execPath, ['scripts/widget-contract-check.mjs'], { cwd: backend, stdio: 'pipe' });
+  execFileSync(process.execPath, ['../docs/rebuild/evidence/maya-chat-first-ux/k1/k1-dossier-check.mjs'],
+    { cwd: backend, stdio: 'pipe' });
+  return assemble(declared, receipts, head);
+}
+
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -244,11 +259,14 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       const p = plan(declared, args[0] ?? '');
       process.stdout.write(`gates=${JSON.stringify(p.gates)}\nmatrix=${JSON.stringify(p.matrix)}\n`);
     } else {
-      assert.equal(command, 'assemble', 'expected plan or assemble');
+      assert(['assemble', 'release'].includes(command), 'expected plan, assemble or release');
       const [input, output, head, requested = ''] = args;
       const receipts = fs.readdirSync(input).filter((f) => /^widgets-mutation-part-.*\.json$/.test(f)).sort()
         .map((f) => JSON.parse(fs.readFileSync(path.join(input, f), 'utf8')));
-      const reports = assemble(declared, receipts, head, requested);
+      if (command === 'release') assert.equal(requested, '', 'release requires the complete corpus');
+      const reports = command === 'release'
+        ? admitRelease(declared, receipts, head, backend)
+        : assemble(declared, receipts, head, requested);
       fs.mkdirSync(output, { recursive: true });
       for (const report of reports) fs.writeFileSync(path.join(output, `widgets-mutation-report-${report.batteries[0].slice(4, -5)}.json`), JSON.stringify(report, null, 2) + '\n');
       process.stdout.write(`COMPLETE BATTERIES: ${reports.length}; mutants: ${reports.reduce((n, r) => n + r.mutants.length, 0)}\n`);

@@ -227,6 +227,8 @@ const expectedHeadline = phase === 'A-W5'
   ? 'GATES LIVE CONTRACT-COMPLETE 3/15 · WITH U-CLASS 6/15 · STOPPED CLAUSES 0 · BLOCKED-DISCHARGE CLAUSES 25'
   : 'GATES LIVE CONTRACT-COMPLETE 3/15 · WITH U-CLASS 6/15 · STOPPED CLAUSES 0 · BLOCKED-DISCHARGE CLAUSES 0';
 if (audit.headline !== expectedHeadline) usage(`${phase} expected ${expectedHeadline}, built ${audit.headline}`);
+audit.archival_only = true;
+audit.release_admissible = false;
 audit.builder = {
   skeleton: false,
   phase,
@@ -247,4 +249,4 @@ const text = `${JSON.stringify(audit, null, 2)}\n`;
 const out = option('--out');
 if (out) fs.writeFileSync(path.resolve(out), text);
 else process.stdout.write(text);
-process.stderr.write(`GATE AUDIT BUILD (${phase}): ${audit.headline}; ${manifest.length} manifest line(s) accepted\n`);
+process.stderr.write(`ARCHIVAL ONLY — NOT RELEASE EVIDENCE: GATE AUDIT BUILD (${phase}): ${audit.headline}; ${manifest.length} manifest line(s) accepted\n`);

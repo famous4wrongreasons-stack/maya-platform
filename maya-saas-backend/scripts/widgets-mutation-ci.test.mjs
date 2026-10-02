@@ -2,11 +2,13 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import ts from 'typescript';
 import {
   assemble,
+  admitRelease,
   DEFAULT_STEPS,
   describeRedBaselines,
   plan,
@@ -19,6 +21,37 @@ import {
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const declared = registry(path.join(backend, 'test/widgets-live/mutations'));
 const head = 'a'.repeat(40);
+
+test('L2 release admission refuses a broken real contract and admits its restored bytes', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'maya-l2-contract-'));
+  const copy = path.join(root, 'maya-saas-backend');
+  fs.mkdirSync(copy);
+  try {
+    for (const item of fs.readdirSync(backend)) {
+      if (item === 'src' || item === 'scripts') continue;
+      fs.symlinkSync(path.join(backend, item), path.join(copy, item));
+    }
+    for (const dir of ['src', 'scripts']) {
+      fs.mkdirSync(path.join(copy, dir));
+      for (const item of fs.readdirSync(path.join(backend, dir))) {
+        const from = path.join(backend, dir, item), to = path.join(copy, dir, item);
+        if (item === 'widget-contract' || item === 'widget-contract-check.mjs') fs.cpSync(from, to, { recursive: true });
+        else fs.symlinkSync(from, to);
+      }
+    }
+    fs.symlinkSync(path.resolve(backend, '../docs'), path.join(root, 'docs'));
+    const target = path.join(copy, 'src/widget-contract/kinds.ts');
+    const original = fs.readFileSync(target, 'utf8');
+    fs.writeFileSync(target, original + '\nconst l2BrokenContract: never = "must refuse";\n');
+    assert.throws(() => admitRelease(declared, fixture(), head, copy), /Command failed/);
+    fs.writeFileSync(target, original);
+    assert.equal(admitRelease(declared, fixture(), head, copy).length, Object.keys(declared).length);
+    const workflow = fs.readFileSync(path.resolve(backend, '../.github/workflows/widget-contract.yml'), 'utf8');
+    assert.doesNotMatch(workflow, /continue-on-error:/);
+    assert.match(fs.readFileSync(path.resolve(backend, '../.github/workflows/widgets-mutation.yml'), 'utf8'),
+      /widgets-mutation-ci\.mjs release mutation-parts/);
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
+});
 
 // Synthetic receipts exercise rejection logic only; they are never release evidence.
 function fixture() {
@@ -168,6 +201,9 @@ test('invalid partition/gate requests fail before execution', () => {
 });
 
 const counterfactuals = {
+  'archival receipt': (r) => { r[0].archival_only = true; },
+  'unverified receipt': (r) => { r[0].release_admissible = false; },
+  'manual historical audit': (r) => { r[0] = { contract: 'maya.gate-audit/1', archival_only: true }; },
   'missing partition': (r) => r.pop(),
   'duplicate partition': (r) => r.push(structuredClone(r[0])),
   'substituted partition': (r) => { r[1] = structuredClone(r[0]); },
