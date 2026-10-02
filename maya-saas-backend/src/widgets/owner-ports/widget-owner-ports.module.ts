@@ -1,3 +1,5 @@
+import { SelectorObservationAuditAdapter } from './selector-observation-audit.adapter';
+import { SELECTOR_OBSERVATION_AUDIT } from '../di-tokens';
 import { AppointmentsModule } from '../../appointments/appointments.module';
 import { PersonalScheduleAdapter } from './personal-schedule.adapter';
 import { PERSONAL_SCHEDULE_SOURCE } from '../di-tokens';
@@ -82,6 +84,10 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     TenancyModule,
   ],
   providers: [
+    {
+      provide: SELECTOR_OBSERVATION_AUDIT,
+      useClass: SelectorObservationAuditAdapter,
+    },
     { provide: PERSONAL_SCHEDULE_SOURCE, useClass: PersonalScheduleAdapter },
     { provide: USER_TURN_AUDIT, useClass: UserTurnAuditAdapter },
     { provide: WIDGET_RELEASE_ACCESS, useClass: WidgetReleaseAccessAdapter },
@@ -126,6 +132,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     },
   ],
   exports: [
+    SELECTOR_OBSERVATION_AUDIT,
     PERSONAL_SCHEDULE_SOURCE,
     USER_TURN_AUDIT,
     WIDGET_RELEASE_ACCESS,

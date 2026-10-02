@@ -412,7 +412,7 @@ export interface WidgetDrawer {
 export interface WidgetDrawerDeps {
   readonly factory: DomFactory;
   readonly scheduler: Pick<Scheduler, 'now' | 'after' | 'frame'>;
-  readonly widgets: Pick<WidgetPort, 'activate'>;
+  readonly widgets: Pick<WidgetPort, 'activate' | 'rendered'>;
 }
 
 /** The neutral sentence an item carries instead of a silent outcome (D9, §1.4). */
@@ -506,6 +506,9 @@ export function createWidgetDrawer(deps: WidgetDrawerDeps): WidgetDrawer {
       if (target !== null) deps.scheduler.frame(() => target.focus());
       else if (focusedRef !== null) (drawn.controls.find((c) => c.ref === focusedRef)?.element ?? drawn.heading)?.focus();
       else if (headingFocused) drawn.heading?.focus();
+      if (item.display === 'live') deps.scheduler.frame(() => {
+        if (article.isConnected && items.get(item.id)?.item === item) deps.widgets.rendered(item.id);
+      });
       return article;
     },
     control(article, ref) {

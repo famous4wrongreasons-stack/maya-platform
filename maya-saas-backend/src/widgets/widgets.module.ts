@@ -1,3 +1,6 @@
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { SelectorLifecycleService } from './rendering/selector-lifecycle.service';
+import { SelectorDeliveryInterceptor } from './rendering/selector-delivery.interceptor';
 import { Module } from '@nestjs/common';
 import type { OnModuleInit } from '@nestjs/common';
 
@@ -58,6 +61,8 @@ import { OPERATIONAL_ALERT_WIDGET_TRIGGER } from '../operational-alerts/operatio
   imports: [PrismaModule, WidgetOwnerPortsModule, WidgetEmissionModule],
   controllers: [WidgetsController],
   providers: [
+    SelectorLifecycleService,
+    { provide: APP_INTERCEPTOR, useClass: SelectorDeliveryInterceptor },
     IntentGatewayService,
     WidgetStoresService,
     { provide: GATE10_STORE, useExisting: WidgetStoresService },

@@ -92,6 +92,21 @@ export async function releaseBookingProof(
       env.kind === kind,
       `expected ${kind}, got ${String(env.kind)}`,
     );
+    // L25 client observation is a separate HTTP request; a selector tap is never its evidence.
+    if (kind === 'SERVICE_SELECTOR' || kind === 'STAFF_SELECTOR') {
+      const rendered = await post('/widgets/resolve', {
+        thread_page: { limit: 1 },
+        rendered: {
+          widget_id: env.widget_id,
+          body_hash: object(env.integrity).body_hash,
+          envelope_seal: object(env.integrity).envelope_seal,
+        },
+      });
+      requireProof(
+        rendered.status === 200,
+        'independent selector render observation',
+      );
+    }
     const intent = array(env.intents).find((i) => i.effect === effect);
     requireProof(
       intent && typeof intent.intent_token === 'string',

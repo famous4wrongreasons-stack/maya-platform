@@ -277,6 +277,8 @@ export interface ShellView {
 }
 
 export interface WidgetPort {
+  /** Called by the carrier after mounting an intact RenderResult, never by a tap. */
+  rendered(itemId: string): void;
   view(): ShellView;
   subscribe(listener: (view: ShellView) => void): Cancel;
   navigate(route: PrimaryRoute): void;

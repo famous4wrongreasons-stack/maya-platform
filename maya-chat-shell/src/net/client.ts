@@ -597,6 +597,10 @@ export function createTransport(auth: Authorizer, timeouts: Timeouts = { request
 
     async resolveWidgets(request: WidgetResolveRequest, signal: AbortSignal) {
       const body: WidgetResolveRequest = {
+        ...(request.rendered === undefined ? {} : { rendered: {
+          widget_id: request.rendered.widget_id, body_hash: request.rendered.body_hash,
+          envelope_seal: request.rendered.envelope_seal,
+        } }),
         thread_page: {
           limit: request.thread_page.limit,
           ...(request.thread_page.before === undefined ? {} : { before: request.thread_page.before }),

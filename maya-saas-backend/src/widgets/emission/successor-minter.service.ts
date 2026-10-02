@@ -323,7 +323,7 @@ export class SuccessorMinterService implements SuccessorMinterPort {
         predecessor.turnId,
         predecessor.deliveryChannel,
       );
-    if (!['MINTED', 'LIVE'].includes(predecessor.lifecycleState)) return null;
+    if (predecessor.lifecycleState !== 'LIVE') return null;
 
     const successor = await this.emitter.emitBookingSelector(
       {
@@ -354,33 +354,6 @@ export class SuccessorMinterService implements SuccessorMinterPort {
           request.tenantId,
           predecessor.turn.conversationId,
         );
-        // The first real shell tap is the first server-observed proof that the returned MINTED
-        // envelope crossed delivery and render. Catch its persisted lifecycle up through the two
-        // legal contract transitions before superseding it; never weaken the generic successor.
-        if (predecessor.lifecycleState === 'MINTED') {
-          const delivered = await tx.widgetEmission.updateMany({
-            where: {
-              tenantId: request.tenantId,
-              widgetId: predecessor.widgetId,
-              lifecycleState: 'MINTED',
-              supersededByWidgetId: null,
-              erasedAt: null,
-            },
-            data: { lifecycleState: 'DELIVERED' },
-          });
-          if (delivered.count !== 1) throw new SuccessorLinkConflict();
-          const live = await tx.widgetEmission.updateMany({
-            where: {
-              tenantId: request.tenantId,
-              widgetId: predecessor.widgetId,
-              lifecycleState: 'DELIVERED',
-              supersededByWidgetId: null,
-              erasedAt: null,
-            },
-            data: { lifecycleState: 'LIVE' },
-          });
-          if (live.count !== 1) throw new SuccessorLinkConflict();
-        }
         const closed = await tx.widgetEmission.updateMany({
           where: {
             tenantId: request.tenantId,
@@ -534,7 +507,7 @@ const bookingSuccessorTerms = (
   const provenance = asObject(envelope?.provenance ?? null);
   return (
     expected !== null &&
-    ['MINTED', 'LIVE', 'SUPERSEDED'].includes(predecessor.lifecycleState) &&
+    ['LIVE', 'SUPERSEDED'].includes(predecessor.lifecycleState) &&
     predecessor.erasedAt === null &&
     predecessor.turn.erasedAt === null &&
     record !== undefined &&

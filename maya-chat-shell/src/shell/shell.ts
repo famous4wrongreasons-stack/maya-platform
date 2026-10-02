@@ -18,7 +18,7 @@ import type { RenderResult } from '../renderer/nodes.ts';
 import { BASE_ROUTES } from '../routes/registry.ts';
 import { createConversation, type AbortHandle, type Conversation } from './conversation.ts';
 import { landDeepLink, type DeepLinkLanding } from './deeplink.ts';
-import { createUnavailableSubmission, createWidgets, type Widgets } from './intents.ts';
+import { createRenderObserver, createUnavailableSubmission, createWidgets, type Widgets } from './intents.ts';
 import type {
   Cancel,
   EnvironmentProbe,
@@ -266,7 +266,7 @@ export const createShell = (deps: ShellDeps): ShellController => {
 // ── composition, for entry/ ────────────────────────────────────────────────────────────────────
 
 export interface ShellRuntimeDeps {
-  readonly transport: Pick<Transport, 'chat'>;
+  readonly transport: Pick<Transport, 'chat' | 'resolveWidgets'>;
   readonly session: Pick<SessionPort, 'view' | 'subscribe'>;
   readonly render: RenderFn;
   readonly environment: Pick<EnvironmentProbe, 'a11y' | 'onA11yChange' | 'fragment'>;
@@ -307,7 +307,9 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
     ingestResolution: (resolution) => ingestAuthorizedEnvelope?.(resolution),
   });
   const shell = createShell({ history: deps.history, session: deps.session });
+  const observations = createRenderObserver(deps.transport, deps.newAbort);
   const widgets = createWidgets({
+    recordRender: observations.record,
     timeline: conversation.timeline,
     render: deps.render,
     environment: deps.environment,
@@ -322,6 +324,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
   };
   const disconnect = shell.connect(widgets);
   const widgetPort: WidgetPort = {
+    rendered: widgets.rendered,
     view: shell.view,
     subscribe: shell.subscribe,
     navigate: shell.navigate,
@@ -341,6 +344,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
     dispose() {
       ingestAuthorizedEnvelope = null;
       disconnect();
+      observations.dispose();
       widgets.dispose();
       shell.dispose();
       conversation.dispose();

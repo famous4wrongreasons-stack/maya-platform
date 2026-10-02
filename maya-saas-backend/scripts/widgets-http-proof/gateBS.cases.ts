@@ -91,6 +91,17 @@ export async function personalSource(
     ['DRAFT', 'slot_ref'],
     ['COMMIT', null],
   ] as const) {
+    if (effect === 'REFINE') {
+      const rendered = await post('/widgets/resolve', {
+        thread_page: { limit: 1 },
+        rendered: {
+          widget_id: envelope.widget_id,
+          body_hash: object(envelope.integrity).body_hash,
+          envelope_seal: object(envelope.integrity).envelope_seal,
+        },
+      });
+      assert.equal(rendered.status, 200, 'L25 independent render observation');
+    }
     const intent = array(envelope.intents).find((v) => v.effect === effect);
     assert(intent);
     const selected =

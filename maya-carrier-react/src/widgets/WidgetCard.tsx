@@ -30,15 +30,20 @@ export function WidgetCard({
   item,
   t,
   activate,
+  rendered,
   variant = 'lane',
 }: {
   readonly item: WidgetItemView;
   readonly t: Tokens;
+  readonly rendered?: ((itemId: string) => void) | undefined;
   readonly activate: (itemId: string, ref: InteractiveRefKey) => void;
   /** In the lane a card is one turn's width; in the fullscreen sheet it is the whole sheet. */
   readonly variant?: 'lane' | 'sheet';
 }) {
   const result = item.result;
+  useEffect(() => {
+    if (item.display === 'live') rendered?.(item.id);
+  }, [item, rendered]);
   const c = widgetTheme(t);
   const cardRef = useRef<ElementOrNone>(null);
   const seenResultRef = useRef<ResultOrNone>(null);

@@ -213,6 +213,19 @@ export const gate7 = async (
 ): Promise<GateVerdict> => {
   const r = ctx.record;
   if (!r) return no('C1', 'no record');
+  // L25: recorded render is a lifecycle prerequisite, never authority. Gates
+  // 1–6 have already run; refusing here precedes the first durable user turn.
+  if (
+    r &&
+    (r.widgetKind === 'SERVICE_SELECTOR' ||
+      r.widgetKind === 'STAFF_SELECTOR') &&
+    r.effect === 'REFINE' &&
+    r.emissionLifecycleState !== 'LIVE'
+  )
+    return refuse(
+      'effect_not_admissible',
+      'L25 selector render evidence required',
+    );
 
   // ── C1 — effect within the kind's declared ceiling, over `widget_kind` ────────────────────────
   //

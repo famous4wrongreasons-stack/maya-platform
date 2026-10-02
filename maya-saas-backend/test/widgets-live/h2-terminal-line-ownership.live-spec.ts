@@ -1,3 +1,4 @@
+import { observe } from './support/release-booking-flow';
 // H2 — the BOOKING_CONFIRMATION terminal line belongs to the intent that was adjudicated.
 //
 // A confirmation carries two separately tokenised intents: the AE COMMIT the primary button submits,
@@ -130,6 +131,11 @@ describe('H2 — the confirmation terminal line survives the same widget escape 
     option: string;
     label: string;
   }): Promise<Envelope> => {
+    if (
+      args.envelope.kind === 'SERVICE_SELECTOR' ||
+      args.envelope.kind === 'STAFF_SELECTOR'
+    )
+      await observe(http, args.accessToken, args.envelope);
     const selected = intentOf(args.envelope, args.effect);
     const field = selectionFieldOf(selected);
     if (field === null)

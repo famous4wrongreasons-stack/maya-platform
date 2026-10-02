@@ -8,7 +8,14 @@
 // Both are behind `widgets.runtime`, which no plan grants. In wave 2 the runtime composes, seals
 // and refuses, and delivers to nobody.
 
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  HttpCode,
+  Post,
+} from '@nestjs/common';
+import { SelectorLifecycleService } from './rendering/selector-lifecycle.service';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
@@ -32,11 +39,12 @@ export class WidgetsController {
   constructor(
     private readonly gateway: IntentGatewayService,
     private readonly threadPage: WidgetThreadPageService,
+    private readonly lifecycle: SelectorLifecycleService,
   ) {}
 
   /**
-   * Resolve — read a widget's current state. Read-only by construction in wave 2: it reaches no
-   * capability owner, and §3 requires zero capability calls on the timeline read path.
+   * Resolve — read current state. L25 optionally records a mounted-selector observation through
+   * the lifecycle/audit owners. It grants no authority and calls zero capabilities.
    */
   @Post('resolve')
   @HttpCode(200)
@@ -45,6 +53,8 @@ export class WidgetsController {
     @Body() dto: ResolveWidgetDto,
     @CurrentUser() actor: AuthenticatedUser,
   ) {
+    if (dto.rendered && !(await this.lifecycle.rendered(dto.rendered)))
+      throw new ForbiddenException('widget_render_evidence_refused');
     const widgets = await this.threadPage.read(dto.thread_page);
     return {
       contract: 'maya.widget.resolve/1',

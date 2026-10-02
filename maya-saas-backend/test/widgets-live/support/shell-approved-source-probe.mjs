@@ -1,3 +1,4 @@
+import { mountRuntimeDrawer } from './mounted-runtime-drawer.mjs';
 // FBE2E-4 — the real shell process. It consumes a server-minted selector, activates only controls
 // drawn by the production renderer, and reaches the production HTTP gateway through the typed
 // widget transport projection. The bearer and intent tokens remain process-local and are never
@@ -117,6 +118,7 @@ const liveSubmission = createLiveSubmission(transport);
 
 const runtime = createShellRuntime({
   transport: {
+    resolveWidgets: transport.resolveWidgets,
     chat: async () => ({ ok: false, failure: { reason: 'no_connection' } }),
   },
   session: {
@@ -170,6 +172,7 @@ const runtime = createShellRuntime({
   },
   newId: () => crypto.randomUUID(),
 });
+const unmountDrawer = mountRuntimeDrawer(runtime);
 const offShell = runtime.shell.subscribe((view) => {
   fullscreenTransitions.push(view.fullscreen === null ? null : {
     phase: view.fullscreen.phase,
@@ -241,4 +244,4 @@ try {
   }
 } catch (error) {
   process.stdout.write(JSON.stringify({mode:input.mode,pass:false,error:String(error),counters:runtime.widgets.counters()}));
-} finally { offShell(); runtime.dispose(); }
+} finally { offShell(); unmountDrawer(); runtime.dispose(); }

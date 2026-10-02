@@ -41,12 +41,14 @@ export function DetailSheet({
   view,
   t,
   activate,
+  rendered,
   close,
   focusFallback,
 }: {
   /** The shell's own `ShellView.fullscreen`. A detail opens from this and from nothing else. */
   readonly view: FullscreenView | null;
   readonly t: Tokens;
+  readonly rendered?: (itemId: string) => void;
   readonly activate: (itemId: string, ref: InteractiveRefKey) => void;
   /** ALWAYS the shell's `closeDetail`. Never `dialog.close()`. */
   readonly close: () => void;
@@ -240,6 +242,7 @@ export function DetailSheet({
             t={t}
             item={{ id: view.itemId, result: view.result, display: 'live', pending: null, sentence: null }}
             activate={activate}
+            rendered={rendered}
           />
         )}
       </div>

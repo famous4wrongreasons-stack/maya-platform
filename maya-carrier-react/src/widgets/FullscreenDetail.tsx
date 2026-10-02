@@ -19,6 +19,7 @@ export function FullscreenDetail({
       view={shell.fullscreen}
       t={t}
       activate={(itemId: string, ref: InteractiveRefKey) => widgets.activate(itemId, ref)}
+      rendered={widgets.rendered}
       close={() => widgets.closeDetail()}
       focusFallback={focusFallback}
     />

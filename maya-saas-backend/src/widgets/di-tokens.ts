@@ -91,3 +91,5 @@ export const USER_TURN_AUDIT = 'USER_TURN_AUDIT';
 
 /** BS-1 exact verified personal appointment source. */
 export const PERSONAL_SCHEDULE_SOURCE = 'PERSONAL_SCHEDULE_SOURCE';
+
+export const SELECTOR_OBSERVATION_AUDIT = 'SELECTOR_OBSERVATION_AUDIT';

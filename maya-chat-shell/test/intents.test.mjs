@@ -61,6 +61,7 @@ const setup = (options = {}) => {
   };
   const runtime = createShellRuntime({
     transport: {
+      resolveWidgets: request => options.observe ? options.observe(request) : Promise.resolve({ ok: false, failure: { reason: 'forbidden' } }),
       chat: (body, signal) => ((counts.chat += 1), (options.chat ?? (() => new Promise(() => undefined)))(body, signal)),
       transcribe: () => ((counts.transcribe += 1), new Promise(() => undefined)),
     },
@@ -1563,5 +1564,48 @@ test('L27: a reference identifies an outcome only on the line class the contract
   const { itemId } = s.runtime.widgets.ingest(terminalCard());
   assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'dismissed' });
   assert.deepEqual(serverLines(s), ['Запись отменена.', CONFIRMED_TEXT], 'two outcome classes are two outcomes');
+  s.runtime.dispose();
+});
+
+
+test('L25: tap alone never observes rendering; explicit mounted callback is bounded, idempotent and gates selector REFINE', async () => {
+  const calls = [];
+  let acknowledge;
+  const s = setup({ observe: request => { calls.push(request); return new Promise(r => { acknowledge = r; }); } });
+  const env = envelope('kind-service-selector');
+  const { itemId } = s.runtime.widgets.ingest(env);
+  const ref = s.item(itemId).result.readingOrder.find(r => r.startsWith('option:'));
+  assert.deepEqual(await s.runtime.widgets.activate(itemId, ref), { outcome: 'sentence', sentence: 'activation_unavailable', submitted: false });
+  assert.equal(calls.length, 0);
+  assert.equal(s.submissions.length, 0);
+  s.runtime.widgetPort.rendered('foreign-item');
+  assert.equal(calls.length, 0);
+  s.runtime.widgetPort.rendered(itemId);
+  s.runtime.widgetPort.rendered(itemId);
+  await flush();
+  assert.equal(calls.length, 1);
+  assert.deepEqual(calls[0], { thread_page: { limit: 1 }, rendered: { widget_id: env.widget_id, body_hash: env.integrity.body_hash, envelope_seal: env.integrity.envelope_seal } });
+  const activating = s.runtime.widgets.activate(itemId, ref);
+  assert.equal(s.submissions.length, 0, 'tap waits for the independent observation');
+  acknowledge({ ok: true, value: { widgets: [] } });
+  await activating;
+  assert.equal(s.submissions.length, 1);
+  s.runtime.dispose();
+});
+
+test('L25: refused render evidence never opens selector submission and can be retried only after a new mounted observation', async () => {
+  let calls = 0;
+  const s = setup({ observe: async () => { calls++; return { ok: false, failure: { reason: 'forbidden' } }; } });
+  const { itemId } = s.runtime.widgets.ingest(envelope('kind-service-selector'));
+  const ref = s.item(itemId).result.readingOrder.find(r => r.startsWith('option:'));
+  s.runtime.widgetPort.rendered(itemId);
+  await flush();
+  await s.runtime.widgets.activate(itemId, ref);
+  assert.equal(calls, 1);
+  assert.equal(s.submissions.length, 0);
+  s.runtime.widgetPort.rendered(itemId);
+  await flush();
+  assert.equal(calls, 2);
+  assert.equal(s.submissions.length, 0);
   s.runtime.dispose();
 });

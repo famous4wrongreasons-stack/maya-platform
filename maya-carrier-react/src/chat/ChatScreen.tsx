@@ -213,7 +213,7 @@ function Row({
         }}
       >
         <div style={{ width: '100%', minWidth: 0, flex: '1 1 100%' }}>
-          <WidgetCard item={item} t={t} activate={widgets.activate} />
+          <WidgetCard item={item} t={t} activate={widgets.activate} rendered={widgets.rendered} />
         </div>
       </div>
     );

@@ -1215,7 +1215,7 @@ test('in-place successor keeps position and takes heading focus when its row say
   const dom = createDom();
   const scheduler = createScheduler(NOW);
   const activations = [];
-  const drawer = createWidgetDrawer({ factory: dom.factory, scheduler, widgets: { activate: (id, ref) => activations.push([id, ref]) } });
+  const drawer = createWidgetDrawer({ factory: dom.factory, scheduler, widgets: { rendered: () => undefined, activate: (id, ref) => activations.push([id, ref]) } });
   const p = page({ voice: false });
   p.runtime.widgets.ingest(envelopeOf('kind-choice'));
   const choice = p.runtime.conversation.view().items.find((i) => i.kind === 'widget');
@@ -1277,7 +1277,7 @@ test('live regions (D7): LIMITATION blocking assertive, non-blocking polite; PRO
 
   const dom = createDom();
   const scheduler = createScheduler(NOW);
-  const drawer = createWidgetDrawer({ factory: dom.factory, scheduler, widgets: { activate: () => undefined } });
+  const drawer = createWidgetDrawer({ factory: dom.factory, scheduler, widgets: { rendered: () => undefined, activate: () => undefined } });
   const p = page({ voice: false });
   p.runtime.widgets.ingest(envelopeOf('kind-progress'));
   const base = p.runtime.conversation.view().items.find((i) => i.kind === 'widget');

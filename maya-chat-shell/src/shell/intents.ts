@@ -150,6 +150,7 @@ export interface ActivationCounters {
 }
 
 export interface WidgetsDeps {
+  readonly recordRender?: (envelope: WidgetEnvelope) => Promise<boolean>;
   readonly timeline: TimelineWriter;
   readonly render: RenderFn;
   readonly environment: Pick<EnvironmentProbe, 'a11y' | 'onA11yChange'>;
@@ -161,6 +162,7 @@ export interface WidgetsDeps {
 }
 
 export interface Widgets extends DetailSource {
+  rendered(itemId: string): void;
   ingest(envelope: WidgetEnvelope): IngestOutcome;
   /** Assignable to `WidgetPort.activate`; the outcome is for tests and the dev fixture host. */
   activate(itemId: string, ref: InteractiveRefKey): Promise<ActivationOutcome>;
@@ -321,9 +323,40 @@ export const inputsForActivation = (
 
 // ── the store ──────────────────────────────────────────────────────────────────────────────────
 
+/** Same bounded resolve transport; the carrier never receives envelope secrets. */
+export const createRenderObserver = (transport: Pick<Transport, 'resolveWidgets'>, newAbort: () => AbortHandle) => {
+  const pending = new Set<AbortHandle>();
+  return {
+    async record(envelope: WidgetEnvelope): Promise<boolean> {
+      const abort = newAbort();
+      pending.add(abort);
+      try {
+        const result = await transport.resolveWidgets({ thread_page: { limit: 1 }, rendered: {
+          widget_id: envelope.widget_id, body_hash: envelope.integrity.body_hash,
+          envelope_seal: envelope.integrity.envelope_seal,
+        } }, abort.signal);
+        return result.ok;
+      } finally { pending.delete(abort); }
+    },
+    dispose() { for (const abort of pending) abort.abort(); pending.clear(); },
+  };
+};
+
 export const createWidgets = (deps: WidgetsDeps): Widgets => {
   const vault = createTokenVault();
   const entries = new Map<string, Entry>();
+  const renderObservations = new Map<string, Promise<boolean>>();
+  const rendered = (itemId: string): void => {
+    const entry = entries.get(itemId);
+    if (!entry || entry.verdict !== 'valid' || entry.display !== 'live' ||
+        !['SERVICE_SELECTOR', 'STAFF_SELECTOR'].includes(entry.envelope.kind)) return;
+    const id = entry.envelope.widget_id;
+    if (renderObservations.has(id)) return;
+    const observe = deps.recordRender;
+    const pending = Promise.resolve().then(() => observe ? observe(entry.envelope) : false).catch(() => false);
+    renderObservations.set(id, pending);
+    void pending.then((ok) => { if (!ok && renderObservations.get(id) === pending) renderObservations.delete(id); });
+  };
   /** Every emission this conversation has drawn or replaced; a repeat renders nothing (P-25, L7). */
   const seen = new Set<string>();
   /**
@@ -640,6 +673,14 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
 
     const inputs = inputsForActivation(intent, ref);
     if (inputs === undefined) return endInSentence(entry, 'activation_unavailable', false);
+    if (['SERVICE_SELECTOR', 'STAFF_SELECTOR'].includes(entry.envelope.kind) && intent.effect === 'REFINE') {
+      // A tap never creates evidence. Only the mounted carrier callback can.
+      const emission = entry.emission;
+      const observed = await (renderObservations.get(entry.envelope.widget_id) ?? Promise.resolve(false));
+      if (entries.get(itemId) !== entry || entry.emission !== emission || entry.pending !== null)
+        return { outcome: 'ignored', reason: 'in_flight' };
+      if (!observed) return endInSentence(entry, 'activation_unavailable', false);
+    }
     const submission: WidgetIntentSubmission = {
       contract: 'maya.widget.intent.submission/1',
       widget_id: entry.envelope.widget_id,
@@ -759,11 +800,13 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     if (reason === 'cleared') {
       seen.clear();
       published.clear();
+      renderObservations.clear();
     }
   });
 
   return {
     ingest,
+    rendered,
     activate,
     openDetail,
     releaseDetail(itemId) {
@@ -782,6 +825,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       vault.clear();
       seen.clear();
       published.clear();
+      renderObservations.clear();
       detailOpeners.clear();
     },
   };

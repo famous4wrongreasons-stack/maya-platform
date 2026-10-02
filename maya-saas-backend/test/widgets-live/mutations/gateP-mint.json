@@ -5,7 +5,9 @@
     "file": "src/widgets/emission/intent-template.registry.ts",
     "find": "  'refine.measurement@1': row({\n    key: 'refine.measurement@1',\n    version: 1,\n    effect: 'REFINE',",
     "replace": "  'refine.measurement@1': row({\n    key: 'refine.measurement@1',\n    version: 1,\n    effect: 'NAVIGATE',",
-    "killers": ["MINT-1"],
+    "killers": [
+      "MINT-1"
+    ],
     "expect": "build-killed"
   },
   {
@@ -14,7 +16,9 @@
     "file": "src/widgets/emission/intent-template.registry.ts",
     "find": "  'navigate.account@1': row({\n    key: 'navigate.account@1',\n    version: 1,\n    effect: 'NAVIGATE',\n    kinds: ['LIMITATION', 'SOURCE_STATUS', 'SETTINGS_DRAFT'],\n    roles: ['handoff', 'remedy'],\n    subject: null,\n    target: { class: 's', ref: { route: 'shell.account', param: null } },",
     "replace": "  'navigate.account@1': row({\n    key: 'navigate.account@1',\n    version: 1,\n    effect: 'NAVIGATE',\n    kinds: ['LIMITATION', 'SOURCE_STATUS', 'SETTINGS_DRAFT'],\n    roles: ['handoff', 'remedy'],\n    subject: null,\n    target: { class: 's', ref: { route: 'shell.pay', param: null } },",
-    "killers": ["MINT-1"],
+    "killers": [
+      "MINT-1"
+    ],
     "expect": "build-killed"
   },
   {
@@ -23,7 +27,9 @@
     "file": "src/widgets/emission/intent-template.registry.ts",
     "find": "  'control.dismiss@1': row({\n    key: 'control.dismiss@1',\n    version: 1,\n    effect: 'CONTROL',\n    kinds: CONTROL_KINDS,\n    roles: ['escape'],\n    subject: DISMISS,\n    target: null,\n    inputSchema: null,\n    selectionDomain: {},\n    selectionDomainLabels: {},\n    priority: 0,\n    singleUse: true,",
     "replace": "  'control.dismiss@1': row({\n    key: 'control.dismiss@1',\n    version: 1,\n    effect: 'CONTROL',\n    kinds: CONTROL_KINDS,\n    roles: ['escape'],\n    subject: DISMISS,\n    target: null,\n    inputSchema: null,\n    selectionDomain: {},\n    selectionDomainLabels: {},\n    priority: 1,\n    singleUse: true,",
-    "killers": ["MINT-1"],
+    "killers": [
+      "MINT-1"
+    ],
     "expect": "build-killed"
   },
   {
@@ -32,7 +38,9 @@
     "file": "src/widgets/emission/intent-template.registry.ts",
     "find": "  'control.dismiss@1': row({\n    key: 'control.dismiss@1',\n    version: 1,\n    effect: 'CONTROL',\n    kinds: CONTROL_KINDS,\n    roles: ['escape'],\n    subject: DISMISS,\n    target: null,\n    inputSchema: null,\n    selectionDomain: {},\n    selectionDomainLabels: {},\n    priority: 0,\n    singleUse: true,\n    ttlSeconds: 600,",
     "replace": "  'control.dismiss@1': row({\n    key: 'control.dismiss@1',\n    version: 1,\n    effect: 'CONTROL',\n    kinds: CONTROL_KINDS,\n    roles: ['escape'],\n    subject: DISMISS,\n    target: null,\n    inputSchema: null,\n    selectionDomain: {},\n    selectionDomainLabels: {},\n    priority: 0,\n    singleUse: false,\n    ttlSeconds: 600,",
-    "killers": ["MINT-1"],
+    "killers": [
+      "MINT-1"
+    ],
     "expect": "build-killed"
   },
   {
@@ -41,7 +49,9 @@
     "file": "src/widgets/emission/intent-template.registry.ts",
     "find": "      selection_min: 1,\n      selection_max: 1,",
     "replace": "      selection_min: 1,\n      selection_max: 2,",
-    "killers": ["MINT-11"],
+    "killers": [
+      "MINT-11"
+    ],
     "expect": "build-killed"
   },
   {
@@ -50,7 +60,10 @@
     "file": "src/widgets/emission/intent-template.registry.ts",
     "find": "    !exactKeys(proposal, [",
     "replace": "    false && !exactKeys(proposal, [",
-    "killers": ["MINT-7", "MINT-9"],
+    "killers": [
+      "MINT-7",
+      "MINT-9"
+    ],
     "expect": "build-killed"
   },
   {
@@ -59,7 +72,9 @@
     "file": "src/widgets/emission/intent-template.registry.ts",
     "find": "  if (!sameRef(proposal.capability, expectedCapability ?? null))",
     "replace": "  if (false && !sameRef(proposal.capability, expectedCapability ?? null))",
-    "killers": ["MINT-9"],
+    "killers": [
+      "MINT-9"
+    ],
     "expect": "build-killed"
   },
   {
@@ -68,7 +83,9 @@
     "file": "src/widgets/emission/intent-template.registry.ts",
     "find": "  if (\n    !carrierAdmits(",
     "replace": "  if (\n    false && !carrierAdmits(",
-    "killers": ["MINT-9"],
+    "killers": [
+      "MINT-9"
+    ],
     "expect": "build-killed"
   },
   {
@@ -77,7 +94,9 @@
     "file": "src/widgets/emission/record-writer.ts",
     "find": "  const token =\n    row.effect === 'NONE' ? null : randomBytes(24).toString('base64url');",
     "replace": "  const token = randomBytes(24).toString('base64url');",
-    "killers": ["MINT-2"],
+    "killers": [
+      "MINT-2"
+    ],
     "expect": "build-killed"
   },
   {
@@ -86,7 +105,9 @@
     "file": "src/widgets/emission/intent-template.registry.ts",
     "find": "    'commit.blocked@1': 'COMMIT',",
     "replace": "    'commit.disabled@1': 'COMMIT',",
-    "killers": ["MINT-3"],
+    "killers": [
+      "MINT-3"
+    ],
     "expect": "build-killed"
   },
   {
@@ -95,7 +116,9 @@
     "file": "src/widgets/emission/record-writer.ts",
     "find": "          idempotency_key: booking.idempotencyKey,\n        }\n      : null,",
     "replace": "          idempotency_key: booking.idempotencyKey,\n        }\n      : { readback_text: 'invented' },",
-    "killers": ["MINT-1"],
+    "killers": [
+      "MINT-1"
+    ],
     "expect": "live-killed"
   },
   {
@@ -104,7 +127,9 @@
     "file": "src/widgets/emission/emitter.service.ts",
     "find": "            slotless: request.piiClass === 'client_identified',",
     "replace": "            slotless: false,",
-    "killers": ["MINT-6"],
+    "killers": [
+      "MINT-6"
+    ],
     "expect": "build-killed"
   },
   {
@@ -113,7 +138,9 @@
     "file": "src/widgets/emission/record-writer.ts",
     "find": "    inputSchemaHash: args.material.inputSchemaHash,",
     "replace": "    inputSchemaHash: null,",
-    "killers": ["MINT-1"],
+    "killers": [
+      "MINT-1"
+    ],
     "expect": "build-killed"
   },
   {
@@ -122,16 +149,20 @@
     "file": "src/widgets/emission/envelope-validator.ts",
     "find": "  assertSourceClosed(input.source);",
     "replace": "  void input.source;",
-    "killers": ["MINT-9"],
+    "killers": [
+      "MINT-9"
+    ],
     "expect": "build-killed"
   },
   {
     "id": "MINT-M15",
     "description": "allow successor minting from a non-LIVE predecessor",
     "file": "src/widgets/emission/successor-minter.service.ts",
-    "find": "    if (predecessor.lifecycleState !== 'LIVE') return null;",
-    "replace": "    if (predecessor.lifecycleState !== 'MINTED') return null;",
-    "killers": ["MINT-8"],
+    "find": "    if (predecessor.lifecycleState !== 'LIVE') return null;\n\n    // AdmissionFacts has an unrelated",
+    "replace": "    if (predecessor.lifecycleState !== 'MINTED') return null;\n\n    // AdmissionFacts has an unrelated",
+    "killers": [
+      "MINT-8"
+    ],
     "expect": "live-killed"
   },
   {
@@ -140,7 +171,9 @@
     "file": "src/widgets/emission/envelope.factory.ts",
     "find": "    if (typeof intentRef === 'string' && intentRef.length > 0)\n      representedIntents.add(intentRef);",
     "replace": "    void intentRef;",
-    "killers": ["FBE2E-2 mints a strict service selector"],
+    "killers": [
+      "FBE2E-2 mints a strict service selector"
+    ],
     "expect": "build-killed"
   },
   {
@@ -149,7 +182,9 @@
     "file": "src/widgets/emission/booking-confirmation-minter.service.ts",
     "find": "      p.subject === 'create' ? input.predecessorWidgetId : null,",
     "replace": "      null,",
-    "killers": ["FBE2E-2 links create confirmation"],
+    "killers": [
+      "FBE2E-2 links create confirmation"
+    ],
     "expect": "build-killed"
   },
   {
@@ -158,7 +193,9 @@
     "file": "src/widgets/owner-ports/noun-resolution.owners.provider.ts",
     "find": "      const ownerValue = bookingSlot\n        ? decodeBookingSlotOwnerRef(opened.ownerRef)\n        : opened.ownerRef;",
     "replace": "      const ownerValue = opened.ownerRef;\n      void bookingSlot;",
-    "killers": ["decodes only the recognized opaque booking slot"],
+    "killers": [
+      "decodes only the recognized opaque booking slot"
+    ],
     "expect": "build-killed"
   },
   {
@@ -167,16 +204,20 @@
     "file": "src/widgets/owner-ports/noun-resolution.owners.provider.ts",
     "find": "      if (\n        key === 'appointments.own.create' &&\n        values.size === 2 &&",
     "replace": "      if (\n        false &&\n        key === 'appointments.own.create' &&\n        values.size === 2 &&",
-    "killers": ["defers the exact selector-stage pair"],
+    "killers": [
+      "defers the exact selector-stage pair"
+    ],
     "expect": "build-killed"
   },
   {
     "id": "MINT-M20",
-    "description": "refuse the first real selector transition merely because its returned HTTP envelope is still in the legal MINTED lifecycle",
+    "description": "L25 B replaces the historical tap-catchup contract: refuse a real selector transition AFTER independent delivery/render evidence. Provenance: FINAL FBE2E OWNER DECISIONS L25=B.",
     "file": "src/widgets/emission/successor-minter.service.ts",
-    "find": "    if (!['MINTED', 'LIVE'].includes(predecessor.lifecycleState)) return null;",
-    "replace": "    if (predecessor.lifecycleState !== 'LIVE') return null;",
-    "killers": ["BOOK-1…BOOK-6"],
+    "find": "    if (predecessor.lifecycleState !== 'LIVE') return null;\n\n    const successor = await this.emitter.emitBookingSelector(",
+    "replace": "    if (predecessor.lifecycleState !== 'MINTED') return null;\n\n    const successor = await this.emitter.emitBookingSelector(",
+    "killers": [
+      "BOOK-1…BOOK-6"
+    ],
     "expect": "live-killed"
   }
 ]

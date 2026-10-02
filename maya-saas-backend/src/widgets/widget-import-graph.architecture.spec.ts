@@ -89,6 +89,7 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
     only: [
       'emission/seal.service.ts',
       'emission/envelope.factory.ts', // L5/L24 H1 uses the H6 canonical codec; no parallel sort.
+
       // U8b-c (IR-8C-1): the input-schema codec reaches the UNKEYED half of the same discipline.
       // H6 admits no canonicalisation scheme other than `stableActionJson`, and §2.2 rule 3 forbids a
       // local copy of a shared codec — so the three pure files import it rather than restating it.
@@ -175,6 +176,14 @@ const NON_WIDGET_DIRECTORIES: Readonly<Record<string, Allowed>> = {
 /** Packages a widget file may import. Closed, so a provider client or a second database client is refused. */
 const PACKAGES: Readonly<Record<string, Allowed>> = {
   '@nestjs/common': { why: 'Nest decorators and the logger' },
+  '@nestjs/core': {
+    why: 'L25 canonical HTTP egress interceptor registration',
+    only: ['widgets.module.ts'],
+  },
+  rxjs: {
+    why: 'L25 awaits delivery observation before HTTP response handoff',
+    only: ['rendering/selector-delivery.interceptor.ts'],
+  },
   '@nestjs/swagger': {
     why: 'request documentation on the DTOs and the controller',
   },
@@ -261,7 +270,10 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
   },
   'audit-log/audit-log.service.ts': {
     why: '9.6 correlation references only, never conversation content or authority',
-    only: ['owner-ports/user-turn-audit.adapter.ts'],
+    only: [
+      'owner-ports/user-turn-audit.adapter.ts',
+      'owner-ports/selector-observation-audit.adapter.ts',
+    ],
   },
   'entitlements/widget-release.contract.ts': {
     why: 'The existing unkeyed release digest for the finite server registry binding',
