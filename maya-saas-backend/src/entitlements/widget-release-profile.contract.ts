@@ -54,9 +54,10 @@ export interface HandoffStop {
 }
 export interface ProfileCertificate extends Omit<
   ReleaseCertificate,
-  'contract' | 'scope' | 'matrix'
+  'contract' | 'scope' | 'matrix' | 'environment'
 > {
   contract: typeof PROFILE_CERT;
+  environment: ReleaseCertificate['environment'] | 'production';
   scope: typeof NO_HANDOFF_PROFILE;
   certification: 'CERTIFIED_FOR_PROFILE';
   profileDigest: string;
@@ -125,7 +126,7 @@ export function profileCertificate(value: unknown): ProfileCertificate {
     }
   }
   // Common fields are checked by the V1 parser's extracted common validator. It sees no matrix.
-  releaseCertificateHeader(v);
+  releaseCertificateHeader(v, true);
   return v as unknown as ProfileCertificate;
 }
 

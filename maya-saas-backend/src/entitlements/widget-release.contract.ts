@@ -1,4 +1,5 @@
 import type { ProfileCertificate } from './widget-release-profile.contract';
+import type { ProductionReleaseAuthorization } from './widget-release-production.contract';
 import { createHash } from 'node:crypto';
 import { ForbiddenException } from '@nestjs/common';
 import { WIDGET_RELEASE_CLAUSES } from './widget-release-clauses';
@@ -61,7 +62,7 @@ export interface ReleaseCertificate {
   matrix: ReleaseClause[];
 }
 export interface ReleaseCommand {
-  authorization: Signed<ReleaseAuthorization>;
+  authorization: Signed<ReleaseAuthorization | ProductionReleaseAuthorization>;
   certificate?: Signed<ReleaseCertificate | ProfileCertificate>;
 }
 export interface ReleaseReceipt {
@@ -80,6 +81,13 @@ export interface ReleaseReceipt {
   appliedAt: string;
   expiresAt: string | null;
   auditId: string;
+  execution?: {
+    releaseId: string;
+    environment: 'production';
+    profileId: string;
+    profileDigest: string;
+    evidenceDigest: string;
+  };
 }
 export function releaseDeny(reason: string): never {
   throw new ForbiddenException(`widget_release_${reason}`);
@@ -129,31 +137,38 @@ export function canonical(value: unknown): string {
 }
 export const releaseHash = (value: unknown) =>
   createHash('sha256').update(canonical(value)).digest('hex');
+export const RELEASE_AUTHORIZATION_KEYS = [
+  'contract',
+  'authorizationId',
+  'operation',
+  'tenantId',
+  'environment',
+  'candidateSha',
+  'buildDigest',
+  'certificateDigest',
+  'operatorId',
+  'approverId',
+  'reviewerId',
+  'rollbackOwnerId',
+  'expectedVersion',
+  'notBefore',
+  'expiresAt',
+  'grantExpiresAt',
+];
 export function authorization(value: unknown): ReleaseAuthorization {
-  const v = exact(value, [
-    'contract',
-    'authorizationId',
-    'operation',
-    'tenantId',
-    'environment',
-    'candidateSha',
-    'buildDigest',
-    'certificateDigest',
-    'operatorId',
-    'approverId',
-    'reviewerId',
-    'rollbackOwnerId',
-    'expectedVersion',
-    'notBefore',
-    'expiresAt',
-    'grantExpiresAt',
-  ]);
+  const v = exact(value, RELEASE_AUTHORIZATION_KEYS);
   if (
     v.contract !== RELEASE_AUTH ||
     !['grant', 'revoke'].includes(String(v.operation)) ||
     !['synthetic', 'staging'].includes(String(v.environment))
   )
     releaseDeny('authorization');
+  validateAuthorizationFields(v);
+  return v as unknown as ReleaseAuthorization;
+}
+
+/** Shared syntax/window rules only. Each version separately admits its environment and keys. */
+export function validateAuthorizationFields(v: Record<string, unknown>): void {
   for (const k of [
     'authorizationId',
     'tenantId',
@@ -180,7 +195,6 @@ export function authorization(value: unknown): ReleaseAuthorization {
   else if (v.grantExpiresAt !== null) releaseDeny('revoke_expiry');
   if (v.reviewerId === v.approverId || v.reviewerId === v.operatorId)
     releaseDeny('independent_reviewer');
-  return v as unknown as ReleaseAuthorization;
 }
 export function certificate(value: unknown): ReleaseCertificate {
   const v = exact(value, [
@@ -224,8 +238,14 @@ export function certificate(value: unknown): ReleaseCertificate {
 }
 
 /** Shared shape checks only; neither function grants or changes a threshold. */
-export function releaseCertificateHeader(v: Record<string, unknown>): void {
-  if (!['synthetic', 'staging'].includes(String(v.environment)))
+export function releaseCertificateHeader(
+  v: Record<string, unknown>,
+  productionProfile = false,
+): void {
+  if (
+    !['synthetic', 'staging'].includes(String(v.environment)) &&
+    !(productionProfile && v.environment === 'production')
+  )
     releaseDeny('certificate');
   if (
     typeof v.candidateSha !== 'string' ||

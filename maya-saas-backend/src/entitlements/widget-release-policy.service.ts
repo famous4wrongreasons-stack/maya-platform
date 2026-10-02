@@ -6,6 +6,11 @@ import {
   type ProfileCertificate,
 } from './widget-release-profile.contract';
 import { widgetProofEnvironment } from './widget-release-environment';
+import {
+  productionAuthorization,
+  PRODUCTION_RELEASE_AUTH,
+  type ProductionReleaseAuthorization,
+} from './widget-release-production.contract';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHash, createPublicKey, verify } from 'node:crypto';
@@ -54,7 +59,12 @@ export class WidgetReleasePolicy {
   constructor(private readonly config: ConfigService = new ConfigService()) {}
   private fingerprint: string | undefined;
   buildDigest(): string {
-    if (this.fingerprint) return this.fingerprint;
+    // Production admission rechecks bytes, including after an earlier successful read.
+    if (
+      this.fingerprint &&
+      this.config.get<string>('NODE_ENV') !== 'production'
+    )
+      return this.fingerprint;
     const root = resolve(__dirname, '..'),
       extension = __filename.endsWith('.ts') ? '.ts' : '.js';
     const files = (dir: string): string[] =>
@@ -76,10 +86,14 @@ export class WidgetReleasePolicy {
     hash.update(readFileSync(resolve(process.cwd(), 'package-lock.json')));
     return (this.fingerprint = hash.digest('hex'));
   }
-  environment(): 'synthetic' | 'staging' {
-    // No production execution unlock is part of AR-1 implementation authorization.
-    if (this.config.get<string>('NODE_ENV') === 'production')
-      return releaseDeny('production_not_authorized');
+  environment(): 'synthetic' | 'staging' | 'production' {
+    if (this.config.get<string>('NODE_ENV') === 'production') {
+      if (
+        this.config.get<string>('WIDGET_RELEASE_ENVIRONMENT') !== 'production'
+      )
+        return releaseDeny('production_not_authorized');
+      return 'production';
+    }
     const environment = this.config.get<string>('WIDGET_RELEASE_ENVIRONMENT');
     if (environment !== 'synthetic' && environment !== 'staging')
       return releaseDeny('environment');
@@ -95,6 +109,28 @@ export class WidgetReleasePolicy {
       releaseDeny('staging_database');
     return environment;
   }
+  private productionTenant(tenantId: string): void {
+    const tenants: unknown = JSON.parse(
+      this.config.get<string>('WIDGET_RELEASE_PRODUCTION_TENANTS_JSON') ?? '[]',
+    );
+    if (
+      !Array.isArray(tenants) ||
+      !tenants.length ||
+      new Set(tenants).size !== tenants.length
+    )
+      releaseDeny('production_tenant');
+    for (const tenant of tenants) identifier(tenant);
+    if (!tenants.includes(tenantId)) releaseDeny('production_tenant');
+  }
+  private readAuthorization(value: unknown) {
+    return this.signed<ReleaseAuthorization | ProductionReleaseAuthorization>(
+      value,
+      'owner',
+      this.environment() === 'production'
+        ? productionAuthorization
+        : authorization,
+    );
+  }
   private signed<T>(
     value: unknown,
     purpose: TrustKey['purpose'],
@@ -108,7 +144,13 @@ export class WidgetReleasePolicy {
     )
       releaseDeny('signature');
     const trust = object(
-      JSON.parse(this.config.get<string>('WIDGET_RELEASE_TRUST_JSON') ?? '{}'),
+      JSON.parse(
+        this.config.get<string>(
+          this.environment() === 'production'
+            ? 'WIDGET_RELEASE_PRODUCTION_TRUST_JSON'
+            : 'WIDGET_RELEASE_TRUST_JSON',
+        ) ?? '{}',
+      ),
     );
     const key = exact(trust[v.keyId], ['principalId', 'purpose', 'publicKey']);
     identifier(key.principalId);
@@ -142,7 +184,7 @@ export class WidgetReleasePolicy {
         ? ['authorization', 'certificate']
         : ['authorization'],
     );
-    const signed = this.signed(input.authorization, 'owner', authorization),
+    const signed = this.readAuthorization(input.authorization),
       a = signed.payload;
     if (
       a.environment !== this.environment() ||
@@ -159,6 +201,8 @@ export class WidgetReleasePolicy {
       releaseDeny('authorization_expired');
     let c: ReleaseCertificate | ProfileCertificate | undefined;
     if (operation === 'grant') {
+      if (a.contract === PRODUCTION_RELEASE_AUTH)
+        this.productionTenant(tenantId);
       c = this.checkCertificate(input.certificate, a, now);
       if (
         instant(a.grantExpiresAt) <= now.getTime() ||
@@ -174,7 +218,11 @@ export class WidgetReleasePolicy {
       authorizationHash: releaseHash(signed.signed),
     };
   }
-  private checkCertificate(value: unknown, a: ReleaseAuthorization, now: Date) {
+  private checkCertificate(
+    value: unknown,
+    a: ReleaseAuthorization | ProductionReleaseAuthorization,
+    now: Date,
+  ) {
     const { payload: c, principalId } = this.signed(
       value,
       'security',
@@ -191,6 +239,14 @@ export class WidgetReleasePolicy {
       c.buildDigest !== a.buildDigest
     )
       releaseDeny('certificate_binding');
+    if (
+      a.contract === PRODUCTION_RELEASE_AUTH &&
+      (c.contract !== PROFILE_CERT ||
+        c.scope !== a.profileId ||
+        c.profileDigest !== a.profileDigest ||
+        c.evidenceDigest !== a.evidenceDigest)
+    )
+      releaseDeny('production_certificate_binding');
     if (
       a.candidateSha !==
         this.config.get<string>('WIDGET_RELEASE_CANDIDATE_SHA') ||
@@ -234,7 +290,7 @@ export class WidgetReleasePolicy {
       )
         return null;
       const command = object(state.command);
-      const signed = this.signed(command.authorization, 'owner', authorization),
+      const signed = this.readAuthorization(command.authorization),
         a = signed.payload;
       if (
         a.tenantId !== tenantId ||
@@ -243,6 +299,8 @@ export class WidgetReleasePolicy {
         a.environment !== this.environment()
       )
         return null;
+      if (a.contract === PRODUCTION_RELEASE_AUTH)
+        this.productionTenant(tenantId);
       if (
         instant(state.appliedAt) < instant(a.notBefore) ||
         instant(state.appliedAt) >= instant(a.expiresAt) ||

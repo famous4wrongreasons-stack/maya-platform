@@ -1,0 +1,134 @@
+[
+  {
+    "id": "PU-M1",
+    "description": "PU-TRUST",
+    "file": "src/entitlements/widget-release-policy.service.ts",
+    "find": "? 'WIDGET_RELEASE_PRODUCTION_TRUST_JSON'",
+    "replace": "? 'WIDGET_RELEASE_TRUST_JSON'",
+    "killers": [
+      "PU-TRUST"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PU-M2",
+    "description": "PU-ALLOWLIST",
+    "file": "src/entitlements/widget-release-policy.service.ts",
+    "find": "if (!tenants.includes(tenantId)) releaseDeny('production_tenant');",
+    "replace": "if (false) releaseDeny('production_tenant');",
+    "killers": [
+      "PU-ALLOWLIST"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PU-M3",
+    "description": "PU-ALLOWLIST",
+    "file": "src/entitlements/widget-release-policy.service.ts",
+    "find": "for (const tenant of tenants) identifier(tenant);",
+    "replace": "// mutation: wildcard entries accepted",
+    "killers": [
+      "PU-ALLOWLIST"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PU-M4",
+    "description": "PU-SCHEMA",
+    "file": "src/entitlements/widget-release-production.contract.ts",
+    "find": "v.profileId !== NO_HANDOFF_PROFILE || v.profileDigest !== PROFILE_DIGEST",
+    "replace": "false",
+    "killers": [
+      "PU-SCHEMA"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PU-M5",
+    "description": "PU-BINDING",
+    "file": "src/entitlements/widget-release-policy.service.ts",
+    "find": "c.evidenceDigest !== a.evidenceDigest",
+    "replace": "false",
+    "killers": [
+      "PU-BINDING"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PU-M6",
+    "description": "PU-BINDING",
+    "file": "src/entitlements/widget-release-production.contract.ts",
+    "find": "instant(v.grantExpiresAt) > instant(v.expiresAt)",
+    "replace": "false",
+    "killers": [
+      "PU-BINDING"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PU-M7",
+    "description": "PU-BYTES",
+    "file": "src/entitlements/widget-release-policy.service.ts",
+    "find": "this.fingerprint &&\n      this.config.get<string>('NODE_ENV') !== 'production'",
+    "replace": "this.fingerprint",
+    "killers": [
+      "PU-BYTES"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PU-M8",
+    "description": "PU-READER",
+    "file": "src/entitlements/widget-release-policy.service.ts",
+    "find": "return null;\n      if (a.contract === PRODUCTION_RELEASE_AUTH)\n        this.productionTenant(tenantId);",
+    "replace": "return null;\n      // mutation: reader no longer checks current allowlist",
+    "killers": [
+      "PU-READER"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "PU-M9",
+    "description": "PU-AUDIT-NOOP",
+    "file": "src/entitlements/widget-release.service.ts",
+    "find": "if (a.contract === PRODUCTION_RELEASE_AUTH) {\n          const recorded",
+    "replace": "if (false) {\n          const recorded",
+    "killers": [
+      "PU-AUDIT-NOOP"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "PU-M10",
+    "description": "PU-REVOKE-BOUND",
+    "file": "src/entitlements/widget-release.service.ts",
+    "find": "granted.releaseId !== a.releaseId ||",
+    "replace": "false ||",
+    "killers": [
+      "PU-REVOKE-BOUND"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "PU-M11",
+    "description": "PU-REVOKE-BOUND",
+    "file": "src/entitlements/widget-release.service.ts",
+    "find": "granted.evidenceDigest !== a.evidenceDigest ||",
+    "replace": "false ||",
+    "killers": [
+      "PU-REVOKE-BOUND"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "PU-M12",
+    "description": "PU-REVOKE-BOUND",
+    "file": "src/entitlements/widget-release.service.ts",
+    "find": "granted.buildDigest !== a.buildDigest",
+    "replace": "false",
+    "killers": [
+      "PU-REVOKE-BOUND"
+    ],
+    "expect": "live-killed"
+  }
+]

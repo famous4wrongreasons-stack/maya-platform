@@ -1,4 +1,5 @@
 import { NO_HANDOFF_PROFILE } from './widget-release-profile.contract';
+import { PRODUCTION_RELEASE_AUTH } from './widget-release-production.contract';
 import { ConflictException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { Prisma, TenantEntitlement } from '@prisma/client';
@@ -153,6 +154,20 @@ export class WidgetReleaseService {
             state.certificateDigest !== a.certificateDigest
           )
             releaseDeny('revoke_target');
+          if (a.contract === PRODUCTION_RELEASE_AUTH) {
+            const granted = object(
+              object(object(state.command).authorization).payload,
+            );
+            if (
+              granted.contract !== PRODUCTION_RELEASE_AUTH ||
+              granted.releaseId !== a.releaseId ||
+              granted.profileId !== a.profileId ||
+              granted.profileDigest !== a.profileDigest ||
+              granted.evidenceDigest !== a.evidenceDigest ||
+              granted.buildDigest !== a.buildDigest
+            )
+              releaseDeny('production_revoke_target');
+          }
         }
         if (dryRun)
           return {
@@ -198,6 +213,17 @@ export class WidgetReleaseService {
           appliedAt: now.toISOString(),
           expiresAt: updated.expiresAt?.toISOString() ?? null,
           auditId,
+          ...(a.contract === PRODUCTION_RELEASE_AUTH
+            ? {
+                execution: {
+                  releaseId: a.releaseId,
+                  environment: a.environment,
+                  profileId: a.profileId,
+                  profileDigest: a.profileDigest,
+                  evidenceDigest: a.evidenceDigest,
+                },
+              }
+            : {}),
         };
         await this.audit.logPlatformAction(
           {
@@ -229,6 +255,24 @@ export class WidgetReleaseService {
           },
           tx,
         );
+        // Production must fail closed even if an audit adapter silently drops the write.
+        if (a.contract === PRODUCTION_RELEASE_AUTH) {
+          const recorded = await tx.auditLog.findUnique({
+            where: { id: auditId },
+          });
+          if (
+            !recorded ||
+            recorded.scope !== 'platform' ||
+            recorded.action !== RELEASE_AUDIT ||
+            recorded.userId !== actor.userId ||
+            recorded.entityId !== tenantId ||
+            object(recorded.metadataJson).authorizationHash !==
+              proof.authorizationHash ||
+            releaseHash(object(recorded.metadataJson).receipt) !==
+              releaseHash(receipt)
+          )
+            releaseDeny('production_audit_missing');
+        }
         return { dryRun: false, replayed: false, receipt };
       },
       { isolationLevel: 'ReadCommitted', maxWait: 5000, timeout: 15000 },

@@ -3,6 +3,7 @@ import {
   releaseHash,
   type ReleaseCommand,
   type Signed,
+  type ReleaseAuthorization,
 } from '../../../src/entitlements/widget-release.contract';
 import {
   NO_HANDOFF_PROFILE,
@@ -17,7 +18,10 @@ export function profileCommand(
   p: ReturnType<typeof releaseProof>,
   tenant: string,
   version = 'absent',
-): ReleaseCommand & { certificate: Signed<ProfileCertificate> } {
+): ReleaseCommand & {
+  authorization: Signed<ReleaseAuthorization>;
+  certificate: Signed<ProfileCertificate>;
+} {
   const base = p.command(tenant, version);
   const matrix: ProfileCertificate['matrix'] =
     base.certificate.payload.matrix.map((row) =>
