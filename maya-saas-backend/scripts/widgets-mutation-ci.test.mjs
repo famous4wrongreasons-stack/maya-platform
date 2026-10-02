@@ -105,9 +105,10 @@ function fixture() {
   });
 }
 
-test('45 batteries, 66 jobs: final FBE2E decisions cover 524 declarations', () => {
+test('46 batteries, 67 jobs: AR1 production unlock covers 536 declarations', () => {
   const p = plan(declared);
-  assert.equal(p.gates.length, 45); assert.equal(p.matrix.include.length, 66);
+  assert.equal(p.gates.length, 46); assert.equal(p.matrix.include.length, 67);
+  assert.deepEqual(declared.PU.mutants.map(m => m.id), Array.from({ length: 12 }, (_, i) => `PU-M${i + 1}`));
   assert.equal(declared.FB.mutants.length, 15);
   assert.deepEqual(declared.SB1.mutants.map(m => m.id), Array.from({ length: 10 }, (_, i) => `SB1-M${String(i + 1).padStart(2, '0')}`));
   assert.deepEqual(declared.AB.mutants.map(m => m.id), ['AB-M1', 'AB-M2']);
@@ -121,7 +122,7 @@ test('45 batteries, 66 jobs: final FBE2E decisions cover 524 declarations', () =
   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-BOOT-LOOPBACK-1').length, 1);
   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-P408-CLOCK-1').length, 1);
   const r = assemble(declared, fixture(), head);
-  assert.equal(r.length, 45); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 524);
+  assert.equal(r.length, 46); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 536);
   for (const report of r) {
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
@@ -299,7 +300,7 @@ test('gate: a baseline control is red on a non-zero step exit, a failed assertio
     for (const c of Object.values(r.neutraliser_controls)) { c.exits[c.steps[0]] = 1; c.failed = ['red on the neutralised copy']; }
     assert.deepEqual(redBaselineControls(r.baseline_controls), []);
   }
-  assert.equal(assemble(declared, receipts, head).length, 45, 'a red neutraliser control is not a red baseline');
+  assert.equal(assemble(declared, receipts, head).length, 46, 'a red neutraliser control is not a red baseline');
 });
 
 test('gate: a red baseline is a distinct shard status and a non-zero exit, and never hides a mismatch', () => {
