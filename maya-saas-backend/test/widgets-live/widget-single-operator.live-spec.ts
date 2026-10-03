@@ -409,22 +409,20 @@ describe('AR-1 single-operator production execution contract with ephemeral test
     });
     expect((await f.post('grant', f.command, token)).status).toBe(403);
     await expect(
-      http.app
-        .get(WidgetReleaseService)
-        .grant(
-          {
-            userId: f.operator.id,
-            sessionId: session.id,
-            tenantId: null,
-            role: UserRole.PLATFORM_OWNER,
-            email: f.operator.email,
-            branchId: null,
-            membershipId: null,
-            membershipStatus: null,
-          },
-          f.tenant.id,
-          f.command,
-        ),
+      http.app.get(WidgetReleaseService).grant(
+        {
+          userId: f.operator.id,
+          sessionId: session.id,
+          tenantId: null,
+          role: UserRole.PLATFORM_OWNER,
+          email: f.operator.email,
+          branchId: null,
+          membershipId: null,
+          membershipStatus: null,
+        },
+        f.tenant.id,
+        f.command,
+      ),
     ).rejects.toThrow('platform_actor');
     // The schema additionally refuses manufacturing a tenant-scoped session for the global User.
     await expect(
