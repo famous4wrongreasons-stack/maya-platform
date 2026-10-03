@@ -8,8 +8,10 @@ import {
 import { widgetProofEnvironment } from './widget-release-environment';
 import {
   productionAuthorization,
-  PRODUCTION_RELEASE_AUTH,
-  type ProductionReleaseAuthorization,
+  isProductionAuthorization,
+  SINGLE_OPERATOR_RELEASE_AUTH,
+  SINGLE_OPERATOR,
+  type AnyReleaseAuthorization,
 } from './widget-release-production.contract';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -29,7 +31,6 @@ import {
   RELEASE_STATE,
   releaseDeny,
   releaseHash,
-  type ReleaseAuthorization,
   type ReleaseCertificate,
   type ReleaseCommand,
   type Signed,
@@ -40,6 +41,8 @@ export interface VerifiedReleaseView {
   readonly version: string;
   readonly certificateDigest: string;
   readonly profileDigest: string | null;
+  readonly governance?: typeof SINGLE_OPERATOR;
+  readonly independentHumanReview?: false;
 }
 
 type TrustKey = {
@@ -123,7 +126,7 @@ export class WidgetReleasePolicy {
     if (!tenants.includes(tenantId)) releaseDeny('production_tenant');
   }
   private readAuthorization(value: unknown) {
-    return this.signed<ReleaseAuthorization | ProductionReleaseAuthorization>(
+    return this.signed<AnyReleaseAuthorization>(
       value,
       'owner',
       this.environment() === 'production'
@@ -201,8 +204,7 @@ export class WidgetReleasePolicy {
       releaseDeny('authorization_expired');
     let c: ReleaseCertificate | ProfileCertificate | undefined;
     if (operation === 'grant') {
-      if (a.contract === PRODUCTION_RELEASE_AUTH)
-        this.productionTenant(tenantId);
+      if (isProductionAuthorization(a)) this.productionTenant(tenantId);
       c = this.checkCertificate(input.certificate, a, now);
       if (
         instant(a.grantExpiresAt) <= now.getTime() ||
@@ -220,17 +222,19 @@ export class WidgetReleasePolicy {
   }
   private checkCertificate(
     value: unknown,
-    a: ReleaseAuthorization | ProductionReleaseAuthorization,
+    a: AnyReleaseAuthorization,
     now: Date,
   ) {
-    const { payload: c, principalId } = this.signed(
-      value,
-      'security',
-      (value) =>
-        object(value).contract === PROFILE_CERT
-          ? profileCertificate(value)
-          : certificate(value),
-    );
+    const { payload: c, principalId } =
+      a.contract === SINGLE_OPERATOR_RELEASE_AUTH
+        ? // Exactly one owner execution signature binds this raw certificate's digest.
+          // A second self-signature is neither needed nor represented as security review.
+          { payload: profileCertificate(value), principalId: null }
+        : this.signed(value, 'security', (value) =>
+            object(value).contract === PROFILE_CERT
+              ? profileCertificate(value)
+              : certificate(value),
+          );
     if (
       principalId !== a.reviewerId ||
       releaseHash(value) !== a.certificateDigest ||
@@ -240,7 +244,7 @@ export class WidgetReleasePolicy {
     )
       releaseDeny('certificate_binding');
     if (
-      a.contract === PRODUCTION_RELEASE_AUTH &&
+      isProductionAuthorization(a) &&
       (c.contract !== PROFILE_CERT ||
         c.scope !== a.profileId ||
         c.profileDigest !== a.profileDigest ||
@@ -299,8 +303,7 @@ export class WidgetReleasePolicy {
         a.environment !== this.environment()
       )
         return null;
-      if (a.contract === PRODUCTION_RELEASE_AUTH)
-        this.productionTenant(tenantId);
+      if (isProductionAuthorization(a)) this.productionTenant(tenantId);
       if (
         instant(state.appliedAt) < instant(a.notBefore) ||
         instant(state.appliedAt) >= instant(a.expiresAt) ||
@@ -316,6 +319,12 @@ export class WidgetReleasePolicy {
         version: state.version,
         certificateDigest: a.certificateDigest,
         profileDigest: cert.contract === PROFILE_CERT ? PROFILE_DIGEST : null,
+        ...(a.contract === SINGLE_OPERATOR_RELEASE_AUTH
+          ? {
+              governance: SINGLE_OPERATOR,
+              independentHumanReview: false as const,
+            }
+          : {}),
       });
     } catch {
       return null;

@@ -1,0 +1,101 @@
+[
+  {
+    "id": "SO-M1",
+    "description": "SO-CONTRACT",
+    "file": "src/entitlements/widget-release-production.contract.ts",
+    "find": "v.independentHumanReview !== false",
+    "replace": "false",
+    "killers": [
+      "SO-CONTRACT"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SO-M2",
+    "description": "SO-CONTRACT",
+    "file": "src/entitlements/widget-release-production.contract.ts",
+    "find": "v.governance !== SINGLE_OPERATOR",
+    "replace": "false",
+    "killers": [
+      "SO-CONTRACT"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SO-M3",
+    "description": "SO-CONTRACT",
+    "file": "src/entitlements/widget-release.contract.ts",
+    "find": "v.reviewerId !== null",
+    "replace": "false",
+    "killers": [
+      "SO-CONTRACT"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SO-M4",
+    "description": "SO-CONTRACT",
+    "file": "src/entitlements/widget-release.contract.ts",
+    "find": "v.approverId !== v.operatorId",
+    "replace": "false",
+    "killers": [
+      "SO-CONTRACT"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SO-M5",
+    "description": "SO-SIGNATURE",
+    "file": "src/entitlements/widget-release-policy.service.ts",
+    "find": "releaseHash(value) !== a.certificateDigest",
+    "replace": "false",
+    "killers": [
+      "SO-SIGNATURE"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SO-M6",
+    "description": "SO-READER",
+    "file": "src/entitlements/widget-release-policy.service.ts",
+    "find": "if (isProductionAuthorization(a)) this.productionTenant(tenantId);\n      if (",
+    "replace": "if (false) this.productionTenant(tenantId);\n      if (",
+    "killers": [
+      "SO-READER"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "SO-M7",
+    "description": "SO-AUDIT-NOOP",
+    "file": "src/entitlements/widget-release.service.ts",
+    "find": "if (isProductionAuthorization(a)) {\n          const recorded",
+    "replace": "if (a.contract !== SINGLE_OPERATOR_RELEASE_AUTH && isProductionAuthorization(a)) {\n          const recorded",
+    "killers": [
+      "SO-AUDIT-NOOP"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "SO-M8",
+    "description": "SO-LIFECYCLE",
+    "file": "src/entitlements/widget-release.service.ts",
+    "find": "independentHumanReview: false as const",
+    "replace": "independentHumanReview: true as never",
+    "killers": [
+      "SO-LIFECYCLE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "SO-M9",
+    "description": "SO-REVOKE-VERSION",
+    "file": "src/entitlements/widget-release.service.ts",
+    "find": "granted.contract !== a.contract ||",
+    "replace": "false ||",
+    "killers": [
+      "SO-REVOKE-VERSION"
+    ],
+    "expect": "live-killed"
+  }
+]

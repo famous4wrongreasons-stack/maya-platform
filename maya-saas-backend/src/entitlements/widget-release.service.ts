@@ -1,5 +1,9 @@
 import { NO_HANDOFF_PROFILE } from './widget-release-profile.contract';
-import { PRODUCTION_RELEASE_AUTH } from './widget-release-production.contract';
+import {
+  isProductionAuthorization,
+  SINGLE_OPERATOR_RELEASE_AUTH,
+  SINGLE_OPERATOR,
+} from './widget-release-production.contract';
 import { ConflictException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { Prisma, TenantEntitlement } from '@prisma/client';
@@ -70,6 +74,9 @@ export class WidgetReleaseService {
         candidateSha: row?.configJson
           ? (object(row.configJson).candidateSha ?? null)
           : null,
+        ...(view?.governance === SINGLE_OPERATOR
+          ? { governance: SINGLE_OPERATOR, independentHumanReview: false }
+          : {}),
       };
     });
   }
@@ -154,17 +161,23 @@ export class WidgetReleaseService {
             state.certificateDigest !== a.certificateDigest
           )
             releaseDeny('revoke_target');
-          if (a.contract === PRODUCTION_RELEASE_AUTH) {
+          if (isProductionAuthorization(a)) {
             const granted = object(
               object(object(state.command).authorization).payload,
             );
             if (
-              granted.contract !== PRODUCTION_RELEASE_AUTH ||
+              granted.contract !== a.contract ||
               granted.releaseId !== a.releaseId ||
               granted.profileId !== a.profileId ||
               granted.profileDigest !== a.profileDigest ||
               granted.evidenceDigest !== a.evidenceDigest ||
-              granted.buildDigest !== a.buildDigest
+              granted.buildDigest !== a.buildDigest ||
+              (a.contract === SINGLE_OPERATOR_RELEASE_AUTH &&
+                (granted.governance !== SINGLE_OPERATOR ||
+                  granted.independentHumanReview !== false ||
+                  granted.reviewerId !== null ||
+                  granted.approverId !== a.approverId ||
+                  granted.operatorId !== a.operatorId))
             )
               releaseDeny('production_revoke_target');
           }
@@ -177,6 +190,9 @@ export class WidgetReleaseService {
             previousVersion,
             candidateSha: a.candidateSha,
             certificateDigest: a.certificateDigest,
+            ...(a.contract === SINGLE_OPERATOR_RELEASE_AUTH
+              ? { governance: SINGLE_OPERATOR, independentHumanReview: false }
+              : {}),
           };
         const data = {
           enabled: operation === 'grant',
@@ -213,7 +229,13 @@ export class WidgetReleaseService {
           appliedAt: now.toISOString(),
           expiresAt: updated.expiresAt?.toISOString() ?? null,
           auditId,
-          ...(a.contract === PRODUCTION_RELEASE_AUTH
+          ...(a.contract === SINGLE_OPERATOR_RELEASE_AUTH
+            ? {
+                governance: SINGLE_OPERATOR,
+                independentHumanReview: false as const,
+              }
+            : {}),
+          ...(isProductionAuthorization(a)
             ? {
                 execution: {
                   releaseId: a.releaseId,
@@ -256,7 +278,7 @@ export class WidgetReleaseService {
           tx,
         );
         // Production must fail closed even if an audit adapter silently drops the write.
-        if (a.contract === PRODUCTION_RELEASE_AUTH) {
+        if (isProductionAuthorization(a)) {
           const recorded = await tx.auditLog.findUnique({
             where: { id: auditId },
           });

@@ -16,6 +16,9 @@ import {
 /** A separate owner execution decision. A certificate, legacy authorization or config flag is insufficient. */
 export const PRODUCTION_RELEASE_AUTH =
   'maya.widget-release-production-authorization/1' as const;
+export const SINGLE_OPERATOR_RELEASE_AUTH =
+  'maya.widget-release-production-authorization/2' as const;
+export const SINGLE_OPERATOR = 'single-operator' as const;
 export interface ProductionReleaseAuthorization extends Omit<
   ReleaseAuthorization,
   'contract' | 'environment'
@@ -28,23 +31,56 @@ export interface ProductionReleaseAuthorization extends Omit<
   evidenceDigest: string;
 }
 
+/** One actual platform principal signs execution and binds the unsigned evidence certificate.
+ * No reviewer identity or second self-signature is manufactured. V1 remains unchanged. */
+export interface SingleOperatorReleaseAuthorization extends Omit<
+  ProductionReleaseAuthorization,
+  'contract' | 'reviewerId'
+> {
+  contract: typeof SINGLE_OPERATOR_RELEASE_AUTH;
+  reviewerId: null;
+  governance: typeof SINGLE_OPERATOR;
+  independentHumanReview: false;
+}
+export type ProductionAuthorization =
+  ProductionReleaseAuthorization | SingleOperatorReleaseAuthorization;
+export type AnyReleaseAuthorization =
+  ReleaseAuthorization | ProductionAuthorization;
+export function isProductionAuthorization(
+  a: AnyReleaseAuthorization,
+): a is ProductionAuthorization {
+  return (
+    a.contract === PRODUCTION_RELEASE_AUTH ||
+    a.contract === SINGLE_OPERATOR_RELEASE_AUTH
+  );
+}
+
 export function productionAuthorization(
   value: unknown,
-): ProductionReleaseAuthorization {
+): ProductionAuthorization {
+  const single =
+    (value as { contract?: unknown } | null)?.contract ===
+    SINGLE_OPERATOR_RELEASE_AUTH;
   const v = exact(value, [
     ...RELEASE_AUTHORIZATION_KEYS,
     'releaseId',
     'profileId',
     'profileDigest',
     'evidenceDigest',
+    ...(single ? ['governance', 'independentHumanReview'] : []),
   ]);
   if (
-    v.contract !== PRODUCTION_RELEASE_AUTH ||
+    (!single && v.contract !== PRODUCTION_RELEASE_AUTH) ||
     v.environment !== 'production' ||
     !['grant', 'revoke'].includes(String(v.operation))
   )
     releaseDeny('production_authorization');
-  validateAuthorizationFields(v);
+  if (
+    single &&
+    (v.governance !== SINGLE_OPERATOR || v.independentHumanReview !== false)
+  )
+    releaseDeny('single_operator_disclosure');
+  validateAuthorizationFields(v, single ? 'single-operator' : 'independent');
   identifier(v.releaseId);
   digest(v.evidenceDigest);
   if (v.profileId !== NO_HANDOFF_PROFILE || v.profileDigest !== PROFILE_DIGEST)
@@ -54,5 +90,5 @@ export function productionAuthorization(
     instant(v.grantExpiresAt) > instant(v.expiresAt)
   )
     releaseDeny('production_execution_window');
-  return v as unknown as ProductionReleaseAuthorization;
+  return v as unknown as ProductionAuthorization;
 }

@@ -16,9 +16,9 @@ Xcode runs the same verifier before every build. After an authorized build, veri
 
 The release manifest now includes the existing `.well-known/.htaccess` and `apple-app-site-association` at their existing production paths and committed bytes. Their contents are unchanged from `aecd770b91e94b74b26f76f6dc9e69775dc6bcab`. The same R01 gate checks all 44 rows and all four committed sources. Follow `maya-saas-backend/deploy/platform/beget-edge/RELAY-RELEASE.md`; the existing off-root archive is selected with `MAYA_R01_ARCHIVE_DIR=legacy-bundle-archive`. Run `node deploy/platform/beget-edge/relay-release.cjs verify` from the backend. This verify mode makes no repairs and does not evaluate PHP source or send business requests.
 
-## 1. Obtain identities and public trust material from the real custodians
+## 1. Single-operator identities and public trust material (owner decision 2026-10-03)
 
-The owner/approver and independent security reviewer supply their own Ed25519 public keys, key IDs and stable principal IDs through the operator's authenticated channel. The reviewer must differ from both approver and platform operator. They must control different private keys. Private keys remain in their existing custody/signing service; do not generate production keys in this repository, send them to chat, copy them to the application, or use the ephemeral test keys. Verify public-key fingerprints directly with each custodian.
+One actual founder may be release approver and platform operator. No second human is required for V2. The operator supplies one Ed25519 public key, key ID and the actual global platform User ID through an authenticated channel. Its private key stays under their control in a secure signer outside this repository and chat. Do not generate production keys during preparation, use ephemeral test keys, invent a reviewer, or produce a second self-signature. Verify the public-key fingerprint with the real custodian. Record `governance=single-operator`, `independentHumanReview=false`, `reviewerId=null`. V1 independent-review remains available under its unchanged contract; this procedure describes V2.
 
 The platform operator is a real active global `platform_owner` User, with `tenantId=null` and `membershipId=null`. Product `tenant_owner` is not this role. Do not promote the business owner, insert an AuthSession, mint a JWT manually, or reuse a tenant token. If the actual account credentials are unavailable, stop this execution step; use the established account recovery owner outside this release unit.
 
@@ -29,24 +29,24 @@ NODE_ENV=production
 WIDGET_RELEASE_ENVIRONMENT=production
 WIDGET_RELEASE_CANDIDATE_SHA=<exact newly certified 40-character SHA>
 WIDGET_RELEASE_PRODUCTION_TENANTS_JSON='["<exact authorized tenant id>"]'
-WIDGET_RELEASE_PRODUCTION_TRUST_JSON='{"<owner key id>":{"principalId":"<approver id>","purpose":"owner","publicKey":"<Ed25519 SPKI PEM with JSON escaped newlines>"},"<reviewer key id>":{"principalId":"<reviewer id>","purpose":"security","publicKey":"<different Ed25519 SPKI PEM with JSON escaped newlines>"}}'
+WIDGET_RELEASE_PRODUCTION_TRUST_JSON='{"<owner key id>":{"principalId":"<actual global platform User id>","purpose":"owner","publicKey":"<Ed25519 SPKI PEM with JSON escaped newlines>"}}'
 ```
 
-No wildcard/additional tenant, staging trust fallback, private PEM or shared signer is admissible. The public settings themselves do not grant authority. Validate offline from the exact built backend:
+No wildcard/additional tenant, staging trust fallback, private PEM or fabricated reviewer is admissible. The public settings themselves do not grant authority. Validate offline from the exact built backend:
 
 ```sh
-node scripts/widget-release-operator.cjs check-config "$AR1_ENV_FILE" "$AR1_TENANT" "$AR1_CANDIDATE_SHA"
+node scripts/widget-release-operator.cjs check-config "$AR1_ENV_FILE" "$AR1_TENANT" "$AR1_CANDIDATE_SHA" single-operator
 ```
 
 This prints only fingerprints/identities and `authorityGranted:false`, `sessionVerified:false`. Installation is a separate authorized operator action: first capture the current service/environment and rollback; then insert only these reviewed settings into the service's actual environment source, preserving unrelated settings and file ownership/mode. The tracked deployment unit names `/etc/maya-saas/live-widgets.env`; verify the running unit's EnvironmentFile before using that path. Use proper systemd environment quoting and verify effective parsed values/fingerprints without printing secrets. Never replace the entire production environment with the five-field preflight file. No restart or installation is performed by the offline checker.
 
-## 2. Independent certificate review and signature
+## 2. Review exact fresh evidence; prepare an unsigned canonical certificate
 
-Use only the new candidate's complete fresh strict-collector evidence and artifact hashes. The reviewer verifies all 163 applicable clauses, isolation, revocation, FBE2E and packaging; the two global HANDOFF duties remain STOP. Full-contract certification remains false. Inspect the production backend artifact with the existing compiled `WidgetReleasePolicy.buildDigest()` from its backend working directory; this hashes executable backend JS and its package lock. Compare web/native inventories separately to the certified carrier digest. A candidate label alone is insufficient.
+Use only the newly certified candidate's complete strict-collector receipts and artifact hashes. The owner/operator reviews all 163 applicable clauses, isolation, revocation, FBE2E and packaging; the two global HANDOFF duties remain STOP, full-contract certification remains false. This is explicitly not independent human review. Inspect the exact production backend artifact with compiled `WidgetReleasePolicy.buildDigest()` from its backend working directory. Compare web/native inventories to the certified carrier digest; a SHA label alone is insufficient.
 
-The reviewer creates a production certificate payload satisfying `profileCertificate` in `src/entitlements/widget-release-profile.contract.ts`. Preserve the exact candidate/build/carrier/registry/evidence/integration/FBE2E/revocation/isolation/dependency digests, matrix and global audit digest from reviewed receipts; use the fixed `closed-input.no-handoff@1` profile digest. Set `environment=production` and an actual reviewed issuance/expiry window. Do not simply relabel or sign an expired synthetic proposal without that review.
+Prepare the existing production `ProfileCertificate` payload validated by `profileCertificate`. Preserve exact candidate/build/carrier/registry/evidence/integration/FBE2E/revocation/isolation/dependency digests, matrix and global audit digest from the newly reviewed receipts, plus the fixed profile and registry digests. Set a current reviewed issuance/expiry window and `environment=production`; an expired synthetic proposal cannot simply be relabelled as fresh evidence. Do not change certified artifact bytes.
 
-Sign the UTF-8 bytes returned by the existing compiled `canonical(payload)` function using Ed25519 (no prehash). Wrap as exactly `{payload,keyId,signature}`, where `signature` is unpadded base64url (86 characters). `releaseHash(signedCertificate)` is SHA-256 of the canonical entire signed wrapper, not the raw JSON file and not just its payload. The operator may prepare bytes for review, but may not manufacture the reviewer's signature. The repository ships no production signing command or private key.
+For V2 there is NO separate certificate signature. `certificateDigest=releaseHash(rawCertificate)` hashes canonical sorted certificate JSON, not raw file formatting. The sole owner execution signature in step 4 binds that exact digest and therefore the whole certificate. An unsigned certificate by itself grants nothing. An old V1 signed certificate wrapper is refused in a V2 command.
 
 ## 3. Real platform-owner session and current CAS
 
@@ -56,7 +56,7 @@ Use that session to call `GET /api/platform/widget-release/<exact-tenant>/status
 
 ## 4. Separate owner execution authorization
 
-The owner signs exactly the production contract `maya.widget-release-production-authorization/1`, not a staging authorization. All fields below are mandatory:
+The owner signs exactly the production contract `maya.widget-release-production-authorization/2`, not a staging authorization. All fields below are mandatory:
 
 | Field | Binding |
 | --- | --- |
@@ -64,16 +64,18 @@ The owner signs exactly the production contract `maya.widget-release-production-
 | `operation` | `grant` |
 | `tenantId`, `environment` | Exact single authorized tenant; `production` |
 | `candidateSha`, `buildDigest` | Exact newly certified source and running compiled bytes |
-| `certificateDigest`, `evidenceDigest` | Canonical signed certificate hash; its reviewed evidence digest |
+| `certificateDigest`, `evidenceDigest` | Canonical raw certificate hash; its reviewed evidence digest |
 | `profileId`, `profileDigest` | Fixed `closed-input.no-handoff@1`; canonical fixed digest |
 | `operatorId` | Actual authenticated global platform User |
-| `approverId`, `reviewerId` | Principals bound to installed owner/security keys |
+| `approverId` | Same actual global User as operatorId and installed owner-key principal |
+| `reviewerId` | Literal null; no reviewer or second self-signature |
+| `governance`, `independentHumanReview` | Literal single-operator and false |
 | `rollbackOwnerId` | Real designated rollback owner |
 | `expectedVersion` | Current canonical status version |
 | `notBefore`, `expiresAt` | UTC ISO instants; positive window of at most 24 hours |
 | `grantExpiresAt` | Future instant, no later than authorization/certificate expiry and at most 24 hours after application |
 
-The owner signs canonical UTF-8 bytes with the same wrapper convention. Package the grant command as exactly `{authorization:<signed owner wrapper>,certificate:<signed reviewer wrapper>}`. Changing any field requires a new appropriate signature. No plan/trial grant or automatic renewal exists. The offline validation is:
+The one real owner/operator signs the UTF-8 bytes returned by compiled `canonical(authorizationPayload)` using Ed25519 with no prehash. Wrap exactly `{payload,keyId,signature}`; signature is unpadded base64url (86 characters). Package the grant command as exactly `{authorization:<one signed owner wrapper>,certificate:<raw ProfileCertificate>}`. Changing a signed field or certificate requires a new owner signature. Keep signing material outside Git, chat and logs; the checker never generates keys or signs. No plan/trial grant or automatic renewal exists. The offline validation is:
 
 ```sh
 node scripts/widget-release-operator.cjs check-command "$AR1_ENV_FILE" "$AR1_TENANT" "$AR1_CANDIDATE_SHA" "$AR1_SIGNED_COMMAND_FILE" "$AR1_PLATFORM_OPERATOR_ID"
@@ -87,6 +89,13 @@ Keep the designated rollback operator/session and owner signer available for the
 
 After authorized revoke, status must be disabled and old widget tokens refused. Natural expiry also fails closed; no auto-renew. Revoke the entitlement before rolling the backend back to an artifact that cannot interpret this state. Retain the independent database/runtime rollback artifacts and the exact migration plan. Do not roll back unrelated production data. Readiness for this procedure is distinct from performing a grant/revoke or asserting an unobserved production result.
 
-## Remaining external inputs
+## Unified owner actions before execution
 
-Real owner public key/identity/custody confirmation; independent reviewer public key/identity and reviewed production certificate signature; actual global platform-owner login/session; separately signed execution authorization tied to the **new** candidate and current CAS. If any is missing, stop that execution step. No tenant authority, caller-authored JSON, test signature or historical receipt substitutes for it.
+1. Confirm access to the existing global platform_owner account (not the salon tenant_owner). If credentials are unavailable, complete established account recovery outside this unit. Do not fabricate/promote an account or mint a session manually.
+2. Supply one controlled Ed25519 signer's public key, key ID and fingerprint, with principal equal to that global User. Keep the private key in a secure signing location; no private secret belongs in Git or chat. If no signer exists, prepare it outside the repository after explicit owner approval.
+3. Review the new exact candidate, fresh certificate evidence, tenant, runtime bytes, current CAS, max-24-hour window and rollback owner. Provide separate production execution authorization and the single V2 execution signature. No independent reviewer is required; absence of review is explicitly recorded.
+4. For the later iPhone installation, connect/unlock the correct device and permit local developer access. Confirm the existing Apple development signing identity/profile is valid and covers that device. Renew expired provisioning through the actual Apple account owner; no silent certificate/profile generation during preparation.
+
+After separate execution permission, the agent can capture backup/pre-state, validate trust configuration, apply only the certified pending migrations, deploy exact artifacts, obtain the actual canonical session using privately supplied credentials, perform health checks, dry-run/grant/revoke, sync/build and install as authorized. Passwords, private keys and token values must not enter chat or logs. Owner-controlled signing/interactive account access cannot be fabricated by the agent. Stop if any necessary external input is absent; technical certification alone does not mean READY for production.
+
+Before execution, rehearse backup/restore, migration, canonical global login, trust validation, exact signed dry-run/grant/revoke/expiry/old-token refusal and packaging in an isolated test database with ephemeral keys. Real production state is read-only during preparation. Record all actual manual prerequisites in the release checkpoint and do not perform deploy, migration, grant, real OTP/provider effects or iPhone installation until separately authorized.

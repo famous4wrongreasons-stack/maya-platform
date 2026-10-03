@@ -35,3 +35,10 @@ for (const [name, edit] of [
   ['private key material', t=>t.owner.publicKey='-----BEGIN PRIVATE KEY-----'],
   ['invalid public key', t=>t.owner.publicKey='invalid'],
 ]) test(name+' refuses',()=>{const e=valid(),t=structuredClone(trust);edit(t);e.WIDGET_RELEASE_PRODUCTION_TRUST_JSON=JSON.stringify(t);assert.throws(()=>check(e));});
+
+test('single-operator preflight accepts one real owner key and explicitly records absent independent review',()=>{
+ const e=valid();e.WIDGET_RELEASE_PRODUCTION_TRUST_JSON=JSON.stringify({owner:trust.owner});
+ const r=checkConfig(e,'test-tenant','a'.repeat(40),'single-operator');
+ assert.equal(r.independentHumanReview,false);assert.equal(r.keys.length,1);assert.equal(r.authorityGranted,false);assert.equal(r.sessionVerified,false);
+ for(const t of [{},trust,{security:trust.security}]) {e.WIDGET_RELEASE_PRODUCTION_TRUST_JSON=JSON.stringify(t);assert.throws(()=>checkConfig(e,'test-tenant','a'.repeat(40),'single-operator'));}
+});

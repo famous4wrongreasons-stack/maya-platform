@@ -1,5 +1,5 @@
 import type { ProfileCertificate } from './widget-release-profile.contract';
-import type { ProductionReleaseAuthorization } from './widget-release-production.contract';
+import type { AnyReleaseAuthorization } from './widget-release-production.contract';
 import { createHash } from 'node:crypto';
 import { ForbiddenException } from '@nestjs/common';
 import { WIDGET_RELEASE_CLAUSES } from './widget-release-clauses';
@@ -62,8 +62,9 @@ export interface ReleaseCertificate {
   matrix: ReleaseClause[];
 }
 export interface ReleaseCommand {
-  authorization: Signed<ReleaseAuthorization | ProductionReleaseAuthorization>;
-  certificate?: Signed<ReleaseCertificate | ProfileCertificate>;
+  authorization: Signed<AnyReleaseAuthorization>;
+  certificate?:
+    Signed<ReleaseCertificate | ProfileCertificate> | ProfileCertificate;
 }
 export interface ReleaseReceipt {
   contract: 'maya.widget-release-receipt/1';
@@ -74,13 +75,15 @@ export interface ReleaseReceipt {
   certificateDigest: string;
   actorId: string;
   approverId: string;
-  reviewerId: string;
+  reviewerId: string | null;
   rollbackOwnerId: string;
   previousVersion: string;
   version: string;
   appliedAt: string;
   expiresAt: string | null;
   auditId: string;
+  governance?: 'single-operator';
+  independentHumanReview?: false;
   execution?: {
     releaseId: string;
     environment: 'production';
@@ -168,13 +171,15 @@ export function authorization(value: unknown): ReleaseAuthorization {
 }
 
 /** Shared syntax/window rules only. Each version separately admits its environment and keys. */
-export function validateAuthorizationFields(v: Record<string, unknown>): void {
+export function validateAuthorizationFields(
+  v: Record<string, unknown>,
+  review: 'independent' | 'single-operator' = 'independent',
+): void {
   for (const k of [
     'authorizationId',
     'tenantId',
     'operatorId',
     'approverId',
-    'reviewerId',
     'rollbackOwnerId',
   ])
     identifier(v[k]);
@@ -193,8 +198,14 @@ export function validateAuthorizationFields(v: Record<string, unknown>): void {
     releaseDeny('authorization_window');
   if (v.operation === 'grant') instant(v.grantExpiresAt);
   else if (v.grantExpiresAt !== null) releaseDeny('revoke_expiry');
-  if (v.reviewerId === v.approverId || v.reviewerId === v.operatorId)
-    releaseDeny('independent_reviewer');
+  if (review === 'single-operator') {
+    if (v.reviewerId !== null || v.approverId !== v.operatorId)
+      releaseDeny('single_operator_identity');
+  } else {
+    identifier(v.reviewerId);
+    if (v.reviewerId === v.approverId || v.reviewerId === v.operatorId)
+      releaseDeny('independent_reviewer');
+  }
 }
 export function certificate(value: unknown): ReleaseCertificate {
   const v = exact(value, [

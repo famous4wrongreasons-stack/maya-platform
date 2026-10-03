@@ -6,7 +6,9 @@ const { createPublicKey, createHash } = require('node:crypto');
 const { parse } = require('dotenv');
 
 const id = (v) => typeof v === 'string' && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$/.test(v);
-function checkConfig(env, tenantId, candidateSha) {
+function checkConfig(env, tenantId, candidateSha, governance = 'independent-review') {
+  assert.ok(['independent-review', 'single-operator'].includes(governance), 'explicit governance required');
+  const single = governance === 'single-operator';
   assert.ok(id(tenantId) && /^[0-9a-f]{40}$/.test(candidateSha), 'exact tenant and candidate required');
   assert.equal(env.NODE_ENV, 'production', 'production runtime required');
   assert.equal(env.WIDGET_RELEASE_ENVIRONMENT, 'production', 'separate production environment required');
@@ -14,7 +16,7 @@ function checkConfig(env, tenantId, candidateSha) {
   assert.deepEqual(JSON.parse(env.WIDGET_RELEASE_PRODUCTION_TENANTS_JSON || '[]'), [tenantId], 'one exact production tenant required');
   const trust = JSON.parse(env.WIDGET_RELEASE_PRODUCTION_TRUST_JSON || '{}');
   assert.ok(trust && !Array.isArray(trust) && typeof trust === 'object');
-  assert.equal(Object.keys(trust).length, 2, 'narrow initial installation requires exactly owner and security keys');
+  assert.equal(Object.keys(trust).length, single ? 1 : 2, 'exact initial-launch trust set required');
   const entries = Object.entries(trust).map(([keyId, value]) => {
     assert.ok(id(keyId) && value && typeof value === 'object');
     assert.deepEqual(Object.keys(value).sort(), ['principalId', 'publicKey', 'purpose']);
@@ -25,23 +27,26 @@ function checkConfig(env, tenantId, candidateSha) {
     return { keyId, principalId: value.principalId, purpose: value.purpose,
       fingerprint: createHash('sha256').update(key.export({ format: 'der', type: 'spki' })).digest('hex') };
   });
-  assert.deepEqual(entries.map((x) => x.purpose).sort(), ['owner', 'security']);
-  assert.equal(new Set(entries.map((x) => x.principalId)).size, 2, 'independent reviewer identity required');
-  assert.equal(new Set(entries.map((x) => x.fingerprint)).size, 2, 'independent reviewer key required');
-  return { status: 'PASS', tenantId, candidateSha, keys: entries, authorityGranted: false, sessionVerified: false };
+  assert.deepEqual(entries.map((x) => x.purpose).sort(), single ? ['owner'] : ['owner', 'security']);
+  assert.equal(new Set(entries.map((x) => x.principalId)).size, single ? 1 : 2, 'distinct configured identities required');
+  assert.equal(new Set(entries.map((x) => x.fingerprint)).size, single ? 1 : 2, 'distinct configured keys required');
+  return { status: 'PASS', tenantId, candidateSha, keys: entries, governance,
+    ...(single ? { independentHumanReview: false } : {}), authorityGranted: false, sessionVerified: false };
 }
 
 function main(argv) {
   const [mode, configFile, tenantId, candidateSha, commandFile, operatorId] = argv;
-  assert.ok((mode === 'check-config' && argv.length === 4) || (mode === 'check-command' && argv.length === 6),
-    'usage: check-config ENV TENANT SHA | check-command ENV TENANT SHA SIGNED_COMMAND PLATFORM_OPERATOR_ID');
+  assert.ok((mode === 'check-config' && [4, 5].includes(argv.length)) || (mode === 'check-command' && argv.length === 6),
+    'usage: check-config ENV TENANT SHA [single-operator] | check-command ENV TENANT SHA SIGNED_COMMAND PLATFORM_OPERATOR_ID');
   const env = parse(fs.readFileSync(configFile));
-  const result = checkConfig(env, tenantId, candidateSha);
+  const command = mode === 'check-command' ? JSON.parse(fs.readFileSync(commandFile, 'utf8')) : null;
+  const single = command?.authorization?.payload?.contract === 'maya.widget-release-production-authorization/2';
+  const result = checkConfig(env, tenantId, candidateSha,
+    mode === 'check-config' ? commandFile : single ? 'single-operator' : 'independent-review');
   if (mode === 'check-command') {
     assert.ok(id(operatorId), 'exact operator required');
     const { ConfigService } = require('@nestjs/config');
     const { WidgetReleasePolicy } = require('../dist/src/entitlements/widget-release-policy.service.js');
-    const command = JSON.parse(fs.readFileSync(commandFile, 'utf8'));
     const operation = command?.authorization?.payload?.operation;
     assert.ok(['grant', 'revoke'].includes(operation));
     const policy = new WidgetReleasePolicy(new ConfigService(env));
