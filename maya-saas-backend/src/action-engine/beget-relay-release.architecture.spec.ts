@@ -120,8 +120,8 @@ describe('R01 live artifact and release/recovery protection', () => {
 
   it('registers every live alias, PWA backup and inaccessible historical relay copy', () => {
     const entries = release.manifest.entries;
-    expect(entries).toHaveLength(42);
-    expect(new Set(entries.map((e) => e.path)).size).toBe(42);
+    expect(entries).toHaveLength(44);
+    expect(new Set(entries.map((e) => e.path)).size).toBe(44);
     expect(entries.filter((e) => e.role.endsWith('php'))).toHaveLength(10);
     expect(entries.filter((e) => e.role === 'preserved_html')).toHaveLength(2);
     expect(entries.filter((e) => e.role === 'preserved_backup')).toHaveLength(
@@ -142,7 +142,7 @@ describe('R01 live artifact and release/recovery protection', () => {
     expect(entries.filter((e) => e.role === 'blocked_archive')).toHaveLength(
       16,
     );
-    expect(entries.filter((e) => e.role === 'hosting_config')).toHaveLength(9);
+    expect(entries.filter((e) => e.role === 'hosting_config')).toHaveLength(10);
     expect(() => release.validateObserved({ found: [], rows: [] })).toThrow();
     expect(() =>
       release.validateObserved({
@@ -157,6 +157,42 @@ describe('R01 live artifact and release/recovery protection', () => {
         rows: [],
       }),
     ).toThrow();
+  });
+
+  it('registers the unchanged AASA and its content-type rule with committed/live hash equality', () => {
+    const expected = [
+      [
+        'well-known/.htaccess',
+        'hosting_config',
+        'ab3175467446655265bcaf284c3d7d9447825a3f4801999996e62bd90e5dd251',
+      ],
+      [
+        'well-known/apple-app-site-association',
+        'hosting_asset',
+        sha(
+          read(
+            'deploy/platform/beget-edge/well-known/apple-app-site-association',
+          ),
+        ),
+      ],
+    ];
+    for (const [file, role, hash] of expected) {
+      const entry = release.manifest.entries.find(
+        (e) => e.committedSource === file,
+      );
+      expect(entry).toEqual({
+        path: '/home/m/mocine3388/mayaos.ru/public_html/.' + file,
+        role,
+        sha256: hash,
+        committedSource: file,
+      });
+      expect(release.validateCommittedSources([entry!])).toBe(1);
+      expect(() =>
+        release.validateCommittedSources([
+          { ...entry!, sha256: '0'.repeat(64) },
+        ]),
+      ).toThrow();
+    }
   });
 
   it('blocks backend upload/activation and checks post-state; the backend cannot replace Beget pages', () => {
@@ -237,18 +273,20 @@ describe('R01 live artifact and release/recovery protection', () => {
     );
   });
 
-  it('pins the two repository-owned routing files against their committed bytes', () => {
+  it('pins all four repository-owned routing and AASA files against their committed bytes', () => {
     const owned = release.manifest.entries.filter((e) => e.committedSource);
-    expect(owned).toHaveLength(2);
+    expect(owned).toHaveLength(4);
     expect(owned.map((e) => e.committedSource).sort()).toEqual([
       '.htaccess',
       'rc/r12-legacy-team-media.htaccess',
+      'well-known/.htaccess',
+      'well-known/apple-app-site-association',
     ]);
     for (const entry of owned)
       expect(
         sha(read('deploy/platform/beget-edge/' + entry.committedSource!)),
       ).toBe(entry.sha256);
-    expect(release.validateCommittedSources(release.manifest.entries)).toBe(2);
+    expect(release.validateCommittedSources(release.manifest.entries)).toBe(4);
   });
 
   // Integration-only: consumes the separately built presentation artifact. Backend verification

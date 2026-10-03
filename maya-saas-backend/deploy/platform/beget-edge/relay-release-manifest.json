@@ -214,6 +214,18 @@
       "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/backups/.htaccess",
       "sha256": "c4491dbf4a323734d29ec036ce17e4cd74425962c5481c93c1297287c342f851",
       "role": "hosting_config"
+    },
+    {
+      "path": "/home/m/mocine3388/mayaos.ru/public_html/.well-known/.htaccess",
+      "sha256": "ab3175467446655265bcaf284c3d7d9447825a3f4801999996e62bd90e5dd251",
+      "role": "hosting_config",
+      "committedSource": "well-known/.htaccess"
+    },
+    {
+      "path": "/home/m/mocine3388/mayaos.ru/public_html/.well-known/apple-app-site-association",
+      "sha256": "c4dac0d3f673977bfc3959a680212a07759bc2744573029b94003a75b884d017",
+      "role": "hosting_asset",
+      "committedSource": "well-known/apple-app-site-association"
     }
   ],
   "archive": {

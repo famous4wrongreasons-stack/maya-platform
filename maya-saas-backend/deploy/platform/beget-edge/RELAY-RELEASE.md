@@ -25,7 +25,7 @@ The existing R01 registered-overlay checks remain mandatory for alias
 changes. `relay-release-manifest.json` pins the 26 inspected PHP artifacts in three mapped roots (10 active,
 16 denied), seven preserved HTML/backup files — two served maintenance pages and
 five `archived_offroot` bundles the owner-approved R3 ruling moved out of the
-served roots — and nine local routing files. Archive content
+served roots — and ten local routing files. Archive content
 is historical evidence, not a permitted rollback target.
 
 `node deploy/platform/beget-edge/relay-release.cjs verify` reads the live manifest,
@@ -112,3 +112,10 @@ pre-state. An `archived_offroot` artifact is absent by ruling, so it is pinned b
 absence in `validateObserved` and by hash in the private archive, never by
 presence in that pre-state. `verify` never accepts the incident pre-state. A failed post-state check blocks backend cutover; never
 restore unsafe bytes as a rollback. No business/provider/message proof is used.
+
+## AASA release inventory
+
+The existing Apple association and its `.well-known/.htaccess` content-type rule are both registered
+with their unchanged committed hashes and `committedSource`. The nested rule is part of the finite
+routing inventory even though it is outside the site-root `.htaccess`. Unknown nested routing still
+fails closed; its location is never an exemption. The AASA content is a pinned `hosting_asset`.

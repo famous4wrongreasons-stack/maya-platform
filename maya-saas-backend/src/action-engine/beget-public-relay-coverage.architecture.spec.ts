@@ -294,7 +294,7 @@ describe('R01 archived-off-root reconciliation — mutation rows', () => {
 
   it('fails closed when a pinned hash is edited to match a changed file', () => {
     const owned = entries().filter((e) => e.committedSource);
-    expect(owned).toHaveLength(2);
+    expect(owned).toHaveLength(4);
     // Committed bytes unchanged, pin moved to a new "live" hash: manifest-only weakening.
     for (const entry of owned)
       expect(() =>
@@ -307,6 +307,9 @@ describe('R01 archived-off-root reconciliation — mutation rows', () => {
     try {
       mkdirSync(join(home, 'rc'), { recursive: true });
       for (const entry of owned) {
+        mkdirSync(resolve(home, entry.committedSource!, '..'), {
+          recursive: true,
+        });
         writeFileSync(
           join(home, entry.committedSource!),
           readFileSync(join(gateDir, entry.committedSource!)),
