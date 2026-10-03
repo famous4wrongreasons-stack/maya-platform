@@ -15,6 +15,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import * as R from './tools/ratchets.mjs';
+import { assertTree, writeTree } from './tools/payload-files.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SHELL = path.join(ROOT, '..', 'maya-chat-shell');
@@ -182,7 +183,6 @@ if (!flags.has('--typecheck')) {
   }
   const dist = path.join(ROOT, 'dist');
   const out = path.join(dist, target);
-  fs.rmSync(out, { recursive: true, force: true });
   const built = await esbuild.build({
     entryPoints: [path.join(ROOT, 'src', 'main.tsx')],
     bundle: true,
@@ -193,63 +193,57 @@ if (!flags.has('--typecheck')) {
     entryNames: 'm/[hash]/main',
     assetNames: 'a/[hash]/[name]',
     metafile: true,
+    write: false,
     minify: false,
     sourcemap: false,
     legalComments: 'none',
   });
-  void built;
-  const jsFiles = [];
-  const collect = (dir) => {
-    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-      const p2 = path.join(dir, e.name);
-      if (e.isDirectory()) collect(p2);
-      else if (e.name.endsWith('.js')) jsFiles.push(p2);
-    }
-  };
-  collect(out);
-
-  // The endpoint substitution: one string, on the emitted bytes, so nothing else in the tree has to
-  // know which carrier it is running on.
-  let mainJs = jsFiles[0];
-  const webJs = fs.readFileSync(mainJs, 'utf8');
+  // Build the expected payload in memory even for verification. A caller-authored inventory
+  // cannot substitute an older shell, and --verify-output never repairs a failing artifact.
+  const javascript = built.outputFiles.filter((f) => f.path.endsWith('.js'));
+  if (javascript.length !== 1) throw new Error('React payload must have exactly one entry chunk');
+  const webJs = javascript[0].text;
   const capJs = webJs.replace(API_NEEDLE(TARGETS.web.apiBase), API_NEEDLE(TARGETS.capacitor.apiBase));
-  if (target === 'capacitor') {
-    fs.writeFileSync(mainJs, capJs);
-    // RE-ADDRESS after substituting. esbuild hashed the pre-substitution bytes, so without this the
-    // two targets would sit at the SAME content address with DIFFERENT payloads — which is the one
-    // thing a content-addressed path must never do.
-    const digest = createHash('sha256').update(capJs).digest('hex').slice(0, 16);
-    const oldDir = path.dirname(mainJs);
-    const newDir = path.join(path.dirname(oldDir), digest);
-    fs.renameSync(oldDir, newDir);
-    mainJs = path.join(newDir, path.basename(mainJs));
-    jsFiles[0] = mainJs;
-  }
+  const webRel = path.relative(out, javascript[0].path).split(path.sep).join('/');
+  const capRel = 'm/' + createHash('sha256').update(capJs).digest('hex').slice(0, 16) + '/main.js';
+  const rel = target === 'capacitor' ? capRel : webRel;
+  const payloadJs = target === 'capacitor' ? capJs : webJs;
+  const expected = new Map([[rel, Buffer.from(payloadJs)]]);
 
   // The emitted bundle is scanned too, against the narrower BUNDLE_BANS: a dependency can carry
   // what a source file may not, and those names have no legitimate reason to exist in the artefact.
   const post = [];
-  for (const abs of jsFiles) post.push(...R.scanBundle(path.relative(ROOT, abs).split(path.sep).join('/'), fs.readFileSync(abs, 'utf8')));
+  post.push(...R.scanBundle(`dist/${target}/${rel}`, payloadJs));
   report(post);
 
-  const rel = jsFiles.length ? path.relative(out, jsFiles[0]).split(path.sep).join('/') : '';
   // The stylesheet is emitted beside the page and re-checked as EMITTED bytes, because that is what
   // a browser loads — the source check would miss anything the copy step could do.
   const cssText = fs.readFileSync(path.join(ROOT, 'src', 'styles.css'), 'utf8');
-  fs.writeFileSync(path.join(out, 'styles.css'), cssText);
+  expected.set('styles.css', Buffer.from(cssText));
   report(R.checkCss(`dist/${target}/styles.css`, cssText));
 
   const template = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
   const html = template
     .replace('%MAIN%', './' + rel)
     .replace(`connect-src ${TARGETS.web.connectSrc}`, `connect-src ${TARGETS[target].connectSrc}`);
-  fs.writeFileSync(path.join(out, 'index.html'), html);
+  expected.set('index.html', Buffer.from(html));
   report(R.checkHtml(`dist/${target}/index.html`, html));
 
   if (target === 'capacitor') {
-    const webHtml = template.replace('%MAIN%', './' + rel);
+    const webHtml = template.replace('%MAIN%', './' + webRel);
     report(targetProof(webJs, capJs, webHtml, html, cssText, cssText));
     console.log('capacitor proof: PASS (one endpoint string differs; index.html differs only in digest path and connect-src; styles.css identical; no other origin in the artefact)');
   }
-  console.log(`built -> dist/${target}/${rel}  (${jsFiles.length} chunk(s), ${(fs.statSync(jsFiles[0]).size / 1024).toFixed(1)} KB)`);
+  // Retain the already-approved install identity and artwork, not the shell's entry or UI.
+  expected.set('manifest.webmanifest', fs.readFileSync(path.join(SHELL, 'entry/manifest.webmanifest')));
+  for (const name of ['maya-192.png', 'maya-512.png', 'maya-512-maskable.png', 'maya-apple-180.png'])
+    expected.set('icons/' + name, fs.readFileSync(path.join(SHELL, 'brand/icons', name)));
+  if (!html.includes('<link rel="manifest" href="./manifest.webmanifest">'))
+    throw new Error('React PWA manifest must be linked from the delivered page');
+  if (flags.has('--verify-output')) assertTree(out, expected);
+  else writeTree(out, expected);
+  const require = createRequire(import.meta.url);
+  const { verifyShellCandidate } = require('../maya-saas-backend/deploy/platform/beget-edge/verify-edge-candidate.cjs');
+  verifyShellCandidate(out, { publishPath: '/maya-chat-shell/' });
+  console.log(`${flags.has('--verify-output') ? 'verified' : 'built'} React AChat -> dist/${target}/${rel} (${expected.size} files)`);
 }

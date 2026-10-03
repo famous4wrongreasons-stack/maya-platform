@@ -1,32 +1,33 @@
 # The iOS carrier
 
-This carries MAYA onto iPhone. **It is not a second Maya.** It owns no booking, no CRM, no widgets,
-no authority and no product UI — those live once, in `../maya-chat-shell`, and both carriers load the
-same bytes.
+The single release web payload owner is `../maya-carrier-react`: the certified React AChat over
+Maya's headless runtime. `maya-chat-shell` remains a runtime library and test harness; its DOM shell
+is not the production PWA or native payload.
+
+## Build and verify locally
 
 ```
-                  MAYA BACKEND
-                       ↑
-                mayaos.ru/api
-                       ↑
-             SHARED CHAT-FIRST SHELL          ../maya-chat-shell
-                ↙             ↘
-             PWA            iOS               this directory
-                           Capacitor
+npm ci
+npm run sync
+npm run verify
+npm run open
 ```
 
-## Build it
+`sync` invokes `maya-carrier-react/tools/release.mjs`. It compiles the runtime dependency, builds both
+React targets, verifies their exact file sets and approved endpoint substitution, invokes Capacitor,
+and verifies the actual generated `App/public` and native configuration. Xcode also runs that refusing
+verifier before every build. Use `node ../maya-carrier-react/tools/release.mjs verify-app PATH/App.app`
+after a build to check the packaged resources. No command above installs, publishes, grants, or logs in.
 
-```
-npm install
-npm run sync      # rebuilds the shell for the capacitor target, then copies it in
-npm run open      # opens Xcode
-```
+Web and native share the React entrypoint, CSS, approved manifest and icons. The existing PWA install
+identity `/maya-chat-shell/` is retained as identity metadata; it does not select the old shell's code.
+The production web artifact is `../maya-carrier-react/dist/web`, published at that approved path.
+The native artifact is `../maya-carrier-react/dist/capacitor`. Only the one approved API endpoint string,
+its content address and the corresponding CSP connect-src differ. No application behavior is native-owned.
 
-`npm run sync` is the only supported way to put web assets here. It runs
-`node ../maya-chat-shell/build.mjs --target=capacitor`, whose **capacitor proof** refuses any
-difference between the two targets except the one line that is allowed to differ. So a drift between
-the PWA and the app cannot survive a sync — it fails the build instead.
+Verification reconstructs expected bytes from the fixed React source. It does not trust an inventory
+supplied with a candidate. Extra files, nonempty bridge placeholders, remote-server overrides, old-shell
+selection, missing manifest or changed generated assets fail closed. A failed check does not repair assets.
 
 ## What may live here, and what may not
 

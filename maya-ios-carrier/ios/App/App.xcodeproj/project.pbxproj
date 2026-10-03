@@ -84,6 +84,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 504EC3161FED79650016851F /* Build configuration list for PBXNativeTarget "App" */;
 			buildPhases = (
+				A11AFE0001000000000000A2 /* Verify canonical React AChat payload */,
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
@@ -169,6 +170,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "set -euo pipefail\n# 🔴 A release build must not carry the development-only mayaos:// auth transport.\n# Universal Links are the real transport; the custom scheme exists solely because Associated\n# Domains is unavailable to a personal team. This refuses the build rather than shipping an app\n# that accepts a callback over a scheme any other app may also claim.\n#\n# It reads the SCHEMES only. An earlier version grepped the whole CFBundleURLTypes dump and\n# matched CFBundleURLName (ru.mayaos.app.devauth), refusing a release that was in fact clean.\nPLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n[ -f \"$PLIST\" ] || exit 0\nSCHEMES=$(/usr/bin/plutil -extract CFBundleURLTypes json -o - \"$PLIST\" 2>/dev/null | /usr/bin/python3 -c '\nimport json, sys\ntry:\n    types = json.load(sys.stdin)\nexcept Exception:\n    types = []\nfor entry in types or []:\n    for scheme in entry.get(\"CFBundleURLSchemes\") or []:\n        if scheme:\n            print(scheme)\n' || true)\nif [ \"${CONFIGURATION}\" = \"Debug\" ]; then\n  case \"$SCHEMES\" in *mayaos*) echo \"note: Debug carries the development-only mayaos:// auth transport.\" ;;\n    *) echo \"warning: this Debug build declares no mayaos:// scheme, so the development Telegram callback cannot reach the app\" ;; esac\n  exit 0\nfi\nif [ -n \"$SCHEMES\" ]; then\n  echo \"error: configuration ${CONFIGURATION} declares the URL scheme(s): ${SCHEMES}. A release build must carry none: its callback is the Universal Link https://mayaos.ru/api/auth/oauth/native/callback, which requires the Associated Domains entitlement.\" >&2\n  exit 1\nfi\nENT=\"${SRCROOT}/${CODE_SIGN_ENTITLEMENTS:-}\"\nif [ -z \"${CODE_SIGN_ENTITLEMENTS:-}\" ] || [ ! -f \"$ENT\" ] || ! /usr/libexec/PlistBuddy -c \"Print :com.apple.developer.associated-domains\" \"$ENT\" >/dev/null 2>&1; then\n  echo \"error: configuration ${CONFIGURATION} declares no associated-domains entitlement, so it has no auth callback at all. Release requires applinks:mayaos.ru.\" >&2\n  exit 1\nfi\necho \"note: ${CONFIGURATION} carries no dev auth scheme and declares applinks:mayaos.ru.\"\n";
+		};
+
+		A11AFE0001000000000000A2 /* Verify canonical React AChat payload */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = ();
+			inputPaths = ();
+			name = "Verify canonical React AChat payload";
+			outputPaths = ();
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "set -euo pipefail\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\"\nnode \"${SRCROOT}/../../../maya-carrier-react/tools/release.mjs\" verify-native\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

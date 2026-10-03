@@ -4,10 +4,11 @@
   "private": true,
   "description": "The canonical iOS carrier for MAYA. It carries the shared chat-first shell and owns no product logic.",
   "scripts": {
-    "shell": "node ../maya-chat-shell/build.mjs --target=capacitor",
-    "sync": "npm run shell && cap sync ios",
+    "shell": "node ../maya-carrier-react/tools/release.mjs build",
+    "sync": "node ../maya-carrier-react/tools/release.mjs sync",
     "open": "cap open ios",
-    "doctor": "cap doctor ios"
+    "doctor": "cap doctor ios",
+    "verify": "node ../maya-carrier-react/tools/release.mjs verify-native"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",

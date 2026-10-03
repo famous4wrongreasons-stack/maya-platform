@@ -12,7 +12,10 @@
     "check": "node build.mjs --typecheck",
     "typecheck": "node build.mjs --typecheck",
     "serve": "node tools/serve.mjs",
-    "test": "node test/build-harness.mjs && node --test test/parity.test.mjs test/reply-link.test.mjs test/voice.test.mjs test/detail.test.mjs"
+    "test": "node test/build-harness.mjs && node --test test/parity.test.mjs test/reply-link.test.mjs test/voice.test.mjs test/detail.test.mjs",
+    "release:build": "node tools/release.mjs build",
+    "release:verify": "node tools/release.mjs verify",
+    "test:release": "node --test test/release.test.mjs"
   },
   "dependencies": {
     "react": "19.2.8",

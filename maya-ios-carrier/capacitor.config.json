@@ -1,7 +1,7 @@
 {
   "appId": "ru.mayaos.app",
   "appName": "MAYA",
-  "webDir": "../maya-chat-shell/dist/capacitor",
+  "webDir": "../maya-carrier-react/dist/capacitor",
   "ios": {
     "contentInset": "never",
     "scrollEnabled": true,

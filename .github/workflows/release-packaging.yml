@@ -1,0 +1,38 @@
+name: Canonical React release packaging
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  release-packaging:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: maya-saas-backend
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: maya-carrier-react
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: maya-ios-carrier
+      - run: npm run sync
+        working-directory: maya-ios-carrier
+      - run: npm test && npm run test:release
+        working-directory: maya-carrier-react
+      - run: node --test scripts/widget-release-operator.test.cjs
+        working-directory: maya-saas-backend
+      - run: npx prisma generate && npm run build
+        working-directory: maya-saas-backend
+      - run: node --test scripts/widget-release-operator.compiled-test.cjs
+        working-directory: maya-saas-backend
+      - name: Unsigned local build, no device install or account provisioning
+        run: xcodebuild -project maya-ios-carrier/ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -derivedDataPath "$RUNNER_TEMP/maya-ios" CODE_SIGNING_ALLOWED=NO build
+      - name: Verify the actual app bundle, not just the sync input
+        run: node maya-carrier-react/tools/release.mjs verify-app "$RUNNER_TEMP/maya-ios/Build/Products/Debug-iphonesimulator/App.app"

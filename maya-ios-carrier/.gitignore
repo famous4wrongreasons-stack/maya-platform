@@ -1,5 +1,5 @@
-# The carrier carries the shell; it never stores a copy of it.
-# `npm run sync` rebuilds maya-chat-shell for the capacitor target and copies it in,
+# The carrier carries React AChat; it never stores a copy of it.
+# `npm run sync` rebuilds maya-carrier-react for the capacitor target and copies it in,
 # so a committed copy could silently drift from the shared source. It is build output.
 ios/App/App/public/
 ios/App/App/capacitor.config.json
