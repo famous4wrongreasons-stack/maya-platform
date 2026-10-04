@@ -77,6 +77,10 @@ jobs:
       # K3 structural checks (widget gate pipeline): one ordered array, no silent pass, the owner-ports
       # boundary, the dark entitlement. Blocking: a red check fails the job.
       - run: node scripts/k3-gateway-check.mjs
+      # The unfiltered R01 integration proof consumes this generated runtime fixture.
+      # This does not select a release payload: PWA/iOS packaging remains React AChat.
+      - name: Build the runtime artifact required by the R01 integration proof
+        run: node ../maya-chat-shell/build.mjs
       - run: npm test -- --runInBand
       - run: npm run test:e2e -- --runInBand
       # 🔴 Регрессия на дефект приёма фактов (2026-09-20..28): повтор внутри чужой

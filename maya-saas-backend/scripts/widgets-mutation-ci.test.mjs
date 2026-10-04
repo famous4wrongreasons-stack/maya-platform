@@ -22,6 +22,36 @@ const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const declared = registry(path.join(backend, 'test/widgets-live/mutations'));
 const head = 'a'.repeat(40);
 
+test('R01 integration artifact is built before unfiltered backend and mutation controls', () => {
+  const command = '        run: node ../maya-chat-shell/build.mjs';
+  function requireBefore(source, consumer) {
+    const lines = source.split('\n');
+    const builds = lines.flatMap((line, index) => line === command ? [index] : []);
+    const target = lines.indexOf(consumer);
+    const install = lines.indexOf('      - run: npm ci');
+    assert.equal(builds.length, 1, 'R01 artifact builder must execute exactly once');
+    assert.ok(install >= 0 && builds[0] > install && builds[0] < target,
+      'R01 artifact must follow dependency installation and precede unfiltered tests');
+  }
+  for (const [file, job, consumer] of [
+    ['platform-ci.yml', 'platform-backend', '      - run: npm test -- --runInBand'],
+    ['widgets-mutation.yml', 'widgets-mutation', '      - name: Run the battery shard'],
+  ]) {
+    const workflow = fs.readFileSync(path.resolve(backend, '../.github/workflows', file), 'utf8');
+    const marker = `  ${job}:\n`;
+    const start = workflow.indexOf(marker);
+    assert.ok(start >= 0, 'Required CI job must exist');
+    const tail = workflow.slice(start + marker.length);
+    const nextJob = tail.search(/^  [A-Za-z][\w-]*:\s*$/m);
+    const source = nextJob < 0 ? tail : tail.slice(0, nextJob);
+    requireBefore(source, consumer);
+    assert.throws(() => requireBefore(source.replace(command, ''), consumer),
+      /R01 artifact builder must execute exactly once/);
+    assert.throws(() => requireBefore(source.replace(command, '').replace(consumer, consumer + '\n' + command), consumer),
+      /precede unfiltered tests/);
+  }
+});
+
 test('L2 release admission refuses a broken real contract and admits its restored bytes', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'maya-l2-contract-'));
   const copy = path.join(root, 'maya-saas-backend');
