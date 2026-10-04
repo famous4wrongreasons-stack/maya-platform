@@ -10,11 +10,10 @@ import {
 import { RELEASE_STATE, releaseHash } from './widget-release.contract';
 import { releaseProof } from '../../test/widgets-live/support/widget-release-proof';
 import { profileCommand } from '../../test/widgets-live/support/widget-profile-proof';
+import { releaseUnitDatabase } from '../../test/widgets-live/support/widget-release-unit-database';
 
 const fixture = () => {
-  const p = releaseProof(
-    'postgresql://proof@127.0.0.1:55729/maya_widget_gate_proof_profile',
-  );
+  const p = releaseProof(releaseUnitDatabase());
   const command = profileCommand(p, 'tenant');
   const row = {
     enabled: true,

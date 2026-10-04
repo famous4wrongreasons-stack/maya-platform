@@ -14,7 +14,8 @@ import {
 } from './widget-release.contract';
 import { productionAuthorization } from './widget-release-production.contract';
 import fs from 'node:fs';
-const db = 'postgresql://proof@127.0.0.1:55729/maya_widget_gate_proof_unlock';
+import { releaseUnitDatabase } from '../../test/widgets-live/support/widget-release-unit-database';
+const db = releaseUnitDatabase();
 describe('AR1 production execution authorization (ephemeral test keys)', () => {
   const read = (p: ReturnType<typeof productionProof>, c: unknown) =>
     p.policy.read(c, 'tenant', 'grant', 'operator', new Date());

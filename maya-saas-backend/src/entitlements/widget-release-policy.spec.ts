@@ -9,7 +9,8 @@ import {
 import { FeatureRegistryService } from './feature-registry.service';
 import { MAYA_FEATURE_READINESS } from '../common/feature-catalog';
 import { widgetProofEnvironment } from './widget-release-environment';
-const db = 'postgresql://proof@127.0.0.1:55729/maya_widget_gate_proof_ar1';
+import { releaseUnitDatabase } from '../../test/widgets-live/support/widget-release-unit-database';
+const db = releaseUnitDatabase();
 describe('AR-1 signed release policy', () => {
   const p = releaseProof(db);
   it('AR1-SIGNED admits the full signed synthetic denominator, exact actor and candidate', () => {

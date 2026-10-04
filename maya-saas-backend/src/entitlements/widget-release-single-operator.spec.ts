@@ -7,8 +7,8 @@ import {
   MAX_RELEASE_MS,
 } from './widget-release.contract';
 import fs from 'node:fs';
-const db =
-  'postgresql://proof@127.0.0.1:55729/maya_widget_gate_proof_single_operator';
+import { releaseUnitDatabase } from '../../test/widgets-live/support/widget-release-unit-database';
+const db = releaseUnitDatabase();
 const read = (p: ReturnType<typeof singleOperatorProof>, c: unknown) =>
   p.policy.read(c, 'tenant', 'grant', 'operator', new Date());
 describe('AR1 V2 one real platform signer; independent review explicitly absent', () => {
