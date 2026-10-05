@@ -47,6 +47,7 @@ const SRC = path.join(BE, 'src');
  * (plan §3.5 item 7), here AND in k3 check 9. U0: none.
  */
 const OWNER_MODULES: readonly string[] = [
+  'encryption/encryption.module.ts#EncryptionModule', // Existing chat text cipher owner; D-6.
   'appointments/appointments.module.ts#AppointmentsModule', // BS-1 personal context owner.
   'audit-log/audit-log.module.ts#AuditLogModule',
   // U6-L1 (R6-2): C20's owner, `AiToolPolicyService.assertCanExecute` (C11:4761-4762).
@@ -97,6 +98,7 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
       'input-schema/input-schema-hash.ts',
       'input-schema/inputs-bytes.ts',
       'routing/handoff-target.signer.ts',
+      'stores/chat-reply-codec.ts', // H6: serialize encrypted text with the canonical codec.
       'stores/user-turn-binding.ts',
       'stores/timeline.store.ts',
     ],
@@ -193,6 +195,14 @@ const PACKAGES: Readonly<Record<string, Allowed>> = {
 
 /** Non-widget modules only the boundary files may import: owner services and adapters. */
 const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
+  'encryption/encryption.module.ts': {
+    why: 'D-6 exposes the existing encrypted transcript owner without its key',
+    only: ['owner-ports/widget-owner-ports.module.ts'],
+  },
+  'encryption/encryption.service.ts': {
+    why: 'RT6 existing text-column cipher; adapter preserves stored ciphertext compatibility',
+    only: ['owner-ports/chat-reply-cipher.adapter.ts'],
+  },
   'appointments/appointments.module.ts': {
     why: 'BS-1 verified personal context owner module',
     only: ['owner-ports/widget-owner-ports.module.ts'],
@@ -1057,6 +1067,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
         'emission/emitter.service.ts:widgetEmission',
         'stores/timeline.store.ts:widgetTimelineTurn',
         'stores/timeline.store.ts:$executeRaw',
+        'stores/timeline.store.ts:$queryRaw',
         'consent/erasure.job.ts:$transaction',
         'consent/erasure.job.ts:$executeRaw',
       ]),
@@ -1066,6 +1077,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
         (x) =>
           /:(?:widget\w+|\$transaction)$/.test(x) ||
           x === 'stores/timeline.store.ts:$executeRaw' ||
+          x === 'stores/timeline.store.ts:$queryRaw' ||
           x === 'consent/erasure.job.ts:$executeRaw',
       ),
     ).toBe(true);
@@ -1084,6 +1096,8 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       ),
     ).toBe(true);
     expect(Object.keys(OWNER_PORT_MODULES)).toEqual([
+      'encryption/encryption.module.ts',
+      'encryption/encryption.service.ts',
       'appointments/appointments.module.ts',
       'appointments/personal-client-context.service.ts',
       'ai-tools/ai-tools.module.ts',
@@ -1234,6 +1248,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
       ),
     );
     expect(values.get('BOUND_PORT_TOKENS')).toEqual([
+      'CHAT_REPLY_CIPHER',
       'PERSONAL_SCHEDULE_SOURCE',
       'USER_TURN_AUDIT',
       'SELECTOR_OBSERVATION_AUDIT',

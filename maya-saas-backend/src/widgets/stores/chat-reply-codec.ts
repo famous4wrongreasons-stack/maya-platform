@@ -1,4 +1,5 @@
-import type { EncryptionService } from '../../encryption/encryption.service';
+import { stableActionJson } from '../../action-engine/action-engine.identity';
+import type { ChatReplyCipher } from '../owner-ports/chat-reply-cipher.port';
 import { sha256Hex } from '../token.util';
 
 // Versioned content encoding inside the existing erasable text column. RT6
@@ -10,7 +11,7 @@ export const chatReplyId = (tenantId: string, parentId: string): string => {
 };
 export const isChatReply = (text: string): boolean => text.startsWith(PREFIX);
 export const encodeChatReply = (
-  encryption: EncryptionService,
+  encryption: ChatReplyCipher,
   text: string,
   completionHash: string,
   parentId: string,
@@ -18,10 +19,10 @@ export const encodeChatReply = (
 ): string =>
   PREFIX +
   encryption.encrypt(
-    JSON.stringify({ text, completionHash, parentId, semanticContext }),
+    stableActionJson({ text, completionHash, parentId, semanticContext }),
   );
 export const decodeChatCompletion = (
-  encryption: EncryptionService | undefined,
+  encryption: ChatReplyCipher | undefined,
   value: string,
 ): {
   text: string;
@@ -55,7 +56,7 @@ export const decodeChatCompletion = (
   };
 };
 export const decodeChatReply = (
-  encryption: EncryptionService | undefined,
+  encryption: ChatReplyCipher | undefined,
   text: string,
 ): string => {
   if (!isChatReply(text)) return text;

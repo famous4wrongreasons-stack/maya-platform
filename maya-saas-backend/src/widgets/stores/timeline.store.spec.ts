@@ -230,3 +230,15 @@ describe('semantic context byte bound before persistence', () => {
     expect(lock).not.toHaveBeenCalled();
   });
 });
+
+describe('TimelineStore authoritative clock', () => {
+  it('reads only the current transaction clock, retaining the database instant under app-clock skew', async () => {
+    const now = new Date('2001-01-01T00:00:00Z');
+    const query = jest.fn().mockResolvedValue([{ now }]);
+    expect(
+      await TimelineStore.readDatabaseClock({ $queryRaw: query } as never),
+    ).toBe(now);
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(query).toHaveBeenCalledWith(['SELECT clock_timestamp() AS now']);
+  });
+});

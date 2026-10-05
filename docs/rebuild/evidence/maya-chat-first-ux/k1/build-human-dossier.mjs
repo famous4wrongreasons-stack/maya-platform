@@ -1,6 +1,7 @@
 import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import {META} from './human-dossier-meta.mjs';
-const R='/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent';
+const R=fileURLToPath(new URL('../../../../../', import.meta.url));
 const rows=JSON.parse(fs.readFileSync(R+'/docs/rebuild/evidence/maya-chat-first-ux/k1/k1-surface-dossier.json','utf8'));
 const G=JSON.parse(fs.readFileSync(new URL('./human-dossier-groups.json',import.meta.url),'utf8'));
 // USER IMPACT and SECURITY/AUTHORITY IMPACT are drafted per group against the actual surface rows

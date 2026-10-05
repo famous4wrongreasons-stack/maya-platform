@@ -28,7 +28,8 @@ import {
 } from '../routing/deterministic-router';
 import { scoped } from '../stores/tenant-scope';
 import { sha256Hex } from '../token.util';
-import { EncryptionService } from '../../encryption/encryption.service';
+import { CHAT_REPLY_CIPHER } from '../di-tokens';
+import type { ChatReplyCipher } from '../owner-ports/chat-reply-cipher.port';
 
 type TypedRoutingCandidate = RoutingCandidate & {
   readonly widgetId: string;
@@ -47,7 +48,7 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
     @Inject(PRINCIPAL_RESOLVER)
     private readonly principals: PrincipalResolver,
     @Inject(USER_TURN_AUDIT) private readonly turnAudit: UserTurnAuditPort,
-    private readonly encryption: EncryptionService,
+    @Inject(CHAT_REPLY_CIPHER) private readonly encryption: ChatReplyCipher,
   ) {}
 
   async persistAssistantReply(
@@ -64,9 +65,7 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
         principal.authority.userId !== input.actor.userId
       )
         throw new ForbiddenException('conversation_principal_unavailable');
-      const [{ now }] = await tx.$queryRaw<
-        { now: Date }[]
-      >`SELECT clock_timestamp() AS now`;
+      const now = await TimelineStore.readDatabaseClock(tx);
       return TimelineStore.persistChatReply(
         tx,
         {
@@ -96,9 +95,7 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
         principal.authority.userId !== actor.userId
       )
         throw new ForbiddenException('conversation_principal_unavailable');
-      const [{ now }] = await tx.$queryRaw<
-        { now: Date }[]
-      >`SELECT clock_timestamp() AS now`;
+      const now = await TimelineStore.readDatabaseClock(tx);
       return TimelineStore.readChatContext(
         tx,
         tenantId,
@@ -125,9 +122,7 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
         principal.authority.userId !== actor.userId
       )
         throw new ForbiddenException('conversation_principal_unavailable');
-      const [{ now }] = await tx.$queryRaw<
-        { now: Date }[]
-      >`SELECT clock_timestamp() AS now`;
+      const now = await TimelineStore.readDatabaseClock(tx);
       return TimelineStore.readCurrentConversation(
         tx,
         tenantId,
@@ -325,9 +320,7 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
         throw new ConflictException('conversation_scope_conflict');
       // Persist the turn age using the same authoritative clock that C9 uses
       // for admission; app/DB clock skew must not make a fresh turn future-dated.
-      const [{ now }] = await tx.$queryRaw<
-        { now: Date }[]
-      >`SELECT clock_timestamp() AS now`;
+      const now = await TimelineStore.readDatabaseClock(tx);
       await TimelineStore.lockConversation(tx, tenantId, conversationId);
       if (input.conversationId !== undefined)
         await TimelineStore.assertConversation(

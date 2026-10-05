@@ -1,3 +1,8 @@
+import { EncryptionService } from '../../src/encryption/encryption.service';
+import {
+  decodeChatCompletion,
+  isChatReply,
+} from '../../src/widgets/stores/chat-reply-codec';
 import request from 'supertest';
 import { randomUUID } from 'node:crypto';
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
@@ -253,10 +258,25 @@ describe('9.6 canonical USER identity [HTTP] [PostgreSQL]', () => {
         'DROP FUNCTION IF EXISTS wl_turn_audit_fault()',
       );
     }
-    expect((await f.chat(id)).status).toBe(201);
+    const success = await f.chat(id);
+    expect(success.status).toBe(201);
+    const rows = await db.prisma.widgetTimelineTurn.findMany({
+      where: { tenantId: f.tenant.id },
+      orderBy: { turnIndex: 'asc' },
+    });
+    // RT6 + accepted resume contract: one USER plus one encrypted completion, not a second USER.
+    expect(rows.map((row) => row.role)).toEqual(['user', 'assistant']);
+    expect(rows[0].id).toBe(object(object(success.body).user_turn).turnId);
     expect(
-      await db.prisma.widgetTimelineTurn.count({
-        where: { tenantId: f.tenant.id },
+      decodeChatCompletion(
+        http.app.get(EncryptionService),
+        rows[1].textContent!,
+      ),
+    ).toMatchObject({ parentId: rows[0].id, text: object(success.body).reply });
+    expect(rows[1].retentionUntil).toEqual(rows[0].retentionUntil);
+    expect(
+      await db.prisma.auditLog.count({
+        where: { tenantId: f.tenant.id, action: 'chat.user_turn_bound' },
       }),
     ).toBe(1);
   }, 120_000);
@@ -293,8 +313,36 @@ describe('9.6 canonical USER identity [HTTP] [PostgreSQL]', () => {
       },
       orderBy: { turnIndex: 'asc' },
     });
-    expect(rows.map((row) => row.role)).toEqual(['user', 'assistant']);
+    expect(rows.map((row) => row.role)).toEqual([
+      'user',
+      'assistant',
+      'assistant',
+    ]);
     expect(rows[0].id).toBe(ref.turnId);
+    expect(rows[1].textContent).toBeNull(); // the widget emission is not a restored chat completion
+    expect(isChatReply(rows[2].textContent!)).toBe(true);
+    expect(
+      decodeChatCompletion(
+        http.app.get(EncryptionService),
+        rows[2].textContent!,
+      ),
+    ).toMatchObject({ parentId: ref.turnId, text: object(first.body).reply });
+    const history = await request(http.app.getHttpServer())
+      .get('/api/ai/conversation')
+      .set('Authorization', `Bearer ${f.token}`);
+    expect(history.status).toBe(200);
+    expect(object(history.body).turns).toEqual([
+      expect.objectContaining({
+        id: ref.turnId,
+        role: 'user',
+        completed: true,
+      }),
+      expect.objectContaining({
+        id: rows[2].id,
+        role: 'assistant',
+        text: object(first.body).reply,
+      }),
+    ]);
     const emission = await db.prisma.widgetEmission.findFirstOrThrow({
       where: { tenantId: f.tenant.id, turnId: rows[1].id },
     });
@@ -319,7 +367,7 @@ describe('9.6 canonical USER identity [HTTP] [PostgreSQL]', () => {
     });
     expect(turn).toMatchObject({
       role: 'user',
-      turnIndex: 2,
+      turnIndex: 3, // user + widget emission + persisted chat completion
       textContent: control.utteranceTemplate,
     });
     const source = http
@@ -370,6 +418,16 @@ describe('9.6 canonical USER identity [HTTP] [PostgreSQL]', () => {
     const first = await f.chat(id);
     expect(first.status).toBe(201);
     const ref = object(object(first.body).user_turn);
+    const completedReplies = await db.prisma.widgetTimelineTurn.findMany({
+      where: { tenantId: f.tenant.id, role: 'assistant' },
+    });
+    expect(completedReplies).toHaveLength(1);
+    expect(
+      decodeChatCompletion(
+        http.app.get(EncryptionService),
+        completedReplies[0].textContent!,
+      ),
+    ).toMatchObject({ parentId: ref.turnId, text: object(first.body).reply });
     const evidence = await db.prisma.auditLog.findFirstOrThrow({
       where: {
         tenantId: f.tenant.id,
@@ -409,8 +467,13 @@ describe('9.6 canonical USER identity [HTTP] [PostgreSQL]', () => {
     ).toBe(0);
     expect(
       await db.prisma.widgetTimelineTurn.count({
-        where: { tenantId: f.tenant.id },
+        where: { tenantId: f.tenant.id, role: 'user' },
       }),
     ).toBe(1);
+    expect(
+      await db.prisma.widgetTimelineTurn.findMany({
+        where: { tenantId: f.tenant.id, role: 'assistant' },
+      }),
+    ).toEqual(completedReplies); // no erased/expired/broken replay rewrites or appends a completion
   }, 120_000);
 });

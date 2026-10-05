@@ -10,6 +10,7 @@ const PATHS = {
   refresh: '/auth/refresh',
   logout: '/auth/logout',
   chat: '/ai/chat',
+  conversation: '/ai/conversation',
   transcribe: '/ai/transcribe',
   widgetIntent: '/widgets/intent',
   widgetResolve: '/widgets/resolve',

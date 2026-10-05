@@ -93,3 +93,6 @@ export const USER_TURN_AUDIT = 'USER_TURN_AUDIT';
 export const PERSONAL_SCHEDULE_SOURCE = 'PERSONAL_SCHEDULE_SOURCE';
 
 export const SELECTOR_OBSERVATION_AUDIT = 'SELECTOR_OBSERVATION_AUDIT';
+
+/** Existing encrypted chat text owner; D-6 never exposes key material. */
+export const CHAT_REPLY_CIPHER = 'CHAT_REPLY_CIPHER';

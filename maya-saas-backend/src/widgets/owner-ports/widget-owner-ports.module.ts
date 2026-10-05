@@ -1,3 +1,6 @@
+import { EncryptionModule } from '../../encryption/encryption.module';
+import { ChatReplyCipherAdapter } from './chat-reply-cipher.adapter';
+import { CHAT_REPLY_CIPHER } from '../di-tokens';
 import { SelectorObservationAuditAdapter } from './selector-observation-audit.adapter';
 import { SELECTOR_OBSERVATION_AUDIT } from '../di-tokens';
 import { AppointmentsModule } from '../../appointments/appointments.module';
@@ -71,6 +74,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
  */
 @Module({
   imports: [
+    EncryptionModule,
     AppointmentsModule,
     AuditLogModule,
     AiToolPolicyModule,
@@ -84,6 +88,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     TenancyModule,
   ],
   providers: [
+    { provide: CHAT_REPLY_CIPHER, useClass: ChatReplyCipherAdapter },
     {
       provide: SELECTOR_OBSERVATION_AUDIT,
       useClass: SelectorObservationAuditAdapter,
@@ -132,6 +137,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     },
   ],
   exports: [
+    CHAT_REPLY_CIPHER,
     SELECTOR_OBSERVATION_AUDIT,
     PERSONAL_SCHEDULE_SOURCE,
     USER_TURN_AUDIT,

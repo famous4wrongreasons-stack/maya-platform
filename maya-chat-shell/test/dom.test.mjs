@@ -761,6 +761,10 @@ test('session-not-active 401 (a bearer after logout or revocation): one refresh,
       });
     calls.push(at);
     if (at === '/api/auth/login') return respond('auth/login.201.json');
+    if (at === '/api/ai/conversation') return new Response(JSON.stringify({
+      contract: 'maya.conversation-history/1', conversationId: null,
+      truncated: false, interrupted: false, turns: [],
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     if (at === '/api/ai/chat') return respond('auth/errors/session-not-active.401.json');
     if (at === '/api/auth/refresh') return respond('auth/errors/session-revoked.401.json');
     return new Response('{}', { status: 404 });
@@ -794,7 +798,7 @@ test('session-not-active 401 (a bearer after logout or revocation): one refresh,
     dom.key(composer, 'Enter');
     await flush(40);
     scheduler.flush();
-    assert.deepEqual(calls, ['/api/auth/login', '/api/ai/chat', '/api/auth/refresh']);
+    assert.deepEqual(calls, ['/api/auth/login', '/api/ai/conversation', '/api/ai/chat', '/api/auth/refresh']);
     assert.match(dom.visibleText(), /Вход в MAYA/);
     assert.match(dom.visibleText(), /Сессия завершена — войдите снова\./);
     assert.equal(dom.find((el) => el.localName === 'textarea'), null);

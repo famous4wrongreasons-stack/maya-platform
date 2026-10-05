@@ -11,7 +11,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import type { RequestTx } from '../authority/principal-view';
 import type { LoweredUtterance } from '../lowering/lowering';
 import { scoped } from './tenant-scope';
-import type { EncryptionService } from '../../encryption/encryption.service';
+import type { ChatReplyCipher } from '../owner-ports/chat-reply-cipher.port';
 import {
   chatReplyId,
   decodeChatReply,
@@ -68,8 +68,18 @@ export const timelineLockKey = (
 export class TimelineStore {
   constructor(
     private readonly prisma: PrismaService | TimelineClient,
-    private readonly encryption?: EncryptionService,
+    private readonly encryption?: ChatReplyCipher,
   ) {}
+
+  /** Retention/admission use the transaction's PostgreSQL clock, never the app clock. */
+  static async readDatabaseClock(
+    tx: Pick<RequestTx, '$queryRaw'>,
+  ): Promise<Date> {
+    const [{ now }] = await tx.$queryRaw<
+      { now: Date }[]
+    >`SELECT clock_timestamp() AS now`;
+    return now;
+  }
 
   /**
    * Serialise widget-store changes for one exact conversation without giving callers raw-SQL
@@ -105,7 +115,7 @@ export class TimelineStore {
       semanticContext?: unknown;
     },
     now: Date,
-    encryption: EncryptionService,
+    encryption: ChatReplyCipher,
   ): Promise<void> {
     if (
       Buffer.byteLength(
@@ -195,7 +205,7 @@ export class TimelineStore {
     principalProofHash: string,
     conversationId: string,
     now: Date,
-    encryption: EncryptionService,
+    encryption: ChatReplyCipher,
     beforeTurnId: string,
   ): Promise<unknown> {
     await TimelineStore.lockConversation(tx, tenantId, conversationId);
@@ -239,16 +249,16 @@ export class TimelineStore {
     tenantId: string,
     principalProofHash: string,
     now: Date,
-    encryption: EncryptionService,
+    encryption: ChatReplyCipher,
   ) {
-    const scope = scoped(tenantId, {
+    const scope = {
       principalProofHash: principalProofHash,
       channel: 'pwa',
       erasedAt: null,
       retentionUntil: { gt: now },
-    });
+    };
     const latest = await tx.widgetTimelineTurn.findFirst({
-      where: { ...scope, role: 'user' },
+      where: scoped(tenantId, { ...scope, role: 'user' }),
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       select: { conversationId: true },
     });
@@ -262,11 +272,11 @@ export class TimelineStore {
       };
     await TimelineStore.lockConversation(tx, tenantId, latest.conversationId);
     const rows = await tx.widgetTimelineTurn.findMany({
-      where: {
+      where: scoped(tenantId, {
         ...scope,
         conversationId: latest.conversationId,
         textContent: { not: null },
-      },
+      }),
       orderBy: { turnIndex: 'desc' },
       take: 51,
       select: { id: true, role: true, textContent: true, createdAt: true },

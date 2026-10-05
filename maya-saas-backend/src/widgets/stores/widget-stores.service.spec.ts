@@ -858,6 +858,7 @@ describe('the stores split (U0, D-6): four sub-stores behind one facade, one ten
     expect(storeFiles.sort()).toEqual(
       [
         ...SUB_STORES.map(([file]) => file),
+        'chat-reply-codec.ts', // Accepted resume contract: encoding in the same erasable text column.
         'tenant-scope.ts',
         'user-turn-binding.ts',
         'widget-stores.service.ts',
