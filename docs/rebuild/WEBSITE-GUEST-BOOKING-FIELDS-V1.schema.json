@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "maya.website-guest-booking/1/fields",
+  "$defs": {
+    "opaqueSelectionRef": {
+      "description": "staffRef, serviceRef, slotRef only; opaque to the browser",
+      "type": "string", "minLength": 1, "maxLength": 4096,
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "uuidRef": {
+      "description": "quoteRef and attemptRef; preserve the exact value",
+      "type": "string", "minLength": 36, "maxLength": 36,
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "photoUrl": {
+      "description": "Use the established portrait fallback for null. URL parsing must also reject username/password.",
+      "anyOf": [
+        { "type": "null" },
+        { "type": "string", "format": "uri", "maxLength": 2048, "pattern": "^https://" }
+      ]
+    }
+  }
+}

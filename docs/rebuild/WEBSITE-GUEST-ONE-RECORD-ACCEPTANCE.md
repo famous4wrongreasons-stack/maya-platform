@@ -2,17 +2,19 @@
 
 Preparation only. Existing owner authorization already covers narrowly scoped own CRM test
 records and cleanup (`MAYA-FINAL-COMPLETION-MAP.md`, owner authorization entry at line 107).
-Do not ask for the same broad permission again. Production configure/deploy, real notifications,
-payments and irreversible deletion are not authorized. Current backend candidate is
+Do not ask for the same broad permission again. The owner subsequently supplied a controlled test
+contact privately and accepted ordinary YCLIENTS notifications to that contact for the one test.
+Production configure/deploy, broader notifications, payments and irreversible deletion remain
+unauthorized. Current recovery backend candidate is
 `2fe4b30389dbdb3df94172da537ea9c029d299cc`; isolated frontend QA is independent.
 
 ## Supply only the missing concrete scope
 
 | Needed binding | Current evidence |
 |---|---|
-| Exact approved tenant/integration/company/branch | Not established; public salon discovery is not this binding. |
-| Owner-controlled test phone; email only if the company requires it | Not established. Enter via the protected contact path, never chat/log/CLI arguments. Guest test needs no verified Maya Client, User or link. |
-| Provider phone-confirmation/prepayment settings and company notification destinations | Not established. Zero reminder hours alone does not disable confirmation/staff/webhook automations. |
+| Exact approved tenant/integration/company/branch | Read-only production mapping verified 2026-10-05: active external tenant `cmsuavtar0003bjyrfngxsne6`, integration `cmsuavtcq0007bjyrpr1z68yi`, YCLIENTS company `503759`, branch `cmsuavtaz0005bjyr8nyrxdat`, Europe/Moscow, live mode. |
+| Owner-controlled test phone; email only if the company requires it | Supplied privately; never persist in this document, logs or CLI arguments. Guest test needs no verified Maya Client, User or link. |
+| Provider phone-confirmation/prepayment settings and company notification destinations | Authenticated provider GET: `confirm_number=false`; all eight returned admin/staff notification types have push/sms/email=0. Candidate staff `3278920`, service `7572285`: 60 minutes, 200000 minor RUB, prepaid forbidden; 21 slots observed for 2026-10-06. Refresh availability/quote before confirm. Active legacy webhook service exists; these YCLIENTS settings alone do not qualify its downstream delivery. |
 | Approved isolated execution environment and secret references | Server network/setup approval remains pending. Do not repurpose the synthetic preview or weaken widgets-live credential/network refusal. |
 
 Master, services and slot can then be selected from the existing read owners for that approved

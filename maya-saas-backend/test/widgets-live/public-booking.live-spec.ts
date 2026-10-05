@@ -166,6 +166,7 @@ describe('Guest website booking [HTTP] [PostgreSQL] [synthetic CRM]', () => {
   }
   async function quote() {
     const session = await open();
+    expect(session.staff[0].photoUrl).toBeNull();
     const staffRef = session.staff[0].staffRef;
     const services = await request(http.app.getHttpServer())
       .get('/api/public-booking/services')
@@ -179,6 +180,8 @@ describe('Guest website booking [HTTP] [PostgreSQL] [synthetic CRM]', () => {
       localDate: tomorrow,
     });
     expect(availability.status).toBe(201);
+    expect(availability.body.slots[0].slotRef.length).toBeGreaterThan(256);
+    expect(availability.body.slots[0].slotRef.length).toBeLessThanOrEqual(4096);
     const q = await post('quotes', {
       slotRef: availability.body.slots[0].slotRef,
     });

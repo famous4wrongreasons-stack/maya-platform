@@ -169,3 +169,31 @@ The synthetic preview accepts optional `--lose-first-reply`: its first create pe
 record and loses the response, then status recovers the receipt without a second dispatch.
 See [provider acceptance and release gates](WEBSITE-GUEST-BOOKING-RELEASE-GATES.md) for official
 schema conflicts, exact prerequisites, migration diff and evidence-preserving rollback.
+
+
+## Integrated-QA field bounds and local same-origin proxy
+
+`WEBSITE-GUEST-BOOKING-FIELDS-V1.schema.json` freezes the field-specific transport bounds:
+`staffRef`, `serviceRef`, `slotRef` are nonempty opaque ASCII `[A-Za-z0-9_.-]` strings up to
+4096 characters. Do not apply this bound to every identifier: quoteRef/attemptRef remain exact
+36-character UUIDv4 values. Backend emits no selection ref beyond that limit. The actual slot
+fixture is 346 characters; a 256-character frontend cap rejects valid availability.
+
+`staff[].photoUrl` is **null or an HTTPS URL up to 2048 characters, without URL credentials**.
+Null means use the existing portrait fallback, not refuse the session. Unsafe/missing source images
+are normalized to null. The frontend may validate these exact cases without loosening authority,
+UUID, origin, consent, quote or attempt checks.
+
+A separate local-only proxy is available for actual same-origin browser integration:
+
+```sh
+node scripts/public-booking-local-proxy.mjs http://127.0.0.1:BACKEND_PORT http://localhost:FRONTEND_PORT http://localhost:PROXY_PORT
+```
+
+Run the backend synthetic preview with that exact browser proxy origin. The proxy binds only
+127.0.0.1, admits only explicit HTTP loopback upstreams, forwards only the six permitted guest
+routes/methods to backend and sends other paths to the local frontend. It supplies the trusted
+browser origin on GET, preserves CSRF/nonce and Secure/HttpOnly/SameSite/Path cookie flags,
+forwards only the guest cookie to backend and strips Authorization. Cross-origin guest writes
+and unknown guest routes are refused. It changes no production proxy or website source and stops
+after 30 minutes. Do not weaken cookie security to make a browser fixture pass.

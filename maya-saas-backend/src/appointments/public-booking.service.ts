@@ -24,6 +24,8 @@ import { TenantsService } from '../tenants/tenants.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { PublicBookingRepository } from './public-booking.repository';
 import {
+  PUBLIC_BOOKING_OPAQUE_REF_MAX,
+  publicBookingPhoto,
   publicObject,
   publicText,
   type PublicBookingAttempt,
@@ -235,7 +237,7 @@ export class PublicBookingService {
     return this.tenancy.runAsPublicTenant(ctx.session.tenantId, fn);
   }
   private seal(ctx: Context, kind: string, data: Record<string, unknown>) {
-    return this.encryption.encrypt(
+    const ref = this.encryption.encrypt(
       JSON.stringify({
         kind,
         session: ctx.session.id,
@@ -243,6 +245,9 @@ export class PublicBookingService {
         data,
       }),
     );
+    if (ref.length > PUBLIC_BOOKING_OPAQUE_REF_MAX)
+      throw new BadRequestException('PUBLIC_BOOKING_SELECTION_UNAVAILABLE');
+    return ref;
   }
   private unseal(
     ctx: Context,
@@ -251,7 +256,7 @@ export class PublicBookingService {
   ): Record<string, unknown> {
     try {
       const value = JSON.parse(
-        this.encryption.decrypt(publicText(ref, 4096)),
+        this.encryption.decrypt(publicText(ref, PUBLIC_BOOKING_OPAQUE_REF_MAX)),
       ) as {
         kind: string;
         session: string;
@@ -325,7 +330,7 @@ export class PublicBookingService {
         staff: staff.map((s) => ({
           staffRef: this.seal(ctx, 'staff', { id: s.id }),
           name: s.name,
-          photoUrl: s.avatar_url || null,
+          photoUrl: publicBookingPhoto(s.avatar_url),
         })),
       };
     });
