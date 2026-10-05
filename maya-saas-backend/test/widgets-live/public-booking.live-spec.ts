@@ -51,6 +51,7 @@ describe('Guest website booking [HTTP] [PostgreSQL] [synthetic CRM]', () => {
       { start, end, staff_id: '101', branch_id: branchId },
     ]),
     createAppointment: create,
+    findPublicBookingByRequestId: jest.fn().mockResolvedValue(null),
     getClientAppointments: jest.fn(async () => []),
   };
   beforeAll(async () => {
@@ -260,6 +261,54 @@ describe('Guest website booking [HTTP] [PostgreSQL] [synthetic CRM]', () => {
     expect(duplicate.status).toBe(409);
     expect(create).toHaveBeenCalledTimes(2);
     expect(adapter.getClientAppointments).not.toHaveBeenCalled();
+    // Restart the real AppModule; only durable DB evidence/session survives.
+    const mapping = http.app
+      .get(ConfigService)
+      .get<string>('PUBLIC_BOOKING_SITES');
+    await http.close();
+    http = await bootHttp();
+    http.app.get(ConfigService).set('PUBLIC_BOOKING_SITES', mapping);
+    jest
+      .spyOn(http.app.get(CrmAdapterFactory), 'create')
+      .mockReturnValue(adapter as never);
+    const unresolved = await request(http.app.getHttpServer())
+      .get(`/api/public-booking/attempts/${key}`)
+      .set('Origin', origin)
+      .set('Cookie', cookie);
+    expect(unresolved.body.state).toBe('UNKNOWN');
+    adapter.findPublicBookingByRequestId.mockResolvedValueOnce({
+      external_id: 'synthetic-recovered',
+      status: 'confirmed',
+      start,
+      end,
+      staff_id: '101',
+      service_ids: ['201'],
+      branch_id: branchId,
+    });
+    const recovered = await request(http.app.getHttpServer())
+      .get(`/api/public-booking/attempts/${key}`)
+      .set('Origin', origin)
+      .set('Cookie', cookie);
+    expect(recovered.body.state).toBe('SUCCEEDED');
+    expect(recovered.body.booking.receiptLabel).toEqual(expect.any(String));
+    expect(create).toHaveBeenCalledTimes(2);
+    const calls = adapter.findPublicBookingByRequestId.mock.calls;
+    expect(calls[0][0].requestId).toMatch(/^maya-guest-[a-f0-9]{64}$/);
+    expect(calls[1][0].requestId).toBe(calls[0][0].requestId);
+    const action = await db.prisma.actionExecution.findFirstOrThrow({
+      where: { tenantId, finalOutcomeCode: 'reconciled_succeeded' },
+    });
+    expect(action.executionAttemptCount).toBe(1);
+    expect(action.reconciliationState).toBe('RESOLVED');
+    expect(action.safeResultSummaryJson).toMatchObject({
+      publicBookingReadback: {
+        contract: 'maya.public-booking-readback/1',
+        requestId: calls[0][0].requestId,
+        companyId: '123',
+        source: 'records-and-record',
+      },
+    });
+    expect(action.actorUserId).toBeNull();
   });
   it('rejects foreign refs, origin, CSRF, unknown keys and missing attempt without inventing failure', async () => {
     const q = await quote();
@@ -319,6 +368,31 @@ describe('Guest website booking [HTTP] [PostgreSQL] [synthetic CRM]', () => {
     );
     expect(r.body.state).toBe('UNKNOWN');
     expect(create).toHaveBeenCalledTimes(4);
+    adapter.findPublicBookingByRequestId.mockResolvedValue({
+      external_id: 'synthetic-recovered-concurrent',
+      status: 'confirmed',
+      start,
+      end,
+      staff_id: '101',
+      service_ids: ['201'],
+      branch_id: branchId,
+    });
+    const poll = () =>
+      request(http.app.getHttpServer())
+        .get(`/api/public-booking/attempts/${r.body.attemptRef}`)
+        .set('Origin', origin)
+        .set('Cookie', cookie);
+    const polls = await Promise.all([poll(), poll()]);
+    expect(polls.some((reply) => reply.body.state === 'SUCCEEDED')).toBe(true);
+    expect((await poll()).body.state).toBe('SUCCEEDED');
+    expect(create).toHaveBeenCalledTimes(4);
+    const settled = await db.prisma.actionExecution.findMany({
+      where: { tenantId, finalOutcomeCode: 'reconciled_succeeded' },
+    });
+    expect(settled).toHaveLength(2);
+    expect(
+      settled.every((execution) => execution.executionAttemptCount === 1),
+    ).toBe(true);
     const attempts = await db.prisma.$queryRaw<Array<{ value: unknown }>>(
       Prisma.sql`SELECT to_jsonb(a) AS value FROM "PublicBookingAttempt" a WHERE "tenantId"=${tenantId}`,
     );

@@ -321,3 +321,33 @@ checkpoint performs no production writes, migrations, notifications, payments, p
 Separately, the authorized offline HTTP conversation replay completed after parent clarification:
 36 canned provider attempts, zero paid requests, qualification not evaluated. Evidence lives in
 `/tmp/maya-http-pilot-resume-20261005-a/` and `/tmp/maya-http-pilot-resume.log`.
+
+
+## Guest UNKNOWN recovery follow-up — 2026-10-05
+
+Supersedes the preceding checkpoint's “exact provider-correlated recovery not implemented” limit.
+The official public-create description and schema disagree on api_id type; the adapter now sends a
+JSON-safe numeric api_id and full opaque HMAC marker in comment, requiring both on exact readback.
+It never treats the response's echoed id as record_id. Guest provider reminders are zero and
+newsletter consent false; real company notification behavior is still an acceptance prerequisite.
+
+GET attempt status performs rate-bounded provider reads only. A complete day listing and exact
+record re-read must match company/correlation/active status/staff/services/instant/duration before
+the existing Action Engine reconciliation receipt can finalize SUCCEEDED. It can settle a guest
+MANUAL_REQUIRED state from positive proof under the existing execution lock. There is no dispatch
+callback or READY/redispatch transition in this path. Missing, duplicated, truncated, changed,
+foreign or unavailable source remains UNKNOWN; no phone search or Client identity is created.
+
+Evidence: `/tmp/maya-guest-recovery-release-http.log` — four suites, eleven HTTP/PG tests PASS,
+including AppModule restart, delayed positive readback, concurrent status and one provider create
+per recovered execution; `/tmp/maya-guest-recovery-unit.log` — five suites, eighty-six tests PASS.
+TypeScript and targeted ESLint PASS. Synthetic preview adds `--lose-first-reply` for browser E2E.
+No new schema migration is needed for recovery. See
+[WEBSITE-GUEST-BOOKING-RELEASE-GATES.md](WEBSITE-GUEST-BOOKING-RELEASE-GATES.md) for exact official
+contract findings, controlled real test prerequisites, migration hashes and rollback boundaries.
+
+Remaining: styled browser integration; actual company/contact/notification qualification and
+approved release target; real provider correlation preservation; qualified negative-outcome/manual
+support resolution for genuinely absent/changed records. Email-empty acceptance and phone
+confirmation settings are explicit activation gates. No real provider writes, payments, paid model
+calls, production migration/deploy, phone changes, push or merge have occurred.

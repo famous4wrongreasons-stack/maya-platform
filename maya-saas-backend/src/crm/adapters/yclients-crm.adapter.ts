@@ -161,6 +161,8 @@ interface YclientsRecordServiceApiItem {
 }
 
 interface YclientsRecordApiItem {
+  api_id?: number | string;
+  company_id?: number | string;
   id?: number | string;
   record_id?: number | string;
   date?: string;
@@ -498,6 +500,87 @@ export class YclientsCRMAdapter implements CRMAdapter {
     });
   }
 
+  private guestNumericApiId(requestId: string): number {
+    if (!/^maya-guest-[a-f0-9]{64}$/.test(requestId))
+      throw new Error('Invalid guest correlation');
+    // Schema says number, prose says string. Stay within exact JSON integer range;
+    // the full HMAC comment marker is also mandatory on readback (no truncated-ID proof).
+    return Number.parseInt(requestId.slice(-13), 16) + 1;
+  }
+
+  /** Official api_id correlation + exact record read. Absence is never non-execution proof. */
+  async findPublicBookingByRequestId(params: {
+    tenantId: string;
+    requestId: string;
+    timezone: string;
+    localDate: string;
+    start: string;
+    end: string;
+    staffId: string;
+    serviceIds: string[];
+    branchId: string;
+  }): Promise<CreatedAppointment | null> {
+    if (!/^maya-guest-[a-f0-9]{64}$/.test(params.requestId))
+      throw new Error('Invalid guest correlation');
+    const fetched = await this.fetchRecords({
+      startDate: params.localDate,
+      endDate: params.localDate,
+      withDeleted: true,
+      requireProgress: true,
+    });
+    if (fetched.completeness !== 'complete') return null;
+    const marker = `MAYA guest booking ${params.requestId}`;
+    const apiId = String(this.guestNumericApiId(params.requestId));
+    const matches = fetched.items.filter(
+      (record) => String(record.api_id) === apiId && record.comment === marker,
+    );
+    if (matches.length !== 1 || !matches[0].id) return null;
+    const id = this.toNumericId(matches[0].id, 'record.id');
+    const response = await this.request<YclientsRecordApiItem>(
+      `record/${this.getCompanyId()}/${id}`,
+    );
+    const record = response.data;
+    if (
+      !record ||
+      String(record.id) !== String(id) ||
+      String(record.api_id) !== apiId ||
+      record.comment !== marker ||
+      String(record.company_id) !== String(this.getCompanyId()) ||
+      !(record.deleted === false || record.deleted === 0) ||
+      String(record.staff_id ?? record.staff?.id) !== params.staffId ||
+      !record.datetime ||
+      !Array.isArray(record.services)
+    )
+      return null;
+    const services = record.services
+      .map((service) => String(service.id))
+      .sort();
+    if (
+      JSON.stringify(services) !== JSON.stringify([...params.serviceIds].sort())
+    )
+      return null;
+    const start = canonicalAppointmentInstant(record.datetime, params.timezone);
+    const duration = Number(record.seance_length ?? record.length);
+    if (
+      !Number.isFinite(duration) ||
+      duration <= 0 ||
+      Date.parse(start) !== Date.parse(params.start) ||
+      Date.parse(start) + duration * 1000 !== Date.parse(params.end)
+    )
+      return null;
+    const status = this.recordStatus(record);
+    if (status === 'canceled' || status === 'cancelled') return null;
+    return {
+      external_id: String(id),
+      status,
+      start,
+      end: params.end,
+      staff_id: params.staffId,
+      service_ids: services,
+      branch_id: params.branchId,
+    };
+  }
+
   async getStaff(tenantId: string): Promise<StaffMember[]> {
     void tenantId;
 
@@ -626,7 +709,16 @@ export class YclientsCRMAdapter implements CRMAdapter {
         phone: this.normalizePhone(params.clientPhone || ''),
         fullname: params.clientName,
         email: '',
-        comment: params.notes || '',
+        comment: params.providerRequestId
+          ? `MAYA guest booking ${params.providerRequestId}`
+          : params.notes || '',
+        ...(params.providerRequestId
+          ? {
+              api_id: this.guestNumericApiId(params.providerRequestId),
+              is_newsletter_allowed: false,
+              is_personal_data_processing_allowed: true,
+            }
+          : {}),
         type: 'mobile',
         notify_by_sms: notifyBySmsHours,
         notify_by_email: 0,
@@ -657,6 +749,18 @@ export class YclientsCRMAdapter implements CRMAdapter {
           : typeof record?.id === 'number' || typeof record?.id === 'string'
             ? record.id
             : null;
+      // The public API's id is only the echoed appointments[].id, never proof of a record.
+      if (
+        params.providerRequestId &&
+        (!Array.isArray(response.data) ||
+          response.data.length !== 1 ||
+          !Number.isSafeInteger(Number(record?.record_id)) ||
+          Number(record?.record_id) <= 0 ||
+          record?.id !== 1)
+      )
+        throw new CrmOutcomeUnknownError(
+          'Guest booking receipt is not an exact created record',
+        );
       if (!externalId) {
         throw new Error(
           response.meta?.message ||
@@ -2736,6 +2840,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
     startDate: string;
     endDate: string;
     clientId?: number;
+    requireProgress?: boolean;
     staffId?: number;
     /**
      * Просить YClients отдать и отменённые (удалённые) записи.
@@ -2795,6 +2900,12 @@ export class YclientsCRMAdapter implements CRMAdapter {
 
       pagesLoaded = page;
 
+      if (params.requireProgress && batch.length >= count && appended === 0)
+        return truncatedFetch(
+          records,
+          pagesLoaded,
+          FETCH_TRUNCATION_REASON.pageLimitReached,
+        );
       if (batch.length < count || appended === 0) {
         // Неполная страница — источник отдал всё. Пустой результат тоже полон.
         return completeFetch(records, pagesLoaded);

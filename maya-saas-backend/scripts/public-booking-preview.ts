@@ -1,3 +1,5 @@
+import { CrmOutcomeUnknownError } from '../src/crm/crm-request.errors';
+import type { CreatedAppointment } from '../src/crm/crm-adapter.interface';
 /** Local synthetic CRM preview only. No inherited credentials or outbound fetch. */
 import 'reflect-metadata';
 import { Test } from '@nestjs/testing';
@@ -14,10 +16,14 @@ import { configureHttpApp } from '../src/bootstrap/configure-http-app';
 
 async function main() {
   const origin = process.argv[2];
+  const loseFirstReply = process.argv[3] === '--lose-first-reply';
   if (
     !origin ||
     !/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin) ||
-    process.argv.length !== 3
+    !(
+      process.argv.length === 3 ||
+      (process.argv.length === 4 && loseFirstReply)
+    )
   )
     throw new Error('Explicit loopback website origin required');
   applyWidgetsLiveEnvironment();
@@ -30,6 +36,7 @@ async function main() {
   const start = `${date}T12:00:00+03:00`,
     end = `${date}T12:30:00+03:00`;
   let dispatches = 0;
+  const records = new Map<string, CreatedAppointment>();
   const adapter = {
     getStaff: () => Promise.resolve([{ id: '101', name: 'Тестовый мастер' }]),
     getPublicBookingServices: () =>
@@ -48,17 +55,28 @@ async function main() {
           ? [{ start, end, staff_id: '101', branch_id: branchId }]
           : [],
       ),
-    createAppointment: () => {
+    createAppointment: (input: { providerRequestId: string }) => {
       dispatches++;
-      return Promise.resolve({
+      const record = {
         external_id: `synthetic-${dispatches}`,
         start,
         end,
         staff_id: '101',
         service_ids: ['201'],
         status: 'confirmed',
-      });
+        branch_id: branchId,
+      };
+      records.set(input.providerRequestId, record);
+      if (loseFirstReply && dispatches === 1)
+        return Promise.reject(
+          new CrmOutcomeUnknownError(
+            'Synthetic lost reply after record persisted',
+          ),
+        );
+      return Promise.resolve(record);
     },
+    findPublicBookingByRequestId: (input: { requestId: string }) =>
+      Promise.resolve(records.get(input.requestId) ?? null),
     getClientAppointments: () =>
       Promise.reject(
         new Error('Guest reconciliation must not search by phone'),
@@ -130,6 +148,7 @@ async function main() {
   process.stdout.write(
     JSON.stringify({
       mode: 'synthetic_crm_only',
+      loseFirstReply,
       baseURL: await app.getUrl(),
       siteKey: 'proof-site',
       websiteOrigin: origin,

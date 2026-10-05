@@ -913,6 +913,7 @@ export class ActionEngineKernel {
     tenantId: string;
     executionId: string;
     workerId: string;
+    allowPublicBookingReadback?: boolean;
   }): Promise<ExecutionClaimV1> {
     const now = this.now();
     const workerId = assertCode(input.workerId, 'workerId');
@@ -922,6 +923,25 @@ export class ActionEngineKernel {
         input.tenantId,
         input.executionId,
       );
+      if (
+        input.allowPublicBookingReadback &&
+        execution.sourceType === 'public_booking' &&
+        execution.capability === 'crm.appointment.create.v1' &&
+        execution.state === ActionExecutionState.UNKNOWN &&
+        execution.reconciliationState ===
+          ActionReconciliationState.MANUAL_REQUIRED
+      ) {
+        await tx.actionExecution.update({
+          where: {
+            id_tenantId: { id: execution.id, tenantId: input.tenantId },
+          },
+          data: {
+            reconciliationState: ActionReconciliationState.REQUIRED,
+            revision: { increment: 1 },
+          },
+        });
+        execution.reconciliationState = ActionReconciliationState.REQUIRED;
+      }
       if (
         execution.state !== ActionExecutionState.UNKNOWN ||
         execution.reconciliationState !== ActionReconciliationState.REQUIRED

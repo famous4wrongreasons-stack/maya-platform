@@ -212,6 +212,58 @@ export class ActionEngineRuntimeService {
     return this.kernel.getExecutionResult(tenantId, executionId);
   }
 
+  /** A positive canonical read may settle this exact guest create. This method has no dispatch path. */
+  async resolvePublicBookingFromReadback(
+    tenantId: string,
+    executionId: string,
+    sourceRef: string,
+    read: (
+      input: Record<string, unknown>,
+    ) => Promise<Record<string, unknown> | null>,
+  ): Promise<ExecutionResultV1> {
+    let execution = (await this.kernel.getAudit(tenantId, executionId))
+      .execution;
+    if (
+      execution.sourceType !== 'public_booking' ||
+      execution.capability !== 'crm.appointment.create.v1' ||
+      execution.sourceRef !== sourceRef
+    )
+      throw new ActionContractError('Exact guest create readback required');
+    if (
+      execution.state === ActionExecutionState.EXECUTING &&
+      execution.leaseExpiresAt &&
+      execution.leaseExpiresAt <= new Date()
+    )
+      execution = await this.kernel.recoverExpiredClaim({
+        tenantId,
+        executionId,
+      });
+    if (
+      execution.state !== ActionExecutionState.UNKNOWN ||
+      execution.reconciliationState === ActionReconciliationState.IN_PROGRESS
+    )
+      return this.kernel.getExecutionResult(tenantId, executionId);
+    const safeResult = await read(
+      await this.kernel.readTrustedNormalizedInput(tenantId, executionId),
+    );
+    if (!safeResult)
+      return this.kernel.getExecutionResult(tenantId, executionId);
+    const claim = await this.kernel.claimReconciliation({
+      tenantId,
+      executionId,
+      workerId: this.workerId,
+      allowPublicBookingReadback: true,
+    });
+    return this.kernel.finalizeReconciliation({
+      tenantId,
+      executionId,
+      attemptId: claim.attempt.id,
+      leaseToken: claim.leaseToken,
+      outcome: 'PROVEN_SUCCEEDED',
+      safeResult,
+    });
+  }
+
   resolveClientBookingRetry(tenantId: string, clientId: string, key: string) {
     return this.kernel.resolveClientBookingRetry(tenantId, clientId, key);
   }

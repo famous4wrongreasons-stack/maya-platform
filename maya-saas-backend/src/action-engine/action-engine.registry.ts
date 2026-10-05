@@ -744,6 +744,7 @@ function createAppointmentNormalizer(value: unknown): Record<string, unknown> {
   const branchId = optionalOpaqueField(source, 'branchId');
   const clientPhone = optionalText(source, 'clientPhone', 40);
   const notes = optionalText(source, 'notes', 2_000);
+  const providerRequestId = optionalOpaqueField(source, 'providerRequestId');
   const duration = source.durationMinutes;
   const notifyBySmsHours = source.notifyBySmsHours;
   const creationMode = source.creationMode;
@@ -786,6 +787,7 @@ function createAppointmentNormalizer(value: unknown): Record<string, unknown> {
     serviceIds: serviceIds(source),
     start: isoTimestamp(source, 'start'),
     ...(notes ? { notes } : {}),
+    ...(providerRequestId ? { providerRequestId } : {}),
     creationMode: creationMode === 'admin' ? 'admin' : 'client',
     allowBusy: source.allowBusy === true,
     ...(duration !== undefined ? { durationMinutes: Number(duration) } : {}),

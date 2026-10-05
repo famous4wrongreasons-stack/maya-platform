@@ -32,6 +32,169 @@ describe('YclientsCRMAdapter', () => {
     jest.restoreAllMocks();
   });
 
+  it('guest create sends api_id and rejects echoed id without record_id', async () => {
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'synthetic',
+      settings: { companyId: 123 },
+    });
+    const params = {
+      tenantId: 'tenant',
+      timezone: 'Europe/Moscow',
+      clientId: 'guest',
+      clientName: 'Synthetic',
+      clientPhone: '+79990000000',
+      staffId: '101',
+      serviceIds: ['201'],
+      start: '2026-10-06T12:00:00+03:00',
+      creationMode: 'client' as const,
+      notifyBySmsHours: 0,
+      providerRequestId: `maya-guest-${'a'.repeat(64)}`,
+    };
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ data: [{ id: 1 }] }),
+    });
+    global.fetch = fetchMock;
+    await expect(adapter.createAppointment(params)).rejects.toBeInstanceOf(
+      CrmOutcomeUnknownError,
+    );
+    const payload = requestJsonBody(fetchMock.mock.calls[0][1] as RequestInit);
+    expect(payload).toMatchObject({
+      api_id: Number.parseInt('a'.repeat(13), 16) + 1,
+      comment: `MAYA guest booking ${params.providerRequestId}`,
+      notify_by_sms: 0,
+      notify_by_email: 0,
+    });
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          data: [
+            {
+              id: 1,
+              record_id: 777,
+              record_hash: 'synthetic-management-secret',
+            },
+          ],
+        }),
+    });
+    await expect(adapter.createAppointment(params)).resolves.toMatchObject({
+      external_id: '777',
+    });
+  });
+
+  describe('exact guest provider readback', () => {
+    const params = {
+      tenantId: 'tenant',
+      requestId: `maya-guest-${'a'.repeat(64)}`,
+      timezone: 'Europe/Moscow',
+      localDate: '2026-10-06',
+      start: '2026-10-06T12:00:00+03:00',
+      end: '2026-10-06T12:30:00+03:00',
+      staffId: '101',
+      serviceIds: ['201'],
+      branchId: 'branch',
+    };
+    const record = {
+      id: 777,
+      company_id: 123,
+      api_id: Number.parseInt('a'.repeat(13), 16) + 1,
+      comment: `MAYA guest booking ${params.requestId}`,
+      staff_id: 101,
+      services: [{ id: 201 }],
+      datetime: params.start,
+      seance_length: 1800,
+      deleted: false,
+    };
+    it.each([
+      ['exact', {}, true],
+      ['foreign company', { company_id: 456 }, false],
+      ['foreign correlation', { api_id: 'other' }, false],
+      ['foreign marker', { comment: 'other' }, false],
+      ['other staff', { staff_id: 102 }, false],
+      ['other services', { services: [{ id: 202 }] }, false],
+      ['other instant', { datetime: '2026-10-06T12:00:00Z' }, false],
+      ['other duration', { seance_length: 3600 }, false],
+      ['deleted', { deleted: true }, false],
+    ])('%s validates exact record facts', async (_name, overrides, matches) => {
+      const adapter = new YclientsCRMAdapter({
+        provider: CrmProvider.YCLIENTS,
+        apiToken: 'synthetic',
+        settings: { companyId: 123 },
+      });
+      const fetched = jest.fn().mockImplementation((input: string | URL) =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: requestUrl(input).includes('/records/')
+                ? [record]
+                : { ...record, ...(overrides as object) },
+            }),
+        }),
+      );
+      global.fetch = fetched;
+      const result = await adapter.findPublicBookingByRequestId(params);
+      if (matches)
+        expect(result).toMatchObject({
+          external_id: '777',
+          branch_id: 'branch',
+        });
+      else expect(result).toBeNull();
+      expect(fetched).toHaveBeenCalledTimes(2);
+      expect(requestUrl(fetched.mock.calls[0][0] as string)).toContain(
+        'with_deleted=1',
+      );
+      expect(requestUrl(fetched.mock.calls[1][0] as string)).toContain(
+        '/record/123/777',
+      );
+    });
+    it('repeated full pages cannot establish unique correlation', async () => {
+      const adapter = new YclientsCRMAdapter({
+        provider: CrmProvider.YCLIENTS,
+        apiToken: 'synthetic',
+        settings: { companyId: 123 },
+      });
+      const fullPage = [
+        record,
+        ...Array.from({ length: 199 }, (_, index) => ({
+          ...record,
+          id: index + 1000,
+          api_id: '',
+          comment: '',
+        })),
+      ];
+      global.fetch = jest
+        .fn()
+        .mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ data: fullPage }),
+        });
+      await expect(
+        adapter.findPublicBookingByRequestId(params),
+      ).resolves.toBeNull();
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+    });
+    it.each([[], [record, { ...record, id: 778 }]])(
+      'does not resolve absent or duplicated correlation',
+      async (...records) => {
+        const adapter = new YclientsCRMAdapter({
+          provider: CrmProvider.YCLIENTS,
+          apiToken: 'synthetic',
+          settings: { companyId: 123 },
+        });
+        global.fetch = jest.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ data: records }),
+        });
+        await expect(
+          adapter.findPublicBookingByRequestId(params),
+        ).resolves.toBeNull();
+      },
+    );
+  });
+
   it('guest catalog uses staff-specific book_services and refuses guessed ranges, duration and required prepayment', async () => {
     const service = {
       id: 201,
@@ -41,23 +204,21 @@ describe('YclientsCRMAdapter', () => {
       seance_length: 1800,
       prepaid: 'forbidden',
     };
-    global.fetch = jest
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            success: true,
-            data: {
-              services: [
-                service,
-                { ...service, id: 202, price_max: 2000 },
-                { ...service, id: 203, prepaid: 'required' },
-                { ...service, id: 204, seance_length: 0 },
-              ],
-            },
-          }),
-      });
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          success: true,
+          data: {
+            services: [
+              service,
+              { ...service, id: 202, price_max: 2000 },
+              { ...service, id: 203, prepaid: 'required' },
+              { ...service, id: 204, seance_length: 0 },
+            ],
+          },
+        }),
+    });
     const adapter = new YclientsCRMAdapter({
       provider: CrmProvider.YCLIENTS,
       apiToken: 'synthetic-token',
@@ -77,12 +238,10 @@ describe('YclientsCRMAdapter', () => {
     expect(
       requestUrl((global.fetch as jest.Mock).mock.calls[0][0] as string),
     ).toContain('/book_services/123?staff_id=101');
-    global.fetch = jest
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ success: true, data: {} }),
-      });
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ success: true, data: {} }),
+    });
     await expect(
       adapter.getPublicBookingServices('tenant', '101'),
     ).rejects.toThrow('Public booking catalog unavailable');

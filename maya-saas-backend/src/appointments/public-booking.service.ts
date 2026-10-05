@@ -704,12 +704,16 @@ export class PublicBookingService {
     const attempt = await this.repo.attempt(ctx.session, nonce);
     if (!attempt)
       throw new NotFoundException('PUBLIC_BOOKING_ATTEMPT_UNAVAILABLE');
-    return this.result(ctx, attempt);
+    return this.scoped(ctx, () => this.result(ctx, attempt, true));
   }
-  private async result(ctx: Context, a: PublicBookingAttempt) {
+  private async result(
+    ctx: Context,
+    a: PublicBookingAttempt,
+    readback = false,
+  ) {
     if (a.preDispatchFailure)
       return this.envelope(a.nonce, 'FAILED', 'REJECTED_BEFORE_DISPATCH');
-    const execution = await this.prisma.actionExecution.findFirst({
+    let execution = await this.prisma.actionExecution.findFirst({
       where: {
         tenantId: a.tenantId,
         sourceType: 'public_booking',
@@ -720,6 +724,46 @@ export class PublicBookingService {
       },
       select: { id: true, state: true },
     });
+    if (
+      readback &&
+      execution &&
+      ['UNKNOWN', 'EXECUTING'].includes(execution.state)
+    ) {
+      const budget = await this.limits.consume(
+        [
+          {
+            action: 'guest-readback',
+            policyKey: 'guest-readback:attempt',
+            scope: 'identity',
+            subjectHash: this.hash('readback', a.id),
+            tenantId: a.tenantId,
+            windowSeconds: 60,
+            maxAttempts: 2,
+          },
+        ],
+        new Date(),
+      );
+      if (budget.allowed) {
+        const quote = await this.repo.quote(ctx.session, a.quoteId);
+        if (quote) {
+          try {
+            await this.crm.reconcilePublicBooking(
+              a.tenantId,
+              execution.id,
+              a.id,
+              quote.snapshotJson,
+              ctx.site.branchId,
+            );
+          } catch {
+            /* Failed source read is not a booking failure. */
+          }
+          execution = await this.prisma.actionExecution.findUnique({
+            where: { id: execution.id },
+            select: { id: true, state: true },
+          });
+        }
+      }
+    }
     if (execution?.state === 'SUCCEEDED') {
       const quote = await this.repo.quote(ctx.session, a.quoteId);
       if (quote)

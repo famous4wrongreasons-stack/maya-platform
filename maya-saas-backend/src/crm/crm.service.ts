@@ -173,6 +173,7 @@ const LEGACY_APPOINTMENT_SHADOW_OBSERVATION_CONTRACT =
   'maya.legacy-appointment-shadow-observation/1';
 
 type CreateAppointmentInput = {
+  providerRequestId?: string;
   clientId: string;
   clientName: string;
   clientPhone?: string;
@@ -188,6 +189,7 @@ type CreateAppointmentInput = {
 };
 
 export type CreateAppointmentRequest = {
+  providerRequestId?: string;
   clientId: string;
   clientName: string;
   clientPhone?: string | null;
@@ -899,6 +901,68 @@ export class CrmService {
     });
   }
 
+  private publicBookingRequestId(attemptId: string) {
+    return `maya-guest-${this.encryptionService.opaqueReference('public-booking-provider-v1', attemptId)}`;
+  }
+
+  /** Read-only provider recovery. Exact external correlation never grants Client authority. */
+  async reconcilePublicBooking(
+    tenantId: string,
+    executionId: string,
+    attemptId: string,
+    snapshot: import('../appointments/public-booking.types').PublicBookingSnapshot,
+    branchId: string,
+  ) {
+    this.tenantContext.assertTenantId(tenantId);
+    const current = await this.canonicalClientBookingTarget(tenantId);
+    if (stableActionJson(current) !== stableActionJson(snapshot.calendarTarget))
+      return;
+    await this.assertExternalSource(tenantId);
+    const adapter = await this.getAdapterForTenant(tenantId);
+    if (!adapter.findPublicBookingByRequestId) return;
+    await this.actionEngineRuntime.resolvePublicBookingFromReadback(
+      tenantId,
+      executionId,
+      attemptId,
+      async (input) => {
+        const requestId = this.publicBookingRequestId(attemptId);
+        if (
+          input.providerRequestId !== requestId ||
+          !sameInstant(String(input.start), snapshot.start) ||
+          input.staffId !== snapshot.staffId ||
+          !sameServiceIds(
+            requireStringArray(input.serviceIds, 'serviceIds'),
+            snapshot.serviceIds,
+          )
+        )
+          return null;
+        const found = await adapter.findPublicBookingByRequestId!({
+          tenantId,
+          requestId,
+          timezone: snapshot.timezone,
+          localDate: snapshot.localDate,
+          start: snapshot.start,
+          end: snapshot.end,
+          staffId: snapshot.staffId,
+          serviceIds: snapshot.serviceIds,
+          branchId,
+        });
+        return found
+          ? {
+              ...this.createdAppointmentSafe(found),
+              publicBookingReadback: {
+                contract: 'maya.public-booking-readback/1',
+                requestId,
+                companyId: current.companyId,
+                source: 'records-and-record',
+                observedAt: new Date().toISOString(),
+              },
+            }
+          : null;
+      },
+    );
+  }
+
   async getStaff(tenantId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
 
@@ -1081,6 +1145,13 @@ export class CrmService {
     const timezone = await this.tenantTimezone(scopedTenantId);
     const actionInput: CreateAppointmentRequest = {
       ...params,
+      ...(invocation.sourceType === 'public_booking'
+        ? {
+            providerRequestId: this.publicBookingRequestId(
+              invocation.sourceRef!,
+            ),
+          }
+        : {}),
       start: canonicalAppointmentInstant(params.start, timezone),
       clientId:
         invocation.sourceType === 'public_booking'
@@ -2948,6 +3019,7 @@ export class CrmService {
       serviceIds: requireStringArray(input.serviceIds, 'serviceIds'),
       start: requireString(input.start, 'start'),
       notes: optionalString(input.notes),
+      providerRequestId: optionalString(input.providerRequestId),
       creationMode: input.creationMode === 'admin' ? 'admin' : 'client',
       allowBusy: input.allowBusy === true,
       durationMinutes: optionalNumber(input.durationMinutes),

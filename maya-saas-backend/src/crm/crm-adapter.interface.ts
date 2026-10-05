@@ -68,6 +68,8 @@ export interface ApplyStaffScheduleDayChangeParams {
 export type AppliedStaffScheduleDayChange = AppliedWorkDayChange;
 
 export interface CreateAppointmentParams {
+  /** Server-generated correlation, not a provider idempotency guarantee. */
+  providerRequestId?: string;
   tenantId: string;
   timezone: string;
   clientId: string;
@@ -495,6 +497,17 @@ export interface CRMAdapter {
   discoverCompanies?(): Promise<CrmCompanyOption[]>;
   getCompanyProfile?(): Promise<CrmCompanyProfile | null>;
   getServices(tenantId: string): Promise<ServiceItem[]>;
+  findPublicBookingByRequestId?(params: {
+    tenantId: string;
+    requestId: string;
+    timezone: string;
+    localDate: string;
+    start: string;
+    end: string;
+    staffId: string;
+    serviceIds: string[];
+    branchId: string;
+  }): Promise<CreatedAppointment | null>;
   getPublicBookingServices?(
     tenantId: string,
     staffId: string,

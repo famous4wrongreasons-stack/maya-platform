@@ -133,8 +133,8 @@ schema migration and activation remain part of the separately approved release b
 - PENDING/UNKNOWN (`OUTCOME_UNRESOLVED`) remain locked. GET status never dispatches. Every
   exception after guest provider entry, including malformed response, is conservatively UNKNOWN.
   Phone/time matching cannot prove this request did not execute, so guest reconciliation never
-  returns PROVEN_NOT_EXECUTED from an empty phone lookup. Exact provider-correlated readback
-  recovery is **not implemented**; UNKNOWN may require owner/provider investigation.
+  returns PROVEN_NOT_EXECUTED from an empty phone lookup. Exact provider-correlated positive readback
+  recovery is implemented; missing or ambiguous evidence still requires owner/provider investigation.
 - SUCCEEDED (`BOOKED`) preserves the receipt. A separate explicit “Новая запись” may archive
   the public terminal receipt and atomically clear the browser active pointer under the same
   WebLock. A different nonce for the same still-active session/phone/staff/services/time/source
@@ -153,3 +153,19 @@ It emits its random loopback baseURL, siteKey `proof-site`, and one synthetic av
 Use synthetic contact data only. It scrubs inherited secrets, refuses dotenv, blocks outbound fetch,
 creates its own proof tenant, and cleans it up on SIGINT/SIGTERM or after 30 minutes. It is an
 integration fixture, never a production server or evidence of real YCLIENTS booking acceptance.
+
+
+## Positive UNKNOWN recovery addition
+
+GET status can now perform a bounded provider **read-only** reconciliation (at most two reads
+per minute per attempt through the durable rate-limit owner). It never issues create/cancel/move.
+A full HMAC correlation marker plus numeric api_id, frozen company and exact record facts can
+finalize the existing UNKNOWN ActionExecution as SUCCEEDED after reload/server restart, including
+an earlier MANUAL_REQUIRED state. No match, duplicates, truncated/unavailable reads, deleted or
+changed record, changed source or missing old correlation stay UNKNOWN. Provider readback creates
+only the existing AE reconciliation receipt; it creates no User/Client/link or new appointment.
+
+The synthetic preview accepts optional `--lose-first-reply`: its first create persists one synthetic
+record and loses the response, then status recovers the receipt without a second dispatch.
+See [provider acceptance and release gates](WEBSITE-GUEST-BOOKING-RELEASE-GATES.md) for official
+schema conflicts, exact prerequisites, migration diff and evidence-preserving rollback.
