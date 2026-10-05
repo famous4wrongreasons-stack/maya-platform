@@ -34,6 +34,82 @@ describe('AiCoreService', () => {
     messages: [{ role: 'user' as const, content: 'Покажи показатели' }],
   };
 
+  it('renders canonical dormancy signals without legacy contacts or inferred activity', () => {
+    const { service } = createService();
+    const render = (value: unknown) =>
+      service['deterministicDormantClientsReply'](value);
+    const item = {
+      handle: 'result_1',
+      kind: 'POLICY_SIGNAL',
+      current: true,
+      available: true,
+      rule: { key: 'c8.dormancy/cadence', version: 2 },
+      values: [{ key: 'cadence', value: true }],
+      asOf: '2026-10-05T10:00:00.000Z',
+      completeness: 'PARTIAL',
+    };
+    const payload = {
+      contract: 'c8.valuation.ai/1',
+      configured: true,
+      items: [item],
+      moreAvailable: true,
+    };
+    const reply = render(payload);
+    expect(reply).toContain('result_1');
+    expect(reply).toContain('c8.dormancy/cadence');
+    expect(reply).toContain('PARTIAL');
+    expect(reply).toContain('не разрешение на контакт');
+    expect(reply).toContain('не весь список');
+    for (const unavailable of [
+      { ...payload, configured: false, items: [] },
+      { ...payload, items: [] },
+      { ...payload, items: [{ ...item, available: false }] },
+      { ...payload, items: [{ ...item, current: false }] },
+    ]) {
+      expect(render(unavailable)).toContain('недоступ');
+      expect(render(unavailable)).not.toContain('база активна');
+    }
+    expect(
+      render({
+        ...payload,
+        items: [{ ...item, values: [{ key: 'cadence', value: false }] }],
+      }),
+    ).toContain('не выполнено');
+    expect(
+      render({
+        inactive_days: 30,
+        clients: [{ name: 'PRIVATE_NAME', phone: 'PRIVATE_PHONE' }],
+      }),
+    ).toBeNull();
+  });
+
+  it('returns C8 unavailability through chat after the selected dormancy read when model continuation fails', async () => {
+    const mocks = createService(['clients.dormant.list']);
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'dormancy-read',
+      result: { contract: 'c8.valuation.ai/1', configured: false, items: [] },
+    });
+    mocks.model.decide
+      .mockResolvedValueOnce(
+        decision({
+          reply: null,
+          toolCall: { name: 'clients.dormant.list', arguments: {} },
+        }),
+      )
+      .mockResolvedValue(null);
+    const result = await mocks.service.chat(user, {
+      ...dto,
+      surface: 'native',
+      messages: [{ role: 'user', content: 'Кто давно не приходил?' }],
+    });
+    expect(mocks.runtime.execute).toHaveBeenCalled();
+    expect(result.reply).toContain(
+      'Подтверждённые результаты давности сейчас недоступны',
+    );
+    expect(result.reply).not.toContain('30 дней');
+  });
+
   it('persists an explicit REMEMBER command without invoking the model', async () => {
     const mocks = createService();
     mocks.memory.handleExplicitCommand.mockResolvedValue({

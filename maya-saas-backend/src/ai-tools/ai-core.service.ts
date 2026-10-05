@@ -2543,71 +2543,52 @@ export class AiCoreService {
     return null;
   }
 
-  /**
-   * Список спящих гостей — поимённо, силами сервера.
-   *
-   * 🔴 Имена и телефоны сюда доходят, но дальше не идут: этот текст
-   * возвращается пользователю напрямую, минуя внешнюю модель. Так владелец
-   * получает живой список «кого возвращать», а контур 152-ФЗ остаётся цел.
-   */
+  /** Render only the canonical C8 projection; never reconstruct Client segments. */
   private deterministicDormantClientsReply(value: unknown): string | null {
     const data = this.record(value);
-    const rows = Array.isArray(data.clients) ? data.clients : [];
-    const days =
-      typeof data.inactive_days === 'number' ? data.inactive_days : null;
-    const total =
-      typeof data.total_dormant === 'number' ? data.total_dormant : rows.length;
-    if (days === null) {
-      return null;
-    }
-    /**
-     * 🔴 Cycle 04 closure B3. Непосчитанные гости обязаны прозвучать.
-     *
-     * Карточки, у которых провайдер не назвал дату последнего визита, из
-     * выдачи выпадали молча — и пустой список произносился как «база активна».
-     * Неизвестность не бывает молчанием: она либо названа, либо выдана за факт.
-     */
-    const unknownRecency = this.safeMetricNumber(
-      data.clients_with_unknown_recency,
-    );
-    if (!rows.length) {
-      return unknownRecency > 0
-        ? `Гостей, которые не приходили дольше ${days} дней, я не вижу. Но у ${unknownRecency} ${this.pluralize(unknownRecency, 'карточки', 'карточек', 'карточек')} давность визита не измерена — в этот ответ они не вошли, и «база активна» про них сказать нельзя.`
-        : `Гостей, которые не приходили дольше ${days} дней, нет — база активна.`;
-    }
-    const lines = rows
-      .map((row: unknown) => {
-        const client = this.record(row);
-        const name =
-          typeof client.name === 'string' && client.name.trim()
-            ? client.name.trim()
-            : 'Без имени в CRM';
-        const phone =
-          typeof client.phone === 'string' && client.phone.trim()
-            ? `, ${client.phone.trim()}`
-            : '';
-        const gap =
-          typeof client.inactivity_days === 'number'
-            ? `${client.inactivity_days} дн.`
-            : 'давно';
-        const visits =
-          typeof client.visits === 'number'
-            ? `, визитов: ${client.visits}`
-            : '';
-        return `• ${name}${phone} — не был ${gap}${visits}`;
-      })
-      .join('\n');
-    const tail =
-      total > rows.length
-        ? `\n\nПоказала ${rows.length} из ${total} — скажите, если нужен весь список.`
-        : '';
-    // Непосчитанные гости упоминаются и рядом с непустым списком: иначе «всего
-    // N» читается как весь охват базы, а часть карточек в него не входила.
-    const unmeasured =
-      unknownRecency > 0
-        ? `\n\nЕщё у ${unknownRecency} ${this.pluralize(unknownRecency, 'карточки', 'карточек', 'карточек')} давность визита не измерена — в этот список они не вошли.`
-        : '';
-    return `Гости, которые не приходили дольше ${days} дней — всего ${total}:\n\n${lines}${tail}${unmeasured}`;
+    if (data.contract !== 'c8.valuation.ai/1') return null;
+    const unavailable =
+      'Подтверждённые результаты давности сейчас недоступны. Нужны действующее правило бизнеса и проверенные Client-факты. Неизвестная история не позволяет отнести гостя к активным или спящим.';
+    if (data.configured !== true) return unavailable;
+    const rows = Array.isArray(data.items) ? data.items : [];
+    const lines = rows.slice(0, 20).flatMap((raw) => {
+      const row = this.record(raw),
+        rule = this.record(row.rule);
+      if (
+        row.kind !== 'POLICY_SIGNAL' ||
+        row.current !== true ||
+        row.available !== true ||
+        typeof row.handle !== 'string' ||
+        !/^result_[0-9]+$/.test(row.handle) ||
+        typeof rule.key !== 'string' ||
+        !rule.key.startsWith('c8.dormancy/')
+      )
+        return [];
+      const values = Array.isArray(row.values) ? row.values : [];
+      const signal = values
+        .map((v) => this.record(v))
+        .find(
+          (v) => v.key === (rule.key as string).slice('c8.dormancy/'.length),
+        );
+      if (typeof signal?.value !== 'boolean') return [];
+      return [
+        `${row.handle}: условие ${rule.key} (версия ${String(rule.version)}) ${signal.value ? 'выполнено' : 'не выполнено'}. На ${String(row.asOf)}; полнота данных: ${String(row.completeness)}.`,
+      ];
+    });
+    if (!lines.length) return unavailable;
+    return [
+      'Результаты по подтверждённым правилам давности:',
+      ...lines,
+      'Метки result обозначают результаты оценки, а не имена гостей. Это не разрешение на контакт или отправку. Прогноз возврата недоступен.',
+      data.moreAvailable === true
+        ? 'Показана ограниченная часть результатов, не весь список.'
+        : 'Результаты не подтверждают полный охват клиентской базы.',
+      ...(lines.length < rows.length
+        ? [
+            'Часть результатов недоступна или не подтверждена; она не отнесена к активным или спящим гостям.',
+          ]
+        : []),
+    ].join('\n');
   }
 
   private deterministicReplyForTool(
