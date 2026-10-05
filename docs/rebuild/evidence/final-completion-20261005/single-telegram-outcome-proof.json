@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-05",
+  "sourceCommit": "1d2611a811d2a12d8b2c76a2d6f1c2ac88be6ac0",
+  "baselineCommit": "764ed4bb481831348c46c0f707bea5330ef606ab",
+  "correction": "Shared response classifier requires exact bridge HTTP400 rejection evidence and canonical message ID; privacy/package2/bulk retain separate allowlists; ambiguous responses remain UNKNOWN.",
+  "executed": {
+    "baselineSingleTelegramPostgres": "3 failed, 2 passed",
+    "correctedSingleTelegramPostgres": "5 passed",
+    "correctedSingleAndB35Postgres": "6 passed, 2 suites",
+    "unitAndArchitecture": "119 passed, 9 suites; includes 14 Python R07 checks",
+    "widgetsLiveTypeScript": "PASS",
+    "scriptsTypeScript": "PASS",
+    "changedSourceESLint": "PASS"
+  },
+  "proofScope": "Single privacy executor invoked through real ActionEngineRuntimeService and PostgreSQL; repeat uses same source event and leaves one execution/one delivery attempt. HTTP status400 unknown code,408,malformed200 all UNKNOWN; exact bridge reject FAILED; canonical message ID ACCEPTED and Action Engine SUCCEEDED.",
+  "package2Scope": "Same tested shared classifier wired into the existing package2 single sender; its full business producer path was not provider-accepted in this task.",
+  "rawLogs": {
+    "single-telegram-before.log": {
+      "path": "/tmp/maya-b35-completion-pg.rponbg/single-telegram-before.log",
+      "sha256": "82d4cb30846f232042129c9be6ba1ce6d7f2a1458deaa3dcc5bac0f1df4eabbe"
+    },
+    "delivery-after.log": {
+      "path": "/tmp/maya-b35-completion-pg.rponbg/delivery-after.log",
+      "sha256": "20bf128cfdd997e808e4207aa1d17b6cf5e02b2187d9aff9dd3118f8269cd725"
+    },
+    "delivery-units.log": {
+      "path": "/tmp/maya-b35-completion-pg.rponbg/delivery-units.log",
+      "sha256": "b06dfe9242fa017e8bde3c78b7a33fa4910b2b6753c4cd57eace324ca0ed889a"
+    }
+  },
+  "fixtures": "Only external fetch replaced in single runtime proof; no kernel/policy/entitlement fake. Eight older standalone proof scripts now use canonical response fixtures and were typechecked, not rerun.",
+  "productionMessages": 0,
+  "productionChanges": false,
+  "realProviderAcceptance": false,
+  "phoneOperations": 0,
+  "crmWrites": 0,
+  "proofProcessHygiene": {
+    "httpProcessesClosed": true,
+    "ownedPostgresStopped": true,
+    "ownedPostgresDataRetained": "/tmp/maya-b35-completion-pg.rponbg/data",
+    "otherProcessesTouched": false
+  }
+}

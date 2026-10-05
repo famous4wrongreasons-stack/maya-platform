@@ -76,5 +76,11 @@
     "Pilot tenant/branch, owner session and controlled verified Client with owner-controlled channels not established",
     "Provider automation/reminder behavior must be established; disabling SMS alone is insufficient",
     "Installed iOS points at unchanged production API; phone UI/login observation still pending"
-  ]
+  ],
+  "proofProcessHygiene": {
+    "httpProcessesClosed": true,
+    "ownedPostgresStopped": true,
+    "ownedPostgresDataRetained": "/tmp/maya-b35-completion-pg.rponbg/data",
+    "otherProcessesTouched": false
+  }
 }
