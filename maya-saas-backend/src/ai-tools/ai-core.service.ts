@@ -51,6 +51,11 @@ import { ReportingPeriodResolver } from './reporting-period.resolver';
 import { StaffScheduleCommandService } from './staff-schedule-command.service';
 import { ModuleRef } from '@nestjs/core';
 import {
+  C9Orchestrator,
+  type C9ConversationReads,
+} from '../orchestration/c9.orchestrator';
+import { C9_CAPABILITIES } from '../orchestration/c9.registry';
+import {
   AI_TYPED_WIDGET_TRIGGER,
   type AiTypedWidgetTriggerPort,
 } from './ai-typed-widget-trigger.port';
@@ -522,6 +527,7 @@ export class AiCoreService {
     private readonly dashboardPreferences: DashboardPreferencesService,
     private readonly staffScheduleCommand: StaffScheduleCommandService,
     private readonly brainRouter: MayaBrainRouterService,
+    private readonly orchestrator: C9Orchestrator,
     @Optional() private readonly memory?: AiMemoryService,
     @Optional()
     private readonly conversationIntelligence?: ConversationIntelligenceService,
@@ -532,6 +538,11 @@ export class AiCoreService {
   private readonly persistedUserTurns = new WeakMap<
     AiCoreChatDto,
     { turnId: string; conversationId: string }
+  >();
+
+  private readonly readTurns = new WeakMap<
+    AiCoreChatDto,
+    C9ConversationReads
   >();
 
   async chat(user: AuthenticatedUser, dto: AiCoreChatDto) {
@@ -558,6 +569,17 @@ export class AiCoreService {
       });
     }
     await this.persistOrdinaryUserTurn(user, dto);
+    const userTurn = this.persistedUserTurns.get(dto);
+    if (userTurn)
+      this.readTurns.set(dto, {
+        turn: userTurn,
+        intentHash: this.orchestrator.conversationDigest([
+          'conversation-read-intent/1',
+          dto.surface,
+          dto.audience ?? null,
+          dto.messages,
+        ]),
+      });
     const clientAudience = this.isClientAudience(user, dto.audience);
     // Поверхность мастера: владельцу/менеджеру в режиме мастера инструменты
     // выдаются и исполняются от роли STAFF — личная аналитика вместо кассы
@@ -682,7 +704,8 @@ export class AiCoreService {
           businessTimezone,
         );
         const execution = this.record(
-          await this.runtime.execute(
+          await this.executeChatTool(
+            dto,
             toolUser,
             toolName,
             {
@@ -795,7 +818,8 @@ export class AiCoreService {
       if (requirement?.presetToolCall) {
         const preset = requirement.presetToolCall;
         const execution = this.record(
-          await this.runtime.execute(
+          await this.executeChatTool(
+            dto,
             toolUser,
             preset.name,
             {
@@ -1184,7 +1208,8 @@ export class AiCoreService {
         let execution: Record<string, unknown>;
         try {
           execution = this.record(
-            await this.runtime.execute(
+            await this.executeChatTool(
+              dto,
               toolUser,
               decision.toolCall.name,
               {
@@ -1320,6 +1345,33 @@ export class AiCoreService {
       }
       this.modelFailure('ai_model_tool_step_limit');
     } catch (error) {
+      if (this.readTurns.get(dto)?.failed) {
+        const partial = this.deterministicGroundedReply(
+          toolResults,
+          this.contextualUserText(sanitized.messages),
+        );
+        return this.complete(
+          user,
+          dto,
+          brain,
+          sanitized.redacted,
+          toolsUsed,
+          decisions,
+          {
+            reply: partial
+              ? `${partial}\n\nЧасть запроса не удалось проверить. Полного ответа пока нет.`
+              : 'Не удалось завершить проверку данных для этого запроса. Подтверждённого ответа пока нет.',
+            source: 'safe_fallback',
+            action: null,
+            grounding: this.groundingReport(
+              requirement,
+              'blocked',
+              toolResults,
+            ),
+          },
+          toolResults,
+        );
+      }
       const deterministicReply = this.deterministicGroundedReply(
         toolResults,
         this.contextualUserText(sanitized.messages),
@@ -1419,6 +1471,34 @@ export class AiCoreService {
       });
       throw error;
     }
+  }
+
+  private executeChatTool(
+    chat: AiCoreChatDto,
+    ...args: Parameters<AiToolRuntimeService['execute']>
+  ): ReturnType<AiToolRuntimeService['execute']> {
+    const turn = this.readTurns.get(chat);
+    const [user, name, dto] = args;
+    const read = () => this.runtime.execute(...args);
+    const capability = C9_CAPABILITIES.find((c) => c.capabilityKey === name);
+    // Persisted web ingress currently supplies the canonical age. Other surfaces
+    // retain their existing source path until their turn identity is connected.
+    if (!turn || capability?.mode !== 'READ') return read();
+    return this.orchestrator.conversationRead(
+      turn,
+      name,
+      dto.idempotencyKey as string,
+      this.orchestrator.conversationDigest([
+        'conversation-source-input/1',
+        name,
+        dto.arguments,
+        dto.surface,
+        user.role,
+      ]),
+      read,
+      (executionId) =>
+        this.runtime.replayCompletedRead(user, name, dto, executionId, args[3]),
+    );
   }
 
   private async routeTypedWidget(user: AuthenticatedUser, dto: AiCoreChatDto) {
@@ -1709,6 +1789,14 @@ export class AiCoreService {
     toolResults: AiCoreToolResult[] = [],
   ) {
     const completedResponse = response;
+    const readTurn = this.readTurns.get(dto);
+    const coordination = readTurn
+      ? await this.orchestrator.finishConversationReads(readTurn).catch(() => ({
+          run_id: readTurn.runId ?? null,
+          scope: 'deterministic_reads' as const,
+          state: 'UNCONFIRMED',
+        }))
+      : null;
     const grounding =
       completedResponse.grounding ??
       this.groundingReport(null, 'not_required', []);
@@ -1764,6 +1852,7 @@ export class AiCoreService {
       metadata: {
         surface: dto.surface,
         source: completedResponse.source,
+        ...(coordination ? { coordination } : {}),
         ...(this.persistedUserTurns.has(dto)
           ? { user_turn: this.persistedUserTurns.get(dto) }
           : {}),
@@ -1800,6 +1889,7 @@ export class AiCoreService {
       .find((tool) => tool.resolution !== undefined)?.resolution;
     return {
       request_id: dto.requestId,
+      ...(coordination ? { coordination } : {}),
       ...(this.persistedUserTurns.has(dto)
         ? { user_turn: this.persistedUserTurns.get(dto) }
         : {}),

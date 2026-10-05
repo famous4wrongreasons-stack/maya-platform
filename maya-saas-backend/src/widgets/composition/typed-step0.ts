@@ -233,7 +233,11 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
         input.conversationId !== conversationId
       )
         throw new ConflictException('conversation_scope_conflict');
-      const now = new Date();
+      // Persist the turn age using the same authoritative clock that C9 uses
+      // for admission; app/DB clock skew must not make a fresh turn future-dated.
+      const [{ now }] = await tx.$queryRaw<
+        { now: Date }[]
+      >`SELECT clock_timestamp() AS now`;
       await TimelineStore.lockConversation(tx, tenantId, conversationId);
       if (input.conversationId !== undefined)
         await TimelineStore.assertConversation(

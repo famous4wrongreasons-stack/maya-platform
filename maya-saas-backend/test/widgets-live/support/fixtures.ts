@@ -983,7 +983,11 @@ export class Fixtures {
       await db.authSession.deleteMany({ where });
       await db.membership.deleteMany({ where });
       await db.user.deleteMany({ where });
-      if ((await db.clientChannelLink.count({ where })) > 0) {
+      // C9 evidence has independent retention and RESTRICT ownership as well.
+      if (
+        (await db.clientChannelLink.count({ where })) > 0 ||
+        (await db.c9Run.count({ where })) > 0
+      ) {
         await db.tenant.update({
           where: { id: tenantId },
           data: { status: 'cancelled' },

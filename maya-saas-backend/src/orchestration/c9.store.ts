@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { stableActionJson } from '../action-engine/action-engine.identity';
 import { C9Run, Prisma } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -165,92 +166,273 @@ export class C9Store {
     );
   }
   admit(eventToken: string, request: unknown, channelProof?: string) {
-    return this.transaction(channelProof, async (tx, p, now) => {
-      const event = this.identity.verify(eventToken, p, now),
-        requestInput = c9Request(request) as C9Object;
-      c9SafeText(requestInput.safeQuestion);
+    return this.transaction(channelProof, (tx, p, now) =>
+      this.admitRequest(tx, p, now, eventToken, request),
+    );
+  }
+  private async admitRequest(
+    tx: C9Tx,
+    p: C9Principal,
+    now: Date,
+    eventToken: string,
+    request: unknown,
+  ) {
+    const event = this.identity.verify(eventToken, p, now),
+      requestInput = c9Request(request) as C9Object;
+    c9SafeText(requestInput.safeQuestion);
+    if (
+      requestInput.eventEnvelopeHash !== event.hash ||
+      requestInput.eventIssuedAt !== event.envelope.issuedAt ||
+      requestInput.eventExpiresAt !== event.envelope.expiresAt
+    )
+      c9Deny('request_event_mismatch');
+    c9Bytes(requestInput, 16384);
+    // Released allowance is frozen into the immutable manifest at admission. Without
+    // configured price evidence this is the deterministic no-paid-allowance foundation.
+    // A confirmed tenant ceiling can only tighten it, never widen it, and is frozen here
+    // so a later configuration change cannot retroactively re-fund a running request.
+    const confirmed = await this.governed.configuration(
+      tx,
+      p.tenantId,
+      'c9_orchestration',
+    );
+    const budget = c9Budget(
+      c9EffectiveLimits(
+        this.allowance.manifest(now),
+        confirmed.content?.resourceLimits ?? null,
+      ),
+    ) as C9Object;
+    const material = c9Hash('request-intent/1', [p, requestInput]);
+    const existing = await tx.c9Run.findFirst({
+      where: { tenantId: p.tenantId, requestKeyHash: event.keyHash },
+    });
+    if (existing) {
       if (
-        requestInput.eventEnvelopeHash !== event.hash ||
-        requestInput.eventIssuedAt !== event.envelope.issuedAt ||
-        requestInput.eventExpiresAt !== event.envelope.expiresAt
+        existing.requestHash !== material ||
+        existing.authorityHash !== c9PrincipalHash(p)
       )
-        c9Deny('request_event_mismatch');
-      c9Bytes(requestInput, 16384);
-      // Released allowance is frozen into the immutable manifest at admission. Without
-      // configured price evidence this is the deterministic no-paid-allowance foundation.
-      // A confirmed tenant ceiling can only tighten it, never widen it, and is frozen here
-      // so a later configuration change cannot retroactively re-fund a running request.
-      const confirmed = await this.governed.configuration(
-        tx,
-        p.tenantId,
-        'c9_orchestration',
-      );
-      const budget = c9Budget(
-        c9EffectiveLimits(
-          this.allowance.manifest(now),
-          confirmed.content?.resourceLimits ?? null,
-        ),
-      ) as C9Object;
-      const material = c9Hash('request-intent/1', [p, requestInput]);
-      const existing = await tx.c9Run.findFirst({
-        where: { tenantId: p.tenantId, requestKeyHash: event.keyHash },
-      });
-      if (existing) {
-        if (
-          existing.requestHash !== material ||
-          existing.authorityHash !== c9PrincipalHash(p)
-        )
-          c9Deny('idempotency_conflict');
-        return existing;
+        c9Deny('idempotency_conflict');
+      return existing;
+    }
+    await this.sources.all(tx, p, requestInput.subjectRefs as unknown[], now);
+    const entry = requestInput.entryRef as C9Object | null;
+    if (entry) {
+      const op = await this.sources.check(tx, p, entry.opportunityRef, now);
+      if ((entry.opportunityRef as C9Object).sourceType !== 'Opportunity')
+        c9Deny('selected_opportunity');
+      if (entry.agentTaskRef) {
+        const task = await this.sources.check(tx, p, entry.agentTaskRef, now);
+        if (task.opportunityId !== op.id) c9Deny('assignment_mismatch');
       }
-      await this.sources.all(tx, p, requestInput.subjectRefs as unknown[], now);
-      const entry = requestInput.entryRef as C9Object | null;
-      if (entry) {
-        const op = await this.sources.check(tx, p, entry.opportunityRef, now);
-        if ((entry.opportunityRef as C9Object).sourceType !== 'Opportunity')
-          c9Deny('selected_opportunity');
-        if (entry.agentTaskRef) {
-          const task = await this.sources.check(tx, p, entry.agentTaskRef, now);
-          if (task.opportunityId !== op.id) c9Deny('assignment_mismatch');
-        }
-      }
-      return c9Insert<C9Run>(tx, 'C9Run', {
-        id: randomUUID(),
-        tenantId: p.tenantId,
-        contractVersion: 1,
-        principalJson: p,
-        authorityHash: c9PrincipalHash(p),
-        requestKeyHash: event.keyHash,
-        requestHash: material,
-        requestIntentJson: requestInput,
-        entryKind: entry ? 'SELECTED_OPPORTUNITY' : 'EXPLICIT_REQUEST',
-        entryRefJson: entry,
-        admittedAt: now,
-        validUntil: new Date(
-          Math.min(
-            Date.parse(event.envelope.expiresAt),
-            ...c9CollectRefs(requestInput).map((ref) =>
-              ref.validUntil ? Date.parse(ref.validUntil as string) : Infinity,
-            ),
+    }
+    return c9Insert<C9Run>(tx, 'C9Run', {
+      id: randomUUID(),
+      tenantId: p.tenantId,
+      contractVersion: 1,
+      principalJson: p,
+      authorityHash: c9PrincipalHash(p),
+      requestKeyHash: event.keyHash,
+      requestHash: material,
+      requestIntentJson: requestInput,
+      entryKind: entry ? 'SELECTED_OPPORTUNITY' : 'EXPLICIT_REQUEST',
+      entryRefJson: entry,
+      admittedAt: now,
+      validUntil: new Date(
+        Math.min(
+          Date.parse(event.envelope.expiresAt),
+          ...c9CollectRefs(requestInput).map((ref) =>
+            ref.validUntil ? Date.parse(ref.validUntil as string) : Infinity,
           ),
         ),
-        retentionUntil: new Date(now.getTime() + C9_RETENTION),
-        state: 'DRAFT',
-        currentRevision: 0,
-        counterVersion: 0,
-        budgetManifestHash: c9Hash('budget/1', [budget]),
-        budgetManifestJson: budget,
-        budgetStateJson: c9EmptyBudget(),
-        reasoningUsedMs: 0,
-        reasoningWindowStartedAt: null,
-        reasoningWindowDeadlineAt: null,
-        leaseTokenHash: null,
-        leaseUntil: null,
-        leaseGeneration: 0,
-        cancelKeyHash: null,
-        cancelledAt: null,
-        updatedAt: now,
+      ),
+      retentionUntil: new Date(now.getTime() + C9_RETENTION),
+      state: 'DRAFT',
+      currentRevision: 0,
+      counterVersion: 0,
+      budgetManifestHash: c9Hash('budget/1', [budget]),
+      budgetManifestJson: budget,
+      budgetStateJson: c9EmptyBudget(),
+      reasoningUsedMs: 0,
+      reasoningWindowStartedAt: null,
+      reasoningWindowDeadlineAt: null,
+      leaseTokenHash: null,
+      leaseUntil: null,
+      leaseGeneration: 0,
+      cancelKeyHash: null,
+      cancelledAt: null,
+      updatedAt: now,
+    });
+  }
+
+  /** Persisted web turn supplies the immutable age; retries cannot refresh it. */
+  conversationReadRun(
+    turn: { turnId: string; conversationId: string },
+    intentHash: string,
+  ) {
+    return this.transaction(undefined, async (tx, p, now) => {
+      if (!/^[a-f0-9]{64}$/.test(intentHash))
+        c9Deny('conversation_intent_hash');
+      const source = await tx.widgetTimelineTurn.findFirst({
+        where: {
+          id: c9Id(turn.turnId) as string,
+          conversationId: c9Id(turn.conversationId) as string,
+          tenantId: p.tenantId,
+          principalProofHash: c9PrincipalHash(p),
+          role: 'user',
+          channel: 'pwa',
+          erasedAt: null,
+          retentionUntil: { gt: now },
+        },
+        select: { id: true, createdAt: true, retentionUntil: true },
       });
+      if (!source) c9Deny('conversation_turn_unavailable');
+      const validUntil = new Date(
+        Math.min(
+          source.createdAt.getTime() + 86_400_000,
+          source.retentionUntil.getTime(),
+        ),
+      );
+      if (source.createdAt > now || validUntil <= now) c9Deny('event_expired');
+      const token = this.identity.issue(
+        p,
+        source.createdAt,
+        validUntil,
+        source.id,
+      );
+      const event = this.identity.verify(token, p, now);
+      return this.admitRequest(tx, p, now, token, {
+        contract: 'maya.c9-request/1',
+        eventEnvelopeHash: event.hash,
+        eventIssuedAt: event.envelope.issuedAt,
+        eventExpiresAt: event.envelope.expiresAt,
+        objectiveKey: `c9.conversation_reads:${intentHash}`,
+        safeQuestion: 'Read capabilities selected by the conversation runtime.',
+        period: null,
+        subjectRefs: [],
+        oneOffConstraints: {
+          discounts: null,
+          branchRefs: [],
+          serviceRefs: [],
+          requestedPeriod: null,
+        },
+        entryRef: null,
+      });
+    });
+  }
+
+  conversationDigest(value: unknown): string {
+    // Chat/tool DTOs bound the input. Only this keyed digest enters a C9 record;
+    // applying the record's byte limit to UTF-8 conversation history rejects
+    // otherwise valid long Russian conversations, including no-tool replies.
+    return this.encryption.opaqueReference(
+      'c9:conversation-digest:v1',
+      stableActionJson(value),
+    );
+  }
+
+  /** Evidence of one exact source read, never a business-fact revision. */
+  conversationReadReceipt(
+    runId: string,
+    capability: string,
+    callKey: string,
+    executionId: string,
+    stale = false,
+  ) {
+    return this.transaction(undefined, async (tx, p, now) => {
+      await this.lock(tx, p, runId, false, now);
+      return this.completedReadReceipt(
+        tx,
+        p,
+        capability,
+        callKey,
+        executionId,
+        stale,
+      );
+    });
+  }
+
+  async completedReadReceipt(
+    tx: C9Tx,
+    p: C9Principal,
+    capability: string,
+    callKey: string,
+    executionId?: string,
+    stale = false,
+  ) {
+    if (!p.userId) c9Deny('source_read_receipt');
+    const attempt = stale
+      ? await tx.aiToolExecution.findFirst({
+          where: {
+            tenantId: p.tenantId,
+            actorUserId: p.userId,
+            toolName: capability,
+            idempotencyKey: callKey,
+            riskTier: 'read',
+            status: 'failed',
+          },
+          select: { id: true, inputHash: true, surface: true },
+        })
+      : null;
+    if (stale && (!attempt || !executionId)) c9Deny('source_read_receipt');
+    const source = await tx.aiToolExecution.findFirst({
+      where: {
+        ...(executionId ? { id: c9Id(executionId) as string } : {}),
+        tenantId: p.tenantId,
+        actorUserId: p.userId,
+        toolName: capability,
+        ...(attempt
+          ? { inputHash: attempt.inputHash, surface: attempt.surface }
+          : { idempotencyKey: callKey }),
+        riskTier: 'read',
+        status: 'completed',
+        encryptedResult: { not: null },
+      },
+      select: { id: true, inputHash: true, completedAt: true },
+    });
+    if (!source?.completedAt) c9Deny('source_read_receipt');
+    return {
+      contract: 'maya.c9-conversation-read-receipt/1',
+      sourceType: 'AiToolExecution',
+      executionId: source.id,
+      inputHash: source.inputHash,
+      completedAt: source.completedAt.toISOString(),
+      capability,
+      ...(attempt ? { stale: true, attemptExecutionId: attempt.id } : {}),
+      businessQualification: 'SOURCE_DEFINED',
+    };
+  }
+
+  finishConversationReads(runId: string, failed = false) {
+    return this.transaction(undefined, async (tx, p, now) => {
+      const root = await this.lock(tx, p, runId, false, now);
+      if (
+        !(root.requestIntentJson as C9Object).objectiveKey
+          ?.toString()
+          .startsWith('c9.conversation_reads:') ||
+        root.currentRevision !== 0
+      )
+        c9Deny('conversation_read_run_required');
+      if (failed) return 'INCOMPLETE';
+      if (terminal.includes(root.state)) return root.state;
+      const receipts = await tx.c9WorkReceipt.findMany({
+        where: { tenantId: p.tenantId, runId },
+        select: { state: true, kind: true },
+      });
+      if (receipts.some((r) => r.kind !== 'TOOL_READ'))
+        c9Deny('conversation_read_only');
+      if (
+        receipts.some((r) => r.state === 'DISPATCHED' || r.state === 'RESERVED')
+      )
+        return 'IN_PROGRESS';
+      const state =
+        receipts.length > 0 && receipts.every((r) => r.state === 'SETTLED')
+          ? 'COMPLETED'
+          : 'STOPPED';
+      await tx.c9Run.update({
+        where: { id: runId },
+        data: { state, counterVersion: { increment: 1 }, updatedAt: now },
+      });
+      return state;
     });
   }
   revision(

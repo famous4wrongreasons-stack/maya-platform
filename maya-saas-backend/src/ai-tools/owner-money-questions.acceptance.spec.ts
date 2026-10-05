@@ -1,3 +1,4 @@
+import type { C9Orchestrator } from '../orchestration/c9.orchestrator';
 import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 import { canonicalReceiptFixture } from '../../test/fixtures/ai-tool-receipt.fixture';
 /**
@@ -736,6 +737,7 @@ function createHarness(
       tryHandle: jest.fn().mockResolvedValue(null),
     } as unknown as StaffScheduleCommandService,
     new MayaBrainRouterService(),
+    {} as C9Orchestrator,
   );
 
   let request = 0;

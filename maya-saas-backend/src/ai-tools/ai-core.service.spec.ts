@@ -1,3 +1,4 @@
+import type { C9Orchestrator } from '../orchestration/c9.orchestrator';
 import { ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -3280,6 +3281,7 @@ describe('AiCoreService', () => {
       dashboardPreferences as unknown as DashboardPreferencesService,
       staffScheduleCommand as unknown as StaffScheduleCommandService,
       brain,
+      {} as C9Orchestrator,
       memory as unknown as AiMemoryService,
     );
     return {

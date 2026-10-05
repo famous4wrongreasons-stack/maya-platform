@@ -5,7 +5,7 @@ import { C9Allowance } from './c9.allowance';
 import { C9ContextService } from './c9.context';
 import { C9Store } from './c9.store';
 import { C9WorkLease, C9WorkService } from './c9.work';
-import { c9Capability } from './c9.registry';
+import { C9_CAPABILITIES, c9Capability } from './c9.registry';
 import {
   C9Domain,
   C9Object,
@@ -46,6 +46,14 @@ export type C9Answer = {
   };
 };
 
+/** Invocation-local state; it carries no source data or authority. */
+export type C9ConversationReads = {
+  turn: { turnId: string; conversationId: string };
+  intentHash: string;
+  runId?: string;
+  failed?: boolean;
+};
+
 /**
  * One Orchestrator. It admits a request, routes it to at most two registered domains,
  * delegates bounded read work through reserved receipts and composes one grounded answer.
@@ -67,6 +75,152 @@ export class C9Orchestrator {
   ) {}
   requestIdentity(channelProof?: string) {
     return this.store.event(channelProof);
+  }
+
+  /**
+   * Coordinate a deterministic read selected by natural conversation. The source
+   * runtime still checks current permissions and owns its result and idempotency.
+   * No live answer is converted to a published C7/C8 revision or an agent finding.
+   */
+  async conversationRead<T>(
+    turn: C9ConversationReads,
+    capability: string,
+    callKey: string,
+    inputHash: string,
+    read: () => Promise<T>,
+    replay: (executionId: string) => Promise<T> = () =>
+      c9Deny('source_replay_owner_required'),
+  ): Promise<T> {
+    try {
+      const registered = C9_CAPABILITIES.find(
+        (c) => c.capabilityKey === capability,
+      );
+      if (!registered || registered.mode !== 'READ')
+        c9Deny('conversation_read_only');
+      const domain = registered.domains[0];
+      const cap = c9Capability(capability, domain);
+      if (!turn.runId)
+        turn.runId = (
+          await this.store.conversationReadRun(turn.turn, turn.intentHash)
+        ).id;
+      let receipt = await this.work.reserve(turn.runId, {
+        callKey,
+        domain,
+        kind: 'TOOL_READ',
+        taskKey: capability,
+        inputHash,
+        evidenceRefs: [],
+        reservation: {
+          contract: 'maya.c9-reservation/1',
+          toolCalls: 1,
+          modelCalls: 0,
+          domain,
+          inputTokens: 0,
+          outputTokens: 0,
+          costMicros: '0',
+          priceHash: null,
+          zeroCostEvidenceRef: `local:${cap.toolOrInterface}:no-provider-charge`,
+          stepRef: null,
+        },
+      });
+      // A settled read may replay only through the same current-authorized source
+      // runtime key; every other in-flight/uncertain state refuses redispatch.
+      if (
+        receipt.state === 'HELD_UNKNOWN' ||
+        (receipt.state === 'DISPATCHED' &&
+          receipt.leaseUntil &&
+          receipt.leaseUntil <= new Date())
+      )
+        receipt = await this.work.reconcileConversationRead(
+          turn.runId,
+          receipt.id,
+          callKey,
+        );
+      if (receipt.state === 'SETTLED') {
+        const previous = c9Object(receipt.resultJson);
+        const result = await replay(previous.executionId as string);
+        const source = c9Object(result);
+        if (
+          source.status !== 'completed' ||
+          source.execution_id !== previous.executionId ||
+          (source.stale === true) !== (previous.stale === true)
+        )
+          c9Deny('source_read_replay_changed');
+        return result;
+      }
+      if (receipt.state !== 'RESERVED')
+        c9Deny('read_work_in_progress_or_unknown');
+      const lease = await this.work.claim(turn.runId, receipt.id);
+      if (!lease) c9Deny('read_work_in_progress_or_unknown');
+      try {
+        const result = await read();
+        const source = c9Object(result);
+        if (
+          source.status !== 'completed' ||
+          typeof source.execution_id !== 'string'
+        )
+          c9Deny('source_read_unconfirmed');
+        const evidence = await this.store.conversationReadReceipt(
+          turn.runId,
+          capability,
+          callKey,
+          source.execution_id,
+          source.stale === true,
+        );
+        try {
+          await this.work.settle(lease, evidence, {
+            contract: 'maya.c9-usage/1',
+            usageReceiptRef: lease.workId,
+            verifiedAt: new Date().toISOString(),
+            inputTokens: 0,
+            outputTokens: 0,
+            costMicros: '0',
+            priceHash: null,
+            completionKind: 'CONFIRMED',
+          });
+        } catch (error) {
+          // Source persistence/widget projection can finish just after the
+          // owner's timeout lease. Recover only exact durable fresh evidence;
+          // do not ask the provider again or extend the original budget/age.
+          if (
+            !(error instanceof Error) ||
+            error.message !== 'c9_work_fenced' ||
+            source.stale === true
+          )
+            throw error;
+          const recovered = await this.work.reconcileConversationRead(
+            turn.runId,
+            receipt.id,
+            callKey,
+          );
+          if (
+            c9Object(recovered.resultJson).executionId !== source.execution_id
+          )
+            c9Deny('source_read_replay_changed');
+        }
+        return result;
+      } catch (error) {
+        // Hold retains the budget on uncertainty and never retries the source.
+        await this.work.hold(lease).catch(() => undefined);
+        throw error;
+      }
+    } catch (error) {
+      turn.failed = true;
+      throw error;
+    }
+  }
+
+  conversationDigest(value: unknown) {
+    return this.store.conversationDigest(value);
+  }
+
+  async finishConversationReads(turn: C9ConversationReads) {
+    if (!turn.runId) return null;
+    return {
+      run_id: turn.runId,
+      scope: 'deterministic_reads' as const,
+      state: await this.store.finishConversationReads(turn.runId, turn.failed),
+    };
   }
   /** Deterministic and bounded; an unmapped objective delegates to nothing at all. */
   route(objectiveKey: string, manifest: C9Object): readonly C9Domain[] {

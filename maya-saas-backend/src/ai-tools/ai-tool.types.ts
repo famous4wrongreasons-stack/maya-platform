@@ -28,6 +28,13 @@ export interface AiToolPrincipal {
   userId: string;
   role: UserRole;
   surface: AiToolSurface;
+  /** Current authenticated membership scope; included only in read cache identity. */
+  readAuthority?: {
+    membershipId: string | null;
+    membershipStatus: string | null;
+    branchId: string | null;
+    personalScopeHash?: string;
+  };
 }
 
 export type ValidatedAiToolArguments = Record<string, unknown>;

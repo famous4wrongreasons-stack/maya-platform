@@ -49,12 +49,13 @@ export class C9RequestIdentity {
     principal: C9Principal,
     now: Date,
     validUntil = new Date(now.getTime() + C9_DAY),
+    eventId: string = randomUUID(),
   ): string {
     if (validUntil <= now || validUntil.getTime() > now.getTime() + C9_DAY)
       c9Deny('event_validity');
     const e: Envelope = {
       purpose: 'c9_request_v1',
-      eventId: randomUUID(),
+      eventId: c9Id(eventId) as string,
       tenantId: principal.tenantId,
       principalHash: c9PrincipalHash(principal),
       issuedAt: now.toISOString(),

@@ -137,7 +137,8 @@ describe('AiToolRuntimeService', () => {
   });
 
   it('returns the latest verified analytics snapshot when the CRM read fails', async () => {
-    const harness = createHarness();
+    const afterCompletedRead = jest.fn();
+    const harness = createHarness({ afterCompletedRead });
     harness.executionFindUnique.mockResolvedValue(null);
     harness.executionCreate.mockResolvedValue({ id: 'execution-failed' });
     harness.handlerExecute.mockRejectedValue(new Error('crm timeout'));
@@ -188,6 +189,7 @@ describe('AiToolRuntimeService', () => {
         entityId: 'execution-failed',
       }),
     );
+    expect(afterCompletedRead).not.toHaveBeenCalled();
   });
 
   it('creates an approval without executing a write tool', async () => {
@@ -432,6 +434,9 @@ function createHarness(widgetTrigger?: AiReadWidgetTriggerPort) {
       update: executionUpdate,
     },
     membership: { findUnique: membershipFindUnique },
+    staff: { findMany: jest.fn().mockResolvedValue([]) },
+    crmStaffAccess: { findMany: jest.fn().mockResolvedValue([]) },
+    client: { findMany: jest.fn().mockResolvedValue([]) },
     $transaction: jest.fn((operations: Array<Promise<unknown>>) =>
       Promise.all(operations),
     ),

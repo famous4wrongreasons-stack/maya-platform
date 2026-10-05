@@ -367,6 +367,74 @@ export class C9WorkService {
       return settled;
     });
   }
+  /** Reconcile read accounting from the exact completed source key; never dispatch. */
+  reconcileConversationRead(runId: string, workId: string, callKey: string) {
+    return this.store.transaction(undefined, async (tx, p, now) => {
+      const root = await this.store.lock(tx, p, runId, false, now);
+      if (
+        root.validUntil <= now ||
+        ['CANCELLED', 'EXPIRED'].includes(root.state) ||
+        !(root.requestIntentJson as C9Object).objectiveKey
+          ?.toString()
+          .startsWith('c9.conversation_reads:')
+      )
+        c9Deny('conversation_read_run_required');
+      const work = await tx.c9WorkReceipt.findFirst({
+        where: { id: workId, tenantId: p.tenantId, runId },
+      });
+      if (
+        !work ||
+        work.kind !== 'TOOL_READ' ||
+        work.revisionId !== null ||
+        work.callKeyHash !==
+          c9Hash('call-key/1', [p.tenantId, runId, c9Id(callKey)])
+      )
+        c9Deny('source_read_receipt');
+      c9Capability(work.taskKey, work.domain as C9Domain, work.registryHash);
+      if (work.state === 'SETTLED') return work;
+      if (
+        work.state !== 'HELD_UNKNOWN' &&
+        !(
+          work.state === 'DISPATCHED' &&
+          work.leaseUntil &&
+          work.leaseUntil <= now
+        )
+      )
+        c9Deny('read_work_in_progress_or_unknown');
+      const result = await this.store.completedReadReceipt(
+        tx,
+        p,
+        work.taskKey,
+        callKey,
+      );
+      const usage = c9Usage({
+        contract: 'maya.c9-usage/1',
+        usageReceiptRef: work.id,
+        verifiedAt: now.toISOString(),
+        inputTokens: 0,
+        outputTokens: 0,
+        costMicros: '0',
+        priceHash: null,
+        completionKind: 'CONFIRMED',
+      }) as Prisma.InputJsonObject;
+      // The exact immutable work fence is recovered inside the trusted store transaction.
+      await tx.$executeRaw`SELECT set_config('maya.c9_work_fence',${work.leaseTokenHash},true)`;
+      const settled = await tx.c9WorkReceipt.update({
+        where: { id: work.id },
+        data: {
+          state: 'SETTLED',
+          usageJson: usage,
+          resultJson: result,
+          resultHash: c9Hash('work-result/1', [result]),
+          settledAt: now,
+        },
+      });
+      await this.pauseWhenIdle(tx, root, now, true);
+      await project(tx, root, now);
+      return settled;
+    });
+  }
+
   hold(lease: C9WorkLease, channelProof?: string) {
     return this.store.transaction(channelProof, async (tx, p, now) => {
       const root = await this.store.lock(tx, p, lease.runId, false, now),

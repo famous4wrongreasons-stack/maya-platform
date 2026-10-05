@@ -1,3 +1,4 @@
+import { C9Module } from '../orchestration/c9.module';
 import { C8Module } from '../valuation/c8.module';
 import { MeasurementModule } from '../measurement/measurement.module';
 import { Module } from '@nestjs/common';
@@ -39,6 +40,7 @@ import { ConversationIntelligenceService } from '../conversation-intelligence/co
 
 @Module({
   imports: [
+    C9Module,
     C8Module,
     MeasurementModule,
     AiToolPolicyModule,

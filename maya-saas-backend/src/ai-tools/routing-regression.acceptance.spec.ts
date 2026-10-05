@@ -1,3 +1,4 @@
+import type { C9Orchestrator } from '../orchestration/c9.orchestrator';
 /**
  * РЕГРЕССИОННЫЙ КОРПУС МАРШРУТИЗАЦИИ.
  *
@@ -199,6 +200,9 @@ function createHarness(
   const executions: Record<string, unknown>[] = [];
 
   const prisma = {
+    staff: { findMany: jest.fn().mockResolvedValue([]) },
+    crmStaffAccess: { findMany: jest.fn().mockResolvedValue([]) },
+    client: { findMany: jest.fn().mockResolvedValue([]) },
     aiApprovalRequest: {
       findUnique: jest.fn().mockResolvedValue(null),
       findMany: jest.fn().mockResolvedValue([]),
@@ -315,6 +319,7 @@ function createHarness(
     } as unknown as DashboardPreferencesService,
     scheduleCommandStub as unknown as StaffScheduleCommandService,
     new MayaBrainRouterService(),
+    {} as C9Orchestrator,
   );
 
   // Модель послушная: берёт ПЕРВОЕ имя из required_tools — то есть подсказку

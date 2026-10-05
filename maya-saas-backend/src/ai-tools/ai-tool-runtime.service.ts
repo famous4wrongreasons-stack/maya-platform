@@ -134,6 +134,7 @@ export class AiToolRuntimeService {
     const definition = this.registry.get(toolName);
     const validated = this.registry.validateArguments(toolName, dto.arguments);
     await this.policy.assertCanExecute(principal, definition);
+    await this.bindPersonalReadScope(principal, definition);
     // 🔴 Доводка ДО подписи: то, что подписано и показано человеку, обязано
     // совпадать с тем, что будет исполнено. Разрешение «сегодня» в местную
     // дату происходит здесь — при повторной проверке уже сохранённых
@@ -181,6 +182,84 @@ export class AiToolRuntimeService {
     );
   }
 
+  /** Replay only: missing/expired source evidence can never dispatch a new read. */
+  async replayCompletedRead(
+    user: AuthenticatedUser,
+    toolName: string,
+    dto: ExecuteAiToolDto,
+    expectedExecutionId: string,
+    internal: Parameters<AiToolRuntimeService['execute']>[3] = {},
+  ): Promise<unknown> {
+    const principal = this.principal(user, dto.surface);
+    const definition = this.registry.get(toolName);
+    if (definition.riskTier !== 'read' || definition.approvalPolicy !== 'none')
+      this.executionConflict('ai_tool_read_replay_only');
+    const validated = this.registry.validateArguments(toolName, dto.arguments);
+    await this.policy.assertCanExecute(principal, definition);
+    await this.bindPersonalReadScope(principal, definition);
+    const args = await this.handler.normalizeArguments(
+      toolName,
+      principal,
+      validated,
+    );
+    const inputHash = this.inputHash(toolName, args, principal);
+    const execution = await this.prisma.aiToolExecution.findUnique({
+      where: {
+        tenantId_idempotencyKey: {
+          tenantId: principal.tenantId,
+          idempotencyKey: this.requireIdempotencyKey(dto.idempotencyKey),
+        },
+      },
+    });
+    if (!execution) this.executionConflict('ai_tool_read_replay_unavailable');
+    this.assertSameExecution(execution, { principal, definition, inputHash });
+    const snapshot =
+      execution.status === EXECUTION_STATUS.FAILED
+        ? await this.lastVerifiedSnapshot(
+            { principal, definition, inputHash, approval: null },
+            execution.errorCode ?? 'source_unavailable',
+            expectedExecutionId,
+          )
+        : null;
+    if (
+      !snapshot &&
+      (execution.id !== expectedExecutionId ||
+        execution.status !== EXECUTION_STATUS.COMPLETED ||
+        !execution.encryptedResult)
+    )
+      this.executionConflict('ai_tool_read_replay_unavailable');
+    const completed = snapshot
+      ? {
+          status: EXECUTION_STATUS.COMPLETED,
+          execution_id: snapshot.executionId,
+          tool_name: execution.toolName,
+          result: snapshot.result,
+          replayed: true,
+          stale: true,
+        }
+      : {
+          status: EXECUTION_STATUS.COMPLETED,
+          execution_id: execution.id,
+          tool_name: execution.toolName,
+          result: this.parseJson(
+            this.encryption.decrypt(execution.encryptedResult!),
+          ),
+          replayed: true,
+        };
+    if (internal.suppressWidgetTrigger === true) return completed;
+    return this.attachReadWidget(
+      user,
+      definition,
+      args,
+      dto.surface,
+      inputHash,
+      completed,
+      internal.widgetTrigger ?? 'T-2b',
+      internal.requestId ?? this.tenantContext.get()?.requestId ?? null,
+      internal.userTurn,
+    );
+  }
+
   private async attachReadWidget(
     actor: Readonly<AuthenticatedUser>,
     definition: AiToolDefinition,
@@ -196,6 +275,7 @@ export class AiToolRuntimeService {
       definition.riskTier !== 'read' ||
       typeof completed !== 'object' ||
       completed === null ||
+      (completed as { stale?: unknown }).stale === true ||
       (completed as { status?: unknown }).status !==
         EXECUTION_STATUS.COMPLETED ||
       typeof (completed as { execution_id?: unknown }).execution_id !==
@@ -1127,6 +1207,7 @@ export class AiToolRuntimeService {
       approval: ApprovalRecord | null;
     },
     errorCode: string,
+    expectedExecutionId?: string,
   ): Promise<{ executionId: string; result: unknown } | null> {
     if (
       params.approval ||
@@ -1136,6 +1217,7 @@ export class AiToolRuntimeService {
     }
     const snapshot = await this.prisma.aiToolExecution.findFirst({
       where: {
+        ...(expectedExecutionId ? { id: expectedExecutionId } : {}),
         tenantId: params.principal.tenantId,
         actorUserId: params.principal.userId,
         toolName: params.definition.name,
@@ -1315,6 +1397,15 @@ export class AiToolRuntimeService {
       arguments: args,
       surface: principal.surface,
       tool_name: toolName,
+      ...(this.registry.get(toolName).riskTier === 'read'
+        ? {
+            read_authority: {
+              contract: 'maya.read-authority/1',
+              role: principal.role,
+              ...principal.readAuthority,
+            },
+          }
+        : {}),
     });
     if (Buffer.byteLength(canonical, 'utf8') > MAX_CANONICAL_INPUT_BYTES) {
       throw new ConflictException({
@@ -1323,6 +1414,85 @@ export class AiToolRuntimeService {
       });
     }
     return createHash('sha256').update(canonical).digest('hex');
+  }
+
+  /** Personal cache results must follow the current source identity mapping. */
+  private async bindPersonalReadScope(
+    principal: AiToolPrincipal,
+    definition: AiToolDefinition,
+  ): Promise<void> {
+    if (definition.riskTier !== 'read') return;
+    const where = { tenantId: principal.tenantId, userId: principal.userId };
+    let scope: unknown;
+    if (
+      ['analytics.employee.query', 'staff.schedule.own.read'].includes(
+        definition.name,
+      )
+    ) {
+      scope = await Promise.all([
+        this.prisma.staff.findMany({
+          where,
+          orderBy: { id: 'asc' },
+          select: {
+            id: true,
+            active: true,
+            branchId: true,
+            providerLinks: {
+              orderBy: { id: 'asc' },
+              select: {
+                id: true,
+                provider: true,
+                externalId: true,
+                unlinkedAt: true,
+              },
+            },
+          },
+        }),
+        this.prisma.crmStaffAccess.findMany({
+          where,
+          orderBy: { id: 'asc' },
+          select: {
+            id: true,
+            staffId: true,
+            externalStaffId: true,
+            status: true,
+            role: true,
+          },
+        }),
+      ]);
+    } else if (
+      ['appointments.own.list', 'loyalty.own.read'].includes(definition.name)
+    ) {
+      scope = await this.prisma.client.findMany({
+        where,
+        orderBy: { id: 'asc' },
+        select: {
+          id: true,
+          mergedIntoClientId: true,
+          crmLinks: {
+            orderBy: { id: 'asc' },
+            select: {
+              id: true,
+              provider: true,
+              externalId: true,
+              unlinkedAt: true,
+            },
+          },
+          channelLinks: {
+            orderBy: { id: 'asc' },
+            select: { id: true, revokedAt: true },
+          },
+        },
+      });
+    } else return;
+    principal.readAuthority = {
+      membershipId: principal.readAuthority?.membershipId ?? null,
+      membershipStatus: principal.readAuthority?.membershipStatus ?? null,
+      branchId: principal.readAuthority?.branchId ?? null,
+      personalScopeHash: createHash('sha256')
+        .update(JSON.stringify(scope))
+        .digest('hex'),
+    };
   }
 
   /**
@@ -1423,12 +1593,19 @@ export class AiToolRuntimeService {
     user: AuthenticatedUser,
     surface: AiToolSurface,
   ): AiToolPrincipal {
-    return this.policy.buildPrincipal(
-      this.requireTenant(user),
-      user.userId,
-      user.role,
-      surface,
-    );
+    return {
+      ...this.policy.buildPrincipal(
+        this.requireTenant(user),
+        user.userId,
+        user.role,
+        surface,
+      ),
+      readAuthority: {
+        membershipId: user.membershipId,
+        membershipStatus: user.membershipStatus,
+        branchId: user.branchId,
+      },
+    };
   }
 
   private requireTenant(user: AuthenticatedUser): string {
