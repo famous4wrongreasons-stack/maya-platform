@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ForbiddenException,
   NotFoundException,
-  ServiceUnavailableException,
 } from '@nestjs/common';
 
 import { ActionExecutionUncertainError } from '../action-engine';
@@ -296,7 +295,13 @@ describe('B29 verified Client appointment cancel authority', () => {
 
     await expect(
       service.forAccount('tenant-1', 'user-1', 'appt-1'),
-    ).rejects.toBeInstanceOf(ServiceUnavailableException);
+    ).rejects.toMatchObject({
+      response: {
+        message:
+          'Результат отмены пока неизвестен. Проверьте актуальное состояние записи перед новым действием.',
+        error: { code: 'crm_outcome_unknown' },
+      },
+    });
     expect(prisma.appointment.findFirst).not.toHaveBeenCalled();
   });
 

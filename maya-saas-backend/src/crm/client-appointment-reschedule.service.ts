@@ -294,7 +294,7 @@ export class ClientAppointmentRescheduleService {
       ) {
         throw new ServiceUnavailableException({
           message:
-            'Не удалось получить ответ CRM. Перенос мог не примениться — повторите попытку.',
+            'Результат переноса пока неизвестен. Проверьте актуальное состояние записи перед новым действием.',
           error: {
             code: 'crm_outcome_unknown',
             message:

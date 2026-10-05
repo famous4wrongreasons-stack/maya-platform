@@ -3,7 +3,6 @@ import {
   ConflictException,
   ForbiddenException,
   NotFoundException,
-  ServiceUnavailableException,
 } from '@nestjs/common';
 
 import { ActionExecutionUncertainError } from '../action-engine';
@@ -364,7 +363,13 @@ describe('B30 verified Client appointment reschedule authority', () => {
 
     await expect(
       service.forAccount('tenant-1', 'user-1', 'appt-1', dto),
-    ).rejects.toBeInstanceOf(ServiceUnavailableException);
+    ).rejects.toMatchObject({
+      response: {
+        message:
+          'Результат переноса пока неизвестен. Проверьте актуальное состояние записи перед новым действием.',
+        error: { code: 'crm_outcome_unknown' },
+      },
+    });
     expect(prisma.appointment.findFirst).not.toHaveBeenCalled();
   });
 

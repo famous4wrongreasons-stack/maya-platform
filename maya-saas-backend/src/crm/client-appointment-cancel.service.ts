@@ -176,7 +176,7 @@ export class ClientAppointmentCancelService {
       ) {
         throw new ServiceUnavailableException({
           message:
-            'Не удалось получить ответ CRM. Отмена могла не примениться — повторите попытку.',
+            'Результат отмены пока неизвестен. Проверьте актуальное состояние записи перед новым действием.',
           error: {
             code: 'crm_outcome_unknown',
             message:
