@@ -351,3 +351,21 @@ approved release target; real provider correlation preservation; qualified negat
 support resolution for genuinely absent/changed records. Email-empty acceptance and phone
 confirmation settings are explicit activation gates. No real provider writes, payments, paid model
 calls, production migration/deploy, phone changes, push or merge have occurred.
+
+
+## One-record provider qualification handoff — 2026-10-05
+
+Existing owner test-record/own-cleanup authorization is preserved; no new broad create approval
+is requested. [WEBSITE-GUEST-ONE-RECORD-ACCEPTANCE.md](WEBSITE-GUEST-ONE-RECORD-ACCEPTANCE.md)
+reduces acceptance to one controlled record with optional qualified response-loss injection and
+exact readback/reload evidence. The missing inputs are concrete approved company/tenant/branch,
+owner-controlled contact, company notification/phone-confirmation settings and isolated environment.
+Guest contact does not require a verified Maya Client; earlier app-Client pilot requirements must
+not be imposed on the guest website flow.
+
+Negative/manual resolution remains evidence-bound: absence, unavailable reads and an operator's
+empty screen cannot establish non-execution. Official create docs enumerate error codes but lack
+qualified negative response envelopes; a provider specification/redacted exact rejection and its
+single-item atomic no-create semantics are needed before adding a safe reset code. An exact record
+later moved/cancelled is not proof that create failed. No blind retry, forced FAILED, destructive
+cleanup, notification, real CRM mutation, production change or paid model request was performed.

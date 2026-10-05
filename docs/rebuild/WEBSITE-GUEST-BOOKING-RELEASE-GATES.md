@@ -38,7 +38,8 @@ No real provider request or write was made for this review.
    real customer identity or create a Maya User/Client link for this test.
 3. Verify partner/user authorization for public create **and** bounded list/detail reads. Read-only
    checks must establish company scope, staff/service compatibility and the slot before dispatch.
-4. Confirm notification destinations/rules and explicitly authorize the finite test record(s).
+4. Confirm notification destinations/rules and bind the existing owner test-record authorization
+   to the exact approved company/contact/interval; do not request that broad authorization again.
    Zero reminder hours alone is insufficient proof of zero messages. No paid charge or broad
    notification acceptance is included. Existing instruction currently forbids real writes.
 5. Record one exact create receipt and provider readback; confirm full correlation preservation,
@@ -107,3 +108,7 @@ A concrete release approval must attach target inventory, candidate SHAs, migrat
 frontend/browser and real test-record evidence, exact ingress/config changes, backup reference and
 rollback operator/commands for that actual environment. Server network/setup approval remains
 separate and pending; no paid model calls are part of this guest release.
+
+
+The shortest actionable provider plan and exact remaining negative/manual proof boundary are in
+[WEBSITE-GUEST-ONE-RECORD-ACCEPTANCE.md](WEBSITE-GUEST-ONE-RECORD-ACCEPTANCE.md).
