@@ -105,9 +105,14 @@ globalThis.fetch = (_url, init) => {
     (calls.get(request.telegram_chat_id) ?? 0) + 1,
   );
   return Promise.resolve(
-    new Response(JSON.stringify({ message_id: 'synthetic-provider-ref' }), {
-      status: outcomes.get(request.telegram_chat_id) ?? 200,
-    }),
+    new Response(
+      JSON.stringify(
+        outcomes.get(request.telegram_chat_id) === 400
+          ? { error: 'B35_TELEGRAM_REJECTED' }
+          : { message_id: '123' },
+      ),
+      { status: outcomes.get(request.telegram_chat_id) ?? 200 },
+    ),
   );
 };
 const delivery = new CommunicationBulkDeliveryService(
@@ -521,7 +526,7 @@ async function main() {
       'concurrent confirmation converges; UNKNOWN preserves one attempt and independent sibling succeeds',
     );
     const reject = await recipient('10007');
-    outcomes.set('10007', 403);
+    outcomes.set('10007', 400);
     const pFail = await bulk.preview(proof, {
       bulkIdentity: randomUUID(),
       text: 'Deterministic synthetic',
