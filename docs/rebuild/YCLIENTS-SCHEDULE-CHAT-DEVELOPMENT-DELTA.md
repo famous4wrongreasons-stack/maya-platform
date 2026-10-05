@@ -85,3 +85,54 @@ No architecture gate was bypassed in this patch.
    release candidate.
 
 Logs: `docs/rebuild/evidence/yclients-schedule-chat-dev/`.
+
+
+## Continuation attempt: actual environment denial and independent review
+
+On the explicitly authorized continuation, a minimal exact A15 SETTINGS_DRAFT
+bridge was implemented as WIP: a closed `commit.schedule.day@1` recipe, server
+approval ID/payload-hash handles, real runtime.approve delegation, noun owner
+read, and AiCore→widget minter connection. No second AE or UI raw invocation.
+Build typecheck passed; seven new exact-template tests passed.
+
+**Actual permission denial:** starting a new isolated proof PostgreSQL cluster
+using `initdb -D /tmp/maya-schedule-chat-pg -A trust --no-locale` failed with
+`FATAL: could not create shared memory segment: Operation not permitted`,
+`shmget(key=164255987, size=56, 03600)`. `initdb` removed its new directory. No
+server started. Per explicit instruction, no escalation, alternate shared-memory
+mode, external database, or other workaround was attempted. Actual-carrier →
+confirmation → synthetic-provider E2E is therefore not executed.
+
+Independent static review (subagent `schedule_bridge_review`) found:
+
+- P1: adding schedule to the global registry digest without a matching restricted
+  profile update breaks existing `closed-input.no-handoff@1` widget admission.
+  Its exact profile also forbids HANDOFF, while SETTINGS_DRAFT requires an editor
+  handoff. This is a restricted-profile conflict, not a universal prohibition:
+  full release infrastructure exists. Preserve the restricted booking profile;
+  use a properly evidenced admissible development scope for this bridge.
+- P1: UNKNOWN needs durable approval/AE linkage and later reconciliation into
+  the same carrier card. A consumed token and pending-only noun resolution are
+  insufficient. Carrier does not render owner_decision directly.
+- P2: blanket catch around runtime.approve must not label uncertain post-dispatch
+  infrastructure faults as authority denial.
+- P2: add schedule-specific terminal presentation; current terminal persistence
+  targets BOOKING_CONFIRMATION, not SETTINGS_DRAFT. Do not reuse booking wording.
+- Preview field mismatch (`slots` vs actual `proposed_slots`) was found and fixed
+  in the saved WIP before review concluded.
+
+No general contract/product prohibition of this bridge was found. The immediate
+execution blocker is the environment permission denial; implementation also has
+these unresolved review findings and is **not promoteable**.
+
+To keep the active development tree free of this incomplete bridge, its entire
+source/test diff is preserved in `evidence/yclients-schedule-chat-dev/bridge-wip.patch`
+and in a local Git stash named `WIP schedule canonical bridge before PostgreSQL
+permission denial`. It is not applied. Do not promote or apply without completing
+review corrections and E2E.
+
+Affected unit run during WIP: 142 suites, 13 failing / 129 passing, 20 failing /
+1933 passing tests. Isolated f22df568 baseline run: 142 suites, 10 failing / 132
+passing, 16 failing / 1937 passing tests. Thus there are pre-existing failures,
+plus WIP regressions; neither run is a green acceptance gate. Full logs are
+retained. Source stable checkout was not changed or used as a test workspace.
