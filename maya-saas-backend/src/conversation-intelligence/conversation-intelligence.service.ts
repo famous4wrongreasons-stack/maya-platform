@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   normalizeSemanticSlots,
   isSingleDaySemanticValue,
+  isExactBookingTime,
   semanticSlotAliases,
 } from './semantic-slot-normalization';
 
@@ -99,6 +100,7 @@ export class ConversationIntelligenceService {
       'When the intent has no ready_tools, keep that intent and return no tool call. This means understood but unavailable, not misunderstood.',
       'Choose at most one next tool call. On the next planning pass, inspect tool_results and continue the first unsatisfied task.',
       'General questions, writing help and small talk need no tool and remain free-form LLM conversation.',
+      'Name mentions may be opaque request-local tokens such as [name removed]@nonce_1. Select the exact token for the employee only when the user means that specialist; self-identification and excluded/negated people are not employee selections. Never invent tokens or reuse tokens from earlier requests. A correction replaces the employee token; history is preference only.',
       'Do not put personal data into semantic entities; input is already redacted and tenant runtime owns identity resolution.',
     ].join('\n');
   }
@@ -168,9 +170,21 @@ export class ConversationIntelligenceService {
           definition.id === 'booking.create_own' ? 'date' : 'date_or_period';
         const oldDateKey =
           previous.intent === 'booking.create_own' ? 'date' : 'date_or_period';
-        for (const key of ['services', 'employee', 'branch', dateKey]) {
-          const oldKey = key === dateKey ? oldDateKey : key;
+        const timeKey =
+          definition.id === 'booking.create_own' ? 'time' : 'time_of_day';
+        const oldTimeKey =
+          previous.intent === 'booking.create_own' ? 'time' : 'time_of_day';
+        for (const key of [
+          'services',
+          'employee',
+          'branch',
+          dateKey,
+          timeKey,
+        ]) {
+          const oldKey =
+            key === dateKey ? oldDateKey : key === timeKey ? oldTimeKey : key;
           const value = previous.entities[oldKey];
+          if (key === 'time' && !isExactBookingTime(value)) continue;
           if (
             key === 'date' &&
             oldKey === 'date_or_period' &&

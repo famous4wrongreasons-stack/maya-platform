@@ -235,9 +235,7 @@ describe('Captured semantic aliases [HTTP] [PostgreSQL] [recorded model transpor
       time: '17:00',
       services: ['моделирование бороды'],
     });
-    expect(replies[2]).toContain(
-      'Подтверждённого результата выполнения пока нет.',
-    );
+    expect(replies[2]).toContain('Запись пока не подготовлена.');
     expect(replies[2]).not.toContain('Подтверждаю запись');
     expect(
       await db.prisma.actionExecution.count({

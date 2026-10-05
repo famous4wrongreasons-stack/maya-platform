@@ -1,4 +1,13 @@
-import { bindBookingCatalog } from './booking-catalog-binding';
+import { isExactBookingTime } from '../conversation-intelligence/semantic-slot-normalization';
+import {
+  buildCommonPersonNameForms,
+  GIVEN_NAME_ALIASES,
+} from '../common/person-name-forms';
+import {
+  bindBookingCatalog,
+  bookingPreferenceDate,
+  MULTI_SERVICE_LIMITATION,
+} from './booking-catalog-binding';
 import { localCalendarDate } from '../owner-reports/owner-reports.time';
 import {
   mutationClarification,
@@ -19,7 +28,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createHash } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
@@ -69,6 +78,7 @@ import {
 
 const MAX_CHAT_INPUT_BYTES = 16 * 1_024;
 const COMMON_PERSON_NAME_FORMS = buildCommonPersonNameForms([
+  ...GIVEN_NAME_ALIASES.keys(),
   'александр',
   'алексей',
   'алёна',
@@ -126,37 +136,6 @@ const COMMON_PERSON_NAME_FORMS = buildCommonPersonNameForms([
   'юрий',
   'ярослав',
 ]);
-
-function buildCommonPersonNameForms(names: string[]): Set<string> {
-  const forms = new Set<string>();
-  for (const name of names) {
-    forms.add(name);
-    const final = name.at(-1);
-    const stem = name.slice(0, -1);
-    if (final === 'а') {
-      ['а', 'ы', 'и', 'е', 'у', 'ой', 'ою'].forEach((ending) =>
-        forms.add(`${stem}${ending}`),
-      );
-    } else if (final === 'я') {
-      ['я', 'и', 'е', 'ю', 'ей', 'ею'].forEach((ending) =>
-        forms.add(`${stem}${ending}`),
-      );
-    } else if (final === 'й') {
-      ['й', 'я', 'ю', 'ем', 'е'].forEach((ending) =>
-        forms.add(`${stem}${ending}`),
-      );
-    } else if (final === 'ь') {
-      ['ь', 'я', 'и', 'ю', 'ем', 'ью', 'е'].forEach((ending) =>
-        forms.add(`${stem}${ending}`),
-      );
-    } else {
-      ['', 'а', 'у', 'ом', 'е'].forEach((ending) =>
-        forms.add(`${name}${ending}`),
-      );
-    }
-  }
-  return forms;
-}
 
 type ToolUsage = {
   name: string;
@@ -689,7 +668,6 @@ export class AiCoreService {
     const maxToolSteps = this.maxToolSteps();
     let activeSemanticPlan: ConversationSemanticPlan | null =
       await this.previousSemanticPlan(user, dto, tools, toolUser.role);
-    const previousBookingPlan = activeSemanticPlan;
     // let, а не const: смысловой план приходит от модели ПОЗЖЕ и может снять
     // требование источника — см. ниже про болтовню.
     let requirement = this.groundingRequirement(
@@ -951,20 +929,19 @@ export class AiCoreService {
           toolUser.role === UserRole.CLIENT &&
           activeSemanticPlan?.tasks.length === 1 &&
           activeSemanticPlan.tasks[0].permission.status === 'allowed' &&
-          decision.toolCall &&
-          allowedNames.has(decision.toolCall.name) &&
+          (!decision.toolCall || allowedNames.has(decision.toolCall.name)) &&
           activeSemanticPlan.tasks[0].tool.status === 'ready' &&
-          !activeSemanticPlan.tasks[0].requires_clarification &&
-          ['booking.availability.read', 'appointments.own.create'].includes(
-            decision.toolCall.name,
+          ['booking.find_availability', 'booking.create_own'].includes(
+            activeSemanticPlan.tasks[0].intent,
           ) &&
           allowedNames.has('catalog.staff.read') &&
           allowedNames.has('catalog.services.read') &&
           allowedNames.has('booking.availability.read') &&
-          (decision.toolCall.arguments.staff_id !== undefined ||
+          (decision.toolCall?.arguments.staff_id !== undefined ||
             activeSemanticPlan.tasks[0].entities.employee !== undefined)
         ) {
           const task = activeSemanticPlan.tasks[0];
+          const proposedArguments = decision.toolCall?.arguments ?? {};
           const readCatalog = async (name: string) => {
             const execution = this.record(
               await this.executeChatTool(
@@ -1009,16 +986,21 @@ export class AiCoreService {
             staffSource,
             serviceSource,
             employee:
-              task.entities.employee ?? decision.toolCall.arguments.staff_id,
+              'employee' in task.entities
+                ? task.entities.employee
+                : proposedArguments.staff_id,
             services:
-              task.entities.services ?? decision.toolCall.arguments.service_ids,
-            latestText: this.latestUserText(dto.messages),
-            latestRedactedText: this.latestUserText(sanitized.messages),
-            previousEmployee:
-              previousBookingPlan?.tasks.length === 1
-                ? previousBookingPlan.tasks[0].entities.employee
-                : undefined,
+              'services' in task.entities
+                ? task.entities.services
+                : proposedArguments.service_ids,
+            nameReferences: sanitized.nameReferences,
           });
+          if (bound.staff) task.entities.employee = bound.staff.name;
+          if (bound.kind === 'resolved')
+            task.entities.services = bound.services.map((s) => s.name);
+          const multiService =
+            Array.isArray(task.entities.services) &&
+            task.entities.services.length > 1;
           if (bound.kind === 'unresolved' || bound.services.length !== 1) {
             return this.complete(
               user,
@@ -1028,11 +1010,19 @@ export class AiCoreService {
               toolsUsed,
               decisions,
               {
-                reply:
-                  bound.kind === 'unresolved' &&
-                  bound.reason === 'source_unavailable'
+                reply: multiService
+                  ? MULTI_SERVICE_LIMITATION
+                  : bound.kind === 'unresolved' &&
+                      bound.reason === 'source_unavailable'
                     ? 'Не удалось проверить каталог салона. Запись пока не подготовлена.'
-                    : 'Уточните точное имя мастера и одну услугу из каталога салона. Запись пока не подготовлена.',
+                    : bound.kind === 'unresolved' && bound.staff
+                      ? 'services' in task.entities
+                        ? 'Уточните услугу из каталога салона. Мастера сохранила.'
+                        : 'date' in task.entities ||
+                            'date_or_period' in task.entities
+                          ? 'Какую услугу выбрать? Мастера и дату сохранила.'
+                          : 'Какую услугу и на какую дату выбрать? Мастера сохранила.'
+                      : 'Уточните точное имя мастера из каталога салона. Запись пока не подготовлена.',
                 source: 'safe_fallback',
                 action: null,
                 grounding: this.groundingReport(
@@ -1048,8 +1038,62 @@ export class AiCoreService {
           // on every turn; these values never become a principal or execution permit.
           task.entities.employee = bound.staff.name;
           task.entities.services = bound.services.map((s) => s.name);
-          const args = decision.toolCall.arguments;
-          const date = args.date ?? args.start;
+          if (!decision.toolCall || task.requires_clarification) {
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply:
+                  this.semanticClarification(activeSemanticPlan) ??
+                  'Уточните дату и время для выбранных мастера и услуги.',
+                source: 'safe_fallback',
+                action: null,
+                grounding: this.groundingReport(
+                  requirement,
+                  'not_required',
+                  toolResults,
+                ),
+              },
+              toolResults,
+            );
+          }
+          const args = proposedArguments;
+          // The language contract requires configured business-local daypart bounds.
+          // This booking path has no such owner setting; never invent an 18:00 cutoff.
+          const timePreference =
+            task.entities.time ?? task.entities.time_of_day;
+          if (timePreference && !isExactBookingTime(timePreference)) {
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply:
+                  'Во сколько вам удобно? Мастера, услугу и дату сохранила.',
+                source: 'safe_fallback',
+                action: null,
+                grounding: this.groundingReport(
+                  requirement,
+                  'not_required',
+                  toolResults,
+                ),
+              },
+              toolResults,
+            );
+          }
+          const date = bookingPreferenceDate(
+            task.entities[
+              task.intent === 'booking.create_own' ? 'date' : 'date_or_period'
+            ],
+            businessTimezone,
+          );
           if (typeof date === 'string') {
             const execution = this.record(
               await this.executeChatTool(
@@ -1141,7 +1185,20 @@ export class AiCoreService {
           );
         }
         if (!decision.toolCall) {
-          const clarification = this.semanticClarification(activeSemanticPlan);
+          const task =
+            activeSemanticPlan?.tasks.length === 1
+              ? activeSemanticPlan.tasks[0]
+              : null;
+          const multiService =
+            task?.permission.status === 'allowed' &&
+            ['booking.find_availability', 'booking.create_own'].includes(
+              task.intent,
+            ) &&
+            Array.isArray(task.entities.services) &&
+            task.entities.services.length > 1;
+          const clarification = multiService
+            ? MULTI_SERVICE_LIMITATION
+            : this.semanticClarification(activeSemanticPlan);
           if (clarification) {
             return this.complete(
               user,
@@ -2064,7 +2121,13 @@ export class AiCoreService {
                 tasks: lastPlan.tasks.map((task) => ({
                   id: task.id,
                   intent: task.intent,
-                  entities: task.entities,
+                  entities: Object.fromEntries(
+                    Object.entries(task.entities).filter(
+                      ([, value]) =>
+                        typeof value !== 'string' ||
+                        !value.startsWith('[name removed]'),
+                    ),
+                  ),
                   depends_on: task.depends_on,
                   confidence: task.confidence,
                   requires_clarification: task.requires_clarification,
@@ -4967,11 +5030,26 @@ export class AiCoreService {
   private sanitizeMessages(messages: AiCoreChatDto['messages']): {
     messages: AiCoreMessage[];
     redacted: boolean;
+    nameReferences: ReadonlyMap<string, string>;
   } {
     let redacted = false;
-    const sanitized = messages.map((message) => {
-      const sensitive = this.redactSensitiveText(message.content);
-      const names = this.redactLikelyProperNames(sensitive.content);
+    const nameReferences = new Map<string, string>();
+    const nonce = randomUUID().replaceAll('-', '');
+    const lastUser = messages.findLastIndex(
+      (message) => message.role === 'user',
+    );
+    let mention = 0;
+    const sanitized = messages.map((message, index) => {
+      const replaceName = (name: string) => {
+        const token = `[name removed]@${nonce}_${++mention}`;
+        if (index === lastUser) nameReferences.set(token, name);
+        return token;
+      };
+      const sensitive = this.redactSensitiveText(message.content, replaceName);
+      const names = this.redactLikelyProperNames(
+        sensitive.content,
+        replaceName,
+      );
       redacted ||= sensitive.redacted || names.redacted;
       return { role: message.role, content: names.content };
     });
@@ -4999,10 +5077,13 @@ export class AiCoreService {
         error: { code: 'ai_chat_input_too_large' },
       });
     }
-    return { messages: trimmed, redacted };
+    return { messages: trimmed, redacted, nameReferences };
   }
 
-  private redactSensitiveText(value: string): {
+  private redactSensitiveText(
+    value: string,
+    replaceName: (name: string) => string = () => '[name removed]',
+  ): {
     content: string;
     redacted: boolean;
   } {
@@ -5031,21 +5112,26 @@ export class AiCoreService {
       // ключевого слова покрываем перечислением, имя — по-прежнему только с
       // заглавной.
       .replace(
-        /(^|[\s,;:])([КкСсМмВв](?:лиент|отрудник|астер|рач)(?:а|у|ом)?)\s+[А-ЯЁA-Z][А-ЯЁа-яёA-Za-z-]{1,40}(?=$|[\s,.;:!?])/gu,
-        '$1$2 [name removed]',
+        /(^|[\s,;:])([КкСсМмВв](?:лиент|отрудник|астер|рач)(?:а|у|ом)?)\s+([А-ЯЁA-Z][А-ЯЁа-яёA-Za-z-]{1,40})(?=$|[\s,.;:!?])/gu,
+        (_match: string, prefix: string, role: string, name: string) =>
+          `${prefix}${role} ${replaceName(name)}`,
       )
       .replace(
-        /(^|[\s,;:])([Мм]еня|[Ее]го|[ЕеЁё]ё?)\s+зовут\s+[А-ЯЁA-Z][А-ЯЁа-яёA-Za-z-]{1,40}(?=$|[\s,.;:!?])/gu,
-        '$1$2 зовут [name removed]',
+        /(^|[\s,;:])([Мм]еня|[Ее]го|[ЕеЁё]ё?)\s+зовут\s+([А-ЯЁA-Z][А-ЯЁа-яёA-Za-z-]{1,40})(?=$|[\s,.;:!?])/gu,
+        (_match: string, prefix: string, role: string, name: string) =>
+          `${prefix}${role} зовут ${replaceName(name)}`,
       );
     return { content, redacted: content !== original };
   }
 
-  private redactLikelyProperNames(value: string): {
+  private redactLikelyProperNames(
+    value: string,
+    replaceName: (name: string) => string = () => '[name removed]',
+  ): {
     content: string;
     redacted: boolean;
   } {
-    const pattern = /[А-ЯЁA-Z][А-ЯЁа-яёA-Za-z-]{1,40}/gu;
+    const pattern = /[А-ЯЁа-яёA-Za-z][А-ЯЁа-яёA-Za-z-]{1,40}/gu;
     let content = '';
     let cursor = 0;
     let redacted = false;
@@ -5055,7 +5141,7 @@ export class AiCoreService {
       content += value.slice(cursor, index);
       const normalized = word.toLowerCase();
       if (COMMON_PERSON_NAME_FORMS.has(normalized)) {
-        content += '[name removed]';
+        content += replaceName(word);
         redacted = true;
       } else {
         content += word;

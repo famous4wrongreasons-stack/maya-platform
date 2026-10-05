@@ -1,3 +1,4 @@
+import { GIVEN_NAME_ALIASES } from '../common/person-name-forms';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
@@ -65,18 +66,6 @@ const MONTHS = new Map<string, number>([
   ['октября', 10],
   ['ноября', 11],
   ['декабря', 12],
-]);
-
-const GIVEN_NAME_ALIASES = new Map<string, string[]>([
-  ['стас', ['станислав']],
-  ['саша', ['александр', 'александра']],
-  ['макс', ['максим']],
-  ['антоха', ['антон']],
-  ['леша', ['алексей']],
-  ['лёша', ['алексей']],
-  ['дима', ['дмитрий']],
-  ['миша', ['михаил']],
-  ['вова', ['владимир']],
 ]);
 
 type ScheduleOperation = 'close_day' | 'set_break' | 'set_hours';

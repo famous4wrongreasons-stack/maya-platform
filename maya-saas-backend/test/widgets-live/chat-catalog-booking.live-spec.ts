@@ -1,3 +1,4 @@
+import { localCalendarDate } from '../../src/owner-reports/owner-reports.time';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -40,16 +41,24 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
     const source = await fx.bookingSource(tenant, user, true);
     await db.prisma.internalService.update({
       where: { id: source.serviceId },
-      data: { name: 'Моделирование бороды' },
+      data: { name: 'Борода' },
+    });
+    await db.prisma.internalService.create({
+      data: {
+        tenantId: tenant.id,
+        name: 'Стрижка',
+        price: 2000,
+        durationMinutes: 30,
+      },
     });
     await db.prisma.internalProvider.update({
       where: { id: source.staffId },
-      data: { displayName: 'Антон' },
+      data: { displayName: 'Стас' },
     });
     const other = await db.prisma.internalProvider.create({
       data: {
         tenantId: tenant.id,
-        displayName: 'Илья',
+        displayName: 'Александр',
         active: true,
         slotIntervalMinutes: 30,
       },
@@ -62,13 +71,22 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
       },
     });
     await db.prisma.internalAvailabilityRule.createMany({
-      data: Array.from({ length: 7 }, (_, weekday) => ({
-        tenantId: tenant.id,
-        providerId: other.id,
-        weekday,
-        startMinute: 1020,
-        endMinute: 1080,
-      })),
+      data: Array.from({ length: 7 }, (_, weekday) => [
+        {
+          tenantId: tenant.id,
+          providerId: other.id,
+          weekday,
+          startMinute: 540,
+          endMinute: 600,
+        },
+        {
+          tenantId: tenant.id,
+          providerId: other.id,
+          weekday,
+          startMinute: 1080,
+          endMinute: 1140,
+        },
+      ]).flat(),
     });
     for (const feature of [
       'ai.consultant',
@@ -89,6 +107,10 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
     const day = new Date(Date.now() + 2 * 86_400_000)
       .toISOString()
       .slice(0, 10);
+    const tomorrow = localCalendarDate(
+      'Europe/Moscow',
+      new Date(Date.now() + 86_400_000),
+    );
     const prompts: string[] = [];
     const plans: unknown[] = [];
     jest
@@ -102,38 +124,43 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
     jest.spyOn(global, 'fetch').mockImplementation(() => {
       // Scripted variants use the saved live response shape and real parser; only
       // the separate raw-capture regression claims exact transcript replay.
-      const output = JSON.parse(captured[index === 2 ? 1 : 0].content) as {
+      const output = JSON.parse(captured[index === 9 ? 1 : 0].content) as {
         semantic_plan: {
           tasks: { entities?: unknown; entities_json?: string }[];
         };
-        tool_call: { arguments_json: string };
+        tool_call: { arguments_json: string } | null;
       };
+      const mentions =
+        prompts.at(-1)!.match(/\[name removed\]@[a-f0-9]{32}_\d+/g) ?? [];
+      const entities = [
+        { employee: mentions[0] },
+        { date_or_period: day, services: ['борода'] },
+        { employee: mentions[0] },
+        { employee: mentions.at(-1) },
+        {}, // self-name is deliberately NOT an employee selection
+        { services: ['стрижка', 'борода'] },
+        { services: ['борода'] },
+        { date_or_period: tomorrow },
+        { time_of_day: 'evening' },
+        { time: '18:30' },
+      ][index];
       const task = output.semantic_plan.tasks[0];
       delete task.entities;
-      task.entities_json = JSON.stringify(
-        index === 0
-          ? {
-              date_or_period: day,
-              employee: '[name removed]',
-              services: ['моделирование бороды'],
-            }
-          : index === 1
-            ? { employee: '[name removed]' }
-            : { time: '17:00' },
-      );
-      output.tool_call.arguments_json = JSON.stringify(
-        index === 2
+      task.entities_json = JSON.stringify(entities);
+      output.tool_call!.arguments_json = JSON.stringify(
+        index === 9
           ? {
               staff_id: '[name removed]',
-              service_ids: ['моделирование бороды'],
-              start: `${day}T17:00:00+03:00`,
+              service_ids: ['борода'],
+              start: `${tomorrow}T18:30:00+03:00`,
             }
           : {
               staff_id: '[name removed]',
-              service_ids: ['моделирование бороды'],
-              date: `${day}T00:00:00+03:00`,
+              service_ids: ['борода'],
+              date: '2000-01-01T00:00:00+03:00', // deliberately stale tool day; semantic preference must win
             },
       );
+      if (index === 0) output.tool_call = null;
       index++;
       return Promise.resolve(
         new Response(
@@ -154,9 +181,16 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
     let conversationId: string | undefined;
     let envelope: unknown;
     const texts = [
-      `Мастер Антон, моделирование бороды на ${day}`,
-      'Теперь мастер Илья',
-      'Запиши меня на 17:00',
+      'Хочу у Стаса',
+      `На бороду на ${day}`,
+      'А у Александра?',
+      'Не у Стаса, а у Александра',
+      'Меня зовут Стас, мастер прежний',
+      'Стрижка и борода',
+      'Тогда только борода',
+      'А завтра?',
+      'Давай вечером',
+      'В 18:30',
     ];
     for (const text of texts) {
       const response = await request(http.app.getHttpServer())
@@ -177,31 +211,54 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
       };
       conversationId = body.user_turn.conversationId;
       expect(body.action).toBeNull();
-      expect(body.resolution?.receipt.envelope.kind).toBe('TIME_SLOT_SELECTOR');
-      envelope = body.resolution?.receipt.envelope;
+      if (index === 1 || index === 6 || index === 9) {
+        expect(Boolean(body.resolution)).toBe(false);
+        expect(body.reply).toContain(
+          index === 1
+            ? 'Какую услугу и на какую дату'
+            : index === 6
+              ? 'только на одну услугу'
+              : 'Во сколько вам удобно?',
+        );
+      } else {
+        expect(body.resolution?.receipt.envelope.kind).toBe(
+          'TIME_SLOT_SELECTOR',
+        );
+        envelope = body.resolution?.receipt.envelope;
+      }
     }
-    expect(
-      prompts.every((p) => !p.includes('Антон') && !p.includes('Илья')),
-    ).toBe(true);
-    expect(index).toBe(3);
-    expect(plans[1]).toMatchObject({
-      tasks: [
-        {
-          entities: {
-            date_or_period: day,
-            services: ['Моделирование бороды'],
-            employee: 'Антон',
-          },
-        },
-      ],
-    });
+    expect(prompts.every((p) => !/Стас|Александр/.test(p))).toBe(true);
+    expect(index).toBe(10);
     expect(plans[2]).toMatchObject({
       tasks: [
         {
           entities: {
             date_or_period: day,
-            services: ['Моделирование бороды'],
-            employee: 'Илья',
+            services: ['Борода'],
+            employee: 'Стас',
+          },
+        },
+      ],
+    });
+    expect(plans[6]).toMatchObject({
+      tasks: [
+        {
+          entities: {
+            date_or_period: day,
+            services: ['Стрижка', 'Борода'],
+            employee: 'Александр',
+          },
+        },
+      ],
+    });
+    expect(plans[9]).toMatchObject({
+      tasks: [
+        {
+          entities: {
+            date_or_period: tomorrow,
+            services: ['Борода'],
+            employee: 'Александр',
+            time_of_day: 'evening',
           },
         },
       ],
@@ -211,14 +268,14 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
     );
     expect(availabilityCalls.map((c) => c[2].staff_id)).toEqual([
       source.staffId,
-      other.id,
-      other.id,
+      ...Array<string>(6).fill(other.id),
     ]);
     expect(
       availabilityCalls.every(
         (c) => (c[2].service_ids as string[])[0] === source.serviceId,
       ),
     ).toBe(true);
+    expect(availabilityCalls.at(-1)?.[2].date).toContain(tomorrow);
     expect(
       await db.prisma.actionExecution.count({
         where: { tenantId: tenant.id, actionClass: 'create_appointment' },
@@ -229,7 +286,7 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
         where: { tenantId: tenant.id },
       }),
     ).toBe(0);
-    const selectedStart = `${day}T17:00:00+03:00`;
+    const selectedStart = `${tomorrow}T18:30:00+03:00`;
     const baseUrl = await http.listenLoopback();
     const shell = await new Promise<{
       assistantLines: string[];
@@ -354,9 +411,16 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
           DEEPSEEK_AI_CORE_MODEL: 'deepseek-v4-pro',
         }),
       );
+      let currentMention = '';
       jest
         .spyOn(http.app.get(AiCoreModelService), 'decide')
-        .mockImplementation((input) => model.decide(input));
+        .mockImplementation((input) => {
+          currentMention =
+            JSON.stringify(input.messages).match(
+              /\[name removed\]@[a-f0-9]{32}_\d+/,
+            )?.[0] ?? '';
+          return model.decide(input);
+        });
       const employee =
         scenario === 'foreign_staff' ? foreign.staffId : '[name removed]';
       const services = [
@@ -378,24 +442,32 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
         staff_id: employee,
         service_ids: services,
       });
-      jest.spyOn(global, 'fetch').mockResolvedValue(
-        new Response(
-          JSON.stringify({
-            choices: [
-              {
-                finish_reason: 'stop',
-                message: { content: JSON.stringify(output) },
+      jest.spyOn(global, 'fetch').mockImplementation(() => {
+        if (scenario !== 'foreign_staff')
+          output.semantic_plan.tasks[0].entities_json = JSON.stringify({
+            date_or_period: 'tomorrow',
+            employee: currentMention,
+            services,
+          });
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              choices: [
+                {
+                  finish_reason: 'stop',
+                  message: { content: JSON.stringify(output) },
+                },
+              ],
+              usage: {
+                prompt_tokens: 1,
+                completion_tokens: 1,
+                total_tokens: 2,
               },
-            ],
-            usage: {
-              prompt_tokens: 1,
-              completion_tokens: 1,
-              total_tokens: 2,
-            },
-          }),
-          { status: 200, headers: { 'content-type': 'application/json' } },
-        ),
-      );
+            }),
+            { status: 200, headers: { 'content-type': 'application/json' } },
+          ),
+        );
+      });
       const handler = jest.spyOn(http.app.get(AiToolHandlerService), 'execute');
       const response = await request(http.app.getHttpServer())
         .post('/api/ai/chat')
@@ -415,7 +487,9 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
         });
       expect(response.status).toBe(201);
       expect((response.body as { reply: string }).reply).toContain(
-        'Уточните точное имя мастера',
+        scenario === 'foreign_service'
+          ? 'Уточните услугу'
+          : 'Уточните точное имя мастера',
       );
       expect(
         handler.mock.calls.some((c) => c[0] === 'booking.availability.read'),

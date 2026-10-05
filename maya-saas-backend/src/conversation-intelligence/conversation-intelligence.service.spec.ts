@@ -592,3 +592,64 @@ describe('ConversationIntelligenceService', () => {
     ).toBe(false);
   });
 });
+
+describe('booking time preference carry across intents', () => {
+  const ci = new ConversationIntelligenceService();
+  const tools = ['booking.availability.read', 'appointments.own.create'];
+  const plan = (
+    intent: string,
+    entities: Record<string, string | string[]>,
+  ) => ({ tasks: [{ intent, entities, confidence: 0.99 }] });
+  it('retains an exact clock time when date or intent changes', () => {
+    const first = ci.validatePlan(
+      plan('booking.create_own', {
+        date: '2026-10-06',
+        services: ['Борода'],
+        employee: 'Стас',
+        time: '18:30',
+      }),
+      UserRole.CLIENT,
+      tools,
+    );
+    const second = ci.validatePlan(
+      plan('booking.find_availability', { date_or_period: '2026-10-07' }),
+      UserRole.CLIENT,
+      tools,
+      first,
+    );
+    expect(second?.tasks[0].entities).toMatchObject({
+      date_or_period: '2026-10-07',
+      time_of_day: '18:30',
+      employee: 'Стас',
+      services: ['Борода'],
+    });
+    const third = ci.validatePlan(
+      plan('booking.create_own', { date: '2026-10-08' }),
+      UserRole.CLIENT,
+      tools,
+      second,
+    );
+    expect(third?.tasks[0].entities.time).toBe('18:30');
+    expect(third?.tasks[0].requires_clarification).toBe(false);
+  });
+  it('does not upgrade a vague daypart to an executable clock time', () => {
+    const first = ci.validatePlan(
+      plan('booking.find_availability', {
+        date_or_period: 'tomorrow',
+        services: ['Борода'],
+        employee: 'Стас',
+        time_of_day: 'evening',
+      }),
+      UserRole.CLIENT,
+      tools,
+    );
+    const second = ci.validatePlan(
+      plan('booking.create_own', {}),
+      UserRole.CLIENT,
+      tools,
+      first,
+    );
+    expect(second?.tasks[0].entities).not.toHaveProperty('time');
+    expect(second?.tasks[0].requires_clarification).toBe(true);
+  });
+});

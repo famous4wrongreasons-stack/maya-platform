@@ -461,3 +461,52 @@ synthetic public catalog, preserving the original corpus as diagnostic evidence.
 No paid environment or expired server proof restarted; counters/TTL unchanged. No new
 paid calls, deploy, production writes, real notifications, migrations, phone operations,
 push or merge. Stable guest backend/frontend candidate SHAs remain unchanged.
+
+
+## Client name references and bounded conversational follow-up (2026-10-05)
+
+Based on `6b6b8b5819c3b4c9227e867bb2f54dde923b34db`, same isolated chat branch.
+Independent review found and this checkpoint fixes the raw-name override: an incidental
+self-name or excluded name must not select staff. The existing sanitizer now supplies
+request-local opaque mention tokens; the semantic owner selects the employee token;
+only its local value is matched against current tenant catalog name forms. Existing
+name-form logic is shared with redaction; no salon dictionary, nickname guessing,
+fuzzy best-match or second intent router was added. Stale/invented/collapsed references
+refuse. Colliding forms (e.g. Александр/Александра) require disambiguation.
+
+Catalog qualification also runs after a valid booking intent on an incomplete first
+turn. «Хочу у Стаса» can preserve the qualified public staff preference while asking
+for service/date. Unresolved request-local token strings are not persisted as reusable
+preferences. Current corrections, date/service carry and exact time/time_of_day carry
+remain in the existing encrypted context owner. A daypart cannot satisfy required
+clock time. Semantic single-day date now wins over conflicting tool date/start, using
+existing business-calendar functions; ranges are never narrowed by guessing.
+
+Multi-service is an explicit current carrier limitation: SERVICE_SELECTOR currently
+emits single selection, booking templates retain one service handle, and the preview
+adapter builds serviceIds:[serviceId]. A tool's service_ids array is not evidence of
+multi-service carrier support. The response states that limit and retains known
+preferences rather than silently dropping a service or asking for an already-known
+master. «Вечером» requires an exact-time clarification because this path has no
+owner-configured daypart bounds; no invented cutoff or automatic slot filtering.
+
+271 unit/architecture tests and11 HTTP/PostgreSQL tests PASS; production/widgets-live
+typechecks, targeted ESLint, diff check PASS. A ten-turn scripted-model/local INTERNAL
+fixture covers partial first turn, у Стаса → у Александра, negation, self-identification,
+two-service limitation → one-service correction, tomorrow, evening clarification,
+18:30, then production carrier preview/explicit confirmation and one successful AE
+attempt with a canonical terminal receipt. Availability includes morning and evening;
+model tool date is deliberately stale. Actual appointment staff/service/start/Client
+is asserted. Foreign IDs and duplicate names refuse. This is NOT semantic acceptance,
+real-provider acceptance or scale certification.
+
+Prepared `maya-saas-backend/datasets/conversation-intelligence/frozen-client-catalog-followup-20261005.json`:
+6 cases /4 existing families /20 user turns, source snapshots and dataset hash retained,
+explicit original-versus-derived labels, synthetic catalog requirements and grading
+prerequisites. Status FROZEN_NOT_RUN. Independent read-only review artifact:
+`task-3/pilot-evidence/name-followup-independent-review.md`; no remaining blocking
+finding in reviewed code, tests not independently rerun. Finite name morphology,
+service-label ambiguity, daypart limits and multi-service contract remain visible
+qualification boundaries. No paid calls or server-proof restart; all old ledgers/TTL
+unchanged. Local proof DB stopped. Stable website/backend pair untouched; no push,
+merge, production writes, deploy, migrations, notifications, payments or phone actions.

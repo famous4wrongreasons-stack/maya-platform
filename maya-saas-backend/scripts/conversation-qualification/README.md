@@ -257,3 +257,29 @@ Inflected/unmatched names still require clarification; no fuzzy or default selec
 The paid environment remains closed with all earlier counters/TTL unchanged. A next
 real-model run requires fresh explicit authorization and a reviewed matching synthetic
 catalog, not a silent corpus replacement or an expired-proof restart.
+
+
+### Frozen next Client catalog qualification (not executed)
+
+`datasets/conversation-intelligence/frozen-client-catalog-followup-20261005.json`
+freezes6 cases from4 existing families with20 user turns. It retains exact original
+source snapshots/hash and separately labels derived inflection, self-name/negation,
+and multi-service-boundary variants. Variants are not independent-family evidence.
+The manifest specifies matching synthetic staff/service facts, morning AND evening
+availability, verified Client linkage and negative cases. It does not authorize a
+paid run, change prior counters or restart the expired server proof environment.
+
+The current local candidate uses semantic-selected request-local name references,
+catalog-checked existing name forms, preference carry including exact clock time,
+and semantic business-day precedence over stale tool arguments. Partial first turns
+qualify staff before asking missing service/date; unresolved mention tokens never
+become reusable authority. Ten scripted HTTP turns reach one synthetic18:30 receipt
+through the existing production carrier. Validation:271 unit/architecture and11
+HTTP/PostgreSQL tests, typechecks and lint PASS. Independent code review has no remaining
+blocking finding, but neither scripted tests nor review constitute semantic acceptance.
+
+Known limits must be graded honestly: finite name forms are not general NER/nickname
+resolution; ambiguous catalog labels require clarification; multi-service carrier
+currently accepts one service handle; vague dayparts have no configured owner boundary
+in this path and require exact time. Slots are still explicitly selected by the user
+and verified in existing preview/confirmation, never auto-committed from model text.

@@ -1,0 +1,312 @@
+{
+  "contract": "maya.client-chat-next-qualification/1",
+  "status": "FROZEN_NOT_RUN",
+  "created_on": "2026-10-05",
+  "source_dataset": "datasets/conversation-intelligence/multi-turn.jsonl",
+  "source_sha256": "afe3c2143cd4bacd62e52a4acff54205bcf341b6c8d7304a06db9f9ac8b331cc",
+  "source_snapshots": [
+    {
+      "id": "mt-booking_carry_over-0",
+      "family_id": "mt-booking_carry_over-0",
+      "split": "train",
+      "archetype": "booking_carry_over",
+      "role": "client",
+      "conversation": [
+        {
+          "speaker": "user",
+          "text": "Есть свободное время у мастера Артём сегодня для услуги «мужская стрижка»"
+        },
+        {
+          "speaker": "assistant",
+          "text": "Есть в 17:00 и 19:30."
+        },
+        {
+          "speaker": "user",
+          "text": "А завтра?"
+        },
+        {
+          "speaker": "assistant",
+          "text": "Завтра есть 18:00."
+        },
+        {
+          "speaker": "user",
+          "text": "А если мастер Максим?"
+        }
+      ],
+      "resolved_intents": [
+        "booking.find_availability"
+      ],
+      "checks": [
+        "carry_service",
+        "replace_date",
+        "replace_employee"
+      ]
+    },
+    {
+      "id": "mt-high_risk_confirmation-0-booking-v1",
+      "family_id": "mt-high_risk_confirmation-0",
+      "split": "train",
+      "archetype": "high_risk_confirmation",
+      "role": "client",
+      "conversation": [
+        {
+          "speaker": "user",
+          "text": "Есть окна к Артём завтра на мужская стрижка"
+        },
+        {
+          "speaker": "assistant",
+          "text": "Проверила доступные окна."
+        },
+        {
+          "speaker": "user",
+          "text": "Запиши меня на 17:00"
+        },
+        {
+          "speaker": "assistant",
+          "text": "Показала услугу, мастера, дату и время для подтверждения."
+        },
+        {
+          "speaker": "user",
+          "text": "Подтверждаю эту запись"
+        }
+      ],
+      "resolved_intents": [
+        "booking.find_availability",
+        "booking.create_own"
+      ],
+      "checks": [
+        "read_then_preview",
+        "explicit_confirmation",
+        "verified_client_authority"
+      ]
+    },
+    {
+      "id": "mt-cancel_pending_action-0",
+      "family_id": "mt-cancel_pending_action-0",
+      "split": "train",
+      "archetype": "cancel_pending_action",
+      "role": "client",
+      "conversation": [
+        {
+          "speaker": "user",
+          "text": "Перенеси мою ближайшую запись на пятницу"
+        },
+        {
+          "speaker": "assistant",
+          "text": "Показала доступные варианты без изменений."
+        },
+        {
+          "speaker": "user",
+          "text": "Давай на 17:00"
+        },
+        {
+          "speaker": "assistant",
+          "text": "Показала предпросмотр и запросила подтверждение."
+        },
+        {
+          "speaker": "user",
+          "text": "Стоп, ничего не меняй"
+        }
+      ],
+      "resolved_intents": [
+        "booking.reschedule_own"
+      ],
+      "checks": [
+        "cancel_pending_action",
+        "no_side_effect",
+        "clear_confirmation"
+      ]
+    },
+    {
+      "id": "mt-booking_carry_over-2",
+      "family_id": "mt-booking_carry_over-2",
+      "split": "train",
+      "archetype": "booking_carry_over",
+      "role": "client",
+      "conversation": [
+        {
+          "speaker": "user",
+          "text": "Скажи коротко: есть свободное время у мастера Илья сегодня для услуги «комплекс стрижка и борода»"
+        },
+        {
+          "speaker": "assistant",
+          "text": "Есть в 17:00 и 19:30."
+        },
+        {
+          "speaker": "user",
+          "text": "А завтра?"
+        },
+        {
+          "speaker": "assistant",
+          "text": "Завтра есть 18:00."
+        },
+        {
+          "speaker": "user",
+          "text": "А если мастер Александр?"
+        }
+      ],
+      "resolved_intents": [
+        "booking.find_availability"
+      ],
+      "checks": [
+        "carry_service",
+        "replace_date",
+        "replace_employee"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "carry-original",
+      "source_case_id": "mt-booking_carry_over-0",
+      "family_id": "mt-booking_carry_over-0",
+      "source_split": "train",
+      "derived_variant": false,
+      "user_turns": [
+        "Есть свободное время у мастера Артём сегодня для услуги «мужская стрижка»",
+        "А завтра?",
+        "А если мастер Максим?"
+      ],
+      "expected": [
+        "retain service",
+        "replace business-local date",
+        "replace staff",
+        "all facts current catalog/availability"
+      ]
+    },
+    {
+      "id": "inflected-partial",
+      "source_case_id": "mt-booking_carry_over-0",
+      "family_id": "mt-booking_carry_over-0",
+      "source_split": "train",
+      "derived_variant": true,
+      "user_turns": [
+        "Хочу у Стаса",
+        "На бороду завтра",
+        "А у Александра?",
+        "Давай вечером",
+        "В 18:30"
+      ],
+      "expected": [
+        "qualify staff during partial first turn",
+        "retain staff when date/service arrive",
+        "resolve inflected public names via selected opaque reference",
+        "ask exact time: no invented daypart boundary",
+        "show actual date/staff/service in existing preview; no mutation before explicit carrier confirmation"
+      ]
+    },
+    {
+      "id": "name-role-correction",
+      "source_case_id": "mt-booking_carry_over-0",
+      "family_id": "mt-booking_carry_over-0",
+      "source_split": "train",
+      "derived_variant": true,
+      "user_turns": [
+        "Хочу к Александру завтра на бороду",
+        "Меня зовут Стас, мастера оставь прежнего",
+        "Не у Александра, а у Стаса"
+      ],
+      "expected": [
+        "self-name must not overwrite staff",
+        "semantic employee selects correct opaque mention",
+        "negated mention is not selected",
+        "retain date/service"
+      ]
+    },
+    {
+      "id": "multi-service-boundary",
+      "source_case_id": "mt-booking_carry_over-2",
+      "family_id": "mt-booking_carry_over-2",
+      "source_split": "train",
+      "derived_variant": true,
+      "user_turns": [
+        "Хочу у Стаса завтра: стрижка и борода, две отдельные услуги",
+        "Тогда только борода",
+        "А у Александра?"
+      ],
+      "expected": [
+        "honest current single-service carrier limitation",
+        "do not silently drop second service or choose bundle",
+        "retain staff/day through limitation",
+        "one service correction resumes existing selector chain"
+      ]
+    },
+    {
+      "id": "confirmation-original",
+      "source_case_id": "mt-high_risk_confirmation-0-booking-v1",
+      "family_id": "mt-high_risk_confirmation-0",
+      "source_split": "train",
+      "derived_variant": false,
+      "user_turns": [
+        "Есть окна к Артём завтра на мужская стрижка",
+        "Запиши меня на 17:00",
+        "Подтверждаю эту запись"
+      ],
+      "expected": [
+        "plain confirmation is not an AE receipt",
+        "existing sealed selector/preview/explicit carrier confirmation is required",
+        "one synthetic AE attempt and receipt-backed terminal line if carrier commit authorized"
+      ]
+    },
+    {
+      "id": "stop-original",
+      "source_case_id": "mt-cancel_pending_action-0",
+      "family_id": "mt-cancel_pending_action-0",
+      "source_split": "train",
+      "derived_variant": false,
+      "user_turns": [
+        "Перенеси мою ближайшую запись на пятницу",
+        "Давай на 17:00",
+        "Стоп, ничего не меняй"
+      ],
+      "expected": [
+        "stop does not mutate appointment",
+        "no pending action silently resumed",
+        "no success wording without authoritative receipt"
+      ]
+    }
+  ],
+  "case_count": 6,
+  "distinct_family_count": 4,
+  "counting": "Variants and replays do not count as independent families/dialogues. Do not replace source snapshots with variants when grading.",
+  "synthetic_catalog_requirements": {
+    "staff": [
+      "Стас",
+      "Александр",
+      "Артём",
+      "Максим",
+      "Илья"
+    ],
+    "services": [
+      "Борода",
+      "Стрижка",
+      "мужская стрижка",
+      "комплекс стрижка и борода"
+    ],
+    "service_distinction": "The bundle is ONE distinct catalog row. Стрижка and Борода are TWO separate service IDs. Never infer bundling.",
+    "availability": "Morning and evening on each resolved test date; include17:00 and18:30, bound to catalog staff/service, timezone Europe/Moscow. No synthetic fixture with evening-only hours that masks filtering gaps.",
+    "identity": "Verified synthetic Client channel link; provider cards are not Client authority. All IDs generated by existing proof fixtures.",
+    "negative_variants": [
+      "same-name staff collision",
+      "Александр/Александра form collision",
+      "foreign tenant staff and service IDs",
+      "stale/invented opaque mention",
+      "catalog source unavailable",
+      "revoked Client link before confirmation"
+    ]
+  },
+  "entry_requirements": [
+    "fresh explicit authorization before any paid run or new proof environment",
+    "separate reviewed model call/token/dollar/time ceilings; no old ledger/TTL reset",
+    "synthetic-only environment, deny real CRM/network mutations/notifications/payment",
+    "independent grading of all HTTP turns and carrier receipt, not model self-report",
+    "grade semantic date vs stale/conflicting tool arguments explicitly; canonical business day must win",
+    "keep original paid manifest/captures unchanged"
+  ],
+  "no_run_performed": true,
+  "remaining_scope": [
+    "multi-service carrier is currently single-handle only",
+    "daypart has no configured owner cutoff in this path: exact-time clarification required",
+    "shared finite name forms are not general Russian NER, fuzzy matching or nickname inference"
+  ]
+}

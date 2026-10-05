@@ -1,6 +1,10 @@
+import { localCalendarDate } from '../owner-reports/owner-reports.time';
+import { localDateMinuteToUtc } from '../internal-calendar/internal-calendar.utils';
+import { isSingleDaySemanticValue } from '../conversation-intelligence/semantic-slot-normalization';
+import { buildCommonPersonNameForms } from '../common/person-name-forms';
 /** Resolves preferences against the current public catalog, never grants authority.
- * Exact normalized labels only: no stemming, guessed IDs, default staff, or fuzzy matching.
- * Original user text stays local and is used only to recover an unambiguous public staff label.
+ * The semantic owner selects an entity or request-local opaque mention. Existing
+ * name forms are checked against this tenant catalog; raw utterances never select staff.
  */
 type Row = { id: string; name: string };
 const normalize = (s: string) =>
@@ -28,22 +32,23 @@ const unique = (list: Row[], preference: unknown): Row | null => {
   );
   return matches.length === 1 ? matches[0] : null;
 };
-const mentioned = (text: string, name: string) => {
-  const words = normalize(text)
-    .split(/[^\p{L}\p{N}_-]+/u)
-    .filter(Boolean);
-  const label = normalize(name)
-    .split(/[^\p{L}\p{N}_-]+/u)
-    .filter(Boolean);
-  return (
-    label.length > 0 &&
-    words.some((_, i) => label.every((word, j) => words[i + j] === word))
+const staffPreference = (list: Row[], preference: unknown): Row | null => {
+  if (typeof preference !== 'string' || !preference.trim()) return null;
+  // Enumerate forms forward from the catalog. Do not trim arbitrary user suffixes,
+  // expand nicknames or choose a "best" fuzzy match. Collisions remain ambiguous.
+  const value = normalize(preference);
+  const matches = list.filter(
+    (row) =>
+      row.id === preference ||
+      buildCommonPersonNameForms([normalize(row.name)]).has(value),
   );
+  return matches.length === 1 ? matches[0] : null;
 };
 export type BookingCatalogBinding =
   | { kind: 'resolved'; staff: Row; services: Row[] }
   | {
       kind: 'unresolved';
+      staff?: Row;
       reason:
         | 'source_unavailable'
         | 'staff_ambiguous_or_missing'
@@ -54,27 +59,18 @@ export function bindBookingCatalog(input: {
   serviceSource: unknown;
   employee: unknown;
   services: unknown;
-  latestText: string;
-  latestRedactedText: string;
-  previousEmployee?: unknown;
+  nameReferences: ReadonlyMap<string, string>;
 }): BookingCatalogBinding {
   const staff = rows(input.staffSource, 'staff');
   const services = rows(input.serviceSource, 'services');
   if (staff === null || services === null)
     return { kind: 'unresolved', reason: 'source_unavailable' };
-  const current = staff.filter((r) => mentioned(input.latestText, r.name));
-  // A current name switch wins over remembered preferences. Multiple names require selection.
-  let selected = current.length === 1 ? current[0] : null;
-  if (current.length === 0) {
-    const redactedName = input.latestRedactedText.includes('[name removed]');
-    // A new redacted/unmatched name cannot silently fall back to the previous specialist.
-    if (!redactedName)
-      selected =
-        unique(staff, input.employee) ??
-        (input.employee === '[name removed]'
-          ? unique(staff, input.previousEmployee)
-          : null);
-  }
+  const reference =
+    typeof input.employee === 'string' &&
+    input.employee.startsWith('[name removed]')
+      ? input.nameReferences.get(input.employee)
+      : input.employee;
+  const selected = staffPreference(staff, reference);
   if (!selected)
     return { kind: 'unresolved', reason: 'staff_ambiguous_or_missing' };
   const preferences = Array.isArray(input.services)
@@ -86,10 +82,35 @@ export function bindBookingCatalog(input: {
     selectedServices.some((s) => s === null) ||
     new Set(selectedServices.map((s) => s?.id)).size !== selectedServices.length
   )
-    return { kind: 'unresolved', reason: 'service_ambiguous_or_missing' };
+    return {
+      kind: 'unresolved',
+      reason: 'service_ambiguous_or_missing',
+      staff: selected,
+    };
   return {
     kind: 'resolved',
     staff: selected,
     services: selectedServices as Row[],
   };
+}
+
+export const MULTI_SERVICE_LIMITATION =
+  'В этом чате пока можно подтвердить запись только на одну услугу. Две услуги в одну запись здесь пока не оформлю. Остальные пожелания сохранены; какую одну услугу выбрать?';
+
+/** Project a semantic single day through the existing business calendar, not tool-argument guesses. */
+export function bookingPreferenceDate(
+  value: unknown,
+  timezone: string,
+  now = new Date(),
+): string | null {
+  if (typeof value !== 'string' || !isSingleDaySemanticValue(value))
+    return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value; // registry owns date validation
+  const today = localCalendarDate(timezone, now);
+  return ['tomorrow', 'завтра'].includes(value)
+    ? localCalendarDate(
+        timezone,
+        localDateMinuteToUtc(today, 24 * 60, timezone),
+      )
+    : today;
 }

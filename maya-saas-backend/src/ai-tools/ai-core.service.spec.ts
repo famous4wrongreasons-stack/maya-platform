@@ -152,7 +152,16 @@ describe('AiCoreService', () => {
       ];
       const result = await mocks.service.chat(user, { ...dto, messages });
       expect(mocks.model.decide).toHaveBeenCalledTimes(1);
-      expect(mocks.model.decide.mock.calls[0]?.[0].messages).toEqual(messages);
+      const forwarded = mocks.model.decide.mock.calls[0]?.[0].messages;
+      expect(
+        forwarded?.map((message) => ({
+          ...message,
+          content: message.content.replace(
+            /\[name removed\]@[a-f0-9]{32}_\d+/g,
+            'Стасу',
+          ),
+        })),
+      ).toEqual(messages);
       expect(mocks.runtime.execute).not.toHaveBeenCalled();
       expect(result.reply).toContain('подтверждённый клиентский доступ');
     },

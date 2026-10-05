@@ -1,107 +1,144 @@
-import { bindBookingCatalog } from './booking-catalog-binding';
+import {
+  bindBookingCatalog,
+  bookingPreferenceDate,
+} from './booking-catalog-binding';
+const reference = '[name removed]@request1_1';
 const input = () => ({
   staffSource: {
     staff: [
-      { id: 'a', name: 'Антон' },
-      { id: 'i', name: 'Илья' },
+      { id: 's', name: 'Стас' },
+      { id: 'a', name: 'Александр' },
     ],
   },
-  serviceSource: { services: [{ id: 's', name: 'Моделирование бороды' }] },
-  employee: '[name removed]',
-  services: ['моделирование бороды'],
-  latestText: 'Мастер Антон, моделирование бороды завтра',
-  latestRedactedText: 'Мастер [name removed], моделирование бороды завтра',
+  serviceSource: {
+    services: [
+      { id: 'hair', name: 'Стрижка' },
+      { id: 'beard', name: 'Борода' },
+    ],
+  },
+  employee: reference,
+  services: ['Стрижка'],
+  nameReferences: new Map([[reference, 'Стаса']]),
 });
-describe('current public booking catalog binding', () => {
-  it('recovers a unique public staff reference locally after privacy redaction', () => {
+describe('semantic-selected references against current public catalog', () => {
+  it('uses existing name forms against the catalog after opaque mention selection', () => {
     expect(bindBookingCatalog(input())).toMatchObject({
       kind: 'resolved',
-      staff: { id: 'a' },
-      services: [{ id: 's' }],
+      staff: { id: 's' },
     });
-  });
-  it('current entity switch wins over a carried preference', () => {
     expect(
       bindBookingCatalog({
         ...input(),
-        employee: 'Антон',
-        previousEmployee: 'Антон',
-        latestText: 'Теперь мастер Илья',
-      }),
-    ).toMatchObject({ kind: 'resolved', staff: { id: 'i' } });
-  });
-  it('retains a revalidated preference for a time-only follow-up', () => {
-    expect(
-      bindBookingCatalog({
-        ...input(),
-        previousEmployee: 'Антон',
-        latestText: 'Запиши на 17:00',
-        latestRedactedText: 'Запиши на 17:00',
+        nameReferences: new Map([[reference, 'Александра']]),
       }),
     ).toMatchObject({ kind: 'resolved', staff: { id: 'a' } });
   });
-  it.each(['Не Антон, а Илья', 'Мастер Антонина', 'К Антону'])(
-    'does not guess ambiguous or inflected references: %s',
-    (latestText) => {
-      expect(
-        bindBookingCatalog({
-          ...input(),
-          latestText,
-          previousEmployee: 'Антон',
-        }).kind,
-      ).toBe('unresolved');
+  it('does not let self-identification overwrite the semantic employee', () => {
+    expect(
+      bindBookingCatalog({
+        ...input(),
+        employee: 'Александр',
+        nameReferences: new Map([[reference, 'Стаса']]),
+      }),
+    ).toMatchObject({ kind: 'resolved', staff: { id: 'a' } });
+  });
+  it('uses the selected occurrence when another name is excluded', () => {
+    const chosen = '[name removed]@request1_2';
+    expect(
+      bindBookingCatalog({
+        ...input(),
+        employee: chosen,
+        nameReferences: new Map([
+          [reference, 'Стаса'],
+          [chosen, 'Александра'],
+        ]),
+      }),
+    ).toMatchObject({ kind: 'resolved', staff: { id: 'a' } });
+    expect(bindBookingCatalog({ ...input(), employee: null }).kind).toBe(
+      'unresolved',
+    );
+  });
+  it.each([
+    '[name removed]',
+    '[name removed]@old_request_1',
+    '[name removed]@invented_1',
+    'foreign-staff',
+    'Антонина',
+  ])(
+    'does not guess unknown, historical, collapsed or foreign references: %s',
+    (employee) => {
+      expect(bindBookingCatalog({ ...input(), employee }).kind).toBe(
+        'unresolved',
+      );
     },
   );
-  it('resolves a current service correction without reusing the old service', () => {
+  it('does not choose an exact female name over a colliding male genitive', () => {
     expect(
       bindBookingCatalog({
         ...input(),
-        serviceSource: {
-          services: [
-            { id: 's', name: 'Моделирование бороды' },
-            { id: 'hair', name: 'Стрижка' },
+        employee: 'Александра',
+        staffSource: {
+          staff: [
+            { id: 'm', name: 'Александр' },
+            { id: 'f', name: 'Александра' },
           ],
         },
-        services: ['Стрижка'],
-      }),
-    ).toMatchObject({ kind: 'resolved', services: [{ id: 'hair' }] });
-  });
-  it('does not recover an old preference when the latest turn contains a new private/unmatched name', () => {
-    expect(
-      bindBookingCatalog({
-        ...input(),
-        employee: 'Антон',
-        previousEmployee: 'Антон',
-        latestText: 'Хочу мастера Константина',
-        latestRedactedText: 'Хочу мастера [name removed]',
       }).kind,
     ).toBe('unresolved');
   });
-  it('refuses duplicate names, foreign IDs, missing services and unavailable sources', () => {
-    const duplicate = {
-      ...input(),
-      staffSource: {
-        staff: [
-          { id: 'a', name: 'Антон' },
-          { id: 'b', name: 'Антон' },
-        ],
-      },
-    };
-    expect(bindBookingCatalog(duplicate).kind).toBe('unresolved');
+  it('refuses duplicate names and foreign service IDs, retaining only a resolved staff preference', () => {
     expect(
       bindBookingCatalog({
         ...input(),
-        latestText: '',
-        latestRedactedText: '',
-        employee: 'foreign-id',
+        staffSource: {
+          staff: [
+            { id: 's', name: 'Стас' },
+            { id: 's2', name: 'Стас' },
+          ],
+        },
       }).kind,
     ).toBe('unresolved');
     expect(
-      bindBookingCatalog({ ...input(), services: ['foreign-service'] }).kind,
-    ).toBe('unresolved');
+      bindBookingCatalog({ ...input(), services: ['foreign-service'] }),
+    ).toMatchObject({
+      kind: 'unresolved',
+      staff: { id: 's' },
+      reason: 'service_ambiguous_or_missing',
+    });
     expect(bindBookingCatalog({ ...input(), staffSource: null })).toEqual({
       kind: 'unresolved',
       reason: 'source_unavailable',
     });
+  });
+  it('validates every service and corrections without silently dropping the second service', () => {
+    expect(
+      bindBookingCatalog({ ...input(), services: ['Стрижка', 'Борода'] }),
+    ).toMatchObject({
+      kind: 'resolved',
+      services: [{ id: 'hair' }, { id: 'beard' }],
+    });
+    expect(
+      bindBookingCatalog({ ...input(), services: ['Борода'] }),
+    ).toMatchObject({ kind: 'resolved', services: [{ id: 'beard' }] });
+  });
+});
+
+describe('semantic booking day projection', () => {
+  it('uses current business calendar and refuses ranges instead of narrowing them', () => {
+    const now = new Date('2026-10-05T22:30:00Z');
+    expect(bookingPreferenceDate('today', 'Europe/Moscow', now)).toBe(
+      '2026-10-06',
+    );
+    expect(bookingPreferenceDate('tomorrow', 'Europe/Moscow', now)).toBe(
+      '2026-10-07',
+    );
+    expect(bookingPreferenceDate('tomorrow', 'America/New_York', now)).toBe(
+      '2026-10-06',
+    );
+    expect(bookingPreferenceDate('2026-10-09', 'Europe/Moscow', now)).toBe(
+      '2026-10-09',
+    );
+    expect(bookingPreferenceDate('next_week', 'Europe/Moscow', now)).toBeNull();
+    expect(bookingPreferenceDate(null, 'Europe/Moscow', now)).toBeNull();
   });
 });

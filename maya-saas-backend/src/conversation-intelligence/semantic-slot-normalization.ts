@@ -1,3 +1,4 @@
+import { parseTimeToMinute } from '../internal-calendar/internal-calendar.utils';
 import type {
   ConversationEntities,
   ConversationEntityValue,
@@ -80,4 +81,15 @@ export function normalizeSemanticSlots(
     for (const alias of aliases) delete result[alias];
   }
   return result;
+}
+
+/** Time syntax belongs to the existing calendar owner, not phrase routing. */
+export function isExactBookingTime(value: unknown): value is string {
+  if (typeof value !== 'string') return false;
+  try {
+    parseTimeToMinute(value);
+    return true;
+  } catch {
+    return false;
+  }
 }
