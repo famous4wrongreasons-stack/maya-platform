@@ -899,7 +899,7 @@ export const MAYA_AI_TOOL_CATALOG = [
       },
     },
     allowedRoles: SCHEDULE_MANAGER_ROLES,
-    allowedSurfaces: ['native'],
+    allowedSurfaces: ['native', 'web'],
     requiredFeatures: ['booking'],
     riskTier: 'medium_write',
     approvalPolicy: 'actor',

@@ -1,5 +1,13 @@
 # Native Staff Schedule Chat Commands
 
+> Development delta (2026-10-05): the isolated development branch now admits
+> `web` as well as `native` at the parser/catalog boundary. This is **not yet a
+> carrier-ready release**: the canonical React/headless carrier intentionally
+> drops legacy approval authority. See
+> [development evidence and remaining gate](../rebuild/YCLIENTS-SCHEDULE-CHAT-DEVELOPMENT-DELTA.md).
+> The native pilot description below records the previous contract; it is not
+> evidence that canonical app/web confirmation is implemented.
+
 ## Статус И Область
 
 Команды управления графиком являются ограниченным native-only сценарием Maya

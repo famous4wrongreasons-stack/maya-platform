@@ -623,7 +623,7 @@ export class AiCoreService {
       });
     }
     const scheduleCommand = await this.staffScheduleCommand.tryHandle(
-      toolUser,
+      clientAudience ? { ...user, role: UserRole.CLIENT } : toolUser,
       dto,
     );
     if (scheduleCommand) {

@@ -147,10 +147,10 @@ export class StaffScheduleCommandService {
     user: AuthenticatedUser,
     dto: AiCoreChatDto,
   ): Promise<StaffScheduleCommandResult | null> {
-    if (dto.surface !== 'native') {
+    if (dto.surface !== 'native' && dto.surface !== 'web') {
       return null;
     }
-    const rawText = this.latestUserText(dto);
+    const rawText = this.commandText(dto);
     const normalizedText = this.normalizeText(rawText);
     const operation = this.detectOperation(normalizedText);
     // 🔴 Здесь остались ТОЛЬКО команды. Читающие ветки (журнал записей и
@@ -174,7 +174,7 @@ export class StaffScheduleCommandService {
       return this.replyOnly('Не нашла активный салон для этой команды.');
     }
 
-    const allowed = await this.runtime.listTools(user, 'native');
+    const allowed = await this.runtime.listTools(user, dto.surface);
     if (!allowed.tools.some((tool) => tool.name === 'staff.schedule.update')) {
       return this.replyOnly(
         'Изменение графика недоступно для текущей роли или тарифа.',
@@ -241,7 +241,7 @@ export class StaffScheduleCommandService {
 
     const execution = this.asRecord(
       await this.runtime.execute(user, 'staff.schedule.update', {
-        surface: 'native',
+        surface: dto.surface,
         arguments: {
           staff_id: match.staff.id,
           date: preview.current.date,
@@ -577,14 +577,23 @@ export class StaffScheduleCommandService {
   }
 
   private detectOperation(text: string): ScheduleOperation | null {
+    // Questions stay on the ordinary model/tool path on both carriers.
+    if (
+      /^(?:когда|какой|какое|какие|сколько|почему|зачем|есть ли)(?:\s|$)/.test(
+        text,
+      ) ||
+      (/\?/.test(text) &&
+        !/(?:постав|сдела|закр|сократ|измен|можешь|можно)/.test(text))
+    )
+      return null;
     if (/(?:^|[^а-я])(перерыв|обед)(?:$|[^а-я])/.test(text)) {
       return 'set_break';
     }
     if (
-      /(?:^|[^а-я])(?:закр(?:ой|ыть|ывай|ываем)|(?:сделай|поставь|назначь)[^.!?]{0,40}выходн)(?:$|[^а-я])/.test(
+      /(?:^|[^а-я])(?:закр(?:ой|ыть|ывай|ываем)|(?:сделай|поставь|назначь|сделать|поставить|назначить)[^.!?]{0,40}выходн[а-я]*)(?:$|[^а-я])/.test(
         text,
       ) &&
-      /(запис|ден|сегодня|завтра|послезавтра|\d{1,2}[./]\d{1,2}|\d{4}-\d{2}-\d{2}|[а-я]+ник|сред|пятниц|суббот|воскрес)/.test(
+      /(выходн|график|смен|день|запис|ден|сегодня|завтра|послезавтра|\d{1,2}[./]\d{1,2}|\d{4}-\d{2}-\d{2}|[а-я]+ник|сред|пятниц|суббот|воскрес)/.test(
         text,
       )
     ) {
@@ -917,6 +926,37 @@ export class StaffScheduleCommandService {
       select: { defaultTimezone: true },
     });
     return tenant?.defaultTimezone ?? 'Europe/Moscow';
+  }
+
+  // Only a contiguous clarification exchange can carry material forward. An
+  // approval, cancellation or unrelated assistant turn ends that exchange.
+  // This is draft input, never authority: current staff/day and approval are
+  // resolved again by the same tenant-scoped owner on every turn.
+  private commandText(dto: AiCoreChatDto): string {
+    const messages = dto.messages;
+    let index = messages.length - 1;
+    while (index >= 0 && messages[index].role !== 'user') index -= 1;
+    if (index < 0) return '';
+    const latest = messages[index].content;
+    if (this.detectOperation(this.normalizeText(latest))) return latest;
+    if (/^(?:нет|отмена|отмени|не надо|стоп)(?:[\s.!]|$)/i.test(latest))
+      return '';
+    const parts = [latest];
+    while (
+      index >= 2 &&
+      messages[index - 1].role === 'assistant' &&
+      /^(?:На какую дату изменить график\?|Какому мастеру изменить график\?|Уточните мастера:|Укажите время перерыва,|До какого времени сократить рабочий день\?)/.test(
+        messages[index - 1].content,
+      ) &&
+      messages[index - 2].role === 'user'
+    ) {
+      index -= 2;
+      const text = messages[index].content;
+      parts.unshift(text);
+      if (this.detectOperation(this.normalizeText(text)))
+        return parts.join(' ');
+    }
+    return latest;
   }
 
   private latestUserText(dto: AiCoreChatDto): string {
