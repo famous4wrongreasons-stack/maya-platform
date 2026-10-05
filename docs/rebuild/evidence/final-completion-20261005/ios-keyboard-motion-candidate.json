@@ -1,0 +1,44 @@
+{
+  "sourceSha": "71e470ed8ed0a41926d7fa8cd23ebf957b54465c",
+  "status": "LOCAL_CANDIDATE_NOT_ACCEPTED",
+  "ownerVideo": {
+    "durationSeconds": 4.15,
+    "fps": 60,
+    "width": 1320,
+    "height": 2868
+  },
+  "checks": {
+    "simulatorBuild": "PASS",
+    "carrierTests": 93,
+    "releaseTests": 18,
+    "softwareKeyboardTyping": "PASS",
+    "wrappedDraft216Keys": "PASS",
+    "scrollGesture": "INCONCLUSIVE",
+    "motion": "long delayed jump removed; short initial WebKit lag still observed",
+    "phoneInstall": "NOT_PERFORMED"
+  },
+  "evidence": [
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/iphone-reference/owner-motion.mp4",
+      "sha256": "70712bced68ba6737c35ac548003e76e59cc85b3279a98c1f670ca6147c740ec"
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/iphone-reference/simulator-motion-before.mp4",
+      "sha256": "c146c967b98458a24f92a526777cdb1a3177a341ed5e01a4fab68288e18bdb2b"
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/iphone-reference/simulator-motion-guide.mp4",
+      "sha256": "3e0f7f5aeee251d8a8d357b41eb348ae774bf964a098cd5fc01e4a1b9a969f5b"
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/iphone-reference/follow-opening-detail.jpg",
+      "sha256": "757e2492d8e3184658e929d2b5bf08bfecf9afe5ed92115d9dee2d2df36dc42e"
+    }
+  ],
+  "limits": [
+    "Simulator UI-only fixture does not qualify CRM or real model behavior",
+    "No 60fps, frame-perfect motion or owner acceptance claim",
+    "iOS 15/16 safe-area behavior not exercised",
+    "No production deployment"
+  ]
+}

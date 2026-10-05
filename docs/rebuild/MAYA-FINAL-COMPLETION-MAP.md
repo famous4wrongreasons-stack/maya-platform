@@ -189,3 +189,42 @@ A reproduced defect allowed caller-supplied prior assistant text to whitelist an
 - **Installed:** canonical signed `ru.mayaos.app` updated in place on owner iPhone; devicectl install receipt SUCCESS. No uninstall/data deletion. The subsequent launch attempt was refused because device was LOCKED, not signature/profile trust. Owner must unlock and open the updated app for real keyboard acceptance; do not repeat install/trust. API remains unchanged production `https://mayaos.ru/api`; no production backend, CRM, message or payment mutation occurred.
 - **Deferred backend checkpoint:** `92ce547b1e679051aee05ea84f2f1c7e0f899375` adds real HTTP/C8/AE/PostgreSQL qualification (PASS: policy+compute+chat, replay, cross-tenant/revocation, changed-source invalidation). Synthetic model selection and source fixtures are explicit. The three other owner-path cases are visibly skipped pending UI priority, with two confirmed failing regressions captured in `/tmp/maya-owner-paths-red.log`: `сейчас` matched `час`, and C7 money fallback omits causal-unavailability explanation. No backend production correction was claimed for these. The isolated PG data is retained, cluster stopped after handoff.
 - **Next dependency:** owner unlocks iPhone and verifies typing in the installed update. Product/backend acceptance remains separate. Broader design directions were authorized for later, not performed in this usability fix.
+
+## Coherent functional delivery directive — 2026-10-05 owner update
+
+- Deliver the agreed functional scope as one qualified **new backend + canonical app** candidate.
+  Do not ask the owner to debug each phrase or install more UI-only updates against the old backend.
+  Design exploration waits for functional completion. Production deployment/rollback execution still
+  requires separate release approval; local isolated implementation continues.
+- Mandatory YCLIENTS scope is now explicit in [canonical product requirements](../product/README.md):
+  every operation supported by official API and current integration/user permission, including goods,
+  stock, services/prices, working schedules/days off/breaks and staff lifecycle. API capability inventory
+  must map provider → adapter → domain/action owner → chat → permission/confirmation → outcome/reconciliation.
+  Separate provider-unsupported, missing integration scope and missing MAYA implementation. This does not
+  authorize real CRM mutations, arbitrary model HTTP or fake verified Client linkage.
+- Current highest-leverage path is conversation/task continuity + role-safe routing + canonical verified
+  Client transition + honest model failure, followed by existing multi-turn/generalization corpus and
+  one candidate qualification matrix. No phrase-specific booking regex patch is planned.
+- Parent reports a fresh read-only production observation: running release
+  `/opt/maya-saas/releases/20260929-recon-fix-eb43bc22`, owner role with CRM card but no active verified
+  Client booking binding. Full deployed tree is not independently proven by the directory suffix.
+  This branch remains local; real-model/provider acceptance is still distinct from scripted tests.
+
+### Keyboard timing candidate and measured limitation
+
+- Owner MP4 materialized locally and decoded: 4.15 seconds, HEVC 1320×2868 at 60fps.
+  Frames show the keyboard covering the composer until a delayed final reposition. Installed Capacitor
+  Keyboard 8.0.5 schedules native resize for keyboard animation duration **plus 0.2 seconds**.
+- Candidate removes plugin resize and native JS VisualViewport competition. A UIKit keyboard guide is
+  the geometry owner. Directly constraining WKWebView was rejected after Simulator recording showed an
+  immediate DOM destination jump and a transient blank gap. The current candidate follows the guide's
+  presentation frame through CADisplayLink only during native keyboard transitions, with no CSS duration
+  guess. Browser VisualViewport behavior remains separate; no runtime/auth/backend behavior changes.
+- Executed: Simulator native build, real software-keyboard open/close and 216-key wrapped draft, carrier
+  93 tests and release 18 tests. Recorded before/direct-guide/follow variants. Follow variant removes the
+  long delayed final jump and visibly traverses intermediate positions. **A short WebKit layout lag remains
+  in the first opening frames; no frame-perfect/60fps or owner acceptance claim.** Native scroll gesture
+  testing was inconclusive; do not label that pass. iOS 15/16 retain the keyboard guide safe-area bottom;
+  this device run is iOS 26.5 only.
+- No further phone installation was performed. This is a bounded candidate checkpoint, with motion and
+  full integrated acceptance still requiring qualification before a coherent release.
