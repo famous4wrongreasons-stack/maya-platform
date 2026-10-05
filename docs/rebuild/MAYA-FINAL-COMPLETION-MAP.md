@@ -556,3 +556,32 @@ production writes, phone work, push, merge or deployment occurred in this pass.
 ## Owner decision text; work paused — 2026-10-05 UTC
 
 Only [OWNER-DECISION-TEXT-20261005.md](OWNER-DECISION-TEXT-20261005.md) was prepared for review after `b16fa1e16cdc8c218e6557061b1dac047c6f54f4`. It spells out staff roles/data, all nine current public outcomes and the difference from the earlier unapproved rendering proposal. Recommendation: approve existing staff-only read and explicit coverage preserving the current neutral outcome; leave seven proposed public-message changes for separate review. No option was applied. Guest booking does not invoke these chat owners, but the existing shared server deploy requires the complete test suite, so these errors still block that deployment path. Separate website acceptance remains outstanding. All code/contract changes and further work are paused until the owner's decision.
+
+
+## Owner-approved contract 1.3; aggregate green — 2026-10-05 UTC
+
+This supersedes the owner-decision wait above. Approval at 22:38 UTC is preserved
+verbatim in [MAYA-WIDGET-CONTRACT-V1.3-DECISION-RECORD.md](MAYA-WIDGET-CONTRACT-V1.3-DECISION-RECORD.md).
+Final code `d2369c45f3dafe83ab9c28d4837f204efd509df2`, based on `2fa9180d79b82991656217bccf5c4c3a8557ba55`:
+F36b admits only the existing staff-only `business.rules.read`, with unchanged
+roles/data/tenant scope and SESSION_VERIFIED; the release profile gains exactly that
+successor and requires its new digest. P10's nine existing codes retain exactly
+UNAVAILABLE / PROVIDER_SILENT / limitation and «Источник пока не отвечает.».
+The seven earlier public-message/state proposals were not approved or applied.
+
+Fresh final checkpoint: **5853 backend PASS / 0 FAIL / 0 skipped across all 601
+configured suites**, 32 completed process partitions, exact census; **27/27 documented
+runner PASS**; scripts types PASS; full lint **0 errors / 9 existing warnings**.
+Initial sandbox loopback failures and the stale F69 whole-document pin are retained
+as diagnostic evidence, then the full census was rerun on the final SHA. No test was
+removed, no status promoted and no F69 authority rule changed. Detailed report and
+evidence: [CONTRACT-V1.3-RECONCILIATION-20261005.md](CONTRACT-V1.3-RECONCILIATION-20261005.md).
+
+No production readiness is inferred: prior HTTP 490/490, shell 430 PASS / 7 explicit
+skips and React 93/93 remain retained evidence, not fresh runs on this candidate.
+Frozen website, Prisma/schema/migrations, C9/tool source registries and business
+owners remain untouched by this slice. No paid calls, app/DB restart, real CRM writes,
+notifications/payments, phone actions, deployment, push or merge. Next is parent
+review of this exact local candidate, then separately authorized website/provider or
+frozen real-model acceptance; Telegram installation and inbound lifecycle decisions
+remain unresolved. Any release using the changed profile requires matching certification.

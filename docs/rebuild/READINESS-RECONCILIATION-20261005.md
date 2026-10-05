@@ -1,5 +1,7 @@
 # Readiness reconciliation — 2026-10-05 UTC
 
+Subsequent owner approval and final aggregate result: [CONTRACT-V1.3-RECONCILIATION-20261005.md](CONTRACT-V1.3-RECONCILIATION-20261005.md). The decision wait and failed matrix below are historical evidence.
+
 Development candidate, not a release approval. This supersedes the remaining-blocker
 classification in CLIENT-READINESS-FIXES-20261005.md, while retaining its test evidence.
 Base `0e1381a40d3f2f2340f1426ea81c24b1e878d0fb`; candidate code
