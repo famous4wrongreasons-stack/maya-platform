@@ -533,3 +533,13 @@ live proposal and website-only release blockers are in
 [CHAT-AGGREGATE-READINESS-20261005.md](CHAT-AGGREGATE-READINESS-20261005.md).
 Owned local proof PostgreSQL is stopped. No paid calls, remote-proof restart,
 production writes, phone work, push, merge or deployment occurred in this pass.
+
+## Client readiness owner-boundary checkpoint — 2026-10-05 UTC
+
+- Isolated development branch: `codex/maya-client-readiness-20261005`, based on accepted aggregate checkpoint `98dc6121b714c51bedb70e396f5ad35cd0f9c346`.
+- Code checkpoint: `2e76a589ff40eb1b503c4ed52339ab3d4125a412`. Full details: [CLIENT-READINESS-FIXES-20261005.md](CLIENT-READINESS-FIXES-20261005.md).
+- Existing encryption owner is bound through a narrow D-6 port; encrypted reply encoding uses the H6 serializer while preserving prior ciphertext readability and reply identity. TimelineStore owns DB-clock reads and explicit tenant-scoped conversation predicates. The old offline runner now carries canonical `user_turn` identity and delegates grants to the existing fixture owner.
+- Accepted resume behavior is asserted in HTTP and shell tests: encrypted completions, atomic correlation, parent retention, immutable conflict replay, restore-before-send. K1 generation stays in its own checkout and reproduces signed artifacts unchanged. No check was removed or certified capability/reason/schema census rewritten.
+- Full backend: 5829 PASS / 11 FAIL, 600 suites, no skips (previous aggregate: 17 failed assertions). Full shell: 430 PASS / zero FAIL / 7 explicit local-API skips. Full configured HTTP census: 490 PASS across all 52 suites, no skips, using fresh-process partitions and one missing-bundle prerequisite rerun; the failed single-process attempt (exit 139) is retained. React: 93/93 PASS. Types/build/Prisma validate pass; full lint remains the identical baseline 22 errors/9 warnings.
+- **Still blocked:** certified registry/release profile versus existing staff-only `business.rules.read`; nine C9 denial codes missing from the certified reason map; frozen website migration/schema baseline; unchanged legacy lint. Next path is substantive versioned contract reconciliation, not changing counts to green the gates. Documented runner: 23/27 PASS (K1 and both K3 stages repaired); widget-contract/K4 and wave-3/wave-4 remain red. See the checkpoint report for evidence.
+- Website frontend stays frozen at `d5b310e9a3dc13051eb7f5ccd1e23bf28e8884d6`. No paid calls, remote proof restart, real notifications/payments/CRM writes, deployment, phone operation, push or merge. Local scripted/internal-calendar proofs are not provider acceptance.
