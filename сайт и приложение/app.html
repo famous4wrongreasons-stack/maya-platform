@@ -2553,6 +2553,23 @@ function MayaMarkAnimated({
     }, style || {})
   }, bars);
 }
+// Motion adapted from the owner's reference clip. Keep the static MAYA mark for
+// reduced-motion users and if the local animation asset is unavailable.
+function MayaRibbonMotion({ kind = 'intro', width = 300, height = 110, fallbackColor = 'currentColor' }) {
+  const reduce = (function () {
+    try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { return false; }
+  })();
+  const [failed, setFailed] = React.useState(false);
+  const [introKey] = React.useState(function () { return Date.now().toString(36) + Math.random().toString(36).slice(2); });
+  if (reduce || failed) return React.createElement(MayaMark, { size: Math.min(height, 64), color: fallbackColor });
+  return React.createElement('img', {
+    src: kind === 'recording' ? 'assets/maya-recording.webp' : 'assets/maya-intro.webp?open=' + introKey,
+    alt: '',
+    'aria-hidden': 'true',
+    onError: function () { setFailed(true); },
+    style: { display: 'block', width: width, height: height, objectFit: 'contain', flexShrink: 0, pointerEvents: 'none' }
+  });
+}
 // Alias: старый SeedLogo → новый знак Maya (совместимость call sites).
 function SeedLogo({
   size = 22,
@@ -15296,7 +15313,7 @@ function ABookCard(props) {
     var key = 'me_saas_auth_v2:' + ctx.ns;
     var base = String(ctx.api).replace(/\/+$/, '');
     var rd = function () { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; } };
-    var finalize = function (r, body) { if (!r.ok) { var er = new Error('http_' + r.status); er.status = r.status; er.code = (body && body.error && body.error.code) || (body && body.code) || null; throw er; } return body; };
+    var finalize = function (r, body) { if (!r.ok) throw authError(r, body); return body; };
     var doFetch = function (token) {
       var ini = init || {};
       var headers = Object.assign({}, ini.headers || {}, { Authorization: 'Bearer ' + token });
@@ -15640,7 +15657,7 @@ function meWidgetAf(path, init) {
     er.body = body;
     return er;
   };
-  var finalize = function (r, body) { if (!r.ok) { var er = new Error('http_' + r.status); er.status = r.status; er.code = (body && body.error && body.error.code) || (body && body.code) || null; throw er; } return body; };
+  var finalize = function (r, body) { if (!r.ok) throw authError(r, body); return body; };
   var doFetch = function (token) {
     var ini = init || {};
     var headers = Object.assign({}, ini.headers || {}, { Authorization: 'Bearer ' + token });
@@ -21690,7 +21707,7 @@ function AChat() {
 	        ] : QUICKS.slice(0, 3).map(function (q) { return [q, function () { quickTap(q); }]; }));
       return e('div', {
         style: { minHeight: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '10px 8px' }
-      }, e(SeedLogoAnimated, { size: 110, color: t.ink, mode: 'once' }),
+      }, e(MayaRibbonMotion, { kind: 'intro', width: 300, height: 110, fallbackColor: t.ink }),
       e('div', { style: { fontFamily: DISPLAY, fontSize: 22, letterSpacing: '0.5em', paddingLeft: '0.5em', textTransform: 'uppercase', fontWeight: 300, color: t.ink, marginTop: 24 } }, 'MAYA'),
 	      e('div', { style: { fontFamily: BODY, fontSize: 13, lineHeight: 1.6, color: t.dim, maxWidth: 280, marginTop: 12 } }, ownerCh ? 'AI-администратор вашего бизнеса. Покажу ситуацию и подготовлю действие к вашему подтверждению.' : (staffCh ? 'Ваш рабочий ассистент. Помогу с записями, расписанием и статистикой.' : 'Помогу выбрать услугу, найти время и проверить ваши записи.')),
       e('div', { style: { display: 'flex', flexDirection: 'column', gap: 10, marginTop: 28, alignItems: 'center' } }, chips.map(function (c, ci) {
@@ -21763,7 +21780,7 @@ function AChat() {
   },
   // голосовой орб — МАЛЕНЬКИЙ, низко над баром (чат остаётся виден, как у GPT);
   // показывается в hands-free режиме ИЛИ при записи голосового; всплывает с анимацией.
-  (voiceMode || recState === 'recording') ? e('div', {
+  (voiceMode && recState !== 'recording') ? e('div', {
     style: {
       flexShrink: 0, display: 'flex', justifyContent: 'center', padding: '2px 0 10px', pointerEvents: 'none',
       transition: 'opacity .14s ease, transform .3s cubic-bezier(.4,0,.2,1)',
@@ -21829,9 +21846,9 @@ function AChat() {
     // Maya OS 3D: одна пилюля — «+», ввод (или статус записи), справа inv-кнопка mic/отправить
     var midEl;
     if (rec) {
-      midEl = e('div', { key: 'rec', style: { flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 10, height: 50 } },
-        e('span', { key: 'dot', style: { width: 9, height: 9, borderRadius: 999, background: dark ? '#f4f0eb' : '#18160f', animation: 'mePulse 1.2s ease-in-out infinite', flexShrink: 0 } }),
-        e('span', { key: 'tm', style: { fontFamily: DISPLAY, fontSize: 14, color: t.ink, fontVariantNumeric: 'tabular-nums' } }, 'Слушаю… ' + recTime), e('span', { key: 'hint', style: { marginLeft: 'auto', fontFamily: BODY, fontSize: 10.5, color: t.faint, paddingRight: 6 } }, 'ещё раз — отправить'));
+      midEl = e('div', { key: 'rec', 'aria-label': 'Идёт запись голоса', style: { flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 8, height: 50 } },
+        e(MayaRibbonMotion, { kind: 'recording', width: 120, height: 44, fallbackColor: t.ink }),
+        e('span', { key: 'tm', style: { fontFamily: DISPLAY, fontSize: 13, color: t.ink, fontVariantNumeric: 'tabular-nums', flexShrink: 0 } }, recTime));
     } else {
       midEl = e('input', {
         key: 'ta', ref: composerRef, type: 'text', value: input, onChange: ev => setInput(ev.target.value),
@@ -25292,6 +25309,7 @@ function AConsentGate() {
     }
     function check() {
       if (done || checkedRef.current) return;
+      if (window.__ME_SAAS_CTX) return; // MAYA OS ходит в SaaS, не в салонный proxy
       if (!force && window.__meCurMode === 'staff') return; // не сотруднику (force — для теста)
       if (!loggedIn()) return; // только после логина
       checkedRef.current = true;
@@ -25601,6 +25619,11 @@ function AMayaConsent() {
         var client = access && typeof meAppAccessFindMode === 'function'
           ? meAppAccessFindMode(access, 'client') : null;
         // Карточки нет — согласие не подписано. profile_linked приходит с сервера.
+        // Preview кабинета читается без карточки; согласие только в полном client-режиме.
+        if (client && client.access === 'preview') {
+          setShow(false);
+          return;
+        }
         setShow(!!client && client.profile_linked !== true);
       } catch (x) {}
     }
@@ -25614,18 +25637,33 @@ function AMayaConsent() {
     var authedFetch = window.__meSaasAuthedFetch;
     if (typeof authedFetch !== 'function') { setErr('Сессия не найдена — войдите снова.'); return; }
     setErr(''); setBusy(true);
+    var key = 'maya.os.consent.pending.v1';
+    var commandId = null;
+    try {
+      var saved = JSON.parse(sessionStorage.getItem(key) || 'null');
+      if (!saved || saved.marketing !== !!mkt || typeof saved.id !== 'string') {
+        var bytes = new Uint8Array(24);
+        window.crypto.getRandomValues(bytes);
+        saved = { marketing: !!mkt, id: Array.prototype.map.call(bytes, function (v) { return ('0' + v.toString(16)).slice(-2); }).join('') };
+        sessionStorage.setItem(key, JSON.stringify(saved));
+      }
+      commandId = saved.id;
+    } catch (x) {}
     Promise.resolve(authedFetch('/customers/me/profile', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Idempotency-Key': commandId || ('consent-' + Date.now()) },
       body: JSON.stringify({ privacyConsent: true, marketingConsent: !!mkt })
     })).then(function () {
       setBusy(false); setShow(false);
+      try { sessionStorage.removeItem(key); } catch (x) {}
       try { if (window.tactile) window.tactile('SUCCESS'); } catch (x) {}
       // Перетянуть /me: profile_linked станет true, режим — полным.
       try { if (window.__meRefresh) window.__meRefresh(); } catch (x) {}
     }).catch(function (error) {
       setBusy(false);
-      setErr((error && error.message) || 'Не удалось сохранить. Попробуйте ещё раз.');
+      var msg = (error && error.message) || '';
+      if (/^http_?400$/i.test(msg) || msg === 'HTTP 400') msg = 'Не удалось сохранить согласие. Попробуйте ещё раз.';
+      setErr(msg || 'Не удалось сохранить. Попробуйте ещё раз.');
     });
   }
 
