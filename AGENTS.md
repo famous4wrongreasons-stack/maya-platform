@@ -1,5 +1,16 @@
 # AGENTS.md — MAYA / Мужская Эстетика
 
+## Current carrier note (2026-10-05)
+
+The canonical chat presentation in the current integration line is `maya-carrier-react/`,
+using `maya-chat-shell/` as its headless runtime. PWA and Capacitor payloads are built
+and verified by `maya-carrier-react/tools/release.mjs`; `maya-ios-carrier/` packages that
+same React payload. The legacy `сайт и приложение/app.html` and the separate old
+`maya-ios` checkout remain historical/site surfaces, not the source to mirror when
+changing React AChat. The older frontend paths and mirror instructions below apply
+only when explicitly maintaining those legacy surfaces. Do not revive retired raw
+phone/name booking authority or the `/app/` service-worker scope for the React build.
+
 Рабочая инструкция для Codex и других coding agents по проектам сайта, PWA, iOS-обёртки, Telegram-бота и голосовой MAYA. Файл содержит только операционные правила и дизайн-конвенции. Секреты, токены, ключи, реальные значения API-ключей и персональные данные сюда не записывать.
 
 ## Карта проектов
