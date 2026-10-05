@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
@@ -24,6 +25,7 @@ import { UpdateCrmTeamAccessDto } from '../users/dto/update-crm-team-access.dto'
 import { UsersService } from '../users/users.service';
 import { attendanceFromWritableCode, attendanceToCode } from './crm-attendance';
 import { CrmService } from './crm.service';
+import { CrmOutcomeUnknownError } from './crm-request.errors';
 import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
 import { ConnectCrmIntegrationDto } from './dto/connect-crm-integration.dto';
 import { DiscoverCrmCompaniesDto } from './dto/discover-crm-companies.dto';
@@ -210,20 +212,22 @@ export class CrmIntegrationController {
     // 🔴 Сознательно НЕ через appointments/createForClient: тот путь требует
     // совпадения со свободным окном и отвечает slot_taken. Мастер в журнале
     // сажает клиента куда решил — это админская запись, allowBusy.
-    const result = await this.crmService.createAppointment(
-      tenantId,
-      {
-        clientId: actor.userId,
-        clientName: dto.client_name || '',
-        clientPhone: dto.client_phone || null,
-        staffId: dto.staff_id,
-        serviceIds: dto.service_ids,
-        start: dto.start,
-        notes: dto.notes ?? null,
-        allowBusy: true,
-        durationMinutes: dto.duration_minutes,
-      },
-      this.actionInvocation('crm-journal.http.create', idempotencyKey),
+    const result = await this.journalOutcome('создания записи', () =>
+      this.crmService.createAppointment(
+        tenantId,
+        {
+          clientId: actor.userId,
+          clientName: dto.client_name || '',
+          clientPhone: dto.client_phone || null,
+          staffId: dto.staff_id,
+          serviceIds: dto.service_ids,
+          start: dto.start,
+          notes: dto.notes ?? null,
+          allowBusy: true,
+          durationMinutes: dto.duration_minutes,
+        },
+        this.actionInvocation('crm-journal.http.create', idempotencyKey),
+      ),
     );
 
     await this.auditLogService.log({
@@ -369,16 +373,18 @@ export class CrmIntegrationController {
     @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     const tenantId = this.tenantId(actor);
-    const result = await this.crmService.rescheduleJournalAppointment(
-      tenantId,
-      actor,
-      {
-        externalId,
-        start: dto.start,
-        staffId: dto.staff_id,
-        serviceIds: dto.service_ids,
-      },
-      this.actionInvocation('crm-journal.http.reschedule', idempotencyKey),
+    const result = await this.journalOutcome('переноса записи', () =>
+      this.crmService.rescheduleJournalAppointment(
+        tenantId,
+        actor,
+        {
+          externalId,
+          start: dto.start,
+          staffId: dto.staff_id,
+          serviceIds: dto.service_ids,
+        },
+        this.actionInvocation('crm-journal.http.reschedule', idempotencyKey),
+      ),
     );
 
     await this.auditLogService.log({
@@ -402,11 +408,13 @@ export class CrmIntegrationController {
     @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     const tenantId = this.tenantId(actor);
-    const result = await this.crmService.cancelJournalAppointment(
-      tenantId,
-      actor,
-      externalId,
-      this.actionInvocation('crm-journal.http.cancel', idempotencyKey),
+    const result = await this.journalOutcome('отмены записи', () =>
+      this.crmService.cancelJournalAppointment(
+        tenantId,
+        actor,
+        externalId,
+        this.actionInvocation('crm-journal.http.cancel', idempotencyKey),
+      ),
     );
 
     await this.auditLogService.log({
@@ -419,6 +427,24 @@ export class CrmIntegrationController {
     });
 
     return result;
+  }
+
+  /** Preserve the canonical uncertain outcome at the HTTP boundary, as the
+   * verified Client routes already do. This never retries or resolves it. */
+  private async journalOutcome<T>(
+    operation: string,
+    execute: () => Promise<T>,
+  ) {
+    try {
+      return await execute();
+    } catch (error) {
+      if (error instanceof CrmOutcomeUnknownError)
+        throw new ServiceUnavailableException({
+          message: `Результат ${operation} пока неизвестен. Проверьте актуальное состояние записи перед новым действием.`,
+          error: { code: 'crm_outcome_unknown' },
+        });
+      throw error;
+    }
   }
 
   private actionInvocation(scope: string, idempotencyKey?: string) {
