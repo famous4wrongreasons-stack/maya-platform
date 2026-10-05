@@ -1,3 +1,4 @@
+import { localCalendarDate } from '../owner-reports/owner-reports.time';
 import {
   mutationClarification,
   mutationReceiptReply,
@@ -1980,7 +1981,6 @@ export class AiCoreService {
     const timezone = await this.resolveBusinessTimezone(
       this.requireTenant(user),
     );
-    const formatter = new Intl.DateTimeFormat('en-CA', { timeZone: timezone });
     const savedDate = new Date(saved.savedAt);
     if (!Number.isFinite(savedDate.getTime())) return null;
     const plan = this.conversationLayer().validatePlan(
@@ -1991,7 +1991,7 @@ export class AiCoreService {
     if (!plan) return null;
     if (
       saved.timezone !== timezone ||
-      formatter.format(savedDate) !== formatter.format(new Date())
+      localCalendarDate(timezone, savedDate) !== localCalendarDate(timezone)
     ) {
       for (const task of plan.tasks) {
         // A relative day cannot silently move when a conversation resumes later.
