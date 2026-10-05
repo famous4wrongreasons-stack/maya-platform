@@ -12,7 +12,6 @@ import { assertProofDatabase } from '../../test/widgets-live/support/proof-db-gu
 import { bootFixtureContext } from '../../test/widgets-live/support/bootstrap';
 import { Fixtures } from '../../test/widgets-live/support/fixtures';
 import { resetLoopbackLoginPreflight } from '../../test/widgets-live/support/login-rate-limit';
-import { CalendarSource, UserRole } from '../../src/common/domain.enums';
 import { configureHttpApp } from '../../src/bootstrap/configure-http-app';
 import { PilotBudgetGate } from './budget-gate.mjs';
 import { freezePilot, replayPilot, sha256 } from './replay.mjs';
@@ -309,20 +308,7 @@ async function main() {
       },
       openDialog: async ({ role }) => {
         if (role !== 'client') throw new Error('client_only_pilot');
-        const tenant = await fixtures!.tenant(
-          'Synthetic client conversation pilot',
-          CalendarSource.INTERNAL,
-        );
-        const user = await fixtures!.user(tenant, UserRole.CLIENT);
-        await fixtures!.bookingSource(tenant, user, true);
-        for (const feature of [
-          'ai.consultant',
-          'widgets.runtime',
-          'booking',
-          'booking.customer_app',
-          'crm.integration',
-        ] as const)
-          await fixtures!.grantFeature(tenant, feature);
+        const { tenant, user } = await fixtures!.clientConversationPilot();
         await resetLoopbackLoginPreflight(db!.prisma);
         const login = await json('/auth/login', {
           tenantSlug: tenant.slug,

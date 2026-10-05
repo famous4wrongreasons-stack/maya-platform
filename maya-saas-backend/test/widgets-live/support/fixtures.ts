@@ -40,10 +40,7 @@ import * as bcrypt from 'bcrypt';
 import { createHash, randomUUID } from 'node:crypto';
 
 import type { AuthenticatedUser } from '../../../src/common/authenticated-user.interface';
-import type {
-  CalendarSource,
-  UserRole,
-} from '../../../src/common/domain.enums';
+import { CalendarSource, UserRole } from '../../../src/common/domain.enums';
 import { C9_REGISTRY_HASH } from '../../../src/orchestration/c9.registry';
 import {
   MAYA_FEATURE_REGISTRY,
@@ -366,6 +363,28 @@ export class Fixtures {
       () => service.link({ proof: token }),
     );
     return { clientId: client.id, linkId: linked.link.id };
+  }
+
+  /** The bounded Client pilot uses the same guarded fixture owner as HTTP proofs. */
+  async clientConversationPilot(): Promise<{
+    tenant: TenantFixture;
+    user: UserFixture;
+  }> {
+    const tenant = await this.tenant(
+      'Synthetic client conversation pilot',
+      CalendarSource.INTERNAL,
+    );
+    const user = await this.user(tenant, UserRole.CLIENT);
+    await this.bookingSource(tenant, user, true);
+    for (const feature of [
+      'ai.consultant',
+      'widgets.runtime',
+      'booking',
+      'booking.customer_app',
+      'crm.integration',
+    ] as const)
+      await this.grantFeature(tenant, feature);
+    return { tenant, user };
   }
 
   /** Source facts only: no widget, action-execution or appointment is minted by this fixture. */

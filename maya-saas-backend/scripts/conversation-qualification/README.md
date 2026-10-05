@@ -283,3 +283,9 @@ resolution; ambiguous catalog labels require clarification; multi-service carrie
 currently accepts one service handle; vague dayparts have no configured owner boundary
 in this path and require exact time. Slots are still explicitly selected by the user
 and verified in existing preview/confirmation, never auto-committed from model text.
+
+The `http-live-pilot.ts` command keeps its existing entrypoint and broker orchestration.
+Its synthetic Client/catalog/entitlement setup delegates to
+`Fixtures.clientConversationPilot()` inside the existing guarded widgets-live
+fixture owner. Database, no-env-files, broker, budget and resume guards remain
+unchanged. This creates no new production grant path and authorizes no paid run.

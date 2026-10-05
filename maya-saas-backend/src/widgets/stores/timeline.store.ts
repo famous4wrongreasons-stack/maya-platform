@@ -108,8 +108,10 @@ export class TimelineStore {
     encryption: EncryptionService,
   ): Promise<void> {
     if (
-      Buffer.byteLength(JSON.stringify(input.semanticContext ?? null), 'utf8') >
-      16_384
+      Buffer.byteLength(
+        stableActionJson(input.semanticContext ?? null),
+        'utf8',
+      ) > 16_384
     )
       throw new ConflictException('conversation_context_too_large');
     const tenantId = input.tenantId;

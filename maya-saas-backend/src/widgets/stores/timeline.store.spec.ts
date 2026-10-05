@@ -192,3 +192,41 @@ describe('TimelineStore.ensureAssistantExecutionTurn — conversation index', ()
     });
   });
 });
+
+describe('semantic context byte bound before persistence', () => {
+  const persist = (semanticContext: unknown, lock: jest.Mock) =>
+    TimelineStore.persistChatReply(
+      { $executeRaw: lock } as never,
+      {
+        tenantId: 'proof-tenant',
+        principalProofHash: 'proof-principal',
+        userTurn: {
+          turnId: 'proof-turn',
+          conversationId: 'proof-conversation',
+        },
+        reply: 'Synthetic reply',
+        completionHash: 'a'.repeat(64),
+        semanticContext,
+      },
+      new Date('2026-10-05T12:00:00Z'),
+      undefined as never,
+    );
+
+  it.each([
+    ['absent context', undefined],
+    ['exactly 16 KiB of UTF-8 JSON', { employee: 'я'.repeat(8184) + 'a' }],
+  ])('admits %s to the existing conversation lock', async (_label, context) => {
+    const stop = new Error('stop-before-persistence');
+    const lock = jest.fn().mockRejectedValue(stop);
+    await expect(persist(context, lock)).rejects.toBe(stop);
+    expect(lock).toHaveBeenCalledTimes(1);
+  });
+
+  it('refuses a context one UTF-8 byte over the bound before any database call', async () => {
+    const lock = jest.fn();
+    await expect(
+      persist({ employee: 'я'.repeat(8184) + 'aa' }, lock),
+    ).rejects.toThrow('conversation_context_too_large');
+    expect(lock).not.toHaveBeenCalled();
+  });
+});
