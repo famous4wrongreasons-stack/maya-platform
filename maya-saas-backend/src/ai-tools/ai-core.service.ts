@@ -1,4 +1,9 @@
 import {
+  mutationClarification,
+  mutationReceiptReply,
+  mutationReceiptStatus,
+} from './mutation-response';
+import {
   measurementText,
   type MeasurementPresentation,
 } from '../measurement/measurement.presentation';
@@ -680,7 +685,8 @@ export class AiCoreService {
     const decisions: AiCoreModelDecision[] = [];
     const signatures = new Set<string>();
     const maxToolSteps = this.maxToolSteps();
-    let activeSemanticPlan: ConversationSemanticPlan | null = null;
+    let activeSemanticPlan: ConversationSemanticPlan | null =
+      await this.previousSemanticPlan(user, dto, tools, toolUser.role);
     // let, а не const: смысловой план приходит от модели ПОЗЖЕ и может снять
     // требование источника — см. ниже про болтовню.
     let requirement = this.groundingRequirement(
@@ -1195,6 +1201,38 @@ export class AiCoreService {
               grounding: this.groundingReport(
                 requirement,
                 requirement ? 'verified' : 'not_required',
+                toolResults,
+              ),
+            },
+            toolResults,
+          );
+        }
+        // Mutation outcomes are composed only from runtime/AE evidence. They
+        // never enter a model final-reply stage, including UNKNOWN and missing receipts.
+        if (
+          tools.find((tool) => tool.name === decision.toolCall!.name)
+            ?.risk_tier !== 'read'
+        ) {
+          return this.complete(
+            user,
+            dto,
+            brain,
+            sanitized.redacted,
+            toolsUsed,
+            decisions,
+            {
+              reply: mutationReceiptReply(execution),
+              source: 'safe_fallback',
+              action: {
+                status: mutationReceiptStatus(execution),
+                execution_id: executionId,
+                canonical_actions: execution.canonical_actions ?? [],
+              },
+              grounding: this.groundingReport(
+                requirement,
+                mutationReceiptStatus(execution) === 'completed'
+                  ? 'verified'
+                  : 'blocked',
                 toolResults,
               ),
             },
@@ -1811,7 +1849,36 @@ export class AiCoreService {
       // This fingerprints historical text/outcome, not a replay cache. Return
       // the current complete response unchanged; never splice an old reply into
       // fresh action or widget fields. Reconciliation may append a new answer.
+      const lastPlan = semanticPlans.at(-1);
+      let semanticContext =
+        response.action || !lastPlan
+          ? null
+          : {
+              version: 'maya.chat-semantic-context/1',
+              savedAt: new Date().toISOString(),
+              timezone: await this.resolveBusinessTimezone(
+                this.requireTenant(user),
+              ),
+              plan: {
+                parent_request: '',
+                language: lastPlan.language,
+                dialogue_act: lastPlan.dialogue_act,
+                tasks: lastPlan.tasks.map((task) => ({
+                  id: task.id,
+                  intent: task.intent,
+                  entities: task.entities,
+                  depends_on: task.depends_on,
+                  confidence: task.confidence,
+                  requires_clarification: task.requires_clarification,
+                  clarification_question: null,
+                })),
+                context: lastPlan.context,
+              },
+            };
+      if (Buffer.byteLength(JSON.stringify(semanticContext), 'utf8') > 16_384)
+        semanticContext = null;
       const transcriptProjection = {
+        semanticPlan: semanticContext?.plan ?? null,
         reply: response.reply,
         source: response.source,
         actionStatus: response.action?.status ?? null,
@@ -1822,6 +1889,7 @@ export class AiCoreService {
         actor: user,
         userTurn,
         reply: response.reply,
+        semanticContext,
         completionHash: createHash('sha256')
           .update(this.canonicalJson(transcriptProjection))
           .digest('hex'),
@@ -1843,7 +1911,10 @@ export class AiCoreService {
         models: [...new Set(decisions.map((decision) => decision.model))],
         model_calls: decisions.length,
         tools_used: toolsUsed.map((tool) => tool.name),
-        outcome: response.action ? 'approval_required' : 'reply',
+        outcome:
+          typeof response.action?.status === 'string'
+            ? response.action.status
+            : 'reply',
         brain_persona: brain.persona,
         brain_intent: brain.intent,
         conversation_intelligence_version: conversationAudit
@@ -1880,6 +1951,65 @@ export class AiCoreService {
       : {};
   }
 
+  private async previousSemanticPlan(
+    user: AuthenticatedUser,
+    dto: AiCoreChatDto,
+    tools: AiCoreToolDescriptor[],
+    effectiveRole: UserRole,
+  ): Promise<ConversationSemanticPlan | null> {
+    if (dto.surface !== 'web' || !dto.conversationId || !this.moduleRef)
+      return null;
+    const timeline = this.moduleRef.get<AiTypedWidgetTriggerPort>(
+      AI_TYPED_WIDGET_TRIGGER,
+      { strict: false },
+    );
+    const currentTurn = this.persistedUserTurns.get(dto);
+    if (!currentTurn) return null;
+    const context = await timeline.readConversationContext?.(
+      user,
+      dto.conversationId,
+      currentTurn.turnId,
+    );
+    if (!context) return null;
+    const saved = this.record(context);
+    if (
+      saved.version !== 'maya.chat-semantic-context/1' ||
+      typeof saved.savedAt !== 'string'
+    )
+      return null;
+    const timezone = await this.resolveBusinessTimezone(
+      this.requireTenant(user),
+    );
+    const formatter = new Intl.DateTimeFormat('en-CA', { timeZone: timezone });
+    const savedDate = new Date(saved.savedAt);
+    if (!Number.isFinite(savedDate.getTime())) return null;
+    const plan = this.conversationLayer().validatePlan(
+      saved.plan,
+      effectiveRole,
+      tools.map((t) => t.name),
+    );
+    if (!plan) return null;
+    if (
+      saved.timezone !== timezone ||
+      formatter.format(savedDate) !== formatter.format(new Date())
+    ) {
+      for (const task of plan.tasks) {
+        // A relative day cannot silently move when a conversation resumes later.
+        for (const key of ['date', 'date_or_period']) {
+          const value = task.entities[key];
+          if (
+            typeof value === 'string' &&
+            ['today', 'tomorrow', 'сегодня', 'завтра'].includes(value)
+          )
+            delete task.entities[key];
+        }
+      }
+    }
+    // Revalidate current permissions and available capabilities. History carries
+    // semantic preferences only; no confirmation, execution or authority survives.
+    return plan;
+  }
+
   private conversationLayer(): ConversationIntelligenceService {
     return (
       this.conversationIntelligence ?? new ConversationIntelligenceService()
@@ -1908,8 +2038,10 @@ export class AiCoreService {
     plan: ConversationSemanticPlan | null,
   ): string | null {
     return (
+      mutationClarification(plan) ??
       plan?.tasks.find((task) => task.requires_clarification)
-        ?.clarification_question ?? null
+        ?.clarification_question ??
+      null
     );
   }
 

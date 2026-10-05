@@ -1,0 +1,44 @@
+[
+  {
+    "runStamp": "1791227249921",
+    "request": 20,
+    "status": 200,
+    "content": "{\n  \"semantic_plan\": {\n    \"parent_request\": \"Скажи коротко: есть свободное время у мастера [name removed] сегодня для услуги «комплекс стрижка и борода». Ответь только после проверки данных.\",\n    \"language\": \"ru\",\n    \"dialogue_act\": \"question\",\n    \"tasks\": [\n      {\n        \"id\": \"task_1\",\n        \"intent\": \"booking.find_availability\",\n        \"entities_json\": \"{\\\"date_or_period\\\":\\\"today\\\",\\\"employee\\\":\\\"[name removed]\\\",\\\"services\\\":[\\\"комплекс стрижка и борода\\\"]}\",\n        \"depends_on\": [],\n        \"confidence\": 0.97,\n        \"requires_clarification\": false,\n        \"clarification_question\": null\n      }\n    ],\n    \"context\": {\n      \"carried_slots\": [],\n      \"replaced_slots\": [],\n      \"unresolved_references\": []\n    }\n  },\n  \"tool_call\": {\n    \"name\": \"booking.availability.read\",\n    \"arguments_json\": \"{\\\"date\\\":\\\"2026-10-05T00:00:00+03:00\\\",\\\"staff_id\\\":\\\"[name removed]\\\",\\\"service_ids\\\":[\\\"комплекс стрижка и борода\\\"]}\"\n  }\n}",
+    "finishReason": "stop"
+  },
+  {
+    "runStamp": "1791227249921",
+    "request": 21,
+    "status": 200,
+    "content": "{\n  \"semantic_plan\": {\n    \"parent_request\": \"А завтра?\",\n    \"language\": \"ru\",\n    \"dialogue_act\": \"clarification\",\n    \"tasks\": [\n      {\n        \"id\": \"task_1\",\n        \"intent\": \"booking.find_availability\",\n        \"entities_json\": \"{\\\"date_or_period\\\":\\\"tomorrow\\\",\\\"employee\\\":\\\"[name removed]\\\",\\\"services\\\":[\\\"комплекс стрижка и борода\\\"]}\",\n        \"depends_on\": [],\n        \"confidence\": 0.95,\n        \"requires_clarification\": false,\n        \"clarification_question\": null\n      }\n    ],\n    \"context\": {\n      \"carried_slots\": [\n        \"employee\",\n        \"services\"\n      ],\n      \"replaced_slots\": [\n        \"date_or_period\"\n      ],\n      \"unresolved_references\": []\n    }\n  },\n  \"tool_call\": {\n    \"name\": \"booking.availability.read\",\n    \"arguments_json\": \"{\\\"date\\\":\\\"2026-10-06T00:00:00+03:00\\\",\\\"staff_id\\\":\\\"[name removed]\\\",\\\"service_ids\\\":[\\\"комплекс стрижка и борода\\\"]}\"\n  }\n}",
+    "finishReason": "stop"
+  },
+  {
+    "runStamp": "1791227249921",
+    "request": 22,
+    "status": 200,
+    "content": "{\n  \"semantic_plan\": {\n    \"parent_request\": \"А если мастер [name removed]?\",\n    \"language\": \"ru\",\n    \"dialogue_act\": \"clarification\",\n    \"tasks\": [\n      {\n        \"id\": \"task_1\",\n        \"intent\": \"booking.find_availability\",\n        \"entities_json\": \"{\\\"date_or_period\\\":\\\"tomorrow\\\",\\\"employee\\\":\\\"[name removed]\\\",\\\"services\\\":[\\\"комплекс стрижка и борода\\\"]}\",\n        \"depends_on\": [],\n        \"confidence\": 0.72,\n        \"requires_clarification\": true,\n        \"clarification_question\": \"Уточните, пожалуйста, какого мастера вы имеете в виду?\"\n      }\n    ],\n    \"context\": {\n      \"carried_slots\": [\n        \"date_or_period\",\n        \"services\"\n      ],\n      \"replaced_slots\": [\n        \"employee\"\n      ],\n      \"unresolved_references\": [\n        \"employee\"\n      ]\n    }\n  },\n  \"tool_call\": null\n}",
+    "finishReason": "stop"
+  },
+  {
+    "runStamp": "1791227339112",
+    "request": 23,
+    "status": 200,
+    "content": "{\n  \"semantic_plan\": {\n    \"parent_request\": \"По актуальным данным, есть окна к [name removed] завтра на моделирование бороды. Покажи главный вывод первым.\",\n    \"language\": \"ru\",\n    \"dialogue_act\": \"request\",\n    \"tasks\": [\n      {\n        \"id\": \"task_1\",\n        \"intent\": \"booking.find_availability\",\n        \"entities_json\": \"{\\\"date_or_period\\\":\\\"tomorrow\\\",\\\"employee\\\":\\\"[name removed]\\\",\\\"services\\\":[\\\"моделирование бороды\\\"]}\",\n        \"depends_on\": [],\n        \"confidence\": 0.95,\n        \"requires_clarification\": false,\n        \"clarification_question\": null\n      }\n    ],\n    \"context\": {\n      \"carried_slots\": [],\n      \"replaced_slots\": [],\n      \"unresolved_references\": []\n    }\n  },\n  \"tool_call\": {\n    \"name\": \"booking.availability.read\",\n    \"arguments_json\": \"{\\\"date\\\":\\\"2026-10-06T00:00:00+03:00\\\",\\\"staff_id\\\":\\\"[name removed]\\\",\\\"service_ids\\\":[\\\"моделирование бороды\\\"]}\"\n  }\n}",
+    "finishReason": "stop"
+  },
+  {
+    "runStamp": "1791227339112",
+    "request": 24,
+    "status": 200,
+    "content": "{\n  \"semantic_plan\": {\n    \"parent_request\": \"Запиши меня на 17:00\",\n    \"language\": \"ru\",\n    \"dialogue_act\": \"request\",\n    \"tasks\": [\n      {\n        \"id\": \"task_1\",\n        \"intent\": \"booking.create_own\",\n        \"entities_json\": \"{\\\"time\\\":\\\"17:00\\\"}\",\n        \"depends_on\": [],\n        \"confidence\": 0.9,\n        \"requires_clarification\": true,\n        \"clarification_question\": \"На какую дату вас записать?\"\n      }\n    ],\n    \"context\": {\n      \"carried_slots\": [],\n      \"replaced_slots\": [],\n      \"unresolved_references\": []\n    }\n  },\n  \"tool_call\": null\n}",
+    "finishReason": "stop"
+  },
+  {
+    "runStamp": "1791227339112",
+    "request": 25,
+    "status": 200,
+    "content": "{\n  \"semantic_plan\": {\n    \"parent_request\": \"Подтверждаю эту запись\",\n    \"language\": \"ru\",\n    \"dialogue_act\": \"confirmation\",\n    \"tasks\": [\n      {\n        \"id\": \"task_1\",\n        \"intent\": \"booking.create_own\",\n        \"entities_json\": \"{\\\"services\\\":[\\\"моделирование бороды\\\"],\\\"date\\\":\\\"2026-10-06\\\",\\\"time\\\":\\\"17:00\\\",\\\"employee\\\":\\\"[name removed]\\\"}\",\n        \"depends_on\": [],\n        \"confidence\": 0.72,\n        \"requires_clarification\": true,\n        \"clarification_question\": \"Подтверждаю запись на завтра, 6 октября, в 17:00 на моделирование бороды. Всё верно?\"\n      }\n    ],\n    \"context\": {\n      \"carried_slots\": [\n        \"services\",\n        \"date\",\n        \"time\",\n        \"employee\"\n      ],\n      \"replaced_slots\": [],\n      \"unresolved_references\": []\n    }\n  },\n  \"tool_call\": null\n}",
+    "finishReason": "stop"
+  }
+]

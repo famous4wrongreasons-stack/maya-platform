@@ -102,10 +102,16 @@ export class TimelineStore {
       userTurn: { turnId: string; conversationId: string };
       reply: string;
       completionHash: string;
+      semanticContext?: unknown;
     },
     now: Date,
     encryption: EncryptionService,
   ): Promise<void> {
+    if (
+      Buffer.byteLength(JSON.stringify(input.semanticContext ?? null), 'utf8') >
+      16_384
+    )
+      throw new ConflictException('conversation_context_too_large');
     const tenantId = input.tenantId;
     await TimelineStore.lockConversation(
       tx,
@@ -174,10 +180,56 @@ export class TimelineStore {
           bounded,
           input.completionHash,
           parent.id,
+          input.semanticContext,
         ),
       },
     });
     return;
+  }
+
+  static async readChatContext(
+    tx: TimelineClient,
+    tenantId: string,
+    principalProofHash: string,
+    conversationId: string,
+    now: Date,
+    encryption: EncryptionService,
+    beforeTurnId: string,
+  ): Promise<unknown> {
+    await TimelineStore.lockConversation(tx, tenantId, conversationId);
+    const current = await TimelineStore.readUserTurn(
+      tx,
+      tenantId,
+      beforeTurnId,
+    );
+    if (
+      !current ||
+      current.role !== 'user' ||
+      current.channel !== 'pwa' ||
+      current.conversationId !== conversationId ||
+      current.principalProofHash !== principalProofHash ||
+      current.erasedAt !== null ||
+      current.retentionUntil <= now
+    )
+      return null;
+    const row = await tx.widgetTimelineTurn.findFirst({
+      where: scoped(tenantId, {
+        conversationId,
+        turnIndex: { lt: current.turnIndex },
+        principalProofHash,
+        role: 'assistant',
+        channel: 'pwa',
+        erasedAt: null,
+        retentionUntil: { gt: now },
+        textContent: { not: null },
+      }),
+      orderBy: { turnIndex: 'desc' },
+      select: { textContent: true },
+    });
+    if (!row?.textContent || !isChatReply(row.textContent)) return null;
+    return (
+      decodeChatCompletion(encryption, row.textContent).semanticContext ?? null
+    );
   }
 
   static async readCurrentConversation(

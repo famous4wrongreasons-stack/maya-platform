@@ -6,8 +6,18 @@ import type {
 // Entity vocabulary only. Tool arguments, identity and execution admission stay with their owners.
 const ALIASES: Readonly<Record<string, readonly string[]>> = {
   date_or_period: ['date', 'period'],
+  date: ['date_or_period'],
   services: ['service'],
 };
+export function isSingleDaySemanticValue(
+  value: ConversationEntityValue,
+): value is string {
+  return (
+    typeof value === 'string' &&
+    (['today', 'tomorrow', 'сегодня', 'завтра'].includes(value) ||
+      /^\d{4}-\d{2}-\d{2}$/.test(value))
+  );
+}
 export function semanticSlotAliases(
   slots: readonly string[],
 ): Record<string, readonly string[]> {
@@ -39,6 +49,15 @@ export function normalizeSemanticSlots(
         value.trim()
       )
         return value.trim();
+      if (canonical === 'date' && typeof value === 'string' && value.trim()) {
+        // A range cannot become a create date merely by changing its key.
+        if (
+          present.includes('date_or_period') &&
+          !isSingleDaySemanticValue(value.trim())
+        )
+          throw new Error('conversation_entity_alias_invalid');
+        return value.trim();
+      }
       if (canonical === 'services') {
         const values = typeof value === 'string' ? [value] : value;
         if (

@@ -1,3 +1,4 @@
+import { mutationClarification } from './mutation-response';
 import {
   Injectable,
   Logger,
@@ -1222,6 +1223,7 @@ export class AiCoreModelService {
       { ...candidate, tasks },
       role,
       input.tools.map((tool) => tool.name),
+      input.conversationPlan,
     );
   }
 
@@ -1244,8 +1246,10 @@ export class AiCoreModelService {
     plan: ConversationSemanticPlan | null,
   ): string | null {
     return (
+      mutationClarification(plan) ??
       plan?.tasks.find((task) => task.requires_clarification)
-        ?.clarification_question ?? null
+        ?.clarification_question ??
+      null
     );
   }
 

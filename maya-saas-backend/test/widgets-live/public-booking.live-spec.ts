@@ -143,7 +143,11 @@ describe('Guest website booking [HTTP] [PostgreSQL] [synthetic CRM]', () => {
     await http?.close();
     await db?.close();
   });
-  const post = (path: string, body: unknown, nonce?: string) => {
+  const post = (
+    path: string,
+    body: object | string | undefined,
+    nonce?: string,
+  ) => {
     const r = request(http.app.getHttpServer())
       .post(`/api/public-booking/${path}`)
       .set('Origin', origin)

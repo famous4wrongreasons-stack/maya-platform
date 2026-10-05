@@ -395,3 +395,27 @@ task-3/pilot-evidence/semantic-final-summary.json. No deploy, real CRM mutation,
 notification, merge or phone operation. Next path is grounded entity resolution,
 cross-intent slot carry and receipt-bound confirmation language; no phrase routing
 or weaker identity/UNKNOWN safety. This remains separate from guest website release.
+
+
+## Chat follow-up checkpoint — receipt wording and context (2026-10-05)
+
+Separate candidate based on755c3726f2edb7b59425bc5f30853612f5ec20aa. Mutation final text
+now comes from authoritative AE receipt projection; clarification wording cannot claim
+completion. Booking preferences persist through the existing encrypted transcript owner
+with current principal/tenant scope, ordered-turn bounds, original erasure/retention and
+fresh permission validation. No new storage owner or schema. Date/service carry and current
+correction precedence are covered; no confirmation is inherited from conversation context.
+
+196 unit/architecture and7 HTTP/PostgreSQL tests PASS, including AppModule restart,
+foreign/expired/future-context refusals and explicit canonical carrier selection through
+one successful synthetic booking receipt. Compiler/lint checks PASS. Immutable captures
+remain diagnostic evidence, not model training or real-provider acceptance.
+
+One bounded live recheck used2 calls: date/service/time retained; unresolved business labels
+as IDs caused safe HTTP503 on turn2. No additional retry. Total26 real calls, estimated
+$0.24586914; ledger27/30, reserved$2.96327064/$20; permit closed. Production unchanged.
+Overall semantic acceptance NOT_PASSED. Staff redaction is production behavior; fixture
+catalog mismatch is an additional limitation. Next owner is existing public booking catalog
+reference grounding, not weaker PII or Client/provider-card authority. See backend pilot
+README and task-3/pilot-evidence/followup-repair for full grading and shutdown evidence.
+Stable guest website/backend candidates and production remain unmodified/unpromoted.

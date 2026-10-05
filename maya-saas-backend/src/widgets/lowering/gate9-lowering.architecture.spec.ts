@@ -365,6 +365,8 @@ const STORE_METHOD_ALLOWLIST = new Set([
   // Durable text-only continuation stays in the same physical table owner.
   'persistChatReply',
   'readCurrentConversation',
+  // Internal bounded context reads share the encrypted transcript owner and erasure.
+  'readChatContext',
   'readActiveUserTurnIdentity',
   'appendUserTurn',
   'readUserTurn',

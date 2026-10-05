@@ -1,0 +1,16 @@
+[
+  {
+    "runStamp": "1791229064126",
+    "request": 26,
+    "status": 200,
+    "content": "{\n  \"semantic_plan\": {\n    \"parent_request\": \"По актуальным данным, есть окна к [name removed] завтра на моделирование бороды. Покажи главный вывод первым.\",\n    \"language\": \"ru\",\n    \"dialogue_act\": \"request\",\n    \"tasks\": [\n      {\n        \"id\": \"task_1\",\n        \"intent\": \"booking.find_availability\",\n        \"entities_json\": \"{\\\"date_or_period\\\":\\\"tomorrow\\\",\\\"employee\\\":\\\"[name removed]\\\",\\\"services\\\":[\\\"моделирование бороды\\\"]}\",\n        \"depends_on\": [],\n        \"confidence\": 0.95,\n        \"requires_clarification\": false,\n        \"clarification_question\": null\n      }\n    ],\n    \"context\": {\n      \"carried_slots\": [],\n      \"replaced_slots\": [],\n      \"unresolved_references\": []\n    }\n  },\n  \"tool_call\": {\n    \"name\": \"booking.availability.read\",\n    \"arguments_json\": \"{\\\"date\\\":\\\"2026-10-06T00:00:00+03:00\\\",\\\"staff_id\\\":\\\"[name removed]\\\",\\\"service_ids\\\":[\\\"моделирование бороды\\\"]}\"\n  }\n}",
+    "finishReason": "stop"
+  },
+  {
+    "runStamp": "1791229064126",
+    "request": 27,
+    "status": 200,
+    "content": "{\n  \"semantic_plan\": {\n    \"parent_request\": \"Запиши меня на 17:00\",\n    \"language\": \"ru\",\n    \"dialogue_act\": \"request\",\n    \"tasks\": [\n      {\n        \"id\": \"task_1\",\n        \"domain\": \"booking\",\n        \"intent\": \"booking.create_own\",\n        \"sub_intent\": \"booking.create_own\",\n        \"action\": \"execute\",\n        \"data_class\": \"E\",\n        \"risk\": \"medium\",\n        \"capability\": {\n          \"readiness\": \"ready\",\n          \"note\": null\n        },\n        \"response_rule\": \"Answer the requested intent directly, then offer at most one useful next step.\",\n        \"entities\": {\n          \"date_or_period\": \"tomorrow\",\n          \"time\": \"17:00\",\n          \"employee\": \"[name removed]\",\n          \"services\": [\"моделирование бороды\"]\n        },\n        \"depends_on\": [],\n        \"permission\": {\n          \"required\": \"booking.write\",\n          \"status\": \"allowed\"\n        },\n        \"tool\": {\n          \"name\": \"appointments.own.create\",\n          \"alternatives\": [\"appointments.own.create\"],\n          \"status\": \"ready\"\n        },\n        \"confidence\": 0.95,\n        \"requires_clarification\": false,\n        \"clarification_question\": null,\n        \"requires_confirmation\": true\n      }\n    ],\n    \"context\": {\n      \"carried_slots\": [\"date_or_period\", \"employee\", \"services\"],\n      \"replaced_slots\": [],\n      \"unresolved_references\": []\n    }\n  },\n  \"tool_call\": {\n    \"name\": \"appointments.own.create\",\n    \"arguments_json\": \"{\\\"staff_id\\\":\\\"[name removed]\\\",\\\"service_ids\\\":[\\\"моделирование бороды\\\"],\\\"start\\\":\\\"2026-10-06T17:00:00+03:00\\\"}\"\n  }\n}",
+    "finishReason": "stop"
+  }
+]

@@ -167,3 +167,70 @@ or trusting arbitrary IDs; grounded slot transfer between availability/create in
 evidence-bound confirmation language. Their fixes need regression coverage before any
 further bounded live test. Original corpus, production service, CRM and notifications
 remain unchanged.
+
+
+## Receipt wording and durable booking context (2026-10-05 follow-up)
+
+Built on `755c3726f2edb7b59425bc5f30853612f5ec20aa`, still the separate chat branch.
+The exact request25 text was a question/proposal with an ambiguous opening, not proof
+that a booking had executed: “Подтверждаю запись ... Всё верно?” had tool_call=null.
+The independent rubric preserves that distinction rather than labelling an actual
+CRM success or an unambiguous completed-booking assertion.
+
+Mutation clarifications and denied/unavailable mutation replies now use server-owned
+wording. A mutation tool result does not enter the LLM final-reply stage: completed
+wording requires the existing runtime's canonical successful AE receipt projection.
+Missing/mixed UNKNOWN receipts stay unconfirmed; status cannot come from model text.
+Approval remains the existing runtime/gateway's job; no new mutation owner was added.
+
+Semantic preferences live inside the existing encrypted, erasable chat-reply column,
+bounded to16KiB and the parent's existing retention ceiling. No new table, migration,
+endpoint or inbound-retention policy. Reads require current tenant/principal/conversation,
+exclude expired/erased data and exclude replies at or after the current user turn.
+Restoration revalidates current role and available tools and never restores approval or
+execution authority. Relative-day context is dropped after the business day/timezone
+changes. Current explicit entities win; finite day aliases bridge availability/create,
+ranges cannot become a single date. A red/green correction regression caught and fixed
+an older carried day overriding a current date_or_period correction. The context audit
+records actual carried/replaced slots. Action outcomes clear the reusable context.
+
+Evidence at task-3/pilot-evidence/followup-repair/ and followup-final-evidence.tar.gz:
+-196 unit/architecture tests PASS; seven HTTP/PostgreSQL tests across captured traces,
+ history/restart and existing carrier booking suite PASS. Targeted lint, production
+ typecheck, script compilation and widgets-live typecheck PASS. The existing guest
+ test helper received only a Supertest-compatible body type; no guest runtime change.
+-Exact captured clarification cannot certify success. Cross-request AppModule restart
+ keeps the date/service; foreign principal, expiry and future/concurrent replies cannot
+ supply context. No semantic payload is exposed by the public history response.
+-After explicit user re-selection from the real synthetic catalog, the production carrier
+ reaches one SUCCEEDED AE execution/one dispatch and receipt-backed “Запись подтверждена.”
+ This does NOT fulfil the original unavailable17:00 request or qualify a real provider.
+-Exact bounded-live invalid IDs are replayed through HTTP and refused before any booking AE.
+
+Exactly one original case2 was retried under the same ledger and TTL after the offline
+checks and a zero-paid18-turn server preflight. It used two real DeepSeek responses.
+Date, service and17:00 were retained, but redacted staff label/service name were used
+as IDs; HTTP503 ai_model_tool_arguments_invalid stopped the second turn. No third turn
+or subsequent paid retry. No overall semantic/booking acceptance, no99% claim.
+The live runtime archive is cf4ccc3d7eda416ac76855f1d9b540ba3df117bef5d3f9db17bd3007c0bb69fb.
+The final local code additionally includes the ordered-context fence and current-date
+alias precedence regression; those additions are offline-qualified, not live-model-qualified.
+
+Cumulative26 real calls,411,078 input/6,329 output tokens;59,520 cache hit/351,558 cache
+miss. Estimated cost$0.24586914, not an account-debit query. Original ledger27/30 attempts,
+reserve$2.96327064 of$20; three attempts unused. Permit closed, writer lock absent,
+runner PID0, production PID21721/release20260929-recon-fix-eb43bc22 unchanged. Original
+broker lifetime expires20:02:08UTC and DB20:02:19UTC. No restart or extension. The required
+post-deadline read-only snapshot is task-3/pilot-evidence/proof-shutdown-after-deadline.json;
+its existence and shutdownVerified=true must be checked before claiming shutdown.
+
+Staff resolution is diagnosed, not patched blindly. The production input sanitizer
+collapses names to one marker; the pilot has no additional deidentification hook.
+Separately, its fixture seeds Release proof provider/service, not the frozen named
+staff/services. The existing catalog.staff.read already owns public staff data and
+catalog.services.read owns service IDs. Next: qualified tenant-scoped grounding of those
+business references, with distinct/missing/foreign-tenant catalog cases and preserved
+client PII/Client-link authority. Do not pass labels as IDs, relax identity checks, or
+change the frozen pilot merely to obtain a green score. Stable guest pair remains
+backend dcba8c8f4d230de31fb93f3d613f7524c3310df9 plus frontend
+d5b310e9a3dc13051eb7f5ccd1e23bf28e8884d6, blocked from production release.

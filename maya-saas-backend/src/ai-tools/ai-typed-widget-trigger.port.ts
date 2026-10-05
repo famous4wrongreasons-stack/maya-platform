@@ -28,6 +28,12 @@ export interface AiTypedWidgetTriggerPort {
       completed: boolean;
     }>;
   }>;
+  /** Internal, erasable semantic context only; never restored action authority. */
+  readConversationContext?(
+    actor: Readonly<AuthenticatedUser>,
+    conversationId: string,
+    beforeTurnId: string,
+  ): Promise<unknown>;
   persistAssistantReply(input: {
     readonly actor: Readonly<AuthenticatedUser>;
     readonly userTurn: {
@@ -36,6 +42,7 @@ export interface AiTypedWidgetTriggerPort {
     };
     readonly reply: string;
     readonly completionHash: string;
+    readonly semanticContext?: unknown;
   }): Promise<void>;
   persistTypedTurn(input: {
     readonly actor: Readonly<AuthenticatedUser>;

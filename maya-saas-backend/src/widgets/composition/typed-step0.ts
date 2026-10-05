@@ -80,6 +80,37 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
     });
   }
 
+  async readConversationContext(
+    actor: Parameters<AiTypedWidgetTriggerPort['readCurrentConversation']>[0],
+    conversationId: string,
+    beforeTurnId: string,
+  ): Promise<unknown> {
+    const tenantId = actor.tenantId;
+    if (tenantId === null)
+      throw new ForbiddenException('conversation_principal_unavailable');
+    return this.prisma.$transaction(async (tx) => {
+      const principal = await this.principals.resolve(tx);
+      if (
+        !principal ||
+        principal.authority.tenantId !== tenantId ||
+        principal.authority.userId !== actor.userId
+      )
+        throw new ForbiddenException('conversation_principal_unavailable');
+      const [{ now }] = await tx.$queryRaw<
+        { now: Date }[]
+      >`SELECT clock_timestamp() AS now`;
+      return TimelineStore.readChatContext(
+        tx,
+        tenantId,
+        principal.proofHash,
+        conversationId,
+        now,
+        this.encryption,
+        beforeTurnId,
+      );
+    });
+  }
+
   async readCurrentConversation(
     actor: Parameters<AiTypedWidgetTriggerPort['readCurrentConversation']>[0],
   ): ReturnType<AiTypedWidgetTriggerPort['readCurrentConversation']> {

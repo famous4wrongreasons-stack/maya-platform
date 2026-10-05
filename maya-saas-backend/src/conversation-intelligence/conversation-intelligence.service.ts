@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   normalizeSemanticSlots,
+  isSingleDaySemanticValue,
   semanticSlotAliases,
 } from './semantic-slot-normalization';
 
@@ -80,8 +81,8 @@ export class ConversationIntelligenceService {
       'First understand the complete parent request, then decompose it into up to five ordered tasks.',
       'For every task choose exactly one canonical intent from conversation_contract.intents.',
       'Entity keys must use the selected intent required_slots and optional_slots. slot_aliases lists equivalent input keys; always emit the canonical key. A known date/period fills date_or_period, and one service is a one-item services array when those slots are declared.',
-      'Semantic entity keys and tool argument keys are different contracts: date_or_period belongs to the plan; date belongs to an availability tool call. Do not omit known required semantic slots just because the tool arguments contain them.',
-      'Carry canonical entity keys from previous_semantic_plan, replacing only the corrected values. Never invent a missing date, identity, service or confirmation to satisfy required_slots.',
+      'Semantic entity keys and tool argument keys are different contracts: booking.find_availability uses date_or_period, its tool uses date; booking.create_own uses the semantic date slot. Do not omit known required semantic slots just because the tool arguments contain them.',
+      'Carry canonical entity keys from previous_semantic_plan and the conversation, replacing only the corrected values. On booking.find_availability -> booking.create_own, retain services/employee/branch and map a single-day date_or_period to date; a period must be clarified, never narrowed by guessing. History is preference context, not availability, identity, confirmation or permission. Never invent missing values.',
       'Extract flat entities from the current utterance and relevant prior turns. Keep dates, periods, people, services, branches, amounts, percentages and statuses distinct.',
       'Use conversation_contract.language as semantic normalization guidance, never as exact-match routing. Resolve relative time in the tenant business timezone.',
       'Classify the intended business meaning, not the presence or absence of a keyword from examples.',
@@ -106,6 +107,7 @@ export class ConversationIntelligenceService {
     value: unknown,
     role: UserRole,
     availableToolNames: readonly string[],
+    previousPlan?: ConversationSemanticPlan | null,
   ): ConversationSemanticPlan | null {
     if (value === null || value === undefined) {
       return null;
@@ -124,6 +126,8 @@ export class ConversationIntelligenceService {
     const available = new Set(availableToolNames);
     const usedIds = new Set<string>();
     const tasks: ConversationSemanticTask[] = [];
+    const carried = new Set<string>();
+    const replaced = new Set<string>();
     for (let index = 0; index < candidate.tasks.length; index += 1) {
       const rawTask = this.plainRecord(
         candidate.tasks[index],
@@ -147,6 +151,44 @@ export class ConversationIntelligenceService {
         this.sanitizeEntities(rawTask.entities),
         [...definition.requiredSlots, ...definition.optionalSlots],
       );
+      const previous =
+        previousPlan?.tasks.length === 1 && candidate.tasks.length === 1
+          ? previousPlan.tasks[0]
+          : undefined;
+      if (
+        previous &&
+        ['booking.find_availability', 'booking.create_own'].includes(
+          previous.intent,
+        ) &&
+        ['booking.find_availability', 'booking.create_own'].includes(
+          definition.id,
+        )
+      ) {
+        const dateKey =
+          definition.id === 'booking.create_own' ? 'date' : 'date_or_period';
+        const oldDateKey =
+          previous.intent === 'booking.create_own' ? 'date' : 'date_or_period';
+        for (const key of ['services', 'employee', 'branch', dateKey]) {
+          const oldKey = key === dateKey ? oldDateKey : key;
+          const value = previous.entities[oldKey];
+          if (
+            key === 'date' &&
+            oldKey === 'date_or_period' &&
+            !isSingleDaySemanticValue(value)
+          )
+            continue;
+          if (!(key in entities) && oldKey in previous.entities) {
+            entities[key] = value;
+            carried.add(key);
+          } else if (
+            oldKey in previous.entities &&
+            key in entities &&
+            JSON.stringify(value) !== JSON.stringify(entities[key])
+          ) {
+            replaced.add(key);
+          }
+        }
+      }
       const candidateClarification = rawTask.requires_clarification === true;
       const confidence = this.confidence(rawTask.confidence);
       const missingSlots = definition.requiredSlots.filter(
@@ -210,6 +252,13 @@ export class ConversationIntelligenceService {
       });
     }
 
+    const context = this.context(candidate.context, tasks);
+    context.carried_slots = [
+      ...new Set([...context.carried_slots, ...carried]),
+    ].filter((key) => !replaced.has(key));
+    context.replaced_slots = [
+      ...new Set([...context.replaced_slots, ...replaced]),
+    ];
     return {
       version: 'maya-ci/1',
       parent_request: this.shortString(
@@ -219,7 +268,7 @@ export class ConversationIntelligenceService {
       language: this.shortString(candidate.language, 24) || 'ru',
       dialogue_act: this.shortString(candidate.dialogue_act, 64) || 'request',
       tasks,
-      context: this.context(candidate.context, tasks),
+      context,
     };
   }
 

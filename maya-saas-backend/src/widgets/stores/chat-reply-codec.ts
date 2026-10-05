@@ -14,13 +14,21 @@ export const encodeChatReply = (
   text: string,
   completionHash: string,
   parentId: string,
+  semanticContext?: unknown,
 ): string =>
   PREFIX +
-  encryption.encrypt(JSON.stringify({ text, completionHash, parentId }));
+  encryption.encrypt(
+    JSON.stringify({ text, completionHash, parentId, semanticContext }),
+  );
 export const decodeChatCompletion = (
   encryption: EncryptionService | undefined,
   value: string,
-): { text: string; completionHash: string; parentId: string } => {
+): {
+  text: string;
+  completionHash: string;
+  parentId: string;
+  semanticContext?: unknown;
+} => {
   if (!encryption || !isChatReply(value))
     throw new Error('conversation_codec_unavailable');
   const decoded: unknown = JSON.parse(
@@ -42,6 +50,8 @@ export const decodeChatCompletion = (
     text: decoded.text,
     completionHash: decoded.completionHash,
     parentId: decoded.parentId,
+    semanticContext:
+      'semanticContext' in decoded ? decoded.semanticContext : null,
   };
 };
 export const decodeChatReply = (
