@@ -151,6 +151,7 @@ try {
       throw new Error(`shell activation refused: ${JSON.stringify(outcome)}`);
   };
 
+  if (input.envelope.kind === 'SERVICE_SELECTOR') {
   const service = first(
     object(input.envelope.body, 'service body').options,
     'service options',
@@ -164,6 +165,7 @@ try {
     'staff options',
   );
   await activate(`option:${opaque(staff.option_id, 'staff option')}`);
+  }
   const slotEnvelope = current('slot selector');
   if (slotEnvelope.kind !== 'TIME_SLOT_SELECTOR')
     throw new Error('slot successor kind mismatch');
@@ -171,7 +173,10 @@ try {
     object(slotEnvelope.body, 'slot body').groups,
     'slot groups',
   );
-  const slot = first(group.slots, 'slot options');
+  const slot = input.selectedStart
+    ? group.slots.find(candidate => Date.parse(candidate.start.value) === Date.parse(input.selectedStart))
+    : first(group.slots, 'slot options');
+  if (!slot) throw new Error('requested slot is absent');
   await activate(`slot:${opaque(slot.slot_ref, 'slot option')}`);
   const confirmation = current('booking confirmation');
   if (confirmation.kind !== 'BOOKING_CONFIRMATION')
@@ -188,6 +193,7 @@ try {
   process.stdout.write(
     JSON.stringify({
       confirmationWidgetId: confirmation.widget_id,
+      selectedStart: slot.start.value,
       assistantLines,
       counters: runtime.widgets.counters(),
     }),

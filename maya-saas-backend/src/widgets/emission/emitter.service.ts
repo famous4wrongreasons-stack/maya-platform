@@ -1,3 +1,4 @@
+import { BOOKING_NOUN_OWNERS } from '../booking/booking-noun-identity';
 import { presentPersonalSchedule } from '../booking/personal-schedule.presenter';
 import type { PersonalScheduleSource } from '../owner-ports/personal-schedule.port';
 import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
@@ -198,11 +199,40 @@ export class WidgetEmitterService {
       request.kind !== 'TIME_SLOT_SELECTOR'
     )
       throw new IntentTemplateRefusal('booking_selector_kind_required');
+    // Completed availability reads may start here without a prior selector. The
+    // handler supplies catalog-qualified selection facts, never model arguments.
+    const source = selector.source as Record<string, unknown> | null;
+    const selection =
+      source && typeof source === 'object' && !Array.isArray(source)
+        ? (source.booking_selection as Record<string, unknown> | null)
+        : null;
+    const inheritedHandles =
+      selector.inheritedHandles ??
+      (request.kind === 'TIME_SLOT_SELECTOR' &&
+      selection &&
+      selection.tenantId === request.tenantId &&
+      typeof selection.serviceId === 'string' &&
+      typeof selection.staffId === 'string'
+        ? this.seals.mintNounHandles([
+            {
+              tenantId: request.tenantId,
+              noun: 'service',
+              ownerKind: BOOKING_NOUN_OWNERS.service,
+              ownerRef: selection.serviceId,
+            },
+            {
+              tenantId: request.tenantId,
+              noun: 'staff',
+              ownerKind: BOOKING_NOUN_OWNERS.staff,
+              ownerRef: selection.staffId,
+            },
+          ])
+        : undefined);
     const presented = presentBookingSelector({
       tenantId: request.tenantId,
       kind: request.kind,
       source: selector.source,
-      inherited: selector.inheritedHandles,
+      inherited: inheritedHandles,
       mint: (identity: OwnerNounIdentity) =>
         this.seals.mintNounHandles([identity])[identity.noun],
     });
@@ -232,7 +262,7 @@ export class WidgetEmitterService {
         {
           intent_template_key: template,
           capability: { space: 'C9', key: intentCapability },
-          argument_handles: selector.inheritedHandles ?? {},
+          argument_handles: inheritedHandles ?? {},
           role: 'primary',
         },
         {

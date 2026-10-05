@@ -378,7 +378,7 @@ describe('Captured semantic aliases [HTTP] [PostgreSQL] [recorded model transpor
       ),
     ).toBe(true);
   });
-  it('rejects the exact bounded-live invalid references through HTTP before any mutation receipt', async () => {
+  it('clarifies the exact bounded-live references absent from this synthetic catalog before any mutation receipt', async () => {
     const tenant = await fx.tenant(
       'Synthetic bounded invalid references',
       CalendarSource.INTERNAL,
@@ -459,10 +459,11 @@ describe('Captured semantic aliases [HTTP] [PostgreSQL] [recorded model transpor
           { role: 'user', content: 'Запиши меня на 17:00' },
         ],
       });
-    expect(second.status).toBe(503);
+    expect(second.status).toBe(201);
     expect(JSON.stringify(second.body)).toContain(
-      'ai_model_tool_arguments_invalid',
+      'Уточните точное имя мастера',
     );
+    expect((second.body as { action: unknown }).action).toBeNull();
     expect(index).toBe(2);
     expect(
       await db.prisma.actionExecution.count({

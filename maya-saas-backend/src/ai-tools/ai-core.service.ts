@@ -1,3 +1,4 @@
+import { bindBookingCatalog } from './booking-catalog-binding';
 import { localCalendarDate } from '../owner-reports/owner-reports.time';
 import {
   mutationClarification,
@@ -688,6 +689,7 @@ export class AiCoreService {
     const maxToolSteps = this.maxToolSteps();
     let activeSemanticPlan: ConversationSemanticPlan | null =
       await this.previousSemanticPlan(user, dto, tools, toolUser.role);
+    const previousBookingPlan = activeSemanticPlan;
     // let, а не const: смысловой план приходит от модели ПОЗЖЕ и может снять
     // требование источника — см. ниже про болтовню.
     let requirement = this.groundingRequirement(
@@ -942,6 +944,201 @@ export class AiCoreService {
             requiredToolNames = [];
             requirementSatisfied = true;
           }
+        }
+        // Only after the semantic owner selected a Client booking capability do we
+        // read its catalogs. Catalog membership resolves nouns, not Client authority.
+        if (
+          toolUser.role === UserRole.CLIENT &&
+          activeSemanticPlan?.tasks.length === 1 &&
+          activeSemanticPlan.tasks[0].permission.status === 'allowed' &&
+          decision.toolCall &&
+          allowedNames.has(decision.toolCall.name) &&
+          activeSemanticPlan.tasks[0].tool.status === 'ready' &&
+          !activeSemanticPlan.tasks[0].requires_clarification &&
+          ['booking.availability.read', 'appointments.own.create'].includes(
+            decision.toolCall.name,
+          ) &&
+          allowedNames.has('catalog.staff.read') &&
+          allowedNames.has('catalog.services.read') &&
+          allowedNames.has('booking.availability.read') &&
+          (decision.toolCall.arguments.staff_id !== undefined ||
+            activeSemanticPlan.tasks[0].entities.employee !== undefined)
+        ) {
+          const task = activeSemanticPlan.tasks[0];
+          const readCatalog = async (name: string) => {
+            const execution = this.record(
+              await this.executeChatTool(
+                dto,
+                toolUser,
+                name,
+                {
+                  surface: dto.surface,
+                  arguments: {},
+                  idempotencyKey: this.toolIdempotencyKey(
+                    tenantId,
+                    user.userId,
+                    dto.requestId,
+                    step,
+                    name,
+                  ),
+                },
+                { suppressWidgetTrigger: true },
+              ),
+            );
+            toolsUsed.push({
+              name,
+              status:
+                typeof execution.status === 'string'
+                  ? execution.status
+                  : 'unknown',
+              execution_id:
+                typeof execution.execution_id === 'string'
+                  ? execution.execution_id
+                  : null,
+            });
+            if (execution.status === 'completed')
+              toolResults.push({
+                name,
+                result: this.sanitizeToolResult(execution.result),
+              });
+            return execution.status === 'completed' ? execution.result : null;
+          };
+          const staffSource = await readCatalog('catalog.staff.read');
+          const serviceSource = await readCatalog('catalog.services.read');
+          const bound = bindBookingCatalog({
+            staffSource,
+            serviceSource,
+            employee:
+              task.entities.employee ?? decision.toolCall.arguments.staff_id,
+            services:
+              task.entities.services ?? decision.toolCall.arguments.service_ids,
+            latestText: this.latestUserText(dto.messages),
+            latestRedactedText: this.latestUserText(sanitized.messages),
+            previousEmployee:
+              previousBookingPlan?.tasks.length === 1
+                ? previousBookingPlan.tasks[0].entities.employee
+                : undefined,
+          });
+          if (bound.kind === 'unresolved' || bound.services.length !== 1) {
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply:
+                  bound.kind === 'unresolved' &&
+                  bound.reason === 'source_unavailable'
+                    ? 'Не удалось проверить каталог салона. Запись пока не подготовлена.'
+                    : 'Уточните точное имя мастера и одну услугу из каталога салона. Запись пока не подготовлена.',
+                source: 'safe_fallback',
+                action: null,
+                grounding: this.groundingReport(
+                  requirement,
+                  'blocked',
+                  toolResults,
+                ),
+              },
+              toolResults,
+            );
+          }
+          // Persist public preferences only. Revalidate against this tenant's catalog
+          // on every turn; these values never become a principal or execution permit.
+          task.entities.employee = bound.staff.name;
+          task.entities.services = bound.services.map((s) => s.name);
+          const args = decision.toolCall.arguments;
+          const date = args.date ?? args.start;
+          if (typeof date === 'string') {
+            const execution = this.record(
+              await this.executeChatTool(
+                dto,
+                toolUser,
+                'booking.availability.read',
+                {
+                  surface: dto.surface,
+                  arguments: {
+                    date,
+                    staff_id: bound.staff.id,
+                    service_ids: bound.services.map((s) => s.id),
+                    ...(args.branch_id === undefined
+                      ? {}
+                      : { branch_id: args.branch_id }),
+                  },
+                  idempotencyKey: this.toolIdempotencyKey(
+                    tenantId,
+                    user.userId,
+                    dto.requestId,
+                    step,
+                    'booking.availability.read',
+                  ),
+                },
+                {
+                  widgetTrigger: 'T-2a',
+                  requestId: dto.requestId,
+                  userTurn: this.persistedUserTurns.get(dto),
+                },
+              ),
+            );
+            if (execution.status === 'completed')
+              toolResults.push({
+                name: 'booking.availability.read',
+                result: this.sanitizeToolResult(execution.result),
+              });
+            toolsUsed.push({
+              name: 'booking.availability.read',
+              status:
+                typeof execution.status === 'string'
+                  ? execution.status
+                  : 'unknown',
+              execution_id:
+                typeof execution.execution_id === 'string'
+                  ? execution.execution_id
+                  : null,
+              ...this.widgetResolution(execution),
+            });
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply: this.widgetResolution(execution).resolution
+                  ? 'Выберите подходящее время. Затем проверьте детали и подтвердите запись.'
+                  : 'Подходящее время пока не удалось подтвердить. Запись не создана.',
+                source: 'safe_fallback',
+                action: null,
+                grounding: this.groundingReport(
+                  requirement,
+                  execution.status === 'completed' ? 'verified' : 'blocked',
+                  toolResults,
+                ),
+              },
+              toolResults,
+            );
+          }
+          return this.complete(
+            user,
+            dto,
+            brain,
+            sanitized.redacted,
+            toolsUsed,
+            decisions,
+            {
+              reply: 'На какую дату проверить время у выбранного мастера?',
+              source: 'safe_fallback',
+              action: null,
+              grounding: this.groundingReport(
+                requirement,
+                'not_required',
+                toolResults,
+              ),
+            },
+            toolResults,
+          );
         }
         if (!decision.toolCall) {
           const clarification = this.semanticClarification(activeSemanticPlan);
@@ -4941,6 +5138,7 @@ export class AiCoreService {
     }
     if (value !== null && typeof value === 'object') {
       const blockedKeys = new Set([
+        'booking_selection',
         'client_email',
         'client_name',
         'client_phone',

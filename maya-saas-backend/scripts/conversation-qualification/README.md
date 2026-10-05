@@ -234,3 +234,26 @@ client PII/Client-link authority. Do not pass labels as IDs, relax identity chec
 change the frozen pilot merely to obtain a green score. Stable guest pair remains
 backend dcba8c8f4d230de31fb93f3d613f7524c3310df9 plus frontend
 d5b310e9a3dc13051eb7f5ccd1e23bf28e8884d6, blocked from production release.
+
+
+### Local catalog binding and connected carrier follow-up
+
+The chat-only candidate after `e875da85b789de89e8fef5c71ebe84bf6d2fa791` resolves
+unique exact public catalog references through existing tenant-scoped read owners.
+It preserves PII redaction and encrypted preference context, qualifies availability
+selection facts, and enters the existing time selector → booking preview → explicit
+carrier confirmation → Action Engine chain. Legacy AI approval is not carrier proof.
+
+`chat-catalog-booking.live-spec.ts` is **scripted model transport / synthetic INTERNAL
+provider**, despite reusing saved DeepSeek response shapes. Its happy path now omits
+date/service from follow-up model plans, proves restoration, switches the staff, and
+asserts the actual 17:00 appointment and one canonical receipt. Foreign staff/service
+IDs and duplicate names refuse before availability or mutation. Exact immutable raw
+captures remain separately replayed in `semantic-slot-captures.live-spec.ts`.
+
+Validation: 253 unit/architecture tests; 11 HTTP/PostgreSQL tests; production and
+widgets-live typechecks; targeted lint. No live-model or real-provider acceptance.
+Inflected/unmatched names still require clarification; no fuzzy or default selection.
+The paid environment remains closed with all earlier counters/TTL unchanged. A next
+real-model run requires fresh explicit authorization and a reviewed matching synthetic
+catalog, not a silent corpus replacement or an expired-proof restart.

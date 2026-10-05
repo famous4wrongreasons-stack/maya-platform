@@ -1541,7 +1541,24 @@ export class AiToolHandlerService {
         ? { branchId: args.branch_id }
         : {}),
     });
+    // A chat read can enter the existing selector chain only with catalog-verified
+    // nouns. The availability owner remains responsible for the actual slot facts.
+    const [services, staff, timezone] = await Promise.all([
+      this.crmService.getServices(tenantId),
+      this.staffService.listStaff(tenantId),
+      this.reportingTimezone(tenantId),
+    ]);
+    const serviceIds = this.stringArray(args.service_ids);
+    const selection =
+      serviceIds.length === 1 &&
+      services.filter((s) => s.id === serviceIds[0]).length === 1 &&
+      staff.filter((s) => s.id === args.staff_id).length === 1 &&
+      slots.every((slot) => slot.staff_id === args.staff_id)
+        ? { tenantId, serviceId: serviceIds[0], staffId: args.staff_id }
+        : null;
     return {
+      timezone,
+      booking_selection: selection,
       slots: slots.map((slot) => ({
         start: slot.start,
         end: slot.end,

@@ -419,3 +419,45 @@ catalog mismatch is an additional limitation. Next owner is existing public book
 reference grounding, not weaker PII or Client/provider-card authority. See backend pilot
 README and task-3/pilot-evidence/followup-repair for full grading and shutdown evidence.
 Stable guest website/backend candidates and production remain unmodified/unpromoted.
+
+
+## Chat catalog → canonical booking checkpoint (2026-10-05)
+
+Separate chat branch based on `e875da85b789de89e8fef5c71ebe84bf6d2fa791`.
+After a validated Client booking plan, current `catalog.staff.read` and
+`catalog.services.read` results resolve exact public labels/IDs within the tenant.
+Original user text stays local; only an unambiguous catalog name can recover a
+redacted staff preference. Current staff switches win; a new unmatched redacted name
+cannot silently reuse the previous staff. Preferences remain encrypted transcript
+context and are revalidated each turn. No phone/name-based Client authority.
+
+Completed availability now includes catalog-qualified selection facts and the existing
+timezone owner. The existing single widget minter supplies service/staff noun handles,
+so a chat availability selector can reach the existing booking preview and explicit
+carrier confirmation. Client create requests in this bounded path prepare that read;
+they do not create a legacy AI approval or execute a booking from model text.
+All final mutations still belong to Action Engine and its canonical receipt.
+
+Local evidence: 253 unit/architecture tests and 11 HTTP/PostgreSQL tests PASS;
+production and widgets-live typechecks and targeted lint PASS. The new connected
+scripted-model test uses natural multi-turn messages, carries omitted date/service,
+switches Антон → Илья, then selects 17:00 through the production headless carrier.
+It verifies the resulting synthetic appointment's staff/service/start/Client,
+exactly one SUCCEEDED AE with one attempt, and a receipt-backed CONFIRMED terminal line.
+Actual foreign-tenant catalog IDs and duplicate names refuse before availability,
+approval or booking AE. Existing encrypted context restart/expiry/principal fences,
+raw captured transcripts and receipt wording regressions also pass.
+
+Qualification boundary: model transport is scripted; catalog/provider is synthetic
+INTERNAL, not YClients acceptance. Original raw captures/frozen paid corpus are unchanged.
+The raw captured «к Антону» in the mismatching fixture now asks for clarification,
+instead of producing an invalid-ID 503. Conservative exact matching intentionally does
+not guess inflections, multiple candidate names or multiple services. This is not a
+complete natural-language acceptance result or proof of 1000-salon throughput.
+
+Next prerequisites: source-qualified disambiguation/aliases for inflected or ambiguous
+staff references, then a separately authorized real-model check against a matching
+synthetic public catalog, preserving the original corpus as diagnostic evidence.
+No paid environment or expired server proof restarted; counters/TTL unchanged. No new
+paid calls, deploy, production writes, real notifications, migrations, phone operations,
+push or merge. Stable guest backend/frontend candidate SHAs remain unchanged.
