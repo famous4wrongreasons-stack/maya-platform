@@ -48,3 +48,23 @@ Remaining live-run dependencies: verified isolated server runner/DB, inherited s
 whole-transport interception and HTTP adapter, synthetic fixture coverage and an outcome review
 rubric. The offline executable deliberately has no live switch. Pilot results diagnose client
 booking; they do not establish 99% acceptance or 1000-salon capacity.
+
+## Authorized isolated pilot attempt (2026-10-05)
+
+`http-live-pilot.ts` is a separate broker-only profile pinned to the dedicated proof DB/port.
+It does not change the production DeepSeek HTTPS validator or widgets-live credential refusal.
+The six-dialogue slice has 18 turns, five independent families and manifest
+`6abcad88012540dbdfff75cf34eeb1971a923f188f31a46e4a42a5106868747d`.
+
+Server canned preflight replayed 18 attempts with zero paid calls. The first live broker request
+then stopped with HTTP 400: its 79,230 UTF-8 bytes exceeded the broker's 65,536-byte envelope.
+The broker rejects this before incrementing its upstream count or contacting DeepSeek.
+Thus **zero actual provider calls/tokens/cost, zero completed dialogues**; the original ledger
+retains its $0.11474232 reservation. The first raw report's `actualPaidRequests=1` was a broker-call
+counter and is corrected by `pilot-evidence/qualified-outcome.json` in the task workspace.
+No provider language-quality conclusion is possible.
+
+The runner now validates the exact broker byte bound in both canned and paid paths before transport,
+and labels broker requests separately. Paid permit is closed; production PID/release stayed unchanged.
+Do not resume through a fresh ledger or restart the broker to reset its cap. Payload compatibility
+must be resolved with the setup owner and the original reservation preserved before another run.
