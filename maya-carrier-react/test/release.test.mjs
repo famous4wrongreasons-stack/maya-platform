@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { checkNativeConfig, verifyParity, verifyNativeFiles } from '../tools/release.mjs';
 import { readTree, assertFiles, assertTree } from '../tools/payload-files.mjs';
+import { nativeApiTarget, parseDevelopmentApi, xcodeDevelopmentApi } from '../tools/native-api-target.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'), REPO=path.dirname(ROOT);
 const web=readTree(path.join(ROOT,'dist/web')),cap=readTree(path.join(ROOT,'dist/capacitor'));
 const config=JSON.parse(fs.readFileSync(path.join(REPO,'maya-ios-carrier/capacitor.config.json')));
@@ -17,6 +18,21 @@ test('RPK positive: complete real React PWA and native payload parity',()=>{
   assert.equal(JSON.parse(manifest).id,'/maya-chat-shell/');
   assert.ok(web.get('index.html').toString().includes('<link rel="manifest" href="./manifest.webmanifest">'));
   for(const [n,b] of web)if(n.startsWith('icons/'))assert.ok(b.equals(fs.readFileSync(path.join(REPO,'maya-chat-shell/brand',n))));
+});
+test('RPK explicit development API preserves production default and refuses unsafe shapes',()=>{
+  assert.equal(nativeApiTarget().apiBase,'https://mayaos.ru/api');
+  const api='https://maya-proof.invalid:3443/api';
+  assert.equal(nativeApiTarget(api).connectSrc,"'self' https://maya-proof.invalid:3443");
+  assert.equal(xcodeDevelopmentApi('Debug',api),api);
+  assert.equal(xcodeDevelopmentApi('Release',undefined),undefined);
+  assert.throws(()=>xcodeDevelopmentApi('Release',api));
+  assert.throws(()=>xcodeDevelopmentApi(undefined,api));
+  for(const bad of ['', 'http://localhost:3310/api', 'https://mayaos.ru/api', 'https://www.mayaos.ru/api',
+    'https://mayaos.ru./api', 'https://www.mayaos.ru./api',
+    'https://name:password@maya-proof.invalid/api', 'https://maya-proof.invalid/api?token=test',
+    'https://maya-proof.invalid/api#test', 'https://maya-proof.invalid/other', 'https://maya-proof.invalid/api/'])
+    assert.throws(()=>nativeApiTarget(bad),bad);
+  assert.throws(()=>parseDevelopmentApi(['--development-api='+api,'--development-api='+api]));
 });
 for(const dir of ['../maya-chat-shell/dist/capacitor','../maya-chat-shell/dist/web','www','../maya-carrier-react/dist/web'])
   test('RPK old/alternate native payload refused: '+dir,()=>assert.throws(()=>checkNativeConfig({...config,webDir:dir})));
@@ -61,6 +77,19 @@ test('RPK verifier rebuilds expected bytes, refuses a swapped artifact, does not
     assert.equal(build.status,0,build.stderr);
     const good=spawnSync(process.execPath,['build.mjs','--target=web','--verify-output'],{cwd:carrier,encoding:'utf8'});
     assert.equal(good.status,0,good.stderr);
+    const api='https://maya-proof.invalid:3443/api';
+    const devArgs=['--target=capacitor','--development-api='+api];
+    const dev=spawnSync(process.execPath,['build.mjs',...devArgs],{cwd:carrier,encoding:'utf8'});
+    assert.equal(dev.status,0,dev.stderr);
+    const devVerify=spawnSync(process.execPath,['build.mjs',...devArgs,'--verify-output'],{cwd:carrier,encoding:'utf8'});
+    assert.equal(devVerify.status,0,devVerify.stderr);
+    const w=readTree(path.join(carrier,'dist/web')),c=readTree(path.join(carrier,'dist/capacitor'));
+    verifyParity(w,c,api);
+    assert.throws(()=>verifyParity(w,c),'development payload cannot pass production parity');
+    assert.throws(()=>verifyParity(w,c,'https://different.invalid/api'),'development endpoint mismatch refuses');
+    const prodVerify=spawnSync(process.execPath,['build.mjs','--target=capacitor','--verify-output'],{cwd:carrier,encoding:'utf8'});
+    assert.notEqual(prodVerify.status,0,'default verifier must refuse development bytes');
+    verifyParity(w,readTree(path.join(carrier,'dist/capacitor')),api); // refusal did not repair the artifact
     const file=path.join(carrier,'dist/web/index.html');fs.writeFileSync(file,'old shell');
     const r=spawnSync(process.execPath,['build.mjs','--target=web','--verify-output'],{cwd:carrier,encoding:'utf8'});
     assert.notEqual(r.status,0);assert.match(r.stderr,/payload bytes differ/);assert.equal(fs.readFileSync(file,'utf8'),'old shell');

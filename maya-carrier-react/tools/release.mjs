@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { assertFiles, readTree } from './payload-files.mjs';
+import { nativeApiTarget, parseDevelopmentApi, xcodeDevelopmentApi } from './native-api-target.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = path.dirname(ROOT);
@@ -24,18 +25,19 @@ function run(file, args, cwd = ROOT) {
   assert.equal(result.status, 0, 'release command failed: ' + path.basename(file));
 }
 
-export function verifyParity(web, cap) {
+export function verifyParity(web, cap, developmentApi) {
+  const target = nativeApiTarget(developmentApi);
   const js = (files) => [...files.keys()].filter((n) => n.endsWith('.js'));
   assert.equal(js(web).length, 1); assert.equal(js(cap).length, 1);
   const webPath = js(web)[0], capPath = js(cap)[0];
   const w = web.get(webPath).toString(), c = cap.get(capPath).toString();
-  const from = 'API_BASE = "/api"', to = 'API_BASE = "https://mayaos.ru/api"';
+  const from = 'API_BASE = "/api"', to = `API_BASE = "${target.apiBase}"`;
   assert.equal(w.split(from).length, 2); assert.equal(c.split(to).length, 2);
   assert.equal(w.replace(from, to), c, 'PWA/Capacitor JS differs beyond the approved endpoint');
   const normalized = new Map(cap);
   normalized.delete(capPath); normalized.set(webPath, web.get(webPath));
   normalized.set('index.html', Buffer.from(cap.get('index.html').toString()
-    .replace(capPath, webPath).replace("connect-src 'self' https://mayaos.ru", "connect-src 'self'")));
+    .replace(capPath, webPath).replace(`connect-src ${target.connectSrc}`, "connect-src 'self'")));
   assertFiles(normalized, web);
 }
 
@@ -52,7 +54,9 @@ export function verifyNativeFiles(actual, expected) {
   assertFiles(clean, expected);
 }
 
-export function main(mode, appDirectory) {
+export function main(mode, appDirectory, developmentApi) {
+  const target = nativeApiTarget(developmentApi);
+  const targetArgs = developmentApi === undefined ? [] : ['--development-api=' + developmentApi];
   assert.ok(['build', 'verify', 'sync', 'verify-native', 'verify-app'].includes(mode), 'expected build, verify, sync, verify-native or verify-app');
   assert.equal(Boolean(appDirectory), mode === 'verify-app', 'app directory is required only for verify-app');
   const config = JSON.parse(fs.readFileSync(path.join(IOS, 'capacitor.config.json'), 'utf8'));
@@ -60,12 +64,12 @@ export function main(mode, appDirectory) {
   if (mode === 'build' || mode === 'sync') {
     // Headless runtime compilation only: its DOM entry is never selected as the release payload.
     run('build.mjs', [], path.join(REPO, 'maya-chat-shell'));
-    for (const target of ['web', 'capacitor']) run('build.mjs', ['--target=' + target]);
+    for (const name of ['web', 'capacitor']) run('build.mjs', ['--target=' + name, ...targetArgs]);
   }
   // Reconstruct from the fixed React entrypoint; don't trust a self-declared payload manifest.
-  for (const target of ['web', 'capacitor']) run('build.mjs', ['--target=' + target, '--verify-output']);
+  for (const name of ['web', 'capacitor']) run('build.mjs', ['--target=' + name, '--verify-output', ...targetArgs]);
   const web = readTree(path.join(ROOT, 'dist/web')), cap = readTree(path.join(ROOT, 'dist/capacitor'));
-  verifyParity(web, cap);
+  verifyParity(web, cap, developmentApi);
   if (mode === 'sync')
     run(path.join(IOS, 'node_modules/@capacitor/cli/bin/capacitor'), ['sync', 'ios'], IOS);
   if (mode === 'sync' || mode === 'verify-native' || mode === 'verify-app') {
@@ -79,10 +83,22 @@ export function main(mode, appDirectory) {
     verifyNativeFiles(readTree(path.join(nativeDirectory, 'public')), cap);
   }
   console.log(JSON.stringify({ status: 'PASS', owner: 'React AChat', mode, files: cap.size,
+    apiMode: target.mode, apiBase: target.apiBase,
     profileAuthority: 'server only', nativeVerified: ['sync', 'verify-native', 'verify-app'].includes(mode) }));
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  try { assert.equal(process.argv.length, process.argv[2] === 'verify-app' ? 4 : 3); main(process.argv[2], process.argv[3]); }
+  try {
+    const args = process.argv.slice(2), mode = args.shift();
+    const appDirectory = mode === 'verify-app' ? args.shift() : undefined;
+    assert.ok(args.every((arg) => arg === '--xcode' || arg.startsWith('--development-api=')), 'unknown release argument');
+    let developmentApi = parseDevelopmentApi(args);
+    if (args.includes('--xcode')) {
+      assert.equal(mode, 'verify-native', '--xcode is only valid for the native build verification phase');
+      assert.equal(developmentApi, undefined, 'Xcode selects the API with its explicit build setting');
+      developmentApi = xcodeDevelopmentApi(process.env.CONFIGURATION, process.env.MAYA_DEVELOPMENT_API);
+    }
+    main(mode, appDirectory, developmentApi);
+  }
   catch (error) { console.error('RELEASE PACKAGING REFUSED: ' + error.message); process.exitCode = 1; }
 }

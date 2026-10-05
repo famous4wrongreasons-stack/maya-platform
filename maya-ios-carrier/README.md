@@ -29,6 +29,32 @@ Verification reconstructs expected bytes from the fixed React source. It does no
 supplied with a candidate. Extra files, nonempty bridge placeholders, remote-server overrides, old-shell
 selection, missing manifest or changed generated assets fail closed. A failed check does not repair assets.
 
+### Explicit isolated API target (Debug only)
+
+Production remains the default `https://mayaos.ru/api`. For an owner-approved test backend with a
+trusted HTTPS endpoint, the same React carrier accepts one explicit build-time override:
+
+```sh
+# Example hostname only: these build commands do not contact or publish a server.
+npm run sync -- --development-api=https://maya-proof.invalid:3443/api
+node ../maya-carrier-react/tools/release.mjs verify-native --development-api=https://maya-proof.invalid:3443/api
+```
+
+Build Debug with the Xcode setting `MAYA_DEVELOPMENT_API=https://maya-proof.invalid:3443/api`.
+The native verification phase reconstructs bytes for exactly that endpoint. The setting in Release,
+a missing setting with development bytes, or a different endpoint refuses the build. Verify a built
+`.app` with `verify-app PATH/App.app --development-api=THE_SAME_URL`. The endpoint and its CSP origin
+are the only allowed target differences; no remote WebView server, runtime selector, ATS exception,
+certificate bypass, firewall change or new shell is introduced. `npm run sync` with no flag restores
+the canonical production payload; omit the Xcode setting when building it.
+
+This prepares test bytes, not device connectivity. `127.0.0.1` on a phone is the phone, not the Mac.
+A reachable, isolated HTTPS backend and normal iOS/backend origin permissions must be established
+separately before a device test. Do not launch a default production-target build as an isolated test.
+Use the isolated backend's debug email login; Telegram/Universal Link parity at a development host
+is not qualified by this configuration. The existing bundle ID is retained and may replace the
+installed app; this change does not authorize installation or production API actions.
+
 ## What may live here, and what may not
 
 Carrier-only concerns, and nothing else: Capacitor bootstrap, app lifecycle, safe areas, keyboard,

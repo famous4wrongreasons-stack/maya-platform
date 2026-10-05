@@ -182,7 +182,7 @@
 			outputPaths = ();
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "set -euo pipefail\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\"\nnode \"${SRCROOT}/../../../maya-carrier-react/tools/release.mjs\" verify-native\n";
+			shellScript = "set -euo pipefail\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\"\nnode \"${SRCROOT}/../../../maya-carrier-react/tools/release.mjs\" verify-native --xcode\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

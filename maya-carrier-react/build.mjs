@@ -16,6 +16,7 @@ import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import * as R from './tools/ratchets.mjs';
 import { assertTree, writeTree } from './tools/payload-files.mjs';
+import { nativeApiTarget, parseDevelopmentApi } from './tools/native-api-target.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SHELL = path.join(ROOT, '..', 'maya-chat-shell');
@@ -90,6 +91,7 @@ async function typecheck() {
 }
 
 const flags = new Set(process.argv.slice(2));
+const nativeTarget = nativeApiTarget(parseDevelopmentApi(process.argv.slice(2)));
 
 if (flags.has('--self-test')) {
   const { selfTest } = await import('./tools/ratchets.selftest.mjs');
@@ -104,15 +106,14 @@ await typecheck();
 /**
  * The two carriers, from one presentation.
  *
- * Carried over from the shell's own target table. `web` is same-origin; the iOS app runs under
- * Capacitor with `server.hostname: mayaos.ru` and `iosScheme: https`, so it is a real https origin
- * and `connect-src` must name it. Exactly ONE string in the bundle names an origin, and
+ * `web` is same-origin; iOS uses bundled assets under Capacitor's local origin.
+ * The explicit native API target also determines connect-src. Exactly ONE endpoint string differs, and
  * `--target=capacitor` substitutes that one string — so the proof below can assert that the two
  * artefacts are otherwise byte-identical.
  */
 export const TARGETS = {
   web: { apiBase: '/api', connectSrc: "'self'" },
-  capacitor: { apiBase: 'https://mayaos.ru/api', connectSrc: "'self' https://mayaos.ru" },
+  capacitor: nativeTarget,
 };
 
 const API_NEEDLE = (base) => `API_BASE = "${base}"`;
@@ -167,7 +168,7 @@ function targetProof(webJs, capJs, webHtml, capHtml, webCss, capCss) {
   for (const text of [webJs, capJs])
     for (const m of text.matchAll(/https?:\/\/[A-Za-z0-9.-]+/g)) origins.add(m[0]);
   for (const origin of origins)
-    if (!(origin in ORIGIN_ALLOW))
+    if (!(origin in ORIGIN_ALLOW) && origin !== new URL(TARGETS.capacitor.apiBase).origin.replace(/:\d+$/, ''))
       out.push(R.refusal('target', 'main.js', 0, origin, 'an origin in the artefact that is not accounted for'));
   return out;
 }
