@@ -1,0 +1,108 @@
+{
+  "sourceCommit": "1bdcf81eb0b78a27a0f520a0992980dd1c983bb0",
+  "bundle": "ru.mayaos.app",
+  "apiBase": "https://mayaos.ru/api",
+  "backendChanged": false,
+  "configuration": {
+    "ios.scrollEnabled": false,
+    "Keyboard.resize": "native"
+  },
+  "verification": {
+    "carrierTests": {
+      "passed": 93,
+      "failed": 0
+    },
+    "releaseTests": {
+      "passed": 18,
+      "failed": 0
+    },
+    "typecheck": "PASS",
+    "carrierRatchets": "PASS",
+    "verifyApp": "PASS",
+    "strictCodesign": "PASS",
+    "simulatorBuild": "PASS",
+    "deviceSignedBuild": "PASS"
+  },
+  "device": {
+    "installation": "SUCCESS",
+    "mode": "in-place update",
+    "appUninstalled": false,
+    "appDataDeletedByAgent": false,
+    "processLaunch": "BLOCKED_DEVICE_LOCKED",
+    "newProfileTrustRequired": false,
+    "ownerKeyboardAcceptance": "PENDING"
+  },
+  "limits": [
+    "Simulator chat used a separate ru.mayaos.keyboardproof presentation fixture with synthetic enabled composer; no session or production login.",
+    "Real WKWebView software-keyboard opening, visible composer, direct key input and closing observed in simulator.",
+    "Multiline and portrait/landscape verified in local browser; native app retains existing portrait orientation policy.",
+    "No production message, email code, CRM action, payment or backend deployment."
+  ],
+  "browserGeometry": {
+    "viewport": [
+      430,
+      530
+    ],
+    "rootHeight": 530,
+    "composerBottom": 517,
+    "composerHeight": 94,
+    "inputFontPx": 16,
+    "outerScroll": [
+      0,
+      0
+    ],
+    "documentSize": [
+      430,
+      530
+    ]
+  },
+  "receipts": {
+    "install": {
+      "path": "/tmp/maya-ui-phone-install.json",
+      "sha256": "f2411a7ac28f7126e2cb70b8ad720578364024a9b9d6ebf3f74582c1ef3ae266"
+    },
+    "launch": {
+      "path": "/tmp/maya-ui-phone-launch.json",
+      "sha256": "c9a68bc87fd96478515ff9ae025a55a2c158c31f20de037030a201a520a561eb"
+    }
+  },
+  "payloadFiles": {
+    "cordova.js": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cordova_plugins.js": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "icons/maya-192.png": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551",
+    "icons/maya-512-maskable.png": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be",
+    "icons/maya-512.png": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a",
+    "icons/maya-apple-180.png": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1",
+    "index.html": "3dc7c2cfd9debf20b9790e73f49a1b5bfea6452c26ef0ceac3a4466cd323083a",
+    "m/18e67064f5142101/main.js": "18e67064f51421014de6ea0bbb9fb37f1f89465f80c1c90a329b79dc2493c645",
+    "manifest.webmanifest": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e",
+    "styles.css": "cc756d6c4db40afd86e4b7979527e4249337e84b1f412b24244e5d947b06506d"
+  },
+  "screenshots": {
+    "login-baseline.png": {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/maya-platform/output/playwright/login-baseline.png",
+      "sha256": "bc6283ad22407fff801398acfeece41d5c20bfd9f9074cf80059664458735cb0"
+    },
+    "login-fixed.png": {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/maya-platform/output/playwright/login-fixed.png",
+      "sha256": "4f01c01b1ca5136745783b1b6e3900e7d0d8e512bb2abc1829fdb5fc285e5fe4"
+    },
+    "ios-login-keyboard.png": {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/maya-platform/output/playwright/ios-login-keyboard.png",
+      "sha256": "d8dcbc76108baeb3d7ea6437a4dbfb064dc82282a6953c2618830d559e863e86"
+    },
+    "ios-chat-keyboard.png": {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/maya-platform/output/playwright/ios-chat-keyboard.png",
+      "sha256": "5800e606b011d8fe568c47f0abc41bb0320303fb16066c776341d1c9648b0f21"
+    },
+    "chat-multiline-keyboard-size.png": {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/maya-platform/output/playwright/chat-multiline-keyboard-size.png",
+      "sha256": "0acf284618436fc44aaeab220f15467988122695e0ac33d75f7448b26fd5c25c"
+    },
+    "chat-landscape.png": {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/maya-platform/output/playwright/chat-landscape.png",
+      "sha256": "ab23aefe0ac65e51c6c51655da2702a83fa24e30ffc015a88f935608f927c95d"
+    }
+  },
+  "backendDeferredCheckpoint": "92ce547b1e679051aee05ea84f2f1c7e0f899375"
+}
