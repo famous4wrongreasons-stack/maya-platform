@@ -1,0 +1,41 @@
+# Bounded conversation pilot
+
+Offline replay and budget mechanics, not a completed live runner or a language-quality score.
+The owner approved at most $20 total for the existing DeepSeek account, up to 50 synthetic
+dialogues. One runner owns that total; no per-worker budgets or top-ups. Production services,
+credentials and CRM effects remain outside this pilot.
+
+```sh
+node --test scripts/conversation-qualification/*.test.mjs
+mkdir /tmp/maya-client-pilot-offline
+node scripts/conversation-qualification/dry-run.mjs /tmp/maya-client-pilot-offline
+```
+
+The dry run uses no HTTP or model, writes exclusive output files, and selects 12 CLIENT booking
+variants / 7 independent families / 36 user turns from the existing dev split. No held-out test
+family is selected. `freezePilot` supports a larger bounded diagnostic selection. Each manifest
+records the source and case hashes; a changed manifest cannot silently reuse the old digest.
+Existing corpus expected intents/checks are review hints, not a grading oracle. Gold assistant
+responses never enter replay: only the actual adapter's response enters the next request history.
+An unresolved response stops the batch without replaying a possibly effectful chat request.
+
+`PilotBudgetGate` reserves a pessimistic amount before each actual provider request, including
+retries. Exclusive, fsynced ledger; no refunds for failed/unknown usage; max 600 requests, 200 turns,
+50 dialogues, concurrency 1, 10 requests/minute, 30 seconds/request, 2 hours, $20 total. Model and
+endpoint are closed; output at most 2048 tokens, thinking disabled. Peak uncached prices verified
+2026-10-05 at https://api-docs.deepseek.com/quick_start/pricing/. Reservation uses serialized UTF-8
+bytes plus framing allowance as a conservative input-token bound. Price/token assumptions must
+still match the provider at dispatch. Existing ledger causes fail-closed restart; no resume or
+remaining-budget inference is implemented. Never start a second ledger as a budget reset.
+
+Before live execution, the dedicated adapter must use the canonical authenticated HTTP route in
+an isolated synthetic tenant/DB and wrap every actual model fetch (including retries) in this gate.
+Keep the existing widgets-live credential refusal unchanged. The live profile must deny all other
+outbound effects and prove its CRM/notification/payment boundaries before receiving inherited
+server-side credentials. Never copy/log credentials on the Mac. A fixture adapter, mock model,
+internal calendar, or passing replay report does not establish real-model/provider acceptance.
+
+Remaining live-run dependencies: verified isolated server runner/DB, inherited secret injection,
+whole-transport interception and HTTP adapter, synthetic fixture coverage and an outcome review
+rubric. The offline executable deliberately has no live switch. Pilot results diagnose client
+booking; they do not establish 99% acceptance or 1000-salon capacity.

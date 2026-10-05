@@ -261,3 +261,24 @@ from user text.
 
 Official YCLIENTS artifacts were materialized through Library onto this Mac; all three SHA256
 checks matched the research handoff. They remain source evidence, not proof of provider execution.
+
+### Client booking release priority and offline pilot preparation
+
+The owner's later directive prioritizes the existing designed website plus reliable canonical
+client booking as a coherent backend/web release. Broader goods/analytics/autopilot work continues
+as backlog; it is not a prerequisite for this booking candidate. One codebase, isolated stable and
+test environments; no salon-specific fork. Production deployment awaits a concrete release and
+rollback approval, and no production change is made by this checkpoint.
+
+The owner explicitly approved the bounded DeepSeek pilot: at most $20 total from the existing
+balance, up to 50 synthetic dialogues; no top-up. The new offline replay/budget core preserves that
+ceiling and keeps actual assistant responses in history instead of gold dataset responses. A
+client-first frozen diagnostic slice contains 12 variants / 7 independent families / 36 user turns;
+manifest SHA256 `6a1f0500c9479af7847218044a9750dedcb3d1e880d9a9b287d63fa5a66c7334`.
+Ten mechanics tests passed, including no-approval refusal, failed-call reservations, caps,
+concurrency, scope/holdout separation, no gold-history injection and stop-on-unknown without retry.
+Local evidence: `/tmp/maya-qualification-client-offline-20261005-a/` and
+`/tmp/maya-qualification-offline-tests.log`. Provider requests, HTTP requests and real CRM effects
+in this dry run: zero. This is **not** real-model qualification. The live runner still needs an
+isolated server DB/environment and actual HTTP/transport integration; do not weaken the existing
+widgets-live secret refusal. See `maya-saas-backend/scripts/conversation-qualification/README.md`.
