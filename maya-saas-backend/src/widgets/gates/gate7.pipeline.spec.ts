@@ -110,10 +110,10 @@ const spacesIn = (cell: string): string[] =>
   SPACES.filter((s) => new RegExp('`' + s + '`').test(cell));
 
 describe('S-G7-F69 [BUILD] — the two halves of F69 are the contract’s own (C11:1358-1367)', () => {
-  it('S-G7-F69-SHA: the contract this suite reads is the certified V1.2 build', () => {
+  it('S-G7-F69-SHA: the contract this suite reads is the owner-approved V1.3 build', () => {
     expect(
       createHash('sha256').update(fs.readFileSync(CONTRACT)).digest('hex'),
-    ).toBe('d2a97b17c0e121d366939be4ff1142c4b9b09b06ff17b7eb8f05bafc4f61b271');
+    ).toBe('b84b3e7303e1a655bf47c436075089ce51d79e315128e8cafb9325c64f19c36c');
   });
 
   it('S-G7-F69-ROWS: F69 has one row per effect class, and the rows are the eight `EffectClass` members', () => {
