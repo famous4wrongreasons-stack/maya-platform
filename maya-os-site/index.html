@@ -685,7 +685,9 @@ window.__meReturnToLegacyWorkspace = function () {
   })();
   window.__ME_SAAS_CTX = { api: apiBase, slug: slug, ns: _ns };
   // ME = legacy salon contour. Any other SaaS tenant must not inherit ME catalog/shop/bot.
-  window.__ME_LEGACY_TENANT_SLUGS = ['muzhskaya-estetika', 'malesthetic', 'malesthetic-staging'];
+  // 🔴 Салон в проде живёт под muzhskaya-estetika-3: без него собственный
+  // салон считался чужим — пропадали магазин, «Друзья», каталог и бренд.
+  window.__ME_LEGACY_TENANT_SLUGS = ['muzhskaya-estetika', 'muzhskaya-estetika-2', 'muzhskaya-estetika-3', 'malesthetic', 'malesthetic-staging'];
   window.meIsMeTenantSlug = function (value) {
     return window.__ME_LEGACY_TENANT_SLUGS.indexOf(String(value || '').toLowerCase()) >= 0;
   };
@@ -4990,6 +4992,25 @@ function meSaasStoreUser(user) {
 // Роль в интерфейсе никогда не выводится из введённого телефона или CRM-токена.
 // Её подтверждает только tenant-scoped /me, то есть подписанная сервером сессия
 // плюс активное Membership в конкретном бизнесе.
+// 🔴 Центр управления (GOD-режим) открыт ровно одному номеру: серверная роль
+// для этого не годится — платформенная учётка без телефона, а Стас в своём
+// салоне значится обычным tenant_admin.
+var MAYA_FOUNDER_PHONES = ['79620259888'];
+function meFounderPhoneDigits(value) {
+  var d = String(value == null ? '' : value).replace(/\D/g, '');
+  if (d.length === 11 && d.charAt(0) === '8') d = '7' + d.slice(1);
+  if (d.length === 10) d = '7' + d;
+  return d;
+}
+function meIsFounderUser(user) {
+  if (!user) return false;
+  var candidates = [user.phone, user.phone_number, user.login, user.username];
+  for (var i = 0; i < candidates.length; i++) {
+    var d = meFounderPhoneDigits(candidates[i]);
+    if (d && MAYA_FOUNDER_PHONES.indexOf(d) >= 0) return true;
+  }
+  return false;
+}
 function meSaasApplyIdentity(user) {
   if (!user) return false;
   var role = String(user.role || '').toLowerCase();
@@ -5006,7 +5027,8 @@ function meSaasApplyIdentity(user) {
   // Владелец салона с полным доступом к СВОЕМУ бизнесу их видеть не должен:
   // там расходы и метрики всех тенантов. Признак берём ТОЛЬКО из роли,
   // подписанной сервером, и никогда не выводим из «владелец с полным доступом».
-  window.__meIsFounder = role === 'platform_owner' || user.is_platform_owner === true;
+  // Только номер основателя.
+  window.__meIsFounder = meIsFounderUser(user);
   window.__meRole = legacyRole;
   window.__meStaffName = name;
   window.__panelInfo = Object.assign({}, window.__panelInfo || {}, user, {
@@ -5060,9 +5082,10 @@ const CLIENT_TABS = [{
   onTap: () => meSaasOpenMayaChat('client', 'home')
 }, {
   ic: TabIcClip,
-  label: "Записи",
+  // Вкладка ведёт в личный кабинет клиента, а не в список записей.
+  label: "Кабинет",
   auth: true,
-  guestLabel: "Записи",
+  guestLabel: "Кабинет",
   guestTap: () => window.__meGo && window.__meGo("login"),
   onTap: () => {
     // Клиентское меню → полный личный кабинет (как в PWA), не бизнес-панель.
@@ -7621,7 +7644,10 @@ function AClientHome() {
       ["Друзья", function () { window.__meGo && window.__meGo("invite"); }, Icon.gift, "referrals"],
       ["Контакты", function () { setContactsOpen(true); }, AIcon.pin || Icon.user]].filter(function (q) {
         if (window.__ME_FOREIGN_TENANT && (q[3] === "shop" || q[3] === "referrals")) return false;
-        return !q[3] || !window.__meFeatureReady || window.__meFeatureReady(q[3], { universal: !!window.__ME_SAAS_CTX });
+        if (window.__ME_FOREIGN_TENANT && (q[3] === "shop" || q[3] === "referrals")) return false;
+        // Магазин и «Друзья» работают в этом же рантайме — не прячем их флагом universal.
+        var universal = !!window.__ME_SAAS_CTX && q[3] !== "shop" && q[3] !== "referrals";
+        return !q[3] || !window.__meFeatureReady || window.__meFeatureReady(q[3], { universal: universal });
       }).map(function (q, qi) {
     return /*#__PURE__*/React.createElement("div", {
       key: qi,
@@ -14206,7 +14232,11 @@ function AReferralCard(props) {
   var rr = React.useState(0); var cp = React.useState(false);
   React.useEffect(function () { if (meIsLegacy()) meEnsureCabinet(function () { rr[1](function (x) { return x + 1; }); }); }, []);
   var inv = (window.APP_DATA && window.APP_DATA.invite) || {};
-  var link = inv.link || ''; var full = window.__meInviteFullLink || (link && /\./.test(link) ? ('https://' + link) : '');
+  // 🔴 Пока сервер не прислал реферальный код, показывать заготовку нельзя:
+  // это чужая ссылка, и «Поделиться» отправит её по-настоящему.
+  var invReal = !!window.__meInviteReal;
+  var link = invReal ? (inv.link || '') : '';
+  var full = invReal ? (window.__meInviteFullLink || (link && /\./.test(link) ? ('https://' + link) : '')) : '';
   var stats = (Array.isArray(inv.stats) && inv.stats.length) ? inv.stats : [['0', 'приглашено'], ['0', 'пришли']];
   var wrap = { border: '1px solid ' + c.line, borderRadius: 20, padding: 18, marginTop: 10, maxWidth: 420, background: c.surf };
   var lab = { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, marginBottom: 12 };
@@ -23003,6 +23033,16 @@ function AInvite() {
       }, "Реферальная программа для этого бизнеса пока не подключена.");
     });
   }
+  // 🔴 Пока сервер не прислал личный реферальный код, экран показывал
+  // рекламную заготовку (malesthetic.pro/r/STAS-4K7) как ссылку пользователя,
+  // и «Поделиться» отправлял чужой код. Без кода — честная заглушка.
+  if (!window.__meInviteReal) {
+    return React.createElement(OverlayShell, { title: "Пригласить" }, function (t) {
+      return React.createElement("div", {
+        style: { fontFamily: BODY, fontSize: 14, lineHeight: 1.55, color: t.dim, padding: "12px 4px" }
+      }, "Личная ссылка ещё не выдана. Привяжите телефон в кабинете — и ссылка появится здесь.");
+    });
+  }
   const d = DS();
   const inv = d.invite;
   const [copied, setCopied] = React.useState(false);
@@ -23205,7 +23245,10 @@ Object.assign(window, {
     }
     var rq = window.__meAuthReq ? window.__meAuthReq(payload || {}) : null;
     if (!rq) {
-      alert('Войдите через Telegram или Яндекс, чтобы оформить покупку.');
+      // 🔴 Оплата идёт через контур «Мужской Эстетики»: у входа по email в
+      // MAYA OS его сессии нет, и запрос даже не уходит. Говорим прямо, что
+      // делать, вместо общего «войдите».
+      alert('Оплата проходит через приложение «Мужской Эстетики». В этой сессии его входа нет — войдите через Telegram-бота МЭ или Яндекс, и вернитесь в магазин.');
       return Promise.resolve(null);
     }
     if (shopBusy) return Promise.resolve(null); // анти-двойной-тап: оплата уже создаётся
@@ -23665,7 +23708,8 @@ function AGodMode(props) {
     card: 'rgba(24,22,15,0.06)'
   });
   var PX = 'https://malesthetic.pro/app/api-proxy.php';
-  var TABS = [{ k: 'os', label: 'MAYA' }, { k: 'overview', label: 'Платформа' }, { k: 'health', label: 'Система' }, { k: 'money', label: 'Расходы' }, { k: 'subs', label: 'Бизнесы' }];
+  // Только деньги платформы: расходы на ИИ и серверы.
+  var TABS = [{ k: 'money', label: 'Расходы' }];
   var sTab = React.useState('os'), tab = sTab[0], setTab = sTab[1];
   var sCc = React.useState(null), cc = sCc[0], setCc = sCc[1];
   var sOv = React.useState(null), ov = sOv[0], setOv = sOv[1];
@@ -26343,23 +26387,15 @@ function AStaffHome() {
     // и она уже работает в обоих контурах — легаси и SaaS.
     onClick: () => window.__meGo && window.__meGo("schedule"),
     style: { marginTop: 10 }
-  }), (isFounder || saasManager) ? /*#__PURE__*/React.createElement("div", {
-    onClick: () => window.__meGo && window.__meGo(saasManager ? "panel" : "god"),
+  }), isFounder ? /*#__PURE__*/React.createElement("div", {
+    onClick: () => window.__meGo && window.__meGo("god"),
     style: { display: "flex", alignItems: "center", gap: 12, border: "1px solid " + t.line, borderRadius: 16, padding: "13px 15px", marginTop: 10, background: t.card, cursor: "pointer" }
   }, /*#__PURE__*/React.createElement("span", {
     style: { width: 7, height: 7, borderRadius: 999, background: t.ink, flex: "none" }
   }), /*#__PURE__*/React.createElement("div", {
     style: { flex: 1, fontFamily: BODY, fontSize: 12, lineHeight: 1.4, color: t.ink }
-  }, saasManager ? "Центр управления · Владелец" : "Центр управления · GOD Mode"), Icon.arrow(t.dim, 16)) : null, /*#__PURE__*/React.createElement("div", {
-    onClick: () => meSaasOpenMayaChat('business', 'staff-home'),
-    style: { display: "flex", alignItems: "center", gap: 12, border: "1px solid " + t.line, borderRadius: 16, padding: "13px 15px", marginTop: 10, cursor: "pointer", color: t.ink }
-  }, /*#__PURE__*/React.createElement(SeedLogo, { size: 20, sw: 1.7 }), /*#__PURE__*/React.createElement("div", {
-    style: { flex: 1 }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: { fontFamily: BODY, fontSize: 12.5, color: t.ink }
-  }, "Спросить Maya"), /*#__PURE__*/React.createElement("div", {
-    style: { fontFamily: BODY, fontSize: 10.5, color: t.dim, marginTop: 1 }
-  }, "Администратор · онлайн")), Icon.arrow(t.dim, 16)), saasBusiness ? null : /*#__PURE__*/React.createElement("div", {
+  }, "Центр управления · GOD Mode"), Icon.arrow(t.dim, 16)) : null, // Строку «Спросить Maya» убрали: в чат ведёт круглая кнопка со знаком MAYA.
+    saasBusiness ? null : /*#__PURE__*/React.createElement("div", {
     // Единственный вход в чат смены: в нижнем меню сотрудника четыре вкладки
     // (индекс 3 — «Клиенты»), а карта __meTab с 'team-chat' осталась только в
     // мёртвом коде — без этой строки экран ATeamChat недостижим вообще.
@@ -31217,7 +31253,7 @@ function ASaasOwnerPanel() {
           ),
           e('div', { style: { marginTop: 'auto', paddingTop: 30, fontFamily: BODY, fontSize: 12, lineHeight: 1.5, opacity: 0.62 } }, verifiedRevenue != null ? 'Финансовые показатели подтверждены CRM.' : (crmReady ? 'Операционные показатели рассчитаны по журналу CRM; кассовая сводка сейчас недоступна.' : 'Права владельца подтверждены. Ожидается подключение источника данных бизнеса.'))
         ),
-        e('div', { style: { display: 'grid', gap: 9, marginTop: 14 } }, action('Спросить MAYA', 'Задать вопрос по текущему бизнесу', function () { meSaasOpenMayaChat('business', 'panel'); }), action('Записать клиента', 'Открыть выбор мастера, услуги, даты и времени', function () { window.__meGo && window.__meGo('book'); }, true)),
+        e('div', { style: { display: 'grid', gap: 9, marginTop: 14 } }, action('Записать клиента', 'Открыть выбор мастера, услуги, даты и времени', function () { window.__meGo && window.__meGo('book'); }, true)),
         section('Ближайшие записи', todayRows.length ? e('div', { style: { display: 'grid', gap: 8 } }, todayRows.slice(0, 5).map(function (x) { return card(e('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } }, e('div', { style: { fontFamily: DISPLAY, fontSize: 18, minWidth: 52 } }, timeLabel(x.start_at, tz)), e('div', { style: { flex: 1, minWidth: 0 } }, e('div', { style: { fontFamily: BODY, fontSize: 13, fontWeight: 650 } }, x.client && x.client.name || 'Клиент'), e('div', { style: { fontFamily: BODY, fontSize: 11, color: t.dim, marginTop: 3 } }, (x.provider && x.provider.name || 'Специалист') + (x.services && x.services.length ? ' · ' + x.services.map(function (s) { return s.name; }).join(', ') : ''))), e('div', { style: { fontFamily: DISPLAY, fontSize: 11 } }, rub(x.total_price))), { padding: '12px 14px' }); })) : card(e('div', { style: { fontFamily: BODY, fontSize: 12.5, color: t.dim } }, 'Активных записей на сегодня нет.')))
       );
     }
@@ -36168,14 +36204,19 @@ function MEApp() {
     key: screenContextKey,
     style: { height: '100%', animation: 'meScreenIn .28s cubic-bezier(.22,.61,.36,1) both', willChange: 'opacity, transform' }
   }, screenInner);
-  const fabScreens = ['home', 'services', 'cutmatch'];
-  const showFab = modeRef.current !== 'staff' && fabScreens.indexOf(screen) >= 0 && window.AChat && !!(window.__meHasSession && window.__meHasSession());
+  const fabScreensClient = ['home', 'services', 'cutmatch', 'cabinet', 'book'];
+  const fabScreensStaff = ['staff-home', 'panel', 'cabinet', 'book'];
+  const fabIsStaff = modeRef.current === 'staff';
+  const fabScreens = fabIsStaff ? fabScreensStaff : fabScreensClient;
+  const showFab = fabScreens.indexOf(screen) >= 0 && window.AChat && !!(window.__meHasSession && window.__meHasSession());
   // Плавающие док-кнопки («Сменить вход» / FAB) — на 70px выше нового положения
   // навбара (env(safe-area-inset-bottom) + 12px), чтобы держаться над ним с просветом.
   const floatDockBottom = 'calc(env(safe-area-inset-bottom, 0px) + 82px + 100dvh - 100vh)';
   const compactRootHome = (typeof meCompactViewport === 'function' && meCompactViewport()) && (screen === 'home' || screen === 'staff-home');
   const hideClientHomeFloat = (screen === 'home' || screen === 'staff-home') && (floatDockHidden || compactRootHome);
   const fab = showFab ? React.createElement('div', {
+    role: 'button',
+    'aria-label': 'Чат с Maya',
     onClick: function () {
       meSaasOpenMayaChat('client', screen);
     },
@@ -36190,26 +36231,20 @@ function MEApp() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: '#15140f',
-      border: '1px solid rgba(255,255,255,0.16)',
-      boxShadow: '0 8px 22px rgba(0,0,0,0.42)',
+      // Фирменный синий и знак MAYA — как в приложении на телефоне.
+      background: '#0A84FF',
+      border: '0',
+      boxShadow: window.__meDark ? '0 8px 22px rgba(10,132,255,.45)' : '0 8px 20px rgba(10,132,255,.34)',
       cursor: 'pointer',
       opacity: hideClientHomeFloat ? 0 : 1,
       pointerEvents: hideClientHomeFloat ? 'none' : 'auto',
       transform: hideClientHomeFloat ? 'translateY(12px) scale(0.92)' : 'translateY(0) scale(1)',
       transition: 'opacity .22s ease, transform .22s ease'
     }
-  }, React.createElement('svg', {
-    width: 24,
-    height: 24,
-    viewBox: '0 0 24 24',
-    fill: 'none'
-  }, React.createElement('path', {
-    d: 'M4 5.5h16v10H9.5l-4 3.5v-3.5h-1.5z',
-    stroke: '#f2f0ec',
-    strokeWidth: 1.5,
-    strokeLinejoin: 'round'
-  }))) : null;
+  }, React.createElement(MayaMark, {
+    size: 24,
+    color: '#FFFFFF'
+  })) : null;
   // persistent bottom tab bar for screens that don't render their own (so "menu is always there", no back needed)
   // ── ЕДИНОЕ нижнее меню: живёт в корне и НЕ пересоздаётся при смене экрана,
   //    поэтому индикатор перетекает между вкладками непрерывно (как в референсе).
@@ -37244,6 +37279,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     var D = ensureData(), inv = D.invite;
     var hasAny = ref.code || ref.link || ref.invited || ref.pending;
     if (!hasAny) return; /* empty referral -> keep baked marketing demo */
+    // 🔴 Отмечаем, что ссылка НАСТОЯЩАЯ. Без этого экран «Друзья» показывал
+    // рекламную заготовку malesthetic.pro/r/STAS-4K7 как личную ссылку —
+    // и кнопка «Поделиться» реально отправляла чужой код.
+    window.__meInviteReal = true;
     if (ref.code) inv.link = 'malesthetic.pro/r/' + ref.code; /* short, fits the pill */
     else if (ref.link) inv.link = String(ref.link).replace(/^https?:\/\//, '');
     window.__meInviteFullLink = ref.link || (ref.code ? 'https://t.me/malesthetic_bot?start=ref_' + ref.code : '');
@@ -37270,7 +37309,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     window.__meCanPanel = !!p.dashboard;
     window.__meCanReport = (body.role === 'owner');
     window.__meCanSchedule = !!body.is_master;
-    window.__meIsFounder = !!body.is_founder;  // GOD-режим (только основатель MAYA)
+    // GOD-режим: серверный признак легаси-контура ЛИБО номер основателя.
+    // Флаг из body сам по себе больше не открывает центр управления —
+    // телефон проверяется всегда, когда контур его знает.
+    window.__meIsFounder = meIsFounderUser(body) || (!!body.is_founder && !body.phone);
     // deep-link из пуша MAYA: ?god=1 → открыть Центр управления (один раз, только основателю)
     try {
       if (window.__meIsFounder && !window.__godAutoOpened && /[?&]god=1/.test(location.search || '') && window.__meGo) {
@@ -38259,7 +38301,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     // Клиента после логина ведём сразу в клиентскую версию. Кэш роли -> мгновенный роутинг без мелькания логина.
     var cached=null; try{ cached=localStorage.getItem('me_is_staff'); }catch(e){}
     if(cached==='1'){ window.__meGo('choose'); }
-    else if(cached==='0'){ meSaasOpenMayaChat('client', 'home'); }
+    else if(cached==='0'){ if(window.__meMode)window.__meMode('client'); window.__meGo('home'); }
     try{
       var rq = window.__meAuthReq ? window.__meAuthReq({}) : null;
       if(!rq){ if(cached===null){ if(window.__meMode)window.__meMode('client'); window.__meGo('home'); }; return true; }
@@ -38282,7 +38324,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
             try{ localStorage.setItem('me_is_staff', staff?'1':'0'); }catch(e2){}
             try{ window.__panelInfo=me; window.__meRole=me.role||null; window.__meIsMaster=!!me.is_master; window.__meIsFounder=!!me.is_founder; window.__meStaffName=((me.role==='owner'||me.role==='manager'||me.role==='master'||me.is_master)?(me.master_name||me.name||null):null); /* staff avatar fallback: salon photo by staff_id when Telegram login gave no photo */ if(!window.__meAvatar && me.staff_id && window.__meMasterPhoto){ var _mp=window.__meMasterPhoto(me.staff_id); if(_mp) window.__meAvatar=_mp; } /* реальное фото из Telegram: тянем с бэка по ЛЮБОЙ tg-сессии, не только staff. */ if(me) __meRefreshTelegramAvatar(rq); window.__meIsStaff=staff; if(window.__meRefresh)window.__meRefresh(); }catch(e3){}
             var want = staff?'1':'0';
-            if(freshLogin || want!==cached){ if(staff){ window.__meGo('choose'); } else { meSaasOpenMayaChat('client', 'home'); } }
+            if(freshLogin || want!==cached){ if(staff){ window.__meGo('choose'); } else { if(window.__meMode)window.__meMode('client'); window.__meGo('home'); } }
           })
           .catch(function(){ if(_roleAttempt < 3){ setTimeout(_tryRole, 1500*_roleAttempt); return; } if(cached===null){ if(window.__meMode)window.__meMode('client'); window.__meGo('home'); }; });
       };
