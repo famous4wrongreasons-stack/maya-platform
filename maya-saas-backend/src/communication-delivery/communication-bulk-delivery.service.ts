@@ -567,18 +567,43 @@ export class CommunicationBulkDeliveryService {
           }),
           signal: AbortSignal.timeout(4000),
         });
-        if (response.status >= 400 && response.status < 500)
+        // Only the existing executor's explicit 400 rejection proves no send.
+        // A proxy/timeout HTTP status alone is not authoritative provider evidence.
+        const decoded: unknown = await response.json().catch(() => null);
+        const body =
+          decoded && typeof decoded === 'object' && !Array.isArray(decoded)
+            ? (decoded as Record<string, unknown>)
+            : null;
+        const rejectionCodes = [
+          'invalid_request',
+          'invalid_bulk_transport',
+          'invalid_parse_mode',
+          'invalid_buttons',
+          'B35_TELEGRAM_REJECTED',
+        ];
+        if (
+          response.status === 400 &&
+          body &&
+          !('message_id' in body) &&
+          typeof body.error === 'string' &&
+          rejectionCodes.includes(body.error)
+        )
           return { state: 'FAILED', code: 'B35_TELEGRAM_REJECTED' };
         if (!response.ok)
           return { state: 'UNKNOWN', code: 'B35_TELEGRAM_UNKNOWN' };
-        const body = (await response.json()) as {
-          message_id?: string | number;
-        };
-        return body.message_id
+        const reference = body?.message_id;
+        const validReference =
+          (typeof reference === 'number' &&
+            Number.isSafeInteger(reference) &&
+            reference > 0) ||
+          (typeof reference === 'string' &&
+            /^[1-9][0-9]{0,15}$/.test(reference) &&
+            Number.isSafeInteger(Number(reference)));
+        return validReference && body && !('error' in body)
           ? {
               state: 'ACCEPTED',
               code: 'B35_TELEGRAM_ACCEPTED',
-              reference: String(body.message_id),
+              reference: String(reference),
             }
           : { state: 'UNKNOWN', code: 'B35_PROVIDER_REFERENCE_MISSING' };
       };

@@ -17,17 +17,23 @@ function fixture() {
   const device = { token: 'a'.repeat(64) };
   const prisma = {
     devicePushToken: { findFirstOrThrow: jest.fn().mockResolvedValue(device) },
+    clientChannelLink: {
+      findFirstOrThrow: jest
+        .fn()
+        .mockResolvedValue({ deliveryAddressEncrypted: '7' }),
+    },
   };
   const service = new CommunicationBulkDeliveryService(
     prisma as never,
     {} as never,
     {} as never,
-    { hash } as never,
+    { hash, current: jest.fn().mockResolvedValue({ allowed: true }) } as never,
     { decrypt: (s: string) => s } as never,
     {} as never,
     {} as never,
     new ConfigService({
       CRM_ENCRYPTION_KEY: 'b35-synthetic-key-at-least-24-characters',
+      MAYA_INBOX_BRIDGE_TOKEN: 'synthetic-local-bridge-token',
     }),
   );
   const route: BulkRoute = {
@@ -63,6 +69,7 @@ function fixture() {
     contentIdentityHash: hash('content', bulkContent('Approved text')),
   };
   return {
+    service,
     device,
     prisma,
     child,
@@ -169,4 +176,185 @@ describe('B35 fixed transport results', () => {
       ),
     ).rejects.toThrow('Use the immutable canonical Client bulk owner');
   });
+});
+
+describe('B35 Telegram authoritative response classification', () => {
+  afterEach(() => jest.restoreAllMocks());
+  async function deliver(status: number, body: unknown, invalidJson = false) {
+    const request = jest
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(
+        new Response(
+          invalidJson ? '<html>gateway response</html>' : JSON.stringify(body),
+          { status },
+        ),
+      );
+    const f = fixture();
+    const operation = await f.prepare(
+      { tenantId: 'tenant' },
+      f.child,
+      { ...f.route, primary: 'telegram', link: { id: 'link' } },
+      { channel: 'telegram' },
+      {},
+    );
+    const result = await operation();
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(f.prisma.clientChannelLink.findFirstOrThrow).toHaveBeenCalledWith({
+      where: { id: 'link', tenantId: 'tenant', clientId: 'client' },
+    });
+    return result;
+  }
+  it.each([408, 429, 500, 502, 504])(
+    'keeps HTTP %s inconclusive even with a rejection-shaped body',
+    async (status) => {
+      expect(
+        await deliver(status, { error: 'B35_TELEGRAM_REJECTED' }),
+      ).toMatchObject({ state: 'UNKNOWN' });
+    },
+  );
+  it.each([
+    'invalid_request',
+    'invalid_bulk_transport',
+    'invalid_parse_mode',
+    'invalid_buttons',
+    'B35_TELEGRAM_REJECTED',
+  ])('retains explicit bridge rejection %s', async (error) => {
+    expect(await deliver(400, { error })).toMatchObject({ state: 'FAILED' });
+  });
+  it.each([400, 403, 404])(
+    'does not turn an unrecognized HTTP %s body into a definitive failure',
+    async (status) => {
+      expect(
+        await deliver(status, { error: 'upstream_timeout' }),
+      ).toMatchObject({ state: 'UNKNOWN' });
+    },
+  );
+  it.each([200, 400])(
+    'keeps a non-JSON HTTP %s response unknown',
+    async (status) => {
+      expect(await deliver(status, null, true)).toMatchObject({
+        state: 'UNKNOWN',
+      });
+    },
+  );
+  it.each([
+    null,
+    {},
+    [],
+    { message_id: {} },
+    { message_id: [] },
+    { message_id: true },
+    { message_id: -1 },
+    { message_id: 1.5 },
+    { message_id: '0' },
+    { message_id: 'garbage' },
+    { message_id: '123', error: 'B35_TELEGRAM_REJECTED' },
+  ])(
+    'does not accept malformed or contradictory provider evidence %j',
+    async (body) => {
+      expect(await deliver(200, body)).toMatchObject({ state: 'UNKNOWN' });
+    },
+  );
+  it.each([123, '123'])(
+    'accepts the canonical message reference %j',
+    async (message_id) => {
+      expect(await deliver(200, { message_id })).toMatchObject({
+        state: 'ACCEPTED',
+        reference: '123',
+      });
+    },
+  );
+});
+
+describe('B35 Telegram UNKNOWN through dispatch and resume', () => {
+  afterEach(() => jest.restoreAllMocks());
+  it.each([
+    [408, { error: 'B35_TELEGRAM_REJECTED' }],
+    [200, { message_id: { unexpected: 'reference' } }],
+  ])(
+    'persists HTTP %s ambiguity and resumes without another send',
+    async (status, body) => {
+      const f = fixture();
+      const leaf = {
+        id: 'leaf',
+        revision: 1,
+        deliveryState: 'NOT_SENT',
+        reconciliationState: 'NOT_REQUIRED',
+        eligibilityEvidenceRef: 'b35:link:link',
+      };
+      const db = {
+        ...f.prisma,
+        marketingCampaignRecipient: {
+          findMany: jest.fn(() => Promise.resolve([{ ...leaf }])),
+        },
+        $transaction: (run: (tx: unknown) => unknown) =>
+          Promise.resolve(run(db)),
+      };
+      Object.assign(f.prisma, db);
+      const claim = {
+        campaign: { id: 'envelope', tenantId: 'tenant' },
+        recipient: { ...leaf },
+        attempt: { id: 'attempt' },
+        leaseToken: 'lease',
+      };
+      const claimNext = jest
+        .spyOn(f.service.kernel, 'claimNext')
+        .mockResolvedValueOnce(claim as never)
+        .mockResolvedValue(null);
+      jest
+        .spyOn(f.service.kernel, 'markBulkDispatchBoundary')
+        .mockResolvedValue({
+          allowed: true,
+          recipient: { ...leaf, revision: 2 },
+        } as never);
+      const unknown = jest
+        .spyOn(f.service.kernel, 'finalizeUnknown')
+        .mockImplementation(() => {
+          leaf.deliveryState = 'UNKNOWN';
+          leaf.reconciliationState = 'MANUAL_REQUIRED';
+          return Promise.resolve(leaf as never);
+        });
+      const rejected = jest.spyOn(
+        f.service.kernel,
+        'finalizeDeterministicReject',
+      );
+      const accepted = jest.spyOn(f.service.kernel, 'finalizeAccepted');
+      const reconciled = jest.spyOn(f.service.kernel, 'claimReconciliation');
+      const request = jest
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValue(new Response(JSON.stringify(body), { status }));
+      const deliverSlot = (
+        f.service as unknown as {
+          deliverSlot: (...args: unknown[]) => Promise<void>;
+        }
+      ).deliverSlot.bind(f.service);
+      const run = () =>
+        deliverSlot(
+          { tenantId: 'tenant', expiresAt: new Date(Date.now() + 60_000) },
+          f.child,
+          { ...f.route, primary: 'telegram', link: { id: 'link' } },
+          { id: 'envelope', channel: 'telegram' },
+          Date.now() + 60_000,
+        );
+      await run();
+      expect(unknown).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tenantId: 'tenant',
+          campaignId: 'envelope',
+          recipientId: 'leaf',
+          attemptId: 'attempt',
+          leaseToken: 'lease',
+          recipientRevision: 2,
+        }),
+      );
+      const claimsBeforeResume = claimNext.mock.calls.length;
+      await run();
+      expect(claimNext).toHaveBeenCalledTimes(claimsBeforeResume);
+      expect(request).toHaveBeenCalledTimes(1);
+      expect(unknown).toHaveBeenCalledTimes(1);
+      expect(rejected).not.toHaveBeenCalled();
+      expect(accepted).not.toHaveBeenCalled();
+      expect(reconciled).not.toHaveBeenCalled();
+    },
+  );
 });
