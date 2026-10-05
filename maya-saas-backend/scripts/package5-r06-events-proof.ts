@@ -71,7 +71,7 @@ globalThis.fetch = async (input) => {
       Error('synthetic reply lost after provider boundary'),
     );
   return await Promise.resolve(
-    new Response(JSON.stringify({ message_id: 'synthetic-' + calls }), {
+    new Response(JSON.stringify({ message_id: String(calls) }), {
       status: 200,
     }),
   );

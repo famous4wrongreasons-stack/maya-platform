@@ -255,8 +255,8 @@ globalThis.fetch = () => {
     new Response(
       JSON.stringify(
         telegramOutcome === 'FAIL'
-          ? { error: 'synthetic' }
-          : { message_id: `synthetic-${telegramSends}` },
+          ? { error: 'invalid_request' }
+          : { message_id: String(telegramSends) },
       ),
       { status: telegramOutcome === 'FAIL' ? 400 : 200 },
     ),

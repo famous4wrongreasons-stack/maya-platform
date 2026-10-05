@@ -311,7 +311,7 @@ globalThis.fetch = async (target, init) => {
   const body = JSON.parse(init!.body as string) as { telegram_chat_id: string };
   const slot = await record('telegram', body.telegram_chat_id);
   const outcome = outcomes.get(slot.key);
-  return new Response(JSON.stringify({ message_id: 'synthetic-confirmed' }), {
+  return new Response(JSON.stringify({ message_id: '123' }), {
     status: outcome === 'unknown' ? 503 : outcome === 'rejected' ? 403 : 200,
   });
 };

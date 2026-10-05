@@ -694,7 +694,7 @@ async function deliveryProof() {
   globalThis.fetch = () => {
     primarySends++;
     return Promise.resolve(
-      new Response(JSON.stringify({ message_id: 'synthetic-provider-ack' }), {
+      new Response(JSON.stringify({ message_id: '123' }), {
         status: 200,
       }),
     );

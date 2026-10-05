@@ -117,7 +117,7 @@ globalThis.fetch = () => {
   providerDispatches += 1;
   return Promise.resolve(
     new Response(
-      JSON.stringify({ message_id: `synthetic-${providerDispatches}` }),
+      JSON.stringify({ message_id: String(providerDispatches) }),
       {
         status: 200,
         headers: { 'content-type': 'application/json' },

@@ -175,8 +175,8 @@ global.fetch = async (url: unknown, init?: RequestInit) => {
     return await Promise.reject(Error('Synthetic lost Telegram receipt'));
   if (failedChat && JSON.stringify(payload).includes(failedChat))
     return await Promise.resolve(
-      new Response(JSON.stringify({ error: 'synthetic_permission_denied' }), {
-        status: 403,
+      new Response(JSON.stringify({ error: 'invalid_request' }), {
+        status: 400,
       }),
     );
   const reference = String(700000 + telegramCalls);

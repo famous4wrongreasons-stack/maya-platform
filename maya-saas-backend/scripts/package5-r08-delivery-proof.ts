@@ -119,7 +119,7 @@ global.fetch = async (url: string | URL | Request) => {
   telegramCalls++;
   if (telegramUnknown) return await Promise.reject(Error('Synthetic UNKNOWN'));
   return await Promise.resolve(
-    new Response(JSON.stringify({ message_id: 'synthetic-r08-accepted' }), {
+    new Response(JSON.stringify({ message_id: '123' }), {
       status: 200,
     }),
   );

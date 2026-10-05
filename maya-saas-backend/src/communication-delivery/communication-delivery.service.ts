@@ -1,3 +1,7 @@
+import {
+  telegramExecutorRejected,
+  telegramMessageReference,
+} from './telegram-executor-result';
 import { ExpenseReminderStore } from '../expense-intake/expense-reminder.store';
 import { NativeFeedbackStore } from '../native-feedback/native-feedback.store';
 import { TeamMessageStore } from '../team-communications/team-message.store';
@@ -976,7 +980,9 @@ export class CommunicationDeliveryService {
             );
           }
           const responseBody = await this.safeJson(response);
-          if (response.status >= 400 && response.status < 500) {
+          if (
+            telegramExecutorRejected(response.status, responseBody, 'package2')
+          ) {
             await this.kernel.finalizeDeterministicReject({
               ...owned,
               recipientRevision: owned.recipientRevision + 1,
@@ -999,11 +1005,7 @@ export class CommunicationDeliveryService {
               'Telegram delivery outcome is unknown',
             );
           }
-          const messageId =
-            typeof responseBody.message_id === 'string' ||
-            typeof responseBody.message_id === 'number'
-              ? String(responseBody.message_id)
-              : '';
+          const messageId = telegramMessageReference(responseBody);
           if (!messageId) {
             await this.markUnknownSafely(owned, 'provider_reference_missing');
             throw new CommunicationDispatchError(
@@ -1691,7 +1693,9 @@ export class CommunicationDeliveryService {
             );
           }
           const responseBody = await this.safeJson(response);
-          if (response.status >= 400 && response.status < 500) {
+          if (
+            telegramExecutorRejected(response.status, responseBody, 'privacy')
+          ) {
             await this.kernel.finalizeDeterministicReject({
               ...owned,
               recipientRevision: owned.recipientRevision + 1,
@@ -1714,11 +1718,7 @@ export class CommunicationDeliveryService {
               'Telegram delivery outcome is unknown',
             );
           }
-          const messageId =
-            typeof responseBody.message_id === 'string' ||
-            typeof responseBody.message_id === 'number'
-              ? String(responseBody.message_id)
-              : '';
+          const messageId = telegramMessageReference(responseBody);
           if (!messageId) {
             await this.markUnknownSafely(owned, 'provider_reference_missing');
             throw new CommunicationDispatchError(
