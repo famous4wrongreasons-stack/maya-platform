@@ -7,7 +7,7 @@ Status: **narrow implementation and synthetic end-to-end proof complete; develop
 Source SHA: `dcba8c8f4d230de31fb93f3d613f7524c3310df9`.
 Stable checkout `/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/maya-platform` remains clean at that SHA.
 Development clone `/Users/stanislavmosin/Documents/Codex/2026-10-05/task-10/maya-platform-dev`, branch `development/yclients-schedule-chat`.
-Initial preview/parser delta: `f22df56848768ceaf0e4da490c3b1642b0f37c76`; historical report/archive commit: `13d8ce2a38af81b59e38c90f998b7bcef57a9a12`. Subsequent bridge commit on this branch contains the completed implementation below.
+Initial preview/parser delta: `f22df56848768ceaf0e4da490c3b1642b0f37c76`; historical report/archive commit: `13d8ce2a38af81b59e38c90f998b7bcef57a9a12`. Bridge implementation commit: `af923798` (full SHA available from Git); it contains the completed implementation below.
 Backend and React dependencies were reused through local read-only-use symlinks; no install or generate modified the source checkout.
 Read AGENTS.md and canonical docs; no repository `.agents` or SKILL.md found. Canonical carrier is React over headless shell.
 
