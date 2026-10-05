@@ -54,6 +54,7 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
+site-post-media/
 venv/
 .pytest_cache/
 
@@ -94,6 +95,7 @@ ai администратор/barber_knowledge_images/
 # Playwright CLI artifacts (logs/screenshots)
 .playwright-cli/
 output/playwright/
+output/site-community-deploy/
 
 # --- локальные артефакты генерации (PDF/PNG превью) ---
 tmp/
