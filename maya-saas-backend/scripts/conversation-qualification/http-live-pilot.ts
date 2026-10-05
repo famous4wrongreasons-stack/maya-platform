@@ -15,14 +15,30 @@ import { resetLoopbackLoginPreflight } from '../../test/widgets-live/support/log
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
 import { configureHttpApp } from '../../src/bootstrap/configure-http-app';
 import { PilotBudgetGate } from './budget-gate.mjs';
-import { freezePilot, replayPilot } from './replay.mjs';
+import { freezePilot, replayPilot, sha256 } from './replay.mjs';
 import { assertProofBrokerBody } from './proof-broker-contract.mjs';
 
 async function main() {
   const outputArg = process.argv[2];
   const paid = process.env.MAYA_PROOF_PAID_APPROVED === 'true';
+  const resume = process.env.MAYA_PROOF_RESUME === 'true';
+  if (resume && !paid) throw new Error('resume_requires_paid_profile');
   const usage: Record<string, unknown>[] = [];
   let dispatched = 0;
+  const runStamp = Date.now().toString();
+  const caseIndex =
+    process.env.MAYA_PROOF_CASE_INDEX === undefined
+      ? null
+      : Number(process.env.MAYA_PROOF_CASE_INDEX);
+  if (
+    caseIndex !== null &&
+    (!Number.isInteger(caseIndex) ||
+      caseIndex < 1 ||
+      caseIndex > 5 ||
+      !paid ||
+      !resume)
+  )
+    throw new Error('independent_case_scope_invalid');
   if (!outputArg || process.argv.length !== 3)
     throw new Error('explicit_output_directory_required');
   assertNoEnvFiles();
@@ -52,9 +68,41 @@ async function main() {
     6,
     ['client'],
   );
+  const manifestPath = path.join(directory, 'http-pilot-manifest.json');
+  if (resume) {
+    const original = JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as {
+      manifestSha256: string;
+    };
+    if (original.manifestSha256 !== manifest.manifestSha256)
+      throw new Error('resume_manifest_changed');
+  } else {
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), {
+      flag: 'wx',
+      mode: 0o600,
+    });
+  }
+  const selectedCases =
+    caseIndex === null ? manifest.cases : [manifest.cases[caseIndex]];
+  const { manifestSha256: parentManifestSha256, ...unsignedManifest } =
+    manifest;
+  const selected = {
+    ...unsignedManifest,
+    cases: selectedCases,
+    dialogs: selectedCases.length,
+    independentFamilies: new Set(selectedCases.map((c) => c.familyId)).size,
+    userTurns: selectedCases.reduce((n, c) => n + c.userTurns.length, 0),
+  };
+  const runManifest = {
+    ...selected,
+    manifestSha256: sha256(JSON.stringify(selected)),
+  };
   fs.writeFileSync(
-    path.join(directory, 'http-pilot-manifest.json'),
-    JSON.stringify(manifest, null, 2),
+    path.join(directory, `selection-${runStamp}.json`),
+    JSON.stringify(
+      { parentManifestSha256, caseIndex, ...runManifest },
+      null,
+      2,
+    ),
     { flag: 'wx', mode: 0o600 },
   );
   const originalFetch = global.fetch;
@@ -85,6 +133,7 @@ async function main() {
   };
   const gate = new PilotBudgetGate({
     ledgerPath: path.join(directory, 'budget-ledger.jsonl'),
+    resume,
     approved: true,
     transport: async (_url: unknown, init: RequestInit) => {
       // Apply the identical broker envelope bound in canned preflight and live mode.
@@ -97,7 +146,7 @@ async function main() {
           }),
           { status: 200, headers: { 'content-type': 'application/json' } },
         );
-      if (dispatched >= 30) throw new Error('broker_pilot_call_cap');
+      if (gate.requests > 30) throw new Error('broker_pilot_call_cap');
       dispatched++;
       const response = await originalFetch(
         'http://127.0.0.1:18081/chat/completions',
@@ -112,7 +161,25 @@ async function main() {
       try {
         const data = (await response.clone().json()) as {
           usage?: Record<string, unknown>;
+          choices?: {
+            message?: { content?: string };
+            finish_reason?: string;
+          }[];
         };
+        fs.appendFileSync(
+          path.join(directory, 'synthetic-model-responses.jsonl'),
+          JSON.stringify({
+            runStamp,
+            request: gate.requests,
+            status: response.status,
+            content:
+              typeof data.choices?.[0]?.message?.content === 'string'
+                ? data.choices[0].message.content.slice(0, 16384)
+                : null,
+            finishReason: data.choices?.[0]?.finish_reason ?? null,
+          }) + '\n',
+          { mode: 0o600 },
+        );
         const allowed = [
           'prompt_tokens',
           'completion_tokens',
@@ -160,6 +227,8 @@ async function main() {
   global.fetch = (url, init) => {
     if (base && typeof url === 'string' && url.startsWith(`${base}/api/`))
       return originalFetch(url, { ...init, redirect: 'error' });
+    if (gate.requests >= 30)
+      return Promise.reject(new Error('total_broker_attempt_cap'));
     return gate.fetch(url, init);
   };
   let app: NestExpressApplication | undefined;
@@ -175,7 +244,41 @@ async function main() {
       },
       body: JSON.stringify(body),
     });
-    if (!response.ok) throw new Error(`pilot_http_${response.status}`);
+    if (!response.ok) {
+      const error = (await response.json().catch(() => null)) as {
+        message?: unknown;
+        code?: unknown;
+        error?: { code?: unknown; detail?: unknown };
+      } | null;
+      fs.appendFileSync(
+        path.join(directory, 'synthetic-http-errors.jsonl'),
+        JSON.stringify({
+          runStamp,
+          route,
+          status: response.status,
+          message:
+            typeof error?.message === 'string'
+              ? error.message.slice(0, 4000)
+              : Array.isArray(error?.message)
+                ? error.message
+                    .filter((x) => typeof x === 'string')
+                    .slice(0, 10)
+                : null,
+          code:
+            typeof error?.code === 'string' ? error.code.slice(0, 200) : null,
+          modelCode:
+            typeof error?.error?.code === 'string'
+              ? error.error.code.slice(0, 120)
+              : null,
+          modelDetail:
+            typeof error?.error?.detail === 'string'
+              ? error.error.detail.slice(0, 200)
+              : null,
+        }) + '\n',
+        { mode: 0o600 },
+      );
+      throw new Error(`pilot_http_${response.status}`);
+    }
     return (await response.json()) as Record<string, unknown>;
   };
   try {
@@ -194,7 +297,7 @@ async function main() {
     base = await app.getUrl();
     db = await bootFixtureContext();
     fixtures = new Fixtures(db, null);
-    const result = await replayPilot(manifest, {
+    const result = await replayPilot(runManifest, {
       budget: gate,
       record: (row) => {
         records.push(row);
@@ -256,17 +359,24 @@ async function main() {
       },
     });
     fs.writeFileSync(
-      path.join(directory, 'http-pilot-report.json'),
+      path.join(
+        directory,
+        resume
+          ? `http-pilot-resume-report-${runStamp}.json`
+          : 'http-pilot-report.json',
+      ),
       JSON.stringify(
         {
           mode: paid
             ? 'isolated_http_real_deepseek_synthetic_crm'
             : 'isolated_http_canned_preflight',
           ...result,
-          manifestSha256: manifest.manifestSha256,
-          families: manifest.independentFamilies,
-          variants: manifest.dialogs,
-          turns: manifest.userTurns,
+          manifestSha256: runManifest.manifestSha256,
+          parentManifestSha256,
+          caseIndex,
+          families: runManifest.independentFamilies,
+          variants: runManifest.dialogs,
+          turns: runManifest.userTurns,
           providerAttempts: gate.requests,
           reservedNanoUsd: gate.reservedNanoUsd,
           brokerRequests: dispatched,

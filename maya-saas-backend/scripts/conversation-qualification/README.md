@@ -1,6 +1,6 @@
 # Bounded conversation pilot
 
-Offline replay and budget mechanics, not a completed live runner or a language-quality score.
+Offline replay, bounded live broker runner, and budget mechanics. The real-model diagnostic below is not a language-quality certification.
 The owner approved at most $20 total for the existing DeepSeek account, up to 50 synthetic
 dialogues. One runner owns that total; no per-worker budgets or top-ups. Production services,
 credentials and CRM effects remain outside this pilot.
@@ -25,8 +25,10 @@ retries. Exclusive, fsynced ledger; no refunds for failed/unknown usage; max 600
 endpoint are closed; output at most 2048 tokens, thinking disabled. Peak uncached prices verified
 2026-10-05 at https://api-docs.deepseek.com/quick_start/pricing/. Reservation uses serialized UTF-8
 bytes plus framing allowance as a conservative input-token bound. Price/token assumptions must
-still match the provider at dispatch. Existing ledger causes fail-closed restart; no resume or
-remaining-budget inference is implemented. Never start a second ledger as a budget reset.
+still match the provider at dispatch. Ordinary restart with an existing ledger fails closed. Explicit checked resume preserves the original
+start time, reservations and counters, validates broker compatibility handoff hashes and uses an
+exclusive writer lock. Truncated/changed/exhausted ledgers are refused; stale locks are not
+automatically stolen. Never start a second ledger as a budget reset.
 
 `http-dry-run.ts` boots the canonical AppModule/auth HTTP pipeline against the guarded local
 proof DB and feeds canned DeepSeek responses through the real model parser and budget gate.
@@ -35,7 +37,7 @@ was explicitly admitted and completed: 36 provider attempts, zero actual paid re
 `replayed_ungraded`, qualification `not_evaluated`. Evidence:
 `/tmp/maya-http-pilot-resume-20261005-a/` and `/tmp/maya-http-pilot-resume.log`.
 It admits no inherited provider key and has no live mode. This is HTTP/parser proof with canned
-transport, not real-model or YCLIENTS acceptance. Isolated paid/server setup remains separately blocked.
+transport, not real-model or YCLIENTS acceptance. At that checkpoint isolated paid/server setup was still blocked; the subsequently authorized run is recorded below.
 
 Before live execution, the dedicated adapter must use the canonical authenticated HTTP route in
 an isolated synthetic tenant/DB and wrap every actual model fetch (including retries) in this gate.
@@ -44,10 +46,9 @@ outbound effects and prove its CRM/notification/payment boundaries before receiv
 server-side credentials. Never copy/log credentials on the Mac. A fixture adapter, mock model,
 internal calendar, or passing replay report does not establish real-model/provider acceptance.
 
-Remaining live-run dependencies: verified isolated server runner/DB, inherited secret injection,
-whole-transport interception and HTTP adapter, synthetic fixture coverage and an outcome review
-rubric. The offline executable deliberately has no live switch. Pilot results diagnose client
-booking; they do not establish 99% acceptance or 1000-salon capacity.
+The offline executable deliberately has no live switch. The separately isolated broker profile
+now has actual model evidence below. Pilot results diagnose client booking; they do not establish
+99% acceptance, actual CRM booking acceptance or 1000-salon capacity.
 
 ## Authorized isolated pilot attempt (2026-10-05)
 
@@ -66,5 +67,41 @@ No provider language-quality conclusion is possible.
 
 The runner now validates the exact broker byte bound in both canned and paid paths before transport,
 and labels broker requests separately. Paid permit is closed; production PID/release stayed unchanged.
-Do not resume through a fresh ledger or restart the broker to reset its cap. Payload compatibility
-must be resolved with the setup owner and the original reservation preserved before another run.
+Do not resume through a fresh ledger or restart the broker to reset its cap. That checkpoint required payload compatibility with the setup owner and preservation of the original
+reservation. The verified recovery and completed diagnostic are recorded below.
+
+
+## Completed real-model diagnostic (2026-10-05, 21:31–21:45 Moscow)
+
+The broker owner raised the isolated envelope to 96 KiB and carried the prior attempt/reservation
+into the same ledger. The runner verified that handoff and resumed without budget or TTL reset.
+Every request kept the canonical prompt and authenticated AppModule HTTP path. Only synthetic
+fixtures/internal calendar were reachable; production credentials were unavailable to the runner.
+
+Six unique dev dialogues (five families) were reached: two cancellation/no-existing-booking
+cases completed all three turns; four availability/booking cases stopped on their first turn.
+The first failure was repeated once to obtain diagnostic evidence; it is not a seventh unique case.
+The remaining cases ran independently in fresh synthetic tenants, preserving stop-on-unknown
+inside each dialogue and without replaying an effectful user turn.
+
+18 real DeepSeek HTTP200 responses: 270,996 input tokens (40,576 cache hit; 230,420 cache miss),
+4,128 output tokens. Estimated off-peak cost from the official verified rates: $0.161143312;
+account debit was not separately queried. Persistent worst-case reserved budget is $2.01215388,
+including the initial pre-upstream rejection; no reservation was refunded. Nineteen counted broker
+attempts remain below the original 30-call ceiling, and the total budget remains $20.
+
+Blocking result: the model repeatedly emits semantic `date` while the taxonomy requires
+`date_or_period`; plan normalization requires clarification, then its simultaneous availability
+tool call fails `conversation_tool_plan_mismatch`. The canonical HTTP route returns503 before
+tool execution. Reproduced locally using captured synthetic output without another paid request.
+Do not weaken required-slot/identity checks or call this successful booking qualification.
+Next implementation path is the existing planner/semantic contract owner, with captured-response
+regression coverage, before another bounded live-model check.
+
+Two completed dialogues truthfully reported no existing bookings and acknowledged stop; these do
+not qualify actual move/cancel behavior against an existing appointment. Public staff-name redaction
+was also observed and is a separate entity-resolution limitation, not a production change here.
+
+Evidence: task-3/pilot-evidence/final-pilot-summary.json and final-evidence.tar.gz. Paid permit is
+closed, writer lock absent, all pilot processes stopped. Production PID21721 and release
+20260929-recon-fix-eb43bc22 remained unchanged. No production deploy, real CRM effects or notifications.

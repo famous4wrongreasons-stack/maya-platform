@@ -1,3 +1,4 @@
+export function sha256(value: string): string;
 export interface PilotManifest {
   version: number;
   purpose: string;
