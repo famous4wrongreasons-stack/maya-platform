@@ -1,0 +1,43 @@
+{
+  "bundle": "ru.mayaos.app",
+  "version": "1.0",
+  "build": "1",
+  "team": [
+    "YCL5U4L56W"
+  ],
+  "appIdentifier": "YCL5U4L56W.ru.mayaos.app",
+  "profileName": "iOS Team Provisioning Profile: ru.mayaos.app",
+  "createdAt": "2026-10-05T11:05:57",
+  "expiresAt": "2026-10-12T11:05:57",
+  "deviceCount": 1,
+  "targetIncluded": true,
+  "payloadFiles": {
+    "cordova.js": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cordova_plugins.js": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "icons/maya-192.png": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551",
+    "icons/maya-512-maskable.png": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be",
+    "icons/maya-512.png": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a",
+    "icons/maya-apple-180.png": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1",
+    "index.html": "93d30a85c2eba528a213a4c47ad9550f00d251eb28a0e835269a24d0e3729946",
+    "m/ca98092e7a464721/main.js": "ca98092e7a464721d9b6857673298b2030e460953a6dc39f60b12757a4768c20",
+    "manifest.webmanifest": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e",
+    "styles.css": "aab5c4b1e87137931a59565697bfd2fed9240a19c08717ce423268b70cc0b504"
+  },
+  "payloadInventorySha256": "c7014ae3984d52958cc587907a1b70be57a42c994aee26fcaf2483234ac90ffc",
+  "apiBase": "https://mayaos.ru/api",
+  "sourceCommit": "b56965f992a74f5453eecd63acf3421392f035ff",
+  "installation": {
+    "status": "confirmed",
+    "deviceLabel": "iPhone Mo",
+    "mode": "in-place update of ru.mayaos.app",
+    "appDeleted": false,
+    "appDataDeletedByAgent": false,
+    "evidence": "devicectl device install app exited 0, 2026-10-05; before/after bundle ru.mayaos.app 1.0 (1)"
+  },
+  "launch": {
+    "status": "blocked",
+    "evidence": "devicectl launch exited 1: iOS Security denied opening (signature/entitlements/profile trust group). Strict local codesign verification and profile entitlement matching passed. User trust on iPhone not verified."
+  },
+  "productionBackendChanged": false,
+  "realCrmActionsPerformed": false
+}

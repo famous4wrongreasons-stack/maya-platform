@@ -58,7 +58,7 @@
       },
       {
         "path": "src/net/client.ts",
-        "sha256": "684bd8bed745d0c63600154a46a1dba3ef1b949a5e96af3cec59083afbaada6b"
+        "sha256": "b42ebd5c5e2ef57ac4bb8f3a9cde2305c34c6f0e2847a85f8b084022423aaf85"
       },
       {
         "path": "src/net/endpoint.ts",
@@ -66,15 +66,15 @@
       },
       {
         "path": "src/net/project.ts",
-        "sha256": "03b8ad3ad1455721c27b8e0d801733facffde822a6e4b01243753049b6b733d0"
+        "sha256": "4e4bdca541c929cd6a88866cdbb79a33033168663d0f8538e790cbf202ec3e23"
       },
       {
         "path": "src/net/session.ts",
-        "sha256": "1a692633376930452ea533e934ea7ce7baa1e41c2bc0c11163a14a6cbf5240d1"
+        "sha256": "43f88579bf4fcf0f3e40c8ada6bc7f4c98e4bbf8951ab3e57812f43a738016ae"
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "c6caccc4eefb2795f07d1633c04d0e12f6e494eb4200e90526a525f959b8c53a"
+        "sha256": "bbcbad3aa9c2b6e6e7c26677bda99cccf3abd9ca3880995f55581f951e31abf7"
       },
       {
         "path": "src/renderer/cells.ts",
@@ -102,7 +102,7 @@
       },
       {
         "path": "src/shell/conversation.ts",
-        "sha256": "bcd56967366a5caa9e7b62a6e217c8b0d79a650f1a7907287bf699d89cad905d"
+        "sha256": "fe70a899acd574d450d83a37a5b4a0ce6d5d74b97615b65969ea2ebaae28aca5"
       },
       {
         "path": "src/shell/deeplink.ts",
@@ -114,7 +114,7 @@
       },
       {
         "path": "src/shell/ports.ts",
-        "sha256": "1b2237102c642c8a702c1059291904e98e15c8d5a63dadcab39b22aa73a97eff"
+        "sha256": "59a39703387b0c65d4ef8719368fa4b5298813980721129e67798293b394bc14"
       },
       {
         "path": "src/shell/shell.ts",
@@ -130,8 +130,8 @@
       }
     ]
   },
-  "bytes": 457610,
-  "digest": "2d308c178ded8405e92a31e732a42f1a800aab232b373d21c4ca6483e3dbbeaf",
+  "bytes": 465595,
+  "digest": "fe9274b4323288d47609e200b59ec2b5098ac8151bf3ec7f4c16f3c4eb9e1fe1",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -139,8 +139,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "a446fbf520af8e11b77f6c8261f73c7eb2e6625745320f55632396b92ba4e147",
-    "modulePath": "m/a446fbf520af8e11/",
+    "digest": "4f1960e1ec0b1d8541b3abac7c8036b47b4eca0033f30cd84543733886f5aa34",
+    "modulePath": "m/4f1960e1ec0b1d85/",
     "files": [
       {
         "path": "entry/main.js",
@@ -179,8 +179,8 @@
       },
       {
         "path": "src/dom/timeline.js",
-        "sha256": "416c3ba79fb1a40974476280e8acc1198b6b3a9ea1e5a1910a5d8178af2b8fcd",
-        "bytes": 12679
+        "sha256": "f089047e7916cb820ef47b8d04174d7d71e13c63e6b83f590f04fd62cc1325c9",
+        "bytes": 13786
       },
       {
         "path": "src/dom/voice-control.js",
@@ -194,8 +194,8 @@
       },
       {
         "path": "src/net/client.js",
-        "sha256": "252bbe749d9c7336b879a9c89480e6f09989b22a9b4e7ba596a4224055f12316",
-        "bytes": 21023
+        "sha256": "a396e145ba0b181bd2d2fe0d2c83e4266a33909bf709bf0eae3ecbe69cb33978",
+        "bytes": 21803
       },
       {
         "path": "src/net/endpoint.js",
@@ -204,13 +204,13 @@
       },
       {
         "path": "src/net/project.js",
-        "sha256": "11f31fcb445b52c3152de90fc47d2cca18a4d520ab2f5fb4778bf645d003743c",
-        "bytes": 10863
+        "sha256": "b183472e69e707a2d26c88af1be1d0ef5b7eeb88e55fa6895df6fe1625c18a07",
+        "bytes": 12510
       },
       {
         "path": "src/net/session.js",
-        "sha256": "952bd62d40e19288d6ca60f7bd74b599b86480098bf74c97c48a6c255edb5a1b",
-        "bytes": 12679
+        "sha256": "10cd624aea830d3f0f648438a63836612d064c84cfdf02be0e8ec2383157c056",
+        "bytes": 12802
       },
       {
         "path": "src/net/types.js",
@@ -249,8 +249,8 @@
       },
       {
         "path": "src/shell/conversation.js",
-        "sha256": "9ff5740de2bce779bc5a3cf4b8d0604d135f726580ee541ba04d2cb96ebcf88d",
-        "bytes": 11802
+        "sha256": "6b51fa1559e627b055e7d546e85f43a7d216851106fca017a10e86a04c778f9e",
+        "bytes": 14971
       },
       {
         "path": "src/shell/deeplink.js",
@@ -303,7 +303,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "ddf2304dfdc76787308e4b3e5340857a0b0fce172eb5324c3986ae55d485b098",
+      "sha256": "3f794c5391c5fcd476ffdf7af3b9535817853715bfc1247eb92ef59c1a106c71",
       "bytes": 1344
     },
     "assets": [
