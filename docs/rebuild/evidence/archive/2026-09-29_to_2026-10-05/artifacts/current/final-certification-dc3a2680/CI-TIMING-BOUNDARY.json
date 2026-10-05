@@ -1,0 +1,20 @@
+{
+  "candidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "battery": "PI-contract",
+  "nativeMutationStatus": "AS-DECLARED",
+  "mutants": 16,
+  "baselineRed": [],
+  "measuredLocalSeconds": 12472.934,
+  "measuredLocalMinutes": 207.88,
+  "workflowJobBudgetMinutes": 180,
+  "localBudgetExceeded": true,
+  "environment": "Darwin arm64; eight concurrent native workers sharing one host; Node 22.23.2",
+  "workflowEnvironment": "ubuntu-latest; isolated GitHub job",
+  "remoteTimingMeasured": false,
+  "inferenceBoundary": "This local receipt exceeds the workflow duration budget. It does not establish the elapsed duration of an actual remote CI job. Functional mutation PASS is not proof of remote headroom or a time-equivalent workflow run.",
+  "existingLimitation": "FBE2E L16 retained; no new owner acceptance inferred",
+  "timeoutPolicyChanged": false,
+  "receiptSha256": "4e8068df188fce1999c40189e6f93fc655f204be9b24a0e98f90e85975c00a43",
+  "workflowSha256": "80dd75f4cf603dcf921db96927ca60c08e8e0de3f19d6ee91791936c1207e2af",
+  "releaseCertificateIssued": false
+}

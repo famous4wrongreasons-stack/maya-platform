@@ -1,0 +1,31 @@
+{
+  "sourceWidgetId": "1b4f3bdf-d03e-4695-b1ea-523d3f1966f8",
+  "detailWidgetId": "ae3d58c6-6a1f-43a4-bad1-cc8edf58a01f",
+  "returnControl": "intent:i4",
+  "serverTarget": {
+    "class": "w",
+    "ref": "1b4f3bdf-d03e-4695-b1ea-523d3f1966f8"
+  },
+  "http": 200,
+  "receipt_outcome": "ACCEPTED",
+  "serverResolvedWidgetId": "1b4f3bdf-d03e-4695-b1ea-523d3f1966f8",
+  "projectedKeys": [
+    "outcome",
+    "code",
+    "next_envelope",
+    "receipt_outcome"
+  ],
+  "submissionOutcomes": [
+    {
+      "status": "advanced",
+      "widgetId": "ae3d58c6-6a1f-43a4-bad1-cc8edf58a01f"
+    },
+    {
+      "status": "accepted",
+      "widgetId": null
+    }
+  ],
+  "fullscreenAfter": "open",
+  "sameDetailStillOpen": true,
+  "timelineUnchanged": true
+}

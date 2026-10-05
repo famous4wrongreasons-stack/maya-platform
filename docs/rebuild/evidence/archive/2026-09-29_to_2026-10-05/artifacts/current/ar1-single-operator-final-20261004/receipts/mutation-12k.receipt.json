@@ -1,0 +1,15 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "name": "mutation-12k",
+  "command": [
+    "node",
+    "scripts/widgets-mutation-battery.mjs",
+    "--gate",
+    "12k",
+    "--out",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/ar1-single-operator-final-20261004/receipts/mutation-parts/widgets-mutation-part-12k.json"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261004/mutation-final2-worker-4/maya-saas-backend",
+  "exit": 0,
+  "seconds": 1733.55
+}

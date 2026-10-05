@@ -1,0 +1,30 @@
+{
+  "candidate": "86044d2b5ce4800c277314ff39e849ece3e63acb",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "parentApprovedCandidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "harnessCommits": [
+    "dac4072dd17ec222fe36cc603863965919039708 test(widgets): own an IPv4 loopback listener for live proofs",
+    "41906e0c0f48392cc0fef2dc199688d74aa8662d test(widgets): satisfy listener harness lint rules",
+    "86044d2b5ce4800c277314ff39e849ece3e63acb test(widgets): pin the expanded listener mutation inventory"
+  ],
+  "trackedStatusAtStart": "",
+  "changedPaths": [
+    "maya-saas-backend/scripts/widgets-mutation-ci.test.mjs",
+    "maya-saas-backend/test/widgets-live/http-listener.live-spec.ts",
+    "maya-saas-backend/test/widgets-live/mutations/gateH-harness.json",
+    "maya-saas-backend/test/widgets-live/support/http-bootstrap.ts"
+  ],
+  "effectBoundary": "loopback guarded synthetic proof DBs and fake provider adapters; no production effects",
+  "profile": "closed-input.no-handoff@1",
+  "globalHandoffStops": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "fullContractCertified": false,
+  "previousCandidatesExcluded": [
+    "fed5f7df",
+    "dac4072d",
+    "41906e0c"
+  ]
+}

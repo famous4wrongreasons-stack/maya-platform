@@ -1,0 +1,14 @@
+{
+  "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "parent": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+  "integration": "fast-forward exact approved commit",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "previousReceiptsReused": false,
+  "certifiedForProfile": false,
+  "finalStatus": "STOP: certification control failure",
+  "clean": true,
+  "fullContractCertified": false,
+  "readyForReleaseAuthorization": false,
+  "harnessProvenanceSha256": "e9affad7a2bcf89622f921dc7e35430d37686ab8f33905573aed696e1c1bb9a1"
+}

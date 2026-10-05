@@ -1,0 +1,34 @@
+{
+  "runtime-full": {
+    "tests": 415,
+    "pass": 408,
+    "failed": 0,
+    "skipped": 7,
+    "skipAudit": "PASS",
+    "skips": [
+      "ok 1 - health, and password sign-in with the typed business address (V2-6) # SKIP LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+      "ok 2 - D6: an untruncated 3 500-char assistant item gets 400; the 2 000-unit cut gets 201 # SKIP LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+      "ok 3 - approval_required attempt (V2-5): PASS only if the binary reaches an approval-gated tool # SKIP LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+      "ok 4 - email OTP (debug code): wrong code → 400 email_code_invalid, right code → session with top-level tenant; refresh rotation and reuse # SKIP LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+      "ok 5 - logout revokes the session; transcribe without a provider key answers 503 (voice is verified with mocks) # SKIP LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+      "ok 6 - 402 provoked on the fixture tenant only (trialEndsAt in the past), then restored # SKIP LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+      "ok 7 - 429 auth_rate_limited with Retry-After through the relay (provoked with a non-user identity on the fixture tenant) # SKIP LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)"
+    ]
+  },
+  "node24-runtime-full": {
+    "tests": 415,
+    "pass": 408,
+    "failed": 0,
+    "skipped": 7,
+    "skipAudit": "PASS",
+    "skips": [
+      "﹣ health, and password sign-in with the typed business address (V2-6) (0.855083ms) # LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+      "﹣ D6: an untruncated 3 500-char assistant item gets 400; the 2 000-unit cut gets 201 (0.275334ms) # LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+      "﹣ approval_required attempt (V2-5): PASS only if the binary reaches an approval-gated tool (0.204375ms) # LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+      "﹣ email OTP (debug code): wrong code → 400 email_code_invalid, right code → session with top-level tenant; refresh rotation and reuse (0.184041ms) # LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+      "﹣ logout revokes the session; transcribe without a provider key answers 503 (voice is verified with mocks) (0.166458ms) # LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+      "﹣ 402 provoked on the fixture tenant only (trialEndsAt in the past), then restored (0.135667ms) # LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+      "﹣ 429 auth_rate_limited with Retry-After through the relay (provoked with a non-user identity on the fixture tenant) (0.120791ms) # LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)"
+    ]
+  }
+}

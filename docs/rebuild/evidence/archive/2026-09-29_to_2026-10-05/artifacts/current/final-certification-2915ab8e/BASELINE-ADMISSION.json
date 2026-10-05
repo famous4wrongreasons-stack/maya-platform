@@ -1,0 +1,92 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "SV2-HTTP": "PASS",
+  "F88-1": "PASS",
+  "F88-2": "PASS",
+  "independentRepeatedRuns": {
+    "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+    "independentRepeats": [
+      {
+        "iteration": 1,
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "tests": [
+          {
+            "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+            "status": "passed",
+            "durationMs": 377
+          },
+          {
+            "title": "F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+            "status": "passed",
+            "durationMs": 190
+          },
+          {
+            "title": "F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+            "status": "passed",
+            "durationMs": 16
+          }
+        ]
+      },
+      {
+        "iteration": 2,
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "tests": [
+          {
+            "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+            "status": "passed",
+            "durationMs": 382
+          },
+          {
+            "title": "F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+            "status": "passed",
+            "durationMs": 190
+          },
+          {
+            "title": "F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+            "status": "passed",
+            "durationMs": 15
+          }
+        ]
+      },
+      {
+        "iteration": 3,
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "tests": [
+          {
+            "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+            "status": "passed",
+            "durationMs": 382
+          },
+          {
+            "title": "F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+            "status": "passed",
+            "durationMs": 190
+          },
+          {
+            "title": "F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+            "status": "passed",
+            "durationMs": 15
+          }
+        ]
+      }
+    ],
+    "nativeCorpusControl": "PENDING; targeted repetitions do not replace unrestricted native baseline"
+  },
+  "freshUnfilteredLiveSuite": {
+    "path": "receipts/widgets-live-full.json",
+    "sha256": "e46f24cdba590004ecde7f7106aa80fba2d3d66fd14494c3fdd6787e7114ac65"
+  },
+  "completeNativeAdmission": "PASS",
+  "completeNativeReceipt": "COMPLETE-MUTATIONS.json",
+  "nativeControlBoundary": "Initial raw controls are retained as diagnostics; complete canonical receipts and assembly now supply final native admission.",
+  "baselineRed": [],
+  "mismatches": 0,
+  "wholeCorpusAdmission": "PASS",
+  "completeNativeReceiptSha256": "afa124cffe9455071feab13b7b508cabcb5c59830f3ec34f54a59770393ddb8a"
+}

@@ -1,0 +1,33 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "priorApprovedRepair": "e180086f",
+  "currentJobBudgetMinutes": 180,
+  "workflowSha256": "80dd75f4cf603dcf921db96927ca60c08e8e0de3f19d6ee91791936c1207e2af",
+  "plannerSha256": "ada2bd0b99ade49adbd28cd057a3e323a4d9b3f7c31a79128db886b7d1cedb8e",
+  "currentPlan": [
+    {
+      "gate": "P-mint",
+      "partition": "1/4",
+      "slot": "P-mint-part-1-of-4"
+    },
+    {
+      "gate": "P-mint",
+      "partition": "2/4",
+      "slot": "P-mint-part-2-of-4"
+    },
+    {
+      "gate": "P-mint",
+      "partition": "3/4",
+      "slot": "P-mint-part-3-of-4"
+    },
+    {
+      "gate": "P-mint",
+      "partition": "4/4",
+      "slot": "P-mint-part-4-of-4"
+    }
+  ],
+  "restrictedTests": false,
+  "freshReceipts": "PENDING all four P-mint parts and full canonical assembly",
+  "requiredPostcondition": "Record every local shard duration and P-mint margins under unchanged 180-minute budget; no remote GitHub elapsed-time claim.",
+  "historicalL16Scope": "Earlier two-part P-mint configuration with approximately 30-minute headroom. Current source explicitly splits it into four while retaining full tests and controls."
+}

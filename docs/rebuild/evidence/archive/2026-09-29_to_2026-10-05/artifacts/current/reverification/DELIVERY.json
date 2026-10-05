@@ -1,0 +1,22 @@
+{
+  "contract": "maya.sb1-reverification-delivery/1",
+  "observed_at": "2026-09-29T18:58:02.746712+00:00",
+  "branch": "codex/widget-release-programme-20260929",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/widget-release",
+  "head": "4e39f5fbb419b0c87f4cbd91cffb9847f02c8499",
+  "backend_source_head": "dc783dbf58118aeb38e2d1982fc1331793997cbe",
+  "backend_identical_to_proof_head": true,
+  "clean_worktree": true,
+  "claude_head": "36fc31d7fa1ba5af758254912fa324093b4d954b",
+  "claude_overlap": [],
+  "self_booking_contract": "BLOCKED",
+  "new_verified_binding_path": "BLOCKED",
+  "pending_decision": "Four immutable JSON V2 correlation members in existing ClientLinkChallenge.issuanceEvidenceJson",
+  "false_clauses": 18,
+  "safe_to_integrate": false,
+  "production_effects": 0,
+  "real_otp_sent": 0,
+  "real_yclients_effects": 0,
+  "migration_files_added_or_changed": "",
+  "merge_performed": false
+}

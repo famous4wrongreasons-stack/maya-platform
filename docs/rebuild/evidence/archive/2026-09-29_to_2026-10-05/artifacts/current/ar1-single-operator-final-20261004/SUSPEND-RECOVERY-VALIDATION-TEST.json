@@ -1,0 +1,76 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "status": "PASS",
+  "checkedAt": "2026-10-04T18:11:45.759284+00:00",
+  "cases": [
+    {
+      "case": "Actual complete pre-sleep control",
+      "result": "PASS"
+    },
+    {
+      "case": "Actual interrupted P-ledger interval cannot become admissible by claiming green",
+      "result": "REFUSED AS REQUIRED"
+    },
+    {
+      "case": "DarkWake is not a full wake",
+      "result": "REFUSED AS REQUIRED"
+    },
+    {
+      "case": "Post-full-wake interval",
+      "result": "PASS"
+    },
+    {
+      "case": "Missing full wake keeps interval inadmissible",
+      "result": "REFUSED AS REQUIRED"
+    },
+    {
+      "case": "Retained evidence hash drift",
+      "result": "REFUSED AS REQUIRED"
+    },
+    {
+      "case": "Reused worker mirror binds by exact part interval",
+      "result": "PASS"
+    },
+    {
+      "case": "Ambiguous overlapping part intervals",
+      "result": "REFUSED AS REQUIRED"
+    },
+    {
+      "case": "Symlinked fixture retains declared worker-mirror parent",
+      "result": "PASS"
+    },
+    {
+      "case": "Prior blanket exit-zero rule incorrectly refuses actual named mutation kill",
+      "result": "REPRODUCED"
+    },
+    {
+      "case": "All eight actual L27 kills bind green baseline, unchanged full command and raw named failures",
+      "result": "PASS"
+    },
+    {
+      "case": "Actual green baseline remains mandatory",
+      "result": "PASS"
+    },
+    {
+      "case": "Unknown nonzero command is not a counterfactual waiver",
+      "result": "REFUSED AS REQUIRED"
+    },
+    {
+      "case": "Surviving L27 mutant is refused",
+      "result": "REFUSED AS REQUIRED"
+    },
+    {
+      "case": "Signal termination is not a named mutation kill",
+      "result": "REFUSED AS REQUIRED"
+    },
+    {
+      "case": "Fabricated named killer cannot replace the raw failure log",
+      "result": "REFUSED AS REQUIRED"
+    }
+  ],
+  "sourceSha256": "b5c160311456be30ed0864720a7105a65050c38fd72b956e817969cc35cac817",
+  "testSha256": "90d41bf9e7a1ce6fdaec2b5cd698db0db1c75ae58a5977e3731e17bcc94fa1e3",
+  "actualInterruptedReceiptSha256": "9dc1a1903584be714f082cb0f642437bdadd7a2216aca37f63954a2de93d50db",
+  "productChanged": false,
+  "timeoutsChanged": false
+}

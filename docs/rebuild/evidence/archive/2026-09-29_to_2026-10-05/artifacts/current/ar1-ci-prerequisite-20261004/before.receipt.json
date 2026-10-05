@@ -1,0 +1,17 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "--runInBand",
+    "--runTestsByPath",
+    "src/action-engine/beget-relay-release.architecture.spec.ts",
+    "--json",
+    "--outputFile",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/ar1-ci-prerequisite-20261004/before.json"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-ci-prerequisite-20261004/clean-fixture/maya-saas-backend",
+  "startedAt": "2026-10-04T09:09:23.850476+00:00",
+  "exit": 1,
+  "seconds": 0.66
+}

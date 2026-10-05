@@ -1,0 +1,158 @@
+[
+  {
+    "name": "repair-before",
+    "exit": 1,
+    "seconds": 2.123,
+    "passed": 2,
+    "failed": 3,
+    "runtimeErrors": 0,
+    "ambientClock": null,
+    "sourceSha256": "de3de3e1878df0af86f48c3e400591413cfcaf60017a1db6aa047bd812308861",
+    "command": [
+      "node",
+      "node_modules/jest/bin/jest.js",
+      "--runInBand",
+      "--runTestsByPath",
+      "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
+      "--json",
+      "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/clock-followup/repair-before.json"
+    ],
+    "failedTests": [
+      "P408TenantBillingCanonicalCutoverService P408-HARNESS-CLOCK anchors implicit billing reads to the fixture clock",
+      "P408TenantBillingCanonicalCutoverService fails closed for a different-plan active-window prepayment",
+      "P408TenantBillingCanonicalCutoverService does not create a recurring intent before the exact due window"
+    ]
+  },
+  {
+    "name": "repair-after",
+    "exit": 0,
+    "seconds": 0.676,
+    "passed": 5,
+    "failed": 0,
+    "runtimeErrors": 0,
+    "ambientClock": null,
+    "sourceSha256": "95283a123a5e858a257849d696ba632cd4c8ed565585787806e883d11b99c928",
+    "command": [
+      "node",
+      "node_modules/jest/bin/jest.js",
+      "--runInBand",
+      "--runTestsByPath",
+      "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
+      "--json",
+      "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/clock-followup/repair-after.json"
+    ],
+    "failedTests": []
+  },
+  {
+    "name": "repair-after-fixture",
+    "exit": 0,
+    "seconds": 1.46,
+    "passed": 5,
+    "failed": 0,
+    "runtimeErrors": 0,
+    "ambientClock": "2026-09-02T12:00:00.000Z",
+    "sourceSha256": "95283a123a5e858a257849d696ba632cd4c8ed565585787806e883d11b99c928",
+    "command": [
+      "node",
+      "node_modules/jest/bin/jest.js",
+      "--runInBand",
+      "--runTestsByPath",
+      "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
+      "--json",
+      "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/clock-followup/repair-after-fixture.json",
+      "--setupFilesAfterEnv",
+      "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/clock-fixture-diagnosis/ambient-clock.cjs"
+    ],
+    "failedTests": []
+  },
+  {
+    "name": "repair-after-before-boundary",
+    "exit": 0,
+    "seconds": 0.631,
+    "passed": 5,
+    "failed": 0,
+    "runtimeErrors": 0,
+    "ambientClock": "2026-09-30T23:59:59.999Z",
+    "sourceSha256": "95283a123a5e858a257849d696ba632cd4c8ed565585787806e883d11b99c928",
+    "command": [
+      "node",
+      "node_modules/jest/bin/jest.js",
+      "--runInBand",
+      "--runTestsByPath",
+      "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
+      "--json",
+      "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/clock-followup/repair-after-before-boundary.json",
+      "--setupFilesAfterEnv",
+      "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/clock-fixture-diagnosis/ambient-clock.cjs"
+    ],
+    "failedTests": []
+  },
+  {
+    "name": "repair-after-at-boundary",
+    "exit": 0,
+    "seconds": 0.637,
+    "passed": 5,
+    "failed": 0,
+    "runtimeErrors": 0,
+    "ambientClock": "2026-10-01T00:00:00.000Z",
+    "sourceSha256": "95283a123a5e858a257849d696ba632cd4c8ed565585787806e883d11b99c928",
+    "command": [
+      "node",
+      "node_modules/jest/bin/jest.js",
+      "--runInBand",
+      "--runTestsByPath",
+      "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
+      "--json",
+      "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/clock-followup/repair-after-at-boundary.json",
+      "--setupFilesAfterEnv",
+      "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/clock-fixture-diagnosis/ambient-clock.cjs"
+    ],
+    "failedTests": []
+  },
+  {
+    "name": "repair-after-after-boundary",
+    "exit": 0,
+    "seconds": 0.647,
+    "passed": 5,
+    "failed": 0,
+    "runtimeErrors": 0,
+    "ambientClock": "2026-10-01T00:00:00.001Z",
+    "sourceSha256": "95283a123a5e858a257849d696ba632cd4c8ed565585787806e883d11b99c928",
+    "command": [
+      "node",
+      "node_modules/jest/bin/jest.js",
+      "--runInBand",
+      "--runTestsByPath",
+      "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
+      "--json",
+      "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/clock-followup/repair-after-after-boundary.json",
+      "--setupFilesAfterEnv",
+      "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/clock-fixture-diagnosis/ambient-clock.cjs"
+    ],
+    "failedTests": []
+  },
+  {
+    "name": "repair-clock-removal-mutant",
+    "exit": 1,
+    "seconds": 82.938,
+    "passed": 2,
+    "failed": 3,
+    "runtimeErrors": 0,
+    "ambientClock": null,
+    "sourceSha256": "e3850e0caff355ce59e04bf672294de76771f98ca46fb1022b41914617e59cf0",
+    "command": [
+      "node",
+      "node_modules/jest/bin/jest.js",
+      "--runInBand",
+      "--runTestsByPath",
+      "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
+      "--json",
+      "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/clock-followup/repair-clock-removal-mutant.json"
+    ],
+    "failedTests": [
+      "P408TenantBillingCanonicalCutoverService P408-HARNESS-CLOCK anchors implicit billing reads to the fixture clock",
+      "P408TenantBillingCanonicalCutoverService fails closed for a different-plan active-window prepayment",
+      "P408TenantBillingCanonicalCutoverService does not create a recurring intent before the exact due window"
+    ]
+  }
+]

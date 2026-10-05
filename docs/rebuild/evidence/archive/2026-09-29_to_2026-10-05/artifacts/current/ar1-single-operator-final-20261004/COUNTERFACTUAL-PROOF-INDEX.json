@@ -1,0 +1,429 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "indexedAt": "2026-10-04T11:10:23.588318+00:00",
+  "kind": "fresh component-proof index; not a release certificate",
+  "completeProgrammeStateAtIndex": "mutation corpus running; hosted CI not started",
+  "productionOperations": 0,
+  "productionPrivateKeysCreatedOrStored": 0,
+  "sourceReceipts": [
+    {
+      "path": "receipts/backend-full.json",
+      "sha256": "35c800f823148efbe4f348264910e985a0d865c610631a57d2e05acb4ca0ed36",
+      "executionReceipt": "receipts/backend-full.receipt.json",
+      "executionSha256": "6341001bc5b73b2de448dd9aec220d7f3c455ee072bdef66f8a4ec088efa103e"
+    },
+    {
+      "path": "receipts/widgets-live-full.json",
+      "sha256": "56f48a701df707245c1c5dc909373ba6f51a3b16f2c9ad9c8492d6f3dd4c4d04",
+      "executionReceipt": "receipts/widgets-live-full.receipt.json",
+      "executionSha256": "e91bf36d62011be032a8ffe2a11a6da0831a7dd887480bcc1eb99fbe4546013a"
+    },
+    {
+      "path": "receipts/release-binary.json",
+      "sha256": "6441d1b48e43c7e1de47e6a0984c67ed8611e38798a81819b5d4fdd5258acef8",
+      "executionReceipt": "receipts/release-binary.receipt.json",
+      "executionSha256": "57d4efdf09c7ff1220de6cedc89a2099476bd88c69163387792de314dbb41366"
+    }
+  ],
+  "requirements": [
+    {
+      "requirement": "tenant_owner cannot release",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/widgets-live-full.json",
+          "title": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-ROLE tenant owner and revoked platform session never gain release authority",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "tenant session cannot replace global session",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/widgets-live-full.json",
+          "title": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-TENANT-SESSION a tenant session cannot substitute for a global session, even with forged platform actor claims",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "Tenant A authorization cannot apply to Tenant B",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/widgets-live-full.json",
+          "title": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-TWO-TENANTS one global session manages two ordinary tenants; grants and revoke never cross scopes",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-tenant is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-MULTITENANT same global principal supports distinct ordinary tenants with separately bound grants",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "fabricated reviewer refused",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed fabricated-reviewer is refused",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "second self-signature is not independent review",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-NO-SELF-SIGNATURE second certificate signature and V1 downgrade cannot substitute",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed self-reviewer is refused",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "explicit independentHumanReview=false required",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-DISCLOSURE mandatory independentHumanReview",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed claimed-review is refused",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "V1 authorization cannot revoke V2 grant",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/widgets-live-full.json",
+          "title": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-REVOKE-VERSION V1-revokes-V2 is refused even with a valid signer and matching stored release digests",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "V2 authorization cannot revoke V1 grant",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/widgets-live-full.json",
+          "title": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-REVOKE-VERSION V2-revokes-V1 is refused even with a valid signer and matching stored release digests",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "stale CAS refused",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/widgets-live-full.json",
+          "title": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-STALE two independently signed grants with the same prestate cannot both win CAS",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "expired or consumed-and-revoked authorization cannot grant or reactivate",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-WINDOW expired",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/widgets-live-full.json",
+          "title": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-LIFECYCLE validate is read-only; signed grant has atomic audit; same authorization retry never grants twice; revoke refuses an old widget token",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/widgets-live-full.json",
+          "title": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-REPLAY-BOUND rebinding an already consumed authorization cannot renew or overwrite",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed fabricated-reviewer is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed self-reviewer is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed claimed-review is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed missing-mode is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed different-approver is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed different-operator is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-tenant is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wildcard is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-profile is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-profile-digest is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-evidence is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-certificate is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed staging is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed extra-exclusion is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/release-binary.json",
+          "title": "AR-1 single-operator production execution (ephemeral keys, guarded proof DB) [HTTP] [PostgreSQL] SO-BIN [BIN] two production binaries observe the same grant, revoke and expiry without stale process state",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "plan and trial cannot grant widgets.runtime",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "EntitlementsService AR1-PLAN refuses widgets even if a plan row is accidentally populated",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR-1 signed release policy AR1-TRIAL widget trial remains forbidden even if readiness changes",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "HANDOFF remains unavailable",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/widgets-live-full.json",
+          "title": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-HANDOFF production profile refuses HANDOFF at mint and admission owners",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "allowlist removal immediately disables effective access",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-READER disclosure survives persistence; expiry, foreign row and allowlist removal disable access",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed fabricated-reviewer is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed self-reviewer is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed claimed-review is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed missing-mode is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed different-approver is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed different-operator is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-tenant is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wildcard is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-profile is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-profile-digest is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-evidence is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-certificate is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed staging is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed extra-exclusion is refused",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/release-binary.json",
+          "title": "AR-1 single-operator production execution (ephemeral keys, guarded proof DB) [HTTP] [PostgreSQL] SO-BIN [BIN] two production binaries observe the same grant, revoke and expiry without stale process state",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "revoke remains available after allowlist removal and candidate replacement",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/widgets-live-full.json",
+          "title": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-REVOKE-BOUND revoke binds exact release, evidence, profile and build; rollback works after allowlist removal and candidate change",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "revoke remains available after certificate expiry",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/widgets-live-full.json",
+          "title": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-REVOKE-EXPIRED-CERT a fresh signed revoke remains available after certificate expiry",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "atomic audit failure cannot leave an entitlement grant",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/widgets-live-full.json",
+          "title": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-AUDIT failure rolls back the entitlement mutation",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/widgets-live-full.json",
+          "title": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-AUDIT-NOOP silently missing audit cannot commit an entitlement",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "concurrent consumption has one grant and audit",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/widgets-live-full.json",
+          "title": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-CONCURRENT two consumes of one authorization produce one grant and one audit",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "requirement": "post-certification byte change refused",
+      "result": "PASS",
+      "freshAssertions": [
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-BYTES re-reads bytes and refuses a changed build after admission",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-RUNNING correctly signed wrong candidateSha refuses",
+          "status": "passed"
+        },
+        {
+          "receipt": "receipts/backend-full.json",
+          "title": "AR1 V2 one real platform signer; independent review explicitly absent SO-RUNNING correctly signed wrong buildDigest refuses",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "replaySemantics": "A consumed authorization can return its original historical receipt idempotently; it cannot create another grant, renew, overwrite or reactivate revoked access."
+}

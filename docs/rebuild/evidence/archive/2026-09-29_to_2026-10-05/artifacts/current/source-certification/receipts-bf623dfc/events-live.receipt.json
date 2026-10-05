@@ -1,0 +1,12 @@
+{
+  "candidate": "bf623dfc708f097db31a767505be517f838f0dd4",
+  "name": "events-live",
+  "command": [
+    "npm",
+    "run",
+    "test:events:live"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 1,
+  "seconds": 0.63
+}

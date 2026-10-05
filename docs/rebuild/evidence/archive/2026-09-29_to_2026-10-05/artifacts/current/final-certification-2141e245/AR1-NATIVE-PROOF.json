@@ -1,0 +1,197 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "scope": "Complete native AR battery only. Whole-corpus certification is still pending.",
+  "source": "outputs/final-certification-2141e245/receipts/mutation-parts/widgets-mutation-part-AR.json",
+  "sourceSha256": "c9984be9d3376524ffecf99568ee6b751d49fdff3a6257d03954dd0377f9c8a6",
+  "durationSeconds": 6047.05,
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "baselineControls": {
+    "baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "mutations": [
+    {
+      "id": "AR-M1",
+      "status": "build-killed",
+      "killers": [
+        "AR1-FORGED"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M2",
+      "status": "build-killed",
+      "killers": [
+        "AR1-CONTEXT"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M3",
+      "status": "build-killed",
+      "killers": [
+        "AR1-NEGATIVE"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M4",
+      "status": "build-killed",
+      "killers": [
+        "AR1-RUNNING"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M5",
+      "status": "build-killed",
+      "killers": [
+        "AR1-THRESHOLD"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M6",
+      "status": "build-killed",
+      "killers": [
+        "AR1-NEGATIVE"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M7",
+      "status": "build-killed",
+      "killers": [
+        "AR1-PRODUCTION"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M8",
+      "status": "build-killed",
+      "killers": [
+        "AR1-TRIAL"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M9",
+      "status": "build-killed",
+      "killers": [
+        "AR1-PLAN"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M10",
+      "status": "build-killed",
+      "killers": [
+        "AR1-UNSIGNED"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M11",
+      "status": "live-killed",
+      "killers": [
+        "AR1-STALE"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M12",
+      "status": "live-killed",
+      "killers": [
+        "AR1-CONCURRENT"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M13",
+      "status": "live-killed",
+      "killers": [
+        "AR1-ADVERSARIAL"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M14",
+      "status": "live-killed",
+      "killers": [
+        "AR1-AUDIT"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M15",
+      "status": "live-killed",
+      "killers": [
+        "AR1-LIFECYCLE"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M16",
+      "status": "live-killed",
+      "killers": [
+        "AR1-EXPIRY"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M17",
+      "status": "live-killed",
+      "killers": [
+        "AR1-REVOKE-WAIT"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M18",
+      "status": "live-killed",
+      "killers": [
+        "AR-G6-REVOCATION"
+      ],
+      "vacuous": []
+    },
+    {
+      "id": "AR-M19",
+      "status": "live-killed",
+      "killers": [
+        "AR-G6-REVOCATION"
+      ],
+      "vacuous": []
+    }
+  ],
+  "status": "19/19 AS DECLARED",
+  "productionGrant": false,
+  "certificateIssued": false
+}

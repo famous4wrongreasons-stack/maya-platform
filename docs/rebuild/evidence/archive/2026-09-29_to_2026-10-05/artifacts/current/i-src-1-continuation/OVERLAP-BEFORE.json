@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-09-30T10:14:10.596087+00:00",
+  "integrationBefore": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "sourceCommit": "f531367f00d62bbf5e27c4df8c64ba9695f9c968",
+  "sourceParent": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "mergeBase": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "worktreeClean": true,
+  "sourcePaths": [
+    "maya-chat-shell/dist/manifest.json",
+    "maya-chat-shell/src/shell/intents.ts",
+    "maya-chat-shell/test/intents.test.mjs"
+  ],
+  "integrationPathsSinceBase": [],
+  "concurrentFileOverlap": [],
+  "sourceParentExactlyCandidate": true,
+  "integrationAction": "cherry-pick -x exact source commit; no semantic rewrite"
+}

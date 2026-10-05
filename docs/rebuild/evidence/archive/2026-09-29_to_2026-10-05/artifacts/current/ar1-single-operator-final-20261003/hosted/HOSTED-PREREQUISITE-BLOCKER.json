@@ -1,0 +1,9 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "at": "2026-10-04T09:07:37.724456+00:00",
+  "reason": "Missing build prerequisite for mandatory full-suite R01 integration artifact; hosted Platform CI has 5700 PASS and one ENOENT. Current mutation source preparation also omits this artifact; no red baseline may certify release.",
+  "platformRun": 37189856220,
+  "mutationRun": 37189868062,
+  "productSourceChanged": false,
+  "productionEffects": 0
+}

@@ -1,0 +1,272 @@
+{
+  "utc": "2026-09-30T22:56:08.996951+00:00",
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "workerRoots": [
+    4674,
+    4825,
+    24305,
+    39383,
+    66194,
+    72104,
+    88170,
+    89649
+  ],
+  "processes": [
+    {
+      "pid": 4674,
+      "ppid": 35474,
+      "pgid": 4674,
+      "etime": "01:02:12",
+      "cpuPercent": 0.0,
+      "rssKiB": 95664,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate SBV --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-SBV.json"
+    },
+    {
+      "pid": 4825,
+      "ppid": 35474,
+      "pgid": 4825,
+      "etime": "01:02:09",
+      "cpuPercent": 0.0,
+      "rssKiB": 105024,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate PI-contract --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-PI-contract.json"
+    },
+    {
+      "pid": 24305,
+      "ppid": 35474,
+      "pgid": 24305,
+      "etime": "46:40",
+      "cpuPercent": 0.0,
+      "rssKiB": 94608,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 10 --partition 1/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-10-part-1-of-4.json"
+    },
+    {
+      "pid": 39383,
+      "ppid": 35474,
+      "pgid": 39383,
+      "etime": "33:46",
+      "cpuPercent": 0.0,
+      "rssKiB": 97168,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 10 --partition 2/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-10-part-2-of-4.json"
+    },
+    {
+      "pid": 66194,
+      "ppid": 35474,
+      "pgid": 66194,
+      "etime": "12:29",
+      "cpuPercent": 0.0,
+      "rssKiB": 90352,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 10 --partition 3/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-10-part-3-of-4.json"
+    },
+    {
+      "pid": 72104,
+      "ppid": 35474,
+      "pgid": 72104,
+      "etime": "07:12",
+      "cpuPercent": 0.0,
+      "rssKiB": 80048,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 10 --partition 4/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-10-part-4-of-4.json"
+    },
+    {
+      "pid": 72115,
+      "ppid": 72104,
+      "pgid": 72104,
+      "etime": "07:12",
+      "cpuPercent": 0.0,
+      "rssKiB": 80560,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-4c393c5a5a --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-4c393c5a5a.json"
+    },
+    {
+      "pid": 72132,
+      "ppid": 72115,
+      "pgid": 72104,
+      "etime": "07:11",
+      "cpuPercent": 107.0,
+      "rssKiB": 1050544,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-4c393c5a5a/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-4c393c5a5a --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-4c393c5a5a.json"
+    },
+    {
+      "pid": 73714,
+      "ppid": 24305,
+      "pgid": 24305,
+      "etime": "06:06",
+      "cpuPercent": 0.0,
+      "rssKiB": 80272,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-741d3b2dae --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-741d3b2dae.json"
+    },
+    {
+      "pid": 73730,
+      "ppid": 73714,
+      "pgid": 24305,
+      "etime": "06:06",
+      "cpuPercent": 148.1,
+      "rssKiB": 1135328,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-741d3b2dae/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-741d3b2dae --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-741d3b2dae.json"
+    },
+    {
+      "pid": 75418,
+      "ppid": 88170,
+      "pgid": 88170,
+      "etime": "04:47",
+      "cpuPercent": 0.0,
+      "rssKiB": 80368,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-fd8bde6c50 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-fd8bde6c50.json"
+    },
+    {
+      "pid": 75447,
+      "ppid": 75418,
+      "pgid": 88170,
+      "etime": "04:47",
+      "cpuPercent": 158.3,
+      "rssKiB": 475840,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-fd8bde6c50/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-fd8bde6c50 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-fd8bde6c50.json"
+    },
+    {
+      "pid": 75602,
+      "ppid": 66194,
+      "pgid": 66194,
+      "etime": "04:38",
+      "cpuPercent": 0.0,
+      "rssKiB": 80624,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-3159533872 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-3159533872.json"
+    },
+    {
+      "pid": 75631,
+      "ppid": 75602,
+      "pgid": 66194,
+      "etime": "04:38",
+      "cpuPercent": 93.8,
+      "rssKiB": 1237616,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-3159533872/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-3159533872 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-3159533872.json"
+    },
+    {
+      "pid": 76361,
+      "ppid": 4825,
+      "pgid": 4825,
+      "etime": "03:49",
+      "cpuPercent": 0.0,
+      "rssKiB": 80416,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-4d09398d8b --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-4d09398d8b.json"
+    },
+    {
+      "pid": 76378,
+      "ppid": 76361,
+      "pgid": 4825,
+      "etime": "03:49",
+      "cpuPercent": 114.3,
+      "rssKiB": 1963360,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-4d09398d8b/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-4d09398d8b --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-4d09398d8b.json"
+    },
+    {
+      "pid": 76688,
+      "ppid": 4674,
+      "pgid": 4674,
+      "etime": "03:33",
+      "cpuPercent": 0.0,
+      "rssKiB": 80240,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-f38154dd8d --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-f38154dd8d.json"
+    },
+    {
+      "pid": 76704,
+      "ppid": 76688,
+      "pgid": 4674,
+      "etime": "03:33",
+      "cpuPercent": 192.3,
+      "rssKiB": 1193264,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-f38154dd8d/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-f38154dd8d --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-f38154dd8d.json"
+    },
+    {
+      "pid": 77585,
+      "ppid": 39383,
+      "pgid": 39383,
+      "etime": "02:24",
+      "cpuPercent": 0.0,
+      "rssKiB": 80432,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-950dc9c8e0 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-950dc9c8e0.json"
+    },
+    {
+      "pid": 77601,
+      "ppid": 77585,
+      "pgid": 39383,
+      "etime": "02:24",
+      "cpuPercent": 0.0,
+      "rssKiB": 214320,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-950dc9c8e0/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-950dc9c8e0 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-950dc9c8e0.json"
+    },
+    {
+      "pid": 80088,
+      "ppid": 77601,
+      "pgid": 39383,
+      "etime": "00:12",
+      "cpuPercent": 100.0,
+      "rssKiB": 322896,
+      "command": "/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python -m unittest test_package5_b22_tip_retirement"
+    },
+    {
+      "pid": 80252,
+      "ppid": 89649,
+      "pgid": 89649,
+      "etime": "00:04",
+      "cpuPercent": 0.0,
+      "rssKiB": 65616,
+      "command": "npm run typecheck:widgets-live"
+    },
+    {
+      "pid": 80267,
+      "ppid": 80252,
+      "pgid": 89649,
+      "etime": "00:04",
+      "cpuPercent": 166.4,
+      "rssKiB": 1244592,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-66a03296ae/maya-saas-backend/node_modules/.bin/tsc --noEmit --project test/tsconfig.widgets-live.json --incremental false"
+    },
+    {
+      "pid": 80420,
+      "ppid": 75631,
+      "pgid": 66194,
+      "etime": "00:00",
+      "cpuPercent": 22.5,
+      "rssKiB": 98672,
+      "command": "/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python -m unittest test_package5_operational_delivery"
+    },
+    {
+      "pid": 88170,
+      "ppid": 35474,
+      "pgid": 88170,
+      "etime": "01:16:14",
+      "cpuPercent": 0.0,
+      "rssKiB": 98368,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate SV2 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-SV2.json"
+    },
+    {
+      "pid": 89649,
+      "ppid": 35474,
+      "pgid": 89649,
+      "etime": "01:14:41",
+      "cpuPercent": 0.0,
+      "rssKiB": 97840,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate SB1 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-SB1.json"
+    }
+  ],
+  "cpuPercentTotal": 1102.7,
+  "rssGiB": 9.85,
+  "memory": {
+    "exit": 0,
+    "stdout": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                   626280.\nPages active:                                3536622.\nPages inactive:                              3461076.\nPages speculative:                             73644.\nPages throttled:                                   0.\nPages wired down:                             388424.\nPages purgeable:                               71263.\n\"Translation faults\":                     8391190281.\nPages copy-on-write:                       453847055.\nPages zero filled:                        9125999711.\nPages reactivated:                           6171557.\nPages purged:                               13421017.\nFile-backed pages:                           1126244.\nAnonymous pages:                             5945098.\nPages stored in compressor:                   619104.\nPages occupied by compressor:                 178137.\nDecompressions:                              4443602.\nCompressions:                                8849715.\nPageins:                                    28648272.\nPageouts:                                      11018.\nSwapins:                                     1522142.\nSwapouts:                                    1996680.\n",
+    "stderr": ""
+  },
+  "uptime": {
+    "exit": 0,
+    "stdout": " 1:56  up 12 days,  3:26, 1 user, load averages: 11.81 10.69 11.32\n",
+    "stderr": ""
+  },
+  "swap": {
+    "exit": 0,
+    "stdout": "vm.swapusage: total = 3072.00M  used = 1792.81M  free = 1279.19M  (encrypted)\n",
+    "stderr": ""
+  },
+  "ownedTCP": {
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "candidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "scope": "Fresh complete ordinary/component programme only. Native full mutation corpus still running; this is not a certificate.",
+  "components": {
+    "backend-full": {
+      "passed": 5599,
+      "failed": 0,
+      "skipped": 0,
+      "suites": 587,
+      "reportSha256": "c9da6a92ba30e386e49e6b791958e441ce0e625aa37513ff23092b89ab8a6e76"
+    },
+    "widgets-live-full": {
+      "passed": 406,
+      "failed": 0,
+      "skipped": 0,
+      "suites": 37,
+      "reportSha256": "d3a88aa7a262cb5653679728635407fa6d4c70f66033d370690d12aaa8182358"
+    },
+    "release-binary": {
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "suites": 2,
+      "reportSha256": "1881689e9f0da7453723f7f97b7d8f18164e0277d259cda89d07168c32b8a5c1"
+    },
+    "runtime-full": {
+      "pass": 422,
+      "fail": 0,
+      "skipped": 7,
+      "reportSha256": "965d16a3bc09df723cef47e82ed18bceb388f2091a0f1937556f03f1fcdcb395"
+    },
+    "node24-runtime-full": {
+      "pass": 422,
+      "fail": 0,
+      "skipped": 7,
+      "reportSha256": "4760b41a236edad0a14db217448b2d699c19b1794214bfb7a10deddec1f0a339"
+    },
+    "carrier-full": {
+      "pass": 93,
+      "fail": 0,
+      "skipped": 0,
+      "reportSha256": "c3cc4711976c9437cf27279f5c993c91dc3c22f93aa6aa15e9d18f8da63a20ba"
+    },
+    "l27Mutations": {
+      "status": "PASS",
+      "killed": 8,
+      "baseline": "GREEN",
+      "fullSuitePerMutant": true
+    }
+  },
+  "fbe2eProbes": [
+    {
+      "name": "fbe2e-canonical-net-bin",
+      "exit": 0,
+      "receiptSha256": "1f9f25d2dd9f40cb4a9d98b30be710ce7a0e15ad024da26f40dcadb6a804f5b1"
+    },
+    {
+      "name": "fbe2e-canonical-net-roundtrip",
+      "exit": 0,
+      "receiptSha256": "1f8ff19d6402abec279e731a0acd6565a1b3fd47354ea355619aa50ecae52ae4"
+    },
+    {
+      "name": "fbe2e-canonical-net-turn",
+      "exit": 0,
+      "receiptSha256": "d5227ea5c5514d78f3b374dc59415e9a9de85d4d94599574d0430c07772b456d"
+    },
+    {
+      "name": "fbe2e-compiled-net-bin",
+      "exit": 0,
+      "receiptSha256": "9c886feb663545ed67822c7f0528d7f4d0a4c4cbb864737ec5909b5844c8e642"
+    },
+    {
+      "name": "fbe2e-compiled-receipt-net-bin",
+      "exit": 0,
+      "receiptSha256": "9f57629691e6eafd6561e87a997d2d3256a0e0e1bde44e87a4841952225fa41d"
+    },
+    {
+      "name": "fbe2e-l27-postcommit-dismiss",
+      "exit": 0,
+      "receiptSha256": "78446777752f8a5f67d201d7656cd63d0747fea100d4fdd70b72f86c70830358"
+    }
+  ],
+  "fullMutationProgramme": "RUNNING",
+  "certificateIssued": false
+}

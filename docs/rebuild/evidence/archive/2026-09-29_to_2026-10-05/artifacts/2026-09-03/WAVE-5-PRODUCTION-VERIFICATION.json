@@ -1,0 +1,236 @@
+{
+  "release": "20260903-c06-p5-wave5-cutover-2a916120",
+  "deployedSource": "2a91612091a80714920754cae647f008e35d78ee",
+  "structural": {
+    "structuralVerification": "PASS",
+    "registrations": {
+      "wave1": 6,
+      "wave2": 13,
+      "wave3": 8,
+      "wave4": 12,
+      "wave5": 1
+    },
+    "correctionRoute": "POST /api/recovery/attribution/corrections",
+    "ownerApproval": "REQUIRED",
+    "tenantScope": "REQUIRED",
+    "legacyRecoveryWriteSites": 0,
+    "artifacts": {
+      "app.module.js": "eea47b4bdcc725e8f42469e4e5fba60c6b2e3f22ef128b2c149221ca3c86964f",
+      "recovery/recovery.module.js": "c9c0336b69ed631425f740c5670ef059f9f24408d09fc78353de445e98adba8c",
+      "recovery/recovery.controller.js": "80d442a1d7534d564b692766edc624de77a79c467d0eb4a6982e6c8a4dae4413",
+      "recovery/recovery.service.js": "c7399352ca7b3efd0ea11373cce378b39e6d20c765a0b0609a4255a00a61dfec",
+      "recovery/dto/recovery.dto.js": "59bcdb9e5016e254e4e6a0359ebd27a5bbc7d08550d19db62da2786092fff0d5",
+      "package5-wave5/package5-wave5.module.js": "d8e08cc07c01497e4e492087c833349a6b27303915e9bdbe719382284c1f5adf",
+      "package5-wave5/package5-wave5-canonical-cutover.service.js": "ea4e6109103daefd16884081878ad75b8faca37a9383c0504b8519bb3f17839d",
+      "package5-wave5/package5-wave5.service.js": "7d8d1210a1195029f6746cdb380c927eab96a91a3b950db4be4ead4e284c08e8",
+      "action-engine/package5-wave5-executable.contract.js": "fc5a1f2ecbe016810d81697da48f98317e2e756539bb3fec5a6daaad1224d77f",
+      "action-engine/action-engine.registry.js": "2dcefe232b9ae0b216abe22aa3b602672089efa96ded6367d63bf22878416fef",
+      "action-engine/action-engine.policy-registry.js": "0314db03b2fe814e7a96156db0d7ee3772188d93ed2540c9417a498f8b1632eb",
+      "action-engine/action-engine.ingress.js": "3dd8ac918600e4708d90cfe714ae8bba8d08a6d60ecab552b3297078b47b896e",
+      "action-engine/action-engine.kernel.js": "47ba6d5445f0bb00da9ed386226c89c47f54770715725fdaeeb1280a5cf944e3",
+      "domain/domain-event.js": "c35ca45c9058587c9bb976047b20e29c9b573b55edb1d125e714fca30a4af574",
+      "crm/shadow-ingestion.service.js": "6049e8a2b76210c8849214bd7d4e71c66c46877e8970cf2ddacd5424a84e436f",
+      "crm/appointment-change.service.js": "e2cde5730bb23a806dfcc72ae05f7ba73441bb7b672f32081221266e345443ce",
+      "crm/appointment-reconciliation.service.js": "26b188bfa685e2d654755b0d03540c0b508c72ccda56cb3ede25651e223a6ead",
+      "crm/quarantine-catchup.service.js": "90cf3fcd5520c1cfddf20e29a1eb73bce9392ded3854d89209aca59eb6088b2d",
+      "events/event-store.service.js": "3819bd6ebf7224a4d00dfedb5f0b08bdd82501e67c08027d4e59c92c29b7db3f"
+    }
+  },
+  "snapshots": {
+    "before": {
+      "RecoveryTouchpoint": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "RecoveryConversion": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "DomainEvent": {
+        "count": 962,
+        "digest": "a2988f6ece825223ae1e44d6f82139dc"
+      },
+      "ActionExecution": {
+        "count": 580,
+        "digest": "0dbd7a103c96e7223edccec124594673"
+      },
+      "ActionTargetMutation": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "Appointment": {
+        "count": 2303,
+        "digest": "6002231a2888a30d399500e022cf7be3"
+      },
+      "Opportunity": {
+        "count": 17,
+        "digest": "5effe1a7663bba6ca05ea00a7aecbd65"
+      },
+      "AgentTask": {
+        "count": 17,
+        "digest": "6dccff6da220e6cac8cec0e09287cb16"
+      },
+      "InboxItem": {
+        "count": 153,
+        "digest": "722cca1ccbcd3a8af0a5e901897b4383"
+      },
+      "OperationalWorkItem": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "LoyaltyTransaction": {
+        "count": 121,
+        "digest": "e365dab9c2361a1c39b7b83b2e598b54"
+      },
+      "ReferralReward": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "CustomerSubscription": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "GiftCertificate": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "Expense": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "BillingPayment": {
+        "count": 1,
+        "digest": "04935a55a309e34360d8b23d9fa0dd75"
+      },
+      "TenantCatalogItemValueVersion": {
+        "count": 9,
+        "digest": "2eb0c1c51d67c974d73067e38a5f02c3"
+      },
+      "InternalService": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "InternalProvider": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "InternalAvailabilityRule": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "InternalAvailabilityException": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "BusinessReview": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "activeIdentityHolds": {
+        "count": 1
+      },
+      "waveExecutions": [],
+      "crossTenantRecoveryLinks": {
+        "count": 0
+      }
+    },
+    "after": {
+      "RecoveryTouchpoint": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "RecoveryConversion": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "DomainEvent": {
+        "count": 962,
+        "digest": "a2988f6ece825223ae1e44d6f82139dc"
+      },
+      "ActionExecution": {
+        "count": 580,
+        "digest": "0dbd7a103c96e7223edccec124594673"
+      },
+      "ActionTargetMutation": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "Appointment": {
+        "count": 2303,
+        "digest": "6002231a2888a30d399500e022cf7be3"
+      },
+      "Opportunity": {
+        "count": 17,
+        "digest": "5effe1a7663bba6ca05ea00a7aecbd65"
+      },
+      "AgentTask": {
+        "count": 17,
+        "digest": "6dccff6da220e6cac8cec0e09287cb16"
+      },
+      "InboxItem": {
+        "count": 153,
+        "digest": "722cca1ccbcd3a8af0a5e901897b4383"
+      },
+      "OperationalWorkItem": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "LoyaltyTransaction": {
+        "count": 121,
+        "digest": "e365dab9c2361a1c39b7b83b2e598b54"
+      },
+      "ReferralReward": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "CustomerSubscription": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "GiftCertificate": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "Expense": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "BillingPayment": {
+        "count": 1,
+        "digest": "04935a55a309e34360d8b23d9fa0dd75"
+      },
+      "TenantCatalogItemValueVersion": {
+        "count": 9,
+        "digest": "2eb0c1c51d67c974d73067e38a5f02c3"
+      },
+      "InternalService": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "InternalProvider": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "InternalAvailabilityRule": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "InternalAvailabilityException": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "BusinessReview": {
+        "count": 0,
+        "digest": "d41d8cd98f00b204e9800998ecf8427e"
+      },
+      "activeIdentityHolds": {
+        "count": 1
+      },
+      "waveExecutions": [],
+      "crossTenantRecoveryLinks": {
+        "count": 0
+      }
+    },
+    "unchanged": true
+  }
+}

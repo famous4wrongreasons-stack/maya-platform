@@ -1,0 +1,78 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "status": "PASS",
+  "testSourceSha256": "862f830733ed77cc87d7ec6c02f05887a2a4162278997fb8748352386321ee41",
+  "validatorSha256": "db147c2f969e9b35d55504da7ec42fcae114543c6e631366e82c54ae8a79fb44",
+  "cases": [
+    {
+      "case": "whole-partition fixture after full wake",
+      "result": "PASS"
+    },
+    {
+      "case": "old attempt substituted",
+      "result": "REFUSED"
+    },
+    {
+      "case": "candidate substituted",
+      "result": "REFUSED"
+    },
+    {
+      "case": "declaration hash substituted",
+      "result": "REFUSED"
+    },
+    {
+      "case": "only a subset of mutants",
+      "result": "REFUSED"
+    },
+    {
+      "case": "filtered tests",
+      "result": "REFUSED"
+    },
+    {
+      "case": "baseline red",
+      "result": "REFUSED"
+    },
+    {
+      "case": "mismatch",
+      "result": "REFUSED"
+    },
+    {
+      "case": "old mirror reused",
+      "result": "REFUSED"
+    },
+    {
+      "case": "old cache reused",
+      "result": "REFUSED"
+    },
+    {
+      "case": "new suspend overlaps admitted result",
+      "result": "REFUSED"
+    },
+    {
+      "case": "result outside recovery window",
+      "result": "REFUSED"
+    },
+    {
+      "case": "exact mirror plus invalidated interval excluded",
+      "result": "PASS"
+    },
+    {
+      "case": "earlier valid job in reused mirror retained",
+      "result": "PASS"
+    },
+    {
+      "case": "unrelated worker at same time retained",
+      "result": "PASS"
+    },
+    {
+      "case": "actual whole-partition recovery admitted after immutable bindings validated",
+      "result": "PASS"
+    }
+  ],
+  "actualIncompleteGateExit": 1,
+  "actualCompleteGateExit": 0,
+  "priorIncompleteProofSha256": "5cf089bfa9cbed50ec2f0010338e4e20bc01256b300b2763a1820a35ec8fcdb4",
+  "syntheticCounterfactsOnly": true,
+  "productTestsReplaced": false,
+  "admissionStillPending": true
+}

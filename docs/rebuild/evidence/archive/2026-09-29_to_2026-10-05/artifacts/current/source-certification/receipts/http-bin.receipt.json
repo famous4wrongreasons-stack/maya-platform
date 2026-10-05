@@ -1,0 +1,12 @@
+{
+  "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "name": "http-bin",
+  "command": [
+    "npm",
+    "run",
+    "test:widgets:http"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 0,
+  "seconds": 12.83
+}

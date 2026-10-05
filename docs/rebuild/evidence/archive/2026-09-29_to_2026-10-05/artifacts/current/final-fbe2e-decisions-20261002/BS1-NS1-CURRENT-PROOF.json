@@ -1,0 +1,686 @@
+{
+  "candidate": "4509d6f55df62da852740658c69613b113b5a1c1",
+  "status": "PASS",
+  "batteries": [
+    {
+      "gate": "BS",
+      "declarations": 5,
+      "receipt": {
+        "path": "receipts/mutation-receipt/widgets-mutation-report-BS.json",
+        "sha256": "059b68b86d4af2dc52655184ed3f1c157ad3a0504897edffa46335b6752d062b"
+      },
+      "mutants": [
+        {
+          "battery": "gateBS.json",
+          "id": "BS-M01",
+          "files": [
+            "src/widgets/owner-ports/personal-schedule.adapter.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "BS-REVOKED"
+          ],
+          "kills": [
+            {
+              "killer": "BS-REVOKED",
+              "test": "BS-1 exact personal schedule source BS-REVOKED absence/revocation of verified personal binding refuses before reading appointments",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateBS.json",
+          "id": "BS-M02",
+          "files": [
+            "src/widgets/owner-ports/personal-schedule.adapter.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "BS-IDENTITY"
+          ],
+          "kills": [
+            {
+              "killer": "BS-IDENTITY",
+              "test": "BS-1 exact personal schedule source BS-IDENTITY requires canonical personal context and exact completed owner id, never a matching time",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateBS.json",
+          "id": "BS-M03",
+          "files": [
+            "src/widgets/owner-ports/personal-schedule.adapter.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "BS-CHANGED"
+          ],
+          "kills": [
+            {
+              "killer": "BS-CHANGED",
+              "test": "BS-1 exact personal schedule source BS-CHANGED binding replacement or changed exact appointment is revalidated before mint",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateBS.json",
+          "id": "BS-M04",
+          "files": [
+            "src/widgets/booking/personal-schedule.presenter.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "live"
+          ],
+          "expect": "live-killed",
+          "status": "live-killed",
+          "killedBy": [
+            "BS-SOURCE"
+          ],
+          "kills": [
+            {
+              "killer": "BS-SOURCE",
+              "test": "BS-1 canonical source evidence BS-SOURCE [HTTP] [E-MINT] own-list exact Client source proposes and commits reschedule and cancel through existing owners",
+              "step": "live",
+              "entry": "HTTP",
+              "neutralisers": null,
+              "evidence": true,
+              "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": true,
+          "kills_by_entry": {
+            "HTTP": 1
+          },
+          "exits": {
+            "plain": {
+              "live": 1
+            }
+          }
+        },
+        {
+          "battery": "gateBS.json",
+          "id": "BS-M05",
+          "files": [
+            "src/widgets/owner-ports/personal-schedule.adapter.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "BS-AVAILABILITY"
+          ],
+          "kills": [
+            {
+              "killer": "BS-AVAILABILITY",
+              "test": "BS-1 exact personal schedule source BS-AVAILABILITY only an available exact-staff future slot can become a reschedule target",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        }
+      ],
+      "controls": {
+        "BS:baseline|live": {
+          "set": null,
+          "steps": [
+            "live"
+          ],
+          "exits": {
+            "live": 0
+          },
+          "failed": [],
+          "problems": []
+        },
+        "BS:baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      }
+    },
+    {
+      "gate": "NS",
+      "declarations": 5,
+      "receipt": {
+        "path": "receipts/mutation-receipt/widgets-mutation-report-NS.json",
+        "sha256": "6b12414ade6e7e41895ab50b32a257ce48852358a0b9b616cea02121fb1a19ec"
+      },
+      "mutants": [
+        {
+          "battery": "gateNS.json",
+          "id": "NS-M01",
+          "files": [
+            "src/widgets/projection/rows/initial-projector.rows.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "live"
+          ],
+          "expect": "live-killed",
+          "status": "live-killed",
+          "killedBy": [
+            "NS-SOURCE"
+          ],
+          "kills": [
+            {
+              "killer": "NS-SOURCE",
+              "test": "NS-1 canonical source evidence NS-SOURCE [HTTP] [E-MINT] production journal detail rereads exact retained date and resolves exact parent",
+              "step": "live",
+              "entry": "HTTP",
+              "neutralisers": null,
+              "evidence": true,
+              "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": true,
+          "kills_by_entry": {
+            "HTTP": 1
+          },
+          "exits": {
+            "plain": {
+              "live": 1
+            }
+          }
+        },
+        {
+          "battery": "gateNS.json",
+          "id": "NS-M02",
+          "files": [
+            "src/widgets/routing/effect-router.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "live"
+          ],
+          "expect": "live-killed",
+          "status": "live-killed",
+          "killedBy": [
+            "NS-REFUSE"
+          ],
+          "kills": [
+            {
+              "killer": "NS-REFUSE",
+              "test": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-REFUSE date cannot project a historical source",
+              "step": "live",
+              "entry": "HTTP",
+              "neutralisers": null,
+              "evidence": true,
+              "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": true,
+          "kills_by_entry": {
+            "HTTP": 1
+          },
+          "exits": {
+            "plain": {
+              "live": 1
+            }
+          }
+        },
+        {
+          "battery": "gateNS.json",
+          "id": "NS-M03",
+          "files": [
+            "src/widgets/resolve/thread-page.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "live"
+          ],
+          "expect": "live-killed",
+          "status": "live-killed",
+          "killedBy": [
+            "NS-PARENT"
+          ],
+          "kills": [
+            {
+              "killer": "NS-PARENT",
+              "test": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-PARENT rechecks parent availability when the new exact return link is used",
+              "step": "live",
+              "entry": "HTTP",
+              "neutralisers": null,
+              "evidence": true,
+              "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": true,
+          "kills_by_entry": {
+            "HTTP": 1
+          },
+          "exits": {
+            "plain": {
+              "live": 1
+            }
+          }
+        },
+        {
+          "battery": "gateNS.json",
+          "id": "NS-M04",
+          "files": [
+            "src/widgets/resolve/thread-page.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "live"
+          ],
+          "expect": "live-killed",
+          "status": "live-killed",
+          "killedBy": [
+            "NS-REFUSE"
+          ],
+          "kills": [
+            {
+              "killer": "NS-REFUSE",
+              "test": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-REFUSE body cannot project a historical source",
+              "step": "live",
+              "entry": "HTTP",
+              "neutralisers": null,
+              "evidence": true,
+              "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": true,
+          "kills_by_entry": {
+            "HTTP": 1
+          },
+          "exits": {
+            "plain": {
+              "live": 1
+            }
+          }
+        },
+        {
+          "battery": "gateNS.json",
+          "id": "NS-M05",
+          "files": [
+            "src/widgets/emission/intent-template.registry.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "live"
+          ],
+          "expect": "live-killed",
+          "status": "live-killed",
+          "killedBy": [
+            "NS-SOURCE"
+          ],
+          "kills": [
+            {
+              "killer": "NS-SOURCE",
+              "test": "NS-1 canonical source evidence NS-SOURCE [HTTP] [E-MINT] production journal detail rereads exact retained date and resolves exact parent",
+              "step": "live",
+              "entry": "HTTP",
+              "neutralisers": null,
+              "evidence": true,
+              "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": true,
+          "kills_by_entry": {
+            "HTTP": 1
+          },
+          "exits": {
+            "plain": {
+              "live": 1
+            }
+          }
+        }
+      ],
+      "controls": {
+        "NS:baseline|live": {
+          "set": null,
+          "steps": [
+            "live"
+          ],
+          "exits": {
+            "live": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      }
+    }
+  ],
+  "live": [
+    {
+      "source": "personal-source.live-spec.ts",
+      "count": 1,
+      "receipt": {
+        "path": "receipts/widgets-live-full.json",
+        "sha256": "be61d81d3ee5d4c91b440a948c39bee7115c94d8380fdb5010873dd78db21a06"
+      },
+      "assertions": [
+        {
+          "ancestorTitles": [
+            "BS-1 canonical source evidence"
+          ],
+          "duration": 1527,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "BS-1 canonical source evidence BS-SOURCE [HTTP] [E-MINT] own-list exact Client source proposes and commits reschedule and cancel through existing owners",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "startAt": 1790931513699,
+          "status": "passed",
+          "title": "BS-SOURCE [HTTP] [E-MINT] own-list exact Client source proposes and commits reschedule and cancel through existing owners"
+        }
+      ]
+    },
+    {
+      "source": "navigation-source.live-spec.ts",
+      "count": 1,
+      "receipt": {
+        "path": "receipts/widgets-live-full.json",
+        "sha256": "be61d81d3ee5d4c91b440a948c39bee7115c94d8380fdb5010873dd78db21a06"
+      },
+      "assertions": [
+        {
+          "ancestorTitles": [
+            "NS-1 canonical source evidence"
+          ],
+          "duration": 431,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "NS-1 canonical source evidence NS-SOURCE [HTTP] [E-MINT] production journal detail rereads exact retained date and resolves exact parent",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "startAt": 1790931500876,
+          "status": "passed",
+          "title": "NS-SOURCE [HTTP] [E-MINT] production journal detail rereads exact retained date and resolves exact parent"
+        }
+      ]
+    },
+    {
+      "source": "navigation-source-boundary.live-spec.ts",
+      "count": 8,
+      "receipt": {
+        "path": "receipts/widgets-live-full.json",
+        "sha256": "be61d81d3ee5d4c91b440a948c39bee7115c94d8380fdb5010873dd78db21a06"
+      },
+      "assertions": [
+        {
+          "ancestorTitles": [
+            "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL]"
+          ],
+          "duration": 311,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-CHECK admits exact detail date and preserves REFINE; all near-miss shapes remain forbidden",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 22,
+          "retryReasons": [],
+          "startAt": 1790931477807,
+          "status": "passed",
+          "title": "NS-CHECK admits exact detail date and preserves REFINE; all near-miss shapes remain forbidden"
+        },
+        {
+          "ancestorTitles": [
+            "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL]"
+          ],
+          "duration": 224,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-REFUSE date cannot project a historical source",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 5,
+          "retryReasons": [],
+          "startAt": 1790931478119,
+          "status": "passed",
+          "title": "NS-REFUSE date cannot project a historical source"
+        },
+        {
+          "ancestorTitles": [
+            "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL]"
+          ],
+          "duration": 212,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-REFUSE erased cannot project a historical source",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 5,
+          "retryReasons": [],
+          "startAt": 1790931478343,
+          "status": "passed",
+          "title": "NS-REFUSE erased cannot project a historical source"
+        },
+        {
+          "ancestorTitles": [
+            "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL]"
+          ],
+          "duration": 200,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-REFUSE expired cannot project a historical source",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 5,
+          "retryReasons": [],
+          "startAt": 1790931478555,
+          "status": "passed",
+          "title": "NS-REFUSE expired cannot project a historical source"
+        },
+        {
+          "ancestorTitles": [
+            "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL]"
+          ],
+          "duration": 205,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-REFUSE body cannot project a historical source",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 5,
+          "retryReasons": [],
+          "startAt": 1790931478755,
+          "status": "passed",
+          "title": "NS-REFUSE body cannot project a historical source"
+        },
+        {
+          "ancestorTitles": [
+            "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL]"
+          ],
+          "duration": 179,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-REFUSE seal cannot project a historical source",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 5,
+          "retryReasons": [],
+          "startAt": 1790931478960,
+          "status": "passed",
+          "title": "NS-REFUSE seal cannot project a historical source"
+        },
+        {
+          "ancestorTitles": [
+            "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL]"
+          ],
+          "duration": 307,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-REFUSE foreign-principal cannot project a historical source",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 5,
+          "retryReasons": [],
+          "startAt": 1790931479139,
+          "status": "passed",
+          "title": "NS-REFUSE foreign-principal cannot project a historical source"
+        },
+        {
+          "ancestorTitles": [
+            "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL]"
+          ],
+          "duration": 272,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-PARENT rechecks parent availability when the new exact return link is used",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 4,
+          "retryReasons": [],
+          "startAt": 1790931479446,
+          "status": "passed",
+          "title": "NS-PARENT rechecks parent availability when the new exact return link is used"
+        }
+      ]
+    }
+  ],
+  "roundtrip": {
+    "receipt": {
+      "path": "receipts/ns1-16-step.receipt.json",
+      "sha256": "b2c3dca03e3f806b143cc48ff32d880abe85f127605c18deb2a7c695b7a33316"
+    },
+    "log": {
+      "path": "receipts/ns1-16-step.log",
+      "sha256": "9fd777832b3ae3f76e75fa85d605c0cfb88f5f27b2fa0641601dfe16d6039dc5"
+    }
+  },
+  "compiledNetwork": {
+    "receipt": {
+      "path": "receipts/fbe2e-compiled-net-bin.receipt.json",
+      "sha256": "c98eea020edc7d40a85881f59839d59d98347e242f3c91c42fc508f18bcbb4f7"
+    },
+    "log": {
+      "path": "receipts/fbe2e-compiled-net-bin.log",
+      "sha256": "f81cf9e257d329e8c5ef024cc7a7b9658fccf244bd3de4edbae558eddea52acf"
+    }
+  },
+  "migrationScope": "Existing NS-1 additive CHECK migration applied only in dedicated fresh proof databases; production not applied."
+}

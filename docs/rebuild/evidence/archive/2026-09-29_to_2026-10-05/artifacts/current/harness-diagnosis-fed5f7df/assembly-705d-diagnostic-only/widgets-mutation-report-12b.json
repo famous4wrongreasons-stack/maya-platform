@@ -1,0 +1,573 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gate12b.json": "c17afc7279a91a90daad8328ea0e18821bd5b2a8acaf742968f0924cc0b91d57"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T16:23:13.266Z",
+  "batteries": [
+    "gate12b.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-63d9c93498",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-63d9c93498",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "12b:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "12b:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gate12b.json",
+      "id": "MUT-12-A",
+      "files": [
+        "src/widgets/projection/widget-projector.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "G12-L07"
+      ],
+      "kills": [
+        {
+          "killer": "G12-L07",
+          "test": "U12b [GW G-SYNTH] registered projector rows G12-L07 no principal or mismatched authority performs zero owner reads",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate12b.json",
+      "id": "MUT-12-D",
+      "files": [
+        "src/widgets/projection/projector.registry.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "G12-L15"
+      ],
+      "kills": [
+        {
+          "killer": "G12-L15",
+          "test": "U12b [GW G-SYNTH] registered projector rows G12-L15 an unregistered subject degrades without a fallback read",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate12b.json",
+      "id": "MUT-12-E",
+      "files": [
+        "src/widgets/projection/widget-projector.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "ARCH-12-1"
+      ],
+      "kills": [
+        {
+          "killer": "ARCH-12-1",
+          "test": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-1 [BUILD] the projection imports and references only the owners it is allowed, through their one call site each",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 1
+        }
+      }
+    },
+    {
+      "battery": "gate12b.json",
+      "id": "MUT-12-F",
+      "files": [
+        "src/widgets/projection/widget-projector.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "G12-L07"
+      ],
+      "kills": [
+        {
+          "killer": "G12-L07",
+          "test": "U12b [GW G-SYNTH] registered projector rows G12-L07 no principal or mismatched authority performs zero owner reads",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate12b.json",
+      "id": "MUT-12-G",
+      "files": [
+        "src/widgets/projection/widget-projector.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "G12-L19"
+      ],
+      "kills": [
+        {
+          "killer": "G12-L19",
+          "test": "U12b [GW G-SYNTH] registered projector rows G12-L19 one composition cannot issue a second read",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate12b.json",
+      "id": "MUT-12-H",
+      "files": [
+        "src/widgets/projection/widget-projector.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "G12-L17/L18"
+      ],
+      "kills": [
+        {
+          "killer": "G12-L17/L18",
+          "test": "U12b [GW G-SYNTH] registered projector rows G12-L17/L18 only the approved journal row binds its typed date scalar",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate12b.json",
+      "id": "MUT-12-I",
+      "files": [
+        "src/widgets/projection/widget-projector.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "G12-L16"
+      ],
+      "kills": [
+        {
+          "killer": "G12-L16",
+          "test": "U12b [GW G-SYNTH] registered projector rows G12-L16 an L2 missing owner field degrades instead of making a partial body",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate12b.json",
+      "id": "MUT-12-L",
+      "files": [
+        "src/widgets/projection/widget-projector.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "G12-L09"
+      ],
+      "kills": [
+        {
+          "killer": "G12-L09",
+          "test": "U12b [GW G-SYNTH] registered projector rows G12-L09 owner denial maps through limitation_codes without leaking its message",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate12b.json",
+      "id": "MUT-12-N",
+      "files": [
+        "src/widgets/projection/widget-projector.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "G12-L20"
+      ],
+      "kills": [
+        {
+          "killer": "G12-L20",
+          "test": "U12b [GW G-SYNTH] registered projector rows G12-L20 NAVIGATE detail reprojects only from its sealed source capability",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate12b.json",
+      "id": "MUT-12-P",
+      "files": [
+        "src/widgets/projection/rows/initial-projector.rows.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "G12-L13"
+      ],
+      "kills": [
+        {
+          "killer": "G12-L13",
+          "test": "U12b [GW G-SYNTH] registered projector rows G12-L13 the owner-composed SCHED.2 row proposes only the A2-blocked COMMIT",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate12b.json",
+      "id": "MUT-12-Q",
+      "files": [
+        "src/widgets/projection/widget-projector.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "G12-L13"
+      ],
+      "kills": [
+        {
+          "killer": "G12-L13",
+          "test": "U12b [GW G-SYNTH] registered projector rows G12-L13 the owner-composed SCHED.2 row proposes only the A2-blocked COMMIT",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate12b.json",
+      "id": "MUT-12-R",
+      "files": [
+        "src/widgets/owner-ports/canonical-read.provider.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "G12-L18-PORT"
+      ],
+      "kills": [
+        {
+          "killer": "G12-L18-PORT",
+          "test": "U12b [GW] canonical read adapter G12-L18-PORT calls only the closed tool set without an idempotency key",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate12b.json",
+      "id": "MUT-12-S",
+      "files": [
+        "src/widgets/owner-ports/canonical-read.provider.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "G12-L09-PORT"
+      ],
+      "kills": [
+        {
+          "killer": "G12-L09-PORT",
+          "test": "U12b [GW] canonical read adapter G12-L09-PORT maps a canonical owner exception and rethrows an infrastructure fault",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T16:59:03.567Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 1,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

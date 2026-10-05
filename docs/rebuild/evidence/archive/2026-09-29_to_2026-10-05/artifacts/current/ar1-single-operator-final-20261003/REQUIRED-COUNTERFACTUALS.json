@@ -1,0 +1,805 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "status": "PASS",
+  "requirements": [
+    {
+      "requirement": "tenant_owner refused",
+      "status": "PASS",
+      "assertions": [
+        {
+          "source": "widget-single-operator.live-spec.ts",
+          "ancestorTitles": [
+            "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+          ],
+          "duration": 271,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-ROLE tenant owner and revoked platform session never gain release authority",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 4,
+          "retryReasons": [],
+          "startAt": 1791059664009,
+          "status": "passed",
+          "title": "SO-ROLE tenant owner and revoked platform session never gain release authority"
+        }
+      ]
+    },
+    {
+      "requirement": "tenant session cannot replace global session",
+      "status": "PASS",
+      "assertions": [
+        {
+          "source": "widget-single-operator.live-spec.ts",
+          "ancestorTitles": [
+            "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+          ],
+          "duration": 271,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-TENANT-SESSION a tenant session cannot substitute for a global session, even with forged platform actor claims",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 6,
+          "retryReasons": [],
+          "startAt": 1791059664592,
+          "status": "passed",
+          "title": "SO-TENANT-SESSION a tenant session cannot substitute for a global session, even with forged platform actor claims"
+        }
+      ]
+    },
+    {
+      "requirement": "Tenant A authorization cannot act on Tenant B",
+      "status": "PASS",
+      "assertions": [
+        {
+          "source": "widget-single-operator.live-spec.ts",
+          "ancestorTitles": [
+            "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+          ],
+          "duration": 312,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-TWO-TENANTS one global session manages two ordinary tenants; grants and revoke never cross scopes",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 9,
+          "retryReasons": [],
+          "startAt": 1791059664280,
+          "status": "passed",
+          "title": "SO-TWO-TENANTS one global session manages two ordinary tenants; grants and revoke never cross scopes"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 83,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-MULTITENANT same global principal supports distinct ordinary tenants with separately bound grants",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 4,
+          "retryReasons": [],
+          "startAt": 1791059979798,
+          "status": "passed",
+          "title": "SO-MULTITENANT same global principal supports distinct ordinary tenants with separately bound grants"
+        }
+      ]
+    },
+    {
+      "requirement": "fabricated reviewer refused",
+      "status": "PASS",
+      "assertions": [
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 31,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-CONTRACT no reviewer identity, explicit absence of review and same actual approver/operator are mandatory before signing",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 5,
+          "retryReasons": [],
+          "startAt": 1791059979079,
+          "status": "passed",
+          "title": "SO-CONTRACT no reviewer identity, explicit absence of review and same actual approver/operator are mandatory before signing"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 22,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed fabricated-reviewer is refused",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979180,
+          "status": "passed",
+          "title": "SO-BINDING signed fabricated-reviewer is refused"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 22,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed self-reviewer is refused",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979203,
+          "status": "passed",
+          "title": "SO-BINDING signed self-reviewer is refused"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 21,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed claimed-review is refused",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979225,
+          "status": "passed",
+          "title": "SO-BINDING signed claimed-review is refused"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 22,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed missing-mode is refused",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979247,
+          "status": "passed",
+          "title": "SO-BINDING signed missing-mode is refused"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 22,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed different-approver is refused",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979270,
+          "status": "passed",
+          "title": "SO-BINDING signed different-approver is refused"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 22,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed different-operator is refused",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979292,
+          "status": "passed",
+          "title": "SO-BINDING signed different-operator is refused"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 21,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-tenant is refused",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979314,
+          "status": "passed",
+          "title": "SO-BINDING signed wrong-tenant is refused"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 22,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wildcard is refused",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979335,
+          "status": "passed",
+          "title": "SO-BINDING signed wildcard is refused"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 21,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-profile is refused",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979358,
+          "status": "passed",
+          "title": "SO-BINDING signed wrong-profile is refused"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 22,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-profile-digest is refused",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979379,
+          "status": "passed",
+          "title": "SO-BINDING signed wrong-profile-digest is refused"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 22,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-evidence is refused",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979401,
+          "status": "passed",
+          "title": "SO-BINDING signed wrong-evidence is refused"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 23,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed wrong-certificate is refused",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979423,
+          "status": "passed",
+          "title": "SO-BINDING signed wrong-certificate is refused"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 22,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed staging is refused",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979446,
+          "status": "passed",
+          "title": "SO-BINDING signed staging is refused"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 23,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-BINDING signed extra-exclusion is refused",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979468,
+          "status": "passed",
+          "title": "SO-BINDING signed extra-exclusion is refused"
+        }
+      ]
+    },
+    {
+      "requirement": "second self-signature never independent review",
+      "status": "PASS",
+      "assertions": [
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 66,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-NO-SELF-SIGNATURE second certificate signature and V1 downgrade cannot substitute",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 2,
+          "retryReasons": [],
+          "startAt": 1791059979601,
+          "status": "passed",
+          "title": "SO-NO-SELF-SIGNATURE second certificate signature and V1 downgrade cannot substitute"
+        }
+      ]
+    },
+    {
+      "requirement": "independentHumanReview false mandatory",
+      "status": "PASS",
+      "assertions": [
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 26,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-DISCLOSURE mandatory governance",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979110,
+          "status": "passed",
+          "title": "SO-DISCLOSURE mandatory governance"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 21,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-DISCLOSURE mandatory independentHumanReview",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979136,
+          "status": "passed",
+          "title": "SO-DISCLOSURE mandatory independentHumanReview"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 21,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-DISCLOSURE mandatory reviewerId",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979158,
+          "status": "passed",
+          "title": "SO-DISCLOSURE mandatory reviewerId"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 31,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-CONTRACT no reviewer identity, explicit absence of review and same actual approver/operator are mandatory before signing",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 5,
+          "retryReasons": [],
+          "startAt": 1791059979079,
+          "status": "passed",
+          "title": "SO-CONTRACT no reviewer identity, explicit absence of review and same actual approver/operator are mandatory before signing"
+        }
+      ]
+    },
+    {
+      "requirement": "V1 revoke V2 and V2 revoke V1 both refused",
+      "status": "PASS",
+      "assertions": [
+        {
+          "source": "widget-single-operator.live-spec.ts",
+          "ancestorTitles": [
+            "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+          ],
+          "duration": 305,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-REVOKE-VERSION V1-revokes-V2 is refused even with a valid signer and matching stored release digests",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 6,
+          "retryReasons": [],
+          "startAt": 1791059664863,
+          "status": "passed",
+          "title": "SO-REVOKE-VERSION V1-revokes-V2 is refused even with a valid signer and matching stored release digests"
+        },
+        {
+          "source": "widget-single-operator.live-spec.ts",
+          "ancestorTitles": [
+            "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+          ],
+          "duration": 312,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-REVOKE-VERSION V2-revokes-V1 is refused even with a valid signer and matching stored release digests",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 6,
+          "retryReasons": [],
+          "startAt": 1791059665168,
+          "status": "passed",
+          "title": "SO-REVOKE-VERSION V2-revokes-V1 is refused even with a valid signer and matching stored release digests"
+        }
+      ]
+    },
+    {
+      "requirement": "stale CAS refused",
+      "status": "PASS",
+      "assertions": [
+        {
+          "source": "widget-single-operator.live-spec.ts",
+          "ancestorTitles": [
+            "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+          ],
+          "duration": 300,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-STALE two independently signed grants with the same prestate cannot both win CAS",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 3,
+          "retryReasons": [],
+          "startAt": 1791059662451,
+          "status": "passed",
+          "title": "SO-STALE two independently signed grants with the same prestate cannot both win CAS"
+        }
+      ]
+    },
+    {
+      "requirement": "expired authorization refused; revoked grant replay cannot re-enable",
+      "status": "PASS",
+      "assertions": [
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 22,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-WINDOW expired",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979491,
+          "status": "passed",
+          "title": "SO-WINDOW expired"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 22,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-WINDOW future",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979513,
+          "status": "passed",
+          "title": "SO-WINDOW future"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 21,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-WINDOW over24h",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979535,
+          "status": "passed",
+          "title": "SO-WINDOW over24h"
+        },
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 22,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-WINDOW grant-after-authorization",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791059979556,
+          "status": "passed",
+          "title": "SO-WINDOW grant-after-authorization"
+        },
+        {
+          "source": "widget-single-operator.live-spec.ts",
+          "ancestorTitles": [
+            "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+          ],
+          "duration": 998,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-LIFECYCLE validate is read-only; signed grant has atomic audit; same authorization retry never grants twice; revoke refuses an old widget token",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 25,
+          "retryReasons": [],
+          "startAt": 1791059661179,
+          "status": "passed",
+          "title": "SO-LIFECYCLE validate is read-only; signed grant has atomic audit; same authorization retry never grants twice; revoke refuses an old widget token"
+        }
+      ]
+    },
+    {
+      "requirement": "plan/trial bypass refused",
+      "status": "PASS",
+      "assertions": [
+        {
+          "source": "entitlements.service.spec.ts",
+          "ancestorTitles": [
+            "EntitlementsService"
+          ],
+          "duration": 4,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "EntitlementsService AR1-PLAN refuses widgets even if a plan row is accidentally populated",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791060016476,
+          "status": "passed",
+          "title": "AR1-PLAN refuses widgets even if a plan row is accidentally populated"
+        },
+        {
+          "source": "widget-release-policy.spec.ts",
+          "ancestorTitles": [
+            "AR-1 signed release policy"
+          ],
+          "duration": 3,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR-1 signed release policy AR1-TRIAL widget trial remains forbidden even if readiness changes",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "startAt": 1791060004381,
+          "status": "passed",
+          "title": "AR1-TRIAL widget trial remains forbidden even if readiness changes"
+        }
+      ]
+    },
+    {
+      "requirement": "HANDOFF STOP",
+      "status": "PASS",
+      "assertions": [
+        {
+          "source": "widget-single-operator.live-spec.ts",
+          "ancestorTitles": [
+            "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+          ],
+          "duration": 283,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-HANDOFF production profile refuses HANDOFF at mint and admission owners",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 6,
+          "retryReasons": [],
+          "startAt": 1791059663453,
+          "status": "passed",
+          "title": "SO-HANDOFF production profile refuses HANDOFF at mint and admission owners"
+        }
+      ]
+    },
+    {
+      "requirement": "allowlist removal closes effective access",
+      "status": "PASS",
+      "assertions": [
+        {
+          "source": "widget-release-single-operator.spec.ts",
+          "ancestorTitles": [
+            "AR1 V2 one real platform signer; independent review explicitly absent"
+          ],
+          "duration": 43,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR1 V2 one real platform signer; independent review explicitly absent SO-READER disclosure survives persistence; expiry, foreign row and allowlist removal disable access",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 4,
+          "retryReasons": [],
+          "startAt": 1791059979881,
+          "status": "passed",
+          "title": "SO-READER disclosure survives persistence; expiry, foreign row and allowlist removal disable access"
+        },
+        {
+          "source": "widget-single-operator.live-spec.ts",
+          "ancestorTitles": [
+            "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+          ],
+          "duration": 269,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-REVOKE-BOUND revoke binds exact release, evidence, profile and build; rollback works after allowlist removal and candidate change",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 9,
+          "retryReasons": [],
+          "startAt": 1791059663183,
+          "status": "passed",
+          "title": "SO-REVOKE-BOUND revoke binds exact release, evidence, profile and build; rollback works after allowlist removal and candidate change"
+        }
+      ]
+    },
+    {
+      "requirement": "revoke after allowlist removal and candidate replacement",
+      "status": "PASS",
+      "assertions": [
+        {
+          "source": "widget-single-operator.live-spec.ts",
+          "ancestorTitles": [
+            "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+          ],
+          "duration": 269,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-REVOKE-BOUND revoke binds exact release, evidence, profile and build; rollback works after allowlist removal and candidate change",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 9,
+          "retryReasons": [],
+          "startAt": 1791059663183,
+          "status": "passed",
+          "title": "SO-REVOKE-BOUND revoke binds exact release, evidence, profile and build; rollback works after allowlist removal and candidate change"
+        }
+      ]
+    },
+    {
+      "requirement": "revoke after certificate expiry",
+      "status": "PASS",
+      "assertions": [
+        {
+          "source": "widget-single-operator.live-spec.ts",
+          "ancestorTitles": [
+            "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+          ],
+          "duration": 1622,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL] SO-REVOKE-EXPIRED-CERT a fresh signed revoke remains available after certificate expiry",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 6,
+          "retryReasons": [],
+          "startAt": 1791059665480,
+          "status": "passed",
+          "title": "SO-REVOKE-EXPIRED-CERT a fresh signed revoke remains available after certificate expiry"
+        }
+      ]
+    }
+  ],
+  "unitReceipt": {
+    "path": "receipts/backend-full.json",
+    "sha256": "e0fff261ff045d0871db83808cea1c061c2c980979392c11114e72436f8c4ba0"
+  },
+  "liveReceipt": {
+    "path": "receipts/widgets-live-full.json",
+    "sha256": "b4e40a9bc8a28140e142e25846e4c03d33700d5444f9a2ad9ceff6fee1332715"
+  },
+  "mutationReceipt": {
+    "path": "COMPLETE-MUTATIONS.json",
+    "sha256": "5198f015ace58f4c9b1c5e45c1589e6b1c187ec04bc66da27aaf1bffc70353b3"
+  },
+  "revokedReplayMeaning": "Canonical idempotency may return the original historical receipt; it never re-applies or renews the revoked grant."
+}

@@ -1,0 +1,439 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gate8c.json": "a149ad098100474e9ca1203587ab1b965400ddba591ef20fe622a1315e361ffe"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T21:39:10.424Z",
+  "batteries": [
+    "gate8c.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-05d17b5552",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-05d17b5552",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "8c:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-1",
+      "files": [
+        "src/widgets/input-schema/codec.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SD-3"
+      ],
+      "kills": [
+        {
+          "killer": "SD-3",
+          "test": "U8b-c — the selection_domain codec SD-3 [U] refuses a duplicate option id on both sides: selections are sets (B-11/AMB-20)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-2",
+      "files": [
+        "src/widgets/input-schema/input-schema-hash.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "HS-5",
+        "ISC-4"
+      ],
+      "kills": [
+        {
+          "killer": "HS-5",
+          "test": "U8b-c — inputSchemaHash HS-5 [U] is exactly SHA-256 over the one canonicaliser, which is what H6 permits (C11:2627)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "ISC-4",
+          "test": "U8b-c — the input-schema single-implementation fence ISC-4 [BUILD] this directory adds no second canonicaliser and no second digest (H6, C11:2627)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "ISC-4",
+          "test": "U8b-c — the input-schema single-implementation fence each rule goes red on a planted violation (in memory; the repository is not edited) ISC-4 goes red when this directory hashes or canonicalises its own way",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 3
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-3",
+      "files": [
+        "src/widgets/input-schema/codec.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "LB-2",
+        "LB-3"
+      ],
+      "kills": [
+        {
+          "killer": "LB-2",
+          "test": "U8b-c — the selection_domain labels decode LB-2 [U] refuses a FLAT map: an option id is only meaningful inside its field (AMB-17)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "LB-3",
+          "test": "U8b-c — the selection_domain labels decode LB-3 [U] refuses a label that is not a non-empty string, and a third level of nesting",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-4",
+      "files": [
+        "src/widgets/input-schema/codec.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SD-4"
+      ],
+      "kills": [
+        {
+          "killer": "SD-4",
+          "test": "U8b-c — the selection_domain codec SD-4 [U] refuses a non-canonical stored spelling rather than accepting it",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-5",
+      "files": [
+        "src/widgets/input-schema/codec.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SD-2"
+      ],
+      "kills": [
+        {
+          "killer": "SD-2",
+          "test": "U8b-c — the selection_domain codec SD-2 [U] is canonical in both axes: field order and option order are not information",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-6",
+      "files": [
+        "src/widgets/input-schema/inputs-bytes.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "IB-1"
+      ],
+      "kills": [
+        {
+          "killer": "IB-1",
+          "test": "U8b-c — inputsByteLength IB-1 [U] measures the UTF-8 bytes of the canonical serialisation, not its characters",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-7",
+      "files": [
+        "src/widgets/input-schema/parse-input-schema.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "PS-3"
+      ],
+      "kills": [
+        {
+          "killer": "PS-3",
+          "test": "U8b-c — parseInputSchema PS-3 [U] refuses an undeclared member, at the schema root and inside a field (R3.8.1/R3.8.2, R3.6.5)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate8c.json",
+      "id": "M8C-8",
+      "files": [
+        "src/widgets/input-schema/parse-input-schema.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "PS-7",
+        "PS-1"
+      ],
+      "kills": [
+        {
+          "killer": "PS-7",
+          "test": "U8b-c — parseInputSchema PS-7 [U] holds R3.6.6 in both directions: required on a non-closed field, absent when every field is closed",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "PS-1",
+          "test": "U8b-c — parseInputSchema PS-1 [U] round-trips every one of the ten declared field kinds without losing a member",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T22:45:17.817Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 1,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "utc": "2026-09-30T20:17:02.475300+00:00",
+  "workers": [
+    {
+      "worker": 1,
+      "rootPid": 89323,
+      "active": true,
+      "processes": 4,
+      "cpu": 99.4,
+      "rssMb": 1887.5,
+      "roots": [
+        {
+          "pid": 89323,
+          "elapsed": "17:16",
+          "state": "Ss",
+          "executable": "node"
+        }
+      ]
+    },
+    {
+      "worker": 2,
+      "rootPid": 93291,
+      "active": true,
+      "processes": 4,
+      "cpu": 98.7,
+      "rssMb": 785.9,
+      "roots": [
+        {
+          "pid": 93291,
+          "elapsed": "13:51",
+          "state": "Ss",
+          "executable": "node"
+        }
+      ]
+    },
+    {
+      "worker": 3,
+      "rootPid": 15923,
+      "active": true,
+      "processes": 3,
+      "cpu": 110.8,
+      "rssMb": 1671.8,
+      "roots": [
+        {
+          "pid": 15923,
+          "elapsed": "01:55:52",
+          "state": "Ss",
+          "executable": "node"
+        }
+      ]
+    },
+    {
+      "worker": 4,
+      "rootPid": 41780,
+      "active": true,
+      "processes": 4,
+      "cpu": 97.8,
+      "rssMb": 2688.7,
+      "roots": [
+        {
+          "pid": 41780,
+          "elapsed": "01:19:22",
+          "state": "Ss",
+          "executable": "node"
+        }
+      ]
+    },
+    {
+      "worker": 5,
+      "rootPid": 78668,
+      "active": true,
+      "processes": 4,
+      "cpu": 3.8,
+      "rssMb": 1705.8,
+      "roots": [
+        {
+          "pid": 78668,
+          "elapsed": "30:58",
+          "state": "Ss",
+          "executable": "node"
+        }
+      ]
+    },
+    {
+      "worker": 6,
+      "rootPid": 87718,
+      "active": true,
+      "processes": 4,
+      "cpu": 99.7,
+      "rssMb": 1585.4,
+      "roots": [
+        {
+          "pid": 87718,
+          "elapsed": "19:03",
+          "state": "Ss",
+          "executable": "node"
+        }
+      ]
+    },
+    {
+      "worker": 7,
+      "rootPid": 71177,
+      "active": true,
+      "processes": 4,
+      "cpu": 99.6,
+      "rssMb": 751.6,
+      "roots": [
+        {
+          "pid": 71177,
+          "elapsed": "40:22",
+          "state": "Ss",
+          "executable": "node"
+        }
+      ]
+    },
+    {
+      "worker": 8,
+      "rootPid": 63430,
+      "active": true,
+      "processes": 4,
+      "cpu": 98.8,
+      "rssMb": 2601.7,
+      "roots": [
+        {
+          "pid": 63430,
+          "elapsed": "50:08",
+          "state": "Ss",
+          "executable": "node"
+        }
+      ]
+    }
+  ],
+  "scope": "Read-only process sample, no environment variables collected"
+}

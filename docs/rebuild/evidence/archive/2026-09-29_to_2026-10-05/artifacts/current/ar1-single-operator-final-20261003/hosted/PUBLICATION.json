@@ -1,0 +1,31 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "repository": "famous4wrongreasons-stack/maya-platform",
+  "startedAt": "2026-10-04T08:43:34.452508+00:00",
+  "productionOperations": 0,
+  "status": "FAILED",
+  "prepublicationRunIds": [],
+  "pushCompletedAt": "2026-10-04T08:43:40.607685+00:00",
+  "requiredWorkflows": {
+    "311601892": "Platform CI",
+    "359168151": "Widget Contract (blocking)",
+    "360279046": "Widgets Live",
+    "360530612": "MAYA Chat Shell",
+    "362140366": "Widgets Mutation",
+    "374470990": "Canonical React release packaging"
+  },
+  "packagingWorkflowSource": {
+    "path": ".github/workflows/release-packaging.yml",
+    "sha256": "d4f2260e46f9c2bfba999ef3c02ae34be4557e7a1b2ecbe9a18942a08d24a3e0",
+    "workflowId": 374470990
+  },
+  "mutationDispatchStartedAt": "2026-10-04T08:43:54.753638+00:00",
+  "mutationDispatchedAt": "2026-10-04T08:43:56.783072+00:00",
+  "finishedAt": "2026-10-04T09:12:13.702816+00:00",
+  "failedWorkflow": 37189856220,
+  "mutationRun": 37189868062,
+  "mutationConclusion": "cancelled",
+  "reason": "Mandatory R01 integration artifact was not built in clean hosted jobs",
+  "certifiedForProfile": false
+}

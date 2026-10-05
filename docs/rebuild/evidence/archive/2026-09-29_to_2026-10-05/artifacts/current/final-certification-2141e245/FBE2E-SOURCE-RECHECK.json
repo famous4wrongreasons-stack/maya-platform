@@ -1,0 +1,54 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "generatedAt": "2026-10-01T06:56:38.608828+00:00",
+  "scope": "Fresh read-only source/hash recheck on exact candidate; no certificate or owner acceptance",
+  "L2": {
+    "workflow": ".github/workflows/widget-contract.yml",
+    "sha256": "43353311e479539f159b78db8b7f5aab4b08b27f59e240340ae418de2f0ee274",
+    "relevantLines": [
+      {
+        "line": 4,
+        "text": "# NON-BLOCKING: `continue-on-error` on every step that could fail, so a contract finding is"
+      },
+      {
+        "line": 23,
+        "text": "continue-on-error: true"
+      },
+      {
+        "line": 37,
+        "text": "continue-on-error: true"
+      },
+      {
+        "line": 40,
+        "text": "continue-on-error: true"
+      },
+      {
+        "line": 43,
+        "text": "continue-on-error: true"
+      },
+      {
+        "line": 48,
+        "text": "continue-on-error: true"
+      },
+      {
+        "line": 54,
+        "text": "continue-on-error: true"
+      },
+      {
+        "line": 61,
+        "text": "continue-on-error: true"
+      }
+    ],
+    "disposition": "Prisma generation repair and local checks are proven separately. Advisory/blocking policy remains explicit; local success does not make the remote workflow blocking."
+  },
+  "L12": {
+    "source": "maya-saas-backend/src/widgets/routing/effect-router.ports.ts",
+    "sha256": "0fad31357c91979b50184744db5acfca65c03d4b407eb3cbb0f7113b9b35a322",
+    "builtFileSha256": "a2f21bf8b4aee4276179713ce48711b6f0ea226f0541b0235a0a481c74bf1eab",
+    "directNativeDeclarationTargets": [],
+    "originalDelta": "6af72aa46e7eff80fa2a4f825ccb2c0c27a0d234 adds type imports and BookingProposeOwnerPort/BookingSelectorOwnerPort declarations.",
+    "existingRuntimeHelper": "bookingPreviewOf is executable and existed before that delta; the entire ports file must not be described as type-only.",
+    "disposition": "Entire file has pre-existing runtime, but the exact added block emits no new JS. Four new runtime sites now have WR declarations. Current full WR receipt remains mandatory before closure; no exhaustive all-lines claim.",
+    "deltaEmittedJSProof": "L12-DELTA-PROOF.json"
+  }
+}

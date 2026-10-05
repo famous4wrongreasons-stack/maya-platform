@@ -1,0 +1,25 @@
+<!-- REDACTED FOR REPOSITORY. Archival copy, not release-admission evidence. Original SHA256: 6667bac0b645945968ff95bb51736578443a8803400a4d36b3c03535491a4b4d -->
+
+# AR-1: инструкция для первого production-выпуска
+
+Candidate для текущей сертификации: `a55534bbe10c4318c1e9e21818f64f387f45f8c1`. Сертификация ещё выполняется; разрешение на production execution не выдано. Исходный сертифицированный checkpoint `77ecb3f5696583389e75592141f46fd0664d33d8` сохранён.
+
+Один реальный человек может быть release approver и platform operator. Второй security reviewer не требуется. Используется одна настоящая Ed25519-подпись execution authorization. В ней обязательно: `governance=single-operator`, `independentHumanReview=false`, `reviewerId=null`. Это не независимая проверка и не вторая собственная подпись.
+
+1. **Глобальная учётная запись. Владелец вручную:** подтвердить доступ к существующему global platform_owner. **Codex может:** проверить роль/состояние, а после отдельного разрешения — использовать обычный canonical login с приватно предоставленными credentials. Учётная запись активна; наличие доступа владельца пока не подтверждено. Салонный tenant_owner не становится платформенным оператором. Пароль не отправлять в чат.
+
+2. **Подпись. Владелец вручную:** выбрать реальный Ed25519 signer под своим контролем и предоставить публичный ключ, key ID и fingerprint. При отсутствии ключа владелец самостоятельно организует его безопасное создание/хранение. **Codex может:** проверить формат публичного ключа, fingerprint и привязку к global User. Codex не создаёт и не хранит production private key. Private key находится вне Git, чата и application files. Production trust сейчас пуст; установка trust в этом проходе запрещена.
+
+3. **Точный release packet. Codex может:** после успешной свежей сертификации подготовить сырой canonical ProfileCertificate и canonical bytes V2 execution authorization: точные SHA/build/evidence/certificate/profile digests, exact tenant, текущий CAS, окно не более 24 часов и rollback owner. **Владелец вручную:** рассмотреть пакет, отдельно разрешить выполнение выпуска и подписать эти bytes своим signer. Signature — Ed25519 без prehash, base64url. Отдельная certificate/reviewer подпись для V2 запрещена как подмена review. Не подписывать старый или истёкший пакет.
+
+4. **Backup и migrations. Codex может после отдельного разрешения:** повторно прочитать production state, снять приватный backup, проверить rollback и применить только две ранее согласованные миграции: JSON V2 ClientLinkChallenge и retained date NS-1. В governance-проходе новых миграций нет. **Владелец вручную:** разрешить окно выпуска. Здесь выполнены только isolated replay/restore; production migrations не применялись.
+
+5. **Deploy и trust installation. Codex может после отдельного разрешения:** установить проверенные публичные trust-настройки, развернуть только сертифицированные backend/PWA bytes, сверить deployed SHA/digests и health/readiness. **Владелец вручную:** обеспечить необходимые production/platform credentials через приватный канал, если они недоступны. Любое изменение кода/байтов требует остановки и новой сертификации.
+
+6. **Grant и rollback. Codex может после отдельного разрешения:** получить current CAS через реальную global platform session, выполнить offline check-command и canonical HTTP validate, затем точный grant одному явно указанному tenant на срок до 24 часов. Проверить effective profile, HANDOFF refusal, аудит и готовность revoke. **Владелец вручную:** подписать свежую authorization после изменения CAS/окна или при необходимости revoke. Plan/trial и auto-renew запрещены. Revoke должен предшествовать откату на backend, не понимающий V2. Повтор старой команды не включает доступ заново.
+
+7. **iPhone. Владелец вручную:** подключить и разблокировать правильный iPhone, подтвердить локальный developer access. Текущий development provisioning profile истекает 2026-10-05 08:16:21 UTC; при истечении владелец обновляет его через свою Apple-учётную запись. **Codex может:** проверить подпись и тот же React AChat payload; собрать и установить development app только после отдельного разрешения на установку. В этом проходе установка не выполняется. App Store Release/Associated Domains не подменяется development-проверкой.
+
+8. **Первая бизнес-операция. Владелец вручную:** отдельно разрешить первый реальный SMS OTP, новый verified personal Client episode и controlled YCLIENTS booking/reschedule/cancel. **Codex может:** провести только явно разрешённый сценарий. Эти эффекты не входят в текущую подготовку.
+
+`READY FOR PRODUCTION EXECUTION AUTHORIZATION: YES` будет означать готовность запросить отдельное разрешение, а не выполненный deploy/grant. Сейчас внешние prerequisites публичного signer и доступа к global account ещё не подтверждены. Полный список ручных действий дан выше заранее; новых фиктивных ролей или исключений для салона основателя нет.

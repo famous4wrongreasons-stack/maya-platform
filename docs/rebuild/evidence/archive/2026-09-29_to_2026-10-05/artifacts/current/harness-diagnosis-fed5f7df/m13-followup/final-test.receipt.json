@@ -1,0 +1,13 @@
+{
+  "name": "final-test",
+  "sourceCandidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "uncommittedHarnessOnly": true,
+  "patchSha256": "df4523929d56df2231b66463a00bfb9b6eac67bc7b5cfb28512b83c6ad899345",
+  "exit": 0,
+  "expectedExit": 0,
+  "seconds": 0.675,
+  "scope": "Pre-commit diagnostic, not final certification",
+  "passed": 13,
+  "failed": 0,
+  "reportSha256": "5117e3f95e547da8b8f26a7881825d898dd4e30d951429a48147406725e9e92a"
+}

@@ -1,0 +1,36 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "status": "PASS",
+  "checkedAt": "2026-10-04T09:18:49.307975+00:00",
+  "source": "work/ar1-single-operator-final-20261004/run-entire.py",
+  "sourceSha256": "2cb6466fb3ac10099424adc8f29616211dfb6671f24ba75123528fb1ed461e28",
+  "proofDriver": "work/ar1-single-operator-final-20261004/check-intermediate-guard.py",
+  "proofDriverSha256": "d1937ed3493e955613c7d039be0347cbaebbb826ade06e529fb6010d4813d337",
+  "before": {
+    "events": [],
+    "error": "KeyError:'status'"
+  },
+  "after": {
+    "events": [
+      "wait",
+      "admission"
+    ],
+    "error": null
+  },
+  "explicitFailure": {
+    "events": [
+      "wait"
+    ],
+    "error": "AssertionError:{'status': 'FAIL'}"
+  },
+  "partialNeverAdmitted": {
+    "events": [
+      "wait"
+    ],
+    "error": "RuntimeError:partial-not-admitted"
+  },
+  "candidateCodeChanged": false,
+  "testProcessInterrupted": false,
+  "admissionOfPartialReport": false,
+  "scope": "Fresh isolated execution of the actual scratch guard AST; synthetic report objects only. Restoring direct indexing reproduces the historical missing-status failure. Current guard waits for a complete report and refuses explicit failure and partial admission. No historical receipt admitted. Actual native corpus and product results remain independently required."
+}

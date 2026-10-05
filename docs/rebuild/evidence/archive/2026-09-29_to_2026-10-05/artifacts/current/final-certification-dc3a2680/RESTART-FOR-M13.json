@@ -1,0 +1,11 @@
+{
+  "from": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "to": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "reason": "Proven missing test-double method masked removal of the source/key guard",
+  "newCommit": "bab750d8d43a61aeb1d994b0914fd396e2b527d3 test(widgets): exercise both booking admission paths in receipt proofs",
+  "productChanges": 0,
+  "harnessOnly": true,
+  "wholeProgrammeMustRestart": true,
+  "partialReceiptsAdmitted": false,
+  "newOutputs": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8"
+}

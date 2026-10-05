@@ -1,0 +1,22 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "name": "clean-ci-xcode",
+  "exit": 0,
+  "command": [
+    "xcodebuild",
+    "-project",
+    "maya-ios-carrier/ios/App/App.xcodeproj",
+    "-scheme",
+    "App",
+    "-configuration",
+    "Debug",
+    "-sdk",
+    "iphonesimulator",
+    "-derivedDataPath",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261005/ios-clean-ci",
+    "CODE_SIGNING_ALLOWED=NO",
+    "build"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261005/clean-packaging-ci",
+  "seconds": 22.01
+}

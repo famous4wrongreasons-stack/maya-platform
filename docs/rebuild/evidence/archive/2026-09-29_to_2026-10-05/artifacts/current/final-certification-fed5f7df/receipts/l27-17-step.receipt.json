@@ -1,0 +1,11 @@
+{
+  "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "name": "l27-17-step",
+  "command": [
+    "node",
+    "test/l27-terminal-outcome-probe.mjs"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+  "exit": 0,
+  "seconds": 0.25
+}

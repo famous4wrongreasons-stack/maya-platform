@@ -1,0 +1,67 @@
+{
+  "contract": "maya.controlled-integration-boundary-proof/1",
+  "candidateSha": "4f479dce32e6e3595516447a5a6bf8cc6278528a",
+  "recordedAt": "2026-09-29T22:03:49.890Z",
+  "purpose": "diagnostic only; no release certification",
+  "checks": [
+    {
+      "id": "synthetic-parser-positive-control-NOT-A-RELEASE-CERTIFICATE",
+      "result": "PASS"
+    },
+    {
+      "id": "HANDOFF-false-rejected-even-if-all-other-163-rows-pass",
+      "result": "PASS"
+    },
+    {
+      "id": "HANDOFF-STOP-rejected-even-if-all-other-163-rows-pass",
+      "result": "PASS"
+    },
+    {
+      "id": "dropping-HANDOFF-rows-rejected",
+      "result": "PASS"
+    },
+    {
+      "id": "new-scope-string-rejected",
+      "result": "PASS"
+    },
+    {
+      "id": "caller-exclusion-field-rejected",
+      "result": "PASS"
+    },
+    {
+      "id": "actual-progress-matrix-refused",
+      "result": "PASS"
+    },
+    {
+      "id": "both-source-checkpoints-preserved-as-merge-parents-in-candidate-history",
+      "result": "PASS"
+    },
+    {
+      "id": "presentation-identical-to-Claude",
+      "result": "PASS"
+    },
+    {
+      "id": "backend-runtime-identical-only-approved-artifact-census-test-differs",
+      "result": "PASS"
+    },
+    {
+      "id": "no-uncommitted-candidate-changes",
+      "result": "PASS"
+    }
+  ],
+  "sourceHashes": {
+    "maya-saas-backend/src/entitlements/widget-release.contract.ts": "11d7cb3cb1d8cfa836fc300b0f5699f729726b15084aabda044d349f9fc62227",
+    "maya-saas-backend/src/entitlements/widget-release-policy.service.ts": "d96a320b20de1c14bd2d4741e4d07c03c43e6ea5c93fc2234a9a6eb3678cc56d",
+    "maya-saas-backend/src/entitlements/entitlements.service.ts": "ee54c93d9e9d3d1fefa473d3af4effd30c0c47e325e2afa689daa2a1d0f5805b",
+    "maya-saas-backend/src/widgets/widgets.controller.ts": "b30730e2f406e3b4f937df6814e8e467ac37303a6c945e406233f26ca1fe5ea9",
+    "maya-saas-backend/src/widgets/routing/effect-router.service.ts": "3a0c3291cce64dd0f3fb515af71cf9e7840faa69f78ce37a754e85bedfc6b636",
+    "maya-saas-backend/src/widgets/routing/handoff-target.signer.ts": "089b47c1f7f9faee43255727a5c2e94f999aa64e991bab570af22c06f074fb18",
+    "maya-saas-backend/src/widgets/composition/typed-step0.ts": "2f8c07c35f1dfdd301daaab297ce7ac75c8d3e8e94da8aefc2d8cec5525d8a48",
+    "maya-saas-backend/src/widgets/stores/timeline.store.ts": "3c672184155650adec38bb4219ddf0c5d91691f091a12bb703fbdccc45bc847f",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "7ed7a385edae495b670f4038e69dbeabd47bc737f494139aca60d042f2124df5",
+    "maya-chat-shell/src/shell/conversation.ts": "6a3337f90c9e778095605f9693c1e82ebe9f2d8bfc8dc9e25e3042c272461bdd"
+  },
+  "productionEffects": 0,
+  "otpEffects": 0,
+  "yclientsEffects": 0
+}

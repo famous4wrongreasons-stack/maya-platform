@@ -1,0 +1,23 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "recordedAt": "2026-10-04T05:05:05.466274+00:00",
+  "reason": "Publication collector originally enumerated five already registered workflows. Candidate also has Canonical React release packaging on push; require its actual new run before hosted admission.",
+  "requiredHostedWorkflowCount": 6,
+  "scope": "Unexecuted publication/reporting helpers only; no product, native runner, test, timeout or expected mutation change.",
+  "sourceChanges": [
+    {
+      "path": "publish-and-watch-final.py",
+      "before": "6559b38083dfea78fc826f5686e86e8538d20679859e3fa7e4529224441917e0",
+      "after": "b65bdd7dda2ece235af07e1b29bdd430d9e0b157843cbd49770631b21fdba6d8"
+    },
+    {
+      "path": "check-hosted-admission.py",
+      "before": "dad72f657e4d60972eb5a907cf70ffa7f7afe342333afd3e810367cecb3def1a",
+      "after": "841e2db0f8142d4f0e4cf37f73ea3bef6febf2543c029ca734d9e9425bc59be0"
+    }
+  ],
+  "syntax": "PASS",
+  "actualPublicationPerformed": false,
+  "actualHostedCiClaimed": false,
+  "productionEffects": 0
+}

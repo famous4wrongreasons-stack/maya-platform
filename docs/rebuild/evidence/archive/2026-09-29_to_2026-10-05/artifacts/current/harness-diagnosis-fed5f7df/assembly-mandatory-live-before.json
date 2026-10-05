@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-01T22:55:51.373411+00:00",
+  "candidateBase": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "exit": 1,
+  "productChanges": false,
+  "regressionTestsAdded": true,
+  "assemblerChanged": false
+}

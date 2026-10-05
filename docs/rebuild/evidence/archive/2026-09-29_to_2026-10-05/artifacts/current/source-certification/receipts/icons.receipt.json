@@ -1,0 +1,12 @@
+{
+  "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "name": "icons",
+  "command": [
+    "node",
+    "brand/make-icons.mjs",
+    "--check"
+  ],
+  "cwd": "maya-chat-shell",
+  "exit": 0,
+  "seconds": 4.46
+}

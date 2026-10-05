@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-10-03T06:57:59.100585+00:00",
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "sourceClean": true,
+  "status": "PASS",
+  "trees": [
+    {
+      "root": "maya-saas-backend/dist",
+      "files": 2720,
+      "matching": true,
+      "differences": []
+    },
+    {
+      "root": "maya-chat-shell/dist",
+      "files": 40,
+      "matching": true,
+      "differences": []
+    },
+    {
+      "root": "maya-carrier-react/dist/web",
+      "files": 3,
+      "matching": true,
+      "differences": []
+    },
+    {
+      "root": "maya-carrier-react/dist/capacitor",
+      "files": 3,
+      "matching": true,
+      "differences": []
+    }
+  ],
+  "certificationReceiptSha256": "b0b0c56fc2ca283018a1ad1c2e99ccc775b8b391d4b2004c949c9bb25ef4e2eb",
+  "referencedReceipts": 149,
+  "badReferences": [],
+  "productionMutations": 0
+}

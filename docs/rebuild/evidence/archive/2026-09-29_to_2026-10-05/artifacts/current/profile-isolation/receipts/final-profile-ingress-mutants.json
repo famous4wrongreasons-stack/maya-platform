@@ -1,0 +1,289 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "5b928b01bcd35abaf734ea172e71d85ea124ab96",
+  "battery_hashes": {
+    "gatePI.json": "4a6de41a138ffd6be99783a038fa92fe7f364bc051723aafeedcfcb1621e5b21"
+  },
+  "partition": null,
+  "startedAt": "2026-09-29T23:57:45.983Z",
+  "batteries": [
+    "gatePI.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-6e896e7da3",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-6e896e7da3",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gatePI.json",
+      "id": "PI-M01",
+      "files": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "PROFILE-INGRESS"
+      ],
+      "kills": [
+        {
+          "killer": "PROFILE-INGRESS",
+          "test": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-INGRESS refuses an old HANDOFF at HTTP/typed/internal ingress and direct dispatch, with zero signer, turn, consumption or owner effect",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gatePI.json",
+      "id": "PI-M02",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "PROFILE-INGRESS"
+      ],
+      "kills": [
+        {
+          "killer": "PROFILE-INGRESS",
+          "test": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-INGRESS refuses an old HANDOFF at HTTP/typed/internal ingress and direct dispatch, with zero signer, turn, consumption or owner effect",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gatePI.json",
+      "id": "PI-M03",
+      "files": [
+        "src/widgets/emission/emitter.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "PROFILE-EGRESS"
+      ],
+      "kills": [
+        {
+          "killer": "PROFILE-EGRESS",
+          "test": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-EGRESS refuses new/mixed HANDOFF mint and suppresses every old mixed control from resolve without rewriting history",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gatePI.json",
+      "id": "PI-M04",
+      "files": [
+        "src/widgets/resolve/thread-page.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "PROFILE-EGRESS"
+      ],
+      "kills": [
+        {
+          "killer": "PROFILE-EGRESS",
+          "test": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-EGRESS refuses new/mixed HANDOFF mint and suppresses every old mixed control from resolve without rewriting history",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gatePI.json",
+      "id": "PI-M05",
+      "files": [
+        "src/widgets/resolve/thread-page.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "PROFILE-EGRESS"
+      ],
+      "kills": [
+        {
+          "killer": "PROFILE-EGRESS",
+          "test": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-EGRESS refuses new/mixed HANDOFF mint and suppresses every old mixed control from resolve without rewriting history",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gatePI.json",
+      "id": "PI-M10",
+      "files": [
+        "src/entitlements/widget-release-access.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "PROFILE-LOCK"
+      ],
+      "kills": [
+        {
+          "killer": "PROFILE-LOCK",
+          "test": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-LOCK serializes concurrent revoke with an in-flight profile admission under the existing AR-1 lock",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [
+    "gatePI.json#PI-M01",
+    "gatePI.json#PI-M02",
+    "gatePI.json#PI-M03",
+    "gatePI.json#PI-M04",
+    "gatePI.json#PI-M05",
+    "gatePI.json#PI-M10"
+  ],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-09-30T00:15:41.462Z"
+}

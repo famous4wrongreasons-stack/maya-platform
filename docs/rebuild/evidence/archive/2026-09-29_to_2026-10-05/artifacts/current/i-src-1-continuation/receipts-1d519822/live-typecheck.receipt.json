@@ -1,0 +1,12 @@
+{
+  "candidate": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+  "name": "live-typecheck",
+  "command": [
+    "npm",
+    "run",
+    "typecheck:widgets-live"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 0,
+  "seconds": 7.48
+}

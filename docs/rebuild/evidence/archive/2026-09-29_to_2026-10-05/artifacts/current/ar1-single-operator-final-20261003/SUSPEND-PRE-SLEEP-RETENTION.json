@@ -1,0 +1,11 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "status": "PASS",
+  "scope": "Pre-sleep retention only; not complete certification",
+  "retainedParts": 55,
+  "retainedFullUnitParts": 52,
+  "admittedOriginalR06Executions": 340,
+  "excludedWholeInvalidatedPartExecutions": 20,
+  "unexplainedExclusions": 0,
+  "retainedHashes": "PASS"
+}

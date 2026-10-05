@@ -1,0 +1,18 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "name": "mutation-P-render",
+  "kind": "hosted-job observation; not a local process receipt",
+  "exit": 0,
+  "exitDerivation": "GitHub job conclusion == success",
+  "seconds": 5830.0,
+  "startedAt": "2026-10-04T22:09:08Z",
+  "finishedAt": "2026-10-04T23:46:18Z",
+  "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+  "workflowRunId": 37238713168,
+  "jobId": 111543133322,
+  "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133322",
+  "jobMetadataFile": "hosted/37238713168-jobs.json",
+  "jobMetadataSha256": "93e899a6d3336b92d0b77fd5355eb074e59982b396d57c2726726c4b0d5087b7",
+  "originalPart": "hosted/artifacts/37238713168/widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-render/widgets-mutation-part-P-render.json",
+  "partSha256": "fe1ccee7e45497d45be47151f479f9c02d1c10151a23d00fd24e137f965d9b33"
+}

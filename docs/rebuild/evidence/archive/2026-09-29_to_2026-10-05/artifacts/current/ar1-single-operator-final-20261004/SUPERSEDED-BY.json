@@ -1,0 +1,7 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "nextCandidate": "dff728e85a97841dd72bd290992b888344780780",
+  "reason": "Fresh hosted corpus found the reproduced CI proof-database unit fixture defect. Prior local receipts preserved; they are not admitted for the new candidate.",
+  "productionEffects": 0,
+  "at": "2026-10-04T22:05:03.240578+00:00"
+}

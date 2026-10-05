@@ -1,0 +1,2138 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "status": "PASS",
+  "checkedAt": "2026-10-04T21:19:05.466145+00:00",
+  "admittedSleepOverlaps": 0,
+  "admittedPartitions": 68,
+  "retainedWholePartitions": 52,
+  "wholePartitionsReexecuted": [
+    "P-ledger",
+    "P-mint-part-2-of-4",
+    "P-mint-part-3-of-4",
+    "P-mint-part-4-of-4",
+    "P-mt3",
+    "P-pairing"
+  ],
+  "newWholePartitions": [
+    "P-principal",
+    "P-render",
+    "P-rt6",
+    "P-seal",
+    "T-tables",
+    "WF",
+    "WR-part-1-of-4",
+    "WR-part-2-of-4",
+    "WR-part-3-of-4",
+    "WR-part-4-of-4"
+  ],
+  "admittedParts": [
+    {
+      "slot": "4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-4.json",
+      "sha256": "ef1307672b44c31d4e1535bb4ce9f050ca2a380e2f53a00c2ec0e6c79f941306",
+      "startedAt": "2026-10-04T14:11:47.735Z",
+      "finishedAt": "2026-10-04T14:41:32.506Z"
+    },
+    {
+      "slot": "6-part-1-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-6-part-1-of-4.json",
+      "sha256": "6eed07e09830daded04dcb45b0fd602b5e582719a24024700414ca6768d9c53b",
+      "startedAt": "2026-10-04T14:23:07.359Z",
+      "finishedAt": "2026-10-04T15:12:48.987Z"
+    },
+    {
+      "slot": "6-part-2-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-6-part-2-of-4.json",
+      "sha256": "8a98deab9f4e817650c0ec05432a1f1f2af71092bb1892aca4ae85b531cbf37e",
+      "startedAt": "2026-10-04T14:32:25.258Z",
+      "finishedAt": "2026-10-04T15:11:04.293Z"
+    },
+    {
+      "slot": "6-part-3-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-6-part-3-of-4.json",
+      "sha256": "a269197d68d4c6045cfe8007ae52bd8c2c64ff5d6ca1cadcf5998e14745c897f",
+      "startedAt": "2026-10-04T14:34:13.090Z",
+      "finishedAt": "2026-10-04T15:07:23.126Z"
+    },
+    {
+      "slot": "6-part-4-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-6-part-4-of-4.json",
+      "sha256": "74dc2ec9a41263e2f55d9a757cc78bfb098e28da936c49a4cd025728a2b1d621",
+      "startedAt": "2026-10-04T14:35:12.596Z",
+      "finishedAt": "2026-10-04T15:08:48.524Z"
+    },
+    {
+      "slot": "7-part-1-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-7-part-1-of-4.json",
+      "sha256": "a8c26c9327d04444c5da9fefa683af22ff02793e9db6cbce5f5c70869131b6c8",
+      "startedAt": "2026-10-04T14:41:32.681Z",
+      "finishedAt": "2026-10-04T15:53:47.801Z"
+    },
+    {
+      "slot": "7-part-2-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-7-part-2-of-4.json",
+      "sha256": "cde7487ecb6c8063d61165cddb7b94f375cd43110b6afd9e5227a5261b2d78ff",
+      "startedAt": "2026-10-04T14:44:56.614Z",
+      "finishedAt": "2026-10-04T15:56:40.250Z"
+    },
+    {
+      "slot": "7-part-3-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-7-part-3-of-4.json",
+      "sha256": "cdbdafad23348e30e1fdc2d8dd4dc0b62bfeb6d3fb4570f3eb9a7a576a8b7935",
+      "startedAt": "2026-10-04T15:07:23.226Z",
+      "finishedAt": "2026-10-04T16:12:05.578Z"
+    },
+    {
+      "slot": "7-part-4-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-7-part-4-of-4.json",
+      "sha256": "d44218564d6616c4d47239b3836381f660c65301acb12255026f6af61e4043b1",
+      "startedAt": "2026-10-04T15:08:48.735Z",
+      "finishedAt": "2026-10-04T16:13:14.548Z"
+    },
+    {
+      "slot": "8",
+      "path": "receipts/mutation-parts/widgets-mutation-part-8.json",
+      "sha256": "6ea922a5fc54cf6a951d31ecfaa3675b660015e5ec1ea096f9f38f184ef079b3",
+      "startedAt": "2026-10-04T15:11:04.474Z",
+      "finishedAt": "2026-10-04T15:32:08.446Z"
+    },
+    {
+      "slot": "9-part-1-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-9-part-1-of-4.json",
+      "sha256": "0138de24edb8d8d8b33967ebd1537301565ea2da69f21afd82179015bea60a78",
+      "startedAt": "2026-10-04T09:40:34.007Z",
+      "finishedAt": "2026-10-04T10:55:26.107Z"
+    },
+    {
+      "slot": "9-part-2-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-9-part-2-of-4.json",
+      "sha256": "41cf7ea364da4f9b2c2fa93dee0f997e2a9f4ec37f3e671e1adbae296c6416aa",
+      "startedAt": "2026-10-04T09:40:34.038Z",
+      "finishedAt": "2026-10-04T10:46:18.349Z"
+    },
+    {
+      "slot": "9-part-3-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-9-part-3-of-4.json",
+      "sha256": "828d06c75ed4f3d04a18663e8347fe95f8d058164f5c9543af4d7f0b804d2cb4",
+      "startedAt": "2026-10-04T09:40:34.038Z",
+      "finishedAt": "2026-10-04T10:45:51.395Z"
+    },
+    {
+      "slot": "9-part-4-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-9-part-4-of-4.json",
+      "sha256": "a4ab8cf98b580f9342d5c665dad88028ba742f6cd7a2b97cb7cd354b82d68db4",
+      "startedAt": "2026-10-04T09:40:34.038Z",
+      "finishedAt": "2026-10-04T10:38:20.414Z"
+    },
+    {
+      "slot": "10-part-1-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-10-part-1-of-4.json",
+      "sha256": "366b0c6c03f040fbdac50752e19bc004f7f7b472c0e6a70f80c44d99e8efeb3d",
+      "startedAt": "2026-10-04T13:03:31.980Z",
+      "finishedAt": "2026-10-04T13:46:44.884Z"
+    },
+    {
+      "slot": "10-part-2-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-10-part-2-of-4.json",
+      "sha256": "43b14d2ea5953d1907cddb399262766fe11039d9800863923bfff54a15ee128a",
+      "startedAt": "2026-10-04T13:08:20.273Z",
+      "finishedAt": "2026-10-04T13:51:33.237Z"
+    },
+    {
+      "slot": "10-part-3-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-10-part-3-of-4.json",
+      "sha256": "de7484c35a96bbd9a9adae26c713a5e59cabe5377a0b51f200fdc37f718a454d",
+      "startedAt": "2026-10-04T13:10:26.328Z",
+      "finishedAt": "2026-10-04T13:53:21.141Z"
+    },
+    {
+      "slot": "10-part-4-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-10-part-4-of-4.json",
+      "sha256": "034479de88cc897a416bf1b2f6542c82b16e2411dfb7172a53af8ea64a993fcd",
+      "startedAt": "2026-10-04T13:22:26.177Z",
+      "finishedAt": "2026-10-04T14:05:19.373Z"
+    },
+    {
+      "slot": "11",
+      "path": "receipts/mutation-parts/widgets-mutation-part-11.json",
+      "sha256": "18269a0a2772782a149e29332957ac41b950bfa095fbf236073790cda1906be0",
+      "startedAt": "2026-10-04T13:46:45.060Z",
+      "finishedAt": "2026-10-04T14:44:56.444Z"
+    },
+    {
+      "slot": "12",
+      "path": "receipts/mutation-parts/widgets-mutation-part-12.json",
+      "sha256": "b60f05328166d85b13caf8df1d11eb652d2b00d213dd474e3ba77f8fe4192fa3",
+      "startedAt": "2026-10-04T13:51:33.403Z",
+      "finishedAt": "2026-10-04T14:35:12.425Z"
+    },
+    {
+      "slot": "13-part-1-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-13-part-1-of-4.json",
+      "sha256": "9a004eac4951f8ffbdd5333e7a2d3ebb88cba6e64d01c4c007ba1f57ca26f964",
+      "startedAt": "2026-10-04T10:40:26.684Z",
+      "finishedAt": "2026-10-04T11:35:58.029Z"
+    },
+    {
+      "slot": "13-part-2-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-13-part-2-of-4.json",
+      "sha256": "2cfd080c69155e9786977373b15266a36df9973c49ecb27425955a0a80e72f64",
+      "startedAt": "2026-10-04T10:45:51.564Z",
+      "finishedAt": "2026-10-04T11:28:28.426Z"
+    },
+    {
+      "slot": "13-part-3-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-13-part-3-of-4.json",
+      "sha256": "7ec07c2640afa35f52cc6adce2fcd8566dcfe40c7f16176d3fea6a77e3325cac",
+      "startedAt": "2026-10-04T10:46:18.448Z",
+      "finishedAt": "2026-10-04T11:37:37.611Z"
+    },
+    {
+      "slot": "13-part-4-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-13-part-4-of-4.json",
+      "sha256": "f6f709d9bf0d038855255b2fa0424eaebe97d3f296311094e854c413d515941a",
+      "startedAt": "2026-10-04T10:55:26.197Z",
+      "finishedAt": "2026-10-04T11:46:59.468Z"
+    },
+    {
+      "slot": "1-5",
+      "path": "receipts/mutation-parts/widgets-mutation-part-1-5.json",
+      "sha256": "5324f2958fa4bc1114a2dc029ccafca31ade0f2d17888610ca995f956632e46b",
+      "startedAt": "2026-10-04T12:52:04.687Z",
+      "finishedAt": "2026-10-04T13:29:00.589Z"
+    },
+    {
+      "slot": "10a",
+      "path": "receipts/mutation-parts/widgets-mutation-part-10a.json",
+      "sha256": "6c9fc571b99e50af64fb601fa052949023850c6cf9154bb68f967c30ae3ea28b",
+      "startedAt": "2026-10-04T13:29:00.757Z",
+      "finishedAt": "2026-10-04T14:11:47.564Z"
+    },
+    {
+      "slot": "12b",
+      "path": "receipts/mutation-parts/widgets-mutation-part-12b.json",
+      "sha256": "7ae0137eb99896add9b24b0f0c1439149c4c1d0c7796c8cbb516913b0df678a8",
+      "startedAt": "2026-10-04T13:53:21.303Z",
+      "finishedAt": "2026-10-04T14:32:25.086Z"
+    },
+    {
+      "slot": "12k",
+      "path": "receipts/mutation-parts/widgets-mutation-part-12k.json",
+      "sha256": "8cb99f7cc3daaa5b7fd781056818e85a86543639bd7858c34f54cab3dfde0c96",
+      "startedAt": "2026-10-04T14:05:19.541Z",
+      "finishedAt": "2026-10-04T14:34:12.919Z"
+    },
+    {
+      "slot": "8c",
+      "path": "receipts/mutation-parts/widgets-mutation-part-8c.json",
+      "sha256": "f1ad69cf3c500ed121f6246091736b4aec90373db4a5d8408b7ffe02eeb28916",
+      "startedAt": "2026-10-04T15:12:49.161Z",
+      "finishedAt": "2026-10-04T16:17:40.605Z"
+    },
+    {
+      "slot": "8r",
+      "path": "receipts/mutation-parts/widgets-mutation-part-8r.json",
+      "sha256": "c7e116ba8925bf41103f70bc3aefac145050f5707459bcef6e0473c7cfc185b0",
+      "startedAt": "2026-10-04T15:32:08.614Z",
+      "finishedAt": "2026-10-04T16:58:35.085Z"
+    },
+    {
+      "slot": "9a",
+      "path": "receipts/mutation-parts/widgets-mutation-part-9a.json",
+      "sha256": "d901042b9a9a5cdcc60ab4bf89a2f49064c47952513286f83d221c63ce651f07",
+      "startedAt": "2026-10-04T15:53:47.977Z",
+      "finishedAt": "2026-10-04T16:15:42.112Z"
+    },
+    {
+      "slot": "AB",
+      "path": "receipts/mutation-parts/widgets-mutation-part-AB.json",
+      "sha256": "b30b3c0477a6a18d8b28e1ea6368c739648b16228d400a838cea2364dab5934e",
+      "startedAt": "2026-10-04T15:56:40.419Z",
+      "finishedAt": "2026-10-04T16:18:19.318Z"
+    },
+    {
+      "slot": "AR",
+      "path": "receipts/mutation-parts/widgets-mutation-part-AR.json",
+      "sha256": "ebc1b51bbcb9cb24ca7dc7a5dc093ff733f85f745bc756c3dafe2e6bc97869bd",
+      "startedAt": "2026-10-04T10:57:32.432Z",
+      "finishedAt": "2026-10-04T12:37:43.733Z"
+    },
+    {
+      "slot": "BS",
+      "path": "receipts/mutation-parts/widgets-mutation-part-BS.json",
+      "sha256": "35aec9ed6f92e1868cb42c51811f7be24aac8ac88826ab8d58c5601b26dbb1de",
+      "startedAt": "2026-10-04T11:35:58.116Z",
+      "finishedAt": "2026-10-04T12:16:32.348Z"
+    },
+    {
+      "slot": "D8",
+      "path": "receipts/mutation-parts/widgets-mutation-part-D8.json",
+      "sha256": "9bf99a79b8927468fa93c1d23a032eaf7abccd1c99f3066088c04f21e6be6103",
+      "startedAt": "2026-10-04T16:12:05.681Z",
+      "finishedAt": "2026-10-04T16:56:17.533Z"
+    },
+    {
+      "slot": "FB",
+      "path": "receipts/mutation-parts/widgets-mutation-part-FB.json",
+      "sha256": "c76271d179207e30a22aaec609ea299ec2254152f8de202e3e6590a2925dc262",
+      "startedAt": "2026-10-04T16:13:14.638Z",
+      "finishedAt": "2026-10-04T16:56:21.526Z"
+    },
+    {
+      "slot": "H-harness",
+      "path": "receipts/mutation-parts/widgets-mutation-part-H-harness.json",
+      "sha256": "86232a99b05e098952accf81f9eb6efddca59eb1359cabfb9ff9621b732187b2",
+      "startedAt": "2026-10-04T10:38:20.667Z",
+      "finishedAt": "2026-10-04T11:59:14.742Z"
+    },
+    {
+      "slot": "NS",
+      "path": "receipts/mutation-parts/widgets-mutation-part-NS.json",
+      "sha256": "72da916662f3fe6029c0b672c64fb2974b66492af084693775e4398cce1ea4b1",
+      "startedAt": "2026-10-04T11:28:28.524Z",
+      "finishedAt": "2026-10-04T11:39:52.562Z"
+    },
+    {
+      "slot": "P-allowlist",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-allowlist.json",
+      "sha256": "60725478005c829ce9927a6e4e54cc87902b5d62a4379288f9ef317d0a87dd99",
+      "startedAt": "2026-10-04T16:15:42.279Z",
+      "finishedAt": "2026-10-04T16:45:02.688Z"
+    },
+    {
+      "slot": "P-discharge",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-discharge.json",
+      "sha256": "b5bf068766a0a89acd49c94b4a9ccaebb9e974411669144a83213bea8c94200f",
+      "startedAt": "2026-10-04T16:17:40.772Z",
+      "finishedAt": "2026-10-04T17:31:20.876Z"
+    },
+    {
+      "slot": "P-f88",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-f88.json",
+      "sha256": "7fca6d8ecd59f4e0feada4ff619342f9d6c3ecce433a0b439092f616d4e49cbd",
+      "startedAt": "2026-10-04T16:18:19.481Z",
+      "finishedAt": "2026-10-04T17:26:11.558Z"
+    },
+    {
+      "slot": "P-g15b",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-g15b.json",
+      "sha256": "fdf4880b5d3cd11d8df5e0f7cc2a43562b5a4e5e21a6c081694f57e215fe70e4",
+      "startedAt": "2026-10-04T16:45:02.778Z",
+      "finishedAt": "2026-10-04T17:15:02.797Z"
+    },
+    {
+      "slot": "P-handle",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-handle.json",
+      "sha256": "fc653dcdca5d04749ab7c624b3ba71e73b24efcf83023609dc8df479b732ff1d",
+      "startedAt": "2026-10-04T16:56:17.722Z",
+      "finishedAt": "2026-10-04T17:24:57.222Z"
+    },
+    {
+      "slot": "P-ledger",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-ledger.json",
+      "sha256": "3e4c1b1d34e33358a338f147e6b50f2601c212207bf481619a36f1a3ba9daae9",
+      "startedAt": "2026-10-04T18:11:51.110Z",
+      "finishedAt": "2026-10-04T20:10:20.866Z"
+    },
+    {
+      "slot": "P-mint-part-1-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-mint-part-1-of-4.json",
+      "sha256": "6065a33cb0f8c660df1f547efeaaef75780ac8914a7aa3eadccb87b95581281c",
+      "startedAt": "2026-10-04T16:58:35.172Z",
+      "finishedAt": "2026-10-04T17:42:41.543Z"
+    },
+    {
+      "slot": "P-mint-part-2-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-mint-part-2-of-4.json",
+      "sha256": "14a529797a4d8c6fecb439f0be086843cabc2fa5deceee04cd44fced1f94ee5f",
+      "startedAt": "2026-10-04T18:11:51.212Z",
+      "finishedAt": "2026-10-04T19:28:50.451Z"
+    },
+    {
+      "slot": "P-mint-part-3-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-mint-part-3-of-4.json",
+      "sha256": "1b663a6956a5732c265837fa29b189959604e159b043d54d4bc0e33e8fbcc32d",
+      "startedAt": "2026-10-04T18:11:51.206Z",
+      "finishedAt": "2026-10-04T19:12:17.321Z"
+    },
+    {
+      "slot": "P-mint-part-4-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-mint-part-4-of-4.json",
+      "sha256": "d2edd953521e3c565f7ba572411f102ad23c4457d99003677d166f0f051153c7",
+      "startedAt": "2026-10-04T18:11:51.205Z",
+      "finishedAt": "2026-10-04T19:21:31.992Z"
+    },
+    {
+      "slot": "P-mt3",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-mt3.json",
+      "sha256": "628e172c54fb4c5cba944d09047e3f651aa3320943761b3ef5e12667ecfe5f05",
+      "startedAt": "2026-10-04T18:11:51.211Z",
+      "finishedAt": "2026-10-04T19:19:02.479Z"
+    },
+    {
+      "slot": "P-pairing",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-pairing.json",
+      "sha256": "128f60f0c2551a4397750ce7fe66e7bb9181661edda351e539d5d331617e04c6",
+      "startedAt": "2026-10-04T18:11:51.205Z",
+      "finishedAt": "2026-10-04T19:41:31.051Z"
+    },
+    {
+      "slot": "P-principal",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-principal.json",
+      "sha256": "fd3e9736ac5cc877d61a35d3a423ff2b9b5c398d3ebe66989d1bb82af618967d",
+      "startedAt": "2026-10-04T19:12:17.494Z",
+      "finishedAt": "2026-10-04T20:28:08.781Z"
+    },
+    {
+      "slot": "P-render",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-render.json",
+      "sha256": "360788efc2b57d8179de7172f5c8d9d57234749a1074eea5dda3a2ae3f5a67c5",
+      "startedAt": "2026-10-04T19:19:02.617Z",
+      "finishedAt": "2026-10-04T20:41:16.808Z"
+    },
+    {
+      "slot": "P-rt6",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-rt6.json",
+      "sha256": "c20fb3bb3182518c26201331db56a46209d7446631d6225bfbe9d88f2e3c6aef",
+      "startedAt": "2026-10-04T19:21:32.126Z",
+      "finishedAt": "2026-10-04T20:36:47.043Z"
+    },
+    {
+      "slot": "P-seal",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-seal.json",
+      "sha256": "cb7501acdc832b264a9fe2c746e03c58bf4b0a7898c9ed3d2350bb93cec4f904",
+      "startedAt": "2026-10-04T19:28:50.593Z",
+      "finishedAt": "2026-10-04T20:33:02.101Z"
+    },
+    {
+      "slot": "PI-contract",
+      "path": "receipts/mutation-parts/widgets-mutation-part-PI-contract.json",
+      "sha256": "4498c9c1e265f4319f4ba6b35a2e818bfd021173fd38501ee0b925306ca1169e",
+      "startedAt": "2026-10-04T12:16:32.446Z",
+      "finishedAt": "2026-10-04T14:23:07.187Z"
+    },
+    {
+      "slot": "PI",
+      "path": "receipts/mutation-parts/widgets-mutation-part-PI.json",
+      "sha256": "f4b04ca5017ce21a92bab9a0c9dc5a0a581e17085c68b422ffef583af509d40e",
+      "startedAt": "2026-10-04T12:37:43.832Z",
+      "finishedAt": "2026-10-04T12:52:04.589Z"
+    },
+    {
+      "slot": "PU",
+      "path": "receipts/mutation-parts/widgets-mutation-part-PU.json",
+      "sha256": "a7e3ad1e01a70e09ed8f85860fcb044b87b9b4c3e7398c5a8d8b46d8193f7e60",
+      "startedAt": "2026-10-04T09:40:33.976Z",
+      "finishedAt": "2026-10-04T10:57:32.346Z"
+    },
+    {
+      "slot": "SB1",
+      "path": "receipts/mutation-parts/widgets-mutation-part-SB1.json",
+      "sha256": "4a267e80d7eee6ebedb10a11d517660a51f1678397e59c846d4b2d9879adf540",
+      "startedAt": "2026-10-04T11:46:59.554Z",
+      "finishedAt": "2026-10-04T13:10:26.232Z"
+    },
+    {
+      "slot": "SBV",
+      "path": "receipts/mutation-parts/widgets-mutation-part-SBV.json",
+      "sha256": "c2ea142018c4cc9a4e2793c5a0e8cb969b27290ed32d3259179e64fc2e56a38b",
+      "startedAt": "2026-10-04T11:59:14.833Z",
+      "finishedAt": "2026-10-04T13:08:20.173Z"
+    },
+    {
+      "slot": "SO",
+      "path": "receipts/mutation-parts/widgets-mutation-part-SO.json",
+      "sha256": "11864a84914c6c5784fca57ab1c5a41ded7a18da911bc55c38a2475828ea56d8",
+      "startedAt": "2026-10-04T09:40:33.926Z",
+      "finishedAt": "2026-10-04T10:40:26.511Z"
+    },
+    {
+      "slot": "SV2",
+      "path": "receipts/mutation-parts/widgets-mutation-part-SV2.json",
+      "sha256": "cd13f4780f878f6590a4fde99006f9c2b2a1eea78aba5d27e328513a5def7be6",
+      "startedAt": "2026-10-04T11:39:52.646Z",
+      "finishedAt": "2026-10-04T13:22:26.012Z"
+    },
+    {
+      "slot": "T-tables",
+      "path": "receipts/mutation-parts/widgets-mutation-part-T-tables.json",
+      "sha256": "81329a37772de45a253bf420fdf54a95d5b2ea5046a5c9764c2bbbc7353107df",
+      "startedAt": "2026-10-04T19:41:31.339Z",
+      "finishedAt": "2026-10-04T20:48:11.678Z"
+    },
+    {
+      "slot": "TURN",
+      "path": "receipts/mutation-parts/widgets-mutation-part-TURN.json",
+      "sha256": "f8c940b050a945d3af09e715f712011b36fc36df467c7d3286d79afa4cca6c2a",
+      "startedAt": "2026-10-04T11:37:37.702Z",
+      "finishedAt": "2026-10-04T13:03:31.883Z"
+    },
+    {
+      "slot": "WF",
+      "path": "receipts/mutation-parts/widgets-mutation-part-WF.json",
+      "sha256": "bbe28d43841b51e427fb227f38d0c2acfe9dbae1e20c930be43b2fd33ebaee90",
+      "startedAt": "2026-10-04T20:10:21.007Z",
+      "finishedAt": "2026-10-04T20:30:17.283Z"
+    },
+    {
+      "slot": "WR-part-1-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-WR-part-1-of-4.json",
+      "sha256": "01c901effb49cb6b0abf1519ea447a8aceb7c9a9cddae8b9d45c1c45b1e30b61",
+      "startedAt": "2026-10-04T20:28:08.873Z",
+      "finishedAt": "2026-10-04T21:17:19.495Z"
+    },
+    {
+      "slot": "WR-part-2-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-WR-part-2-of-4.json",
+      "sha256": "cfa0f805baffa2108d58e16296e37187a3a5ca27b367f07e08a638f3a3209da4",
+      "startedAt": "2026-10-04T20:30:17.369Z",
+      "finishedAt": "2026-10-04T21:16:40.914Z"
+    },
+    {
+      "slot": "WR-part-3-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-WR-part-3-of-4.json",
+      "sha256": "52eb6e633c9a1dfc7414e56d98ac3fd3799213e4373ea5a856f611356eee601e",
+      "startedAt": "2026-10-04T20:33:02.235Z",
+      "finishedAt": "2026-10-04T21:18:59.819Z"
+    },
+    {
+      "slot": "WR-part-4-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-WR-part-4-of-4.json",
+      "sha256": "056653ff33ce7e104f2669c8a64ebab0854b63997ab3916b6bd0966d006d4e1e",
+      "startedAt": "2026-10-04T20:36:47.185Z",
+      "finishedAt": "2026-10-04T21:18:55.818Z"
+    }
+  ],
+  "admittedCommandReceipts": [
+    {
+      "path": "receipts/L27-M01.receipt.json",
+      "sha256": "af8b20a0b892d021517f15436a773713751803ed87d765e1993b990afe51bbcd",
+      "expectedExit": 1
+    },
+    {
+      "path": "receipts/L27-M02.receipt.json",
+      "sha256": "cf2bfe061cd5e0826f7bf9f90385316e3982dcfce79256a533f12d91ab985590",
+      "expectedExit": 1
+    },
+    {
+      "path": "receipts/L27-M03.receipt.json",
+      "sha256": "16d2592eeb6721e4b03e0fe367288faf3ca77c2474da4ddd21029921c5d26b4d",
+      "expectedExit": 1
+    },
+    {
+      "path": "receipts/L27-M04.receipt.json",
+      "sha256": "43a484e9da4d1b11d07c7caf4b2111a32c6c4c2e822ababd9a06a775d07907d9",
+      "expectedExit": 1
+    },
+    {
+      "path": "receipts/L27-M05.receipt.json",
+      "sha256": "1be964a4c4254d00a5c1d3a8c95f4482c90c7fd835207a53df889a9be2884711",
+      "expectedExit": 1
+    },
+    {
+      "path": "receipts/L27-M06.receipt.json",
+      "sha256": "fa1b18bc5a1e2d98e4423355dada05a0f7104c79d882d13401bdb304b9780892",
+      "expectedExit": 1
+    },
+    {
+      "path": "receipts/L27-M07.receipt.json",
+      "sha256": "8baf0d7bfe10e114b97106e7b1cf9ef2becc9a1fdb04615af868713bb8b30c1c",
+      "expectedExit": 1
+    },
+    {
+      "path": "receipts/L27-M08.receipt.json",
+      "sha256": "bd846f8616612db14bf4b66cc8b3e7d895eaf3ae6e088e735f83ffb676b507fd",
+      "expectedExit": 1
+    },
+    {
+      "path": "receipts/backend-build.receipt.json",
+      "sha256": "e26d3ff485d2cbe08517287ce3d483fe028210b3ded577e13a8ab9c26b4329cd",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/backend-full.receipt.json",
+      "sha256": "6341001bc5b73b2de448dd9aec220d7f3c455ee072bdef66f8a4ec088efa103e",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/backend-typecheck.receipt.json",
+      "sha256": "907616ae078b6e18cf346146aab249092ce46c945308fcf72c23212f8c023cde",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/carrier-build.receipt.json",
+      "sha256": "a7fc72e231f48c7bb5084fd6966f966b1a6460fc9bc6dad26ffd62235e26154d",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/carrier-capacitor-build.receipt.json",
+      "sha256": "092fa9f8619bd798f9cf3dc39a340f3249476fa9e853ec9e9c3cdb3d69899251",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/carrier-full.receipt.json",
+      "sha256": "2246694ca7c65615590052ec4caf6541bb3b6533e74a6b599799c174432f086e",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/carrier-harness.receipt.json",
+      "sha256": "5019e49cc8c4058070dc51375b837165d122293eabf37f84e61c084a8deadf4a",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/carrier-ratchet-selftest.receipt.json",
+      "sha256": "fd0d33c9591c851f8987a41babe355079d2f1399b8cb6909ab045836d6c277c7",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/carrier-typecheck.receipt.json",
+      "sha256": "274c5f618e2fd8e0ca68a6654968edf3eb921072caa2cd2f8aa301f6dc981840",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/clean-ci-actual-app.receipt.json",
+      "sha256": "c00440b71f8cc5b0914b822501b12794799198bc67f81034fba497586a2f760e",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/clean-ci-backend-build.receipt.json",
+      "sha256": "18b1f0ef5ee5879b380c591adef2dd4c46f024949a368579e136a9dd20349715",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/clean-ci-carrier.receipt.json",
+      "sha256": "a92a109d32afb054bc9198546587c9b4109036602e9611a5546c8b5b95632736",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/clean-ci-install-maya-carrier-react.receipt.json",
+      "sha256": "5400a25e6c949245c3c745c0ecbbae22664891874fa15854fc7a2a6c0861285f",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/clean-ci-install-maya-ios-carrier.receipt.json",
+      "sha256": "adb49cfe7d68150fd8143e7c784afb711e3ba4deeb3d5ac854eace06d62910cc",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/clean-ci-install-maya-saas-backend.receipt.json",
+      "sha256": "e91c0b90da77eb99615497a3b695b283bfcc2fb9c8caaef94cfb1f85ae4d28c6",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/clean-ci-packaging.receipt.json",
+      "sha256": "894fe345c7485aafbe518cb281ae7adb256a109400c0c801971aa427adb1d8c1",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/clean-ci-prisma.receipt.json",
+      "sha256": "ebe5197069f987bcca92c0c0900b9a7ddc43835cb6455f51fa4ed0916cfd903d",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/clean-ci-sync.receipt.json",
+      "sha256": "30c82ede14d5df1c144f34bba32ac82f8108ed6eb3dc2d2f7b6a58952a4aab11",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/clean-ci-trust-compiled.receipt.json",
+      "sha256": "60261a4022f67528b07510941e0f7bbe788a10be4d9fc0de672d3d1bb4a8b5db",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/clean-ci-trust.receipt.json",
+      "sha256": "91418788c85a23a429e5030463e1ecd61d8571ba970529d7514e36a45d79049d",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/clean-ci-xcode.receipt.json",
+      "sha256": "688cf60834e6d5eb06456701a96d07a80f45b5027903c56844f5df03f4c35516",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/contract-check.receipt.json",
+      "sha256": "0c17a0458fc67535788f256e1a3b2cafd8c39f2acde888cdc0e4e5850fc2941d",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/contract-compile.receipt.json",
+      "sha256": "9f797d1136db660dfee2c38efc3a1dcfd1faf68470786da4d169778cf4253cad",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/e2e.receipt.json",
+      "sha256": "401e56dd028b5700e87e0926a73686d6edd6443ff1c9f5890240393a55fa4e13",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/events-db-migration.receipt.json",
+      "sha256": "6a5761662505d08aa6911a213765323e58f944b6c417422f5e4d573830ed8d72",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/events-live.receipt.json",
+      "sha256": "0a34f981e43b0df7b04bad09476fe6984cc67ce3378a8f87a2de69d2d330168c",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/evidence-verifier.receipt.json",
+      "sha256": "d50c30cbd50d66f5eea734141e05b65d8cc4c07f60130114b86dc575ecd42604",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/fbe2e-canonical-net-bin.receipt.json",
+      "sha256": "e33a110dfd8b170a03e513e8cfc0145b91e4fca4d5052fe2a652e3239c216102",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/fbe2e-canonical-net-roundtrip.receipt.json",
+      "sha256": "e56eb755ba85a229ef1ee07d17fcfd7fc8bc9e27f0d74ae1ee45b610f630feef",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/fbe2e-canonical-net-turn.receipt.json",
+      "sha256": "3985d09cdfc3d84108ee3d04dd2491a6f0d7614b176a3847c5458d59525274b3",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/fbe2e-compiled-net-bin.receipt.json",
+      "sha256": "81c446094a8400ec2364b9fd1f242e4fd3907ebc7d8a83fe3d8f43faa087db40",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/fbe2e-compiled-receipt-net-bin.receipt.json",
+      "sha256": "ae8b5f3746401ee6b4ad1962e2c7621bd02a57aa9f2f1b7eb164b21dbae46ace",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/fbe2e-l27-postcommit-dismiss.receipt.json",
+      "sha256": "20db8fa9e6283b293be746cca2f8ad1ff71e8dd0751ef4a737c3d37108ca91a6",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/frontend-inline.receipt.json",
+      "sha256": "e214cc4cea2699ffc29398b09e7797512a7a72e9938b450c13a5364c0559a70d",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/http-bin.receipt.json",
+      "sha256": "f405eb4fc54ff9ae46f5565b32d9a61855a26208cdd2c5e0bb13aef4e70e0f10",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/icons.receipt.json",
+      "sha256": "be03fdda5ebc83aaf9339f4cb912f3c74aad4392219d07b297bb0f38b7af8b34",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/ios-actual-bundle.receipt.json",
+      "sha256": "5c88bf9221b6ebd7634762887a31f173b4bdbb99fb3fdc5e310a43481156d1d0",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/ios-unsigned-build.receipt.json",
+      "sha256": "8eb4ebc8729dd5036058b7666860a0f1341742ac6c4f0cb55b200cd796ba5eac",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/isolated-production-preflight.receipt.json",
+      "sha256": "b1a602128c39e7dd23376d7db0aa34295e340104060928a983d65b916924cbb4",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/isolated-structural-schema.receipt.json",
+      "sha256": "788a53633206754c7bb2322e7adccf3d221c049531724dba3036c814cc6e1db9",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/k1-dossier.receipt.json",
+      "sha256": "fac801f71dd95938961c20aefa67921797a307d6198bbb7d4ebb4cb7b22c942a",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/k15-census.receipt.json",
+      "sha256": "9f1e660397fbb99860a50ab28322fde62faed3fe3c91481f481c09ca6c5e7c0e",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/k3.receipt.json",
+      "sha256": "cc64d9f22e41000ddab66e2ee45d73b2c3260fd3780d70a1e091eda755373f0a",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/k5-exit.receipt.json",
+      "sha256": "0b6aab5abf4e8472df5984f17b7ce86355f44aa4b81c4eae89c362c8392bc760",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/l25-browser-fixtures.receipt.json",
+      "sha256": "ffff73535d68a636b1a311e389a940d106b65b5e641b0f652b307fba3f9b13a1",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/l25-browser.receipt.json",
+      "sha256": "ad40d9819a0993f31fa4f4474a472c722bff88276d3161dffa63ba9de8eb4ef7",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/l27-17-step.receipt.json",
+      "sha256": "0ba50af7ba137946ae36aa94f92bee5f5b514bc64d6f97f1565d459091b51925",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/l27-mutations-baseline.receipt.json",
+      "sha256": "d93251783783079597aaa000a1f80d4dde588b113d5d11402fc00628d4bfddd5",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/legacy-python-full.receipt.json",
+      "sha256": "a6b0a5068a0935766090db9dc570958f67b98e231881ca5a412d64f6766b84f8",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/lint.receipt.json",
+      "sha256": "0f805c92243c83a5f562c71ecd4e91b250fdd12eba4890f537f8ae988f124519",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/live-typecheck.receipt.json",
+      "sha256": "92fe411b68e5095710f7118ed40bf62ef7e56b1bc0e2a685ad68555585a2eaf9",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-1-5.receipt.json",
+      "sha256": "104ef76a2ae9bbcc3c10ea6d51e29038d17f3033b880cdcb60478993e1f48d49",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-10-part-1-of-4.receipt.json",
+      "sha256": "6a8e7b1128ee58cea8243cd12b9d756929b32b001a7ab898ed9b5704542c52c9",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-10-part-2-of-4.receipt.json",
+      "sha256": "4d1118b28ca5ae74550b4724e106dd2e719aebf3d56b8353c955f032ac157c9d",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-10-part-3-of-4.receipt.json",
+      "sha256": "78f98deefe61746c6c0488d37cdfea3768dab77d483de10c89bed7231b4f3acd",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-10-part-4-of-4.receipt.json",
+      "sha256": "fff3490abd549c4b3140a2588f0bcdf2fb93719a02c988319346f1aba6eca5f7",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-10a.receipt.json",
+      "sha256": "2213c0169e267e2eaa90fd135b26119ca68b9ee2969f7fafb6b57e42227bdd79",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-11.receipt.json",
+      "sha256": "2d2392197f28bd9ee2bb0697ff9f638103c4a66075de1cf577c4e520c98fe5cb",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-12.receipt.json",
+      "sha256": "3e13771c7becf3222eabba78f9629e154d175de05edce20a891e05a60f9c5dc6",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-12b.receipt.json",
+      "sha256": "794aac6a104cb684b5d21ca73ddd1d47c2a626358a41c213d50430b6e8e5b3e6",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-12k.receipt.json",
+      "sha256": "62fbba126e8b22486fdfa59c937e0cc39c9539936c0d1e2a10c7c88f1e3626a7",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-13-part-1-of-4.receipt.json",
+      "sha256": "8d0852aff36cfcd0d0de835de289c801c1f38eb5f24ba9f65b44cdb8c12f763c",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-13-part-2-of-4.receipt.json",
+      "sha256": "1cfc68205b5613afb317506355cef5a58d3fb22d46b57611e1e6f9e2dbc4de6b",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-13-part-3-of-4.receipt.json",
+      "sha256": "ee44e352572a19a54de8754f30093996935f8ae5f8359246798c40373ab61d12",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-13-part-4-of-4.receipt.json",
+      "sha256": "0334ec7c73c65eb6c2e11df714961e856c1bee03df7e3888e97db94c1dfe8cd4",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-4.receipt.json",
+      "sha256": "5651bf54fafb2f9a50b36486fb753695969644d00cecbfa8ae6947152aac11eb",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-6-part-1-of-4.receipt.json",
+      "sha256": "1e15ad6f8ace7c1b1f83ffc3c7538d923024ddb2cb67db33399b34a26da3c375",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-6-part-2-of-4.receipt.json",
+      "sha256": "6c05d89470a3cc2f71954816a30324468206a5e553479b112493220485c007e6",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-6-part-3-of-4.receipt.json",
+      "sha256": "7c768f97e6b43607617c6236fb29bf84a9c788150496e6b87a0b9547307928ff",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-6-part-4-of-4.receipt.json",
+      "sha256": "fa58a3ae728a7a058321e0d7c5b9610ab682675bf53572131e695e42e2449102",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-7-part-1-of-4.receipt.json",
+      "sha256": "b4e3829dfe4441acad59eeb4812a695ff28d2b8080db85e1e63a5b70564f7f61",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-7-part-2-of-4.receipt.json",
+      "sha256": "680690a2ce37251681d28e4a260456d44346a1ba644140f00f1e395ab8a846d2",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-7-part-3-of-4.receipt.json",
+      "sha256": "c8b1eeec2cddd35211f866bc94dfb7e2bcf51b3a0267cfa4aa1d25c0d5176cd4",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-7-part-4-of-4.receipt.json",
+      "sha256": "801807ae89ab8e81587811e583c551c889134307565645a0472c9b157898c283",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-8.receipt.json",
+      "sha256": "55ea938f2f373820173a1481e6b1e5053690f29670c8d7e8a751782ffa914eb1",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-8c.receipt.json",
+      "sha256": "3c7b91247ae905a48ccda876254853aa4074594f0d317f6cfc8e3c7a3f4f381e",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-8r.receipt.json",
+      "sha256": "7b040a22cf3ba9b8f4c3452c356f813636e49fa57346562d0e08791380cc3fba",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-9-part-1-of-4.receipt.json",
+      "sha256": "2af1770fdb9d839fe4f6152343089be45dd05f39dc6cd17f4a6709eb0f8a6516",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-9-part-2-of-4.receipt.json",
+      "sha256": "07d5aa0a23669d602319759155e043a854bb99d8d400eb67041b846e2ac9d774",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-9-part-3-of-4.receipt.json",
+      "sha256": "96e19f4697c40ce68a656a244f4130730084fe66001e451e1ae33485262b8f6e",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-9-part-4-of-4.receipt.json",
+      "sha256": "21a40ff0dfc7c82ea55a0448414efa26fbe4eb9a54e8602bd5af0bb31009c437",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-9a.receipt.json",
+      "sha256": "0b62528d584ba513e14b0bb59e424f38756cab865369b33bb55f7fa3070cfb1c",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-AB.receipt.json",
+      "sha256": "c769720e23fee09de74db4a37d15b0aa356da6b15117170a91ebe17a57679d08",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-AR.receipt.json",
+      "sha256": "23f13484d4239c41afb9b1e30185f5f7393d326568f08b066c041cbf3e91c7bf",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-BS.receipt.json",
+      "sha256": "bc817490479a51ae67b95828f09ae1173dd8f77c2494cce19e84279fb837d776",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-D8.receipt.json",
+      "sha256": "d9fb03dea969233d17de85f4d84605ef2bdaba77e06c1253f3d89ed93a36e338",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-FB.receipt.json",
+      "sha256": "b49a97f2a945b1e8b4df4befca247e3456847b86b56247f8afd101b2687ab47a",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-H-harness.receipt.json",
+      "sha256": "303942bc7e34b9a64d430e9b70b4cd78bb8363626edc1096c037efa6449e0934",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-NS.receipt.json",
+      "sha256": "3f059f7168f725907044cfa5a1773e0f85720ace717742d8f0d2b91abda6bbe9",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-allowlist.receipt.json",
+      "sha256": "8c181c7b2d49f65fb05142296c1634a634fade895687d8484fbfb5912681a7db",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-discharge.receipt.json",
+      "sha256": "31ecb7c409f5ab9adaddb6f168ef8ca3fed31274d42dea5d7e5a4134f27b57be",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-f88.receipt.json",
+      "sha256": "0fede14b27625cc208f44538b47090a380f2b47137be9afac270f34ab185a868",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-g15b.receipt.json",
+      "sha256": "452d4be4955a1615efd3d8ff54e2ea35e4496694412b0006cb9d7fe0776b80c7",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-handle.receipt.json",
+      "sha256": "59431fd49d49c5c359977d2a53cf79a1091b91ba9143911ae985eb5f9bce53aa",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-ledger.receipt.json",
+      "sha256": "7d9ed332f890ed906c909545caf44d3747602a41036b7aec8623f157b00bdcd1",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-mint-part-1-of-4.receipt.json",
+      "sha256": "e50b66f0bee65746cc8188ef9009edf0ef176b9930fa839fdd6c7f64a1873844",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-mint-part-2-of-4.receipt.json",
+      "sha256": "b24492ac4481a9d215f1304ebefc5b30418cdc58e729df726ead7249a0ad54fa",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-mint-part-3-of-4.receipt.json",
+      "sha256": "7ed94c969e57a8912cd5a231e7de1e11beee2c37b3d94e96d22bbf57f27489fb",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-mint-part-4-of-4.receipt.json",
+      "sha256": "e361fd5ebc809494dd0cd909a08b06838c7ee6a90e5fd3702cb74569b9f121ff",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-mt3.receipt.json",
+      "sha256": "fc10dc4183f2e103b3e32b0940e731b4601933c912e6cda3a7ab527b314a7623",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-pairing.receipt.json",
+      "sha256": "6735a245c7c5b78ef0550be5d04e4f13c63a4e2aa39bfff41b915294ef1d4132",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-principal.receipt.json",
+      "sha256": "dd2bfe924a69d51da63d8ffa29dc8775f14060de60635a36d6d7f7bedd0b0f53",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-render.receipt.json",
+      "sha256": "0bed62d79129efd24579d5eebea98e9b88b3636c073ffb6d757cf3371da43298",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-rt6.receipt.json",
+      "sha256": "c7cf5b27134ad5a45cfcd26389a8c7987e7a1bed5b06f8383b95406281ac8db7",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-P-seal.receipt.json",
+      "sha256": "d75f10b2dcc8247c80df51ac26ca0d473fe9c6272b697c6c7835620b89359642",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-PI-contract.receipt.json",
+      "sha256": "87b0a1189d4f13ab32f9b23e9be1362df1e5c5fd6ffcf4a3c3a26c989f6cdbd9",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-PI.receipt.json",
+      "sha256": "c575cfa7a829d60446c0bd77914458d124930f1e07aae433649bef802c6302c3",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-PU.receipt.json",
+      "sha256": "866f7ae4635822471434a80ec9f4604033a3030d2bad024069339d560d287a85",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-SB1.receipt.json",
+      "sha256": "2f767bf7f7afaaa3c659f57be606dbd00ad90037da0576e08e8f4213cd10b6fa",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-SBV.receipt.json",
+      "sha256": "6eebcd5e19690b8cce7f79a9b270470a0897a4889a0aea827e0bb111fc0585e8",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-SO.receipt.json",
+      "sha256": "f69d2bcdbc2b7927baf8e5e93afe49f0f1f1fe3f3457edf49b5b31d018331986",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-SV2.receipt.json",
+      "sha256": "54fdc80c646cc4ee7665b50391a54a88c86aa3a447cf00541ae2f8356ee2a129",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-T-tables.receipt.json",
+      "sha256": "94ddbb7f7bd9249a76e77ae6316b7c8b7e29e7da752cc6c7236d2654b3f82920",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-TURN.receipt.json",
+      "sha256": "e5963d4ad3baab86857c12c3134b515872b611df4800dedfe338b1c2f6398492",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-WF.receipt.json",
+      "sha256": "d6a378d8f9b0c8601930be99f6fff313f10e587b86701f6a6d866fa9f2351fe6",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-WR-part-1-of-4.receipt.json",
+      "sha256": "b9f648ad8f56b928b4f74a4d658a1c3878bd064289c0654545f76c4f448441e7",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-WR-part-2-of-4.receipt.json",
+      "sha256": "0142e28c52579508f5451fcf34382be2dae7404c6f4a1b5118eeceb564c4efbe",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-WR-part-3-of-4.receipt.json",
+      "sha256": "2bc6b953d11771496381fee6b00d9fa2c31153ccbe258780dad7b176deba8dcf",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-WR-part-4-of-4.receipt.json",
+      "sha256": "e5e77e48b12d0ba46cf6505593cdf79eb1a6ec3e8057bb75247c4a874eec4702",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-assemble.receipt.json",
+      "sha256": "9e4990c3f2551fd175e419adab9d4cbba8e0bdfac4976a9e5f7c864a132446bc",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-ci-integrity.receipt.json",
+      "sha256": "f94452a2bb4c654adf70a96946ca719c23debe46ac58d508be37f5d10ff45a9c",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/mutation-inventory.receipt.json",
+      "sha256": "7fd4380594d7c8dd4a57b66e0bc9524c27704debbd8810479d7c7b854fc827b2",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/node24-icons.receipt.json",
+      "sha256": "7bdd72ceef6986d8bd6b9be9190bdeef2d39b01b9cbc485c9fd898031f3eae60",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/node24-runtime-check.receipt.json",
+      "sha256": "6af04b0d5493babb33394ad6a8ad84aa202e1dd04eca9d78cef441fe6c86e0b2",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/node24-runtime-full.receipt.json",
+      "sha256": "a42e1c6774d2d56f353d66659569af8547efc45e435efd55b908f7c557e3083e",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/node24-runtime-selftest.receipt.json",
+      "sha256": "01e7556665ff470e682dca03321e58b3a9d8d956ed87675ebc99f5c6a47ec572",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/node24-runtime-typecheck.receipt.json",
+      "sha256": "ca05b6bf0bdd67a47b6cf7a0a7b40d5e4b9f5712016f866fb681a331af0bdb08",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/npm-audit.receipt.json",
+      "sha256": "858e0aa0768332a78468b12962bd83a0867bca4a52a5d8aa99860adcd7c12bff",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/ns1-16-step.receipt.json",
+      "sha256": "dbab341928331944d220f24d0cfbdbf01cff87bab44c8e3ecfeb8ffff9628aca",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/operator-compiled-tests.receipt.json",
+      "sha256": "9ba421a0734c2f86b178994ea6736026002ed482789c5fd1e4f196f00e835ba3",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/operator-tests.receipt.json",
+      "sha256": "f43aa96d8f7bb55aa7ff82e51160b08400ac9b0e220c51ce21b27d3aa40f09e5",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/packaging-sync.receipt.json",
+      "sha256": "b8436c7f00e1a40b7436a94614aebf99ae56facbf035f5667feb90f6c11fe5f2",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/packaging-tests.receipt.json",
+      "sha256": "2ede2621d624c4fc5889f63863b5c47f87a38877d76d91eb898fee4ca8c70a42",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/platform-http-smoke.receipt.json",
+      "sha256": "1fb4ec32d4c98a8c2a9b2f9afc400069ce4826dc91adbd06a89313b417d7a908",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/prepublication-contracts.receipt.json",
+      "sha256": "a3972762db007153eb5a793025423e7a60752aec78ec00cc40f471a1a9b7f3f5",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/prepublication-counterfactuals.receipt.json",
+      "sha256": "e5bd6c6352e172c644cd616b4c9126a54b695a0044ebf4771a10df58659575ff",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/prisma-generate.receipt.json",
+      "sha256": "2083e73cce537648be49ee5a2d9de6b06262fced288f6c18c86f87fa02802524",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/prisma-validate.receipt.json",
+      "sha256": "9afbbc9fa37b9446993461da0b04fb83e1f66b40d7dd19ec39373f4cef6f4cbe",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/proof-db-migration.receipt.json",
+      "sha256": "ac3d741a2afefbad596567db9239a48f0d78d431b9e804d0294e67d7bf5bf104",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/python-compile.receipt.json",
+      "sha256": "7d2a8d0af211694292e24bd4bc91e1b330ad1e04111d69a26a796a9349d6d9e0",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/r01-live-readonly.receipt.json",
+      "sha256": "970ced315768c3447539eeae1dda9df01d3532264ee6da3898901f249ee00a98",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/release-binary.receipt.json",
+      "sha256": "57d4efdf09c7ff1220de6cedc89a2099476bd88c69163387792de314dbb41366",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/requested-baselines-1.receipt.json",
+      "sha256": "f75c2115af348c58631053a7c2185a7002411b455d4a0f8d5965142d6213644e",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/requested-baselines-2.receipt.json",
+      "sha256": "18e70f3307b5ac3a83a24e488e2a3484c2872ca5ba46bbf43b20ab0ec9a1c4f2",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/requested-baselines-3.receipt.json",
+      "sha256": "d3d24d941090a0298f609ffd8541ea1aed8b6448b95bd49fd4f94d4e50ad0a8b",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/runtime-build.receipt.json",
+      "sha256": "83e44cf53669a928cf646f240c976cae3084c86f46fb8278c249c42420a6b58e",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/runtime-full.receipt.json",
+      "sha256": "c82f1b1e99b4281b5e054442f41be19338c5b4ea8f20aebe585fbb78a551fbe7",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/runtime-hash-check.receipt.json",
+      "sha256": "0089cea115b7a73fbd921408a8355758d3b2a2c7ed1813a1357c052857b7a0c9",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/runtime-self-test.receipt.json",
+      "sha256": "d9f8a133d80d22dfdf1cc45abe440beb9b3ec09d0de6069ba626a9dd071db582",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/runtime-typecheck.receipt.json",
+      "sha256": "b136ab883579f3653ab6d87af888f67e3f790a6b86ae4d373d9ca83e546cbb67",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/scripts-typecheck.receipt.json",
+      "sha256": "3f58790ff18805635cf0fd106e54155dc807d0919b2d5f05541c4c6072c20c27",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/synthetic-smoke-migration.receipt.json",
+      "sha256": "440dbe38802c03bad5992cbc2bc5aa9271f28712bfb543228293839262d9ea8b",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/synthetic-smoke-seed.receipt.json",
+      "sha256": "a93b4b70a01bf446331ba573aa26bc4cc8e3530b1a7cb6453f8742d149a515c5",
+      "expectedExit": 0
+    },
+    {
+      "path": "receipts/widgets-live-full.receipt.json",
+      "sha256": "e91bf36d62011be032a8ffe2a11a6da0831a7dd887480bcc1eb99fbe4546013a",
+      "expectedExit": 0
+    }
+  ],
+  "admittedRawR06Traces": [
+    {
+      "path": "receipts/r06-native-worker-1.jsonl",
+      "sha256": "a39d389be7e958d40ac0dafe1d1154faa090ba85e214d2397ec6d3cb2481f139",
+      "rawExecutions": 52,
+      "admittedExecutions": 51,
+      "admittedLines": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51
+      ],
+      "excludedLines": [
+        52
+      ]
+    },
+    {
+      "path": "receipts/r06-native-worker-2.jsonl",
+      "sha256": "77dbd790d090c1e5998c1b4331988252a6df4a9190361fc2325ddd5d3ed7aee8",
+      "rawExecutions": 61,
+      "admittedExecutions": 58,
+      "admittedLines": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58
+      ],
+      "excludedLines": [
+        59,
+        60,
+        61
+      ]
+    },
+    {
+      "path": "receipts/r06-native-worker-3.jsonl",
+      "sha256": "e8008ccc56c91f70d355d5f0cdd9d692da0568357535f3fb7ac776202dc4e4a8",
+      "rawExecutions": 53,
+      "admittedExecutions": 46,
+      "admittedLines": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46
+      ],
+      "excludedLines": [
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53
+      ]
+    },
+    {
+      "path": "receipts/r06-native-worker-4.jsonl",
+      "sha256": "ee5b6bbb2ea4618d75dafaafcfc42896bec848ebbf24d4147fe878da3c0b2450",
+      "rawExecutions": 60,
+      "admittedExecutions": 57,
+      "admittedLines": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57
+      ],
+      "excludedLines": [
+        58,
+        59,
+        60
+      ]
+    },
+    {
+      "path": "receipts/r06-native-worker-5.jsonl",
+      "sha256": "b9d9b3efc117529d787213ace8dc79f1b13265050efdcc74e17aaebe930b3941",
+      "rawExecutions": 57,
+      "admittedExecutions": 52,
+      "admittedLines": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52
+      ],
+      "excludedLines": [
+        53,
+        54,
+        55,
+        56,
+        57
+      ]
+    },
+    {
+      "path": "receipts/r06-native-worker-6.jsonl",
+      "sha256": "a76c2da4934e9ae9097ed3692ef6f4cb40db7d052b1203f85419aed688f28202",
+      "rawExecutions": 62,
+      "admittedExecutions": 61,
+      "admittedLines": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61
+      ],
+      "excludedLines": [
+        62
+      ]
+    },
+    {
+      "path": "receipts/r06-recovery-worker-1.jsonl",
+      "sha256": "90bb5235fe90c01bfcbe014e5eb8c17b7b0080d211885d1a49ec03fd276ac651",
+      "rawExecutions": 19,
+      "admittedExecutions": 19,
+      "admittedLines": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "excludedLines": []
+    },
+    {
+      "path": "receipts/r06-recovery-worker-2.jsonl",
+      "sha256": "6f67229598dafbc455ade70bd97455c51f6c6ea45cf5f8833d53acfff0f629a9",
+      "rawExecutions": 19,
+      "admittedExecutions": 19,
+      "admittedLines": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "excludedLines": []
+    },
+    {
+      "path": "receipts/r06-recovery-worker-3.jsonl",
+      "sha256": "652665023cd84e429264fb794efada5344a1379f33b1105ddef0405d6bef1f3a",
+      "rawExecutions": 15,
+      "admittedExecutions": 15,
+      "admittedLines": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "excludedLines": []
+    },
+    {
+      "path": "receipts/r06-recovery-worker-4.jsonl",
+      "sha256": "23c5dfedfe1015dab84fe04ae5fe46e778d1280a32b07d6b534e743ea483648f",
+      "rawExecutions": 13,
+      "admittedExecutions": 13,
+      "admittedLines": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "excludedLines": []
+    },
+    {
+      "path": "receipts/r06-recovery-worker-5.jsonl",
+      "sha256": "30bfcf61cf17cbf46fa6ba5f694b3467cf1fa1aab0c00f830958a4732e551708",
+      "rawExecutions": 18,
+      "admittedExecutions": 18,
+      "admittedLines": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "excludedLines": []
+    },
+    {
+      "path": "receipts/r06-recovery-worker-6.jsonl",
+      "sha256": "3168219e7003f77e98e3f83374cd490a01889e39b1184c088746ceec62bc7df8",
+      "rawExecutions": 15,
+      "admittedExecutions": 15,
+      "admittedLines": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "excludedLines": []
+    }
+  ],
+  "unitPartsRequiringR06": [
+    "1-5",
+    "10-part-1-of-4",
+    "10-part-2-of-4",
+    "10-part-3-of-4",
+    "10-part-4-of-4",
+    "10a",
+    "11",
+    "12",
+    "12b",
+    "12k",
+    "13-part-1-of-4",
+    "13-part-2-of-4",
+    "13-part-3-of-4",
+    "13-part-4-of-4",
+    "4",
+    "6-part-1-of-4",
+    "6-part-2-of-4",
+    "6-part-3-of-4",
+    "6-part-4-of-4",
+    "7-part-1-of-4",
+    "7-part-2-of-4",
+    "7-part-3-of-4",
+    "7-part-4-of-4",
+    "8c",
+    "8r",
+    "9-part-1-of-4",
+    "9-part-2-of-4",
+    "9-part-3-of-4",
+    "9-part-4-of-4",
+    "9a",
+    "AB",
+    "AR",
+    "BS",
+    "D8",
+    "FB",
+    "H-harness",
+    "P-allowlist",
+    "P-discharge",
+    "P-f88",
+    "P-g15b",
+    "P-handle",
+    "P-ledger",
+    "P-mint-part-1-of-4",
+    "P-mint-part-2-of-4",
+    "P-mint-part-3-of-4",
+    "P-mint-part-4-of-4",
+    "P-mt3",
+    "P-pairing",
+    "P-principal",
+    "P-render",
+    "P-rt6",
+    "P-seal",
+    "PI-contract",
+    "PU",
+    "SB1",
+    "SBV",
+    "SO",
+    "SV2",
+    "T-tables",
+    "TURN",
+    "WF",
+    "WR-part-1-of-4",
+    "WR-part-2-of-4",
+    "WR-part-3-of-4",
+    "WR-part-4-of-4"
+  ],
+  "r06CoveredParts": [
+    "1-5",
+    "10-part-1-of-4",
+    "10-part-2-of-4",
+    "10-part-3-of-4",
+    "10-part-4-of-4",
+    "10a",
+    "11",
+    "12",
+    "12b",
+    "12k",
+    "13-part-1-of-4",
+    "13-part-2-of-4",
+    "13-part-3-of-4",
+    "13-part-4-of-4",
+    "4",
+    "6-part-1-of-4",
+    "6-part-2-of-4",
+    "6-part-3-of-4",
+    "6-part-4-of-4",
+    "7-part-1-of-4",
+    "7-part-2-of-4",
+    "7-part-3-of-4",
+    "7-part-4-of-4",
+    "8c",
+    "8r",
+    "9-part-1-of-4",
+    "9-part-2-of-4",
+    "9-part-3-of-4",
+    "9-part-4-of-4",
+    "9a",
+    "AB",
+    "AR",
+    "BS",
+    "D8",
+    "FB",
+    "H-harness",
+    "P-allowlist",
+    "P-discharge",
+    "P-f88",
+    "P-g15b",
+    "P-handle",
+    "P-ledger",
+    "P-mint-part-1-of-4",
+    "P-mint-part-2-of-4",
+    "P-mint-part-3-of-4",
+    "P-mint-part-4-of-4",
+    "P-mt3",
+    "P-pairing",
+    "P-principal",
+    "P-render",
+    "P-rt6",
+    "P-seal",
+    "PI-contract",
+    "PU",
+    "SB1",
+    "SBV",
+    "SO",
+    "SV2",
+    "T-tables",
+    "TURN",
+    "WF",
+    "WR-part-1-of-4",
+    "WR-part-2-of-4",
+    "WR-part-3-of-4",
+    "WR-part-4-of-4"
+  ],
+  "excludedOriginalTraces": [
+    {
+      "path": "receipts/r06-native-worker-1.jsonl",
+      "line": 52,
+      "slot": "P-pairing",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-2.jsonl",
+      "line": 59,
+      "slot": "P-mint-part-4-of-4",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-2.jsonl",
+      "line": 60,
+      "slot": "P-mint-part-4-of-4",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-2.jsonl",
+      "line": 61,
+      "slot": "P-mint-part-4-of-4",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-3.jsonl",
+      "line": 47,
+      "slot": "P-ledger",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-3.jsonl",
+      "line": 48,
+      "slot": "P-ledger",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-3.jsonl",
+      "line": 49,
+      "slot": "P-ledger",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-3.jsonl",
+      "line": 50,
+      "slot": "P-ledger",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-3.jsonl",
+      "line": 51,
+      "slot": "P-ledger",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-3.jsonl",
+      "line": 52,
+      "slot": "P-ledger",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-3.jsonl",
+      "line": 53,
+      "slot": "P-ledger",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-4.jsonl",
+      "line": 58,
+      "slot": "P-mint-part-3-of-4",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-4.jsonl",
+      "line": 59,
+      "slot": "P-mint-part-3-of-4",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-4.jsonl",
+      "line": 60,
+      "slot": "P-mint-part-3-of-4",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-5.jsonl",
+      "line": 53,
+      "slot": "P-mint-part-2-of-4",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-5.jsonl",
+      "line": 54,
+      "slot": "P-mint-part-2-of-4",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-5.jsonl",
+      "line": 55,
+      "slot": "P-mint-part-2-of-4",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-5.jsonl",
+      "line": 56,
+      "slot": "P-mint-part-2-of-4",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-5.jsonl",
+      "line": 57,
+      "slot": "P-mint-part-2-of-4",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    },
+    {
+      "path": "receipts/r06-native-worker-6.jsonl",
+      "line": 62,
+      "slot": "P-mt3",
+      "reason": "Entire original part invalidated or interrupted; fresh whole part required"
+    }
+  ],
+  "historicalCandidateReceiptsAdmitted": 0,
+  "timeoutsChanged": false,
+  "unrestrictedTests": true,
+  "productionEffects": 0
+}

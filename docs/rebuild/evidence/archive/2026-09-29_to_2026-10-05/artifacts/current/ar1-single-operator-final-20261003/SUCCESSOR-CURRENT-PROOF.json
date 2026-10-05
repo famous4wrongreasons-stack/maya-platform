@@ -1,0 +1,1839 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "status": "PASS",
+  "batteries": [
+    {
+      "gate": "SV2",
+      "declarations": 13,
+      "receipt": {
+        "path": "receipts/mutation-receipt/widgets-mutation-report-SV2.json",
+        "sha256": "ea285a57a5550080c2400812129046626211ae267aa0e5d02c37ea276413fd02"
+      },
+      "mutants": [
+        {
+          "battery": "gateSV2.json",
+          "id": "SV2-M1",
+          "files": [
+            "src/crm/client-link-challenge.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SV2-U-OTP"
+          ],
+          "kills": [
+            {
+              "killer": "SV2-U-OTP",
+              "test": "SB-1 V2 coordinator guard proofs SV2-U-OTP rejects wrong code before link writer",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSV2.json",
+          "id": "SV2-M2",
+          "files": [
+            "src/crm/client-link-challenge.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SV2-U-BINDING"
+          ],
+          "kills": [
+            {
+              "killer": "SV2-U-BINDING",
+              "test": "SB-1 V2 coordinator guard proofs SV2-U-BINDING rejects substitution of mayaUserId before writer",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "SV2-U-BINDING",
+              "test": "SB-1 V2 coordinator guard proofs SV2-U-BINDING rejects substitution of mayaSubjectHash before writer",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "SV2-U-BINDING",
+              "test": "SB-1 V2 coordinator guard proofs SV2-U-BINDING rejects substitution of verificationChannel before writer",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "SV2-U-BINDING",
+              "test": "SB-1 V2 coordinator guard proofs SV2-U-BINDING rejects substitution of predecessorLinkId before writer",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 4
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSV2.json",
+          "id": "SV2-M3",
+          "files": [
+            "src/crm/client-link-challenge.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SV2-U-EXPIRY"
+          ],
+          "kills": [
+            {
+              "killer": "SV2-U-EXPIRY",
+              "test": "SB-1 V2 coordinator guard proofs SV2-U-EXPIRY rejects expired proof before link writer",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSV2.json",
+          "id": "SV2-M4",
+          "files": [
+            "src/crm/client-link-challenge.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SV2-U-REPLAY"
+          ],
+          "kills": [
+            {
+              "killer": "SV2-U-REPLAY",
+              "test": "SB-1 V2 coordinator guard proofs SV2-U-REPLAY rejects consumed challenge before writer",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSV2.json",
+          "id": "SV2-M5",
+          "files": [
+            "src/crm/client-link-challenge.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SV2-U-OUTCOME"
+          ],
+          "kills": [
+            {
+              "killer": "SV2-U-OUTCOME",
+              "test": "SB-1 V2 coordinator guard proofs SV2-U-OUTCOME refuses a lost compare-and-set outcome",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSV2.json",
+          "id": "SV2-M6",
+          "files": [
+            "src/crm/client-link-challenge.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SV2-U-LIMIT"
+          ],
+          "kills": [
+            {
+              "killer": "SV2-U-LIMIT",
+              "test": "SB-1 V2 coordinator guard proofs SV2-U-LIMIT rejects exhausted attempts before resolving or writing",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSV2.json",
+          "id": "SV2-M7",
+          "files": [
+            "src/crm/client-link-challenge.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "live"
+          ],
+          "expect": "live-killed",
+          "status": "live-killed",
+          "killedBy": [
+            "SV2-07"
+          ],
+          "kills": [
+            {
+              "killer": "SV2-07",
+              "test": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-07 predecessor changed after resolver read is rejected inside identity lock",
+              "step": "live",
+              "entry": null,
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "untagged": 1
+          },
+          "exits": {
+            "plain": {
+              "live": 1
+            }
+          }
+        },
+        {
+          "battery": "gateSV2.json",
+          "id": "SV2-M8",
+          "files": [
+            "src/crm/client-link-challenge.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SV2-U-POLICY"
+          ],
+          "kills": [
+            {
+              "killer": "SV2-U-POLICY",
+              "test": "SB-1 V2 coordinator guard proofs SV2-U-POLICY rejects changed policyVersion",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSV2.json",
+          "id": "SV2-M9",
+          "files": [
+            "src/crm/client-link-challenge.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SV2-U-POLICY"
+          ],
+          "kills": [
+            {
+              "killer": "SV2-U-POLICY",
+              "test": "SB-1 V2 coordinator guard proofs SV2-U-POLICY rejects changed clientId",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSV2.json",
+          "id": "SV2-M10",
+          "files": [
+            "src/crm/client-link-challenge.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SV2-U-POLICY"
+          ],
+          "kills": [
+            {
+              "killer": "SV2-U-POLICY",
+              "test": "SB-1 V2 coordinator guard proofs SV2-U-POLICY rejects changed issuanceEvidenceHash",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSV2.json",
+          "id": "SV2-M11",
+          "files": [
+            "src/crm/client-link-challenge.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SV2-U-HAPPY"
+          ],
+          "kills": [
+            {
+              "killer": "SV2-U-HAPPY",
+              "test": "SB-1 V2 coordinator guard proofs SV2-U-HAPPY verifies exact binding, locks, writes successor, correlates outcome and actual actor",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSV2.json",
+          "id": "SV2-M12",
+          "files": [
+            "src/crm/client-link-challenge.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SV2-U-HAPPY"
+          ],
+          "kills": [
+            {
+              "killer": "SV2-U-HAPPY",
+              "test": "SB-1 V2 coordinator guard proofs SV2-U-HAPPY verifies exact binding, locks, writes successor, correlates outcome and actual actor",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSV2.json",
+          "id": "SV2-M13",
+          "files": [
+            "src/crm/client-link-challenge.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SV2-U-SESSION"
+          ],
+          "kills": [
+            {
+              "killer": "SV2-U-SESSION",
+              "test": "SB-1 V2 coordinator guard proofs SV2-U-SESSION bounds the proof by the current authenticated session deadline",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        }
+      ],
+      "controls": {
+        "SV2:baseline|live": {
+          "set": null,
+          "steps": [
+            "live"
+          ],
+          "exits": {
+            "live": 0
+          },
+          "failed": [],
+          "problems": []
+        },
+        "SV2:baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      }
+    },
+    {
+      "gate": "SB1",
+      "declarations": 10,
+      "receipt": {
+        "path": "receipts/mutation-receipt/widgets-mutation-report-SB1.json",
+        "sha256": "33e336f800390aafbf32d4c74916f90f9a42a1f24882a814aced9e6af3ced1c0"
+      },
+      "mutants": [
+        {
+          "battery": "gateSB1.json",
+          "id": "SB1-M01",
+          "files": [
+            "src/appointments/personal-client-context.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SB1-SELECTION"
+          ],
+          "kills": [
+            {
+              "killer": "SB1-SELECTION",
+              "test": "SB-1 explicit personal Client authority SB1-SELECTION refuses an implicit/caller-shaped choice undefined",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "SB1-SELECTION",
+              "test": "SB-1 explicit personal Client authority SB1-SELECTION refuses an implicit/caller-shaped choice \"business_owner\"",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "SB1-SELECTION",
+              "test": "SB-1 explicit personal Client authority SB1-SELECTION refuses an implicit/caller-shaped choice \"client\"",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "SB1-SELECTION",
+              "test": "SB-1 explicit personal Client authority SB1-SELECTION refuses an implicit/caller-shaped choice {\"clientId\": \"client-a\"}",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 4
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSB1.json",
+          "id": "SB1-M02",
+          "files": [
+            "src/appointments/personal-client-context.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SB1-SESSION"
+          ],
+          "kills": [
+            {
+              "killer": "SB1-SESSION",
+              "test": "SB-1 explicit personal Client authority SB1-SESSION refuses stale session or membership: revoked",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSB1.json",
+          "id": "SB1-M03",
+          "files": [
+            "src/appointments/personal-client-context.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SB1-SESSION"
+          ],
+          "kills": [
+            {
+              "killer": "SB1-SESSION",
+              "test": "SB-1 explicit personal Client authority SB1-SESSION refuses stale session or membership: role",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSB1.json",
+          "id": "SB1-M04",
+          "files": [
+            "src/appointments/personal-client-context.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SB1-LINK"
+          ],
+          "kills": [
+            {
+              "killer": "SB1-LINK",
+              "test": "SB-1 explicit personal Client authority SB1-LINK refuses missing or noncurrent binding: ambiguous",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSB1.json",
+          "id": "SB1-M05",
+          "files": [
+            "src/appointments/personal-client-context.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SB1-LINK"
+          ],
+          "kills": [
+            {
+              "killer": "SB1-LINK",
+              "test": "SB-1 explicit personal Client authority SB1-LINK refuses missing or noncurrent binding: revoked",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSB1.json",
+          "id": "SB1-M06",
+          "files": [
+            "src/appointments/personal-client-context.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SB1-RECHECK"
+          ],
+          "kills": [
+            {
+              "killer": "SB1-RECHECK",
+              "test": "SB-1 explicit personal Client authority SB1-RECHECK refuses changes after selection: link",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "SB1-RECHECK",
+              "test": "SB-1 explicit personal Client authority SB1-RECHECK refuses changes after selection: client",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "SB1-RECHECK",
+              "test": "SB-1 explicit personal Client authority SB1-RECHECK refuses changes after selection: evidence",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 3
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSB1.json",
+          "id": "SB1-M07",
+          "files": [
+            "src/appointments/client-appointment-create.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SB1-NOSELECT"
+          ],
+          "kills": [
+            {
+              "killer": "SB1-NOSELECT",
+              "test": "SB-1 canonical create with personal context SB1-NOSELECT refuses owner create and quote without an explicit personal context",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSB1.json",
+          "id": "SB1-M08",
+          "files": [
+            "src/appointments/client-appointment-create.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SB1-DISPATCH"
+          ],
+          "kills": [
+            {
+              "killer": "SB1-DISPATCH",
+              "test": "SB-1 canonical create with personal context SB1-DISPATCH rechecks revocation immediately before provider dispatch",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSB1.json",
+          "id": "SB1-M09",
+          "files": [
+            "src/appointments/client-appointment-create.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SB1-BOUND"
+          ],
+          "kills": [
+            {
+              "killer": "SB1-BOUND",
+              "test": "SB-1 canonical create with personal context SB1-BOUND refuses a changed selected linkId",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSB1.json",
+          "id": "SB1-M10",
+          "files": [
+            "src/crm/crm.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "SB1-CREATE"
+          ],
+          "kills": [
+            {
+              "killer": "SB1-CREATE",
+              "test": "SB-1 canonical create with personal context SB1-CREATE persists actual actor/context alongside Client authority without owner privileges",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        }
+      ],
+      "controls": {
+        "SB1:baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      }
+    },
+    {
+      "gate": "SBV",
+      "declarations": 8,
+      "receipt": {
+        "path": "receipts/mutation-receipt/widgets-mutation-report-SBV.json",
+        "sha256": "5699902c950f93b575b36548f8900627a73597acb93128fdafb4fbacacd43ab2"
+      },
+      "mutants": [
+        {
+          "battery": "gateSBV.json",
+          "id": "SBV-M1",
+          "files": [
+            "src/crm/client-reverification-candidate.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "RV-PREDECESSOR"
+          ],
+          "kills": [
+            {
+              "killer": "RV-PREDECESSOR",
+              "test": "SB-1 re-verification candidate (not authority) RV-PREDECESSOR refuses active predecessor",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSBV.json",
+          "id": "SBV-M2",
+          "files": [
+            "src/crm/client-reverification-candidate.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "RV-PREDECESSOR"
+          ],
+          "kills": [
+            {
+              "killer": "RV-PREDECESSOR",
+              "test": "SB-1 re-verification candidate (not authority) RV-PREDECESSOR refuses other Client predecessor",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSBV.json",
+          "id": "SBV-M3",
+          "files": [
+            "src/crm/client-reverification-candidate.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "RV-DRIFT"
+          ],
+          "kills": [
+            {
+              "killer": "RV-DRIFT",
+              "test": "SB-1 re-verification candidate (not authority) RV-DRIFT refuses predecessor changed during provider read",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "RV-DRIFT",
+              "test": "SB-1 re-verification candidate (not authority) RV-DRIFT refuses CRM source changed during provider read",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "RV-DRIFT",
+              "test": "SB-1 re-verification candidate (not authority) RV-DRIFT refuses candidate changed during provider read",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 3
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSBV.json",
+          "id": "SBV-M4",
+          "files": [
+            "src/crm/client-reverification-candidate.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "RV-CANDIDATE"
+          ],
+          "kills": [
+            {
+              "killer": "RV-CANDIDATE",
+              "test": "SB-1 re-verification candidate (not authority) RV-CANDIDATE refuses multiple candidate",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSBV.json",
+          "id": "SBV-M5",
+          "files": [
+            "src/crm/client-reverification-candidate.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "RV-CHANNEL"
+          ],
+          "kills": [
+            {
+              "killer": "RV-CHANNEL",
+              "test": "SB-1 re-verification candidate (not authority) RV-CHANNEL refuses incomplete canonical channel without User.phone fallback",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSBV.json",
+          "id": "SBV-M6",
+          "files": [
+            "src/crm/client-reverification-candidate.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "RV-CHANNEL"
+          ],
+          "kills": [
+            {
+              "killer": "RV-CHANNEL",
+              "test": "SB-1 re-verification candidate (not authority) RV-CHANNEL refuses ambiguous source canonical channel without User.phone fallback",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSBV.json",
+          "id": "SBV-M7",
+          "files": [
+            "src/auth/phone-auth-delivery.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "RV-TRANSPORT"
+          ],
+          "kills": [
+            {
+              "killer": "RV-TRANSPORT",
+              "test": "SB-1 existing SMS transport strict adapter RV-TRANSPORT refuses debug/test/missing paths before sending: {\"PHONE_AUTH_DEBUG\":\"true\"}",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "RV-TRANSPORT",
+              "test": "SB-1 existing SMS transport strict adapter RV-TRANSPORT refuses debug/test/missing paths before sending: {\"PHONE_AUTH_PROVIDER\":\"debug\"}",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "RV-TRANSPORT",
+              "test": "SB-1 existing SMS transport strict adapter RV-TRANSPORT refuses debug/test/missing paths before sending: {\"NODE_ENV\":\"test\"}",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 3
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gateSBV.json",
+          "id": "SBV-M8",
+          "files": [
+            "src/auth/phone-auth-delivery.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "RV-TRANSPORT"
+          ],
+          "kills": [
+            {
+              "killer": "RV-TRANSPORT",
+              "test": "SB-1 existing SMS transport strict adapter RV-TRANSPORT refuses debug/test/missing paths before sending: {\"SMSRU_TEST\":\"true\"}",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        }
+      ],
+      "controls": {
+        "SBV:baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      }
+    }
+  ],
+  "live": {
+    "source": "sb1-successor.live-spec.ts",
+    "count": 19,
+    "receipt": {
+      "path": "receipts/widgets-live-full.json",
+      "sha256": "b4e40a9bc8a28140e142e25846e4c03d33700d5444f9a2ad9ceff6fee1332715"
+    },
+    "assertions": [
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 192,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-01 happy successor verification creates usable explicit personal context and actual actor audit",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 11,
+        "retryReasons": [],
+        "startAt": 1791059766072,
+        "status": "passed",
+        "title": "SV2-01 happy successor verification creates usable explicit personal context and actual actor audit"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 188,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-02 wrong OTP has no link or consumption effect",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 4,
+        "retryReasons": [],
+        "startAt": 1791059766264,
+        "status": "passed",
+        "title": "SV2-02 wrong OTP has no link or consumption effect"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 157,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-03 replay fails closed",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 3,
+        "retryReasons": [],
+        "startAt": 1791059766453,
+        "status": "passed",
+        "title": "SV2-03 replay fails closed"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 127,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-04 expired OTP fails under database time",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 3,
+        "retryReasons": [],
+        "startAt": 1791059766611,
+        "status": "passed",
+        "title": "SV2-04 expired OTP fails under database time"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 216,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-05 Client substitution cannot transfer a challenge",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 5,
+        "retryReasons": [],
+        "startAt": 1791059766738,
+        "status": "passed",
+        "title": "SV2-05 Client substitution cannot transfer a challenge"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 188,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-06 tenant substitution fails closed",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 3,
+        "retryReasons": [],
+        "startAt": 1791059766955,
+        "status": "passed",
+        "title": "SV2-06 tenant substitution fails closed"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 139,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-07 predecessor changed after resolver read is rejected inside identity lock",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 3,
+        "retryReasons": [],
+        "startAt": 1791059767143,
+        "status": "passed",
+        "title": "SV2-07 predecessor changed after resolver read is rejected inside identity lock"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 210,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-08 active predecessor never authorizes issuance or consumption",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 5,
+        "retryReasons": [],
+        "startAt": 1791059767282,
+        "status": "passed",
+        "title": "SV2-08 active predecessor never authorizes issuance or consumption"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 150,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-09 non-latest revoked predecessor cannot be consumed",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 3,
+        "retryReasons": [],
+        "startAt": 1791059767492,
+        "status": "passed",
+        "title": "SV2-09 non-latest revoked predecessor cannot be consumed"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 144,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-10 revoked episode remains byte-for-byte immutable",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 4,
+        "retryReasons": [],
+        "startAt": 1791059767643,
+        "status": "passed",
+        "title": "SV2-10 revoked episode remains byte-for-byte immutable"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 163,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-11 successful consume creates exactly one successor and one outcome",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 5,
+        "retryReasons": [],
+        "startAt": 1791059767787,
+        "status": "passed",
+        "title": "SV2-11 successful consume creates exactly one successor and one outcome"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 167,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-12 concurrent consume serializes to one success and one refusal",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 5,
+        "retryReasons": [],
+        "startAt": 1791059767950,
+        "status": "passed",
+        "title": "SV2-12 concurrent consume serializes to one success and one refusal"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 149,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-JSON all four V2 fields are mandatory, exact and immutable",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 10,
+        "retryReasons": [],
+        "startAt": 1791059768118,
+        "status": "passed",
+        "title": "SV2-JSON all four V2 fields are mandatory, exact and immutable"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 141,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-CHANNEL canonical channel changed after issuance invalidates exact Client proof",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 3,
+        "retryReasons": [],
+        "startAt": 1791059768267,
+        "status": "passed",
+        "title": "SV2-CHANNEL canonical channel changed after issuance invalidates exact Client proof"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 118,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-SESSION current revocation is checked on consume",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 3,
+        "retryReasons": [],
+        "startAt": 1791059768408,
+        "status": "passed",
+        "title": "SV2-SESSION current revocation is checked on consume"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 219,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-LIMIT failed OTP attempts survive rollback and cannot be reset with correct code",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 8,
+        "retryReasons": [],
+        "startAt": 1791059768526,
+        "status": "passed",
+        "title": "SV2-LIMIT failed OTP attempts survive rollback and cannot be reset with correct code"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 108,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-DELIVERY failed SMS grants nothing and discloses no OTP",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 3,
+        "retryReasons": [],
+        "startAt": 1791059768746,
+        "status": "passed",
+        "title": "SV2-DELIVERY failed SMS grants nothing and discloses no OTP"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 134,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-V1 historical V1 remains immutable and initial-only; V1 consumption still works for a fresh subject",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 7,
+        "retryReasons": [],
+        "startAt": 1791059768854,
+        "status": "passed",
+        "title": "SV2-V1 historical V1 remains immutable and initial-only; V1 consumption still works for a fresh subject"
+      },
+      {
+        "ancestorTitles": [
+          "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru]"
+        ],
+        "duration": 1195,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 14,
+        "retryReasons": [],
+        "startAt": 1791059768988,
+        "status": "passed",
+        "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator"
+      }
+    ]
+  },
+  "realOtp": false,
+  "boundary": "Test transport only. No owner account or production binding episode changed."
+}

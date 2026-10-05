@@ -1,0 +1,1387 @@
+[
+  {
+    "total_count": 69,
+    "artifacts": [
+      {
+        "id": 11326695092,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyNjY5NTA5Mg==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-TURN",
+        "size_in_bytes": 2574,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11326695092",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11326695092/zip",
+        "expired": false,
+        "digest": "sha256:a9c07df094c688df5d0f41ee465d6793973d728b7bb09e22227c2e3b4f4dfb90",
+        "created_at": "2026-10-05T04:50:25Z",
+        "updated_at": "2026-10-05T04:50:25Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11326178657,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyNjE3ODY1Nw==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-SV2",
+        "size_in_bytes": 2039,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11326178657",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11326178657/zip",
+        "expired": false,
+        "digest": "sha256:b9ad4535793faf99c648da591dca1829bc1a781aa4eb71aef66f0a85752820e0",
+        "created_at": "2026-10-05T05:01:00Z",
+        "updated_at": "2026-10-05T05:01:00Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11325654892,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyNTY1NDg5Mg==",
+        "name": "widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780",
+        "size_in_bytes": 109780,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11325654892",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11325654892/zip",
+        "expired": false,
+        "digest": "sha256:dd9061eef29d766f0a105af0df37209654f51bd1d44c595e1ca47539705fb3eb",
+        "created_at": "2026-10-05T05:01:54Z",
+        "updated_at": "2026-10-05T05:01:54Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11325652302,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyNTY1MjMwMg==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-PU",
+        "size_in_bytes": 2104,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11325652302",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11325652302/zip",
+        "expired": false,
+        "digest": "sha256:05773d74e9c29d821fa8523e20cd5f89f5e19698abbe6c0970005e421d940d84",
+        "created_at": "2026-10-05T04:38:59Z",
+        "updated_at": "2026-10-05T04:38:59Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11325025671,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyNTAyNTY3MQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-WR-part-3-of-4",
+        "size_in_bytes": 2216,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11325025671",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11325025671/zip",
+        "expired": false,
+        "digest": "sha256:5d0a50be13fc853200e7bd184f297252ed8c5621e91e54ee82bdd7372be3cd08",
+        "created_at": "2026-10-05T03:53:41Z",
+        "updated_at": "2026-10-05T03:53:41Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11324921071,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyNDkyMTA3MQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-WR-part-1-of-4",
+        "size_in_bytes": 2094,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11324921071",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11324921071/zip",
+        "expired": false,
+        "digest": "sha256:ba496cbb41c15e419dfb558625cb01e0e2787181a111521c9b41a23849f8bf5e",
+        "created_at": "2026-10-05T03:49:38Z",
+        "updated_at": "2026-10-05T03:49:38Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11324830137,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyNDgzMDEzNw==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-ledger",
+        "size_in_bytes": 2087,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11324830137",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11324830137/zip",
+        "expired": false,
+        "digest": "sha256:d947fe8bbf71a1bb498bae5a920840b0bab99eceb08202b37453f0106f4e9ae7",
+        "created_at": "2026-10-05T03:39:35Z",
+        "updated_at": "2026-10-05T03:39:35Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11324595973,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyNDU5NTk3Mw==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-WR-part-2-of-4",
+        "size_in_bytes": 2349,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11324595973",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11324595973/zip",
+        "expired": false,
+        "digest": "sha256:c0781a25d739283e80f13f6efe8af9ae3dcf8e73ca511811685c18409f3cb7b9",
+        "created_at": "2026-10-05T03:48:31Z",
+        "updated_at": "2026-10-05T03:48:31Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11324050925,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyNDA1MDkyNQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-handle",
+        "size_in_bytes": 1534,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11324050925",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11324050925/zip",
+        "expired": false,
+        "digest": "sha256:1145c3c9b87e48ed547ffb7166e24b4c2ea63b4349feb899128ff9c371f69e97",
+        "created_at": "2026-10-05T03:11:41Z",
+        "updated_at": "2026-10-05T03:11:41Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11323813347,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMzgxMzM0Nw==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-9-part-1-of-4",
+        "size_in_bytes": 1811,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11323813347",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11323813347/zip",
+        "expired": false,
+        "digest": "sha256:ecf3a2ad1880b0ec3651cd2b0450143a14a87b0961b40a26e3be845ecd57b3a4",
+        "created_at": "2026-10-05T03:26:26Z",
+        "updated_at": "2026-10-05T03:26:26Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11323756753,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMzc1Njc1Mw==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-WR-part-4-of-4",
+        "size_in_bytes": 1880,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11323756753",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11323756753/zip",
+        "expired": false,
+        "digest": "sha256:938900712621166ec31c64fcf8da43ecff0a6088b78df390208d679d9a28842b",
+        "created_at": "2026-10-05T03:11:59Z",
+        "updated_at": "2026-10-05T03:11:59Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11323637099,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMzYzNzA5OQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-7-part-4-of-4",
+        "size_in_bytes": 2859,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11323637099",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11323637099/zip",
+        "expired": false,
+        "digest": "sha256:a85bc872137222d4eac14be46ae43ac11dc6672c4db77ad64c7f9428a2ccce07",
+        "created_at": "2026-10-05T03:10:33Z",
+        "updated_at": "2026-10-05T03:10:33Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11323560095,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMzU2MDA5NQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-SO",
+        "size_in_bytes": 2097,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11323560095",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11323560095/zip",
+        "expired": false,
+        "digest": "sha256:ea733e055e953498ec3809548fa9c3c52ff92263e62e80fe89959ff514a9f725",
+        "created_at": "2026-10-05T02:48:42Z",
+        "updated_at": "2026-10-05T02:48:42Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11323222450,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMzIyMjQ1MA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-9-part-4-of-4",
+        "size_in_bytes": 2049,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11323222450",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11323222450/zip",
+        "expired": false,
+        "digest": "sha256:0cc967f1ee63e6b7c7c6301018d411b42a9f4a092e02197c41877eccccf6a2fc",
+        "created_at": "2026-10-05T02:54:16Z",
+        "updated_at": "2026-10-05T02:54:16Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11322858067,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMjg1ODA2Nw==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-principal",
+        "size_in_bytes": 3002,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322858067",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322858067/zip",
+        "expired": false,
+        "digest": "sha256:48d7685a05767fff14cc0d18bf0b06ef24d4d2c6fff5b7222b5621c251f57c89",
+        "created_at": "2026-10-05T02:48:39Z",
+        "updated_at": "2026-10-05T02:48:39Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11322497808,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMjQ5NzgwOA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-SBV",
+        "size_in_bytes": 1791,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322497808",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322497808/zip",
+        "expired": false,
+        "digest": "sha256:d6d3474339142f25e8c38008a311e68d3a1f7719635e1bebe17c6d7e6703a1e5",
+        "created_at": "2026-10-05T02:36:26Z",
+        "updated_at": "2026-10-05T02:36:26Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11322486919,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMjQ4NjkxOQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-H-harness",
+        "size_in_bytes": 3641,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322486919",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322486919/zip",
+        "expired": false,
+        "digest": "sha256:28aa10ed6dcf463a4bd33caa7037db3bf9425e81d0081c24807a06304a552afb",
+        "created_at": "2026-10-05T02:28:32Z",
+        "updated_at": "2026-10-05T02:28:32Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11322470291,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMjQ3MDI5MQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-AB",
+        "size_in_bytes": 1547,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322470291",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322470291/zip",
+        "expired": false,
+        "digest": "sha256:4a210a7cefe64f86ec7a3e72c4ae857afb82d50200616ac297e1827f44a9c544",
+        "created_at": "2026-10-05T02:14:55Z",
+        "updated_at": "2026-10-05T02:14:55Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11322442944,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMjQ0Mjk0NA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-12b",
+        "size_in_bytes": 2145,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322442944",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322442944/zip",
+        "expired": false,
+        "digest": "sha256:c3317ced22011f636895d279035b2d2fe80b1fd460b235d007a2105dc1e0ebbc",
+        "created_at": "2026-10-05T02:35:16Z",
+        "updated_at": "2026-10-05T02:35:16Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11322392409,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMjM5MjQwOQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-BS",
+        "size_in_bytes": 1839,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322392409",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322392409/zip",
+        "expired": false,
+        "digest": "sha256:4a49a147bec369b3376fee679ddd01def2c8b1fe5cf0aa4135742dbc75b167ed",
+        "created_at": "2026-10-05T02:28:17Z",
+        "updated_at": "2026-10-05T02:28:17Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11322336221,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMjMzNjIyMQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-10-part-2-of-4",
+        "size_in_bytes": 1658,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322336221",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322336221/zip",
+        "expired": false,
+        "digest": "sha256:ba68be8190fd7c594635021b1340e28bababaf0e9a8d911a1f0c347a405f4189",
+        "created_at": "2026-10-05T02:13:04Z",
+        "updated_at": "2026-10-05T02:13:04Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11322221421,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMjIyMTQyMQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-8",
+        "size_in_bytes": 2031,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322221421",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11322221421/zip",
+        "expired": false,
+        "digest": "sha256:6fd6a13523dea98b8579ba7d417e06e7dd2b2ad3d86e5d062d0cc99ef33cbe29",
+        "created_at": "2026-10-05T02:03:41Z",
+        "updated_at": "2026-10-05T02:03:41Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11321960832,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMTk2MDgzMg==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-AR",
+        "size_in_bytes": 2695,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321960832",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321960832/zip",
+        "expired": false,
+        "digest": "sha256:80b9e9964cadafd1f055cc7676326f3244ee79f5b4d7adb0082c0d43dd309a43",
+        "created_at": "2026-10-05T01:49:53Z",
+        "updated_at": "2026-10-05T01:49:53Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11321922201,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMTkyMjIwMQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-T-tables",
+        "size_in_bytes": 2077,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321922201",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321922201/zip",
+        "expired": false,
+        "digest": "sha256:1078fc9ab988a363c49bd85c9c5208082903854f0f398dad2250b385c256ca22",
+        "created_at": "2026-10-05T02:05:51Z",
+        "updated_at": "2026-10-05T02:05:51Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11321891306,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMTg5MTMwNg==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-11",
+        "size_in_bytes": 2304,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321891306",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321891306/zip",
+        "expired": false,
+        "digest": "sha256:6a0e047d081d0ef6a092c7c97453f46db1a8bc46fe0ca9c342a1eadeee90ca94",
+        "created_at": "2026-10-05T01:54:49Z",
+        "updated_at": "2026-10-05T01:54:49Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11321823775,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMTgyMzc3NQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-6-part-2-of-4",
+        "size_in_bytes": 2231,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321823775",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321823775/zip",
+        "expired": false,
+        "digest": "sha256:278f79c98ed261bfe456a9fe58cce7b33ec1e08a2f38377000ca3cbc248a79f4",
+        "created_at": "2026-10-05T02:09:52Z",
+        "updated_at": "2026-10-05T02:09:52Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11321799345,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMTc5OTM0NQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-9-part-3-of-4",
+        "size_in_bytes": 2007,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321799345",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321799345/zip",
+        "expired": false,
+        "digest": "sha256:fca3b82655c79907865731cf3e71a4ee172f919c29dc7391fc747fdc0f5c05d8",
+        "created_at": "2026-10-05T02:32:26Z",
+        "updated_at": "2026-10-05T02:32:26Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11321702796,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMTcwMjc5Ng==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-13-part-1-of-4",
+        "size_in_bytes": 2154,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321702796",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321702796/zip",
+        "expired": false,
+        "digest": "sha256:ebadf346ce8024d053206d79054d1958f72cb39a5e983fc9e4518c308e4001cb",
+        "created_at": "2026-10-05T01:58:34Z",
+        "updated_at": "2026-10-05T01:58:34Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11321634155,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMTYzNDE1NQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-PI-contract",
+        "size_in_bytes": 2444,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321634155",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321634155/zip",
+        "expired": false,
+        "digest": "sha256:aaefa52e8079ae03d257e2c2c46fc3a3c2fc36ae0d4516c7935b67fe20dacd11",
+        "created_at": "2026-10-05T02:28:34Z",
+        "updated_at": "2026-10-05T02:28:34Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11321532620,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMTUzMjYyMA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-f88",
+        "size_in_bytes": 2521,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321532620",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321532620/zip",
+        "expired": false,
+        "digest": "sha256:0ddd731588f318e77c752951dae262a562aaf3ea5b256ed7a9f81b4f52bb6718",
+        "created_at": "2026-10-05T02:07:51Z",
+        "updated_at": "2026-10-05T02:07:51Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11321269272,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMTI2OTI3Mg==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-9-part-2-of-4",
+        "size_in_bytes": 1933,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321269272",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321269272/zip",
+        "expired": false,
+        "digest": "sha256:a99639063584ede5c00abc8a869ea6ca3cc509841287e607db8db9816a8104c2",
+        "created_at": "2026-10-05T02:01:42Z",
+        "updated_at": "2026-10-05T02:01:42Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11321132130,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMTEzMjEzMA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-7-part-2-of-4",
+        "size_in_bytes": 3251,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321132130",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321132130/zip",
+        "expired": false,
+        "digest": "sha256:7aafaf96c9f58ccf329194902794e5af53cfc0b8ef3ba23bb646d3b918bcc618",
+        "created_at": "2026-10-05T01:36:27Z",
+        "updated_at": "2026-10-05T01:36:27Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11321040834,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMTA0MDgzNA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-rt6",
+        "size_in_bytes": 1646,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321040834",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11321040834/zip",
+        "expired": false,
+        "digest": "sha256:6d7731cd7d09d8b0c878ee45cc82408ab33201590934c4657b7e203ec3ff67d2",
+        "created_at": "2026-10-05T01:06:21Z",
+        "updated_at": "2026-10-05T01:06:21Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11320578774,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMDU3ODc3NA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-PI",
+        "size_in_bytes": 1761,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11320578774",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11320578774/zip",
+        "expired": false,
+        "digest": "sha256:62a6bef07873fa8ceae0ab7b7cfa39b28be26428ae00e3c769cdefb023059b14",
+        "created_at": "2026-10-05T01:17:24Z",
+        "updated_at": "2026-10-05T01:17:24Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11320540295,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMDU0MDI5NQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-10-part-1-of-4",
+        "size_in_bytes": 1863,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11320540295",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11320540295/zip",
+        "expired": false,
+        "digest": "sha256:a9c6d09bd69bd3971bce3d573044026eae69a7e383d0b8a11b32c5abd6d726c0",
+        "created_at": "2026-10-05T00:45:19Z",
+        "updated_at": "2026-10-05T00:45:19Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11320427669,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMDQyNzY2OQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-mint-part-4-of-4",
+        "size_in_bytes": 2008,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11320427669",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11320427669/zip",
+        "expired": false,
+        "digest": "sha256:35120b3a97bb515eeb33a341eca68e17f3b444b9de3b73caac99fc6e621f63c2",
+        "created_at": "2026-10-05T01:04:02Z",
+        "updated_at": "2026-10-05T01:04:02Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11320412933,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMDQxMjkzMw==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-12k",
+        "size_in_bytes": 1588,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11320412933",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11320412933/zip",
+        "expired": false,
+        "digest": "sha256:24e112ed67c6241a1678818d85d0de979519cfba78e25f5c599e8eefb94b01b7",
+        "created_at": "2026-10-05T01:18:14Z",
+        "updated_at": "2026-10-05T01:18:14Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11320137935,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMDEzNzkzNQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-13-part-4-of-4",
+        "size_in_bytes": 1941,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11320137935",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11320137935/zip",
+        "expired": false,
+        "digest": "sha256:106b2ab252d9a1682f011d13de133b9a2f2e0ef33a618600fac51940815b16cf",
+        "created_at": "2026-10-05T00:57:06Z",
+        "updated_at": "2026-10-05T00:57:06Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11320118541,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMyMDExODU0MQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-SB1",
+        "size_in_bytes": 1900,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11320118541",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11320118541/zip",
+        "expired": false,
+        "digest": "sha256:b590a4cb58714423fcaee250c0982442d96024b1b7b762a4ad7d8cc231f80a3a",
+        "created_at": "2026-10-05T01:17:36Z",
+        "updated_at": "2026-10-05T01:17:36Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11319991819,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxOTk5MTgxOQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-12",
+        "size_in_bytes": 1846,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319991819",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319991819/zip",
+        "expired": false,
+        "digest": "sha256:b1ef881c801e8bc45c172c0ff1100b350d1e27e5fd5124cf8d8a55858cfc0260",
+        "created_at": "2026-10-05T00:50:14Z",
+        "updated_at": "2026-10-05T00:50:14Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11319931830,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxOTkzMTgzMA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-8c",
+        "size_in_bytes": 2180,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319931830",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319931830/zip",
+        "expired": false,
+        "digest": "sha256:348766c2b399edb90a688385c419d010a4c714e378837235ac74e2256f53bbfa",
+        "created_at": "2026-10-05T00:47:11Z",
+        "updated_at": "2026-10-05T00:47:11Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11319912270,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxOTkxMjI3MA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-pairing",
+        "size_in_bytes": 1683,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319912270",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319912270/zip",
+        "expired": false,
+        "digest": "sha256:74a1730d3a6d7aa3419a7cb3e00018c083048c022e7563a12ba9b0838a6d79d0",
+        "created_at": "2026-10-05T00:49:24Z",
+        "updated_at": "2026-10-05T00:49:24Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11319887158,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxOTg4NzE1OA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-discharge",
+        "size_in_bytes": 1723,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319887158",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319887158/zip",
+        "expired": false,
+        "digest": "sha256:af1fbeaf0881b768b83f137f85dbd262c16b22782789020df5f8ebc55a30e824",
+        "created_at": "2026-10-05T00:48:16Z",
+        "updated_at": "2026-10-05T00:48:16Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11319651036,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxOTY1MTAzNg==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-10-part-3-of-4",
+        "size_in_bytes": 1667,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319651036",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319651036/zip",
+        "expired": false,
+        "digest": "sha256:8a4efd7d251333d595b62c8f85f931faad28a5ff001b0bdd6e7ecdb3b972541d",
+        "created_at": "2026-10-05T00:12:47Z",
+        "updated_at": "2026-10-05T00:12:47Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11319479488,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxOTQ3OTQ4OA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-1-5",
+        "size_in_bytes": 1657,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319479488",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319479488/zip",
+        "expired": false,
+        "digest": "sha256:1f404105bef5071c8f09f2bd3d50ba32f80851694900bcf57f23d17207ca98f3",
+        "created_at": "2026-10-05T00:40:18Z",
+        "updated_at": "2026-10-05T00:40:18Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11319469451,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxOTQ2OTQ1MQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-10a",
+        "size_in_bytes": 1768,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319469451",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319469451/zip",
+        "expired": false,
+        "digest": "sha256:1dfc568d6b04ee1379e11e250abdb4c8a75e70d8e911ac5117a265a32917c7c6",
+        "created_at": "2026-10-05T00:39:26Z",
+        "updated_at": "2026-10-05T00:39:26Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11319457180,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxOTQ1NzE4MA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-FB",
+        "size_in_bytes": 2931,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319457180",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319457180/zip",
+        "expired": false,
+        "digest": "sha256:7046618435a9620e47aaf1b5ae6719d85e26fec513d2f233d7d8c3718e405db4",
+        "created_at": "2026-10-05T00:19:00Z",
+        "updated_at": "2026-10-05T00:19:00Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11319118955,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxOTExODk1NQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-8r",
+        "size_in_bytes": 3753,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319118955",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319118955/zip",
+        "expired": false,
+        "digest": "sha256:f65f34eef4524c69c1d3b03257cfd2cc72f5009c2db53d78b4c39faecdf375ad",
+        "created_at": "2026-10-05T00:30:42Z",
+        "updated_at": "2026-10-05T00:30:42Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11319098348,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxOTA5ODM0OA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-10-part-4-of-4",
+        "size_in_bytes": 1665,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319098348",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319098348/zip",
+        "expired": false,
+        "digest": "sha256:99c5abe3699b320ed766980af52bad6d535a8651a545422efff3ac56f34c4029",
+        "created_at": "2026-10-05T00:19:59Z",
+        "updated_at": "2026-10-05T00:19:59Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11319025985,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxOTAyNTk4NQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-mint-part-2-of-4",
+        "size_in_bytes": 1964,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319025985",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11319025985/zip",
+        "expired": false,
+        "digest": "sha256:7c3924b3a8980081e5effd8918fff16083c29e73439501545ea1d2e45a3c8e6c",
+        "created_at": "2026-10-04T23:43:21Z",
+        "updated_at": "2026-10-04T23:43:21Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11318973492,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxODk3MzQ5Mg==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-9a",
+        "size_in_bytes": 1614,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318973492",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318973492/zip",
+        "expired": false,
+        "digest": "sha256:465ca6fb9c6c6d6352d51882b79cd315611986100be12394a82e9639a2e38186",
+        "created_at": "2026-10-05T00:01:02Z",
+        "updated_at": "2026-10-05T00:01:02Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11318887810,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxODg4NzgxMA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-7-part-3-of-4",
+        "size_in_bytes": 2556,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318887810",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318887810/zip",
+        "expired": false,
+        "digest": "sha256:2306f84e2ffbcd51e1b8b0e36ccb7067738fbb0d5e5065ca9a81d318ce08000a",
+        "created_at": "2026-10-04T23:49:54Z",
+        "updated_at": "2026-10-04T23:49:54Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11318790861,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxODc5MDg2MQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-7-part-1-of-4",
+        "size_in_bytes": 3151,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318790861",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318790861/zip",
+        "expired": false,
+        "digest": "sha256:b36de9b6fdfa55e4bbff07f4850f12e400f0f40fa865046d5e11304b41b440bb",
+        "created_at": "2026-10-04T23:33:43Z",
+        "updated_at": "2026-10-04T23:33:43Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11318673140,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxODY3MzE0MA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-render",
+        "size_in_bytes": 2212,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318673140",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318673140/zip",
+        "expired": false,
+        "digest": "sha256:13cdb9293ae28f2d74ca816c1457e8ac2cc676833482cea6c36c35a060da39de",
+        "created_at": "2026-10-04T23:46:15Z",
+        "updated_at": "2026-10-04T23:46:15Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11318590004,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxODU5MDAwNA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-13-part-3-of-4",
+        "size_in_bytes": 1945,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318590004",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318590004/zip",
+        "expired": false,
+        "digest": "sha256:a504d084f2eaafc1cb48750a3ff28c6bff6422854abacc22b07632f2da80d92b",
+        "created_at": "2026-10-04T23:12:56Z",
+        "updated_at": "2026-10-04T23:12:56Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11318535730,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxODUzNTczMA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-6-part-4-of-4",
+        "size_in_bytes": 2336,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318535730",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318535730/zip",
+        "expired": false,
+        "digest": "sha256:849ec6dd638ad7b40db87ae131b62c9df8e0ddbd4a62d140c0fb1ceebebe259a",
+        "created_at": "2026-10-04T23:18:36Z",
+        "updated_at": "2026-10-04T23:18:36Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11318410980,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxODQxMDk4MA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-WF",
+        "size_in_bytes": 1690,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318410980",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318410980/zip",
+        "expired": false,
+        "digest": "sha256:d3b6ec9f787e8a23af6b20011564e92461606d7440cdbb06f6edbbd7f8c28013",
+        "created_at": "2026-10-04T23:26:03Z",
+        "updated_at": "2026-10-04T23:26:03Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11318405200,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxODQwNTIwMA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-4",
+        "size_in_bytes": 4497,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318405200",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318405200/zip",
+        "expired": false,
+        "digest": "sha256:3f1308b42eb9cdde02daa70eda906eadc57ae253469aa579ff00d794f6037640",
+        "created_at": "2026-10-04T23:10:40Z",
+        "updated_at": "2026-10-04T23:10:40Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11318352714,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxODM1MjcxNA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-mint-part-1-of-4",
+        "size_in_bytes": 1814,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318352714",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318352714/zip",
+        "expired": false,
+        "digest": "sha256:00529824138fc9c46d11d6a910d4f9cd06d8c1661347a85e62d79483801bf45d",
+        "created_at": "2026-10-04T23:34:52Z",
+        "updated_at": "2026-10-04T23:34:52Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11318185411,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxODE4NTQxMQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-g15b",
+        "size_in_bytes": 2001,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318185411",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318185411/zip",
+        "expired": false,
+        "digest": "sha256:27512db611fdf6a411b8262cbd2236985f55d100ff460060c1feb47ca294023c",
+        "created_at": "2026-10-04T23:08:31Z",
+        "updated_at": "2026-10-04T23:08:31Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11318181911,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxODE4MTkxMQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-13-part-2-of-4",
+        "size_in_bytes": 2059,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318181911",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318181911/zip",
+        "expired": false,
+        "digest": "sha256:5d8177ff86558e75b6318bec0884b639ec5e1dcf0c911d454b82a6197091d4c6",
+        "created_at": "2026-10-04T23:34:49Z",
+        "updated_at": "2026-10-04T23:34:49Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11318017661,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxODAxNzY2MQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-6-part-1-of-4",
+        "size_in_bytes": 2128,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318017661",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11318017661/zip",
+        "expired": false,
+        "digest": "sha256:eef7af353f51417a7e22cbe612f0e9067366333069954064648bea740b9654d6",
+        "created_at": "2026-10-04T23:23:36Z",
+        "updated_at": "2026-10-04T23:23:36Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11317919533,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxNzkxOTUzMw==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-mint-part-3-of-4",
+        "size_in_bytes": 1953,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11317919533",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11317919533/zip",
+        "expired": false,
+        "digest": "sha256:fabb2c65df68a30e8332979a4e36862c78b66f6b0ab7c18e36ad56cd0e23535b",
+        "created_at": "2026-10-04T23:21:51Z",
+        "updated_at": "2026-10-04T23:21:51Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11317848315,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxNzg0ODMxNQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-mt3",
+        "size_in_bytes": 1799,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11317848315",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11317848315/zip",
+        "expired": false,
+        "digest": "sha256:9dd8e3101245a2fe112a42f98ee43d15adeb3cda4dec944408fa88b14cf9b670",
+        "created_at": "2026-10-04T23:02:29Z",
+        "updated_at": "2026-10-04T23:02:29Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11317633552,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxNzYzMzU1Mg==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-seal",
+        "size_in_bytes": 1830,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11317633552",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11317633552/zip",
+        "expired": false,
+        "digest": "sha256:0064bd6951c84b63cc01a9067070ac979c79d2f973aa6a04e7c4d7e9938f5c9c",
+        "created_at": "2026-10-04T23:14:26Z",
+        "updated_at": "2026-10-04T23:14:26Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11317617260,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxNzYxNzI2MA==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-NS",
+        "size_in_bytes": 1675,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11317617260",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11317617260/zip",
+        "expired": false,
+        "digest": "sha256:71dd621e64a97168a2ccd92cf9c1c67afc9812588c50b6e5454b6f597841415f",
+        "created_at": "2026-10-04T22:42:07Z",
+        "updated_at": "2026-10-04T22:42:07Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11317436819,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxNzQzNjgxOQ==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-allowlist",
+        "size_in_bytes": 1557,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11317436819",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11317436819/zip",
+        "expired": false,
+        "digest": "sha256:8fca2ba86c0cc80a94f76c43369028fff42a7e133d3c2a6bd54e9154f90c29a3",
+        "created_at": "2026-10-04T22:45:24Z",
+        "updated_at": "2026-10-04T22:45:24Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11317093062,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxNzA5MzA2Mg==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-D8",
+        "size_in_bytes": 1613,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11317093062",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11317093062/zip",
+        "expired": false,
+        "digest": "sha256:3286798ad7ca8b15c25a857679ac07177298fecf7d97c733be8b3390497435f5",
+        "created_at": "2026-10-04T22:58:13Z",
+        "updated_at": "2026-10-04T22:58:13Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      },
+      {
+        "id": 11317084257,
+        "node_id": "MDg6QXJ0aWZhY3QxMTMxNzA4NDI1Nw==",
+        "name": "widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-6-part-3-of-4",
+        "size_in_bytes": 2239,
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11317084257",
+        "archive_download_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/artifacts/11317084257/zip",
+        "expired": false,
+        "digest": "sha256:3ed8771afb2838bf93fe0fe3fc69dd2c41a9b149334b06b093c9675b427ebf6a",
+        "created_at": "2026-10-04T23:15:01Z",
+        "updated_at": "2026-10-04T23:15:01Z",
+        "expires_at": "2027-01-02T22:06:07Z",
+        "workflow_run": {
+          "id": 37238713168,
+          "repository_id": 1283350075,
+          "head_repository_id": 1283350075,
+          "head_branch": "codex/maya-controlled-integration-20260930",
+          "head_sha": "dff728e85a97841dd72bd290992b888344780780"
+        }
+      }
+    ]
+  }
+]

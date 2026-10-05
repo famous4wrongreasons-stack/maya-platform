@@ -1,0 +1,63 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "sourceDisposition": "outputs/final-certification-fed5f7df/FBE2E-DISPOSITION.json",
+  "sourceDispositionSha256": "be2f21d4f572dc0c06d81656f7035e839f5e7bea11040f4ae9f55456ede5048d",
+  "sourceDispositionIsNotFreshReceipt": true,
+  "freshSyntheticProbes": "6/6 PASS; separately indexed receipts",
+  "retainedBoundaries": [
+    {
+      "id": "L2",
+      "status": "PARTIAL",
+      "currentBoundary": "Fresh local checker PASS; advisory CI blocking/acceptance policy remains unresolved."
+    },
+    {
+      "id": "L5",
+      "status": "OPEN",
+      "currentBoundary": "Booking tomorrow/day-window policy remains unresolved with L24; the repaired billing fixture clock does not change this product policy."
+    },
+    {
+      "id": "L12",
+      "status": "PARTIAL",
+      "currentBoundary": "Exact historical ports delta is type-only: parent, delta and current candidate emit byte-identical 569-byte JS retaining the pre-existing runtime helper. All four new runtime sites have named WR mutants; wait for full fresh WR results before closing the literal uncovered-delta limitation.",
+      "classification": "EVIDENCE_PENDING_NATIVE_WR",
+      "proof": "L12-DELTA-PROOF.json",
+      "newOwnerPolicyRequired": false
+    },
+    {
+      "id": "L16",
+      "status": "PARTIAL",
+      "currentBoundary": "Current canonical planner explicitly repairs L16 by four P-mint partitions instead of two, retaining unrestricted tests and unchanged 180-minute budget. Await complete fresh P-mint/whole-corpus receipts and observed local durations; never claim an unexecuted remote CI run.",
+      "classification": "EVIDENCE_PENDING_NATIVE_PMINT",
+      "proof": "L16-CURRENT-PLAN-PROOF.json"
+    },
+    {
+      "id": "L20",
+      "status": "PARTIAL",
+      "currentBoundary": "Supplying an UNKNOWN verdict is not a provider/Action Engine fault-produced UNKNOWN proof."
+    },
+    {
+      "id": "L23",
+      "status": "OPEN",
+      "currentBoundary": "The carrier network structural-ratchet limitation remains; successful network probes do not replace that assertion."
+    },
+    {
+      "id": "L24",
+      "status": "OPEN",
+      "currentBoundary": "The fixed booking availability window/timezone policy remains unresolved with L5."
+    },
+    {
+      "id": "L25",
+      "status": "OPEN",
+      "currentBoundary": "Tap-as-delivery/render requires the retained lifecycle ruling; no new acceptance inferred."
+    },
+    {
+      "id": "L26",
+      "status": "PARTIAL",
+      "currentBoundary": "Current strict mutation consumer does not retroactively approve the historical manual audit builder."
+    }
+  ],
+  "ownerAcceptanceInferred": false,
+  "nativeCorpus": "RUNNING",
+  "certificateIssued": false,
+  "requirement": "Approved AR-1 activation review requires named accepted remaining FBE2E limitations/prerequisites; successful local suites alone do not supply owner acceptance."
+}

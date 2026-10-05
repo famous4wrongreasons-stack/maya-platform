@@ -1,0 +1,273 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "copiedSources": [
+    {
+      "source": "work/ar1-production-unlock-final-20261002/r06-child-trace.cjs",
+      "sourceSha256": "c1838a6a87f27553b8bfe9abbd6dc6f360a19291ca294e8532ea7ef15e773ec1",
+      "destination": "work/release-packaging-final-20261003/r06-child-trace.cjs"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/prove-requested-baselines.py",
+      "sourceSha256": "ed6e282bf045b8d8b9b05b00f95e231d2f53c4e79b722fe0694c0064980f646c",
+      "destination": "work/release-packaging-final-20261003/prove-requested-baselines.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-additional-carrier-harness.py",
+      "sourceSha256": "db91a07a7535d17d3194ac3356a1f5b4aa1f3aaa17f6a11bf2811fcae33b8273",
+      "destination": "work/release-packaging-final-20261003/run-additional-carrier-harness.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/index-fresh-artifacts.py",
+      "sourceSha256": "2dbced17b53fb8179b6de9b73d61ca6f0f07a893cc9568b71eb4ff67ab5a9654",
+      "destination": "work/release-packaging-final-20261003/index-fresh-artifacts.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-net-bin.py",
+      "sourceSha256": "aaf7c18e1c57251324665fa9adebfa23ad18555ddb1201d5db197135ec9d4375",
+      "destination": "work/release-packaging-final-20261003/run-net-bin.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-l27-mutations.py",
+      "sourceSha256": "c13845a1958bc4e42038fb36ae546ca536063bbf498ffd84c6cf7edcc857dc1e",
+      "destination": "work/release-packaging-final-20261003/run-l27-mutations.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/finalize-fbe2e.py",
+      "sourceSha256": "353f18d8dfc315e1580e6dfdf39800dd66d86302dbe53b38d3c5faa1ad82eb42",
+      "destination": "work/release-packaging-final-20261003/finalize-fbe2e.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/check-final-process-lifecycle.py",
+      "sourceSha256": "650a75e8be5a77e5738d2d9b0e772cdf93a5a77ceaa0ced03c96cb6d6c3e43ac",
+      "destination": "work/release-packaging-final-20261003/check-final-process-lifecycle.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/check-host-environment.py",
+      "sourceSha256": "88cc5947f3a094d2ea8ac978ac6d53750bc2b0adf72d3a7701c2bbca7b2e9dd4",
+      "destination": "work/release-packaging-final-20261003/check-host-environment.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/l25-browser-proof.js",
+      "sourceSha256": "d07e2dcf1e0d491ad48a67c3f2997c50b6b6f4cc05ac5d98104e755de0cfb578",
+      "destination": "work/release-packaging-final-20261003/l25-browser-proof.js"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/check-ci-postconditions.py",
+      "sourceSha256": "d4c3830abd5d4ab170691278cd7d9e4a3bbd9cfef6d7503cfc22a9a5ba3f6f34",
+      "destination": "work/release-packaging-final-20261003/check-ci-postconditions.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-all-mutations-isolated.py",
+      "sourceSha256": "1eb8989753296e2a197c6c7de0b4bcae7713f95b3a799ee8328d20eefc7b606e",
+      "destination": "work/release-packaging-final-20261003/run-all-mutations-isolated.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-net-proof.py",
+      "sourceSha256": "b64e6d1ddf00bae89ca1b2ffb88a36310c3decdfdd7689638e4d04189ae79a9b",
+      "destination": "work/release-packaging-final-20261003/run-net-proof.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/check-final-artifact-stability.py",
+      "sourceSha256": "02367ec90d1657c5add794e08411a7f0dc3f6b25f90342138e2173caba2d3d1e",
+      "destination": "work/release-packaging-final-20261003/check-final-artifact-stability.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-programme.py",
+      "sourceSha256": "a4e6e1b254c86bd6c8a294bafa798150379d549ecc9d76cae87843b8591f6fc4",
+      "destination": "work/release-packaging-final-20261003/run-programme.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-extra.py",
+      "sourceSha256": "65e5ed59dfb39fef02fe6d41fc0fe9823325ca71ac30c9527d487d80896bfb5b",
+      "destination": "work/release-packaging-final-20261003/run-extra.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/index-final-proofs.py",
+      "sourceSha256": "75728991bcca7874caa1c222820032f25f16f1f8de8101434e1788532509fd6e",
+      "destination": "work/release-packaging-final-20261003/index-final-proofs.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/finalize-receipts.py",
+      "sourceSha256": "3ca2d3692dd1350611100fc027da190fbd40b623feb52c5efde3632e37eac7e2",
+      "destination": "work/release-packaging-final-20261003/finalize-receipts.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/prepare-extra-dbs.py",
+      "sourceSha256": "9b2e98f08ce0a20b7d4429affd897c143f3820c2a92ecc22f1936667f0e61d35",
+      "destination": "work/release-packaging-final-20261003/prepare-extra-dbs.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/index-final-orchestration-sources.py",
+      "sourceSha256": "b9cf364d9525878be432a6f0868b49750fe1adca3c0bee0dd5a18d2225cc3ff0",
+      "destination": "work/release-packaging-final-20261003/index-final-orchestration-sources.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/finish-programme.py",
+      "sourceSha256": "89f0c28fd35478735cc9468e42f1f0ad9e8b057b09fab867b68604cb1bdee97d",
+      "destination": "work/release-packaging-final-20261003/finish-programme.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-complete-native.py",
+      "sourceSha256": "ac671375a29c225d3c1bad3f3c616c9e130156181d4846ae419339729fc4ea97",
+      "destination": "work/release-packaging-final-20261003/run-complete-native.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-final-flow.py",
+      "sourceSha256": "3b20b999a76a75eaeb9ec13b3b036941cdc2def11ecd602be41b0849f3adee8d",
+      "destination": "work/release-packaging-final-20261003/run-final-flow.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/capture-native-progress.py",
+      "sourceSha256": "8406b8cc7d44a6ea7752b5aa96cee6b098d3a7dfa615f16b2130b960c9949e0d",
+      "destination": "work/release-packaging-final-20261003/capture-native-progress.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/assemble-complete.py",
+      "sourceSha256": "df0494e58670959ffbd75cfba6f6bb1fb1e7b332cf72906631fe3e85bc2d243d",
+      "destination": "work/release-packaging-final-20261003/assemble-complete.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/prepare-final.py",
+      "sourceSha256": "a57a3cb3eba1b1505887d750920d8908f893d68db5e28624f0e77ac888e103b4",
+      "destination": "work/release-packaging-final-20261003/prepare-final.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-compiled-receipt-bin.py",
+      "sourceSha256": "62f187f3846b770b44341a514ed03c2e3576180830a725a1223045cd300d79b0",
+      "destination": "work/release-packaging-final-20261003/run-compiled-receipt-bin.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-postcommit-bin.py",
+      "sourceSha256": "5d0d74965500ea199c64a0e34bfc991f53fe9036830194f6e50ee9f29543de0b",
+      "destination": "work/release-packaging-final-20261003/run-postcommit-bin.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-parity.py",
+      "sourceSha256": "f135fe54e4ef33fc0302cdd929515e8bba5a80979ed3e232427f247bcf8a8860",
+      "destination": "work/release-packaging-final-20261003/run-parity.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-net-turn-proof.py",
+      "sourceSha256": "c0a00c8c4c1e62f4a33f6f3dbf32bafc1725aa8134cb038385f0aa364d0fafea",
+      "destination": "work/release-packaging-final-20261003/run-net-turn-proof.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-baseline.py",
+      "sourceSha256": "c9204478bb79048d81b3b501068009967579e2bc7bd696078d67eec58f381d9d",
+      "destination": "work/release-packaging-final-20261003/run-baseline.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-rest.py",
+      "sourceSha256": "a56a333d01c8e7c8c9ff8ce701c43a9e9a7a4d5505ff6fb1975f79ac4ab8df03",
+      "destination": "work/release-packaging-final-20261003/run-rest.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-carrier-selftest.py",
+      "sourceSha256": "6ccaa4d02f7cf6ea7aa44a634e4af0db9c5d40596b5b8b9782d36b4086e0a07f",
+      "destination": "work/release-packaging-final-20261003/run-carrier-selftest.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/run-compiled-bin.py",
+      "sourceSha256": "7da919a8d4bdff29dfbc33c2601aa1cd2a12ee7a62ad3bbbfbc46d6f9bcb2f73",
+      "destination": "work/release-packaging-final-20261003/run-compiled-bin.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/status.py",
+      "sourceSha256": "c5fa43e85e7c70d7d7c55f66bd0a9d142bf561c9b536aea4678c701587c3c372",
+      "destination": "work/release-packaging-final-20261003/status.py"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/jest-net-return.json",
+      "sourceSha256": "723b5ed108cebd569a169083ae0aea23cdfae08602554fbfb68cc2cac48c7c9d",
+      "destination": "work/release-packaging-final-20261003/jest-net-return.json"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/jest-net-turn.json",
+      "sourceSha256": "9af9fe29a0be3001f0b9d60814e0bf3bdf3109ccc3eda10a4587d65f25f8a2d1",
+      "destination": "work/release-packaging-final-20261003/jest-net-turn.json"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/bin-cases/gateNETBIN.cases.ts",
+      "sourceSha256": "c2d25b62c25184a12bc88e48f2fafb2ee18c392a5ee687be6b344b5f6e1cc0fe",
+      "destination": "work/release-packaging-final-20261003/bin-cases/gateNETBIN.cases.ts"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/compiled-bin-cases/gateCOMPILEDBIN.cases.ts",
+      "sourceSha256": "c11d8306cdd009472db4f6d95fef8e40410dc83af76f1d25221d959b8d77c444",
+      "destination": "work/release-packaging-final-20261003/compiled-bin-cases/gateCOMPILEDBIN.cases.ts"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/compiled-receipt-bin-cases/gateRECEIPTBIN.cases.ts",
+      "sourceSha256": "923746be81b517b5b5ca1f6aa81ef9e80ae0ed708cf8f94f74981b7f9ab02165",
+      "destination": "work/release-packaging-final-20261003/compiled-receipt-bin-cases/gateRECEIPTBIN.cases.ts"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/postcommit-bin-cases/gateL27.cases.ts",
+      "sourceSha256": "c1fa3c1c0853b2e001d7efe02ff374c345ef98de044490ae945f6805bc401164",
+      "destination": "work/release-packaging-final-20261003/postcommit-bin-cases/gateL27.cases.ts"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/probes/mounted-compiled-drawer.mjs",
+      "sourceSha256": "36fdb66566e4877b84734ce5f16adea3a05813900d78b0f352f685deed6e1f44",
+      "destination": "work/release-packaging-final-20261003/probes/mounted-compiled-drawer.mjs"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/probes/mounted-source-drawer.mjs",
+      "sourceSha256": "07131efe3c25368d35e4d92ebbdd710011b495e1cb13ddc721c0a385fefb6e13",
+      "destination": "work/release-packaging-final-20261003/probes/mounted-source-drawer.mjs"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/probes/source-net-turn.mjs",
+      "sourceSha256": "a4bda0c43514f18365dd447fb22febec6074a042459fd12eda94e142e3065d13",
+      "destination": "work/release-packaging-final-20261003/probes/source-net-turn.mjs"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/probes/source-net-return.mjs",
+      "sourceSha256": "ff32c11f59f153f83e38f2bfe335dbe6d3558f7c097f1ab5f47212d83bb0c99e",
+      "destination": "work/release-packaging-final-20261003/probes/source-net-return.mjs"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/probes/compiled-postcommit-dismiss.mjs",
+      "sourceSha256": "dc75dff6d38c36a3867adcdb495365ffa1d257e25804c3d9c99cf67eb5bbfe84",
+      "destination": "work/release-packaging-final-20261003/probes/compiled-postcommit-dismiss.mjs"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/probes/source-return.probe-spec.ts",
+      "sourceSha256": "19932cef7e15a017031ade69d4fdc6db90b227d41e70e65d797b2dccb293c7d6",
+      "destination": "work/release-packaging-final-20261003/probes/source-return.probe-spec.ts"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/probes/source-net-turn.probe-spec.ts",
+      "sourceSha256": "04652c285f47540e191a8d2e4214c45f79864d494b94a7416f7252a750c08602",
+      "destination": "work/release-packaging-final-20261003/probes/source-net-turn.probe-spec.ts"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/probes/source-return.mjs",
+      "sourceSha256": "8a58c3a6725cc00d3ae92fabfe421317dc3da7ac0f3839081957437971272f15",
+      "destination": "work/release-packaging-final-20261003/probes/source-return.mjs"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/probes/compiled-net-return.mjs",
+      "sourceSha256": "7e83204b00b7e3ca3bf141f09d36abe11452a80eca4791ce606b91724096c5e6",
+      "destination": "work/release-packaging-final-20261003/probes/compiled-net-return.mjs"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/probes/compiled-net-receipt.mjs",
+      "sourceSha256": "2c303b52bbeba7d4fe8e8563ba9c9325b5fe048ec953b8788dcd1a8fd55649f9",
+      "destination": "work/release-packaging-final-20261003/probes/compiled-net-receipt.mjs"
+    },
+    {
+      "source": "work/ar1-production-unlock-final-20261002/probes/source-net-return.probe-spec.ts",
+      "sourceSha256": "a528acb01c866360e3dc5a1effffd7843b1fc73eba5efefa2f8a773a588b1201",
+      "destination": "work/release-packaging-final-20261003/probes/source-net-return.probe-spec.ts"
+    }
+  ],
+  "copiedReceipts": 0,
+  "adaptations": [
+    "fresh output and isolated database namespaces",
+    "candidate binding",
+    "backend build before all runtime and smoke consumers",
+    "new packaging/trust proof required for final admission",
+    "old attempt repair receipts removed: not evidence for new candidate"
+  ]
+}

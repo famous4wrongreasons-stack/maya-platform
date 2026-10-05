@@ -1,0 +1,12 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "name": "node24-icons",
+  "command": [
+    "node",
+    "brand/make-icons.mjs",
+    "--check"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+  "exit": 0,
+  "seconds": 4.08
+}

@@ -1,0 +1,276 @@
+{
+  "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+  "scope": "Fresh behavioural evidence only. Full certification stopped on confirmed FBE2E L27; all mutation work interrupted, not certified.",
+  "receipt": "receipts/widgets-live-full.json",
+  "suites": [
+    {
+      "file": "profile-isolation.live-spec.ts",
+      "assertions": [
+        {
+          "title": "PROFILE-INGRESS refuses an old HANDOFF at HTTP/typed/internal ingress and direct dispatch, with zero signer, turn, consumption or owner effect",
+          "status": "passed"
+        },
+        {
+          "title": "PROFILE-EGRESS refuses new/mixed HANDOFF mint and suppresses every old mixed control from resolve without rewriting history",
+          "status": "passed"
+        },
+        {
+          "title": "PROFILE-GRANT passes allowed navigation through scope admission, rejects old grants, and rolls back a failed binding",
+          "status": "passed"
+        },
+        {
+          "title": "PROFILE-LOCK serializes concurrent revoke with an in-flight profile admission under the existing AR-1 lock",
+          "status": "passed"
+        },
+        {
+          "title": "PROFILE-BOOKING admits the actual HTTP catalog \u2192 selectors \u2192 DRAFT \u2192 COMMIT source under a signed restricted grant",
+          "status": "passed"
+        },
+        {
+          "title": "PROFILE-SOURCE NS admits only the exact new source under a signed restricted grant",
+          "status": "passed"
+        },
+        {
+          "title": "PROFILE-SOURCE BS admits only the exact new source under a signed restricted grant",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "widget-release.live-spec.ts",
+      "assertions": [
+        {
+          "title": "AR1-LIFECYCLE validate is read-only; signed grant has atomic audit; same authorization retry never grants twice; revoke refuses an old widget token",
+          "status": "passed"
+        },
+        {
+          "title": "AR1-CONCURRENT two consumes of one authorization produce one grant and one audit",
+          "status": "passed"
+        },
+        {
+          "title": "AR1-STALE two independently signed grants with the same prestate cannot both win CAS",
+          "status": "passed"
+        },
+        {
+          "title": "AR1-AUDIT failure rolls back the entitlement mutation",
+          "status": "passed"
+        },
+        {
+          "title": "AR1-EXPIRY expires without renewal and denies the old authorization",
+          "status": "passed"
+        },
+        {
+          "title": "AR1-ADVERSARIAL forged, expired, tenant-substituted and rebound authorizations have no grant effect",
+          "status": "passed"
+        },
+        {
+          "title": "AR1-SUSPENDED rollback remains available after a tenant is suspended",
+          "status": "passed"
+        },
+        {
+          "title": "AR1-ROLE tenant owner and revoked platform session never gain release authority",
+          "status": "passed"
+        },
+        {
+          "title": "AR1-REVOKE-WAIT active admitted work and revoke serialize on the tenant release lock",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "navigation-source-boundary.live-spec.ts",
+      "assertions": [
+        {
+          "title": "NS-CHECK admits exact detail date and preserves REFINE; all near-miss shapes remain forbidden",
+          "status": "passed"
+        },
+        {
+          "title": "NS-REFUSE date cannot project a historical source",
+          "status": "passed"
+        },
+        {
+          "title": "NS-REFUSE erased cannot project a historical source",
+          "status": "passed"
+        },
+        {
+          "title": "NS-REFUSE expired cannot project a historical source",
+          "status": "passed"
+        },
+        {
+          "title": "NS-REFUSE body cannot project a historical source",
+          "status": "passed"
+        },
+        {
+          "title": "NS-REFUSE seal cannot project a historical source",
+          "status": "passed"
+        },
+        {
+          "title": "NS-REFUSE foreign-principal cannot project a historical source",
+          "status": "passed"
+        },
+        {
+          "title": "NS-PARENT rechecks parent availability when the new exact return link is used",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "sb1-successor.live-spec.ts",
+      "assertions": [
+        {
+          "title": "SV2-01 happy successor verification creates usable explicit personal context and actual actor audit",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-02 wrong OTP has no link or consumption effect",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-03 replay fails closed",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-04 expired OTP fails under database time",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-05 Client substitution cannot transfer a challenge",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-06 tenant substitution fails closed",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-07 predecessor changed after resolver read is rejected inside identity lock",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-08 active predecessor never authorizes issuance or consumption",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-09 non-latest revoked predecessor cannot be consumed",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-10 revoked episode remains byte-for-byte immutable",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-11 successful consume creates exactly one successor and one outcome",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-12 concurrent consume serializes to one success and one refusal",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-JSON all four V2 fields are mandatory, exact and immutable",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-CHANNEL canonical channel changed after issuance invalidates exact Client proof",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-SESSION current revocation is checked on consume",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-LIMIT failed OTP attempts survive rollback and cannot be reset with correct code",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-DELIVERY failed SMS grants nothing and discloses no OTP",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-V1 historical V1 remains immutable and initial-only; V1 consumption still works for a fresh subject",
+          "status": "passed"
+        },
+        {
+          "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "user-turn-identity.live-spec.ts",
+      "assertions": [
+        {
+          "title": "TURN-ORDINARY persists exactly one USER row on concurrent same-request retries and carries its conversation forward",
+          "status": "passed"
+        },
+        {
+          "title": "TURN-WIDGET uses the same persisted writer for production-minted typed and tapped controls; expired retry never falls through to ordinary chat",
+          "status": "passed"
+        },
+        {
+          "title": "TURN-ERASURE refuses replay of an erased row without restoring content or extending retention",
+          "status": "passed"
+        },
+        {
+          "title": "TURN-ATOMIC rolls back the USER row when its immutable correlation cannot be committed",
+          "status": "passed"
+        },
+        {
+          "title": "TURN-READ keeps an actual chat read, its widget emission and the next typed widget turn in one conversation",
+          "status": "passed"
+        },
+        {
+          "title": "TURN-SCOPE refuses a foreign current actor or tenant conversation; request IDs alone never confer identity",
+          "status": "passed"
+        },
+        {
+          "title": "TURN-BROKEN-BINDING refuses duplicate evidence, orphan rows and expired history without recreating either half",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "release-revocation.live-spec.ts",
+      "assertions": [
+        {
+          "title": "AR-G6-REVOCATION [E-MINT] real post-Gate6 revoke refuses at canonical admission and increments metric",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "user-turn-canonical.live-spec.ts",
+      "assertions": [
+        {
+          "title": "TURN-CANONICAL [HTTP] [E-MINT] ordinary typed, widget typed and native tap persist byte-identical USER content through the same writer",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "personal-source.live-spec.ts",
+      "assertions": [
+        {
+          "title": "BS-SOURCE [HTTP] [E-MINT] own-list exact Client source proposes and commits reschedule and cancel through existing owners",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "navigation-source.live-spec.ts",
+      "assertions": [
+        {
+          "title": "NS-SOURCE [HTTP] [E-MINT] production journal detail rereads exact retained date and resolves exact parent",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "integration": {
+    "NS1": "receipts/ns1-16-step.log",
+    "canonicalNetTypedAndWidgetIdentity": "receipts/canonical-net-turn-observations.json",
+    "builtRuntimeAndBuiltBackend": "receipts/compiled-net-bin-observations.json",
+    "postcommitDismiss": "FAIL: receipts/l27-postcommit-dismiss-observations.json"
+  },
+  "certifiedForProfile": false,
+  "fullContractCertified": false
+}

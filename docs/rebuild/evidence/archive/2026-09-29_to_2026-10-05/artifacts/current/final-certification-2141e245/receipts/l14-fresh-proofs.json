@@ -1,0 +1,47 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "generatedAt": "2026-10-01T06:59:46.490579+00:00",
+  "proofs": [
+    {
+      "path": "receipts/widgets-live-full.json",
+      "sha256": "eb2d76be8ebe0631985bf1c9c366cb77eda747e9eb015a8f6233ffef9d4f9140",
+      "assertions": [
+        {
+          "title": "H2 \u2014 the confirmation terminal line survives the same widget escape [HTTP] [PostgreSQL] WR-H2 escape preserves the receipt boundary (committed=true)",
+          "status": "passed"
+        },
+        {
+          "title": "H2 \u2014 the confirmation terminal line survives the same widget escape [HTTP] [PostgreSQL] WR-H2 escape preserves the receipt boundary (committed=false)",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "path": "receipts/backend-full.json",
+      "sha256": "7588004734adbe1759eb4cfa04568c1222cff8270a70e27dc4b4201b9dec417d",
+      "assertions": [
+        {
+          "title": "WidgetStoresService \u2014 every existing method sends what it sent before the split 3. receipt store (shell) WR-L22 idempotent retries derive the terminal outcome from the existing durable receipt",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "path": "receipts/fbe2e-l27-postcommit-dismiss.receipt.json",
+      "sha256": "19ab251daa6c4b15044c05a4352b834224bf93f86ac0cde190e3d1c3e3ea15fc"
+    },
+    {
+      "path": "receipts/l27-postcommit-dismiss-observations.json",
+      "sha256": "90148038ed0818529ed6ed0a398f9f107326055ee3a5325fb9274e5d21386d7b"
+    }
+  ],
+  "source": {
+    "path": "maya-saas-backend/src/widgets/stores/intent-audit.store.ts",
+    "sha256": "5d066f2155a7cc1a7953a3057e75f975bf8d3c5a438d559ba37b71d399adde13",
+    "equalsApprovedProductBase": true
+  },
+  "immutableAdjudicationRetry": "PASS",
+  "reachableCommitDismiss": "PASS",
+  "changedReferenceThroughRuntimeDouble": "DEFENSIVE ONLY; not a reachable production re-reference claim",
+  "WRnativeMutationAdmission": "PENDING"
+}

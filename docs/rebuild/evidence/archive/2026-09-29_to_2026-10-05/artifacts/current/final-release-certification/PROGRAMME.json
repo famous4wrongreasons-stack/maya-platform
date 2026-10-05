@@ -1,0 +1,102 @@
+{
+  "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+  "termination": "STOP_ON_GENUINE_DEFECT",
+  "mutationInventory": {
+    "batteries": 44,
+    "declarations": 502,
+    "byDeclaredExpectation": {
+      "build-killed": 338,
+      "equivalent": 1,
+      "live-killed": 161,
+      "pending": 2
+    },
+    "executedInThisPass": 0
+  },
+  "checks": [
+    {
+      "name": "full applicable mutation corpus",
+      "status": "NOT RUN",
+      "detail": "502 declarations / 44 batteries; STOP on FBE2E defect before running corpus"
+    },
+    {
+      "name": "full CI-equivalent",
+      "status": "FAIL / INCOMPLETE",
+      "detail": "FBE2E required path failed; remaining programme stopped"
+    },
+    {
+      "name": "backend full suite",
+      "status": "NOT RUN",
+      "detail": "STOP; no historical receipts reused"
+    },
+    {
+      "name": "runtime full suite",
+      "status": "NOT RUN",
+      "detail": "STOP; runtime build fresh PASS only"
+    },
+    {
+      "name": "carrier full suite",
+      "status": "NOT RUN",
+      "detail": "STOP; carrier build and test-harness build fresh PASS only"
+    },
+    {
+      "name": "widgets-live full",
+      "status": "NOT RUN",
+      "detail": "STOP; targeted roundtrip FBE2E probe is separate"
+    },
+    {
+      "name": "HTTP/BIN full",
+      "status": "NOT RUN",
+      "detail": "STOP; actual HTTP used by targeted FBE2E only"
+    },
+    {
+      "name": "complete applicable FBE2E",
+      "status": "FAIL",
+      "detail": "Personal create/reschedule/cancel PASS; detail opening PASS; server-resolved parent return FAIL"
+    },
+    {
+      "name": "profile isolation",
+      "status": "NOT RUN",
+      "detail": "STOP"
+    },
+    {
+      "name": "revocation/expiry",
+      "status": "NOT RUN",
+      "detail": "STOP"
+    },
+    {
+      "name": "cross-tenant/profile substitution",
+      "status": "NOT RUN",
+      "detail": "STOP"
+    },
+    {
+      "name": "old-token refusal",
+      "status": "NOT RUN",
+      "detail": "STOP"
+    },
+    {
+      "name": "artifact/hash/parity",
+      "status": "INCOMPLETE",
+      "detail": "Fresh builds pass; current artifact hashes recorded, full parity programme stopped"
+    },
+    {
+      "name": "9.6 proof",
+      "status": "NOT RUN",
+      "detail": "STOP"
+    },
+    {
+      "name": "BS-1",
+      "status": "PARTIAL",
+      "detail": "Fresh actual personal carrier create/reschedule/cancel PASS; full certification programme stopped"
+    },
+    {
+      "name": "NS-1",
+      "status": "FAIL",
+      "detail": "Exact parent received from server; projection drops it and detail stays open"
+    },
+    {
+      "name": "self-booking successor mechanism",
+      "status": "NOT RUN",
+      "detail": "STOP; no OTP sent"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "capturedAt": "2026-10-04T18:09:08.113111+00:00",
+  "events": [
+    {
+      "utc": "2026-10-04T17:45:22+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Clamshell Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 396 secs"
+    },
+    {
+      "utc": "2026-10-04T17:51:58+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using BATT (Charge:100%) 45 secs"
+    },
+    {
+      "utc": "2026-10-04T17:52:43+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 486 secs"
+    },
+    {
+      "utc": "2026-10-04T18:00:49+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty E_PFN_NET_FOUND ARPT/ Using BATT (Charge:100%) 45 secs"
+    },
+    {
+      "utc": "2026-10-04T18:01:34+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 143 secs"
+    },
+    {
+      "utc": "2026-10-04T18:03:57+00:00",
+      "event": "Wake",
+      "details": "Wake from Deep Idle [CDNVA] : due to smc.sysState.Wake(0x70070000) lid SMC.OutboxNotEmpty RTP.multi-touch/HID Activity Using BATT (Charge:100%)"
+    }
+  ],
+  "admission": "DIAGNOSTIC ONLY"
+}

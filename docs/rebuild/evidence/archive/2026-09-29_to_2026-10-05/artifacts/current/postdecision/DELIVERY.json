@@ -1,0 +1,19 @@
+{
+  "contract": "maya.widget-release-delivery/1",
+  "observed_at": "2026-09-29T18:30:37.872439+00:00",
+  "branch": "codex/widget-release-programme-20260929",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/widget-release",
+  "head": "54540cde208a5c8ced1418fae8b67fcb4519def4",
+  "clean_worktree": true,
+  "backend_tree": "6ade2119c6f251a782d5923091bb8d540e644c1b",
+  "runtime_head": "a46b228bcc2c8912f2b25d194944be7ea0dee365",
+  "evidence_head": "b2a8c8a2bd0ab34ed18456536086ae04ace73f9c",
+  "backend_identical_to_evidence_head": true,
+  "claude_head": "36fc31d7fa1ba5af758254912fa324093b4d954b",
+  "claude_overlap": [],
+  "merge_performed": false,
+  "production_effects": 0,
+  "real_yclients_effects": 0,
+  "safe_to_integrate": false,
+  "integration_reason": "Canonical persisted user-turn identity and authorized combined artifact/CI acceptance remain unproved; no merge or activation."
+}

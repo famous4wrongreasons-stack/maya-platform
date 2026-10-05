@@ -1,0 +1,11 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "name": "k5-exit",
+  "command": [
+    "bash",
+    "docs/rebuild/evidence/maya-chat-first-ux/k5-exit-gate.sh"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "exit": 0,
+  "seconds": 26.66
+}

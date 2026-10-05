@@ -1,0 +1,37 @@
+{
+  "historicalCandidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "capturedAt": "2026-10-01T18:56:51.225173+00:00",
+  "historicalRuns": [
+    {
+      "path": "outputs/final-certification-fed5f7df/receipts/mutation-diagnostics/1-live-1790778318690.json",
+      "sha256": "23918ccbe2abbc8a54c74669f20457f8757473b0cd2c8c3592a22f698ba7b366",
+      "from": "2026-09-30T14:25:18.690000+00:00",
+      "to": "2026-09-30T14:32:34.062101+00:00",
+      "failureTitles": [
+        "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+        "PROFILE-INGRESS refuses an old HANDOFF at HTTP/typed/internal ingress and direct dispatch, with zero signer, turn, consumption or owner effect",
+        "E1-T2B-CLEAN [HTTP] [E-MINT] mints through the journal owner and traverses the real gate pipeline",
+        "T-F11/B-1 (b): live stops at 0, 1, 3, 5 [synthetic record], 7 [synthetic record] and 8 each report ran equal to the slot's position, over records the real writers minted for JwtStrategy-validated principals",
+        "BS-SOURCE [HTTP] [E-MINT] own-list exact Client source proposes and commits reschedule and cancel through existing owners"
+      ]
+    },
+    {
+      "path": "outputs/final-certification-fed5f7df/receipts/mutation-diagnostics/1-live-1790779347865.json",
+      "sha256": "b002f67e95d2b145b0d192bb4280c61fee3e80a3a395ec1d2be174fd0893ccb8",
+      "from": "2026-09-30T14:42:27.865000+00:00",
+      "to": "2026-09-30T14:48:44.186115+00:00",
+      "failureTitles": [
+        "F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+        "F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused"
+      ]
+    }
+  ],
+  "powerEventsWithinExpandedWindows": [],
+  "scope": "Read-only historical power-log correlation. Absence of events in a retained log is not a socket trace or proof of every possible cause.",
+  "retainedPowerEventRange": {
+    "from": "2026-09-25T05:49:11+00:00",
+    "to": "2026-10-01T18:39:17+00:00",
+    "eventCount": 129
+  },
+  "historicalWindowsWithinRetainedRange": true
+}

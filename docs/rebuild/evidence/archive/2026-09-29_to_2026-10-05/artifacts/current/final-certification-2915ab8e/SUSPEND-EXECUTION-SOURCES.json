@@ -1,0 +1,35 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "capturedAt": "2026-10-02T06:59:43.768548+00:00",
+  "reason": "Full fresh replacement of the two exact current-candidate parts interrupted by observed host sleep.",
+  "files": [
+    {
+      "path": "work/final-certification-2915ab8e/launch-current-suspend-reverification.py",
+      "sha256": "4d2ce709cbfd58e122d2d1fe798c8f428ec667401663adfb275e2f4016519930"
+    },
+    {
+      "path": "work/final-certification-2915ab8e/run-suspend-reverification.py",
+      "sha256": "d4d12e50888cd4107bc9f84cf79aecaa20b0fdd58339ca223016cc9f7849171e"
+    },
+    {
+      "path": "work/final-certification-2915ab8e/capture-host-suspend.py",
+      "sha256": "52508ce620cd05969994ab4e71ba93c5aab990b1bdeb3a78284275096ca14e60"
+    },
+    {
+      "path": "work/final-certification-2915ab8e/check-host-environment.py",
+      "sha256": "f0c8c8d29bb5ebae2b7d54e537ec6b8f7132ecf6ed329ce882348c8c6511e2f6"
+    },
+    {
+      "path": "work/maya-controlled-integration/maya-saas-backend/scripts/widgets-mutation-battery.mjs",
+      "sha256": "5a9cf6590fedd4172ea2b3162e359da0cc4ce5d76808a58188b48447f3ec1fc0"
+    },
+    {
+      "path": "work/maya-controlled-integration/maya-saas-backend/scripts/widgets-mutation-ci.mjs",
+      "sha256": "6360208534be7c3eac79561e6c09f9d03250463096dfdc913ccc11cd4e2f9bfa"
+    }
+  ],
+  "restrictions": "none; canonical whole parts, default steps and full suites",
+  "productChanged": false,
+  "timeoutsChanged": false,
+  "powerSettingsChanged": false
+}

@@ -1,0 +1,12 @@
+{
+  "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+  "controlSource": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+  "harnessSha256": "b899bfc46e9b03ac985b599853259d3e11660c3e271ac31602da440ca1d278d7",
+  "name": "ns1-fresh-counterfactual",
+  "exit": 0,
+  "observedControlExit": 1,
+  "expectedFailures": 9,
+  "totalProbeSteps": 16,
+  "result": "PASS \u2014 fresh pre-fix control fails precisely nine steps; exact candidate passes all sixteen",
+  "seconds": 0.29
+}

@@ -1,0 +1,39 @@
+{
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "scope": "Fresh synthetic/local evidence only; not production evidence or whole-corpus certification",
+  "result": "PASS",
+  "liveEntry": [
+    {
+      "title": "TURN-CANONICAL [HTTP] [E-MINT] ordinary typed, widget typed and native tap persist byte-identical USER content through the same writer",
+      "status": "passed",
+      "durationMs": 518
+    }
+  ],
+  "persistedTurnProof": [
+    {
+      "turnId": "400132fd-f021-4f62-af65-23343165cb32",
+      "conversationId": "4e7f771f-4885-490f-81d5-fe3207071592",
+      "canonicalRows": 1,
+      "bindingAudits": 1,
+      "actualActor": true
+    },
+    {
+      "turnId": "ff19deb1-4615-4031-aa9c-04292cbe0a8b",
+      "conversationId": "4e7f771f-4885-490f-81d5-fe3207071592",
+      "canonicalRows": 1,
+      "bindingAudits": 1,
+      "actualActor": true
+    }
+  ],
+  "sources": [
+    {
+      "path": "receipts/widgets-live-full.json",
+      "sha256": "09875b253460ccfdbd34117956f2cf729182e202617bb9780c5dd92eb1963be1"
+    },
+    {
+      "path": "receipts/canonical-net-turn-observations.json",
+      "sha256": "a791e09e69e62417a3042dacd43ba65176e0bf5a38fed6a8301140e97f1de52f"
+    }
+  ],
+  "boundary": "Persisted turn probe inspects the journal typed turns. Ordinary typed, widget typed and native tap share the writer in the named full-live proof. The personal observation does not itself inspect persisted turn rows."
+}

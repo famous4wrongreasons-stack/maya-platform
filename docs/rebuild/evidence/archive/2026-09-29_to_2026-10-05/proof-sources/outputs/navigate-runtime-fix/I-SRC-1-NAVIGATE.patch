@@ -1,0 +1,493 @@
+From 6a40575cc0dc841a84f42367a45364ff7e626f09 Mon Sep 17 00:00:00 2001
+From: Codex <codex@local>
+Date: Wed, 30 Sep 2026 13:28:30 +0300
+Subject: [PATCH] fix(runtime): resolve accepted NAVIGATE detail into owned
+ fullscreen
+
+Resolve the canonical detail response through the existing shell detail controller without a timeline insertion or history close/reopen. Require explicit server acceptance, matching parent/route/tenant/principal/turn/profile and live integrity. Refuse late outcomes after close, Back, sign-out or another opener. Keep ordinary successor timeline behavior and the carrier visual implementation unchanged.
+
+Add 33 NAVIGATE regression proofs including substituted results, authority refusals, zero timeline pollution, and focus return through Escape, Back and closeDetail. Based on combined candidate 1d519822bb92343f1bf4efdf92cbc4264eace48a; no backend files changed.
+---
+ maya-chat-shell/dist/manifest.json    |  24 ++--
+ maya-chat-shell/src/shell/intents.ts  |  40 +++++-
+ maya-chat-shell/src/shell/ports.ts    |   3 +-
+ maya-chat-shell/src/shell/shell.ts    |  26 ++--
+ maya-chat-shell/test/dom.test.mjs     |  41 +++++-
+ maya-chat-shell/test/intents.test.mjs | 173 +++++++++++++++++++++++++-
+ 6 files changed, 282 insertions(+), 25 deletions(-)
+
+diff --git a/maya-chat-shell/dist/manifest.json b/maya-chat-shell/dist/manifest.json
+index bae60377..3aad669c 100644
+--- a/maya-chat-shell/dist/manifest.json
++++ b/maya-chat-shell/dist/manifest.json
+@@ -110,15 +110,15 @@
+       },
+       {
+         "path": "src/shell/intents.ts",
+-        "sha256": "dcda58fc44c2898763541344999661e5c42094e444594d506aa2b0a9439bd950"
++        "sha256": "2fc9ccdf1ce7c5d6d2775502f2d15cf8bd482cf5654763193e1f85266534b223"
+       },
+       {
+         "path": "src/shell/ports.ts",
+-        "sha256": "9c5346910f28b385edebd1c342f1252af2d145a8d7713465dbce4dd7c661bc7a"
++        "sha256": "27043f647b90845e7dc69e51fbf674ff876732e094af62454bd685b2a6f72b5d"
+       },
+       {
+         "path": "src/shell/shell.ts",
+-        "sha256": "dacbcf81791d77496ff09030ed5ced3b30c2ca2e41d45ca77a27d6280f195fd9"
++        "sha256": "edb383105100f1008bf6bfb779cdc53c941a4bebe70d390245ac526e98facef3"
+       },
+       {
+         "path": "src/shell/view.ts",
+@@ -130,8 +130,8 @@
+       }
+     ]
+   },
+-  "bytes": 441692,
+-  "digest": "90adc07408a82bc19779aee088e21fb7b3d958b83882fb4f46f3f36895c1c00e",
++  "bytes": 444582,
++  "digest": "88436be72d3cd7f537f3dfc50cfc5e0a62df21621fefbb029f135c5ec9643886",
+   "toolchain": {
+     "typescript": "5.9.3",
+     "target": "ES2022",
+@@ -139,8 +139,8 @@
+     "moduleResolution": "Bundler"
+   },
+   "web": {
+-    "digest": "3cae86b6ba23c77979d0c47434a74081851acdfed11dabc9b00c616788e6d111",
+-    "modulePath": "m/3cae86b6ba23c779/",
++    "digest": "ee3b4e564882af58ef930aaedd0ca9313021272e9912125cf4b5b4f6f5dce821",
++    "modulePath": "m/ee3b4e564882af58/",
+     "files": [
+       {
+         "path": "entry/main.js",
+@@ -264,8 +264,8 @@
+       },
+       {
+         "path": "src/shell/intents.js",
+-        "sha256": "7bbc51edb2996c029d02ca2236f606eaad1695ce8ee45f00d49efad8ceb45f74",
+-        "bytes": 19049
++        "sha256": "f322a77e7ed8aa62d3f0adba705fbb47b0ada04f6383078e6ea6f72e869e06bf",
++        "bytes": 21058
+       },
+       {
+         "path": "src/shell/ports.js",
+@@ -274,8 +274,8 @@
+       },
+       {
+         "path": "src/shell/shell.js",
+-        "sha256": "119b2b2b45206a847d15524c59c7259f8699585c46c7afa6f6c4e99e29dcafb6",
+-        "bytes": 7155
++        "sha256": "3d2e36bd76fde493bd148aed74544fd9d9df2c738b4789899fe1e11b1f860bf2",
++        "bytes": 7462
+       },
+       {
+         "path": "src/shell/view.js",
+@@ -303,7 +303,7 @@
+       "bytes": 29125
+     },
+     "index": {
+-      "sha256": "6182516d6fc63c447146e0ac00ca328e5644d5f17eeafe04b65b5f1ee8762700",
++      "sha256": "7a3ba7fa9483eccb0cb3e73b22af226bcb7498e6e9115d3ad846d0214047542b",
+       "bytes": 1344
+     },
+     "assets": [
+diff --git a/maya-chat-shell/src/shell/intents.ts b/maya-chat-shell/src/shell/intents.ts
+index 36a93505..7176da37 100644
+--- a/maya-chat-shell/src/shell/intents.ts
++++ b/maya-chat-shell/src/shell/intents.ts
+@@ -97,7 +97,11 @@ export const createLiveSubmission = (
+       if (sent.failure.reason === 'server_error') return { status: 'server_error' };
+       return { status: 'unexpected_response' };
+     }
+-    if (sent.value.next_envelope !== null) return { status: 'advanced', envelope: sent.value.next_envelope };
++    if (sent.value.next_envelope !== null) return {
++      status: 'advanced',
++      envelope: sent.value.next_envelope,
++      accepted: sent.value.outcome === 'terminate' && sent.value.code === null && sent.value.receipt_outcome === 'ACCEPTED',
++    };
+     if (sent.value.outcome !== 'terminate' || sent.value.receipt_outcome !== 'ACCEPTED') {
+       return { status: 'forbidden' };
+     }
+@@ -477,6 +481,24 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
+     }
+   };
+ 
++  /** Response correlation only; current authority and keyed seals remain the server's checks. */
++  const isBoundDetail = (entry: Entry, intent: WidgetIntent, next: WidgetEnvelope): boolean => {
++    const source = entry.envelope;
++    return intent.effect === 'NAVIGATE' && intent.target?.class === 'detail'
++      && typeof source.tenant_id === 'string' && source.tenant_id.length > 0
++      && typeof source.integrity.principal_proof_hash === 'string' && source.integrity.principal_proof_hash.length > 0
++      && next.tenant_id === source.tenant_id
++      && next.integrity?.principal_proof_hash === source.integrity.principal_proof_hash
++      && typeof next.widget_id === 'string' && next.widget_id.length > 0 && next.widget_id !== source.widget_id
++      && next.correlation?.parent_widget_id === source.widget_id
++      && next.correlation.turn_id === source.correlation.turn_id
++      && next.render?.profile_id === source.render.profile_id
++      && next.render.profile_version === source.render.profile_version
++      && next.presentation?.fullscreen_detail?.route_key === intent.target.ref
++      && verdictOf(source) === 'valid' && verdictOf(next) === 'valid'
++      && LIVE_STATES.has(next.lifecycle.state);
++  };
++
+   const activate = async (itemId: string, ref: InteractiveRefKey): Promise<ActivationOutcome> => {
+     const entry = entries.get(itemId);
+     if (entry === undefined) return { outcome: 'ignored', reason: 'unknown_item' };
+@@ -535,15 +557,29 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
+       outcome = { status: 'unexpected_response' };
+     }
+ 
+-    if (route === 'opens_detail') deps.chrome.closeProgress(entry.itemId);
+     // The item left, or its emission was replaced, while the submission ran: that change is what
+     // the screen shows, and there is nothing left to put a sentence on.
+     if (entries.get(entry.itemId) !== entry || entry.emission !== emission || entry.inflight !== abort) {
++      if (route === 'opens_detail') deps.chrome.closeProgress(entry.itemId);
+       counters = { ...counters, stateChanges: counters.stateChanges + 1 };
+       return { outcome: 'ignored', reason: 'unknown_item' };
+     }
+     entry.inflight = null;
+     entry.pending = null;
++    if (route === 'opens_detail' && outcome.status === 'advanced') {
++      // Only the accepted server-declared detail path resolves PROGRESS into OPEN. Keeping the
++      // same chrome owner preserves its history entry and focus return; ordinary successors
++      // retain the timeline branch below. A substituted or late detail never falls through there.
++      if (outcome.accepted !== true || !isBoundDetail(entry, intent, outcome.envelope)
++        || !deps.chrome.resolveDetail(outcome.envelope, { itemId: entry.itemId, ref }).presented) {
++        deps.chrome.closeProgress(entry.itemId);
++        return endInSentence(entry, 'route_refused', true);
++      }
++      publish(entry);
++      counters = { ...counters, stateChanges: counters.stateChanges + 1 };
++      return { outcome: 'dismissed' };
++    }
++    if (route === 'opens_detail') deps.chrome.closeProgress(entry.itemId);
+     if (outcome.status === 'advanced') {
+       const ingested = ingest(outcome.envelope);
+       if (ingested.ingested === 'duplicate') return endInSentence(entry, 'activation_unavailable', true);
+diff --git a/maya-chat-shell/src/shell/ports.ts b/maya-chat-shell/src/shell/ports.ts
+index 1a996ed3..2cbff647 100644
+--- a/maya-chat-shell/src/shell/ports.ts
++++ b/maya-chat-shell/src/shell/ports.ts
+@@ -167,7 +167,8 @@ export interface SessionPort {
+  * then no receipt shape exists in the shell.
+  */
+ export type SubmissionOutcome =
+-  | { readonly status: 'advanced'; readonly envelope: WidgetEnvelope }
++  // Safe stale successors may still advance the timeline; fullscreen requires an accepted reply.
++  | { readonly status: 'advanced'; readonly envelope: WidgetEnvelope; readonly accepted: boolean }
+   | { readonly status: 'settled'; readonly lines: readonly TerminalLine[] }
+   | { readonly status: 'accepted' }
+   | { readonly status: 'unavailable' }
+diff --git a/maya-chat-shell/src/shell/shell.ts b/maya-chat-shell/src/shell/shell.ts
+index 74e676e1..ad274d0e 100644
+--- a/maya-chat-shell/src/shell/shell.ts
++++ b/maya-chat-shell/src/shell/shell.ts
+@@ -100,6 +100,8 @@ export interface DetailSource {
+ /** What `shell/intents.ts` may do to the chrome. */
+ export interface ShellChrome {
+   openProgress(opener: DetailOpener): void;
++  /** Resolve only this opener's still-pending detail; never reopen dismissed or replaced chrome. */
++  resolveDetail(envelope: WidgetEnvelope, opener: DetailOpener): PresentOutcome;
+   /** Redraw the open detail (an environment change); ignored unless `itemId` is the one open. */
+   updateDetail(itemId: string, result: RenderResult): void;
+   closeDetail(): void;
+@@ -172,6 +174,16 @@ export const createShell = (deps: ShellDeps): ShellController => {
+     }
+   };
+ 
++  const presentDetail = (envelope: WidgetEnvelope, opener: DetailOpener): PresentOutcome => {
++    if (source === null) return { presented: false, reason: 'no_source' };
++    if (opener === null || typeof opener !== 'object' || !source.hasTimelineItem(opener.itemId)) return { presented: false, reason: 'no_opener' };
++    const opened = source.openDetail(envelope, opener);
++    if (opened === null) return { presented: false, reason: 'refused' };
++    ensureHistoryEntry();
++    set(openState(state, opener, opened.itemId, opened.result));
++    return { presented: true, itemId: opened.itemId };
++  };
++
+   const offBack = deps.history.onBack(() => {
+     if (!pushed) return;
+     // The browser already popped the entry; closing must not pop another one.
+@@ -228,14 +240,12 @@ export const createShell = (deps: ShellDeps): ShellController => {
+       const shown = state.fullscreen;
+       if (shown?.phase === 'progress' && shown.itemId === itemId) closeDetail();
+     },
+-    presentDetail(envelope, opener) {
+-      if (source === null) return { presented: false, reason: 'no_source' };
+-      if (opener === null || typeof opener !== 'object' || !source.hasTimelineItem(opener.itemId)) return { presented: false, reason: 'no_opener' };
+-      const opened = source.openDetail(envelope, opener);
+-      if (opened === null) return { presented: false, reason: 'refused' };
+-      ensureHistoryEntry();
+-      set(openState(state, opener, opened.itemId, opened.result));
+-      return { presented: true, itemId: opened.itemId };
++    presentDetail,
++    resolveDetail(envelope, opener) {
++      if (state.fullscreen?.phase !== 'progress' || state.opener?.itemId !== opener.itemId || state.opener.ref !== opener.ref) {
++        return { presented: false, reason: 'no_opener' };
++      }
++      return presentDetail(envelope, opener);
+     },
+     connect(next) {
+       source = next;
+diff --git a/maya-chat-shell/test/dom.test.mjs b/maya-chat-shell/test/dom.test.mjs
+index 387758d8..392da416 100644
+--- a/maya-chat-shell/test/dom.test.mjs
++++ b/maya-chat-shell/test/dom.test.mjs
+@@ -136,7 +136,7 @@ function voiceDouble() {
+ }
+ 
+ /** The page: dom double + real shell runtime + counting network doubles + mountApp. */
+-function page({ signedIn = true, voice = true, chat = null, fragment = '' } = {}) {
++function page({ signedIn = true, voice = true, chat = null, fragment = '', submission = undefined } = {}) {
+   const dom = createDom();
+   const scheduler = createScheduler(NOW);
+   const s = sessionDouble(signedIn ? { signedIn: true, display: DISPLAY } : { signedIn: false, reason: null });
+@@ -155,6 +155,7 @@ function page({ signedIn = true, voice = true, chat = null, fragment = '' } = {}
+   let ids = 0;
+   const runtime = createShellRuntime({
+     transport,
++    submission,
+     session: s.session,
+     render,
+     environment: { a11y: () => A11Y, onA11yChange: () => () => undefined, fragment: () => fragment },
+@@ -1426,3 +1427,41 @@ test('the real shell: NAVIGATE(detail) opens PROGRESS in the dialog, the P1 bind
+   assert.deepEqual([p.history.pushes, p.history.backs], [1, 1], 'Back entry pushed and popped; no address');
+   assert.equal(p.chats.length, 0);
+ });
++
++for (const closing of ['Escape', 'closeDetail', 'Back']) {
++  test(`I-SRC-1 NAVIGATE DOM: accepted detail keeps one dialog; ${closing} returns focus to the original timeline control`, async () => {
++    const source = envelopeOf('kind-schedule');
++    const detail = structuredClone(source);
++    detail.widget_id = '01M2Q9G7M0AAAAAAAAAAAAAAAA';
++    detail.correlation.parent_widget_id = source.widget_id;
++    let reply;
++    const p = page({ voice: false, submission: { submit: () => new Promise((r) => { reply = r; }) } });
++    p.runtime.widgets.ingest(source);
++    p.scheduler.flush();
++    const control = p.dom.find((el) => el.getAttribute('data-ref') === 'intent:i1', p.log());
++    control.focus();
++    p.dom.click(control);
++    p.scheduler.flush();
++    const dialog = p.dom.modal();
++    assert.ok(dialog && dialog.contains(p.dom.active()));
++    reply({ status: 'advanced', envelope: detail, accepted: true });
++    await flush();
++    p.scheduler.flush();
++    assert.equal(p.runtime.shell.view().fullscreen.phase, 'open');
++    assert.equal(p.dom.modal(), dialog, 'PROGRESS resolves inside the same open dialog');
++    assert.ok(dialog.contains(p.dom.active()));
++    assert.equal(p.runtime.conversation.view().items.filter((i) => i.kind === 'widget').length, 1);
++    assert.deepEqual([p.history.pushes, p.history.backs], [1, 0]);
++    if (closing === 'Escape') p.dom.key(p.dom.active(), 'Escape');
++    if (closing === 'closeDetail') p.runtime.widgetPort.closeDetail();
++    if (closing === 'Back') p.history.listener();
++    p.scheduler.flush();
++    assert.equal(p.runtime.shell.view().fullscreen, null);
++    assert.equal(p.dom.modal(), null);
++    const opener = p.dom.find((el) => el.getAttribute('data-ref') === 'intent:i1', p.log());
++    assert.equal(p.dom.active(), opener, 'the ref survives the pending-to-live redraw');
++    assert.equal(p.history.backs, closing === 'Back' ? 0 : 1, 'browser Back must not be popped twice');
++    p.cancel();
++    p.runtime.dispose();
++  });
++}
+diff --git a/maya-chat-shell/test/intents.test.mjs b/maya-chat-shell/test/intents.test.mjs
+index 68a1c8a4..34f4793f 100644
+--- a/maya-chat-shell/test/intents.test.mjs
++++ b/maya-chat-shell/test/intents.test.mjs
+@@ -158,6 +158,7 @@ test('FBE2E-1: live submission uses only widget intent/resolve and returns the a
+   assert.deepEqual(await port.submit(submission, new AbortController().signal), {
+     status: 'advanced',
+     envelope: successor,
++    accepted: false,
+   });
+   assert.deepEqual(calls, [['intent', submission]]);
+ 
+@@ -215,7 +216,7 @@ test('FBE2E-1: a drawn selector can submit only one server-declared option/ref v
+ 
+ test('FBE2E-1/3: successor replaces the selector and only a server terminal receipt enters conversation', async () => {
+   const successor = envelope('slots-superseded-successor');
+-  const advanced = setup({ submission: { submit: async () => ({ status: 'advanced', envelope: successor }) } });
++  const advanced = setup({ submission: { submit: async () => ({ status: 'advanced', envelope: successor, accepted: false }) } });
+   const predecessor = advanced.runtime.widgets.ingest(
+     reseal({ ...structuredClone(envelope('slots-superseded-predecessor')), lifecycle: { ...envelope('slots-superseded-predecessor').lifecycle, state: 'LIVE' } }),
+   );
+@@ -725,3 +726,173 @@ test('I-SRC-1 — the fix did not make a schema-bearing intent accept an entry r
+   assert.equal(outcome.outcome, 'sentence');
+   assert.equal(s.submissions.length, 0, 'a value-bearing schema still refuses an entry ref');
+ });
++
++// I-SRC-1: accepted NAVIGATE detail is a fullscreen result, never a timeline successor.
++const detailPair = () => {
++  const source = envelope('kind-schedule');
++  const detail = structuredClone(source);
++  detail.widget_id = '01M2Q9G7M0AAAAAAAAAAAAAAAA';
++  detail.correlation.parent_widget_id = source.widget_id;
++  return { source, detail: reseal(detail) };
++};
++
++test('I-SRC-1 NAVIGATE: live fs.calendar response resolves PROGRESS to fullscreen, without a timeline insertion or history bounce', async () => {
++  const { source, detail } = detailPair();
++  let reply;
++  let calls = 0;
++  const s = setup({ submission: createLiveSubmission({
++    widgetIntent: async () => { calls += 1; return new Promise((resolve) => { reply = resolve; }); },
++    resolveWidgets: async () => { throw new Error('detail must not query terminal receipts'); },
++  }) });
++  const { itemId } = s.runtime.widgets.ingest(source);
++  const before = s.items().map((item) => item.id);
++  const heldBefore = s.runtime.widgets.heldTokens();
++  const phases = [];
++  s.runtime.shell.subscribe((v) => phases.push(v.fullscreen?.phase ?? null));
++  const running = s.runtime.widgets.activate(itemId, 'intent:i1');
++  assert.equal(s.runtime.shell.view().fullscreen.phase, 'progress');
++  reply({ ok: true, value: { outcome: 'terminate', code: null, next_envelope: detail, receipt_outcome: 'ACCEPTED' } });
++  assert.deepEqual(await running, { outcome: 'dismissed' });
++  assert.equal(calls, 1);
++  const open = s.runtime.shell.view().fullscreen;
++  assert.equal(open.phase, 'open');
++  assert.equal(open.result.density, 'SHEET');
++  assert.deepEqual(s.items().map((item) => item.id), before, 'detail adds zero timeline items');
++  assert.equal(s.item(itemId).display, 'live', 'the opener stops being pending');
++  assert.equal(s.item(itemId).pending, null);
++  assert.deepEqual(phases, ['progress', 'open'], 'PROGRESS resolves, never closes/reopens history');
++  assert.deepEqual(s.runtime.shell.state().opener, { itemId, ref: 'intent:i1' }, 'same focus return owner');
++  assert.equal(s.history.pushes, 1);
++  assert.equal(s.history.backs, 0);
++  s.runtime.widgetPort.closeDetail();
++  assert.equal(s.runtime.shell.view().fullscreen, null);
++  assert.equal(s.runtime.widgets.heldTokens(), heldBefore, 'only detail tokens are released');
++  assert.deepEqual(phases, ['progress', 'open', null]);
++  assert.equal(s.history.backs, 1);
++  s.runtime.widgetPort.closeDetail();
++  assert.equal(s.history.backs, 1, 'close remains idempotent');
++  s.runtime.dispose();
++});
++
++for (const [name, mutate] of [
++  ['undeclared route', (s) => { s.presentation.fullscreen_detail = null; }],
++  ['forged route', (s) => { s.intents[0].target.ref = 'fs.booking'; }],
++  ['unknown route', (s) => { s.intents[0].target.ref = 'fs.unknown'; s.presentation.fullscreen_detail.route_key = 'fs.unknown'; }],
++]) test(`I-SRC-1 NAVIGATE: ${name} is route_refused before transport`, async () => {
++  const { source, detail } = detailPair();
++  mutate(source);
++  let calls = 0;
++  const s = setup({ submission: { submit: async () => { calls += 1; return { status: 'advanced', envelope: detail, accepted: true }; } } });
++  const { itemId } = s.runtime.widgets.ingest(reseal(source));
++  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'sentence', sentence: 'route_refused', submitted: false });
++  assert.equal(calls, 0);
++  assert.equal(s.runtime.shell.view().fullscreen, null);
++  assert.equal(s.items().length, 1);
++  s.runtime.dispose();
++});
++
++for (const [name, mutate, seal = true] of [
++  ['substituted parent', (d) => { d.correlation.parent_widget_id = 'unrelated-widget'; }],
++  ['missing parent', (d) => { d.correlation.parent_widget_id = null; }],
++  ['same widget', (d, s) => { d.widget_id = s.widget_id; }],
++  ['wrong tenant', (d) => { d.tenant_id = 'other-tenant'; }],
++  ['wrong principal', (d) => { d.integrity.principal_proof_hash = 'a'.repeat(64); }],
++  ['wrong turn', (d) => { d.correlation.turn_id = 'other-turn'; }],
++  ['wrong profile', (d) => { d.render.profile_id = 'other-profile'; }],
++  ['wrong profile version', (d) => { d.render.profile_version += 1; }],
++  ['substituted route', (d) => { d.presentation.fullscreen_detail.route_key = 'fs.booking'; }],
++  ['missing returned route', (d) => { d.presentation.fullscreen_detail = null; }],
++  ['tampered detail', (d) => { d.presentation.text_equivalent.headline = 'Substituted body'; }, false],
++  ['expired detail', (d) => { d.lifecycle.expires_at = INDEX.now; }],
++  ['terminal detail', (d) => { d.lifecycle.state = 'CONSUMED'; }],
++]) test(`I-SRC-1 NAVIGATE: ${name} is refused without fullscreen or timeline pollution`, async () => {
++  const { source, detail } = detailPair();
++  mutate(detail, source);
++  if (seal) reseal(detail);
++  const s = setup({ submission: { submit: async () => ({ status: 'advanced', envelope: detail, accepted: true }) } });
++  const { itemId } = s.runtime.widgets.ingest(source);
++  const heldBefore = s.runtime.widgets.heldTokens();
++  const phases = [];
++  s.runtime.shell.subscribe((v) => phases.push(v.fullscreen?.phase ?? null));
++  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'sentence', sentence: 'route_refused', submitted: true });
++  assert.deepEqual(phases, ['progress', null]);
++  assert.equal(s.runtime.shell.view().fullscreen, null);
++  assert.equal(s.items().length, 1);
++  assert.equal(s.runtime.widgets.heldTokens(), heldBefore, 'refused response never enters the vault');
++  assert.equal(s.item(itemId).pending, null);
++  s.runtime.dispose();
++});
++
++for (const code of ['widget_principal_mismatch', 'tenant_mismatch']) {
++  test(`I-SRC-1 NAVIGATE: canonical server ${code} refusal never opens a detail`, async () => {
++    const { source } = detailPair();
++    const s = setup({ submission: createLiveSubmission({
++      widgetIntent: async () => ({ ok: true, value: { outcome: 'terminate', code, next_envelope: null, receipt_outcome: 'REFUSED' } }),
++      resolveWidgets: async () => { throw new Error('refusal must not resolve a body'); },
++    }) });
++    const { itemId } = s.runtime.widgets.ingest(source);
++    assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'sentence', sentence: 'activation_forbidden', submitted: true });
++    assert.equal(s.runtime.shell.view().fullscreen, null);
++    assert.equal(s.items().length, 1);
++    s.runtime.dispose();
++  });
++}
++
++for (const action of ['close', 'back', 'navigate', 'sign-out', 'another-detail']) {
++  test(`I-SRC-1 NAVIGATE: ${action} while pending prevents a late response from taking chrome ownership`, async () => {
++    const { source, detail } = detailPair();
++    let reply;
++    const s = setup({ submission: { submit: () => new Promise((r) => { reply = r; }) } });
++    const { itemId } = s.runtime.widgets.ingest(source);
++    const running = s.runtime.widgets.activate(itemId, 'intent:i1');
++    if (action === 'close') s.runtime.widgetPort.closeDetail();
++    if (action === 'back') s.history.onBack();
++    if (action === 'navigate') s.runtime.shell.navigate('shell.privacy');
++    if (action === 'sign-out') s.signOut();
++    if (action === 'another-detail') {
++      const other = envelope('kind-report');
++      const otherItem = s.runtime.widgets.ingest(other);
++      s.runtime.shell.openProgress({ itemId: otherItem.itemId, ref: 'intent:i1' });
++    }
++    const before = s.runtime.shell.view().fullscreen;
++    const beforeIds = s.items().map((item) => item.id);
++    reply({ status: 'advanced', envelope: detail, accepted: true });
++    await running;
++    assert.deepEqual(s.runtime.shell.view().fullscreen, before, 'late response cannot reopen or replace the current chrome');
++    assert.deepEqual(s.items().map((item) => item.id), beforeIds, 'no fallback to timeline');
++    s.runtime.dispose();
++  });
++}
++
++test('I-SRC-1 NAVIGATE: ordinary non-detail advanced response keeps timeline semantics even with fs.calendar in its payload', async () => {
++  const { source, detail } = detailPair();
++  source.intents[0].effect = 'REFINE';
++  source.intents[0].target = null;
++  reseal(source);
++  const s = setup({ submission: { submit: async () => ({ status: 'advanced', envelope: detail, accepted: true }) } });
++  const { itemId } = s.runtime.widgets.ingest(source);
++  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'dismissed' });
++  assert.equal(s.runtime.shell.view().fullscreen, null);
++  assert.equal(s.items().length, 2, 'ordinary successor still appends');
++  assert.equal(s.history.pushes, 0, 'payload kind/route alone never opens fullscreen');
++  s.runtime.dispose();
++});
++
++for (const [name, outcome, code, receipt_outcome] of [
++  ['refused principal even with an attached envelope', 'refuse', 'widget_principal_mismatch', 'REFUSED'],
++  ['refused tenant even with an attached envelope', 'terminate', 'tenant_mismatch', 'REFUSED'],
++  ['missing acceptance', 'terminate', null, null],
++  ['verification required', 'terminate', null, 'NEEDS_VERIFICATION'],
++  ['expired successor', 'expired', null, 'ACCEPTED'],
++]) test(`I-SRC-1 NAVIGATE: ${name} cannot open fullscreen`, async () => {
++  const { source, detail } = detailPair();
++  const s = setup({ submission: createLiveSubmission({
++    widgetIntent: async () => ({ ok: true, value: { outcome, code, next_envelope: detail, receipt_outcome } }),
++    resolveWidgets: async () => { throw new Error('successor must not query receipts'); },
++  }) });
++  const { itemId } = s.runtime.widgets.ingest(source);
++  assert.deepEqual(await s.runtime.widgets.activate(itemId, 'intent:i1'), { outcome: 'sentence', sentence: 'route_refused', submitted: true });
++  assert.equal(s.runtime.shell.view().fullscreen, null);
++  assert.equal(s.items().length, 1);
++  s.runtime.dispose();
++});
+-- 
+2.50.1 (Apple Git-155)
+

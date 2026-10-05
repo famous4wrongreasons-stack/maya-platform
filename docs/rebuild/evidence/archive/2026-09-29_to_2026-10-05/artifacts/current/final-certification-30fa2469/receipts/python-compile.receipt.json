@@ -1,0 +1,13 @@
+{
+  "candidate": "30fa24698f3ae277c22209e8edfd448c29e4f872",
+  "name": "python-compile",
+  "command": [
+    "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/wave1-closure-20260919/python-venv/bin/python",
+    "-m",
+    "compileall",
+    "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "exit": 0,
+  "seconds": 0.06
+}

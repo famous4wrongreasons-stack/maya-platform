@@ -1,0 +1,1212 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gate6.json": "af34de6a5cb8ceb9bc6f4a5fb9f3a5f8595cfc690061be5d3d9ad342fc6624e9"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T16:49:42.828Z",
+  "batteries": [
+    "gate6.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-41a1587482",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-41a1587482",
+  "neutraliser_controls": {
+    "6-part-3-of-4:N6-FLOOR|live": {
+      "set": "N6-FLOOR",
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 1
+      },
+      "failed": [
+        "E1 — production-triggered evidence records E1-G6-TOOL [HTTP] [E-TAMPER:capabilitySpace=TOOL] stays fail-closed while N6-FLOOR exposes the independent Gate 6 refusal"
+      ],
+      "problems": []
+    },
+    "6-part-4-of-4:N6-FLOOR|live": {
+      "set": "N6-FLOOR",
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 1
+      },
+      "failed": [
+        "E1 — production-triggered evidence records E1-G6-TOOL [HTTP] [E-TAMPER:capabilitySpace=TOOL] stays fail-closed while N6-FLOOR exposes the independent Gate 6 refusal"
+      ],
+      "problems": []
+    }
+  },
+  "baseline_controls": {
+    "6-part-1-of-4:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "6-part-1-of-4:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "6-part-2-of-4:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "6-part-2-of-4:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "6-part-3-of-4:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "6-part-3-of-4:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "6-part-4-of-4:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "6-part-4-of-4:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gate6.json",
+      "id": "M1",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "S-4"
+      ],
+      "kills": [
+        {
+          "killer": "S-4",
+          "test": "Gate 6 source fences — slot 6 is what the gateway array says it is S-4: the subject is bound exactly once, and no ref column is read beside the binding (G6-1)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M2",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "P-HANDOFF-A22"
+      ],
+      "kills": [
+        {
+          "killer": "P-HANDOFF-A22",
+          "test": "Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736-4798) [GW] the block, branch by branch, on the real pipeline P-HANDOFF-A22 / P-HANDOFF-BI / P-HANDOFF-NOEXEC / P-HANDOFF-SCHEDULE-UPDATE [GW]: a reachable HANDOFF resolves the destination fences ONLY (G6-6, G6-7)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M3",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "N-HANDOFF-SENS-C9"
+      ],
+      "kills": [
+        {
+          "killer": "N-HANDOFF-SENS-C9",
+          "test": "Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736-4798) [GW] the block, branch by branch, on the real pipeline N-HANDOFF-SENS-C9 / N-HANDOFF-SENS-C9b [GW]: a SENSITIVE destination admits a class-`s` target and nothing else (R3.5.1 at Gate 6, F48)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M4a",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "N-HANDOFF-SENS-C9"
+      ],
+      "kills": [
+        {
+          "killer": "N-HANDOFF-SENS-C9",
+          "test": "Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736-4798) [GW] the block, branch by branch, on the real pipeline N-HANDOFF-SENS-C9 / N-HANDOFF-SENS-C9b [GW]: a SENSITIVE destination admits a class-`s` target and nothing else (R3.5.1 at Gate 6, F48)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M4b",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "F48"
+      ],
+      "kills": [
+        {
+          "killer": "F48",
+          "test": "Gate 6 — HANDOFF resolves the DESTINATION fences only (G6-6, G6-7) F48: a SENSITIVE destination admits a class-`s` target and nothing else (R3.5.1 at Gate 6)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M5",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "N-HANDOFF-SENS-C9",
+        "P-HANDOFF-W-NONSENS"
+      ],
+      "kills": [
+        {
+          "killer": "N-HANDOFF-SENS-C9",
+          "test": "Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736-4798) [GW] the block, branch by branch, on the real pipeline N-HANDOFF-SENS-C9 / N-HANDOFF-SENS-C9b [GW]: a SENSITIVE destination admits a class-`s` target and nothing else (R3.5.1 at Gate 6, F48)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "P-HANDOFF-W-NONSENS",
+          "test": "Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736-4798) [GW] the block, branch by branch, on the real pipeline P-HANDOFF-W-NONSENS [GW]: a NON-sensitive destination is admitted at a `w` target — F48 constrains the class only where the destination is sensitive",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 2
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M8b",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "N-HANDOFF-UNREG-CONTROL"
+      ],
+      "kills": [
+        {
+          "killer": "N-HANDOFF-UNREG-CONTROL",
+          "test": "Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736-4798) [GW] the block, branch by branch, on the real pipeline N-HANDOFF-UNREG-CONTROL [GW]: an unregistered CONTROL destination is Gate 6’s first refusal, because FLOOR_EXEMPT waived Gate 5",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M10",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "N-C9-DOMAIN",
+        "P-C9-9-RUN"
+      ],
+      "kills": [
+        {
+          "killer": "N-C9-DOMAIN",
+          "test": "Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736-4798) [GW] the block, branch by branch, on the real pipeline N-C9-DOMAIN / N-OWNER-THROW-C9 [GW]: a domain the key is not registered for refuses, and the RAISE is the refusal (G6-20, C11:4779-4781)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "P-C9-9-RUN",
+          "test": "Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736-4798) [GW] the block, branch by branch, on the real pipeline P-C9-9-RUN [GW]: with `c9_domain` non-null `c9Capability` IS called, with the record’s domain and the registry hash (G6-16)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 2
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M11",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "N-C9-DOMAIN"
+      ],
+      "kills": [
+        {
+          "killer": "N-C9-DOMAIN",
+          "test": "Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736-4798) [GW] the block, branch by branch, on the real pipeline N-C9-DOMAIN / N-OWNER-THROW-C9 [GW]: a domain the key is not registered for refuses, and the RAISE is the refusal (G6-20, C11:4779-4781)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M13",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "N-C9-DOMAIN"
+      ],
+      "kills": [
+        {
+          "killer": "N-C9-DOMAIN",
+          "test": "Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736-4798) [GW] the block, branch by branch, on the real pipeline N-C9-DOMAIN / N-OWNER-THROW-C9 [GW]: a domain the key is not registered for refuses, and the RAISE is the refusal (G6-20, C11:4779-4781)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M15",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "N-C9-DOMAIN"
+      ],
+      "kills": [
+        {
+          "killer": "N-C9-DOMAIN",
+          "test": "Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736-4798) [GW] the block, branch by branch, on the real pipeline N-C9-DOMAIN / N-OWNER-THROW-C9 [GW]: a domain the key is not registered for refuses, and the RAISE is the refusal (G6-20, C11:4779-4781)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M16b",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "S-A"
+      ],
+      "kills": [
+        {
+          "killer": "S-A",
+          "test": "Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB before P-DISCHARGE, D-4) S-A: (a) a registered key with no `AE_WIDGET_COMMIT_ALLOWLIST` row refuses — MONEY included, which is why the `MONEY && !isAllowlisted` check could go",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M17b",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "pending",
+      "status": "pending",
+      "killedBy": [],
+      "kills": [],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {},
+      "exits": {
+        "plain": {
+          "live": 0
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M18b",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "pending",
+      "status": "pending",
+      "killedBy": [],
+      "kills": [],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {},
+      "exits": {
+        "plain": {
+          "live": 0
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M19b",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [
+        "N6-FLOOR"
+      ],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "S-TOOL"
+      ],
+      "kills": [
+        {
+          "killer": "S-TOOL",
+          "test": "Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736-4798) [GW] the block, branch by branch, on the real pipeline S-TOOL [GW]: a TOOL-spaced subject stops at slot 5 (Gate 5 shadows it) or at slot 6, never past 6, and at 6 it is the TOOL refusal",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": "N6-FLOOR",
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "N6-FLOOR": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M20b",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [
+        "N6-FLOOR"
+      ],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "S-REG"
+      ],
+      "kills": [
+        {
+          "killer": "S-REG",
+          "test": "Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736-4798) [GW] the block, branch by branch, on the real pipeline S-REG [GW]: an unregistered C9 key stops at slot 5 or at slot 6, never past 6, and at 6 it is the REGISTRY refusal and not the policy-row one",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": "N6-FLOOR",
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "N6-FLOOR": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M21",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G6-6-REG"
+      ],
+      "kills": [
+        {
+          "killer": "G6-6-REG",
+          "test": "Gate 6 — HANDOFF resolves the DESTINATION fences only (G6-6, G6-7) G6-6-REG: an unregistered destination is refused in every space",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M23",
+      "files": [
+        "src/widgets/owner-ports/gate6.owners.provider.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "S-SURFACE"
+      ],
+      "kills": [
+        {
+          "killer": "S-SURFACE",
+          "test": "Gate 6 source fences — slot 6 is what the gateway array says it is S-SURFACE: the catalogue surface is the literal `web`, stated once (C11:4762)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M25",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "S-TX"
+      ],
+      "kills": [
+        {
+          "killer": "S-TX",
+          "test": "Gate 6 source fences — slot 6 is what the gateway array says it is S-TX: the only role input to slot 6 is the live principal — `ctx.actor` is not read at all (D-9, B-02)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M28",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "P-NAV-SOURCE"
+      ],
+      "kills": [
+        {
+          "killer": "P-NAV-SOURCE",
+          "test": "Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736-4798) [GW] the block, branch by branch, on the real pipeline P-NAV-SOURCE [GW]: detail/w use sealed source evidence and recheck current authority",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M6",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "N-D1"
+      ],
+      "kills": [
+        {
+          "killer": "N-D1",
+          "test": "Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB before P-DISCHARGE, D-4) N-D1: (d) refuses a role outside the canonical policy before asking entitlements",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M7",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "N-AE-NOPRINCIPAL"
+      ],
+      "kills": [
+        {
+          "killer": "N-AE-NOPRINCIPAL",
+          "test": "Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB before P-DISCHARGE, D-4) N-AE-NOPRINCIPAL [RI]: (d) refuses without the in-T role and admits only after (e)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M8a",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "N-E"
+      ],
+      "kills": [
+        {
+          "killer": "N-E",
+          "test": "Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB before P-DISCHARGE, D-4) N-E: (e) refuses when the canonical feature conjunction is not granted",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M9",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "P-F78"
+      ],
+      "kills": [
+        {
+          "killer": "P-F78",
+          "test": "Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB before P-DISCHARGE, D-4) P-F78 / P-AE: an admitted role plus every canonical required feature passes",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M12",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G6-14"
+      ],
+      "kills": [
+        {
+          "killer": "G6-14",
+          "test": "Gate 6 — the C9 branch (C11:4760-4769) G6-14: C20 uses the live principal and the canonical owner admission",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M14",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "N-OWNER-THROW-E"
+      ],
+      "kills": [
+        {
+          "killer": "N-OWNER-THROW-E",
+          "test": "Gate 6 — a raise IS the refusal (G6-20, C11:4779-4781) N-OWNER-THROW-E: a catalogue owner raise is the refusal",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T17:43:49.475Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 4,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

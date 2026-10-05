@@ -1,0 +1,17 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "name": "isolated-structural-schema",
+  "exit": 0,
+  "command": [
+    "npx",
+    "prisma",
+    "migrate",
+    "diff",
+    "--from-config-datasource",
+    "--to-schema",
+    "prisma/schema.prisma",
+    "--exit-code"
+  ],
+  "seconds": 0.72,
+  "scope": "guarded isolated replay DB; no production connection or real effects"
+}

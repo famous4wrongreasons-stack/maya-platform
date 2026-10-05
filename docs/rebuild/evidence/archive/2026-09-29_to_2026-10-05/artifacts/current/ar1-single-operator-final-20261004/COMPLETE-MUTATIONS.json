@@ -1,0 +1,870 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "status": "PASS",
+  "parts": 68,
+  "batteries": 47,
+  "declarations": 545,
+  "applicableKills": 542,
+  "counts": {
+    "build-killed": 359,
+    "equivalent": 1,
+    "live-killed": 183,
+    "pending": 2
+  },
+  "existingNonKillDeclarations": [
+    {
+      "battery": "gate10.json",
+      "id": "M10-5",
+      "status": "equivalent",
+      "reason": "RI-killed / equivalent on conformant input: row 1 exact subject agreement precedes effect comparison, so changing a matched record's effect while retaining the exact subject cannot alter the outcome table"
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M17b",
+      "status": "pending",
+      "reason": null
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M18b",
+      "status": "pending",
+      "reason": null
+    }
+  ],
+  "restrictions": null,
+  "baselineRed": [],
+  "mismatches": 0,
+  "reports": [
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-1-5.json",
+      "sha256": "db0f778ddc2b36b1c37bfaac439e0c19d19995101275c750d3df3da5ab91466f",
+      "declarations": 4,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-10.json",
+      "sha256": "efaed82042b944a18349e8cc419b8dbdc178cb6f6521f2b8e3ad2541173eb27b",
+      "declarations": 21,
+      "baselineControls": 4
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-10a.json",
+      "sha256": "f3717a8b393489173ae9ef862c9a801b4895a587e540f7e8c72717b6163bc239",
+      "declarations": 5,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-11.json",
+      "sha256": "b269e10e9380e3b03ce35ee78bd66bb8777441403363625d4c7d09cf5fb9f246",
+      "declarations": 7,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-12.json",
+      "sha256": "88744328113fdde60311b459c407cdb22e56bd8aaa831575ce57afa533afd5d3",
+      "declarations": 5,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-12b.json",
+      "sha256": "4956d354b0e390fde6d9641ce40b124e86fa80a733966987a3de4479fb513764",
+      "declarations": 13,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-12k.json",
+      "sha256": "ab7b533a5005c7f09107c3e73c5a50300d21825de3d9911dfb185b11b498c0dd",
+      "declarations": 3,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-13.json",
+      "sha256": "ddd19832b216ea74c5a16bb44d1c8f8fd43d76c53e8ba1bcac685efb87ae7b48",
+      "declarations": 25,
+      "baselineControls": 6
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-4.json",
+      "sha256": "2a041e0fb7e6c86bce39a6d933e7f276754985d4aa24ce5fd0ed54526c3a804d",
+      "declarations": 4,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-6.json",
+      "sha256": "08d4b97784bbb3dc8936277a65c15a3e1841abc0ff1243e8d8808a584f20a3b8",
+      "declarations": 26,
+      "baselineControls": 8
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-7.json",
+      "sha256": "2036e3f6f5455798637233b838ca75a8d35a512b5ab89ae1ef4e5e676e3e94f0",
+      "declarations": 38,
+      "baselineControls": 8
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-8.json",
+      "sha256": "322ff68321c4df04239e14dddf8e97654b55ad874e305e1d40a3b0484dff92a7",
+      "declarations": 10,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-8c.json",
+      "sha256": "c35f4bcf31d6e129f3fcdb3dfdef35290b21f2b088f3ec2943cd14e5a6703139",
+      "declarations": 8,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-8r.json",
+      "sha256": "acfa188428768981bbca720f45623bcacf347e76ca83f137f0a47351076142d9",
+      "declarations": 29,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-9.json",
+      "sha256": "a851621815117abe1714e908e596fac3b9afa84e3cb28c11bf3ca50b780773c4",
+      "declarations": 35,
+      "baselineControls": 7
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-9a.json",
+      "sha256": "3a84e98aa4b3e614469fcc296f87d320d7a6a54c89bd245e634bea950059d54a",
+      "declarations": 2,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-AB.json",
+      "sha256": "1f4f5e073815439fb26733f5178bed6dee3b5f73a2d5975f5249eac49880cf81",
+      "declarations": 2,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-AR.json",
+      "sha256": "ec733cbc2a88a856c6457673171be67369844a326b781cef7068686f698d0bce",
+      "declarations": 19,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-BS.json",
+      "sha256": "47cee88aac147be35a5a91e95caf1ecb3407d12c95a36ec67ee57b66eb76da4f",
+      "declarations": 5,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-D8.json",
+      "sha256": "e6f93b6d8f52d4e91c2670cf94f94136d5daae31d6a92b50be10ddfbdfdd9682",
+      "declarations": 5,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-FB.json",
+      "sha256": "592dc2777ac85c5ec17d3695215d6343d78001b44a3f776341dafdb9f17b25f9",
+      "declarations": 15,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-H-harness.json",
+      "sha256": "fc486caa978a3481ef6fcafcda86784d5c6c8c637b93ddfbb032588f1c521741",
+      "declarations": 26,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-NS.json",
+      "sha256": "16186d37081b43ed1de2ff32fbe4cab2f04a5454558ad1382f2bf686cd558ea2",
+      "declarations": 5,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-allowlist.json",
+      "sha256": "c63d4e2799a7fc675c0079b0962fd488669ce266bbfb2524032772ab78c94378",
+      "declarations": 3,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-discharge.json",
+      "sha256": "f3fef531c6ee7e4e6d20533f11afe211f210ee8cf25d32e11d7785a6dd55aece",
+      "declarations": 9,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-f88.json",
+      "sha256": "62e5676f2bb39e2c4d3eb11e30984f5a84531ad8fdaeaa04c4d49d38decd272d",
+      "declarations": 14,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-g15b.json",
+      "sha256": "584bb6af07f3285b3bdeff9dffc1b97c43a64ef34b30d2c4533614cb6a873c31",
+      "declarations": 8,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-handle.json",
+      "sha256": "2dd7386d909a40c76f62b083c77274c8641173785be6a8cfc1cecd859e053a4e",
+      "declarations": 3,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-ledger.json",
+      "sha256": "ac667413c2485ef19a6f539e53d14d5822ab083819479103731d0607297366e4",
+      "declarations": 9,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-mint.json",
+      "sha256": "2baf1ed1ed1635d136f33e1b357bf9e17ecca6e7693ff2ddc10b4b74b8334df4",
+      "declarations": 20,
+      "baselineControls": 6
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-mt3.json",
+      "sha256": "e8ff13ad0a96621e7fd823c349d0f23458e261e1bd14eabbbd21362793f135cc",
+      "declarations": 7,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-pairing.json",
+      "sha256": "56b7f857820651f64924e89ae6b02a61ff0fefe71371992c05a966e37efa4f81",
+      "declarations": 6,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-principal.json",
+      "sha256": "b732b20fd44dc2cf90d6baaf515ccbb48882af711710c6701680b0f46524f936",
+      "declarations": 12,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-render.json",
+      "sha256": "0274bb6802f315113a6a2badc6b5046b5672bdfc1c2cf823bbe3edb57f69e726",
+      "declarations": 8,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-rt6.json",
+      "sha256": "08f1d60483353cf6ea4840d47620d70752a8714cf24687696f4c13d9b26ee8da",
+      "declarations": 7,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-seal.json",
+      "sha256": "69966220888a2048961da8f671b6c49044efd1769fa717f98e469fa4dcf383d4",
+      "declarations": 6,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-PI-contract.json",
+      "sha256": "27e3640c86306624148651585dfd1a033ad8e7e23e8d0acf234d42b94ec2e346",
+      "declarations": 16,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-PI.json",
+      "sha256": "30d4e66dc93f3d4e716053f12676aa5ac1052aaa245338f96ba407d39673dfed",
+      "declarations": 6,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-PU.json",
+      "sha256": "5c429ae2f6f3ba44712de5ae413ab926feec5d61df470a8ed6a31aeef0eaa2ad",
+      "declarations": 12,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-SB1.json",
+      "sha256": "ea98ef6744ae81591862d575488a87dbeac3c9409017e6b9c1bdeb8a5cec81ef",
+      "declarations": 10,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-SBV.json",
+      "sha256": "28a84dd929089e523d637f2b23acfd1e592efd3b105c631db2e36dcb0b9c577e",
+      "declarations": 8,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-SO.json",
+      "sha256": "2bac6fc1ea649471a041ba4337c86844d1d56f44e838810af741f445c2951636",
+      "declarations": 9,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-SV2.json",
+      "sha256": "b5410cff32859cb72f51e970e6f2e20ca4d451fb584c06cf0d7f66d0d97f64ff",
+      "declarations": 13,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-T-tables.json",
+      "sha256": "1d94b5bb6356377ef5cd864db7122ecb5559957c458f20ba9f683558d0daac05",
+      "declarations": 7,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-TURN.json",
+      "sha256": "d7e99937aa835cc071c49f7a0296f8d95e62d2e2c630b6bb1708ad84a9f0b3b4",
+      "declarations": 14,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-WF.json",
+      "sha256": "ea0888ba48ec953c88e9bd805e71edf60b9c20e4368dc2fc8c02a2265a618fcb",
+      "declarations": 3,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+      "sha256": "286c95aaf5f52d94df4770bded4b3ed1c7965c076026d32da9d566eb86ed8a3f",
+      "declarations": 23,
+      "baselineControls": 6
+    }
+  ],
+  "localJobTimings": [
+    {
+      "slot": "4",
+      "gate": "4",
+      "partition": "",
+      "seconds": 1784.94,
+      "localMarginTo180Minutes": 9015.06,
+      "receiptSha256": "5651bf54fafb2f9a50b36486fb753695969644d00cecbfa8ae6947152aac11eb"
+    },
+    {
+      "slot": "6-part-1-of-4",
+      "gate": "6",
+      "partition": "1/4",
+      "seconds": 2981.8,
+      "localMarginTo180Minutes": 7818.2,
+      "receiptSha256": "1e15ad6f8ace7c1b1f83ffc3c7538d923024ddb2cb67db33399b34a26da3c375"
+    },
+    {
+      "slot": "6-part-2-of-4",
+      "gate": "6",
+      "partition": "2/4",
+      "seconds": 2319.21,
+      "localMarginTo180Minutes": 8480.79,
+      "receiptSha256": "6c05d89470a3cc2f71954816a30324468206a5e553479b112493220485c007e6"
+    },
+    {
+      "slot": "6-part-3-of-4",
+      "gate": "6",
+      "partition": "3/4",
+      "seconds": 1990.2,
+      "localMarginTo180Minutes": 8809.8,
+      "receiptSha256": "7c768f97e6b43607617c6236fb29bf84a9c788150496e6b87a0b9547307928ff"
+    },
+    {
+      "slot": "6-part-4-of-4",
+      "gate": "6",
+      "partition": "4/4",
+      "seconds": 2016.1,
+      "localMarginTo180Minutes": 8783.9,
+      "receiptSha256": "fa58a3ae728a7a058321e0d7c5b9610ab682675bf53572131e695e42e2449102"
+    },
+    {
+      "slot": "7-part-1-of-4",
+      "gate": "7",
+      "partition": "1/4",
+      "seconds": 4335.3,
+      "localMarginTo180Minutes": 6464.7,
+      "receiptSha256": "b4e3829dfe4441acad59eeb4812a695ff28d2b8080db85e1e63a5b70564f7f61"
+    },
+    {
+      "slot": "7-part-2-of-4",
+      "gate": "7",
+      "partition": "2/4",
+      "seconds": 4303.81,
+      "localMarginTo180Minutes": 6496.19,
+      "receiptSha256": "680690a2ce37251681d28e4a260456d44346a1ba644140f00f1e395ab8a846d2"
+    },
+    {
+      "slot": "7-part-3-of-4",
+      "gate": "7",
+      "partition": "3/4",
+      "seconds": 3882.45,
+      "localMarginTo180Minutes": 6917.55,
+      "receiptSha256": "c8b1eeec2cddd35211f866bc94dfb7e2bcf51b3a0267cfa4aa1d25c0d5176cd4"
+    },
+    {
+      "slot": "7-part-4-of-4",
+      "gate": "7",
+      "partition": "4/4",
+      "seconds": 3866.03,
+      "localMarginTo180Minutes": 6933.969999999999,
+      "receiptSha256": "801807ae89ab8e81587811e583c551c889134307565645a0472c9b157898c283"
+    },
+    {
+      "slot": "8",
+      "gate": "8",
+      "partition": "",
+      "seconds": 1264.15,
+      "localMarginTo180Minutes": 9535.85,
+      "receiptSha256": "55ea938f2f373820173a1481e6b1e5053690f29670c8d7e8a751782ffa914eb1"
+    },
+    {
+      "slot": "9-part-1-of-4",
+      "gate": "9",
+      "partition": "1/4",
+      "seconds": 4492.2,
+      "localMarginTo180Minutes": 6307.8,
+      "receiptSha256": "2af1770fdb9d839fe4f6152343089be45dd05f39dc6cd17f4a6709eb0f8a6516"
+    },
+    {
+      "slot": "9-part-2-of-4",
+      "gate": "9",
+      "partition": "2/4",
+      "seconds": 3944.41,
+      "localMarginTo180Minutes": 6855.59,
+      "receiptSha256": "07d5aa0a23669d602319759155e043a854bb99d8d400eb67041b846e2ac9d774"
+    },
+    {
+      "slot": "9-part-3-of-4",
+      "gate": "9",
+      "partition": "3/4",
+      "seconds": 3917.45,
+      "localMarginTo180Minutes": 6882.55,
+      "receiptSha256": "96e19f4697c40ce68a656a244f4130730084fe66001e451e1ae33485262b8f6e"
+    },
+    {
+      "slot": "9-part-4-of-4",
+      "gate": "9",
+      "partition": "4/4",
+      "seconds": 3466.48,
+      "localMarginTo180Minutes": 7333.52,
+      "receiptSha256": "21a40ff0dfc7c82ea55a0448414efa26fbe4eb9a54e8602bd5af0bb31009c437"
+    },
+    {
+      "slot": "10-part-1-of-4",
+      "gate": "10",
+      "partition": "1/4",
+      "seconds": 2593.0,
+      "localMarginTo180Minutes": 8207.0,
+      "receiptSha256": "6a8e7b1128ee58cea8243cd12b9d756929b32b001a7ab898ed9b5704542c52c9"
+    },
+    {
+      "slot": "10-part-2-of-4",
+      "gate": "10",
+      "partition": "2/4",
+      "seconds": 2593.06,
+      "localMarginTo180Minutes": 8206.94,
+      "receiptSha256": "4d1118b28ca5ae74550b4724e106dd2e719aebf3d56b8353c955f032ac157c9d"
+    },
+    {
+      "slot": "10-part-3-of-4",
+      "gate": "10",
+      "partition": "3/4",
+      "seconds": 2574.91,
+      "localMarginTo180Minutes": 8225.09,
+      "receiptSha256": "78f98deefe61746c6c0488d37cdfea3768dab77d483de10c89bed7231b4f3acd"
+    },
+    {
+      "slot": "10-part-4-of-4",
+      "gate": "10",
+      "partition": "4/4",
+      "seconds": 2573.36,
+      "localMarginTo180Minutes": 8226.64,
+      "receiptSha256": "fff3490abd549c4b3140a2588f0bcdf2fb93719a02c988319346f1aba6eca5f7"
+    },
+    {
+      "slot": "11",
+      "gate": "11",
+      "partition": "",
+      "seconds": 3491.56,
+      "localMarginTo180Minutes": 7308.4400000000005,
+      "receiptSha256": "2d2392197f28bd9ee2bb0697ff9f638103c4a66075de1cf577c4e520c98fe5cb"
+    },
+    {
+      "slot": "12",
+      "gate": "12",
+      "partition": "",
+      "seconds": 2619.19,
+      "localMarginTo180Minutes": 8180.8099999999995,
+      "receiptSha256": "3e13771c7becf3222eabba78f9629e154d175de05edce20a891e05a60f9c5dc6"
+    },
+    {
+      "slot": "13-part-1-of-4",
+      "gate": "13",
+      "partition": "1/4",
+      "seconds": 3331.52,
+      "localMarginTo180Minutes": 7468.48,
+      "receiptSha256": "8d0852aff36cfcd0d0de835de289c801c1f38eb5f24ba9f65b44cdb8c12f763c"
+    },
+    {
+      "slot": "13-part-2-of-4",
+      "gate": "13",
+      "partition": "2/4",
+      "seconds": 2557.03,
+      "localMarginTo180Minutes": 8242.97,
+      "receiptSha256": "1cfc68205b5613afb317506355cef5a58d3fb22d46b57611e1e6f9e2dbc4de6b"
+    },
+    {
+      "slot": "13-part-3-of-4",
+      "gate": "13",
+      "partition": "3/4",
+      "seconds": 3079.26,
+      "localMarginTo180Minutes": 7720.74,
+      "receiptSha256": "ee44e352572a19a54de8754f30093996935f8ae5f8359246798c40373ab61d12"
+    },
+    {
+      "slot": "13-part-4-of-4",
+      "gate": "13",
+      "partition": "4/4",
+      "seconds": 3093.36,
+      "localMarginTo180Minutes": 7706.639999999999,
+      "receiptSha256": "0334ec7c73c65eb6c2e11df714961e856c1bee03df7e3888e97db94c1dfe8cd4"
+    },
+    {
+      "slot": "1-5",
+      "gate": "1-5",
+      "partition": "",
+      "seconds": 2216.0,
+      "localMarginTo180Minutes": 8584.0,
+      "receiptSha256": "104ef76a2ae9bbcc3c10ea6d51e29038d17f3033b880cdcb60478993e1f48d49"
+    },
+    {
+      "slot": "10a",
+      "gate": "10a",
+      "partition": "",
+      "seconds": 2566.98,
+      "localMarginTo180Minutes": 8233.02,
+      "receiptSha256": "2213c0169e267e2eaa90fd135b26119ca68b9ee2969f7fafb6b57e42227bdd79"
+    },
+    {
+      "slot": "12b",
+      "gate": "12b",
+      "partition": "",
+      "seconds": 2343.94,
+      "localMarginTo180Minutes": 8456.06,
+      "receiptSha256": "794aac6a104cb684b5d21ca73ddd1d47c2a626358a41c213d50430b6e8e5b3e6"
+    },
+    {
+      "slot": "12k",
+      "gate": "12k",
+      "partition": "",
+      "seconds": 1733.55,
+      "localMarginTo180Minutes": 9066.45,
+      "receiptSha256": "62fbba126e8b22486fdfa59c937e0cc39c9539936c0d1e2a10c7c88f1e3626a7"
+    },
+    {
+      "slot": "8c",
+      "gate": "8c",
+      "partition": "",
+      "seconds": 3891.62,
+      "localMarginTo180Minutes": 6908.38,
+      "receiptSha256": "3c7b91247ae905a48ccda876254853aa4074594f0d317f6cfc8e3c7a3f4f381e"
+    },
+    {
+      "slot": "8r",
+      "gate": "8r",
+      "partition": "",
+      "seconds": 5186.64,
+      "localMarginTo180Minutes": 5613.36,
+      "receiptSha256": "7b040a22cf3ba9b8f4c3452c356f813636e49fa57346562d0e08791380cc3fba"
+    },
+    {
+      "slot": "9a",
+      "gate": "9a",
+      "partition": "",
+      "seconds": 1314.31,
+      "localMarginTo180Minutes": 9485.69,
+      "receiptSha256": "0b62528d584ba513e14b0bb59e424f38756cab865369b33bb55f7fa3070cfb1c"
+    },
+    {
+      "slot": "AB",
+      "gate": "AB",
+      "partition": "",
+      "seconds": 1299.07,
+      "localMarginTo180Minutes": 9500.93,
+      "receiptSha256": "c769720e23fee09de74db4a37d15b0aa356da6b15117170a91ebe17a57679d08"
+    },
+    {
+      "slot": "AR",
+      "gate": "AR",
+      "partition": "",
+      "seconds": 6011.39,
+      "localMarginTo180Minutes": 4788.61,
+      "receiptSha256": "23f13484d4239c41afb9b1e30185f5f7393d326568f08b066c041cbf3e91c7bf"
+    },
+    {
+      "slot": "BS",
+      "gate": "BS",
+      "partition": "",
+      "seconds": 2434.32,
+      "localMarginTo180Minutes": 8365.68,
+      "receiptSha256": "bc817490479a51ae67b95828f09ae1173dd8f77c2494cce19e84279fb837d776"
+    },
+    {
+      "slot": "D8",
+      "gate": "D8",
+      "partition": "",
+      "seconds": 2651.95,
+      "localMarginTo180Minutes": 8148.05,
+      "receiptSha256": "d9fb03dea969233d17de85f4d84605ef2bdaba77e06c1253f3d89ed93a36e338"
+    },
+    {
+      "slot": "FB",
+      "gate": "FB",
+      "partition": "",
+      "seconds": 2586.98,
+      "localMarginTo180Minutes": 8213.02,
+      "receiptSha256": "b49a97f2a945b1e8b4df4befca247e3456847b86b56247f8afd101b2687ab47a"
+    },
+    {
+      "slot": "H-harness",
+      "gate": "H-harness",
+      "partition": "",
+      "seconds": 4854.32,
+      "localMarginTo180Minutes": 5945.68,
+      "receiptSha256": "303942bc7e34b9a64d430e9b70b4cd78bb8363626edc1096c037efa6449e0934"
+    },
+    {
+      "slot": "NS",
+      "gate": "NS",
+      "partition": "",
+      "seconds": 684.13,
+      "localMarginTo180Minutes": 10115.87,
+      "receiptSha256": "3f059f7168f725907044cfa5a1773e0f85720ace717742d8f0d2b91abda6bbe9"
+    },
+    {
+      "slot": "P-allowlist",
+      "gate": "P-allowlist",
+      "partition": "",
+      "seconds": 1760.58,
+      "localMarginTo180Minutes": 9039.42,
+      "receiptSha256": "8c181c7b2d49f65fb05142296c1634a634fade895687d8484fbfb5912681a7db"
+    },
+    {
+      "slot": "P-discharge",
+      "gate": "P-discharge",
+      "partition": "",
+      "seconds": 4420.27,
+      "localMarginTo180Minutes": 6379.73,
+      "receiptSha256": "31ecb7c409f5ab9adaddb6f168ef8ca3fed31274d42dea5d7e5a4134f27b57be"
+    },
+    {
+      "slot": "P-f88",
+      "gate": "P-f88",
+      "partition": "",
+      "seconds": 4072.24,
+      "localMarginTo180Minutes": 6727.76,
+      "receiptSha256": "0fede14b27625cc208f44538b47090a380f2b47137be9afac270f34ab185a868"
+    },
+    {
+      "slot": "P-g15b",
+      "gate": "P-g15b",
+      "partition": "",
+      "seconds": 1800.11,
+      "localMarginTo180Minutes": 8999.89,
+      "receiptSha256": "452d4be4955a1615efd3d8ff54e2ea35e4496694412b0006cb9d7fe0776b80c7"
+    },
+    {
+      "slot": "P-handle",
+      "gate": "P-handle",
+      "partition": "",
+      "seconds": 1719.69,
+      "localMarginTo180Minutes": 9080.31,
+      "receiptSha256": "59431fd49d49c5c359977d2a53cf79a1091b91ba9143911ae985eb5f9bce53aa"
+    },
+    {
+      "slot": "P-ledger",
+      "gate": "P-ledger",
+      "partition": "",
+      "seconds": 7109.87,
+      "localMarginTo180Minutes": 3690.13,
+      "receiptSha256": "7d9ed332f890ed906c909545caf44d3747602a41036b7aec8623f157b00bdcd1"
+    },
+    {
+      "slot": "P-mint-part-1-of-4",
+      "gate": "P-mint",
+      "partition": "1/4",
+      "seconds": 2646.46,
+      "localMarginTo180Minutes": 8153.54,
+      "receiptSha256": "e50b66f0bee65746cc8188ef9009edf0ef176b9930fa839fdd6c7f64a1873844"
+    },
+    {
+      "slot": "P-mint-part-2-of-4",
+      "gate": "P-mint",
+      "partition": "2/4",
+      "seconds": 4619.39,
+      "localMarginTo180Minutes": 6180.61,
+      "receiptSha256": "b24492ac4481a9d215f1304ebefc5b30418cdc58e729df726ead7249a0ad54fa"
+    },
+    {
+      "slot": "P-mint-part-3-of-4",
+      "gate": "P-mint",
+      "partition": "3/4",
+      "seconds": 3626.26,
+      "localMarginTo180Minutes": 7173.74,
+      "receiptSha256": "7ed94c969e57a8912cd5a231e7de1e11beee2c37b3d94e96d22bbf57f27489fb"
+    },
+    {
+      "slot": "P-mint-part-4-of-4",
+      "gate": "P-mint",
+      "partition": "4/4",
+      "seconds": 4180.93,
+      "localMarginTo180Minutes": 6619.07,
+      "receiptSha256": "e361fd5ebc809494dd0cd909a08b06838c7ee6a90e5fd3702cb74569b9f121ff"
+    },
+    {
+      "slot": "P-mt3",
+      "gate": "P-mt3",
+      "partition": "",
+      "seconds": 4031.41,
+      "localMarginTo180Minutes": 6768.59,
+      "receiptSha256": "fc10dc4183f2e103b3e32b0940e731b4601933c912e6cda3a7ab527b314a7623"
+    },
+    {
+      "slot": "P-pairing",
+      "gate": "P-pairing",
+      "partition": "",
+      "seconds": 5379.98,
+      "localMarginTo180Minutes": 5420.02,
+      "receiptSha256": "6735a245c7c5b78ef0550be5d04e4f13c63a4e2aa39bfff41b915294ef1d4132"
+    },
+    {
+      "slot": "P-principal",
+      "gate": "P-principal",
+      "partition": "",
+      "seconds": 4551.46,
+      "localMarginTo180Minutes": 6248.54,
+      "receiptSha256": "dd2bfe924a69d51da63d8ffa29dc8775f14060de60635a36d6d7f7bedd0b0f53"
+    },
+    {
+      "slot": "P-render",
+      "gate": "P-render",
+      "partition": "",
+      "seconds": 4934.33,
+      "localMarginTo180Minutes": 5865.67,
+      "receiptSha256": "0bed62d79129efd24579d5eebea98e9b88b3636c073ffb6d757cf3371da43298"
+    },
+    {
+      "slot": "P-rt6",
+      "gate": "P-rt6",
+      "partition": "",
+      "seconds": 4515.05,
+      "localMarginTo180Minutes": 6284.95,
+      "receiptSha256": "c7cf5b27134ad5a45cfcd26389a8c7987e7a1bed5b06f8383b95406281ac8db7"
+    },
+    {
+      "slot": "P-seal",
+      "gate": "P-seal",
+      "partition": "",
+      "seconds": 3851.65,
+      "localMarginTo180Minutes": 6948.35,
+      "receiptSha256": "d75f10b2dcc8247c80df51ac26ca0d473fe9c6272b697c6c7835620b89359642"
+    },
+    {
+      "slot": "PI-contract",
+      "gate": "PI-contract",
+      "partition": "",
+      "seconds": 7594.84,
+      "localMarginTo180Minutes": 3205.16,
+      "receiptSha256": "87b0a1189d4f13ab32f9b23e9be1362df1e5c5fd6ffcf4a3c3a26c989f6cdbd9"
+    },
+    {
+      "slot": "PI",
+      "gate": "PI",
+      "partition": "",
+      "seconds": 860.85,
+      "localMarginTo180Minutes": 9939.15,
+      "receiptSha256": "c575cfa7a829d60446c0bd77914458d124930f1e07aae433649bef802c6302c3"
+    },
+    {
+      "slot": "PU",
+      "gate": "PU",
+      "partition": "",
+      "seconds": 4618.46,
+      "localMarginTo180Minutes": 6181.54,
+      "receiptSha256": "866f7ae4635822471434a80ec9f4604033a3030d2bad024069339d560d287a85"
+    },
+    {
+      "slot": "SB1",
+      "gate": "SB1",
+      "partition": "",
+      "seconds": 5006.76,
+      "localMarginTo180Minutes": 5793.24,
+      "receiptSha256": "2f767bf7f7afaaa3c659f57be606dbd00ad90037da0576e08e8f4213cd10b6fa"
+    },
+    {
+      "slot": "SBV",
+      "gate": "SBV",
+      "partition": "",
+      "seconds": 4145.43,
+      "localMarginTo180Minutes": 6654.57,
+      "receiptSha256": "6eebcd5e19690b8cce7f79a9b270470a0897a4889a0aea827e0bb111fc0585e8"
+    },
+    {
+      "slot": "SO",
+      "gate": "SO",
+      "partition": "",
+      "seconds": 3592.67,
+      "localMarginTo180Minutes": 7207.33,
+      "receiptSha256": "f69d2bcdbc2b7927baf8e5e93afe49f0f1f1fe3f3457edf49b5b31d018331986"
+    },
+    {
+      "slot": "SV2",
+      "gate": "SV2",
+      "partition": "",
+      "seconds": 6153.45,
+      "localMarginTo180Minutes": 4646.55,
+      "receiptSha256": "54fdc80c646cc4ee7665b50391a54a88c86aa3a447cf00541ae2f8356ee2a129"
+    },
+    {
+      "slot": "T-tables",
+      "gate": "T-tables",
+      "partition": "",
+      "seconds": 4000.62,
+      "localMarginTo180Minutes": 6799.38,
+      "receiptSha256": "94ddbb7f7bd9249a76e77ae6316b7c8b7e29e7da752cc6c7236d2654b3f82920"
+    },
+    {
+      "slot": "TURN",
+      "gate": "TURN",
+      "partition": "",
+      "seconds": 5154.27,
+      "localMarginTo180Minutes": 5645.73,
+      "receiptSha256": "e5963d4ad3baab86857c12c3134b515872b611df4800dedfe338b1c2f6398492"
+    },
+    {
+      "slot": "WF",
+      "gate": "WF",
+      "partition": "",
+      "seconds": 1196.42,
+      "localMarginTo180Minutes": 9603.58,
+      "receiptSha256": "d6a378d8f9b0c8601930be99f6fff313f10e587b86701f6a6d866fa9f2351fe6"
+    },
+    {
+      "slot": "WR-part-1-of-4",
+      "gate": "WR",
+      "partition": "1/4",
+      "seconds": 2950.71,
+      "localMarginTo180Minutes": 7849.29,
+      "receiptSha256": "b9f648ad8f56b928b4f74a4d658a1c3878bd064289c0654545f76c4f448441e7"
+    },
+    {
+      "slot": "WR-part-2-of-4",
+      "gate": "WR",
+      "partition": "2/4",
+      "seconds": 2783.63,
+      "localMarginTo180Minutes": 8016.37,
+      "receiptSha256": "0142e28c52579508f5451fcf34382be2dae7404c6f4a1b5118eeceb564c4efbe"
+    },
+    {
+      "slot": "WR-part-3-of-4",
+      "gate": "WR",
+      "partition": "3/4",
+      "seconds": 2757.72,
+      "localMarginTo180Minutes": 8042.280000000001,
+      "receiptSha256": "2bc6b953d11771496381fee6b00d9fa2c31153ccbe258780dad7b176deba8dcf"
+    },
+    {
+      "slot": "WR-part-4-of-4",
+      "gate": "WR",
+      "partition": "4/4",
+      "seconds": 2528.77,
+      "localMarginTo180Minutes": 8271.23,
+      "receiptSha256": "e5e77e48b12d0ba46cf6505593cdf79eb1a6ec3e8057bb75247c4a874eec4702"
+    }
+  ],
+  "historicalMutationReceiptsAdmitted": 0,
+  "certificateIssued": false,
+  "admissionEntry": "widgets-mutation-ci.mjs release"
+}

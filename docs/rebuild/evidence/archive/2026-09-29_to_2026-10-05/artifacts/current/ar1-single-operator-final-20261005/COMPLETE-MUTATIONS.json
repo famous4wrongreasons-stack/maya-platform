@@ -1,0 +1,1007 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "status": "PASS",
+  "parts": 68,
+  "batteries": 47,
+  "declarations": 545,
+  "applicableKills": 542,
+  "counts": {
+    "build-killed": 359,
+    "equivalent": 1,
+    "live-killed": 183,
+    "pending": 2
+  },
+  "existingNonKillDeclarations": [
+    {
+      "battery": "gate10.json",
+      "id": "M10-5",
+      "status": "equivalent",
+      "reason": "RI-killed / equivalent on conformant input: row 1 exact subject agreement precedes effect comparison, so changing a matched record's effect while retaining the exact subject cannot alter the outcome table"
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M17b",
+      "status": "pending",
+      "reason": null
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M18b",
+      "status": "pending",
+      "reason": null
+    }
+  ],
+  "restrictions": null,
+  "baselineRed": [],
+  "mismatches": 0,
+  "reports": [
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-1-5.json",
+      "sha256": "41a0172a4dc2311788652b5c90a22e7e8dfa391dcf3ff70489bcbfcb61381643",
+      "declarations": 4,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-10.json",
+      "sha256": "024e32813dff8ef08f9c975d902dff7b6183b6e7e6d5d93295ff2bb4e25f50e2",
+      "declarations": 21,
+      "baselineControls": 4
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-10a.json",
+      "sha256": "ae73a6c91f488b02bd9b32d2b5fe2516e45daa73618de85618e431b942e054f3",
+      "declarations": 5,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-11.json",
+      "sha256": "e598ef791c6c4d10ccf1cd8a4b95e0200979ffdb26f653e02a8a3ba4a807956b",
+      "declarations": 7,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-12.json",
+      "sha256": "b6a512d649de829fe0720952a5c601d75c702bec034cc38fd048733e530da8f9",
+      "declarations": 5,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-12b.json",
+      "sha256": "a1ec381b4da8d9e6b28052d3088ba71a0e8604f8d76060e88f7b2b438b2bbdd3",
+      "declarations": 13,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-12k.json",
+      "sha256": "b74849fbfdecda9440210862ef8e9840aeac6d8c75c80b80521380894f239ca0",
+      "declarations": 3,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-13.json",
+      "sha256": "da9c2b568b6a3b54171c720e2e8dfb7702860181acbae55c1303e4d5ff9a950b",
+      "declarations": 25,
+      "baselineControls": 6
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-4.json",
+      "sha256": "c527f567c91c296d95aaa4ef734208389edcc32b9b18d30a5d979b5d083331ad",
+      "declarations": 4,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-6.json",
+      "sha256": "dc74f9cd65107002b197601a006a8fa7b18bc436734ab1f00994dbeb133438b2",
+      "declarations": 26,
+      "baselineControls": 8
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-7.json",
+      "sha256": "d5f8398f99c9b61a80fe1c763e10b50c962a44a4b5a000a5a2d307d1348913bb",
+      "declarations": 38,
+      "baselineControls": 8
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-8.json",
+      "sha256": "8adacae1c512455d6d8d0062a5583f2b67fda12e62fad1fcf6af93d6b5a23d4c",
+      "declarations": 10,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-8c.json",
+      "sha256": "8d1868b9cc43cff62f4c5d24d743ee63ac838bfd20c4ad9deef65a247a31cb28",
+      "declarations": 8,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-8r.json",
+      "sha256": "29ab9ee983d9e0e73f85d564ebaaaba1a4c7d145f69048eff2112c0abc2d56a6",
+      "declarations": 29,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-9.json",
+      "sha256": "a22d479c6786e09218d3ea16b15d783df37fea6fc2eb1996e7c80fed0fc84e78",
+      "declarations": 35,
+      "baselineControls": 7
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-9a.json",
+      "sha256": "71071995cb7983bd859c6ffd32ac8ff726a11818e01bc4a1c40e9da14ace6bb8",
+      "declarations": 2,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-AB.json",
+      "sha256": "df46437b184084f6be4391b94eb7c3ac4bc2cf2926a464698395904eeb54fbd4",
+      "declarations": 2,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-AR.json",
+      "sha256": "e208484b88d724dbc48bae0255b12bb15b9ca01bf348fec9828ea040d2570cd7",
+      "declarations": 19,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-BS.json",
+      "sha256": "b0dd1e3ac1480bb2248671fc7ef6d2416c5f3572ca00bdb001856552ddcca261",
+      "declarations": 5,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-D8.json",
+      "sha256": "39c9fdaeb8b9c1a647cad5f72b3cc34eb2e15df9f3fec97d7f0542d1aaef4ecb",
+      "declarations": 5,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-FB.json",
+      "sha256": "35c25cdd2618fd8d37b1fb59c047daeda01f97bcec01d014a46deb04346ff636",
+      "declarations": 15,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-H-harness.json",
+      "sha256": "a0d02afeac04f179c91a943fb4173b562e232dafb85bc58815eb13baa3b6635d",
+      "declarations": 26,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-NS.json",
+      "sha256": "f40339a911e2d11800b720b86349e7acd0214ed837c0339a387564d184ad7ca2",
+      "declarations": 5,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-allowlist.json",
+      "sha256": "4f79358374566ecd4f9483a513f9500e2f5eb7a63f364f153b11834c332522cd",
+      "declarations": 3,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-discharge.json",
+      "sha256": "ca6f8acc19e57c5e891b0cc90862e8c0de28f6a4fd7abf16f264311ec5555d03",
+      "declarations": 9,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-f88.json",
+      "sha256": "01c275cda9ae91ffef799197e64e4fa98015dbd37878dc591a552553a631fd00",
+      "declarations": 14,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-g15b.json",
+      "sha256": "1b09907e1459c07724bc61565aca91d39f0bb0dcfd121261d38adb85360b4c84",
+      "declarations": 8,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-handle.json",
+      "sha256": "3fde3cfb50cada1635891843bac3eeef60173c4545d596f120e8f998d6057ed6",
+      "declarations": 3,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-ledger.json",
+      "sha256": "3626cf1c5dabb6b188652c905916b126d6dc0ad90356e24a7410085e334efee4",
+      "declarations": 9,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-mint.json",
+      "sha256": "ee98e4d366a87b8fc9573a4f3ac9e4bbc75b82961587ce5bf589d598b785802a",
+      "declarations": 20,
+      "baselineControls": 6
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-mt3.json",
+      "sha256": "61c729e9e7b1065a81feabc57e88f3caa7d80461feb8d11fe0135dd5f1b7095a",
+      "declarations": 7,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-pairing.json",
+      "sha256": "36ab4795f99a3a6e4f27c051d37e91bfa3153c0a51e16299b2216555a4229c15",
+      "declarations": 6,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-principal.json",
+      "sha256": "2dc6190b2d24fd408e76cf6ac2fddc02f937719ee8d08a74bc74373532513659",
+      "declarations": 12,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-render.json",
+      "sha256": "28b787940c5616bea70acf1cb40106efb0107dec9cb0b8d5446f1a894e57d7d7",
+      "declarations": 8,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-rt6.json",
+      "sha256": "9db729f85915eabb1b23344101da105b3b594bd081fc380caaa7d5b4d8d1e05d",
+      "declarations": 7,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-P-seal.json",
+      "sha256": "cacd04f921bc3eb71165fcbc10f7d5283f52499f38fe69a7805d08080ebb9a71",
+      "declarations": 6,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-PI-contract.json",
+      "sha256": "8f88afae5491220f832a2be5cf58b4f18209d20c1750437ca00e829c44999c7a",
+      "declarations": 16,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-PI.json",
+      "sha256": "2822a9b35e6f205b30a8625a8444cec77d7bddae1e3f69a987594854e0d8fb59",
+      "declarations": 6,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-PU.json",
+      "sha256": "4abc06dd281e3f9968843627c93d62eb4b4577ebb50410bc3a3bdb4489c6e959",
+      "declarations": 12,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-SB1.json",
+      "sha256": "c8b9557a25cc57478748c4edf64f0d09365d02bf53791c355a185ae096d272bb",
+      "declarations": 10,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-SBV.json",
+      "sha256": "14b85105a081fa9fb2463f784e6dc670d5dd95bf37c3fd59008b705867470dcc",
+      "declarations": 8,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-SO.json",
+      "sha256": "87a0e542eb9ea43a91910f15684e53e74a6e92aa5180e9955fbf6d4dc21bddb5",
+      "declarations": 9,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-SV2.json",
+      "sha256": "86cf6ea55a46dab40d9d4a339f2696411ebe0b11d4972477a5bea11f56bc8b9f",
+      "declarations": 13,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-T-tables.json",
+      "sha256": "499d1780b3c15aca2eff03c5580df5f8114392479daefb675f00bcbc6b45fe11",
+      "declarations": 7,
+      "baselineControls": 1
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-TURN.json",
+      "sha256": "b7f1fdba814597ea8a8bc3bd5385c721026107f9a601a881299dfb884626f65d",
+      "declarations": 14,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-WF.json",
+      "sha256": "f88e77f944de3c59bcb7f7114da2535f2749b7889cfcb14caf3b05dd13ad7a87",
+      "declarations": 3,
+      "baselineControls": 2
+    },
+    {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+      "sha256": "513587435fd11d8ae4253abbbb15ba1a2a525fc3ca4011a7a1aa320341e53b81",
+      "declarations": 23,
+      "baselineControls": 6
+    }
+  ],
+  "nativeJobTimings": [
+    {
+      "slot": "4",
+      "gate": "4",
+      "partition": "",
+      "seconds": 3800.0,
+      "marginTo180Minutes": 7000.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133088",
+      "receiptSha256": "58825031837c58c27dd2cc6053caaa4a26f581e6a03adef69659752a3e222ea5"
+    },
+    {
+      "slot": "6-part-1-of-4",
+      "gate": "6",
+      "partition": "1/4",
+      "seconds": 4576.0,
+      "marginTo180Minutes": 6224.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133093",
+      "receiptSha256": "0809e9317e863101309d1f0e9e28f40a87fc11fc4fc0a79452f0c600fe92229f"
+    },
+    {
+      "slot": "6-part-2-of-4",
+      "gate": "6",
+      "partition": "2/4",
+      "seconds": 4894.0,
+      "marginTo180Minutes": 5906.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133111",
+      "receiptSha256": "8d1be0eaf2028ba6a37980f975a097474cf4befed68b291af9750ed0ae3cee04"
+    },
+    {
+      "slot": "6-part-3-of-4",
+      "gate": "6",
+      "partition": "3/4",
+      "seconds": 4060.0,
+      "marginTo180Minutes": 6740.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133068",
+      "receiptSha256": "26439985158b9f4e9c58c1f130f57e19bd9d5904cf143af1aeeb780bce28c9b9"
+    },
+    {
+      "slot": "6-part-4-of-4",
+      "gate": "6",
+      "partition": "4/4",
+      "seconds": 4274.0,
+      "marginTo180Minutes": 6526.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133118",
+      "receiptSha256": "76d736539a46a08c4496116fcb77286b9c9cfd2136164b3d6e19274301ed12e0"
+    },
+    {
+      "slot": "7-part-1-of-4",
+      "gate": "7",
+      "partition": "1/4",
+      "seconds": 5183.0,
+      "marginTo180Minutes": 5617.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133106",
+      "receiptSha256": "f8928b456484c8458fbe8ac7f3408ddae508761cf7aff12628770f93c0d26c77"
+    },
+    {
+      "slot": "7-part-2-of-4",
+      "gate": "7",
+      "partition": "2/4",
+      "seconds": 8609.0,
+      "marginTo180Minutes": 2191.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133124",
+      "receiptSha256": "a8b599c1938e7c7a7acdbb2002975e2bb66d777ccfbf6be9cedd9277e483b9b9"
+    },
+    {
+      "slot": "7-part-3-of-4",
+      "gate": "7",
+      "partition": "3/4",
+      "seconds": 6154.0,
+      "marginTo180Minutes": 4646.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133105",
+      "receiptSha256": "6da2dc42fccd87c9c4cfb14cbe20805d80ecf8e0d0fc3aa39be9b36428201c26"
+    },
+    {
+      "slot": "7-part-4-of-4",
+      "gate": "7",
+      "partition": "4/4",
+      "seconds": 4317.0,
+      "marginTo180Minutes": 6483.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133133",
+      "receiptSha256": "58f167c89475e768bd73fafdd3efc803a2202104d66e0c4dc5c7dcc596e6bf22"
+    },
+    {
+      "slot": "8",
+      "gate": "8",
+      "partition": "",
+      "seconds": 2765.0,
+      "marginTo180Minutes": 8035.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133131",
+      "receiptSha256": "89d14b8f4e149649329497b45253ff1c571fb864bade1c9a2c41ad06af1cc1ad"
+    },
+    {
+      "slot": "9-part-1-of-4",
+      "gate": "9",
+      "partition": "1/4",
+      "seconds": 9370.0,
+      "marginTo180Minutes": 1430.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133265",
+      "receiptSha256": "669adbd7cfd876cdcfb00ba09a3da7c7d95c36089f3616843d5c4927aee804c5"
+    },
+    {
+      "slot": "9-part-2-of-4",
+      "gate": "9",
+      "partition": "2/4",
+      "seconds": 6101.0,
+      "marginTo180Minutes": 4699.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133223",
+      "receiptSha256": "d2b7d6686a68e0e5027d446b38cb2d8eeec1f589e13efcdc5ea109f346ab1717"
+    },
+    {
+      "slot": "9-part-3-of-4",
+      "gate": "9",
+      "partition": "3/4",
+      "seconds": 8005.0,
+      "marginTo180Minutes": 2795.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133246",
+      "receiptSha256": "bfd48bca0164256bade31a94b914eaeeaae719b14d0196af7aead8968e84cff7"
+    },
+    {
+      "slot": "9-part-4-of-4",
+      "gate": "9",
+      "partition": "4/4",
+      "seconds": 7624.0,
+      "marginTo180Minutes": 3176.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133237",
+      "receiptSha256": "e30eac0cb4389785bb4b929f314d0d696e8e1c1e766e6096343aed9c24920933"
+    },
+    {
+      "slot": "10-part-1-of-4",
+      "gate": "10",
+      "partition": "1/4",
+      "seconds": 5416.0,
+      "marginTo180Minutes": 5384.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133182",
+      "receiptSha256": "0cd24b035dfb2aee8e47c37a2ccb252b2020d3566c7a878d47dc55576393b23f"
+    },
+    {
+      "slot": "10-part-2-of-4",
+      "gate": "10",
+      "partition": "2/4",
+      "seconds": 5616.0,
+      "marginTo180Minutes": 5184.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133215",
+      "receiptSha256": "151d3974d10747cb807194c220478e4f3695221fe22d651e784b645911a509ba"
+    },
+    {
+      "slot": "10-part-3-of-4",
+      "gate": "10",
+      "partition": "3/4",
+      "seconds": 4217.0,
+      "marginTo180Minutes": 6583.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133171",
+      "receiptSha256": "5bb2c798bbdc37ab24ca827af6a1947dcbdad59b39f4af573c3cc904e14d9869"
+    },
+    {
+      "slot": "10-part-4-of-4",
+      "gate": "10",
+      "partition": "4/4",
+      "seconds": 3236.0,
+      "marginTo180Minutes": 7564.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133142",
+      "receiptSha256": "e09bf92c41c6a421fa4e187cf83c855a50a0ff5ad2ff052a357da254d6254d35"
+    },
+    {
+      "slot": "11",
+      "gate": "11",
+      "partition": "",
+      "seconds": 7491.0,
+      "marginTo180Minutes": 3309.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133189",
+      "receiptSha256": "5dbd6530a442812c047684faf35bc06c1ab50cc5afb9231aed7659bae1f780da"
+    },
+    {
+      "slot": "12",
+      "gate": "12",
+      "partition": "",
+      "seconds": 5496.0,
+      "marginTo180Minutes": 5304.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133208",
+      "receiptSha256": "ecb0d8bb1ac694effef33a31a06b983c813b27ee22a9c988c26a7903209fee7c"
+    },
+    {
+      "slot": "13-part-1-of-4",
+      "gate": "13",
+      "partition": "1/4",
+      "seconds": 5271.0,
+      "marginTo180Minutes": 5529.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133167",
+      "receiptSha256": "db2814879e0a592f7701824de016425743cb1f4469b9d2d5f4a54fc781f767c3"
+    },
+    {
+      "slot": "13-part-2-of-4",
+      "gate": "13",
+      "partition": "2/4",
+      "seconds": 5248.0,
+      "marginTo180Minutes": 5552.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133135",
+      "receiptSha256": "9d2af927eae6f925170950504bffd398f624695450fc4f487ca503dc38449f92"
+    },
+    {
+      "slot": "13-part-3-of-4",
+      "gate": "13",
+      "partition": "3/4",
+      "seconds": 3934.0,
+      "marginTo180Minutes": 6866.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133147",
+      "receiptSha256": "c74f638cd5c6bf0e05fd7d162363023339751c00a5216f46f977346a045ff5ad"
+    },
+    {
+      "slot": "13-part-4-of-4",
+      "gate": "13",
+      "partition": "4/4",
+      "seconds": 5000.0,
+      "marginTo180Minutes": 5800.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133238",
+      "receiptSha256": "3cd15f54e15b86939519340940a291aebdc16ee6eb22b230220ba2a77615c74d"
+    },
+    {
+      "slot": "1-5",
+      "gate": "1-5",
+      "partition": "",
+      "seconds": 4706.0,
+      "marginTo180Minutes": 6094.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133203",
+      "receiptSha256": "9d0ee39c373935274e1fc56b3c21345695a655abd188a816c65c5f01e0325c4f"
+    },
+    {
+      "slot": "10a",
+      "gate": "10a",
+      "partition": "",
+      "seconds": 3362.0,
+      "marginTo180Minutes": 7438.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133179",
+      "receiptSha256": "30a16771c393a12477b562eef03a7b7b141cc1bb4d85353d382af7402f44c326"
+    },
+    {
+      "slot": "12b",
+      "gate": "12b",
+      "partition": "",
+      "seconds": 4672.0,
+      "marginTo180Minutes": 6128.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133216",
+      "receiptSha256": "284bee102723f129d93eebcfba84124406f8e2ea31ede22807eaa8c3ef3e099e"
+    },
+    {
+      "slot": "12k",
+      "gate": "12k",
+      "partition": "",
+      "seconds": 3925.0,
+      "marginTo180Minutes": 6875.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133334",
+      "receiptSha256": "021e6ce06adbe472432db601bddbf5ef9a22c864f7d82bf3849266c046f53bfc"
+    },
+    {
+      "slot": "8c",
+      "gate": "8c",
+      "partition": "",
+      "seconds": 7305.0,
+      "marginTo180Minutes": 3495.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133183",
+      "receiptSha256": "25b2bc20e355aaeaf54d8e464c1fd757c6cd7b5287e75777f38e184dcd3c8ad0"
+    },
+    {
+      "slot": "8r",
+      "gate": "8r",
+      "partition": "",
+      "seconds": 8600.0,
+      "marginTo180Minutes": 2200.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133152",
+      "receiptSha256": "1e01b27db46506d451a5c2716fbcaa497788ddcd5eaba30d5d68abb7de0e8e1c"
+    },
+    {
+      "slot": "9a",
+      "gate": "9a",
+      "partition": "",
+      "seconds": 3020.0,
+      "marginTo180Minutes": 7780.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133177",
+      "receiptSha256": "28efd31e6859a8e68b8894f7672498482465add0119c04fa78e0d18c6c38b22d"
+    },
+    {
+      "slot": "AB",
+      "gate": "AB",
+      "partition": "",
+      "seconds": 1500.0,
+      "marginTo180Minutes": 9300.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133354",
+      "receiptSha256": "1adf0a77541a8112dd142470aab3af2d0c418f00c557a770415d7868ab168891"
+    },
+    {
+      "slot": "AR",
+      "gate": "AR",
+      "partition": "",
+      "seconds": 9681.0,
+      "marginTo180Minutes": 1119.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133205",
+      "receiptSha256": "45efdd9d3637888b3bba4cbb6f181e5d572f0ab5f6c56f57420ffc2f3f1b93a1"
+    },
+    {
+      "slot": "BS",
+      "gate": "BS",
+      "partition": "",
+      "seconds": 5054.0,
+      "marginTo180Minutes": 5746.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133304",
+      "receiptSha256": "9f75ac06563f206252756823018016a9783ef77220f2d7846cdf71fe28359e59"
+    },
+    {
+      "slot": "D8",
+      "gate": "D8",
+      "partition": "",
+      "seconds": 3052.0,
+      "marginTo180Minutes": 7748.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133255",
+      "receiptSha256": "d4e42266599a2a93a56992a96a02987b92cd0b45186c9c4c525120ba07e15414"
+    },
+    {
+      "slot": "FB",
+      "gate": "FB",
+      "partition": "",
+      "seconds": 3322.0,
+      "marginTo180Minutes": 7478.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133235",
+      "receiptSha256": "da7438651fd49e7d520ff7f64755c4c3279854356acdcacb351f448c22942a70"
+    },
+    {
+      "slot": "H-harness",
+      "gate": "H-harness",
+      "partition": "",
+      "seconds": 10422.0,
+      "marginTo180Minutes": 378.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133331",
+      "receiptSha256": "c16515acb893518ea94f662cd30c943193141b11529cfc27e269440aaea120ef"
+    },
+    {
+      "slot": "NS",
+      "gate": "NS",
+      "partition": "",
+      "seconds": 1365.0,
+      "marginTo180Minutes": 9435.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133288",
+      "receiptSha256": "472d61f7d21e09fa36d2b8ca92ad8fafb2b08969ae7648530aee6ce16921d37a"
+    },
+    {
+      "slot": "P-allowlist",
+      "gate": "P-allowlist",
+      "partition": "",
+      "seconds": 2215.0,
+      "marginTo180Minutes": 8585.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133279",
+      "receiptSha256": "1e95c662080a49557880d9c57510a8ca36cea072749c8a29b73db9b66e2072d7"
+    },
+    {
+      "slot": "P-discharge",
+      "gate": "P-discharge",
+      "partition": "",
+      "seconds": 5629.0,
+      "marginTo180Minutes": 5171.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133308",
+      "receiptSha256": "662eba6391622c8c51c4d4e33d6ebd477b622cd607eb52bc01e5e46f164c1f98"
+    },
+    {
+      "slot": "P-f88",
+      "gate": "P-f88",
+      "partition": "",
+      "seconds": 4950.0,
+      "marginTo180Minutes": 5850.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133224",
+      "receiptSha256": "f41bf7e823d2f469cb0decb4cd4cf39688d5882a1346eb85375cf4e885563f38"
+    },
+    {
+      "slot": "P-g15b",
+      "gate": "P-g15b",
+      "partition": "",
+      "seconds": 3463.0,
+      "marginTo180Minutes": 7337.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133275",
+      "receiptSha256": "9166ef853a0a626f91e3e87ec444b86cef65904595a127b99fcce80c27399b19"
+    },
+    {
+      "slot": "P-handle",
+      "gate": "P-handle",
+      "partition": "",
+      "seconds": 3880.0,
+      "marginTo180Minutes": 6920.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133371",
+      "receiptSha256": "b954ce57f5877ffc3d22a447c8bce694344a862ec366760b9d205cf76c342e43"
+    },
+    {
+      "slot": "P-ledger",
+      "gate": "P-ledger",
+      "partition": "",
+      "seconds": 9192.0,
+      "marginTo180Minutes": 1608.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133326",
+      "receiptSha256": "a6dd615a7e57872dae5f6274099af35e75dd076ef7c3791246755603e94c0ec3"
+    },
+    {
+      "slot": "P-mint-part-1-of-4",
+      "gate": "P-mint",
+      "partition": "1/4",
+      "seconds": 4937.0,
+      "marginTo180Minutes": 5863.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133349",
+      "receiptSha256": "1a80315860b8510d21be16354e5beb586d03173863258f588fad9b915a67e465"
+    },
+    {
+      "slot": "P-mint-part-2-of-4",
+      "gate": "P-mint",
+      "partition": "2/4",
+      "seconds": 5760.0,
+      "marginTo180Minutes": 5040.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133257",
+      "receiptSha256": "5fb6277927c6290c49789c47f4747561e8f5cf05ac1a9635d2e2c4958265f42c"
+    },
+    {
+      "slot": "P-mint-part-3-of-4",
+      "gate": "P-mint",
+      "partition": "3/4",
+      "seconds": 4469.0,
+      "marginTo180Minutes": 6331.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133242",
+      "receiptSha256": "c7e4ca6352e4ff88568701767193b83813ba244a9d10900e4f9fa5324ae07d0c"
+    },
+    {
+      "slot": "P-mint-part-4-of-4",
+      "gate": "P-mint",
+      "partition": "4/4",
+      "seconds": 4665.0,
+      "marginTo180Minutes": 6135.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133345",
+      "receiptSha256": "e658618324660e7c654d4c78b4f6739a23c0559b4fc455814d12a4b86d4e0c87"
+    },
+    {
+      "slot": "P-mt3",
+      "gate": "P-mt3",
+      "partition": "",
+      "seconds": 3307.0,
+      "marginTo180Minutes": 7493.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133254",
+      "receiptSha256": "375b5921353c4f2c3a972deb9069d88eb4ced2862443a62ae732e243cf6a5593"
+    },
+    {
+      "slot": "P-pairing",
+      "gate": "P-pairing",
+      "partition": "",
+      "seconds": 6667.0,
+      "marginTo180Minutes": 4133.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133344",
+      "receiptSha256": "9ea0589dbd339c4a0398982a6a101d4d7e09ed2c7f7312ea307a0c433ae49d45"
+    },
+    {
+      "slot": "P-principal",
+      "gate": "P-principal",
+      "partition": "",
+      "seconds": 6691.0,
+      "marginTo180Minutes": 4109.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133348",
+      "receiptSha256": "b19992d364af617b2d4578826ebcd5cde614ca24841da98617082a6cfbeef1ea"
+    },
+    {
+      "slot": "P-render",
+      "gate": "P-render",
+      "partition": "",
+      "seconds": 5830.0,
+      "marginTo180Minutes": 4970.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133322",
+      "receiptSha256": "b6d8bd963de5b2c92bdb718661242e51255a734ded4e39337ad597e8bdc42997"
+    },
+    {
+      "slot": "P-rt6",
+      "gate": "P-rt6",
+      "partition": "",
+      "seconds": 5489.0,
+      "marginTo180Minutes": 5311.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133360",
+      "receiptSha256": "74d677864d183c5e3fd4bc244b1f2349fa58da4b2a2602eeab0cdfa4772dbd44"
+    },
+    {
+      "slot": "P-seal",
+      "gate": "P-seal",
+      "partition": "",
+      "seconds": 4024.0,
+      "marginTo180Minutes": 6776.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133287",
+      "receiptSha256": "cd39352ec21eb55b18b7909726c727ff0ec9ca7007a21c681edce5ddfa072a64"
+    },
+    {
+      "slot": "PI-contract",
+      "gate": "PI-contract",
+      "partition": "",
+      "seconds": 8850.0,
+      "marginTo180Minutes": 1950.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133337",
+      "receiptSha256": "32078b1315d7447987af6bf4f8f939df2d6c0dac61e501c24776a19a9d44ce63"
+    },
+    {
+      "slot": "PI",
+      "gate": "PI",
+      "partition": "",
+      "seconds": 1678.0,
+      "marginTo180Minutes": 9122.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133248",
+      "receiptSha256": "2437a4f5ef0cc57a7b23580fd785cc5bae97a42858780b1d40b40f9b52c35ab2"
+    },
+    {
+      "slot": "PU",
+      "gate": "PU",
+      "partition": "",
+      "seconds": 9314.0,
+      "marginTo180Minutes": 1486.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133513",
+      "receiptSha256": "8b3ff029ea57c723b746d97638074170c4d818bb30a9fe3def57024501af7e85"
+    },
+    {
+      "slot": "SB1",
+      "gate": "SB1",
+      "partition": "",
+      "seconds": 10582.0,
+      "marginTo180Minutes": 218.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133266",
+      "receiptSha256": "0c6e1c122083da7f2854a5ee19d1ed9269e7d67f18b0fbf6b9b5225fac25ff3e"
+    },
+    {
+      "slot": "SBV",
+      "gate": "SBV",
+      "partition": "",
+      "seconds": 4690.0,
+      "marginTo180Minutes": 6110.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133362",
+      "receiptSha256": "6d09108cca92df2b7539cb0cd9b9a60bd0a85c337006058652cf0bef0f514406"
+    },
+    {
+      "slot": "SO",
+      "gate": "SO",
+      "partition": "",
+      "seconds": 4334.0,
+      "marginTo180Minutes": 6466.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133384",
+      "receiptSha256": "84f26e005048fc4a9bd3bce748d82cb1e3ab5fb1f0e79ae463c6e1458d85f3dc"
+    },
+    {
+      "slot": "SV2",
+      "gate": "SV2",
+      "partition": "",
+      "seconds": 10756.0,
+      "marginTo180Minutes": 44.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133536",
+      "receiptSha256": "41a64e6514ba04afd64adcd20f9631ef566edf956d30f22628739bf68f43e666"
+    },
+    {
+      "slot": "T-tables",
+      "gate": "T-tables",
+      "partition": "",
+      "seconds": 5130.0,
+      "marginTo180Minutes": 5670.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133421",
+      "receiptSha256": "036c5b8f389b7822771e807c3ac4e4226c9dd289a81b57070cf790e66927cf2a"
+    },
+    {
+      "slot": "TURN",
+      "gate": "TURN",
+      "partition": "",
+      "seconds": 10535.0,
+      "marginTo180Minutes": 265.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133590",
+      "receiptSha256": "473d7fb35c054db1a46e8c5bb64ca3f6f11a10d062e059a7c327ce363e3fa6fe"
+    },
+    {
+      "slot": "WF",
+      "gate": "WF",
+      "partition": "",
+      "seconds": 2633.0,
+      "marginTo180Minutes": 8167.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133370",
+      "receiptSha256": "46dfc9cbf26e76d4283ddc413413300f14a227fd8a2c286e3dc11713bfd5818a"
+    },
+    {
+      "slot": "WR-part-1-of-4",
+      "gate": "WR",
+      "partition": "1/4",
+      "seconds": 6105.0,
+      "marginTo180Minutes": 4695.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543135521",
+      "receiptSha256": "12f1877ae9116b003591b88cd631e2cd4f319149772169a5df070403b49aa63e"
+    },
+    {
+      "slot": "WR-part-2-of-4",
+      "gate": "WR",
+      "partition": "2/4",
+      "seconds": 5918.0,
+      "marginTo180Minutes": 4882.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543135522",
+      "receiptSha256": "c3bfb0210211357275f679f20e915536ffefd15762bafc52ad944dc920070410"
+    },
+    {
+      "slot": "WR-part-3-of-4",
+      "gate": "WR",
+      "partition": "3/4",
+      "seconds": 5924.0,
+      "marginTo180Minutes": 4876.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543135640",
+      "receiptSha256": "a75f1d8479710967561809cfd76778ba8ed0172b12a476bd54549727c0f353d2"
+    },
+    {
+      "slot": "WR-part-4-of-4",
+      "gate": "WR",
+      "partition": "4/4",
+      "seconds": 3534.0,
+      "marginTo180Minutes": 7266.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543135474",
+      "receiptSha256": "0581c9f68aa2fe5c7d794490d2452b3d1bc3a927390cb3bd3f78b7c158294cd2"
+    }
+  ],
+  "executionEnvironment": "GitHub Actions; fresh native parts, reassembled by the unchanged canonical strict collector",
+  "historicalMutationReceiptsAdmitted": 0,
+  "certificateIssued": false,
+  "admissionEntry": "widgets-mutation-ci.mjs release"
+}

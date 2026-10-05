@@ -1,0 +1,18 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "name": "mutation-SB1",
+  "kind": "hosted-job observation; not a local process receipt",
+  "exit": 0,
+  "exitDerivation": "GitHub job conclusion == success",
+  "seconds": 10582.0,
+  "startedAt": "2026-10-04T22:21:16Z",
+  "finishedAt": "2026-10-05T01:17:38Z",
+  "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+  "workflowRunId": 37238713168,
+  "jobId": 111543133266,
+  "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133266",
+  "jobMetadataFile": "hosted/37238713168-jobs.json",
+  "jobMetadataSha256": "93e899a6d3336b92d0b77fd5355eb074e59982b396d57c2726726c4b0d5087b7",
+  "originalPart": "hosted/artifacts/37238713168/widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-SB1/widgets-mutation-part-SB1.json",
+  "partSha256": "35232c4270813321b11efc4484b1b176bca244f68b63cb25c16bbc22be9e1a50"
+}

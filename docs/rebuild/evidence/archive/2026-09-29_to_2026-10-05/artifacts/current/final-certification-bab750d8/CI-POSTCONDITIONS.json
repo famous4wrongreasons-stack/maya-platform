@@ -1,0 +1,49 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "scope": "Assertions over fresh exact-candidate artifacts; no test rerun, no source changes, no certificate.",
+  "k15WorkflowPostconditions": {
+    "status": "PASS",
+    "logSha256": "5cdd3ba5b28dfe9dced4c8d5ec31366e9547b7da3c4d3bf47513f76b06cb6e24"
+  },
+  "runtimeSkipAudit": {
+    "runtime-full": {
+      "logSha256": "de60e76278dc2e13a7bb60d2d962ed5474c0bff7c025b2668a31a7a9684f498c",
+      "count": 7,
+      "unlabelled": 0,
+      "rows": [
+        "ok 1 - health, and password sign-in with the typed business address (V2-6) # SKIP LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+        "ok 2 - D6: an untruncated 3 500-char assistant item gets 400; the 2 000-unit cut gets 201 # SKIP LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+        "ok 3 - approval_required attempt (V2-5): PASS only if the binary reaches an approval-gated tool # SKIP LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+        "ok 4 - email OTP (debug code): wrong code → 400 email_code_invalid, right code → session with top-level tenant; refresh rotation and reuse # SKIP LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+        "ok 5 - logout revokes the session; transcribe without a provider key answers 503 (voice is verified with mocks) # SKIP LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+        "ok 6 - 402 provoked on the fixture tenant only (trialEndsAt in the past), then restored # SKIP LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+        "ok 7 - 429 auth_rate_limited with Retry-After through the relay (provoked with a non-user identity on the fixture tenant) # SKIP LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)"
+      ],
+      "savedReporter": "TAP"
+    },
+    "node24-runtime-full": {
+      "logSha256": "f360df131b831cbce867b62bd1deec7cc93d8b60e515340ca2a51fa35ff7f4ce",
+      "count": 7,
+      "unlabelled": 0,
+      "rows": [
+        "﹣ health, and password sign-in with the typed business address (V2-6) (0.4585ms) # LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+        "﹣ D6: an untruncated 3 500-char assistant item gets 400; the 2 000-unit cut gets 201 (0.158709ms) # LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+        "﹣ approval_required attempt (V2-5): PASS only if the binary reaches an approval-gated tool (0.105917ms) # LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+        "﹣ email OTP (debug code): wrong code → 400 email_code_invalid, right code → session with top-level tenant; refresh rotation and reuse (0.095458ms) # LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+        "﹣ logout revokes the session; transcribe without a provider key answers 503 (voice is verified with mocks) (0.092667ms) # LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+        "﹣ 402 provoked on the fixture tenant only (trialEndsAt in the past), then restored (0.079958ms) # LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)",
+        "﹣ 429 auth_rate_limited with Retry-After through the relay (provoked with a non-user identity on the fixture tenant) (0.06825ms) # LOCAL API NOT GIVEN — skipped, this is NOT a PASS (run with --api, --env and --fixture)"
+      ],
+      "savedReporter": "spec"
+    }
+  },
+  "widgetContractBuildExclusion": {
+    "status": "PASS",
+    "configSha256": "a46a29e9f9e73a46fd6a5132da07640ea5cca408c6cc71ba6084aaf31c0d154a"
+  },
+  "runtimeManifestEqualsCommitted": {
+    "status": "PASS",
+    "manifestSha256": "0152777aef3f6df4f06fa5b35b47e3ac524173df050799c651a6e5fad7a9ee5a"
+  },
+  "status": "PASS"
+}

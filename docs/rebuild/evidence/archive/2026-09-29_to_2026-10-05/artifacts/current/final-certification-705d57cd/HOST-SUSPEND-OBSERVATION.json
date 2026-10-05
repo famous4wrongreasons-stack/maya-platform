@@ -1,0 +1,392 @@
+{
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "capturedAt": "2026-10-01T22:53:50.046684+00:00",
+  "powerEvents": [
+    {
+      "utc": "2026-10-01T18:10:27+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Clamshell Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 233 secs"
+    },
+    {
+      "utc": "2026-10-01T18:14:20+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using BATT (Charge:100%) 45 secs"
+    },
+    {
+      "utc": "2026-10-01T18:15:05+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 488 secs"
+    },
+    {
+      "utc": "2026-10-01T18:23:13+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty E_PFN_NET_FOUND ARPT/ Using BATT (Charge:100%) 45 secs"
+    },
+    {
+      "utc": "2026-10-01T18:23:58+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 919 secs"
+    },
+    {
+      "utc": "2026-10-01T18:39:17+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) USB-C_plug SMC.OutboxNotEmpty nub-spmi-a0.0x3F/ Using BATT (Charge:100%) 0 secs"
+    },
+    {
+      "utc": "2026-10-01T18:39:17+00:00",
+      "event": "Wake",
+      "details": "DarkWake to FullWake from Deep Idle [CDNVAP] : due to Notification Using AC (Charge:100%)"
+    }
+  ],
+  "suspensionWindows": [
+    {
+      "from": "2026-10-01T18:10:27+00:00",
+      "to": "2026-10-01T18:39:17+00:00",
+      "fullWakeObserved": true
+    }
+  ],
+  "windowScope": "Conservative first Sleep through actual FullWake, including short maintenance DarkWakes.",
+  "potentiallyOverlappingTestRuns": [
+    {
+      "path": "receipts/mutation-diagnostics/3-unit-1790877798471.json",
+      "sha256": "7a44fd0087e106d661b0a3f6af0c37578e6859d6dc15af7725522c6d004b008c",
+      "worker": "3",
+      "step": "unit",
+      "startTime": "2026-10-01T18:03:18.471000+00:00",
+      "capturedAt": "2026-10-01T18:39:54.864446+00:00",
+      "success": false,
+      "passed": 5602,
+      "failed": 1,
+      "failureTitles": [
+        "S-G7-TIER: Gate 7\u2019s own code names no channel id and no tier"
+      ]
+    },
+    {
+      "path": "receipts/mutation-diagnostics/4-unit-1790877816168.json",
+      "sha256": "80bdde85a0cc9eb9fc70d401916ff1b6034440e8cd08ec6efa0bc1086a920681",
+      "worker": "4",
+      "step": "unit",
+      "startTime": "2026-10-01T18:03:36.168000+00:00",
+      "capturedAt": "2026-10-01T18:40:13.875229+00:00",
+      "success": false,
+      "passed": 5602,
+      "failed": 1,
+      "failureTitles": [
+        "S-G7-F72-K7: K7\u2019s guard CALLS the one owner for each of F72 and F74, and keeps no comparison of its own"
+      ]
+    },
+    {
+      "path": "receipts/mutation-diagnostics/7-unit-1790877828180.json",
+      "sha256": "aa500d727e37df49c1137117e1e6a3e62a15424c80eaa302dfba7a030d02006e",
+      "worker": "7",
+      "step": "unit",
+      "startTime": "2026-10-01T18:03:48.180000+00:00",
+      "capturedAt": "2026-10-01T18:40:09.204204+00:00",
+      "success": false,
+      "passed": 5602,
+      "failed": 1,
+      "failureTitles": [
+        "SD-4 [U] refuses a non-canonical stored spelling rather than accepting it"
+      ]
+    },
+    {
+      "path": "receipts/mutation-diagnostics/6-unit-1790878067783.json",
+      "sha256": "a0b6faf0e3ca6d03cdece81f3160642d83fc362ac7161c739d179e4c2a46d765",
+      "worker": "6",
+      "step": "unit",
+      "startTime": "2026-10-01T18:07:47.783000+00:00",
+      "capturedAt": "2026-10-01T18:44:05.519459+00:00",
+      "success": true,
+      "passed": 5603,
+      "failed": 0,
+      "failureTitles": []
+    },
+    {
+      "path": "receipts/mutation-diagnostics/1-unit-1790878079495.json",
+      "sha256": "5e23edce08147badf45cdaaaed9c77e8205462de99dbab6f86c1ea99965a369f",
+      "worker": "1",
+      "step": "unit",
+      "startTime": "2026-10-01T18:07:59.495000+00:00",
+      "capturedAt": "2026-10-01T18:44:27.984536+00:00",
+      "success": false,
+      "passed": 5570,
+      "failed": 33,
+      "failureTitles": [
+        "no file in the gates directory casts to the bottom type",
+        "no non-spec gate file writes a refusal code the compiler was told not to check",
+        "D-10-PIPE-b: no file a slot calls writes a refusal code the compiler was told not to check",
+        "S-G7-VOCAB: `refuse` is called with `effect_not_admissible` or `booking_confirmation_required`, and with nothing else",
+        "S-G7-VOCAB-NEVER: there is no cast to the bottom type anywhere in Gate 7\u2019s closure",
+        "G7-N1a: a DRAFT on METRIC \u2014 the cell is the fence, and METRIC\u2019s does not list DRAFT",
+        "G7-N1b: a REFINE on APPROVAL \u2014 MEMBERSHIP, not an ordered rank. APPROVAL\u2019s cell is `NONE, NAVIGATE, CONTROL, COMMIT, HANDOFF`, so an ordered comparison would admit this and the contract does not",
+        "G7-N1c: a HANDOFF on METRIC \u2014 METRIC\u2019s cell has no HANDOFF, and HANDOFF is off-order",
+        "G7-N1d: a COMMIT on METRIC \u2014 K11\u2019s four COMMIT-bearing kinds do not include it",
+        "an unknown kind and an unknown effect both refuse: the lookup has no default branch",
+        "G7-N2a: a HANDOFF whose destination is CONTROL-spaced \u2014 R3.2.2 admits C9 and AE only",
+        "G7-N2b: a NAVIGATE carrying a `capability` \u2014 F69 gives NAVIGATE the class-`c` target and no other member",
+        "G7-N2c: a CONTROL carrying a C9 ref",
+        "G7-N2d: a REFINE carrying an AE ref \u2014 the widget layer never bridges a key space (F70)",
+        "G7-N2e: a COMMIT with a half-populated ref \u2014 F21 says a half pair is not a ref",
+        "an effect that must name a capability and names none refuses; a `NONE` that names one refuses too",
+        "no effect may name a TOOL ref (F69\u2019s closing sentence), including one spelled like a C9 key",
+        "G7-N3a: an unregistered CONTROL key \u2014 F27 closes the space at three keys, and Gate 7 is the fence",
+        "an unregistered C9 key refuses at the same membership check, reported as C2",
+        "a class-`c` target on an effect F69 does not give one refuses",
+        "G7-N-ESC-P1: the escape is that ONE intent \u2014 this key, at priority 0. Priority 1 is not it",
+        "G7-A1c: another registered CONTROL key is not the escape, even at priority 0",
+        "G7-N7a/N7b/N7c: a class the cell does not list is refused, whichever tier it is",
+        "G7-N7-GUEST-NAV: `ANONYMOUS_CHAT` carries REFINE and HANDOFF \u2014 an ALLOWLIST, so NAVIGATE is refused although a richer tier carries it",
+        "G7-N-NONE-PUSH: `NONE` is carried by `RICH_INTERACTIVE` alone (R3.2.3)",
+        "G7-N7e: a channel outside `ChannelId`, and one that is a property of `Object.prototype`, admit nothing",
+        "G7-N9a: C9a refuses a MONEY capability \u2014 FR-6d\u2019s fence is that no money-mutating key is actuatable from a widget at all (fixture-only)",
+        "G7-N9b: C9a is FR-6d\u2019s predicate, not F31\u2019s VETO \u2014 the same MONEY key refuses on `PAYMENT_HANDOFF`, which F31 admits (F82 routes this very key there), so an F31-shaped C9a would pass it down to C9b (fixture-only)",
+        "G7-N6e: a key whose row was WITHDRAWN resolves to no confirmation kind at all \u2014 F72 has no default branch (fixture-only)",
+        "G7-N6g: F80 \u2014 the same COMMIT whose pairing\u2019s propose key is `personal_data` refuses at C6a (fixture-only)",
+        "G7-N6g-2: a `SETTINGS_DRAFT` COMMIT with no single pairing row refuses at C6a too \u2014 the propose key is what F80 reads (fixture-only)",
+        "G7-FC4: C9b \u2014 `PAYMENT_HANDOFF` is gap-blocked, and the block is READ from K20\u2019s derived `emittable`, not hard-coded (fixture-only)",
+        "no record at all refuses, and reports C1"
+      ]
+    },
+    {
+      "path": "receipts/mutation-diagnostics/8-live-1790878197603.json",
+      "sha256": "33733820883197624fef30d7ad26b25748dabe26a345b7ec09a90a5e920fec52",
+      "worker": "8",
+      "step": "live",
+      "startTime": "2026-10-01T18:09:57.603000+00:00",
+      "capturedAt": "2026-10-01T18:40:25.162915+00:00",
+      "success": false,
+      "passed": 403,
+      "failed": 3,
+      "failureTitles": [
+        "T6-stub (R-3): a foreign `readback_ref` refuses",
+        "AR1-EXPIRY expires without renewal and denies the old authorization",
+        "SV2-01 happy successor verification creates usable explicit personal context and actual actor audit"
+      ]
+    },
+    {
+      "path": "receipts/mutation-diagnostics/2-unit-1790878227441.json",
+      "sha256": "b0bc170e3a3253c5a8f08c91ccd1f1ca314d5ee777de85cee7b50741b9e9ecd0",
+      "worker": "2",
+      "step": "unit",
+      "startTime": "2026-10-01T18:10:27.441000+00:00",
+      "capturedAt": "2026-10-01T18:46:29.381814+00:00",
+      "success": false,
+      "passed": 5601,
+      "failed": 2,
+      "failureTitles": [
+        "G7-A1c: another registered CONTROL key is not the escape, even at priority 0",
+        "S-G7-F27-ONE: Gate 7 uses that one function rather than a membership set of its own"
+      ]
+    },
+    {
+      "path": "receipts/mutation-diagnostics/5-unit-1790879018642.json",
+      "sha256": "193c5769b8491ad079d42caddfcad920d478275dcd7a6511dda5db3a560fc9e2",
+      "worker": "5",
+      "step": "unit",
+      "startTime": "2026-10-01T18:23:38.642000+00:00",
+      "capturedAt": "2026-10-01T18:46:55.079564+00:00",
+      "success": true,
+      "passed": 5603,
+      "failed": 0,
+      "failureTitles": []
+    }
+  ],
+  "completedOverlappingJobs": [
+    {
+      "slot": "7-part-1-of-4",
+      "gate": "7",
+      "partition": "1/4",
+      "receipt": "receipts/mutation-7-part-1-of-4.receipt.json",
+      "receiptSha256": "e099c280d7833b13aa4e8fc97ab9cb47a3e7108d22c718c8d999ec93b8dcaf3f",
+      "startInferredFromReceipt": "2026-10-01T17:00:30.852790+00:00",
+      "completedAt": "2026-10-01T18:48:01.472790+00:00",
+      "wallSeconds": 6450.62,
+      "exit": 0,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "7",
+        "--partition",
+        "1/4",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-7-part-1-of-4.json"
+      ],
+      "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-3/maya-saas-backend"
+    },
+    {
+      "slot": "7-part-2-of-4",
+      "gate": "7",
+      "partition": "2/4",
+      "receipt": "receipts/mutation-7-part-2-of-4.receipt.json",
+      "receiptSha256": "ea1666124d731af832df5b12d762b25c1027422aecc077cb8ef57c94c56de24f",
+      "startInferredFromReceipt": "2026-10-01T17:07:55.306735+00:00",
+      "completedAt": "2026-10-01T18:54:47.266735+00:00",
+      "wallSeconds": 6411.96,
+      "exit": 0,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "7",
+        "--partition",
+        "2/4",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-7-part-2-of-4.json"
+      ],
+      "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-2/maya-saas-backend"
+    },
+    {
+      "slot": "7-part-3-of-4",
+      "gate": "7",
+      "partition": "3/4",
+      "receipt": "receipts/mutation-7-part-3-of-4.receipt.json",
+      "receiptSha256": "b98770f1089c16ea81b4b15654885fedb373c10aee0316833cc0174dab9a7229",
+      "startInferredFromReceipt": "2026-10-01T17:09:32.141920+00:00",
+      "completedAt": "2026-10-01T18:48:41.201920+00:00",
+      "wallSeconds": 5949.06,
+      "exit": 0,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "7",
+        "--partition",
+        "3/4",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-7-part-3-of-4.json"
+      ],
+      "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-4/maya-saas-backend"
+    },
+    {
+      "slot": "7-part-4-of-4",
+      "gate": "7",
+      "partition": "4/4",
+      "receipt": "receipts/mutation-7-part-4-of-4.receipt.json",
+      "receiptSha256": "7355b4995682bd8c889745c41675a58a4602b3fdc239b723acfaba8dc843b505",
+      "startInferredFromReceipt": "2026-10-01T17:14:03.503205+00:00",
+      "completedAt": "2026-10-01T18:52:56.423205+00:00",
+      "wallSeconds": 5932.92,
+      "exit": 0,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "7",
+        "--partition",
+        "4/4",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-7-part-4-of-4.json"
+      ],
+      "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-1/maya-saas-backend"
+    },
+    {
+      "slot": "8c",
+      "gate": "8c",
+      "partition": null,
+      "receipt": "receipts/mutation-8c.receipt.json",
+      "receiptSha256": "03538998de6e5566f781b19948274a8a899323de79e953dad873e7cc8bd2b603",
+      "startInferredFromReceipt": "2026-10-01T17:31:02.658761+00:00",
+      "completedAt": "2026-10-01T19:13:40.688761+00:00",
+      "wallSeconds": 6158.03,
+      "exit": 0,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "8c",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-8c.json"
+      ],
+      "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-7/maya-saas-backend"
+    },
+    {
+      "slot": "8r",
+      "gate": "8r",
+      "partition": null,
+      "receipt": "receipts/mutation-8r.receipt.json",
+      "receiptSha256": "198d0e4ef8226b26e693c7f830490f8622000b023e19451f1a8909ad580f2a8a",
+      "startInferredFromReceipt": "2026-10-01T17:33:56.356251+00:00",
+      "completedAt": "2026-10-01T19:27:26.536251+00:00",
+      "wallSeconds": 6810.18,
+      "exit": 0,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "8r",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-8r.json"
+      ],
+      "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-8/maya-saas-backend"
+    },
+    {
+      "slot": "AB",
+      "gate": "AB",
+      "partition": null,
+      "receipt": "receipts/mutation-AB.receipt.json",
+      "receiptSha256": "20c5018e6126024948b0e354fbb3151c938b2d8ce4f1a39a6185161e63604c16",
+      "startInferredFromReceipt": "2026-10-01T17:46:17.608778+00:00",
+      "completedAt": "2026-10-01T18:23:28.438778+00:00",
+      "wallSeconds": 2230.83,
+      "exit": 0,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "AB",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-AB.json"
+      ],
+      "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-5/maya-saas-backend"
+    },
+    {
+      "slot": "D8",
+      "gate": "D8",
+      "partition": null,
+      "receipt": "receipts/mutation-D8.receipt.json",
+      "receiptSha256": "e4c951a714192961e51475657ee25eae1059228d0801a328c6375349998d8061",
+      "startInferredFromReceipt": "2026-10-01T18:07:46.799196+00:00",
+      "completedAt": "2026-10-01T19:26:14.129196+00:00",
+      "wallSeconds": 4707.33,
+      "exit": 0,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "D8",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-D8.json"
+      ],
+      "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-6/maya-saas-backend"
+    },
+    {
+      "slot": "P-allowlist",
+      "gate": "P-allowlist",
+      "partition": null,
+      "receipt": "receipts/mutation-P-allowlist.receipt.json",
+      "receiptSha256": "b605766bf6795e3d1f699756f4f97d7506d7011ca60a342997d4f39f3db776a0",
+      "startInferredFromReceipt": "2026-10-01T18:23:28.435580+00:00",
+      "completedAt": "2026-10-01T19:13:09.105580+00:00",
+      "wallSeconds": 2980.67,
+      "exit": 0,
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "P-allowlist",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-P-allowlist.json"
+      ],
+      "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-5/maya-saas-backend"
+    }
+  ],
+  "jobTimestampMethod": "Receipt filesystem completion timestamp minus its recorded wall seconds; overlap widened by one second.",
+  "nativeOriginalExecutionComplete": true,
+  "nativeOriginalExecutionExit": 0,
+  "admissionAssessment": "All overlapping whole parts will be withheld and rerun with canonical unrestricted steps on the identical candidate. Unaffected fresh parts remain in this same certification programme.",
+  "timeoutsChanged": false,
+  "productSourceChanged": false,
+  "powerSettingsChanged": false,
+  "parserCorrection": "Wake Requests scheduler hints in the initial diagnostic were not actual wake events and are excluded here."
+}

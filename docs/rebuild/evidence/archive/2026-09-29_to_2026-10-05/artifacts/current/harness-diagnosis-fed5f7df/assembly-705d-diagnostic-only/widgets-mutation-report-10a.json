@@ -1,0 +1,294 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gate10a.json": "12ff06bf443674a142b9bc492bb107d0111a19e9e525d9d6bedfe479ced5d841"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T16:02:12.043Z",
+  "batteries": [
+    "gate10a.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-87bd47f2ea",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-87bd47f2ea",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "10a:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gate10a.json",
+      "id": "M10-7",
+      "files": [
+        "src/widgets/routing/owner-set.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "U10A-OS-1",
+        "U10A-OS-4",
+        "U10A-OS-15"
+      ],
+      "kills": [
+        {
+          "killer": "U10A-OS-1",
+          "test": "U10a — ownerSet and sameOwner (C11:4833-4844) U10A-OS-1 a C9 key resolves to the owner classes of the kinds that name it",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "U10A-OS-4",
+          "test": "U10a — ownerSet and sameOwner (C11:4833-4844) U10A-OS-4 INHERITED and NONE never appear in an owner set (C11:4836) [M10-7]",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "U10A-OS-15",
+          "test": "U10a — ownerSet and sameOwner (C11:4833-4844) U10A-OS-15 sameOwner is intersection, and `undefined` fails closed on either side [M10-6]",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 3
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate10a.json",
+      "id": "M10-8",
+      "files": [
+        "src/widgets/routing/owner-set.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "U10A-OS-8"
+      ],
+      "kills": [
+        {
+          "killer": "U10A-OS-8",
+          "test": "U10a — ownerSet and sameOwner (C11:4833-4844) U10A-OS-8 [RI] an AE key with TWO pairing rows is `undefined` (FR-6b) [M10-8]",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate10a.json",
+      "id": "M10-14",
+      "files": [
+        "src/widgets/routing/deterministic-router.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "U10A-R-15"
+      ],
+      "kills": [
+        {
+          "killer": "U10A-R-15",
+          "test": "U10a — routeUtterance (C11:4805-4810, §4.7 V1 and V9) U10A-R-15 an escape verb matches the escape candidate BEFORE any other [M10-14]",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate10a.json",
+      "id": "M10-15",
+      "files": [
+        "src/widgets/routing/deterministic-router.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "U10A-R-6"
+      ],
+      "kills": [
+        {
+          "killer": "U10A-R-6",
+          "test": "U10a — routeUtterance (C11:4805-4810, §4.7 V1 and V9) U10A-R-6 array order decides, and the tapped record is not privileged [M10-15]",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate10a.json",
+      "id": "M10-24",
+      "files": [
+        "src/widgets/routing/deterministic-router.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "U10A-R-5"
+      ],
+      "kills": [
+        {
+          "killer": "U10A-R-5",
+          "test": "U10a — routeUtterance (C11:4805-4810, §4.7 V1 and V9) U10A-R-5 no substring, prefix or suffix match [M10-24]",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T16:50:16.575Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 1,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

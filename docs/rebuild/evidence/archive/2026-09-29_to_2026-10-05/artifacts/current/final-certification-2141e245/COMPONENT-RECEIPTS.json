@@ -1,0 +1,33 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "backend": {
+    "pass": 5602,
+    "fail": 0,
+    "suites": 587
+  },
+  "widgetsLive": {
+    "pass": 406,
+    "fail": 0
+  },
+  "runtime": {
+    "pass": 422,
+    "skip": 7,
+    "fail": 0,
+    "nodes": [
+      22,
+      24
+    ]
+  },
+  "carrier": {
+    "pass": 93,
+    "fail": 0
+  },
+  "python": {
+    "pass": 613,
+    "fail": 0
+  },
+  "FBE2ESafeProbes": "6/6 PASS",
+  "L27extraMutations": "8/8 KILLED",
+  "artifactParity": "PASS",
+  "nativeMutationCorpus": "RUNNING; no full certificate yet"
+}

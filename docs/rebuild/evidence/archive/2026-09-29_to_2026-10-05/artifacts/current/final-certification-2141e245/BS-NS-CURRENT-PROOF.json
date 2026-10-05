@@ -1,0 +1,273 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "scope": "Fresh synthetic/local evidence only; not production evidence or whole-corpus certification",
+  "BS1": "PASS",
+  "NS1": "PASS",
+  "liveProofs": [
+    {
+      "title": "BS-SOURCE [HTTP] [E-MINT] own-list exact Client source proposes and commits reschedule and cancel through existing owners",
+      "status": "passed",
+      "durationMs": 1467
+    },
+    {
+      "title": "NS-SOURCE [HTTP] [E-MINT] production journal detail rereads exact retained date and resolves exact parent",
+      "status": "passed",
+      "durationMs": 363
+    },
+    {
+      "title": "NS-CHECK admits exact detail date and preserves REFINE; all near-miss shapes remain forbidden",
+      "status": "passed",
+      "durationMs": 319
+    },
+    {
+      "title": "NS-REFUSE date cannot project a historical source",
+      "status": "passed",
+      "durationMs": 233
+    },
+    {
+      "title": "NS-REFUSE erased cannot project a historical source",
+      "status": "passed",
+      "durationMs": 210
+    },
+    {
+      "title": "NS-REFUSE expired cannot project a historical source",
+      "status": "passed",
+      "durationMs": 202
+    },
+    {
+      "title": "NS-REFUSE body cannot project a historical source",
+      "status": "passed",
+      "durationMs": 200
+    },
+    {
+      "title": "NS-REFUSE seal cannot project a historical source",
+      "status": "passed",
+      "durationMs": 182
+    },
+    {
+      "title": "NS-REFUSE foreign-principal cannot project a historical source",
+      "status": "passed",
+      "durationMs": 305
+    },
+    {
+      "title": "NS-PARENT rechecks parent availability when the new exact return link is used",
+      "status": "passed",
+      "durationMs": 269
+    }
+  ],
+  "compiledPersonal": {
+    "mode": "personal",
+    "createRescheduleCancel": true,
+    "realCanonicalNet": true,
+    "compiledRuntime": true,
+    "allCommitsRan14Gates": true
+  },
+  "compiledJournal": {
+    "mode": "journal",
+    "realCanonicalNet": true,
+    "compiledRuntime": true,
+    "backendDetail": true,
+    "fullscreen": null,
+    "roundTripPassed": true,
+    "parentReturn": {
+      "requestedParentWidgetId": "cd90af4a-47e2-4a34-bea7-4ede3e6b2b0b",
+      "returnIntent": {
+        "rawJsonSha256": "64dd83aa13c0f59ae170127675916994f91750a3714183158a7a7d822b4b302c",
+        "value": {
+          "intent_ref": "i4",
+          "intent_token": "[redacted:sha256:ad88e2d6a3cc8d914d65a23243d13e814933be95ecf36bfb7aad634fcfc9b9c8]",
+          "role": "secondary",
+          "label": "Return to journal",
+          "utterance_preview": "Return to journal",
+          "speech_aliases": [
+            "return to journal"
+          ],
+          "ordinal": 4,
+          "priority": 1,
+          "effect": "NAVIGATE",
+          "capability": null,
+          "handoff_capability_ref": null,
+          "target": {
+            "class": "w",
+            "ref": "cd90af4a-47e2-4a34-bea7-4ede3e6b2b0b"
+          },
+          "input_schema": null,
+          "verification_floor": "ANONYMOUS",
+          "confirmation": null,
+          "authority_hint": {
+            "emphasis": "secondary",
+            "disabled_because": null
+          },
+          "enabled": {
+            "state": "KNOWN",
+            "value": true,
+            "label": "Return to journal",
+            "reason_code": null,
+            "fact_ref": null,
+            "as_of": null,
+            "evidence_refs": [],
+            "next_intent_ref": null
+          },
+          "expires_at": "2026-10-01T06:56:21.299Z",
+          "single_use": false
+        }
+      },
+      "resolvedParentWidgetId": "cd90af4a-47e2-4a34-bea7-4ede3e6b2b0b",
+      "before": {
+        "fullscreen": {
+          "phase": "open",
+          "itemId": "d2",
+          "result": {
+            "kind": "SCHEDULE",
+            "tier": "RICH_INTERACTIVE",
+            "density": "SHEET",
+            "mode": "prose",
+            "roleHint": "grid",
+            "label": "Расписание · 1 мастер",
+            "description": "Все мастера: нет записей",
+            "nodes": [
+              {
+                "t": "heading",
+                "level": 2,
+                "text": "Расписание · 1 мастер",
+                "focusTarget": false
+              },
+              {
+                "t": "block",
+                "block": "paragraph",
+                "roleHint": null,
+                "label": null,
+                "children": [
+                  {
+                    "t": "text",
+                    "text": "Все мастера: нет записей"
+                  }
+                ]
+              },
+              {
+                "t": "block",
+                "block": "list",
+                "roleHint": null,
+                "label": null,
+                "children": [
+                  {
+                    "t": "block",
+                    "block": "item",
+                    "roleHint": null,
+                    "label": null,
+                    "children": [
+                      {
+                        "t": "text",
+                        "text": "Все мастера: нет записей"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "t": "action",
+                "ref": "intent:i1",
+                "intent_ref": "i1",
+                "name": "Open journal detail",
+                "label": "Open journal detail",
+                "role": "primary",
+                "effect": "NAVIGATE",
+                "enabled": "KNOWN",
+                "explanation": null
+              },
+              {
+                "t": "action",
+                "ref": "intent:i2",
+                "intent_ref": "i2",
+                "name": "Refresh journal",
+                "label": "Refresh journal",
+                "role": "secondary",
+                "effect": "REFINE",
+                "enabled": "KNOWN",
+                "explanation": null
+              },
+              {
+                "t": "action",
+                "ref": "intent:i3",
+                "intent_ref": "i3",
+                "name": "Dismiss",
+                "label": "Dismiss",
+                "role": "escape",
+                "effect": "CONTROL",
+                "enabled": "KNOWN",
+                "explanation": null
+              },
+              {
+                "t": "action",
+                "ref": "intent:i4",
+                "intent_ref": "i4",
+                "name": "Return to journal",
+                "label": "Return to journal",
+                "role": "secondary",
+                "effect": "NAVIGATE",
+                "enabled": "KNOWN",
+                "explanation": null
+              }
+            ],
+            "textEquivalent": {
+              "headline": "Расписание · 1 мастер",
+              "body": "Все мастера: нет записей",
+              "itemized": [
+                "Все мастера: нет записей"
+              ],
+              "completeness_sentence": null,
+              "unknowns_sentence": null
+            },
+            "readingOrder": [
+              "intent:i1",
+              "intent:i2",
+              "intent:i3",
+              "intent:i4"
+            ],
+            "accessibleNames": {
+              "intent:i1": "Open journal detail",
+              "intent:i2": "Refresh journal",
+              "intent:i3": "Dismiss",
+              "intent:i4": "Return to journal"
+            },
+            "liveRegion": "off",
+            "announceIntervalMs": 0,
+            "focus": "none",
+            "motion": "standard",
+            "lifecycle": {
+              "state": "MINTED",
+              "input_lock": "none",
+              "on_expiry": "collapse_to_summary"
+            }
+          }
+        },
+        "timeline": [
+          {
+            "id": "w1",
+            "kind": "widget"
+          }
+        ]
+      },
+      "after": {
+        "fullscreen": null,
+        "timeline": [
+          {
+            "id": "w1",
+            "kind": "widget"
+          }
+        ]
+      }
+    }
+  },
+  "sources": [
+    {
+      "path": "receipts/widgets-live-full.json",
+      "sha256": "eb2d76be8ebe0631985bf1c9c366cb77eda747e9eb015a8f6233ffef9d4f9140"
+    },
+    {
+      "path": "receipts/compiled-net-bin-observations.json",
+      "sha256": "6a9184fed574735ee7b5ba24954316fbe4e3df92be97d1b765c50f6a905867ce"
+    }
+  ],
+  "migration": "Written and tested only in fresh local proof databases; production not applied"
+}

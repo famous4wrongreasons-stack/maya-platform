@@ -1,0 +1,212 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "requestedBaselines": [
+    {
+      "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+      "status": "passed",
+      "durationMs": 546
+    },
+    {
+      "name": "P-F88 \u2014 the \u00a73.8 submission and F88\u2019s walk, at the shape stage [HTTP] F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+      "status": "passed",
+      "durationMs": 649
+    },
+    {
+      "name": "P-F88 \u2014 the \u00a73.8 submission and F88\u2019s walk, at the shape stage [HTTP] F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+      "status": "passed",
+      "durationMs": 53
+    }
+  ],
+  "mainFullLiveReportSha256": "d05ec2836e1f562d5f92688408a68c1e4ad831f62a4205b6341cbfe38248d207",
+  "nativeARBaselineControls": "PASS; complete unrestricted native AR part finished AS-DECLARED 19/19",
+  "wholeCorpusCertification": "PENDING",
+  "timeoutsIncreased": false,
+  "nativeARInitialFullControls": [
+    {
+      "step": "live",
+      "passed": 406,
+      "failed": 0,
+      "pending": 0,
+      "diagnostic": "receipts/mutation-diagnostics/3-live-1790801405244.json",
+      "sourceReportSha256": "5ec0503c9c2b11ed3abbe351f5c0423bbcb3b32b4892b73bcf280193dd9fc093",
+      "diagnosticSha256": "56b8a3ea1fb29de9e236e148a4015ba5652e59c874272c9ae40172eeeaeae328",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-bab750d8/mutation-isolated-worker-3/maya-saas-backend",
+      "startTime": 1790801405244
+    },
+    {
+      "step": "unit",
+      "passed": 5601,
+      "failed": 0,
+      "pending": 0,
+      "diagnostic": "receipts/mutation-diagnostics/3-unit-1790801515618.json",
+      "sourceReportSha256": "ff3365f65e43c875adc7a6cb7a2f5739228ecf7b1595c734aeb65f4bfb7acb6e",
+      "diagnosticSha256": "9869ba68dedc806b75078d3b4cac30077578a308f159873b72db3025cbd5a1f1",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-bab750d8/mutation-isolated-worker-3/maya-saas-backend",
+      "startTime": 1790801515618
+    }
+  ],
+  "nativeARFinalReceipt": {
+    "path": "receipts/mutation-parts/widgets-mutation-part-AR.json",
+    "sha256": "71598741ace5507de3d67a3814f325ddfb1203bd6637e849200241f606ce4c5a",
+    "status": "AS-DECLARED",
+    "baselineControls": {
+      "baseline|live": {
+        "set": null,
+        "steps": [
+          "live"
+        ],
+        "exits": {
+          "live": 0
+        },
+        "failed": [],
+        "problems": []
+      },
+      "baseline|unit,typecheck,k3": {
+        "set": null,
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "exits": {
+          "unit": 0,
+          "typecheck": 0,
+          "k3": 0
+        },
+        "failed": [],
+        "problems": []
+      }
+    },
+    "restrictions": {
+      "live_tests": null,
+      "live_filter": null,
+      "unit_tests": null
+    },
+    "baselineRed": [],
+    "mismatches": 0,
+    "declarations": 19
+  },
+  "completedNativeUnrestrictedLiveControlCount": 8,
+  "completedNativeUnrestrictedLiveControls": [
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-13-part-1-of-4.json",
+      "sha256": "3c0bb87e32f29e8b5981c85670b2c9f52e2a4833ee00f08b4d6f05fd9412b907",
+      "baseline": {
+        "set": null,
+        "steps": [
+          "live"
+        ],
+        "exits": {
+          "live": 0
+        },
+        "failed": [],
+        "problems": []
+      }
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-13-part-2-of-4.json",
+      "sha256": "71c52eabd155eceb73bfe228b5db43f379601285fd8d485f1278289e506ea0df",
+      "baseline": {
+        "set": null,
+        "steps": [
+          "live"
+        ],
+        "exits": {
+          "live": 0
+        },
+        "failed": [],
+        "problems": []
+      }
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-AR.json",
+      "sha256": "71598741ace5507de3d67a3814f325ddfb1203bd6637e849200241f606ce4c5a",
+      "baseline": {
+        "set": null,
+        "steps": [
+          "live"
+        ],
+        "exits": {
+          "live": 0
+        },
+        "failed": [],
+        "problems": []
+      }
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-BS.json",
+      "sha256": "a43a084d98cc762c1fe2e4702c05dad22388e54f3f68b854f14171b018d7c132",
+      "baseline": {
+        "set": null,
+        "steps": [
+          "live"
+        ],
+        "exits": {
+          "live": 0
+        },
+        "failed": [],
+        "problems": []
+      }
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-H-harness.json",
+      "sha256": "db2502889935f55b4547405a75ab7119a76708f7939d8bca32d0a6e5d4bc2ba4",
+      "baseline": {
+        "set": null,
+        "steps": [
+          "live"
+        ],
+        "exits": {
+          "live": 0
+        },
+        "failed": [],
+        "problems": []
+      }
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-NS.json",
+      "sha256": "8c0c9df1587351d0c86381945d1da2cf972d6022d7aeb8d224e42c3dc8c44261",
+      "baseline": {
+        "set": null,
+        "steps": [
+          "live"
+        ],
+        "exits": {
+          "live": 0
+        },
+        "failed": [],
+        "problems": []
+      }
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-PI.json",
+      "sha256": "c9b2ef166ed7a883c7acc697fb6c900923da1720176fd1c0f8bf84bc75ed8fd0",
+      "baseline": {
+        "set": null,
+        "steps": [
+          "live"
+        ],
+        "exits": {
+          "live": 0
+        },
+        "failed": [],
+        "problems": []
+      }
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-TURN.json",
+      "sha256": "4c9cd0db50e7b6d248404a01823a7d7072821420d2c0ce56aa2cecdd40b19f37",
+      "baseline": {
+        "set": null,
+        "steps": [
+          "live"
+        ],
+        "exits": {
+          "live": 0
+        },
+        "failed": [],
+        "problems": []
+      }
+    }
+  ]
+}

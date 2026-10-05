@@ -1,0 +1,18 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "name": "mutation-P-f88",
+  "kind": "hosted-job observation; not a local process receipt",
+  "exit": 0,
+  "exitDerivation": "GitHub job conclusion == success",
+  "seconds": 4950.0,
+  "startedAt": "2026-10-05T00:45:24Z",
+  "finishedAt": "2026-10-05T02:07:54Z",
+  "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+  "workflowRunId": 37238713168,
+  "jobId": 111543133224,
+  "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133224",
+  "jobMetadataFile": "hosted/37238713168-jobs.json",
+  "jobMetadataSha256": "93e899a6d3336b92d0b77fd5355eb074e59982b396d57c2726726c4b0d5087b7",
+  "originalPart": "hosted/artifacts/37238713168/widgets-mutation-part-dff728e85a97841dd72bd290992b888344780780-P-f88/widgets-mutation-part-P-f88.json",
+  "partSha256": "beaf7e70f1e15875b3a5516443635725e67b1b0ef7b592b9b5c477bdc1e260a9"
+}

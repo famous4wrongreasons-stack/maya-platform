@@ -1,0 +1,105 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "completedAt": "2026-10-02T07:47:49.821523+00:00",
+  "technicalProgrammeComplete": true,
+  "backgroundWorkRemaining": false,
+  "profileApplicableFalse": 0,
+  "globalFalse": 2,
+  "globalStops": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "productDefectEstablished": false,
+  "harnessDefectEstablished": true,
+  "baselines": {
+    "SV2-HTTP": "PASS",
+    "F88-1": "PASS",
+    "F88-2": "PASS"
+  },
+  "fullMutations": "PASS:506/506 applicable,509 declarations",
+  "ciEquivalent": "PASS:local workflow-equivalent",
+  "fbe2eSafeProbes": "PASS:6/6",
+  "fbe2eAcceptance": "PARTIAL:21 CLOSED/3 PARTIAL/4 OPEN",
+  "certifiedForProfile": false,
+  "fullContractCertified": false,
+  "readyForReleaseAuthorization": false,
+  "remainingBlockers": [
+    {
+      "id": "L2",
+      "boundary": "Fresh local checker PASS; advisory CI blocking/acceptance policy remains unresolved."
+    },
+    {
+      "id": "L5",
+      "boundary": "Booking tomorrow/day-window policy remains unresolved with L24; the repaired billing fixture clock does not change this product policy."
+    },
+    {
+      "id": "L20",
+      "boundary": "Supplying an UNKNOWN verdict is not a provider/Action Engine fault-produced UNKNOWN proof."
+    },
+    {
+      "id": "L23",
+      "boundary": "The carrier network structural-ratchet limitation remains; successful network probes do not replace that assertion."
+    },
+    {
+      "id": "L24",
+      "boundary": "The fixed booking availability window/timezone policy remains unresolved with L5."
+    },
+    {
+      "id": "L25",
+      "boundary": "Tap-as-delivery/render requires the retained lifecycle ruling; no new acceptance inferred."
+    },
+    {
+      "id": "L26",
+      "boundary": "Current strict mutation consumer does not retroactively approve the historical manual audit builder."
+    }
+  ],
+  "productionEffects": 0,
+  "realOtpEffects": 0,
+  "realYclientsEffects": 0,
+  "files": [
+    {
+      "path": "REPORT.md",
+      "sha256": "d49cedf44520dce3d00d5cb4a42947c66e029393a70eb75c957502506129aa0e"
+    },
+    {
+      "path": "CERTIFICATION-RECEIPTS.json",
+      "sha256": "11f97a54befc7c1860499c9f65498fec2e56c0a7c7f8efc534b1b80fbb3dc74c"
+    },
+    {
+      "path": "COMPLETE-MUTATIONS.json",
+      "sha256": "afa124cffe9455071feab13b7b508cabcb5c59830f3ec34f54a59770393ddb8a"
+    },
+    {
+      "path": "BASELINE-ADMISSION.json",
+      "sha256": "f87556c7409514bba9fe2d7b325a90160776c492a5d6cba1487e1ff197339695"
+    },
+    {
+      "path": "FBE2E-DISPOSITION.json",
+      "sha256": "ddd3dc5cc18682b49b23ae6ac6ce602eee55ab2aa3dcb319a31466eed9a65970"
+    },
+    {
+      "path": "HOST-ENVIRONMENT-CHECK.json",
+      "sha256": "e521a22251d28401ecea3667f9264f56f672403080f54ddc80a9df4d7ce09fbf"
+    },
+    {
+      "path": "SUSPEND-REEXECUTION.json",
+      "sha256": "b7784dd7bec7f4d6dad3ade210ad1fb2dcb4f5741ae3910df56f174835c23a8b"
+    },
+    {
+      "path": "FINAL-PROCESS-LIFECYCLE.json",
+      "sha256": "7b88cf583204fe98596f1e850af863372a39d6fa6c9ed4afc0f768663663d28b"
+    },
+    {
+      "path": "FINAL-DELIVERY-HASH-CHECK.json",
+      "sha256": "25c26b3c19c61bb20f6375db94d579b42b07f93454bddd48c618c82452a6c3a1"
+    },
+    {
+      "path": "REPORT-INDEX-FINALIZATION.json",
+      "sha256": "00b317c4f25d76a5ada371566964c49a99cd9058d040ad0b299b14ff11a03d30"
+    },
+    {
+      "path": "OWNERSHIP-PROOF.json",
+      "sha256": "ec29e2856cc338cc4016c872a4afa558e8a898fecd3492b0f6703e7f942b6b15"
+    }
+  ]
+}

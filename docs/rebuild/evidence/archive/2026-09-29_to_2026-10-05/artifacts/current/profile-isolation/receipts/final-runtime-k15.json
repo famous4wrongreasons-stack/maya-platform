@@ -1,0 +1,149 @@
+{
+  "bundlesCarryingAShell": 4,
+  "legacyBundlesCarryingAShell": 3,
+  "successorBundles": 1,
+  "shellSourceCopies": 1,
+  "clientSideAuthorityValuesInLegacy": 192,
+  "clientSideAuthorityValuesInSuccessor": 0,
+  "successorReadsClientStorage": [],
+  "successorReflectiveAccess": [],
+  "storageScan": "ast+text",
+  "successorRoots": [
+    {
+      "root": "maya-chat-shell/src",
+      "present": true,
+      "files": 30
+    },
+    {
+      "root": "maya-chat-shell/entry",
+      "present": true,
+      "files": 2
+    }
+  ],
+  "unreachabilityProbeRecorded": true,
+  "mayaOsSiteUnreachableProven": true,
+  "productionServedLegacyCopies": 0,
+  "productionServedAuthorityValues": 0,
+  "census": [
+    {
+      "bundle": "app.html (the shipped PWA)",
+      "tree": "canonical",
+      "bytes": 2719425,
+      "authorityTokenOccurrences": 88,
+      "perToken": {
+        "me_is_staff": 9,
+        "__meRole": 19,
+        "__meIsStaff": 11,
+        "__meIsMaster": 11,
+        "__meIsFounder": 21,
+        "__panelInfo": 17
+      },
+      "carriesAShell": true
+    },
+    {
+      "bundle": "app.html (the shipped PWA)",
+      "tree": "primary",
+      "bytes": 2704295,
+      "authorityTokenOccurrences": 88,
+      "perToken": {
+        "me_is_staff": 9,
+        "__meRole": 19,
+        "__meIsStaff": 11,
+        "__meIsMaster": 11,
+        "__meIsFounder": 21,
+        "__panelInfo": 17
+      },
+      "carriesAShell": true
+    },
+    {
+      "bundle": "maya-os-site/index.html",
+      "tree": "canonical",
+      "bytes": 2506607,
+      "authorityTokenOccurrences": 60,
+      "perToken": {
+        "me_is_staff": 5,
+        "__meRole": 14,
+        "__meIsStaff": 7,
+        "__meIsMaster": 7,
+        "__meIsFounder": 17,
+        "__panelInfo": 10
+      },
+      "carriesAShell": true
+    },
+    {
+      "bundle": "maya-os-site/index.html",
+      "tree": "primary",
+      "bytes": 2506256,
+      "authorityTokenOccurrences": 60,
+      "perToken": {
+        "me_is_staff": 5,
+        "__meRole": 14,
+        "__meIsStaff": 7,
+        "__meIsMaster": 7,
+        "__meIsFounder": 17,
+        "__panelInfo": 10
+      },
+      "carriesAShell": true
+    },
+    {
+      "bundle": "app-tenant.html",
+      "tree": "canonical",
+      "bytes": 1096396,
+      "authorityTokenOccurrences": 44,
+      "perToken": {
+        "me_is_staff": 4,
+        "__meRole": 10,
+        "__meIsStaff": 6,
+        "__meIsMaster": 6,
+        "__meIsFounder": 10,
+        "__panelInfo": 8
+      },
+      "carriesAShell": true
+    },
+    {
+      "bundle": "app-tenant.html",
+      "tree": "primary",
+      "bytes": 1097158,
+      "authorityTokenOccurrences": 44,
+      "perToken": {
+        "me_is_staff": 4,
+        "__meRole": 10,
+        "__meIsStaff": 6,
+        "__meIsMaster": 6,
+        "__meIsFounder": 10,
+        "__panelInfo": 8
+      },
+      "carriesAShell": true
+    },
+    {
+      "bundle": "index.html (the site)",
+      "tree": "canonical",
+      "bytes": 870237,
+      "authorityTokenOccurrences": 0,
+      "perToken": {
+        "me_is_staff": 0,
+        "__meRole": 0,
+        "__meIsStaff": 0,
+        "__meIsMaster": 0,
+        "__meIsFounder": 0,
+        "__panelInfo": 0
+      },
+      "carriesAShell": false
+    },
+    {
+      "bundle": "index.html (the site)",
+      "tree": "primary",
+      "bytes": 870237,
+      "authorityTokenOccurrences": 0,
+      "perToken": {
+        "me_is_staff": 0,
+        "__meRole": 0,
+        "__meIsStaff": 0,
+        "__meIsMaster": 0,
+        "__meIsFounder": 0,
+        "__panelInfo": 0
+      },
+      "carriesAShell": false
+    }
+  ]
+}

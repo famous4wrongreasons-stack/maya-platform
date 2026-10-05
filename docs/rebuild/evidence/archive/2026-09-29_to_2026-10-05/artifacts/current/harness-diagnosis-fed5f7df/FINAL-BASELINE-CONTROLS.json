@@ -1,0 +1,99 @@
+{
+  "candidate": "41906e0c0f48392cc0fef2dc199688d74aa8662d",
+  "classification": "diagnostic full unmutated AR controls; not mutation certificates",
+  "runs": [
+    {
+      "run": 1,
+      "report": "outputs/harness-diagnosis-fed5f7df/final-native-1/trace/jest-51660-3.json",
+      "sha256": "a68520df5b783394a9906fb9e0c95223509a50ca02d92a3286911653a7e2df37",
+      "success": true,
+      "passed": 406,
+      "failed": 0,
+      "pending": 0,
+      "namedTests": [
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+          "status": "passed",
+          "durationMs": 478
+        },
+        {
+          "name": "P-F88 \u2014 the \u00a73.8 submission and F88\u2019s walk, at the shape stage [HTTP] F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+          "status": "passed",
+          "durationMs": 561
+        },
+        {
+          "name": "P-F88 \u2014 the \u00a73.8 submission and F88\u2019s walk, at the shape stage [HTTP] F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+          "status": "passed",
+          "durationMs": 50
+        },
+        {
+          "name": "HTTP harness listener ownership HAR-LOOPBACK owns one ready IPv4 listener across requests and closes it at teardown",
+          "status": "passed",
+          "durationMs": 579
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "report": "outputs/harness-diagnosis-fed5f7df/final-native-2/trace/jest-51658-3.json",
+      "sha256": "736a77fb8b0218d3c00e5703be7f4836388dfdf0efc83f92f7cbdaabe4b089bf",
+      "success": true,
+      "passed": 406,
+      "failed": 0,
+      "pending": 0,
+      "namedTests": [
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+          "status": "passed",
+          "durationMs": 481
+        },
+        {
+          "name": "P-F88 \u2014 the \u00a73.8 submission and F88\u2019s walk, at the shape stage [HTTP] F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+          "status": "passed",
+          "durationMs": 526
+        },
+        {
+          "name": "P-F88 \u2014 the \u00a73.8 submission and F88\u2019s walk, at the shape stage [HTTP] F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+          "status": "passed",
+          "durationMs": 47
+        },
+        {
+          "name": "HTTP harness listener ownership HAR-LOOPBACK owns one ready IPv4 listener across requests and closes it at teardown",
+          "status": "passed",
+          "durationMs": 724
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "report": "outputs/harness-diagnosis-fed5f7df/final-native-3/trace/jest-51656-3.json",
+      "sha256": "91d803125ad21cd0b27162bccef06b9fa90bb1edddf781aa11a67fa77650181e",
+      "success": true,
+      "passed": 406,
+      "failed": 0,
+      "pending": 0,
+      "namedTests": [
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+          "status": "passed",
+          "durationMs": 481
+        },
+        {
+          "name": "P-F88 \u2014 the \u00a73.8 submission and F88\u2019s walk, at the shape stage [HTTP] F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+          "status": "passed",
+          "durationMs": 557
+        },
+        {
+          "name": "P-F88 \u2014 the \u00a73.8 submission and F88\u2019s walk, at the shape stage [HTTP] F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+          "status": "passed",
+          "durationMs": 47
+        },
+        {
+          "name": "HTTP harness listener ownership HAR-LOOPBACK owns one ready IPv4 listener across requests and closes it at teardown",
+          "status": "passed",
+          "durationMs": 644
+        }
+      ]
+    }
+  ]
+}

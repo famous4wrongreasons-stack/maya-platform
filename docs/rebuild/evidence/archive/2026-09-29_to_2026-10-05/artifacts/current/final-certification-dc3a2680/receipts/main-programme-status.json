@@ -1,0 +1,45 @@
+{
+  "candidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "jobs": [
+    [
+      "run-baseline.py",
+      "backend"
+    ],
+    [
+      "run-baseline.py",
+      "live"
+    ],
+    [
+      "run-extra.py",
+      "events"
+    ],
+    [
+      "run-extra.py",
+      "smoke"
+    ],
+    [
+      "run-extra.py",
+      "frontend-ci"
+    ],
+    [
+      "run-extra.py",
+      "node24"
+    ],
+    [
+      "run-carrier-selftest.py"
+    ],
+    [
+      "run-rest.py"
+    ]
+  ],
+  "exits": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ]
+}

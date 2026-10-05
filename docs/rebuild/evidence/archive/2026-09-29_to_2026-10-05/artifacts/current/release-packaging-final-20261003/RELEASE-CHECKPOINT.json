@@ -1,0 +1,166 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "createdAt": "2026-10-03T18:45:12.170829+00:00",
+  "checkpoint": {
+    "NEW CANDIDATE SHA": "77ecb3f5696583389e75592141f46fd0664d33d8",
+    "R01 MANIFEST": "PASS",
+    "AASA BYTES UNCHANGED": "YES",
+    "CANONICAL PWA PAYLOAD": "React AChat",
+    "CANONICAL IOS PAYLOAD": "React AChat",
+    "OLD SHELL PACKAGING": "REFUSED",
+    "PWA MANIFEST": "PASS",
+    "PWA/CAPACITOR PARITY": "PASS",
+    "AR1 TRUST IMPLEMENTATION": "PASS",
+    "PRODUCTION KEYS REQUIRED FROM OWNER": "YES",
+    "SECURITY REVIEWER ACTION REQUIRED": "YES",
+    "PLATFORM OWNER SESSION REQUIRED": "YES",
+    "CERTIFIED_FOR_PROFILE": "YES",
+    "PRODUCTION EXECUTION PATH CERTIFIED": "YES",
+    "READY FOR PRODUCTION PREFLIGHT": "YES"
+  },
+  "profile": "closed-input.no-handoff@1",
+  "profileApplicableFalse": 0,
+  "globalFalse": 2,
+  "globalStops": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "fullContractCertified": false,
+  "verification": {
+    "components": {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "backend": {
+        "pass": 5671,
+        "fail": 0,
+        "suites": 590
+      },
+      "widgetsLive": {
+        "pass": 429,
+        "fail": 0,
+        "suites": 41
+      },
+      "runtime": {
+        "pass": 424,
+        "skip": 7,
+        "fail": 0,
+        "nodes": [
+          22,
+          24
+        ]
+      },
+      "carrier": {
+        "pass": 93,
+        "skip": 0,
+        "fail": 0
+      },
+      "python": {
+        "pass": 613,
+        "fail": 0
+      },
+      "extraRuntimeL27": "8/8 KILLED",
+      "nativeMutationCorpus": "533/533 applicable kills; 46 batteries; 67 parts; 536 declarations",
+      "nonKillDeclarations": [
+        {
+          "battery": "gate10.json",
+          "id": "M10-5",
+          "status": "equivalent",
+          "reason": "RI-killed / equivalent on conformant input: row 1 exact subject agreement precedes effect comparison, so changing a matched record's effect while retaining the exact subject cannot alter the outcome table"
+        },
+        {
+          "battery": "gate6.json",
+          "id": "M17b",
+          "status": "pending",
+          "reason": null
+        },
+        {
+          "battery": "gate6.json",
+          "id": "M18b",
+          "status": "pending",
+          "reason": null
+        }
+      ],
+      "historicalReceiptsAdmitted": 0
+    },
+    "mutationCorpus": {
+      "batteries": 46,
+      "parts": 67,
+      "declarations": 536,
+      "applicableKills": 533,
+      "preexistingPending": 2,
+      "pendingDeclarations": [
+        "gate6.json#M17b",
+        "gate6.json#M18b"
+      ],
+      "pendingMeaning": "Existing standalone mutations shadowed by allowlist; not killed and not HANDOFF scope exclusions. No new waiver.",
+      "preexistingEquivalent": 1,
+      "extraL27Kills": 8,
+      "extraPackagingTrustKills": 12,
+      "historicalReceiptsAdmitted": 0
+    },
+    "localCiEquivalent": "PASS",
+    "fbe2e": "PASS",
+    "fbe2eCounts": {
+      "CLOSED": 26,
+      "ACCEPTED": 2
+    },
+    "packagingTests": 16,
+    "trustConfigTests": 20,
+    "trustCompiledTests": 7
+  },
+  "sleepRecovery": "Only WR partitions 3/4 and 4/4 overlapped host clamshell sleep; original results archived and excluded; both full canonical partitions reexecuted on fresh isolated source copies/test DBs with unchanged tests and timeouts. Strict complete release collector rerun. All 67 admitted partitions have zero suspend overlap.",
+  "externalActions": [
+    "Real owner public trust material and custody confirmation",
+    "Independent reviewer production certificate signature",
+    "Actual global platform-owner session",
+    "Separate owner execution authorization for this new candidate and current CAS"
+  ],
+  "readyForProductionPreflightMeaning": "Technical certification complete. Production remains blocked on real custodian trust, independent reviewer signature, actual platform session and new separately signed execution authorization.",
+  "effects": {
+    "productionDeploy": 0,
+    "productionMigration": 0,
+    "productionGrant": 0,
+    "realOtp": 0,
+    "realYclients": 0,
+    "iphoneInstall": 0
+  },
+  "sourceClean": true,
+  "signedProductionCertificateIssued": false,
+  "proofs": [
+    {
+      "path": "CERTIFICATION-RECEIPTS.json",
+      "sha256": "fd3a541502c9a05b65276b114f7b01f18e26bd917b992760455b9d0f388ebb1a"
+    },
+    {
+      "path": "PACKAGING-TRUST-PROOF.json",
+      "sha256": "786775c9602fadbf4b322429381c2f07976e546eaf16a9087568f3e3232a34d1"
+    },
+    {
+      "path": "COMPLETE-MUTATIONS.json",
+      "sha256": "28bec2038e29ac30b36943d8daf341a8df37d61cdb7c1f93e03c49ed2d58dd60"
+    },
+    {
+      "path": "SUSPEND-RECOVERY-PROOF.json",
+      "sha256": "5c665f79a9716924242d234f1b4612b0a7eae957b4c8cde33e5fefd25a8c25ab"
+    },
+    {
+      "path": "SUSPEND-RECOVERY-ADMISSION-COUNTERFACTS.json",
+      "sha256": "f41b49558300e9d3d1620ea3ec2c0a23511c4666f51e452b79c053540b737aa6"
+    },
+    {
+      "path": "HOST-ENVIRONMENT-CHECK.json",
+      "sha256": "17749b78a3a9b672aefa78769cc1cf801f1b74872315771efa8ff6f9a2a6bd6d"
+    },
+    {
+      "path": "FINAL-ARTIFACT-STABILITY.json",
+      "sha256": "fb97af3ea2c1314e802770428ad5d740863a41dcc730e50d33ee487841d10765"
+    },
+    {
+      "path": "FINAL-PROCESS-LIFECYCLE.json",
+      "sha256": "051572388e63bcc414c1795f4a8f2dc2ce2e121bc380136b193ee3e16465a559"
+    },
+    {
+      "path": "PROFILE-CERTIFICATE-PROPOSAL.json",
+      "sha256": "7e8ca38d359290861052e79e173655dd3c6acd0070a72f281a3d847c38627457"
+    }
+  ]
+}

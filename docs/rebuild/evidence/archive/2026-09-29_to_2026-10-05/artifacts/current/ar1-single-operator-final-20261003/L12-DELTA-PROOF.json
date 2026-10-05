@@ -1,0 +1,68 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "historicalDelta": "6af72aa46e7eff80fa2a4f825ccb2c0c27a0d234",
+  "compiledFresh": [
+    {
+      "ref": "6af72aa46e7eff80fa2a4f825ccb2c0c27a0d234^",
+      "sourceSha256": "86fb3ec2207fa34a30c85d5f154bb2ac0b6105dd5ba7cbc3c7702d30d4e2a828",
+      "emittedSha256": "a2f21bf8b4aee4276179713ce48711b6f0ea226f0541b0235a0a481c74bf1eab",
+      "emittedBytes": 569
+    },
+    {
+      "ref": "6af72aa46e7eff80fa2a4f825ccb2c0c27a0d234",
+      "sourceSha256": "0d65b6ff47b2833677bbe0393eb85bf1f9f254fc3934e052ce783d710c5af423",
+      "emittedSha256": "a2f21bf8b4aee4276179713ce48711b6f0ea226f0541b0235a0a481c74bf1eab",
+      "emittedBytes": 569
+    },
+    {
+      "ref": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+      "sourceSha256": "0fad31357c91979b50184744db5acfca65c03d4b407eb3cbb0f7113b9b35a322",
+      "emittedSha256": "a2f21bf8b4aee4276179713ce48711b6f0ea226f0541b0235a0a481c74bf1eab",
+      "emittedBytes": 569
+    }
+  ],
+  "emittedRuntimeIdenticalAcrossAllThree": true,
+  "entireFileIsTypeOnly": false,
+  "runtimeSites": [
+    {
+      "file": "src/widgets/booking/booking-selector.presenter.ts",
+      "sourceSha256": "05091af940b9e3442a4a1a514c42ffdb0cf113aabac6df6367f3eb78c9915dcf",
+      "mutationIds": [
+        "WR-M03",
+        "WR-M04",
+        "WR-M05"
+      ]
+    },
+    {
+      "file": "src/widgets/booking/booking-noun-identity.ts",
+      "sourceSha256": "23b87d5718ef910a2555e7aa6f5ec985c0f53d9bd867128ada2cb62af45f6bc0",
+      "mutationIds": [
+        "WR-M20"
+      ]
+    },
+    {
+      "file": "src/widgets/owner-ports/booking-selector.adapter.ts",
+      "sourceSha256": "9c68631ba88674aa080608f8ef2f268659f9bedaf7e519cbe64701e891295018",
+      "mutationIds": [
+        "WR-M01",
+        "WR-M02"
+      ]
+    },
+    {
+      "file": "src/widgets/owner-ports/booking-preview.adapter.ts",
+      "sourceSha256": "b25e0280fda5796ee4fde580d4412215971a209376b9f334e7dc87f6e2a01a47",
+      "mutationIds": [
+        "WR-M21"
+      ]
+    }
+  ],
+  "nativeWRReceipt": {
+    "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+    "sha256": "e4e39d6b82953019750dad640fda319b6652a753579f1c18fa0f63597c3c0d42"
+  },
+  "newDecisionMutationReceipt": {
+    "path": "receipts/mutation-receipt/widgets-mutation-report-FB.json",
+    "sha256": "8322e36f356ebea1e5bd98acbf97b2cbd51cc0994a7bb337b757063338ef5fcf"
+  },
+  "scope": "Exact historical uncovered-delta claim. Pre-existing runtime helper is not type-only. No exhaustive line mutation-coverage claim. New bounded decisions additionally covered by FB."
+}

@@ -1,0 +1,11 @@
+{
+  "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "name": "k3",
+  "command": [
+    "node",
+    "scripts/k3-gateway-check.mjs"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 0,
+  "seconds": 3.09
+}

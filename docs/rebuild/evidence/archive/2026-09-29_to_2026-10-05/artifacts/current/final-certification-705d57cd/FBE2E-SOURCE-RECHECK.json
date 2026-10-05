@@ -1,0 +1,722 @@
+{
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "generatedAt": "2026-10-01T13:54:53.873543+00:00",
+  "scope": "Fresh source recheck. Historical closure descriptions are context, not fresh test receipts. No owner acceptance inferred.",
+  "retainedFacts": [
+    {
+      "limitation": "L2",
+      "source": ".github/workflows/widget-contract.yml",
+      "sha256": "43353311e479539f159b78db8b7f5aab4b08b27f59e240340ae418de2f0ee274",
+      "lines": [
+        {
+          "line": 1,
+          "text": "name: Widget Contract"
+        },
+        {
+          "line": 2,
+          "text": ""
+        },
+        {
+          "line": 3,
+          "text": "# Wave 1 (K1 + K2) changes no runtime and no deployed byte. Its CI job therefore arrives"
+        },
+        {
+          "line": 4,
+          "text": "# NON-BLOCKING: `continue-on-error` on every step that could fail, so a contract finding is"
+        },
+        {
+          "line": 5,
+          "text": "# reported and does not stop a release that the contract does not yet govern. It becomes"
+        },
+        {
+          "line": 6,
+          "text": "# blocking in wave 2, when the gateway it describes starts running."
+        },
+        {
+          "line": 7,
+          "text": "on:"
+        },
+        {
+          "line": 8,
+          "text": "  pull_request:"
+        },
+        {
+          "line": 9,
+          "text": "  push:"
+        },
+        {
+          "line": 10,
+          "text": ""
+        },
+        {
+          "line": 11,
+          "text": "permissions:"
+        },
+        {
+          "line": 12,
+          "text": "  contents: read"
+        },
+        {
+          "line": 13,
+          "text": ""
+        },
+        {
+          "line": 14,
+          "text": "concurrency:"
+        },
+        {
+          "line": 15,
+          "text": "  group: widget-contract-${{ github.workflow }}-${{ github.ref }}"
+        },
+        {
+          "line": 16,
+          "text": "  cancel-in-progress: true"
+        },
+        {
+          "line": 17,
+          "text": ""
+        },
+        {
+          "line": 18,
+          "text": "jobs:"
+        },
+        {
+          "line": 19,
+          "text": "  widget-contract:"
+        },
+        {
+          "line": 20,
+          "text": "    name: Widget Contract (non-blocking)"
+        },
+        {
+          "line": 21,
+          "text": "    runs-on: ubuntu-latest"
+        },
+        {
+          "line": 22,
+          "text": "    timeout-minutes: 10"
+        },
+        {
+          "line": 23,
+          "text": "    continue-on-error: true"
+        },
+        {
+          "line": 24,
+          "text": "    defaults:"
+        },
+        {
+          "line": 25,
+          "text": "      run:"
+        },
+        {
+          "line": 26,
+          "text": "        working-directory: maya-saas-backend"
+        },
+        {
+          "line": 27,
+          "text": "    steps:"
+        },
+        {
+          "line": 28,
+          "text": "      - uses: actions/checkout@v4"
+        },
+        {
+          "line": 29,
+          "text": "      - uses: actions/setup-node@v4"
+        },
+        {
+          "line": 30,
+          "text": "        with:"
+        },
+        {
+          "line": 31,
+          "text": "          node-version: 22"
+        },
+        {
+          "line": 32,
+          "text": "          cache: npm"
+        },
+        {
+          "line": 33,
+          "text": "          cache-dependency-path: maya-saas-backend/package-lock.json"
+        },
+        {
+          "line": 34,
+          "text": "      - run: npm ci"
+        },
+        {
+          "line": 35,
+          "text": "      - name: Generate the canonical Prisma client before contract compilation"
+        },
+        {
+          "line": 36,
+          "text": "        run: npm run prisma:generate"
+        },
+        {
+          "line": 37,
+          "text": "        continue-on-error: true"
+        },
+        {
+          "line": 38,
+          "text": "      - name: The certified contract compiles"
+        },
+        {
+          "line": 39,
+          "text": "        run: npx tsc --noEmit --project tsconfig.widget-contract.json"
+        },
+        {
+          "line": 40,
+          "text": "        continue-on-error: true"
+        },
+        {
+          "line": 41,
+          "text": "      - name: Widget Contract checkers"
+        },
+        {
+          "line": 42,
+          "text": "        run: node scripts/widget-contract-check.mjs"
+        },
+        {
+          "line": 43,
+          "text": "        continue-on-error: true"
+        },
+        {
+          "line": 44,
+          "text": "      - name: Wave 1 fence - the contract module is excluded from the build"
+        },
+        {
+          "line": 45,
+          "text": "        run: |"
+        },
+        {
+          "line": 46,
+          "text": "          grep -q '\"src/widget-contract\"' tsconfig.build.json"
+        },
+        {
+          "line": 47,
+          "text": "          echo \"src/widget-contract is excluded from tsconfig.build.json: deployed bytes unchanged\""
+        },
+        {
+          "line": 48,
+          "text": "        continue-on-error: true"
+        },
+        {
+          "line": 49,
+          "text": ""
+        },
+        {
+          "line": 50,
+          "text": "  k1-dossier:"
+        },
+        {
+          "line": 51,
+          "text": "    name: K1 surface dossier (non-blocking)"
+        },
+        {
+          "line": 52,
+          "text": "    runs-on: ubuntu-latest"
+        },
+        {
+          "line": 53,
+          "text": "    timeout-minutes: 10"
+        },
+        {
+          "line": 54,
+          "text": "    continue-on-error: true"
+        },
+        {
+          "line": 55,
+          "text": "    steps:"
+        },
+        {
+          "line": 56,
+          "text": "      - uses: actions/checkout@v4"
+        },
+        {
+          "line": 57,
+          "text": "      - uses: actions/setup-node@v4"
+        },
+        {
+          "line": 58,
+          "text": "        with: { node-version: 22 }"
+        },
+        {
+          "line": 59,
+          "text": "      - name: The dossier covers every surface, and the ledgers are complete"
+        },
+        {
+          "line": 60,
+          "text": "        run: node docs/rebuild/evidence/maya-chat-first-ux/k1/k1-dossier-check.mjs"
+        },
+        {
+          "line": 61,
+          "text": "        continue-on-error: true"
+        }
+      ]
+    },
+    {
+      "limitation": "L5/L24",
+      "source": "maya-saas-backend/src/widgets/owner-ports/booking-selector.adapter.ts",
+      "sha256": "449e5654fa168de53a8e73d6ccb5cc75af27f983acffb36a0f1dcb12d3aa996a",
+      "lines": [
+        {
+          "line": 48,
+          "text": "    const name: 'catalog.staff.read' | 'booking.availability.read' ="
+        },
+        {
+          "line": 49,
+          "text": "      input.step === 'service'"
+        },
+        {
+          "line": 50,
+          "text": "        ? 'catalog.staff.read'"
+        },
+        {
+          "line": 51,
+          "text": "        : 'booking.availability.read';"
+        },
+        {
+          "line": 52,
+          "text": "    const args ="
+        },
+        {
+          "line": 53,
+          "text": "      input.step === 'service'"
+        },
+        {
+          "line": 54,
+          "text": "        ? {}"
+        },
+        {
+          "line": 55,
+          "text": "        : {"
+        },
+        {
+          "line": 56,
+          "text": "            date: new Date("
+        },
+        {
+          "line": 57,
+          "text": "              input.routing.now.getTime() + 86_400_000,"
+        },
+        {
+          "line": 58,
+          "text": "            ).toISOString(),"
+        },
+        {
+          "line": 59,
+          "text": "            service_ids: [opened.get('service')],"
+        },
+        {
+          "line": 60,
+          "text": "            staff_id: opened.get('staff'),"
+        },
+        {
+          "line": 61,
+          "text": "          };"
+        },
+        {
+          "line": 62,
+          "text": "    if ("
+        }
+      ]
+    },
+    {
+      "limitation": "L5/L24",
+      "source": "maya-saas-backend/src/widgets/booking/booking-selector.presenter.ts",
+      "sha256": "5de536dd62e10a91c3d6b58aab8e1a563984fad41318c3adc654762623361cb6",
+      "lines": [
+        {
+          "line": 263,
+          "text": "  if (rendered.length === 0) return null;"
+        },
+        {
+          "line": 264,
+          "text": "  const starts = rendered.map((slot) => String(slot.start.value));"
+        },
+        {
+          "line": 265,
+          "text": "  return {"
+        },
+        {
+          "line": 266,
+          "text": "    kind: 'TIME_SLOT_SELECTOR',"
+        },
+        {
+          "line": 267,
+          "text": "    body: {"
+        },
+        {
+          "line": 268,
+          "text": "      prompt: phrase('Choose a time'),"
+        },
+        {
+          "line": 269,
+          "text": "      timezone: 'UTC',"
+        },
+        {
+          "line": 270,
+          "text": "      window: { from: starts[0], to: starts[starts.length - 1] },"
+        },
+        {
+          "line": 271,
+          "text": "      grouping: 'flat',"
+        },
+        {
+          "line": 272,
+          "text": "      groups: ["
+        },
+        {
+          "line": 273,
+          "text": "        {"
+        },
+        {
+          "line": 274,
+          "text": "          group_id: 'available',"
+        },
+        {
+          "line": 275,
+          "text": "          label: phrase('Available times'),"
+        },
+        {
+          "line": 276,
+          "text": "          slots: rendered,"
+        },
+        {
+          "line": 277,
+          "text": "        },"
+        },
+        {
+          "line": 278,
+          "text": "      ],"
+        },
+        {
+          "line": 279,
+          "text": "      shown_count: rendered.length,"
+        },
+        {
+          "line": 280,
+          "text": "      total_count: null,"
+        },
+        {
+          "line": 281,
+          "text": "      more_intent: null,"
+        }
+      ]
+    },
+    {
+      "limitation": "L23",
+      "source": "maya-chat-shell/test/net.test.mjs",
+      "sha256": "d2a997a11213ffad750720996cca35f5ef02e32796da503f7be47966d838a9a5",
+      "lines": [
+        {
+          "line": 337,
+          "text": ""
+        },
+        {
+          "line": 338,
+          "text": "  const netSources = ['client.ts', 'session.ts', 'project.ts', 'endpoint.ts'].map((f) => [f, read(`src/net/${f}`)]);"
+        },
+        {
+          "line": 339,
+          "text": "  const fetchCalls = netSources.flatMap(([f, s]) => [...s.matchAll(/\\bfetch\\s*\\(/g)].map(() => f));"
+        },
+        {
+          "line": 340,
+          "text": "  assert.deepEqual(fetchCalls, ['client.ts'], 'exactly one fetch( call, in client.ts');"
+        },
+        {
+          "line": 341,
+          "text": "  assert.equal((src.match(/\\/widgets\\/intent/g) ?? []).length, 1, 'one approved widget intent literal');"
+        },
+        {
+          "line": 342,
+          "text": "  assert.equal((src.match(/\\/widgets\\/resolve/g) ?? []).length, 1, 'one approved widget resolve literal');"
+        },
+        {
+          "line": 343,
+          "text": "  assert.equal(read('src/net/endpoint.ts').split('\\n').filter((l) => !l.startsWith('//') && l.trim() !== '').join('\\n'), \"export const API_BASE = '/api';\");"
+        },
+        {
+          "line": 344,
+          "text": "  assert.equal(endpoint.API_BASE, '/api');"
+        },
+        {
+          "line": 345,
+          "text": "});"
+        }
+      ]
+    },
+    {
+      "limitation": "L25",
+      "source": "maya-saas-backend/src/widgets/emission/successor-minter.service.ts",
+      "sha256": "3e2c5f6990e3ff3a868b4741fd4cf4ef4e19d67c5b23895fdc5cdf32b957a3ac",
+      "lines": [
+        {
+          "line": 350,
+          "text": "    try {"
+        },
+        {
+          "line": 351,
+          "text": "      await this.prisma.$transaction(async (tx) => {"
+        },
+        {
+          "line": 352,
+          "text": "        await TimelineStore.lockConversation("
+        },
+        {
+          "line": 353,
+          "text": "          tx,"
+        },
+        {
+          "line": 354,
+          "text": "          request.tenantId,"
+        },
+        {
+          "line": 355,
+          "text": "          predecessor.turn.conversationId,"
+        },
+        {
+          "line": 356,
+          "text": "        );"
+        },
+        {
+          "line": 357,
+          "text": "        // The first real shell tap is the first server-observed proof that the returned MINTED"
+        },
+        {
+          "line": 358,
+          "text": "        // envelope crossed delivery and render. Catch its persisted lifecycle up through the two"
+        },
+        {
+          "line": 359,
+          "text": "        // legal contract transitions before superseding it; never weaken the generic successor."
+        },
+        {
+          "line": 360,
+          "text": "        if (predecessor.lifecycleState === 'MINTED') {"
+        },
+        {
+          "line": 361,
+          "text": "          const delivered = await tx.widgetEmission.updateMany({"
+        },
+        {
+          "line": 362,
+          "text": "            where: {"
+        },
+        {
+          "line": 363,
+          "text": "              tenantId: request.tenantId,"
+        },
+        {
+          "line": 364,
+          "text": "              widgetId: predecessor.widgetId,"
+        },
+        {
+          "line": 365,
+          "text": "              lifecycleState: 'MINTED',"
+        },
+        {
+          "line": 366,
+          "text": "              supersededByWidgetId: null,"
+        },
+        {
+          "line": 367,
+          "text": "              erasedAt: null,"
+        },
+        {
+          "line": 368,
+          "text": "            },"
+        },
+        {
+          "line": 369,
+          "text": "            data: { lifecycleState: 'DELIVERED' },"
+        },
+        {
+          "line": 370,
+          "text": "          });"
+        },
+        {
+          "line": 371,
+          "text": "          if (delivered.count !== 1) throw new SuccessorLinkConflict();"
+        },
+        {
+          "line": 372,
+          "text": "          const live = await tx.widgetEmission.updateMany({"
+        },
+        {
+          "line": 373,
+          "text": "            where: {"
+        },
+        {
+          "line": 374,
+          "text": "              tenantId: request.tenantId,"
+        },
+        {
+          "line": 375,
+          "text": "              widgetId: predecessor.widgetId,"
+        },
+        {
+          "line": 376,
+          "text": "              lifecycleState: 'DELIVERED',"
+        },
+        {
+          "line": 377,
+          "text": "              supersededByWidgetId: null,"
+        },
+        {
+          "line": 378,
+          "text": "              erasedAt: null,"
+        },
+        {
+          "line": 379,
+          "text": "            },"
+        },
+        {
+          "line": 380,
+          "text": "            data: { lifecycleState: 'LIVE' },"
+        },
+        {
+          "line": 381,
+          "text": "          });"
+        },
+        {
+          "line": 382,
+          "text": "          if (live.count !== 1) throw new SuccessorLinkConflict();"
+        },
+        {
+          "line": 383,
+          "text": "        }"
+        },
+        {
+          "line": 384,
+          "text": "        const closed = await tx.widgetEmission.updateMany({"
+        },
+        {
+          "line": 385,
+          "text": "          where: {"
+        },
+        {
+          "line": 386,
+          "text": "            tenantId: request.tenantId,"
+        }
+      ]
+    },
+    {
+      "limitation": "L26",
+      "source": "docs/rebuild/evidence/maya-chat-first-ux/gate-audit-build.mjs",
+      "sha256": "cf48209dd6182c01e5ad182f9ee080f8b999da3b5abef28dab380931f6b4d0d2",
+      "lines": [
+        {
+          "line": 78,
+          "text": "const mutationReports = options('--mutation-report').map((file) => ({"
+        },
+        {
+          "line": 79,
+          "text": "  file: path.basename(file),"
+        },
+        {
+          "line": 80,
+          "text": "  report: JSON.parse(fs.readFileSync(path.resolve(file), 'utf8')),"
+        },
+        {
+          "line": 81,
+          "text": "}));"
+        },
+        {
+          "line": 82,
+          "text": "if (mutationReports.length === 0) usage('at least one --mutation-report is required');"
+        },
+        {
+          "line": 83,
+          "text": "for (const { file, report } of mutationReports) {"
+        },
+        {
+          "line": 84,
+          "text": "  if (report?.contract !== 'maya.widgets-mutation-battery/2')"
+        },
+        {
+          "line": 85,
+          "text": "    usage(`${file} is not a maya.widgets-mutation-battery/2 report`);"
+        },
+        {
+          "line": 86,
+          "text": "  const bad = (report.mutants ?? []).filter((mutant) =>"
+        },
+        {
+          "line": 87,
+          "text": "    ['SURVIVED', 'UNEXPECTED'].includes(mutant.status),"
+        },
+        {
+          "line": 88,
+          "text": "  );"
+        },
+        {
+          "line": 89,
+          "text": "  if (bad.length > 0)"
+        },
+        {
+          "line": 90,
+          "text": "    usage(`${file} has unexpected mutants: ${bad.map((mutant) => mutant.id).join(', ')}`);"
+        },
+        {
+          "line": 91,
+          "text": "}"
+        },
+        {
+          "line": 92,
+          "text": ""
+        }
+      ]
+    },
+    {
+      "limitation": "L20",
+      "source": "docs/rebuild/WIDGET-GATE-FBE2E-CLOSURE.md",
+      "sha256": "a733a02c0054e97aa492eafb288f3bcc93bf6b194030a2dd11a8bd64aaef1a24",
+      "lines": [
+        {
+          "line": 933,
+          "text": "**L20 — LOW. `UNKNOWN SEMANTICS` is not fully proven: one unknown branch is asserted nowhere.** Every staff"
+        },
+        {
+          "line": 934,
+          "text": "option's nearest availability is rendered as a `NOT_MEASURED` / `NOT_COLLECTED` measure, and"
+        },
+        {
+          "line": 935,
+          "text": "`nearest_availability` occurs in **zero** spec or test file across both projects (the only non-runtime"
+        },
+        {
+          "line": 936,
+          "text": "occurrences are the contract's own type files and a shell dev fixture); the staff assertions check the"
+        },
+        {
+          "line": 937,
+          "text": "service refs, the shown count, the staff ref and the label only, and per **L12** the presenter has no"
+        },
+        {
+          "line": 938,
+          "text": "mutant. The unknown-price branches are properly covered — a missing canonical price renders `NOT_MEASURED`"
+        },
+        {
+          "line": 939,
+          "text": "rather than inventing zero, and a priceless service refuses the whole selector. Separately, and unchanged by"
+        },
+        {
+          "line": 940,
+          "text": "the fix: the Action Engine's own `UNKNOWN` outcome has no fault-injection seam, so §7.5's `SUBMITTED` proof"
+        },
+        {
+          "line": 941,
+          "text": "supplies that verdict to the booted application's own writer instead of producing it from an uncertain call."
+        },
+        {
+          "line": 942,
+          "text": "The gap is narrow but real, which is why the result line below reads `PARTIAL` and not `PASS`."
+        }
+      ]
+    }
+  ],
+  "currentCertificatePolicy": "No historical receipts admitted; complete fresh canonical assembly remains mandatory. This does not edit or retroactively approve the separate historical builder.",
+  "sourceChangesFromInspected2141e245": 0
+}

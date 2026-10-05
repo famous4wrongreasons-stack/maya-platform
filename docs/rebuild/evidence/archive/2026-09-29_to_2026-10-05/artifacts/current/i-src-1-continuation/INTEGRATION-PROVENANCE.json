@@ -1,0 +1,30 @@
+{
+  "sourceCommit": "f531367f00d62bbf5e27c4df8c64ba9695f9c968",
+  "integratedCommit": "977b814ecf2c41ae2caeca2df1ded812ce926b10",
+  "exactSourceParent": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "integratedParent": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "cherryPickMarkerPreserved": true,
+  "runtimeAndCarrierDiffFromClaudeCommit": "EMPTY",
+  "nonClaudeEdits": [
+    "maya-saas-backend/test/widgets-live/support/shell-approved-source-probe.mjs"
+  ],
+  "productionBackendEdited": false,
+  "artifacts": [
+    {
+      "path": "maya-chat-shell/dist/manifest.json",
+      "sha256": "25576be911d6565404494dd6cb6a99cc2b81e88af04f63017a10e278648e2831"
+    },
+    {
+      "path": "maya-chat-shell/src/shell/intents.ts",
+      "sha256": "dcda58fc44c2898763541344999661e5c42094e444594d506aa2b0a9439bd950"
+    },
+    {
+      "path": "maya-chat-shell/test/intents.test.mjs",
+      "sha256": "ef02d3416244cb33a94fa8e5601ba534146e6ac45e3a86ef4cbebf4f67558840"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/shell-approved-source-probe.mjs",
+      "sha256": "38ead2bbb66160f744b7b36c02ebfbf751c748be3407d33de8c42ddf87b4231e"
+    }
+  ]
+}

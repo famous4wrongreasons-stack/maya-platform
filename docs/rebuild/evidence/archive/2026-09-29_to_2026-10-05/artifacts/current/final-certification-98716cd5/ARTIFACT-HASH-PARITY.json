@@ -1,0 +1,56 @@
+{
+  "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+  "parity": "PASS",
+  "jsDifference": "one approved API endpoint string",
+  "css": "byte identical",
+  "htmlDifference": "content address and approved connect-src only",
+  "files": [
+    {
+      "path": "maya-chat-shell/dist/manifest.json",
+      "sha256": "7e6f8926c96e17e92141ff50f2670054427f7f54b1b50c66416706eac25fbc63",
+      "bytes": 11187
+    },
+    {
+      "path": "maya-saas-backend/package-lock.json",
+      "sha256": "96c60011160ea7cc960030c86823762675dbdbad8e6f2122a9a181e76d2f7287",
+      "bytes": 471458
+    },
+    {
+      "path": "maya-saas-backend/dist/src/main.js",
+      "sha256": "3caede16a0ba37d968aee8d0ae5b39c726ba545e1894d29dc944d2751c34898f",
+      "bytes": 2569
+    },
+    {
+      "path": "maya-carrier-react/dist/web/m/U2JA6757/main.js",
+      "sha256": "754c1403c8f0e4d72ddb776e75141146a10781e9ad1a60763ea6f8c960e9dc00",
+      "bytes": 1350154
+    },
+    {
+      "path": "maya-carrier-react/dist/web/styles.css",
+      "sha256": "aab5c4b1e87137931a59565697bfd2fed9240a19c08717ce423268b70cc0b504",
+      "bytes": 3916
+    },
+    {
+      "path": "maya-carrier-react/dist/web/index.html",
+      "sha256": "441ed1fde1eb0953ff74231c4ca944f9b197b2dbdfea794542f2106c2e1bc2c3",
+      "bytes": 795
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/m/c38a94f9e1ff2234/main.js",
+      "sha256": "c38a94f9e1ff2234aacc7a1a5be4558bfb4dfed79c21d72174da1e23ff18094a",
+      "bytes": 1350171
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/styles.css",
+      "sha256": "aab5c4b1e87137931a59565697bfd2fed9240a19c08717ce423268b70cc0b504",
+      "bytes": 3916
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/index.html",
+      "sha256": "60381752fb8d55fbf86b953eeb01e0a436eb57f52b33f71dd3a25b3f846e8e5a",
+      "bytes": 821
+    }
+  ],
+  "productionDeployment": false,
+  "iphoneInstalled": false
+}

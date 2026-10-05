@@ -1,0 +1,59 @@
+{
+  "candidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "requestedBaselines": [
+    {
+      "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+      "status": "passed",
+      "durationMs": 557
+    },
+    {
+      "name": "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+      "status": "passed",
+      "durationMs": 599
+    },
+    {
+      "name": "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+      "status": "passed",
+      "durationMs": 57
+    }
+  ],
+  "mainFullLiveReportSha256": "d3a88aa7a262cb5653679728635407fa6d4c70f66033d370690d12aaa8182358",
+  "nativeARReceipt": "receipts/mutation-parts/widgets-mutation-part-AR.json",
+  "nativeARReceiptSha256": "57a235ff254f8ea2146e13cc2eee9e2800d2ca21510481c4422bd457fa19bf6b",
+  "nativeARBaselineControls": {
+    "baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "nativeARRestrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "nativeARMutations": "19/19 AS-DECLARED",
+  "wholeCorpusCertification": "RUNNING",
+  "timeoutsIncreased": false
+}

@@ -1,0 +1,79 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "name": "l25-browser",
+  "exit": 0,
+  "seconds": 1.71,
+  "command": [
+    "playwright-cli",
+    "--session",
+    "maya-pkg-cert",
+    "run-code",
+    "l25-browser-proof.js"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003",
+  "network": "loopback only",
+  "result": {
+    "status": "PASS",
+    "first": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        }
+      ],
+      "activations": 0
+    },
+    "tapped": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        }
+      ],
+      "activations": 1
+    },
+    "collapsed": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        }
+      ],
+      "activations": 1
+    },
+    "remounted": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        },
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": false
+        }
+      ],
+      "activations": 1
+    },
+    "mutant": {
+      "observed": [],
+      "activations": 0
+    },
+    "mutantTap": {
+      "observed": [],
+      "activations": 1
+    },
+    "productSourceEdited": false,
+    "realNetworkEffects": false
+  },
+  "logSha256": "cf5dd801707b0865975118763be771d06b45a431127acf5627884cb7e6ef4c20"
+}

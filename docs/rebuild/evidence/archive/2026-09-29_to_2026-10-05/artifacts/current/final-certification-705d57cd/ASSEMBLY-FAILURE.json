@@ -1,0 +1,13 @@
+{
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "status": "FAILED_CANONICAL_ASSEMBLY",
+  "productDefect": false,
+  "harnessDefect": true,
+  "failure": "Gate4 mandatory unmutated live control is rejected as extra by assembler, despite being required by runner.",
+  "nativeParts": 65,
+  "declarations": 509,
+  "sleepReexecution": "9/9 PASS",
+  "certificateIssued": false,
+  "successorCandidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "oldReceiptsAdmittedToSuccessor": false
+}

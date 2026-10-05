@@ -1,0 +1,230 @@
+{
+  "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "artifacts": [
+    {
+      "path": "maya-chat-shell/dist/manifest.json",
+      "bytes": 11187,
+      "sha256": "f7f6a6966d58847b8d464026cdbf5071e50dd9eb02e2b40c150e765c71354b05"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/icons/maya-192.png",
+      "bytes": 1970,
+      "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/icons/maya-512-maskable.png",
+      "bytes": 4476,
+      "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/icons/maya-512.png",
+      "bytes": 5951,
+      "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/icons/maya-apple-180.png",
+      "bytes": 1977,
+      "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/index.html",
+      "bytes": 1344,
+      "sha256": "d6dee3086144685a82fa7b9a854cbde04720153a99d5fa3cbbdd1689b0cc2890"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/entry/main.js",
+      "bytes": 6984,
+      "sha256": "c286ecbb5bed2b1bfa1c25f9b3e25e507c6380ce78085440a176836170a4cc3a"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/contract.js",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/dom/composer.js",
+      "bytes": 5547,
+      "sha256": "4d184bf92dac30485656b7e6a790aee146c8c100dd46589485f289e818b26c35"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/dom/fullscreen.js",
+      "bytes": 4461,
+      "sha256": "13268f9257736e5f6a80097e2c056a0c50d401682b57629cf69e51432fa434cc"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/dom/host.js",
+      "bytes": 20584,
+      "sha256": "edfaa3aae6b6d2a89e02af10d2fd39bb7315bf26a90429741f5f472c8221c065"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/dom/nav.js",
+      "bytes": 3065,
+      "sha256": "02c8319501e4192286963c26020f08be8cfda7bc90daeb4c1d9388163e52e180"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/dom/signin.js",
+      "bytes": 21952,
+      "sha256": "fd34f1fdb93d15f2c1bdda4cf81734c9461cb4b41303cd3d3414f034c9f02855"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/dom/timeline.js",
+      "bytes": 12679,
+      "sha256": "416c3ba79fb1a40974476280e8acc1198b6b3a9ea1e5a1910a5d8178af2b8fcd"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/dom/voice-control.js",
+      "bytes": 8245,
+      "sha256": "7ce81361c45ea3a5d5c5252adfb22415d88204562267ae9ea3b98e436020e58e"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/integrity/h7.js",
+      "bytes": 7782,
+      "sha256": "eb79f98a9c84077731f0629ccc106aabb4d3006535035645b68b725cdb1c7272"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/net/client.js",
+      "bytes": 20752,
+      "sha256": "8a45499053a7476d3eb506ad92387b12b7164adfdd1f37d216b750772ac57eac"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/net/endpoint.js",
+      "bytes": 32,
+      "sha256": "5d822288a47d4ef73f570283f16042d002ef954973be25c2b9585b79f41bbbde"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/net/project.js",
+      "bytes": 10735,
+      "sha256": "d8f1081a59dec02a7338a4e471a998aba815ceb80348b60b3436254212c74ca7"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/net/session.js",
+      "bytes": 12679,
+      "sha256": "952bd62d40e19288d6ca60f7bd74b599b86480098bf74c97c48a6c255edb5a1b"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/net/types.js",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/renderer/cells.js",
+      "bytes": 2484,
+      "sha256": "c0487d5e0be38edfb51628d0164e74fe9eb1d14b589fc54655d27ed450b91356"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/renderer/kinds.js",
+      "bytes": 8123,
+      "sha256": "304dc41bb09878cfd5f9fc46e840453a5ebef5fe3f24f97da3517cd0e0c45d71"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/renderer/nodes.js",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/renderer/render.js",
+      "bytes": 24155,
+      "sha256": "4d3caa689daab0e6194df37d3812aba8f741892c9f84fdb89b6b623cf900fd11"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/renderer/tables.js",
+      "bytes": 2219,
+      "sha256": "b6e75fcee591a630549c65106407c7365083ec5248ec820032d71b45e8bb292e"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/routes/registry.js",
+      "bytes": 4340,
+      "sha256": "6684d9660c2d829817f5b4c0583c52fad53fa0340d0b6a515005386a6c0bdc2d"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/shell/conversation.js",
+      "bytes": 11802,
+      "sha256": "9ff5740de2bce779bc5a3cf4b8d0604d135f726580ee541ba04d2cb96ebcf88d"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/shell/deeplink.js",
+      "bytes": 2012,
+      "sha256": "91661bb980372a955c3a40fdde59b4bf20f4ab6cae8b258472eacc912862db9e"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/shell/dom-port.js",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/shell/intents.js",
+      "bytes": 19089,
+      "sha256": "d5f644382912b3fa7db13ed2478b7f0387bf60951c8c6bd4b53c5ea3cb050f46"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/shell/ports.js",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/shell/shell.js",
+      "bytes": 7155,
+      "sha256": "119b2b2b45206a847d15524c59c7259f8699585c46c7afa6f6c4e99e29dcafb6"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/shell/view.js",
+      "bytes": 10823,
+      "sha256": "9faaaa92da86538ce6218bdd0d46d80a860e5964004a3117b2f93e0a6873ba24"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/shell/voice-state.js",
+      "bytes": 11655,
+      "sha256": "a9c7201012bf7d655c24836dbb69a6aaaf9096cc134c2fff4e3b4dfe6d9d6425"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/voice/capture.js",
+      "bytes": 9284,
+      "sha256": "ee5bde165f9dd19e369fdd1b39bf530f6a91745b2b2301a5e8f27dfb9d5c0a18"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/db72d7241cbf76d9/src/voice/wav.js",
+      "bytes": 2373,
+      "sha256": "c099d535f4d30bc2d16869bd0706bbf1d0dc234ca21ef28671558897437839f1"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/manifest.webmanifest",
+      "bytes": 670,
+      "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/styles.css",
+      "bytes": 29125,
+      "sha256": "f0e73356b508c4c281ab8e80498736d24d36423b7a73a476675e336e80e147d8"
+    },
+    {
+      "path": "maya-carrier-react/dist/web/index.html",
+      "bytes": 795,
+      "sha256": "18377411d56d51013b06f14616a6dbef03f779c84c10f2045dbff1d70845e86c"
+    },
+    {
+      "path": "maya-carrier-react/dist/web/m/45GG7DSA/main.js",
+      "bytes": 1345795,
+      "sha256": "afcfa04847a7c3b9b391703bcaf6fe3bc9f9b6e80fdafdeb379df73fe9a4cc9c"
+    },
+    {
+      "path": "maya-carrier-react/dist/web/styles.css",
+      "bytes": 3916,
+      "sha256": "aab5c4b1e87137931a59565697bfd2fed9240a19c08717ce423268b70cc0b504"
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/index.html",
+      "bytes": 821,
+      "sha256": "a304951bd9f4b4acecdd91b629d9e9ef86cc699a87883fd787a9472dcb0723c5"
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/m/b5ab3930b338984a/main.js",
+      "bytes": 1345812,
+      "sha256": "b5ab3930b338984ad1820fde271a3ef54ff63ddaae1f7bb8486375d630a7b640"
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/styles.css",
+      "bytes": 3916,
+      "sha256": "aab5c4b1e87137931a59565697bfd2fed9240a19c08717ce423268b70cc0b504"
+    }
+  ]
+}

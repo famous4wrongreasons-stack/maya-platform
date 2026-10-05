@@ -1,0 +1,25 @@
+{
+  "candidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "tests": [
+    {
+      "name": "H2 \u2014 the confirmation terminal line survives the same widget escape [HTTP] [PostgreSQL] WR-H2 escape preserves the receipt boundary (committed=true)",
+      "status": "passed",
+      "report": "receipts/widgets-live-full.json",
+      "reportSha256": "d3a88aa7a262cb5653679728635407fa6d4c70f66033d370690d12aaa8182358"
+    },
+    {
+      "name": "H2 \u2014 the confirmation terminal line survives the same widget escape [HTTP] [PostgreSQL] WR-H2 escape preserves the receipt boundary (committed=false)",
+      "status": "passed",
+      "report": "receipts/widgets-live-full.json",
+      "reportSha256": "d3a88aa7a262cb5653679728635407fa6d4c70f66033d370690d12aaa8182358"
+    },
+    {
+      "name": "WidgetStoresService \u2014 every existing method sends what it sent before the split 3. receipt store (shell) WR-L22 idempotent retries derive the terminal outcome from the existing durable receipt",
+      "status": "passed",
+      "report": "receipts/backend-full.json",
+      "reportSha256": "c9da6a92ba30e386e49e6b791958e441ce0e625aa37513ff23092b89ab8a6e76"
+    }
+  ],
+  "mutationAdmission": "PENDING",
+  "provenanceDecision": "9085c2bbbe256c670a2836445a2c92265d139cb7"
+}

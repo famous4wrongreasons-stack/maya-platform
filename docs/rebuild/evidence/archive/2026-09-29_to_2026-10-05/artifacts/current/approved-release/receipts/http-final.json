@@ -1,0 +1,172 @@
+{
+  "contract": "maya.widgets-intent-http-proof/2",
+  "database": "maya_widget_gate_proof_release_20260929",
+  "cases_dir": "scripts/widgets-http-proof",
+  "cases_dir_explicit": false,
+  "evidence": {
+    "enabled": true,
+    "dir": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/approved-release/evidence-final"
+  },
+  "cases": 18,
+  "status": "PASS",
+  "failed": 0,
+  "binary": {
+    "health": 200
+  },
+  "mint_provenance": {
+    "captured": 18,
+    "malformed": 0
+  },
+  "results": [
+    {
+      "id": "SMOKE-G15-EXPIRED",
+      "gate": "1",
+      "proofClass": "CONTROL",
+      "source": "scripts/widgets-http-proof/gate1-5.cases.ts",
+      "ok": true,
+      "retainedTenants": []
+    },
+    {
+      "id": "SMOKE-G10-CONTROL",
+      "gate": "10",
+      "proofClass": "CONTROL",
+      "source": "scripts/widgets-http-proof/gate10.cases.ts",
+      "ok": true,
+      "retainedTenants": []
+    },
+    {
+      "id": "SMOKE-G11-CONTROL",
+      "gate": "11",
+      "proofClass": "CONTROL",
+      "source": "scripts/widgets-http-proof/gate11.cases.ts",
+      "ok": true,
+      "retainedTenants": []
+    },
+    {
+      "id": "SMOKE-G12-CONTROL",
+      "gate": "12",
+      "proofClass": "CONTROL",
+      "source": "scripts/widgets-http-proof/gate12.cases.ts",
+      "ok": true,
+      "retainedTenants": []
+    },
+    {
+      "id": "SMOKE-G13-CONTROL",
+      "gate": "13",
+      "proofClass": "CONTROL",
+      "source": "scripts/widgets-http-proof/gate13.cases.ts",
+      "ok": true,
+      "retainedTenants": []
+    },
+    {
+      "id": "SMOKE-G4-CONTROL",
+      "gate": "4",
+      "proofClass": "CONTROL",
+      "source": "scripts/widgets-http-proof/gate4.cases.ts",
+      "ok": true,
+      "retainedTenants": []
+    },
+    {
+      "id": "SMOKE-G6-CONTROL",
+      "gate": "6",
+      "proofClass": "CONTROL",
+      "source": "scripts/widgets-http-proof/gate6.cases.ts",
+      "ok": true,
+      "retainedTenants": []
+    },
+    {
+      "id": "SMOKE-G6-BODY",
+      "gate": "6",
+      "proofClass": "CONTROL",
+      "source": "scripts/widgets-http-proof/gate6.cases.ts",
+      "ok": true,
+      "retainedTenants": []
+    },
+    {
+      "id": "SMOKE-G7-CONTROL",
+      "gate": "7",
+      "proofClass": "CONTROL",
+      "source": "scripts/widgets-http-proof/gate7.cases.ts",
+      "ok": true,
+      "retainedTenants": []
+    },
+    {
+      "id": "SMOKE-G8-NULL-INPUTS",
+      "gate": "8",
+      "proofClass": "CONTROL",
+      "source": "scripts/widgets-http-proof/gate8.cases.ts",
+      "ok": true,
+      "retainedTenants": []
+    },
+    {
+      "id": "SMOKE-G8R-CONTROL",
+      "gate": "8-R",
+      "proofClass": "CONTROL",
+      "source": "scripts/widgets-http-proof/gate8r.cases.ts",
+      "ok": true,
+      "retainedTenants": []
+    },
+    {
+      "id": "SMOKE-G9-CONTROL",
+      "gate": "9",
+      "proofClass": "CONTROL",
+      "source": "scripts/widgets-http-proof/gate9.cases.ts",
+      "ok": true,
+      "retainedTenants": []
+    },
+    {
+      "id": "AR-G6-REVOCATION",
+      "gate": "6",
+      "proofClass": "L",
+      "source": "scripts/widgets-http-proof/gateAR-revocation.cases.ts",
+      "ok": true,
+      "retainedTenants": [
+        "cmun6tx6k001zvlc9u77fg3xc"
+      ]
+    },
+    {
+      "id": "E1-T2B-CLEAN",
+      "gate": "E1",
+      "proofClass": "L",
+      "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+      "ok": true,
+      "retainedTenants": []
+    },
+    {
+      "id": "P-F88",
+      "gate": "shape",
+      "proofClass": "LIVE",
+      "source": "scripts/widgets-http-proof/gateP-f88.cases.ts",
+      "ok": true,
+      "retainedTenants": []
+    },
+    {
+      "id": "PR-G2EQ-BIN",
+      "gate": "2",
+      "proofClass": "LIVE-TRANSPORT",
+      "source": "scripts/widgets-http-proof/gateP-principal.cases.ts",
+      "ok": true,
+      "retainedTenants": []
+    },
+    {
+      "id": "SB1-PERSONAL-CREATE",
+      "gate": "SB1",
+      "proofClass": "BACKEND-CONTEXT",
+      "source": "scripts/widgets-http-proof/gateSB1-personal.cases.ts",
+      "ok": true,
+      "retainedTenants": [
+        "cmun6tybb0031vlc9vagk64mi"
+      ]
+    },
+    {
+      "id": "WR-BOOKING-CREATE",
+      "gate": "WR",
+      "proofClass": "L",
+      "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+      "ok": true,
+      "retainedTenants": [
+        "cmun6tyj6003ivlc98hheosms"
+      ]
+    }
+  ]
+}

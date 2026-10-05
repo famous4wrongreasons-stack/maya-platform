@@ -1,0 +1,55 @@
+--- unchanged-original-runner
+
++++ explicit-whole-part-recovery-runner
+
+@@ -14,15 +14,19 @@
+
+ plan_text=subprocess.check_output(['node','scripts/widgets-mutation-ci.mjs','plan',''],cwd=be,env=env,text=True)
+ plan=dict(line.split('=',1) for line in plan_text.strip().splitlines())
+ jobs=json.loads(plan['matrix'])['include']
+-(out/'mutation-plan.json').write_text(json.dumps({'candidate':head,'jobs':jobs,'workers':6,'restrictions':'none; canonical default steps; full unfiltered tests'},indent=2)+'\n')
++(out/'mutation-recovery-plan.json').write_text(json.dumps({'candidate':head,'jobs':jobs,'workers':6,'restrictions':'none; canonical default steps; full unfiltered tests'},indent=2)+'\n')
+ priority=['SO','PU','9','H-harness','13','AR','NS','BS','TURN','SV2','SB1','SBV','PI-contract','PI']
+ jobs.sort(key=lambda j:(priority.index(j['gate']) if j['gate'] in priority else len(priority),j['slot']))
+-(out/'mutation-execution-order.json').write_text(json.dumps({'candidate':head,'workers':6,'priority':priority,'slots':[j['slot'] for j in jobs],'restriction':'none; scheduling only'},indent=2)+'\n')
++(out/'mutation-recovery-execution-order.json').write_text(json.dumps({'candidate':head,'workers':6,'priority':priority,'slots':[j['slot'] for j in jobs],'restriction':'none; scheduling only'},indent=2)+'\n')
++recovery=json.loads((out.parent/'SUSPEND-RECOVERY-PLAN.json').read_text());assert recovery['candidate']==head
++selected={j['slot'] for j in recovery['retryJobs']}
++jobs=[j for j in jobs if j['slot'] in selected]
++assert len(jobs)==16 and {j['slot'] for j in jobs}==selected
+ q=queue.Queue()
+ for j in jobs:q.put(j)
+ stopped=threading.Event()
+ def worker(i):
+- wr=work/('mutation-final2-worker-'+str(i));wb=wr/'maya-saas-backend';wr.mkdir(exist_ok=True)
++ wr=work/('mutation-suspend-worker-'+str(i));wb=wr/'maya-saas-backend';wr.mkdir(exist_ok=True)
+  if wb.exists():raise RuntimeError('Fresh mutation input already exists')
+  if not wb.exists():
+   shutil.copytree(be,wb,ignore=shutil.ignore_patterns('node_modules','dist','coverage','.git','.env*','*.tsbuildinfo'))
+@@ -33,11 +37,11 @@
+
+     if (p/'node_modules').exists():(wr/p.name/'node_modules').symlink_to(p/'node_modules',target_is_directory=True)
+    elif p.name!='maya-saas-backend':(wr/p.name).symlink_to(p,target_is_directory=p.is_dir())
+  assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=wr,text=True).strip()==head
+- db='maya_widget_gate_proof_singleopcertiso4_worker'+str(i)
+- ee={**env,'DATABASE_URL':'[REDACTED DATABASE URL]'+db,'NODE_OPTIONS':'--require='+str(work/'r06-child-trace.cjs'),'R06_TRACE_FILE':str(out/('r06-native-worker-'+str(i)+'.jsonl'))}
+- script="const {Client}=require('pg');(async()=>{const c=new Client({connectionString:process.env.DATABASE_URL});await c.connect();const n=process.argv[1];if(!/^maya_widget_gate_proof_singleopcertiso4_worker[1-6]$/.test(n))throw Error('guard');if((await c.query('select 1 from pg_database where datname=$1',[n])).rowCount)throw Error('fresh DB already exists');await c.query('CREATE DATABASE '+n);await c.end()})().catch(e=>{console.error(e.message);process.exit(1)})"
++ db='maya_widget_gate_proof_singleopcertrecovery4_worker'+str(i)
++ ee={**env,'DATABASE_URL':'[REDACTED DATABASE URL]'+db,'NODE_OPTIONS':'--require='+str(work/'r06-child-trace.cjs'),'R06_TRACE_FILE':str(out/('r06-recovery-worker-'+str(i)+'.jsonl'))}
++ script="const {Client}=require('pg');(async()=>{const c=new Client({connectionString:process.env.DATABASE_URL});await c.connect();const n=process.argv[1];if(!/^maya_widget_gate_proof_singleopcertrecovery4_worker[1-6]$/.test(n))throw Error('guard');if((await c.query('select 1 from pg_database where datname=$1',[n])).rowCount)throw Error('fresh DB already exists');await c.query('CREATE DATABASE '+n);await c.end()})().catch(e=>{console.error(e.message);process.exit(1)})"
+  subprocess.run(['node','-e',script,db],cwd=be,env=env,check=True)
+- with (out/('mutation-worker-'+str(i)+'-migration.log')).open('w') as log:subprocess.run(['npx','prisma','migrate','deploy'],cwd=wb,env=ee,stdout=log,stderr=subprocess.STDOUT,check=True)
++ with (out/('mutation-recovery-worker-'+str(i)+'-migration.log')).open('w') as log:subprocess.run(['npx','prisma','migrate','deploy'],cwd=wb,env=ee,stdout=log,stderr=subprocess.STDOUT,check=True)
+  while not stopped.is_set():
+   try:j=q.get_nowait()
+   except queue.Empty:return
+@@ -45,7 +49,7 @@
+
+   if j['partition']:args+=['--partition',j['partition']]
+   args+=['--out',str(parts/('widgets-mutation-part-'+slot+'.json'))]
+   t=time.time();print(json.dumps({'started':slot,'worker':i}),flush=True)
+-  with (out/('mutation-'+slot+'.log')).open('w') as log:p=subprocess.Popen(args,cwd=wb,env=ee,stdout=log,stderr=subprocess.STDOUT,start_new_session=True);(work/('worker-'+str(i)+'-pid')).write_text(str(p.pid));rc=p.wait()
++  with (out/('mutation-'+slot+'.log')).open('w') as log:p=subprocess.Popen(args,cwd=wb,env=ee,stdout=log,stderr=subprocess.STDOUT,start_new_session=True);(work/('recovery-worker-'+str(i)+'-pid')).write_text(str(p.pid));rc=p.wait()
+   receipt={'candidate':head,'name':'mutation-'+slot,'command':args,'cwd':str(wb),'exit':rc,'seconds':round(time.time()-t,2)}
+   (out/('mutation-'+slot+'.receipt.json')).write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps(receipt),flush=True)
+   if rc:stopped.set();return

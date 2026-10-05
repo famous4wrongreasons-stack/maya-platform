@@ -1,0 +1,20 @@
+{
+  "branch": "codex/widget-release-programme-20260929",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/widget-release",
+  "head": "f8d6fe419ae5a157f964d3d9359f834f56475ddd",
+  "verification_source_head": "c94c751ca58342fc7ebf6f83cdec7bc16dd6c3ee",
+  "backend_delta_since_verification": [],
+  "worktree_clean": true,
+  "claude_path_overlap": 0,
+  "production_effects": 0,
+  "real_otp_sent": 0,
+  "real_yclients_effects": 0,
+  "local_proof_cluster": "STOPPED",
+  "safe_to_integrate": "NO",
+  "commits": [
+    "f8d6fe419ae5a157f964d3d9359f834f56475ddd docs(release): record JSON V2 successor proofs and recomputed checkpoint",
+    "c94c751ca58342fc7ebf6f83cdec7bc16dd6c3ee test(schema): pin approved JSON V2 extension without broadening widget migrations",
+    "eb200c98f5e9ca47ec5b3eca9b541a2f9512b81b fix(identity): cap successor OTP proof at current session expiry",
+    "06b2b7176a43a3ecfe2e79fa560f101ba34fd485 feat(identity): verify personal Client successor with immutable JSON V2 OTP proof"
+  ]
+}

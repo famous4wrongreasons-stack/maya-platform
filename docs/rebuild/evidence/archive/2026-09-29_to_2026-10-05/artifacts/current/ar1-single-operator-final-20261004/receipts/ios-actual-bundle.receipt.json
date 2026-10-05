@@ -1,0 +1,13 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "name": "ios-actual-bundle",
+  "exit": 0,
+  "seconds": 8.63,
+  "command": [
+    "node",
+    "maya-carrier-react/tools/release.mjs",
+    "verify-app",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261004/ios-final/Build/Products/Debug-iphonesimulator/App.app"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration"
+}

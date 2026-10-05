@@ -1,0 +1,12 @@
+[
+  {
+    "name": "lint",
+    "exit": 1,
+    "seconds": 3.67,
+    "command": [
+      "node",
+      "node_modules/eslint/bin/eslint.js",
+      "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts"
+    ]
+  }
+]

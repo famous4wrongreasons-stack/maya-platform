@@ -1,0 +1,334 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "template": "work/final-certification-705d57cd",
+  "priorResultsCopied": false,
+  "substitutions": [
+    [
+      "705d57cd787e24d8944dbe764789e27fd9af3708",
+      "2915ab8e7c089e2c1f39848cb795940e5267c119"
+    ],
+    [
+      "final-certification-705d57cd",
+      "final-certification-2915ab8e"
+    ],
+    [
+      "final705d",
+      "final2915"
+    ],
+    [
+      "preflight705d",
+      "preflight2915"
+    ],
+    [
+      "_20261001",
+      "_20261002"
+    ]
+  ],
+  "files": [
+    {
+      "path": "watch-isolated-mutation-reports.py",
+      "templateSha256": "308bfdb73295fdcaca070c97af29356f6cc80a59cda2ef0d491dfcba11f9cade",
+      "copiedSha256": "c85a2992aedb01a832f1da7a3f87464c2e7bfa1ae8c858bd0f1f10b9a3c9d275"
+    },
+    {
+      "path": "run-suspend-reverification.py",
+      "templateSha256": "377ea615605381e6474b128e0b89c50bd77860552f327127769c46062b06a2f5",
+      "copiedSha256": "d4d12e50888cd4107bc9f84cf79aecaa20b0fdd58339ca223016cc9f7849171e"
+    },
+    {
+      "path": "monitor-preflight.py",
+      "templateSha256": "fe8b5c898c64c48999d52f71790060ee9756debf85cc5a6a1e0523e965fcabfd",
+      "copiedSha256": "19fab93b1b85056690cf16f458dae0c345a44098f376144a97b1d3733fcdf735"
+    },
+    {
+      "path": "prove-requested-baselines.py",
+      "templateSha256": "1f75b477e1097ca5fd823041dbce86886a8ed07b3a40d984741010e7476dc737",
+      "copiedSha256": "13b197aeb028ca7f684937d70e04d059134d478dc830e32fa6919c690e44a696"
+    },
+    {
+      "path": "launch-native.py",
+      "templateSha256": "a73214c66ca43c04399bd82f2c6bae921c6aad3a0b76308630d1747a6d52d79e",
+      "copiedSha256": "5b307f4fc35ab4050551d3c8a77a2fcad14d4384a312b942fd1ea9a5f01cb11e"
+    },
+    {
+      "path": "jest-return.json",
+      "templateSha256": "394d2ebfec879af55bac4e3e542c8716869ef3f7f10b4208c4d14e38bfeddd26",
+      "copiedSha256": "78068896027c31ff57ac269abc5dac4348c11a434f6a0f4adc918abeab483fac"
+    },
+    {
+      "path": "index-fresh-artifacts.py",
+      "templateSha256": "d6747964a044017a7a0e005b4766a27966f8668e80580abdd0af5d2094be364f",
+      "copiedSha256": "87618f76855d1c3410705cb8430ef99de9424c340532f13f4f3d5900621c576a"
+    },
+    {
+      "path": "run-net-bin.py",
+      "templateSha256": "bf7669e18909b615a02678d0b463a7c19a90b097e54c72d67d9591ab541f87c9",
+      "copiedSha256": "e14fd829cd3d5fc4162f909fcf2df0f55eeffb06ab5374fd409b2b0320b17f47"
+    },
+    {
+      "path": "run-l27-mutations.py",
+      "templateSha256": "b7672d550b093f8d94ba067cec2dde137191eb09ea50ce648c7280b2a4ad4d0e",
+      "copiedSha256": "1cf8f6a05bf55bb703c7370b023b04a05f9a99b60c9e005e41855518db2a8012"
+    },
+    {
+      "path": "finalize-fbe2e.py",
+      "templateSha256": "e5265d59e4cadbfbd924ca214080ca296cc713521a5564f15f9ccc9597ac807a",
+      "copiedSha256": "572aa29eeb9259a0fe8c1de3d3e53d8995ec05f5f2fb4875a6664e9e15ea8ae0"
+    },
+    {
+      "path": "check-final-process-lifecycle.py",
+      "templateSha256": "6a0a9d1e5256e4d1282e024bc41f74645f24043b008f187ab5e91afb76e6442e",
+      "copiedSha256": "1d84513691dd0e790c7e1ec2d798e1b795eeb8719d748dbd3a61a3188ae62ebc"
+    },
+    {
+      "path": "index-after-ordinary.py",
+      "templateSha256": "db11672256b89a225b7bf54978a1d0111d1f78b11620e37e0db91208171cc2f3",
+      "copiedSha256": "6046b6350fcd2b7f7c901781bb10326a19d0d2d652d9fda1667b9c81e67e8cea"
+    },
+    {
+      "path": "check-ci-postconditions.py",
+      "templateSha256": "629c08528e46bdc58c59db58327834df1cb79ab8127c3aec4204a90e346c8314",
+      "copiedSha256": "3f479f45ca9d9a035092b93cefba5b1158928e755a5874b0c0fc61d551c026cd"
+    },
+    {
+      "path": "launch-l27-after-ordinary.py",
+      "templateSha256": "225a8ae871b3dfee1e3bd7d4c6916e0be2392df2fb7d2a8f10faa4a59a54444e",
+      "copiedSha256": "f0464fd174ddb543a14e03adacb10e20983079a91e8155e66a4da1a7a4d564b2"
+    },
+    {
+      "path": "prove-l12-delta.cjs",
+      "templateSha256": "b2ee03d0a9a104d91b730000b306240f008a02821a0d26294c8379db46a3df7f",
+      "copiedSha256": "b2f6c0d72c6a97552a9aa357597eeff0fe31e5e9eea714e56e7d6a305d716ded"
+    },
+    {
+      "path": "monitor-suspend-reverification.py",
+      "templateSha256": "dc00c103afa39d7d3b1c04f3bd412a1b967690482bbc862c9047e9b0c65f4ac8",
+      "copiedSha256": "b0c806fb14afeadef7165829a0355b6252202f8a029e54c35847ba10aba4e699"
+    },
+    {
+      "path": "run-all-mutations-isolated.py",
+      "templateSha256": "31a7c99a1bdf34e2cfb140d7f597cd53b3a30b2e1864d8ce9cddb6818440e5fd",
+      "copiedSha256": "22f55657c1a9b66ea9490652cc96cb49e100f1d07b8a2402c062f6040ef0924c"
+    },
+    {
+      "path": "run-net-proof.py",
+      "templateSha256": "baa85276af36a72039da9be184d127a2ba7b11f6f1a98d512749cb230eb2520c",
+      "copiedSha256": "d94a7a4432afa152e8706742481c670cfb8b38af0d1d574cfb0ef6cf78bc9379"
+    },
+    {
+      "path": "check-final-artifact-stability.py",
+      "templateSha256": "d145c1eea97a42b59aff28db77e4a239dde332e6b27c7f0af7b8b49d77823e95",
+      "copiedSha256": "a5990636c4b5abb0341692fe2411f9b74994ab9ccaab0903a6683e73f1198fbe"
+    },
+    {
+      "path": "run-extra.py",
+      "templateSha256": "274a4e39657e9a98d4f1aaa7e296977054d76d3cf9989b6e313ac039abba6cd2",
+      "copiedSha256": "7f43d169dc6afb52a1e2c632a167187f23bd083f8ea46150c713d5b38ea9dcdd"
+    },
+    {
+      "path": "index-integration-proofs.py",
+      "templateSha256": "33c533c11a126bacc64ef6b94e5f4f5b445797fc8d7fbe1c029c562813380b57",
+      "copiedSha256": "b4c8f139b70957b72b0ca9900fe9c42dd841e694d322755a0671042e0a1874d6"
+    },
+    {
+      "path": "preflight-l27.py",
+      "templateSha256": "17a0e312d449b46108cc6bc8b044618539dd8213afeb1633bd6331d1b4467d38",
+      "copiedSha256": "34ff4fe7321b55d94827d19d09b26e227349e6922ba28d6b89262a0c768cad84"
+    },
+    {
+      "path": "monitor-complete.py",
+      "templateSha256": "948c626dc5e3f37f17eca56f9ef0a669671fbdebb195bc8130e142ba48c1abee",
+      "copiedSha256": "0c741a812f3f15736637e94decfe28b24942c116d0cfa377bc795cdfa76679d5"
+    },
+    {
+      "path": "capture-host-suspend.py",
+      "templateSha256": "4b7c8d905cf65ec2712f683b71039779645910cadc7d3d3889c8ecbb050d3ef6",
+      "copiedSha256": "105dc42257aee6e77216c344386ab49c7935b664ba61f139ef535d3cae909eae"
+    },
+    {
+      "path": "launch-final-after-diagnostic.py",
+      "templateSha256": "ea12e5aea93a68aa17c63d6fc5d55f115ed8d1e629683c6f796113f00486d755",
+      "copiedSha256": "4074677b6cbeb3e327775c205b270fd59760d6301c8e8abe5f4f59033e2a338f"
+    },
+    {
+      "path": "finalize-receipts.py",
+      "templateSha256": "701fdb8a2eb3ac143aabb848f1e876679c138b46740a5941ab6ecfd605baa730",
+      "copiedSha256": "248535d6e85550f42b9eff02b5d7f3ce966994b4b926c3d175c82391272c8387"
+    },
+    {
+      "path": "prepare-extra-dbs.py",
+      "templateSha256": "f4b9cfc38fd5e0c8a8b4fc06112f053f00e4cce7d3f474cf128dcdec3a1fcc26",
+      "copiedSha256": "5f481001319c79895facbfa3777719c5f30206a4dcc8fd374d0c2dfdf732de28"
+    },
+    {
+      "path": "snapshot-processes.py",
+      "templateSha256": "ac5e684c5c3e67ad38477457673d37ebf565d3758150d53fd848c96ed43ae090",
+      "copiedSha256": "1a2ca3394b653212407e7e853f0a2c9db9aa2625ea70f6aad48d3c0ad17fc087"
+    },
+    {
+      "path": "index-final-orchestration-sources.py",
+      "templateSha256": "4b2813a8afe90762c9330480a3d5d4d15f9d7a5711f7bf330279dbd17a3787b3",
+      "copiedSha256": "76acc1557030289b4677cf2fd33b091bfbce36148986cf2c5925fe2fdb1ea34c"
+    },
+    {
+      "path": "launch-diagnostic-preflight.py",
+      "templateSha256": "db8468f7ecdd3616767391e086601390e90bd40fa84a0762a8bc651daccf7469",
+      "copiedSha256": "3cb9137378eba269bd333f948a5d12f6e28c62607f5b8243702c45c4178b248c"
+    },
+    {
+      "path": "launch-suspend-after-original.py",
+      "templateSha256": "00311e81ef508e1e4b5a9d07190858dadef718ea088bb2a71529249e54684e9b",
+      "copiedSha256": "6103eee2172abc23e406d3799a71616b16a15d125b31da0feba25f903a538e16"
+    },
+    {
+      "path": "assemble-complete.py",
+      "templateSha256": "8cfb03bea4826a4b949edd66ddd488caf5a588d23888cb5812a8a04469499640",
+      "copiedSha256": "842e94fedf8a92ac8d39e0220136c9d091c469f51b499ca255a94805159ca339"
+    },
+    {
+      "path": "jest-net-turn.json",
+      "templateSha256": "3aeddd7ef36b12b4f29aba69dc7bf4cb15a57e4c86177eb58aa8dd54454ffcc6",
+      "copiedSha256": "cfc8297d2e649418755049dc49c4cd9c66e11297777263edfc322c547727a0e1"
+    },
+    {
+      "path": "index-complete-proofs.py",
+      "templateSha256": "28b5b6a113140fc11b3f5f550128819a1633a1f2f83892de70a72b14221dbe96",
+      "copiedSha256": "19a5cd43ac26febeb3904bda018a54803f818ece33071677be9d7e49af21778d"
+    },
+    {
+      "path": "run-after-surfaces.py",
+      "templateSha256": "3273efd011a9cb53f519a8789be2e7bfeb93dc5ffc706dc9202e63bf8dbed6ea",
+      "copiedSha256": "83b58e5e5ffb3128fc8defe531feeb98d82722058dd5248f5606c18d9c6cc7b3"
+    },
+    {
+      "path": "run-compiled-receipt-bin.py",
+      "templateSha256": "5b573598fdb98210fa25584a876598b759ec65ee5fbab963a05916d10fe5418c",
+      "copiedSha256": "acb6f324df92ef19f621aade98f149e6c83ca918a2630b5eeb9166314738d692"
+    },
+    {
+      "path": "run-anchor-preflight.py",
+      "templateSha256": "2c88e0da997814b1b26c09f46e7bebead5201f8806ca9b3d0bf600b2065452f5",
+      "copiedSha256": "d6cbf79c9322de0d5eb65f19e7668b2d305e271cda1c12e7e3e28f3c11b3364d"
+    },
+    {
+      "path": "run-postcommit-bin.py",
+      "templateSha256": "1d4b11609f274429628f1b64ff05a14b7340d7bf85e6512f59f3aa19428a75e1",
+      "copiedSha256": "f9801222f69e28ec6990acdb7dcdb32b58fda53fa1932d81808751119f019260"
+    },
+    {
+      "path": "run-parity.py",
+      "templateSha256": "18af3f7aa714f32bf090d18da0c39e5dfe0fbd32c6c1dd8baccf3a650fda2f61",
+      "copiedSha256": "0a3b47f74785e478f1e28048ec90daeb3941d413292e6dcbfb7c461c0b82ad59"
+    },
+    {
+      "path": "run-net-turn-proof.py",
+      "templateSha256": "96093d4f7bcbb8ce526b939bc6fa00558dde52a954a9f4462139806b6145969e",
+      "copiedSha256": "1cefbfcd90a341d2e714eb1beed77ba772adc339dab197b2de952bc254f3d006"
+    },
+    {
+      "path": "run-baseline.py",
+      "templateSha256": "032c454d8eb584adb5ba35f65a6d3d81e2209efa02b068f51090fdd7e2f59db2",
+      "copiedSha256": "071b53fca5eef05c80dcc2de3ca3f38e8d8961fe6eb2b2da6cbf13716218a706"
+    },
+    {
+      "path": "write-final-report.py",
+      "templateSha256": "9febfb7fa3c9dc2bcea1f2db392f4b8326adbe79e5e98c41168d89c31f889488",
+      "copiedSha256": "045a3cf6066937f17354f7715a3de93e7bcf7d9e2cef1d21316dc4398e7b5b8a"
+    },
+    {
+      "path": "run-rest.py",
+      "templateSha256": "f38f18924ff9061b9cd833d1ed25d143f6b3c447abc33e5c6d27ac5288443fca",
+      "copiedSha256": "96dfaf6a4fbfd24cdbe87bc1b5cc1743d85b21c7bce0d1dff762afee3673d30a"
+    },
+    {
+      "path": "run-carrier-selftest.py",
+      "templateSha256": "c369338376e5b456c785f05f88b645b98cb647da8a9e8ae4cac12e65afe51e63",
+      "copiedSha256": "11493211d8ee7f02b62fd53ef90299cfe750efafe28a648b9bb3b9d5b7bc7bc9"
+    },
+    {
+      "path": "run-compiled-bin.py",
+      "templateSha256": "d5f15dd53b2d5673d0e43bc8607a4fe003a747ee43bc911bf7b04212e0a92cfe",
+      "copiedSha256": "56461d2f604f890cfb3ae004d011a3562cbd567b3124912573d399ef1742ec89"
+    },
+    {
+      "path": "status.py",
+      "templateSha256": "11444e4a756e6cd2cdbeb2c3a9efa6249b4196386a452c332cba17918ab6a606",
+      "copiedSha256": "735cde7aba4151bfa5fb8ebeaf618b33814492ce4b08c8ed0113afd814923623"
+    },
+    {
+      "path": "jest-net-return.json",
+      "templateSha256": "f650191e51e3ac040ebaddb5e31b1aab1a11bdf47ea20b3c38498650891ed4f5",
+      "copiedSha256": "5ad0847d61027a76e66062385b1a416bed5448591b18447aa36d31aa62f9f4ea"
+    },
+    {
+      "path": "probes/source-net-turn.mjs",
+      "templateSha256": "765485845cda61c2f55aaf73be0519270c1b5a991ee7dccbc6b3c92c5adc50d0",
+      "copiedSha256": "765485845cda61c2f55aaf73be0519270c1b5a991ee7dccbc6b3c92c5adc50d0"
+    },
+    {
+      "path": "probes/source-net-return.mjs",
+      "templateSha256": "369b3f1a1ae5dee0d3699e218ac86aca03f99bf0470f1870df20561e0bcfcf23",
+      "copiedSha256": "369b3f1a1ae5dee0d3699e218ac86aca03f99bf0470f1870df20561e0bcfcf23"
+    },
+    {
+      "path": "probes/compiled-postcommit-dismiss.mjs",
+      "templateSha256": "b17dae22400e024cb96af4cfd0f89a4cce1c5060e5da12ff87e96c5c8937940b",
+      "copiedSha256": "b17dae22400e024cb96af4cfd0f89a4cce1c5060e5da12ff87e96c5c8937940b"
+    },
+    {
+      "path": "probes/source-return.probe-spec.ts",
+      "templateSha256": "590d70e89ff4b78bc0e36e0d3636d2f0f38e944dcf6b9fa15c0f5c5ee3dac846",
+      "copiedSha256": "14a979c664c9eb387b9a0d23cb3bf56a389bbf61e490545e3cfd9813103111ed"
+    },
+    {
+      "path": "probes/source-net-turn.probe-spec.ts",
+      "templateSha256": "4dcfbd9d4c3bfd37735cbd1eff7fe4c8b804c7ec42507cd378fed721c37eb314",
+      "copiedSha256": "f5c24c3ee0d6d725fda76b0c1eee8ade73e546e8332bc703a84ccce4b2b25384"
+    },
+    {
+      "path": "probes/source-return.mjs",
+      "templateSha256": "e4cc3f892b873ece152f63072e03b2a539e1b8b631db1361bc4bdc07d1fb11f2",
+      "copiedSha256": "e4cc3f892b873ece152f63072e03b2a539e1b8b631db1361bc4bdc07d1fb11f2"
+    },
+    {
+      "path": "probes/compiled-net-return.mjs",
+      "templateSha256": "cc7b61be0964ee7a9542bcd9ae48b671c876df1e26443187969172638366c54e",
+      "copiedSha256": "cc7b61be0964ee7a9542bcd9ae48b671c876df1e26443187969172638366c54e"
+    },
+    {
+      "path": "probes/compiled-net-receipt.mjs",
+      "templateSha256": "34add2526b3328992f80f83c3f20e7c9eb7a98d1bc9348bfffb37f592c8950d0",
+      "copiedSha256": "34add2526b3328992f80f83c3f20e7c9eb7a98d1bc9348bfffb37f592c8950d0"
+    },
+    {
+      "path": "probes/source-net-return.probe-spec.ts",
+      "templateSha256": "9ab39e5f623ef5498e0b0c0497185c85d5a56c7c5a7841151a2e111182f30ff1",
+      "copiedSha256": "f6b571645fa8130ebc06763cc192aec3a169d2cb2d13e4342aff10fe3a5420a8"
+    },
+    {
+      "path": "bin-cases/gateNETBIN.cases.ts",
+      "templateSha256": "dff60483600e97488d283e0516a8aa9032440fafcce622e2c6a1e441153edef9",
+      "copiedSha256": "9da7df53c9f58c8ba0a5c4eeba880614059553fe4d80ab7716d72a21b32b9ffc"
+    },
+    {
+      "path": "compiled-bin-cases/gateCOMPILEDBIN.cases.ts",
+      "templateSha256": "1333e731ecf0f57feba31f4ab66cd617cb29558dbfdcd5e0dd1f8879cd2a236f",
+      "copiedSha256": "91d7088620964ab3d65c9189b2bd1c5ae39237ed2349f9882e968a9dd04289b7"
+    },
+    {
+      "path": "compiled-receipt-bin-cases/gateRECEIPTBIN.cases.ts",
+      "templateSha256": "47a4d4069130455de585ce0f9861a666bb17d822b00e48e2c8f11b4636d8460c",
+      "copiedSha256": "951fe336a622a1c0cf6a3df5a6093f52612906c371422846eea09b3cdf75ca84"
+    },
+    {
+      "path": "postcommit-bin-cases/gateL27.cases.ts",
+      "templateSha256": "63b8bed7f39565939467a773f6e42be9144f15f5903533faa7e8800ccde0d3aa",
+      "copiedSha256": "880dec430cdd42a90be02f9072edeed4568f203d4d30ae0775bb3add807e6562"
+    }
+  ],
+  "updates": [
+    "New collector diagnostic replaces the earlier anchor preflight; neither diagnostic is final mutation admission.",
+    "14 test/harness paths, unchanged 509 declarations and 506 applicable kills.",
+    "Power observation begins at this candidate campaign; old host suspension is not imputed to this new run."
+  ]
+}

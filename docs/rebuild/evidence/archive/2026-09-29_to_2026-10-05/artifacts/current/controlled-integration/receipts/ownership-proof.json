@@ -1,0 +1,19 @@
+{
+  "candidate": "4f479dce32e6e3595516447a5a6bf8cc6278528a",
+  "candidateWorktreeStatus": "",
+  "backend": {
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/widget-release",
+    "head": "f9e703e3265f31aa6f3e16eb0774b3349abf1fc0",
+    "status": ""
+  },
+  "presentation": {
+    "path": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent",
+    "head": "36fc31d7fa1ba5af758254912fa324093b4d954b",
+    "status": "?? docs/rebuild/PRESENTATION-CARRIER-MIGRATION-SPEC.md"
+  },
+  "backendIntegrationEdits": [
+    "maya-saas-backend/src/action-engine/beget-relay-release.architecture.spec.ts"
+  ],
+  "presentationIntegrationEdits": [],
+  "testOnlyDelta": "commit 4f479dce32e6e3595516447a5a6bf8cc6278528a\nAuthor:     Codex <codex@local>\nAuthorDate: Wed Sep 30 01:00:11 2026 +0300\nCommit:     Codex <codex@local>\nCommitDate: Wed Sep 30 01:00:11 2026 +0300\n\n    test(integration): align shell census with approved runtime boundary\n\ndiff --git a/maya-saas-backend/src/action-engine/beget-relay-release.architecture.spec.ts b/maya-saas-backend/src/action-engine/beget-relay-release.architecture.spec.ts\nindex a7c629a3..b05a93ea 100644\n--- a/maya-saas-backend/src/action-engine/beget-relay-release.architecture.spec.ts\n+++ b/maya-saas-backend/src/action-engine/beget-relay-release.architecture.spec.ts\n@@ -256,7 +256,9 @@ describe('R01 live artifact and release/recovery protection', () => {\n   it('[INTEGRATION-ONLY] gates a static shell candidate as strictly as a PHP edge candidate', () => {\n     const shell = resolve(root, '../maya-chat-shell/dist/web');\n     const result = edge.verifyShellCandidate(shell);\n-    expect(result).toMatchObject({ files: 37, php: 0, icons: 3 });\n+    // e437e114 split the runtime DOM boundary into shell/dom-port.js. The approved artifact\n+    // therefore has 38 files; keep the census exact instead of accepting arbitrary extra files.\n+    expect(result).toMatchObject({ files: 38, php: 0, icons: 3 });\n     // A shell that claims the legacy install id would update the owner's existing PWA.\n     expect(result.id).toBe('/maya-chat-shell/');\n     expect(() =>"
+}

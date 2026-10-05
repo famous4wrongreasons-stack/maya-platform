@@ -1,0 +1,127 @@
+{
+  "contract": "maya.controlled-production-checkpoint/1",
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "profile": "closed-input.no-handoff@1",
+  "createdAt": "2026-10-03T06:58:48.815665+00:00",
+  "status": "STOP_BEFORE_DEPLOY",
+  "tenantId": "cmsuavtar0003bjyrfngxsne6",
+  "sourceClean": true,
+  "localCertifiedBytesMatch": true,
+  "certificationStateChanged": false,
+  "blockers": [
+    "REL-1: canonical AASA routing file missing from R01 manifest",
+    "REL-2: independent production signing path and active global platform operator session missing",
+    "REL-3: default native sync selects shell; AChat web output lacks required PWA manifest"
+  ],
+  "resolved": [
+    "R3 archive locator and pinned archive hashes"
+  ],
+  "pendingMigrations": [
+    "20260929190000_client_link_challenge_json_v2",
+    "20260930120000_journal_detail_retained_date"
+  ],
+  "backupStatus": "PASS",
+  "productionDeployedSha": null,
+  "currentProductionRelease": "/opt/maya-saas/releases/20260929-recon-fix-eb43bc22",
+  "backendHealth": "PASS existing production",
+  "readiness": "PASS existing production",
+  "reconciliation": "NOT RUN",
+  "webhooks": "NOT RUN",
+  "profileEffective": "NOT GRANTED",
+  "profileExpiry": null,
+  "handoffProductionCheck": "NOT RUN",
+  "revokeReady": "code certified; signing/session prerequisites missing",
+  "pwa": "NOT DEPLOYED",
+  "iosInstalled": false,
+  "login": "NOT RUN",
+  "achat": "NOT RUN",
+  "normalChat": "NOT RUN",
+  "voice": "NOT RUN",
+  "readOnlyWidgets": "NOT RUN",
+  "certifiedBytesMatchProduction": false,
+  "readyForOwnerControlledRealOtpAndBooking": false,
+  "effects": {
+    "privateBackupFilesCreated": true,
+    "sourceChanges": 0,
+    "productionRuntimeChanges": 0,
+    "productionConfigChanges": 0,
+    "migrationsApplied": 0,
+    "productionDataWrites": 0,
+    "entitlementGrants": 0,
+    "realOtp": 0,
+    "clientSuccessors": 0,
+    "realYclientsEffects": 0,
+    "iphoneInstall": 0,
+    "chapter10": 0
+  },
+  "receipts": [
+    {
+      "path": "BACKUP-RECEIPT.json",
+      "sha256": "4e1873f2d09e6bc4b14716239fefe50d393090c93daaba8fedc67dacd2a873be"
+    },
+    {
+      "path": "BACKUP-RECOVERY-INSPECTION.json",
+      "sha256": "11899c61e1f1d20713532eb99ad4c67245172ecf62625da1d9553afad7fbaa48"
+    },
+    {
+      "path": "BACKUP-TRANSPORT-INTERRUPTION.json",
+      "sha256": "6975e6841432f8a8907dbf92209e7265060f4616417e13c5b497a72f60117fb4"
+    },
+    {
+      "path": "BACKUP-VERIFIED-POSTSTATE.json",
+      "sha256": "d9d2ed2cc92dca310ff20c6b962a124f394676e7ec58dd098b634dc3c71b73dd"
+    },
+    {
+      "path": "CERTIFIED-ARTIFACT-PREFLIGHT.json",
+      "sha256": "f8be3a190a49045b15bac29d064512305b2f90c44587156ca5464ea2298d3ce5"
+    },
+    {
+      "path": "IOS-DEVICE-PREFLIGHT.json",
+      "sha256": "16f32d050ab2153f169087769f0cc0d9b15307bd028f372a79468498c54a0869"
+    },
+    {
+      "path": "MIGRATION-PRESTATE.json",
+      "sha256": "f616e8ba1c71ad378ad111a2be8011d3f838ca65d35d8aa0c23a4571f8ac5caa"
+    },
+    {
+      "path": "NATIVE-PACKAGING-PREFLIGHT.json",
+      "sha256": "984565b1a0a9f33a42424df05e9490834d5e53f1ac5ab2e0bc59446b7c522d83"
+    },
+    {
+      "path": "PREDEPLOY-STOP.md",
+      "sha256": "8853c4ce44cab0b1c3a04e842e82681f779e104b752fedb1666397b4a5289cca"
+    },
+    {
+      "path": "PRODUCTION-PRESTATE-READONLY.json",
+      "sha256": "d917e75de68bddcac1e7af5ca1d7afee2226335a06cd7b6bcbd6df869c051f57"
+    },
+    {
+      "path": "PWA-PACKAGING-PREFLIGHT.json",
+      "sha256": "d5ac59b9b0ee006574bf50f3fd950e225e62bd09203695c7a0c5200c7a0a879f"
+    },
+    {
+      "path": "R3-ARCHIVE-RESOLVED.json",
+      "sha256": "d6c92518fecaddc8898de714444d96566d31ef8f52ca3023d033cc5ce6023138"
+    },
+    {
+      "path": "RELAY-CONFIG-PROVENANCE.json",
+      "sha256": "423036653d21b339b7adbc64521f6eaa669a3e2355b4b3d8193df9aff2f8a4ea"
+    },
+    {
+      "path": "RELAY-DIAGNOSIS.json",
+      "sha256": "16db7f8f8ece6600a8d99d4fdf89cd959eebd5f28c96f2c79403fc2048d0e8e9"
+    },
+    {
+      "path": "RELAY-GATE.json",
+      "sha256": "c1a1037ce689250c515ab194c35d49ad585f15cd8059a32bddac416d9eeb3072"
+    },
+    {
+      "path": "RELAY-UNREGISTERED-CONFIG.json",
+      "sha256": "0f4e44cab2af51f9fb69cabbe42f65a5fe01d76dcf8699b95d88c26949d5c6e6"
+    },
+    {
+      "path": "relay-gate.log",
+      "sha256": "3e95bacb3b5a524617f6e1790dc258f0aebca269e66705bc5c27edc156d95ed8"
+    }
+  ]
+}

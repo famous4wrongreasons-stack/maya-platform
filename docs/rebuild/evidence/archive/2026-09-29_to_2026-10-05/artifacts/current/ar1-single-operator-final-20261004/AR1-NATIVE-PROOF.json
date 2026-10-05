@@ -1,0 +1,996 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "status": "PASS",
+  "battery": {
+    "gate": "AR",
+    "declarations": 19,
+    "receipt": {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-AR.json",
+      "sha256": "ec733cbc2a88a856c6457673171be67369844a326b781cef7068686f698d0bce"
+    },
+    "mutants": [
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M1",
+        "files": [
+          "src/entitlements/widget-release-policy.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "AR1-FORGED"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-FORGED",
+            "test": "AR-1 signed release policy AR1-FORGED rejects a well-formed unsigned CAS substitution even when every other binding is valid",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M2",
+        "files": [
+          "src/entitlements/widget-release-policy.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "AR1-CONTEXT"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-CONTEXT",
+            "test": "AR-1 signed release policy AR1-CONTEXT rejects tenant substitution",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M3",
+        "files": [
+          "src/entitlements/widget-release-policy.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "AR1-NEGATIVE"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-NEGATIVE",
+            "test": "AR-1 signed release policy AR1-NEGATIVE expired",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M4",
+        "files": [
+          "src/entitlements/widget-release-policy.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "AR1-RUNNING"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-RUNNING",
+            "test": "AR-1 signed release policy AR1-RUNNING independently refuses signed evidence for stale running candidate, bytes, or expired certificate",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M5",
+        "files": [
+          "src/entitlements/widget-release.contract.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "AR1-THRESHOLD"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-THRESHOLD",
+            "test": "AR-1 signed release policy AR1-THRESHOLD rejects false",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M6",
+        "files": [
+          "src/entitlements/widget-release.contract.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "AR1-NEGATIVE"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-NEGATIVE",
+            "test": "AR-1 signed release policy AR1-NEGATIVE independent reviewer identity cannot alias the approver even with two valid signatures",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M7",
+        "files": [
+          "src/entitlements/widget-release-policy.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "AR1-PRODUCTION"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-PRODUCTION",
+            "test": "AR-1 signed release policy AR1-PRODUCTION production execution is refused even with a fully valid staging environment and trusted signatures",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M8",
+        "files": [
+          "src/entitlements/feature-registry.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "AR1-TRIAL"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-TRIAL",
+            "test": "AR-1 signed release policy AR1-TRIAL widget trial remains forbidden even if readiness changes",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 1
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M9",
+        "files": [
+          "src/entitlements/entitlements.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "AR1-PLAN"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-PLAN",
+            "test": "EntitlementsService AR1-PLAN refuses widgets even if a plan row is accidentally populated",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M10",
+        "files": [
+          "src/entitlements/entitlements.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "AR1-UNSIGNED"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-UNSIGNED",
+            "test": "EntitlementsService AR1-UNSIGNED refuses a widget override without certified release evidence",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M11",
+        "files": [
+          "src/entitlements/widget-release.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "AR1-STALE"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-STALE",
+            "test": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-STALE two independently signed grants with the same prestate cannot both win CAS",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M12",
+        "files": [
+          "src/entitlements/widget-release.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "AR1-CONCURRENT"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-CONCURRENT",
+            "test": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-CONCURRENT two consumes of one authorization produce one grant and one audit",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M13",
+        "files": [
+          "src/entitlements/widget-release.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "AR1-ADVERSARIAL"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-ADVERSARIAL",
+            "test": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-ADVERSARIAL forged, expired, tenant-substituted and rebound authorizations have no grant effect",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M14",
+        "files": [
+          "src/entitlements/widget-release.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "AR1-AUDIT"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-AUDIT",
+            "test": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-AUDIT failure rolls back the entitlement mutation",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M15",
+        "files": [
+          "src/entitlements/widget-release.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "AR1-LIFECYCLE"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-LIFECYCLE",
+            "test": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-LIFECYCLE validate is read-only; signed grant has atomic audit; same authorization retry never grants twice; revoke refuses an old widget token",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M16",
+        "files": [
+          "src/entitlements/widget-release-policy.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "AR1-EXPIRY"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-EXPIRY",
+            "test": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-EXPIRY expires without renewal and denies the old authorization",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M17",
+        "files": [
+          "src/entitlements/widget-release.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "AR1-REVOKE-WAIT"
+        ],
+        "kills": [
+          {
+            "killer": "AR1-REVOKE-WAIT",
+            "test": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-REVOKE-WAIT active admitted work and revoke serialize on the tenant release lock",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M18",
+        "files": [
+          "src/widgets/routing/gate14-disagreement.metric.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "AR-G6-REVOCATION"
+        ],
+        "kills": [
+          {
+            "killer": "AR-G6-REVOCATION",
+            "test": "AR release revocation [HTTP] [PostgreSQL] AR-G6-REVOCATION [E-MINT] real post-Gate6 revoke refuses at canonical admission and increments metric",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateAR.json",
+        "id": "AR-M19",
+        "files": [
+          "src/entitlements/entitlements.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "AR-G6-REVOCATION"
+        ],
+        "kills": [
+          {
+            "killer": "AR-G6-REVOCATION",
+            "test": "AR release revocation [HTTP] [PostgreSQL] AR-G6-REVOCATION [E-MINT] real post-Gate6 revoke refuses at canonical admission and increments metric",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      }
+    ],
+    "controls": {
+      "AR:baseline|live": {
+        "set": null,
+        "steps": [
+          "live"
+        ],
+        "exits": {
+          "live": 0
+        },
+        "failed": [],
+        "problems": []
+      },
+      "AR:baseline|unit,typecheck,k3": {
+        "set": null,
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "exits": {
+          "unit": 0,
+          "typecheck": 0,
+          "k3": 0
+        },
+        "failed": [],
+        "problems": []
+      }
+    }
+  },
+  "live": {
+    "source": "widget-release.live-spec.ts",
+    "count": 9,
+    "receipt": {
+      "path": "receipts/widgets-live-full.json",
+      "sha256": "56f48a701df707245c1c5dc909373ba6f51a3b16f2c9ad9c8492d6f3dd4c4d04"
+    },
+    "assertions": [
+      {
+        "ancestorTitles": [
+          "AR-1 synthetic certified writer [HTTP] [PostgreSQL]"
+        ],
+        "duration": 544,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-LIFECYCLE validate is read-only; signed grant has atomic audit; same authorization retry never grants twice; revoke refuses an old widget token",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 22,
+        "retryReasons": [],
+        "startAt": 1791106103377,
+        "status": "passed",
+        "title": "AR1-LIFECYCLE validate is read-only; signed grant has atomic audit; same authorization retry never grants twice; revoke refuses an old widget token"
+      },
+      {
+        "ancestorTitles": [
+          "AR-1 synthetic certified writer [HTTP] [PostgreSQL]"
+        ],
+        "duration": 171,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-CONCURRENT two consumes of one authorization produce one grant and one audit",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 4,
+        "retryReasons": [],
+        "startAt": 1791106103922,
+        "status": "passed",
+        "title": "AR1-CONCURRENT two consumes of one authorization produce one grant and one audit"
+      },
+      {
+        "ancestorTitles": [
+          "AR-1 synthetic certified writer [HTTP] [PostgreSQL]"
+        ],
+        "duration": 175,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-STALE two independently signed grants with the same prestate cannot both win CAS",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 3,
+        "retryReasons": [],
+        "startAt": 1791106104093,
+        "status": "passed",
+        "title": "AR1-STALE two independently signed grants with the same prestate cannot both win CAS"
+      },
+      {
+        "ancestorTitles": [
+          "AR-1 synthetic certified writer [HTTP] [PostgreSQL]"
+        ],
+        "duration": 164,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-AUDIT failure rolls back the entitlement mutation",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 4,
+        "retryReasons": [],
+        "startAt": 1791106104268,
+        "status": "passed",
+        "title": "AR1-AUDIT failure rolls back the entitlement mutation"
+      },
+      {
+        "ancestorTitles": [
+          "AR-1 synthetic certified writer [HTTP] [PostgreSQL]"
+        ],
+        "duration": 1976,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-EXPIRY expires without renewal and denies the old authorization",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 5,
+        "retryReasons": [],
+        "startAt": 1791106104432,
+        "status": "passed",
+        "title": "AR1-EXPIRY expires without renewal and denies the old authorization"
+      },
+      {
+        "ancestorTitles": [
+          "AR-1 synthetic certified writer [HTTP] [PostgreSQL]"
+        ],
+        "duration": 195,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-ADVERSARIAL forged, expired, tenant-substituted and rebound authorizations have no grant effect",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 8,
+        "retryReasons": [],
+        "startAt": 1791106106408,
+        "status": "passed",
+        "title": "AR1-ADVERSARIAL forged, expired, tenant-substituted and rebound authorizations have no grant effect"
+      },
+      {
+        "ancestorTitles": [
+          "AR-1 synthetic certified writer [HTTP] [PostgreSQL]"
+        ],
+        "duration": 181,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-SUSPENDED rollback remains available after a tenant is suspended",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 5,
+        "retryReasons": [],
+        "startAt": 1791106106603,
+        "status": "passed",
+        "title": "AR1-SUSPENDED rollback remains available after a tenant is suspended"
+      },
+      {
+        "ancestorTitles": [
+          "AR-1 synthetic certified writer [HTTP] [PostgreSQL]"
+        ],
+        "duration": 271,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-ROLE tenant owner and revoked platform session never gain release authority",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 4,
+        "retryReasons": [],
+        "startAt": 1791106106784,
+        "status": "passed",
+        "title": "AR1-ROLE tenant owner and revoked platform session never gain release authority"
+      },
+      {
+        "ancestorTitles": [
+          "AR-1 synthetic certified writer [HTTP] [PostgreSQL]"
+        ],
+        "duration": 325,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 synthetic certified writer [HTTP] [PostgreSQL] AR1-REVOKE-WAIT active admitted work and revoke serialize on the tenant release lock",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 5,
+        "retryReasons": [],
+        "startAt": 1791106107055,
+        "status": "passed",
+        "title": "AR1-REVOKE-WAIT active admitted work and revoke serialize on the tenant release lock"
+      }
+    ]
+  },
+  "revocation": {
+    "source": "release-revocation.live-spec.ts",
+    "count": 1,
+    "receipt": {
+      "path": "receipts/widgets-live-full.json",
+      "sha256": "56f48a701df707245c1c5dc909373ba6f51a3b16f2c9ad9c8492d6f3dd4c4d04"
+    },
+    "assertions": [
+      {
+        "ancestorTitles": [
+          "AR release revocation [HTTP] [PostgreSQL]"
+        ],
+        "duration": 837,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR release revocation [HTTP] [PostgreSQL] AR-G6-REVOCATION [E-MINT] real post-Gate6 revoke refuses at canonical admission and increments metric",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791106168425,
+        "status": "passed",
+        "title": "AR-G6-REVOCATION [E-MINT] real post-Gate6 revoke refuses at canonical admission and increments metric"
+      }
+    ]
+  },
+  "productionGrant": false,
+  "certificateIssued": false
+}

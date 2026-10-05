@@ -1,0 +1,33 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "status": "PASS",
+  "recordedAt": "2026-10-01T23:17:33.395064+00:00",
+  "reason": "Standalone runtime/web builds, carrier build-harness and the sixth safe L27 HTTP/BIN probe were not dispatched by the reused top-level launcher. Each required command has now been freshly executed in this same campaign. No receipt was copied or retagged.",
+  "receipts": [
+    {
+      "name": "runtime-build",
+      "receipt": "receipts/runtime-build.receipt.json",
+      "sha256": "2c7f7fe955739de6c720b937f420501cea29e54ed3bfc5c6f7b29e1fb5882271"
+    },
+    {
+      "name": "carrier-build",
+      "receipt": "receipts/carrier-build.receipt.json",
+      "sha256": "1a4a66f95010b51ea658f88bdf692d1cc61a3b65e497e26d591b4f7b2cd39c25"
+    },
+    {
+      "name": "carrier-harness",
+      "receipt": "receipts/carrier-harness.receipt.json",
+      "sha256": "e59a1a86101b39dfd822f0a6dc09b77f4b073ea115845f3fe913972828079e45"
+    },
+    {
+      "name": "fbe2e-l27-postcommit-dismiss",
+      "receipt": "receipts/fbe2e-l27-postcommit-dismiss.receipt.json",
+      "sha256": "d18e021a355268f09964ab58bf4536df6a9c024eeb9765fbe009c4da20cd5918"
+    }
+  ],
+  "buildByteEquivalence": "FRESH-BUILD-EQUIVALENCE.json",
+  "nativeRunnerChanged": false,
+  "productChanged": false,
+  "testAssertionsChanged": false,
+  "timing": "Additional bounded commands completed after native workers had copied their isolated inputs; emitted runtime/carrier bytes were verified unchanged."
+}

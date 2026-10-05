@@ -1,0 +1,25 @@
+{
+  "base": "30fa24698f3ae277c22209e8edfd448c29e4f872",
+  "records": [
+    {
+      "name": "old27",
+      "exit": 1,
+      "status": "SURVIVED",
+      "seconds": 2.074,
+      "baselineRed": []
+    },
+    {
+      "name": "fixed27",
+      "exit": 0,
+      "status": "build-killed",
+      "seconds": 2.079,
+      "baselineRed": []
+    }
+  ],
+  "guardBefore": "6 PASS / 1 FAIL (M9-27 only)",
+  "guardAfter": "7 PASS / 0 FAIL",
+  "fullHarnessIntegrity": "42 PASS / 0 FAIL",
+  "productSourceUnchanged": true,
+  "diagnosticOnly": true,
+  "restriction": "exact timeline store spec, unit step"
+}

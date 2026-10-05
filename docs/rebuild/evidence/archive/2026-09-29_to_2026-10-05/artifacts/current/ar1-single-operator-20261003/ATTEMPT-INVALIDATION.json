@@ -1,0 +1,111 @@
+{
+  "candidate": "b5621b1062ba3c7882c725d160f588d3b04e3938",
+  "status": "INADMISSIBLE",
+  "reason": "blocking ESLint Prettier mismatch in newly added SO tenant-session proof; no product failure",
+  "ownedProcessSnapshot": [
+    {
+      "pid": 61830,
+      "ppid": 58828,
+      "pgid": 61830,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python work/ar1-single-operator-20261003/run-certification.py"
+    },
+    {
+      "pid": 61831,
+      "ppid": 61830,
+      "pgid": 61830,
+      "command": "caffeinate -is python3 work/ar1-single-operator-20261003/run-certification.py"
+    },
+    {
+      "pid": 65659,
+      "ppid": 61830,
+      "pgid": 61830,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-20261003/run-programme.py"
+    },
+    {
+      "pid": 65666,
+      "ppid": 65659,
+      "pgid": 61830,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-20261003/run-extra.py python"
+    },
+    {
+      "pid": 65679,
+      "ppid": 65666,
+      "pgid": 61830,
+      "command": "/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python -u -m unittest discover -v -s ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440 -p test_*.py"
+    },
+    {
+      "pid": 67806,
+      "ppid": 65659,
+      "pgid": 61830,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-20261003/run-baseline.py live"
+    },
+    {
+      "pid": 67810,
+      "ppid": 65659,
+      "pgid": 61830,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-20261003/run-baseline.py backend"
+    },
+    {
+      "pid": 67811,
+      "ppid": 65659,
+      "pgid": 61830,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-20261003/run-extra.py node24"
+    },
+    {
+      "pid": 67813,
+      "ppid": 65659,
+      "pgid": 61830,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-20261003/run-rest.py"
+    },
+    {
+      "pid": 67829,
+      "ppid": 67806,
+      "pgid": 61830,
+      "command": "npm run test:widgets:live --json --outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/ar1-single-operator-20261003/receipts/widgets-live-full.json"
+    },
+    {
+      "pid": 67833,
+      "ppid": 67810,
+      "pgid": 61830,
+      "command": "npm test --runInBand --json --outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/ar1-single-operator-20261003/receipts/backend-full.json"
+    },
+    {
+      "pid": 67867,
+      "ppid": 67829,
+      "pgid": 61830,
+      "command": "node /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend/node_modules/.bin/jest --config ./test/jest-widgets-live.json --runInBand --json --outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/ar1-single-operator-20261003/receipts/widgets-live-full.json"
+    },
+    {
+      "pid": 67884,
+      "ppid": 67833,
+      "pgid": 61830,
+      "command": "node /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend/node_modules/.bin/jest --runInBand --json --outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/ar1-single-operator-20261003/receipts/backend-full.json"
+    },
+    {
+      "pid": 68061,
+      "ppid": 67884,
+      "pgid": 61830,
+      "command": "/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python -m unittest /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_package5_control_plane_runtime_guard.py"
+    },
+    {
+      "pid": 68285,
+      "ppid": 67811,
+      "pgid": 61830,
+      "command": "node --test conformance.test.mjs test/brand.test.mjs test/build.selftest.test.mjs test/conversation.test.mjs test/deeplink.test.mjs test/dom.test.mjs test/integrity.parity.test.mjs test/intents.test.mjs test/k15-census.test.mjs test/local-api.history.test.mjs test/net.test.mjs test/renderer.conformance.test.mjs test/routes.conformance.test.mjs test/serve.test.mjs test/shell.test.mjs test/view.tokenfree.test.mjs test/voice.test.mjs"
+    },
+    {
+      "pid": 68289,
+      "ppid": 68285,
+      "pgid": 61830,
+      "command": "/usr/local/bin/node --test-concurrency=0 --heap-prof-interval=524288 --test-timeout=0 --max-http-header-size=16384 --stack-trace-limit=10 --report-signal=SIGUSR2 --heapsnapshot-near-heap-limit=0 --tls-cipher-list=TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA --watch-kill-signal=SIGTERM --inspect-publish-uid=stderr,http --cpu-prof-interval=1000 --test-coverage-functions=0 --test-coverage-lines=0 --inspect-port=127.0.0.1:9229 --test-coverage-branches=0 --test-isolation=process --use-largepages=off --network-family-autoselection-attempt-timeout=250 --secure-heap-min=2 --v8-pool-size=4 --node-snapshot --trace-event-file-pattern=node_trace.${rotation}.log --secure-heap=0 test/build.selftest.test.mjs"
+    },
+    {
+      "pid": 68739,
+      "ppid": 68289,
+      "pgid": 61830,
+      "command": "/usr/local/bin/node /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell/build.mjs --dry-run"
+    }
+  ],
+  "completeNativeCorpusStarted": false,
+  "action": "interrupt this exact certification process tree; retain receipts as diagnostic only"
+}

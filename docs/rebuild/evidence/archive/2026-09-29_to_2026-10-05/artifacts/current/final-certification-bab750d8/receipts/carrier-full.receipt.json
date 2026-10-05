@@ -1,0 +1,11 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "name": "carrier-full",
+  "command": [
+    "npm",
+    "test"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-carrier-react",
+  "exit": 0,
+  "seconds": 0.36
+}

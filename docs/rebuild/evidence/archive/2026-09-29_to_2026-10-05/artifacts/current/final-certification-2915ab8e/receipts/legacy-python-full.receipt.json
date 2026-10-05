@@ -1,0 +1,19 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "name": "legacy-python-full",
+  "command": [
+    "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/wave1-closure-20260919/python-venv/bin/python",
+    "-u",
+    "-m",
+    "unittest",
+    "discover",
+    "-v",
+    "-s",
+    "ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440",
+    "-p",
+    "test_*.py"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "exit": 0,
+  "seconds": 322.63
+}

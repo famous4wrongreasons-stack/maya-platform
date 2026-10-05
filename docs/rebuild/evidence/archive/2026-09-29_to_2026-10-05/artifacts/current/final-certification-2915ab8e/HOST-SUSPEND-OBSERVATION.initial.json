@@ -1,0 +1,59 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "capturedAt": "2026-10-02T06:56:06.780938+00:00",
+  "powerEvents": [
+    {
+      "utc": "2026-10-02T06:35:59+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Clamshell Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 354 secs"
+    },
+    {
+      "utc": "2026-10-02T06:41:53+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using BATT (Charge:100%) 45 secs"
+    },
+    {
+      "utc": "2026-10-02T06:42:38+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 694 secs"
+    },
+    {
+      "utc": "2026-10-02T06:54:12+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty E_PFN_NET_FOUND ARPT/ Using BATT (Charge:100%) 45 secs"
+    },
+    {
+      "utc": "2026-10-02T06:54:57+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 25 secs"
+    },
+    {
+      "utc": "2026-10-02T06:55:22+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) USB-C_plug SMC.OutboxNotEmpty nub-spmi-a0.0x3F/ Using BATT (Charge:100%) 1 secs"
+    },
+    {
+      "utc": "2026-10-02T06:55:23+00:00",
+      "event": "Wake",
+      "details": "DarkWake to FullWake from Deep Idle [CDNVAP] : due to Notification Using AC (Charge:100%)"
+    }
+  ],
+  "suspensionWindows": [
+    {
+      "from": "2026-10-02T06:35:59+00:00",
+      "to": "2026-10-02T06:55:23+00:00",
+      "fullWakeObserved": true
+    }
+  ],
+  "windowScope": "Conservative first Sleep through actual FullWake, including short maintenance DarkWakes.",
+  "potentiallyOverlappingTestRuns": [],
+  "completedOverlappingJobs": [],
+  "jobTimestampMethod": "Receipt filesystem completion timestamp minus its recorded wall seconds; overlap widened by one second.",
+  "nativeOriginalExecutionComplete": false,
+  "nativeOriginalExecutionExit": null,
+  "admissionAssessment": "All overlapping whole parts will be withheld and rerun with canonical unrestricted steps on the identical candidate. Unaffected fresh parts remain in this same certification programme.",
+  "timeoutsChanged": false,
+  "productSourceChanged": false,
+  "powerSettingsChanged": false,
+  "parserCorrection": "Wake Requests scheduler hints in the initial diagnostic were not actual wake events and are excluded here."
+}

@@ -1,0 +1,25 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "status": "PASS",
+  "before": {
+    "events": [],
+    "error": "KeyError"
+  },
+  "after": {
+    "events": [
+      "wait",
+      "admission"
+    ],
+    "error": null
+  },
+  "explicitFailure": {
+    "events": [
+      "wait"
+    ],
+    "error": "AssertionError"
+  },
+  "sourceSha256": "01791c35fc01b3d05fe3e2640104fa00c2378e57b015445bf84bfa3443c3e436",
+  "candidateCodeChanged": false,
+  "testProcessInterrupted": false,
+  "admissionOfPartialReport": false
+}

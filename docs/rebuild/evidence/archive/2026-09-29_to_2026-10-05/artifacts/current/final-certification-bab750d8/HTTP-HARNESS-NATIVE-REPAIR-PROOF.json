@@ -1,0 +1,216 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "receipt": "receipts/mutation-parts/widgets-mutation-part-H-harness.json",
+  "sha256": "db2502889935f55b4547405a75ab7119a76708f7939d8bca32d0a6e5d4bc2ba4",
+  "declarations": 25,
+  "status": "AS-DECLARED",
+  "controls": {
+    "baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "repairMutants": [
+    {
+      "battery": "gateH-harness.json",
+      "id": "H-LOOPBACK-1",
+      "files": [
+        "test/widgets-live/support/http-bootstrap.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "HAR-LOOPBACK"
+      ],
+      "kills": [
+        {
+          "killer": "HAR-LOOPBACK",
+          "test": "HTTP harness listener ownership HAR-LOOPBACK owns one ready IPv4 listener across requests and closes it at teardown",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "H-R02-LOOPBACK-1",
+      "files": [
+        "src/auth/legacy-staff-principal.http.spec.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "R02-LOOPBACK"
+      ],
+      "kills": [
+        {
+          "killer": "R02-LOOPBACK",
+          "test": "R02 canonical principal through actual Nest JWT/tenant/role guards R02-LOOPBACK owns one ready IPv4 listener across requests",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "H-ADMIN-LOOPBACK-1",
+      "files": [
+        "src/admin/admin.controller.spec.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "accepts a logo in the multipart field"
+      ],
+      "kills": [
+        {
+          "killer": "accepts a logo in the multipart field",
+          "test": "AdminController logo upload accepts a logo in the multipart field \"file\"",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "accepts a logo in the multipart field",
+          "test": "AdminController logo upload accepts a logo in the multipart field \"logo\"",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateH-harness.json",
+      "id": "H-BOOT-LOOPBACK-1",
+      "files": [
+        "src/bootstrap/configure-http-app.spec.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "a route is served under /api, and not without it"
+      ],
+      "kills": [
+        {
+          "killer": "a route is served under /api, and not without it",
+          "test": "configureHttpApp \u2014 the parsers, the api prefix and the validation pipe the 'api' prefix a route is served under /api, and not without it",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "fullCorpusAdmission": "PENDING"
+}

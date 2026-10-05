@@ -1,0 +1,41 @@
+{
+  "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+  "integration": "Exact requested commit already at HEAD; exact parent 1d519822bb92343f1bf4efdf92cbc4264eace48a verified; no duplicate cherry-pick",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "worktreeClean": true,
+  "candidateFilesChangedThisPass": 0,
+  "profileApplicableFalse": 0,
+  "globalFalse": 2,
+  "matrixQualification": "Inherited backend progress matrix only, not fresh full certification",
+  "fullMutations": "NOT RUN \u2014 STOP",
+  "ciEquivalent": "FAIL / INCOMPLETE",
+  "fbe2e": "FAIL \u2014 canonical parent return",
+  "pwaCarrierParity": "NOT CERTIFIED \u2014 full check stopped",
+  "certifiedForProfile": false,
+  "fullContractCertified": false,
+  "readyForReleaseAuthorization": false,
+  "defect": {
+    "id": "I-SRC-1-RETURN",
+    "owner": "RUNTIME",
+    "rawResolvedParent": "1b4f3bdf-d03e-4695-b1ea-523d3f1966f8",
+    "projectionPreservesResolvedWidget": false,
+    "submissionOutcome": "accepted",
+    "activationOutcome": {
+      "outcome": "dismissed"
+    },
+    "fullscreenAfter": "open",
+    "sameDetailStillOpen": true,
+    "timelinePollution": 0
+  },
+  "productionEffects": 0,
+  "productionMigrationApplied": false,
+  "realOtp": 0,
+  "realYclientsEffects": 0,
+  "iphoneReinstall": false,
+  "chapter10": false,
+  "remainingBlockers": [
+    "Runtime typed projection/submission loses the canonical NAVIGATE(w) resolved parent; accepted outcome does not return/close the current detail.",
+    "After fixing that exact runtime path, produce a new exact candidate and run the complete fresh certification programme. This pass stopped at the defect; no old/partial receipts substitute."
+  ]
+}

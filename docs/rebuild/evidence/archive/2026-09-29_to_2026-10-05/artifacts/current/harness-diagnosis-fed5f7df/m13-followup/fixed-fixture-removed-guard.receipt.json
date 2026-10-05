@@ -1,0 +1,22 @@
+{
+  "name": "fixed-fixture-removed-guard",
+  "sourceCandidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "diagnosticOnly": true,
+  "isolatedProductMutation": "M13-U13C-11",
+  "exit": 1,
+  "expectedExit": 1,
+  "seconds": 1.602,
+  "passed": 6,
+  "failed": 6,
+  "failures": [
+    "U13c booking COMMIT owner port N11 refuses an owner invocation whose Action Engine request does not preserve source and key",
+    "U13c booking COMMIT owner port WR-F33 refuses a forged agent_task source even with the correct server key",
+    "U13c booking COMMIT owner port WR-F33 refuses a forged scheduler source even with the correct server key",
+    "U13c booking COMMIT owner port WR-F33 refuses a forged webhook source even with the correct server key",
+    "U13c booking COMMIT owner port WR-F33 refuses a forged legacy_bridge source even with the correct server key",
+    "U13c booking COMMIT owner port WR-F33 refuses a forged synthetic_shadow source even with the correct server key"
+  ],
+  "specSha256": "28d13d7e6480ea24a6f2adae519c431d1044c9c5b38eff1683b562aaa9f48b16",
+  "adapterSha256": "17009d624e08d911017506c7275d33d6845a0b7e375d747301b6ac0677d25269",
+  "reportSha256": "26544ef9bedccbd46af83ac4b8f3edf41391a36afb663694975c7e3b6ee069fc"
+}

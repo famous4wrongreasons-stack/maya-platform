@@ -1,0 +1,194 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "status": "PASS",
+  "startedAt": "2026-10-04T18:11:45.772397+00:00",
+  "completedAt": "2026-10-04T21:18:59.852025+00:00",
+  "jobs": [
+    {
+      "gate": "P-ledger",
+      "partition": "",
+      "slot": "P-ledger",
+      "receipt": {
+        "path": "receipts/mutation-P-ledger.receipt.json",
+        "sha256": "7d9ed332f890ed906c909545caf44d3747602a41036b7aec8623f157b00bdcd1"
+      }
+    },
+    {
+      "gate": "P-mint",
+      "partition": "2/4",
+      "slot": "P-mint-part-2-of-4",
+      "receipt": {
+        "path": "receipts/mutation-P-mint-part-2-of-4.receipt.json",
+        "sha256": "b24492ac4481a9d215f1304ebefc5b30418cdc58e729df726ead7249a0ad54fa"
+      }
+    },
+    {
+      "gate": "P-mint",
+      "partition": "3/4",
+      "slot": "P-mint-part-3-of-4",
+      "receipt": {
+        "path": "receipts/mutation-P-mint-part-3-of-4.receipt.json",
+        "sha256": "7ed94c969e57a8912cd5a231e7de1e11beee2c37b3d94e96d22bbf57f27489fb"
+      }
+    },
+    {
+      "gate": "P-mint",
+      "partition": "4/4",
+      "slot": "P-mint-part-4-of-4",
+      "receipt": {
+        "path": "receipts/mutation-P-mint-part-4-of-4.receipt.json",
+        "sha256": "e361fd5ebc809494dd0cd909a08b06838c7ee6a90e5fd3702cb74569b9f121ff"
+      }
+    },
+    {
+      "gate": "P-mt3",
+      "partition": "",
+      "slot": "P-mt3",
+      "receipt": {
+        "path": "receipts/mutation-P-mt3.receipt.json",
+        "sha256": "fc10dc4183f2e103b3e32b0940e731b4601933c912e6cda3a7ab527b314a7623"
+      }
+    },
+    {
+      "gate": "P-pairing",
+      "partition": "",
+      "slot": "P-pairing",
+      "receipt": {
+        "path": "receipts/mutation-P-pairing.receipt.json",
+        "sha256": "6735a245c7c5b78ef0550be5d04e4f13c63a4e2aa39bfff41b915294ef1d4132"
+      }
+    },
+    {
+      "gate": "P-principal",
+      "partition": "",
+      "slot": "P-principal",
+      "receipt": {
+        "path": "receipts/mutation-P-principal.receipt.json",
+        "sha256": "dd2bfe924a69d51da63d8ffa29dc8775f14060de60635a36d6d7f7bedd0b0f53"
+      }
+    },
+    {
+      "gate": "P-render",
+      "partition": "",
+      "slot": "P-render",
+      "receipt": {
+        "path": "receipts/mutation-P-render.receipt.json",
+        "sha256": "0bed62d79129efd24579d5eebea98e9b88b3636c073ffb6d757cf3371da43298"
+      }
+    },
+    {
+      "gate": "P-rt6",
+      "partition": "",
+      "slot": "P-rt6",
+      "receipt": {
+        "path": "receipts/mutation-P-rt6.receipt.json",
+        "sha256": "c7cf5b27134ad5a45cfcd26389a8c7987e7a1bed5b06f8383b95406281ac8db7"
+      }
+    },
+    {
+      "gate": "P-seal",
+      "partition": "",
+      "slot": "P-seal",
+      "receipt": {
+        "path": "receipts/mutation-P-seal.receipt.json",
+        "sha256": "d75f10b2dcc8247c80df51ac26ca0d473fe9c6272b697c6c7835620b89359642"
+      }
+    },
+    {
+      "gate": "T-tables",
+      "partition": "",
+      "slot": "T-tables",
+      "receipt": {
+        "path": "receipts/mutation-T-tables.receipt.json",
+        "sha256": "94ddbb7f7bd9249a76e77ae6316b7c8b7e29e7da752cc6c7236d2654b3f82920"
+      }
+    },
+    {
+      "gate": "WF",
+      "partition": "",
+      "slot": "WF",
+      "receipt": {
+        "path": "receipts/mutation-WF.receipt.json",
+        "sha256": "d6a378d8f9b0c8601930be99f6fff313f10e587b86701f6a6d866fa9f2351fe6"
+      }
+    },
+    {
+      "gate": "WR",
+      "partition": "1/4",
+      "slot": "WR-part-1-of-4",
+      "receipt": {
+        "path": "receipts/mutation-WR-part-1-of-4.receipt.json",
+        "sha256": "b9f648ad8f56b928b4f74a4d658a1c3878bd064289c0654545f76c4f448441e7"
+      }
+    },
+    {
+      "gate": "WR",
+      "partition": "2/4",
+      "slot": "WR-part-2-of-4",
+      "receipt": {
+        "path": "receipts/mutation-WR-part-2-of-4.receipt.json",
+        "sha256": "0142e28c52579508f5451fcf34382be2dae7404c6f4a1b5118eeceb564c4efbe"
+      }
+    },
+    {
+      "gate": "WR",
+      "partition": "3/4",
+      "slot": "WR-part-3-of-4",
+      "receipt": {
+        "path": "receipts/mutation-WR-part-3-of-4.receipt.json",
+        "sha256": "2bc6b953d11771496381fee6b00d9fa2c31153ccbe258780dad7b176deba8dcf"
+      }
+    },
+    {
+      "gate": "WR",
+      "partition": "4/4",
+      "slot": "WR-part-4-of-4",
+      "receipt": {
+        "path": "receipts/mutation-WR-part-4-of-4.receipt.json",
+        "sha256": "e5e77e48b12d0ba46cf6505593cdf79eb1a6ec3e8057bb75247c4a874eec4702"
+      }
+    }
+  ],
+  "retainedWholeParts": 52,
+  "sleepAffectedWholePartsReexecuted": 6,
+  "interruptedPostWakePartReexecuted": 0,
+  "neverStartedPartsExecuted": 10,
+  "sources": [
+    {
+      "path": "work/ar1-single-operator-final-20261004/suspend-recovery-runner.py",
+      "sha256": "5025943c18801a12d5e96f55c71a13425fd809dd64f9820975cc945737407137"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261004/suspend-recovery-controller.py",
+      "sha256": "a71ec6194e0c198924f9925f59b36d70704ad92212622d3b6a8686255e9821d1"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261004/suspend-recovery-validation.py",
+      "sha256": "b5c160311456be30ed0864720a7105a65050c38fd72b956e817969cc35cac817"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261004/suspend-recovery-validation-test.py",
+      "sha256": "90d41bf9e7a1ce6fdaec2b5cd698db0db1c75ae58a5977e3731e17bcc94fa1e3"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261004/suspend-recovery-preparation.py",
+      "sha256": "d26f50415c3461d816a58f0a11d8db48a8b57f04a00152ed1fc584e8d3431a1f"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261004/r06-child-trace.cjs",
+      "sha256": "c1838a6a87f27553b8bfe9abbd6dc6f360a19291ca294e8532ea7ef15e773ec1"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261004/index-final-orchestration-sources.py",
+      "sha256": "258c773a5ee4f0a351932f7baa3ad05829fdedd0efa8ed4d88f9185bb2d141fd"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261004/finalize-receipts.py",
+      "sha256": "d0341a4be3c269dd784b307c6021eb43a641ebe4ae9b8470d328169961b32d4c"
+    }
+  ],
+  "restrictions": null,
+  "timeoutsChanged": false,
+  "productChanged": false,
+  "productionEffects": 0
+}

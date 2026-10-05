@@ -1,0 +1,30 @@
+{
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "base": "4509d6f55df62da852740658c69613b113b5a1c1",
+  "commits": [
+    "76df1766a74212f2c8a06ab879386fc8e4468d73 test(release): pin complete production unlock mutation inventory",
+    "667b687c161a03d2d5f3f508f63b8fd0beedfbd9 feat(release): require separately signed exact production execution authorization"
+  ],
+  "changedPaths": [
+    "docs/rebuild/widget-release-programme/AR1-PRODUCTION-EXECUTION-CONTRACT.md",
+    "maya-saas-backend/scripts/widgets-mutation-ci.test.mjs",
+    "maya-saas-backend/src/entitlements/widget-release-policy.service.ts",
+    "maya-saas-backend/src/entitlements/widget-release-production.contract.ts",
+    "maya-saas-backend/src/entitlements/widget-release-production.spec.ts",
+    "maya-saas-backend/src/entitlements/widget-release-profile.contract.ts",
+    "maya-saas-backend/src/entitlements/widget-release.contract.ts",
+    "maya-saas-backend/src/entitlements/widget-release.service.ts",
+    "maya-saas-backend/test/widgets-live/mutations/gatePU.json",
+    "maya-saas-backend/test/widgets-live/support/widget-production-proof.ts",
+    "maya-saas-backend/test/widgets-live/support/widget-profile-proof.ts",
+    "maya-saas-backend/test/widgets-live/widget-production.binary-spec.ts",
+    "maya-saas-backend/test/widgets-live/widget-production.live-spec.ts"
+  ],
+  "presentationPathOverlap": 0,
+  "migrationAdded": false,
+  "schemaChanged": false,
+  "productionEffects": 0,
+  "realOtpEffects": 0,
+  "realYclientsEffects": 0,
+  "productionAuthorizationIssued": false
+}

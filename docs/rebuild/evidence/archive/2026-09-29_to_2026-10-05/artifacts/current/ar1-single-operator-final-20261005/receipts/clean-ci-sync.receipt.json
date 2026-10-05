@@ -1,0 +1,12 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "name": "clean-ci-sync",
+  "exit": 0,
+  "command": [
+    "npm",
+    "run",
+    "sync"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261005/clean-packaging-ci/maya-ios-carrier",
+  "seconds": 16.57
+}

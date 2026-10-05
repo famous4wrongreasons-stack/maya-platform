@@ -1,0 +1,9 @@
+{
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "status": "PASS",
+  "cause": "Initial runtime ran before backend dist; mandatory backend ValidationPipe parity skipped explicitly on both Node versions.",
+  "priorReports": "receipts/attempts/prebuild-runtime",
+  "repair": "Complete Node22 and Node24 runtime reruns after exact-candidate build; strict skip audit now requires exactly seven optional API skips; ValidationPipe parity must pass.",
+  "productCodeChanged": false,
+  "timeoutsChanged": false
+}

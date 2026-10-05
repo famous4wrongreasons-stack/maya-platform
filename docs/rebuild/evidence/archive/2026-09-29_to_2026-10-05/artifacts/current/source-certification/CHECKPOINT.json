@@ -1,0 +1,499 @@
+{
+  "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "workingTreeClean": true,
+  "profile": "closed-input.no-handoff@1",
+  "profileApplicableFalse": 0,
+  "globalFalse": 2,
+  "globalStops": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "evidenceMissing": 0,
+  "BS-1": {
+    "backend": "PASS",
+    "carrier": "BLOCKED: I-SRC-1"
+  },
+  "NS-1": {
+    "backend": "PASS",
+    "carrier": "BLOCKED: I-SRC-1"
+  },
+  "migration": {
+    "implementation": "WRITTEN+TESTED",
+    "productionApplied": false
+  },
+  "backend": {
+    "suites": 587,
+    "tests": 5598,
+    "failed": 0
+  },
+  "widgetsLive": {
+    "suites": 36,
+    "tests": 405,
+    "failed": 0
+  },
+  "releaseBinary": {
+    "suites": 2,
+    "tests": 2,
+    "failed": 0
+  },
+  "runtime": {
+    "passed": 355,
+    "skipped": 7,
+    "failed": 0
+  },
+  "carrier": {
+    "passed": 93,
+    "failed": 0
+  },
+  "httpBin": {
+    "passed": 21,
+    "failed": 0
+  },
+  "mutationProgramme": {
+    "declarations": 502,
+    "newFocusedKills": 10,
+    "newBaselineFailures": 0,
+    "completeFreshCorpus": "NOT RUN / NOT CERTIFIED",
+    "focusedReceiptsAreNotFullCertification": true
+  },
+  "ciEquivalent": "NOT COMPLETE: source integration probe FAIL; complete mutation corpus pending final runtime candidate",
+  "fbe2e": "FAIL / I-SRC-1",
+  "certifiedForProfile": false,
+  "fullContractCertified": false,
+  "readyForReleaseAuthorization": false,
+  "claudePathOverlap": 0,
+  "productionEffects": 0,
+  "realOtp": 0,
+  "realYclients": 0,
+  "remainingBlockers": [
+    "I-SRC-1 ownership decision and narrow runtime integration: null-input SCHEDULE entry, accepted detail presentation and exact server-resolved parent result.",
+    "After the final integrated runtime exists: full applicable 502-declaration mutation programme and complete fresh combined CI/FBE2E certification. Preserve explicitly disclosed FBE2E prerequisites/limitations; do not manufacture production or device evidence."
+  ],
+  "receipts": [
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "backend",
+      "command": [
+        "npm",
+        "test",
+        "--",
+        "--runInBand",
+        "--json",
+        "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/source-certification/receipts/backend.json"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 385.53
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 23.67
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "carrier-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "maya-carrier-react",
+      "exit": 0,
+      "seconds": 5.13
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "carrier-test",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "cwd": "maya-carrier-react",
+      "exit": 0,
+      "seconds": 0.34
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "carrier-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": "maya-carrier-react",
+      "exit": 0,
+      "seconds": 5.16
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "contract-check",
+      "command": [
+        "node",
+        "scripts/widget-contract-check.mjs"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 0.88
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "contract-compile",
+      "command": [
+        "npx",
+        "tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.widget-contract.json"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 3.87
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "e2e",
+      "command": [
+        "npm",
+        "run",
+        "test:e2e",
+        "--",
+        "--runInBand"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 0.71
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "events-live",
+      "command": [
+        "npm",
+        "run",
+        "test:events:live"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 0.8
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "evidence-verifier",
+      "command": [
+        "node",
+        "scripts/widgets-evidence-verify.mjs",
+        "--dir",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/source-certification/receipts/evidence",
+        "--audit",
+        "../docs/rebuild/widget-release-programme/approved-release/current-audit.json",
+        "--u-proofs",
+        "../docs/rebuild/widget-release-programme/approved-release/u-proofs.json"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 0.04
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "http-bin",
+      "command": [
+        "npm",
+        "run",
+        "test:widgets:http"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 12.83
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "icons",
+      "command": [
+        "node",
+        "brand/make-icons.mjs",
+        "--check"
+      ],
+      "cwd": "maya-chat-shell",
+      "exit": 0,
+      "seconds": 4.46
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "k1-dossier",
+      "command": [
+        "node",
+        "docs/rebuild/evidence/maya-chat-first-ux/k1/k1-dossier-check.mjs"
+      ],
+      "exit": 0,
+      "seconds": 0.03
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "k15-census",
+      "command": [
+        "node",
+        "docs/rebuild/evidence/maya-chat-first-ux/k15-bundle-census.mjs",
+        "--json"
+      ],
+      "exit": 0,
+      "seconds": 0.21
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "k3",
+      "command": [
+        "node",
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 3.09
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "k5-exit",
+      "command": [
+        "bash",
+        "docs/rebuild/evidence/maya-chat-first-ux/k5-exit-gate.sh"
+      ],
+      "cwd": ".",
+      "exit": 0,
+      "seconds": 26.8
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "lint",
+      "command": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 66.54
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "live-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck:widgets-live"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 8.97
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "mutation-inventory",
+      "command": [
+        "node",
+        "--test",
+        "scripts/widgets-mutation-ci.test.mjs"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 2.32
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "npm-audit",
+      "command": [
+        "npm",
+        "audit",
+        "--omit=dev",
+        "--audit-level=high",
+        "--json"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 2.18
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "platform-http-smoke",
+      "command": [
+        "npm",
+        "run",
+        "test:http"
+      ],
+      "exit": 0,
+      "seconds": 7.01
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "prisma-validate",
+      "command": [
+        "npx",
+        "prisma",
+        "validate"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 0.67
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "release-binary",
+      "command": [
+        "npm",
+        "run",
+        "test:widgets:release-binary",
+        "--",
+        "--json",
+        "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/source-certification/receipts/release-binary.json"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 6.68
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "runtime-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "maya-chat-shell",
+      "exit": 0,
+      "seconds": 5.53
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "runtime-check",
+      "command": [
+        "node",
+        "build.mjs",
+        "--check",
+        "--no-baseline"
+      ],
+      "cwd": "maya-chat-shell",
+      "exit": 0,
+      "seconds": 5.32
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "runtime-self-test",
+      "command": [
+        "npm",
+        "run",
+        "self-test"
+      ],
+      "cwd": "maya-chat-shell",
+      "exit": 0,
+      "seconds": 7.21
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "runtime-test",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "cwd": "maya-chat-shell",
+      "exit": 0,
+      "seconds": 46.29
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "runtime-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": "maya-chat-shell",
+      "exit": 0,
+      "seconds": 5.13
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "scripts-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck:scripts"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 21.27
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "smoke-migration",
+      "command": [
+        "npx",
+        "prisma",
+        "migrate",
+        "deploy"
+      ],
+      "exit": 0,
+      "seconds": 1.18
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "smoke-seed",
+      "command": [
+        "npm",
+        "run",
+        "prisma:seed"
+      ],
+      "exit": 0,
+      "seconds": 0.59
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "source-carrier",
+      "command": [
+        "npx",
+        "jest",
+        "--config",
+        "test/jest-widgets-live.json",
+        "--runInBand",
+        "--testRegex",
+        "widgets-live/source-carrier.probe-spec.ts$"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 1,
+      "seconds": 2.97
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 8.22
+    },
+    {
+      "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+      "name": "widgets-live",
+      "command": [
+        "npm",
+        "run",
+        "test:widgets:live",
+        "--",
+        "--json",
+        "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/source-certification/receipts/widgets-live.json"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 91.57
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "candidate": "4509d6f55df62da852740658c69613b113b5a1c1",
+  "status": "PASS",
+  "runtimeCounterfactuals": {
+    "path": "receipts/l27-runtime-mutations.json",
+    "sha256": "d3e050eeaa2c2d1cc603a2d16dea6a66df2f938e81ac3e8d69a1fb65544b05ce"
+  },
+  "canonicalReceipt": {
+    "receipt": {
+      "path": "receipts/l27-17-step.receipt.json",
+      "sha256": "f9edb3c9e565c0e79d5e5c83c42d7e2444a9076a1362efacd08cc5db514b3934"
+    },
+    "log": {
+      "path": "receipts/l27-17-step.log",
+      "sha256": "905a1a08a3c29204bc87749367aa92240714c0ed852166ec55287e522f9946c1"
+    }
+  },
+  "networkReceipt": {
+    "receipt": {
+      "path": "receipts/fbe2e-l27-postcommit-dismiss.receipt.json",
+      "sha256": "3f902f3729d7acb695d72c44a03921b370fd18c3f8dede117a46e41571293a50"
+    },
+    "log": {
+      "path": "receipts/fbe2e-l27-postcommit-dismiss.log",
+      "sha256": "93d386550bc8a82cd8d62202669a09466526efe6aac73d1a9b20357f5a4bf9ed"
+    }
+  },
+  "observations": {
+    "path": "receipts/l27-postcommit-dismiss-observations.json",
+    "sha256": "bfa7520b424f509f05cbbbc06a214eadcab7b678ccadf171418730fe5e264524"
+  }
+}

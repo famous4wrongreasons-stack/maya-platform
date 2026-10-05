@@ -1,0 +1,2336 @@
+[
+  {
+    "at": 1790781178899,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "client-request",
+    "key": "client:1713",
+    "route": "/api/widgets/intent",
+    "host": "127.0.0.1"
+  },
+  {
+    "at": 1790781178899,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "client-socket",
+    "key": "client:1713",
+    "reused": false,
+    "socket": {
+      "id": 1714,
+      "localPort": 53801,
+      "connecting": true,
+      "destroyed": false,
+      "readyState": "opening",
+      "bytesRead": 0,
+      "bytesWritten": 0
+    }
+  },
+  {
+    "at": 1790781178899,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "client-connect",
+    "key": "client:1713",
+    "socket": {
+      "id": 1714,
+      "localPort": 53801,
+      "remotePort": 53800,
+      "remoteAddress": "127.0.0.1",
+      "connecting": false,
+      "destroyed": false,
+      "readyState": "open",
+      "bytesRead": 0,
+      "bytesWritten": 782
+    },
+    "ms": 0
+  },
+  {
+    "at": 1790781178899,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "client-finish",
+    "key": "client:1713",
+    "ms": 0
+  },
+  {
+    "at": 1790781179234,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 87041,
+    "resources": {
+      "userCPUTime": 78497857,
+      "systemCPUTime": 5333434,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 148794,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 24393,
+      "ipcReceived": 24439,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 170392
+    },
+    "memory": {
+      "rss": 2175877120,
+      "heapTotal": 1744715776,
+      "heapUsed": 1651652752,
+      "external": 143647973,
+      "arrayBuffers": 28373027
+    },
+    "eventLoopMaxMs": 703.594495,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 335
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Socket",
+        "id": 1668,
+        "localPort": 53642,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 85284,
+        "bytesWritten": 120156
+      },
+      {
+        "type": "Socket",
+        "id": 1715,
+        "localPort": 53647,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 199882,
+        "bytesWritten": 260077
+      },
+      {
+        "type": "Socket",
+        "id": 1716,
+        "localPort": 53771,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 41735,
+        "bytesWritten": 59464
+      },
+      {
+        "type": "Socket",
+        "id": 1717,
+        "localPort": 53776,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 49441,
+        "bytesWritten": 67919
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781184235,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 92043,
+    "resources": {
+      "userCPUTime": 78500906,
+      "systemCPUTime": 5334791,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 148794,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 24393,
+      "ipcReceived": 24439,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 170627
+    },
+    "memory": {
+      "rss": 2175877120,
+      "heapTotal": 1744715776,
+      "heapUsed": 1651749272,
+      "external": 143647973,
+      "arrayBuffers": 28373027
+    },
+    "eventLoopMaxMs": 53.510143,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 5336
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Socket",
+        "id": 1668,
+        "localPort": 53642,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 85284,
+        "bytesWritten": 120156
+      },
+      {
+        "type": "Socket",
+        "id": 1715,
+        "localPort": 53647,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 199882,
+        "bytesWritten": 260077
+      },
+      {
+        "type": "Socket",
+        "id": 1716,
+        "localPort": 53771,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 41735,
+        "bytesWritten": 59464
+      },
+      {
+        "type": "Socket",
+        "id": 1717,
+        "localPort": 53776,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 49441,
+        "bytesWritten": 67919
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781189237,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 97045,
+    "resources": {
+      "userCPUTime": 78505348,
+      "systemCPUTime": 5336339,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 148794,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 24397,
+      "ipcReceived": 24439,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 170870
+    },
+    "memory": {
+      "rss": 2175877120,
+      "heapTotal": 1744715776,
+      "heapUsed": 1652035888,
+      "external": 143647973,
+      "arrayBuffers": 28373027
+    },
+    "eventLoopMaxMs": 53.247999,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 10338
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781194238,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 102046,
+    "resources": {
+      "userCPUTime": 78508334,
+      "systemCPUTime": 5337653,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 148794,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 24397,
+      "ipcReceived": 24439,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 171098
+    },
+    "memory": {
+      "rss": 2175877120,
+      "heapTotal": 1744715776,
+      "heapUsed": 1652126064,
+      "external": 143647973,
+      "arrayBuffers": 28373027
+    },
+    "eventLoopMaxMs": 54.394879,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 15339
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781199239,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 107047,
+    "resources": {
+      "userCPUTime": 78511831,
+      "systemCPUTime": 5339049,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 148794,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 24397,
+      "ipcReceived": 24439,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 171326
+    },
+    "memory": {
+      "rss": 2175877120,
+      "heapTotal": 1744715776,
+      "heapUsed": 1652216736,
+      "external": 143647973,
+      "arrayBuffers": 28373027
+    },
+    "eventLoopMaxMs": 55.705599,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 20340
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781204241,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 112049,
+    "resources": {
+      "userCPUTime": 78514746,
+      "systemCPUTime": 5340434,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 148794,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 24397,
+      "ipcReceived": 24439,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 171552
+    },
+    "memory": {
+      "rss": 2175877120,
+      "heapTotal": 1744715776,
+      "heapUsed": 1652306296,
+      "external": 143647973,
+      "arrayBuffers": 28373027
+    },
+    "eventLoopMaxMs": 55.377919,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 25342
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781209242,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 117050,
+    "resources": {
+      "userCPUTime": 78517741,
+      "systemCPUTime": 5341855,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 148794,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 24397,
+      "ipcReceived": 24439,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 171785
+    },
+    "memory": {
+      "rss": 2175877120,
+      "heapTotal": 1744715776,
+      "heapUsed": 1652396392,
+      "external": 143647973,
+      "arrayBuffers": 28373027
+    },
+    "eventLoopMaxMs": 52.658175,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 30343
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781214243,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 122051,
+    "resources": {
+      "userCPUTime": 78520582,
+      "systemCPUTime": 5343251,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 148794,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 24397,
+      "ipcReceived": 24439,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 172009
+    },
+    "memory": {
+      "rss": 2175877120,
+      "heapTotal": 1744715776,
+      "heapUsed": 1652485912,
+      "external": 143647973,
+      "arrayBuffers": 28373027
+    },
+    "eventLoopMaxMs": 71.958527,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 35344
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781219244,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 127052,
+    "resources": {
+      "userCPUTime": 80332726,
+      "systemCPUTime": 5496604,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 149643,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 24397,
+      "ipcReceived": 24439,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 177692
+    },
+    "memory": {
+      "rss": 1444888576,
+      "heapTotal": 1045331968,
+      "heapUsed": 791558064,
+      "external": 90241116,
+      "arrayBuffers": 23790490
+    },
+    "eventLoopMaxMs": 55.934975,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 40345
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781224246,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 132054,
+    "resources": {
+      "userCPUTime": 80339300,
+      "systemCPUTime": 5498278,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 149654,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 24397,
+      "ipcReceived": 24439,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 177932
+    },
+    "memory": {
+      "rss": 1444200448,
+      "heapTotal": 1045331968,
+      "heapUsed": 790847096,
+      "external": 90241116,
+      "arrayBuffers": 23790490
+    },
+    "eventLoopMaxMs": 53.444607,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 45347
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781229246,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 137054,
+    "resources": {
+      "userCPUTime": 80342300,
+      "systemCPUTime": 5499673,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 149658,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 24397,
+      "ipcReceived": 24439,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 178165
+    },
+    "memory": {
+      "rss": 1444265984,
+      "heapTotal": 1045331968,
+      "heapUsed": 790936688,
+      "external": 90241116,
+      "arrayBuffers": 23790490
+    },
+    "eventLoopMaxMs": 53.149695,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 50347
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781234247,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 142055,
+    "resources": {
+      "userCPUTime": 80595428,
+      "systemCPUTime": 5517158,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 150470,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 24642,
+      "ipcReceived": 24683,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 179548
+    },
+    "memory": {
+      "rss": 1457569792,
+      "heapTotal": 1061060608,
+      "heapUsed": 796869504,
+      "external": 90481516,
+      "arrayBuffers": 24030890
+    },
+    "eventLoopMaxMs": 56.590335,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 55348
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      },
+      {
+        "type": "Socket",
+        "id": 1718,
+        "localPort": 55594,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 60420,
+        "bytesWritten": 101338
+      },
+      {
+        "type": "Socket",
+        "id": 1719,
+        "localPort": 55595,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 1146,
+        "bytesWritten": 2177
+      }
+    ]
+  },
+  {
+    "at": 1790781239248,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 147056,
+    "resources": {
+      "userCPUTime": 81109522,
+      "systemCPUTime": 5548761,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 151347,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 25323,
+      "ipcReceived": 25365,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 182370
+    },
+    "memory": {
+      "rss": 1471938560,
+      "heapTotal": 1077837824,
+      "heapUsed": 817002440,
+      "external": 90784324,
+      "arrayBuffers": 24333698
+    },
+    "eventLoopMaxMs": 56.819711,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 60349
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      },
+      {
+        "type": "Socket",
+        "id": 1718,
+        "localPort": 55594,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 116734,
+        "bytesWritten": 205798
+      },
+      {
+        "type": "Socket",
+        "id": 1719,
+        "localPort": 55595,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 1146,
+        "bytesWritten": 2177
+      },
+      {
+        "type": "Socket",
+        "id": 1720,
+        "localPort": 55626,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 116734,
+        "bytesWritten": 205798
+      },
+      {
+        "type": "Socket",
+        "id": 1721,
+        "localPort": 55627,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 1146,
+        "bytesWritten": 2177
+      },
+      {
+        "type": "Socket",
+        "id": 1722,
+        "localPort": 55628,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 4911,
+        "bytesWritten": 7548
+      },
+      {
+        "type": "Socket",
+        "id": 1723,
+        "localPort": 55629,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 768,
+        "bytesWritten": 1298
+      }
+    ]
+  },
+  {
+    "at": 1790781244249,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 152057,
+    "resources": {
+      "userCPUTime": 81113180,
+      "systemCPUTime": 5550289,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 151347,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 25324,
+      "ipcReceived": 25365,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 182612
+    },
+    "memory": {
+      "rss": 1471938560,
+      "heapTotal": 1077837824,
+      "heapUsed": 817151552,
+      "external": 90784324,
+      "arrayBuffers": 24333698
+    },
+    "eventLoopMaxMs": 58.064895,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 65350
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      },
+      {
+        "type": "Socket",
+        "id": 1718,
+        "localPort": 55594,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 116734,
+        "bytesWritten": 205798
+      },
+      {
+        "type": "Socket",
+        "id": 1720,
+        "localPort": 55626,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 116734,
+        "bytesWritten": 205798
+      },
+      {
+        "type": "Socket",
+        "id": 1721,
+        "localPort": 55627,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 1146,
+        "bytesWritten": 2177
+      },
+      {
+        "type": "Socket",
+        "id": 1722,
+        "localPort": 55628,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 4911,
+        "bytesWritten": 7548
+      },
+      {
+        "type": "Socket",
+        "id": 1723,
+        "localPort": 55629,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 768,
+        "bytesWritten": 1298
+      }
+    ]
+  },
+  {
+    "at": 1790781249249,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 157057,
+    "resources": {
+      "userCPUTime": 81117649,
+      "systemCPUTime": 5551867,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 151347,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 25329,
+      "ipcReceived": 25365,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 182856
+    },
+    "memory": {
+      "rss": 1471938560,
+      "heapTotal": 1077837824,
+      "heapUsed": 817487080,
+      "external": 90784324,
+      "arrayBuffers": 24333698
+    },
+    "eventLoopMaxMs": 61.800447,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 70350
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781254249,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 162057,
+    "resources": {
+      "userCPUTime": 81120515,
+      "systemCPUTime": 5553176,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 151347,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 25329,
+      "ipcReceived": 25365,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 183082
+    },
+    "memory": {
+      "rss": 1471938560,
+      "heapTotal": 1077837824,
+      "heapUsed": 817578040,
+      "external": 90784324,
+      "arrayBuffers": 24333698
+    },
+    "eventLoopMaxMs": 55.640063,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 75350
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781259250,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 167058,
+    "resources": {
+      "userCPUTime": 81123299,
+      "systemCPUTime": 5554570,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 151347,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 25329,
+      "ipcReceived": 25365,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 183313
+    },
+    "memory": {
+      "rss": 1471938560,
+      "heapTotal": 1077837824,
+      "heapUsed": 817667576,
+      "external": 90784324,
+      "arrayBuffers": 24333698
+    },
+    "eventLoopMaxMs": 56.229887,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 80351
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781264252,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 172060,
+    "resources": {
+      "userCPUTime": 81143307,
+      "systemCPUTime": 5557246,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 151348,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 25349,
+      "ipcReceived": 25385,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 183643
+    },
+    "memory": {
+      "rss": 1471954944,
+      "heapTotal": 1045331968,
+      "heapUsed": 808120704,
+      "external": 90742852,
+      "arrayBuffers": 24292226
+    },
+    "eventLoopMaxMs": 69.926911,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 85353
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      },
+      {
+        "type": "Socket",
+        "id": 1724,
+        "localPort": 55951,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 1146,
+        "bytesWritten": 2177
+      }
+    ]
+  },
+  {
+    "at": 1790781269253,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 177061,
+    "resources": {
+      "userCPUTime": 81180170,
+      "systemCPUTime": 5559805,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 151349,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 25378,
+      "ipcReceived": 25414,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 183959
+    },
+    "memory": {
+      "rss": 1471971328,
+      "heapTotal": 1048477696,
+      "heapUsed": 809444280,
+      "external": 90759269,
+      "arrayBuffers": 24308643
+    },
+    "eventLoopMaxMs": 56.459263,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 90354
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      },
+      {
+        "type": "Socket",
+        "id": 1724,
+        "localPort": 55951,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 1146,
+        "bytesWritten": 2177
+      },
+      {
+        "type": "Socket",
+        "id": 1725,
+        "localPort": 56012,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 1146,
+        "bytesWritten": 2177
+      },
+      {
+        "type": "Socket",
+        "id": 1726,
+        "localPort": 56013,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 547,
+        "bytesWritten": 784
+      },
+      {
+        "type": "Socket",
+        "id": 1727,
+        "localPort": 56014,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 768,
+        "bytesWritten": 1298
+      },
+      {
+        "type": "Socket",
+        "id": 1728,
+        "localPort": 56015,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 570,
+        "bytesWritten": 1354
+      }
+    ]
+  },
+  {
+    "at": 1790781274254,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 182062,
+    "resources": {
+      "userCPUTime": 81182980,
+      "systemCPUTime": 5560910,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 151349,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 25379,
+      "ipcReceived": 25414,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 184184
+    },
+    "memory": {
+      "rss": 1471971328,
+      "heapTotal": 1048477696,
+      "heapUsed": 809587256,
+      "external": 90759269,
+      "arrayBuffers": 24308643
+    },
+    "eventLoopMaxMs": 51.412991,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 95355
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      },
+      {
+        "type": "Socket",
+        "id": 1725,
+        "localPort": 56012,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 1146,
+        "bytesWritten": 2177
+      },
+      {
+        "type": "Socket",
+        "id": 1726,
+        "localPort": 56013,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 547,
+        "bytesWritten": 784
+      },
+      {
+        "type": "Socket",
+        "id": 1727,
+        "localPort": 56014,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 768,
+        "bytesWritten": 1298
+      },
+      {
+        "type": "Socket",
+        "id": 1728,
+        "localPort": 56015,
+        "remotePort": 55729,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 570,
+        "bytesWritten": 1354
+      }
+    ]
+  },
+  {
+    "at": 1790781279255,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 187063,
+    "resources": {
+      "userCPUTime": 81188777,
+      "systemCPUTime": 5562038,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 151350,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 25383,
+      "ipcReceived": 25414,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 184418
+    },
+    "memory": {
+      "rss": 1471987712,
+      "heapTotal": 1048477696,
+      "heapUsed": 809879368,
+      "external": 90759269,
+      "arrayBuffers": 24308643
+    },
+    "eventLoopMaxMs": 51.412991,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 100356
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781284256,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 192064,
+    "resources": {
+      "userCPUTime": 81191522,
+      "systemCPUTime": 5563070,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 151350,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 25383,
+      "ipcReceived": 25414,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 184635
+    },
+    "memory": {
+      "rss": 1471987712,
+      "heapTotal": 1048477696,
+      "heapUsed": 809969384,
+      "external": 90759269,
+      "arrayBuffers": 24308643
+    },
+    "eventLoopMaxMs": 51.412991,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 105357
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  },
+  {
+    "at": 1790781289259,
+    "pid": 31748,
+    "ppid": 31670,
+    "event": "sample",
+    "uptimeMs": 197064,
+    "resources": {
+      "userCPUTime": 81194231,
+      "systemCPUTime": 5564074,
+      "maxRSS": 2147952,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 151350,
+      "majorPageFault": 5,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 0,
+      "ipcSent": 25383,
+      "ipcReceived": 25414,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 1548,
+      "involuntaryContextSwitches": 184857
+    },
+    "memory": {
+      "rss": 1471987712,
+      "heapTotal": 1048477696,
+      "heapUsed": 810058488,
+      "external": 90759269,
+      "arrayBuffers": 24308643
+    },
+    "eventLoopMaxMs": 61.046783,
+    "pending": [
+      {
+        "key": "client:1713",
+        "begin": 1790781178899,
+        "route": "/api/widgets/intent",
+        "ms": 110358
+      }
+    ],
+    "handles": [
+      {
+        "type": "Socket",
+        "id": 69,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 93
+      },
+      {
+        "type": "Socket",
+        "id": 70,
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "writeOnly",
+        "bytesRead": 0,
+        "bytesWritten": 17472
+      },
+      {
+        "type": "Server",
+        "id": 1669,
+        "listening": true,
+        "address": {
+          "address": "::",
+          "family": "IPv6",
+          "port": 53800
+        }
+      },
+      {
+        "type": "Socket",
+        "id": 1714,
+        "localPort": 53801,
+        "remotePort": 53800,
+        "remoteAddress": "127.0.0.1",
+        "connecting": false,
+        "destroyed": false,
+        "readyState": "open",
+        "bytesRead": 0,
+        "bytesWritten": 782
+      }
+    ]
+  }
+]

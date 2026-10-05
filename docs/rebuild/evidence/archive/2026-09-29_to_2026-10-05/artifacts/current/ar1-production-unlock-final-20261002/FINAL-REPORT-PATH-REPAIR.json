@@ -1,0 +1,32 @@
+{
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "status": "PASS",
+  "recordedAt": "2026-10-03T06:11:18.791254+00:00",
+  "cause": "Native attempt archival glob mutation-* also moved two previously successful current-candidate component checks: CI integrity and dry-run inventory. These were not executions from the failed native corpus.",
+  "repair": "Byte-identical restoration of only these two component checks and their dry-run inventory. No native part, baseline, mutant result, or failed-attempt receipt was admitted.",
+  "restoredFiles": [
+    {
+      "file": "mutation-ci-integrity.log",
+      "sha256": "1e6a14096f30014f949b94089d3b325247bd4e698cfeea9398bef12f7cfa4d2a"
+    },
+    {
+      "file": "mutation-ci-integrity.receipt.json",
+      "sha256": "541e5b4b297f906611606b49923c5230a9086eb972dce2091010227ed3dad429"
+    },
+    {
+      "file": "mutation-inventory.log",
+      "sha256": "97c3f906c992d327847949051ff0ee11971b11039c59add391b4d73137313bbb"
+    },
+    {
+      "file": "mutation-inventory.receipt.json",
+      "sha256": "ca691d026386bb1e70de00949e47c9c09195c6db3e31c9e04e3a940433ab8a5b"
+    },
+    {
+      "file": "mutation-inventory.json",
+      "sha256": "97c3f906c992d327847949051ff0ee11971b11039c59add391b4d73137313bbb"
+    }
+  ],
+  "productCodeChanged": false,
+  "nativeCorpusChanged": false,
+  "nativeCertification": "complete current attempt 2 remains the only admitted native corpus"
+}

@@ -1,0 +1,740 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gateP-f88.json": "746c572c2722fde1f392c804c3248dbda3d7a7c0c15914331179155586a261f9"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T18:48:41.389Z",
+  "batteries": [
+    "gateP-f88.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-63913e5261",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-63913e5261",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "P-f88:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "P-f88:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M1",
+      "files": [
+        "src/widgets/validation/f88-walk.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "F88-1",
+        "F88-2"
+      ],
+      "kills": [
+        {
+          "killer": "F88-1",
+          "test": "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        },
+        {
+          "killer": "F88-2",
+          "test": "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 2
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M2",
+      "files": [
+        "src/widgets/validation/f88-walk.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "F88-2"
+      ],
+      "kills": [
+        {
+          "killer": "F88-2",
+          "test": "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M3",
+      "files": [
+        "src/widgets/validation/f88-walk.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "F88-1"
+      ],
+      "kills": [
+        {
+          "killer": "F88-1",
+          "test": "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M4",
+      "files": [
+        "src/widgets/validation/f88-walk.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "F88-2"
+      ],
+      "kills": [
+        {
+          "killer": "F88-2",
+          "test": "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M5",
+      "files": [
+        "src/widget-contract/f88.generated.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "F88-1"
+      ],
+      "kills": [
+        {
+          "killer": "F88-1",
+          "test": "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M6",
+      "files": [
+        "src/widgets/dto/submit-intent.dto.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "F88-5"
+      ],
+      "kills": [
+        {
+          "killer": "F88-5",
+          "test": "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-5 [HTTP] `spoken_transcript` is refused at the shape stage on this carrier, and the value is not echoed back",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M7",
+      "files": [
+        "src/widgets/dto/submit-intent.dto.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "F88-4"
+      ],
+      "kills": [
+        {
+          "killer": "F88-4",
+          "test": "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-4 [HTTP] `readback_ack: null` is refused at the shape stage, not as `readback_mismatch` (AMB-02c)",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M8",
+      "files": [
+        "src/widgets/dto/submit-intent.dto.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "F88-1",
+        "F88-2",
+        "F88-4",
+        "F88-5"
+      ],
+      "kills": [
+        {
+          "killer": "F88-1",
+          "test": "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        },
+        {
+          "killer": "F88-2",
+          "test": "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        },
+        {
+          "killer": "F88-4",
+          "test": "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-4 [HTTP] `readback_ack: null` is refused at the shape stage, not as `readback_mismatch` (AMB-02c)",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        },
+        {
+          "killer": "F88-5",
+          "test": "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-5 [HTTP] `spoken_transcript` is refused at the shape stage on this carrier, and the value is not echoed back",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 4
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M9",
+      "files": [
+        "src/widgets/validation/f88-walk.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "F88-U6"
+      ],
+      "kills": [
+        {
+          "killer": "F88-U6",
+          "test": "F88 — the one structural validator, at runtime F88.2 — the five required negative vectors, over values F88-U6 [U] holds no key-name allowlist and cannot be given one (F88.2 prohibition)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M10",
+      "files": [
+        "src/widgets/validation/f88-walk.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "F88-U3",
+        "F88-U6"
+      ],
+      "kills": [
+        {
+          "killer": "F88-U3",
+          "test": "F88 — the one structural validator, at runtime F88.2 — the five required negative vectors, over values F88-U3 [U] refuses a nested arbitrary role at any depth, a nested role carrying an owner value, a nested tenant_id below a root, and a role on RenderReceipt outside intents_withheld[]",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "F88-U6",
+          "test": "F88 — the one structural validator, at runtime F88.2 — the five required negative vectors, over values F88-U6 [U] holds no key-name allowlist and cannot be given one (F88.2 prohibition)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M11",
+      "files": [
+        "src/widgets/validation/f88-walk.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "F88-U2",
+        "F88-U4",
+        "F88-U6"
+      ],
+      "kills": [
+        {
+          "killer": "F88-U2",
+          "test": "F88 — the one structural validator, at runtime F88.1 — the nine wire vectors, over values F88-U2 [U] admits `WidgetIntent.role` at its declared location for all eight declared members, and refuses a ninth",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "F88-U4",
+          "test": "F88 — the one structural validator, at runtime F88.2 — the five required negative vectors, over values F88-U4 [U] binds rows 1 and 2 to their declared enums and to depth 0",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "F88-U6",
+          "test": "F88 — the one structural validator, at runtime F88.2 — the five required negative vectors, over values F88-U6 [U] holds no key-name allowlist and cannot be given one (F88.2 prohibition)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 3
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M12",
+      "files": [
+        "src/widget-contract/f88.generated.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "F88-U2",
+        "F88-8b"
+      ],
+      "kills": [
+        {
+          "killer": "F88-U2",
+          "test": "F88 — the one structural validator, at runtime F88.1 — the nine wire vectors, over values F88-U2 [U] admits `WidgetIntent.role` at its declared location for all eight declared members, and refuses a ninth",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "F88-8b",
+          "test": "F88 — the one structural validator, at runtime F88-8 [BUILD] — one key list F88-8b [BUILD] the generated union and exemption table are what the contract says (emit-f88 --check)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M13",
+      "files": [
+        "src/widget-contract/f88.generated.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "F88-U6",
+        "F88-8b",
+        "F88-8c"
+      ],
+      "kills": [
+        {
+          "killer": "F88-U6",
+          "test": "F88 — the one structural validator, at runtime F88.2 — the five required negative vectors, over values F88-U6 [U] holds no key-name allowlist and cannot be given one (F88.2 prohibition)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "F88-8b",
+          "test": "F88 — the one structural validator, at runtime F88-8 [BUILD] — one key list F88-8b [BUILD] the generated union and exemption table are what the contract says (emit-f88 --check)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "F88-8c",
+          "test": "F88 — the one structural validator, at runtime F88-8 [BUILD] — one key list F88-8c [BUILD] the generated exemption table equals the static checker’s six locations",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 3
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-f88.json",
+      "id": "F88-M14",
+      "files": [
+        "scripts/widget-contract/emit-f88.mjs"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "F88-8b"
+      ],
+      "kills": [
+        {
+          "killer": "F88-8b",
+          "test": "F88 — the one structural validator, at runtime F88-8 [BUILD] — one key list F88-8b [BUILD] the generated union and exemption table are what the contract says (emit-f88 --check)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [
+    "gateP-f88.json#F88-M1",
+    "gateP-f88.json#F88-M2",
+    "gateP-f88.json#F88-M3",
+    "gateP-f88.json#F88-M4",
+    "gateP-f88.json#F88-M5",
+    "gateP-f88.json#F88-M6",
+    "gateP-f88.json#F88-M7",
+    "gateP-f88.json#F88-M8"
+  ],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T19:59:33.888Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 1,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

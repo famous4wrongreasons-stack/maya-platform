@@ -1,0 +1,248 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "utc": "2026-10-01T00:03:44.063372+00:00",
+  "reason": "Two clock-dependent unmutated billing fixture failures after 2026-10-01T00:00Z; isolated reproduction 2 PASS/2 FAIL. Root cause diagnosis before any edit.",
+  "orchestrator": [
+    {
+      "pid": 35474,
+      "ppid": 58828,
+      "pgid": 35474,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python work/final-certification-bab750d8/run-all-mutations-isolated.py"
+    }
+  ],
+  "nativeGroups": [
+    {
+      "pid": 27675,
+      "ppid": 35474,
+      "pgid": 27675,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 6 --partition 1/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-6-part-1-of-4.json",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-bab750d8/mutation-isolated-worker-1/maya-saas-backend"
+    },
+    {
+      "pid": 55802,
+      "ppid": 35474,
+      "pgid": 55802,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 6 --partition 4/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-6-part-4-of-4.json",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-bab750d8/mutation-isolated-worker-2/maya-saas-backend"
+    },
+    {
+      "pid": 62921,
+      "ppid": 35474,
+      "pgid": 62921,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 7 --partition 2/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-7-part-2-of-4.json",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-bab750d8/mutation-isolated-worker-3/maya-saas-backend"
+    },
+    {
+      "pid": 4825,
+      "ppid": 35474,
+      "pgid": 4825,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate PI-contract --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-PI-contract.json",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-bab750d8/mutation-isolated-worker-4/maya-saas-backend"
+    },
+    {
+      "pid": 94875,
+      "ppid": 35474,
+      "pgid": 94875,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 11 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-11.json",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-bab750d8/mutation-isolated-worker-5/maya-saas-backend"
+    },
+    {
+      "pid": 45040,
+      "ppid": 35474,
+      "pgid": 45040,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 6 --partition 3/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-6-part-3-of-4.json",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-bab750d8/mutation-isolated-worker-6/maya-saas-backend"
+    },
+    {
+      "pid": 62246,
+      "ppid": 35474,
+      "pgid": 62246,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 7 --partition 1/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-7-part-1-of-4.json",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-bab750d8/mutation-isolated-worker-7/maya-saas-backend"
+    },
+    {
+      "pid": 38803,
+      "ppid": 35474,
+      "pgid": 38803,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 6 --partition 2/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-6-part-2-of-4.json",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-bab750d8/mutation-isolated-worker-8/maya-saas-backend"
+    }
+  ],
+  "processTreeBefore": [
+    {
+      "pid": 4825,
+      "ppid": 35474,
+      "pgid": 4825,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate PI-contract --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-PI-contract.json"
+    },
+    {
+      "pid": 27675,
+      "ppid": 35474,
+      "pgid": 27675,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 6 --partition 1/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-6-part-1-of-4.json"
+    },
+    {
+      "pid": 38803,
+      "ppid": 35474,
+      "pgid": 38803,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 6 --partition 2/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-6-part-2-of-4.json"
+    },
+    {
+      "pid": 45040,
+      "ppid": 35474,
+      "pgid": 45040,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 6 --partition 3/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-6-part-3-of-4.json"
+    },
+    {
+      "pid": 55802,
+      "ppid": 35474,
+      "pgid": 55802,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 6 --partition 4/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-6-part-4-of-4.json"
+    },
+    {
+      "pid": 56915,
+      "ppid": 45040,
+      "pgid": 45040,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-66a03296ae --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-66a03296ae.json"
+    },
+    {
+      "pid": 56931,
+      "ppid": 56915,
+      "pgid": 45040,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-66a03296ae/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-66a03296ae --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-66a03296ae.json"
+    },
+    {
+      "pid": 60215,
+      "ppid": 38803,
+      "pgid": 38803,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-741d3b2dae --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-741d3b2dae.json"
+    },
+    {
+      "pid": 60244,
+      "ppid": 60215,
+      "pgid": 38803,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-741d3b2dae/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-741d3b2dae --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-741d3b2dae.json"
+    },
+    {
+      "pid": 62246,
+      "ppid": 35474,
+      "pgid": 62246,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 7 --partition 1/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-7-part-1-of-4.json"
+    },
+    {
+      "pid": 62719,
+      "ppid": 55802,
+      "pgid": 55802,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-950dc9c8e0 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-950dc9c8e0.json"
+    },
+    {
+      "pid": 62737,
+      "ppid": 62719,
+      "pgid": 55802,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-950dc9c8e0/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-950dc9c8e0 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-950dc9c8e0.json"
+    },
+    {
+      "pid": 62921,
+      "ppid": 35474,
+      "pgid": 62921,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 7 --partition 2/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-7-part-2-of-4.json"
+    },
+    {
+      "pid": 64702,
+      "ppid": 4825,
+      "pgid": 4825,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-4d09398d8b --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-4d09398d8b.json"
+    },
+    {
+      "pid": 64721,
+      "ppid": 64702,
+      "pgid": 4825,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-4d09398d8b/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-4d09398d8b --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-4d09398d8b.json"
+    },
+    {
+      "pid": 65430,
+      "ppid": 94875,
+      "pgid": 94875,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-f38154dd8d --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-f38154dd8d.json"
+    },
+    {
+      "pid": 65447,
+      "ppid": 65430,
+      "pgid": 94875,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-f38154dd8d/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-f38154dd8d --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-f38154dd8d.json"
+    },
+    {
+      "pid": 65615,
+      "ppid": 65447,
+      "pgid": 94875,
+      "command": "/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python -m unittest /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-f38154dd8d/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_package5_control_plane_runtime_guard.py"
+    },
+    {
+      "pid": 65622,
+      "ppid": 27675,
+      "pgid": 27675,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-4c393c5a5a --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-4c393c5a5a.json"
+    },
+    {
+      "pid": 65646,
+      "ppid": 65622,
+      "pgid": 27675,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-4c393c5a5a/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-4c393c5a5a --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-4c393c5a5a.json"
+    },
+    {
+      "pid": 65753,
+      "ppid": 65646,
+      "pgid": 27675,
+      "command": "/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python -m unittest /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-4c393c5a5a/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/test_package5_control_plane_runtime_guard.py"
+    },
+    {
+      "pid": 66731,
+      "ppid": 62246,
+      "pgid": 62246,
+      "command": "npm exec jest --config ./test/jest-widgets-live.json --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-fd8bde6c50 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-live-fd8bde6c50.json"
+    },
+    {
+      "pid": 66748,
+      "ppid": 66731,
+      "pgid": 62246,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-fd8bde6c50/maya-saas-backend/node_modules/.bin/jest --config ./test/jest-widgets-live.json --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-fd8bde6c50 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-live-fd8bde6c50.json"
+    },
+    {
+      "pid": 67049,
+      "ppid": 62921,
+      "pgid": 62921,
+      "command": "npm exec jest --config ./test/jest-widgets-live.json --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-3159533872 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-live-3159533872.json"
+    },
+    {
+      "pid": 67069,
+      "ppid": 67049,
+      "pgid": 62921,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-3159533872/maya-saas-backend/node_modules/.bin/jest --config ./test/jest-widgets-live.json --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-3159533872 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-live-3159533872.json"
+    },
+    {
+      "pid": 67566,
+      "ppid": 62737,
+      "pgid": 55802,
+      "command": "/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python -m unittest test_package5_b24_web_push"
+    },
+    {
+      "pid": 67660,
+      "ppid": 64721,
+      "pgid": 4825,
+      "command": "/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python -m unittest test_package5_b22_tip_retirement"
+    },
+    {
+      "pid": 67676,
+      "ppid": 60244,
+      "pgid": 38803,
+      "command": "/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-741d3b2dae/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/package5_control_plane_runtime_guard.py --root /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-741d3b2dae/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440 --json"
+    },
+    {
+      "pid": 94875,
+      "ppid": 35474,
+      "pgid": 94875,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 11 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-11.json"
+    }
+  ],
+  "admission": "INTERRUPTED; must not be admitted as complete certification"
+}

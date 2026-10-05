@@ -1,0 +1,15 @@
+const fs = require('node:fs');
+const r = process.cwd();
+const {INTENT_TEMPLATE_REGISTRY: general} = require(r+'/src/widgets/emission/intent-template.registry');
+const {BOOKING_INTENT_TEMPLATE_REGISTRY: booking, bookingTemplateAsIntentRow} = require(r+'/src/widgets/booking/booking-intent-template.registry');
+const {parseInputSchema} = require(r+'/src/widgets/input-schema/parse-input-schema');
+const {inputSchemaHash} = require(r+'/src/widgets/input-schema/input-schema-hash');
+const {releaseHash} = require(r+'/src/entitlements/widget-release.contract');
+const {C9_CAPABILITIES} = require(r+'/src/orchestration/c9.registry');
+const tuples = Object.fromEntries([...Object.entries(general), ...Object.entries(booking).map(([k,v])=>[k,bookingTemplateAsIntentRow(v)])].filter(([,v])=>v.effect !== 'HANDOFF').map(([k,v])=>[k,{effect:v.effect,kinds:v.kinds,subject:v.subject,target:v.target,inputSchemaHash:v.inputSchema===null?null:inputSchemaHash(parseInputSchema(v.inputSchema).schema),sourceSubject:v.sourceSubject}]));
+const p = r+'/src/entitlements/widget-release-profile.registry.ts';
+const old = fs.readFileSync(p,'utf8');
+fs.writeFileSync(p, old.slice(0,old.indexOf('const snapshot = '))+'const snapshot = '+JSON.stringify({tuples,successorCapabilities:C9_CAPABILITIES.map(v=>v.capabilityKey).sort()},null,2)+old.slice(old.indexOf(' as const;')));
+const c = r+'/src/entitlements/widget-release-profile.contract.ts';
+fs.writeFileSync(c,fs.readFileSync(c,'utf8').replace(/export const PROFILE_REGISTRY_DIGEST =\s*'[a-f0-9]+';/,'export const PROFILE_REGISTRY_DIGEST = '+JSON.stringify(releaseHash({general,booking}))+';').replace("'navigate.schedule@1',","'navigate.schedule@1',\n    'navigate.journal.detail@1',\n    'navigate.journal.parent@1',"));
+console.log(releaseHash({general,booking}));

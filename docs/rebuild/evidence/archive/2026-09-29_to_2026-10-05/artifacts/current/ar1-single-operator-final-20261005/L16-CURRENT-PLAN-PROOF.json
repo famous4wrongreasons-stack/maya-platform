@@ -1,0 +1,54 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "status": "PASS",
+  "currentJobBudgetMinutes": 180,
+  "priorApprovedRepair": "e180086f",
+  "nativeReceipt": {
+    "path": "receipts/mutation-receipt/widgets-mutation-report-P-mint.json",
+    "sha256": "ee98e4d366a87b8fc9573a4f3ac9e4bbc75b82961587ce5bf589d598b785802a"
+  },
+  "observedHostedTimings": [
+    {
+      "slot": "P-mint-part-1-of-4",
+      "gate": "P-mint",
+      "partition": "1/4",
+      "seconds": 4937.0,
+      "marginTo180Minutes": 5863.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133349",
+      "receiptSha256": "1a80315860b8510d21be16354e5beb586d03173863258f588fad9b915a67e465"
+    },
+    {
+      "slot": "P-mint-part-2-of-4",
+      "gate": "P-mint",
+      "partition": "2/4",
+      "seconds": 5760.0,
+      "marginTo180Minutes": 5040.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133257",
+      "receiptSha256": "5fb6277927c6290c49789c47f4747561e8f5cf05ac1a9635d2e2c4958265f42c"
+    },
+    {
+      "slot": "P-mint-part-3-of-4",
+      "gate": "P-mint",
+      "partition": "3/4",
+      "seconds": 4469.0,
+      "marginTo180Minutes": 6331.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133242",
+      "receiptSha256": "c7e4ca6352e4ff88568701767193b83813ba244a9d10900e4f9fa5324ae07d0c"
+    },
+    {
+      "slot": "P-mint-part-4-of-4",
+      "gate": "P-mint",
+      "partition": "4/4",
+      "seconds": 4665.0,
+      "marginTo180Minutes": 6135.0,
+      "executionEnvironment": "GitHub Actions isolated Ubuntu/PostgreSQL service container",
+      "jobUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168/job/111543133345",
+      "receiptSha256": "e658618324660e7c654d4c78b4f6739a23c0559b4fc455814d12a4b86d4e0c87"
+    }
+  ],
+  "scope": "Four complete unfiltered parts pass on actual hosted runners below the unchanged 180-minute job budget. No future capacity guarantee is claimed.",
+  "L25AnchorRebaseProvenance": "MINT-M20 tap-driven catch-up superseded by approved L25 independent observation; same six-edge proof remains load-bearing."
+}

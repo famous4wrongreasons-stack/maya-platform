@@ -1,0 +1,12 @@
+{
+  "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "name": "smoke-migration",
+  "command": [
+    "npx",
+    "prisma",
+    "migrate",
+    "deploy"
+  ],
+  "exit": 0,
+  "seconds": 1.18
+}

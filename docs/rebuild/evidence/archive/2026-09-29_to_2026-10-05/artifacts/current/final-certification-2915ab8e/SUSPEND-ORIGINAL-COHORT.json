@@ -1,0 +1,251 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "capturedAt": "2026-10-02T06:59:44.660088+00:00",
+  "requiredSlots": [
+    "WR-part-3-of-4",
+    "WR-part-4-of-4"
+  ],
+  "reason": "Every complete part overlapping the observed clamshell/maintenance suspension window is invalidated for this admission, whether or not the runner reported a mismatch.",
+  "observation": {
+    "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+    "capturedAt": "2026-10-02T06:59:43.849293+00:00",
+    "powerEvents": [
+      {
+        "utc": "2026-10-02T06:35:59+00:00",
+        "event": "Sleep",
+        "details": "Entering Sleep state due to 'Clamshell Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 354 secs"
+      },
+      {
+        "utc": "2026-10-02T06:41:53+00:00",
+        "event": "DarkWake",
+        "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using BATT (Charge:100%) 45 secs"
+      },
+      {
+        "utc": "2026-10-02T06:42:38+00:00",
+        "event": "Sleep",
+        "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 694 secs"
+      },
+      {
+        "utc": "2026-10-02T06:54:12+00:00",
+        "event": "DarkWake",
+        "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty E_PFN_NET_FOUND ARPT/ Using BATT (Charge:100%) 45 secs"
+      },
+      {
+        "utc": "2026-10-02T06:54:57+00:00",
+        "event": "Sleep",
+        "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 25 secs"
+      },
+      {
+        "utc": "2026-10-02T06:55:22+00:00",
+        "event": "DarkWake",
+        "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) USB-C_plug SMC.OutboxNotEmpty nub-spmi-a0.0x3F/ Using BATT (Charge:100%) 1 secs"
+      },
+      {
+        "utc": "2026-10-02T06:55:23+00:00",
+        "event": "Wake",
+        "details": "DarkWake to FullWake from Deep Idle [CDNVAP] : due to Notification Using AC (Charge:100%)"
+      }
+    ],
+    "suspensionWindows": [
+      {
+        "from": "2026-10-02T06:35:59+00:00",
+        "to": "2026-10-02T06:55:23+00:00",
+        "fullWakeObserved": true
+      }
+    ],
+    "windowScope": "Conservative first Sleep through actual FullWake, including short maintenance DarkWakes.",
+    "potentiallyOverlappingTestRuns": [
+      {
+        "path": "receipts/mutation-diagnostics/4-unit-1790922683942.json",
+        "sha256": "05bf21873a795979f99adb00c403ee6c9940b6dfa4b654761345584a900dab86",
+        "worker": "4",
+        "step": "unit",
+        "startTime": "2026-10-02T06:31:23.942000+00:00",
+        "capturedAt": "2026-10-02T06:56:47.576537+00:00",
+        "success": false,
+        "passed": 5602,
+        "failed": 1,
+        "failureTitles": [
+          "WR-L13 lock-time principal change cancels the newly minted successor"
+        ]
+      },
+      {
+        "path": "receipts/mutation-diagnostics/8-unit-1790922752387.json",
+        "sha256": "431edd61f82edae1a4bc340e5eb5adb8cbb3d6ef84df2bfd21cbebbd2eeb3f23",
+        "worker": "8",
+        "step": "unit",
+        "startTime": "2026-10-02T06:32:32.387000+00:00",
+        "capturedAt": "2026-10-02T06:58:01.168828+00:00",
+        "success": false,
+        "passed": 5602,
+        "failed": 1,
+        "failureTitles": [
+          "WR-L12 requires both the exact noun and its canonical owner"
+        ]
+      }
+    ],
+    "completedOverlappingJobs": [
+      {
+        "slot": "WR-part-3-of-4",
+        "gate": "WR",
+        "partition": "3/4",
+        "receipt": "receipts/mutation-WR-part-3-of-4.receipt.json",
+        "receiptSha256": "56da71edcec6caa3593cb2e7dabd918db36f64ae2fe69393ffe8e86ee4eb1016",
+        "startInferredFromReceipt": "2026-10-02T05:54:31.026316+00:00",
+        "completedAt": "2026-10-02T06:58:17.556316+00:00",
+        "wallSeconds": 3826.53,
+        "exit": 0,
+        "command": [
+          "node",
+          "scripts/widgets-mutation-battery.mjs",
+          "--gate",
+          "WR",
+          "--partition",
+          "3/4",
+          "--out",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-2915ab8e/receipts/mutation-parts/widgets-mutation-part-WR-part-3-of-4.json"
+        ],
+        "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-2915ab8e/mutation-isolated-worker-4/maya-saas-backend"
+      },
+      {
+        "slot": "WR-part-4-of-4",
+        "gate": "WR",
+        "partition": "4/4",
+        "receipt": "receipts/mutation-WR-part-4-of-4.receipt.json",
+        "receiptSha256": "1679a9ba2b9ca13126b3c8f9a721c3b0c6647c97cfd2bb4263f134891ff5213c",
+        "startInferredFromReceipt": "2026-10-02T05:57:09.863698+00:00",
+        "completedAt": "2026-10-02T06:58:12.173698+00:00",
+        "wallSeconds": 3662.31,
+        "exit": 0,
+        "command": [
+          "node",
+          "scripts/widgets-mutation-battery.mjs",
+          "--gate",
+          "WR",
+          "--partition",
+          "4/4",
+          "--out",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-2915ab8e/receipts/mutation-parts/widgets-mutation-part-WR-part-4-of-4.json"
+        ],
+        "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-2915ab8e/mutation-isolated-worker-8/maya-saas-backend"
+      }
+    ],
+    "jobTimestampMethod": "Receipt filesystem completion timestamp minus its recorded wall seconds; overlap widened by one second.",
+    "nativeOriginalExecutionComplete": true,
+    "nativeOriginalExecutionExit": 0,
+    "admissionAssessment": "All overlapping whole parts will be withheld and rerun with canonical unrestricted steps on the identical candidate. Unaffected fresh parts remain in this same certification programme.",
+    "timeoutsChanged": false,
+    "productSourceChanged": false,
+    "powerSettingsChanged": false,
+    "parserCorrection": "Wake Requests scheduler hints in the initial diagnostic were not actual wake events and are excluded here."
+  },
+  "originalParts": [
+    {
+      "slot": "WR-part-3-of-4",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-WR-part-3-of-4.json",
+          "retained": "receipts/suspend-invalidated/WR-part-3-of-4/widgets-mutation-part-WR-part-3-of-4.json",
+          "sha256": "cb05279cf330ac960131cd4283c2334b4b8ee655ddcfe8c8348f5ca57afc1649"
+        },
+        {
+          "original": "receipts/mutation-WR-part-3-of-4.receipt.json",
+          "retained": "receipts/suspend-invalidated/WR-part-3-of-4/mutation-WR-part-3-of-4.receipt.json",
+          "sha256": "56da71edcec6caa3593cb2e7dabd918db36f64ae2fe69393ffe8e86ee4eb1016"
+        },
+        {
+          "original": "receipts/mutation-WR-part-3-of-4.log",
+          "retained": "receipts/suspend-invalidated/WR-part-3-of-4/mutation-WR-part-3-of-4.log",
+          "sha256": "cb05279cf330ac960131cd4283c2334b4b8ee655ddcfe8c8348f5ca57afc1649"
+        }
+      ]
+    },
+    {
+      "slot": "WR-part-4-of-4",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-WR-part-4-of-4.json",
+          "retained": "receipts/suspend-invalidated/WR-part-4-of-4/widgets-mutation-part-WR-part-4-of-4.json",
+          "sha256": "5e2307f7e79262dadb97e8ac155514f39a8eda83bf91d77d393b88c5173fcb4d"
+        },
+        {
+          "original": "receipts/mutation-WR-part-4-of-4.receipt.json",
+          "retained": "receipts/suspend-invalidated/WR-part-4-of-4/mutation-WR-part-4-of-4.receipt.json",
+          "sha256": "1679a9ba2b9ca13126b3c8f9a721c3b0c6647c97cfd2bb4263f134891ff5213c"
+        },
+        {
+          "original": "receipts/mutation-WR-part-4-of-4.log",
+          "retained": "receipts/suspend-invalidated/WR-part-4-of-4/mutation-WR-part-4-of-4.log",
+          "sha256": "5e2307f7e79262dadb97e8ac155514f39a8eda83bf91d77d393b88c5173fcb4d"
+        }
+      ]
+    }
+  ],
+  "allOriginalPartHashes": {
+    "4": "69cd6a04c13a4dac5d453a275a91225d978c4e97cec6595dfcaabfc04d834176",
+    "6-part-1-of-4": "51b01d826ba8b2469a0a81fb0c02a1996abe0a90e87c694569f0bb08a1d1fa04",
+    "6-part-2-of-4": "63dad2965d4f380af68daaf9dba2b2e5d8bc707cdf76d08484a87110b34db161",
+    "6-part-3-of-4": "8a42ccb75db72298d181d319d48c66eedddbcb9886024bc6c23f0e307e51163c",
+    "6-part-4-of-4": "14123d03105f40c011208543b93038c5ce0e5bb8f1d3cbd24e070d20f9301e6e",
+    "7-part-1-of-4": "041cb20d9b994f51ca8cdf1f6434e303502e5e7cafab1ac54a827a1e6f199683",
+    "7-part-2-of-4": "6644315a5a2ee3abf6db18d2f2acf3c8704b9d4989cd6511f7dca24afb2e7d5c",
+    "7-part-3-of-4": "6b5a4fd7a6bfe6294f3d5f6b38e2b20ec6e7da129e952562ea6df2b7a512d16d",
+    "7-part-4-of-4": "c0da0ecd5828a1e4d97cf408e974d164e0423ef74418a4f890b3e323c91da3d7",
+    "8": "0037fc5cfec3b27051e80b15435cc3f4ca425038a3b66aedb73e96514e2112e0",
+    "9-part-1-of-4": "ea9c07f2ab90fab218882b7da5aea46b138165941623bc7bb3b02ee621fd55bb",
+    "9-part-2-of-4": "73d3c0ea7ee2be8cb2f01001a3ea8a8621f4fd0ee5abdb54f0d76ef7ceb40622",
+    "9-part-3-of-4": "31cba70b488647f08781917c07138bef3d84a9ef954b33ab65d9749893cce5c3",
+    "9-part-4-of-4": "e7dd18920c4769feeef69e4729f56b1bc519ded912a6cb369d640525b5d23711",
+    "10-part-1-of-4": "321262bc5f4fcfb072f9583594a283aef7ea0da6c2515136b829023cd8cf41e3",
+    "10-part-2-of-4": "8fee130f712807e6f0896e5255260ddb2ad02eb56c19bca73e3540a607ef54b7",
+    "10-part-3-of-4": "1d83efa36afacc88e51a719a71105ba9921e828e5b7f0af73342099219ab5360",
+    "10-part-4-of-4": "657aa3fa53246ffa73ad1d2dce843add14ff5f559221774f9edca169a0986b4a",
+    "11": "e98dc95338eb0c01824db465d0238d47c455946639792ecceadf85396ea03136",
+    "12": "4027a772f9018838c3440c0245b74129cad2757b36442fce91c518fcc81212fa",
+    "13-part-1-of-4": "6ca6b632ff49839193a94d304176aa163b43b37a682ae1e6b1cb2dac4648be29",
+    "13-part-2-of-4": "3317fbb186f569945bc9e5f5294354a0c2aeaf41eba4ece45617888770b76a4c",
+    "13-part-3-of-4": "c7fb6e6be189bd7fa14dc21f9a489d019f9cf574693af8d82ecfe74e850ce600",
+    "13-part-4-of-4": "990bd8226bb82e516cabe005d27716d2f80fffe5fd44d3585a1c1604537bec3c",
+    "1-5": "b973627409c16163bda21680cf044b05f94ecc690651a93c3179516d56c24fa8",
+    "10a": "80e49d49e5715025ff40892ee527103f831bca523bff6ba40c791f41b16643a4",
+    "12b": "357081128a96d4c530306ec53931c12dc774566de3746361cf2a172a26f46ae4",
+    "12k": "d0e6639d9da80c046207652ee351fff253323fcce792b8b6d43e2b85a10abd67",
+    "8c": "365df249d56d5ea4243b00734fcf03e56314972a72058dccee484d8261e7b42f",
+    "8r": "f9739d46c221cfc75818b779f68549c7b43cac1655f7706d19a70eb23a4daae4",
+    "9a": "ff949125cb48129ebbe2b8de61320e63260a4e65e09bb54dd4b19ac2cc5f9fd9",
+    "AB": "2159c140c47c5500c47c477889f14689250d3996912b490c5464f5d92b8055b7",
+    "AR": "dc0d2a879162cb1952144f8ffe9b27423e3d1e87568bac5315153163f5d49407",
+    "BS": "7d03585546ebd6348955f7462c0d277936534fe74d47368e5f12c09830ad495a",
+    "D8": "cebd65db2ac80ff8d5360f881921760418cc09424c1a4f9624b135617f71d770",
+    "H-harness": "18b17cceacfe4b5a2d6cb17889ab62c8ae64c5eaa3b6a62713e6aba2c317ae30",
+    "NS": "3f8f84b77fddba6d604ca433f286ccc7bd55b0a5d8104ef8559f030295023348",
+    "P-allowlist": "71a221e58cd2fe7712ce9da3f7f5e974b21f8a99416d005347d6b804c6db0870",
+    "P-discharge": "f93b26b461597398b834eb0f3ae08bae5e682d5d42cfbc7efd45637f2d35c80f",
+    "P-f88": "d36dafec006460bf0a7bcc70cb22c03253d20166c5815275da193689fe526f36",
+    "P-g15b": "e2fa375577235404777a7e9cea6dd27801bc31c8722f79baa9970e6dc0fa59c7",
+    "P-handle": "713b0a97e381403e3e33ba6f68be2d8a0c8866440bfd94bf20085671bcc1d4be",
+    "P-ledger": "180f084accd5a73d94a33c479987f11bba04d0c6236c15af3014bec696b2d89f",
+    "P-mint-part-1-of-4": "ac451a99084959f66cb3daf005c705fed1982ab12c3cb0094fa6426c5fd1072f",
+    "P-mint-part-2-of-4": "a759df4a699e8c9785d4a0406fa8fb81d1a896d56a38f077a764dec44d73a28b",
+    "P-mint-part-3-of-4": "aeeecf970e4da42a956c7b1cfd1d031e887dc4294e61e1a9f8e7163872e6ddb0",
+    "P-mint-part-4-of-4": "3a12f4ea9c18d83b581e1339e6ef32f64efef987e6ac67d828182a44fae21435",
+    "P-mt3": "a32569e9be46be5e04da93d8af8a639eb48ddd113480c86bd484dd43fe8fe256",
+    "P-pairing": "bccdb36529b6fd17fb487633b88cbda09aab4fc9a5551633b66eaa03c78b1c93",
+    "P-principal": "f3e132f09efab29847c9a63491a6e28baaf5fb8fd8249b73b6c673f47980c27e",
+    "P-render": "28c01020305a600cec51d4c6d3df9cc9433abc0dfec0c73685aa96298e5331d2",
+    "P-rt6": "9169f1419685032c087748d93e6ee297e6c20a15d460c6f837414534e546f7c6",
+    "P-seal": "22b8e64a861c32eab8f17dd50cb2e750286db2b4972704d665d92cc625650135",
+    "PI-contract": "1ee6a5748cc6d6144c3331de7eb437896042e8c32fba5f7413be4b0441e4017d",
+    "PI": "3129e045e7131f7232f3303ef52a6a3825c56bacb60d3d4f038f3a48f60d1884",
+    "SB1": "a98bf90cddc9ee31f6cde02787e11820b56923da291c819dc75fa0170bc61bd7",
+    "SBV": "ace854d2fe5da2ee1183c6b920d4e6312d90b6c29848b6dda3ed5acff49d0584",
+    "SV2": "7b16166564ddd277ebc8417a728639d9fbaf55e8b30e5fbff5e8d39bbf29db6a",
+    "T-tables": "473e3ea559b40e33f57aaf877363fabe8ec682465116938cdebdcf5e3c1c85a2",
+    "TURN": "988aeda7a31dc603d6debb8583344ba9391ac56d12297ee250cecb113c723fd5",
+    "WF": "e1dc45b9f08baa4b53fad26f5e485d99eb8ca9e9a8fec336e4a6c028edfaf3ec",
+    "WR-part-1-of-4": "6ee4aa98fec8239a41a0c12c568c9caaaeeb03af94a2ee36dd460d7cf32b5fb3",
+    "WR-part-2-of-4": "d7d85366dafb98203e87c05331666e679a7e8f10fc47e8114d6328e1f62a4656",
+    "WR-part-3-of-4": "cb05279cf330ac960131cd4283c2334b4b8ee655ddcfe8c8348f5ca57afc1649",
+    "WR-part-4-of-4": "5e2307f7e79262dadb97e8ac155514f39a8eda83bf91d77d393b88c5173fcb4d"
+  }
+}

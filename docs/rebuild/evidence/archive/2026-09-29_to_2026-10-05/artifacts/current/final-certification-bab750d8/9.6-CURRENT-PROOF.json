@@ -1,0 +1,122 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "clause": "9.6",
+  "ordinaryProbeExit": 0,
+  "nativeMutations": "12/12 AS-DECLARED",
+  "fullNativeControls": {
+    "baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "sourceCarrierPersistedObservations": [
+    {
+      "mode": "journal",
+      "persistedTurns": 2,
+      "oneCanonicalRowPerTurn": true,
+      "oneBindingAuditPerTurn": true,
+      "actualActorPreserved": true,
+      "conversationCount": 1,
+      "realCanonicalNet": true,
+      "typedTurnProof": {
+        "rows": [
+          {
+            "text": "Dismiss",
+            "userTurn": {
+              "turnId": "1b6e5b9f-c3c7-495e-afaa-a7037f0996ee",
+              "conversationId": "a802e77d-95d8-4a3b-86fa-9dc04134fc69"
+            }
+          },
+          {
+            "text": "\u0447\u0442\u043e \u0442\u044b \u0443\u043c\u0435\u0435\u0448\u044c",
+            "userTurn": {
+              "turnId": "c7ae085e-dfce-416b-af23-ffeac4f7291a",
+              "conversationId": "a802e77d-95d8-4a3b-86fa-9dc04134fc69"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "observationBoundary": "The personal-booking observation contains no persistedTurnProof; no personal persisted-identity claim is derived from that row. The complete HTTP TURN-CANONICAL proof separately covers ordinary typed, widget typed and native tap through the same writer.",
+  "httpAssertions": [
+    {
+      "title": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-ORDINARY persists exactly one USER row on concurrent same-request retries and carries its conversation forward",
+      "status": "passed"
+    },
+    {
+      "title": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-WIDGET uses the same persisted writer for production-minted typed and tapped controls; expired retry never falls through to ordinary chat",
+      "status": "passed"
+    },
+    {
+      "title": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-ERASURE refuses replay of an erased row without restoring content or extending retention",
+      "status": "passed"
+    },
+    {
+      "title": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-ATOMIC rolls back the USER row when its immutable correlation cannot be committed",
+      "status": "passed"
+    },
+    {
+      "title": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-READ keeps an actual chat read, its widget emission and the next typed widget turn in one conversation",
+      "status": "passed"
+    },
+    {
+      "title": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-SCOPE refuses a foreign current actor or tenant conversation; request IDs alone never confer identity",
+      "status": "passed"
+    },
+    {
+      "title": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-BROKEN-BINDING refuses duplicate evidence, orphan rows and expired history without recreating either half",
+      "status": "passed"
+    },
+    {
+      "title": "9.6 canonical source evidence TURN-CANONICAL [HTTP] [E-MINT] ordinary typed, widget typed and native tap persist byte-identical USER content through the same writer",
+      "status": "passed"
+    }
+  ],
+  "files": [
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-TURN.json",
+      "sha256": "4c9cd0db50e7b6d248404a01823a7d7072821420d2c0ce56aa2cecdd40b19f37"
+    },
+    {
+      "path": "receipts/fbe2e-canonical-net-turn.receipt.json",
+      "sha256": "07de6ba211d6d7b3c16c1cf687177ba8754b2a0a0181a78338aa56b151b191bd"
+    },
+    {
+      "path": "receipts/canonical-net-turn-observations.json",
+      "sha256": "b3c83f561f086c890600f41bcd6568c23b3823387a2b835c31cec43b0513dadf"
+    },
+    {
+      "path": "receipts/widgets-live-full.json",
+      "sha256": "d05ec2836e1f562d5f92688408a68c1e4ad831f62a4205b6341cbfe38248d207"
+    }
+  ],
+  "completeReleaseCertification": "PENDING full corpus and threshold evaluation"
+}

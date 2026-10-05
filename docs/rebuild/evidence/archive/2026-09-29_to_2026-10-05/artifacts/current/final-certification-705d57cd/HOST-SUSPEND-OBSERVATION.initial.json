@@ -1,0 +1,118 @@
+{
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "capturedAt": "2026-10-01T18:42:06.516895+00:00",
+  "powerEvents": [
+    {
+      "utc": "2026-10-01T18:10:27+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Clamshell Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 233 secs"
+    },
+    {
+      "utc": "2026-10-01T18:10:29+00:00",
+      "event": "Wake",
+      "details": "Requests       \t[*process=dasd request=SleepService deltaSecs=1066 wakeAt=2026-10-01 21:28:15 info=\"com.apple.dasd:501:com.apple.CloudKit.SyncEngine.9507CC72-1A8E-4A0C-8A5A-E0EB45EB5AF1.sync\"] [process=mDNSResponder request=Maintenance deltaSecs=7198 wakeAt=2026-10-01 23:10:27 info=\"upkeep wake\"] [process=powerd request=TCPKATurnOff deltaSecs=316858 wakeAt=2026-10-05 13:11:27] [process=powerd request=CSPNEvaluation deltaSecs=7254 wakeAt=2026-10-01 23:11:22] [process=powerd request=UserWake deltaSecs=5735 wakeAt=2026-10-01 22:46:04 info=\"com.apple.alarm.user-invisible-com.apple.calaccessd.travelEngine.periodicRefreshTimer,622\"]"
+    },
+    {
+      "utc": "2026-10-01T18:14:20+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using BATT (Charge:100%) 45 secs"
+    },
+    {
+      "utc": "2026-10-01T18:15:05+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 488 secs"
+    },
+    {
+      "utc": "2026-10-01T18:15:07+00:00",
+      "event": "Wake",
+      "details": "Requests       \t[*process=dasd request=SleepService deltaSecs=978 wakeAt=2026-10-01 21:31:24 info=\"com.apple.dasd:501:com.apple.CloudKit.SyncEngine.9507CC72-1A8E-4A0C-8A5A-E0EB45EB5AF1.sync\"] [process=mDNSResponder request=Maintenance deltaSecs=7198 wakeAt=2026-10-01 23:15:05 info=\"upkeep wake\"] [process=powerd request=TCPKATurnOff deltaSecs=316580 wakeAt=2026-10-05 13:11:27] [process=powerd request=CSPNEvaluation deltaSecs=6975 wakeAt=2026-10-01 23:11:22] [process=powerd request=UserWake deltaSecs=5457 wakeAt=2026-10-01 22:46:04 info=\"com.apple.alarm.user-invisible-com.apple.calaccessd.travelEngine.periodicRefreshTimer,622\"]"
+    },
+    {
+      "utc": "2026-10-01T18:23:13+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty E_PFN_NET_FOUND ARPT/ Using BATT (Charge:100%) 45 secs"
+    },
+    {
+      "utc": "2026-10-01T18:23:58+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 919 secs"
+    },
+    {
+      "utc": "2026-10-01T18:24:00+00:00",
+      "event": "Wake",
+      "details": "Requests       \t[*process=dasd request=SleepService deltaSecs=1065 wakeAt=2026-10-01 21:41:45 info=\"com.apple.dasd:501:com.apple.devicecheck.notify.webauthattest.keychain\"] [process=mDNSResponder request=Maintenance deltaSecs=7198 wakeAt=2026-10-01 23:23:58 info=\"upkeep wake\"] [process=powerd request=TCPKATurnOff deltaSecs=316048 wakeAt=2026-10-05 13:11:27] [process=powerd request=CSPNEvaluation deltaSecs=6443 wakeAt=2026-10-01 23:11:22] [process=powerd request=UserWake deltaSecs=4924 wakeAt=2026-10-01 22:46:04 info=\"com.apple.alarm.user-invisible-com.apple.calaccessd.travelEngine.periodicRefreshTimer,622\"]"
+    },
+    {
+      "utc": "2026-10-01T18:39:17+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) USB-C_plug SMC.OutboxNotEmpty nub-spmi-a0.0x3F/ Using BATT (Charge:100%) 0 secs"
+    },
+    {
+      "utc": "2026-10-01T18:39:17+00:00",
+      "event": "Wake",
+      "details": "DarkWake to FullWake from Deep Idle [CDNVAP] : due to Notification Using AC (Charge:100%)"
+    }
+  ],
+  "potentiallyOverlappingTestRuns": [
+    {
+      "path": "receipts/mutation-diagnostics/3-unit-1790877798471.json",
+      "sha256": "7a44fd0087e106d661b0a3f6af0c37578e6859d6dc15af7725522c6d004b008c",
+      "worker": "3",
+      "step": "unit",
+      "startTime": "2026-10-01T18:03:18.471000+00:00",
+      "capturedAt": "2026-10-01T18:39:54.864446+00:00",
+      "success": false,
+      "passed": 5602,
+      "failed": 1,
+      "failureTitles": [
+        "S-G7-TIER: Gate 7\u2019s own code names no channel id and no tier"
+      ]
+    },
+    {
+      "path": "receipts/mutation-diagnostics/4-unit-1790877816168.json",
+      "sha256": "80bdde85a0cc9eb9fc70d401916ff1b6034440e8cd08ec6efa0bc1086a920681",
+      "worker": "4",
+      "step": "unit",
+      "startTime": "2026-10-01T18:03:36.168000+00:00",
+      "capturedAt": "2026-10-01T18:40:13.875229+00:00",
+      "success": false,
+      "passed": 5602,
+      "failed": 1,
+      "failureTitles": [
+        "S-G7-F72-K7: K7\u2019s guard CALLS the one owner for each of F72 and F74, and keeps no comparison of its own"
+      ]
+    },
+    {
+      "path": "receipts/mutation-diagnostics/7-unit-1790877828180.json",
+      "sha256": "aa500d727e37df49c1137117e1e6a3e62a15424c80eaa302dfba7a030d02006e",
+      "worker": "7",
+      "step": "unit",
+      "startTime": "2026-10-01T18:03:48.180000+00:00",
+      "capturedAt": "2026-10-01T18:40:09.204204+00:00",
+      "success": false,
+      "passed": 5602,
+      "failed": 1,
+      "failureTitles": [
+        "SD-4 [U] refuses a non-canonical stored spelling rather than accepting it"
+      ]
+    },
+    {
+      "path": "receipts/mutation-diagnostics/8-live-1790878197603.json",
+      "sha256": "33733820883197624fef30d7ad26b25748dabe26a345b7ec09a90a5e920fec52",
+      "worker": "8",
+      "step": "live",
+      "startTime": "2026-10-01T18:09:57.603000+00:00",
+      "capturedAt": "2026-10-01T18:40:25.162915+00:00",
+      "success": false,
+      "passed": 403,
+      "failed": 3,
+      "failureTitles": [
+        "T6-stub (R-3): a foreign `readback_ref` refuses",
+        "AR1-EXPIRY expires without renewal and denies the old authorization",
+        "SV2-01 happy successor verification creates usable explicit personal context and actual actor audit"
+      ]
+    }
+  ],
+  "admissionAssessment": "PENDING inspection; no timeout or product source changed",
+  "powerSettingsChanged": false
+}

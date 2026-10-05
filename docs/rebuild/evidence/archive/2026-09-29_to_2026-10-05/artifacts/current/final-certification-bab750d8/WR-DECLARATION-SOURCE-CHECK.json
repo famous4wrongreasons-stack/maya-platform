@@ -1,0 +1,146 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "scope": "Read-only source/declaration applicability check; not an executed mutation receipt",
+  "declarationSha256": "5ed8abe4648b635489297320892a67f5063873c25e7db2ee82047cb99940bbdb",
+  "rows": [
+    {
+      "id": "WR-M01",
+      "source": "src/widgets/owner-ports/booking-selector.adapter.ts",
+      "sourceSha256": "449e5654fa168de53a8e73d6ccb5cc75af27f983acffb36a0f1dcb12d3aa996a",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M02",
+      "source": "src/widgets/owner-ports/booking-selector.adapter.ts",
+      "sourceSha256": "449e5654fa168de53a8e73d6ccb5cc75af27f983acffb36a0f1dcb12d3aa996a",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M03",
+      "source": "src/widgets/booking/booking-selector.presenter.ts",
+      "sourceSha256": "5de536dd62e10a91c3d6b58aab8e1a563984fad41318c3adc654762623361cb6",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M04",
+      "source": "src/widgets/booking/booking-selector.presenter.ts",
+      "sourceSha256": "5de536dd62e10a91c3d6b58aab8e1a563984fad41318c3adc654762623361cb6",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M05",
+      "source": "src/widgets/booking/booking-selector.presenter.ts",
+      "sourceSha256": "5de536dd62e10a91c3d6b58aab8e1a563984fad41318c3adc654762623361cb6",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M06",
+      "source": "src/widgets/resolve/thread-page.service.ts",
+      "sourceSha256": "54717c348d76ca6de54ea86c033a10aa050b5e94ac4131f0f260815cc54e0efb",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M07",
+      "source": "src/widgets/resolve/thread-page.service.ts",
+      "sourceSha256": "54717c348d76ca6de54ea86c033a10aa050b5e94ac4131f0f260815cc54e0efb",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M08",
+      "source": "src/widgets/resolve/thread-page.service.ts",
+      "sourceSha256": "54717c348d76ca6de54ea86c033a10aa050b5e94ac4131f0f260815cc54e0efb",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M09",
+      "source": "src/widgets/routing/effect-router.service.ts",
+      "sourceSha256": "be44c58f96c61a3b0d95611205667bc18323963bb56c7f4b2eb7243dc18dc2f1",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M10",
+      "source": "src/widgets/routing/effect-router.service.ts",
+      "sourceSha256": "be44c58f96c61a3b0d95611205667bc18323963bb56c7f4b2eb7243dc18dc2f1",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M11",
+      "source": "src/widgets/routing/effect-router.service.ts",
+      "sourceSha256": "be44c58f96c61a3b0d95611205667bc18323963bb56c7f4b2eb7243dc18dc2f1",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M12",
+      "source": "src/widgets/stores/intent-audit.store.ts",
+      "sourceSha256": "5d066f2155a7cc1a7953a3057e75f975bf8d3c5a438d559ba37b71d399adde13",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M13",
+      "source": "src/widgets/stores/intent-audit.store.ts",
+      "sourceSha256": "5d066f2155a7cc1a7953a3057e75f975bf8d3c5a438d559ba37b71d399adde13",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M14",
+      "source": "src/widgets/stores/intent-audit.store.ts",
+      "sourceSha256": "5d066f2155a7cc1a7953a3057e75f975bf8d3c5a438d559ba37b71d399adde13",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M15",
+      "source": "src/widgets/stores/intent-audit.store.ts",
+      "sourceSha256": "5d066f2155a7cc1a7953a3057e75f975bf8d3c5a438d559ba37b71d399adde13",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M16",
+      "source": "src/widgets/stores/intent-audit.store.ts",
+      "sourceSha256": "5d066f2155a7cc1a7953a3057e75f975bf8d3c5a438d559ba37b71d399adde13",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M17",
+      "source": "src/widgets/composition/chat-read.trigger.ts",
+      "sourceSha256": "bc2a8cde12d6eb307bf6dbc28dfa7459cebf5da65b48e95ec3e179c7ac39388a",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M18",
+      "source": "src/widgets/emission/successor-minter.service.ts",
+      "sourceSha256": "3e2c5f6990e3ff3a868b4741fd4cf4ef4e19d67c5b23895fdc5cdf32b957a3ac",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M19",
+      "source": "src/widgets/emission/successor-minter.service.ts",
+      "sourceSha256": "3e2c5f6990e3ff3a868b4741fd4cf4ef4e19d67c5b23895fdc5cdf32b957a3ac",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M20",
+      "source": "src/widgets/booking/booking-noun-identity.ts",
+      "sourceSha256": "23b87d5718ef910a2555e7aa6f5ec985c0f53d9bd867128ada2cb62af45f6bc0",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M21",
+      "source": "src/widgets/owner-ports/booking-preview.adapter.ts",
+      "sourceSha256": "844f3e71deb2805bc6308b59cc14efb53e69b9c629a61d69807388123db2155f",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M22",
+      "source": "src/widgets/emission/emitter.service.ts",
+      "sourceSha256": "a3b92691272f8c339290746eda671531a7286c184540c4c0d5a4a7e4cb5708a9",
+      "exactFindMatches": 1
+    },
+    {
+      "id": "WR-M23",
+      "source": "test/widgets-live/support/mint-provenance.ts",
+      "sourceSha256": "9dc77fa69d8b2fe4b1c12dbb73179945978ea154181ccae7f4504fbf65078edd",
+      "exactFindMatches": 1
+    }
+  ],
+  "nativeWRResult": "PENDING complete fresh corpus"
+}

@@ -1,0 +1,14 @@
+{
+  "base": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "candidate": "dac4072dd17ec222fe36cc603863965919039708",
+  "changed": [
+    "maya-saas-backend/test/widgets-live/http-listener.live-spec.ts",
+    "maya-saas-backend/test/widgets-live/mutations/gateH-harness.json",
+    "maya-saas-backend/test/widgets-live/support/http-bootstrap.ts"
+  ],
+  "productSourceChanged": false,
+  "rootCause": "IPv6 wildcard listener can be shadowed by a different IPv4 loopback listener on the same port. Supertest targets IPv4. Observed timeout went to local VPN 53800, ECONNRESET went to PostgreSQL 55729.",
+  "fix": "Own a ready 127.0.0.1 ephemeral listener before any Supertest request; keep until harness teardown.",
+  "timeoutsChanged": false,
+  "nativeCorpus": 503
+}

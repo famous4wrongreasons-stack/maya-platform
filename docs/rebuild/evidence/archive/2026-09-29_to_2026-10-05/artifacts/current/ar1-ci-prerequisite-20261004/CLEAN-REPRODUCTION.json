@@ -1,0 +1,23 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "status": "PASS",
+  "rootCause": "CI omitted the separately generated runtime artifact required by an unchanged integration-only R01 test.",
+  "before": {
+    "fail": 1,
+    "pass": 13,
+    "reason": "ENOENT: maya-chat-shell/dist/web"
+  },
+  "after": {
+    "fail": 0,
+    "pass": 14
+  },
+  "testSourceSha256": "b37b6c036371d93c3bbd5b237d984e9f83f15d2d716eb730c299c96e35359074",
+  "testChanged": false,
+  "productChanged": false,
+  "artifactCopied": false,
+  "artifactBuiltFromExistingSource": true,
+  "runtimeBuilderSha256": "ad6765877c352b16b1732aef342d769c8ec1b2c078526af429f631fc0616290d",
+  "releasePayloadOwner": "React AChat; this integration fixture does not select or publish a release payload",
+  "productionEffects": 0,
+  "driverSha256": "27d26101cb53f927ffb26ed2d0722e0f7dd2b9b84f30331b2401bf6126e559fa"
+}

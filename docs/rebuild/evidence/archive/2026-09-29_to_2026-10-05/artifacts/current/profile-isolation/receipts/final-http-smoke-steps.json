@@ -1,0 +1,22 @@
+[
+  {
+    "name": "smoke-create-database",
+    "exitCode": 0,
+    "seconds": 0.078
+  },
+  {
+    "name": "smoke-existing-migrations",
+    "exitCode": 0,
+    "seconds": 1.182
+  },
+  {
+    "name": "smoke-fixture-seed",
+    "exitCode": 0,
+    "seconds": 0.654
+  },
+  {
+    "name": "final-http-smoke",
+    "exitCode": 0,
+    "seconds": 7.571
+  }
+]

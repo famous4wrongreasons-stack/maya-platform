@@ -1,0 +1,7 @@
+import os,subprocess,pathlib,json,re,time
+be=pathlib.Path.cwd();repo=be.parent;out=be.parents[2]/'outputs/source-certification/receipts';env={k:os.environ[k] for k in ['HOME','TMPDIR','USER','LANG'] if k in os.environ};env['PATH']='/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-p01-option-a-940ddd51/node-v22.23.2-darwin-arm64/bin:/opt/homebrew/bin:/usr/bin:/bin';env.update(dict(re.findall(r"([A-Z][A-Z0-9_]+):\s*'([^']+)'",(be/'test/widgets-live/support/environment.ts').read_text())));env['DATABASE_URL']='[REDACTED DATABASE URL]';env['HTTP_SMOKE_PORT']='33741';sha=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+for name,cwd,args in [('smoke-migration',be,['npx','prisma','migrate','deploy']),('smoke-seed',be,['npm','run','prisma:seed']),('platform-http-smoke',be,['npm','run','test:http']),('k15-census',repo,['node','docs/rebuild/evidence/maya-chat-first-ux/k15-bundle-census.mjs','--json']),('k1-dossier',repo,['node','docs/rebuild/evidence/maya-chat-first-ux/k1/k1-dossier-check.mjs'])]:
+ t=time.time()
+ with (out/(name+'.log')).open('w') as f:r=subprocess.run(args,cwd=cwd,env=env,stdout=f,stderr=subprocess.STDOUT)
+ receipt={'candidate':sha,'name':name,'command':args,'exit':r.returncode,'seconds':round(time.time()-t,2)};(out/(name+'.receipt.json')).write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps(receipt),flush=True)
+ if r.returncode and name in ['smoke-migration','smoke-seed']:break

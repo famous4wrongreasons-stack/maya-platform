@@ -1,0 +1,89 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "utc": "2026-10-01T06:51:41.093089+00:00",
+  "workers": [
+    {
+      "worker": 1,
+      "trackedFilesVerified": 2332,
+      "omittedPublicEnvTemplates": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "mismatches": [],
+      "inventorySha256": "c078a8ffd73f1f99e86d0b1fd20c21c867dc239754648dc4de555d5e47cf47b1"
+    },
+    {
+      "worker": 2,
+      "trackedFilesVerified": 2332,
+      "omittedPublicEnvTemplates": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "mismatches": [],
+      "inventorySha256": "c078a8ffd73f1f99e86d0b1fd20c21c867dc239754648dc4de555d5e47cf47b1"
+    },
+    {
+      "worker": 3,
+      "trackedFilesVerified": 2332,
+      "omittedPublicEnvTemplates": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "mismatches": [],
+      "inventorySha256": "c078a8ffd73f1f99e86d0b1fd20c21c867dc239754648dc4de555d5e47cf47b1"
+    },
+    {
+      "worker": 4,
+      "trackedFilesVerified": 2332,
+      "omittedPublicEnvTemplates": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "mismatches": [],
+      "inventorySha256": "c078a8ffd73f1f99e86d0b1fd20c21c867dc239754648dc4de555d5e47cf47b1"
+    },
+    {
+      "worker": 5,
+      "trackedFilesVerified": 2332,
+      "omittedPublicEnvTemplates": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "mismatches": [],
+      "inventorySha256": "c078a8ffd73f1f99e86d0b1fd20c21c867dc239754648dc4de555d5e47cf47b1"
+    },
+    {
+      "worker": 6,
+      "trackedFilesVerified": 2332,
+      "omittedPublicEnvTemplates": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "mismatches": [],
+      "inventorySha256": "c078a8ffd73f1f99e86d0b1fd20c21c867dc239754648dc4de555d5e47cf47b1"
+    },
+    {
+      "worker": 7,
+      "trackedFilesVerified": 2332,
+      "omittedPublicEnvTemplates": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "mismatches": [],
+      "inventorySha256": "c078a8ffd73f1f99e86d0b1fd20c21c867dc239754648dc4de555d5e47cf47b1"
+    },
+    {
+      "worker": 8,
+      "trackedFilesVerified": 2332,
+      "omittedPublicEnvTemplates": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "mismatches": [],
+      "inventorySha256": "c078a8ffd73f1f99e86d0b1fd20c21c867dc239754648dc4de555d5e47cf47b1"
+    }
+  ],
+  "productOrPresentationEdits": 0,
+  "nativeDefaultSteps": true,
+  "restrictedTestSelectors": false
+}

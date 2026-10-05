@@ -1,0 +1,2675 @@
+{
+  "contract": "maya.canonical-net-bin-integration/1",
+  "observations": [
+    {
+      "mode": "personal",
+      "realCanonicalNet": true,
+      "compiledRuntime": true,
+      "scenario": "COMMIT then canonical CONTROL escape on same confirmation",
+      "confirmationId": "4df072db-a932-48a3-8c05-072506d29f64",
+      "before": [
+        {
+          "id": "a1",
+          "text": "Запись подтверждена."
+        }
+      ],
+      "after": [
+        {
+          "id": "a1",
+          "text": "Запись подтверждена."
+        }
+      ],
+      "serverBefore": [
+        {
+          "text": "Запись подтверждена.",
+          "outcome": "CONFIRMED",
+          "action_receipt_ref": "056a6a1f-0a0d-40f9-8366-d02b0a4c7708"
+        }
+      ],
+      "serverAfter": [
+        {
+          "text": "Запись подтверждена.",
+          "outcome": "CONFIRMED",
+          "action_receipt_ref": "056a6a1f-0a0d-40f9-8366-d02b0a4c7708"
+        }
+      ],
+      "dismissed": {
+        "rawJsonSha256": "09a78fd2d32bca169e308e407286d156dffb8bca3d5d670d6e3d080e0de00cde",
+        "value": {
+          "contract": "maya.widget.intent/1",
+          "outcome": "terminate",
+          "code": null,
+          "reason_text": null,
+          "stopped_at_gate": "13",
+          "gates_run": 14,
+          "gates_total": 15,
+          "next_envelope": null,
+          "resolved_widget": {
+            "control": "dismissed"
+          },
+          "owner_decision": null,
+          "receipt_outcome": "ACCEPTED"
+        }
+      },
+      "counters": {
+        "activations": 5,
+        "stateChanges": 5,
+        "sentences": 0,
+        "submissions": 5
+      },
+      "exchanges": [
+        {
+          "status": 200,
+          "request": {
+            "rawJsonSha256": "85133eec993d2866a69e69d4b1cf21d36b911e6f69fdf491fdd3b3532231aa54",
+            "value": {
+              "contract": "maya.widget.intent.submission/1",
+              "widget_id": "7bb0fea8-a855-45b7-8d70-ac1da137471c",
+              "intent_token": "[redacted:sha256:51eb5d51e3232e69e81e113db255bf43704d59007dfc12774958314955715abe]",
+              "inputs": {
+                "service_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2VydmljZSIsIm93bmVyS2luZCI6ImNhdGFsb2dfc2VydmljZSIsIm93bmVyUmVmIjoiY211bzlqOGp6MDAwNGtqYzkyN2dnamY3YSJ9.4a96a365138965eda2ca88a96ba02d18bd285e4f25e6f5e7d0db1458e2cfb425"
+              },
+              "client_nonce": "e7c6a8bf-0a50-4eae-9b8f-830bd19e4f56",
+              "profile_id": "pwa/1"
+            }
+          },
+          "response": {
+            "rawJsonSha256": "4f489c5711111c7c7561e96413157ef52fc8f9680ed102be069316e46b62f4b3",
+            "value": {
+              "contract": "maya.widget.intent/1",
+              "outcome": "terminate",
+              "code": null,
+              "reason_text": null,
+              "stopped_at_gate": "13",
+              "gates_run": 14,
+              "gates_total": 15,
+              "next_envelope": {
+                "contract": "maya.widget.envelope/1",
+                "widget_id": "c84619ae-77a4-4a6d-bb23-094ed373b25f",
+                "kind": "STAFF_SELECTOR",
+                "body_version": 1,
+                "tenant_id": "cmuo9j8hp0000kjc9fercsmwz",
+                "correlation": {
+                  "run_id": null,
+                  "turn_id": "4de0a33a-996b-4e6a-a2b7-583ae2e91d3d",
+                  "message_id": null,
+                  "agent_id": null,
+                  "parent_widget_id": "7bb0fea8-a855-45b7-8d70-ac1da137471c",
+                  "step_index": null,
+                  "step_total": null,
+                  "trace_id": "1e93261957f24f8a1cf8ac69d3b9481b"
+                },
+                "source": {
+                  "from": "capability_envelope",
+                  "capability": "catalog.staff.read",
+                  "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                  "fact_index": 0
+                },
+                "origin": {
+                  "trigger": "system_reply",
+                  "emitter": "capability_read",
+                  "moment_key": null,
+                  "proactive_provenance": null
+                },
+                "authority": {
+                  "verification_level": "SESSION_VERIFIED",
+                  "pii_class": "none",
+                  "data_scope": {
+                    "masked_fields": []
+                  }
+                },
+                "body": {
+                  "prompt": {
+                    "phrase_key": "booking.selector",
+                    "rendered": "Choose a specialist"
+                  },
+                  "for_service_refs": [
+                    "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2VydmljZSIsIm93bmVyS2luZCI6ImNhdGFsb2dfc2VydmljZSIsIm93bmVyUmVmIjoiY211bzlqOGp6MDAwNGtqYzkyN2dnamY3YSJ9.4a96a365138965eda2ca88a96ba02d18bd285e4f25e6f5e7d0db1458e2cfb425"
+                  ],
+                  "options": [
+                    {
+                      "option_id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c",
+                      "staff_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c",
+                      "label": {
+                        "state": "KNOWN",
+                        "value": "Release proof provider",
+                        "label": "Release proof provider",
+                        "reason_code": null,
+                        "fact_ref": 0,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "sublabel": {
+                        "state": "KNOWN",
+                        "value": "Specialist",
+                        "label": "Specialist",
+                        "reason_code": null,
+                        "fact_ref": 0,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "badges": [],
+                      "measures": [],
+                      "media": null,
+                      "intent_ref": "i1",
+                      "enabled": {
+                        "state": "NOT_MEASURED",
+                        "value": null,
+                        "label": "Not measured",
+                        "reason_code": "NOT_COLLECTED",
+                        "fact_ref": null,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "role_label": {
+                        "state": "KNOWN",
+                        "value": "Specialist",
+                        "label": "Specialist",
+                        "reason_code": null,
+                        "fact_ref": 0,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "nearest_availability": {
+                        "state": "NOT_MEASURED",
+                        "value": null,
+                        "label": "Not measured",
+                        "reason_code": "NOT_COLLECTED",
+                        "fact_ref": null,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null,
+                        "key": "booking.nearest_availability",
+                        "unit": "datetime",
+                        "basis_key": null,
+                        "basis": "Canonical booking owner",
+                        "currency": null,
+                        "formatted": "Not measured",
+                        "comparison": null
+                      },
+                      "rating": null
+                    }
+                  ],
+                  "any_staff_option": null,
+                  "shown_count": 1,
+                  "total_count": null,
+                  "more_intent": null
+                },
+                "intents": [
+                  {
+                    "intent_ref": "i1",
+                    "intent_token": "[redacted:sha256:4c58b60bd7ebcb0a8f16e13cd12bead0a7f1a3bd568121781212a35f565674c6]",
+                    "role": "primary",
+                    "label": "Choose specialist",
+                    "utterance_preview": "Choose specialist",
+                    "speech_aliases": [
+                      "choose specialist"
+                    ],
+                    "ordinal": 1,
+                    "priority": 1,
+                    "effect": "REFINE",
+                    "capability": {
+                      "space": "C9",
+                      "key": "catalog.staff.read"
+                    },
+                    "handoff_capability_ref": null,
+                    "target": null,
+                    "input_schema": {
+                      "fields": [
+                        {
+                          "name": "staff_ref",
+                          "required": true,
+                          "kind": "ref",
+                          "domain_ref": "staff_ref",
+                          "selection_min": 1,
+                          "selection_max": 1
+                        }
+                      ],
+                      "max_total_bytes": 2048,
+                      "free_input_justification": null
+                    },
+                    "verification_floor": "SESSION_VERIFIED",
+                    "confirmation": null,
+                    "authority_hint": {
+                      "emphasis": "secondary",
+                      "disabled_because": null
+                    },
+                    "enabled": {
+                      "state": "KNOWN",
+                      "value": true,
+                      "label": "Choose specialist",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "expires_at": "2026-09-30T15:41:22.857Z",
+                    "single_use": true
+                  },
+                  {
+                    "intent_ref": "i2",
+                    "intent_token": "[redacted:sha256:d80185c8733da26a354162b3d85050ae616c34f8200f41233a175cf0a817e100]",
+                    "role": "escape",
+                    "label": "Dismiss",
+                    "utterance_preview": "Dismiss",
+                    "speech_aliases": [
+                      "dismiss",
+                      "close"
+                    ],
+                    "ordinal": 2,
+                    "priority": 0,
+                    "effect": "CONTROL",
+                    "capability": {
+                      "space": "CONTROL",
+                      "key": "control.widget.dismiss"
+                    },
+                    "handoff_capability_ref": null,
+                    "target": null,
+                    "input_schema": null,
+                    "verification_floor": "ANONYMOUS",
+                    "confirmation": null,
+                    "authority_hint": {
+                      "emphasis": "muted",
+                      "disabled_because": null
+                    },
+                    "enabled": {
+                      "state": "KNOWN",
+                      "value": true,
+                      "label": "Dismiss",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "expires_at": "2026-09-30T15:41:22.857Z",
+                    "single_use": true
+                  }
+                ],
+                "provenance": {
+                  "source_capability": "catalog.staff.read",
+                  "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                  "projector_id": "catalog.staff.read@1",
+                  "source_kind": "capability_read",
+                  "facts_used": [
+                    {
+                      "capability": "catalog.staff.read",
+                      "status": "measured",
+                      "as_of": "2026-09-30T15:31:22.857Z",
+                      "evidence_refs": [],
+                      "completeness": {
+                        "status": "PARTIAL",
+                        "requestedScopeHash": "32f9036885d36654375660d7acc02a1a8063822224c186330316f206389dd267",
+                        "returnedCount": 1,
+                        "totalCount": null,
+                        "hasMore": true,
+                        "cursorRef": null,
+                        "truncated": false,
+                        "reasonCodes": [
+                          "NOT_COLLECTED"
+                        ]
+                      }
+                    }
+                  ],
+                  "facts_origin": [
+                    "synthesised"
+                  ],
+                  "facts_digest": "2171a62929b85cecd7fd825d8122f031f932ec16f4b332d2586331f0c743300e",
+                  "completeness": {
+                    "status": "PARTIAL",
+                    "requestedScopeHash": "32f9036885d36654375660d7acc02a1a8063822224c186330316f206389dd267",
+                    "returnedCount": 1,
+                    "totalCount": null,
+                    "hasMore": true,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": [
+                      "NOT_COLLECTED"
+                    ]
+                  },
+                  "completeness_envelope_hash": "d862bedeb38a33e4e608b35080844185dbbb86cabc7d31c4a7246752d936044d",
+                  "evidence_refs": [],
+                  "confidence": "medium",
+                  "authorship": {
+                    "body_values": "server_formatter",
+                    "body_phrases": "server_catalogue",
+                    "narrative": "none",
+                    "narrative_template_id": null,
+                    "narrative_template_version": null,
+                    "model_contribution": "none",
+                    "model_contribution_ref": null
+                  }
+                },
+                "limitations": [],
+                "lifecycle": {
+                  "freshness_class": "live",
+                  "state": "MINTED",
+                  "issued_at": "2026-09-30T15:31:22.857Z",
+                  "expires_at": "2026-09-30T15:41:22.857Z",
+                  "flow_ttl_s": null,
+                  "input_lock": "none",
+                  "on_expiry": "collapse_to_summary",
+                  "supersedes_widget_id": "7bb0fea8-a855-45b7-8d70-ac1da137471c",
+                  "superseded_by_widget_id": null,
+                  "delivery": {
+                    "delivery_state": "live",
+                    "answered_at": null,
+                    "answering_channel": null,
+                    "action_receipt_ref": null
+                  },
+                  "historised_form": "summary_bubble",
+                  "timeline_placement": "chronological",
+                  "dedupe_key": "STAFF_SELECTOR:c84619ae-77a4-4a6d-bb23-094ed373b25f",
+                  "retention_sec": 600,
+                  "delivery_channel": "pwa"
+                },
+                "presentation": {
+                  "presentation_mode": "client",
+                  "density": "CARD",
+                  "text_equivalent": {
+                    "headline": "STAFF_SELECTOR",
+                    "body": "{\"any_staff_option\":null,\"for_service_refs\":[\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2VydmljZSIsIm93bmVyS2luZCI6ImNhdGFsb2dfc2VydmljZSIsIm93bmVyUmVmIjoiY211bzlqOGp6MDAwNGtqYzkyN2dnamY3YSJ9.4a96a365138965eda2ca88a96ba02d18bd285e4f25e6f5e7d0db1458e2cfb425\"],\"more_intent\":null,\"options\":[{\"badges\":[],\"enabled\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":null,\"label\":\"Not measured\",\"next_intent_ref\":null,\"reason_code\":\"NOT_COLLECTED\",\"state\":\"NOT_MEASURED\",\"value\":null},\"intent_ref\":\"i1\",\"label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Release proof provider\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Release proof provider\"},\"measures\":[],\"media\":null,\"nearest_availability\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":null,\"formatted\":\"Not measured\",\"key\":\"booking.nearest_availability\",\"label\":\"Not measured\",\"next_intent_ref\":null,\"reason_code\":\"NOT_COLLECTED\",\"state\":\"NOT_MEASURED\",\"unit\":\"datetime\",\"value\":null},\"option_id\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c\",\"rating\":null,\"role_label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Specialist\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Specialist\"},\"staff_ref\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5Zm…",
+                    "itemized": [],
+                    "completeness_sentence": null,
+                    "unknowns_sentence": null
+                  },
+                  "speech": null,
+                  "a11y": {
+                    "role_hint": "listbox",
+                    "label": "STAFF_SELECTOR",
+                    "description": "{\"any_staff_option\":null,\"for_service_refs\":[\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2VydmljZSIsIm93bmVyS2luZCI6ImNhdGFsb2dfc2VydmljZSIsIm93bmVyUmVmIjoiY211bzlqOGp6MDAwNGtqYzkyN2dnamY3YSJ9.4a96a365138965eda2ca88a96ba02d18bd285e4f25e6f5e7d0db1458e2cfb425\"],\"more_intent\":null,\"options\":[{\"badges\":[],\"enabled\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":null,\"label\":\"Not measured\",\"next_intent_ref\":null,\"reason_code\":\"NOT_COLLECTED\",\"state\":\"NOT_MEASURED\",\"value\":null},\"intent_ref\":\"i1\",\"label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Release proof provider\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Release proof provider\"},\"measures\":[],\"media\":null,\"nearest_availability\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":null,\"formatted\":\"Not measured\",\"key\":\"booking.nearest_availability\",\"label\":\"Not measured\",\"next_intent_ref\":null,\"reason_code\":\"NOT_COLLECTED\",\"state\":\"NOT_MEASURED\",\"unit\":\"datetime\",\"value\":null},\"option_id\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c\",\"rating\":null,\"role_label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Specialist\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Specialist\"},\"staff_ref\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5Zm…",
+                    "reading_order": [
+                      {
+                        "k": "option",
+                        "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c"
+                      },
+                      {
+                        "k": "intent",
+                        "id": "i2"
+                      }
+                    ],
+                    "live_region": "off",
+                    "accessible_names": {
+                      "option:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c": "Release proof provider",
+                      "intent:i2": "Dismiss"
+                    }
+                  },
+                  "fullscreen_detail": null
+                },
+                "render": {
+                  "contract": "maya.render.receipt/1",
+                  "profile_id": "pwa/1",
+                  "profile_version": 1,
+                  "render_tier": "RICH_INTERACTIVE",
+                  "intents_minted": 2,
+                  "intents_emitted": 2,
+                  "intents_withheld": [],
+                  "body_reductions": [],
+                  "text_equivalent_is_canonical": false,
+                  "escalation": null,
+                  "degraded_at": "2026-09-30T15:31:22.857Z"
+                },
+                "integrity": {
+                  "body_hash": "ccaa30b7eb4c6a588d95671246bef99c93b40dff1878246832f3ac08ee7e13b8",
+                  "cell_index_digest": "b4d7c50a29f4765fb696bbdd52515a21cd9e17efaa2532111981ae9f4e218584",
+                  "envelope_seal": "b1ba50cd8477a722e27282c830224ca8ecd78e02d8133aeaeb977369e486605c",
+                  "seal_key_version": 1,
+                  "principal_proof_hash": "21f31efb87acc022e387754f731a25a9e87dd9015ff45fbe299860fed1db0867",
+                  "approval_echo": null,
+                  "policy_context_echo": null
+                }
+              },
+              "resolved_widget": null,
+              "owner_decision": null,
+              "receipt_outcome": "ACCEPTED"
+            }
+          },
+          "projection": {
+            "rawJsonSha256": "9dd97cd9440eb1acc8c22388b8d7e2a1e57b3bbe4df1415beec5c7613c3dcece",
+            "value": {
+              "outcome": "terminate",
+              "code": null,
+              "next_envelope": {
+                "contract": "maya.widget.envelope/1",
+                "widget_id": "c84619ae-77a4-4a6d-bb23-094ed373b25f",
+                "kind": "STAFF_SELECTOR",
+                "body_version": 1,
+                "tenant_id": "cmuo9j8hp0000kjc9fercsmwz",
+                "correlation": {
+                  "run_id": null,
+                  "turn_id": "4de0a33a-996b-4e6a-a2b7-583ae2e91d3d",
+                  "message_id": null,
+                  "agent_id": null,
+                  "parent_widget_id": "7bb0fea8-a855-45b7-8d70-ac1da137471c",
+                  "step_index": null,
+                  "step_total": null,
+                  "trace_id": "1e93261957f24f8a1cf8ac69d3b9481b"
+                },
+                "source": {
+                  "from": "capability_envelope",
+                  "capability": "catalog.staff.read",
+                  "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                  "fact_index": 0
+                },
+                "origin": {
+                  "trigger": "system_reply",
+                  "emitter": "capability_read",
+                  "moment_key": null,
+                  "proactive_provenance": null
+                },
+                "authority": {
+                  "verification_level": "SESSION_VERIFIED",
+                  "pii_class": "none",
+                  "data_scope": {
+                    "masked_fields": []
+                  }
+                },
+                "body": {
+                  "prompt": {
+                    "phrase_key": "booking.selector",
+                    "rendered": "Choose a specialist"
+                  },
+                  "for_service_refs": [
+                    "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2VydmljZSIsIm93bmVyS2luZCI6ImNhdGFsb2dfc2VydmljZSIsIm93bmVyUmVmIjoiY211bzlqOGp6MDAwNGtqYzkyN2dnamY3YSJ9.4a96a365138965eda2ca88a96ba02d18bd285e4f25e6f5e7d0db1458e2cfb425"
+                  ],
+                  "options": [
+                    {
+                      "option_id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c",
+                      "staff_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c",
+                      "label": {
+                        "state": "KNOWN",
+                        "value": "Release proof provider",
+                        "label": "Release proof provider",
+                        "reason_code": null,
+                        "fact_ref": 0,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "sublabel": {
+                        "state": "KNOWN",
+                        "value": "Specialist",
+                        "label": "Specialist",
+                        "reason_code": null,
+                        "fact_ref": 0,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "badges": [],
+                      "measures": [],
+                      "media": null,
+                      "intent_ref": "i1",
+                      "enabled": {
+                        "state": "NOT_MEASURED",
+                        "value": null,
+                        "label": "Not measured",
+                        "reason_code": "NOT_COLLECTED",
+                        "fact_ref": null,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "role_label": {
+                        "state": "KNOWN",
+                        "value": "Specialist",
+                        "label": "Specialist",
+                        "reason_code": null,
+                        "fact_ref": 0,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "nearest_availability": {
+                        "state": "NOT_MEASURED",
+                        "value": null,
+                        "label": "Not measured",
+                        "reason_code": "NOT_COLLECTED",
+                        "fact_ref": null,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null,
+                        "key": "booking.nearest_availability",
+                        "unit": "datetime",
+                        "basis_key": null,
+                        "basis": "Canonical booking owner",
+                        "currency": null,
+                        "formatted": "Not measured",
+                        "comparison": null
+                      },
+                      "rating": null
+                    }
+                  ],
+                  "any_staff_option": null,
+                  "shown_count": 1,
+                  "total_count": null,
+                  "more_intent": null
+                },
+                "intents": [
+                  {
+                    "intent_ref": "i1",
+                    "intent_token": "[redacted:sha256:4c58b60bd7ebcb0a8f16e13cd12bead0a7f1a3bd568121781212a35f565674c6]",
+                    "role": "primary",
+                    "label": "Choose specialist",
+                    "utterance_preview": "Choose specialist",
+                    "speech_aliases": [
+                      "choose specialist"
+                    ],
+                    "ordinal": 1,
+                    "priority": 1,
+                    "effect": "REFINE",
+                    "capability": {
+                      "space": "C9",
+                      "key": "catalog.staff.read"
+                    },
+                    "handoff_capability_ref": null,
+                    "target": null,
+                    "input_schema": {
+                      "fields": [
+                        {
+                          "name": "staff_ref",
+                          "required": true,
+                          "kind": "ref",
+                          "domain_ref": "staff_ref",
+                          "selection_min": 1,
+                          "selection_max": 1
+                        }
+                      ],
+                      "max_total_bytes": 2048,
+                      "free_input_justification": null
+                    },
+                    "verification_floor": "SESSION_VERIFIED",
+                    "confirmation": null,
+                    "authority_hint": {
+                      "emphasis": "secondary",
+                      "disabled_because": null
+                    },
+                    "enabled": {
+                      "state": "KNOWN",
+                      "value": true,
+                      "label": "Choose specialist",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "expires_at": "2026-09-30T15:41:22.857Z",
+                    "single_use": true
+                  },
+                  {
+                    "intent_ref": "i2",
+                    "intent_token": "[redacted:sha256:d80185c8733da26a354162b3d85050ae616c34f8200f41233a175cf0a817e100]",
+                    "role": "escape",
+                    "label": "Dismiss",
+                    "utterance_preview": "Dismiss",
+                    "speech_aliases": [
+                      "dismiss",
+                      "close"
+                    ],
+                    "ordinal": 2,
+                    "priority": 0,
+                    "effect": "CONTROL",
+                    "capability": {
+                      "space": "CONTROL",
+                      "key": "control.widget.dismiss"
+                    },
+                    "handoff_capability_ref": null,
+                    "target": null,
+                    "input_schema": null,
+                    "verification_floor": "ANONYMOUS",
+                    "confirmation": null,
+                    "authority_hint": {
+                      "emphasis": "muted",
+                      "disabled_because": null
+                    },
+                    "enabled": {
+                      "state": "KNOWN",
+                      "value": true,
+                      "label": "Dismiss",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "expires_at": "2026-09-30T15:41:22.857Z",
+                    "single_use": true
+                  }
+                ],
+                "provenance": {
+                  "source_capability": "catalog.staff.read",
+                  "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                  "projector_id": "catalog.staff.read@1",
+                  "source_kind": "capability_read",
+                  "facts_used": [
+                    {
+                      "capability": "catalog.staff.read",
+                      "status": "measured",
+                      "as_of": "2026-09-30T15:31:22.857Z",
+                      "evidence_refs": [],
+                      "completeness": {
+                        "status": "PARTIAL",
+                        "requestedScopeHash": "32f9036885d36654375660d7acc02a1a8063822224c186330316f206389dd267",
+                        "returnedCount": 1,
+                        "totalCount": null,
+                        "hasMore": true,
+                        "cursorRef": null,
+                        "truncated": false,
+                        "reasonCodes": [
+                          "NOT_COLLECTED"
+                        ]
+                      }
+                    }
+                  ],
+                  "facts_origin": [
+                    "synthesised"
+                  ],
+                  "facts_digest": "2171a62929b85cecd7fd825d8122f031f932ec16f4b332d2586331f0c743300e",
+                  "completeness": {
+                    "status": "PARTIAL",
+                    "requestedScopeHash": "32f9036885d36654375660d7acc02a1a8063822224c186330316f206389dd267",
+                    "returnedCount": 1,
+                    "totalCount": null,
+                    "hasMore": true,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": [
+                      "NOT_COLLECTED"
+                    ]
+                  },
+                  "completeness_envelope_hash": "d862bedeb38a33e4e608b35080844185dbbb86cabc7d31c4a7246752d936044d",
+                  "evidence_refs": [],
+                  "confidence": "medium",
+                  "authorship": {
+                    "body_values": "server_formatter",
+                    "body_phrases": "server_catalogue",
+                    "narrative": "none",
+                    "narrative_template_id": null,
+                    "narrative_template_version": null,
+                    "model_contribution": "none",
+                    "model_contribution_ref": null
+                  }
+                },
+                "limitations": [],
+                "lifecycle": {
+                  "freshness_class": "live",
+                  "state": "MINTED",
+                  "issued_at": "2026-09-30T15:31:22.857Z",
+                  "expires_at": "2026-09-30T15:41:22.857Z",
+                  "flow_ttl_s": null,
+                  "input_lock": "none",
+                  "on_expiry": "collapse_to_summary",
+                  "supersedes_widget_id": "7bb0fea8-a855-45b7-8d70-ac1da137471c",
+                  "superseded_by_widget_id": null,
+                  "delivery": {
+                    "delivery_state": "live",
+                    "answered_at": null,
+                    "answering_channel": null,
+                    "action_receipt_ref": null
+                  },
+                  "historised_form": "summary_bubble",
+                  "timeline_placement": "chronological",
+                  "dedupe_key": "STAFF_SELECTOR:c84619ae-77a4-4a6d-bb23-094ed373b25f",
+                  "retention_sec": 600,
+                  "delivery_channel": "pwa"
+                },
+                "presentation": {
+                  "presentation_mode": "client",
+                  "density": "CARD",
+                  "text_equivalent": {
+                    "headline": "STAFF_SELECTOR",
+                    "body": "{\"any_staff_option\":null,\"for_service_refs\":[\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2VydmljZSIsIm93bmVyS2luZCI6ImNhdGFsb2dfc2VydmljZSIsIm93bmVyUmVmIjoiY211bzlqOGp6MDAwNGtqYzkyN2dnamY3YSJ9.4a96a365138965eda2ca88a96ba02d18bd285e4f25e6f5e7d0db1458e2cfb425\"],\"more_intent\":null,\"options\":[{\"badges\":[],\"enabled\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":null,\"label\":\"Not measured\",\"next_intent_ref\":null,\"reason_code\":\"NOT_COLLECTED\",\"state\":\"NOT_MEASURED\",\"value\":null},\"intent_ref\":\"i1\",\"label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Release proof provider\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Release proof provider\"},\"measures\":[],\"media\":null,\"nearest_availability\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":null,\"formatted\":\"Not measured\",\"key\":\"booking.nearest_availability\",\"label\":\"Not measured\",\"next_intent_ref\":null,\"reason_code\":\"NOT_COLLECTED\",\"state\":\"NOT_MEASURED\",\"unit\":\"datetime\",\"value\":null},\"option_id\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c\",\"rating\":null,\"role_label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Specialist\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Specialist\"},\"staff_ref\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5Zm…",
+                    "itemized": [],
+                    "completeness_sentence": null,
+                    "unknowns_sentence": null
+                  },
+                  "speech": null,
+                  "a11y": {
+                    "role_hint": "listbox",
+                    "label": "STAFF_SELECTOR",
+                    "description": "{\"any_staff_option\":null,\"for_service_refs\":[\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2VydmljZSIsIm93bmVyS2luZCI6ImNhdGFsb2dfc2VydmljZSIsIm93bmVyUmVmIjoiY211bzlqOGp6MDAwNGtqYzkyN2dnamY3YSJ9.4a96a365138965eda2ca88a96ba02d18bd285e4f25e6f5e7d0db1458e2cfb425\"],\"more_intent\":null,\"options\":[{\"badges\":[],\"enabled\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":null,\"label\":\"Not measured\",\"next_intent_ref\":null,\"reason_code\":\"NOT_COLLECTED\",\"state\":\"NOT_MEASURED\",\"value\":null},\"intent_ref\":\"i1\",\"label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Release proof provider\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Release proof provider\"},\"measures\":[],\"media\":null,\"nearest_availability\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":null,\"formatted\":\"Not measured\",\"key\":\"booking.nearest_availability\",\"label\":\"Not measured\",\"next_intent_ref\":null,\"reason_code\":\"NOT_COLLECTED\",\"state\":\"NOT_MEASURED\",\"unit\":\"datetime\",\"value\":null},\"option_id\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c\",\"rating\":null,\"role_label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Specialist\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Specialist\"},\"staff_ref\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5Zm…",
+                    "reading_order": [
+                      {
+                        "k": "option",
+                        "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c"
+                      },
+                      {
+                        "k": "intent",
+                        "id": "i2"
+                      }
+                    ],
+                    "live_region": "off",
+                    "accessible_names": {
+                      "option:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c": "Release proof provider",
+                      "intent:i2": "Dismiss"
+                    }
+                  },
+                  "fullscreen_detail": null
+                },
+                "render": {
+                  "contract": "maya.render.receipt/1",
+                  "profile_id": "pwa/1",
+                  "profile_version": 1,
+                  "render_tier": "RICH_INTERACTIVE",
+                  "intents_minted": 2,
+                  "intents_emitted": 2,
+                  "intents_withheld": [],
+                  "body_reductions": [],
+                  "text_equivalent_is_canonical": false,
+                  "escalation": null,
+                  "degraded_at": "2026-09-30T15:31:22.857Z"
+                },
+                "integrity": {
+                  "body_hash": "ccaa30b7eb4c6a588d95671246bef99c93b40dff1878246832f3ac08ee7e13b8",
+                  "cell_index_digest": "b4d7c50a29f4765fb696bbdd52515a21cd9e17efaa2532111981ae9f4e218584",
+                  "envelope_seal": "b1ba50cd8477a722e27282c830224ca8ecd78e02d8133aeaeb977369e486605c",
+                  "seal_key_version": 1,
+                  "principal_proof_hash": "21f31efb87acc022e387754f731a25a9e87dd9015ff45fbe299860fed1db0867",
+                  "approval_echo": null,
+                  "policy_context_echo": null
+                }
+              },
+              "resolved_widget": null,
+              "receipt_outcome": "ACCEPTED"
+            }
+          }
+        },
+        {
+          "status": 200,
+          "request": {
+            "rawJsonSha256": "b5bc4cfcf12ba2c4cf0e2a41580d4357eed39a5eb575396511cbdbf1af64d671",
+            "value": {
+              "contract": "maya.widget.intent.submission/1",
+              "widget_id": "c84619ae-77a4-4a6d-bb23-094ed373b25f",
+              "intent_token": "[redacted:sha256:4c58b60bd7ebcb0a8f16e13cd12bead0a7f1a3bd568121781212a35f565674c6]",
+              "inputs": {
+                "staff_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c"
+              },
+              "client_nonce": "206a3bf1-bda0-40ad-a839-972b0852695a",
+              "profile_id": "pwa/1"
+            }
+          },
+          "response": {
+            "rawJsonSha256": "e866317065a2b728957b0dde8b8356a674d12ae28d562a06ea4392f3fbb47f27",
+            "value": {
+              "contract": "maya.widget.intent/1",
+              "outcome": "terminate",
+              "code": null,
+              "reason_text": null,
+              "stopped_at_gate": "13",
+              "gates_run": 14,
+              "gates_total": 15,
+              "next_envelope": {
+                "contract": "maya.widget.envelope/1",
+                "widget_id": "f7d8d161-912a-44a5-ad74-a56713b3ed9d",
+                "kind": "TIME_SLOT_SELECTOR",
+                "body_version": 1,
+                "tenant_id": "cmuo9j8hp0000kjc9fercsmwz",
+                "correlation": {
+                  "run_id": null,
+                  "turn_id": "4de0a33a-996b-4e6a-a2b7-583ae2e91d3d",
+                  "message_id": null,
+                  "agent_id": null,
+                  "parent_widget_id": "c84619ae-77a4-4a6d-bb23-094ed373b25f",
+                  "step_index": null,
+                  "step_total": null,
+                  "trace_id": "b9a2b112f459b2e59e05a128d7ca75b3"
+                },
+                "source": {
+                  "from": "capability_envelope",
+                  "capability": "booking.availability.read",
+                  "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                  "fact_index": 0
+                },
+                "origin": {
+                  "trigger": "system_reply",
+                  "emitter": "capability_read",
+                  "moment_key": null,
+                  "proactive_provenance": null
+                },
+                "authority": {
+                  "verification_level": "SESSION_VERIFIED",
+                  "pii_class": "none",
+                  "data_scope": {
+                    "masked_fields": []
+                  }
+                },
+                "body": {
+                  "prompt": {
+                    "phrase_key": "booking.selector",
+                    "rendered": "Choose a time"
+                  },
+                  "timezone": "UTC",
+                  "window": {
+                    "from": "2026-10-01T09:00:00.000Z",
+                    "to": "2026-10-01T10:30:00.000Z"
+                  },
+                  "grouping": "flat",
+                  "groups": [
+                    {
+                      "group_id": "available",
+                      "label": {
+                        "phrase_key": "booking.selector",
+                        "rendered": "Available times"
+                      },
+                      "slots": [
+                        {
+                          "slot_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvd01Eb3dNQzR3TURCYSJ9.b86704eb8f5c288c08b3514eac064ea9dab448aeb6fcd21e6e0e32f6812170a9",
+                          "start": {
+                            "state": "KNOWN",
+                            "value": "2026-10-01T09:00:00.000Z",
+                            "label": "2026-10-01T09:00:00.000Z",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.start",
+                            "unit": "datetime",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "2026-10-01T09:00:00.000Z",
+                            "comparison": null
+                          },
+                          "duration": {
+                            "state": "KNOWN",
+                            "value": 30,
+                            "label": "30 min",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.duration",
+                            "unit": "minutes",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "30 min",
+                            "comparison": null
+                          },
+                          "staff_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c",
+                          "price": null,
+                          "availability": {
+                            "state": "NOT_MEASURED",
+                            "value": null,
+                            "label": "Not measured",
+                            "reason_code": "NOT_COLLECTED",
+                            "fact_ref": null,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null
+                          },
+                          "intent_ref": "i1"
+                        },
+                        {
+                          "slot_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvek1Eb3dNQzR3TURCYSJ9.b6b1979376fa67d50c3886ec48926c15a6ea887dc61947ab3eec79c82458a760",
+                          "start": {
+                            "state": "KNOWN",
+                            "value": "2026-10-01T09:30:00.000Z",
+                            "label": "2026-10-01T09:30:00.000Z",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.start",
+                            "unit": "datetime",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "2026-10-01T09:30:00.000Z",
+                            "comparison": null
+                          },
+                          "duration": {
+                            "state": "KNOWN",
+                            "value": 30,
+                            "label": "30 min",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.duration",
+                            "unit": "minutes",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "30 min",
+                            "comparison": null
+                          },
+                          "staff_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c",
+                          "price": null,
+                          "availability": {
+                            "state": "NOT_MEASURED",
+                            "value": null,
+                            "label": "Not measured",
+                            "reason_code": "NOT_COLLECTED",
+                            "fact_ref": null,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null
+                          },
+                          "intent_ref": "i1"
+                        },
+                        {
+                          "slot_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF4TURvd01Eb3dNQzR3TURCYSJ9.d354d39e3665dbf3ad5791fdfdb63373faddc766c86341b79ee315133319670e",
+                          "start": {
+                            "state": "KNOWN",
+                            "value": "2026-10-01T10:00:00.000Z",
+                            "label": "2026-10-01T10:00:00.000Z",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.start",
+                            "unit": "datetime",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "2026-10-01T10:00:00.000Z",
+                            "comparison": null
+                          },
+                          "duration": {
+                            "state": "KNOWN",
+                            "value": 30,
+                            "label": "30 min",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.duration",
+                            "unit": "minutes",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "30 min",
+                            "comparison": null
+                          },
+                          "staff_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c",
+                          "price": null,
+                          "availability": {
+                            "state": "NOT_MEASURED",
+                            "value": null,
+                            "label": "Not measured",
+                            "reason_code": "NOT_COLLECTED",
+                            "fact_ref": null,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null
+                          },
+                          "intent_ref": "i1"
+                        },
+                        {
+                          "slot_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF4TURvek1Eb3dNQzR3TURCYSJ9.f74d59ce50e2f1d22c05fe8f252b8c7b609ebfff9850d62cb396c62a41df8602",
+                          "start": {
+                            "state": "KNOWN",
+                            "value": "2026-10-01T10:30:00.000Z",
+                            "label": "2026-10-01T10:30:00.000Z",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.start",
+                            "unit": "datetime",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "2026-10-01T10:30:00.000Z",
+                            "comparison": null
+                          },
+                          "duration": {
+                            "state": "KNOWN",
+                            "value": 30,
+                            "label": "30 min",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.duration",
+                            "unit": "minutes",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "30 min",
+                            "comparison": null
+                          },
+                          "staff_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c",
+                          "price": null,
+                          "availability": {
+                            "state": "NOT_MEASURED",
+                            "value": null,
+                            "label": "Not measured",
+                            "reason_code": "NOT_COLLECTED",
+                            "fact_ref": null,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null
+                          },
+                          "intent_ref": "i1"
+                        }
+                      ]
+                    }
+                  ],
+                  "shown_count": 4,
+                  "total_count": null,
+                  "more_intent": null,
+                  "widen_window_intent": null,
+                  "none_fit_intent": "i1"
+                },
+                "intents": [
+                  {
+                    "intent_ref": "i1",
+                    "intent_token": "[redacted:sha256:70ff49be10ea679e119617b112f842f29b0a2a51ef8ec81c52856cd3d2cd828e]",
+                    "role": "primary",
+                    "label": "Review booking",
+                    "utterance_preview": "Review booking",
+                    "speech_aliases": [
+                      "review booking"
+                    ],
+                    "ordinal": 1,
+                    "priority": 1,
+                    "effect": "DRAFT",
+                    "capability": {
+                      "space": "C9",
+                      "key": "appointments.own.create"
+                    },
+                    "handoff_capability_ref": null,
+                    "target": null,
+                    "input_schema": {
+                      "fields": [
+                        {
+                          "name": "slot_ref",
+                          "required": true,
+                          "kind": "ref",
+                          "domain_ref": "slot_ref",
+                          "selection_min": 1,
+                          "selection_max": 1
+                        }
+                      ],
+                      "max_total_bytes": 2048,
+                      "free_input_justification": null
+                    },
+                    "verification_floor": "SESSION_VERIFIED",
+                    "confirmation": null,
+                    "authority_hint": {
+                      "emphasis": "secondary",
+                      "disabled_because": null
+                    },
+                    "enabled": {
+                      "state": "KNOWN",
+                      "value": true,
+                      "label": "Review booking",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "expires_at": "2026-09-30T15:41:22.919Z",
+                    "single_use": true
+                  },
+                  {
+                    "intent_ref": "i2",
+                    "intent_token": "[redacted:sha256:ddc97632fc70204c28b0e3cb583e5728200e0bbb7ae20a12da6e5df59f8a2c2f]",
+                    "role": "escape",
+                    "label": "Dismiss",
+                    "utterance_preview": "Dismiss",
+                    "speech_aliases": [
+                      "dismiss",
+                      "close"
+                    ],
+                    "ordinal": 2,
+                    "priority": 0,
+                    "effect": "CONTROL",
+                    "capability": {
+                      "space": "CONTROL",
+                      "key": "control.widget.dismiss"
+                    },
+                    "handoff_capability_ref": null,
+                    "target": null,
+                    "input_schema": null,
+                    "verification_floor": "ANONYMOUS",
+                    "confirmation": null,
+                    "authority_hint": {
+                      "emphasis": "muted",
+                      "disabled_because": null
+                    },
+                    "enabled": {
+                      "state": "KNOWN",
+                      "value": true,
+                      "label": "Dismiss",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "expires_at": "2026-09-30T15:41:22.919Z",
+                    "single_use": true
+                  }
+                ],
+                "provenance": {
+                  "source_capability": "booking.availability.read",
+                  "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                  "projector_id": "booking.availability.read@1",
+                  "source_kind": "capability_read",
+                  "facts_used": [
+                    {
+                      "capability": "booking.availability.read",
+                      "status": "measured",
+                      "as_of": "2026-09-30T15:31:22.919Z",
+                      "evidence_refs": [],
+                      "completeness": {
+                        "status": "PARTIAL",
+                        "requestedScopeHash": "f364e5fdf1d689e40e35892aa22b723ed2ea953120ec5fe0cd61292eec27015c",
+                        "returnedCount": 4,
+                        "totalCount": null,
+                        "hasMore": true,
+                        "cursorRef": null,
+                        "truncated": false,
+                        "reasonCodes": [
+                          "NOT_COLLECTED"
+                        ]
+                      }
+                    }
+                  ],
+                  "facts_origin": [
+                    "synthesised"
+                  ],
+                  "facts_digest": "8f0a84348f88f273419cbfc810adb33f618893fbcb03b3a97b7c16b1cf37feca",
+                  "completeness": {
+                    "status": "PARTIAL",
+                    "requestedScopeHash": "f364e5fdf1d689e40e35892aa22b723ed2ea953120ec5fe0cd61292eec27015c",
+                    "returnedCount": 4,
+                    "totalCount": null,
+                    "hasMore": true,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": [
+                      "NOT_COLLECTED"
+                    ]
+                  },
+                  "completeness_envelope_hash": "dfbf0cc6db7328cda70968ff7623d9dd364356dbc7392d978627c3bba46b2208",
+                  "evidence_refs": [],
+                  "confidence": "medium",
+                  "authorship": {
+                    "body_values": "server_formatter",
+                    "body_phrases": "server_catalogue",
+                    "narrative": "none",
+                    "narrative_template_id": null,
+                    "narrative_template_version": null,
+                    "model_contribution": "none",
+                    "model_contribution_ref": null
+                  }
+                },
+                "limitations": [],
+                "lifecycle": {
+                  "freshness_class": "live",
+                  "state": "MINTED",
+                  "issued_at": "2026-09-30T15:31:22.919Z",
+                  "expires_at": "2026-09-30T15:41:22.919Z",
+                  "flow_ttl_s": null,
+                  "input_lock": "none",
+                  "on_expiry": "collapse_to_summary",
+                  "supersedes_widget_id": "c84619ae-77a4-4a6d-bb23-094ed373b25f",
+                  "superseded_by_widget_id": null,
+                  "delivery": {
+                    "delivery_state": "live",
+                    "answered_at": null,
+                    "answering_channel": null,
+                    "action_receipt_ref": null
+                  },
+                  "historised_form": "summary_bubble",
+                  "timeline_placement": "chronological",
+                  "dedupe_key": "TIME_SLOT_SELECTOR:f7d8d161-912a-44a5-ad74-a56713b3ed9d",
+                  "retention_sec": 600,
+                  "delivery_channel": "pwa"
+                },
+                "presentation": {
+                  "presentation_mode": "client",
+                  "density": "CARD",
+                  "text_equivalent": {
+                    "headline": "TIME_SLOT_SELECTOR",
+                    "body": "{\"grouping\":\"flat\",\"groups\":[{\"group_id\":\"available\",\"label\":{\"phrase_key\":\"booking.selector\",\"rendered\":\"Available times\"},\"slots\":[{\"availability\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":null,\"label\":\"Not measured\",\"next_intent_ref\":null,\"reason_code\":\"NOT_COLLECTED\",\"state\":\"NOT_MEASURED\",\"value\":null},\"duration\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"30 min\",\"key\":\"booking.slot.duration\",\"label\":\"30 min\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"minutes\",\"value\":30},\"intent_ref\":\"i1\",\"price\":null,\"slot_ref\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvd01Eb3dNQzR3TURCYSJ9.b86704eb8f5c288c08b3514eac064ea9dab448aeb6fcd21e6e0e32f6812170a9\",\"staff_ref\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c\",\"start\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"2026-10-01T09:00:00.000Z\",\"key\":\"booking.slot.start\",\"label\":\"2026-10-01T09:00:00.000Z\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"datetime\",\"value\":\"2026-10-01T09:00:00.000Z\"}},{\"availability\":{\"as_of\":null,\"evidence_refs\":[],\"fact_re…",
+                    "itemized": [],
+                    "completeness_sentence": null,
+                    "unknowns_sentence": null
+                  },
+                  "speech": null,
+                  "a11y": {
+                    "role_hint": "listbox",
+                    "label": "TIME_SLOT_SELECTOR",
+                    "description": "{\"grouping\":\"flat\",\"groups\":[{\"group_id\":\"available\",\"label\":{\"phrase_key\":\"booking.selector\",\"rendered\":\"Available times\"},\"slots\":[{\"availability\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":null,\"label\":\"Not measured\",\"next_intent_ref\":null,\"reason_code\":\"NOT_COLLECTED\",\"state\":\"NOT_MEASURED\",\"value\":null},\"duration\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"30 min\",\"key\":\"booking.slot.duration\",\"label\":\"30 min\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"minutes\",\"value\":30},\"intent_ref\":\"i1\",\"price\":null,\"slot_ref\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvd01Eb3dNQzR3TURCYSJ9.b86704eb8f5c288c08b3514eac064ea9dab448aeb6fcd21e6e0e32f6812170a9\",\"staff_ref\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c\",\"start\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"2026-10-01T09:00:00.000Z\",\"key\":\"booking.slot.start\",\"label\":\"2026-10-01T09:00:00.000Z\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"datetime\",\"value\":\"2026-10-01T09:00:00.000Z\"}},{\"availability\":{\"as_of\":null,\"evidence_refs\":[],\"fact_re…",
+                    "reading_order": [
+                      {
+                        "k": "slot",
+                        "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvd01Eb3dNQzR3TURCYSJ9.b86704eb8f5c288c08b3514eac064ea9dab448aeb6fcd21e6e0e32f6812170a9"
+                      },
+                      {
+                        "k": "slot",
+                        "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvek1Eb3dNQzR3TURCYSJ9.b6b1979376fa67d50c3886ec48926c15a6ea887dc61947ab3eec79c82458a760"
+                      },
+                      {
+                        "k": "slot",
+                        "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF4TURvd01Eb3dNQzR3TURCYSJ9.d354d39e3665dbf3ad5791fdfdb63373faddc766c86341b79ee315133319670e"
+                      },
+                      {
+                        "k": "slot",
+                        "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF4TURvek1Eb3dNQzR3TURCYSJ9.f74d59ce50e2f1d22c05fe8f252b8c7b609ebfff9850d62cb396c62a41df8602"
+                      },
+                      {
+                        "k": "intent",
+                        "id": "i2"
+                      }
+                    ],
+                    "live_region": "off",
+                    "accessible_names": {
+                      "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvd01Eb3dNQzR3TURCYSJ9.b86704eb8f5c288c08b3514eac064ea9dab448aeb6fcd21e6e0e32f6812170a9": "2026-10-01T09:00:00.000Z",
+                      "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvek1Eb3dNQzR3TURCYSJ9.b6b1979376fa67d50c3886ec48926c15a6ea887dc61947ab3eec79c82458a760": "2026-10-01T09:30:00.000Z",
+                      "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF4TURvd01Eb3dNQzR3TURCYSJ9.d354d39e3665dbf3ad5791fdfdb63373faddc766c86341b79ee315133319670e": "2026-10-01T10:00:00.000Z",
+                      "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF4TURvek1Eb3dNQzR3TURCYSJ9.f74d59ce50e2f1d22c05fe8f252b8c7b609ebfff9850d62cb396c62a41df8602": "2026-10-01T10:30:00.000Z",
+                      "intent:i2": "Dismiss"
+                    }
+                  },
+                  "fullscreen_detail": null
+                },
+                "render": {
+                  "contract": "maya.render.receipt/1",
+                  "profile_id": "pwa/1",
+                  "profile_version": 1,
+                  "render_tier": "RICH_INTERACTIVE",
+                  "intents_minted": 2,
+                  "intents_emitted": 2,
+                  "intents_withheld": [],
+                  "body_reductions": [],
+                  "text_equivalent_is_canonical": false,
+                  "escalation": null,
+                  "degraded_at": "2026-09-30T15:31:22.919Z"
+                },
+                "integrity": {
+                  "body_hash": "2bae9985f148fe9d76766926ee3c831e687ce17522adac44c7c70dbe5ced3361",
+                  "cell_index_digest": "cb1cf846e5fcfefb899288c1029369ed31fb68724962dc98f4f9ca23f02659eb",
+                  "envelope_seal": "f505d302e68497c023be77fbd8efd1c8e68a454b41e01439a21774085404c969",
+                  "seal_key_version": 1,
+                  "principal_proof_hash": "21f31efb87acc022e387754f731a25a9e87dd9015ff45fbe299860fed1db0867",
+                  "approval_echo": null,
+                  "policy_context_echo": null
+                }
+              },
+              "resolved_widget": null,
+              "owner_decision": null,
+              "receipt_outcome": "ACCEPTED"
+            }
+          },
+          "projection": {
+            "rawJsonSha256": "5cfbb5ad953544eb2309a0855d5826bd49e03093d9f8a69d9c38c6170d804484",
+            "value": {
+              "outcome": "terminate",
+              "code": null,
+              "next_envelope": {
+                "contract": "maya.widget.envelope/1",
+                "widget_id": "f7d8d161-912a-44a5-ad74-a56713b3ed9d",
+                "kind": "TIME_SLOT_SELECTOR",
+                "body_version": 1,
+                "tenant_id": "cmuo9j8hp0000kjc9fercsmwz",
+                "correlation": {
+                  "run_id": null,
+                  "turn_id": "4de0a33a-996b-4e6a-a2b7-583ae2e91d3d",
+                  "message_id": null,
+                  "agent_id": null,
+                  "parent_widget_id": "c84619ae-77a4-4a6d-bb23-094ed373b25f",
+                  "step_index": null,
+                  "step_total": null,
+                  "trace_id": "b9a2b112f459b2e59e05a128d7ca75b3"
+                },
+                "source": {
+                  "from": "capability_envelope",
+                  "capability": "booking.availability.read",
+                  "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                  "fact_index": 0
+                },
+                "origin": {
+                  "trigger": "system_reply",
+                  "emitter": "capability_read",
+                  "moment_key": null,
+                  "proactive_provenance": null
+                },
+                "authority": {
+                  "verification_level": "SESSION_VERIFIED",
+                  "pii_class": "none",
+                  "data_scope": {
+                    "masked_fields": []
+                  }
+                },
+                "body": {
+                  "prompt": {
+                    "phrase_key": "booking.selector",
+                    "rendered": "Choose a time"
+                  },
+                  "timezone": "UTC",
+                  "window": {
+                    "from": "2026-10-01T09:00:00.000Z",
+                    "to": "2026-10-01T10:30:00.000Z"
+                  },
+                  "grouping": "flat",
+                  "groups": [
+                    {
+                      "group_id": "available",
+                      "label": {
+                        "phrase_key": "booking.selector",
+                        "rendered": "Available times"
+                      },
+                      "slots": [
+                        {
+                          "slot_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvd01Eb3dNQzR3TURCYSJ9.b86704eb8f5c288c08b3514eac064ea9dab448aeb6fcd21e6e0e32f6812170a9",
+                          "start": {
+                            "state": "KNOWN",
+                            "value": "2026-10-01T09:00:00.000Z",
+                            "label": "2026-10-01T09:00:00.000Z",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.start",
+                            "unit": "datetime",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "2026-10-01T09:00:00.000Z",
+                            "comparison": null
+                          },
+                          "duration": {
+                            "state": "KNOWN",
+                            "value": 30,
+                            "label": "30 min",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.duration",
+                            "unit": "minutes",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "30 min",
+                            "comparison": null
+                          },
+                          "staff_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c",
+                          "price": null,
+                          "availability": {
+                            "state": "NOT_MEASURED",
+                            "value": null,
+                            "label": "Not measured",
+                            "reason_code": "NOT_COLLECTED",
+                            "fact_ref": null,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null
+                          },
+                          "intent_ref": "i1"
+                        },
+                        {
+                          "slot_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvek1Eb3dNQzR3TURCYSJ9.b6b1979376fa67d50c3886ec48926c15a6ea887dc61947ab3eec79c82458a760",
+                          "start": {
+                            "state": "KNOWN",
+                            "value": "2026-10-01T09:30:00.000Z",
+                            "label": "2026-10-01T09:30:00.000Z",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.start",
+                            "unit": "datetime",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "2026-10-01T09:30:00.000Z",
+                            "comparison": null
+                          },
+                          "duration": {
+                            "state": "KNOWN",
+                            "value": 30,
+                            "label": "30 min",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.duration",
+                            "unit": "minutes",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "30 min",
+                            "comparison": null
+                          },
+                          "staff_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c",
+                          "price": null,
+                          "availability": {
+                            "state": "NOT_MEASURED",
+                            "value": null,
+                            "label": "Not measured",
+                            "reason_code": "NOT_COLLECTED",
+                            "fact_ref": null,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null
+                          },
+                          "intent_ref": "i1"
+                        },
+                        {
+                          "slot_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF4TURvd01Eb3dNQzR3TURCYSJ9.d354d39e3665dbf3ad5791fdfdb63373faddc766c86341b79ee315133319670e",
+                          "start": {
+                            "state": "KNOWN",
+                            "value": "2026-10-01T10:00:00.000Z",
+                            "label": "2026-10-01T10:00:00.000Z",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.start",
+                            "unit": "datetime",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "2026-10-01T10:00:00.000Z",
+                            "comparison": null
+                          },
+                          "duration": {
+                            "state": "KNOWN",
+                            "value": 30,
+                            "label": "30 min",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.duration",
+                            "unit": "minutes",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "30 min",
+                            "comparison": null
+                          },
+                          "staff_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c",
+                          "price": null,
+                          "availability": {
+                            "state": "NOT_MEASURED",
+                            "value": null,
+                            "label": "Not measured",
+                            "reason_code": "NOT_COLLECTED",
+                            "fact_ref": null,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null
+                          },
+                          "intent_ref": "i1"
+                        },
+                        {
+                          "slot_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF4TURvek1Eb3dNQzR3TURCYSJ9.f74d59ce50e2f1d22c05fe8f252b8c7b609ebfff9850d62cb396c62a41df8602",
+                          "start": {
+                            "state": "KNOWN",
+                            "value": "2026-10-01T10:30:00.000Z",
+                            "label": "2026-10-01T10:30:00.000Z",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.start",
+                            "unit": "datetime",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "2026-10-01T10:30:00.000Z",
+                            "comparison": null
+                          },
+                          "duration": {
+                            "state": "KNOWN",
+                            "value": 30,
+                            "label": "30 min",
+                            "reason_code": null,
+                            "fact_ref": 0,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null,
+                            "key": "booking.slot.duration",
+                            "unit": "minutes",
+                            "basis_key": null,
+                            "basis": "Canonical booking owner",
+                            "currency": null,
+                            "formatted": "30 min",
+                            "comparison": null
+                          },
+                          "staff_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c",
+                          "price": null,
+                          "availability": {
+                            "state": "NOT_MEASURED",
+                            "value": null,
+                            "label": "Not measured",
+                            "reason_code": "NOT_COLLECTED",
+                            "fact_ref": null,
+                            "as_of": null,
+                            "evidence_refs": [],
+                            "next_intent_ref": null
+                          },
+                          "intent_ref": "i1"
+                        }
+                      ]
+                    }
+                  ],
+                  "shown_count": 4,
+                  "total_count": null,
+                  "more_intent": null,
+                  "widen_window_intent": null,
+                  "none_fit_intent": "i1"
+                },
+                "intents": [
+                  {
+                    "intent_ref": "i1",
+                    "intent_token": "[redacted:sha256:70ff49be10ea679e119617b112f842f29b0a2a51ef8ec81c52856cd3d2cd828e]",
+                    "role": "primary",
+                    "label": "Review booking",
+                    "utterance_preview": "Review booking",
+                    "speech_aliases": [
+                      "review booking"
+                    ],
+                    "ordinal": 1,
+                    "priority": 1,
+                    "effect": "DRAFT",
+                    "capability": {
+                      "space": "C9",
+                      "key": "appointments.own.create"
+                    },
+                    "handoff_capability_ref": null,
+                    "target": null,
+                    "input_schema": {
+                      "fields": [
+                        {
+                          "name": "slot_ref",
+                          "required": true,
+                          "kind": "ref",
+                          "domain_ref": "slot_ref",
+                          "selection_min": 1,
+                          "selection_max": 1
+                        }
+                      ],
+                      "max_total_bytes": 2048,
+                      "free_input_justification": null
+                    },
+                    "verification_floor": "SESSION_VERIFIED",
+                    "confirmation": null,
+                    "authority_hint": {
+                      "emphasis": "secondary",
+                      "disabled_because": null
+                    },
+                    "enabled": {
+                      "state": "KNOWN",
+                      "value": true,
+                      "label": "Review booking",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "expires_at": "2026-09-30T15:41:22.919Z",
+                    "single_use": true
+                  },
+                  {
+                    "intent_ref": "i2",
+                    "intent_token": "[redacted:sha256:ddc97632fc70204c28b0e3cb583e5728200e0bbb7ae20a12da6e5df59f8a2c2f]",
+                    "role": "escape",
+                    "label": "Dismiss",
+                    "utterance_preview": "Dismiss",
+                    "speech_aliases": [
+                      "dismiss",
+                      "close"
+                    ],
+                    "ordinal": 2,
+                    "priority": 0,
+                    "effect": "CONTROL",
+                    "capability": {
+                      "space": "CONTROL",
+                      "key": "control.widget.dismiss"
+                    },
+                    "handoff_capability_ref": null,
+                    "target": null,
+                    "input_schema": null,
+                    "verification_floor": "ANONYMOUS",
+                    "confirmation": null,
+                    "authority_hint": {
+                      "emphasis": "muted",
+                      "disabled_because": null
+                    },
+                    "enabled": {
+                      "state": "KNOWN",
+                      "value": true,
+                      "label": "Dismiss",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "expires_at": "2026-09-30T15:41:22.919Z",
+                    "single_use": true
+                  }
+                ],
+                "provenance": {
+                  "source_capability": "booking.availability.read",
+                  "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                  "projector_id": "booking.availability.read@1",
+                  "source_kind": "capability_read",
+                  "facts_used": [
+                    {
+                      "capability": "booking.availability.read",
+                      "status": "measured",
+                      "as_of": "2026-09-30T15:31:22.919Z",
+                      "evidence_refs": [],
+                      "completeness": {
+                        "status": "PARTIAL",
+                        "requestedScopeHash": "f364e5fdf1d689e40e35892aa22b723ed2ea953120ec5fe0cd61292eec27015c",
+                        "returnedCount": 4,
+                        "totalCount": null,
+                        "hasMore": true,
+                        "cursorRef": null,
+                        "truncated": false,
+                        "reasonCodes": [
+                          "NOT_COLLECTED"
+                        ]
+                      }
+                    }
+                  ],
+                  "facts_origin": [
+                    "synthesised"
+                  ],
+                  "facts_digest": "8f0a84348f88f273419cbfc810adb33f618893fbcb03b3a97b7c16b1cf37feca",
+                  "completeness": {
+                    "status": "PARTIAL",
+                    "requestedScopeHash": "f364e5fdf1d689e40e35892aa22b723ed2ea953120ec5fe0cd61292eec27015c",
+                    "returnedCount": 4,
+                    "totalCount": null,
+                    "hasMore": true,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": [
+                      "NOT_COLLECTED"
+                    ]
+                  },
+                  "completeness_envelope_hash": "dfbf0cc6db7328cda70968ff7623d9dd364356dbc7392d978627c3bba46b2208",
+                  "evidence_refs": [],
+                  "confidence": "medium",
+                  "authorship": {
+                    "body_values": "server_formatter",
+                    "body_phrases": "server_catalogue",
+                    "narrative": "none",
+                    "narrative_template_id": null,
+                    "narrative_template_version": null,
+                    "model_contribution": "none",
+                    "model_contribution_ref": null
+                  }
+                },
+                "limitations": [],
+                "lifecycle": {
+                  "freshness_class": "live",
+                  "state": "MINTED",
+                  "issued_at": "2026-09-30T15:31:22.919Z",
+                  "expires_at": "2026-09-30T15:41:22.919Z",
+                  "flow_ttl_s": null,
+                  "input_lock": "none",
+                  "on_expiry": "collapse_to_summary",
+                  "supersedes_widget_id": "c84619ae-77a4-4a6d-bb23-094ed373b25f",
+                  "superseded_by_widget_id": null,
+                  "delivery": {
+                    "delivery_state": "live",
+                    "answered_at": null,
+                    "answering_channel": null,
+                    "action_receipt_ref": null
+                  },
+                  "historised_form": "summary_bubble",
+                  "timeline_placement": "chronological",
+                  "dedupe_key": "TIME_SLOT_SELECTOR:f7d8d161-912a-44a5-ad74-a56713b3ed9d",
+                  "retention_sec": 600,
+                  "delivery_channel": "pwa"
+                },
+                "presentation": {
+                  "presentation_mode": "client",
+                  "density": "CARD",
+                  "text_equivalent": {
+                    "headline": "TIME_SLOT_SELECTOR",
+                    "body": "{\"grouping\":\"flat\",\"groups\":[{\"group_id\":\"available\",\"label\":{\"phrase_key\":\"booking.selector\",\"rendered\":\"Available times\"},\"slots\":[{\"availability\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":null,\"label\":\"Not measured\",\"next_intent_ref\":null,\"reason_code\":\"NOT_COLLECTED\",\"state\":\"NOT_MEASURED\",\"value\":null},\"duration\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"30 min\",\"key\":\"booking.slot.duration\",\"label\":\"30 min\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"minutes\",\"value\":30},\"intent_ref\":\"i1\",\"price\":null,\"slot_ref\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvd01Eb3dNQzR3TURCYSJ9.b86704eb8f5c288c08b3514eac064ea9dab448aeb6fcd21e6e0e32f6812170a9\",\"staff_ref\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c\",\"start\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"2026-10-01T09:00:00.000Z\",\"key\":\"booking.slot.start\",\"label\":\"2026-10-01T09:00:00.000Z\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"datetime\",\"value\":\"2026-10-01T09:00:00.000Z\"}},{\"availability\":{\"as_of\":null,\"evidence_refs\":[],\"fact_re…",
+                    "itemized": [],
+                    "completeness_sentence": null,
+                    "unknowns_sentence": null
+                  },
+                  "speech": null,
+                  "a11y": {
+                    "role_hint": "listbox",
+                    "label": "TIME_SLOT_SELECTOR",
+                    "description": "{\"grouping\":\"flat\",\"groups\":[{\"group_id\":\"available\",\"label\":{\"phrase_key\":\"booking.selector\",\"rendered\":\"Available times\"},\"slots\":[{\"availability\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":null,\"label\":\"Not measured\",\"next_intent_ref\":null,\"reason_code\":\"NOT_COLLECTED\",\"state\":\"NOT_MEASURED\",\"value\":null},\"duration\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"30 min\",\"key\":\"booking.slot.duration\",\"label\":\"30 min\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"minutes\",\"value\":30},\"intent_ref\":\"i1\",\"price\":null,\"slot_ref\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvd01Eb3dNQzR3TURCYSJ9.b86704eb8f5c288c08b3514eac064ea9dab448aeb6fcd21e6e0e32f6812170a9\",\"staff_ref\":\"h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c\",\"start\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"2026-10-01T09:00:00.000Z\",\"key\":\"booking.slot.start\",\"label\":\"2026-10-01T09:00:00.000Z\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"datetime\",\"value\":\"2026-10-01T09:00:00.000Z\"}},{\"availability\":{\"as_of\":null,\"evidence_refs\":[],\"fact_re…",
+                    "reading_order": [
+                      {
+                        "k": "slot",
+                        "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvd01Eb3dNQzR3TURCYSJ9.b86704eb8f5c288c08b3514eac064ea9dab448aeb6fcd21e6e0e32f6812170a9"
+                      },
+                      {
+                        "k": "slot",
+                        "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvek1Eb3dNQzR3TURCYSJ9.b6b1979376fa67d50c3886ec48926c15a6ea887dc61947ab3eec79c82458a760"
+                      },
+                      {
+                        "k": "slot",
+                        "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF4TURvd01Eb3dNQzR3TURCYSJ9.d354d39e3665dbf3ad5791fdfdb63373faddc766c86341b79ee315133319670e"
+                      },
+                      {
+                        "k": "slot",
+                        "id": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF4TURvek1Eb3dNQzR3TURCYSJ9.f74d59ce50e2f1d22c05fe8f252b8c7b609ebfff9850d62cb396c62a41df8602"
+                      },
+                      {
+                        "k": "intent",
+                        "id": "i2"
+                      }
+                    ],
+                    "live_region": "off",
+                    "accessible_names": {
+                      "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvd01Eb3dNQzR3TURCYSJ9.b86704eb8f5c288c08b3514eac064ea9dab448aeb6fcd21e6e0e32f6812170a9": "2026-10-01T09:00:00.000Z",
+                      "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvek1Eb3dNQzR3TURCYSJ9.b6b1979376fa67d50c3886ec48926c15a6ea887dc61947ab3eec79c82458a760": "2026-10-01T09:30:00.000Z",
+                      "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF4TURvd01Eb3dNQzR3TURCYSJ9.d354d39e3665dbf3ad5791fdfdb63373faddc766c86341b79ee315133319670e": "2026-10-01T10:00:00.000Z",
+                      "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF4TURvek1Eb3dNQzR3TURCYSJ9.f74d59ce50e2f1d22c05fe8f252b8c7b609ebfff9850d62cb396c62a41df8602": "2026-10-01T10:30:00.000Z",
+                      "intent:i2": "Dismiss"
+                    }
+                  },
+                  "fullscreen_detail": null
+                },
+                "render": {
+                  "contract": "maya.render.receipt/1",
+                  "profile_id": "pwa/1",
+                  "profile_version": 1,
+                  "render_tier": "RICH_INTERACTIVE",
+                  "intents_minted": 2,
+                  "intents_emitted": 2,
+                  "intents_withheld": [],
+                  "body_reductions": [],
+                  "text_equivalent_is_canonical": false,
+                  "escalation": null,
+                  "degraded_at": "2026-09-30T15:31:22.919Z"
+                },
+                "integrity": {
+                  "body_hash": "2bae9985f148fe9d76766926ee3c831e687ce17522adac44c7c70dbe5ced3361",
+                  "cell_index_digest": "cb1cf846e5fcfefb899288c1029369ed31fb68724962dc98f4f9ca23f02659eb",
+                  "envelope_seal": "f505d302e68497c023be77fbd8efd1c8e68a454b41e01439a21774085404c969",
+                  "seal_key_version": 1,
+                  "principal_proof_hash": "21f31efb87acc022e387754f731a25a9e87dd9015ff45fbe299860fed1db0867",
+                  "approval_echo": null,
+                  "policy_context_echo": null
+                }
+              },
+              "resolved_widget": null,
+              "receipt_outcome": "ACCEPTED"
+            }
+          }
+        },
+        {
+          "status": 200,
+          "request": {
+            "rawJsonSha256": "49b0d5de451c85ce9a22fe5fc119e339611428d4b9cdcb3a8670ce1f76c0f33e",
+            "value": {
+              "contract": "maya.widget.intent.submission/1",
+              "widget_id": "f7d8d161-912a-44a5-ad74-a56713b3ed9d",
+              "intent_token": "[redacted:sha256:70ff49be10ea679e119617b112f842f29b0a2a51ef8ec81c52856cd3d2cd828e]",
+              "inputs": {
+                "slot_ref": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvd01Eb3dNQzR3TURCYSJ9.b86704eb8f5c288c08b3514eac064ea9dab448aeb6fcd21e6e0e32f6812170a9"
+              },
+              "client_nonce": "8587e0b0-8f56-4d2a-ab6f-830c70712cf2",
+              "profile_id": "pwa/1"
+            }
+          },
+          "response": {
+            "rawJsonSha256": "44568c0ca42745b104ae26ceede749a0053f6b352563969170f038e91df10494",
+            "value": {
+              "contract": "maya.widget.intent/1",
+              "outcome": "terminate",
+              "code": null,
+              "reason_text": null,
+              "stopped_at_gate": "13",
+              "gates_run": 14,
+              "gates_total": 15,
+              "next_envelope": {
+                "contract": "maya.widget.envelope/1",
+                "widget_id": "4df072db-a932-48a3-8c05-072506d29f64",
+                "kind": "BOOKING_CONFIRMATION",
+                "body_version": 1,
+                "tenant_id": "cmuo9j8hp0000kjc9fercsmwz",
+                "correlation": {
+                  "run_id": null,
+                  "turn_id": "4de0a33a-996b-4e6a-a2b7-583ae2e91d3d",
+                  "message_id": null,
+                  "agent_id": null,
+                  "parent_widget_id": "f7d8d161-912a-44a5-ad74-a56713b3ed9d",
+                  "step_index": null,
+                  "step_total": null,
+                  "trace_id": "d57f5323fc697b47c58fa4fd1c639938"
+                },
+                "source": {
+                  "from": "capability_envelope",
+                  "capability": "appointments.own.create",
+                  "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                  "fact_index": 0
+                },
+                "origin": {
+                  "trigger": "system_reply",
+                  "emitter": "capability_read",
+                  "moment_key": null,
+                  "proactive_provenance": null
+                },
+                "authority": {
+                  "verification_level": "SESSION_VERIFIED",
+                  "pii_class": "none",
+                  "data_scope": {
+                    "masked_fields": []
+                  }
+                },
+                "body": {
+                  "confirmation_subject": "create",
+                  "draft_ref": "1c391beb-36ca-46fd-81be-96a351925b67",
+                  "appointment_ref": null,
+                  "lines": [
+                    {
+                      "label": {
+                        "phrase_key": "booking.confirmation",
+                        "rendered": "Release proof service"
+                      },
+                      "detail": {
+                        "state": "KNOWN",
+                        "value": "Release proof service",
+                        "label": "Release proof service",
+                        "reason_code": null,
+                        "fact_ref": 0,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "measures": []
+                    }
+                  ],
+                  "when": {
+                    "state": "KNOWN",
+                    "value": "2026-10-01T09:00:00.000Z",
+                    "label": "2026-10-01T09:00:00.000Z",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null,
+                    "key": "booking.when",
+                    "unit": "datetime",
+                    "basis_key": null,
+                    "basis": "Canonical booking owner",
+                    "currency": null,
+                    "formatted": "2026-10-01T09:00:00.000Z",
+                    "comparison": null
+                  },
+                  "when_previous": null,
+                  "staff_label": {
+                    "state": "KNOWN",
+                    "value": "cmuo9j8k00005kjc9cc9dqgjh",
+                    "label": "cmuo9j8k00005kjc9cc9dqgjh",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "duration_total": {
+                    "state": "KNOWN",
+                    "value": 30,
+                    "label": "30 min",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null,
+                    "key": "booking.duration",
+                    "unit": "minutes",
+                    "basis_key": null,
+                    "basis": "Canonical booking owner",
+                    "currency": null,
+                    "formatted": "30 min",
+                    "comparison": null
+                  },
+                  "price_total": {
+                    "state": "KNOWN",
+                    "value": 1500,
+                    "label": "1500 RUB",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null,
+                    "key": "booking.price",
+                    "unit": "RUB",
+                    "basis_key": null,
+                    "basis": "Canonical booking owner",
+                    "currency": "RUB",
+                    "formatted": "1500 RUB",
+                    "comparison": null
+                  },
+                  "price_delta": null,
+                  "refund_preview": null,
+                  "loyalty_applied": null,
+                  "policy_notices": [],
+                  "commit_intent": "i1",
+                  "amend_intents": [],
+                  "dismiss_intent": "i2"
+                },
+                "intents": [
+                  {
+                    "intent_ref": "i1",
+                    "intent_token": "[redacted:sha256:ed7dcde8d9c05308247b66110cda15b04fcb88fa030104cbdd129bd8e15046e7]",
+                    "role": "primary",
+                    "label": "Confirm booking",
+                    "utterance_preview": "Confirm booking",
+                    "speech_aliases": [
+                      "confirm booking"
+                    ],
+                    "ordinal": 1,
+                    "priority": 1,
+                    "effect": "COMMIT",
+                    "capability": {
+                      "space": "AE",
+                      "key": "crm.appointment.create.v1"
+                    },
+                    "handoff_capability_ref": null,
+                    "target": null,
+                    "input_schema": null,
+                    "verification_floor": "SESSION_VERIFIED",
+                    "confirmation": null,
+                    "authority_hint": {
+                      "emphasis": "secondary",
+                      "disabled_because": null
+                    },
+                    "enabled": {
+                      "state": "KNOWN",
+                      "value": true,
+                      "label": "Confirm booking",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "expires_at": "2026-09-30T15:41:22.966Z",
+                    "single_use": true
+                  },
+                  {
+                    "intent_ref": "i2",
+                    "intent_token": "[redacted:sha256:8dffb8b7277850b4c280a5990dfc00a15e2ca46bba0a576ef7c03a4aa4516d8f]",
+                    "role": "escape",
+                    "label": "Dismiss",
+                    "utterance_preview": "Dismiss",
+                    "speech_aliases": [
+                      "dismiss",
+                      "close"
+                    ],
+                    "ordinal": 2,
+                    "priority": 0,
+                    "effect": "CONTROL",
+                    "capability": {
+                      "space": "CONTROL",
+                      "key": "control.widget.dismiss"
+                    },
+                    "handoff_capability_ref": null,
+                    "target": null,
+                    "input_schema": null,
+                    "verification_floor": "ANONYMOUS",
+                    "confirmation": null,
+                    "authority_hint": {
+                      "emphasis": "muted",
+                      "disabled_because": null
+                    },
+                    "enabled": {
+                      "state": "KNOWN",
+                      "value": true,
+                      "label": "Dismiss",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "expires_at": "2026-09-30T15:41:22.966Z",
+                    "single_use": true
+                  }
+                ],
+                "provenance": {
+                  "source_capability": "appointments.own.create",
+                  "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                  "projector_id": "appointments.own.create@1",
+                  "source_kind": "capability_read",
+                  "facts_used": [
+                    {
+                      "capability": "appointments.own.create",
+                      "status": "measured",
+                      "as_of": "2026-09-30T15:31:22.966Z",
+                      "evidence_refs": [],
+                      "completeness": {
+                        "status": "COMPLETE",
+                        "requestedScopeHash": "7bbe65cd4f4f006a25fa64c5d39b8ae032dfc3c9191186ea0c1d7035ab76d2c7",
+                        "returnedCount": 1,
+                        "totalCount": 1,
+                        "hasMore": false,
+                        "cursorRef": null,
+                        "truncated": false,
+                        "reasonCodes": []
+                      }
+                    }
+                  ],
+                  "facts_origin": [
+                    "copied"
+                  ],
+                  "facts_digest": "bb5e84f1ea240fe23d91fbff6d779d6217bd401bbcf3d253a3eaf3079c29bb9a",
+                  "completeness": {
+                    "status": "COMPLETE",
+                    "requestedScopeHash": "7bbe65cd4f4f006a25fa64c5d39b8ae032dfc3c9191186ea0c1d7035ab76d2c7",
+                    "returnedCount": 1,
+                    "totalCount": 1,
+                    "hasMore": false,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": []
+                  },
+                  "completeness_envelope_hash": "da360b0284823f307850920f897f5dcf7e2004b11d174016168f23f00a172a16",
+                  "evidence_refs": [],
+                  "confidence": "high",
+                  "authorship": {
+                    "body_values": "server_formatter",
+                    "body_phrases": "server_catalogue",
+                    "narrative": "none",
+                    "narrative_template_id": null,
+                    "narrative_template_version": null,
+                    "model_contribution": "none",
+                    "model_contribution_ref": null
+                  }
+                },
+                "limitations": [],
+                "lifecycle": {
+                  "freshness_class": "live",
+                  "state": "MINTED",
+                  "issued_at": "2026-09-30T15:31:22.966Z",
+                  "expires_at": "2026-09-30T15:41:22.966Z",
+                  "flow_ttl_s": null,
+                  "input_lock": "none",
+                  "on_expiry": "collapse_to_summary",
+                  "supersedes_widget_id": "f7d8d161-912a-44a5-ad74-a56713b3ed9d",
+                  "superseded_by_widget_id": null,
+                  "delivery": {
+                    "delivery_state": "live",
+                    "answered_at": null,
+                    "answering_channel": null,
+                    "action_receipt_ref": null
+                  },
+                  "historised_form": "summary_bubble",
+                  "timeline_placement": "chronological",
+                  "dedupe_key": "BOOKING_CONFIRMATION:4df072db-a932-48a3-8c05-072506d29f64",
+                  "retention_sec": 600,
+                  "delivery_channel": "pwa"
+                },
+                "presentation": {
+                  "presentation_mode": "client",
+                  "density": "CARD",
+                  "text_equivalent": {
+                    "headline": "BOOKING_CONFIRMATION",
+                    "body": "{\"amend_intents\":[],\"appointment_ref\":null,\"commit_intent\":\"i1\",\"confirmation_subject\":\"create\",\"dismiss_intent\":\"i2\",\"draft_ref\":\"1c391beb-36ca-46fd-81be-96a351925b67\",\"duration_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"30 min\",\"key\":\"booking.duration\",\"label\":\"30 min\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"minutes\",\"value\":30},\"lines\":[{\"detail\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Release proof service\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Release proof service\"},\"label\":{\"phrase_key\":\"booking.confirmation\",\"rendered\":\"Release proof service\"},\"measures\":[]}],\"loyalty_applied\":null,\"policy_notices\":[],\"price_delta\":null,\"price_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":\"RUB\",\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"1500 RUB\",\"key\":\"booking.price\",\"label\":\"1500 RUB\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"RUB\",\"value\":1500},\"refund_preview\":null,\"staff_label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"cmuo9j8k00005kjc9cc9dqgjh\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"cmuo9j8k00005kjc9cc9dqgjh\"},\"when\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"2026-10-01T09:00:00.000Z\",\"key\":\"booking.when\",\"label\":\"2026-10-01T09:00:00.000Z\",\"next_intent_ref\":null,\"reason_code\":null,\"s…",
+                    "itemized": [],
+                    "completeness_sentence": null,
+                    "unknowns_sentence": null
+                  },
+                  "speech": null,
+                  "a11y": {
+                    "role_hint": "group",
+                    "label": "BOOKING_CONFIRMATION",
+                    "description": "{\"amend_intents\":[],\"appointment_ref\":null,\"commit_intent\":\"i1\",\"confirmation_subject\":\"create\",\"dismiss_intent\":\"i2\",\"draft_ref\":\"1c391beb-36ca-46fd-81be-96a351925b67\",\"duration_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"30 min\",\"key\":\"booking.duration\",\"label\":\"30 min\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"minutes\",\"value\":30},\"lines\":[{\"detail\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Release proof service\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Release proof service\"},\"label\":{\"phrase_key\":\"booking.confirmation\",\"rendered\":\"Release proof service\"},\"measures\":[]}],\"loyalty_applied\":null,\"policy_notices\":[],\"price_delta\":null,\"price_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":\"RUB\",\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"1500 RUB\",\"key\":\"booking.price\",\"label\":\"1500 RUB\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"RUB\",\"value\":1500},\"refund_preview\":null,\"staff_label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"cmuo9j8k00005kjc9cc9dqgjh\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"cmuo9j8k00005kjc9cc9dqgjh\"},\"when\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"2026-10-01T09:00:00.000Z\",\"key\":\"booking.when\",\"label\":\"2026-10-01T09:00:00.000Z\",\"next_intent_ref\":null,\"reason_code\":null,\"s…",
+                    "reading_order": [
+                      {
+                        "k": "intent",
+                        "id": "i1"
+                      },
+                      {
+                        "k": "intent",
+                        "id": "i2"
+                      }
+                    ],
+                    "live_region": "off",
+                    "accessible_names": {
+                      "intent:i1": "Confirm booking",
+                      "intent:i2": "Dismiss"
+                    }
+                  },
+                  "fullscreen_detail": null
+                },
+                "render": {
+                  "contract": "maya.render.receipt/1",
+                  "profile_id": "pwa/1",
+                  "profile_version": 1,
+                  "render_tier": "RICH_INTERACTIVE",
+                  "intents_minted": 2,
+                  "intents_emitted": 2,
+                  "intents_withheld": [],
+                  "body_reductions": [],
+                  "text_equivalent_is_canonical": false,
+                  "escalation": null,
+                  "degraded_at": "2026-09-30T15:31:22.966Z"
+                },
+                "integrity": {
+                  "body_hash": "14adfa5e1f1bc8e395df6b772f6f40d473dc0f26b6ec0b307aeef7849433cece",
+                  "cell_index_digest": "1f7fa2d6948ef73437c6e810f3536c6dfa1ddaf176cb9b5dbb55dcc0704f65a9",
+                  "envelope_seal": "cdf146e42065a35cdc8a7fe334a35e9315adb1f02bc81fc48658101ce82a25fe",
+                  "seal_key_version": 1,
+                  "principal_proof_hash": "21f31efb87acc022e387754f731a25a9e87dd9015ff45fbe299860fed1db0867",
+                  "approval_echo": null,
+                  "policy_context_echo": null
+                }
+              },
+              "resolved_widget": null,
+              "owner_decision": {
+                "kind": "booking_preview",
+                "preview": {
+                  "subject": "create",
+                  "sourceCapabilityKey": "appointments.own.create",
+                  "frozenArgumentHandles": {
+                    "service": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2VydmljZSIsIm93bmVyS2luZCI6ImNhdGFsb2dfc2VydmljZSIsIm93bmVyUmVmIjoiY211bzlqOGp6MDAwNGtqYzkyN2dnamY3YSJ9.4a96a365138965eda2ca88a96ba02d18bd285e4f25e6f5e7d0db1458e2cfb425",
+                    "staff": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic3RhZmYiLCJvd25lcktpbmQiOiJjYXRhbG9nX3N0YWZmIiwib3duZXJSZWYiOiJjbXVvOWo4azAwMDA1a2pjOWNjOWRxZ2poIn0.bab9741ad0e3917ca49d0eaba3e12dabfb88c8a0eca1dfc3561c70dd33e4139c",
+                    "slot": "h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdW85ajhocDAwMDBramM5ZmVyY3Ntd3oiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHdNVlF3T1Rvd01Eb3dNQzR3TURCYSJ9.b86704eb8f5c288c08b3514eac064ea9dab448aeb6fcd21e6e0e32f6812170a9"
+                  },
+                  "draftRef": "1c391beb-36ca-46fd-81be-96a351925b67",
+                  "appointmentRef": null,
+                  "producingIntentTokenHash": null,
+                  "when": "2026-10-01T09:00:00.000Z",
+                  "whenPrevious": null,
+                  "serviceLabel": "Release proof service",
+                  "staffLabel": "cmuo9j8k00005kjc9cc9dqgjh",
+                  "durationMinutes": 30,
+                  "priceKopecks": 150000,
+                  "currency": "RUB",
+                  "fact": {
+                    "capability": "appointments.own.create",
+                    "status": "measured",
+                    "as_of": "2026-09-30T15:31:22.966Z",
+                    "evidence_refs": [],
+                    "completeness": {
+                      "status": "COMPLETE",
+                      "requestedScopeHash": "7bbe65cd4f4f006a25fa64c5d39b8ae032dfc3c9191186ea0c1d7035ab76d2c7",
+                      "returnedCount": 1,
+                      "totalCount": 1,
+                      "hasMore": false,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": []
+                    }
+                  }
+                }
+              },
+              "receipt_outcome": "ACCEPTED"
+            }
+          },
+          "projection": {
+            "rawJsonSha256": "484b3e043036321c777e4a15dfb23cfd726fb38721ae2fe6cbf1ea7a20686896",
+            "value": {
+              "outcome": "terminate",
+              "code": null,
+              "next_envelope": {
+                "contract": "maya.widget.envelope/1",
+                "widget_id": "4df072db-a932-48a3-8c05-072506d29f64",
+                "kind": "BOOKING_CONFIRMATION",
+                "body_version": 1,
+                "tenant_id": "cmuo9j8hp0000kjc9fercsmwz",
+                "correlation": {
+                  "run_id": null,
+                  "turn_id": "4de0a33a-996b-4e6a-a2b7-583ae2e91d3d",
+                  "message_id": null,
+                  "agent_id": null,
+                  "parent_widget_id": "f7d8d161-912a-44a5-ad74-a56713b3ed9d",
+                  "step_index": null,
+                  "step_total": null,
+                  "trace_id": "d57f5323fc697b47c58fa4fd1c639938"
+                },
+                "source": {
+                  "from": "capability_envelope",
+                  "capability": "appointments.own.create",
+                  "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                  "fact_index": 0
+                },
+                "origin": {
+                  "trigger": "system_reply",
+                  "emitter": "capability_read",
+                  "moment_key": null,
+                  "proactive_provenance": null
+                },
+                "authority": {
+                  "verification_level": "SESSION_VERIFIED",
+                  "pii_class": "none",
+                  "data_scope": {
+                    "masked_fields": []
+                  }
+                },
+                "body": {
+                  "confirmation_subject": "create",
+                  "draft_ref": "1c391beb-36ca-46fd-81be-96a351925b67",
+                  "appointment_ref": null,
+                  "lines": [
+                    {
+                      "label": {
+                        "phrase_key": "booking.confirmation",
+                        "rendered": "Release proof service"
+                      },
+                      "detail": {
+                        "state": "KNOWN",
+                        "value": "Release proof service",
+                        "label": "Release proof service",
+                        "reason_code": null,
+                        "fact_ref": 0,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "measures": []
+                    }
+                  ],
+                  "when": {
+                    "state": "KNOWN",
+                    "value": "2026-10-01T09:00:00.000Z",
+                    "label": "2026-10-01T09:00:00.000Z",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null,
+                    "key": "booking.when",
+                    "unit": "datetime",
+                    "basis_key": null,
+                    "basis": "Canonical booking owner",
+                    "currency": null,
+                    "formatted": "2026-10-01T09:00:00.000Z",
+                    "comparison": null
+                  },
+                  "when_previous": null,
+                  "staff_label": {
+                    "state": "KNOWN",
+                    "value": "cmuo9j8k00005kjc9cc9dqgjh",
+                    "label": "cmuo9j8k00005kjc9cc9dqgjh",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null
+                  },
+                  "duration_total": {
+                    "state": "KNOWN",
+                    "value": 30,
+                    "label": "30 min",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null,
+                    "key": "booking.duration",
+                    "unit": "minutes",
+                    "basis_key": null,
+                    "basis": "Canonical booking owner",
+                    "currency": null,
+                    "formatted": "30 min",
+                    "comparison": null
+                  },
+                  "price_total": {
+                    "state": "KNOWN",
+                    "value": 1500,
+                    "label": "1500 RUB",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": null,
+                    "evidence_refs": [],
+                    "next_intent_ref": null,
+                    "key": "booking.price",
+                    "unit": "RUB",
+                    "basis_key": null,
+                    "basis": "Canonical booking owner",
+                    "currency": "RUB",
+                    "formatted": "1500 RUB",
+                    "comparison": null
+                  },
+                  "price_delta": null,
+                  "refund_preview": null,
+                  "loyalty_applied": null,
+                  "policy_notices": [],
+                  "commit_intent": "i1",
+                  "amend_intents": [],
+                  "dismiss_intent": "i2"
+                },
+                "intents": [
+                  {
+                    "intent_ref": "i1",
+                    "intent_token": "[redacted:sha256:ed7dcde8d9c05308247b66110cda15b04fcb88fa030104cbdd129bd8e15046e7]",
+                    "role": "primary",
+                    "label": "Confirm booking",
+                    "utterance_preview": "Confirm booking",
+                    "speech_aliases": [
+                      "confirm booking"
+                    ],
+                    "ordinal": 1,
+                    "priority": 1,
+                    "effect": "COMMIT",
+                    "capability": {
+                      "space": "AE",
+                      "key": "crm.appointment.create.v1"
+                    },
+                    "handoff_capability_ref": null,
+                    "target": null,
+                    "input_schema": null,
+                    "verification_floor": "SESSION_VERIFIED",
+                    "confirmation": null,
+                    "authority_hint": {
+                      "emphasis": "secondary",
+                      "disabled_because": null
+                    },
+                    "enabled": {
+                      "state": "KNOWN",
+                      "value": true,
+                      "label": "Confirm booking",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "expires_at": "2026-09-30T15:41:22.966Z",
+                    "single_use": true
+                  },
+                  {
+                    "intent_ref": "i2",
+                    "intent_token": "[redacted:sha256:8dffb8b7277850b4c280a5990dfc00a15e2ca46bba0a576ef7c03a4aa4516d8f]",
+                    "role": "escape",
+                    "label": "Dismiss",
+                    "utterance_preview": "Dismiss",
+                    "speech_aliases": [
+                      "dismiss",
+                      "close"
+                    ],
+                    "ordinal": 2,
+                    "priority": 0,
+                    "effect": "CONTROL",
+                    "capability": {
+                      "space": "CONTROL",
+                      "key": "control.widget.dismiss"
+                    },
+                    "handoff_capability_ref": null,
+                    "target": null,
+                    "input_schema": null,
+                    "verification_floor": "ANONYMOUS",
+                    "confirmation": null,
+                    "authority_hint": {
+                      "emphasis": "muted",
+                      "disabled_because": null
+                    },
+                    "enabled": {
+                      "state": "KNOWN",
+                      "value": true,
+                      "label": "Dismiss",
+                      "reason_code": null,
+                      "fact_ref": null,
+                      "as_of": null,
+                      "evidence_refs": [],
+                      "next_intent_ref": null
+                    },
+                    "expires_at": "2026-09-30T15:41:22.966Z",
+                    "single_use": true
+                  }
+                ],
+                "provenance": {
+                  "source_capability": "appointments.own.create",
+                  "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                  "projector_id": "appointments.own.create@1",
+                  "source_kind": "capability_read",
+                  "facts_used": [
+                    {
+                      "capability": "appointments.own.create",
+                      "status": "measured",
+                      "as_of": "2026-09-30T15:31:22.966Z",
+                      "evidence_refs": [],
+                      "completeness": {
+                        "status": "COMPLETE",
+                        "requestedScopeHash": "7bbe65cd4f4f006a25fa64c5d39b8ae032dfc3c9191186ea0c1d7035ab76d2c7",
+                        "returnedCount": 1,
+                        "totalCount": 1,
+                        "hasMore": false,
+                        "cursorRef": null,
+                        "truncated": false,
+                        "reasonCodes": []
+                      }
+                    }
+                  ],
+                  "facts_origin": [
+                    "copied"
+                  ],
+                  "facts_digest": "bb5e84f1ea240fe23d91fbff6d779d6217bd401bbcf3d253a3eaf3079c29bb9a",
+                  "completeness": {
+                    "status": "COMPLETE",
+                    "requestedScopeHash": "7bbe65cd4f4f006a25fa64c5d39b8ae032dfc3c9191186ea0c1d7035ab76d2c7",
+                    "returnedCount": 1,
+                    "totalCount": 1,
+                    "hasMore": false,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": []
+                  },
+                  "completeness_envelope_hash": "da360b0284823f307850920f897f5dcf7e2004b11d174016168f23f00a172a16",
+                  "evidence_refs": [],
+                  "confidence": "high",
+                  "authorship": {
+                    "body_values": "server_formatter",
+                    "body_phrases": "server_catalogue",
+                    "narrative": "none",
+                    "narrative_template_id": null,
+                    "narrative_template_version": null,
+                    "model_contribution": "none",
+                    "model_contribution_ref": null
+                  }
+                },
+                "limitations": [],
+                "lifecycle": {
+                  "freshness_class": "live",
+                  "state": "MINTED",
+                  "issued_at": "2026-09-30T15:31:22.966Z",
+                  "expires_at": "2026-09-30T15:41:22.966Z",
+                  "flow_ttl_s": null,
+                  "input_lock": "none",
+                  "on_expiry": "collapse_to_summary",
+                  "supersedes_widget_id": "f7d8d161-912a-44a5-ad74-a56713b3ed9d",
+                  "superseded_by_widget_id": null,
+                  "delivery": {
+                    "delivery_state": "live",
+                    "answered_at": null,
+                    "answering_channel": null,
+                    "action_receipt_ref": null
+                  },
+                  "historised_form": "summary_bubble",
+                  "timeline_placement": "chronological",
+                  "dedupe_key": "BOOKING_CONFIRMATION:4df072db-a932-48a3-8c05-072506d29f64",
+                  "retention_sec": 600,
+                  "delivery_channel": "pwa"
+                },
+                "presentation": {
+                  "presentation_mode": "client",
+                  "density": "CARD",
+                  "text_equivalent": {
+                    "headline": "BOOKING_CONFIRMATION",
+                    "body": "{\"amend_intents\":[],\"appointment_ref\":null,\"commit_intent\":\"i1\",\"confirmation_subject\":\"create\",\"dismiss_intent\":\"i2\",\"draft_ref\":\"1c391beb-36ca-46fd-81be-96a351925b67\",\"duration_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"30 min\",\"key\":\"booking.duration\",\"label\":\"30 min\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"minutes\",\"value\":30},\"lines\":[{\"detail\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Release proof service\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Release proof service\"},\"label\":{\"phrase_key\":\"booking.confirmation\",\"rendered\":\"Release proof service\"},\"measures\":[]}],\"loyalty_applied\":null,\"policy_notices\":[],\"price_delta\":null,\"price_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":\"RUB\",\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"1500 RUB\",\"key\":\"booking.price\",\"label\":\"1500 RUB\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"RUB\",\"value\":1500},\"refund_preview\":null,\"staff_label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"cmuo9j8k00005kjc9cc9dqgjh\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"cmuo9j8k00005kjc9cc9dqgjh\"},\"when\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"2026-10-01T09:00:00.000Z\",\"key\":\"booking.when\",\"label\":\"2026-10-01T09:00:00.000Z\",\"next_intent_ref\":null,\"reason_code\":null,\"s…",
+                    "itemized": [],
+                    "completeness_sentence": null,
+                    "unknowns_sentence": null
+                  },
+                  "speech": null,
+                  "a11y": {
+                    "role_hint": "group",
+                    "label": "BOOKING_CONFIRMATION",
+                    "description": "{\"amend_intents\":[],\"appointment_ref\":null,\"commit_intent\":\"i1\",\"confirmation_subject\":\"create\",\"dismiss_intent\":\"i2\",\"draft_ref\":\"1c391beb-36ca-46fd-81be-96a351925b67\",\"duration_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"30 min\",\"key\":\"booking.duration\",\"label\":\"30 min\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"minutes\",\"value\":30},\"lines\":[{\"detail\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"Release proof service\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"Release proof service\"},\"label\":{\"phrase_key\":\"booking.confirmation\",\"rendered\":\"Release proof service\"},\"measures\":[]}],\"loyalty_applied\":null,\"policy_notices\":[],\"price_delta\":null,\"price_total\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":\"RUB\",\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"1500 RUB\",\"key\":\"booking.price\",\"label\":\"1500 RUB\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"unit\":\"RUB\",\"value\":1500},\"refund_preview\":null,\"staff_label\":{\"as_of\":null,\"evidence_refs\":[],\"fact_ref\":0,\"label\":\"cmuo9j8k00005kjc9cc9dqgjh\",\"next_intent_ref\":null,\"reason_code\":null,\"state\":\"KNOWN\",\"value\":\"cmuo9j8k00005kjc9cc9dqgjh\"},\"when\":{\"as_of\":null,\"basis\":\"Canonical booking owner\",\"basis_key\":null,\"comparison\":null,\"currency\":null,\"evidence_refs\":[],\"fact_ref\":0,\"formatted\":\"2026-10-01T09:00:00.000Z\",\"key\":\"booking.when\",\"label\":\"2026-10-01T09:00:00.000Z\",\"next_intent_ref\":null,\"reason_code\":null,\"s…",
+                    "reading_order": [
+                      {
+                        "k": "intent",
+                        "id": "i1"
+                      },
+                      {
+                        "k": "intent",
+                        "id": "i2"
+                      }
+                    ],
+                    "live_region": "off",
+                    "accessible_names": {
+                      "intent:i1": "Confirm booking",
+                      "intent:i2": "Dismiss"
+                    }
+                  },
+                  "fullscreen_detail": null
+                },
+                "render": {
+                  "contract": "maya.render.receipt/1",
+                  "profile_id": "pwa/1",
+                  "profile_version": 1,
+                  "render_tier": "RICH_INTERACTIVE",
+                  "intents_minted": 2,
+                  "intents_emitted": 2,
+                  "intents_withheld": [],
+                  "body_reductions": [],
+                  "text_equivalent_is_canonical": false,
+                  "escalation": null,
+                  "degraded_at": "2026-09-30T15:31:22.966Z"
+                },
+                "integrity": {
+                  "body_hash": "14adfa5e1f1bc8e395df6b772f6f40d473dc0f26b6ec0b307aeef7849433cece",
+                  "cell_index_digest": "1f7fa2d6948ef73437c6e810f3536c6dfa1ddaf176cb9b5dbb55dcc0704f65a9",
+                  "envelope_seal": "cdf146e42065a35cdc8a7fe334a35e9315adb1f02bc81fc48658101ce82a25fe",
+                  "seal_key_version": 1,
+                  "principal_proof_hash": "21f31efb87acc022e387754f731a25a9e87dd9015ff45fbe299860fed1db0867",
+                  "approval_echo": null,
+                  "policy_context_echo": null
+                }
+              },
+              "resolved_widget": null,
+              "receipt_outcome": "ACCEPTED"
+            }
+          }
+        },
+        {
+          "status": 200,
+          "request": {
+            "rawJsonSha256": "4e1604f31ee137716bb14e48815487b1a1d3b2a593c9100164728b35341f02a0",
+            "value": {
+              "contract": "maya.widget.intent.submission/1",
+              "widget_id": "4df072db-a932-48a3-8c05-072506d29f64",
+              "intent_token": "[redacted:sha256:ed7dcde8d9c05308247b66110cda15b04fcb88fa030104cbdd129bd8e15046e7]",
+              "inputs": null,
+              "client_nonce": "479a7336-2160-45d9-be3c-a289f4ba1995",
+              "profile_id": "pwa/1"
+            }
+          },
+          "response": {
+            "rawJsonSha256": "7ddb208bf7fba046af19fc7e7f4e2aed30655f1fd712fbe626ac9f238a98867d",
+            "value": {
+              "contract": "maya.widget.intent/1",
+              "outcome": "terminate",
+              "code": null,
+              "reason_text": null,
+              "stopped_at_gate": "13",
+              "gates_run": 14,
+              "gates_total": 15,
+              "next_envelope": null,
+              "resolved_widget": null,
+              "owner_decision": {
+                "state": "SUCCEEDED",
+                "outcomeCode": "provider_applied"
+              },
+              "receipt_outcome": "ACCEPTED"
+            }
+          },
+          "projection": {
+            "rawJsonSha256": "c94a08c7ccf809beefa1911948832f989b95d2e7b6b951a85f381600f47c3475",
+            "value": {
+              "outcome": "terminate",
+              "code": null,
+              "next_envelope": null,
+              "resolved_widget": null,
+              "receipt_outcome": "ACCEPTED"
+            }
+          }
+        },
+        {
+          "status": 200,
+          "request": {
+            "rawJsonSha256": "c05cec1309a361296f1bb453a06ec9f3d937dce7322b4c313e92737f109f3c09",
+            "value": {
+              "contract": "maya.widget.intent.submission/1",
+              "widget_id": "4df072db-a932-48a3-8c05-072506d29f64",
+              "intent_token": "[redacted:sha256:8dffb8b7277850b4c280a5990dfc00a15e2ca46bba0a576ef7c03a4aa4516d8f]",
+              "inputs": null,
+              "client_nonce": "4bef7dbf-ea54-49ca-91c4-645a3d224d2c",
+              "profile_id": "pwa/1"
+            }
+          },
+          "response": {
+            "rawJsonSha256": "09a78fd2d32bca169e308e407286d156dffb8bca3d5d670d6e3d080e0de00cde",
+            "value": {
+              "contract": "maya.widget.intent/1",
+              "outcome": "terminate",
+              "code": null,
+              "reason_text": null,
+              "stopped_at_gate": "13",
+              "gates_run": 14,
+              "gates_total": 15,
+              "next_envelope": null,
+              "resolved_widget": {
+                "control": "dismissed"
+              },
+              "owner_decision": null,
+              "receipt_outcome": "ACCEPTED"
+            }
+          },
+          "projection": {
+            "rawJsonSha256": "c94a08c7ccf809beefa1911948832f989b95d2e7b6b951a85f381600f47c3475",
+            "value": {
+              "outcome": "terminate",
+              "code": null,
+              "next_envelope": null,
+              "resolved_widget": null,
+              "receipt_outcome": "ACCEPTED"
+            }
+          }
+        }
+      ],
+      "durable": {
+        "appointments": [
+          {
+            "id": "appointment-action:056a6a1f-0a0d-40f9-8366-d02b0a4c7708",
+            "status": "confirmed"
+          }
+        ],
+        "executions": 1
+      }
+    }
+  ]
+}

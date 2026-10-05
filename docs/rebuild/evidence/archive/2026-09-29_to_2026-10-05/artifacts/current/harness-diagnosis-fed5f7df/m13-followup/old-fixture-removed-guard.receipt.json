@@ -1,0 +1,15 @@
+{
+  "name": "old-fixture-removed-guard",
+  "sourceCandidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "diagnosticOnly": true,
+  "isolatedProductMutation": "M13-U13C-11",
+  "exit": 0,
+  "expectedExit": 0,
+  "seconds": 1.404,
+  "passed": 11,
+  "failed": 0,
+  "failures": [],
+  "specSha256": "1966e300dc5a51bcf2d24ac3bc44448d7c10aeb4d59f84dab52ba66f1a0546c9",
+  "adapterSha256": "17009d624e08d911017506c7275d33d6845a0b7e375d747301b6ac0677d25269",
+  "reportSha256": "94c63a21a219f75948320d9e9ae8095dd948fe2442b0687ba06d3c8f799c7b86"
+}

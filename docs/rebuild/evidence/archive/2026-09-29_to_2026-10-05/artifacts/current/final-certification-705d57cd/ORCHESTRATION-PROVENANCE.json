@@ -1,0 +1,269 @@
+{
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "template": "work/final-certification-5230bd9e",
+  "priorResultsCopied": false,
+  "substitutions": [
+    [
+      "5230bd9e23903941b8f7c4b814c2a326d14a3cbf",
+      "705d57cd787e24d8944dbe764789e27fd9af3708"
+    ],
+    [
+      "final-certification-5230bd9e",
+      "final-certification-705d57cd"
+    ],
+    [
+      "final5230",
+      "final705d"
+    ],
+    [
+      "preflight5230",
+      "preflight705d"
+    ]
+  ],
+  "updates": [
+    "509 declarations, 506 applicable, 344 build-killed, backend 5603",
+    "diagnostic adds TURN: 26 parts"
+  ],
+  "files": [
+    {
+      "path": "watch-isolated-mutation-reports.py",
+      "templateSha256": "953fe134d56804a0db2614fde2a23d103e5003121080e2dbce8f1a1dfe030e4d",
+      "currentSha256": "308bfdb73295fdcaca070c97af29356f6cc80a59cda2ef0d491dfcba11f9cade"
+    },
+    {
+      "path": "monitor-preflight.py",
+      "templateSha256": "b010138962e881ac268a7e91bb95dbd01ab29aafeabcaee686b0fc97c359c2da",
+      "currentSha256": "fe8b5c898c64c48999d52f71790060ee9756debf85cc5a6a1e0523e965fcabfd"
+    },
+    {
+      "path": "prove-requested-baselines.py",
+      "templateSha256": "9db9e146f110a71e59299b606a90e423229c9270427e653a84f6485d4682d3b2",
+      "currentSha256": "1f75b477e1097ca5fd823041dbce86886a8ed07b3a40d984741010e7476dc737"
+    },
+    {
+      "path": "launch-native.py",
+      "templateSha256": "9a262a39b4f62d959f567567bde37343176549aecfc0af3b4ce4c30862356e17",
+      "currentSha256": "a73214c66ca43c04399bd82f2c6bae921c6aad3a0b76308630d1747a6d52d79e"
+    },
+    {
+      "path": "index-fresh-artifacts.py",
+      "templateSha256": "21d47f6068ac74ae55f8ccacb08bf0970038f96181ab5521b5331ec8d73e4b0c",
+      "currentSha256": "d6747964a044017a7a0e005b4766a27966f8668e80580abdd0af5d2094be364f"
+    },
+    {
+      "path": "run-net-bin.py",
+      "templateSha256": "28ec27a936feb267a1539f471912551ba037467c8ae493ca5e3631889cef7143",
+      "currentSha256": "bf7669e18909b615a02678d0b463a7c19a90b097e54c72d67d9591ab541f87c9"
+    },
+    {
+      "path": "run-l27-mutations.py",
+      "templateSha256": "6aa991bf30b8cdcef9322e3394be5b5814b57a41ff5068bd496e37ca3ff87d36",
+      "currentSha256": "b7672d550b093f8d94ba067cec2dde137191eb09ea50ce648c7280b2a4ad4d0e"
+    },
+    {
+      "path": "finalize-fbe2e.py",
+      "templateSha256": "ba642119e8cd8111953fde9205780dc9b286f7d5d390fb6e7457d8781761b8d6",
+      "currentSha256": "e5265d59e4cadbfbd924ca214080ca296cc713521a5564f15f9ccc9597ac807a"
+    },
+    {
+      "path": "check-ci-postconditions.py",
+      "templateSha256": "17ab3b39406c6074e52092a98fea3e416ff6b4f230d5db630ca7890fc13c6bfb",
+      "currentSha256": "629c08528e46bdc58c59db58327834df1cb79ab8127c3aec4204a90e346c8314"
+    },
+    {
+      "path": "launch-l27-after-ordinary.py",
+      "templateSha256": "97f281a5fb45576991a4ded58cf7ba86765cb2306c17605666b3dbdbeca2e6fb",
+      "currentSha256": "225a8ae871b3dfee1e3bd7d4c6916e0be2392df2fb7d2a8f10faa4a59a54444e"
+    },
+    {
+      "path": "run-all-mutations-isolated.py",
+      "templateSha256": "46fe67c21a6ddd6ab120beb7703c200c28e2496b245c0050c9d80bddcd2b5596",
+      "currentSha256": "31a7c99a1bdf34e2cfb140d7f597cd53b3a30b2e1864d8ce9cddb6818440e5fd"
+    },
+    {
+      "path": "run-net-proof.py",
+      "templateSha256": "85dcbf3a4ada330b2c0da888521a29b77e0e444a078ba4639a4770572778a78c",
+      "currentSha256": "baa85276af36a72039da9be184d127a2ba7b11f6f1a98d512749cb230eb2520c"
+    },
+    {
+      "path": "run-extra.py",
+      "templateSha256": "b606ef4f87b38e2e8a5e94d85a209fc8781640e8f6e35a95616d630da416d75b",
+      "currentSha256": "274a4e39657e9a98d4f1aaa7e296977054d76d3cf9989b6e313ac039abba6cd2"
+    },
+    {
+      "path": "index-integration-proofs.py",
+      "templateSha256": "903caaad2b900b2e04405d90668d9599da75be23be9e8a212a5c38a6fc33ea34",
+      "currentSha256": "33c533c11a126bacc64ef6b94e5f4f5b445797fc8d7fbe1c029c562813380b57"
+    },
+    {
+      "path": "preflight-l27.py",
+      "templateSha256": "a23af8076619543c56aa918ee6073afba7a41115eb8e3f508781519f51270b7a",
+      "currentSha256": "17a0e312d449b46108cc6bc8b044618539dd8213afeb1633bd6331d1b4467d38"
+    },
+    {
+      "path": "finalize-receipts.py",
+      "templateSha256": "d702d9c79ef275176bdbd706f61cc2022d1e1e4404f9b6e330bbaae4d3894254",
+      "currentSha256": "c88fd12ffb74f435220957b26c1a50a0ed87ef14f083bf54316c739a782e3f7d"
+    },
+    {
+      "path": "prepare-extra-dbs.py",
+      "templateSha256": "cbf67e069dce7a06ae9fdcc4434b82fcf7fbd9e28916be549ce198db0526d1f7",
+      "currentSha256": "f4b9cfc38fd5e0c8a8b4fc06112f053f00e4cce7d3f474cf128dcdec3a1fcc26"
+    },
+    {
+      "path": "snapshot-processes.py",
+      "templateSha256": "f7660924126be0b74eb6a50ea61d6ac4184562cac164f69937b3e92d6045b91f",
+      "currentSha256": "ac5e684c5c3e67ad38477457673d37ebf565d3758150d53fd848c96ed43ae090"
+    },
+    {
+      "path": "launch-diagnostic-preflight.py",
+      "templateSha256": "898f8321904dea46b9f37d071b1bbe147a6278c1ff7fafe6da4cfded13de2217",
+      "currentSha256": "db8468f7ecdd3616767391e086601390e90bd40fa84a0762a8bc651daccf7469"
+    },
+    {
+      "path": "assemble-complete.py",
+      "templateSha256": "c6ad4e53e76d1c357576f078b7c1c19276e53356033ae35cb6cf4c0e452ed503",
+      "currentSha256": "59a3b51d534c92f78743168bea7b66bf7e20a092c3d3017476850a369ef5d8d0"
+    },
+    {
+      "path": "run-after-surfaces.py",
+      "templateSha256": "bba4e9c2749bd34bd45e995bec59978f3f9290f5eb84e284de3a1a20afdcbf38",
+      "currentSha256": "3273efd011a9cb53f519a8789be2e7bfeb93dc5ffc706dc9202e63bf8dbed6ea"
+    },
+    {
+      "path": "run-compiled-receipt-bin.py",
+      "templateSha256": "1dd0a64dae67d676d5ab0506ffb6638aac7a9388b535e6f6f0dc34c5de2081ec",
+      "currentSha256": "5b573598fdb98210fa25584a876598b759ec65ee5fbab963a05916d10fe5418c"
+    },
+    {
+      "path": "run-anchor-preflight.py",
+      "templateSha256": "338bad34338b38e793fc5281c08aabcc0f1e89a4d51069d23800c24b608adcea",
+      "currentSha256": "2c88e0da997814b1b26c09f46e7bebead5201f8806ca9b3d0bf600b2065452f5"
+    },
+    {
+      "path": "run-postcommit-bin.py",
+      "templateSha256": "23ef5565a48db97780f98d76bfda99caf586e39610fad1feb8bffbe4f6af8c0c",
+      "currentSha256": "1d4b11609f274429628f1b64ff05a14b7340d7bf85e6512f59f3aa19428a75e1"
+    },
+    {
+      "path": "run-parity.py",
+      "templateSha256": "906cd6652f0783ddc58209c1e45b2228d3af5a63dbdae4e413cef45ae4e5e4ef",
+      "currentSha256": "18af3f7aa714f32bf090d18da0c39e5dfe0fbd32c6c1dd8baccf3a650fda2f61"
+    },
+    {
+      "path": "run-net-turn-proof.py",
+      "templateSha256": "f783be1b678d68d561c4b0869322881a41d03d60d70e4cb6b2a23e053fdab89e",
+      "currentSha256": "96093d4f7bcbb8ce526b939bc6fa00558dde52a954a9f4462139806b6145969e"
+    },
+    {
+      "path": "run-baseline.py",
+      "templateSha256": "8219de5f3476cb232313ab5a900b00e23e7dec0788f3b0c97c251d4e05be4d0f",
+      "currentSha256": "032c454d8eb584adb5ba35f65a6d3d81e2209efa02b068f51090fdd7e2f59db2"
+    },
+    {
+      "path": "run-rest.py",
+      "templateSha256": "51869e89fe3b180975c381aa40fc26f3f31519fe3bc77d1be6ab35290adf11d2",
+      "currentSha256": "f38f18924ff9061b9cd833d1ed25d143f6b3c447abc33e5c6d27ac5288443fca"
+    },
+    {
+      "path": "run-carrier-selftest.py",
+      "templateSha256": "c003ac6a70303aa27d6847c025c1b452f4b7275a0ee3cf1639125beebd3a96f6",
+      "currentSha256": "c369338376e5b456c785f05f88b645b98cb647da8a9e8ae4cac12e65afe51e63"
+    },
+    {
+      "path": "run-compiled-bin.py",
+      "templateSha256": "707925ba7b38e0a42b54e6bc054c44ab6f2afe0692827111ed0f3cdf667ef237",
+      "currentSha256": "d5f15dd53b2d5673d0e43bc8607a4fe003a747ee43bc911bf7b04212e0a92cfe"
+    },
+    {
+      "path": "status.py",
+      "templateSha256": "1e9f63299d0bf10fce7a91d51be0cdaba04b326280624b73673f6266c042631f",
+      "currentSha256": "11444e4a756e6cd2cdbeb2c3a9efa6249b4196386a452c332cba17918ab6a606"
+    },
+    {
+      "path": "prove-l12-delta.cjs",
+      "templateSha256": "d859cff1275734f8ea0104d8300c3aebec2865c52389abac1da120ebf4e6ca5a",
+      "currentSha256": "b2ee03d0a9a104d91b730000b306240f008a02821a0d26294c8379db46a3df7f"
+    },
+    {
+      "path": "jest-net-return.json",
+      "templateSha256": "6f9b055436ae3c821e9c03dbaa44365567ceec2fc6768dd21fad71140448b281",
+      "currentSha256": "f650191e51e3ac040ebaddb5e31b1aab1a11bdf47ea20b3c38498650891ed4f5"
+    },
+    {
+      "path": "jest-net-turn.json",
+      "templateSha256": "e6431260db55a513f281f091c5658cd2c7c334bdd6aaa092fd6ba7c998679462",
+      "currentSha256": "3aeddd7ef36b12b4f29aba69dc7bf4cb15a57e4c86177eb58aa8dd54454ffcc6"
+    },
+    {
+      "path": "jest-return.json",
+      "templateSha256": "998fff9cb89beeaee652398493eb1b727b92455d8f89078100c070c90310e8d4",
+      "currentSha256": "394d2ebfec879af55bac4e3e542c8716869ef3f7f10b4208c4d14e38bfeddd26"
+    },
+    {
+      "path": "probes/source-net-turn.mjs",
+      "templateSha256": "765485845cda61c2f55aaf73be0519270c1b5a991ee7dccbc6b3c92c5adc50d0",
+      "currentSha256": "765485845cda61c2f55aaf73be0519270c1b5a991ee7dccbc6b3c92c5adc50d0"
+    },
+    {
+      "path": "probes/source-net-return.mjs",
+      "templateSha256": "369b3f1a1ae5dee0d3699e218ac86aca03f99bf0470f1870df20561e0bcfcf23",
+      "currentSha256": "369b3f1a1ae5dee0d3699e218ac86aca03f99bf0470f1870df20561e0bcfcf23"
+    },
+    {
+      "path": "probes/compiled-postcommit-dismiss.mjs",
+      "templateSha256": "b17dae22400e024cb96af4cfd0f89a4cce1c5060e5da12ff87e96c5c8937940b",
+      "currentSha256": "b17dae22400e024cb96af4cfd0f89a4cce1c5060e5da12ff87e96c5c8937940b"
+    },
+    {
+      "path": "probes/source-return.probe-spec.ts",
+      "templateSha256": "d34303759a4792ddd092fcb12cd6d51a4a2c98d027e70e9f4144a7e52a302337",
+      "currentSha256": "590d70e89ff4b78bc0e36e0d3636d2f0f38e944dcf6b9fa15c0f5c5ee3dac846"
+    },
+    {
+      "path": "probes/source-net-turn.probe-spec.ts",
+      "templateSha256": "a030384d1d963208d640429736129faddff3f02a546a1cdc9d188a9798df5856",
+      "currentSha256": "4dcfbd9d4c3bfd37735cbd1eff7fe4c8b804c7ec42507cd378fed721c37eb314"
+    },
+    {
+      "path": "probes/source-return.mjs",
+      "templateSha256": "e4cc3f892b873ece152f63072e03b2a539e1b8b631db1361bc4bdc07d1fb11f2",
+      "currentSha256": "e4cc3f892b873ece152f63072e03b2a539e1b8b631db1361bc4bdc07d1fb11f2"
+    },
+    {
+      "path": "probes/compiled-net-return.mjs",
+      "templateSha256": "cc7b61be0964ee7a9542bcd9ae48b671c876df1e26443187969172638366c54e",
+      "currentSha256": "cc7b61be0964ee7a9542bcd9ae48b671c876df1e26443187969172638366c54e"
+    },
+    {
+      "path": "probes/compiled-net-receipt.mjs",
+      "templateSha256": "34add2526b3328992f80f83c3f20e7c9eb7a98d1bc9348bfffb37f592c8950d0",
+      "currentSha256": "34add2526b3328992f80f83c3f20e7c9eb7a98d1bc9348bfffb37f592c8950d0"
+    },
+    {
+      "path": "probes/source-net-return.probe-spec.ts",
+      "templateSha256": "874745f16efbc329f72cc6355b74218b4e67374b529dd8367047e1fbcdb9c569",
+      "currentSha256": "9ab39e5f623ef5498e0b0c0497185c85d5a56c7c5a7841151a2e111182f30ff1"
+    },
+    {
+      "path": "bin-cases/gateNETBIN.cases.ts",
+      "templateSha256": "32d59ad9d9f3666c10f32b2a3817ed153965796f68e0342fc14aafbea54264a9",
+      "currentSha256": "dff60483600e97488d283e0516a8aa9032440fafcce622e2c6a1e441153edef9"
+    },
+    {
+      "path": "compiled-bin-cases/gateCOMPILEDBIN.cases.ts",
+      "templateSha256": "c20f39f16f0874b4fcace13dd6d0200f53af7a9f25a96b5c0ad744ea621dbfee",
+      "currentSha256": "1333e731ecf0f57feba31f4ab66cd617cb29558dbfdcd5e0dd1f8879cd2a236f"
+    },
+    {
+      "path": "compiled-receipt-bin-cases/gateRECEIPTBIN.cases.ts",
+      "templateSha256": "84a8a02d534f486d4bc1636c34c0d1914dea227749d23222eec43bd1a100f7aa",
+      "currentSha256": "47a4d4069130455de585ce0f9861a666bb17d822b00e48e2c8f11b4636d8460c"
+    },
+    {
+      "path": "postcommit-bin-cases/gateL27.cases.ts",
+      "templateSha256": "01321d5d1e440058c183f56d61a97c43e156654d00534d0d96f3d412e4fddfb4",
+      "currentSha256": "63b8bed7f39565939467a773f6e42be9144f15f5903533faa7e8800ccde0d3aa"
+    }
+  ]
+}

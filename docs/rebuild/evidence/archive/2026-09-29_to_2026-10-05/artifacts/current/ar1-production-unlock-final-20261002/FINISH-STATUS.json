@@ -1,0 +1,45 @@
+{
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "updatedAt": "2026-10-03T06:11:21.426586+00:00",
+  "steps": [
+    {
+      "step": "assemble-complete.py",
+      "exit": 0,
+      "receipt": "COMPLETE-MUTATIONS.json; already completed by the current full native programme"
+    },
+    {
+      "step": "index-final-proofs.py",
+      "exit": 0
+    },
+    {
+      "step": "finalize-fbe2e.py",
+      "exit": 0
+    },
+    {
+      "step": "index-fresh-artifacts.py",
+      "exit": 0
+    },
+    {
+      "step": "check-final-artifact-stability.py",
+      "exit": 0
+    },
+    {
+      "step": "check-host-environment.py",
+      "exit": 0
+    },
+    {
+      "step": "index-final-orchestration-sources.py",
+      "exit": 0
+    },
+    {
+      "step": "check-final-process-lifecycle.py",
+      "exit": 0
+    },
+    {
+      "step": "finalize-receipts.py",
+      "exit": 0
+    }
+  ],
+  "status": "PASS",
+  "reportingRepair": "FINAL-REPORT-PATH-REPAIR.json"
+}

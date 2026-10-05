@@ -1,0 +1,150 @@
+{
+  "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "createdAt": "2026-09-30T15:01:51.676659+00:00",
+  "integration": "Exact fast-forward from 98716cd5; commit provenance preserved",
+  "candidateClean": true,
+  "additionalCandidateEdits": 0,
+  "backendFilesTouched": 0,
+  "profile": "closed-input.no-handoff@1",
+  "profileApplicableFalse": 0,
+  "globalFalse": 2,
+  "matrixQualification": "Source/evidence disposition, not completed certification. Full165 contract remains unchanged.",
+  "globalStops": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "checks": {
+    "backend": {
+      "status": "PASS",
+      "suites": 587,
+      "passed": 5598,
+      "failed": 0
+    },
+    "runtimeNode22": {
+      "status": "PASS_WITH_DISCLOSED_SKIPS",
+      "passed": 422,
+      "skipped": 7,
+      "failed": 0
+    },
+    "runtimeNode24": {
+      "status": "PASS_WITH_DISCLOSED_SKIPS",
+      "passed": 422,
+      "skipped": 7,
+      "failed": 0
+    },
+    "carrier": {
+      "status": "PASS",
+      "passed": 93,
+      "failed": 0
+    },
+    "widgetsLiveMain": {
+      "status": "PASS",
+      "suites": 36,
+      "passed": 405,
+      "failed": 0
+    },
+    "python": {
+      "status": "PASS",
+      "passed": 613
+    },
+    "httpBin": {
+      "status": "PASS",
+      "passed": 21
+    },
+    "releaseBinary": {
+      "status": "PASS",
+      "passed": 2
+    },
+    "NS1": {
+      "status": "PASS",
+      "roundtrip": "16/16"
+    },
+    "L27": {
+      "status": "PASS",
+      "probe": "17/17",
+      "exactFormerFailingFBE2E": "PASS",
+      "visibleTerminalOutcomes": 1
+    },
+    "9.6": {
+      "status": "PASS",
+      "proof": "receipts/canonical-net-turn-observations.json",
+      "mirrorWriter": false
+    },
+    "BS1": {
+      "status": "PASS",
+      "proof": "receipts/compiled-net-bin-observations.json"
+    },
+    "successorVerification": {
+      "status": "PASS in main full live suite",
+      "requiredProofs": "12/12",
+      "additionalV2Proofs": 7,
+      "limit": "Its SV2-HTTP test also timed out in the native AR control; full certification is withheld."
+    },
+    "profileRevocationExpiryOldTokenSubstitution": {
+      "status": "PASS in main suites",
+      "fullMutationCertification": false
+    },
+    "pwaCapacitorParity": {
+      "status": "PASS",
+      "proof": "ARTIFACT-HASH-PARITY.json",
+      "deviceInstall": false
+    }
+  },
+  "mutations": {
+    "status": "INCOMPLETE / BLOCKED",
+    "declared": 502,
+    "batteries": 44,
+    "plannedNativeParts": 65,
+    "completedNativeParts": 1,
+    "completedNativePart": "NS",
+    "completedDeclaredMutants": 5,
+    "additionalRuntimeL27Killed": 8,
+    "note": "Other native parts are interrupted or not run. No partial result substitutes for the complete corpus.",
+    "pendingHandoffDeclarations": [
+      "gate6.json#M17b",
+      "gate6.json#M18b"
+    ],
+    "assembledCompleteReceipt": false
+  },
+  "ciEquivalent": "NOT CERTIFIED: complete native mutation gate blocked",
+  "fbe2e": {
+    "status": "PARTIAL / NOT CERTIFIED",
+    "executedIntegrationProbes": "PASS",
+    "limitationDisposition": {
+      "CLOSED": 19,
+      "PARTIAL": 5,
+      "OPEN": 4
+    },
+    "remaining": {
+      "L2": "Local contract checks PASS; no fresh remote CI run or new advisory-policy acceptance.",
+      "L5": "Fixed tomorrow window remains tied to unresolved date/window policy, together with L24.",
+      "L12": "Type-only/runtime port mutation coverage remains a disclosed boundary; no historical mutation receipt is admitted for this candidate.",
+      "L16": "Remote shard timing/headroom unproved; local complete mutation programme also interrupted.",
+      "L20": "A supplied UNKNOWN verdict does not prove an actual Action Engine uncertainty/fault-produced UNKNOWN.",
+      "L23": "Narrowed network structural ratchet remains a presentation dependency; successful network probes do not replace that ratchet.",
+      "L24": "Canonical date/window/timezone policy owner remains unsettled; no new tenant policy invented.",
+      "L25": "Tap-as-delivery/render lifecycle ruling remains open.",
+      "L26": "Historical audit-builder baseline admission ruling remains open; current strict consumer does not retroactively approve old controls."
+    }
+  },
+  "certifiedForProfile": false,
+  "fullContractCertified": false,
+  "readyForReleaseAuthorization": false,
+  "exactRemainingBlockers": [
+    "Repeated red unmutated native AR live controls (SV2-HTTP timeout; F88-1 timeout/F88-2 socket hang up); underlying cause unresolved.",
+    "Complete 502-declaration native programme and aggregate not completed; complete CI-equivalent/profile certification cannot be issued.",
+    "Retained FBE2E boundaries L2/L5/L12/L16/L20/L23/L24/L25/L26 have not been waived or newly owner-accepted."
+  ],
+  "effects": {
+    "productionMigration": 0,
+    "productionDeploy": 0,
+    "productionGrant": 0,
+    "realOTP": 0,
+    "realYclients": 0,
+    "iphoneReinstall": 0,
+    "chapter10": 0
+  },
+  "allCertificationProcessesStopped": true
+}

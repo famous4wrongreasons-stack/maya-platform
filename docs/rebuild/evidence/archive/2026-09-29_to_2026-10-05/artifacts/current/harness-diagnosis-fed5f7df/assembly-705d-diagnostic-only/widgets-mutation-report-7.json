@@ -1,0 +1,1937 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gate7.json": "4ed81b91500a718c48e77f706504c80e14da215e56d8f83a10ce9a659cfff714"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T21:39:10.394Z",
+  "batteries": [
+    "gate7.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-7b5c77e086",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-7b5c77e086",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "7-part-1-of-4:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "7-part-1-of-4:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "7-part-2-of-4:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "7-part-2-of-4:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "7-part-3-of-4:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "7-part-3-of-4:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "7-part-4-of-4:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "7-part-4-of-4:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gate7.json",
+      "id": "M7-18",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T7-C7",
+        "T7-C1",
+        "T7-C2",
+        "T7-C7-ALLOWLIST",
+        "T7-C7-ESC-P1"
+      ],
+      "kills": [
+        {
+          "killer": "T7-C7",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7 [GW]: a `NONE` record whose envelope was minted for `web-push` is refused at slot 7 — `NONE` is carried by `RICH_INTERACTIVE` alone (R3.2.3), and before U7a this passed",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T7-C1",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C1 [GW]: an effect outside the kind’s cell is refused — `DRAFT` on `METRIC`, whose cell is `NONE, NAVIGATE, REFINE, CONTROL`",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T7-C2",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C2 [GW]: a `REFINE` that names no capability is refused — F69 gives REFINE a `C9` ref, and \"names nothing\" is not one of its cells",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T7-C7-ALLOWLIST",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7-ALLOWLIST [GW]: `ANONYMOUS_CHAT` carries `REFINE` and `HANDOFF`; a `NAVIGATE` on `guest-chat` is refused, although every richer tier carries it — the cell is an ALLOWLIST, not an ordered ceiling (CH1)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T7-C7-ESC-P1",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7-ESC-P1 [GW]: the F60 escape is ONE intent — `control.widget.dismiss` at priority 0. The same key at priority 1 is refused on `web-push`",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 5
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-3",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T7-C7",
+        "T7-C7-TIER",
+        "T7-C7-CARRIER",
+        "T7-C7-ALLOWLIST"
+      ],
+      "kills": [
+        {
+          "killer": "T7-C7",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7 [GW]: a `NONE` record whose envelope was minted for `web-push` is refused at slot 7 — `NONE` is carried by `RICH_INTERACTIVE` alone (R3.2.3), and before U7a this passed",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T7-C7-TIER",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7-TIER [GW]: the same clause over three more tiers — `sms` (TEXT_ONLY), `guest-chat` (ANONYMOUS_CHAT) and `web-public` (PUBLIC_READ) each refuse a `NONE`",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T7-C7-CARRIER",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7-CARRIER [GW]: the refusal is keyed on the EMISSION’s minted channel, not on the submitting carrier — the route hard-codes `carrier: pwa` and `web-push` still refuses",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T7-C7-ALLOWLIST",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7-ALLOWLIST [GW]: `ANONYMOUS_CHAT` carries `REFINE` and `HANDOFF`; a `NAVIGATE` on `guest-chat` is refused, although every richer tier carries it — the cell is an ALLOWLIST, not an ordered ceiling (CH1)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 4
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-4",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T7-C2"
+      ],
+      "kills": [
+        {
+          "killer": "T7-C2",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C2 [GW]: a `REFINE` that names no capability is refused — F69 gives REFINE a `C9` ref, and \"names nothing\" is not one of its cells",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-14",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T7-C7",
+        "T7-C7-CARRIER",
+        "T7-C7-TIER",
+        "T7-C7-ALLOWLIST"
+      ],
+      "kills": [
+        {
+          "killer": "T7-C7",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7 [GW]: a `NONE` record whose envelope was minted for `web-push` is refused at slot 7 — `NONE` is carried by `RICH_INTERACTIVE` alone (R3.2.3), and before U7a this passed",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T7-C7-CARRIER",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7-CARRIER [GW]: the refusal is keyed on the EMISSION’s minted channel, not on the submitting carrier — the route hard-codes `carrier: pwa` and `web-push` still refuses",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T7-C7-TIER",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7-TIER [GW]: the same clause over three more tiers — `sms` (TEXT_ONLY), `guest-chat` (ANONYMOUS_CHAT) and `web-public` (PUBLIC_READ) each refuse a `NONE`",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T7-C7-ALLOWLIST",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7-ALLOWLIST [GW]: `ANONYMOUS_CHAT` carries `REFINE` and `HANDOFF`; a `NAVIGATE` on `guest-chat` is refused, although every richer tier carries it — the cell is an ALLOWLIST, not an ordered ceiling (CH1)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 4
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-33",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T7-POS-ESCAPE"
+      ],
+      "kills": [
+        {
+          "killer": "T7-POS-ESCAPE",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-POS-ESCAPE [GW]: the one F60 escape passes on `web-push` — CH1 admits it on every tier whose cell does not reach CONTROL, `ANNOUNCEMENT` included (AMB-11 reverses G7’s A1 interim)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-37",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T7-C7-ESC-P1"
+      ],
+      "kills": [
+        {
+          "killer": "T7-C7-ESC-P1",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7-ESC-P1 [GW]: the F60 escape is ONE intent — `control.widget.dismiss` at priority 0. The same key at priority 1 is refused on `web-push`",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-31",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T7-C7-ALLOWLIST"
+      ],
+      "kills": [
+        {
+          "killer": "T7-C7-ALLOWLIST",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7-ALLOWLIST [GW]: `ANONYMOUS_CHAT` carries `REFINE` and `HANDOFF`; a `NAVIGATE` on `guest-chat` is refused, although every richer tier carries it — the cell is an ALLOWLIST, not an ordered ceiling (CH1)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-38",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T7-C7",
+        "T7-C7-TIER"
+      ],
+      "kills": [
+        {
+          "killer": "T7-C7",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7 [GW]: a `NONE` record whose envelope was minted for `web-push` is refused at slot 7 — `NONE` is carried by `RICH_INTERACTIVE` alone (R3.2.3), and before U7a this passed",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T7-C7-TIER",
+          "test": "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7-TIER [GW]: the same clause over three more tiers — `sms` (TEXT_ONLY), `guest-chat` (ANONYMOUS_CHAT) and `web-public` (PUBLIC_READ) each refuse a `NONE`",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 2
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-1",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N1a",
+        "G7-N1b",
+        "G7-N1c",
+        "G7-N1d"
+      ],
+      "kills": [
+        {
+          "killer": "G7-N1a",
+          "test": "C1 — `effect` is within the kind’s declared ceiling, over `IntentRecord.widget_kind` G7-N1a: a DRAFT on METRIC — the cell is the fence, and METRIC’s does not list DRAFT",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "G7-N1b",
+          "test": "C1 — `effect` is within the kind’s declared ceiling, over `IntentRecord.widget_kind` G7-N1b: a REFINE on APPROVAL — MEMBERSHIP, not an ordered rank. APPROVAL’s cell is `NONE, NAVIGATE, CONTROL, COMMIT, HANDOFF`, so an ordered comparison would admit this and the contract does not",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "G7-N1c",
+          "test": "C1 — `effect` is within the kind’s declared ceiling, over `IntentRecord.widget_kind` G7-N1c: a HANDOFF on METRIC — METRIC’s cell has no HANDOFF, and HANDOFF is off-order",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "G7-N1d",
+          "test": "C1 — `effect` is within the kind’s declared ceiling, over `IntentRecord.widget_kind` G7-N1d: a COMMIT on METRIC — K11’s four COMMIT-bearing kinds do not include it",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 4
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-2",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N1b"
+      ],
+      "kills": [
+        {
+          "killer": "G7-N1b",
+          "test": "C1 — `effect` is within the kind’s declared ceiling, over `IntentRecord.widget_kind` G7-N1b: a REFINE on APPROVAL — MEMBERSHIP, not an ordered rank. APPROVAL’s cell is `NONE, NAVIGATE, CONTROL, COMMIT, HANDOFF`, so an ordered comparison would admit this and the contract does not",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-5",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-P5"
+      ],
+      "kills": [
+        {
+          "killer": "G7-P5",
+          "test": "C2 and C3 — the key space matches the effect (R3.2.2, F69), and the key resolves G7-P5/P6/P7/P8: each effect passes with the member and space F69 gives it",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-6",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N3a"
+      ],
+      "kills": [
+        {
+          "killer": "G7-N3a",
+          "test": "C2 and C3 — the key space matches the effect (R3.2.2, F69), and the key resolves G7-N3a: an unregistered CONTROL key — F27 closes the space at three keys, and Gate 7 is the fence",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-16",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N7e"
+      ],
+      "kills": [
+        {
+          "killer": "G7-N7e",
+          "test": "C7 — the delivering tier was permitted to carry this effect (§3.12, CH1/CH2) G7-N7e: a channel outside `ChannelId`, and one that is a property of `Object.prototype`, admit nothing",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-7",
+      "files": [
+        "src/widgets/authority/commit-guard.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N5a",
+        "G7-N5f",
+        "G7-N5h",
+        "G7-FC2"
+      ],
+      "kills": [
+        {
+          "killer": "G7-N5a",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-N5a/N5b/N5c/N5e/N5g: C5a — the producing record must be named, resolve in this tenant, be CONSUMED, and be of the effect class F74 fixes",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "G7-N5f",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-N5f: the loader is tenant-scoped IN THE QUERY — a record that exists only in another tenant simply does not resolve",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "G7-N5h",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-N5h: C5b — the producing record’s C9 key must be the `propose` side of the COMMIT’s own pairing row, not merely some booking propose key",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "G7-FC2",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-FC2 / G7-P-C11-RESCHEDULE: a consumed canonical reschedule proposal and matching subject pass",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 4
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-9",
+      "files": [
+        "src/widgets/authority/commit-guard.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N5a"
+      ],
+      "kills": [
+        {
+          "killer": "G7-N5a",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-N5a/N5b/N5c/N5e/N5g: C5a — the producing record must be named, resolve in this tenant, be CONSUMED, and be of the effect class F74 fixes",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-10",
+      "files": [
+        "src/widgets/authority/commit-guard.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "S-G7-PAIR",
+        "G7-FC2"
+      ],
+      "kills": [
+        {
+          "killer": "S-G7-PAIR",
+          "test": "S-G7-PAIR [BUILD] — the pairing is `AE_PROPOSE_PAIRING`, never the allowlist’s `propose` column S-G7-PAIR: neither Gate 7 nor the commit guard names `proposeKey`",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "G7-FC2",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-FC2 / G7-P-C11-RESCHEDULE: a consumed canonical reschedule proposal and matching subject pass",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-11",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N6a"
+      ],
+      "kills": [
+        {
+          "killer": "G7-N6a",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-N6a/N6b/N6c: C6 compares the LIVE allowlist row’s kind with `widget_kind` — the same key on three other COMMIT-bearing kinds refuses",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-12",
+      "files": [
+        "src/widgets/authority/commit-guard.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N6d"
+      ],
+      "kills": [
+        {
+          "killer": "G7-N6d",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-N6d: C6 reads the table in the RUNNING process, not the state the record was minted under (fixture-only)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-13",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N6e"
+      ],
+      "kills": [
+        {
+          "killer": "G7-N6e",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-N6e: a key whose row was WITHDRAWN resolves to no confirmation kind at all — F72 has no default branch (fixture-only)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-17",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T7-UNWIRED"
+      ],
+      "kills": [
+        {
+          "killer": "T7-UNWIRED",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b T7-UNWIRED: the INTERIM default loader is fail-closed: with no loader wired, a non-draft COMMIT refuses at C5a rather than passing",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-20",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "S-G7-I18",
+        "S-G7-I21"
+      ],
+      "kills": [
+        {
+          "killer": "S-G7-I18",
+          "test": "S-G7-I18 / I21 [BUILD] — no client value and no role is an antecedent S-G7-I18: slot 7’s gate file reads none of `submission`, `carrier`, `principal`, `facts`",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "S-G7-I21",
+          "test": "S-G7-I18 / I21 [BUILD] — no client value and no role is an antecedent S-G7-I21: no file of Gate 7’s closure reads a property named `role`, `presentationMode`, `profileId` or `a11yEnv`",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-21",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-FC4"
+      ],
+      "kills": [
+        {
+          "killer": "G7-FC4",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-FC4: C9b — `PAYMENT_HANDOFF` is gap-blocked, and the block is READ from K20’s derived `emittable`, not hard-coded (fixture-only)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-22",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N-C11-NULL",
+        "G7-N-C11-MISMATCH"
+      ],
+      "kills": [
+        {
+          "killer": "G7-N-C11-NULL",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-N-C11-NULL: a missing stored confirmation subject refuses",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "G7-N-C11-MISMATCH",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-N-C11-MISMATCH: a subject from another canonical booking row refuses",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-23",
+      "files": [
+        "src/widgets/authority/commit-guard.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-FC3"
+      ],
+      "kills": [
+        {
+          "killer": "G7-FC3",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-FC3: the same APPROVAL case with the producing REQUEST_APPROVAL on the COMMIT’s own AE key passes Gate 7 — the identity is evaluated, not a blanket refusal (fixture-only)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-24",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N9a"
+      ],
+      "kills": [
+        {
+          "killer": "G7-N9a",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-N9a: C9a refuses a MONEY capability — FR-6d’s fence is that no money-mutating key is actuatable from a widget at all (fixture-only)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-25",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N9b"
+      ],
+      "kills": [
+        {
+          "killer": "G7-N9b",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-N9b: C9a is FR-6d’s predicate, not F31’s VETO — the same MONEY key refuses on `PAYMENT_HANDOFF`, which F31 admits (F82 routes this very key there), so an F31-shaped C9a would pass it down to C9b (fixture-only)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-26",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N8a"
+      ],
+      "kills": [
+        {
+          "killer": "G7-N8a",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-N8a: C8a — a BOOKING capability whose row is not `BOOKING_CONFIRMATION` refuses even when C6 agrees with the record (fixture-only)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-27",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "S-G7-F15"
+      ],
+      "kills": [
+        {
+          "killer": "S-G7-F15",
+          "test": "S-G7-F15 [BUILD] — Gate 7 reaches no class-C column (I20, F15 C11:216-235) S-G7-F15: no file of Gate 7’s closure names one",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-35",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "S-G7-F15"
+      ],
+      "kills": [
+        {
+          "killer": "S-G7-F15",
+          "test": "S-G7-F15 [BUILD] — Gate 7 reaches no class-C column (I20, F15 C11:216-235) S-G7-F15: no file of Gate 7’s closure names one",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-36",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "R353-READERS"
+      ],
+      "kills": [
+        {
+          "killer": "R353-READERS",
+          "test": "R353-READERS [BUILD] — handoff_capability_ref has a closed reader set (R3.5.3, AMB-09) R353-READERS: every direct member access to the field stands in an allowlisted reader",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-28",
+      "files": [
+        "src/widgets/booking/booking-commit.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "S-G7-F72-K7"
+      ],
+      "kills": [
+        {
+          "killer": "S-G7-F72-K7",
+          "test": "S-G7-F72 [BUILD] — one statement of F72, and one comparison of it S-G7-F72-K7: K7’s guard CALLS the one owner for each of F72 and F74, and keeps no comparison of its own",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-29",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "S-G7-VOCAB",
+        "S-G7-VOCAB-NEVER"
+      ],
+      "kills": [
+        {
+          "killer": "S-G7-VOCAB",
+          "test": "S-G7-VOCAB [BUILD] — every Gate 7 refusal is one of row 7’s two codes S-G7-VOCAB: `refuse` is called with `effect_not_admissible` or `booking_confirmation_required`, and with nothing else",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "S-G7-VOCAB-NEVER",
+          "test": "S-G7-VOCAB [BUILD] — every Gate 7 refusal is one of row 7’s two codes S-G7-VOCAB-NEVER: there is no cast to the bottom type anywhere in Gate 7’s closure",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-30",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "S-G7-TIER"
+      ],
+      "kills": [
+        {
+          "killer": "S-G7-TIER",
+          "test": "S-G7-TIER [BUILD] — the tier table is K6’s, and Gate 7 states none of it S-G7-TIER: Gate 7’s own code names no channel id and no tier",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-32",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "S-G7-F27-ONE"
+      ],
+      "kills": [
+        {
+          "killer": "S-G7-F27-ONE",
+          "test": "S-G7-F27 [BUILD] — one space-membership function, and its CONTROL arm is the generated table S-G7-F27-ONE: Gate 7 uses that one function rather than a membership set of its own",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-8",
+      "files": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T7-PRODUCING-SCOPE"
+      ],
+      "kills": [
+        {
+          "killer": "T7-PRODUCING-SCOPE",
+          "test": "S-ROW and D-3 — the record gates read is AUDIT_RETAINED, and confirmation is projected T7-PRODUCING-SCOPE: slot 7’s producing-record read selects C5a’s four AUDIT_RETAINED columns and is tenant-scoped IN THE QUERY",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-INV30",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T-SRC-INV30-b"
+      ],
+      "kills": [
+        {
+          "killer": "T-SRC-INV30-b",
+          "test": "T-SRC-INV30 — no gate antecedent names a claimed render profile, a locale hint or a header T-SRC-INV30-b no reachable runtime module names one of the five spellings",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-39",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-C8b"
+      ],
+      "kills": [
+        {
+          "killer": "G7-C8b",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-C8b: a BOOKING key that is the `ae` side of NO single pairing row refuses at C8b (fixture-only pairing)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-40",
+      "files": [
+        "src/widgets/gates/gate7.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N6g",
+        "G7-N6g-2"
+      ],
+      "kills": [
+        {
+          "killer": "G7-N6g",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-N6g: F80 — the same COMMIT whose pairing’s propose key is `personal_data` refuses at C6a (fixture-only)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "G7-N6g-2",
+          "test": "the COMMIT branch — C9a → C6 → C8a → C4 → C5a → C5b → C8b → C6a → C11 → C9b G7-N6g-2: a `SETTINGS_DRAFT` COMMIT with no single pairing row refuses at C6a too — the propose key is what F80 reads (fixture-only)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T22:50:33.680Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 4,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

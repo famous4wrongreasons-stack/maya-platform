@@ -1,0 +1,11 @@
+{
+  "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "name": "k5-exit",
+  "command": [
+    "bash",
+    "docs/rebuild/evidence/maya-chat-first-ux/k5-exit-gate.sh"
+  ],
+  "cwd": ".",
+  "exit": 0,
+  "seconds": 26.8
+}

@@ -1,0 +1,1456 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "status": "PASS",
+  "battery": {
+    "gate": "H-harness",
+    "declarations": 26,
+    "receipt": {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-H-harness.json",
+      "sha256": "2c3d987581e53bd58eda4f80b60eaa4553e6b830ccbef8ef728fca6a1b144c46"
+    },
+    "mutants": [
+      {
+        "battery": "gateH-harness.json",
+        "id": "H-LOOPBACK-1",
+        "files": [
+          "test/widgets-live/support/http-bootstrap.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-LOOPBACK"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-LOOPBACK",
+            "test": "HTTP harness listener ownership HAR-LOOPBACK owns one ready IPv4 listener across requests and closes it at teardown",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "H-R02-LOOPBACK-1",
+        "files": [
+          "src/auth/legacy-staff-principal.http.spec.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "R02-LOOPBACK"
+        ],
+        "kills": [
+          {
+            "killer": "R02-LOOPBACK",
+            "test": "R02 canonical principal through actual Nest JWT/tenant/role guards R02-LOOPBACK owns one ready IPv4 listener across requests",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "H-ADMIN-LOOPBACK-1",
+        "files": [
+          "src/admin/admin.controller.spec.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "accepts a logo in the multipart field"
+        ],
+        "kills": [
+          {
+            "killer": "accepts a logo in the multipart field",
+            "test": "AdminController logo upload accepts a logo in the multipart field \"file\"",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "accepts a logo in the multipart field",
+            "test": "AdminController logo upload accepts a logo in the multipart field \"logo\"",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 2
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "H-BOOT-LOOPBACK-1",
+        "files": [
+          "src/bootstrap/configure-http-app.spec.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "a route is served under /api, and not without it"
+        ],
+        "kills": [
+          {
+            "killer": "a route is served under /api, and not without it",
+            "test": "configureHttpApp — the parsers, the api prefix and the validation pipe the 'api' prefix a route is served under /api, and not without it",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "H-P408-CLOCK-1",
+        "files": [
+          "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "P408-HARNESS-CLOCK"
+        ],
+        "kills": [
+          {
+            "killer": "P408-HARNESS-CLOCK",
+            "test": "P408TenantBillingCanonicalCutoverService P408-HARNESS-CLOCK anchors implicit billing reads to the fixture clock",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "H-M1",
+        "files": [
+          "test/widgets-live/support/no-write-recorder.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-3 [GW]"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-3 [GW]",
+            "test": "widgets-live harness NW recorder [GW] HAR-3 [GW] the recorder records a FOR SHARE and an advisory lock as locks, not writes, and NW turns red on a durable write in the same request",
+            "step": "live",
+            "entry": "GW",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "GW": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "H-M2",
+        "files": [
+          "../docs/rebuild/evidence/maya-chat-first-ux/gate-audit-check.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-5"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-5",
+            "test": "widgets-live harness gate audit check HAR-5 gate-audit-check passes on the committed /2 audit, and its self-test turns every check red, the SHA compare included",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "H-M3",
+        "files": [
+          "scripts/widgets-evidence-verify.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-9 [GW]"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-9 [GW]",
+            "test": "widgets-live harness NW recorder [GW] HAR-9 [GW] the verifier rejects a manifest line whose record is missing from the server's mint provenance lines, or from the database before teardown (a Fixtures.widget record)",
+            "step": "live",
+            "entry": "GW",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "GW": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "H-M4",
+        "files": [
+          "scripts/widgets-evidence-verify.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-10"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-10",
+            "test": "widgets-live harness evidence verifier HAR-10 the verifier rejects an E-TAMPER label on a column the SealVerifier reads, except for key G1-a",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M1",
+        "files": [
+          "scripts/widgets-evidence-verify.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-13"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-L-PAIR turns red on an HTTP half with no BIN half",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-L-PAIR turns red on halves offered for different clauses",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-L-PAIR turns red on a BIN half that claims nothing",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 3
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M2",
+        "files": [
+          "scripts/widgets-evidence-verify.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-13"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a module mock",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a providers-array binding",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a replaced property",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a spy replaced in a second statement",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a member assigned on a resolved provider",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a member assigned through a variable holding a resolved provider",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a guard override",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a prototype member assigned",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-MODEL-STUB turns red on a module mock of the model transport",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-MODEL-STUB turns red on the model transport replaced on its resolved provider",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-MODEL-STUB turns red on a spy on decide replaced in a second statement",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-CONTROLLED turns red on controlledFixtureMode",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 12
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M3",
+        "files": [
+          "scripts/widgets-evidence-verify.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-13"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a module mock",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a providers-array binding",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a replaced property",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a spy replaced in a second statement",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a member assigned on a resolved provider",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a member assigned through a variable holding a resolved provider",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a guard override",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on a prototype member assigned",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on an override in a nested support directory",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-OVERRIDE turns red on an allowlisted target overridden from a file the allowlist does not name",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 10
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M4",
+        "files": [
+          "scripts/widgets-evidence-verify.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-13"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-FIXTURE-WRITE turns red on Fixtures.widget through a variable argument",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-FIXTURE-WRITE turns red on Fixtures.synthetic",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-FIXTURE-WRITE turns red on a widget model write",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-FIXTURE-WRITE turns red on the emitter",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-FIXTURE-WRITE turns red on raw SQL",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-FIXTURE-WRITE turns red on its own database client",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-FIXTURE-WRITE turns red on a logger with a provenance context assembled at run time",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-FIXTURE-WRITE turns red on the evidence directory's files",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-FIXTURE-WRITE turns red on code loaded dynamically",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-FIXTURE-WRITE turns red on a helper it imports that writes",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 10
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M5",
+        "files": [
+          "scripts/widgets-evidence-verify.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-13"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-SYNTH-CLAIM turns red on a G-SYNTH label on an L claim",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-SYNTH-CLAIM turns red on a synthetic label in another case",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 2
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M6",
+        "files": [
+          "scripts/widgets-evidence-verify.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-10"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-10",
+            "test": "widgets-live harness evidence verifier HAR-10 the verifier rejects an E-TAMPER label on a column the SealVerifier reads, except for key G1-a",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M7",
+        "files": [
+          "scripts/widgets-evidence-verify.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-13"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-GW turns red on a claim on a GW line",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M8",
+        "files": [
+          "scripts/widgets-evidence-verify.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-13"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-MODEL-STUB turns red on a module mock of the model transport",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-MODEL-STUB turns red on the model transport replaced on its resolved provider",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-MODEL-STUB turns red on a spy on decide replaced in a second statement",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-MODEL-STUB turns red on a providers-array binding of the model transport in a support file",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 4
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M9",
+        "files": [
+          "scripts/widgets-evidence-verify.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-13"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-SCHEMA turns red on a claim with no evidence label",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M10",
+        "files": [
+          "scripts/widgets-evidence-verify.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-13"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-PROV-TRIGGER turns red on a mint line whose trigger is not a production trigger",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          },
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-PROV-TRIGGER turns red on a successor mint whose predecessor is not traced",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 2
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M11",
+        "files": [
+          "../docs/rebuild/evidence/maya-chat-first-ux/gate-audit-check.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-5"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-5",
+            "test": "widgets-live harness gate audit check HAR-5 gate-audit-check passes on the committed /2 audit, and its self-test turns every check red, the SHA compare included",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M12",
+        "files": [
+          "scripts/widgets-evidence-verify.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-13"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-13",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) HAR-13 V-ENTRY-SOURCE turns red on an HTTP claim from a support file",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M13",
+        "files": [
+          "test/widgets-live/support/mint-provenance.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-14"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-14",
+            "test": "widgets-live harness mint provenance capture (D-17) HAR-14 the HTTP sink refuses a provenance line logged from test code, the reviewer forgery included, and the writer refuses a line no capture point registered",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M14",
+        "files": [
+          "test/widgets-live/support/evidence.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-14"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-14",
+            "test": "widgets-live harness mint provenance capture (D-17) HAR-14 the HTTP sink refuses a provenance line logged from test code, the reviewer forgery included, and the writer refuses a line no capture point registered",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M15",
+        "files": [
+          "test/widgets-live/support/evidence-source-scan.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "HAR-12"
+        ],
+        "kills": [
+          {
+            "killer": "HAR-12",
+            "test": "widgets-live harness D-17 (3) evidence sources [BUILD] HAR-12 [BUILD] the scan goes red on every forbidden construct in a labelled test, through a helper too, and stays quiet on unlabelled tests",
+            "step": "live",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M16",
+        "files": [
+          "scripts/widgets-evidence-lineage.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "WR-H1"
+        ],
+        "kills": [
+          {
+            "killer": "WR-H1",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) WR-H1 rejects a foreign-process predecessor chain",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateH-harness.json",
+        "id": "R-M17",
+        "files": [
+          "scripts/widgets-evidence-lineage.mjs"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "WR-H1"
+        ],
+        "kills": [
+          {
+            "killer": "WR-H1",
+            "test": "widgets-live harness evidence verifier rules (review findings 1-2) WR-H1 rejects a not-durable predecessor chain",
+            "step": "live",
+            "entry": null,
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "untagged": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      }
+    ],
+    "controls": {
+      "H-harness:baseline|live": {
+        "set": null,
+        "steps": [
+          "live"
+        ],
+        "exits": {
+          "live": 0
+        },
+        "failed": [],
+        "problems": []
+      },
+      "H-harness:baseline|unit,typecheck,k3": {
+        "set": null,
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "exits": {
+          "unit": 0,
+          "typecheck": 0,
+          "k3": 0
+        },
+        "failed": [],
+        "problems": []
+      }
+    }
+  },
+  "independentRepeatedBaselines": {
+    "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+    "independentRepeats": [
+      {
+        "iteration": 1,
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "tests": [
+          {
+            "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+            "status": "passed",
+            "durationMs": 434
+          },
+          {
+            "title": "F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+            "status": "passed",
+            "durationMs": 216
+          },
+          {
+            "title": "F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+            "status": "passed",
+            "durationMs": 18
+          }
+        ]
+      },
+      {
+        "iteration": 2,
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "tests": [
+          {
+            "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+            "status": "passed",
+            "durationMs": 409
+          },
+          {
+            "title": "F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+            "status": "passed",
+            "durationMs": 211
+          },
+          {
+            "title": "F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+            "status": "passed",
+            "durationMs": 16
+          }
+        ]
+      },
+      {
+        "iteration": 3,
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "tests": [
+          {
+            "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+            "status": "passed",
+            "durationMs": 414
+          },
+          {
+            "title": "F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+            "status": "passed",
+            "durationMs": 212
+          },
+          {
+            "title": "F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+            "status": "passed",
+            "durationMs": 20
+          }
+        ]
+      }
+    ],
+    "nativeCorpusControl": "PENDING; targeted repetitions do not replace unrestricted native baseline"
+  },
+  "baselineRed": [],
+  "mismatches": 0
+}

@@ -1,0 +1,46 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "startedAt": "2026-10-03T18:00:33.497900+00:00",
+  "status": "PASS",
+  "sources": [
+    {
+      "path": "work/release-packaging-recovery-20261003/prepare-recovery.py",
+      "sha256": "053d68c63a0ced5a93dbf1dda2a6edce1660167cc8fb6d8f355235f1088e1bca"
+    },
+    {
+      "path": "work/release-packaging-recovery-20261003/run-recovery-partitions.py",
+      "sha256": "d6ff8af27ae8f97a8a2087218526cf9a91984aefb4b09ef3cd71d4d76ac07c19"
+    },
+    {
+      "path": "work/release-packaging-recovery-20261003/r06-child-trace.cjs",
+      "sha256": "c1838a6a87f27553b8bfe9abbd6dc6f360a19291ca294e8532ea7ef15e773ec1"
+    },
+    {
+      "path": "work/release-packaging-recovery-20261003/canonical-runner-diff.patch",
+      "sha256": "a0f3a4e9a47bd3799725fbc9d794075edb32c4769901a80e13d7d14f4cb4ed76"
+    },
+    {
+      "path": "work/release-packaging-recovery-20261003/run-recovery.py",
+      "sha256": "ea2d506d9046382090efac7fe660370eb14a5a9f34b19a5ed223b5dae48eb9a8"
+    }
+  ],
+  "planSha256": "77150d473c8771d06e654a96b6ab4f10b8d80600b1806b9a99136f83019668b1",
+  "slots": [
+    "WR-part-3-of-4",
+    "WR-part-4-of-4"
+  ],
+  "command": [
+    "python3",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-recovery-20261003/run-recovery-partitions.py"
+  ],
+  "freshDbNames": [
+    "maya_widget_gate_proof_pkgfinal_recovery1_worker1",
+    "maya_widget_gate_proof_pkgfinal_recovery1_worker2"
+  ],
+  "timeoutsChanged": false,
+  "restrictions": null,
+  "effects": "local isolated test DB only",
+  "exit": 0,
+  "completedAt": "2026-10-03T18:43:27.163333+00:00",
+  "seconds": 2573.67
+}

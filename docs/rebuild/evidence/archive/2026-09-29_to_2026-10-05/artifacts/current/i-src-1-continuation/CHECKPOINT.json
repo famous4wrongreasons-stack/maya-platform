@@ -1,0 +1,193 @@
+{
+  "candidate": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "workingTreeClean": true,
+  "cancelPatchIntegrated": true,
+  "originalCancelCommit": "f531367f00d62bbf5e27c4df8c64ba9695f9c968",
+  "cherryPickCommit": "977b814ecf2c41ae2caeca2df1ded812ce926b10",
+  "diagnosticCommit": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+  "cancelSourceProbe": "PASS: create/reschedule/cancel, 8 submissions, 3 completed owner executions, DB appointment canceled",
+  "navigateRootCause": "The source declares fs.calendar and the HTTP/projection returns valid detail. Runtime closes progress, treats advanced as timeline ingest, never opens fullscreen.",
+  "navigateFixOwner": "RUNTIME",
+  "navigate": "FAIL",
+  "profile": "closed-input.no-handoff@1",
+  "profileApplicableFalse": 0,
+  "matrixQualification": "Backend progress disposition only; source-carrier integration fails and certification is incomplete.",
+  "globalFalse": 2,
+  "globalStops": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "fullMutations": "NOT RUN on this candidate; deferred at the explicit runtime-defect STOP boundary",
+  "ciEquivalent": "NOT COMPLETE; source-carrier probe FAIL",
+  "fbe2e": "PARTIAL: personal create/reschedule/cancel PASS; journal detail FAIL; return not exercised through carrier",
+  "runtime": {
+    "tests": 366,
+    "pass": 359,
+    "fail": 0,
+    "skipped": 7
+  },
+  "carrier": {
+    "tests": 93,
+    "pass": 93,
+    "fail": 0,
+    "skipped": 0
+  },
+  "backendSourceProfileLive": {
+    "suites": 3,
+    "tests": 9,
+    "failed": 0
+  },
+  "fullBackendSuite": "NOT RERUN in this pass; previous receipts not relabeled",
+  "widgetsLiveFull": "NOT RERUN in this pass; targeted source/profile suites only",
+  "httpBinFull": "NOT RERUN in this pass",
+  "certifiedForProfile": false,
+  "fullContractCertified": false,
+  "readyForReleaseAuthorization": false,
+  "migrationProductionApplied": false,
+  "productionEffects": 0,
+  "realOtp": 0,
+  "realYclientsEffects": 0,
+  "filesTouched": [
+    "maya-chat-shell/dist/manifest.json",
+    "maya-chat-shell/src/shell/intents.ts",
+    "maya-chat-shell/test/intents.test.mjs",
+    "maya-saas-backend/test/widgets-live/support/shell-approved-source-probe.mjs"
+  ],
+  "remainingBlockers": [
+    "Claude-owned runtime NAVIGATE lifecycle does not open accepted detail; exact canonical envelope and observation attached. Stop observed as requested.",
+    "After the corrected runtime is integrated, rerun source-carrier detail and parent return, then the full fresh applicable mutation/CI/FBE2E certification on the final candidate."
+  ],
+  "receipts": [
+    {
+      "candidate": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+      "name": "carrier-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": "maya-carrier-react",
+      "exit": 0,
+      "seconds": 4.46
+    },
+    {
+      "candidate": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+      "name": "source-carrier",
+      "command": [
+        "npx",
+        "jest",
+        "--config",
+        "test/jest-widgets-live.json",
+        "--runInBand",
+        "--testRegex",
+        "widgets-live/source-carrier.probe-spec.ts$"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 1,
+      "seconds": 2.81
+    },
+    {
+      "candidate": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+      "name": "runtime-check",
+      "command": [
+        "node",
+        "build.mjs",
+        "--check",
+        "--no-baseline"
+      ],
+      "cwd": "maya-chat-shell",
+      "exit": 0,
+      "seconds": 4.71
+    },
+    {
+      "candidate": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+      "name": "live-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck:widgets-live"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 7.48
+    },
+    {
+      "candidate": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+      "name": "runtime-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "maya-chat-shell",
+      "exit": 0,
+      "seconds": 4.8
+    },
+    {
+      "candidate": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+      "name": "carrier-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "maya-carrier-react",
+      "exit": 0,
+      "seconds": 4.48
+    },
+    {
+      "candidate": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+      "name": "runtime-test",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "cwd": "maya-chat-shell",
+      "exit": 0,
+      "seconds": 39.36
+    },
+    {
+      "candidate": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+      "name": "carrier-test",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "cwd": "maya-carrier-react",
+      "exit": 0,
+      "seconds": 0.31
+    },
+    {
+      "candidate": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+      "name": "source-profile-live",
+      "command": [
+        "npx",
+        "jest",
+        "--config",
+        "test/jest-widgets-live.json",
+        "--runInBand",
+        "--testPathPatterns",
+        "(personal-source|navigation-source|profile-isolation)\\.live-spec",
+        "--json",
+        "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/i-src-1-continuation/receipts-1d519822/source-profile-live.json"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 7.11
+    },
+    {
+      "candidate": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+      "name": "runtime-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": "maya-chat-shell",
+      "exit": 0,
+      "seconds": 4.52
+    }
+  ]
+}

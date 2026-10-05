@@ -1,0 +1,17 @@
+{
+  "name": "healthy-regression-before",
+  "sourceCandidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "diagnosticOnly": true,
+  "isolatedProductMutation": null,
+  "exit": 1,
+  "expectedExit": 1,
+  "seconds": 1.435,
+  "passed": 11,
+  "failed": 1,
+  "failures": [
+    "N11-HARNESS a canonical invocation without an existing transaction reaches persistence"
+  ],
+  "specSha256": "e00341a83345f480d675e837f104e0ef0cab5f05e114d37eb4f3f59cb21b15c3",
+  "adapterSha256": "b12f109df9c47fcfd2846f67abf272e72c69156ef3a5a24873d7a46cdf888e4f",
+  "reportSha256": "078ef0d8db0bf30878366ba8d969e4a73c32e71b69e9a63e7dac0f3740f313c9"
+}

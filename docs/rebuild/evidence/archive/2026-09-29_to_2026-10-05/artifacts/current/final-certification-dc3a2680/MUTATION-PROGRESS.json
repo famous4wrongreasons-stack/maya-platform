@@ -1,0 +1,50 @@
+{
+  "utc": "2026-09-30T20:33:13.772490+00:00",
+  "parts": 21,
+  "totalParts": 65,
+  "partStatuses": {
+    "PARTITION-AS-DECLARED": 4,
+    "AS-DECLARED": 16,
+    "MISMATCH": 1
+  },
+  "completedDeclarations": 184,
+  "declarationStatuses": {
+    "build-killed": 120,
+    "live-killed": 62,
+    "SURVIVED": 1,
+    "equivalent": 1
+  },
+  "baselineRed": [],
+  "mismatches": 1,
+  "testRuns": 250,
+  "transportFailureAlerts": [],
+  "newRuns": [
+    {
+      "worker": "1",
+      "step": "live",
+      "passed": 403,
+      "failed": 3,
+      "failingTitles": [
+        "N-C9-DOMAIN / N-OWNER-THROW-C9 [GW]: a domain the key is not registered for refuses, and the RAISE is the refusal (G6-20, C11:4779-4781)",
+        "N-C9-BI [GW]: a non-`READ` destination under BUSINESS_INTELLIGENCE is refused OUTSIDE a HANDOFF, and admitted as a destination inside one",
+        "SMOKE-G6-HANDOFF-BI / SMOKE-G6-C9-9-DOMAIN [HTTP]: a BI destination is admitted and a BI-unregistered subject is refused, on the same key"
+      ],
+      "omittedTitles": 0
+    },
+    {
+      "worker": "2",
+      "step": "unit",
+      "passed": 5598,
+      "failed": 1,
+      "failingTitles": [
+        "S-SURFACE: the catalogue surface is the literal `web`, stated once (C11:4762)"
+      ],
+      "omittedTitles": 0
+    }
+  ],
+  "candidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "scope": "Interrupted complete run: native M13-U13C-11 SURVIVED; partial receipts not a certificate",
+  "certificateIssued": false,
+  "canonicalAssembly": "REFUSED / incomplete and mismatch",
+  "wholeCorpus": "INTERRUPTED"
+}

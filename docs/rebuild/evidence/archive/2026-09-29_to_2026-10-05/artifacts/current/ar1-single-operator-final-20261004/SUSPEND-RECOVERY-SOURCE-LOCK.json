@@ -1,0 +1,40 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "capturedAt": "2026-10-04T18:11:45.772397+00:00",
+  "sources": [
+    {
+      "path": "work/ar1-single-operator-final-20261004/suspend-recovery-runner.py",
+      "sha256": "5025943c18801a12d5e96f55c71a13425fd809dd64f9820975cc945737407137"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261004/suspend-recovery-controller.py",
+      "sha256": "a71ec6194e0c198924f9925f59b36d70704ad92212622d3b6a8686255e9821d1"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261004/suspend-recovery-validation.py",
+      "sha256": "b5c160311456be30ed0864720a7105a65050c38fd72b956e817969cc35cac817"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261004/suspend-recovery-validation-test.py",
+      "sha256": "90d41bf9e7a1ce6fdaec2b5cd698db0db1c75ae58a5977e3731e17bcc94fa1e3"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261004/suspend-recovery-preparation.py",
+      "sha256": "d26f50415c3461d816a58f0a11d8db48a8b57f04a00152ed1fc584e8d3431a1f"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261004/r06-child-trace.cjs",
+      "sha256": "c1838a6a87f27553b8bfe9abbd6dc6f360a19291ca294e8532ea7ef15e773ec1"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261004/index-final-orchestration-sources.py",
+      "sha256": "258c773a5ee4f0a351932f7baa3ad05829fdedd0efa8ed4d88f9185bb2d141fd"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261004/finalize-receipts.py",
+      "sha256": "d0341a4be3c269dd784b307c6021eb43a641ebe4ae9b8470d328169961b32d4c"
+    }
+  ],
+  "timeoutsChanged": false,
+  "filtersAdded": false
+}

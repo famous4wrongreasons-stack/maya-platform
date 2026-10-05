@@ -1,0 +1,20 @@
+[
+  ".github/workflows/platform-ci.yml",
+  ".github/workflows/widgets-mutation.yml",
+  "docs/rebuild/widget-release-programme/AR1-PRODUCTION-EXECUTION-CONTRACT.md",
+  "docs/rebuild/widget-release-programme/RELEASE-PACKAGING-AND-TRUST-RUNBOOK.md",
+  "maya-saas-backend/scripts/widget-release-operator.cjs",
+  "maya-saas-backend/scripts/widget-release-operator.compiled-test.cjs",
+  "maya-saas-backend/scripts/widget-release-operator.test.cjs",
+  "maya-saas-backend/scripts/widgets-mutation-ci.test.mjs",
+  "maya-saas-backend/src/entitlements/widget-release-policy.service.ts",
+  "maya-saas-backend/src/entitlements/widget-release-production.contract.ts",
+  "maya-saas-backend/src/entitlements/widget-release-single-operator.spec.ts",
+  "maya-saas-backend/src/entitlements/widget-release.contract.ts",
+  "maya-saas-backend/src/entitlements/widget-release.service.ts",
+  "maya-saas-backend/test/widgets-live/mutations/gatePU.json",
+  "maya-saas-backend/test/widgets-live/mutations/gateSO.json",
+  "maya-saas-backend/test/widgets-live/support/widget-single-operator-proof.ts",
+  "maya-saas-backend/test/widgets-live/widget-single-operator.binary-spec.ts",
+  "maya-saas-backend/test/widgets-live/widget-single-operator.live-spec.ts"
+]

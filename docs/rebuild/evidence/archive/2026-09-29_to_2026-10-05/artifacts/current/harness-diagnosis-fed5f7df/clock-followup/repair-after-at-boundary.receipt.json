@@ -1,0 +1,22 @@
+{
+  "name": "repair-after-at-boundary",
+  "exit": 0,
+  "seconds": 0.637,
+  "passed": 5,
+  "failed": 0,
+  "runtimeErrors": 0,
+  "ambientClock": "2026-10-01T00:00:00.000Z",
+  "sourceSha256": "95283a123a5e858a257849d696ba632cd4c8ed565585787806e883d11b99c928",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "--runInBand",
+    "--runTestsByPath",
+    "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
+    "--json",
+    "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/clock-followup/repair-after-at-boundary.json",
+    "--setupFilesAfterEnv",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/clock-fixture-diagnosis/ambient-clock.cjs"
+  ],
+  "failedTests": []
+}

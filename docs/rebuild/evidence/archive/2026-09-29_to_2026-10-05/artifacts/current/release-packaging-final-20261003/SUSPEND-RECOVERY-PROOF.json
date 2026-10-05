@@ -1,0 +1,115 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "status": "PASS",
+  "checkedAt": "2026-10-03T18:44:56.439318+00:00",
+  "plan": {
+    "path": "SUSPEND-RECOVERY-PLAN.json",
+    "sha256": "77150d473c8771d06e654a96b6ab4f10b8d80600b1806b9a99136f83019668b1"
+  },
+  "execution": {
+    "path": "SUSPEND-RECOVERY-EXECUTION.json",
+    "sha256": "6463bd71306e392a7a08ac11279b1198c0e2ff5339c167d33998200ee6904d25"
+  },
+  "suspendIntervals": [
+    {
+      "from": "2026-10-03T17:28:28+00:00",
+      "throughFullWake": "2026-10-03T17:54:59+00:00"
+    }
+  ],
+  "admittedPartitions": 67,
+  "unchangedSameProgrammePartitions": 65,
+  "wholePartitionsReexecuted": [
+    {
+      "slot": "WR-part-3-of-4",
+      "oldPartSha256": "3e6eff2036845e4f702b673c38a61b1fb3af5e9b30e2bbf4547e1f847222bbea",
+      "newPartSha256": "eba6ec5b78ffdf5bf0d748b5f86b5815d812f6f274f7a620701d472fe8c27b94",
+      "newReceiptSha256": "54bc02d50672b9fe7888cc2637e117c86097da0f2a37d20c326d15b515ca18ae",
+      "startedAt": "2026-10-03T18:00:36.150Z",
+      "finishedAt": "2026-10-03T18:43:27.154Z",
+      "wholeCanonicalPartition": true,
+      "freshMirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-1518ca81d9"
+    },
+    {
+      "slot": "WR-part-4-of-4",
+      "oldPartSha256": "77e594fdd1f52c57ab798a2f2f9729aac2f056cbb670f2fe0992718379627e4a",
+      "newPartSha256": "f9024580e9519d61a30c898027960235f4c94e9640e6aac9d13e04c0dc94ad92",
+      "newReceiptSha256": "682408aba93efb3f2276c3530143a2ff546e4a80ddfc0cae6284b0b007fd4195",
+      "startedAt": "2026-10-03T18:00:36.150Z",
+      "finishedAt": "2026-10-03T18:40:33.722Z",
+      "wholeCanonicalPartition": true,
+      "freshMirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-483e3b4880"
+    }
+  ],
+  "admittedSleepOverlaps": 0,
+  "admittedRawR06Traces": [
+    {
+      "path": "receipts/r06-native-worker-1.jsonl",
+      "sha256": "e7b9791933dc69b02055982ae68966f0ce7945280b78ee026fcc996d684b16c4",
+      "admittedExecutions": 69,
+      "excludedInvalidatedAttemptExecutions": 0,
+      "maxElapsedMs": 5487,
+      "replacementTrace": false
+    },
+    {
+      "path": "receipts/r06-native-worker-2.jsonl",
+      "sha256": "dbcfa5c82a2810bc31f39a417537a990cde36ff9ed713301ea641c459f693768",
+      "admittedExecutions": 69,
+      "excludedInvalidatedAttemptExecutions": 0,
+      "maxElapsedMs": 5761,
+      "replacementTrace": false
+    },
+    {
+      "path": "receipts/r06-native-worker-3.jsonl",
+      "sha256": "f8db251533314b8bb0e044845f90ce6a2662431b31ab37330ebf87c1c2eddff3",
+      "admittedExecutions": 71,
+      "excludedInvalidatedAttemptExecutions": 0,
+      "maxElapsedMs": 5317,
+      "replacementTrace": false
+    },
+    {
+      "path": "receipts/r06-native-worker-4.jsonl",
+      "sha256": "88aabbadeb36ff3d28ddc09dc305230acbacafcacfdbcd1540a5c4a579d2be5a",
+      "admittedExecutions": 56,
+      "excludedInvalidatedAttemptExecutions": 6,
+      "maxElapsedMs": 5749,
+      "replacementTrace": false
+    },
+    {
+      "path": "receipts/r06-native-worker-5.jsonl",
+      "sha256": "d4edfe24b8e4a7dbc194bfcab4803b6397e882a8527618eb79634ce084109294",
+      "admittedExecutions": 64,
+      "excludedInvalidatedAttemptExecutions": 6,
+      "maxElapsedMs": 5616,
+      "replacementTrace": false
+    },
+    {
+      "path": "receipts/r06-native-worker-6.jsonl",
+      "sha256": "affa8ce94354a5cacac44ff842c119e75742aaa33149f1d44a37cce84af98528",
+      "admittedExecutions": 76,
+      "excludedInvalidatedAttemptExecutions": 0,
+      "maxElapsedMs": 5434,
+      "replacementTrace": false
+    },
+    {
+      "path": "receipts/r06-recovery-worker-1.jsonl",
+      "sha256": "4c156162deffe2b8a604f9ed886b731c582006213ea28d6ed5768bf2c6bc252f",
+      "admittedExecutions": 6,
+      "excludedInvalidatedAttemptExecutions": 0,
+      "maxElapsedMs": 4463,
+      "replacementTrace": true
+    },
+    {
+      "path": "receipts/r06-recovery-worker-2.jsonl",
+      "sha256": "9db73a93852d525e82dae8b0fee41e97a0885899a6a92e111c7b658d61f31dec",
+      "admittedExecutions": 6,
+      "excludedInvalidatedAttemptExecutions": 0,
+      "maxElapsedMs": 4546,
+      "replacementTrace": true
+    }
+  ],
+  "timeoutsChanged": false,
+  "productCandidateChanged": false,
+  "originalSleepAndReceiptsRetained": true,
+  "newWaivers": 0,
+  "bootstrapLogNote": "Recovery bootstrap reused migration-worker-1/2 log filenames; those bootstrap logs are not release-admission evidence. All original mutation part, test log and job receipts were retained. Replacement DB names and migration stdout remain recorded in recovery execution."
+}

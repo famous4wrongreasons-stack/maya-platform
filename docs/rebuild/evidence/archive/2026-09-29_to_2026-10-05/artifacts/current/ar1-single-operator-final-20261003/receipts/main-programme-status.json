@@ -1,0 +1,52 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "exits": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "historicalReceiptsAdmitted": 0,
+  "integrationRecovery": "HARNESS-PROBE-ASSEMBLY-REPAIR.json",
+  "originalFailureRetained": "diagnostics/missing-probe-assembly/main-programme-status.original.json",
+  "freshIntegrationReceipts": [
+    {
+      "path": "receipts/fbe2e-canonical-net-roundtrip.receipt.json",
+      "sha256": "b8e4266e2e83b661c7e046f87cc784f88de4bf0eb9d005e1fc49d7d85c5e1594"
+    },
+    {
+      "path": "receipts/fbe2e-canonical-net-turn.receipt.json",
+      "sha256": "2a8edff16f55c251d5d72926cc747ebdc2f7f5adf99ea9552fdd18914c89d31a"
+    },
+    {
+      "path": "receipts/fbe2e-canonical-net-bin.receipt.json",
+      "sha256": "df9153178e51cf73f69b344da2ed7d100455f4b4de9ea7639f9a813baea6199f"
+    },
+    {
+      "path": "receipts/fbe2e-compiled-net-bin.receipt.json",
+      "sha256": "6ad43cda2495d8d4bf7c4d8907dc2d44d312b02cbff85d17d4a6bb1dfaadb142"
+    },
+    {
+      "path": "receipts/fbe2e-compiled-receipt-net-bin.receipt.json",
+      "sha256": "631ba143e0b4adbb31234b4dba320faa35f79536636ce39f2ea772a92e028f56"
+    },
+    {
+      "path": "receipts/fbe2e-l27-postcommit-dismiss.receipt.json",
+      "sha256": "6f64158aa6b8312e4809b8326964991d09e682a33cd4abb181888f4699697550"
+    },
+    {
+      "path": "receipts/ns1-16-step.receipt.json",
+      "sha256": "6bce8fff1fb2f4e377b3cdf620096e1b22027100e9c84125554ce5e6124f33e7"
+    },
+    {
+      "path": "receipts/l27-17-step.receipt.json",
+      "sha256": "317dcf76133ccdb684741bd7c0c91ef37dd990dd883a062d9f707157e0d95676"
+    }
+  ],
+  "reason": "Only omitted scratch harness drivers restored. Product, assertions, timeout budgets and candidate unchanged. All component executions are fresh at this HEAD."
+}

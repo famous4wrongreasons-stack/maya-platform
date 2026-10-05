@@ -1,0 +1,16 @@
+{
+  "utc": "2026-09-30T22:10:01.066252+00:00",
+  "scope": "Observation tool only; not a native test command",
+  "error": "Failed to create unified exec process: No such file or directory (os error 2)",
+  "invocation": "status.py, implicit/default shell",
+  "retry": "Explicit /bin/zsh, login false; status command succeeded",
+  "nativeSession": 99604,
+  "nativeSessionRemainedRunning": true,
+  "completedWhileObserved": [
+    "H-harness: AS-DECLARED 25/25",
+    "PI: AS-DECLARED 6/6"
+  ],
+  "candidateUnchanged": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "causeOfToolLaunchFailure": "Not established; not attributed to Maya or its mutation runner",
+  "timeoutsChanged": false
+}

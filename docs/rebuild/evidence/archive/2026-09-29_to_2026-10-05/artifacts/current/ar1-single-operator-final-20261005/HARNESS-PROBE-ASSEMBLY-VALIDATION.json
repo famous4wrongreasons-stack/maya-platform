@@ -1,0 +1,63 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "status": "PASS",
+  "checkedAt": "2026-10-04T22:07:17.431286+00:00",
+  "scope": "Current source assembly only; no historical execution receipt",
+  "jestAndBinarySources": [
+    {
+      "path": "probes/source-net-turn.probe-spec.ts",
+      "sha256": "a2e2785b07c8bad518f850b155b0fa2644b55592702bc360239b23ae241671f0"
+    },
+    {
+      "path": "probes/source-net-return.probe-spec.ts",
+      "sha256": "9517b12b6baca2c271d37986ff88d04070a375bb8a3792717b230fa6aecf8c52"
+    },
+    {
+      "path": "bin-cases/gateNETBIN.cases.ts",
+      "sha256": "a37aa1d542e3f899d281b62350c6d5454811212af8f1284f654582b200c86e64"
+    },
+    {
+      "path": "compiled-bin-cases/gateCOMPILEDBIN.cases.ts",
+      "sha256": "4308bff0d9e36ea011bee9afaf2028cfe258768d7556c5e492d9ad575c72bc39"
+    },
+    {
+      "path": "compiled-receipt-bin-cases/gateRECEIPTBIN.cases.ts",
+      "sha256": "a1d5445b4b05dfcc893324845ba117993c5429c153101095725452d1af6b652d"
+    },
+    {
+      "path": "postcommit-bin-cases/gateL27.cases.ts",
+      "sha256": "b29758cbad95d06ef12b0b6e065b3053118f1586d20a25da62ce314582edf839"
+    }
+  ],
+  "typescriptDrivers": [
+    {
+      "path": "bin-cases/gateNETBIN.cases.ts",
+      "sha256": "a37aa1d542e3f899d281b62350c6d5454811212af8f1284f654582b200c86e64"
+    },
+    {
+      "path": "compiled-bin-cases/gateCOMPILEDBIN.cases.ts",
+      "sha256": "4308bff0d9e36ea011bee9afaf2028cfe258768d7556c5e492d9ad575c72bc39"
+    },
+    {
+      "path": "compiled-receipt-bin-cases/gateRECEIPTBIN.cases.ts",
+      "sha256": "a1d5445b4b05dfcc893324845ba117993c5429c153101095725452d1af6b652d"
+    },
+    {
+      "path": "postcommit-bin-cases/gateL27.cases.ts",
+      "sha256": "b29758cbad95d06ef12b0b6e065b3053118f1586d20a25da62ce314582edf839"
+    },
+    {
+      "path": "probes/source-net-return.probe-spec.ts",
+      "sha256": "9517b12b6baca2c271d37986ff88d04070a375bb8a3792717b230fa6aecf8c52"
+    },
+    {
+      "path": "probes/source-net-turn.probe-spec.ts",
+      "sha256": "a2e2785b07c8bad518f850b155b0fa2644b55592702bc360239b23ae241671f0"
+    },
+    {
+      "path": "probes/source-return.probe-spec.ts",
+      "sha256": "09cde6f6caa8b2e17960fb21b313e5dbbaaf9bce5af6ba60206581ad3f8c617e"
+    }
+  ],
+  "sourceFilesPresent": true
+}

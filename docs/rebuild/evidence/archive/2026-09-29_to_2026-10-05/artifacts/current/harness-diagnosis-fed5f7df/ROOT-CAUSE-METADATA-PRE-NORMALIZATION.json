@@ -1,0 +1,180 @@
+{
+  "note": "Retained snapshot before removing stale current-native fields from earlier candidate; not current certification.",
+  "data": {
+    "base": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+    "productDefect": false,
+    "harnessDefect": true,
+    "rootCause": "Darwin address-family port shadowing: Supertest implicitly binds HTTP to IPv6 wildcard but connects to IPv4 loopback. An existing IPv4 listener at the chosen port receives the request.",
+    "reproduced": {
+      "timeout": {
+        "run": "corpus-5",
+        "pid": 31748,
+        "client": "127.0.0.1:53801",
+        "destination": "127.0.0.1:53800",
+        "wrongListener": "Red Shield VPN PID 675",
+        "intendedListener": "node PID 31748 IPv6 wildcard",
+        "serverRequestObserved": false,
+        "eventLoopLagDuringStallMs": 56,
+        "databaseWaits": []
+      },
+      "socketReset": {
+        "run": "corpus-3",
+        "pid": 31778,
+        "client": "127.0.0.1:55730",
+        "destination": "127.0.0.1:55729",
+        "wrongListener": "dedicated proof PostgreSQL",
+        "error": "ECONNRESET",
+        "ms": 3
+      }
+    },
+    "alternatives": {
+      "productLatencyOrDeadlock": "Ruled out for captured failures: intended backend never accepted the TCP connection or HTTP request; no waiting database session.",
+      "timeoutBudget": "Not causal: packets went to another process. No timeout changed.",
+      "resourceExhaustion": "Not causal for captured stall: event loop responsive; socket established to wrong process.",
+      "socketReuse": "No reused client socket in captured failing requests.",
+      "processLeak": "No stale Maya listener owns either captured destination; these are existing unrelated local services.",
+      "orderingConcurrency": "Changes probability of ephemeral port choice; not required for deterministic reduced reproduction.",
+      "environment": "Darwin wildcard/IPv4 coexistence plus occupied loopback port triggers flaw."
+    },
+    "fix": "One awaited app.listen(0, 127.0.0.1) before any request; same port until app.close; listenLoopback returns that address.",
+    "regression": {
+      "before": "regression-before-v2/jest.json: 1 FAIL because server.address() is null",
+      "after": "regression-after/jest.json: 1 PASS; IPv4 ownership, repeated requests, same URL, teardown",
+      "reduction": "collision-repro.json: wrong server before, intended server after; no Maya/DB/VPN calls",
+      "nativeControls": [
+        {
+          "run": "fixed-native-1",
+          "pass": 406,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "run": "fixed-native-2",
+          "pass": 406,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "run": "fixed-native-3",
+          "pass": 406,
+          "fail": 0,
+          "skip": 0
+        }
+      ]
+    },
+    "timeoutsChanged": false,
+    "productFilesTouched": 0,
+    "certification": "Fresh programme 2141e245 started; bab750d8 interrupted and excluded",
+    "initialHarnessCandidate": "dac4072dd17ec222fe36cc603863965919039708",
+    "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+    "remainingFixturesProof": "r02-followup/DIAGNOSIS.json",
+    "nativeMutationDeclarations": 506,
+    "causalBoundary": "Original historical three AR sockets were not traced; same failure classes reproduced under stock runner in other unmutated tests with wrong peers directly captured.",
+    "nativeRepairProof": {
+      "candidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+      "receipt": "outputs/final-certification-dc3a2680/receipts/mutation-parts/widgets-mutation-part-H-harness.json",
+      "sha256": "af0a2beed810ee052d447c6922f43e41fe03db204554cd4220e83c4074c0e4b2",
+      "allHarnessMutants": 25,
+      "status": "AS-DECLARED",
+      "newRegressionMutants": [
+        {
+          "id": "H-LOOPBACK-1",
+          "status": "live-killed",
+          "killers": [
+            "HAR-LOOPBACK"
+          ]
+        },
+        {
+          "id": "H-R02-LOOPBACK-1",
+          "status": "build-killed",
+          "killers": [
+            "R02-LOOPBACK"
+          ]
+        },
+        {
+          "id": "H-ADMIN-LOOPBACK-1",
+          "status": "build-killed",
+          "killers": [
+            "accepts a logo in the multipart field"
+          ]
+        },
+        {
+          "id": "H-BOOT-LOOPBACK-1",
+          "status": "build-killed",
+          "killers": [
+            "a route is served under /api, and not without it"
+          ]
+        }
+      ],
+      "baselineControls": {
+        "baseline|live": {
+          "set": null,
+          "steps": [
+            "live"
+          ],
+          "exits": {
+            "live": 0
+          },
+          "failed": [],
+          "problems": []
+        },
+        "baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      },
+      "scope": "Complete H-harness only; all-battery certification still running"
+    },
+    "currentCandidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+    "currentCertification": "RUNNING FRESH; previous dc3a2680 native receipt is diagnostic only",
+    "additionalHarnessDefect": {
+      "id": "M13-U13C-11",
+      "cause": "Missing non-transaction admission method in the negative test double masked removal of the source/key guard",
+      "proof": "m13-followup/DIAGNOSIS.json",
+      "repair": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+      "productChanges": 0
+    },
+    "previousHarnessCandidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+    "currentNativeRepairProofs": [
+      {
+        "path": "outputs/final-certification-bab750d8/HTTP-HARNESS-NATIVE-REPAIR-PROOF.json",
+        "sha256": "cfdaa05158e782e28c9e78f9dc6a7d27b8584fc1cb2fb5ff0264b6aaa2e32929",
+        "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3"
+      },
+      {
+        "path": "outputs/final-certification-bab750d8/M13-NATIVE-REPAIR-PROOF.json",
+        "sha256": "40f3d39efae8ba7f7a99c39cb50dd62320756b3eaca159504edaee2eb9f83825",
+        "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3"
+      },
+      {
+        "path": "outputs/final-certification-bab750d8/AR1-NATIVE-PROOF.json",
+        "sha256": "d107c18efae5e004533d54a5aeefd7b474717dde23b497399940f92ee148b4fb",
+        "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3"
+      }
+    ],
+    "currentRepairAdmission": "Fresh native H-harness, exact M13-U13C-11 part and full AR battery PASS; whole corpus still running",
+    "earlierNativeReceiptBoundary": "Any earlier-candidate nativeRepairProof field is retained diagnostic history only, never current release certification",
+    "clockFixtureDefect": {
+      "classification": "HARNESS",
+      "unmutatedBoundary": "4 pass before / 2 pass 2 fail at and after 2026-10-01T00:00Z",
+      "repair": "describe-scoped existing NOW fake clock, restored after each test",
+      "regressionBefore": "2 pass / 3 fail",
+      "regressionAfter": "5 pass / 0 fail on all four ambient clocks",
+      "removalMutant": "2 pass / 3 fail",
+      "nativeRegression": "H-P408-CLOCK-1",
+      "receipts": "clock-followup/REPAIR-REGRESSION.json"
+    },
+    "previousNativeRepairProofsDiagnosticOnly": null
+  }
+}

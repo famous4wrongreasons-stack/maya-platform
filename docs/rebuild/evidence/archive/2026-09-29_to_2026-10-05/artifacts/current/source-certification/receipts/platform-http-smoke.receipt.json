@@ -1,0 +1,11 @@
+{
+  "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "name": "platform-http-smoke",
+  "command": [
+    "npm",
+    "run",
+    "test:http"
+  ],
+  "exit": 0,
+  "seconds": 7.01
+}

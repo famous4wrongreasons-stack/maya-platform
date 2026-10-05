@@ -1,0 +1,11 @@
+{
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "name": "l25-browser-fixtures",
+  "command": [
+    "node",
+    "dev/build-gallery.mjs"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-carrier-react",
+  "exit": 0,
+  "seconds": 0.08
+}

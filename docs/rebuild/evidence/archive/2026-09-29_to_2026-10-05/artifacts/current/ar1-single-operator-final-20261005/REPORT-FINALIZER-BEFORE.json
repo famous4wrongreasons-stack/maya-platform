@@ -1,0 +1,22 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "capturedAt": "2026-10-05T05:04:08.502528+00:00",
+  "sourceBeforeSha256": "4cdc9c1875cd2e70e540af5cc38c2dee6762221dd2c2808e2e1dc0d38fbb576a",
+  "sourceBefore": "work/ar1-single-operator-final-20261005/finalizer-status-before.py.txt",
+  "results": [
+    {
+      "part": "receipts/mutation-parts/widgets-mutation-part-NS.json",
+      "sha256": "1c849a89bea9bd583e94949576988d4b37e31d6c8d39fc6cadd5e3f8413c4ec9",
+      "status": "AS-DECLARED",
+      "oldReportingAssertionAccepted": true
+    },
+    {
+      "part": "receipts/mutation-parts/widgets-mutation-part-6-part-1-of-4.json",
+      "sha256": "af34f5fbfe92430bff6047b092ae796dc1a75f2e0e103c8fa0e4266169934713",
+      "status": "PARTITION-AS-DECLARED",
+      "oldReportingAssertionAccepted": false
+    }
+  ],
+  "canonicalCollectorAlreadyPassed": true,
+  "productChanged": false
+}

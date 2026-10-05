@@ -1,0 +1,4081 @@
+{
+  "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+  "profile": "closed-input.no-handoff@1",
+  "sourceDispositionOnly": true,
+  "globalFalse": 2,
+  "profileApplicableFalse": 0,
+  "applicableDuties": 163,
+  "freshEvidenceCoveredDuties": 163,
+  "manifestSha256": "2a5469fbaec6d26544d3fcd7077a0eb98fb450dbaa112debc447b82be5873ce7",
+  "completeMutationCertification": "INTERRUPTED ON CONFIRMED FBE2E L27 DEFECT",
+  "certifiedForProfile": false,
+  "fullContractCertified": false,
+  "rows": [
+    {
+      "gate": "1",
+      "id": "G1-a",
+      "state": "L-T",
+      "text": "HMAC valid: seal verified, keyed, before Gate 1 proceeds",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-G1-SEAL",
+          "entry": "HTTP",
+          "claim": "L-T",
+          "recordHash": "8d5194925ee3d815f7365875130ac9ac4dce387948a004acc9a79f5fddb18bb2",
+          "triggerTraceId": "e1-http-4cf8a0c8-ff81-4c61-8730-a4fb6eb04cf0"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "1",
+      "id": "G1-b",
+      "state": "L",
+      "text": "`widget_id` matches",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "1",
+      "id": "G1-c",
+      "state": "L",
+      "text": "not expired",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "1",
+      "id": "G1-d",
+      "state": "L",
+      "text": "not consumed when `single_use`",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "1",
+      "id": "G1-e",
+      "state": "L",
+      "text": "not superseded",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "1",
+      "id": "G1-f",
+      "state": "L",
+      "text": "`EXPIRED`/`SUPERSEDED` are response outcomes, with the R3.9.4 successor or the code alone (including A4's three fail-closed conditions)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "1",
+      "id": "G1-g",
+      "state": "L",
+      "text": "the successor reads nothing canonical (no projector or owner port; `EP-BUILD`)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "2",
+      "id": "G2-a",
+      "state": "L",
+      "text": "session resolved exactly as for a typed message (JWT + Membership, or a verified ClientChannelLink): the same transport chain as `POST /api/ai/chat`, proven by G2-EQ (D-16). `C9Authority.current` in `T` is the K1/K3 principal of Gates 1, 3, 5 and 6, not this clause",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        },
+        {
+          "testId": "PR-G2EQ-BIN",
+          "entry": "BIN",
+          "claim": null,
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "2",
+      "id": "G2-b",
+      "state": "L",
+      "text": "no credential comes from the widget",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "2",
+      "id": "G2-c",
+      "state": "L",
+      "text": "`REFUSED/unauthenticated`",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "3",
+      "id": "G3-a",
+      "state": "L",
+      "text": "`principal_proof_hash === c9PrincipalHash(live)`, constant time",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "3",
+      "id": "G3-b",
+      "state": "L",
+      "text": "a token minted for A and replayed by B fails",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "3",
+      "id": "G3-c1",
+      "state": "L",
+      "text": "membership re-create or role change invalidates outstanding envelopes (the membership branch of K4, C11:2546)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "3",
+      "id": "G3-c2",
+      "state": "U",
+      "text": "client-link unlink/relink invalidates outstanding envelopes (the CLIENT_CHANNEL branch; U candidate, K14-10)",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "3",
+      "id": "G3-d",
+      "state": "L",
+      "text": "`REFUSED/widget_principal_mismatch`",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "3",
+      "id": "G3-e",
+      "state": "L",
+      "text": "a shared push is inert: a web-push token minted for A and submitted by B is refused, NW (T-3)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "3",
+      "id": "G3-f",
+      "state": "U",
+      "text": "a forwarded Telegram message is inert (U candidate: K14-10 PKT:485, R-03/P-33)",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "4",
+      "id": "G4-a",
+      "state": "L",
+      "text": "`TenantContextService.assertTenantId` over the record's tenant and the live principal's",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "4",
+      "id": "G4-b",
+      "state": "L-T",
+      "text": "`REFUSED/tenant_mismatch`",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-G4-INDEP",
+          "entry": "HTTP",
+          "claim": "L-T",
+          "recordHash": "21f111d2afbd93001ad1a498241ce618502704a1ff74ca5912f1f76a1a0c9551",
+          "triggerTraceId": "e1-http-9ccdf1f4-9670-4d7e-93ea-1a5ca7ba9c35"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "5",
+      "id": "G5-a",
+      "state": "L",
+      "text": "floor re-derived from the live registry and policy tables",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "5",
+      "id": "G5-b",
+      "state": "L",
+      "text": "compared with the server-derived level (K1/K2, in `T`)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "5",
+      "id": "G5-c",
+      "state": "L",
+      "text": "capped by `profile.max_verification_level`",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "5",
+      "id": "G5-d",
+      "state": "L",
+      "text": "branch per effect class",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "5",
+      "id": "G5-e",
+      "state": "L-T",
+      "text": "any stored/recomputed difference → `SUPERSEDED/policy_floor_changed` + successor or the code alone, with the non-durable `widget_floor_divergence` counter",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-G5-FLOOR",
+          "entry": "HTTP",
+          "claim": "L-T",
+          "recordHash": "45b96b091ad87fa2a39d842d57e343517fb476f399166e9a3ee0b4b522837dde",
+          "triggerTraceId": "e1-http-82d6f753-3c08-4bfa-9862-171dc0051cdc"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "5",
+      "id": "G5-f",
+      "state": "U",
+      "text": "`NEEDS_SECOND_CHANNEL`/`HANDOFF_REQUIRED` + deep link (U candidate, K6/F53; mechanism blocked on OD-4 + P-12; never Gate 13's `HandoffTarget`)",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-1",
+      "state": "L",
+      "text": "dispatch on `subjectCapability(record)`, bound once",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-2",
+      "state": "L",
+      "text": "`authority_hint` not read",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-3",
+      "state": "L",
+      "text": "a never-rendered widget still cannot act",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-4",
+      "state": "L",
+      "text": "`REFUSED/insufficient_authority`, AuthorityResolver",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-5",
+      "state": "L",
+      "text": "null subject → proceeds with no owner call",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-6",
+      "state": "false",
+      "text": "HANDOFF: destination fences only (registration, F48, `targetFloor('s')`, landing ingress)",
+      "freshEvidence": [],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "globalDisposition": "STOP",
+      "profileApplicable": false
+    },
+    {
+      "gate": "6",
+      "id": "G6-7",
+      "state": "L",
+      "text": "HANDOFF never resolves `assertCanExecute`, `c9Capability` or the allowlist",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-8",
+      "state": "L",
+      "text": "(a) allowlist row",
+      "freshEvidence": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-9",
+      "state": "L",
+      "text": "(b) `policyDecision === 'ALLOW'`",
+      "freshEvidence": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-10",
+      "state": "L",
+      "text": "(c) `authenticated_request`",
+      "freshEvidence": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-11",
+      "state": "L",
+      "text": "(d) live principal role ∈ `allowedActorRoles`",
+      "freshEvidence": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-12",
+      "state": "L",
+      "text": "(e) entitlements grant `requiredFeatures`",
+      "freshEvidence": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-13",
+      "state": "L",
+      "text": "Gate 14 governs; a disagreement is refused and counted",
+      "freshEvidence": [
+        {
+          "testId": "AR-G6-REVOCATION",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "8e60253349b054c5ed1204ce3efd4703456ae962874752c09d714d6bd40765d4",
+          "triggerTraceId": "2f7a0da7-1b9b-4e6d-beeb-4f9822607f16"
+        },
+        {
+          "testId": "AR-G6-REVOCATION",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "ab4d641e2c67983c3b4d2e93baea7ff99d76c770a3dae0b1f848f542168b6f08",
+          "triggerTraceId": "e080c619-8a17-4a42-b0c1-ed9e3d16e3a0"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-14",
+      "state": "L",
+      "text": "the 47: `assertCanExecute(principal, def)` with surface `'web'`",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-15",
+      "state": "L",
+      "text": "non-catalogue: `WIDGET_CAPABILITY_POLICY` row (build totality + positive)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-16",
+      "state": "L",
+      "text": "`c9Capability` when `c9_domain !== null`, including BI non-READ",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-17",
+      "state": "L",
+      "text": "run-less: `c9Capability` not applied",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-18",
+      "state": "L",
+      "text": "CONTROL: `CONTROL_FLOOR[ref.key]` at Gate 5, Gate 3's principal binding, Gate 4's tenant assertion, then the one registered handler's own principal and tenant check (R3.2.4, C11:4771-4773); no execute-admission test",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-19",
+      "state": "L-T",
+      "text": "TOOL unreachable/refused",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-G6-TOOL",
+          "entry": "HTTP",
+          "claim": "L-T",
+          "recordHash": "5cb73954f356e4c1091d707d8820e3dd89501b7c287f661d4b34ecb64792558a",
+          "triggerTraceId": "e1-http-a11845ec-2c19-489e-a88d-792a1f70cff5"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-20",
+      "state": "L",
+      "text": "a raise is the refusal",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-FR14",
+      "state": "L",
+      "text": "reads Membership/Staff/Client binding, never `presentation_mode`/`profile_id`/`a11y_env` (FR-14 C11:1798)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-1",
+      "state": "L",
+      "text": "effect within the kind's ceiling over `widget_kind`",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-2",
+      "state": "L",
+      "text": "key space matches effect (R3.2.2)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-3",
+      "state": "L",
+      "text": "CONTROL keys in the control registry",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-4",
+      "state": "L",
+      "text": "COMMIT carries a non-null `confirmation_of_ref`",
+      "freshEvidence": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-5",
+      "state": "L",
+      "text": "kind ≠ draft → non-null `produced_by_intent_token_hash` satisfying §3.10.2",
+      "freshEvidence": [
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "c1a4dd9b70631dda1773766be8b48241d328c3dd040da21f757163a63b785d58",
+          "triggerTraceId": "e1fddc97-3ed9-4545-8b7a-eba3c813a70b"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "fb29a48bf38b5988b870e0edc8a011ac785f0b41eefd1f6ee23389083223a5d5",
+          "triggerTraceId": "c6ee0710-27ff-4028-81af-c38a2e8bf917"
+        },
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "df62bd6726f208d9c72812e26d6f2b7dbd8a2122cefd0d9794e1f8bb694a4b08",
+          "triggerTraceId": "0f342350-ba85-4532-9c14-a81d69cd4df2"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "fe61c14311c0e4982b82f85f5ef5888096b6069ec417f8236c07f1ac9ff4c71c",
+          "triggerTraceId": "0782552b-4764-4101-b0c3-3b03758549be"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-6",
+      "state": "L",
+      "text": "`requiredConfirmationKind(subject) === widget_kind`, re-read live (F72)",
+      "freshEvidence": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-7",
+      "state": "L",
+      "text": "the delivering tier was permitted this effect (§3.12)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-8",
+      "state": "L",
+      "text": "the two codes",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-BOOK1",
+      "state": "L",
+      "text": "BOOK.1 subject = `confirmation_subject` (C11:3109)",
+      "freshEvidence": [
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "c1a4dd9b70631dda1773766be8b48241d328c3dd040da21f757163a63b785d58",
+          "triggerTraceId": "e1fddc97-3ed9-4545-8b7a-eba3c813a70b"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "fb29a48bf38b5988b870e0edc8a011ac785f0b41eefd1f6ee23389083223a5d5",
+          "triggerTraceId": "c6ee0710-27ff-4028-81af-c38a2e8bf917"
+        },
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "df62bd6726f208d9c72812e26d6f2b7dbd8a2122cefd0d9794e1f8bb694a4b08",
+          "triggerTraceId": "0f342350-ba85-4532-9c14-a81d69cd4df2"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "fe61c14311c0e4982b82f85f5ef5888096b6069ec417f8236c07f1ac9ff4c71c",
+          "triggerTraceId": "0782552b-4764-4101-b0c3-3b03758549be"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-FR6b",
+      "state": "L",
+      "text": "exactly one pairing (C11:1786)",
+      "freshEvidence": [
+        {
+          "testId": "WF-PAIRING",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "WF-PAIRING",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-FR6d",
+      "state": "L",
+      "text": "no MONEY actuation; `PAYMENT_HANDOFF` gap-blocked; F80 (C11:1788, 1524)",
+      "freshEvidence": [
+        {
+          "testId": "AR-FR6D-NONMONEY",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "AR-FR6D-NONMONEY",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-1",
+      "state": "L",
+      "text": "closed-domain membership (per field)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-2",
+      "state": "L",
+      "text": "cardinality",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-3",
+      "state": "U",
+      "text": "bounds re-read from `bounds_source`",
+      "freshEvidence": [
+        {
+          "testId": "D8-U",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-4",
+      "state": "U",
+      "text": "normalizers applied",
+      "freshEvidence": [
+        {
+          "testId": "D8-U",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-5t",
+      "state": "U",
+      "text": "`c9SafeText` over **text** values",
+      "freshEvidence": [
+        {
+          "testId": "D8-U",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-5p",
+      "state": "U",
+      "text": "`c9SafeText` over **phone** values (U candidate, PKT:469)",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-6",
+      "state": "L",
+      "text": "`max_total_bytes` by refusal",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-7",
+      "state": "L",
+      "text": "inputs on a null schema refused",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-8",
+      "state": "L",
+      "text": "the four codes",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-SCHEMA",
+      "state": "L",
+      "text": "server-held and hash-bound; erased or absent → `SUPERSEDED/handle_stale`; hash failure is a fault (B-10)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-SHAPE",
+      "state": "L",
+      "text": "undeclared keys and kind conformance",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-LABELS",
+      "state": "L",
+      "text": "labels from validated members; no write before 9 (R3.9.1/R3.9.2)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-DENY",
+      "state": "U",
+      "text": "a `c9Deny` is a verdict (R3.9.3)",
+      "freshEvidence": [
+        {
+          "testId": "D8-U",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-0",
+      "state": "L",
+      "text": "reachable on the live path",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-1",
+      "state": "L",
+      "text": "applies exactly when `confirmation?.requires_readback === true`",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-1a",
+      "state": "U",
+      "text": "recomputed at ingress from effect and tier (B-17)",
+      "freshEvidence": [
+        {
+          "testId": "WF-READBACK-DIVERGENCE",
+          "entry": "HTTP",
+          "claim": "L-T",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "WF-READBACK-POSITIVE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "WF-U-R1A",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        },
+        {
+          "testId": "WF-READBACK-DIVERGENCE",
+          "entry": "BIN",
+          "claim": "L-T",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        },
+        {
+          "testId": "WF-READBACK-POSITIVE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-2",
+      "state": "U",
+      "text": "ack present (`readback_missing`)",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-3",
+      "state": "U",
+      "text": "`readback_ref` matches",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-4",
+      "state": "U",
+      "text": "`body_hash` matches (H4 integrity)",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-5",
+      "state": "U",
+      "text": "affirmation ∈ the closed vocabulary for the locale",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-6",
+      "state": "L",
+      "text": "an ack on a record that does not require one (including a null confirmation) is refused",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-7",
+      "state": "U",
+      "text": "refuses, never repairs; the affirmation is never logged or echoed",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.1",
+      "state": "L",
+      "text": "render",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.1a",
+      "state": "L",
+      "text": "R3.9.2 labels only, no `inputs` parameter",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.1b",
+      "state": "L",
+      "text": "one slot",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.2",
+      "state": "L",
+      "text": "appended to the conversation",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.3",
+      "state": "L",
+      "text": "as a USER turn",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.4",
+      "state": "L",
+      "text": "authority NONE (E10)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.5",
+      "state": "L",
+      "text": "first durable write (R3.9.1, E11)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.6",
+      "state": "L",
+      "text": "byte-identical to a typed message from here",
+      "freshEvidence": [
+        {
+          "testId": "TURN-CANONICAL",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d4b7ee03d2ef44c020288883a46af9785d3665c4f26a4f2bc3bee3aac215cfe2",
+          "triggerTraceId": "d0ff6b0d-bf91-49db-a64e-d3229052b51f"
+        },
+        {
+          "testId": "TURN-CANONICAL",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "d0a68674f4c831781abc5fcd6a22c51d46c54c38c2f3e61823d79b23bc4cfacb",
+          "triggerTraceId": "af3b2044-4d1e-4e0c-b428-c9afda61dc35"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.7",
+      "state": "L",
+      "text": "DS-03 A: superseded/handle_stale, no turn, no effect, no guessed label",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.8",
+      "state": "L",
+      "text": "runs in chat ingress",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.9",
+      "state": "L",
+      "text": "`rendered_utterance`/`selected_labels` persisted",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.10",
+      "state": "L",
+      "text": "F15: lowered content read only by Gate 10",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.1",
+      "state": "L",
+      "text": "router over the lowering against live intents",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.2",
+      "state": "L",
+      "text": "`routeUtterance` (pure, pre-LLM, escape first)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.3",
+      "state": "L",
+      "text": "`liveCandidates`",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.4",
+      "state": "L",
+      "text": "`u`, `s`, `q`",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.5",
+      "state": "L",
+      "text": "`ownerSet`/`sameOwner`, undefined fails closed",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.6",
+      "state": "L",
+      "text": "the first row that holds decides",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.7",
+      "state": "L",
+      "text": "exactly one audit record per non-AGREE, in `T`, with its members",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.8",
+      "state": "L",
+      "text": "REFUSE → `intent_divergence`; NULL/AUDIT recorded, not refused",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.9",
+      "state": "L",
+      "text": "widget-layer records only; never substitutes",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.10",
+      "state": "L",
+      "text": "the R3.12.4 fixture duty at `EP-BUILD`",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.11",
+      "state": "L",
+      "text": "intent router",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.R1",
+      "state": "L",
+      "text": "row 1 of «Gate 10 in full»",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.R2",
+      "state": "L",
+      "text": "row 2 of «Gate 10 in full»",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.R3",
+      "state": "L",
+      "text": "row 3 of «Gate 10 in full»",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.R4",
+      "state": "L",
+      "text": "row 4 of «Gate 10 in full»",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.R5",
+      "state": "U",
+      "text": "row 5 of «Gate 10 in full» (null subject with a non-null match of the same effect)",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.R6",
+      "state": "L",
+      "text": "row 6 of «Gate 10 in full»",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.R7",
+      "state": "L",
+      "text": "row 7 of «Gate 10 in full»",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-R1",
+      "state": "L",
+      "text": "fresh read from the canonical owner",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-R2",
+      "state": "L",
+      "text": "witnesses compared, not re-read",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-R3",
+      "state": "L",
+      "text": "value divergence → SUPERSEDED with a rendered diff",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-R4",
+      "state": "L",
+      "text": "`handle_stale`",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-R5",
+      "state": "L",
+      "text": "IntentGateway + owner",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I1",
+      "state": "L",
+      "text": "R3.7.3 nouns never travel to the client",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I2",
+      "state": "L",
+      "text": "R3.7.4 Handle/Witness types",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I3",
+      "state": "L",
+      "text": "F15 exactly seven inputs",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I4",
+      "state": "U",
+      "text": "R3.11.1 approval decision reads nouns from the decision record",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I5",
+      "state": "U",
+      "text": "R3.11.3 reject and re-mint",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I6",
+      "state": "U",
+      "text": "R3.11.4 both checks in order",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I7",
+      "state": "L",
+      "text": "RT3(b)/B-21",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I8",
+      "state": "L",
+      "text": "R3.9.3 rendering",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I9",
+      "state": "L",
+      "text": "BOOK.4 booking nouns",
+      "freshEvidence": [
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "c1a4dd9b70631dda1773766be8b48241d328c3dd040da21f757163a63b785d58",
+          "triggerTraceId": "e1fddc97-3ed9-4545-8b7a-eba3c813a70b"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "fb29a48bf38b5988b870e0edc8a011ac785f0b41eefd1f6ee23389083223a5d5",
+          "triggerTraceId": "c6ee0710-27ff-4028-81af-c38a2e8bf917"
+        },
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "df62bd6726f208d9c72812e26d6f2b7dbd8a2122cefd0d9794e1f8bb694a4b08",
+          "triggerTraceId": "0f342350-ba85-4532-9c14-a81d69cd4df2"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "fe61c14311c0e4982b82f85f5ef5888096b6069ec417f8236c07f1ac9ff4c71c",
+          "triggerTraceId": "0782552b-4764-4101-b0c3-3b03758549be"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I10",
+      "state": "U",
+      "text": "E13 re-enters approval",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-R1a",
+      "state": "L",
+      "text": "REFINE body by the projector",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-R1b",
+      "state": "L",
+      "text": "NAVIGATE body by the projector",
+      "freshEvidence": [
+        {
+          "testId": "NS-SOURCE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "ef0ea2d0334de3fec836003fdc7e9819158c9b69ccc1852c07d13ec6e1491668",
+          "triggerTraceId": "7472173d-d14f-4640-bf83-c9950011b613"
+        },
+        {
+          "testId": "NS-SOURCE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "55cbd2d2bed7fbb5668dcc037b31e570c500b021d99cded961866588d5f485a9",
+          "triggerTraceId": "1e92c9ed-92aa-4fab-bbce-39db0d2fba1b"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-R2",
+      "state": "L",
+      "text": "the same projector",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-R3",
+      "state": "L",
+      "text": "the same enforcement call sites (F95 remainder)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-R4",
+      "state": "L",
+      "text": "no widget PII path",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-R5",
+      "state": "L",
+      "text": "masked body, never a leak",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-R6",
+      "state": "L",
+      "text": "runs in the projector (pointer slot)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I1",
+      "state": "L",
+      "text": "F7",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I2",
+      "state": "L",
+      "text": "L2",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I3",
+      "state": "L",
+      "text": "B-16",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I4",
+      "state": "L",
+      "text": "P9/P10",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I5",
+      "state": "L",
+      "text": "K18",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I6",
+      "state": "L",
+      "text": "`allowedKinds`/B-27",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I7",
+      "state": "L",
+      "text": "B-02/F18",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I8",
+      "state": "L",
+      "text": "B-03",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I9",
+      "state": "L",
+      "text": "RT4/RT4a",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I10",
+      "state": "L",
+      "text": "FR-14/R3.8.3",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I11",
+      "state": "L",
+      "text": "K16",
+      "freshEvidence": [
+        {
+          "testId": "NS-SOURCE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "ef0ea2d0334de3fec836003fdc7e9819158c9b69ccc1852c07d13ec6e1491668",
+          "triggerTraceId": "7472173d-d14f-4640-bf83-c9950011b613"
+        },
+        {
+          "testId": "NS-SOURCE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "55cbd2d2bed7fbb5668dcc037b31e570c500b021d99cded961866588d5f485a9",
+          "triggerTraceId": "1e92c9ed-92aa-4fab-bbce-39db0d2fba1b"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R1",
+      "state": "L",
+      "text": "NONE unreachable",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R2",
+      "state": "L",
+      "text": "NAVIGATE → projector → `next_envelope`",
+      "freshEvidence": [
+        {
+          "testId": "NS-SOURCE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "ef0ea2d0334de3fec836003fdc7e9819158c9b69ccc1852c07d13ec6e1491668",
+          "triggerTraceId": "7472173d-d14f-4640-bf83-c9950011b613"
+        },
+        {
+          "testId": "NS-SOURCE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "55cbd2d2bed7fbb5668dcc037b31e570c500b021d99cded961866588d5f485a9",
+          "triggerTraceId": "1e92c9ed-92aa-4fab-bbce-39db0d2fba1b"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R3",
+      "state": "L",
+      "text": "REFINE → projector → `next_envelope`",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R4",
+      "state": "L",
+      "text": "terminates; no business effect from a selector",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R5",
+      "state": "L",
+      "text": "CONTROL → the one registered control handler, which performs its own principal and tenant check; no Action Engine edge (row 13, C11:4733; R3.2.4). Sub-cases: dismiss, `run.cancel`, `delivery.resolve` (the last needs P-17)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R5b",
+      "state": "L",
+      "text": "the R3.2.4 source test: each handler module imports no Prisma model outside the widget layer's own except through its owner endpoint (`EP-BUILD`, C11:3852-3861)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R6",
+      "state": "L",
+      "text": "DRAFT → draft owner",
+      "freshEvidence": [
+        {
+          "testId": "WR-DRAFT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "0a05f4cf1d8a7185df95bd56d5cb7bd5712fd1af6c8320e6050ce15c91ff176b",
+          "triggerTraceId": "a1a935fe-9ddd-4c91-b2d4-f05de47c90d4"
+        },
+        {
+          "testId": "WR-DRAFT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "ca5b5ee1a323a07a0db37e631cf471ddb8221ad6d235f0361a74a4b4ec04bfed",
+          "triggerTraceId": "9d0a3bde-57d7-4f94-8e0a-f8776517064f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R7",
+      "state": "U",
+      "text": "REQUEST_APPROVAL → approval object → PENDING",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R8",
+      "state": "false",
+      "text": "HANDOFF → one `HandoffTarget`, no capability invoked",
+      "freshEvidence": [],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "globalDisposition": "STOP",
+      "profileApplicable": false
+    },
+    {
+      "gate": "13",
+      "id": "G13-R9",
+      "state": "L",
+      "text": "COMMIT → Gate 14 with a server-minted key",
+      "freshEvidence": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R10",
+      "state": "L",
+      "text": "closed per-class switch (FR-1/B-28)",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I1",
+      "state": "U",
+      "text": "`approval_decision` routing",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I2",
+      "state": "U",
+      "text": "R3.11.3",
+      "freshEvidence": [
+        {
+          "testId": "E1-U-CLASS",
+          "entry": "HTTP",
+          "claim": "U",
+          "recordHash": null,
+          "triggerTraceId": null
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I3",
+      "state": "L",
+      "text": "F74/F75 consumption",
+      "freshEvidence": [
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "c1a4dd9b70631dda1773766be8b48241d328c3dd040da21f757163a63b785d58",
+          "triggerTraceId": "e1fddc97-3ed9-4545-8b7a-eba3c813a70b"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "fb29a48bf38b5988b870e0edc8a011ac785f0b41eefd1f6ee23389083223a5d5",
+          "triggerTraceId": "c6ee0710-27ff-4028-81af-c38a2e8bf917"
+        },
+        {
+          "testId": "BS-SOURCE-RESCHEDULE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "df62bd6726f208d9c72812e26d6f2b7dbd8a2122cefd0d9794e1f8bb694a4b08",
+          "triggerTraceId": "0f342350-ba85-4532-9c14-a81d69cd4df2"
+        },
+        {
+          "testId": "BS-SOURCE-CANCEL",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "fe61c14311c0e4982b82f85f5ef5888096b6069ec417f8236c07f1ac9ff4c71c",
+          "triggerTraceId": "0782552b-4764-4101-b0c3-3b03758549be"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I4",
+      "state": "L",
+      "text": "L7/L8/L10",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I5",
+      "state": "L",
+      "text": "FR2/B-29 receipts",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I6",
+      "state": "L",
+      "text": "F15 AUDIT_RETAINED only",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I7",
+      "state": "L",
+      "text": "F33/F76",
+      "freshEvidence": [
+        {
+          "testId": "WR-COMMIT-ACTION-BOUNDARY",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "WR-COMMIT-ACTION-BOUNDARY",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I8",
+      "state": "L",
+      "text": "FR-11/R3.9.3",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I9",
+      "state": "L",
+      "text": "R3.11.6 approver test / P-27",
+      "freshEvidence": [
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "d44ee9a25963e7b2b658a9fc8a74ca2d4d65eca13f6a6e835fa3ac6c92755390",
+          "triggerTraceId": "e1-http-eaad0400-eb5c-4107-8bbd-401c9ef563c4"
+        },
+        {
+          "testId": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "9e60c9ce3b02146344534aa660c16ecbb126d2ac3a610783424d635f96efc45b",
+          "triggerTraceId": "e1-bin-dcdc5bea-9428-44b4-8520-eed3c2105021"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "14",
+      "id": "G14-a",
+      "state": "L",
+      "text": "`prepare()` receives the key, normalized input, server-minted idempotency key and evidence refs (every G14 key is BLOCKED-DISCHARGE until a live widget COMMIT reaches `prepare()`, E2)",
+      "freshEvidence": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "14",
+      "id": "G14-b",
+      "state": "L",
+      "text": "the policy resolver owns the decision (`assertNoCallerAuthority`, `assertResolverOwnsDecision`)",
+      "freshEvidence": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    },
+    {
+      "gate": "14",
+      "id": "G14-c",
+      "state": "L",
+      "text": "the Action Engine, never the widget, calls the provider owner",
+      "freshEvidence": [
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "claim": "L",
+          "recordHash": "24c006fd9564a569a5e1ade1da027b3a627f7a7448621c7582080baf5289f2d1",
+          "triggerTraceId": "f8a48115-f9da-4ceb-9645-b3ebd580fee7"
+        },
+        {
+          "testId": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "claim": "L",
+          "recordHash": "e343f7ac689d41f354ec97a4ebb0c465c18a569c130c4565bac6fb16d11ea0fa",
+          "triggerTraceId": "741d6f72-2791-4a75-81cc-47aa87a7693f"
+        }
+      ],
+      "mutationCertification": "NOT CERTIFIED — programme interrupted",
+      "certified": false,
+      "profileApplicable": true
+    }
+  ],
+  "certificationBlockers": [
+    "FBE2E L27 reproduces an unchanged receipt appended twice after Dismiss",
+    "Complete fresh mutation/CI aggregation not completed after required STOP"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "platform": "darwin",
+  "shadow": {
+    "address": "127.0.0.1",
+    "family": "IPv4",
+    "port": 56588
+  },
+  "old": {
+    "address": "::",
+    "family": "IPv6",
+    "port": 56588
+  },
+  "fixed": {
+    "address": "127.0.0.1",
+    "family": "IPv4",
+    "port": 56592
+  },
+  "oldResponse": "OTHER_LOCAL_PROCESS",
+  "fixedResponse": "INTENDED_HARNESS",
+  "beforeFails": true,
+  "afterPasses": true
+}

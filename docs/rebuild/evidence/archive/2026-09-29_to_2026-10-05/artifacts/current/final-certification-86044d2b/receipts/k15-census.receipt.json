@@ -1,0 +1,12 @@
+{
+  "candidate": "86044d2b5ce4800c277314ff39e849ece3e63acb",
+  "name": "k15-census",
+  "command": [
+    "node",
+    "docs/rebuild/evidence/maya-chat-first-ux/k15-bundle-census.mjs",
+    "--json"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "exit": 0,
+  "seconds": 0.36
+}

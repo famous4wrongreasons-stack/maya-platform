@@ -1,0 +1,1190 @@
+{
+  "sourceHead": "a65aa04d10500f1b32a25234d922462a0414fc2e",
+  "counts": {
+    "gates": 15,
+    "clauses": 165,
+    "byState": {
+      "L-T": 4,
+      "L": 130,
+      "U": 22,
+      "false": 9
+    }
+  },
+  "profile": {
+    "id": "closed-input.no-handoff@1",
+    "excludedDuties": [
+      "G6-6",
+      "G13-R8"
+    ],
+    "globalFalse": 9,
+    "applicableFalse": 7,
+    "certifiedForProfile": false,
+    "fullContractCertified": false
+  },
+  "rows": [
+    {
+      "gate": "1",
+      "id": "G1-a",
+      "state": "L-T",
+      "classification": "ADMITTED",
+      "text": "HMAC valid: seal verified, keyed, before Gate 1 proceeds"
+    },
+    {
+      "gate": "1",
+      "id": "G1-b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`widget_id` matches"
+    },
+    {
+      "gate": "1",
+      "id": "G1-c",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "not expired"
+    },
+    {
+      "gate": "1",
+      "id": "G1-d",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "not consumed when `single_use`"
+    },
+    {
+      "gate": "1",
+      "id": "G1-e",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "not superseded"
+    },
+    {
+      "gate": "1",
+      "id": "G1-f",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`EXPIRED`/`SUPERSEDED` are response outcomes, with the R3.9.4 successor or the code alone (including A4's three fail-closed conditions)"
+    },
+    {
+      "gate": "1",
+      "id": "G1-g",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the successor reads nothing canonical (no projector or owner port; `EP-BUILD`)"
+    },
+    {
+      "gate": "2",
+      "id": "G2-a",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "session resolved exactly as for a typed message (JWT + Membership, or a verified ClientChannelLink): the same transport chain as `POST /api/ai/chat`, proven by G2-EQ (D-16). `C9Authority.current` in `T` is the K1/K3 principal of Gates 1, 3, 5 and 6, not this clause"
+    },
+    {
+      "gate": "2",
+      "id": "G2-b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "no credential comes from the widget"
+    },
+    {
+      "gate": "2",
+      "id": "G2-c",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`REFUSED/unauthenticated`"
+    },
+    {
+      "gate": "3",
+      "id": "G3-a",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`principal_proof_hash === c9PrincipalHash(live)`, constant time"
+    },
+    {
+      "gate": "3",
+      "id": "G3-b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "a token minted for A and replayed by B fails"
+    },
+    {
+      "gate": "3",
+      "id": "G3-c1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "membership re-create or role change invalidates outstanding envelopes (the membership branch of K4, C11:2546)"
+    },
+    {
+      "gate": "3",
+      "id": "G3-c2",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "client-link unlink/relink invalidates outstanding envelopes (the CLIENT_CHANNEL branch; U candidate, K14-10)"
+    },
+    {
+      "gate": "3",
+      "id": "G3-d",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`REFUSED/widget_principal_mismatch`"
+    },
+    {
+      "gate": "3",
+      "id": "G3-e",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "a shared push is inert: a web-push token minted for A and submitted by B is refused, NW (T-3)"
+    },
+    {
+      "gate": "3",
+      "id": "G3-f",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "a forwarded Telegram message is inert (U candidate: K14-10 PKT:485, R-03/P-33)"
+    },
+    {
+      "gate": "4",
+      "id": "G4-a",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`TenantContextService.assertTenantId` over the record's tenant and the live principal's"
+    },
+    {
+      "gate": "4",
+      "id": "G4-b",
+      "state": "L-T",
+      "classification": "ADMITTED",
+      "text": "`REFUSED/tenant_mismatch`"
+    },
+    {
+      "gate": "5",
+      "id": "G5-a",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "floor re-derived from the live registry and policy tables"
+    },
+    {
+      "gate": "5",
+      "id": "G5-b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "compared with the server-derived level (K1/K2, in `T`)"
+    },
+    {
+      "gate": "5",
+      "id": "G5-c",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "capped by `profile.max_verification_level`"
+    },
+    {
+      "gate": "5",
+      "id": "G5-d",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "branch per effect class"
+    },
+    {
+      "gate": "5",
+      "id": "G5-e",
+      "state": "L-T",
+      "classification": "ADMITTED",
+      "text": "any stored/recomputed difference → `SUPERSEDED/policy_floor_changed` + successor or the code alone, with the non-durable `widget_floor_divergence` counter"
+    },
+    {
+      "gate": "5",
+      "id": "G5-f",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "`NEEDS_SECOND_CHANNEL`/`HANDOFF_REQUIRED` + deep link (U candidate, K6/F53; mechanism blocked on OD-4 + P-12; never Gate 13's `HandoffTarget`)"
+    },
+    {
+      "gate": "6",
+      "id": "G6-1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "dispatch on `subjectCapability(record)`, bound once"
+    },
+    {
+      "gate": "6",
+      "id": "G6-2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`authority_hint` not read"
+    },
+    {
+      "gate": "6",
+      "id": "G6-3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "a never-rendered widget still cannot act"
+    },
+    {
+      "gate": "6",
+      "id": "G6-4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`REFUSED/insufficient_authority`, AuthorityResolver"
+    },
+    {
+      "gate": "6",
+      "id": "G6-5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "null subject → proceeds with no owner call"
+    },
+    {
+      "gate": "6",
+      "id": "G6-6",
+      "state": "false",
+      "classification": "ACCEPTED_STOP",
+      "text": "HANDOFF: destination fences only (registration, F48, `targetFloor('s')`, landing ingress)",
+      "current_boundary": "D-H A: HANDOFF STOP preserved for this release; generic receiver forbidden. Still fails the full-165 activation threshold."
+    },
+    {
+      "gate": "6",
+      "id": "G6-7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "HANDOFF never resolves `assertCanExecute`, `c9Capability` or the allowlist"
+    },
+    {
+      "gate": "6",
+      "id": "G6-8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "(a) allowlist row"
+    },
+    {
+      "gate": "6",
+      "id": "G6-9",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "(b) `policyDecision === 'ALLOW'`"
+    },
+    {
+      "gate": "6",
+      "id": "G6-10",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "(c) `authenticated_request`"
+    },
+    {
+      "gate": "6",
+      "id": "G6-11",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "(d) live principal role ∈ `allowedActorRoles`"
+    },
+    {
+      "gate": "6",
+      "id": "G6-12",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "(e) entitlements grant `requiredFeatures`"
+    },
+    {
+      "gate": "6",
+      "id": "G6-13",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "Gate 14 governs; a disagreement is refused and counted"
+    },
+    {
+      "gate": "6",
+      "id": "G6-14",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the 47: `assertCanExecute(principal, def)` with surface `'web'`"
+    },
+    {
+      "gate": "6",
+      "id": "G6-15",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "non-catalogue: `WIDGET_CAPABILITY_POLICY` row (build totality + positive)"
+    },
+    {
+      "gate": "6",
+      "id": "G6-16",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`c9Capability` when `c9_domain !== null`, including BI non-READ"
+    },
+    {
+      "gate": "6",
+      "id": "G6-17",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "run-less: `c9Capability` not applied"
+    },
+    {
+      "gate": "6",
+      "id": "G6-18",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "CONTROL: `CONTROL_FLOOR[ref.key]` at Gate 5, Gate 3's principal binding, Gate 4's tenant assertion, then the one registered handler's own principal and tenant check (R3.2.4, C11:4771-4773); no execute-admission test"
+    },
+    {
+      "gate": "6",
+      "id": "G6-19",
+      "state": "L-T",
+      "classification": "ADMITTED",
+      "text": "TOOL unreachable/refused"
+    },
+    {
+      "gate": "6",
+      "id": "G6-20",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "a raise is the refusal"
+    },
+    {
+      "gate": "6",
+      "id": "G6-FR14",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "reads Membership/Staff/Client binding, never `presentation_mode`/`profile_id`/`a11y_env` (FR-14 C11:1798)"
+    },
+    {
+      "gate": "7",
+      "id": "G7-1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "effect within the kind's ceiling over `widget_kind`"
+    },
+    {
+      "gate": "7",
+      "id": "G7-2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "key space matches effect (R3.2.2)"
+    },
+    {
+      "gate": "7",
+      "id": "G7-3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "CONTROL keys in the control registry"
+    },
+    {
+      "gate": "7",
+      "id": "G7-4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "COMMIT carries a non-null `confirmation_of_ref`"
+    },
+    {
+      "gate": "7",
+      "id": "G7-5",
+      "state": "false",
+      "classification": "EVIDENCE_MISSING",
+      "text": "kind ≠ draft → non-null `produced_by_intent_token_hash` satisfying §3.10.2",
+      "current_boundary": "Create is draft-linked. Non-draft reschedule/cancel producing-record linkage still lacks a production-triggered HTTP/BIN pair."
+    },
+    {
+      "gate": "7",
+      "id": "G7-6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`requiredConfirmationKind(subject) === widget_kind`, re-read live (F72)"
+    },
+    {
+      "gate": "7",
+      "id": "G7-7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the delivering tier was permitted this effect (§3.12)"
+    },
+    {
+      "gate": "7",
+      "id": "G7-8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the two codes"
+    },
+    {
+      "gate": "7",
+      "id": "G7-BOOK1",
+      "state": "false",
+      "classification": "EVIDENCE_MISSING",
+      "text": "BOOK.1 subject = `confirmation_subject` (C11:3109)",
+      "current_boundary": "Create subject is proven; whole BOOK.1 includes the non-draft reschedule/cancel identities, whose existing E2 sources use direct emitter setup."
+    },
+    {
+      "gate": "7",
+      "id": "G7-FR6b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "exactly one pairing (C11:1786)"
+    },
+    {
+      "gate": "7",
+      "id": "G7-FR6d",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "no MONEY actuation; `PAYMENT_HANDOFF` gap-blocked; F80 (C11:1788, 1524)"
+    },
+    {
+      "gate": "8",
+      "id": "G8-1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "closed-domain membership (per field)"
+    },
+    {
+      "gate": "8",
+      "id": "G8-2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "cardinality"
+    },
+    {
+      "gate": "8",
+      "id": "G8-3",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "bounds re-read from `bounds_source`"
+    },
+    {
+      "gate": "8",
+      "id": "G8-4",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "normalizers applied"
+    },
+    {
+      "gate": "8",
+      "id": "G8-5t",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "`c9SafeText` over **text** values"
+    },
+    {
+      "gate": "8",
+      "id": "G8-5p",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "`c9SafeText` over **phone** values (U candidate, PKT:469)"
+    },
+    {
+      "gate": "8",
+      "id": "G8-6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`max_total_bytes` by refusal"
+    },
+    {
+      "gate": "8",
+      "id": "G8-7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "inputs on a null schema refused"
+    },
+    {
+      "gate": "8",
+      "id": "G8-8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the four codes"
+    },
+    {
+      "gate": "8",
+      "id": "G8-SCHEMA",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "server-held and hash-bound; erased or absent → `SUPERSEDED/handle_stale`; hash failure is a fault (B-10)"
+    },
+    {
+      "gate": "8",
+      "id": "G8-SHAPE",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "undeclared keys and kind conformance"
+    },
+    {
+      "gate": "8",
+      "id": "G8-LABELS",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "labels from validated members; no write before 9 (R3.9.1/R3.9.2)"
+    },
+    {
+      "gate": "8",
+      "id": "G8-DENY",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "a `c9Deny` is a verdict (R3.9.3)"
+    },
+    {
+      "gate": "8-R",
+      "id": "R-0",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "reachable on the live path"
+    },
+    {
+      "gate": "8-R",
+      "id": "R-1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "applies exactly when `confirmation?.requires_readback === true`"
+    },
+    {
+      "gate": "8-R",
+      "id": "R-1a",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "recomputed at ingress from effect and tier (B-17)"
+    },
+    {
+      "gate": "8-R",
+      "id": "R-2",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "ack present (`readback_missing`)"
+    },
+    {
+      "gate": "8-R",
+      "id": "R-3",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "`readback_ref` matches"
+    },
+    {
+      "gate": "8-R",
+      "id": "R-4",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "`body_hash` matches (H4 integrity)"
+    },
+    {
+      "gate": "8-R",
+      "id": "R-5",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "affirmation ∈ the closed vocabulary for the locale"
+    },
+    {
+      "gate": "8-R",
+      "id": "R-6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "an ack on a record that does not require one (including a null confirmation) is refused"
+    },
+    {
+      "gate": "8-R",
+      "id": "R-7",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "refuses, never repairs; the affirmation is never logged or echoed"
+    },
+    {
+      "gate": "9",
+      "id": "9.1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "render"
+    },
+    {
+      "gate": "9",
+      "id": "9.1a",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "R3.9.2 labels only, no `inputs` parameter"
+    },
+    {
+      "gate": "9",
+      "id": "9.1b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "one slot"
+    },
+    {
+      "gate": "9",
+      "id": "9.2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "appended to the conversation"
+    },
+    {
+      "gate": "9",
+      "id": "9.3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "as a USER turn"
+    },
+    {
+      "gate": "9",
+      "id": "9.4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "authority NONE (E10)"
+    },
+    {
+      "gate": "9",
+      "id": "9.5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "first durable write (R3.9.1, E11)"
+    },
+    {
+      "gate": "9",
+      "id": "9.6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "byte-identical to a typed message from here"
+    },
+    {
+      "gate": "9",
+      "id": "9.7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "DS-03 A: superseded/handle_stale, no turn, no effect, no guessed label"
+    },
+    {
+      "gate": "9",
+      "id": "9.8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "runs in chat ingress"
+    },
+    {
+      "gate": "9",
+      "id": "9.9",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`rendered_utterance`/`selected_labels` persisted"
+    },
+    {
+      "gate": "9",
+      "id": "9.10",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "F15: lowered content read only by Gate 10"
+    },
+    {
+      "gate": "10",
+      "id": "10.1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "router over the lowering against live intents"
+    },
+    {
+      "gate": "10",
+      "id": "10.2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`routeUtterance` (pure, pre-LLM, escape first)"
+    },
+    {
+      "gate": "10",
+      "id": "10.3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`liveCandidates`"
+    },
+    {
+      "gate": "10",
+      "id": "10.4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`u`, `s`, `q`"
+    },
+    {
+      "gate": "10",
+      "id": "10.5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`ownerSet`/`sameOwner`, undefined fails closed"
+    },
+    {
+      "gate": "10",
+      "id": "10.6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the first row that holds decides"
+    },
+    {
+      "gate": "10",
+      "id": "10.7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "exactly one audit record per non-AGREE, in `T`, with its members"
+    },
+    {
+      "gate": "10",
+      "id": "10.8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "REFUSE → `intent_divergence`; NULL/AUDIT recorded, not refused"
+    },
+    {
+      "gate": "10",
+      "id": "10.9",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "widget-layer records only; never substitutes"
+    },
+    {
+      "gate": "10",
+      "id": "10.10",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the R3.12.4 fixture duty at `EP-BUILD`"
+    },
+    {
+      "gate": "10",
+      "id": "10.11",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "intent router"
+    },
+    {
+      "gate": "10",
+      "id": "10.R1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "row 1 of «Gate 10 in full»"
+    },
+    {
+      "gate": "10",
+      "id": "10.R2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "row 2 of «Gate 10 in full»"
+    },
+    {
+      "gate": "10",
+      "id": "10.R3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "row 3 of «Gate 10 in full»"
+    },
+    {
+      "gate": "10",
+      "id": "10.R4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "row 4 of «Gate 10 in full»"
+    },
+    {
+      "gate": "10",
+      "id": "10.R5",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "row 5 of «Gate 10 in full» (null subject with a non-null match of the same effect)"
+    },
+    {
+      "gate": "10",
+      "id": "10.R6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "row 6 of «Gate 10 in full»"
+    },
+    {
+      "gate": "10",
+      "id": "10.R7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "row 7 of «Gate 10 in full»"
+    },
+    {
+      "gate": "11",
+      "id": "G11-R1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "fresh read from the canonical owner"
+    },
+    {
+      "gate": "11",
+      "id": "G11-R2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "witnesses compared, not re-read"
+    },
+    {
+      "gate": "11",
+      "id": "G11-R3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "value divergence → SUPERSEDED with a rendered diff"
+    },
+    {
+      "gate": "11",
+      "id": "G11-R4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`handle_stale`"
+    },
+    {
+      "gate": "11",
+      "id": "G11-R5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "IntentGateway + owner"
+    },
+    {
+      "gate": "11",
+      "id": "G11-I1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "R3.7.3 nouns never travel to the client"
+    },
+    {
+      "gate": "11",
+      "id": "G11-I2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "R3.7.4 Handle/Witness types"
+    },
+    {
+      "gate": "11",
+      "id": "G11-I3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "F15 exactly seven inputs"
+    },
+    {
+      "gate": "11",
+      "id": "G11-I4",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "R3.11.1 approval decision reads nouns from the decision record"
+    },
+    {
+      "gate": "11",
+      "id": "G11-I5",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "R3.11.3 reject and re-mint"
+    },
+    {
+      "gate": "11",
+      "id": "G11-I6",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "R3.11.4 both checks in order"
+    },
+    {
+      "gate": "11",
+      "id": "G11-I7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "RT3(b)/B-21"
+    },
+    {
+      "gate": "11",
+      "id": "G11-I8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "R3.9.3 rendering"
+    },
+    {
+      "gate": "11",
+      "id": "G11-I9",
+      "state": "false",
+      "classification": "EVIDENCE_MISSING",
+      "text": "BOOK.4 booking nouns",
+      "current_boundary": "Create selector nouns are exercised; BOOK.4 non-draft appointment noun re-resolution still lacks a production-triggered pair."
+    },
+    {
+      "gate": "11",
+      "id": "G11-I10",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "E13 re-enters approval"
+    },
+    {
+      "gate": "12",
+      "id": "G12-R1a",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "REFINE body by the projector"
+    },
+    {
+      "gate": "12",
+      "id": "G12-R1b",
+      "state": "false",
+      "classification": "EVIDENCE_MISSING",
+      "text": "NAVIGATE body by the projector",
+      "current_boundary": "NAVIGATE is implemented and the old built:false metadata is corrected. Current executable RI detail/w coverage does not constitute a production-minted whole-target HTTP/BIN pair."
+    },
+    {
+      "gate": "12",
+      "id": "G12-R2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the same projector"
+    },
+    {
+      "gate": "12",
+      "id": "G12-R3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the same enforcement call sites (F95 remainder)"
+    },
+    {
+      "gate": "12",
+      "id": "G12-R4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "no widget PII path"
+    },
+    {
+      "gate": "12",
+      "id": "G12-R5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "masked body, never a leak"
+    },
+    {
+      "gate": "12",
+      "id": "G12-R6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "runs in the projector (pointer slot)"
+    },
+    {
+      "gate": "12",
+      "id": "G12-I1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "F7"
+    },
+    {
+      "gate": "12",
+      "id": "G12-I2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "L2"
+    },
+    {
+      "gate": "12",
+      "id": "G12-I3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "B-16"
+    },
+    {
+      "gate": "12",
+      "id": "G12-I4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "P9/P10"
+    },
+    {
+      "gate": "12",
+      "id": "G12-I5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "K18"
+    },
+    {
+      "gate": "12",
+      "id": "G12-I6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`allowedKinds`/B-27"
+    },
+    {
+      "gate": "12",
+      "id": "G12-I7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "B-02/F18"
+    },
+    {
+      "gate": "12",
+      "id": "G12-I8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "B-03"
+    },
+    {
+      "gate": "12",
+      "id": "G12-I9",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "RT4/RT4a"
+    },
+    {
+      "gate": "12",
+      "id": "G12-I10",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "FR-14/R3.8.3"
+    },
+    {
+      "gate": "12",
+      "id": "G12-I11",
+      "state": "false",
+      "classification": "EVIDENCE_MISSING",
+      "text": "K16",
+      "current_boundary": "K16 source-capability/erasure fences are implemented and tested. Whole NAVIGATE target-class HTTP/BIN admission remains absent."
+    },
+    {
+      "gate": "13",
+      "id": "G13-R1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "NONE unreachable"
+    },
+    {
+      "gate": "13",
+      "id": "G13-R2",
+      "state": "false",
+      "classification": "EVIDENCE_MISSING",
+      "text": "NAVIGATE → projector → `next_envelope`",
+      "current_boundary": "NAVIGATE -> projector -> next_envelope exists. No invented trigger or direct emitter call is credited as whole-clause L."
+    },
+    {
+      "gate": "13",
+      "id": "G13-R3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "REFINE → projector → `next_envelope`"
+    },
+    {
+      "gate": "13",
+      "id": "G13-R4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "terminates; no business effect from a selector"
+    },
+    {
+      "gate": "13",
+      "id": "G13-R5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "CONTROL → the one registered control handler, which performs its own principal and tenant check; no Action Engine edge (row 13, C11:4733; R3.2.4). Sub-cases: dismiss, `run.cancel`, `delivery.resolve` (the last needs P-17)"
+    },
+    {
+      "gate": "13",
+      "id": "G13-R5b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the R3.2.4 source test: each handler module imports no Prisma model outside the widget layer's own except through its owner endpoint (`EP-BUILD`, C11:3852-3861)"
+    },
+    {
+      "gate": "13",
+      "id": "G13-R6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "DRAFT → draft owner"
+    },
+    {
+      "gate": "13",
+      "id": "G13-R7",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "REQUEST_APPROVAL → approval object → PENDING"
+    },
+    {
+      "gate": "13",
+      "id": "G13-R8",
+      "state": "false",
+      "classification": "ACCEPTED_STOP",
+      "text": "HANDOFF → one `HandoffTarget`, no capability invoked",
+      "current_boundary": "D-H A: HANDOFF STOP preserved for this release; generic receiver forbidden. Still fails the full-165 activation threshold."
+    },
+    {
+      "gate": "13",
+      "id": "G13-R9",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "COMMIT → Gate 14 with a server-minted key"
+    },
+    {
+      "gate": "13",
+      "id": "G13-R10",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "closed per-class switch (FR-1/B-28)"
+    },
+    {
+      "gate": "13",
+      "id": "G13-I1",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "`approval_decision` routing"
+    },
+    {
+      "gate": "13",
+      "id": "G13-I2",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "R3.11.3"
+    },
+    {
+      "gate": "13",
+      "id": "G13-I3",
+      "state": "false",
+      "classification": "EVIDENCE_MISSING",
+      "text": "F74/F75 consumption",
+      "current_boundary": "Single-use create is exercised, but F74/F75 includes non-draft producing-record identity; the whole pair remains unproved."
+    },
+    {
+      "gate": "13",
+      "id": "G13-I4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "L7/L8/L10"
+    },
+    {
+      "gate": "13",
+      "id": "G13-I5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "FR2/B-29 receipts"
+    },
+    {
+      "gate": "13",
+      "id": "G13-I6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "F15 AUDIT_RETAINED only"
+    },
+    {
+      "gate": "13",
+      "id": "G13-I7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "F33/F76"
+    },
+    {
+      "gate": "13",
+      "id": "G13-I8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "FR-11/R3.9.3"
+    },
+    {
+      "gate": "13",
+      "id": "G13-I9",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "R3.11.6 approver test / P-27"
+    },
+    {
+      "gate": "14",
+      "id": "G14-a",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`prepare()` receives the key, normalized input, server-minted idempotency key and evidence refs (every G14 key is BLOCKED-DISCHARGE until a live widget COMMIT reaches `prepare()`, E2)"
+    },
+    {
+      "gate": "14",
+      "id": "G14-b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the policy resolver owns the decision (`assertNoCallerAuthority`, `assertResolverOwnsDecision`)"
+    },
+    {
+      "gate": "14",
+      "id": "G14-c",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the Action Engine, never the widget, calls the provider owner"
+    }
+  ]
+}

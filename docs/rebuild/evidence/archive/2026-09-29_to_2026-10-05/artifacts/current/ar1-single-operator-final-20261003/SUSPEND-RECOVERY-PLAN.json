@@ -1,0 +1,1258 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "recordedAt": "2026-10-04T06:42:21.239748+00:00",
+  "reason": "Clamshell Sleep on battery despite idle inhibitor; owner confirms Mac now open on AC. Whole sleep-overlapped parts are inadmissible even if their tests passed.",
+  "firstSleep": "2026-10-04T06:13:11+00:00",
+  "fullWake": "2026-10-04T06:37:15+00:00",
+  "retainedWholeParts": [
+    {
+      "slot": "4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-4.json",
+          "sha256": "635c019341e8a793885590036387438e2f556f2a5cb5244cd904546978be5495"
+        },
+        {
+          "path": "receipts/mutation-4.receipt.json",
+          "sha256": "e9bfd0a6e560f5831c27965349394b11e24c3bdbbdd2b32b6a475f243396a02e"
+        },
+        {
+          "path": "receipts/mutation-4.log",
+          "sha256": "635c019341e8a793885590036387438e2f556f2a5cb5244cd904546978be5495"
+        }
+      ]
+    },
+    {
+      "slot": "6-part-1-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-6-part-1-of-4.json",
+          "sha256": "d2e203eae40bd9ca340d8ca82f123839b3b03ffb5ae8bb19ea8fb2ffc95a1525"
+        },
+        {
+          "path": "receipts/mutation-6-part-1-of-4.receipt.json",
+          "sha256": "3f637b09e5f2afd7b2b91af38766e09f9a9610357b1c7038f505bb29a1266f13"
+        },
+        {
+          "path": "receipts/mutation-6-part-1-of-4.log",
+          "sha256": "d2e203eae40bd9ca340d8ca82f123839b3b03ffb5ae8bb19ea8fb2ffc95a1525"
+        }
+      ]
+    },
+    {
+      "slot": "6-part-2-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-6-part-2-of-4.json",
+          "sha256": "5e362a35206da6a8518861068bf41db01928174bb36b7b640d3d50bc8f08c5ff"
+        },
+        {
+          "path": "receipts/mutation-6-part-2-of-4.receipt.json",
+          "sha256": "ca4e8b0c9d917ed62a87848f6d4e2eadaa455016e085737c0d33841f3041019c"
+        },
+        {
+          "path": "receipts/mutation-6-part-2-of-4.log",
+          "sha256": "5e362a35206da6a8518861068bf41db01928174bb36b7b640d3d50bc8f08c5ff"
+        }
+      ]
+    },
+    {
+      "slot": "6-part-3-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-6-part-3-of-4.json",
+          "sha256": "8ca4a2e5c050aa6b4641483e0110df1e1643e0eeda14b91d23616619129d2b27"
+        },
+        {
+          "path": "receipts/mutation-6-part-3-of-4.receipt.json",
+          "sha256": "4220d8877af46d4da339dd9cf7d72d5c70f5ab346ede72498fd7343d5090c25a"
+        },
+        {
+          "path": "receipts/mutation-6-part-3-of-4.log",
+          "sha256": "8ca4a2e5c050aa6b4641483e0110df1e1643e0eeda14b91d23616619129d2b27"
+        }
+      ]
+    },
+    {
+      "slot": "6-part-4-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-6-part-4-of-4.json",
+          "sha256": "b50ed34eb383e70ca0bee9e318c76026c9d3b65725ada43b2858ed698cd85d18"
+        },
+        {
+          "path": "receipts/mutation-6-part-4-of-4.receipt.json",
+          "sha256": "d37f420311a3bcf5eebccaf8634554789d2b870d59ff57a3a081f93adb970c61"
+        },
+        {
+          "path": "receipts/mutation-6-part-4-of-4.log",
+          "sha256": "b50ed34eb383e70ca0bee9e318c76026c9d3b65725ada43b2858ed698cd85d18"
+        }
+      ]
+    },
+    {
+      "slot": "7-part-1-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-7-part-1-of-4.json",
+          "sha256": "f1baaa29beb7f33f66bb3e1941de460ac244c6faf4314ed7b69b79aba1f2a829"
+        },
+        {
+          "path": "receipts/mutation-7-part-1-of-4.receipt.json",
+          "sha256": "8c1adc17b2d98f08d4fdec80f8c2f583cbbc62be9ef32eb87a31f0f309125a5d"
+        },
+        {
+          "path": "receipts/mutation-7-part-1-of-4.log",
+          "sha256": "f1baaa29beb7f33f66bb3e1941de460ac244c6faf4314ed7b69b79aba1f2a829"
+        }
+      ]
+    },
+    {
+      "slot": "7-part-2-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-7-part-2-of-4.json",
+          "sha256": "91224916b902ece57accf0608fc8c118578f754329acbc32ac2ebadce653e92f"
+        },
+        {
+          "path": "receipts/mutation-7-part-2-of-4.receipt.json",
+          "sha256": "7f2c5058a00bc9acfac976f0169f3a1647861655dc4c412fee89109c268f73a9"
+        },
+        {
+          "path": "receipts/mutation-7-part-2-of-4.log",
+          "sha256": "91224916b902ece57accf0608fc8c118578f754329acbc32ac2ebadce653e92f"
+        }
+      ]
+    },
+    {
+      "slot": "7-part-3-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-7-part-3-of-4.json",
+          "sha256": "bcd8570d0dfd5dbee3d75c4331d37905104b6708cad84acb01d1cbe1455589fd"
+        },
+        {
+          "path": "receipts/mutation-7-part-3-of-4.receipt.json",
+          "sha256": "2aeb5ac2ff807d7d69cc8fc229c99dc45dbb8d5720ba78cc32780e7a37ce95f5"
+        },
+        {
+          "path": "receipts/mutation-7-part-3-of-4.log",
+          "sha256": "bcd8570d0dfd5dbee3d75c4331d37905104b6708cad84acb01d1cbe1455589fd"
+        }
+      ]
+    },
+    {
+      "slot": "7-part-4-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-7-part-4-of-4.json",
+          "sha256": "eb94e23b701fbcf255ef319742d78249e5b33cf2641cc9cc17c5323196260517"
+        },
+        {
+          "path": "receipts/mutation-7-part-4-of-4.receipt.json",
+          "sha256": "de60c6776f7f7b90b3f9143cca94b6d6117f003e7af12b1d584904bccfda9651"
+        },
+        {
+          "path": "receipts/mutation-7-part-4-of-4.log",
+          "sha256": "eb94e23b701fbcf255ef319742d78249e5b33cf2641cc9cc17c5323196260517"
+        }
+      ]
+    },
+    {
+      "slot": "8",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-8.json",
+          "sha256": "1479c6a966c07b7602d915c27660afb08776b4c1fdf230483a3908a7339bbe7c"
+        },
+        {
+          "path": "receipts/mutation-8.receipt.json",
+          "sha256": "3b1c0988a2692544f287c68bf4444757e9c04077947d755916e6004db823a4a4"
+        },
+        {
+          "path": "receipts/mutation-8.log",
+          "sha256": "1479c6a966c07b7602d915c27660afb08776b4c1fdf230483a3908a7339bbe7c"
+        }
+      ]
+    },
+    {
+      "slot": "9-part-1-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-9-part-1-of-4.json",
+          "sha256": "cbc795e5a1a28c36b0327325397de70f8d34bd8ee751c5c5f22a89a0389af280"
+        },
+        {
+          "path": "receipts/mutation-9-part-1-of-4.receipt.json",
+          "sha256": "cd506e9d8e06034948db43c97f4d21565398c0c44e571bd3a6275be7319080bc"
+        },
+        {
+          "path": "receipts/mutation-9-part-1-of-4.log",
+          "sha256": "cbc795e5a1a28c36b0327325397de70f8d34bd8ee751c5c5f22a89a0389af280"
+        }
+      ]
+    },
+    {
+      "slot": "9-part-2-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-9-part-2-of-4.json",
+          "sha256": "4b19b2c395db33209a7c3b4c77001aee14de5644b7e18cb84755fb5ba70f37bd"
+        },
+        {
+          "path": "receipts/mutation-9-part-2-of-4.receipt.json",
+          "sha256": "5c092d3f8adb1892d2dae4a2178190b6fb99e0cd55d5084aa380074eae947b97"
+        },
+        {
+          "path": "receipts/mutation-9-part-2-of-4.log",
+          "sha256": "4b19b2c395db33209a7c3b4c77001aee14de5644b7e18cb84755fb5ba70f37bd"
+        }
+      ]
+    },
+    {
+      "slot": "9-part-3-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-9-part-3-of-4.json",
+          "sha256": "01882bddb102b42d3215e6eff75b23ad837a97b2eef244186ac4bbc8a815b31b"
+        },
+        {
+          "path": "receipts/mutation-9-part-3-of-4.receipt.json",
+          "sha256": "84526732c4005da7a873d308df2478a069c45b4dc1ae7b18743c4500c6cfad02"
+        },
+        {
+          "path": "receipts/mutation-9-part-3-of-4.log",
+          "sha256": "01882bddb102b42d3215e6eff75b23ad837a97b2eef244186ac4bbc8a815b31b"
+        }
+      ]
+    },
+    {
+      "slot": "9-part-4-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-9-part-4-of-4.json",
+          "sha256": "bd2c114809a757d243a104d46ab370061316d940b078427a11f55200edcd4c5d"
+        },
+        {
+          "path": "receipts/mutation-9-part-4-of-4.receipt.json",
+          "sha256": "7029f34c06d2f45bb850a63b53eefc95f8991809c0287f62c6bdce9ab8059277"
+        },
+        {
+          "path": "receipts/mutation-9-part-4-of-4.log",
+          "sha256": "bd2c114809a757d243a104d46ab370061316d940b078427a11f55200edcd4c5d"
+        }
+      ]
+    },
+    {
+      "slot": "10-part-1-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-10-part-1-of-4.json",
+          "sha256": "b0a3e994f211af55843076bce9378246886cffbf4e330a8caa9deafd64d5910c"
+        },
+        {
+          "path": "receipts/mutation-10-part-1-of-4.receipt.json",
+          "sha256": "61cfe032741434c58315d93ad59b3e4117ee19067519151da249a3eefe76a558"
+        },
+        {
+          "path": "receipts/mutation-10-part-1-of-4.log",
+          "sha256": "b0a3e994f211af55843076bce9378246886cffbf4e330a8caa9deafd64d5910c"
+        }
+      ]
+    },
+    {
+      "slot": "10-part-2-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-10-part-2-of-4.json",
+          "sha256": "1f07bf4f218fde7d160f3f71587960bf6d6a18001f088db68672a6102014c7dc"
+        },
+        {
+          "path": "receipts/mutation-10-part-2-of-4.receipt.json",
+          "sha256": "1b623289215175efb45587e3393f436eaf63344581ac9043ee0ddca3137a2433"
+        },
+        {
+          "path": "receipts/mutation-10-part-2-of-4.log",
+          "sha256": "1f07bf4f218fde7d160f3f71587960bf6d6a18001f088db68672a6102014c7dc"
+        }
+      ]
+    },
+    {
+      "slot": "10-part-3-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-10-part-3-of-4.json",
+          "sha256": "f75c41b02eb9265915f072f408eb8510b97514474bcd595f5653c1020142f1c6"
+        },
+        {
+          "path": "receipts/mutation-10-part-3-of-4.receipt.json",
+          "sha256": "a64565c6600d641289e360f598879f6c10ea748dba8657b125beba55510768d5"
+        },
+        {
+          "path": "receipts/mutation-10-part-3-of-4.log",
+          "sha256": "f75c41b02eb9265915f072f408eb8510b97514474bcd595f5653c1020142f1c6"
+        }
+      ]
+    },
+    {
+      "slot": "10-part-4-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-10-part-4-of-4.json",
+          "sha256": "e7d318e0467175f17b94fbdf4be45cb8b21ea5e3577b8034d041133de157a05b"
+        },
+        {
+          "path": "receipts/mutation-10-part-4-of-4.receipt.json",
+          "sha256": "c835199d2bebca21418a4f7613de0c55cf676e35c3f460255433c510970de4ae"
+        },
+        {
+          "path": "receipts/mutation-10-part-4-of-4.log",
+          "sha256": "e7d318e0467175f17b94fbdf4be45cb8b21ea5e3577b8034d041133de157a05b"
+        }
+      ]
+    },
+    {
+      "slot": "11",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-11.json",
+          "sha256": "c88678963ee413dc863c210c1436f6906df331e7a447030d7ef53fb26bdda624"
+        },
+        {
+          "path": "receipts/mutation-11.receipt.json",
+          "sha256": "2690ff06209cb9cff7ed7231db2c27f2426e1dd9a84248924cd913a3445f5a29"
+        },
+        {
+          "path": "receipts/mutation-11.log",
+          "sha256": "c88678963ee413dc863c210c1436f6906df331e7a447030d7ef53fb26bdda624"
+        }
+      ]
+    },
+    {
+      "slot": "12",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-12.json",
+          "sha256": "81c56ba6e439f661c22c81fe8fc45188f4545f8406b2a9c53837623c103c70a2"
+        },
+        {
+          "path": "receipts/mutation-12.receipt.json",
+          "sha256": "fdf3568a4fd97e7dca0d12af0d32a0bdf9fe2239d1315ea57f9bc0dc28c63169"
+        },
+        {
+          "path": "receipts/mutation-12.log",
+          "sha256": "81c56ba6e439f661c22c81fe8fc45188f4545f8406b2a9c53837623c103c70a2"
+        }
+      ]
+    },
+    {
+      "slot": "13-part-1-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-13-part-1-of-4.json",
+          "sha256": "f203009e85e38e1b5b7ca8f4e06541a088d5c401a354e11f5a975ea663db096e"
+        },
+        {
+          "path": "receipts/mutation-13-part-1-of-4.receipt.json",
+          "sha256": "e7d375385a54cf0f96f2b3d59590f3d67d2178ca08e4d8fa60e5a588c5b57d06"
+        },
+        {
+          "path": "receipts/mutation-13-part-1-of-4.log",
+          "sha256": "f203009e85e38e1b5b7ca8f4e06541a088d5c401a354e11f5a975ea663db096e"
+        }
+      ]
+    },
+    {
+      "slot": "13-part-2-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-13-part-2-of-4.json",
+          "sha256": "8095c100570e867e3fd369bfb955939546a93b9f312ffc2bdc57b43eeeb2a03f"
+        },
+        {
+          "path": "receipts/mutation-13-part-2-of-4.receipt.json",
+          "sha256": "7ed05bddefd4645c2cb43d8e708e64bab5bbc237900a17e572953a3d2a3bfbbd"
+        },
+        {
+          "path": "receipts/mutation-13-part-2-of-4.log",
+          "sha256": "8095c100570e867e3fd369bfb955939546a93b9f312ffc2bdc57b43eeeb2a03f"
+        }
+      ]
+    },
+    {
+      "slot": "13-part-3-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-13-part-3-of-4.json",
+          "sha256": "317ea5a7fc0da29ae9724cc4f72b36b12bddb1c05c1e741ed643c3f71e2490d3"
+        },
+        {
+          "path": "receipts/mutation-13-part-3-of-4.receipt.json",
+          "sha256": "90005e4b40f30edf03bb06a4041819066381bfba799e571fff0211e404316a28"
+        },
+        {
+          "path": "receipts/mutation-13-part-3-of-4.log",
+          "sha256": "317ea5a7fc0da29ae9724cc4f72b36b12bddb1c05c1e741ed643c3f71e2490d3"
+        }
+      ]
+    },
+    {
+      "slot": "13-part-4-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-13-part-4-of-4.json",
+          "sha256": "eb942362518ddf70fa2aaba543b07d80d0522b246cf2f87c51381256f1414a70"
+        },
+        {
+          "path": "receipts/mutation-13-part-4-of-4.receipt.json",
+          "sha256": "7ee8161acd42415637bfd90dea364938e50d89458a168dcc25b6676031083e96"
+        },
+        {
+          "path": "receipts/mutation-13-part-4-of-4.log",
+          "sha256": "eb942362518ddf70fa2aaba543b07d80d0522b246cf2f87c51381256f1414a70"
+        }
+      ]
+    },
+    {
+      "slot": "1-5",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-1-5.json",
+          "sha256": "adad89fef7a3c17e7e43b68acb7336cc932825a1658d1046154024272868b0d5"
+        },
+        {
+          "path": "receipts/mutation-1-5.receipt.json",
+          "sha256": "c931c565c09b34d2aca21e3d1f60f3129c728fd4b254bc07fe36050e9b414c81"
+        },
+        {
+          "path": "receipts/mutation-1-5.log",
+          "sha256": "adad89fef7a3c17e7e43b68acb7336cc932825a1658d1046154024272868b0d5"
+        }
+      ]
+    },
+    {
+      "slot": "10a",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-10a.json",
+          "sha256": "803d03ea0fefc70b1d6a84e70dab926224a432c13729cdcc6628be9193ae46cb"
+        },
+        {
+          "path": "receipts/mutation-10a.receipt.json",
+          "sha256": "cd9e3d3773b0a75c86787d571f40ef365ed86d20db73f35da0ba3a1ac973eb98"
+        },
+        {
+          "path": "receipts/mutation-10a.log",
+          "sha256": "803d03ea0fefc70b1d6a84e70dab926224a432c13729cdcc6628be9193ae46cb"
+        }
+      ]
+    },
+    {
+      "slot": "12b",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-12b.json",
+          "sha256": "615d26704e6c9f4e7a423a444371bcbe3f18b10f5cba150053cc5cea9994182d"
+        },
+        {
+          "path": "receipts/mutation-12b.receipt.json",
+          "sha256": "5bbad8aae54813fc9e12360bc7e27e17957d6e882b6eb24b04e6f4f1ded005f3"
+        },
+        {
+          "path": "receipts/mutation-12b.log",
+          "sha256": "615d26704e6c9f4e7a423a444371bcbe3f18b10f5cba150053cc5cea9994182d"
+        }
+      ]
+    },
+    {
+      "slot": "12k",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-12k.json",
+          "sha256": "cdcd5a2d77c8a5923e4b0c6bf96534f1d31dacc154eeb33c01056a4e551dd692"
+        },
+        {
+          "path": "receipts/mutation-12k.receipt.json",
+          "sha256": "f3ee0f7524088817f2b9c8493c963ff9c11c5a3170fa14cc35450d20d2df2285"
+        },
+        {
+          "path": "receipts/mutation-12k.log",
+          "sha256": "cdcd5a2d77c8a5923e4b0c6bf96534f1d31dacc154eeb33c01056a4e551dd692"
+        }
+      ]
+    },
+    {
+      "slot": "8c",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-8c.json",
+          "sha256": "d390e6d27243fd4fabb0c9a5dcd776b771f97e2fb8f79944e38d2a38cb79cc7b"
+        },
+        {
+          "path": "receipts/mutation-8c.receipt.json",
+          "sha256": "80911b6be082ae11cf4db9d259611a0375036f7a141ea618109dfeff34054bf6"
+        },
+        {
+          "path": "receipts/mutation-8c.log",
+          "sha256": "d390e6d27243fd4fabb0c9a5dcd776b771f97e2fb8f79944e38d2a38cb79cc7b"
+        }
+      ]
+    },
+    {
+      "slot": "8r",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-8r.json",
+          "sha256": "145f041151f201dc06c5a78e4669c60860132f0230aa1a84c80c0613e3a43b86"
+        },
+        {
+          "path": "receipts/mutation-8r.receipt.json",
+          "sha256": "a74095ffafb9d32565383f1f6e1f8c4ae8206ec542e7be48713d4da5d677df7d"
+        },
+        {
+          "path": "receipts/mutation-8r.log",
+          "sha256": "145f041151f201dc06c5a78e4669c60860132f0230aa1a84c80c0613e3a43b86"
+        }
+      ]
+    },
+    {
+      "slot": "9a",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-9a.json",
+          "sha256": "3028f575e9ab6b5a36253c64ec686e281bfe4709349ce8700d5252a4f3468dfc"
+        },
+        {
+          "path": "receipts/mutation-9a.receipt.json",
+          "sha256": "d9a155b7694ff048eef9761b03a504aacf6ee5b0adbc833fb8ac76760b7566f0"
+        },
+        {
+          "path": "receipts/mutation-9a.log",
+          "sha256": "3028f575e9ab6b5a36253c64ec686e281bfe4709349ce8700d5252a4f3468dfc"
+        }
+      ]
+    },
+    {
+      "slot": "AB",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-AB.json",
+          "sha256": "7cb66cae5ddb6143577b2e411913b18c106f47db3de755f0c5e082f83b94c5b6"
+        },
+        {
+          "path": "receipts/mutation-AB.receipt.json",
+          "sha256": "2944cc70ad0cc07aa7275b034f6e57f67742fa9cf00074370a11e51ad785c25b"
+        },
+        {
+          "path": "receipts/mutation-AB.log",
+          "sha256": "7cb66cae5ddb6143577b2e411913b18c106f47db3de755f0c5e082f83b94c5b6"
+        }
+      ]
+    },
+    {
+      "slot": "AR",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-AR.json",
+          "sha256": "c81029c1f232fb9a746f2554ae09b5588dde46b50bebc53d5065173c947c781c"
+        },
+        {
+          "path": "receipts/mutation-AR.receipt.json",
+          "sha256": "60b73b05152f44142ab8a6ef0f7dfacaaa959a07caf02d218892a730c1600f48"
+        },
+        {
+          "path": "receipts/mutation-AR.log",
+          "sha256": "c81029c1f232fb9a746f2554ae09b5588dde46b50bebc53d5065173c947c781c"
+        }
+      ]
+    },
+    {
+      "slot": "BS",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-BS.json",
+          "sha256": "85cb954ced12f39dba73e2c9d3f2bcb3566785fc37d92fb199fb4999e2e287fa"
+        },
+        {
+          "path": "receipts/mutation-BS.receipt.json",
+          "sha256": "b13e4cf0ad0032db882dc50864f550c4f313ca596d5c6b9c835fc553026480b2"
+        },
+        {
+          "path": "receipts/mutation-BS.log",
+          "sha256": "85cb954ced12f39dba73e2c9d3f2bcb3566785fc37d92fb199fb4999e2e287fa"
+        }
+      ]
+    },
+    {
+      "slot": "D8",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-D8.json",
+          "sha256": "cfde583d79b79b8fa32d8e249c91fc89b92cb06e8357e3e7efdaab865516f6f0"
+        },
+        {
+          "path": "receipts/mutation-D8.receipt.json",
+          "sha256": "a9577159b8969ad1a038360cb13b3998f3f6935c67457607158e6068baa2a091"
+        },
+        {
+          "path": "receipts/mutation-D8.log",
+          "sha256": "cfde583d79b79b8fa32d8e249c91fc89b92cb06e8357e3e7efdaab865516f6f0"
+        }
+      ]
+    },
+    {
+      "slot": "FB",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-FB.json",
+          "sha256": "7b3e9bac1bf00cdcca3af13e8d889d2b87163759c897c34ee8e03f0a8dc67d87"
+        },
+        {
+          "path": "receipts/mutation-FB.receipt.json",
+          "sha256": "aeec9a68f5faa58852f1d72da51a6924eee8d67b0462daed8fc880a63253e6d8"
+        },
+        {
+          "path": "receipts/mutation-FB.log",
+          "sha256": "7b3e9bac1bf00cdcca3af13e8d889d2b87163759c897c34ee8e03f0a8dc67d87"
+        }
+      ]
+    },
+    {
+      "slot": "H-harness",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-H-harness.json",
+          "sha256": "6a976b19c735e11858f88fe6a43c40942e2f4f8e066d3f840d2a5674f0040d15"
+        },
+        {
+          "path": "receipts/mutation-H-harness.receipt.json",
+          "sha256": "19685f03ec1b38e8cafc9f69b9d690ce4855dc1b24b3190f209a9de7d5381c9f"
+        },
+        {
+          "path": "receipts/mutation-H-harness.log",
+          "sha256": "6a976b19c735e11858f88fe6a43c40942e2f4f8e066d3f840d2a5674f0040d15"
+        }
+      ]
+    },
+    {
+      "slot": "NS",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-NS.json",
+          "sha256": "8c14a3480275ed323e051a6f6fff8a59c487de0bcae1905722d0cfbe131d8123"
+        },
+        {
+          "path": "receipts/mutation-NS.receipt.json",
+          "sha256": "c6648c87e2e7c50de603e892c8596ec7733148b3def0314d23b1b036dcc7b7e5"
+        },
+        {
+          "path": "receipts/mutation-NS.log",
+          "sha256": "8c14a3480275ed323e051a6f6fff8a59c487de0bcae1905722d0cfbe131d8123"
+        }
+      ]
+    },
+    {
+      "slot": "P-allowlist",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-P-allowlist.json",
+          "sha256": "a79405bae7442efb9aa73022ba67143dd349281d08063bd3aa6cc1cb6728a6cb"
+        },
+        {
+          "path": "receipts/mutation-P-allowlist.receipt.json",
+          "sha256": "f6488ea8e30fd810290f4b93d6b44d784825eeed8f26ed02124b7ac4d7a2182c"
+        },
+        {
+          "path": "receipts/mutation-P-allowlist.log",
+          "sha256": "a79405bae7442efb9aa73022ba67143dd349281d08063bd3aa6cc1cb6728a6cb"
+        }
+      ]
+    },
+    {
+      "slot": "P-discharge",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-P-discharge.json",
+          "sha256": "6adddb3968a7be1d360e48adc7a8e2789ced8819b21ca167fac0fd9556603166"
+        },
+        {
+          "path": "receipts/mutation-P-discharge.receipt.json",
+          "sha256": "1fd975bd13d27268de6c5df90ccf9485931a8d7f214ad66a16433a7e302149ae"
+        },
+        {
+          "path": "receipts/mutation-P-discharge.log",
+          "sha256": "6adddb3968a7be1d360e48adc7a8e2789ced8819b21ca167fac0fd9556603166"
+        }
+      ]
+    },
+    {
+      "slot": "P-f88",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-P-f88.json",
+          "sha256": "a778f4ee58f879e237af1e00edbf0158c1f52bafc094b9e97bcd2f8521879775"
+        },
+        {
+          "path": "receipts/mutation-P-f88.receipt.json",
+          "sha256": "e995dc8eab192f4df0d52f23fcbfd8cd6495b239d0e32f0b987e83cfe3eef83e"
+        },
+        {
+          "path": "receipts/mutation-P-f88.log",
+          "sha256": "a778f4ee58f879e237af1e00edbf0158c1f52bafc094b9e97bcd2f8521879775"
+        }
+      ]
+    },
+    {
+      "slot": "P-g15b",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-P-g15b.json",
+          "sha256": "eb85c1a9a5c96453a6e03d86c5e5b798a71dffa030790c2651f4083404ada6e2"
+        },
+        {
+          "path": "receipts/mutation-P-g15b.receipt.json",
+          "sha256": "0e81f6f98f86c8edbab8a0cb81a70a267cfafd07184ea8835542ef831109f3be"
+        },
+        {
+          "path": "receipts/mutation-P-g15b.log",
+          "sha256": "eb85c1a9a5c96453a6e03d86c5e5b798a71dffa030790c2651f4083404ada6e2"
+        }
+      ]
+    },
+    {
+      "slot": "P-handle",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-P-handle.json",
+          "sha256": "48919b38f91c254084afb4d0ba389d74ddc9eff797b4693796be232169822fca"
+        },
+        {
+          "path": "receipts/mutation-P-handle.receipt.json",
+          "sha256": "0931fa9d6543395a6d0089320b124b6ea929f83820a4ba91856ae834e902cff1"
+        },
+        {
+          "path": "receipts/mutation-P-handle.log",
+          "sha256": "48919b38f91c254084afb4d0ba389d74ddc9eff797b4693796be232169822fca"
+        }
+      ]
+    },
+    {
+      "slot": "P-mint-part-1-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-P-mint-part-1-of-4.json",
+          "sha256": "2b301702e90d71f569ae160d1dc7ed7dd2e69dda9814f4ad1a0ba7ffac4bacbb"
+        },
+        {
+          "path": "receipts/mutation-P-mint-part-1-of-4.receipt.json",
+          "sha256": "2780ed12d1629c24e198b7f57dca2127c7e772cad1aee1ca86e1e21b68f47bf8"
+        },
+        {
+          "path": "receipts/mutation-P-mint-part-1-of-4.log",
+          "sha256": "2b301702e90d71f569ae160d1dc7ed7dd2e69dda9814f4ad1a0ba7ffac4bacbb"
+        }
+      ]
+    },
+    {
+      "slot": "P-mint-part-2-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-P-mint-part-2-of-4.json",
+          "sha256": "5411b53cfa6a1f65bd2e2bd6ec972a88ba33dbbd1c498f8fe4b3e2079fc42739"
+        },
+        {
+          "path": "receipts/mutation-P-mint-part-2-of-4.receipt.json",
+          "sha256": "50930fc75a2f705dce1b4d074cd70e4db2c7f4a756da47ba1ba7ca116d8ed67f"
+        },
+        {
+          "path": "receipts/mutation-P-mint-part-2-of-4.log",
+          "sha256": "5411b53cfa6a1f65bd2e2bd6ec972a88ba33dbbd1c498f8fe4b3e2079fc42739"
+        }
+      ]
+    },
+    {
+      "slot": "P-mint-part-3-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-P-mint-part-3-of-4.json",
+          "sha256": "f8ed4b8c0828dd2476e6e6653231f175924a0e976c8b654096e0c3dabda50aac"
+        },
+        {
+          "path": "receipts/mutation-P-mint-part-3-of-4.receipt.json",
+          "sha256": "12339ad0b51da1e9067364074735b9b51d6553af4c72909e7e08d9012a60d7cf"
+        },
+        {
+          "path": "receipts/mutation-P-mint-part-3-of-4.log",
+          "sha256": "f8ed4b8c0828dd2476e6e6653231f175924a0e976c8b654096e0c3dabda50aac"
+        }
+      ]
+    },
+    {
+      "slot": "P-mint-part-4-of-4",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-P-mint-part-4-of-4.json",
+          "sha256": "34be5450cd7f0f93c3c3752e3cc5094df5126c8dedeb82b4b7c585a50669edb1"
+        },
+        {
+          "path": "receipts/mutation-P-mint-part-4-of-4.receipt.json",
+          "sha256": "5e2b887d9c35c87131110a3196cdbef28d73ad5335d07d8af9a132101ac2d3a7"
+        },
+        {
+          "path": "receipts/mutation-P-mint-part-4-of-4.log",
+          "sha256": "34be5450cd7f0f93c3c3752e3cc5094df5126c8dedeb82b4b7c585a50669edb1"
+        }
+      ]
+    },
+    {
+      "slot": "PI-contract",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-PI-contract.json",
+          "sha256": "515042b72c36026508e87d9347a426adc1a93fdfda36a300ec41958d7688bcd1"
+        },
+        {
+          "path": "receipts/mutation-PI-contract.receipt.json",
+          "sha256": "2d82a12f484019abfdd354fc7910edca93f51f7fdef36c1f760590937b36747a"
+        },
+        {
+          "path": "receipts/mutation-PI-contract.log",
+          "sha256": "515042b72c36026508e87d9347a426adc1a93fdfda36a300ec41958d7688bcd1"
+        }
+      ]
+    },
+    {
+      "slot": "PI",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-PI.json",
+          "sha256": "7c57614976119325da90fec730feaafc286696261b82d46d26fff7606a328fb6"
+        },
+        {
+          "path": "receipts/mutation-PI.receipt.json",
+          "sha256": "1879880187784963f4f220b111323a67d1054f81bbcd01c5357a3a2edb41656e"
+        },
+        {
+          "path": "receipts/mutation-PI.log",
+          "sha256": "7c57614976119325da90fec730feaafc286696261b82d46d26fff7606a328fb6"
+        }
+      ]
+    },
+    {
+      "slot": "PU",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-PU.json",
+          "sha256": "9d0b42203147fd02c654a7777125949c40b445fb3ef1c811c2b8858b7196df39"
+        },
+        {
+          "path": "receipts/mutation-PU.receipt.json",
+          "sha256": "a931ced699cdf98bb0e6890b944c858d041b324ba08602add28b9c85ed0a7cd2"
+        },
+        {
+          "path": "receipts/mutation-PU.log",
+          "sha256": "9d0b42203147fd02c654a7777125949c40b445fb3ef1c811c2b8858b7196df39"
+        }
+      ]
+    },
+    {
+      "slot": "SB1",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-SB1.json",
+          "sha256": "03e1cf2507819181cca5ea88c3def6a83d016888fe9aabdf3ac4f14945801250"
+        },
+        {
+          "path": "receipts/mutation-SB1.receipt.json",
+          "sha256": "5e99f2d014523587ff928ce856018ecafecb97631a4030e565766c94f607b21f"
+        },
+        {
+          "path": "receipts/mutation-SB1.log",
+          "sha256": "03e1cf2507819181cca5ea88c3def6a83d016888fe9aabdf3ac4f14945801250"
+        }
+      ]
+    },
+    {
+      "slot": "SBV",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-SBV.json",
+          "sha256": "444f186226040ea19aa3917cffe40c4a62d0b73c2489496d2f8f822f0cacdc83"
+        },
+        {
+          "path": "receipts/mutation-SBV.receipt.json",
+          "sha256": "0fba42f9d4a9cb1d60a346ee23fa34bcdf86efba6ad8e8ab60fe6a43194fe7a2"
+        },
+        {
+          "path": "receipts/mutation-SBV.log",
+          "sha256": "444f186226040ea19aa3917cffe40c4a62d0b73c2489496d2f8f822f0cacdc83"
+        }
+      ]
+    },
+    {
+      "slot": "SO",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-SO.json",
+          "sha256": "af596abc96dd345bf1338eef0226328c93dba560bc5dddee92b5cb1c820d643b"
+        },
+        {
+          "path": "receipts/mutation-SO.receipt.json",
+          "sha256": "5c4a87de83a8db3debe2ad4117aefe5034e983ccf96a807de761b09797ff4d8a"
+        },
+        {
+          "path": "receipts/mutation-SO.log",
+          "sha256": "af596abc96dd345bf1338eef0226328c93dba560bc5dddee92b5cb1c820d643b"
+        }
+      ]
+    },
+    {
+      "slot": "SV2",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-SV2.json",
+          "sha256": "c2e5dff7496a6a90beb7049e0994c34c9fa23901ec419a22a55af93bf195f1c6"
+        },
+        {
+          "path": "receipts/mutation-SV2.receipt.json",
+          "sha256": "7f111099fb7c5fa711ca448b9645456c3499b440a5bae09d2b88a437508d81d7"
+        },
+        {
+          "path": "receipts/mutation-SV2.log",
+          "sha256": "c2e5dff7496a6a90beb7049e0994c34c9fa23901ec419a22a55af93bf195f1c6"
+        }
+      ]
+    },
+    {
+      "slot": "TURN",
+      "files": [
+        {
+          "path": "receipts/mutation-parts/widgets-mutation-part-TURN.json",
+          "sha256": "e4c58cd9854327ce0012e063a131a9cbf8628053fab00e827a006d5432a43a30"
+        },
+        {
+          "path": "receipts/mutation-TURN.receipt.json",
+          "sha256": "10c85ef791c2844005e9521f16729f244f72a971819d08c0e40743ecb0b5f82b"
+        },
+        {
+          "path": "receipts/mutation-TURN.log",
+          "sha256": "e4c58cd9854327ce0012e063a131a9cbf8628053fab00e827a006d5432a43a30"
+        }
+      ]
+    }
+  ],
+  "sleepAffectedSlots": [
+    "P-ledger",
+    "P-mt3",
+    "P-pairing",
+    "P-principal",
+    "P-render",
+    "P-rt6"
+  ],
+  "interruptedPostWakeSlots": [
+    "P-seal"
+  ],
+  "neverStartedSlots": [
+    "T-tables",
+    "WF",
+    "WR-part-1-of-4",
+    "WR-part-2-of-4",
+    "WR-part-3-of-4",
+    "WR-part-4-of-4"
+  ],
+  "retryJobs": [
+    {
+      "gate": "P-ledger",
+      "partition": "",
+      "slot": "P-ledger"
+    },
+    {
+      "gate": "P-mt3",
+      "partition": "",
+      "slot": "P-mt3"
+    },
+    {
+      "gate": "P-pairing",
+      "partition": "",
+      "slot": "P-pairing"
+    },
+    {
+      "gate": "P-principal",
+      "partition": "",
+      "slot": "P-principal"
+    },
+    {
+      "gate": "P-render",
+      "partition": "",
+      "slot": "P-render"
+    },
+    {
+      "gate": "P-rt6",
+      "partition": "",
+      "slot": "P-rt6"
+    },
+    {
+      "gate": "P-seal",
+      "partition": "",
+      "slot": "P-seal"
+    },
+    {
+      "gate": "T-tables",
+      "partition": "",
+      "slot": "T-tables"
+    },
+    {
+      "gate": "WF",
+      "partition": "",
+      "slot": "WF"
+    },
+    {
+      "gate": "WR",
+      "partition": "1/4",
+      "slot": "WR-part-1-of-4"
+    },
+    {
+      "gate": "WR",
+      "partition": "2/4",
+      "slot": "WR-part-2-of-4"
+    },
+    {
+      "gate": "WR",
+      "partition": "3/4",
+      "slot": "WR-part-3-of-4"
+    },
+    {
+      "gate": "WR",
+      "partition": "4/4",
+      "slot": "WR-part-4-of-4"
+    }
+  ],
+  "originalOrchestration": {
+    "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+    "startedAt": "2026-10-03T20:49:18.322937+00:00",
+    "completedAt": "2026-10-04T06:39:56.876663+00:00",
+    "seconds": 35438.55,
+    "exit": 1,
+    "restrictions": null,
+    "historicalReceiptsAdmitted": 0
+  },
+  "invalidatedArtifacts": [
+    {
+      "slot": "P-ledger",
+      "files": [
+        {
+          "path": "receipts/suspend-invalidated/P-ledger/widgets-mutation-part-P-ledger.json",
+          "sha256": "736b94130b34b32c2bf55681562495b7a5e01f0a34773470aea0c8bf94a1ea5b"
+        },
+        {
+          "path": "receipts/suspend-invalidated/P-ledger/mutation-P-ledger.receipt.json",
+          "sha256": "b0d5dd28af45eaa823d5dab42df270c9053fbc5bf7846114112f3369cf19a3a5"
+        },
+        {
+          "path": "receipts/suspend-invalidated/P-ledger/mutation-P-ledger.log",
+          "sha256": "736b94130b34b32c2bf55681562495b7a5e01f0a34773470aea0c8bf94a1ea5b"
+        }
+      ]
+    },
+    {
+      "slot": "P-mt3",
+      "files": [
+        {
+          "path": "receipts/suspend-invalidated/P-mt3/mutation-P-mt3.receipt.json",
+          "sha256": "8123ddf669dae33d7d9c719c667f61c375ee9df5a7b97c9b3bf6a03b391b18a0"
+        },
+        {
+          "path": "receipts/suspend-invalidated/P-mt3/mutation-P-mt3.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "slot": "P-pairing",
+      "files": [
+        {
+          "path": "receipts/suspend-invalidated/P-pairing/mutation-P-pairing.receipt.json",
+          "sha256": "557c6135a17e4d1b6c45c8fba827fad1c60b0f3e770ea077800e1b28552797f0"
+        },
+        {
+          "path": "receipts/suspend-invalidated/P-pairing/mutation-P-pairing.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "slot": "P-principal",
+      "files": [
+        {
+          "path": "receipts/suspend-invalidated/P-principal/mutation-P-principal.receipt.json",
+          "sha256": "97c3634f0cddcce9909e9fa6e163442d66538bb8ac7e96de91e5114824e8c880"
+        },
+        {
+          "path": "receipts/suspend-invalidated/P-principal/mutation-P-principal.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "slot": "P-render",
+      "files": [
+        {
+          "path": "receipts/suspend-invalidated/P-render/mutation-P-render.receipt.json",
+          "sha256": "9f89a6745bdad1028eb221d082c0e347309ebbe6c4a2042c42034165a5271241"
+        },
+        {
+          "path": "receipts/suspend-invalidated/P-render/mutation-P-render.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "slot": "P-rt6",
+      "files": [
+        {
+          "path": "receipts/suspend-invalidated/P-rt6/mutation-P-rt6.receipt.json",
+          "sha256": "9725ec1ecb6b63f74f90d3eb485a49a136b28356aa69e7bc40f4a2317e6a7d7b"
+        },
+        {
+          "path": "receipts/suspend-invalidated/P-rt6/mutation-P-rt6.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "slot": "P-seal",
+      "files": [
+        {
+          "path": "receipts/suspend-invalidated/P-seal/mutation-P-seal.receipt.json",
+          "sha256": "97fe56e6e75ec5b4da3617e8ef42a9368978ad3e81f6a435029afaff17e28bdd"
+        },
+        {
+          "path": "receipts/suspend-invalidated/P-seal/mutation-P-seal.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "slot": "T-tables",
+      "files": []
+    },
+    {
+      "slot": "WF",
+      "files": []
+    },
+    {
+      "slot": "WR-part-1-of-4",
+      "files": []
+    },
+    {
+      "slot": "WR-part-2-of-4",
+      "files": []
+    },
+    {
+      "slot": "WR-part-3-of-4",
+      "files": []
+    },
+    {
+      "slot": "WR-part-4-of-4",
+      "files": []
+    }
+  ],
+  "originalRawR06Traces": [
+    {
+      "path": "receipts/r06-native-worker-1.jsonl",
+      "sha256": "63eec734c83aa2554682b0de6f8710ffb950a10341260923f395ff5404591aa1"
+    },
+    {
+      "path": "receipts/r06-native-worker-2.jsonl",
+      "sha256": "ed0784484a9329cb540c12233709423ec084dbb03d02509430a2d46923d18a6d"
+    },
+    {
+      "path": "receipts/r06-native-worker-3.jsonl",
+      "sha256": "ea8ae8107e24300fadfb5d2278838c888ce29d8807b93e59d72b2d8f12b7c529"
+    },
+    {
+      "path": "receipts/r06-native-worker-4.jsonl",
+      "sha256": "c643fc98cafd7f378b6b2c5bc66d7e3ba88c9818fb246f667fdb846536e82c74"
+    },
+    {
+      "path": "receipts/r06-native-worker-5.jsonl",
+      "sha256": "82f271e1a40a1c4676eb9aad8319b4b45ba3066b0425b8ace665611ba80a2edc"
+    },
+    {
+      "path": "receipts/r06-native-worker-6.jsonl",
+      "sha256": "9b0cf840c564b2a0e02618a07ed5e123ee8670e4d54894dcbb47169dfad3136e"
+    }
+  ],
+  "originalExecutionSources": [
+    {
+      "path": "work/ar1-single-operator-final-20261003/run-all-mutations-isolated.py",
+      "sha256": "bca961ad50b90556fb7fee9badb34554ba403ae48b2ba2c4e5e9d5d9db66214b"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261003/run-complete-native.py",
+      "sha256": "6a64db3d22ef0a8a882de5b45cef1951e14b89f8e7631ef177b1296d82582545"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261003/r06-child-trace.cjs",
+      "sha256": "c1838a6a87f27553b8bfe9abbd6dc6f360a19291ca294e8532ea7ef15e773ec1"
+    }
+  ],
+  "candidateChanged": false,
+  "testRestrictions": null,
+  "maxWorkers": 6,
+  "jobTimeoutMinutes": 180,
+  "r06TimeoutMs": 20000,
+  "powerSettingsChanged": false,
+  "productionEffects": 0,
+  "invalidatedRunWindows": [
+    {
+      "slot": "P-rt6",
+      "worker": 1,
+      "startedAt": "2026-10-04T06:12:45.813220+00:00",
+      "finishedAt": "2026-10-04T06:39:56.855382+00:00",
+      "source": "Verified process-group leader + immutable worker PID-file start time captured before recovery; stopped only these owned groups."
+    },
+    {
+      "slot": "P-principal",
+      "worker": 2,
+      "startedAt": "2026-10-04T06:04:32.419362+00:00",
+      "finishedAt": "2026-10-04T06:39:56.855382+00:00",
+      "source": "Verified process-group leader + immutable worker PID-file start time captured before recovery; stopped only these owned groups."
+    },
+    {
+      "slot": "P-seal",
+      "worker": 3,
+      "startedAt": "2026-10-04T06:37:27.704999+00:00",
+      "finishedAt": "2026-10-04T06:39:56.855382+00:00",
+      "source": "Verified process-group leader + immutable worker PID-file start time captured before recovery; stopped only these owned groups."
+    },
+    {
+      "slot": "P-mt3",
+      "worker": 4,
+      "startedAt": "2026-10-04T05:37:14.212834+00:00",
+      "finishedAt": "2026-10-04T06:39:56.855382+00:00",
+      "source": "Verified process-group leader + immutable worker PID-file start time captured before recovery; stopped only these owned groups."
+    },
+    {
+      "slot": "P-pairing",
+      "worker": 5,
+      "startedAt": "2026-10-04T05:49:03.771713+00:00",
+      "finishedAt": "2026-10-04T06:39:56.855382+00:00",
+      "source": "Verified process-group leader + immutable worker PID-file start time captured before recovery; stopped only these owned groups."
+    },
+    {
+      "slot": "P-render",
+      "worker": 6,
+      "startedAt": "2026-10-04T06:05:35.198539+00:00",
+      "finishedAt": "2026-10-04T06:39:56.855382+00:00",
+      "source": "Verified process-group leader + immutable worker PID-file start time captured before recovery; stopped only these owned groups."
+    },
+    {
+      "slot": "P-ledger",
+      "worker": 3,
+      "startedAt": "2026-10-04T05:02:46.253Z",
+      "finishedAt": "2026-10-04T06:37:27.696Z",
+      "source": "Invalidated canonical native part (passed but sleep-overlapped)."
+    }
+  ]
+}

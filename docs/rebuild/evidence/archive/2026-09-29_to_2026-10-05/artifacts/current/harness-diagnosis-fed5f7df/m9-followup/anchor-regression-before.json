@@ -1,0 +1,12 @@
+{
+  "candidateBase": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "test": "new regression against unchanged stale declaration",
+  "command": [
+    "node",
+    "--test",
+    "--test-name-pattern=M9-28",
+    "scripts/widgets-mutation-ci.test.mjs"
+  ],
+  "exit": 1,
+  "seconds": 0.227
+}

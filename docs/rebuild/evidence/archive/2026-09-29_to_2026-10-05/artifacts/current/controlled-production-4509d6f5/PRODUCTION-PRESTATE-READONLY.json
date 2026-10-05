@@ -1,0 +1,8 @@
+{
+  "checkedAt": "2026-10-02T17:46:47.345410+00:00",
+  "readOnly": true,
+  "exit": 0,
+  "stdout": "CURRENT_RELEASE=/opt/maya-saas/releases/20260929-recon-fix-eb43bc22\nMainPID=21721\nWorkingDirectory=/opt/maya-saas/current\nActiveState=active\nSubState=running\nHEALTH={\"status\":\"ok\",\"service\":\"maya-saas-backend\",\"release\":\"20260929-recon-fix-eb43bc22\",\"started_at\":\"2026-09-29T09:07:19.429Z\",\"timestamp\":\"2026-10-02T17:46:47.235Z\"}\nREADINESS={\"status\":\"ready\",\"service\":\"maya-saas-backend\",\"checks\":{\"database\":\"ready\"},\"timestamp\":\"2026-10-02T17:46:47.249Z\"}\n",
+  "stderr": "Welcome to LTD BeGet SSH Server 'prime'\n",
+  "mutations": 0
+}

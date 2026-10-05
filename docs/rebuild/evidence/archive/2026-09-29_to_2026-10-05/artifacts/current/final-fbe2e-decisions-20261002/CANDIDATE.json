@@ -1,0 +1,15 @@
+{
+  "candidate": "4509d6f55df62da852740658c69613b113b5a1c1",
+  "base": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "clean": true,
+  "startedAt": "2026-10-02T08:53:53.617983+00:00",
+  "historicalReceiptsAdmitted": 0,
+  "effects": {
+    "production": 0,
+    "realOTP": 0,
+    "realYclients": 0
+  },
+  "scope": "closed-input.no-handoff@1",
+  "fullContractCertified": false
+}

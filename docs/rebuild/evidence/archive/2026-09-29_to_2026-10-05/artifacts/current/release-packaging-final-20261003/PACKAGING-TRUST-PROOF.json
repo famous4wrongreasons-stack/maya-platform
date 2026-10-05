@@ -1,0 +1,191 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "status": "PASS",
+  "receipts": [
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "packaging-sync",
+      "exit": 0,
+      "seconds": 21.83,
+      "command": [
+        "npm",
+        "run",
+        "sync"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-ios-carrier"
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "packaging-tests",
+      "exit": 0,
+      "seconds": 12.98,
+      "command": [
+        "npm",
+        "run",
+        "test:release"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-carrier-react"
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "operator-tests",
+      "exit": 0,
+      "seconds": 0.06,
+      "command": [
+        "node",
+        "--test",
+        "scripts/widget-release-operator.test.cjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend"
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "operator-compiled-tests",
+      "exit": 0,
+      "seconds": 0.92,
+      "command": [
+        "node",
+        "--test",
+        "scripts/widget-release-operator.compiled-test.cjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend"
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "r01-live-readonly",
+      "exit": 0,
+      "seconds": 195.73,
+      "command": [
+        "node",
+        "deploy/platform/beget-edge/relay-release.cjs",
+        "verify"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend"
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "ios-unsigned-build",
+      "exit": 0,
+      "seconds": 19.87,
+      "command": [
+        "xcodebuild",
+        "-project",
+        "maya-ios-carrier/ios/App/App.xcodeproj",
+        "-scheme",
+        "App",
+        "-configuration",
+        "Debug",
+        "-sdk",
+        "iphonesimulator",
+        "-derivedDataPath",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/ios-final",
+        "CODE_SIGNING_ALLOWED=NO",
+        "build"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration"
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "ios-actual-bundle",
+      "exit": 0,
+      "seconds": 8.72,
+      "command": [
+        "node",
+        "maya-carrier-react/tools/release.mjs",
+        "verify-app",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/ios-final/Build/Products/Debug-iphonesimulator/App.app"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration"
+    }
+  ],
+  "webOwner": "React AChat",
+  "nativeOwner": "React AChat",
+  "oldShell": "REFUSED",
+  "aasaUnchanged": [
+    {
+      "path": "maya-saas-backend/deploy/platform/beget-edge/well-known/.htaccess",
+      "sha256": "ab3175467446655265bcaf284c3d7d9447825a3f4801999996e62bd90e5dd251"
+    },
+    {
+      "path": "maya-saas-backend/deploy/platform/beget-edge/well-known/apple-app-site-association",
+      "sha256": "c4dac0d3f673977bfc3959a680212a07759bc2744573029b94003a75b884d017"
+    }
+  ],
+  "reactBehaviourBytesUnchanged": [
+    {
+      "path": "maya-carrier-react/dist/web/m/QKWX6FGA/main.js",
+      "sha256": "15c0d6890757417b36c6c9eb1bb3afec60229d3f37464f103a39bbf5c3fc78ca"
+    },
+    {
+      "path": "maya-carrier-react/dist/web/styles.css",
+      "sha256": "aab5c4b1e87137931a59565697bfd2fed9240a19c08717ce423268b70cc0b504"
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/m/031f844087a2dd50/main.js",
+      "sha256": "031f844087a2dd5012e47e3e8a3fae63906f470f73f8ff5fbc05704b3ff2f824"
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/styles.css",
+      "sha256": "aab5c4b1e87137931a59565697bfd2fed9240a19c08717ce423268b70cc0b504"
+    }
+  ],
+  "historicalReceiptsAdmitted": 0,
+  "historicalComparisonOnly": "AASA and JS/CSS content equality; all admission executions are fresh",
+  "actualUnsignedAppPublicInventory": [
+    {
+      "path": "public/cordova.js",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "public/cordova_plugins.js",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "public/icons/maya-192.png",
+      "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+    },
+    {
+      "path": "public/icons/maya-512-maskable.png",
+      "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+    },
+    {
+      "path": "public/icons/maya-512.png",
+      "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+    },
+    {
+      "path": "public/icons/maya-apple-180.png",
+      "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+    },
+    {
+      "path": "public/index.html",
+      "sha256": "a89f1985f1c32b61af03d017902ef3b55bcec469c122ef3ad85ee02dac56a902"
+    },
+    {
+      "path": "public/m/031f844087a2dd50/main.js",
+      "sha256": "031f844087a2dd5012e47e3e8a3fae63906f470f73f8ff5fbc05704b3ff2f824"
+    },
+    {
+      "path": "public/manifest.webmanifest",
+      "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+    },
+    {
+      "path": "public/styles.css",
+      "sha256": "aab5c4b1e87137931a59565697bfd2fed9240a19c08717ce423268b70cc0b504"
+    }
+  ],
+  "publicTrustTests": 20,
+  "compiledCommandTests": 7,
+  "packagingTests": 16,
+  "externalPrerequisites": {
+    "realCustodianKeys": true,
+    "independentReviewerSignature": true,
+    "platformOwnerSession": true,
+    "newExecutionAuthorization": true
+  },
+  "effects": {
+    "production": 0,
+    "realOtp": 0,
+    "realYclients": 0,
+    "iphoneInstall": 0
+  }
+}

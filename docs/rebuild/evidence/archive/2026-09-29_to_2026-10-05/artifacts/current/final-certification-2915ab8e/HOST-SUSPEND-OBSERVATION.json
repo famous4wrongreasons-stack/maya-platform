@@ -1,0 +1,88 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "capturedAt": "2026-10-02T07:43:03.048808+00:00",
+  "powerEvents": [
+    {
+      "utc": "2026-10-02T06:35:59+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Clamshell Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 354 secs"
+    },
+    {
+      "utc": "2026-10-02T06:41:53+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using BATT (Charge:100%) 45 secs"
+    },
+    {
+      "utc": "2026-10-02T06:42:38+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 694 secs"
+    },
+    {
+      "utc": "2026-10-02T06:54:12+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty E_PFN_NET_FOUND ARPT/ Using BATT (Charge:100%) 45 secs"
+    },
+    {
+      "utc": "2026-10-02T06:54:57+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 25 secs"
+    },
+    {
+      "utc": "2026-10-02T06:55:22+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) USB-C_plug SMC.OutboxNotEmpty nub-spmi-a0.0x3F/ Using BATT (Charge:100%) 1 secs"
+    },
+    {
+      "utc": "2026-10-02T06:55:23+00:00",
+      "event": "Wake",
+      "details": "DarkWake to FullWake from Deep Idle [CDNVAP] : due to Notification Using AC (Charge:100%)"
+    }
+  ],
+  "suspensionWindows": [
+    {
+      "from": "2026-10-02T06:35:59+00:00",
+      "to": "2026-10-02T06:55:23+00:00",
+      "fullWakeObserved": true
+    }
+  ],
+  "windowScope": "Conservative first Sleep through actual FullWake, including short maintenance DarkWakes.",
+  "potentiallyOverlappingTestRuns": [
+    {
+      "path": "receipts/mutation-diagnostics/4-unit-1790922683942.json",
+      "sha256": "05bf21873a795979f99adb00c403ee6c9940b6dfa4b654761345584a900dab86",
+      "worker": "4",
+      "step": "unit",
+      "startTime": "2026-10-02T06:31:23.942000+00:00",
+      "capturedAt": "2026-10-02T06:56:47.576537+00:00",
+      "success": false,
+      "passed": 5602,
+      "failed": 1,
+      "failureTitles": [
+        "WR-L13 lock-time principal change cancels the newly minted successor"
+      ]
+    },
+    {
+      "path": "receipts/mutation-diagnostics/8-unit-1790922752387.json",
+      "sha256": "431edd61f82edae1a4bc340e5eb5adb8cbb3d6ef84df2bfd21cbebbd2eeb3f23",
+      "worker": "8",
+      "step": "unit",
+      "startTime": "2026-10-02T06:32:32.387000+00:00",
+      "capturedAt": "2026-10-02T06:58:01.168828+00:00",
+      "success": false,
+      "passed": 5602,
+      "failed": 1,
+      "failureTitles": [
+        "WR-L12 requires both the exact noun and its canonical owner"
+      ]
+    }
+  ],
+  "completedOverlappingJobs": [],
+  "jobTimestampMethod": "Receipt filesystem completion timestamp minus its recorded wall seconds; overlap widened by one second.",
+  "nativeOriginalExecutionComplete": true,
+  "nativeOriginalExecutionExit": 0,
+  "admissionAssessment": "All overlapping whole parts will be withheld and rerun with canonical unrestricted steps on the identical candidate. Unaffected fresh parts remain in this same certification programme.",
+  "timeoutsChanged": false,
+  "productSourceChanged": false,
+  "powerSettingsChanged": false,
+  "parserCorrection": "Wake Requests scheduler hints in the initial diagnostic were not actual wake events and are excluded here."
+}

@@ -1,0 +1,11 @@
+{
+  "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "name": "k15-census",
+  "command": [
+    "node",
+    "docs/rebuild/evidence/maya-chat-first-ux/k15-bundle-census.mjs",
+    "--json"
+  ],
+  "exit": 0,
+  "seconds": 0.21
+}

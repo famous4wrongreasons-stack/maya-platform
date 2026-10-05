@@ -1,0 +1,99 @@
+{
+  "contract": "maya.controlled-production-preflight/1",
+  "candidate": "4509d6f55df62da852740658c69613b113b5a1c1",
+  "checkedAt": "2026-10-02T17:47:59.252102+00:00",
+  "status": "STOP_BEFORE_PRODUCTION_MUTATION",
+  "sourceClean": true,
+  "candidateChanged": false,
+  "profile": "closed-input.no-handoff@1",
+  "existingCertificationChanged": false,
+  "sourceCertificationReceipt": {
+    "path": "outputs/final-fbe2e-decisions-20261002/CERTIFICATION-RECEIPTS.json",
+    "sha256": "bf71bb918b53834d4ee818e3cd4490e34824cb0197fa70db1cbabe2131b8a527"
+  },
+  "blockers": [
+    {
+      "id": "AR1-PRODUCTION-UNLOCK-NOT-IN-CANDIDATE",
+      "proven": true,
+      "cause": "WidgetReleasePolicy.environment unconditionally refuses NODE_ENV=production. Release authorization/certificate schema admits synthetic and staging only; profileCertificate invokes the same environment validator.",
+      "compiledReasons": [
+        "widget_release_production_not_authorized",
+        "widget_release_certificate"
+      ],
+      "constraintConflict": "User authorizes a production release but forbids all candidate code/byte changes. The exact immutable candidate cannot grant this profile in production.",
+      "requiredResolution": "Separately authorize a narrow reviewed production execution unlock, produce a new candidate and recertify. Do not relabel production as staging/synthetic or write an entitlement directly."
+    }
+  ],
+  "checkpoint": {
+    "PRODUCTION SHA": "Exact full running SHA not independently attested; certified candidate NOT DEPLOYED",
+    "CURRENT PRODUCTION RELEASE": "20260929-recon-fix-eb43bc22",
+    "MIGRATIONS": "NOT APPLIED; production schema inventory not performed after preflight STOP",
+    "BACKEND HEALTH": "Existing production health ok and readiness ready",
+    "PWA": "NOT DEPLOYED; acceptance NOT RUN",
+    "IOS INSTALLED": "NO — not attempted after preflight STOP",
+    "LOGIN": "NOT RUN",
+    "ACHAT": "NOT RUN",
+    "NORMAL CHAT": "NOT RUN",
+    "VOICE": "NOT RUN",
+    "WIDGETS": "NOT RUN",
+    "PROFILE EFFECTIVE": "NOT GRANTED; candidate production admission is REFUSED",
+    "HANDOFF REFUSED": "Certified candidate isolation unchanged; fresh production check NOT RUN",
+    "ROLLBACK READY": "NOT PREPARED; no production change made",
+    "READY FOR OWNER-CONTROLLED REAL BOOKING": "NO"
+  },
+  "effects": {
+    "productionDeploy": 0,
+    "productionMigration": 0,
+    "productionConfigWrites": 0,
+    "productionDbWrites": 0,
+    "entitlementGrant": 0,
+    "realOtp": 0,
+    "clientSuccessorVerification": 0,
+    "realYclientsEffects": 0,
+    "iphoneInstall": 0,
+    "chapter10": 0
+  },
+  "sources": [
+    {
+      "path": "maya-saas-backend/src/entitlements/widget-release-policy.service.ts",
+      "startLine": 79,
+      "sha256": "1d9e5a2beac98222ab53427417a35e7b7535aa72550919a487b227e667f3f0c7",
+      "excerpt": "79:   environment(): 'synthetic' | 'staging' {\n80:     // No production execution unlock is part of AR-1 implementation authorization.\n81:     if (this.config.get<string>('NODE_ENV') === 'production')\n82:       return releaseDeny('production_not_authorized');\n83:     const environment = this.config.get<string>('WIDGET_RELEASE_ENVIRONMENT');\n84:     if (environment !== 'synthetic' && environment !== 'staging')\n85:       return releaseDeny('environment');\n86:     const db = new URL(this.config.get<string>('DATABASE_URL') ?? 'invalid:');\n87:     if (environment === 'synthetic' && !widgetProofEnvironment(this.config))\n88:       releaseDeny('synthetic_database');\n89:     if (\n90:       environment === 'staging' &&\n91:       (!['postgres:', 'postgresql:'].includes(db.protocol) ||\n92:         [...db.searchParams.keys()].some((k) => k !== 'schema') ||\n93:         !/^\\/maya_widget_release_staging_[a-z0-9_]+$/.test(db.pathname))\n94:     )\n95:       releaseDeny('staging_database');\n96:     return environment;"
+    },
+    {
+      "path": "maya-saas-backend/src/entitlements/widget-release.contract.ts",
+      "startLine": 225,
+      "sha256": "c54659576e2365f444844f99addf3e27105436ce3ea32e91c308709086d6e6b5",
+      "excerpt": "225: \n226: /** Shared shape checks only; neither function grants or changes a threshold. */\n227: export function releaseCertificateHeader(v: Record<string, unknown>): void {\n228:   if (!['synthetic', 'staging'].includes(String(v.environment)))\n229:     releaseDeny('certificate');"
+    },
+    {
+      "path": "maya-saas-backend/src/entitlements/widget-release-policy.spec.ts",
+      "startLine": 150,
+      "sha256": "8825742fb118135a245db67152c46e37b2ff4b4293ff41bb1ed749ca75bc03ad",
+      "excerpt": "150:   it('AR1-PRODUCTION production execution is refused even with a fully valid staging environment and trusted signatures', () => {\n151:     const q = releaseProof(db);\n152:     q.config.set('NODE_ENV', 'production');\n153:     q.config.set('WIDGET_RELEASE_ENVIRONMENT', 'staging');\n154:     q.config.set(\n155:       'DATABASE_URL',\n156:       '[REDACTED DATABASE URL]',\n157:     );\n158:     const c = q.command('tenant');\n159:     c.certificate = q.signCertificate({\n160:       ...c.certificate.payload,\n161:       environment: 'staging',\n162:     });\n163:     c.authorization = q.signOwner({\n164:       ...c.authorization.payload,\n165:       environment: 'staging',\n166:       certificateDigest: releaseHash(c.certificate),\n167:     });\n168:     expect(() =>\n169:       q.policy.read(c, 'tenant', 'grant', 'operator', new Date()),\n170:     ).toThrow('production_not_authorized');"
+    }
+  ],
+  "proofs": [
+    {
+      "path": "COMPILED-PRODUCTION-REFUSAL.json",
+      "sha256": "9f52d808705f0674695220cd24090ba7bd62b835713b5559dec8402e428a30e7"
+    },
+    {
+      "path": "ar1-production-refusal.test.json",
+      "sha256": "0e65c82f6eaf74b0572394ff4f1eb60c55985c62616ae5ec978a0c0d1b8cdd35"
+    },
+    {
+      "path": "ar1-production-refusal.test.log",
+      "sha256": "fa8275fe1f09188849278b84109b102e457b556ca8ad3ecfe2f4a350d3b7d5ce"
+    },
+    {
+      "path": "ar1-production-refusal.receipt.json",
+      "sha256": "8505e08d3423410bcb19bd0b5be22b2ee396960bf791e94aef4a069b254ba913"
+    },
+    {
+      "path": "PRODUCTION-PRESTATE-READONLY.json",
+      "sha256": "9ea00ea26fe4c7d4db2daab36e8cc25d2a2fcec606844fb203a9000c81e72f20"
+    }
+  ],
+  "readinessClarification": "Prior READY FOR RELEASE AUTHORIZATION described completed profile evidence. It was too broad to imply that this exact candidate implements a production execution unlock; it does not."
+}

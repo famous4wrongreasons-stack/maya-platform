@@ -1,0 +1,11 @@
+{
+  "livePath": "/home/m/mocine3388/mayaos.ru/public_html/.well-known/.htaccess",
+  "source": "maya-saas-backend/deploy/platform/beget-edge/well-known/.htaccess",
+  "sha256": "ab3175467446655265bcaf284c3d7d9447825a3f4801999996e62bd90e5dd251",
+  "liveSourceMatch": true,
+  "introducedBy": "aecd770b91e94b74b26f76f6dc9e69775dc6bcab",
+  "presentInCertifiedCandidate": true,
+  "presentInR01Manifest": false,
+  "purpose": "Apple App Site Association Content-Type and Cache-Control",
+  "codeChanges": 0
+}

@@ -1,0 +1,458 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "30fa24698f3ae277c22209e8edfd448c29e4f872",
+  "battery_hashes": {
+    "gate9.json": "5319771995234e7c8e61742edabfb42edf1878f7f7153e8c82f8a2342b1ce98b"
+  },
+  "partition": {
+    "index": 3,
+    "count": 4,
+    "total_mutants": 35,
+    "mutant_ids": [
+      "M9-3",
+      "M9-7",
+      "M9-11",
+      "M9-15",
+      "M9-19",
+      "M9-23",
+      "M9-27",
+      "M9-31",
+      "M9-35"
+    ]
+  },
+  "startedAt": "2026-10-01T12:19:05.330Z",
+  "batteries": [
+    "gate9.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": "(?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-])",
+    "unit_tests": null,
+    "unit_filter": "(?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-])"
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-7f1b17a634",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-7f1b17a634",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gate9.json",
+      "id": "M9-3",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-DEF-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-DEF-1",
+          "test": "Gate 9 lowering (U9b) T9-DEF-1 treats a missing request transaction as a construction defect",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-7",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T9-INV24-1",
+        "T9-INV24-4"
+      ],
+      "kills": [
+        {
+          "killer": "T9-INV24-1",
+          "test": "Gate 9 — canonical lowering and atomic timeline append (U9b) T9-INV24-1 [GW] an unrenderable template returns stale and appends no turn",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T9-INV24-4",
+          "test": "Gate 9 — canonical lowering and atomic timeline append (U9b) T9-INV24-4 [GW] an unrenderable template returns stale and appends no turn",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 2
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-11",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T9-POS-5"
+      ],
+      "kills": [
+        {
+          "killer": "T9-POS-5",
+          "test": "Gate 9 — canonical lowering and atomic timeline append (U9b) T9-POS-5 [GW] appends the lowered USER turn and hands Gate 10 byte-identical content",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-15",
+      "files": [
+        "src/widgets/lowering/lowering.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-POS-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-POS-1",
+          "test": "Gate 9 lowering (U9b) T9-POS-1 renders canonical labels, writes once through T, and produces both Gate 9 facts",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-19",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-23",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-27",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "SURVIVED",
+      "killedBy": [],
+      "kills": [],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {},
+      "exits": {
+        "plain": {
+          "unit": 0,
+          "typecheck": 0,
+          "k3": 0
+        }
+      },
+      "tails": {
+        "plain": {
+          "unit": "PASS src/widgets/stores/timeline.store.spec.ts\nPASS src/widgets/lowering/lowering.gate.spec.ts\nPASS src/widgets/lowering/gate9-lowering.architecture.spec.ts\n\nTest Suites: 584 skipped, 3 passed, 3 of 587 total\nTests:       5586 skipped, 16 passed, 5602 total\nSnapshots:   0 total\nTime:        31.526 s\nRan all test suites with tests matching \"(?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-])\".\nTest results written to: ../../../../../../../../var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-7f1b17a634.json\nForce exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?\n",
+          "typecheck": "",
+          "k3": "        1 2 3 4 5 6 7 8 8-R 9 10 11 12 13 14\nPASS  the runner walks every gate and stops only on a verdict\n        one for-of over the handed slice; two contiguous slices of this.gates covering it; no continue, no index; stops at the first non-pass\nPASS  no gate can pass silently: no slot is a constant pass except a proven one, and a pending() helper refuses\n        15 slots read; proven constant passes: 12 (Projector pointer, D-7); Projector exception (D-7): admitted for 12: ARCH-12-9 and ARCH-12-10 passed (projector-fences.architecture.spec.ts); no pending() helper; refusing seam stubs (slots carrying pendingOn): none\nPASS  the submission shape has no member able to carry an endpoint\n        members: contract, widget_id, intent_token, inputs, client_nonce, profile_id, spoken_transcript, client_emitted_at, readback_ack\nPASS  the tenant comes from the authenticated principal, never from the body\n        controller submits intentSubmitArgs(dto, actor) (1 submit call); intentSubmitArgs sets the tenant 1 time(s), from actor.tenantId; the DTO has no tenant field to read; the controller's intentSubmitArgs is the one imported from './intent-submit-args', which declares and exports it once\nPASS  the two widget routes, and no more\n        POST /widgets/resolve, POST /widgets/intent; controllers under src/widgets: widgets.controller.ts#WidgetsController\nPASS  the runtime is dark: gated by widgets.runtime, which no plan and no trial grants\n        controller requires widgets.runtime; in no plan; readiness planned: true; trial expansion excludes planned: true\nPASS  the widget layer reaches an owner only through the owner-ports boundary (D-6)\n        WidgetsModule imports [PrismaModule, WidgetOwnerPortsModule, WidgetEmissionModule] and registers [widgets.controller.ts#WidgetsController]; WidgetOwnerPortsModule imports [AppointmentsModule, AuditLogModule, AiToolPolicyModule, AiToolsModule, MeasurementModule, C8Module, C9Module, CrmModule, MarketingModule, EntitlementsModule, TenancyModule] (enumerated owner modules: appointments/appointments.module.ts#AppointmentsModule, audit-log/audit-log.module.ts#AuditLogModule, ai-tools/ai-tool-policy.module.ts#AiToolPolicyModule, ai-tools/ai-tools.module.ts#AiToolsModule, measurement/measurement.module.ts#MeasurementModule, valuation/c8.module.ts#C8Module, orchestration/c9.module.ts#C9Module, crm/crm.module.ts#CrmModule, marketing/marketing.module.ts#MarketingModule, entitlements/entitlements.module.ts#EntitlementsModule, tenancy/tenancy.module.ts#TenancyModule; ActionEngineModule never), registers no controller and provides [PERSONAL_SCHEDULE_SOURCE, USER_TURN_AUDIT, WIDGET_RELEASE_ACCESS, PRINCIPAL_RESOLVER, TENANT_SCOPE, GATE6_OWNERS, CANONICAL_READ, C9_CANCEL_OWNER, DRAFT_OWNER_REGISTRY, BOOKING_PROPOSE_OWNER, BOOKING_SELECTOR_OWNER, APPROVAL_REQUEST_OWNER, COMMIT_BOOKING_OWNER, NOUN_RESOLUTION_PORTS] (bound port tokens: PERSONAL_SCHEDULE_SOURCE, USER_TURN_AUDIT, WIDGET_RELEASE_ACCESS, CANONICAL_READ, GATE6_OWNERS, PRINCIPAL_RESOLVER, TENANT_SCOPE, NOUN_RESOLUTION_PORTS, C9_CANCEL_OWNER, DRAFT_OWNER_REGISTRY, APPROVAL_REQUEST_OWNER, COMMIT_BOOKING_OWNER, BOOKING_PROPOSE_OWNER, BOOKING_SELECTOR_OWNER); 145 widget files read: the only non-widget DI class imported is the store client (20 files); owner services under owner-ports/**: owner-ports/approval-request.adapter.ts -> marketing/canonical-bulk.service.ts#CanonicalBulkService, owner-ports/booking-preview.adapter.ts -> appointments/client-appointment-create.service.ts#ClientAppointmentCreateService, owner-ports/booking-preview.adapter.ts -> crm/client-appointment-cancel.service.ts#ClientAppointmentCancelService, owner-ports/booking-preview.adapter.ts -> crm/client-appointment-reschedule.service.ts#ClientAppointmentRescheduleService, owner-ports/booking-selector.adapter.ts -> ai-tools/ai-tool-runtime.service.ts#AiToolRuntimeService, owner-ports/c9-cancel.adapter.ts -> orchestration/c9.store.ts#C9Store, owner-ports/canonical-read.provider.ts -> ai-tools/ai-tool-runtime.service.ts#AiToolRuntimeService, owner-ports/canonical-read.provider.ts -> orchestration/c9.store.ts#C9Store, owner-ports/commit-booking.adapter.ts -> entitlements/entitlements.service.ts#EntitlementsService, owner-ports/commit-booking.adapter.ts -> appointments/client-appointment-create.service.ts#ClientAppointmentCreateService, owner-ports/commit-booking.adapter.ts -> crm/client-appointment-cancel.service.ts#ClientAppointmentCancelService, owner-ports/commit-booking.adapter.ts -> crm/client-appointment-reschedule.service.ts#ClientAppointmentRescheduleService, owner-ports/gate6.owners.provider.ts -> ai-tools/ai-tool-policy.service.ts#AiToolPolicyService, owner-ports/gate6.owners.provider.ts -> entitlements/entitlements.service.ts#EntitlementsService, owner-ports/noun-booking-cancel.adapter.ts -> crm/client-appointment-cancel.service.ts#ClientAppointmentCancelService, owner-ports/noun-booking-create.adapter.ts -> appointments/client-appointment-create.service.ts#ClientAppointmentCreateService, owner-ports/noun-booking-reschedule.adapter.ts -> crm/client-appointment-reschedule.service.ts#ClientAppointmentRescheduleService, owner-ports/noun-client-appointment-read.adapter.ts -> crm/client-appointment-read.service.ts#ClientAppointmentReadService, owner-ports/personal-schedule.adapter.ts -> appointments/personal-client-context.service.ts#PersonalClientContextService, owner-ports/personal-schedule.adapter.ts -> crm/client-appointment-read.service.ts#ClientAppointmentReadService, owner-ports/personal-schedule.adapter.ts -> ai-tools/ai-tool-runtime.service.ts#AiToolRuntimeService, owner-ports/principal.adapter.ts -> orchestration/c9.authority.ts#C9Authority, owner-ports/principal.adapter.ts -> tenancy/memberships.service.ts#MembershipsService, owner-ports/release-access.adapter.ts -> entitlements/widget-release-access.service.ts#WidgetReleaseAccessService, owner-ports/tenant-scope.provider.ts -> tenancy/tenant-context.service.ts#TenantContextService, owner-ports/user-turn-audit.adapter.ts -> audit-log/audit-log.service.ts#AuditLogService, owner-ports/witness-c9-revision.adapter.ts -> orchestration/c9.store.ts#C9Store\nPASS  widgets.runtime has one certified writer plus the existing guarded proof fixture; no ad-hoc writer\n        certified writer src/entitlements/widget-release.service.ts, production still refused; guarded fixture test/widgets-live/support/fixtures.ts, reached from test/widgets-live/**, scripts/widgets-http-proof/** and scripts/widgets-intent-http-proof.ts\n\n10/10 K3 structural checks pass\n"
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-31",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-35",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T-ARCH-TX"
+      ],
+      "kills": [
+        {
+          "killer": "T-ARCH-TX",
+          "test": "T-ARCH-TX — Gate 9 writes through the request transaction T (D-1, C11:4861) T-ARCH-TX [XF→U9b] lowerToUserTurn takes the transaction and opens none of its own",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "MISMATCH",
+  "mismatches": 1,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T12:26:14.062Z"
+}

@@ -1,0 +1,11 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "name": "isolated-production-preflight",
+  "exit": 0,
+  "command": [
+    "node",
+    "dist/scripts/release-preflight.js"
+  ],
+  "seconds": 0.27,
+  "scope": "guarded isolated replay DB; no production connection or real effects"
+}

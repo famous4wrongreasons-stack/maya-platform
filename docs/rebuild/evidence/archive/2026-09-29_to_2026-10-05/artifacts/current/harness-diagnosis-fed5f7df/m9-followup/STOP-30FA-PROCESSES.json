@@ -1,0 +1,118 @@
+{
+  "candidate": "30fa24698f3ae277c22209e8edfd448c29e4f872",
+  "utc": "2026-10-01T12:28:31.284416+00:00",
+  "reason": "Diagnostic M9-27 has the same wrong-method anchor; stop only candidate orchestration and its process descendants before the paired harness repair.",
+  "roots": [
+    {
+      "pid": 4027,
+      "ppid": 95648,
+      "pgid": 95648,
+      "command": "python3 /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-30fa2469/run-l27-mutations.py"
+    },
+    {
+      "pid": 94663,
+      "ppid": 58828,
+      "pgid": 94663,
+      "command": "python3 work/final-certification-30fa2469/run-anchor-preflight.py"
+    },
+    {
+      "pid": 95648,
+      "ppid": 58828,
+      "pgid": 95648,
+      "command": "python3 work/final-certification-30fa2469/launch-l27-after-ordinary.py"
+    },
+    {
+      "pid": 95649,
+      "ppid": 58828,
+      "pgid": 95649,
+      "command": "python3 work/final-certification-30fa2469/launch-native.py"
+    },
+    {
+      "pid": 95650,
+      "ppid": 58828,
+      "pgid": 95650,
+      "command": "python3 work/final-certification-30fa2469/watch-isolated-mutation-reports.py"
+    }
+  ],
+  "before": [
+    {
+      "pid": 1730,
+      "ppid": 94663,
+      "pgid": 1730,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate D8 --unit-filter (?:^|\\s)(?:D8\\-BOUNDS|D8\\-MECHANISM|D8\\-NORMALIZER|D8\\-SAFE\\-TEXT)(?=$|[^A-Za-z0-9_.-]) --live-filter (?:^|\\s)(?:D8\\-BOUNDS|D8\\-MECHANISM|D8\\-NORMALIZER|D8\\-SAFE\\-TEXT)(?=$|[^A-Za-z0-9_.-]) --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-30fa2469/diagnostics/anchor-preflight/mutation-parts/widgets-mutation-part-D8.json"
+    },
+    {
+      "pid": 2324,
+      "ppid": 94663,
+      "pgid": 2324,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate P-discharge --unit-filter (?:^|\\s)(?:DIS\\-1|DIS\\-2|DIS\\-3)(?=$|[^A-Za-z0-9_.-]) --live-filter (?:^|\\s)(?:DIS\\-1|DIS\\-2|DIS\\-3)(?=$|[^A-Za-z0-9_.-]) --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-30fa2469/diagnostics/anchor-preflight/mutation-parts/widgets-mutation-part-P-discharge.json"
+    },
+    {
+      "pid": 4027,
+      "ppid": 95648,
+      "pgid": 95648,
+      "command": "python3 /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-30fa2469/run-l27-mutations.py"
+    },
+    {
+      "pid": 4049,
+      "ppid": 4027,
+      "pgid": 95648,
+      "command": "node --test conformance.test.mjs test/brand.test.mjs test/build.selftest.test.mjs test/conversation.test.mjs test/deeplink.test.mjs test/dom.test.mjs test/integrity.parity.test.mjs test/intents.test.mjs test/k15-census.test.mjs test/local-api.history.test.mjs test/net.test.mjs test/renderer.conformance.test.mjs test/routes.conformance.test.mjs test/serve.test.mjs test/shell.test.mjs test/view.tokenfree.test.mjs test/voice.test.mjs"
+    },
+    {
+      "pid": 4053,
+      "ppid": 4049,
+      "pgid": 95648,
+      "command": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-p01-option-a-940ddd51/node-v22.23.2-darwin-arm64/bin/node test/build.selftest.test.mjs"
+    },
+    {
+      "pid": 4146,
+      "ppid": 2324,
+      "pgid": 2324,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-f27008a442 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-f27008a442.json -t (?:^|\\s)(?:DIS\\-1|DIS\\-2|DIS\\-3)(?=$|[^A-Za-z0-9_.-])"
+    },
+    {
+      "pid": 4164,
+      "ppid": 4146,
+      "pgid": 2324,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-f27008a442/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-f27008a442 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-f27008a442.json -t (?:^|\\s)(?:DIS\\-1|DIS\\-2|DIS\\-3)(?=$|[^A-Za-z0-9_.-])"
+    },
+    {
+      "pid": 4242,
+      "ppid": 1730,
+      "pgid": 1730,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-c30bd45241 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-c30bd45241.json -t (?:^|\\s)(?:D8\\-BOUNDS|D8\\-MECHANISM|D8\\-NORMALIZER|D8\\-SAFE\\-TEXT)(?=$|[^A-Za-z0-9_.-])"
+    },
+    {
+      "pid": 4258,
+      "ppid": 4242,
+      "pgid": 1730,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-c30bd45241/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-c30bd45241 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-c30bd45241.json -t (?:^|\\s)(?:D8\\-BOUNDS|D8\\-MECHANISM|D8\\-NORMALIZER|D8\\-SAFE\\-TEXT)(?=$|[^A-Za-z0-9_.-])"
+    },
+    {
+      "pid": 94663,
+      "ppid": 58828,
+      "pgid": 94663,
+      "command": "python3 work/final-certification-30fa2469/run-anchor-preflight.py"
+    },
+    {
+      "pid": 95648,
+      "ppid": 58828,
+      "pgid": 95648,
+      "command": "python3 work/final-certification-30fa2469/launch-l27-after-ordinary.py"
+    },
+    {
+      "pid": 95649,
+      "ppid": 58828,
+      "pgid": 95649,
+      "command": "python3 work/final-certification-30fa2469/launch-native.py"
+    },
+    {
+      "pid": 95650,
+      "ppid": 58828,
+      "pgid": 95650,
+      "command": "python3 work/final-certification-30fa2469/watch-isolated-mutation-reports.py"
+    }
+  ],
+  "after": []
+}

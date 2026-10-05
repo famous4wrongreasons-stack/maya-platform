@@ -1,0 +1,315 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "status": "PASS",
+  "checkedAt": "2026-10-05T05:05:02.716423+00:00",
+  "localCertification": {
+    "path": "CERTIFICATION-RECEIPTS.json",
+    "sha256": "5f4d605a0e26ad8249ade9d6d25b3929835be42d40ab20089e426e40f1e459c0"
+  },
+  "actualHostedCi": [
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T22:06:03Z",
+      "databaseId": 37238710215,
+      "event": "push",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dff728e85a97841dd72bd290992b888344780780",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238710215",
+      "workflowDatabaseId": 360530612,
+      "workflowName": "MAYA Chat Shell"
+    },
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T22:06:03Z",
+      "databaseId": 37238710218,
+      "event": "push",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dff728e85a97841dd72bd290992b888344780780",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238710218",
+      "workflowDatabaseId": 374470990,
+      "workflowName": "Canonical React release packaging"
+    },
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T22:06:03Z",
+      "databaseId": 37238710222,
+      "event": "push",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dff728e85a97841dd72bd290992b888344780780",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238710222",
+      "workflowDatabaseId": 359168151,
+      "workflowName": "Widget Contract"
+    },
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T22:06:03Z",
+      "databaseId": 37238710226,
+      "event": "push",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dff728e85a97841dd72bd290992b888344780780",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238710226",
+      "workflowDatabaseId": 360279046,
+      "workflowName": "Widgets Live"
+    },
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T22:06:03Z",
+      "databaseId": 37238710237,
+      "event": "push",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dff728e85a97841dd72bd290992b888344780780",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238710237",
+      "workflowDatabaseId": 311601892,
+      "workflowName": "Platform CI"
+    },
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T22:06:05Z",
+      "databaseId": 37238713168,
+      "event": "workflow_dispatch",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dff728e85a97841dd72bd290992b888344780780",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168",
+      "workflowDatabaseId": 362140366,
+      "workflowName": "Widgets Mutation"
+    }
+  ],
+  "hostedMutationJobs": 70,
+  "hostedCompleteReports": [
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-1-5.json",
+      "sha256": "41a0172a4dc2311788652b5c90a22e7e8dfa391dcf3ff70489bcbfcb61381643"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-10.json",
+      "sha256": "024e32813dff8ef08f9c975d902dff7b6183b6e7e6d5d93295ff2bb4e25f50e2"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-10a.json",
+      "sha256": "ae73a6c91f488b02bd9b32d2b5fe2516e45daa73618de85618e431b942e054f3"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-11.json",
+      "sha256": "e598ef791c6c4d10ccf1cd8a4b95e0200979ffdb26f653e02a8a3ba4a807956b"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-12.json",
+      "sha256": "b6a512d649de829fe0720952a5c601d75c702bec034cc38fd048733e530da8f9"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-12b.json",
+      "sha256": "a1ec381b4da8d9e6b28052d3088ba71a0e8604f8d76060e88f7b2b438b2bbdd3"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-12k.json",
+      "sha256": "b74849fbfdecda9440210862ef8e9840aeac6d8c75c80b80521380894f239ca0"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-13.json",
+      "sha256": "da9c2b568b6a3b54171c720e2e8dfb7702860181acbae55c1303e4d5ff9a950b"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-4.json",
+      "sha256": "c527f567c91c296d95aaa4ef734208389edcc32b9b18d30a5d979b5d083331ad"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-6.json",
+      "sha256": "dc74f9cd65107002b197601a006a8fa7b18bc436734ab1f00994dbeb133438b2"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-7.json",
+      "sha256": "d5f8398f99c9b61a80fe1c763e10b50c962a44a4b5a000a5a2d307d1348913bb"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-8.json",
+      "sha256": "8adacae1c512455d6d8d0062a5583f2b67fda12e62fad1fcf6af93d6b5a23d4c"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-8c.json",
+      "sha256": "8d1868b9cc43cff62f4c5d24d743ee63ac838bfd20c4ad9deef65a247a31cb28"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-8r.json",
+      "sha256": "29ab9ee983d9e0e73f85d564ebaaaba1a4c7d145f69048eff2112c0abc2d56a6"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-9.json",
+      "sha256": "a22d479c6786e09218d3ea16b15d783df37fea6fc2eb1996e7c80fed0fc84e78"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-9a.json",
+      "sha256": "71071995cb7983bd859c6ffd32ac8ff726a11818e01bc4a1c40e9da14ace6bb8"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-AB.json",
+      "sha256": "df46437b184084f6be4391b94eb7c3ac4bc2cf2926a464698395904eeb54fbd4"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-AR.json",
+      "sha256": "e208484b88d724dbc48bae0255b12bb15b9ca01bf348fec9828ea040d2570cd7"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-BS.json",
+      "sha256": "b0dd1e3ac1480bb2248671fc7ef6d2416c5f3572ca00bdb001856552ddcca261"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-D8.json",
+      "sha256": "39c9fdaeb8b9c1a647cad5f72b3cc34eb2e15df9f3fec97d7f0542d1aaef4ecb"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-FB.json",
+      "sha256": "35c25cdd2618fd8d37b1fb59c047daeda01f97bcec01d014a46deb04346ff636"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-H-harness.json",
+      "sha256": "a0d02afeac04f179c91a943fb4173b562e232dafb85bc58815eb13baa3b6635d"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-NS.json",
+      "sha256": "f40339a911e2d11800b720b86349e7acd0214ed837c0339a387564d184ad7ca2"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-P-allowlist.json",
+      "sha256": "4f79358374566ecd4f9483a513f9500e2f5eb7a63f364f153b11834c332522cd"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-P-discharge.json",
+      "sha256": "ca6f8acc19e57c5e891b0cc90862e8c0de28f6a4fd7abf16f264311ec5555d03"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-P-f88.json",
+      "sha256": "01c275cda9ae91ffef799197e64e4fa98015dbd37878dc591a552553a631fd00"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-P-g15b.json",
+      "sha256": "1b09907e1459c07724bc61565aca91d39f0bb0dcfd121261d38adb85360b4c84"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-P-handle.json",
+      "sha256": "3fde3cfb50cada1635891843bac3eeef60173c4545d596f120e8f998d6057ed6"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-P-ledger.json",
+      "sha256": "3626cf1c5dabb6b188652c905916b126d6dc0ad90356e24a7410085e334efee4"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-P-mint.json",
+      "sha256": "ee98e4d366a87b8fc9573a4f3ac9e4bbc75b82961587ce5bf589d598b785802a"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-P-mt3.json",
+      "sha256": "61c729e9e7b1065a81feabc57e88f3caa7d80461feb8d11fe0135dd5f1b7095a"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-P-pairing.json",
+      "sha256": "36ab4795f99a3a6e4f27c051d37e91bfa3153c0a51e16299b2216555a4229c15"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-P-principal.json",
+      "sha256": "2dc6190b2d24fd408e76cf6ac2fddc02f937719ee8d08a74bc74373532513659"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-P-render.json",
+      "sha256": "28b787940c5616bea70acf1cb40106efb0107dec9cb0b8d5446f1a894e57d7d7"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-P-rt6.json",
+      "sha256": "9db729f85915eabb1b23344101da105b3b594bd081fc380caaa7d5b4d8d1e05d"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-P-seal.json",
+      "sha256": "cacd04f921bc3eb71165fcbc10f7d5283f52499f38fe69a7805d08080ebb9a71"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-PI-contract.json",
+      "sha256": "8f88afae5491220f832a2be5cf58b4f18209d20c1750437ca00e829c44999c7a"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-PI.json",
+      "sha256": "2822a9b35e6f205b30a8625a8444cec77d7bddae1e3f69a987594854e0d8fb59"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-PU.json",
+      "sha256": "4abc06dd281e3f9968843627c93d62eb4b4577ebb50410bc3a3bdb4489c6e959"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-SB1.json",
+      "sha256": "c8b9557a25cc57478748c4edf64f0d09365d02bf53791c355a185ae096d272bb"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-SBV.json",
+      "sha256": "14b85105a081fa9fb2463f784e6dc670d5dd95bf37c3fd59008b705867470dcc"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-SO.json",
+      "sha256": "87a0e542eb9ea43a91910f15684e53e74a6e92aa5180e9955fbf6d4dc21bddb5"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-SV2.json",
+      "sha256": "86cf6ea55a46dab40d9d4a339f2696411ebe0b11d4972477a5bea11f56bc8b9f"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-T-tables.json",
+      "sha256": "499d1780b3c15aca2eff03c5580df5f8114392479daefb675f00bcbc6b45fe11"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-TURN.json",
+      "sha256": "b7f1fdba814597ea8a8bc3bd5385c721026107f9a601a881299dfb884626f65d"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-WF.json",
+      "sha256": "f88e77f944de3c59bcb7f7114da2535f2749b7889cfcb14caf3b05dd13ad7a87"
+    },
+    {
+      "path": "hosted/artifacts/37238713168/widgets-mutation-complete-dff728e85a97841dd72bd290992b888344780780/widgets-mutation-report-WR.json",
+      "sha256": "513587435fd11d8ae4253abbbb15ba1a2a525fc3ca4011a7a1aa320341e53b81"
+    }
+  ],
+  "hostedMutationCounts": {
+    "build-killed": 359,
+    "equivalent": 1,
+    "live-killed": 183,
+    "pending": 2
+  },
+  "multiTenantAuthorityPreserved": true,
+  "singleOperatorAr1": "PASS",
+  "independentHumanReview": false,
+  "releaseRehearsal": "PASS; isolated database only",
+  "pwaIosPackaging": "PASS; React AChat; endpoint substitution contract preserved; no installation",
+  "profileApplicableFalse": 0,
+  "globalFalse": 2,
+  "globalStops": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "certifiedForProfile": true,
+  "fullContractCertified": false,
+  "readyForProductionExecutionAuthorization": false,
+  "ownerActionsRemaining": [
+    "Real owner public trust material and custody confirmation",
+    "Confirm access to actual global platform-owner credentials; issue session only during separately authorized execution"
+  ],
+  "separateExecutionAuthorizationRequired": true,
+  "executionPrerequisites": [
+    "Separate owner execution authorization for this new candidate and current CAS after readiness prerequisites are confirmed"
+  ],
+  "deviceBoundary": "Owner must connect/unlock iPhone for separately authorized install; development provisioning expires 2026-10-05T08:16:21Z.",
+  "headEqualsOrigin": true,
+  "worktreeClean": true,
+  "unpublishedRequiredSourceWork": 0,
+  "productionOperations": 0,
+  "productionPrivateKeysCreatedOrStored": 0,
+  "historicalReceiptsAdmitted": 0
+}

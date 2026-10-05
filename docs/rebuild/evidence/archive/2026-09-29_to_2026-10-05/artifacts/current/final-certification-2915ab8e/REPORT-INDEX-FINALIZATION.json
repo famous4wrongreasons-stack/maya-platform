@@ -1,0 +1,16 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "capturedAt": "2026-10-02T07:46:37.123171+00:00",
+  "reason": "FBE2E evidence links were hashed before final admission fields were added to CURRENT-LIVE-PROOF-INDEX.json and HTTP-HARNESS-NATIVE-REPAIR-PROOF.json. Re-index those same final evidence documents after admission; no raw test receipt or result is edited.",
+  "priorManifest": "FBE2E-DISPOSITION.before-final-admission-index.json",
+  "priorSha256": "3e2b40b4455038adab1726674d77aeeb66344154f5ea252ec07d7a864386f3ac",
+  "nativeReceiptSha256Before": "afa124cffe9455071feab13b7b508cabcb5c59830f3ec34f54a59770393ddb8a",
+  "status": "PASS",
+  "completedAt": "2026-10-02T07:47:08.727597+00:00",
+  "finalFbeManifestSha256": "ddd3dc5cc18682b49b23ae6ac6ce602eee55ab2aa3dcb319a31466eed9a65970",
+  "checkedReferences": 293,
+  "mismatches": [],
+  "unresolvedReferences": [],
+  "rawTestReceiptsChanged": false,
+  "mutationResultsChanged": false
+}

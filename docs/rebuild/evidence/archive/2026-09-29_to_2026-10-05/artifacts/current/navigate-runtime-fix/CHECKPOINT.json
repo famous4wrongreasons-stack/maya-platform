@@ -1,0 +1,161 @@
+{
+  "base": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+  "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "workingTreeClean": true,
+  "navigateRootCauseFixed": true,
+  "navigateFullscreen": "PASS",
+  "timelinePollution": 0,
+  "negativeRouteAuthProofs": "PASS",
+  "newNavigateRegressionTests": 33,
+  "runtime": {
+    "tests": 399,
+    "pass": 392,
+    "fail": 0,
+    "skipped": 7
+  },
+  "carrier": {
+    "tests": 93,
+    "pass": 93,
+    "fail": 0,
+    "skipped": 0
+  },
+  "backendFilesTouched": 0,
+  "carrierFilesTouched": 0,
+  "visualDesignChanged": false,
+  "handoff": "STOP unchanged",
+  "sourceCarrierProbe": "PASS: personal create/reschedule/cancel and canonical NS-1 detail",
+  "proofs": {
+    "valid fs.calendar NAVIGATE to fullscreen": "PASS; real canonical journal HTTP source + live submission + actual runtime",
+    "detail never inserted into timeline": "PASS; before/after timeline IDs identical in actual source probe",
+    "PROGRESS resolves correctly": "PASS; progress -> open, no history pop/push bounce",
+    "undeclared or forged route": "PASS; 0 submissions",
+    "substituted detail": "PASS; parent, route, turn, profile, self-echo, tampering, expiry and terminal negatives",
+    "wrong tenant/principal": "PASS; runtime opaque correlation checks and canonical refusal propagation; server authority implementation unchanged",
+    "contradictory or missing server acceptance": "PASS; REFUSED/NEEDS_VERIFICATION/expired/missing acceptance cannot open even with an attached envelope",
+    "late response after close/back/sign-out/replacement": "PASS; no reopening, no timeline fallback",
+    "closeDetail/fullscreen null": "PASS; idempotent close and detail token release",
+    "focus/escape/back": "PASS; runtime with DOM double and unchanged carrier suite; no new device/browser certification claimed",
+    "ordinary non-detail timeline": "PASS; successor append and in-place replacement preserved"
+  },
+  "readyForCodexFinalCertification": true,
+  "fullReleaseCertification": "NOT RUN in this narrow runtime unit; no certificate issued",
+  "scopeBoundary": "Opening NAVIGATE(detail) and existing close/Escape/browser-Back behavior. NAVIGATE(w) resolved_widget transport was not modified or newly certified.",
+  "productionEffects": 0,
+  "productionMigration": false,
+  "realOtp": 0,
+  "realYclients": 0,
+  "iphoneReinstall": false,
+  "chapter10": false,
+  "changedFiles": [
+    "maya-chat-shell/dist/manifest.json",
+    "maya-chat-shell/src/shell/intents.ts",
+    "maya-chat-shell/src/shell/ports.ts",
+    "maya-chat-shell/src/shell/shell.ts",
+    "maya-chat-shell/test/dom.test.mjs",
+    "maya-chat-shell/test/intents.test.mjs"
+  ],
+  "receipts": [
+    {
+      "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+      "name": "carrier-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "maya-carrier-react",
+      "exit": 0,
+      "seconds": 4.57
+    },
+    {
+      "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+      "name": "carrier-test",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "cwd": "maya-carrier-react",
+      "exit": 0,
+      "seconds": 0.31
+    },
+    {
+      "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+      "name": "carrier-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": "maya-carrier-react",
+      "exit": 0,
+      "seconds": 4.46
+    },
+    {
+      "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+      "name": "runtime-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "maya-chat-shell",
+      "exit": 0,
+      "seconds": 4.97
+    },
+    {
+      "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+      "name": "runtime-check",
+      "command": [
+        "node",
+        "build.mjs",
+        "--check",
+        "--no-baseline"
+      ],
+      "cwd": "maya-chat-shell",
+      "exit": 0,
+      "seconds": 4.76
+    },
+    {
+      "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+      "name": "runtime-test",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "cwd": "maya-chat-shell",
+      "exit": 0,
+      "seconds": 39.52
+    },
+    {
+      "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+      "name": "runtime-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": "maya-chat-shell",
+      "exit": 0,
+      "seconds": 4.48
+    },
+    {
+      "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+      "name": "source-carrier",
+      "command": [
+        "npx",
+        "jest",
+        "--config",
+        "test/jest-widgets-live.json",
+        "--runInBand",
+        "--testRegex",
+        "widgets-live/source-carrier.probe-spec.ts$"
+      ],
+      "cwd": "maya-saas-backend",
+      "exit": 0,
+      "seconds": 2.79
+    }
+  ],
+  "patch": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/navigate-runtime-fix/I-SRC-1-NAVIGATE.patch"
+}

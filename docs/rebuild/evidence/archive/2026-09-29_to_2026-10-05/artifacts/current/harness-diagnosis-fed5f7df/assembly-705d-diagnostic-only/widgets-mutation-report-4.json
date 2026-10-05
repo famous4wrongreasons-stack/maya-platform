@@ -1,0 +1,335 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gate4.json": "1995675a03dd538b5f92fb244351889a67cc132c84c0c7f34ce20598fb2a71d2"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T16:43:14.392Z",
+  "batteries": [
+    "gate4.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-24117eb9a5",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-24117eb9a5",
+  "neutraliser_controls": {
+    "4:N4|live": {
+      "set": "N4",
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 1
+      },
+      "failed": [
+        "P-G15a — Gates 1 and 5 on the live PostgreSQL path [GW] G15-1 [GW] a forged token answers code-less EXPIRED and writes nothing",
+        "P-G15a — Gates 1 and 5 on the live PostgreSQL path [GW] G15-2 [GW] tampering with the stored body hash invalidates the seal",
+        "P-G15a — Gates 1 and 5 on the live PostgreSQL path [GW] G15-3 [GW] a mismatched widget id answers code-less EXPIRED",
+        "P-G15a — Gates 1 and 5 on the live PostgreSQL path [HTTP] G15-1 [HTTP] a forged token answers code-less EXPIRED and writes nothing",
+        "P-G15a — Gates 1 and 5 on the live PostgreSQL path [HTTP] G15-2 [HTTP] tampering with the stored body hash invalidates the seal",
+        "P-G15a — Gates 1 and 5 on the live PostgreSQL path [HTTP] G15-3 [HTTP] a mismatched widget id answers code-less EXPIRED",
+        "P-G15b — R3.9.4 successor on the live PostgreSQL path [GW] G15-7 [GW] own expired returns one stored-text remedy whose tap passes Gates 1–13",
+        "P-G15b — R3.9.4 successor on the live PostgreSQL path [GW] G15-8 [GW] own superseded returns the already linked successor without minting another",
+        "P-G15b — R3.9.4 successor on the live PostgreSQL path [GW] G15-9 [GW] a foreign principal receives code alone",
+        "P-G15b — R3.9.4 successor on the live PostgreSQL path [HTTP] G15-7 [HTTP] own expired returns one stored-text remedy whose tap passes Gates 1–13",
+        "P-G15b — R3.9.4 successor on the live PostgreSQL path [HTTP] G15-8 [HTTP] own superseded returns the already linked successor without minting another",
+        "P-G15b — R3.9.4 successor on the live PostgreSQL path [HTTP] G15-9 [HTTP] a foreign principal receives code alone",
+        "P-PRINCIPAL — the wired pipeline [merge-step exits, D-18] PR-12 [GW]: every refusal performs one principal resolution and the two required record reads",
+        "Gate 6 — may THIS principal exercise THIS capability (C11:4725, 4736-4798) [GW] the block, branch by branch, on the real pipeline N-CONTROL-FOREIGN [GW]: a CONTROL record submitted by another principal never reaches slot 6 — Gate 3 binds it first (R3.2.4 is the handler’s, at Gate 13)",
+        "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-NULL-NULL [GW]: `inputs: null` passes slot 8 and Gate 9 fails stale without a template",
+        "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-NULL-OBJ [GW]: a null-schema record carrying `inputs` is REFUSED / selection_out_of_domain at 8, with NO lowering-source read (K12)",
+        "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-NULL-EMPTY [GW]: a null-schema record carrying `inputs` is REFUSED / selection_out_of_domain at 8, with NO lowering-source read (K12)",
+        "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7 [GW]: a `NONE` record whose envelope was minted for `web-push` is refused at slot 7 — `NONE` is carried by `RICH_INTERACTIVE` alone (R3.2.3), and before U7a this passed",
+        "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7-TIER [GW]: the same clause over three more tiers — `sms` (TEXT_ONLY), `guest-chat` (ANONYMOUS_CHAT) and `web-public` (PUBLIC_READ) each refuse a `NONE`",
+        "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7-CARRIER [GW]: the refusal is keyed on the EMISSION’s minted channel, not on the submitting carrier — the route hard-codes `carrier: pwa` and `web-push` still refuses",
+        "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7-ALLOWLIST [GW]: `ANONYMOUS_CHAT` carries `REFINE` and `HANDOFF`; a `NAVIGATE` on `guest-chat` is refused, although every richer tier carries it — the cell is an ALLOWLIST, not an ordered ceiling (CH1)",
+        "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C7-ESC-P1 [GW]: the F60 escape is ONE intent — `control.widget.dismiss` at priority 0. The same key at priority 1 is refused on `web-push`",
+        "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C1 [GW]: an effect outside the kind’s cell is refused — `DRAFT` on `METRIC`, whose cell is `NONE, NAVIGATE, REFINE, CONTROL`",
+        "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C1-MEMBERSHIP [GW]: the cell is an ALLOWLIST, not an ordered rank — `REFINE` is refused on `LIMITATION`, whose cell lists the off-order `HANDOFF` above it",
+        "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-C2 [GW]: a `REFINE` that names no capability is refused — F69 gives REFINE a `C9` ref, and \"names nothing\" is not one of its cells",
+        "Gate 7 — effect admissibility runs on the live path and refuses (C11:4726) T7-NW [GW]: neither the admitted nor the refused submission writes anything durable; the one store operation is the record read",
+        "Gate 9 — canonical lowering and atomic timeline append (U9b) [HTTP] AppModule behind all six guards T9-HTTP-4 a different principal is refused before Gate 9 and cannot write",
+        "E1 — production-triggered evidence records E1-T2B-CLEAN [HTTP] [E-MINT] mints through the journal owner and traverses the real gate pipeline",
+        "E1 — production-triggered evidence records E1-G1-SEAL [HTTP] [E-TAMPER:WidgetEmission.bodyHash] rejects a production record whose sealed body is altered",
+        "E1 — production-triggered evidence records E1-G4-INDEP [HTTP] [E-INDEP] keeps a foreign tenant outside the record while the N4 battery exposes Gate 4",
+        "Gate 4 — the tenant scope is the owner’s answer, not the widget layer’s (C11:4723) [GW] the real WidgetsModule, through its controller T4-NW [GW]: neither the admitted nor the foreign submission writes anything durable; the one store operation is the record read",
+        "Gate 4 — the tenant scope is the owner’s answer, not the widget layer’s (C11:4723) [HTTP] AppModule behind all six global guards T4-NW [HTTP]: neither submission writes anything durable; the one store operation is the record read",
+        "G12-L00 — no canonical read is reachable through the widget route (regression guard; holds by absence, not enforcement) [GW] G12-L00 [GW] holds by absence: client A's and staff S's tokens for the emitter's five kinds reach no owner read, answer with the controller's six keys only, add no AiToolExecution row, carry no owner byte and write nothing",
+        "G12-L00 — no canonical read is reachable through the widget route (regression guard; holds by absence, not enforcement) [HTTP] G12-L00 [HTTP] holds by absence: behind every global guard, the route is dark until widgets.runtime is granted; then client A's and staff S's tokens reach no owner read, answer with the controller's six keys only, add no AiToolExecution row, carry no owner byte and write nothing",
+        "Gate 13 — PostgreSQL claim, receipt and CONTROL routing (U13a) G13-P01/N02/N03/N05 [GW][G-SYNTH][XF→U10b] reaches the closed router only after Gate 10 is built",
+        "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-0 [HTTP] control: a conformant §3.8 body passes the shape stage and is refused at slot 1, so a 400 below is about its own violation",
+        "P-F88 — the §3.8 submission and F88’s walk, at the shape stage [HTTP] F88-6 [HTTP] the other §3.8 members are enforced as declared: required-nullable `inputs`, a UUID `widget_id`, a non-null `readback_ack` shape",
+        "Gate 11 — the witness lane refuses while it is unbound, and its twin still passes (C11:4731) G11-N4d-NW [GW]: neither twin writes anything durable, at whatever slot the pipeline stops",
+        "P-MT3 — canonical K13 moment trigger [GW, PostgreSQL] G3-e a web-push token minted for A is inert when submitted by B",
+        "T-F11/B-1 — the pipeline order on the live code path [GW] T-F11/B-1 (b): live stops at 0, 1, 3, 5 [synthetic record], 7 [synthetic record] and 8 each report ran equal to the slot's position, over records the real writers minted for JwtStrategy-validated principals",
+        "R3.9.3 — the refusal the route returns is rendered from the table [HTTP] REN-5a [HTTP] control: a refusal whose code carries a row renders from THAT row, and the response carries no error token"
+      ],
+      "problems": []
+    }
+  },
+  "baseline_controls": {
+    "4:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "4:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gate4.json",
+      "id": "M4-1",
+      "files": [
+        "src/widgets/gates/gate4.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T4-SRC-a",
+        "T4-SRC-b"
+      ],
+      "kills": [
+        {
+          "killer": "T4-SRC-a",
+          "test": "T4-SRC — slot 4 delegates: the call §3.9 row 4 names, and no compare of its own T4-SRC-a: no tenant id is compared for equality anywhere in slot 4",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T4-SRC-b",
+          "test": "T4-SRC — slot 4 delegates: the call §3.9 row 4 names, and no compare of its own T4-SRC-b: `gate4.ts` asks the port exactly once, and asks it the RECORD tenant",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate4.json",
+      "id": "M4-2",
+      "files": [
+        "src/widgets/gates/gate4.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [
+        "N4"
+      ],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T4-INDEP"
+      ],
+      "kills": [
+        {
+          "killer": "T4-INDEP",
+          "test": "Gate 4 — the tenant scope is the owner’s answer, not the widget layer’s (C11:4723) [GW] the real WidgetsModule, through its controller T4-INDEP [GW]: tenant A submitting tenant B's record never gets past slot 4 — it stops at 1 (never read), at 3 (the hash covers the tenant) or at 4 (`tenant_mismatch`), each with no write",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": "N4",
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T4-INDEP",
+          "test": "Gate 4 — the tenant scope is the owner’s answer, not the widget layer’s (C11:4723) [HTTP] AppModule behind all six global guards T4-INDEP [HTTP]: behind every global guard, tenant A submitting tenant B's record never gets past slot 4 — stop 1, 3 or 4, each with no write",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": "N4",
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "GW": 1,
+        "HTTP": 1
+      },
+      "exits": {
+        "N4": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate4.json",
+      "id": "M4-3",
+      "files": [
+        "src/widgets/gates/gate4.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [
+        "N4"
+      ],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T4-INDEP"
+      ],
+      "kills": [
+        {
+          "killer": "T4-INDEP",
+          "test": "Gate 4 — the tenant scope is the owner’s answer, not the widget layer’s (C11:4723) [GW] the real WidgetsModule, through its controller T4-INDEP [GW]: tenant A submitting tenant B's record never gets past slot 4 — it stops at 1 (never read), at 3 (the hash covers the tenant) or at 4 (`tenant_mismatch`), each with no write",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": "N4",
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T4-INDEP",
+          "test": "Gate 4 — the tenant scope is the owner’s answer, not the widget layer’s (C11:4723) [HTTP] AppModule behind all six global guards T4-INDEP [HTTP]: behind every global guard, tenant A submitting tenant B's record never gets past slot 4 — stop 1, 3 or 4, each with no write",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": "N4",
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "GW": 1,
+        "HTTP": 1
+      },
+      "exits": {
+        "N4": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate4.json",
+      "id": "M4-4",
+      "files": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T4-WIRED"
+      ],
+      "kills": [
+        {
+          "killer": "T4-WIRED",
+          "test": "T4-SRC — slot 4 delegates: the call §3.9 row 4 names, and no compare of its own T4-WIRED: the gateway passes the bound port to `gate4`, so slot 4 runs on `TENANT_SCOPE`",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T4-WIRED",
+          "test": "T4-SRC — slot 4 delegates: the call §3.9 row 4 names, and no compare of its own T4-WIRED (control): the rule is red exactly while the argument is missing, so flipping `.failing` is a decision about the gateway and not about this test",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [
+    "gate4.json#M4-2",
+    "gate4.json#M4-3"
+  ],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T17:14:03.497Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 1,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

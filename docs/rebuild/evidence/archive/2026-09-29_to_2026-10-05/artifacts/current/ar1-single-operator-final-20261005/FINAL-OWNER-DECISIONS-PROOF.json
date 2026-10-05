@@ -1,0 +1,1241 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "status": "PASS",
+  "decisionSource": "User FINAL FBE2E OWNER DECISIONS in this conversation",
+  "decisionLedger": {
+    "path": "docs/rebuild/widget-release-programme/FINAL-FBE2E-DECISIONS.md",
+    "sha256": "a223b705b6406bf1a8b097d7cb8d6173086d071d39d71d0658327f15c71b13c2"
+  },
+  "counterfactuals": {
+    "gate": "FB",
+    "declarations": 15,
+    "receipt": {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-FB.json",
+      "sha256": "35c25cdd2618fd8d37b1fb59c047daeda01f97bcec01d014a46deb04346ff636"
+    },
+    "mutants": [
+      {
+        "battery": "gateFB.json",
+        "id": "FB-DAY-UTC",
+        "files": [
+          "src/crm/appointment-time.utils.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "L5-PIPELINE"
+        ],
+        "kills": [
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Europe/Moscow at 2027-10-01T21:30:00Z → 2027-10-03 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/Los_Angeles at 2027-01-01T02:00:00Z → 2027-01-01 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Pacific/Kiritimati at 2027-12-31T12:00:00Z → 2028-01-02 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Asia/Kathmandu at 2027-01-31T20:00:00Z → 2027-02-02 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/New_York at 2027-03-14T04:30:00Z → 2027-03-14 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 5
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateFB.json",
+        "id": "FB-DAY-ELAPSED",
+        "files": [
+          "src/crm/appointment-time.utils.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "L5-PIPELINE"
+        ],
+        "kills": [
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Europe/Moscow at 2027-10-01T21:30:00Z → 2027-10-03 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/Los_Angeles at 2027-01-01T02:00:00Z → 2027-01-01 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Pacific/Kiritimati at 2027-12-31T12:00:00Z → 2028-01-02 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Asia/Kathmandu at 2027-01-31T20:00:00Z → 2027-02-02 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/New_York at 2027-03-14T04:30:00Z → 2027-03-14 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 5
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateFB.json",
+        "id": "FB-DAY-BRANCH",
+        "files": [
+          "src/crm/availability-calendar.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "L5-PIPELINE"
+        ],
+        "kills": [
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Europe/Moscow at 2027-10-01T21:30:00Z → 2027-10-03 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/Los_Angeles at 2027-01-01T02:00:00Z → 2027-01-01 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Pacific/Kiritimati at 2027-12-31T12:00:00Z → 2028-01-02 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Asia/Kathmandu at 2027-01-31T20:00:00Z → 2027-02-02 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/New_York at 2027-03-14T04:30:00Z → 2027-03-14 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/New_York at 2027-11-07T04:30:00Z → 2027-11-08 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 6
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateFB.json",
+        "id": "FB-DAY-DISPLAY",
+        "files": [
+          "src/widgets/booking/booking-selector.presenter.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "L5-PIPELINE"
+        ],
+        "kills": [
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Europe/Moscow at 2027-10-01T21:30:00Z → 2027-10-03 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/Los_Angeles at 2027-01-01T02:00:00Z → 2027-01-01 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Pacific/Kiritimati at 2027-12-31T12:00:00Z → 2028-01-02 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Asia/Kathmandu at 2027-01-31T20:00:00Z → 2027-02-02 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/New_York at 2027-03-14T04:30:00Z → 2027-03-14 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/New_York at 2027-11-07T04:30:00Z → 2027-11-08 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 6
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateFB.json",
+        "id": "FB-DAY-CONFIRM",
+        "files": [
+          "src/widgets/emission/booking-confirmation-minter.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "L5-PIPELINE"
+        ],
+        "kills": [
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE UTC at 2028-02-28T23:59:59Z → 2028-02-29 (branch=false)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE UTC at 2028-02-29T12:00:00Z → 2028-03-01 (branch=false)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Europe/Moscow at 2027-10-01T21:30:00Z → 2027-10-03 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/Los_Angeles at 2027-01-01T02:00:00Z → 2027-01-01 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Pacific/Kiritimati at 2027-12-31T12:00:00Z → 2028-01-02 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Asia/Kathmandu at 2027-01-31T20:00:00Z → 2027-02-02 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/New_York at 2027-03-14T04:30:00Z → 2027-03-14 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          },
+          {
+            "killer": "L5-PIPELINE",
+            "test": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/New_York at 2027-11-07T04:30:00Z → 2027-11-08 (branch=true)",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 8
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateFB.json",
+        "id": "FB-H1-CODEC",
+        "files": [
+          "src/widgets/emission/envelope.factory.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "L5-H1"
+        ],
+        "kills": [
+          {
+            "killer": "L5-H1",
+            "test": "L5-H1: fractional-offset slot names use the same canonical codec as H7, not a parallel ASCII sort",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gateFB.json",
+        "id": "FB-UNKNOWN",
+        "files": [
+          "src/crm/crm.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "L20-LOST-RESPONSE"
+        ],
+        "kills": [
+          {
+            "killer": "L20-LOST-RESPONSE",
+            "test": "L20 real lost-response fault → canonical UNKNOWN [HTTP] [test provider PostgreSQL] L20-LOST-RESPONSE: one persisted booking; UNKNOWN is natural, retries cannot duplicate, unresolved reconciliation stays pending",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateFB.json",
+        "id": "FB-DELIVERY-ONLY",
+        "files": [
+          "src/widgets/rendering/selector-lifecycle.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "L25-OBSERVED"
+        ],
+        "kills": [
+          {
+            "killer": "L25-OBSERVED",
+            "test": "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL] L25-OBSERVED: HTTP delivery alone is DELIVERED; tap cannot create LIVE; render then permits canonical successor",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateFB.json",
+        "id": "FB-RENDER-STATE",
+        "files": [
+          "src/widgets/rendering/selector-lifecycle.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "L25-OBSERVED"
+        ],
+        "kills": [
+          {
+            "killer": "L25-OBSERVED",
+            "test": "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL] L25-OBSERVED: HTTP delivery alone is DELIVERED; tap cannot create LIVE; render then permits canonical successor",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateFB.json",
+        "id": "FB-REPLAY",
+        "files": [
+          "src/widgets/rendering/selector-lifecycle.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "L25-MISSING"
+        ],
+        "kills": [
+          {
+            "killer": "L25-MISSING",
+            "test": "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL] L25-MISSING: missing delivery evidence and legacy LIVE cannot manufacture a render observation",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateFB.json",
+        "id": "FB-DELIVERY-AUDIT",
+        "files": [
+          "src/widgets/rendering/selector-lifecycle.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "L25-MISSING"
+        ],
+        "kills": [
+          {
+            "killer": "L25-MISSING",
+            "test": "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL] L25-MISSING: missing delivery evidence and legacy LIVE cannot manufacture a render observation",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateFB.json",
+        "id": "FB-RENDER-AUDIT",
+        "files": [
+          "src/widgets/rendering/selector-lifecycle.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "L25-CONCURRENT"
+        ],
+        "kills": [
+          {
+            "killer": "L25-CONCURRENT",
+            "test": "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL] L25-CONCURRENT: repeated and concurrent observations produce exactly one rendered audit and no authority",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateFB.json",
+        "id": "FB-AUDIT-ATOMIC",
+        "files": [
+          "src/widgets/owner-ports/selector-observation-audit.adapter.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "L25-ATOMIC"
+        ],
+        "kills": [
+          {
+            "killer": "L25-ATOMIC",
+            "test": "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL] L25-ATOMIC: audit failure rolls back LIVE and its observation together",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateFB.json",
+        "id": "FB-TAP-CANNOT-RENDER",
+        "files": [
+          "src/widgets/gates/gate7.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "L25-OBSERVED"
+        ],
+        "kills": [
+          {
+            "killer": "L25-OBSERVED",
+            "test": "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL] L25-OBSERVED: HTTP delivery alone is DELIVERED; tap cannot create LIVE; render then permits canonical successor",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gateFB.json",
+        "id": "FB-DRAWER-OBSERVATION",
+        "files": [
+          "../maya-chat-shell/src/dom/host.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "BOOK-1…BOOK-6"
+        ],
+        "kills": [
+          {
+            "killer": "BOOK-1…BOOK-6",
+            "test": "E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP] [PostgreSQL] BOOK-1…BOOK-6: create, reschedule and cancel each propose then COMMIT through Gate 14",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      }
+    ],
+    "controls": {
+      "FB:baseline|live": {
+        "set": null,
+        "steps": [
+          "live"
+        ],
+        "exits": {
+          "live": 0
+        },
+        "failed": [],
+        "problems": []
+      },
+      "FB:baseline|unit,typecheck,k3": {
+        "set": null,
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "exits": {
+          "unit": 0,
+          "typecheck": 0,
+          "k3": 0
+        },
+        "failed": [],
+        "problems": []
+      }
+    }
+  },
+  "L2": {
+    "status": "PASS",
+    "proof": {
+      "receipt": {
+        "path": "receipts/mutation-ci-integrity.receipt.json",
+        "sha256": "5e46cb47182db0e6f55c347867f99d1a37adacf16021c41d4946f12949e34213"
+      },
+      "log": {
+        "path": "receipts/mutation-ci-integrity.log",
+        "sha256": "f00dce2b691fd91acfefb4543e2368362eb8e6485424ea90700bb0312dcf4cdc"
+      }
+    },
+    "strictFinalAdmission": {
+      "receipt": {
+        "path": "receipts/mutation-assemble.receipt.json",
+        "sha256": "06cc043a279f20c5edb19162cdc9ec023fe910d988585f30b2c84cba86ffdb7a"
+      },
+      "log": {
+        "path": "receipts/mutation-assemble.log",
+        "sha256": "04493767df76e6dfe4da6e132745e3c4ae821bdd3d554e58f44e0fd0a896aeb7"
+      }
+    },
+    "boundary": "Blocking workflow commands and strict admission are proven locally; remote GitHub branch-protection configuration is not claimed."
+  },
+  "L5/L24": {
+    "status": "PASS",
+    "proof": {
+      "source": "availability-calendar.live-spec.ts",
+      "count": 8,
+      "receipt": {
+        "path": "receipts/widgets-live-full.json",
+        "sha256": "d75a953bc5f6d9272ce7f170cd050d333ded464cd217cc129c1c6c35c170b5ee"
+      },
+      "assertions": [
+        {
+          "ancestorTitles": [
+            "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL]"
+          ],
+          "duration": 870,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE UTC at 2028-02-28T23:59:59Z → 2028-02-29 (branch=false)",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 13,
+          "retryReasons": [],
+          "startAt": 1791152199326,
+          "status": "passed",
+          "title": "L5-PIPELINE UTC at 2028-02-28T23:59:59Z → 2028-02-29 (branch=false)"
+        },
+        {
+          "ancestorTitles": [
+            "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL]"
+          ],
+          "duration": 563,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE UTC at 2028-02-29T12:00:00Z → 2028-03-01 (branch=false)",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 13,
+          "retryReasons": [],
+          "startAt": 1791152200197,
+          "status": "passed",
+          "title": "L5-PIPELINE UTC at 2028-02-29T12:00:00Z → 2028-03-01 (branch=false)"
+        },
+        {
+          "ancestorTitles": [
+            "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL]"
+          ],
+          "duration": 552,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Europe/Moscow at 2027-10-01T21:30:00Z → 2027-10-03 (branch=true)",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 13,
+          "retryReasons": [],
+          "startAt": 1791152200760,
+          "status": "passed",
+          "title": "L5-PIPELINE Europe/Moscow at 2027-10-01T21:30:00Z → 2027-10-03 (branch=true)"
+        },
+        {
+          "ancestorTitles": [
+            "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL]"
+          ],
+          "duration": 543,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/Los_Angeles at 2027-01-01T02:00:00Z → 2027-01-01 (branch=true)",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 13,
+          "retryReasons": [],
+          "startAt": 1791152201312,
+          "status": "passed",
+          "title": "L5-PIPELINE America/Los_Angeles at 2027-01-01T02:00:00Z → 2027-01-01 (branch=true)"
+        },
+        {
+          "ancestorTitles": [
+            "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL]"
+          ],
+          "duration": 539,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Pacific/Kiritimati at 2027-12-31T12:00:00Z → 2028-01-02 (branch=true)",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 13,
+          "retryReasons": [],
+          "startAt": 1791152201855,
+          "status": "passed",
+          "title": "L5-PIPELINE Pacific/Kiritimati at 2027-12-31T12:00:00Z → 2028-01-02 (branch=true)"
+        },
+        {
+          "ancestorTitles": [
+            "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL]"
+          ],
+          "duration": 519,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE Asia/Kathmandu at 2027-01-31T20:00:00Z → 2027-02-02 (branch=true)",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 13,
+          "retryReasons": [],
+          "startAt": 1791152202394,
+          "status": "passed",
+          "title": "L5-PIPELINE Asia/Kathmandu at 2027-01-31T20:00:00Z → 2027-02-02 (branch=true)"
+        },
+        {
+          "ancestorTitles": [
+            "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL]"
+          ],
+          "duration": 539,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/New_York at 2027-03-14T04:30:00Z → 2027-03-14 (branch=true)",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 13,
+          "retryReasons": [],
+          "startAt": 1791152202914,
+          "status": "passed",
+          "title": "L5-PIPELINE America/New_York at 2027-03-14T04:30:00Z → 2027-03-14 (branch=true)"
+        },
+        {
+          "ancestorTitles": [
+            "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL]"
+          ],
+          "duration": 521,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL] L5-PIPELINE America/New_York at 2027-11-07T04:30:00Z → 2027-11-08 (branch=true)",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 13,
+          "retryReasons": [],
+          "startAt": 1791152203453,
+          "status": "passed",
+          "title": "L5-PIPELINE America/New_York at 2027-11-07T04:30:00Z → 2027-11-08 (branch=true)"
+        }
+      ]
+    },
+    "boundary": "One next local calendar day only; no widening/free-text/new input kinds."
+  },
+  "L20": {
+    "status": "PASS",
+    "proof": {
+      "source": "provider-unknown.live-spec.ts",
+      "count": 1,
+      "receipt": {
+        "path": "receipts/widgets-live-full.json",
+        "sha256": "d75a953bc5f6d9272ce7f170cd050d333ded464cd217cc129c1c6c35c170b5ee"
+      },
+      "assertions": [
+        {
+          "ancestorTitles": [
+            "L20 real lost-response fault → canonical UNKNOWN [HTTP] [test provider PostgreSQL]"
+          ],
+          "duration": 1164,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "L20 real lost-response fault → canonical UNKNOWN [HTTP] [test provider PostgreSQL] L20-LOST-RESPONSE: one persisted booking; UNKNOWN is natural, retries cannot duplicate, unresolved reconciliation stays pending",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 22,
+          "retryReasons": [],
+          "startAt": 1791152280157,
+          "status": "passed",
+          "title": "L20-LOST-RESPONSE: one persisted booking; UNKNOWN is natural, retries cannot duplicate, unresolved reconciliation stays pending"
+        }
+      ]
+    },
+    "boundary": "Test provider persisted one row then destroyed socket. Real AE derives UNKNOWN; ordinary and six concurrent retries dispatch no duplicate. Reconciliation read fault remains safely pending; successful production reconciliation is not claimed."
+  },
+  "L23": {
+    "status": "ACCEPTED",
+    "exactCandidateOnly": "dff728e85a97841dd72bd290992b888344780780",
+    "ratchets": [
+      {
+        "receipt": {
+          "path": "receipts/runtime-full.receipt.json",
+          "sha256": "e98e7850a5cb132f969e996ca3e2e328f351315b41dd9b4c4b59d365edb01349"
+        },
+        "log": {
+          "path": "receipts/runtime-full.log",
+          "sha256": "a26de636fc1527ebbfb0424b5388b9230cb876c18d3df9d03148918d464b3bca"
+        }
+      },
+      {
+        "receipt": {
+          "path": "receipts/runtime-self-test.receipt.json",
+          "sha256": "e9f6bbd1856a2ac9b154e2df7ad84ecd2a3302e1df3a125b7b450e5ef6c7b9c4"
+        },
+        "log": {
+          "path": "receipts/runtime-self-test.log",
+          "sha256": "79407a3bac8d527ac3e4029b95520d06064176b911badd393d4d44d244948a81"
+        }
+      },
+      {
+        "receipt": {
+          "path": "receipts/runtime-hash-check.receipt.json",
+          "sha256": "7701bb6416d394e8e8be646fbe5f4e880072daeb3847dea52235872faaca36c3"
+        },
+        "log": {
+          "path": "receipts/runtime-hash-check.log",
+          "sha256": "a0d4589248fd76857e2c0fdb5a1d7c75c7fb70289195d3f59eb45113ef2f798d"
+        }
+      }
+    ],
+    "boundary": "Structural network test does not inspect every extra widget-path literal in all four network modules. Existing exact endpoint allowlist, single fetch site, build counterfactuals and network tests remain required."
+  },
+  "L25": {
+    "status": "PASS",
+    "proof": {
+      "source": "selector-lifecycle.live-spec.ts",
+      "count": 6,
+      "receipt": {
+        "path": "receipts/widgets-live-full.json",
+        "sha256": "d75a953bc5f6d9272ce7f170cd050d333ded464cd217cc129c1c6c35c170b5ee"
+      },
+      "assertions": [
+        {
+          "ancestorTitles": [
+            "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL]"
+          ],
+          "duration": 495,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL] L25-OBSERVED: HTTP delivery alone is DELIVERED; tap cannot create LIVE; render then permits canonical successor",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 17,
+          "retryReasons": [],
+          "startAt": 1791152243568,
+          "status": "passed",
+          "title": "L25-OBSERVED: HTTP delivery alone is DELIVERED; tap cannot create LIVE; render then permits canonical successor"
+        },
+        {
+          "ancestorTitles": [
+            "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL]"
+          ],
+          "duration": 484,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL] L25-CONCURRENT: repeated and concurrent observations produce exactly one rendered audit and no authority",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 4,
+          "retryReasons": [],
+          "startAt": 1791152244064,
+          "status": "passed",
+          "title": "L25-CONCURRENT: repeated and concurrent observations produce exactly one rendered audit and no authority"
+        },
+        {
+          "ancestorTitles": [
+            "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL]"
+          ],
+          "duration": 588,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL] L25-FOREIGN: foreign principal, tenant and forged bytes cannot attest a selector",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 11,
+          "retryReasons": [],
+          "startAt": 1791152244548,
+          "status": "passed",
+          "title": "L25-FOREIGN: foreign principal, tenant and forged bytes cannot attest a selector"
+        },
+        {
+          "ancestorTitles": [
+            "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL]"
+          ],
+          "duration": 238,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL] L25-MISSING: missing delivery evidence and legacy LIVE cannot manufacture a render observation",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 5,
+          "retryReasons": [],
+          "startAt": 1791152245136,
+          "status": "passed",
+          "title": "L25-MISSING: missing delivery evidence and legacy LIVE cannot manufacture a render observation"
+        },
+        {
+          "ancestorTitles": [
+            "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL]"
+          ],
+          "duration": 401,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL] L25-EXPIRY: expired or revoked current authority cannot assert LIVE",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 4,
+          "retryReasons": [],
+          "startAt": 1791152245375,
+          "status": "passed",
+          "title": "L25-EXPIRY: expired or revoked current authority cannot assert LIVE"
+        },
+        {
+          "ancestorTitles": [
+            "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL]"
+          ],
+          "duration": 256,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL] L25-ATOMIC: audit failure rolls back LIVE and its observation together",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 5,
+          "retryReasons": [],
+          "startAt": 1791152245776,
+          "status": "passed",
+          "title": "L25-ATOMIC: audit failure rolls back LIVE and its observation together"
+        }
+      ]
+    },
+    "browser": {
+      "receipt": {
+        "path": "receipts/l25-browser.receipt.json",
+        "sha256": "3820e2d9617df578e2b7662d9fd1b9aca7206f22d15edbad628004ceea7ff8d9"
+      },
+      "log": {
+        "path": "receipts/l25-browser.log",
+        "sha256": "d25debf5cfd98e66997ca015123094c6923870d4f511705dead351cc6a5c161d"
+      }
+    },
+    "boundary": "DELIVERED means server HTTP handoff; LIVE means authenticated post-mount carrier observation, not human attention. Observation grants no action/booking authority."
+  },
+  "L26": {
+    "status": "ACCEPTED + ADMISSION REFUSAL PASS",
+    "proof": {
+      "receipt": {
+        "path": "receipts/mutation-ci-integrity.receipt.json",
+        "sha256": "5e46cb47182db0e6f55c347867f99d1a37adacf16021c41d4946f12949e34213"
+      },
+      "log": {
+        "path": "receipts/mutation-ci-integrity.log",
+        "sha256": "f00dce2b691fd91acfefb4543e2368362eb8e6485424ea90700bb0312dcf4cdc"
+      }
+    },
+    "strictFinalAdmission": {
+      "receipt": {
+        "path": "receipts/mutation-assemble.receipt.json",
+        "sha256": "06cc043a279f20c5edb19162cdc9ec023fe910d988585f30b2c84cba86ffdb7a"
+      },
+      "log": {
+        "path": "receipts/mutation-assemble.log",
+        "sha256": "04493767df76e6dfe4da6e132745e3c4ae821bdd3d554e58f44e0fd0a896aeb7"
+      }
+    },
+    "boundary": "Historical/manual audit builder and all its reports are archival-only. Fresh complete raw native receipts alone enter release admission."
+  },
+  "productionEffects": 0,
+  "realOtpEffects": 0,
+  "realYclientsEffects": 0
+}

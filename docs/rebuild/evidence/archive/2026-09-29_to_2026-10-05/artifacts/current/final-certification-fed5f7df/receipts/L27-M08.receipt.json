@@ -1,0 +1,28 @@
+{
+  "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "name": "L27-M08",
+  "command": [
+    "node",
+    "--test",
+    "conformance.test.mjs",
+    "test/brand.test.mjs",
+    "test/build.selftest.test.mjs",
+    "test/conversation.test.mjs",
+    "test/deeplink.test.mjs",
+    "test/dom.test.mjs",
+    "test/integrity.parity.test.mjs",
+    "test/intents.test.mjs",
+    "test/k15-census.test.mjs",
+    "test/local-api.history.test.mjs",
+    "test/net.test.mjs",
+    "test/renderer.conformance.test.mjs",
+    "test/routes.conformance.test.mjs",
+    "test/serve.test.mjs",
+    "test/shell.test.mjs",
+    "test/view.tokenfree.test.mjs",
+    "test/voice.test.mjs"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-fed5f7df/runtime-l27-mutations/maya-chat-shell",
+  "exit": 1,
+  "seconds": 128.74
+}

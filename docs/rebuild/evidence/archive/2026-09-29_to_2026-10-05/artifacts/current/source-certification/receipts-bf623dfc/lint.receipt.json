@@ -1,0 +1,12 @@
+{
+  "candidate": "bf623dfc708f097db31a767505be517f838f0dd4",
+  "name": "lint",
+  "command": [
+    "npm",
+    "run",
+    "lint"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 0,
+  "seconds": 65.91
+}

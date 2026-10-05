@@ -1,0 +1,88 @@
+{
+  "startedAt": "2026-10-03T06:36:23.267786+00:00",
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "currentRelease": "/opt/maya-saas/releases/20260929-recon-fix-eb43bc22",
+  "directory": "/opt/maya-saas/backups/controlled-76df1766-20261003",
+  "mode": "0700",
+  "databaseMutations": 0,
+  "runtimeChanges": 0,
+  "dumpArchiveReadable": true,
+  "dumpTocEntries": 1601,
+  "releaseArchiveReadable": true,
+  "status": "PASS",
+  "finishedAt": "2026-10-03T06:37:37.768328+00:00",
+  "files": [
+    {
+      "name": "backend-release.tar.gz",
+      "bytes": 136831976,
+      "sha256": "c327ec544cd09d1e0dbb5183d6da484f19109fac6cab68693c0543441aac2e80",
+      "mode": "0600"
+    },
+    {
+      "name": "live-widgets.env",
+      "bytes": 7916,
+      "sha256": "38429d38e30032d921cd3b39f9b58b94cc277623fe99d1a751098162b1f652cd",
+      "mode": "0600"
+    },
+    {
+      "name": "maya-saas.service.txt",
+      "bytes": 1081,
+      "sha256": "252f3a972f35cfd5046fcd3734be721e076726103d551fba77dbbc165a0fb937",
+      "mode": "0600"
+    },
+    {
+      "name": "previous-current.txt",
+      "bytes": 52,
+      "sha256": "1401a15ecaa45fa94787ca64ac842217588c4921c6ca3d88415c88cf045a51fe",
+      "mode": "0600"
+    },
+    {
+      "name": "production.pgdump",
+      "bytes": 4510508,
+      "sha256": "e6d1132865c4f37d20a68de57d659b7fb451a4e6b881a53a3d75e6a257a393f6",
+      "mode": "0600"
+    },
+    {
+      "name": "production.toc",
+      "bytes": 131978,
+      "sha256": "515798e4964bf58758ddb4ef12b99cc0a161270cbc496f4fd8d065d8d1002df5",
+      "mode": "0600"
+    }
+  ],
+  "restoreExecuted": false,
+  "privateContentsReturned": false,
+  "transportInterrupted": true,
+  "recoveredBy": "read-only remote manifest inspection and independent rehash",
+  "independentVerification": {
+    "checkedAt": "2026-10-03T06:57:52.078177+00:00",
+    "backupFilesChecked": 6,
+    "mismatches": [],
+    "backupStatus": "PASS",
+    "currentRelease": "/opt/maya-saas/releases/20260929-recon-fix-eb43bc22",
+    "envUnchanged": true,
+    "health": {
+      "health": {
+        "status": 200,
+        "body": {
+          "status": "ok",
+          "service": "maya-saas-backend",
+          "release": "20260929-recon-fix-eb43bc22",
+          "started_at": "2026-09-29T09:07:19.429Z",
+          "timestamp": "2026-10-03T06:57:52.075Z"
+        }
+      },
+      "health/ready": {
+        "status": 200,
+        "body": {
+          "status": "ready",
+          "service": "maya-saas-backend",
+          "checks": {
+            "database": "ready"
+          },
+          "timestamp": "2026-10-03T06:57:52.077Z"
+        }
+      }
+    },
+    "restoreExecuted": false
+  }
+}

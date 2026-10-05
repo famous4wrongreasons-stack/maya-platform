@@ -1,0 +1,77 @@
+{
+  "candidate": "dac4072dd17ec222fe36cc603863965919039708",
+  "workers": [
+    {
+      "worker": 1,
+      "compared": 2332,
+      "mismatches": [],
+      "omissions": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ]
+    },
+    {
+      "worker": 2,
+      "compared": 2332,
+      "mismatches": [],
+      "omissions": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ]
+    },
+    {
+      "worker": 3,
+      "compared": 2332,
+      "mismatches": [],
+      "omissions": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ]
+    },
+    {
+      "worker": 4,
+      "compared": 2332,
+      "mismatches": [],
+      "omissions": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ]
+    },
+    {
+      "worker": 5,
+      "compared": 2332,
+      "mismatches": [],
+      "omissions": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ]
+    },
+    {
+      "worker": 6,
+      "compared": 2332,
+      "mismatches": [],
+      "omissions": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ]
+    },
+    {
+      "worker": 7,
+      "compared": 2332,
+      "mismatches": [],
+      "omissions": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ]
+    },
+    {
+      "worker": 8,
+      "compared": 2332,
+      "mismatches": [],
+      "omissions": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ]
+    }
+  ]
+}

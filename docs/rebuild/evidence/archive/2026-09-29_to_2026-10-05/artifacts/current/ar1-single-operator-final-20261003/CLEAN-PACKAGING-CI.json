@@ -1,0 +1,171 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "status": "PASS",
+  "receipts": [
+    {
+      "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+      "name": "clean-ci-install-maya-saas-backend",
+      "exit": 0,
+      "command": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003/clean-packaging-ci/maya-saas-backend",
+      "seconds": 3.73
+    },
+    {
+      "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+      "name": "clean-ci-install-maya-carrier-react",
+      "exit": 0,
+      "command": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003/clean-packaging-ci/maya-carrier-react",
+      "seconds": 0.33
+    },
+    {
+      "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+      "name": "clean-ci-install-maya-ios-carrier",
+      "exit": 0,
+      "command": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003/clean-packaging-ci/maya-ios-carrier",
+      "seconds": 0.41
+    },
+    {
+      "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+      "name": "clean-ci-sync",
+      "exit": 0,
+      "command": [
+        "npm",
+        "run",
+        "sync"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003/clean-packaging-ci/maya-ios-carrier",
+      "seconds": 16.49
+    },
+    {
+      "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+      "name": "clean-ci-carrier",
+      "exit": 0,
+      "command": [
+        "npm",
+        "test"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003/clean-packaging-ci/maya-carrier-react",
+      "seconds": 0.35
+    },
+    {
+      "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+      "name": "clean-ci-packaging",
+      "exit": 0,
+      "command": [
+        "npm",
+        "run",
+        "test:release"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003/clean-packaging-ci/maya-carrier-react",
+      "seconds": 9.65
+    },
+    {
+      "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+      "name": "clean-ci-trust",
+      "exit": 0,
+      "command": [
+        "node",
+        "--test",
+        "scripts/widget-release-operator.test.cjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003/clean-packaging-ci/maya-saas-backend",
+      "seconds": 0.08
+    },
+    {
+      "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+      "name": "clean-ci-prisma",
+      "exit": 0,
+      "command": [
+        "npx",
+        "prisma",
+        "generate"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003/clean-packaging-ci/maya-saas-backend",
+      "seconds": 2.71
+    },
+    {
+      "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+      "name": "clean-ci-backend-build",
+      "exit": 0,
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003/clean-packaging-ci/maya-saas-backend",
+      "seconds": 23.44
+    },
+    {
+      "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+      "name": "clean-ci-trust-compiled",
+      "exit": 0,
+      "command": [
+        "node",
+        "--test",
+        "scripts/widget-release-operator.compiled-test.cjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003/clean-packaging-ci/maya-saas-backend",
+      "seconds": 2.06
+    },
+    {
+      "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+      "name": "clean-ci-xcode",
+      "exit": 0,
+      "command": [
+        "xcodebuild",
+        "-project",
+        "maya-ios-carrier/ios/App/App.xcodeproj",
+        "-scheme",
+        "App",
+        "-configuration",
+        "Debug",
+        "-sdk",
+        "iphonesimulator",
+        "-derivedDataPath",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003/ios-clean-ci",
+        "CODE_SIGNING_ALLOWED=NO",
+        "build"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003/clean-packaging-ci",
+      "seconds": 22.47
+    },
+    {
+      "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+      "name": "clean-ci-actual-app",
+      "exit": 0,
+      "command": [
+        "node",
+        "maya-carrier-react/tools/release.mjs",
+        "verify-app",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003/ios-clean-ci/Build/Products/Debug-iphonesimulator/App.app"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003/clean-packaging-ci",
+      "seconds": 10.16
+    }
+  ],
+  "databaseUrlProvided": false,
+  "freshIndependentInstalls": 3,
+  "hostedRunClaimed": false,
+  "sourceChanged": false,
+  "productionEffects": 0
+}

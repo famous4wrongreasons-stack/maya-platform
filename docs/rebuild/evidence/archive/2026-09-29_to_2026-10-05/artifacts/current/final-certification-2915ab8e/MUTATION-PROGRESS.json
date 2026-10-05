@@ -1,0 +1,57 @@
+{
+  "utc": "2026-10-02T06:58:22.916835+00:00",
+  "parts": 65,
+  "totalParts": 65,
+  "partStatuses": {
+    "PARTITION-AS-DECLARED": 28,
+    "AS-DECLARED": 37
+  },
+  "completedDeclarations": 509,
+  "declarationStatuses": {
+    "live-killed": 162,
+    "build-killed": 344,
+    "pending": 2,
+    "equivalent": 1
+  },
+  "baselineRed": [],
+  "mismatches": 0,
+  "testRuns": 607,
+  "transportFailureAlerts": [
+    {
+      "report": "7-unit-1790897123770.json",
+      "title": "rejects wrong-session-tenant before read admission"
+    },
+    {
+      "report": "7-unit-1790897123770.json",
+      "title": "uses current membership role rather than a role supplied in signed claims"
+    }
+  ],
+  "newRuns": [
+    {
+      "worker": "8",
+      "step": "unit",
+      "passed": 5602,
+      "failed": 1,
+      "failingTitles": [
+        "WR-L12 requires both the exact noun and its canonical owner"
+      ],
+      "omittedTitles": 0
+    },
+    {
+      "worker": "4",
+      "step": "live",
+      "passed": 403,
+      "failed": 3,
+      "failingTitles": [
+        "PROFILE-BOOKING admits the actual HTTP catalog → selectors → DRAFT → COMMIT source under a signed restricted grant",
+        "WR-CREATE [E-MINT] DRAFT and COMMIT traverse the canonical owners with a traced production predecessor",
+        "AR-G6-REVOCATION [E-MINT] real post-Gate6 revoke refuses at canonical admission and increments metric"
+      ],
+      "omittedTitles": 0
+    }
+  ],
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "scope": "Live progress only. Does not admit partial receipts as whole-corpus certification.",
+  "certificateIssued": false,
+  "canonicalAssembly": "PENDING"
+}

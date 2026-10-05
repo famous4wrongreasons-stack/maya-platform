@@ -1,0 +1,225 @@
+{
+  "companionSnapshots": [
+    {
+      "repository": "legacy-ios",
+      "root": "/Users/stanislavmosin/Desktop/Projects/maya-ios",
+      "branch": "archive/legacy-ios-development-20261005",
+      "sha": "ee8791da3b13f5fe5dd41545e3a4e828500681e8",
+      "base": "30ad78f1551c7a4f5d638f37e492415add453965",
+      "files": [
+        "android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+        "android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png",
+        "android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png",
+        "android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+        "android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png",
+        "android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png",
+        "android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+        "android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png",
+        "android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png",
+        "android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+        "android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png",
+        "android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png",
+        "android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+        "android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+        "android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png",
+        "android/app/src/main/res/values/ic_launcher_background.xml",
+        "capacitor.config.json",
+        "ios/App/App.xcodeproj/project.pbxproj",
+        "ios/App/App/AppDebug.entitlements",
+        "ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png",
+        "ios/App/App/Assets.xcassets/AppIconBarber.appiconset/AppIcon-512@2x.png",
+        "ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732-1.png",
+        "ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732-2.png",
+        "ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png",
+        "ios/App/App/Base.lproj/LaunchScreen.storyboard",
+        "ios/App/App/MainViewController.swift",
+        "scripts/verify-native.js",
+        "www/android-adaptive-foreground-432.png",
+        "www/apple-touch-icon.png",
+        "www/assets/malesthetic-logo.svg",
+        "www/assets/maya-intro.webp",
+        "www/assets/maya-mark-dark-1024.png",
+        "www/assets/maya-mark-dark.png",
+        "www/assets/maya-mark-dark.svg",
+        "www/assets/maya-mark-icon.png",
+        "www/assets/maya-mark-light-1024.png",
+        "www/assets/maya-mark-light.png",
+        "www/assets/maya-mark-light.svg",
+        "www/assets/maya-mark-mono.png",
+        "www/assets/maya-mark-mono.svg",
+        "www/assets/maya-recording.webp",
+        "www/assets/mayaos-login-bot-avatar-640.png",
+        "www/favicon-256.png",
+        "www/icon-192-maskable.png",
+        "www/icon-192-rounded.png",
+        "www/icon-192.png",
+        "www/icon-512-maskable.png",
+        "www/icon-512-rounded.png",
+        "www/icon-512.png",
+        "www/index.html",
+        "www/manifest.json"
+      ]
+    },
+    {
+      "repository": "workspace",
+      "root": "/Users/stanislavmosin/Desktop/Projects/maya-platform/MAYA_WORKSPACE",
+      "branch": "archive/workspace-development-20261005",
+      "sha": "e951694f2bd5fa34b1515fc73bd863d0e274bd41",
+      "base": "8b9cb2a12b76b6da4e9d89f74bf416362deae41c",
+      "files": [
+        "docs/android-native-build.md",
+        "docs/claude-safe-booking-handoff.md"
+      ]
+    }
+  ],
+  "iosBranches": [
+    {
+      "repository": "maya-ios",
+      "branch": "archive/legacy-ios-development-20261005",
+      "sha": "ee8791da3b13f5fe5dd41545e3a4e828500681e8",
+      "originHead": null,
+      "ahead": 0,
+      "behind": 0,
+      "action": "CREATE_REMOTE_BRANCH"
+    },
+    {
+      "repository": "maya-ios",
+      "branch": "codex/ai-onboarding-foundation-ios",
+      "sha": "568a87a0cb2e36e9910dd112a27e7a1f44e627f4",
+      "originHead": "568a87a0cb2e36e9910dd112a27e7a1f44e627f4",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT"
+    },
+    {
+      "repository": "maya-ios",
+      "branch": "codex/barbershop-release-candidate",
+      "sha": "ddc64d84ce16149e71c581d96f4637d3d814f74b",
+      "originHead": "ddc64d84ce16149e71c581d96f4637d3d814f74b",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT"
+    },
+    {
+      "repository": "maya-ios",
+      "branch": "codex/client-return-widgets-20260810",
+      "sha": "78a27a6e76cfa96b4592baf2a4af0fc9e65b73cd",
+      "originHead": "78a27a6e76cfa96b4592baf2a4af0fc9e65b73cd",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT"
+    },
+    {
+      "repository": "maya-ios",
+      "branch": "codex/maya-app-internal-calendar",
+      "sha": "28c447b56a55d5cab1194960dc9878c05dd3ece8",
+      "originHead": "28c447b56a55d5cab1194960dc9878c05dd3ece8",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT"
+    },
+    {
+      "repository": "maya-ios",
+      "branch": "codex/maya-ios-prepublication-review",
+      "sha": "94f0c63fba76b955b2c7bbe437a13e23d6d464be",
+      "originHead": "94f0c63fba76b955b2c7bbe437a13e23d6d464be",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT"
+    },
+    {
+      "repository": "maya-ios",
+      "branch": "codex/maya-os-crm-integration-final",
+      "sha": "3c8ee04ab95a3df7ea27a1b1c07e8bb673b92749",
+      "originHead": "3c8ee04ab95a3df7ea27a1b1c07e8bb673b92749",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT"
+    },
+    {
+      "repository": "maya-ios",
+      "branch": "codex/maya-os-trial-chat-ios",
+      "sha": "e2e21294ea04129f127bd3d0da8a6cbe2a2ca101",
+      "originHead": "e2e21294ea04129f127bd3d0da8a6cbe2a2ca101",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT"
+    },
+    {
+      "repository": "maya-ios",
+      "branch": "codex/native-app-access-ui",
+      "sha": "30ad78f1551c7a4f5d638f37e492415add453965",
+      "originHead": "78a27a6e76cfa96b4592baf2a4af0fc9e65b73cd",
+      "ahead": 0,
+      "behind": 6,
+      "action": "LOCAL_BEHIND"
+    },
+    {
+      "repository": "maya-ios",
+      "branch": "codex/pr9-access-hardening-20260810",
+      "sha": "d955d4bf9d0e22a365955c286b6cb6e3ea63b057",
+      "originHead": null,
+      "ahead": 0,
+      "behind": 0,
+      "action": "CREATE_REMOTE_BRANCH"
+    },
+    {
+      "repository": "maya-ios",
+      "branch": "codex/pr9-native-chat-contract-20260810",
+      "sha": "25072087832d05443aa0a4c6d4cbd843683fa9a3",
+      "originHead": null,
+      "ahead": 0,
+      "behind": 0,
+      "action": "CREATE_REMOTE_BRANCH"
+    },
+    {
+      "repository": "maya-ios",
+      "branch": "codex/pwa-ios-functional-parity",
+      "sha": "148ac59b30e9bbee2743c0f6720ca7f427248511",
+      "originHead": "148ac59b30e9bbee2743c0f6720ca7f427248511",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT"
+    },
+    {
+      "repository": "maya-ios",
+      "branch": "codex/saas-client-sync",
+      "sha": "96d4029c3747341138c8dc94013a80ca2ad5c728",
+      "originHead": "96d4029c3747341138c8dc94013a80ca2ad5c728",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT"
+    },
+    {
+      "repository": "maya-ios",
+      "branch": "main",
+      "sha": "2d730648ec6bd8ae6d80fad5acb09e1180046a36",
+      "originHead": "c7979633a5e29a45a612fda993e0b7fcd7a5489c",
+      "ahead": 0,
+      "behind": 43,
+      "action": "LOCAL_BEHIND"
+    }
+  ],
+  "relatedHistory": [
+    {
+      "repository": "maya-platform alternate clones",
+      "disposition": "All local branch tips checked against canonical objects; no independent history to import. Incomplete checkout deletions are reconstruction state, not product work."
+    },
+    {
+      "repository": "maya-web",
+      "disposition": "Independent salon website repository, outside requested website-in-this-repository scope. Original Git and WIP privately inventoried; not merged or changed."
+    },
+    {
+      "repository": "maya-remotion",
+      "disposition": "Existing main on its own origin; local gym video work unrelated to Maya platform and excluded."
+    },
+    {
+      "repository": "maya-saas-blueprint",
+      "disposition": "Existing main on its own origin; clean; separate historical blueprint not merged."
+    },
+    {
+      "repository": "MAYA_WORKSPACE",
+      "disposition": "No original remote. Safe metadata history plus two local build/handoff documents imported under archive/workspace-development-20261005, without merging product trees."
+    }
+  ]
+}

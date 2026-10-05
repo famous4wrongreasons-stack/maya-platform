@@ -1,0 +1,1430 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gate8r.json": "2b2ac46164c1f9765fefa225a1da422ded577550f9ad26d43434bcd123f07975"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T21:39:10.428Z",
+  "batteries": [
+    "gate8r.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-b98712f447",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-b98712f447",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "8r:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "8r:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gate8r.json",
+      "id": "M1",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T5",
+        "T10-ri",
+        "T10",
+        "SMOKE-G8R-UNREQUIRED-ACK"
+      ],
+      "kills": [
+        {
+          "killer": "T5",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T5 (R-2): on a real SPOKEN COMMIT that requires a readback, an absent ack refuses `readback_missing`",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T10-ri",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T10-ri (R-6): an object ack on a real record whose confirmation is null is refused",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T10",
+          "test": "Gate 8-R — readback, on the live path [GW] the real WidgetsModule, through its controller T10 (R-6): an object ack on a record whose confirmation is NULL is refused, and writes nothing",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "SMOKE-G8R-UNREQUIRED-ACK",
+          "test": "Gate 8-R — readback, on the live path [HTTP] AppModule behind all six global guards SMOKE-G8R-UNREQUIRED-ACK (R-6, R-7): behind every guard, an OBJECT ack on a record whose confirmation is null and on one whose `requires_readback` is false is refused, and neither writes",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "RI": 2,
+        "GW": 1,
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M2a",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-DIV-2",
+        "T-DIV-1",
+        "T-DIV-1-http"
+      ],
+      "kills": [
+        {
+          "killer": "T-DIV-2",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T-DIV-2 (R-1a): a real COMMIT fitted for the SPOKEN tier with the duty ERASED from its row is refused — the recompute is the second half of the antecedent",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T-DIV-1",
+          "test": "Gate 8-R — readback, on the live path [GW] the real WidgetsModule, through its controller T-DIV-1 (R-1a): a record that is not a SPOKEN COMMIT but carries a stored duty DIVERGES from the recompute and is refused, with no ack sent at all",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T-DIV-1-http",
+          "test": "Gate 8-R — readback, on the live path [HTTP] AppModule behind all six global guards T-DIV-1-http (R-1a): behind every guard, a record that is not a SPOKEN COMMIT but carries a stored readback duty is refused for the DIVERGENCE alone, with no ack sent at all, and writes nothing",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "RI": 1,
+        "GW": 1,
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M2b",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 2,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-DIV-2",
+        "T-DIV-1",
+        "T-DIV-1-http"
+      ],
+      "kills": [
+        {
+          "killer": "T-DIV-2",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T-DIV-2 (R-1a): a real COMMIT fitted for the SPOKEN tier with the duty ERASED from its row is refused — the recompute is the second half of the antecedent",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T-DIV-1",
+          "test": "Gate 8-R — readback, on the live path [GW] the real WidgetsModule, through its controller T-DIV-1 (R-1a): a record that is not a SPOKEN COMMIT but carries a stored duty DIVERGES from the recompute and is refused, with no ack sent at all",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T-DIV-1-http",
+          "test": "Gate 8-R — readback, on the live path [HTTP] AppModule behind all six global guards T-DIV-1-http (R-1a): behind every guard, a record that is not a SPOKEN COMMIT but carries a stored readback duty is refused for the DIVERGENCE alone, with no ack sent at all, and writes nothing",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "RI": 1,
+        "GW": 1,
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M3a",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T3-ri",
+        "T3"
+      ],
+      "kills": [
+        {
+          "killer": "T3-ri",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T3-ri (R-1): a real record with NO confirmation column and no ack passes 8-R",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T3",
+          "test": "Gate 8-R — readback, on the live path [GW] the real WidgetsModule, through its controller T3 (R-0/R-1): an unrequired record with no ack is not held by 8-R",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 1,
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M3b",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T3d-ri",
+        "T3d"
+      ],
+      "kills": [
+        {
+          "killer": "T3d-ri",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T3d-ri (R-1): a stored `requires_readback: \"true\"` is a string, so the record requires nothing and nothing diverges",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T3d",
+          "test": "Gate 8-R — readback, on the live path [GW] the real WidgetsModule, through its controller T3d (R-1): a stored `requires_readback: \"true\"` is a string, not the boolean true, so the record requires nothing and nothing diverges",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 1,
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M22",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-DIV-2",
+        "T-DIV-1-http"
+      ],
+      "kills": [
+        {
+          "killer": "T-DIV-2",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T-DIV-2 (R-1a): a real COMMIT fitted for the SPOKEN tier with the duty ERASED from its row is refused — the recompute is the second half of the antecedent",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T-DIV-1-http",
+          "test": "Gate 8-R — readback, on the live path [HTTP] AppModule behind all six global guards T-DIV-1-http (R-1a): behind every guard, a record that is not a SPOKEN COMMIT but carries a stored readback duty is refused for the DIVERGENCE alone, with no ack sent at all, and writes nothing",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "RI": 1,
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M23",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-DIV-2",
+        "T-DIV-1",
+        "T-DIV-1-http"
+      ],
+      "kills": [
+        {
+          "killer": "T-DIV-2",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T-DIV-2 (R-1a): a real COMMIT fitted for the SPOKEN tier with the duty ERASED from its row is refused — the recompute is the second half of the antecedent",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T-DIV-1",
+          "test": "Gate 8-R — readback, on the live path [GW] the real WidgetsModule, through its controller T-DIV-1 (R-1a): a record that is not a SPOKEN COMMIT but carries a stored duty DIVERGES from the recompute and is refused, with no ack sent at all",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T-DIV-1-http",
+          "test": "Gate 8-R — readback, on the live path [HTTP] AppModule behind all six global guards T-DIV-1-http (R-1a): behind every guard, a record that is not a SPOKEN COMMIT but carries a stored readback duty is refused for the DIVERGENCE alone, with no ack sent at all, and writes nothing",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "RI": 1,
+        "GW": 1,
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M24",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-DIV-2"
+      ],
+      "kills": [
+        {
+          "killer": "T-DIV-2",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T-DIV-2 (R-1a): a real COMMIT fitted for the SPOKEN tier with the duty ERASED from its row is refused — the recompute is the second half of the antecedent",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M25",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-DIV-2",
+        "T-DIV-1",
+        "T-DIV-1-http"
+      ],
+      "kills": [
+        {
+          "killer": "T-DIV-2",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T-DIV-2 (R-1a): a real COMMIT fitted for the SPOKEN tier with the duty ERASED from its row is refused — the recompute is the second half of the antecedent",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T-DIV-1",
+          "test": "Gate 8-R — readback, on the live path [GW] the real WidgetsModule, through its controller T-DIV-1 (R-1a): a record that is not a SPOKEN COMMIT but carries a stored duty DIVERGES from the recompute and is refused, with no ack sent at all",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T-DIV-1-http",
+          "test": "Gate 8-R — readback, on the live path [HTTP] AppModule behind all six global guards T-DIV-1-http (R-1a): behind every guard, a record that is not a SPOKEN COMMIT but carries a stored readback duty is refused for the DIVERGENCE alone, with no ack sent at all, and writes nothing",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "RI": 1,
+        "GW": 1,
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M4",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T10-ri",
+        "T10",
+        "SMOKE-G8R-UNREQUIRED-ACK"
+      ],
+      "kills": [
+        {
+          "killer": "T10-ri",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T10-ri (R-6): an object ack on a real record whose confirmation is null is refused",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T10",
+          "test": "Gate 8-R — readback, on the live path [GW] the real WidgetsModule, through its controller T10 (R-6): an object ack on a record whose confirmation is NULL is refused, and writes nothing",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "SMOKE-G8R-UNREQUIRED-ACK",
+          "test": "Gate 8-R — readback, on the live path [HTTP] AppModule behind all six global guards SMOKE-G8R-UNREQUIRED-ACK (R-6, R-7): behind every guard, an OBJECT ack on a record whose confirmation is null and on one whose `requires_readback` is false is refused, and neither writes",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "RI": 1,
+        "GW": 1,
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M9",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 2,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T5",
+        "T10-ri"
+      ],
+      "kills": [
+        {
+          "killer": "T5",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T5 (R-2): on a real SPOKEN COMMIT that requires a readback, an absent ack refuses `readback_missing`",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T10-ri",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T10-ri (R-6): an object ack on a real record whose confirmation is null is refused",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 2
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M17",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T12"
+      ],
+      "kills": [
+        {
+          "killer": "T12",
+          "test": "Gate 8-R — the duty is the record’s, and the record’s alone (C11:4728) R-6 — an ack on a record that requires none T12: a NULL ack on an unrequired record is refused, not ignored (AMB-02c; at HTTP P-F88 answers it 400 at the shape stage, so this branch is reachable only below the route)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M5a",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T6-stub"
+      ],
+      "kills": [
+        {
+          "killer": "T6-stub",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T6-stub (R-3): a foreign `readback_ref` refuses",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M5b",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T13c-stub"
+      ],
+      "kills": [
+        {
+          "killer": "T13c-stub",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T13c-stub (R-3): a null `readback_ref` on BOTH sides is not a match, and the owner is never asked",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M6",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T7-stub"
+      ],
+      "kills": [
+        {
+          "killer": "T7-stub",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T7-stub (R-4): a `body_hash` that is not this record’s refuses — affirming a body other than the one read out does not pass",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M7",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-DEF3",
+        "T1-stub"
+      ],
+      "kills": [
+        {
+          "killer": "T-DEF3",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T-DEF3 (R-5): a correct ref and a correct body hash still refuse while the production vocabulary owner is null — fail closed, not fail open",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T1-stub",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T1-stub (R-3, R-4, R-5): the correct ref, the record’s own body hash and an owner-accepted affirmation pass, and the owner is asked exactly once",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 2
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M8",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T9-stub"
+      ],
+      "kills": [
+        {
+          "killer": "T9-stub",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T9-stub (R-5, R-7): the affirmation reaches the owner VERBATIM — no trim, no case fold, no normalisation",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M10",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T1-stub"
+      ],
+      "kills": [
+        {
+          "killer": "T1-stub",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T1-stub (R-3, R-4, R-5): the correct ref, the record’s own body hash and an owner-accepted affirmation pass, and the owner is asked exactly once",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M16",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-DEF3"
+      ],
+      "kills": [
+        {
+          "killer": "T-DEF3",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T-DEF3 (R-5): a correct ref and a correct body hash still refuse while the production vocabulary owner is null — fail closed, not fail open",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M18",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T13d"
+      ],
+      "kills": [
+        {
+          "killer": "T13d",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T13d (R-7): a NULL ack on a record that requires a readback refuses rather than throwing (`null.readback_ref` would be a 500)",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M19",
+      "files": [
+        "src/widgets/gates/gate-8r.owners.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-DEF3"
+      ],
+      "kills": [
+        {
+          "killer": "T-DEF3",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T-DEF3 (R-5): a correct ref and a correct body hash still refuse while the production vocabulary owner is null — fail closed, not fail open",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M20",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T1-stub"
+      ],
+      "kills": [
+        {
+          "killer": "T1-stub",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T1-stub (R-3, R-4, R-5): the correct ref, the record’s own body hash and an owner-accepted affirmation pass, and the owner is asked exactly once",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M13a",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T15-ri",
+        "T15"
+      ],
+      "kills": [
+        {
+          "killer": "T15-ri",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) T15-ri (R-7): the gate itself writes no log line carrying the affirmation, on either branch",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T15",
+          "test": "Gate 8-R — readback, on the live path [GW] the real WidgetsModule, through its controller T15 (R-7): a marker affirmation reaches no log line, no response member and no verdict detail",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 1,
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M13b",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T15"
+      ],
+      "kills": [
+        {
+          "killer": "T15",
+          "test": "Gate 8-R — the duty is the record’s, and the record’s alone (C11:4728) R-7 — refuses, never repairs, and never throws T15 (unit half): no refusal detail carries the affirmation, the ref or the body hash",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M15",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T-SRC-8R"
+      ],
+      "kills": [
+        {
+          "killer": "T-SRC-8R",
+          "test": "T-SRC-8R — slot 8-R reads the record’s stored duty, and the recompute’s two terms T-SRC-8R (a): no file of slot 8-R names a carrier, a claimed render profile, a header, a locale or another gate’s antecedent",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M21",
+      "files": [
+        "src/widgets/gates/gate8r.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T-SRC-8R",
+        "T-SRC-INV30-b"
+      ],
+      "kills": [
+        {
+          "killer": "T-SRC-8R",
+          "test": "T-SRC-8R — slot 8-R reads the record’s stored duty, and the recompute’s two terms T-SRC-8R (a): no file of slot 8-R names a carrier, a claimed render profile, a header, a locale or another gate’s antecedent",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T-SRC-INV30-b",
+          "test": "T-SRC-INV30 — no gate antecedent names a claimed render profile, a locale hint or a header T-SRC-INV30-b no reachable runtime module names one of the five spellings",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M11",
+      "files": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "RI-PROJ"
+      ],
+      "kills": [
+        {
+          "killer": "RI-PROJ",
+          "test": "Gate 8-R — readback, on the live path [RI] the real record row and the real projection — never evidence (§0.5) RI-PROJ (D-3): the stored confirmation reaches the gate as exactly two members — `readback_text` and `idempotency_key` never do",
+          "step": "live",
+          "entry": "RI",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "RI": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M12",
+      "files": [
+        "src/widgets/intent-submit-args.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "SMOKE-G8R-UNREQUIRED-ACK"
+      ],
+      "kills": [
+        {
+          "killer": "SMOKE-G8R-UNREQUIRED-ACK",
+          "test": "Gate 8-R — readback, on the live path [HTTP] AppModule behind all six global guards SMOKE-G8R-UNREQUIRED-ACK (R-6, R-7): behind every guard, an OBJECT ack on a record whose confirmation is null and on one whose `requires_readback` is false is refused, and neither writes",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8r.json",
+      "id": "M14",
+      "files": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T10",
+        "SMOKE-G8R-UNREQUIRED-ACK"
+      ],
+      "kills": [
+        {
+          "killer": "T10",
+          "test": "Gate 8-R — readback, on the live path [GW] the real WidgetsModule, through its controller T10 (R-6): an object ack on a record whose confirmation is NULL is refused, and writes nothing",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "SMOKE-G8R-UNREQUIRED-ACK",
+          "test": "Gate 8-R — readback, on the live path [HTTP] AppModule behind all six global guards SMOKE-G8R-UNREQUIRED-ACK (R-6, R-7): behind every guard, an OBJECT ack on a record whose confirmation is null and on one whose `requires_readback` is false is refused, and neither writes",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "GW": 1,
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [
+    "gate8r.json#M1",
+    "gate8r.json#M2a",
+    "gate8r.json#M2b",
+    "gate8r.json#M22",
+    "gate8r.json#M23",
+    "gate8r.json#M25",
+    "gate8r.json#M4",
+    "gate8r.json#M12",
+    "gate8r.json#M14"
+  ],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T22:53:49.720Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 1,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "utc": "2026-10-01T07:30:55.903222+00:00",
+  "clean": true,
+  "changedPaths": [
+    "maya-saas-backend/scripts/widgets-mutation-ci.test.mjs",
+    "maya-saas-backend/src/admin/admin.controller.spec.ts",
+    "maya-saas-backend/src/auth/legacy-staff-principal.http.spec.ts",
+    "maya-saas-backend/src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
+    "maya-saas-backend/src/bootstrap/configure-http-app.spec.ts",
+    "maya-saas-backend/src/widgets/owner-ports/commit-booking.adapter.spec.ts",
+    "maya-saas-backend/test/app.e2e-spec.ts",
+    "maya-saas-backend/test/widgets-live/http-listener.live-spec.ts",
+    "maya-saas-backend/test/widgets-live/mutations/gateH-harness.json",
+    "maya-saas-backend/test/widgets-live/support/http-bootstrap.ts"
+  ],
+  "productChanges": 0,
+  "presentationChanges": 0,
+  "timeoutChanges": 0
+}

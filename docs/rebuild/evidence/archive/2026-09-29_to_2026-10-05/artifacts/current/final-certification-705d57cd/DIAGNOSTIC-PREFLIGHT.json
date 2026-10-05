@@ -1,0 +1,27 @@
+{
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "status": "PASS",
+  "diagnosticOnly": true,
+  "parts": 26,
+  "selectedGates": [
+    "9",
+    "D8",
+    "P-discharge",
+    "P-f88",
+    "P-handle",
+    "P-ledger",
+    "P-mint",
+    "P-mt3",
+    "P-pairing",
+    "P-principal",
+    "P-render",
+    "P-rt6",
+    "P-seal",
+    "T-tables",
+    "TURN",
+    "WF",
+    "WR"
+  ],
+  "restriction": "named-killer filters; not full certification",
+  "remainingShards": 0
+}

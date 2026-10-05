@@ -1,0 +1,25 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "repository": "famous4wrongreasons-stack/maya-platform",
+  "startedAt": "2026-10-04T21:19:39.972001+00:00",
+  "productionOperations": 0,
+  "status": "AWAITING HOSTED CI",
+  "prepublicationRunIds": [],
+  "pushCompletedAt": "2026-10-04T21:19:43.857391+00:00",
+  "requiredWorkflows": {
+    "311601892": "Platform CI",
+    "359168151": "Widget Contract (blocking)",
+    "360279046": "Widgets Live",
+    "360530612": "MAYA Chat Shell",
+    "362140366": "Widgets Mutation",
+    "374470990": "Canonical React release packaging"
+  },
+  "packagingWorkflowSource": {
+    "path": ".github/workflows/release-packaging.yml",
+    "sha256": "d4f2260e46f9c2bfba999ef3c02ae34be4557e7a1b2ecbe9a18942a08d24a3e0",
+    "workflowId": 374470990
+  },
+  "mutationDispatchStartedAt": "2026-10-04T21:19:46.781682+00:00",
+  "mutationDispatchedAt": "2026-10-04T21:19:48.661152+00:00"
+}

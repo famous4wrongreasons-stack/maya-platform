@@ -1,0 +1,46 @@
+[
+  {
+    "name": "lint",
+    "exit": 0,
+    "seconds": 3.03,
+    "command": [
+      "node",
+      "node_modules/eslint/bin/eslint.js",
+      "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts"
+    ]
+  },
+  {
+    "name": "inventory",
+    "exit": 0,
+    "seconds": 2.17,
+    "command": [
+      "node",
+      "--test",
+      "scripts/widgets-mutation-ci.test.mjs"
+    ]
+  },
+  {
+    "name": "typecheck",
+    "exit": 0,
+    "seconds": 6.34,
+    "command": [
+      "npm",
+      "run",
+      "typecheck"
+    ]
+  },
+  {
+    "name": "clock-spec",
+    "exit": 0,
+    "seconds": 0.51,
+    "command": [
+      "node",
+      "node_modules/jest/bin/jest.js",
+      "--runInBand",
+      "--runTestsByPath",
+      "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
+      "--json",
+      "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/clock-followup/canonical-formatted-clock-spec.json"
+    ]
+  }
+]

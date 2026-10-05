@@ -1,0 +1,20 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "status": "PASS",
+  "checkedAt": "2026-10-02T07:43:03.888588+00:00",
+  "campaignStart": "2026-10-01T22:58:49.761593+00:00",
+  "suspensionWindows": [
+    {
+      "from": "2026-10-02T06:35:59+00:00",
+      "to": "2026-10-02T06:55:23+00:00",
+      "fullWakeObserved": true
+    }
+  ],
+  "reexecutionRequired": true,
+  "wholePartsReexecuted": 2,
+  "reexecutionReceiptSha256": "b7784dd7bec7f4d6dad3ade210ad1fb2dcb4f5741ae3910df56f174835c23a8b",
+  "observationSha256": "5188699f18466f0643521f928bf8f0992cfcbb60a75b8d5213eb759d1a91cac1",
+  "scope": "Current campaign only. Interrupted originals retained; exact full replacements verified. No sleep result is waived or imported from another candidate.",
+  "powerSettingsChanged": false,
+  "timeoutsChanged": false
+}

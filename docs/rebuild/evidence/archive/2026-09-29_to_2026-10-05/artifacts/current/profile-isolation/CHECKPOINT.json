@@ -1,0 +1,99 @@
+{
+  "candidateSha": "a65aa04d10500f1b32a25234d922462a0414fc2e",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "profile": "closed-input.no-handoff@1",
+  "profileIsolation": "PASS",
+  "handoffIngressEgressRefusals": "PASS",
+  "9.6": "PASS",
+  "falseBefore": 10,
+  "falseGlobal": 9,
+  "profileApplicableFalse": 7,
+  "evidenceMissing": 7,
+  "integrationOwned": 0,
+  "globalHandoffStop": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "tests": {
+    "backend": {
+      "numPassedTests": 5594,
+      "numPassedTestSuites": 586,
+      "numPendingTests": 0,
+      "numFailedTests": 0
+    },
+    "widgetsLive": {
+      "numPassedTests": 394,
+      "numPassedTestSuites": 34,
+      "numPendingTests": 0,
+      "numFailedTests": 0
+    },
+    "binaryCases": 19,
+    "releaseBinaryCases": 2,
+    "carrier": {
+      "pass": 93,
+      "fail": 0
+    },
+    "runtime": {
+      "pass": 355,
+      "fail": 0,
+      "skipped": 7
+    },
+    "e2e": 1,
+    "eventsLive": 4,
+    "httpSmoke": "PASS"
+  },
+  "mutations": {
+    "declared": 492,
+    "batteries": 42,
+    "scheduledJobs": 63,
+    "completeProgramme": "NOT_COMPLETE",
+    "TURN": {
+      "status": "AS-DECLARED",
+      "mutants": 12,
+      "restrictions": {
+        "live_tests": "test/widgets-live/user-turn-(identity|canonical).live-spec.ts",
+        "live_filter": null,
+        "unit_tests": "user-turn-binding.spec.ts|user-turn-audit.adapter.spec.ts"
+      },
+      "sourceHead": "5b928b01bcd35abaf734ea172e71d85ea124ab96"
+    },
+    "PI": {
+      "status": "AS-DECLARED",
+      "mutants": 6,
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": null
+      },
+      "sourceHead": "5b928b01bcd35abaf734ea172e71d85ea124ab96"
+    },
+    "PI-contract": {
+      "status": "AS-DECLARED",
+      "mutants": 16,
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": "widget-release-(access|profile.contract).spec|profile-successor.spec|booking-successor-boundary.spec|chat-read.trigger.spec"
+      },
+      "sourceHead": "a65aa04d10500f1b32a25234d922462a0414fc2e"
+    }
+  },
+  "ciEquivalent": "INCOMPLETE",
+  "carrierIntegration": "PARTIAL: conformance, runtime binding and build/parity pass; complete live journey not certified",
+  "certifiedForProfile": false,
+  "fullContractCertified": false,
+  "readyForReleaseAuthorization": false,
+  "schemaChanges": 0,
+  "presentationOverlap": 0,
+  "productionEffects": 0,
+  "realOtp": 0,
+  "realYclientsEffects": 0,
+  "remainingBlockers": [
+    "BS-1 source contract: personal appointments.own.list → SCHEDULE for G7-5/G7-BOOK1/G11-I9/G13-I3.",
+    "NS-1 bounded CHECK/source contract: retained journal date and exact detail/parent navigation for G12-R1b/G12-I11/G13-R2.",
+    "After source implementation: complete fresh applicable 492-mutation/CI/carrier/FBE2E certification on the final exact candidate; no current release certificate."
+  ],
+  "sourceReceiptQualification": "Backend and clean HTTP/BIN receipts were captured on 5b928b01; a65aa04d adds only the independently verified exact CI inventory test. Runtime rebuild bytes are identical. This validation-only overlay is documented; it is not a complete exact-final-HEAD release certificate.",
+  "timestamp": "2026-09-30T00:17:36.917333+00:00"
+}

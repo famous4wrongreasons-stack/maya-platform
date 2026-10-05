@@ -1,0 +1,23 @@
+{
+  "base": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "records": [
+    {
+      "name": "old",
+      "exit": 1,
+      "status": "SURVIVED",
+      "baselineRed": [],
+      "seconds": 2.438,
+      "restrictions": "diagnostic: unit step, exact timeline store spec only; NOT full certification"
+    },
+    {
+      "name": "fixed",
+      "exit": 0,
+      "status": "build-killed",
+      "baselineRed": [],
+      "seconds": 2.118,
+      "restrictions": "diagnostic: unit step, exact timeline store spec only; NOT full certification"
+    }
+  ],
+  "productSourceUnchanged": true,
+  "diagnosticOnly": true
+}

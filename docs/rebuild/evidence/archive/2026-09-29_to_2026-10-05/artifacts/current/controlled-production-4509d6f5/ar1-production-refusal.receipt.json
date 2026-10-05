@@ -1,0 +1,18 @@
+{
+  "candidate": "4509d6f55df62da852740658c69613b113b5a1c1",
+  "command": [
+    "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-p01-option-a-940ddd51/node-v22.23.2-darwin-arm64/bin/node",
+    "node_modules/jest/bin/jest.js",
+    "--runInBand",
+    "--runTestsByPath",
+    "src/entitlements/widget-release-policy.spec.ts",
+    "--testNamePattern=AR1-PRODUCTION",
+    "--json",
+    "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/controlled-production-4509d6f5/ar1-production-refusal.test.json"
+  ],
+  "exit": 0,
+  "seconds": 0.77,
+  "productionWrites": 0,
+  "realOtp": 0,
+  "realYclients": 0
+}

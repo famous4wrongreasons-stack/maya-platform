@@ -1,0 +1,17 @@
+{
+  "candidate": "4509d6f55df62da852740658c69613b113b5a1c1",
+  "status": "PASS",
+  "canonicalStore": {
+    "path": "maya-saas-backend/src/widgets/stores/intent-audit.store.ts",
+    "sha256": "5d066f2155a7cc1a7953a3057e75f975bf8d3c5a438d559ba37b71d399adde13"
+  },
+  "adjudicationProvenance": "9085c2bbbe256c670a2836445a2c92265d139cb7",
+  "contract": "Receipt upsert identity is tenant + intent token; empty update preserves its actionReceiptRef. Reconciliation only transitions ACCEPTED/null once under tenant CAS and AE COMMIT ownership.",
+  "provenanceBoundary": "9085c2bb strengthened exclusive confirmed publication and AE COMMIT reconciliation. The empty idempotent upsert predates that commit.",
+  "liveProof": "Real HTTP/PG COMMIT then Dismiss preserves terminal line, reference, appointment and execution.",
+  "defensiveProofBoundary": "Injected second COMMIT and contradictory store retry are adversarial proofs, not claims that production can mint a second re-reference. Runtime double with changed reference proves identity behavior only.",
+  "freshProof": {
+    "path": "receipts/l14-fresh-proofs.json",
+    "sha256": "9decab7ff3711f9102509e286b9795b0414bc75a188c9a9f767a0a4580167552"
+  }
+}

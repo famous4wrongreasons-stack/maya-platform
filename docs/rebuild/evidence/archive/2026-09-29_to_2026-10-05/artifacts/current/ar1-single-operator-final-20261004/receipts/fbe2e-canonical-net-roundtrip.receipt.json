@@ -1,0 +1,16 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "name": "fbe2e-canonical-net-roundtrip",
+  "command": [
+    "npx",
+    "jest",
+    "--config",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261004/jest-net-return.json",
+    "--runInBand",
+    "--json",
+    "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/ar1-single-operator-final-20261004/receipts/fbe2e-canonical-net-roundtrip.json"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+  "exit": 0,
+  "seconds": 7.21
+}

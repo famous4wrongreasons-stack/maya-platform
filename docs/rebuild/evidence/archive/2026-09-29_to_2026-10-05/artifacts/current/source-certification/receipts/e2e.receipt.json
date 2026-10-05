@@ -1,0 +1,14 @@
+{
+  "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "name": "e2e",
+  "command": [
+    "npm",
+    "run",
+    "test:e2e",
+    "--",
+    "--runInBand"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 0,
+  "seconds": 0.71
+}

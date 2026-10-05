@@ -1,0 +1,13 @@
+{
+  "candidate": "b5621b1062ba3c7882c725d160f588d3b04e3938",
+  "name": "clean-ci-actual-app",
+  "exit": 0,
+  "command": [
+    "node",
+    "maya-carrier-react/tools/release.mjs",
+    "verify-app",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-20261003/ios-clean-ci/Build/Products/Debug-iphonesimulator/App.app"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-20261003/clean-packaging-ci",
+  "seconds": 11.06
+}

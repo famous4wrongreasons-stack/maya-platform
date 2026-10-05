@@ -1,0 +1,1252 @@
+{
+  "repository": "git@github.com:famous4wrongreasons-stack/maya-platform.git",
+  "defaultBranch": "main",
+  "defaultBranchChanged": false,
+  "initialBranches": [
+    {
+      "branch": "agent/maya-os-architecture-specification",
+      "head": "641bc4ef494f5e200e7344274068b38957d0730b",
+      "upstream": "origin/agent/maya-os-architecture-specification",
+      "originHead": "641bc4ef494f5e200e7344274068b38957d0730b",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Documents/Codex/2026-08-05/referenced-chatgpt-conversation-this-is-an/work/maya-platform-architecture"
+      ],
+      "purpose": "docs: add Maya OS architecture specification"
+    },
+    {
+      "branch": "claude/chat-booking-widget",
+      "head": "0ebffe16b13b668d47eaaf2256f5c8ee46f91691",
+      "upstream": "origin/claude/chat-booking-widget",
+      "originHead": "0ebffe16b13b668d47eaaf2256f5c8ee46f91691",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-os-prepublication-review"
+      ],
+      "purpose": "fix(nav): жидкий индикатор вкладок — переделан по покадровому замеру референса"
+    },
+    {
+      "branch": "claude/crm-integration-center",
+      "head": "517f69bb96966d10124b0eadd97c095fb2114417",
+      "upstream": "origin/claude/crm-integration-center",
+      "originHead": "517f69bb96966d10124b0eadd97c095fb2114417",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "feat(frontend): MAYA CRM Integration Center (owner «Интеграции» screen)"
+    },
+    {
+      "branch": "claude/prepublication-frontend",
+      "head": "13de8c5d8628ea59de1c926ea8541152aaf3361c",
+      "upstream": "origin/claude/prepublication-frontend",
+      "originHead": "13de8c5d8628ea59de1c926ea8541152aaf3361c",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-os-final-integration"
+      ],
+      "purpose": "docs(frontend): prepublication results with acceptance matrix evidence"
+    },
+    {
+      "branch": "codex-wave2-pg15-staging",
+      "head": "c010e9fbeba7ebb222f7e73e22dee22f6b45c14e",
+      "upstream": null,
+      "originHead": null,
+      "ahead": null,
+      "behind": null,
+      "action": "CREATE_REMOTE_BRANCH",
+      "sourceWorktrees": [
+        "/private/tmp/maya-w2-pg15-integration"
+      ],
+      "purpose": "test(wave2): align binary controls with Gate 1 expiry"
+    },
+    {
+      "branch": "codex-wave2-u13-staging",
+      "head": "d065513ca751212028559cea1ce095eb5a7d35d9",
+      "upstream": null,
+      "originHead": null,
+      "ahead": null,
+      "behind": null,
+      "action": "CREATE_REMOTE_BRANCH",
+      "sourceWorktrees": [
+        "/private/tmp/maya-w2-u13-integration"
+      ],
+      "purpose": "wave2: route admitted widget effects fail closed"
+    },
+    {
+      "branch": "codex-wave2-u13-staging-v2",
+      "head": "70b935ea7ea77a2d953d9dfe25befbf6798541b7",
+      "upstream": null,
+      "originHead": null,
+      "ahead": null,
+      "behind": null,
+      "action": "CREATE_REMOTE_BRANCH",
+      "sourceWorktrees": [
+        "/private/tmp/maya-w2-u13-integration-v2"
+      ],
+      "purpose": "wave2: route admitted widget effects fail closed"
+    },
+    {
+      "branch": "codex-wave2-u13-staging-v3",
+      "head": "f29002dd33de88e8e7a50e6dd8796e2deb47ce8c",
+      "upstream": null,
+      "originHead": null,
+      "ahead": null,
+      "behind": null,
+      "action": "CREATE_REMOTE_BRANCH",
+      "sourceWorktrees": [
+        "/private/tmp/maya-w2-u13-integration-v3"
+      ],
+      "purpose": "test(wave2): bind gate 13 unknown-effect mutant to B28"
+    },
+    {
+      "branch": "codex-wave2-u7-staging",
+      "head": "44b001a796ff3c3bcf7ec339ddba9af4e9d6ac90",
+      "upstream": null,
+      "originHead": null,
+      "ahead": null,
+      "behind": null,
+      "action": "CREATE_REMOTE_BRANCH",
+      "sourceWorktrees": [
+        "/private/tmp/maya-w2-u7-integration"
+      ],
+      "purpose": "wave2: close Gate 7 absent-input mutation coverage"
+    },
+    {
+      "branch": "codex-wave2-u9-staging",
+      "head": "d3c629f6ff9e307025b3c31c60b795f03c5c1b97",
+      "upstream": null,
+      "originHead": null,
+      "ahead": null,
+      "behind": null,
+      "action": "CREATE_REMOTE_BRANCH",
+      "sourceWorktrees": [
+        "/private/tmp/maya-w2-u9-integration"
+      ],
+      "purpose": "wave2: implement deterministic Gate 9 lowering"
+    },
+    {
+      "branch": "codex-wave2-u9-staging-v2",
+      "head": "a697bd066634d7817169c6ddb503e84326c64959",
+      "upstream": null,
+      "originHead": null,
+      "ahead": null,
+      "behind": null,
+      "action": "CREATE_REMOTE_BRANCH",
+      "sourceWorktrees": [
+        "/private/tmp/maya-w2-u9-integration-v2"
+      ],
+      "purpose": "ci(wave2): partition gate 9 mutation corpus"
+    },
+    {
+      "branch": "codex/ai-onboarding-foundation",
+      "head": "3ed1d0250af6885094a525709d7c65d5e6c06d85",
+      "upstream": "origin/codex/ai-onboarding-foundation",
+      "originHead": "3ed1d0250af6885094a525709d7c65d5e6c06d85",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "fix: keep conversational onboarding moving"
+    },
+    {
+      "branch": "codex/auth-abuse-protection",
+      "head": "00de4415c54491ae6c0919f25dbb77c1896493d5",
+      "upstream": "origin/codex/auth-abuse-protection",
+      "originHead": "00de4415c54491ae6c0919f25dbb77c1896493d5",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-auth-abuse-protection"
+      ],
+      "purpose": "docs: document auth abuse protection"
+    },
+    {
+      "branch": "codex/auth-retention-maintenance",
+      "head": "76282f6b80640a40a23675e45e78f2d3ab3ec4a5",
+      "upstream": "origin/codex/auth-retention-maintenance",
+      "originHead": "76282f6b80640a40a23675e45e78f2d3ab3ec4a5",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-auth-retention-maintenance"
+      ],
+      "purpose": "docs: add frontend session follow-up"
+    },
+    {
+      "branch": "codex/barbershop-release-candidate",
+      "head": "08502674f2b8754cada5ddb054acb1b97709a778",
+      "upstream": "origin/codex/barbershop-release-candidate",
+      "originHead": "08502674f2b8754cada5ddb054acb1b97709a778",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "feat(saas): подсказка «где взять токен» на экране подключения CRM"
+    },
+    {
+      "branch": "codex/capability-readiness-contract",
+      "head": "7b5a2aac05a3968b8d36413a4e2240b1f4295357",
+      "upstream": "origin/codex/capability-readiness-contract",
+      "originHead": "7b5a2aac05a3968b8d36413a4e2240b1f4295357",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-capability-readiness"
+      ],
+      "purpose": "docs: audit remaining MAYA OS work"
+    },
+    {
+      "branch": "codex/client-return-access-20260810",
+      "head": "87eeb755aa1aec7ed026c9105bfda05e639ad11e",
+      "upstream": "origin/codex/client-return-access-20260810",
+      "originHead": "87eeb755aa1aec7ed026c9105bfda05e639ad11e",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "fix(ai): preserve redacted staff client advice"
+    },
+    {
+      "branch": "codex/cursor-production-snapshot-20260810",
+      "head": "47c99b57be2f225da06ff752ae05b92f23786a8f",
+      "upstream": "origin/codex/cursor-production-snapshot-20260810",
+      "originHead": "47c99b57be2f225da06ff752ae05b92f23786a8f",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "feat(ai): capture deployed native client access"
+    },
+    {
+      "branch": "codex/dependency-audit-fix-20260809",
+      "head": "d5531e6513ab3fa329376b82bde4ce11d46d7184",
+      "upstream": "origin/codex/dependency-audit-fix-20260809",
+      "originHead": "d5531e6513ab3fa329376b82bde4ce11d46d7184",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "test(tenants): freeze subscription clock in update specs"
+    },
+    {
+      "branch": "codex/exact-client-inactivity-20260810",
+      "head": "1c8328b584805d68dd8d556cbb6eadaaf5f6b630",
+      "upstream": "origin/codex/exact-client-inactivity-20260810",
+      "originHead": "1c8328b584805d68dd8d556cbb6eadaaf5f6b630",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "fix(ai): let model choose authoritative CRM tools"
+    },
+    {
+      "branch": "codex/fix-authoritative-staff-schedule",
+      "head": "fa3f9d3a41342b229f2d4a8432f6b4cccc93a655",
+      "upstream": "origin/codex/fix-authoritative-staff-schedule",
+      "originHead": "fa3f9d3a41342b229f2d4a8432f6b4cccc93a655",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-schedule-fix"
+      ],
+      "purpose": "Add founder-controlled client capability registry"
+    },
+    {
+      "branch": "codex/frontend-saas-hardening",
+      "head": "c1d84fc6fe13cbbc22b868304906b92f81ca7a3d",
+      "upstream": "origin/codex/frontend-saas-hardening",
+      "originHead": "c1d84fc6fe13cbbc22b868304906b92f81ca7a3d",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-frontend-saas-hardening"
+      ],
+      "purpose": "feat: complete tenant-scoped SaaS frontend"
+    },
+    {
+      "branch": "codex/human-onboarding-trial",
+      "head": "f2b44161c24c73d21176cf1c87458372ab39f30a",
+      "upstream": "origin/codex/human-onboarding-trial",
+      "originHead": "f2b44161c24c73d21176cf1c87458372ab39f30a",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "docs: hand off MAYA trial chat UI"
+    },
+    {
+      "branch": "codex/maya-app-internal-calendar",
+      "head": "abd4ff1fee51b1ccfa6e39b26228dd5715d7f0b2",
+      "upstream": "origin/codex/maya-app-internal-calendar",
+      "originHead": "abd4ff1fee51b1ccfa6e39b26228dd5715d7f0b2",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-app-local"
+      ],
+      "purpose": "feat: add internal calendar flows to Maya app"
+    },
+    {
+      "branch": "codex/maya-brain-provider",
+      "head": "9c6f1e37b00817d3b2af5dc5dea14652636aa548",
+      "upstream": "origin/codex/maya-brain-provider",
+      "originHead": "9c6f1e37b00817d3b2af5dc5dea14652636aa548",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "test(config): validate native Brain provider"
+    },
+    {
+      "branch": "codex/maya-brain-systemic-release-20260815",
+      "head": "6b245f0605ef5458abb4b05e38e8fdfe1fb10325",
+      "upstream": "origin/codex/maya-brain-systemic-release-20260815",
+      "originHead": "7f0ff81e5771841e8438e9c49bfe6d5b7e791731",
+      "ahead": 2,
+      "behind": 204,
+      "action": "DIVERGED_PRESERVE_UNDER_ARCHIVE_REF",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/maya-platform"
+      ],
+      "purpose": "style(consent): fix prettier so the deploy gate can pass"
+    },
+    {
+      "branch": "codex/maya-brain-v1",
+      "head": "2f108afa552139583d9eb3a68971f0bfa0aa83bd",
+      "upstream": "origin/codex/maya-brain-v1",
+      "originHead": "b736ce7aae898974f7644c15af7d4dda00fba171",
+      "ahead": 1,
+      "behind": 9,
+      "action": "DIVERGED_PRESERVE_UNDER_ARCHIVE_REF",
+      "sourceWorktrees": [],
+      "purpose": "fix(native): accept voice recordings for transcription"
+    },
+    {
+      "branch": "codex/maya-controlled-integration-20260930",
+      "head": "dff728e85a97841dd72bd290992b888344780780",
+      "upstream": "origin/codex/maya-controlled-integration-20260930",
+      "originHead": "dff728e85a97841dd72bd290992b888344780780",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration"
+      ],
+      "purpose": "Use the guarded CI database in AR-1 unit fixtures"
+    },
+    {
+      "branch": "codex/maya-identity-consent-20260913",
+      "head": "36fc31d7fa1ba5af758254912fa324093b4d954b",
+      "upstream": "origin/codex/maya-identity-consent-20260913",
+      "originHead": "9e4b266d9c426708824f9f02380beeb83c7c5830",
+      "ahead": 25,
+      "behind": 0,
+      "action": "FAST_FORWARD",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent"
+      ],
+      "purpose": "feat(carrier): the last four presentation units — detail sheet, orb, equaliser, tenant recovery"
+    },
+    {
+      "branch": "codex/maya-os-crm-integration-final",
+      "head": "d71371fb966ab93ebe5febab46dfc68e57d52db4",
+      "upstream": "origin/codex/maya-os-crm-integration-final",
+      "originHead": "d71371fb966ab93ebe5febab46dfc68e57d52db4",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "chore(release): verify native safety contracts"
+    },
+    {
+      "branch": "codex/maya-os-feature-catalog-design",
+      "head": "2f285da42730bc27a48f0a80571b1449d1e6eeda",
+      "upstream": "origin/codex/maya-os-feature-catalog-design",
+      "originHead": "2f285da42730bc27a48f0a80571b1449d1e6eeda",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-feature-catalog-design"
+      ],
+      "purpose": "docs: add MAYA OS feature catalog for design"
+    },
+    {
+      "branch": "codex/maya-os-final-integration",
+      "head": "6016ff5c12eaed15b3c6e00487e08103b461d823",
+      "upstream": "origin/codex/maya-os-final-integration",
+      "originHead": "6016ff5c12eaed15b3c6e00487e08103b461d823",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "ci(frontend): enforce prepublication safety contracts"
+    },
+    {
+      "branch": "codex/maya-os-release-candidate",
+      "head": "9c3d66af6ae72c6452618ed05ca653912707a50e",
+      "upstream": "origin/codex/maya-os-release-candidate",
+      "originHead": "9c3d66af6ae72c6452618ed05ca653912707a50e",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-os-release-candidate"
+      ],
+      "purpose": "feat(onboarding): editable seven-day schedule in the confirmation card"
+    },
+    {
+      "branch": "codex/maya-os-trial-chat-fe",
+      "head": "bd93b715064b251b6c9d8155f83c291f5cc570ca",
+      "upstream": "origin/codex/maya-os-trial-chat-fe",
+      "originHead": "bd93b715064b251b6c9d8155f83c291f5cc570ca",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-ai-onboarding"
+      ],
+      "purpose": "feat(app): MAYA OS trial+onboarding chat, subscription fence, capability-readiness, full-screen trial banner"
+    },
+    {
+      "branch": "codex/native-ai-pipeline-20260811",
+      "head": "46c98244a5686c0580ec4809af04e78672a7f0e3",
+      "upstream": "origin/codex/native-ai-pipeline-20260811",
+      "originHead": "46c98244a5686c0580ec4809af04e78672a7f0e3",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "fix(crm): reconcile confirmed revenue by staff"
+    },
+    {
+      "branch": "codex/native-cabinet-link-20260811",
+      "head": "ccb3ff1a22756a8a360d39c2e6f2e1e792ec3cf0",
+      "upstream": "origin/codex/native-cabinet-link-20260811",
+      "originHead": "ccb3ff1a22756a8a360d39c2e6f2e1e792ec3cf0",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "fix(loyalty): preserve migrated balance by CRM branch"
+    },
+    {
+      "branch": "codex/native-chat-contract-20260810",
+      "head": "4e3fcf1d008066b532242b43f9ed44e174844fd4",
+      "upstream": "origin/codex/native-chat-contract-20260810",
+      "originHead": "4e3fcf1d008066b532242b43f9ed44e174844fd4",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "fix(ai): accept native chat audience hint"
+    },
+    {
+      "branch": "codex/native-mode-contract-20260809",
+      "head": "91e603331deca245b1a27578949f653c17eaf257",
+      "upstream": "origin/codex/native-mode-contract-20260809",
+      "originHead": "91e603331deca245b1a27578949f653c17eaf257",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "chore(backend): restore the full lint gate"
+    },
+    {
+      "branch": "codex/native-schedule-actions",
+      "head": "8846d14082cdc2a94796463bbdc9b96821a8dd46",
+      "upstream": "origin/codex/native-schedule-actions",
+      "originHead": "8846d14082cdc2a94796463bbdc9b96821a8dd46",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "docs(ai): document native schedule commands"
+    },
+    {
+      "branch": "codex/owner-telegram-role-fix-20260908",
+      "head": "c5f1383e2c0813d168005a3160e4c8075ba37bd1",
+      "upstream": "origin/codex/maya-brain-systemic-release-20260815",
+      "originHead": "c5f1383e2c0813d168005a3160e4c8075ba37bd1",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "test(c7): preserve recovery proofs and identify unversioned release input"
+    },
+    {
+      "branch": "codex/pr22-architecture-fixes-20260809",
+      "head": "b86f4175767f106527a5ba9b30b59259ccba0d27",
+      "upstream": "origin/codex/pr22-architecture-fixes-20260809",
+      "originHead": "b86f4175767f106527a5ba9b30b59259ccba0d27",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "Merge remote-tracking branch 'origin/main' into codex/pr22-architecture-fixes-20260809"
+    },
+    {
+      "branch": "codex/production-bootstrap-hardening",
+      "head": "6a31ecdf2092a1ce236a2faf48d58437192994e9",
+      "upstream": "origin/codex/production-bootstrap-hardening",
+      "originHead": "6a31ecdf2092a1ce236a2faf48d58437192994e9",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-production-bootstrap-hardening"
+      ],
+      "purpose": "docs: add client state fence micro fix"
+    },
+    {
+      "branch": "codex/pwa-ios-functional-parity",
+      "head": "86e08902f9ebf85f1fbcb05b300b0cea0868076e",
+      "upstream": "origin/codex/pwa-ios-functional-parity",
+      "originHead": "86e08902f9ebf85f1fbcb05b300b0cea0868076e",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "docs: separate MAYA platform from tenant domain"
+    },
+    {
+      "branch": "codex/release-integration",
+      "head": "0b0a326f6720216c354b0b8423537e2ac8414dce",
+      "upstream": "origin/codex/release-integration",
+      "originHead": "0b0a326f6720216c354b0b8423537e2ac8414dce",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-release-integration"
+      ],
+      "purpose": "docs: make universal service demo the default"
+    },
+    {
+      "branch": "codex/safe-booking-backend-handoff",
+      "head": "dd04248fd2a214eacdf434c8d437b1fbe3129957",
+      "upstream": "origin/codex/safe-booking-backend-handoff",
+      "originHead": "dd04248fd2a214eacdf434c8d437b1fbe3129957",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "Document MAYA capabilities and local voice flow"
+    },
+    {
+      "branch": "codex/secure-crm-integration-lifecycle",
+      "head": "628ee9c4e1827be7aff3ff210f41d8257f5ca446",
+      "upstream": "origin/codex/secure-crm-integration-lifecycle",
+      "originHead": "628ee9c4e1827be7aff3ff210f41d8257f5ca446",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "docs(crm): hand off integration center frontend"
+    },
+    {
+      "branch": "codex/session-security",
+      "head": "9b0032cd2353525707670398df7f6a8ce575c45f",
+      "upstream": "origin/codex/session-security",
+      "originHead": "9b0032cd2353525707670398df7f6a8ce575c45f",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-session-security"
+      ],
+      "purpose": "docs: document session security rollout"
+    },
+    {
+      "branch": "codex/telegram-registration-hotfix-20260902",
+      "head": "03bdf3d869112165e501b9b4ea0cdd462e603919",
+      "upstream": "origin/codex/telegram-registration-hotfix-20260902",
+      "originHead": "03bdf3d869112165e501b9b4ea0cdd462e603919",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "fix(auth): allow Telegram client registration without phone"
+    },
+    {
+      "branch": "codex/telegram-reports-hotfix-20260903",
+      "head": "166697cee7c3b67d82c94c5b038746688df9ea52",
+      "upstream": "origin/codex/telegram-reports-hotfix-20260903",
+      "originHead": "166697cee7c3b67d82c94c5b038746688df9ea52",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/telegram-reports-hotfix"
+      ],
+      "purpose": "fix(bot): initialize request-only Telegram executor"
+    },
+    {
+      "branch": "codex/tenant-auth-isolation",
+      "head": "6c7a220dd03575de600897e161623f7b4ead5393",
+      "upstream": "origin/codex/tenant-auth-isolation",
+      "originHead": "6c7a220dd03575de600897e161623f7b4ead5393",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-tenant-auth-isolation"
+      ],
+      "purpose": "docs: describe tenant auth isolation"
+    },
+    {
+      "branch": "codex/tenant-data-isolation",
+      "head": "4180fa5766901320f16a6361768a0b589b5f4416",
+      "upstream": "origin/codex/tenant-data-isolation",
+      "originHead": "4180fa5766901320f16a6361768a0b589b5f4416",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-tenant-data-isolation"
+      ],
+      "purpose": "docs: record tenant data isolation operations"
+    },
+    {
+      "branch": "codex/tenant-operations-isolation",
+      "head": "0f872fab311918535e80fff26ecf26cfcf7ce4bd",
+      "upstream": "origin/codex/tenant-operations-isolation",
+      "originHead": "0f872fab311918535e80fff26ecf26cfcf7ce4bd",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-tenant-operations-isolation"
+      ],
+      "purpose": "docs: describe isolated tenant operations"
+    },
+    {
+      "branch": "codex/widget-release-programme-20260929",
+      "head": "f9e703e3265f31aa6f3e16eb0774b3349abf1fc0",
+      "upstream": null,
+      "originHead": null,
+      "ahead": null,
+      "behind": null,
+      "action": "CREATE_REMOTE_BRANCH",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/widget-release"
+      ],
+      "purpose": "docs(widgets): admit approved evidence and prepare controlled integration checkpoint"
+    },
+    {
+      "branch": "contour/c7-recovery-cd157b66",
+      "head": "a7389950346355c589816fdbbc055b09d5ef79ea",
+      "upstream": "origin/codex/maya-brain-systemic-release-20260815",
+      "originHead": "c5f1383e2c0813d168005a3160e4c8075ba37bd1",
+      "ahead": 14,
+      "behind": 0,
+      "action": "FAST_FORWARD",
+      "sourceWorktrees": [
+        "/private/tmp/maya-b29-contour"
+      ],
+      "purpose": "docs(c7): certify final acceptance and Chapter 7 completion"
+    },
+    {
+      "branch": "contour/native-consent-baseline",
+      "head": "b15cf282e1629cf6eaf84c82ad0f4a46289b614f",
+      "upstream": "origin/contour/native-consent-baseline",
+      "originHead": "b15cf282e1629cf6eaf84c82ad0f4a46289b614f",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/private/tmp/maya-native-consent-baseline"
+      ],
+      "purpose": "docs(a18): certify exact production security correction and consent release"
+    },
+    {
+      "branch": "contour/native-consent-first-party-client",
+      "head": "6b245f0605ef5458abb4b05e38e8fdfe1fb10325",
+      "upstream": null,
+      "originHead": "6b245f0605ef5458abb4b05e38e8fdfe1fb10325",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "style(consent): fix prettier so the deploy gate can pass"
+    },
+    {
+      "branch": "contour/owner-telegram-staff-principal",
+      "head": "fe8b97bf93aa930bfc9a6482cd7c27b52421f521",
+      "upstream": null,
+      "originHead": "fe8b97bf93aa930bfc9a6482cd7c27b52421f521",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/private/tmp/maya-owner-telegram-fix"
+      ],
+      "purpose": "feat(auth): expose read-only Telegram staff principal for owner bot"
+    },
+    {
+      "branch": "feature/multi-tenant-foundation",
+      "head": "04b6510f948ad6d8ebf427b5848fe4f288a726be",
+      "upstream": "origin/feature/multi-tenant-foundation",
+      "originHead": "04b6510f948ad6d8ebf427b5848fe4f288a726be",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-multi-tenant-foundation"
+      ],
+      "purpose": "docs: add tenancy foundation runbook"
+    },
+    {
+      "branch": "fix/i-src-1-runtime",
+      "head": "f531367f00d62bbf5e27c4df8c64ba9695f9c968",
+      "upstream": null,
+      "originHead": null,
+      "ahead": null,
+      "behind": null,
+      "action": "CREATE_REMOTE_BRANCH",
+      "sourceWorktrees": [
+        "/private/tmp/isrc1"
+      ],
+      "purpose": "fix(runtime): I-SRC-1 — a SCHEDULE entry may reach its retained cancel proposal"
+    },
+    {
+      "branch": "fix/l27-terminal-outcome-duplication",
+      "head": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+      "upstream": null,
+      "originHead": null,
+      "ahead": null,
+      "behind": null,
+      "action": "CREATE_REMOTE_BRANCH",
+      "sourceWorktrees": [
+        "/private/tmp/ns1"
+      ],
+      "purpose": "fix(runtime): one canonical terminal outcome, one visible terminal outcome (L27)"
+    },
+    {
+      "branch": "fix/ns-1-parent-return",
+      "head": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "upstream": null,
+      "originHead": null,
+      "ahead": null,
+      "behind": null,
+      "action": "CREATE_REMOTE_BRANCH",
+      "sourceWorktrees": [],
+      "purpose": "fix(runtime): return the canonical parent from `resolved_widget` (NS-1)"
+    },
+    {
+      "branch": "hotfix/native-consent-first-party-20260911",
+      "head": "a1db797855c226148354a9a9942f7740879ef31e",
+      "upstream": "origin/codex/maya-brain-systemic-release-20260815",
+      "originHead": null,
+      "ahead": null,
+      "behind": null,
+      "action": "CREATE_REMOTE_BRANCH",
+      "sourceWorktrees": [
+        "/private/tmp/maya-consent-first-party"
+      ],
+      "purpose": "test(release): give python ratchet subprocesses room to finish"
+    },
+    {
+      "branch": "hotfix/native-consent-link-403-20260908",
+      "head": "b6c53ff9ee31bb43d0419f5ce32aa6b0e4999ae0",
+      "upstream": "origin/codex/maya-brain-systemic-release-20260815",
+      "originHead": "b6c53ff9ee31bb43d0419f5ce32aa6b0e4999ae0",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "fix(client): support installed native consent flow"
+    },
+    {
+      "branch": "hotfix/pwa-owner-login-recovery-20260908",
+      "head": "d96996c115fefe136d73eb38e7913d730c92834e",
+      "upstream": "origin/hotfix/pwa-owner-login-recovery-20260908",
+      "originHead": "d96996c115fefe136d73eb38e7913d730c92834e",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [],
+      "purpose": "fix(pwa): recover login from unlinked client preview"
+    },
+    {
+      "branch": "main",
+      "head": "cfb9e8eeb476a800e319b43411fe8780e6024513",
+      "upstream": "origin/main",
+      "originHead": "d6583a96c58b3b75b0ecfadc3a3b01e55b3b9015",
+      "ahead": 0,
+      "behind": 263,
+      "action": "LOCAL_BEHIND",
+      "sourceWorktrees": [],
+      "purpose": "Animated liquid-glass icon set across staff & client home"
+    },
+    {
+      "branch": "release/wave-ra-20260907-ef091875",
+      "head": "4891f5e758a51bf7f680d0ba27aee490b413dc93",
+      "upstream": "origin/release/wave-ra-20260907-ef091875",
+      "originHead": "4891f5e758a51bf7f680d0ba27aee490b413dc93",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/private/tmp/maya-wave-ra-release-ef091875"
+      ],
+      "purpose": "release(wave-ra): preserve B35 report runtime while shipping R-A"
+    },
+    {
+      "branch": "release/wave-rb-20260907-42962475",
+      "head": "6ad559c3cec1dab7a4fc7fdd438e788b77aaaed8",
+      "upstream": null,
+      "originHead": "6ad559c3cec1dab7a4fc7fdd438e788b77aaaed8",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/private/tmp/maya-wave-rb-release-42962475"
+      ],
+      "purpose": "release(wave-rb): preserve B35 report runtime while shipping R-B"
+    },
+    {
+      "branch": "release/wave-rb-20260907-85cdd762",
+      "head": "39c465fdeca3a98c9a93cf9e24504f38f246270c",
+      "upstream": null,
+      "originHead": "39c465fdeca3a98c9a93cf9e24504f38f246270c",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/private/tmp/maya-wave-rb-release-85cdd762"
+      ],
+      "purpose": "release(wave-rb): preserve B35 report runtime while shipping R-B"
+    },
+    {
+      "branch": "release/wave-rb-20260907-c418550a",
+      "head": "a19e56c549cbe33e4387d134f44ee2fcb3b275e6",
+      "upstream": null,
+      "originHead": "a19e56c549cbe33e4387d134f44ee2fcb3b275e6",
+      "ahead": 0,
+      "behind": 0,
+      "action": "ALREADY_EXACT",
+      "sourceWorktrees": [
+        "/private/tmp/maya-wave-rb-release-c418550a"
+      ],
+      "purpose": "release(wave-rb): preserve B35 report runtime while shipping R-B"
+    }
+  ],
+  "publicationTargets": [
+    {
+      "branch": "codex-wave2-pg15-staging",
+      "sha": "c010e9fbeba7ebb222f7e73e22dee22f6b45c14e",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex-wave2-pg15-staging"
+    },
+    {
+      "branch": "codex-wave2-u13-staging",
+      "sha": "d065513ca751212028559cea1ce095eb5a7d35d9",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex-wave2-u13-staging"
+    },
+    {
+      "branch": "codex-wave2-u13-staging-v2",
+      "sha": "70b935ea7ea77a2d953d9dfe25befbf6798541b7",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex-wave2-u13-staging-v2"
+    },
+    {
+      "branch": "codex-wave2-u13-staging-v3",
+      "sha": "f29002dd33de88e8e7a50e6dd8796e2deb47ce8c",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex-wave2-u13-staging-v3"
+    },
+    {
+      "branch": "codex-wave2-u7-staging",
+      "sha": "44b001a796ff3c3bcf7ec339ddba9af4e9d6ac90",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex-wave2-u7-staging"
+    },
+    {
+      "branch": "codex-wave2-u9-staging",
+      "sha": "d3c629f6ff9e307025b3c31c60b795f03c5c1b97",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex-wave2-u9-staging"
+    },
+    {
+      "branch": "codex-wave2-u9-staging-v2",
+      "sha": "a697bd066634d7817169c6ddb503e84326c64959",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex-wave2-u9-staging-v2"
+    },
+    {
+      "branch": "codex/maya-identity-consent-20260913",
+      "sha": "36fc31d7fa1ba5af758254912fa324093b4d954b",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex/maya-identity-consent-20260913"
+    },
+    {
+      "branch": "codex/widget-release-programme-20260929",
+      "sha": "f9e703e3265f31aa6f3e16eb0774b3349abf1fc0",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex/widget-release-programme-20260929"
+    },
+    {
+      "branch": "contour/c7-recovery-cd157b66",
+      "sha": "a7389950346355c589816fdbbc055b09d5ef79ea",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "contour/c7-recovery-cd157b66"
+    },
+    {
+      "branch": "fix/i-src-1-runtime",
+      "sha": "f531367f00d62bbf5e27c4df8c64ba9695f9c968",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "fix/i-src-1-runtime"
+    },
+    {
+      "branch": "fix/l27-terminal-outcome-duplication",
+      "sha": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "fix/l27-terminal-outcome-duplication"
+    },
+    {
+      "branch": "fix/ns-1-parent-return",
+      "sha": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "fix/ns-1-parent-return"
+    },
+    {
+      "branch": "hotfix/native-consent-first-party-20260911",
+      "sha": "a1db797855c226148354a9a9942f7740879ef31e",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "hotfix/native-consent-first-party-20260911"
+    },
+    {
+      "branch": "archive/test-http-own-loopback-listeners-in-remaining-s-0332dcc6-20261005",
+      "sha": "0332dcc66a172d891b7de53b31ce353c1821105c",
+      "purpose": "test(http): own loopback listeners in remaining Supertest harnesses",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/feat-widgets-implement-gate-10-divergence-audit-ae499631-20261005",
+      "sha": "ae49963147753dee684955c9101767551d1bd6a9",
+      "purpose": "feat(widgets): implement Gate 10 divergence audit",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/docs-cycle-06-record-p4-04-production-schema-ap-0892de75-20261005",
+      "sha": "0892de75fb10704f244ddbd5bd6b6274ba7cf12c",
+      "purpose": "docs(cycle-06): record p4-04 production schema apply",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/snapshot-7db55441-20261005",
+      "sha": "7db5544124d9920b2071bc00c7734340dae05056",
+      "purpose": "WIP on main: 0c3af3f Stop voice player error banner flashing on idle",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/snapshot-40c55cc7-20261005",
+      "sha": "40c55cc7dbd5a03858184f6adde89a96ae103c94",
+      "purpose": "WIP on codex/maya-identity-consent-20260913: 149af90a docs(platform): Telegram login is configured by the bot's domain, nothing else",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/feat-ai-complete-grounded-maya-business-intelli-87c6ea71-20261005",
+      "sha": "87c6ea718756a9f864f88aef930746782675ad61",
+      "purpose": "feat(ai): complete grounded MAYA business intelligence",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/feat-widgets-implement-gate-10-divergence-audit-56d994b8-20261005",
+      "sha": "56d994b8952fdb6fef4898173974c81a4aa24399",
+      "purpose": "feat(widgets): implement Gate 10 divergence audit",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/fix-reports-restore-telegram-owner-delivery-4ff7dc7c-20261005",
+      "sha": "4ff7dc7c95eadf498cd7c8b828f183c47aaf6ae2",
+      "purpose": "fix(reports): restore Telegram owner delivery",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/feat-widgets-reauthorize-navigate-source-projec-cf0303c6-20261005",
+      "sha": "cf0303c6a4145c348841d5ef189aa2337140a1a8",
+      "purpose": "feat(widgets): reauthorize navigate source projections",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/fix-r01-gate-relay-recovery-and-record-unregist-e46dbdf3-20261005",
+      "sha": "e46dbdf3b91ccbe307b583a8194c2e6469e38c13",
+      "purpose": "fix(r01): gate relay recovery and record unregistered production alias stop",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/snapshot-e96d3922-20261005",
+      "sha": "e96d3922340b74cb7515f213f2cc9de27c1b8a40",
+      "purpose": "WIP on main: 2649737 Add Telegram-style hold-to-record voice input in team chat",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/feat-widgets-certify-wave-4-live-moments-c0809b7b-20261005",
+      "sha": "c0809b7b9caccd0b14f4151a904b3ad87fb67a28",
+      "purpose": "feat(widgets): certify Wave 4 live moments",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/test-wave2-align-live-fixtures-with-keyed-seal--279c6508-20261005",
+      "sha": "279c6508c0dbf19fdce5a861fd4b2cf5a0dbf04e",
+      "purpose": "test(wave2): align live fixtures with keyed seal verification",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/snapshot-a7a345fa-20261005",
+      "sha": "a7a345fae20ab7e7ddbacf1367ed47389ee31ce0",
+      "purpose": "WIP on fix/ns-1-parent-return: 6a40575c fix(runtime): resolve accepted NAVIGATE detail into owned fullscreen",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/test-wave2-align-live-fixtures-with-keyed-seal--ddac21d5-20261005",
+      "sha": "ddac21d5325ba72f3b9b7dbedc089ee465dac6f3",
+      "purpose": "test(wave2): align live fixtures with keyed seal verification",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/snapshot-00d91bcb-20261005",
+      "sha": "00d91bcb797a3fc13d9b9b5faf2c7c82f8712f95",
+      "purpose": "WIP on fix/ns-1-parent-return: 6a40575c fix(runtime): resolve accepted NAVIGATE detail into owned fullscreen",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/snapshot-63da592d-20261005",
+      "sha": "63da592d66a8017a99f4c7cf4260baff37d0f7c9",
+      "purpose": "WIP on fix/ns-1-parent-return: 6a40575c fix(runtime): resolve accepted NAVIGATE detail into owned fullscreen",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/feat-widgets-implement-gate-10-divergence-audit-20dc397a-20261005",
+      "sha": "20dc397a620cf5814a66d639d68e4457bdc22b3f",
+      "purpose": "feat(widgets): implement Gate 10 divergence audit",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/snapshot-5af2c9f0-20261005",
+      "sha": "5af2c9f0ed63a7498bb8613d122e13e78be9137a",
+      "purpose": "WIP on fix/i-src-1-runtime: 2b477417 Correct the approved journal constraint reference",
+      "sourceBranch": "formerly unreachable; safety bundle retained"
+    },
+    {
+      "branch": "archive/repository-ignore-state-20261005",
+      "sha": "8ca93d4d8547574999bd7ad972e49a9e4c8943aa",
+      "purpose": "repository-ignore-state WIP snapshot",
+      "sourceBranch": "refs/heads/codex/maya-brain-systemic-release-20260815",
+      "sourceWorktree": "/Users/stanislavmosin/Desktop/Projects/maya-platform",
+      "files": [
+        {
+          "path": ".gitignore",
+          "sha256": "1cd6b9fcf98f55193110d376ceec2d1e77447d45688ed616f9a253180dad7eba"
+        }
+      ]
+    },
+    {
+      "branch": "archive/site-community-backend-20261005",
+      "sha": "78f197d39108843de1e3a0bdd57bdfd87a4e0022",
+      "purpose": "site-community-backend WIP snapshot",
+      "sourceBranch": "refs/heads/codex/maya-brain-systemic-release-20260815",
+      "sourceWorktree": "/Users/stanislavmosin/Desktop/Projects/maya-platform",
+      "files": [
+        {
+          "path": "ai администратор/bot.py",
+          "sha256": "cf0ca8d140aefcee0cb78b9a8c00caeaa8899c002fb777689f307af85f2800e7"
+        },
+        {
+          "path": "ai администратор/webhook_server.py",
+          "sha256": "3af3827135c2cdb68bc67b780f4124e56744b3c665d6c5f6d92e37b0258248a1"
+        },
+        {
+          "path": "ai администратор/deploy/barbershop-pwa.service",
+          "sha256": "d04f3d6efb6a52bf061495f014d79658aa50048213a5cae4cf017c3d6066c049"
+        },
+        {
+          "path": "ai администратор/pwa_api.py",
+          "sha256": "c17ccd82d2cc4e7a94538c7b40cdfab7a0f98797e8399c6064abaa1d2af2828f"
+        },
+        {
+          "path": "ai администратор/site_community.py",
+          "sha256": "f631935b676ac26614206b91d8448e415b1db6883e11fcea445e103d731fba65"
+        },
+        {
+          "path": "ai администратор/site_engagement.py",
+          "sha256": "96bc5a18df899670746ea2dcc3055c6cd7a5feb21885ebc2b5da26a5327ea6ac"
+        },
+        {
+          "path": "ai администратор/site_guest_chat.py",
+          "sha256": "035541c84fbefa4f38af9ca30c86fca1f21ac2acbd023accc4195544b1af981a"
+        },
+        {
+          "path": "ai администратор/site_publication_bot.py",
+          "sha256": "afc8c01d8a77878002442d2030103266c45896cc519f5da257f58d73004b6aa5"
+        },
+        {
+          "path": "ai администратор/site_publications.py",
+          "sha256": "846b04430d2f81abc62bb1f0ff37384e27631ce7c23b286f1dadb86344ff4bb5"
+        },
+        {
+          "path": "ai администратор/test_site_community.py",
+          "sha256": "f22224b6ef1c805f6a97bf58180ac5319c4f17cf6b4ce21f794aaa2a98422f83"
+        },
+        {
+          "path": "ai администратор/test_site_engagement.py",
+          "sha256": "c9d58a5f3df0cf9c28bb135b050f623df740b3d932370a1d793eed1b42a3b8ca"
+        },
+        {
+          "path": "ai администратор/test_site_guest_chat.py",
+          "sha256": "fd6d15f20b85320c381433d8292c448d8a6a6bc013f36e595bd28aa5f98b3894"
+        },
+        {
+          "path": "ai администратор/test_site_publications.py",
+          "sha256": "198fef3473a3da3debc90efd9185a159ea3133a6f08342faae990b5355cda130"
+        },
+        {
+          "path": "docs/SITE_COMMUNITY.md",
+          "sha256": "f7e1fd3c630ac482494c39f8962a724a97d2db7a669accce5f0cdba525e6babc"
+        },
+        {
+          "path": "docs/SITE_PUBLICATIONS.md",
+          "sha256": "9b24196825de53d376dce81ed3fdfe381f5a653e257f83cdb7b5cc93ccac9081"
+        }
+      ]
+    },
+    {
+      "branch": "archive/maya-website-20261005",
+      "sha": "33cff162204a683e2117aa9746027a3ac3159d51",
+      "purpose": "maya-website WIP snapshot",
+      "sourceBranch": "refs/heads/codex/maya-brain-systemic-release-20260815",
+      "sourceWorktree": "/Users/stanislavmosin/Desktop/Projects/maya-platform",
+      "files": [
+        {
+          "path": "maya-os-site/index.html",
+          "sha256": "e43193ffb0d8b0b18f464d20ec613688c5ad9415ea249eff706b1fa7db37322e"
+        }
+      ]
+    },
+    {
+      "branch": "archive/legacy-pwa-community-assets-20261005",
+      "sha": "530d68c7678d1eaf140c3fa8e5238afc8b5a201c",
+      "purpose": "legacy-pwa-community-assets WIP snapshot",
+      "sourceBranch": "refs/heads/codex/maya-brain-systemic-release-20260815",
+      "sourceWorktree": "/Users/stanislavmosin/Desktop/Projects/maya-platform",
+      "files": [
+        {
+          "path": "сайт и приложение/app.html",
+          "sha256": "9e7f34e6d413f686694e23f0d36badc6db6af273a626ff98cddedef79bc37aef"
+        },
+        {
+          "path": "сайт и приложение/assets/maya-intro.webp",
+          "sha256": "bd8d578d35f97a00cfba67a09647d22369d7f2ae5ff903187b36df5b5d983e6c"
+        },
+        {
+          "path": "сайт и приложение/assets/maya-recording.webp",
+          "sha256": "fc4cd25a8fea2cd8160ce2cd33dba75128816cf45995253e32c8fd2ff7b69bdf"
+        },
+        {
+          "path": "сайт и приложение/pwa-assets/tg-auth/site-community-proxy.php",
+          "sha256": "94e8960b5fd9d3b9148cca65e72286a3565fb102348aa97f29aa2fae352d8bf0"
+        },
+        {
+          "path": "сайт и приложение/pwa-assets/tg-auth/site-publications-proxy.php",
+          "sha256": "e0c930b3e4bb6ee35289c075097a5e9b6a5ab179a5e1f10fc00f4fbbd0071f97"
+        }
+      ]
+    },
+    {
+      "branch": "archive/claude-frontend-evidence-20261005",
+      "sha": "1ff5750a808cd154a505663534e6394ee91e8239",
+      "purpose": "claude-frontend-evidence WIP snapshot",
+      "sourceBranch": "refs/heads/claude/prepublication-frontend",
+      "sourceWorktree": "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-os-final-integration",
+      "files": [
+        {
+          "path": "CLAUDE_WEEK_CARD.png",
+          "sha256": "f15302f7c9a1aea2b40776072eed4c76012d80a7f0a3a8515e2a649d336baa86"
+        }
+      ]
+    },
+    {
+      "branch": "archive/claude-booking-carrier-20261005",
+      "sha": "5a195f03f750639e9e772a7e9825658fe756369c",
+      "purpose": "claude-booking-carrier WIP snapshot",
+      "sourceBranch": "refs/heads/claude/chat-booking-widget",
+      "sourceWorktree": "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-os-prepublication-review",
+      "files": [
+        {
+          "path": "сайт и приложение/app.html",
+          "sha256": "4db144950527fd14957d0e934c03350911b0a4887fb501a38e69b4067cc73d2f"
+        }
+      ]
+    },
+    {
+      "branch": "archive/carrier-migration-spec-20261005",
+      "sha": "34bc68871366ab0cd73d553e558a4a5928e22acf",
+      "purpose": "carrier-migration-spec WIP snapshot",
+      "sourceBranch": "refs/heads/codex/maya-identity-consent-20260913",
+      "sourceWorktree": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent",
+      "files": [
+        {
+          "path": "docs/rebuild/PRESENTATION-CARRIER-MIGRATION-SPEC.md",
+          "sha256": "0e750a9e3c22961a8db7572dc263a3603f454ccfe9b0e86727b4b87a596f2cf9"
+        }
+      ]
+    },
+    {
+      "branch": "archive/workspace-development-20261005",
+      "sha": "e951694f2bd5fa34b1515fc73bd863d0e274bd41",
+      "purpose": "Independent workspace metadata history and uncommitted Android/handoff documents",
+      "sourceWorktree": "/Users/stanislavmosin/Desktop/Projects/maya-platform/MAYA_WORKSPACE"
+    },
+    {
+      "branch": "archive/wave2-detached-f2cb0820-20261005",
+      "sha": "f2cb082022e99994d5f8f55cfc5b5c8461fc643a",
+      "purpose": "Preserve detached registered Wave 2 staging worktree HEAD",
+      "sourceWorktrees": [
+        "/private/tmp/maya-mint-core",
+        "/private/tmp/maya-pg15-fix"
+      ]
+    },
+    {
+      "branch": "archive/wave2-detached-cfe9878b-20261005",
+      "sha": "cfe9878b92b0e4c51f6e88685e240f44aa992a49",
+      "purpose": "Preserve detached registered Wave 2 staging worktree HEAD",
+      "sourceWorktrees": [
+        "/private/tmp/maya-mint-core-v2",
+        "/private/tmp/maya-u13-only"
+      ]
+    },
+    {
+      "branch": "archive/wave2-detached-8cf205ab-20261005",
+      "sha": "8cf205ab6546e65b3ac45d75582b523a76e5309c",
+      "purpose": "Preserve detached registered Wave 2 staging worktree HEAD",
+      "sourceWorktrees": [
+        "/private/tmp/maya-u13-prep"
+      ]
+    },
+    {
+      "branch": "archive/wave2-detached-1589b3be-20261005",
+      "sha": "1589b3befff0ee1a8e21340003c5c7832e968251",
+      "purpose": "Preserve detached registered Wave 2 staging worktree HEAD",
+      "sourceWorktrees": [
+        "/private/tmp/maya-u9b-clean"
+      ]
+    }
+  ],
+  "note": "Archival branches never replace a certified integration candidate. Publication verification is in the final owner report."
+}

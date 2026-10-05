@@ -1,0 +1,22 @@
+{
+  "scope": "Proposed publication only; private backup/internal refs excluded",
+  "secretScan": "PASS_REVIEWED",
+  "piiScanNewMaterial": "PASS_REVIEWED",
+  "historicalOriginPrivacyIncident": true,
+  "gitleaksVersion": "8.30.1",
+  "canonicalHistoryGenericFindingsReviewed": 1099,
+  "newArchiveDigestFindingsReviewed": 308,
+  "wipFindingsReviewed": 8,
+  "legacyIosHistoryFindingsReviewed": 2,
+  "companionSnapshotFindingsReviewed": 6,
+  "blockedPrivateMaterial": [
+    "Internal Codex snapshot contains unpublished pilot password/fixed OTP; never a publication ref",
+    ".tmp-pilot-fix.sh original",
+    ".tmp-pilot-unlock.sh original"
+  ],
+  "redactedProofHarnesses": 20,
+  "manifestHashMismatches": 0,
+  "productionOperations": 0,
+  "testRerunDuringArchive": false,
+  "note": "Exact committed publication-history scan and post-push verification must follow before completion. Historical origin privacy incident remains disclosed, not silently waived."
+}

@@ -1,0 +1,16 @@
+{
+  "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+  "name": "source-carrier",
+  "command": [
+    "npx",
+    "jest",
+    "--config",
+    "test/jest-widgets-live.json",
+    "--runInBand",
+    "--testRegex",
+    "widgets-live/source-carrier.probe-spec.ts$"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 0,
+  "seconds": 2.79
+}

@@ -1,0 +1,9 @@
+{
+  "candidate": "41906e0c0f48392cc0fef2dc199688d74aa8662d",
+  "reason": "New listener mutant expanded inventory to 503; update exact CI count and pin mutant presence. Before 34/35; after 35/35. No product changes. Restart all final receipts on 86044d2b.",
+  "stoppedPids": [
+    54162,
+    54166
+  ],
+  "timestamp": "2026-09-30T15:35:09.483540+00:00"
+}

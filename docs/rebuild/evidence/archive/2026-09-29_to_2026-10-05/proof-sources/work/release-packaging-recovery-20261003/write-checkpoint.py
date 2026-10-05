@@ -1,0 +1,23 @@
+from pathlib import Path
+import datetime,hashlib,json,subprocess
+root=Path.cwd();o=root/'outputs/release-packaging-final-20261003';repo=root/'work/maya-controlled-integration';read=lambda p:json.loads(p.read_text());sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+c=read(o/'CERTIFICATION-RECEIPTS.json');p=read(o/'PACKAGING-TRUST-PROOF.json');recovery=read(o/'SUSPEND-RECOVERY-PROOF.json');host=read(o/'HOST-ENVIRONMENT-CHECK.json');finish=read(o/'FINISH-STATUS.json')
+head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip();assert head==c['candidate']==p['candidate']==recovery['candidate']=='77ecb3f5696583389e75592141f46fd0664d33d8'
+assert not subprocess.check_output(['git','status','--porcelain'],cwd=repo,text=True).strip()
+assert finish['status']==host['status']==recovery['status']==p['status']=='PASS'
+assert c['certifiedForProfile'] and c['productionExecutionPathCertified'] and not c['fullContractCertified']
+assert c['profileApplicableFalse']==0 and c['globalFalse']==2 and c['globalStops']==['G6-6','G13-R8']
+assert c['fullMutations']==c['localCiEquivalent']==c['fbe2e']=='PASS'
+assert not c['productionAuthorized'] and c['productionEffects']==c['realOtpEffects']==c['realYclientsEffects']==0
+assert not c['iphoneReinstalled'] and not c['productionMigrationApplied']
+assert p['oldShell']=='REFUSED' and p['webOwner']==p['nativeOwner']=='React AChat'
+assert len(p['aasaUnchanged'])==2 and len(p['reactBehaviourBytesUnchanged'])==4
+assert recovery['admittedSleepOverlaps']==0 and len(recovery['wholePartitionsReexecuted'])==2
+fields={'NEW CANDIDATE SHA':head,'R01 MANIFEST':'PASS','AASA BYTES UNCHANGED':'YES','CANONICAL PWA PAYLOAD':'React AChat','CANONICAL IOS PAYLOAD':'React AChat','OLD SHELL PACKAGING':'REFUSED','PWA MANIFEST':'PASS','PWA/CAPACITOR PARITY':'PASS','AR1 TRUST IMPLEMENTATION':'PASS','PRODUCTION KEYS REQUIRED FROM OWNER':'YES','SECURITY REVIEWER ACTION REQUIRED':'YES','PLATFORM OWNER SESSION REQUIRED':'YES','CERTIFIED_FOR_PROFILE':'YES','PRODUCTION EXECUTION PATH CERTIFIED':'YES','READY FOR PRODUCTION PREFLIGHT':'YES'}
+result={'candidate':head,'createdAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'checkpoint':fields,'profile':c['profile'],'profileApplicableFalse':0,'globalFalse':2,'globalStops':c['globalStops'],'fullContractCertified':False,'verification':{'components':c['componentResults'],'mutationCorpus':c['mutationCorpus'],'localCiEquivalent':c['localCiEquivalent'],'fbe2e':c['fbe2e'],'fbe2eCounts':c['fbe2eCounts'],'packagingTests':p['packagingTests'],'trustConfigTests':p['publicTrustTests'],'trustCompiledTests':p['compiledCommandTests']},'sleepRecovery':'Only WR partitions 3/4 and 4/4 overlapped host clamshell sleep; original results archived and excluded; both full canonical partitions reexecuted on fresh isolated source copies/test DBs with unchanged tests and timeouts. Strict complete release collector rerun. All 67 admitted partitions have zero suspend overlap.','externalActions':c['remainingBlockers'],'readyForProductionPreflightMeaning':'Technical certification complete. Production remains blocked on real custodian trust, independent reviewer signature, actual platform session and new separately signed execution authorization.','effects':{'productionDeploy':0,'productionMigration':0,'productionGrant':0,'realOtp':0,'realYclients':0,'iphoneInstall':0},'sourceClean':True,'signedProductionCertificateIssued':False,'proofs':[{'path':name,'sha256':sha(o/name)} for name in ['CERTIFICATION-RECEIPTS.json','PACKAGING-TRUST-PROOF.json','COMPLETE-MUTATIONS.json','SUSPEND-RECOVERY-PROOF.json','SUSPEND-RECOVERY-ADMISSION-COUNTERFACTS.json','HOST-ENVIRONMENT-CHECK.json','FINAL-ARTIFACT-STABILITY.json','FINAL-PROCESS-LIFECYCLE.json','PROFILE-CERTIFICATE-PROPOSAL.json']]}
+(o/'RELEASE-CHECKPOINT.json').write_text(json.dumps(result,indent=2)+'\n')
+a=o/'OWNER-ACTIONS.md';text=a.read_text();old='Certification is pending until `CERTIFICATION-RECEIPTS.json` is successfully produced by the complete fresh admission programme. No certificate or production authorization is implied by this checklist.'
+assert old in text
+text=text.replace(old,'Fresh complete admission has passed for this exact candidate; see `CERTIFICATION-RECEIPTS.json` and `RELEASE-CHECKPOINT.json`. The two sleep-overlapped WR partitions were excluded and fully reexecuted before strict admission. `PROFILE-CERTIFICATE-PROPOSAL.json` is an unsigned synthetic review proposal, not a production certificate, signature or execution authorization. All four external prerequisites above remain required.')
+a.write_text(text)
+print(json.dumps(fields,indent=2))

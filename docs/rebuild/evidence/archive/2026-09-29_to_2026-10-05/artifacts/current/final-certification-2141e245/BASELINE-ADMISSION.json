@@ -1,0 +1,216 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "SV2-HTTP": "PASS",
+  "F88-1": "PASS",
+  "F88-2": "PASS",
+  "independentRepeatedRuns": [
+    {
+      "iteration": 1,
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+          "status": "passed",
+          "durationMs": 449
+        },
+        {
+          "title": "F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+          "status": "passed",
+          "durationMs": 272
+        },
+        {
+          "title": "F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+          "status": "passed",
+          "durationMs": 23
+        }
+      ]
+    },
+    {
+      "iteration": 2,
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+          "status": "passed",
+          "durationMs": 452
+        },
+        {
+          "title": "F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+          "status": "passed",
+          "durationMs": 280
+        },
+        {
+          "title": "F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+          "status": "passed",
+          "durationMs": 26
+        }
+      ]
+    },
+    {
+      "iteration": 3,
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+          "status": "passed",
+          "durationMs": 453
+        },
+        {
+          "title": "F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+          "status": "passed",
+          "durationMs": 298
+        },
+        {
+          "title": "F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+          "status": "passed",
+          "durationMs": 23
+        }
+      ]
+    }
+  ],
+  "freshUnfilteredLiveSuite": {
+    "passed": 406,
+    "failed": 0,
+    "sha256": "eb2d76be8ebe0631985bf1c9c366cb77eda747e9eb015a8f6233ffef9d4f9140"
+  },
+  "firstObservedNativeControls": [
+    {
+      "worker": "8",
+      "step": "live",
+      "pass": 406,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/8-live-1790837428758.json",
+      "observedReportSha256": "5379686eb13416e42573eae698a7338b68241257ea0965c1092a02a6f004546d",
+      "indexSha256": "fca6e72f08a88616486fb0d2eace0ce25110e55efabd26f9a361594a7da60ee9",
+      "startTime": 1790837428758
+    },
+    {
+      "worker": "4",
+      "step": "live",
+      "pass": 406,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/4-live-1790837428758.json",
+      "observedReportSha256": "ca2cbef5e6c8b8322166a2728be8c577971894f21bea3c933e221844dcd83f02",
+      "indexSha256": "9dfa1f8f9a43ee3727e968f7a54fed4b922459b6c97ccfcc9721b504148adc6e",
+      "startTime": 1790837428758
+    },
+    {
+      "worker": "5",
+      "step": "unit",
+      "pass": 5602,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/5-unit-1790837532410.json",
+      "observedReportSha256": "dcd4e6d53865ee55422ac357fcb48947408dce6e8090bbecda4ac342d445ee3c",
+      "indexSha256": "951e87c6aefd2864b954ba776291f086c2ee6bea9d4032390cf46285418cf4ef",
+      "startTime": 1790837532410
+    },
+    {
+      "worker": "6",
+      "step": "live",
+      "pass": 406,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/6-live-1790837428760.json",
+      "observedReportSha256": "73ed3d9d34a863d6fc370d96e4683dd61e817d307fca50a22cb47cf29efe67a9",
+      "indexSha256": "dd254016065dd18dcdc6b77d5d30efbf062799972dbad6108a6a3e402e0c4ce6",
+      "startTime": 1790837428760
+    },
+    {
+      "worker": "2",
+      "step": "unit",
+      "pass": 5602,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/2-unit-1790837623880.json",
+      "observedReportSha256": "194c73d852f05a1620f2239a2232a1ca47d9ed44b966314e17f5a776bbaa4d4b",
+      "indexSha256": "8940ff995efdc657d3d3bd019683f00b007186078b7e14c6ce82f3642ee27831",
+      "startTime": 1790837623880
+    },
+    {
+      "worker": "3",
+      "step": "unit",
+      "pass": 5602,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/3-unit-1790837428687.json",
+      "observedReportSha256": "fbc43bb08e6317f96172a8bde6b13457bb5802e242de4df78fe92b48db5a8f01",
+      "indexSha256": "1db592763a4743ff8cbb7ddd4b6824a3410d06fa1af7286675840c814a6bca1b",
+      "startTime": 1790837428687
+    },
+    {
+      "worker": "5",
+      "step": "live",
+      "pass": 406,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/5-live-1790837428760.json",
+      "observedReportSha256": "be051c93852e7fd46d94cff13d1bf1d19f1b7bc872d9aac5539ee718748684e0",
+      "indexSha256": "55033e57d8cddb23291731e9ff836b6281bb5d58ee9adb4b545978fabb611043",
+      "startTime": 1790837428760
+    },
+    {
+      "worker": "6",
+      "step": "unit",
+      "pass": 5602,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/6-unit-1790837532324.json",
+      "observedReportSha256": "ce5e20c0dc41cdc80d7d28c0f557bd0dd120a4f5732aa3f9a5ea8d42ac31c6c5",
+      "indexSha256": "e2ebc7965803d683ae12e3de44caaf30723f9b00c02819aad95646c049490e6e",
+      "startTime": 1790837532324
+    },
+    {
+      "worker": "4",
+      "step": "unit",
+      "pass": 5602,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/4-unit-1790837627345.json",
+      "observedReportSha256": "eddfb7733b38f3e6779b7cf39f34c033b00ad066da92d9447b3d0b8d86721cfb",
+      "indexSha256": "be55dc451d6c5e433cea18e0a0c6842b2c616cb59610298360c8ccae5d9cd70c",
+      "startTime": 1790837627345
+    },
+    {
+      "worker": "2",
+      "step": "live",
+      "pass": 406,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/2-live-1790837428759.json",
+      "observedReportSha256": "916069c374f3a354e36bcf743901d6dc8982e4fb6022f6b30dc5f7ee1b736de1",
+      "indexSha256": "de8ef52a7a006a95a2a93da503d5a1be527b9687c4e74f958946a5664ad1ae27",
+      "startTime": 1790837428759
+    },
+    {
+      "worker": "1",
+      "step": "unit",
+      "pass": 5602,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/1-unit-1790837628076.json",
+      "observedReportSha256": "ec8942871d9f8eeca67132e4cdb83c45304442a7e4e2eda6ef1583b6e4c3745a",
+      "indexSha256": "94d6ea3bb277371dbd521ece9444c1c7b26684573a1f09bfe718bfaec24314f1",
+      "startTime": 1790837628076
+    },
+    {
+      "worker": "1",
+      "step": "live",
+      "pass": 406,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/1-live-1790837428759.json",
+      "observedReportSha256": "6d11af481e1fc5770d632836b7a49aaf714e8071737540dd93ed27895cea3d27",
+      "indexSha256": "442eb42743555edf44bf226c7b43262a4a3ef16d4ada87c19d1cb4d5259ae71c",
+      "startTime": 1790837428759
+    },
+    {
+      "worker": "7",
+      "step": "unit",
+      "pass": 5602,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/7-unit-1790837428684.json",
+      "observedReportSha256": "397ce77c4f07c9396ac1dbcebb456260ebb97d61dcb78fc461651f67b0c870f6",
+      "indexSha256": "66e0fca92d9cf19a764551b32b4968416baf3135dedabd737d422432405d1664",
+      "startTime": 1790837428684
+    }
+  ],
+  "nativeControlBoundary": "First raw report per worker/step from fresh default runner, captured immediately. Final canonical battery receipts/assembly remain required.",
+  "wholeCorpusAdmission": "PENDING"
+}

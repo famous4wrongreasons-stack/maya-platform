@@ -1,0 +1,18 @@
+{
+  "candidate": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+  "name": "source-profile-live",
+  "command": [
+    "npx",
+    "jest",
+    "--config",
+    "test/jest-widgets-live.json",
+    "--runInBand",
+    "--testPathPatterns",
+    "(personal-source|navigation-source|profile-isolation)\\.live-spec",
+    "--json",
+    "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/i-src-1-continuation/receipts-1d519822/source-profile-live.json"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 0,
+  "seconds": 7.11
+}

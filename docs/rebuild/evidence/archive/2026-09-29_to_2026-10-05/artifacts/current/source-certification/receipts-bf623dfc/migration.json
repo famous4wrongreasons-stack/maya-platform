@@ -1,0 +1,10 @@
+{
+  "candidate": "bf623dfc708f097db31a767505be517f838f0dd4",
+  "migration": "prisma/migrations/20260930120000_journal_detail_retained_date/migration.sql",
+  "sha256": "d832f451efc898a92f258c05fcd5b2434eb3b3d22b5e93ee85121f9f7fbabfc6",
+  "checksumMatchesAppliedLocalMigration": true,
+  "database": "127.0.0.1:55729/maya_widget_gate_proof_sources_final_20260930",
+  "productionApplied": false,
+  "tablesAdded": 0,
+  "columnsAdded": 0
+}

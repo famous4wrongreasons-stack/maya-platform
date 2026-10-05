@@ -1,0 +1,34 @@
+{
+  "contract": "maya.runtime-l27-counterfactuals/1",
+  "candidate": "dac4072dd17ec222fe36cc603863965919039708",
+  "restrictions": "none: full runtime test suite per baseline and mutant",
+  "mutations": [
+    {
+      "id": "L27-M01",
+      "purpose": "Remove terminal identity guard",
+      "source": "maya-chat-shell/src/shell/intents.ts",
+      "before": "if (published.has(key)) continue;",
+      "after": "if (false) continue;",
+      "namedKillerPrefix": "L27: COMMIT",
+      "actualFailedTests": [
+        "L27: COMMIT \u2192 CONFIRMED \u2192 Dismiss leaves one business effect, one receipt and ONE visible terminal outcome",
+        "L27: repeated Dismiss keeps the visible terminal outcome at one, however many times it is pressed",
+        "L27: two genuinely different terminal outcomes both remain representable",
+        "L27: identity is the canonical reference, never the sentence \u2014 in BOTH directions",
+        "L27: an ordinary assistant message and a terminal outcome never deduplicate each other, in either order",
+        "L27: UNKNOWN \u2192 reconciliation \u2192 CONFIRMED keeps the later canonical transition visible",
+        "L27: a successor emission carrying its predecessor's confirmation states it once",
+        "L27: the record survives the display cap, on the path where that is reachable",
+        "L27: one canonical receipt is stated once ACROSS widgets, even after the first statement is evicted",
+        "L27: a settled submission whose thread page failed loses nothing \u2014 the next one writes the outcome",
+        "L27: two identical lines inside ONE response are one outcome, and two different ones are two"
+      ],
+      "namedKillers": [
+        "L27: COMMIT \u2192 CONFIRMED \u2192 Dismiss leaves one business effect, one receipt and ONE visible terminal outcome"
+      ],
+      "exit": 1,
+      "status": "KILLED",
+      "mutatedSourceSha256": "565aad236d764c944ee253ea91f7575ec1121e9c14d77069f9488669036bd16b"
+    }
+  ]
+}

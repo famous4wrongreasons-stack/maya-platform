@@ -1,0 +1,15 @@
+{
+  "candidate": "667b687c161a03d2d5f3f508f63b8fd0beedfbd9",
+  "name": "frontend-inline",
+  "command": [
+    "node",
+    "scripts/verify-frontend-bundles.mjs",
+    "\u0441\u0430\u0439\u0442 \u0438 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435/app.html",
+    "\u0441\u0430\u0439\u0442 \u0438 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435/maya-admin.html",
+    "\u0441\u0430\u0439\u0442 \u0438 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435/maya-start.html",
+    "\u0441\u0430\u0439\u0442 \u0438 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435/oauth-callback.html"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "exit": 0,
+  "seconds": 0.05
+}

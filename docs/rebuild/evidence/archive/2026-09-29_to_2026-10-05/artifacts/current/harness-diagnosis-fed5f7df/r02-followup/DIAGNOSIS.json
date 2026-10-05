@@ -1,0 +1,158 @@
+{
+  "rootCause": "Remaining Supertest fixtures exposed the same implicit IPv6 wildcard / IPv4 shadowing path. Controlled occupied-port selection routes unmodified requests to a synthetic different process; owned explicit IPv4 listeners prevent it.",
+  "actualCorpusFailure": "SBV unmutated unit baseline 5596 pass / 2 timeout; a parallel SB1 unit baseline passed 5598. Original R02 sockets were not traced, so no claim of their exact historical receiving process.",
+  "injectionBoundary": "Only ephemeral wildcard port selection changed in external diagnostic preload; no route, guard, product, timeout or test expectation change. Responses originate from a synthetic local wrong process.",
+  "productDefectProven": false,
+  "harnessDefectProven": true,
+  "rows": [
+    {
+      "run": "before",
+      "code": 1,
+      "signal": null,
+      "seconds": 0.868,
+      "syntheticShadowAddress": {
+        "address": "127.0.0.1",
+        "family": "IPv4",
+        "port": 53743
+      },
+      "requestsMisroutedToShadow": 21,
+      "diagnosticInjection": "Only implicit wildcard listen(0) selects existing shadow IPv4 port; explicit listeners unchanged",
+      "passed": 0,
+      "failed": 21,
+      "reportSha256": "0c628196e4243d4143c676bdd8f9fca958ff43a7c8f781a0570e1bf7655f10bf"
+    },
+    {
+      "run": "after",
+      "code": 0,
+      "signal": null,
+      "seconds": 0.674,
+      "syntheticShadowAddress": {
+        "address": "127.0.0.1",
+        "family": "IPv4",
+        "port": 53997
+      },
+      "requestsMisroutedToShadow": 0,
+      "diagnosticInjection": "Only implicit wildcard listen(0) selects existing shadow IPv4 port; explicit listeners unchanged",
+      "passed": 22,
+      "failed": 0,
+      "reportSha256": "4bbd71c1a433def918a6771e54ac08acae40ced7c9463e98ebae94a439648686"
+    },
+    {
+      "run": "regression-before",
+      "code": 1,
+      "signal": null,
+      "seconds": 1.572,
+      "syntheticShadowAddress": {
+        "address": "127.0.0.1",
+        "family": "IPv4",
+        "port": 54058
+      },
+      "requestsMisroutedToShadow": 21,
+      "diagnosticInjection": "Only implicit wildcard listen(0) selects existing shadow IPv4 port; explicit listeners unchanged",
+      "passed": 0,
+      "failed": 22,
+      "reportSha256": "a85aea6f6282520abc4281f1812f4f1967d34f5641d117cf6adeb3f8d295dc5d"
+    },
+    {
+      "run": "other-unit-before",
+      "code": 1,
+      "signal": null,
+      "seconds": 0.828,
+      "syntheticShadowAddress": {
+        "address": "127.0.0.1",
+        "family": "IPv4",
+        "port": 54139
+      },
+      "requestsMisroutedToShadow": 9,
+      "diagnosticInjection": "Only implicit wildcard listen(0) selects existing shadow IPv4 port; explicit listeners unchanged",
+      "passed": 10,
+      "failed": 9,
+      "reportSha256": "cae82da5bc0b328ce4defc7342c091eee655b75beabe54fadc0c00bfc27f37da"
+    },
+    {
+      "run": "other-unit-after",
+      "code": 0,
+      "signal": null,
+      "seconds": 0.982,
+      "syntheticShadowAddress": {
+        "address": "127.0.0.1",
+        "family": "IPv4",
+        "port": 54180
+      },
+      "requestsMisroutedToShadow": 0,
+      "diagnosticInjection": "Only implicit wildcard listen(0) selects existing shadow IPv4 port; explicit listeners unchanged",
+      "passed": 19,
+      "failed": 0,
+      "reportSha256": "81b7c87f5551b4a014646ac75f1b4bd1233f849b4a7f1000a9f77f097e5fe75d"
+    },
+    {
+      "run": "e2e-before",
+      "code": 1,
+      "signal": null,
+      "seconds": 0.464,
+      "syntheticShadowAddress": {
+        "address": "127.0.0.1",
+        "family": "IPv4",
+        "port": 54150
+      },
+      "requestsMisroutedToShadow": 1,
+      "diagnosticInjection": "Only implicit wildcard listen(0) selects existing shadow IPv4 port; explicit listeners unchanged",
+      "passed": 0,
+      "failed": 1,
+      "reportSha256": "fc756d7f6c62221c31ed5e8d5dd928641061a0bce1ed702d5d561dc1ffa12aeb"
+    },
+    {
+      "run": "e2e-after",
+      "code": 0,
+      "signal": null,
+      "seconds": 0.474,
+      "syntheticShadowAddress": {
+        "address": "127.0.0.1",
+        "family": "IPv4",
+        "port": 54201
+      },
+      "requestsMisroutedToShadow": 0,
+      "diagnosticInjection": "Only implicit wildcard listen(0) selects existing shadow IPv4 port; explicit listeners unchanged",
+      "passed": 1,
+      "failed": 0,
+      "reportSha256": "427d56a7c458422d644a8d58b7b5d0be1f11766ba6fcd8e28b3989679f42e106"
+    },
+    {
+      "run": "timeout-before",
+      "code": 1,
+      "signal": null,
+      "seconds": 5.608,
+      "syntheticShadowAddress": {
+        "address": "127.0.0.1",
+        "family": "IPv4",
+        "port": 54355
+      },
+      "shadowHoldsResponse": true,
+      "requestsMisroutedToShadow": 1,
+      "diagnosticInjection": "Only implicit wildcard listen(0) selects existing shadow IPv4 port; explicit listeners unchanged",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 21,
+      "reportSha256": "31bc2dd728c1f61f6783a5d39d98f41c1aae45fe354d125d118df5ae8ba8f436"
+    },
+    {
+      "run": "timeout-after",
+      "code": 0,
+      "signal": null,
+      "seconds": 0.674,
+      "syntheticShadowAddress": {
+        "address": "127.0.0.1",
+        "family": "IPv4",
+        "port": 54359
+      },
+      "shadowHoldsResponse": true,
+      "requestsMisroutedToShadow": 0,
+      "diagnosticInjection": "Only implicit wildcard listen(0) selects existing shadow IPv4 port; explicit listeners unchanged",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 21,
+      "reportSha256": "fd15b7afba8640f4004bbcc6a8c5e25df5c4946ddf66137647ec011692ba248d"
+    }
+  ],
+  "finalCandidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1"
+}

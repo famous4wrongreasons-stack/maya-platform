@@ -1,0 +1,446 @@
+{
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "status": "PASS",
+  "completedAt": "2026-10-01T22:53:51.070457+00:00",
+  "restrictions": "none; complete canonical parts and default steps",
+  "requiredSlots": [
+    "7-part-1-of-4",
+    "7-part-2-of-4",
+    "7-part-3-of-4",
+    "7-part-4-of-4",
+    "8c",
+    "8r",
+    "AB",
+    "D8",
+    "P-allowlist"
+  ],
+  "reexecutedSlots": [
+    "7-part-1-of-4",
+    "7-part-2-of-4",
+    "7-part-3-of-4",
+    "7-part-4-of-4",
+    "8c",
+    "8r",
+    "AB",
+    "D8",
+    "P-allowlist"
+  ],
+  "admittedParts": [
+    {
+      "slot": "7-part-1-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-7-part-1-of-4.json",
+      "sha256": "3551ce9ca9bbe11d0e57dc4605950affeb3c76b391f44c36cadae2f1325416ee"
+    },
+    {
+      "slot": "7-part-2-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-7-part-2-of-4.json",
+      "sha256": "e50f7401e9c275d7365c8753c56b41ef0ba7ea897beae3409f25b8513bc2c18e"
+    },
+    {
+      "slot": "7-part-3-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-7-part-3-of-4.json",
+      "sha256": "b0d596937ec440acad8775217925d99b3118f7f197892857e3ec775db2a0bf53"
+    },
+    {
+      "slot": "7-part-4-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-7-part-4-of-4.json",
+      "sha256": "5cb5546733deff0364e47be58b2ffdba644658c1b20c64b822d5bdc5450fa881"
+    },
+    {
+      "slot": "8c",
+      "path": "receipts/mutation-parts/widgets-mutation-part-8c.json",
+      "sha256": "702d0441a05a4395ff0955995e380f92af17141de4e7accde90d2f6893ac76d2"
+    },
+    {
+      "slot": "8r",
+      "path": "receipts/mutation-parts/widgets-mutation-part-8r.json",
+      "sha256": "4ad5f3135467dd4239ae5236e5bbe801b70f1341a7e364c1c59ab9c375a824d9"
+    },
+    {
+      "slot": "AB",
+      "path": "receipts/mutation-parts/widgets-mutation-part-AB.json",
+      "sha256": "e4f3002271e9aeeddff9da2efe2e1ce64219c357fde5dc795f69fd1b07139383"
+    },
+    {
+      "slot": "D8",
+      "path": "receipts/mutation-parts/widgets-mutation-part-D8.json",
+      "sha256": "6be816f6a6a8d08b8d55ab6806812d5fe6fe5947781878903828f95b0071af72"
+    },
+    {
+      "slot": "P-allowlist",
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-allowlist.json",
+      "sha256": "a18fb9a82aeffa8a1c9a939561a3e9afb9cbe4298add3aa0eb632eae78606e9f"
+    }
+  ],
+  "originalCohort": "SUSPEND-ORIGINAL-COHORT.json",
+  "originalCohortSha256": "ef9d1e5b5671e9e5e4a42846028b1496ad8ef8c2d06a9632a27dcab9d89b328d",
+  "invalidatedOriginalsRetained": [
+    {
+      "slot": "7-part-1-of-4",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-7-part-1-of-4.json",
+          "retained": "receipts/suspend-invalidated/7-part-1-of-4/widgets-mutation-part-7-part-1-of-4.json",
+          "sha256": "4ea47f5c37cab84929890aec01f2cd64d3a8a10dbf0dd41495ff050b9eccb23b"
+        },
+        {
+          "original": "receipts/mutation-7-part-1-of-4.receipt.json",
+          "retained": "receipts/suspend-invalidated/7-part-1-of-4/mutation-7-part-1-of-4.receipt.json",
+          "sha256": "e099c280d7833b13aa4e8fc97ab9cb47a3e7108d22c718c8d999ec93b8dcaf3f"
+        },
+        {
+          "original": "receipts/mutation-7-part-1-of-4.log",
+          "retained": "receipts/suspend-invalidated/7-part-1-of-4/mutation-7-part-1-of-4.log",
+          "sha256": "4ea47f5c37cab84929890aec01f2cd64d3a8a10dbf0dd41495ff050b9eccb23b"
+        }
+      ]
+    },
+    {
+      "slot": "7-part-2-of-4",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-7-part-2-of-4.json",
+          "retained": "receipts/suspend-invalidated/7-part-2-of-4/widgets-mutation-part-7-part-2-of-4.json",
+          "sha256": "a30fce3360629a5bff0bdcf0c6f0b0fd63ecb43906dbcc95203d5f65839ec6e6"
+        },
+        {
+          "original": "receipts/mutation-7-part-2-of-4.receipt.json",
+          "retained": "receipts/suspend-invalidated/7-part-2-of-4/mutation-7-part-2-of-4.receipt.json",
+          "sha256": "ea1666124d731af832df5b12d762b25c1027422aecc077cb8ef57c94c56de24f"
+        },
+        {
+          "original": "receipts/mutation-7-part-2-of-4.log",
+          "retained": "receipts/suspend-invalidated/7-part-2-of-4/mutation-7-part-2-of-4.log",
+          "sha256": "a30fce3360629a5bff0bdcf0c6f0b0fd63ecb43906dbcc95203d5f65839ec6e6"
+        }
+      ]
+    },
+    {
+      "slot": "7-part-3-of-4",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-7-part-3-of-4.json",
+          "retained": "receipts/suspend-invalidated/7-part-3-of-4/widgets-mutation-part-7-part-3-of-4.json",
+          "sha256": "ada325182de5bd37933b063b13960d22b84cc8b6d18acd86245efbe5ccb4acbd"
+        },
+        {
+          "original": "receipts/mutation-7-part-3-of-4.receipt.json",
+          "retained": "receipts/suspend-invalidated/7-part-3-of-4/mutation-7-part-3-of-4.receipt.json",
+          "sha256": "b98770f1089c16ea81b4b15654885fedb373c10aee0316833cc0174dab9a7229"
+        },
+        {
+          "original": "receipts/mutation-7-part-3-of-4.log",
+          "retained": "receipts/suspend-invalidated/7-part-3-of-4/mutation-7-part-3-of-4.log",
+          "sha256": "ada325182de5bd37933b063b13960d22b84cc8b6d18acd86245efbe5ccb4acbd"
+        }
+      ]
+    },
+    {
+      "slot": "7-part-4-of-4",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-7-part-4-of-4.json",
+          "retained": "receipts/suspend-invalidated/7-part-4-of-4/widgets-mutation-part-7-part-4-of-4.json",
+          "sha256": "faea6462eef6812bbc5a47e57667f44f5d8dd61af01ce025a74f2fe36d8a5f5f"
+        },
+        {
+          "original": "receipts/mutation-7-part-4-of-4.receipt.json",
+          "retained": "receipts/suspend-invalidated/7-part-4-of-4/mutation-7-part-4-of-4.receipt.json",
+          "sha256": "7355b4995682bd8c889745c41675a58a4602b3fdc239b723acfaba8dc843b505"
+        },
+        {
+          "original": "receipts/mutation-7-part-4-of-4.log",
+          "retained": "receipts/suspend-invalidated/7-part-4-of-4/mutation-7-part-4-of-4.log",
+          "sha256": "faea6462eef6812bbc5a47e57667f44f5d8dd61af01ce025a74f2fe36d8a5f5f"
+        }
+      ]
+    },
+    {
+      "slot": "8c",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-8c.json",
+          "retained": "receipts/suspend-invalidated/8c/widgets-mutation-part-8c.json",
+          "sha256": "7b2864ee26586422df2b6917a325407603c250c7eb3af0b862225d0a4ce975e7"
+        },
+        {
+          "original": "receipts/mutation-8c.receipt.json",
+          "retained": "receipts/suspend-invalidated/8c/mutation-8c.receipt.json",
+          "sha256": "03538998de6e5566f781b19948274a8a899323de79e953dad873e7cc8bd2b603"
+        },
+        {
+          "original": "receipts/mutation-8c.log",
+          "retained": "receipts/suspend-invalidated/8c/mutation-8c.log",
+          "sha256": "7b2864ee26586422df2b6917a325407603c250c7eb3af0b862225d0a4ce975e7"
+        }
+      ]
+    },
+    {
+      "slot": "8r",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-8r.json",
+          "retained": "receipts/suspend-invalidated/8r/widgets-mutation-part-8r.json",
+          "sha256": "78d19f53d1b6f0f278f3691704dd5bc190deeb9f1ba1881db708cdc9873e84b3"
+        },
+        {
+          "original": "receipts/mutation-8r.receipt.json",
+          "retained": "receipts/suspend-invalidated/8r/mutation-8r.receipt.json",
+          "sha256": "198d0e4ef8226b26e693c7f830490f8622000b023e19451f1a8909ad580f2a8a"
+        },
+        {
+          "original": "receipts/mutation-8r.log",
+          "retained": "receipts/suspend-invalidated/8r/mutation-8r.log",
+          "sha256": "78d19f53d1b6f0f278f3691704dd5bc190deeb9f1ba1881db708cdc9873e84b3"
+        }
+      ]
+    },
+    {
+      "slot": "AB",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-AB.json",
+          "retained": "receipts/suspend-invalidated/AB/widgets-mutation-part-AB.json",
+          "sha256": "8aee6c646b12a7ffe3c8e6c95fb7b188bf2e0bf4fbf16a876024a8bc2182e7aa"
+        },
+        {
+          "original": "receipts/mutation-AB.receipt.json",
+          "retained": "receipts/suspend-invalidated/AB/mutation-AB.receipt.json",
+          "sha256": "20c5018e6126024948b0e354fbb3151c938b2d8ce4f1a39a6185161e63604c16"
+        },
+        {
+          "original": "receipts/mutation-AB.log",
+          "retained": "receipts/suspend-invalidated/AB/mutation-AB.log",
+          "sha256": "8aee6c646b12a7ffe3c8e6c95fb7b188bf2e0bf4fbf16a876024a8bc2182e7aa"
+        }
+      ]
+    },
+    {
+      "slot": "D8",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-D8.json",
+          "retained": "receipts/suspend-invalidated/D8/widgets-mutation-part-D8.json",
+          "sha256": "f0b9bf8b046da1e9283a44a854ae076fae9fa5a26afe0185eda8f33dc7a13c36"
+        },
+        {
+          "original": "receipts/mutation-D8.receipt.json",
+          "retained": "receipts/suspend-invalidated/D8/mutation-D8.receipt.json",
+          "sha256": "e4c951a714192961e51475657ee25eae1059228d0801a328c6375349998d8061"
+        },
+        {
+          "original": "receipts/mutation-D8.log",
+          "retained": "receipts/suspend-invalidated/D8/mutation-D8.log",
+          "sha256": "f0b9bf8b046da1e9283a44a854ae076fae9fa5a26afe0185eda8f33dc7a13c36"
+        }
+      ]
+    },
+    {
+      "slot": "P-allowlist",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-P-allowlist.json",
+          "retained": "receipts/suspend-invalidated/P-allowlist/widgets-mutation-part-P-allowlist.json",
+          "sha256": "dd2516027b9c22ab119f3161e88f1fb515bbbadda7ce895bc33ef851e07305c7"
+        },
+        {
+          "original": "receipts/mutation-P-allowlist.receipt.json",
+          "retained": "receipts/suspend-invalidated/P-allowlist/mutation-P-allowlist.receipt.json",
+          "sha256": "b605766bf6795e3d1f699756f4f97d7506d7011ca60a342997d4f39f3db776a0"
+        },
+        {
+          "original": "receipts/mutation-P-allowlist.log",
+          "retained": "receipts/suspend-invalidated/P-allowlist/mutation-P-allowlist.log",
+          "sha256": "dd2516027b9c22ab119f3161e88f1fb515bbbadda7ce895bc33ef851e07305c7"
+        }
+      ]
+    }
+  ],
+  "executions": [
+    {
+      "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+      "name": "mutation-AB",
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "AB",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/suspend-reverification/parts/widgets-mutation-part-AB.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/suspend-reverification-worker-6/maya-saas-backend",
+      "exit": 0,
+      "seconds": 1363.85,
+      "startedAt": "2026-10-01T21:39:10.346200+00:00",
+      "completedAt": "2026-10-01T22:01:54.200266+00:00",
+      "pid": 34186,
+      "campaignPhase": "Unrestricted whole-part reexecution after documented host suspension"
+    },
+    {
+      "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+      "name": "mutation-D8",
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "D8",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/suspend-reverification/parts/widgets-mutation-part-D8.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/suspend-reverification-worker-1/maya-saas-backend",
+      "exit": 0,
+      "seconds": 2743.57,
+      "startedAt": "2026-10-01T21:39:10.384562+00:00",
+      "completedAt": "2026-10-01T22:24:53.956634+00:00",
+      "pid": 34196,
+      "campaignPhase": "Unrestricted whole-part reexecution after documented host suspension"
+    },
+    {
+      "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+      "name": "mutation-P-allowlist",
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "P-allowlist",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/suspend-reverification/parts/widgets-mutation-part-P-allowlist.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/suspend-reverification-worker-6/maya-saas-backend",
+      "exit": 0,
+      "seconds": 1788.84,
+      "startedAt": "2026-10-01T22:01:54.200556+00:00",
+      "completedAt": "2026-10-01T22:31:43.037051+00:00",
+      "pid": 61000,
+      "campaignPhase": "Unrestricted whole-part reexecution after documented host suspension"
+    },
+    {
+      "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+      "name": "mutation-7-part-3-of-4",
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "7",
+        "--partition",
+        "3/4",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/suspend-reverification/parts/widgets-mutation-part-7-part-3-of-4.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/suspend-reverification-worker-8/maya-saas-backend",
+      "exit": 0,
+      "seconds": 3871.84,
+      "startedAt": "2026-10-01T21:39:10.296776+00:00",
+      "completedAt": "2026-10-01T22:43:42.138306+00:00",
+      "pid": 34179,
+      "campaignPhase": "Unrestricted whole-part reexecution after documented host suspension"
+    },
+    {
+      "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+      "name": "mutation-7-part-4-of-4",
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "7",
+        "--partition",
+        "4/4",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/suspend-reverification/parts/widgets-mutation-part-7-part-4-of-4.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/suspend-reverification-worker-4/maya-saas-backend",
+      "exit": 0,
+      "seconds": 3886.98,
+      "startedAt": "2026-10-01T21:39:10.329064+00:00",
+      "completedAt": "2026-10-01T22:43:57.304500+00:00",
+      "pid": 34182,
+      "campaignPhase": "Unrestricted whole-part reexecution after documented host suspension"
+    },
+    {
+      "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+      "name": "mutation-8c",
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "8c",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/suspend-reverification/parts/widgets-mutation-part-8c.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/suspend-reverification-worker-7/maya-saas-backend",
+      "exit": 0,
+      "seconds": 3967.49,
+      "startedAt": "2026-10-01T21:39:10.329259+00:00",
+      "completedAt": "2026-10-01T22:45:17.821582+00:00",
+      "pid": 34183,
+      "campaignPhase": "Unrestricted whole-part reexecution after documented host suspension"
+    },
+    {
+      "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+      "name": "mutation-7-part-2-of-4",
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "7",
+        "--partition",
+        "2/4",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/suspend-reverification/parts/widgets-mutation-part-7-part-2-of-4.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/suspend-reverification-worker-2/maya-saas-backend",
+      "exit": 0,
+      "seconds": 4274.47,
+      "startedAt": "2026-10-01T21:39:10.296718+00:00",
+      "completedAt": "2026-10-01T22:50:24.766761+00:00",
+      "pid": 34180,
+      "campaignPhase": "Unrestricted whole-part reexecution after documented host suspension"
+    },
+    {
+      "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+      "name": "mutation-7-part-1-of-4",
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "7",
+        "--partition",
+        "1/4",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/suspend-reverification/parts/widgets-mutation-part-7-part-1-of-4.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/suspend-reverification-worker-3/maya-saas-backend",
+      "exit": 0,
+      "seconds": 4283.39,
+      "startedAt": "2026-10-01T21:39:10.296610+00:00",
+      "completedAt": "2026-10-01T22:50:33.684271+00:00",
+      "pid": 34178,
+      "campaignPhase": "Unrestricted whole-part reexecution after documented host suspension"
+    },
+    {
+      "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+      "name": "mutation-8r",
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "8r",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/suspend-reverification/parts/widgets-mutation-part-8r.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/suspend-reverification-worker-5/maya-saas-backend",
+      "exit": 0,
+      "seconds": 4479.39,
+      "startedAt": "2026-10-01T21:39:10.332959+00:00",
+      "completedAt": "2026-10-01T22:53:49.723254+00:00",
+      "pid": 34184,
+      "campaignPhase": "Unrestricted whole-part reexecution after documented host suspension"
+    }
+  ],
+  "timeoutsChanged": false,
+  "candidateChanged": false,
+  "fullSuitesAndControls": true,
+  "newTransportFailures": [],
+  "reexecutionOverlappedSleep": false,
+  "admissionScope": "Complete fresh certification on this single unchanged candidate. Only interrupted whole parts were replaced by full current reexecutions; no historical/restricted receipts admitted."
+}

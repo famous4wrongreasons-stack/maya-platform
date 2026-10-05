@@ -1,0 +1,79 @@
+{
+  "candidate": "4509d6f55df62da852740658c69613b113b5a1c1",
+  "name": "l25-browser",
+  "exit": 0,
+  "seconds": null,
+  "durationMeasurement": "not recorded",
+  "completedAt": "2026-10-02T08:57:06.490364+00:00",
+  "command": [
+    "playwright-cli",
+    "-s=maya-l25",
+    "run-code",
+    "--filename",
+    "work/final-fbe2e-decisions-20261002/l25-browser-proof.js"
+  ],
+  "logSha256": "69d4dc6d3f87ff5096ac809fe7341a1da0b50363fca2be47f0eb0e340898316c",
+  "result": {
+    "status": "PASS",
+    "first": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        }
+      ],
+      "activations": 0
+    },
+    "tapped": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        }
+      ],
+      "activations": 1
+    },
+    "collapsed": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        }
+      ],
+      "activations": 1
+    },
+    "remounted": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        },
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": false
+        }
+      ],
+      "activations": 1
+    },
+    "mutant": {
+      "observed": [],
+      "activations": 0
+    },
+    "mutantTap": {
+      "observed": [],
+      "activations": 1
+    },
+    "productSourceEdited": false,
+    "realNetworkEffects": false
+  }
+}

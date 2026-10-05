@@ -1,0 +1,840 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "status": "PASS",
+  "parts": 65,
+  "batteries": 44,
+  "declarations": 509,
+  "applicableKills": 506,
+  "counts": {
+    "build-killed": 344,
+    "equivalent": 1,
+    "live-killed": 162,
+    "pending": 2
+  },
+  "existingNonKillDeclarations": [
+    {
+      "battery": "gate10.json",
+      "id": "M10-5",
+      "status": "equivalent",
+      "reason": "RI-killed / equivalent on conformant input: row 1 exact subject agreement precedes effect comparison, so changing a matched record's effect while retaining the exact subject cannot alter the outcome table"
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M17b",
+      "status": "pending",
+      "reason": null
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M18b",
+      "status": "pending",
+      "reason": null
+    }
+  ],
+  "restrictions": "none; full canonical default steps and unfiltered tests",
+  "baselineRed": [],
+  "mismatches": 0,
+  "reports": [
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-1-5.json",
+      "sha256": "2ecd5ba869f3becc0d230700d76429599b21dc7583972e8c77ca81dc1e38eaa2",
+      "battery": "gate1-5.json",
+      "mutants": 4,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-10.json",
+      "sha256": "e62e96883ac5a7e1ea1e111658f63590ff6f3edeb8e100099fd39fc4f253fc68",
+      "battery": "gate10.json",
+      "mutants": 21,
+      "partitions": 4,
+      "baselineControls": 4,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-10a.json",
+      "sha256": "c400276cc047ea94e0338ff9996157266a71ce40a31b057620088c88b4b195a9",
+      "battery": "gate10a.json",
+      "mutants": 5,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-11.json",
+      "sha256": "ee1c7ddd639b1eec6dd8f98f6bda6339cc8caa50260c6fe5e1bc3ab45e94b1e0",
+      "battery": "gate11.json",
+      "mutants": 7,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-12.json",
+      "sha256": "c208d508e660a58039c6690a6df073c33479a49a33ece4a16f362f7b6ac8ffc3",
+      "battery": "gate12.json",
+      "mutants": 5,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-12b.json",
+      "sha256": "22d8a0091ed8cd9896187f0304c9c7f0c78a4a6bbbf79f86c7bec84e63efc438",
+      "battery": "gate12b.json",
+      "mutants": 13,
+      "partitions": 1,
+      "baselineControls": 2,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-12k.json",
+      "sha256": "df62753f31334f3354ffd7b7649000f7ff1465f387401c280827dd470309bdfb",
+      "battery": "gate12k.json",
+      "mutants": 3,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-13.json",
+      "sha256": "96664e857d7b34b83814431e92fd43351f5056e15a3e496dfcf774155655edfa",
+      "battery": "gate13.json",
+      "mutants": 25,
+      "partitions": 4,
+      "baselineControls": 6,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-4.json",
+      "sha256": "3b728164c371f16d3b02caa2fb19d0cf775057f5823967274634cc1424a53b57",
+      "battery": "gate4.json",
+      "mutants": 4,
+      "partitions": 1,
+      "baselineControls": 2,
+      "neutraliserControls": 1
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-6.json",
+      "sha256": "53d406e929d4cc8d65818d0c34fd90accbf103baf354fc296f659cbf86cf957e",
+      "battery": "gate6.json",
+      "mutants": 26,
+      "partitions": 4,
+      "baselineControls": 8,
+      "neutraliserControls": 2
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-7.json",
+      "sha256": "256b6a4f32695c70db9be77cf8ba24ce554216dd7f3c58a2728b0edd32ca7bfa",
+      "battery": "gate7.json",
+      "mutants": 38,
+      "partitions": 4,
+      "baselineControls": 8,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-8.json",
+      "sha256": "e5986dfe135cdcb42fd5be5f57be09381f31ff20694b1fa1436c9ff7bf462692",
+      "battery": "gate8.json",
+      "mutants": 10,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-8c.json",
+      "sha256": "204c5c445cb3ae5c83631804f1fa5ae6815525c2d16b07b11c4e744170871626",
+      "battery": "gate8c.json",
+      "mutants": 8,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-8r.json",
+      "sha256": "0f6d4aac095a4624194eea61b4e490d978e65446d894139679a72f881662d76c",
+      "battery": "gate8r.json",
+      "mutants": 29,
+      "partitions": 1,
+      "baselineControls": 2,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-9.json",
+      "sha256": "1a293a7fe9ceca69d305e56b2ec191133cec3712f21235961622814ccf3790ba",
+      "battery": "gate9.json",
+      "mutants": 35,
+      "partitions": 4,
+      "baselineControls": 7,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-9a.json",
+      "sha256": "de63140caebee5507859486d9e1143d7ab86f36365e9333c13655d3a3b5054ca",
+      "battery": "gate9a.json",
+      "mutants": 2,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-AB.json",
+      "sha256": "a4cd5c1ecc848f80341a34613bac0d8e9042ef2c8caab429d3b9f1cf07c2c3a0",
+      "battery": "gateAB.json",
+      "mutants": 2,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-AR.json",
+      "sha256": "a1704cdea545d4902bb1d49888d0a9f6814f748a99b2dde0ab89fd6577881555",
+      "battery": "gateAR.json",
+      "mutants": 19,
+      "partitions": 1,
+      "baselineControls": 2,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-BS.json",
+      "sha256": "89105f876f9185682da60a6eb01d0eab5897a659033bb4ebc305af759afc23cc",
+      "battery": "gateBS.json",
+      "mutants": 5,
+      "partitions": 1,
+      "baselineControls": 2,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-D8.json",
+      "sha256": "12a3ca61b676c4942ddb81d3a5a328f6d8cec83ec63ced8217666d64117b4d67",
+      "battery": "gateD8.json",
+      "mutants": 5,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-H-harness.json",
+      "sha256": "55e13070521525a5ffe0b0801462f34d03811e3f2c60e2cdaa4e0999c7d10e79",
+      "battery": "gateH-harness.json",
+      "mutants": 26,
+      "partitions": 1,
+      "baselineControls": 2,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-NS.json",
+      "sha256": "b547791182df6c7c3b79845819a89c66dda9e9abf6eb89ec9a9cf93d0eec2a02",
+      "battery": "gateNS.json",
+      "mutants": 5,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-P-allowlist.json",
+      "sha256": "3486608d10957bb469bceb00b205688db058195614dba9ca34c807fdc8417e9c",
+      "battery": "gateP-allowlist.json",
+      "mutants": 3,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-P-discharge.json",
+      "sha256": "cd5b9d0edd0be60e3624b18fc85196f2687e1d92ecfca6989bee1a1afc656467",
+      "battery": "gateP-discharge.json",
+      "mutants": 9,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-P-f88.json",
+      "sha256": "0b1705736026dd477f2ba0bff90816758ff0c9a04f5dcf9a950de9d30383c2ab",
+      "battery": "gateP-f88.json",
+      "mutants": 14,
+      "partitions": 1,
+      "baselineControls": 2,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-P-g15b.json",
+      "sha256": "7d9a4deb60422771e31db0ffae3384ead7a221c67979175fa2125f70c978f71e",
+      "battery": "gateP-g15b.json",
+      "mutants": 8,
+      "partitions": 1,
+      "baselineControls": 2,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-P-handle.json",
+      "sha256": "2c2ea7516bbba534254387dc9f62fd2cd13158cb2c11f0633410b9df91a14cfe",
+      "battery": "gateP-handle.json",
+      "mutants": 3,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-P-ledger.json",
+      "sha256": "ed07330daa770583ddb1b5ad3121b66ed703c9aeb9940370c79d7da905d5c3f7",
+      "battery": "gateP-ledger.json",
+      "mutants": 9,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-P-mint.json",
+      "sha256": "f003b7f26fd17a956f335c2ec61bb576d89d4f81498cf62d7468ab5f65e6c14f",
+      "battery": "gateP-mint.json",
+      "mutants": 20,
+      "partitions": 4,
+      "baselineControls": 6,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-P-mt3.json",
+      "sha256": "a1412eb9b66e903d0fb0c82979fb54cc6ddef61656333fd676928ea2ebc75e92",
+      "battery": "gateP-mt3.json",
+      "mutants": 7,
+      "partitions": 1,
+      "baselineControls": 2,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-P-pairing.json",
+      "sha256": "78916bdfd9c7b40ac4db9a0934ea551efba2148e6d69310815215229f932a755",
+      "battery": "gateP-pairing.json",
+      "mutants": 6,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-P-principal.json",
+      "sha256": "0c33f52958d12d5b06853b1389b357881e811d2cd92d7264ccf2186f0df4c913",
+      "battery": "gateP-principal.json",
+      "mutants": 12,
+      "partitions": 1,
+      "baselineControls": 2,
+      "neutraliserControls": 1
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-P-render.json",
+      "sha256": "9d98c26895d09a8d16577694eba84580fe57cf6f67e2965e1ca8e38ece2abc63",
+      "battery": "gateP-render.json",
+      "mutants": 8,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-P-rt6.json",
+      "sha256": "fe6032d2998069502e664baeefa13504bc1833b3fed898a460fd4af821d30ff0",
+      "battery": "gateP-rt6.json",
+      "mutants": 7,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-P-seal.json",
+      "sha256": "f2fe8b0373d1ddcd9d55cbb49ccc87941b748567c8fea7c33b985c8d34b4dcca",
+      "battery": "gateP-seal.json",
+      "mutants": 6,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-PI-contract.json",
+      "sha256": "1481aa7b503efb29e756e852e1ae2faeab711d737cdf14066439bf077e4687d0",
+      "battery": "gatePI-contract.json",
+      "mutants": 16,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-PI.json",
+      "sha256": "df6555deec3c2b3c1290d82e56effa91ac07eb7b63b23aa93048801d64dd0b82",
+      "battery": "gatePI.json",
+      "mutants": 6,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-SB1.json",
+      "sha256": "8c3fda895578090c997962e9cc483b1ca65998410b21a541158a7dbbd104ec10",
+      "battery": "gateSB1.json",
+      "mutants": 10,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-SBV.json",
+      "sha256": "dfd26d7b1c2b769567d874e314c21b4b0fa778767fd65d54346a88148d5b2e03",
+      "battery": "gateSBV.json",
+      "mutants": 8,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-SV2.json",
+      "sha256": "937e8e1b7b05e5531307344d1ba51b995d0e5147d8fa11c18b4015fa42af069c",
+      "battery": "gateSV2.json",
+      "mutants": 13,
+      "partitions": 1,
+      "baselineControls": 2,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-T-tables.json",
+      "sha256": "cf741efeea71f96965167dc254d456c826cd647cbf1b3c4acfeedab03eb3f85a",
+      "battery": "gateT-tables.json",
+      "mutants": 7,
+      "partitions": 1,
+      "baselineControls": 1,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-TURN.json",
+      "sha256": "ba0cfff4259d314fa69d8f01eedee36cdc172cc20d18f56f49fbf514d29f112a",
+      "battery": "gateTURN.json",
+      "mutants": 14,
+      "partitions": 1,
+      "baselineControls": 2,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-WF.json",
+      "sha256": "f7091d7fe3289e06abe39d537479f987f1fd7b7188aa872e8a899541caede31f",
+      "battery": "gateWF.json",
+      "mutants": 3,
+      "partitions": 1,
+      "baselineControls": 2,
+      "neutraliserControls": 0
+    },
+    {
+      "path": "outputs/final-certification-2915ab8e/receipts/mutation-receipt/widgets-mutation-report-WR.json",
+      "sha256": "07f5db1ee2f64f2a8711330494cfcecdace0b0e867f5a198d97c5c5157439e13",
+      "battery": "gateWR.json",
+      "mutants": 23,
+      "partitions": 4,
+      "baselineControls": 6,
+      "neutraliserControls": 0
+    }
+  ],
+  "localJobTimings": [
+    {
+      "slot": "4",
+      "gate": "4",
+      "seconds": 1772.56,
+      "localMarginTo180Minutes": 9027.44
+    },
+    {
+      "slot": "6-part-1-of-4",
+      "gate": "6",
+      "seconds": 3064.65,
+      "localMarginTo180Minutes": 7735.35
+    },
+    {
+      "slot": "6-part-2-of-4",
+      "gate": "6",
+      "seconds": 2319.94,
+      "localMarginTo180Minutes": 8480.06
+    },
+    {
+      "slot": "6-part-3-of-4",
+      "gate": "6",
+      "seconds": 1964.95,
+      "localMarginTo180Minutes": 8835.05
+    },
+    {
+      "slot": "6-part-4-of-4",
+      "gate": "6",
+      "seconds": 1946.52,
+      "localMarginTo180Minutes": 8853.48
+    },
+    {
+      "slot": "7-part-1-of-4",
+      "gate": "7",
+      "seconds": 4490.31,
+      "localMarginTo180Minutes": 6309.69
+    },
+    {
+      "slot": "7-part-2-of-4",
+      "gate": "7",
+      "seconds": 4458.96,
+      "localMarginTo180Minutes": 6341.04
+    },
+    {
+      "slot": "7-part-3-of-4",
+      "gate": "7",
+      "seconds": 4002.77,
+      "localMarginTo180Minutes": 6797.23
+    },
+    {
+      "slot": "7-part-4-of-4",
+      "gate": "7",
+      "seconds": 4034.86,
+      "localMarginTo180Minutes": 6765.14
+    },
+    {
+      "slot": "8",
+      "gate": "8",
+      "seconds": 1035.02,
+      "localMarginTo180Minutes": 9764.98
+    },
+    {
+      "slot": "9-part-1-of-4",
+      "gate": "9",
+      "seconds": 4586.24,
+      "localMarginTo180Minutes": 6213.76
+    },
+    {
+      "slot": "9-part-2-of-4",
+      "gate": "9",
+      "seconds": 3942.52,
+      "localMarginTo180Minutes": 6857.48
+    },
+    {
+      "slot": "9-part-3-of-4",
+      "gate": "9",
+      "seconds": 3954.57,
+      "localMarginTo180Minutes": 6845.43
+    },
+    {
+      "slot": "9-part-4-of-4",
+      "gate": "9",
+      "seconds": 3468.54,
+      "localMarginTo180Minutes": 7331.46
+    },
+    {
+      "slot": "10-part-1-of-4",
+      "gate": "10",
+      "seconds": 2713.01,
+      "localMarginTo180Minutes": 8086.99
+    },
+    {
+      "slot": "10-part-2-of-4",
+      "gate": "10",
+      "seconds": 2735.77,
+      "localMarginTo180Minutes": 8064.23
+    },
+    {
+      "slot": "10-part-3-of-4",
+      "gate": "10",
+      "seconds": 2774.15,
+      "localMarginTo180Minutes": 8025.85
+    },
+    {
+      "slot": "10-part-4-of-4",
+      "gate": "10",
+      "seconds": 2737.26,
+      "localMarginTo180Minutes": 8062.74
+    },
+    {
+      "slot": "11",
+      "gate": "11",
+      "seconds": 3696.19,
+      "localMarginTo180Minutes": 7103.81
+    },
+    {
+      "slot": "12",
+      "gate": "12",
+      "seconds": 2793.06,
+      "localMarginTo180Minutes": 8006.94
+    },
+    {
+      "slot": "13-part-1-of-4",
+      "gate": "13",
+      "seconds": 3407.73,
+      "localMarginTo180Minutes": 7392.27
+    },
+    {
+      "slot": "13-part-2-of-4",
+      "gate": "13",
+      "seconds": 2604.12,
+      "localMarginTo180Minutes": 8195.88
+    },
+    {
+      "slot": "13-part-3-of-4",
+      "gate": "13",
+      "seconds": 3224.03,
+      "localMarginTo180Minutes": 7575.97
+    },
+    {
+      "slot": "13-part-4-of-4",
+      "gate": "13",
+      "seconds": 3193.89,
+      "localMarginTo180Minutes": 7606.11
+    },
+    {
+      "slot": "1-5",
+      "gate": "1-5",
+      "seconds": 2250.21,
+      "localMarginTo180Minutes": 8549.79
+    },
+    {
+      "slot": "10a",
+      "gate": "10a",
+      "seconds": 2756.42,
+      "localMarginTo180Minutes": 8043.58
+    },
+    {
+      "slot": "12b",
+      "gate": "12b",
+      "seconds": 2144.04,
+      "localMarginTo180Minutes": 8655.96
+    },
+    {
+      "slot": "12k",
+      "gate": "12k",
+      "seconds": 1849.12,
+      "localMarginTo180Minutes": 8950.88
+    },
+    {
+      "slot": "8c",
+      "gate": "8c",
+      "seconds": 4137.04,
+      "localMarginTo180Minutes": 6662.96
+    },
+    {
+      "slot": "8r",
+      "gate": "8r",
+      "seconds": 4746.95,
+      "localMarginTo180Minutes": 6053.05
+    },
+    {
+      "slot": "9a",
+      "gate": "9a",
+      "seconds": 1385.83,
+      "localMarginTo180Minutes": 9414.17
+    },
+    {
+      "slot": "AB",
+      "gate": "AB",
+      "seconds": 1380.65,
+      "localMarginTo180Minutes": 9419.35
+    },
+    {
+      "slot": "AR",
+      "gate": "AR",
+      "seconds": 5863.72,
+      "localMarginTo180Minutes": 4936.28
+    },
+    {
+      "slot": "BS",
+      "gate": "BS",
+      "seconds": 2461.89,
+      "localMarginTo180Minutes": 8338.11
+    },
+    {
+      "slot": "D8",
+      "gate": "D8",
+      "seconds": 2792.41,
+      "localMarginTo180Minutes": 8007.59
+    },
+    {
+      "slot": "H-harness",
+      "gate": "H-harness",
+      "seconds": 4427.82,
+      "localMarginTo180Minutes": 6372.18
+    },
+    {
+      "slot": "NS",
+      "gate": "NS",
+      "seconds": 547.22,
+      "localMarginTo180Minutes": 10252.78
+    },
+    {
+      "slot": "P-allowlist",
+      "gate": "P-allowlist",
+      "seconds": 1869.25,
+      "localMarginTo180Minutes": 8930.75
+    },
+    {
+      "slot": "P-discharge",
+      "gate": "P-discharge",
+      "seconds": 4681.94,
+      "localMarginTo180Minutes": 6118.06
+    },
+    {
+      "slot": "P-f88",
+      "gate": "P-f88",
+      "seconds": 4039.01,
+      "localMarginTo180Minutes": 6760.99
+    },
+    {
+      "slot": "P-g15b",
+      "gate": "P-g15b",
+      "seconds": 1678.27,
+      "localMarginTo180Minutes": 9121.73
+    },
+    {
+      "slot": "P-handle",
+      "gate": "P-handle",
+      "seconds": 1844.79,
+      "localMarginTo180Minutes": 8955.21
+    },
+    {
+      "slot": "P-ledger",
+      "gate": "P-ledger",
+      "seconds": 4580.23,
+      "localMarginTo180Minutes": 6219.77
+    },
+    {
+      "slot": "P-mint-part-1-of-4",
+      "gate": "P-mint",
+      "seconds": 2799.58,
+      "localMarginTo180Minutes": 8000.42
+    },
+    {
+      "slot": "P-mint-part-2-of-4",
+      "gate": "P-mint",
+      "seconds": 2790.54,
+      "localMarginTo180Minutes": 8009.46
+    },
+    {
+      "slot": "P-mint-part-3-of-4",
+      "gate": "P-mint",
+      "seconds": 2149.45,
+      "localMarginTo180Minutes": 8650.55
+    },
+    {
+      "slot": "P-mint-part-4-of-4",
+      "gate": "P-mint",
+      "seconds": 2522.84,
+      "localMarginTo180Minutes": 8277.16
+    },
+    {
+      "slot": "P-mt3",
+      "gate": "P-mt3",
+      "seconds": 2305.16,
+      "localMarginTo180Minutes": 8494.84
+    },
+    {
+      "slot": "P-pairing",
+      "gate": "P-pairing",
+      "seconds": 3258.05,
+      "localMarginTo180Minutes": 7541.95
+    },
+    {
+      "slot": "P-principal",
+      "gate": "P-principal",
+      "seconds": 3027.23,
+      "localMarginTo180Minutes": 7772.77
+    },
+    {
+      "slot": "P-render",
+      "gate": "P-render",
+      "seconds": 4104.54,
+      "localMarginTo180Minutes": 6695.46
+    },
+    {
+      "slot": "P-rt6",
+      "gate": "P-rt6",
+      "seconds": 3726.86,
+      "localMarginTo180Minutes": 7073.14
+    },
+    {
+      "slot": "P-seal",
+      "gate": "P-seal",
+      "seconds": 3209.63,
+      "localMarginTo180Minutes": 7590.37
+    },
+    {
+      "slot": "PI-contract",
+      "gate": "PI-contract",
+      "seconds": 7822.35,
+      "localMarginTo180Minutes": 2977.65
+    },
+    {
+      "slot": "PI",
+      "gate": "PI",
+      "seconds": 655.87,
+      "localMarginTo180Minutes": 10144.13
+    },
+    {
+      "slot": "SB1",
+      "gate": "SB1",
+      "seconds": 5023.52,
+      "localMarginTo180Minutes": 5776.48
+    },
+    {
+      "slot": "SBV",
+      "gate": "SBV",
+      "seconds": 4131.44,
+      "localMarginTo180Minutes": 6668.56
+    },
+    {
+      "slot": "SV2",
+      "gate": "SV2",
+      "seconds": 6182.85,
+      "localMarginTo180Minutes": 4617.15
+    },
+    {
+      "slot": "T-tables",
+      "gate": "T-tables",
+      "seconds": 3728.53,
+      "localMarginTo180Minutes": 7071.47
+    },
+    {
+      "slot": "TURN",
+      "gate": "TURN",
+      "seconds": 5018.29,
+      "localMarginTo180Minutes": 5781.71
+    },
+    {
+      "slot": "WF",
+      "gate": "WF",
+      "seconds": 1229.07,
+      "localMarginTo180Minutes": 9570.93
+    },
+    {
+      "slot": "WR-part-1-of-4",
+      "gate": "WR",
+      "seconds": 3122.29,
+      "localMarginTo180Minutes": 7677.71
+    },
+    {
+      "slot": "WR-part-2-of-4",
+      "gate": "WR",
+      "seconds": 2888.28,
+      "localMarginTo180Minutes": 7911.72
+    },
+    {
+      "slot": "WR-part-3-of-4",
+      "gate": "WR",
+      "seconds": 2576.6,
+      "localMarginTo180Minutes": 8223.4
+    },
+    {
+      "slot": "WR-part-4-of-4",
+      "gate": "WR",
+      "seconds": 2406.22,
+      "localMarginTo180Minutes": 8393.78
+    }
+  ],
+  "timingScope": "Observed local execution: original eight-worker corpus; two complete sleep-affected WR parts reexecuted with two workers. No remote GitHub execution or timing guarantee is claimed.",
+  "historicalMutationReceiptsAdmitted": 0,
+  "certificateIssued": false,
+  "hostSuspendRecovery": {
+    "status": "PASS",
+    "wholePartsReexecuted": 2,
+    "receipt": "SUSPEND-REEXECUTION.json",
+    "receiptSha256": "b7784dd7bec7f4d6dad3ade210ad1fb2dcb4f5741ae3910df56f174835c23a8b",
+    "sourceCandidateUnchanged": true,
+    "timeoutsChanged": false,
+    "restrictions": "none; complete canonical parts and default steps",
+    "originalsRetained": true
+  }
+}

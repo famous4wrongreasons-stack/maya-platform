@@ -1,0 +1,21 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "name": "mutation-WR-part-4-of-4",
+  "command": [
+    "node",
+    "scripts/widgets-mutation-battery.mjs",
+    "--gate",
+    "WR",
+    "--partition",
+    "4/4",
+    "--out",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-2915ab8e/receipts/suspend-reverification/parts/widgets-mutation-part-WR-part-4-of-4.json"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-2915ab8e/suspend-reverification-worker-2/maya-saas-backend",
+  "exit": 0,
+  "seconds": 2406.22,
+  "startedAt": "2026-10-02T06:59:47.278695+00:00",
+  "completedAt": "2026-10-02T07:39:53.501308+00:00",
+  "pid": 15095,
+  "campaignPhase": "Unrestricted whole-part reexecution after documented host suspension"
+}

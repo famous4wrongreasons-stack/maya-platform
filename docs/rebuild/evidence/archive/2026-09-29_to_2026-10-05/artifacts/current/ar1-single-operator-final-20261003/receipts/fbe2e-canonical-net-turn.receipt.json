@@ -1,0 +1,16 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "name": "fbe2e-canonical-net-turn",
+  "command": [
+    "npx",
+    "jest",
+    "--config",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003/jest-net-turn.json",
+    "--runInBand",
+    "--json",
+    "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/ar1-single-operator-final-20261003/receipts/fbe2e-canonical-net-turn.json"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+  "exit": 0,
+  "seconds": 3.17
+}

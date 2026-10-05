@@ -1,0 +1,215 @@
+{
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "capturedAt": "2026-10-01T14:49:28.868336+00:00",
+  "scope": "Orchestration source inventory; no past test results copied or admitted.",
+  "files": [
+    {
+      "path": "assemble-complete.py",
+      "sha256": "59a3b51d534c92f78743168bea7b66bf7e20a092c3d3017476850a369ef5d8d0"
+    },
+    {
+      "path": "bin-cases/gateNETBIN.cases.ts",
+      "sha256": "dff60483600e97488d283e0516a8aa9032440fafcce622e2c6a1e441153edef9"
+    },
+    {
+      "path": "check-ci-postconditions.py",
+      "sha256": "629c08528e46bdc58c59db58327834df1cb79ab8127c3aec4204a90e346c8314"
+    },
+    {
+      "path": "compiled-bin-cases/gateCOMPILEDBIN.cases.ts",
+      "sha256": "1333e731ecf0f57feba31f4ab66cd617cb29558dbfdcd5e0dd1f8879cd2a236f"
+    },
+    {
+      "path": "compiled-receipt-bin-cases/gateRECEIPTBIN.cases.ts",
+      "sha256": "47a4d4069130455de585ce0f9861a666bb17d822b00e48e2c8f11b4636d8460c"
+    },
+    {
+      "path": "finalize-fbe2e.py",
+      "sha256": "e5265d59e4cadbfbd924ca214080ca296cc713521a5564f15f9ccc9597ac807a"
+    },
+    {
+      "path": "finalize-receipts.py",
+      "sha256": "c88fd12ffb74f435220957b26c1a50a0ed87ef14f083bf54316c739a782e3f7d"
+    },
+    {
+      "path": "index-after-ordinary.py",
+      "sha256": "db11672256b89a225b7bf54978a1d0111d1f78b11620e37e0db91208171cc2f3"
+    },
+    {
+      "path": "index-complete-proofs.py",
+      "sha256": "28b5b6a113140fc11b3f5f550128819a1633a1f2f83892de70a72b14221dbe96"
+    },
+    {
+      "path": "index-fresh-artifacts.py",
+      "sha256": "d6747964a044017a7a0e005b4766a27966f8668e80580abdd0af5d2094be364f"
+    },
+    {
+      "path": "index-integration-proofs.py",
+      "sha256": "33c533c11a126bacc64ef6b94e5f4f5b445797fc8d7fbe1c029c562813380b57"
+    },
+    {
+      "path": "jest-net-return.json",
+      "sha256": "f650191e51e3ac040ebaddb5e31b1aab1a11bdf47ea20b3c38498650891ed4f5"
+    },
+    {
+      "path": "jest-net-turn.json",
+      "sha256": "3aeddd7ef36b12b4f29aba69dc7bf4cb15a57e4c86177eb58aa8dd54454ffcc6"
+    },
+    {
+      "path": "jest-return.json",
+      "sha256": "394d2ebfec879af55bac4e3e542c8716869ef3f7f10b4208c4d14e38bfeddd26"
+    },
+    {
+      "path": "launch-diagnostic-preflight.py",
+      "sha256": "db8468f7ecdd3616767391e086601390e90bd40fa84a0762a8bc651daccf7469"
+    },
+    {
+      "path": "launch-final-after-diagnostic.py",
+      "sha256": "ea12e5aea93a68aa17c63d6fc5d55f115ed8d1e629683c6f796113f00486d755"
+    },
+    {
+      "path": "launch-l27-after-ordinary.py",
+      "sha256": "225a8ae871b3dfee1e3bd7d4c6916e0be2392df2fb7d2a8f10faa4a59a54444e"
+    },
+    {
+      "path": "launch-native.py",
+      "sha256": "a73214c66ca43c04399bd82f2c6bae921c6aad3a0b76308630d1747a6d52d79e"
+    },
+    {
+      "path": "monitor-complete.py",
+      "sha256": "948c626dc5e3f37f17eca56f9ef0a669671fbdebb195bc8130e142ba48c1abee"
+    },
+    {
+      "path": "monitor-preflight.py",
+      "sha256": "fe8b5c898c64c48999d52f71790060ee9756debf85cc5a6a1e0523e965fcabfd"
+    },
+    {
+      "path": "postcommit-bin-cases/gateL27.cases.ts",
+      "sha256": "63b8bed7f39565939467a773f6e42be9144f15f5903533faa7e8800ccde0d3aa"
+    },
+    {
+      "path": "preflight-l27.py",
+      "sha256": "17a0e312d449b46108cc6bc8b044618539dd8213afeb1633bd6331d1b4467d38"
+    },
+    {
+      "path": "prepare-extra-dbs.py",
+      "sha256": "f4b9cfc38fd5e0c8a8b4fc06112f053f00e4cce7d3f474cf128dcdec3a1fcc26"
+    },
+    {
+      "path": "probes/compiled-net-receipt.mjs",
+      "sha256": "34add2526b3328992f80f83c3f20e7c9eb7a98d1bc9348bfffb37f592c8950d0"
+    },
+    {
+      "path": "probes/compiled-net-return.mjs",
+      "sha256": "cc7b61be0964ee7a9542bcd9ae48b671c876df1e26443187969172638366c54e"
+    },
+    {
+      "path": "probes/compiled-postcommit-dismiss.mjs",
+      "sha256": "b17dae22400e024cb96af4cfd0f89a4cce1c5060e5da12ff87e96c5c8937940b"
+    },
+    {
+      "path": "probes/source-net-return.mjs",
+      "sha256": "369b3f1a1ae5dee0d3699e218ac86aca03f99bf0470f1870df20561e0bcfcf23"
+    },
+    {
+      "path": "probes/source-net-return.probe-spec.ts",
+      "sha256": "9ab39e5f623ef5498e0b0c0497185c85d5a56c7c5a7841151a2e111182f30ff1"
+    },
+    {
+      "path": "probes/source-net-turn.mjs",
+      "sha256": "765485845cda61c2f55aaf73be0519270c1b5a991ee7dccbc6b3c92c5adc50d0"
+    },
+    {
+      "path": "probes/source-net-turn.probe-spec.ts",
+      "sha256": "4dcfbd9d4c3bfd37735cbd1eff7fe4c8b804c7ec42507cd378fed721c37eb314"
+    },
+    {
+      "path": "probes/source-return.mjs",
+      "sha256": "e4cc3f892b873ece152f63072e03b2a539e1b8b631db1361bc4bdc07d1fb11f2"
+    },
+    {
+      "path": "probes/source-return.probe-spec.ts",
+      "sha256": "590d70e89ff4b78bc0e36e0d3636d2f0f38e944dcf6b9fa15c0f5c5ee3dac846"
+    },
+    {
+      "path": "prove-l12-delta.cjs",
+      "sha256": "b2ee03d0a9a104d91b730000b306240f008a02821a0d26294c8379db46a3df7f"
+    },
+    {
+      "path": "prove-requested-baselines.py",
+      "sha256": "1f75b477e1097ca5fd823041dbce86886a8ed07b3a40d984741010e7476dc737"
+    },
+    {
+      "path": "run-after-surfaces.py",
+      "sha256": "3273efd011a9cb53f519a8789be2e7bfeb93dc5ffc706dc9202e63bf8dbed6ea"
+    },
+    {
+      "path": "run-all-mutations-isolated.py",
+      "sha256": "31a7c99a1bdf34e2cfb140d7f597cd53b3a30b2e1864d8ce9cddb6818440e5fd"
+    },
+    {
+      "path": "run-anchor-preflight.py",
+      "sha256": "2c88e0da997814b1b26c09f46e7bebead5201f8806ca9b3d0bf600b2065452f5"
+    },
+    {
+      "path": "run-baseline.py",
+      "sha256": "032c454d8eb584adb5ba35f65a6d3d81e2209efa02b068f51090fdd7e2f59db2"
+    },
+    {
+      "path": "run-carrier-selftest.py",
+      "sha256": "c369338376e5b456c785f05f88b645b98cb647da8a9e8ae4cac12e65afe51e63"
+    },
+    {
+      "path": "run-compiled-bin.py",
+      "sha256": "d5f15dd53b2d5673d0e43bc8607a4fe003a747ee43bc911bf7b04212e0a92cfe"
+    },
+    {
+      "path": "run-compiled-receipt-bin.py",
+      "sha256": "5b573598fdb98210fa25584a876598b759ec65ee5fbab963a05916d10fe5418c"
+    },
+    {
+      "path": "run-extra.py",
+      "sha256": "274a4e39657e9a98d4f1aaa7e296977054d76d3cf9989b6e313ac039abba6cd2"
+    },
+    {
+      "path": "run-l27-mutations.py",
+      "sha256": "b7672d550b093f8d94ba067cec2dde137191eb09ea50ce648c7280b2a4ad4d0e"
+    },
+    {
+      "path": "run-net-bin.py",
+      "sha256": "bf7669e18909b615a02678d0b463a7c19a90b097e54c72d67d9591ab541f87c9"
+    },
+    {
+      "path": "run-net-proof.py",
+      "sha256": "baa85276af36a72039da9be184d127a2ba7b11f6f1a98d512749cb230eb2520c"
+    },
+    {
+      "path": "run-net-turn-proof.py",
+      "sha256": "96093d4f7bcbb8ce526b939bc6fa00558dde52a954a9f4462139806b6145969e"
+    },
+    {
+      "path": "run-parity.py",
+      "sha256": "18af3f7aa714f32bf090d18da0c39e5dfe0fbd32c6c1dd8baccf3a650fda2f61"
+    },
+    {
+      "path": "run-postcommit-bin.py",
+      "sha256": "1d4b11609f274429628f1b64ff05a14b7340d7bf85e6512f59f3aa19428a75e1"
+    },
+    {
+      "path": "run-rest.py",
+      "sha256": "f38f18924ff9061b9cd833d1ed25d143f6b3c447abc33e5c6d27ac5288443fca"
+    },
+    {
+      "path": "snapshot-processes.py",
+      "sha256": "ac5e684c5c3e67ad38477457673d37ebf565d3758150d53fd848c96ed43ae090"
+    },
+    {
+      "path": "status.py",
+      "sha256": "11444e4a756e6cd2cdbeb2c3a9efa6249b4196386a452c332cba17918ab6a606"
+    },
+    {
+      "path": "watch-isolated-mutation-reports.py",
+      "sha256": "308bfdb73295fdcaca070c97af29356f6cc80a59cda2ef0d491dfcba11f9cade"
+    }
+  ]
+}

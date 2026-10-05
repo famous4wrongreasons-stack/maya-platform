@@ -1,0 +1,229 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "files": [
+    {
+      "path": "maya-chat-shell/dist/manifest.json",
+      "sha256": "869dfd862f9e1fb5e8d10a885b29fe2e5b872c62cb8e82aa947e2cead3470410"
+    },
+    {
+      "path": "maya-chat-shell/dist/maya-chat-shell.ts",
+      "sha256": "2d308c178ded8405e92a31e732a42f1a800aab232b373d21c4ca6483e3dbbeaf"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/icons/maya-192.png",
+      "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/icons/maya-512-maskable.png",
+      "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/icons/maya-512.png",
+      "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/icons/maya-apple-180.png",
+      "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/index.html",
+      "sha256": "ddf2304dfdc76787308e4b3e5340857a0b0fce172eb5324c3986ae55d485b098"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/entry/main.js",
+      "sha256": "c286ecbb5bed2b1bfa1c25f9b3e25e507c6380ce78085440a176836170a4cc3a"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/contract.js",
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/dom/composer.js",
+      "sha256": "4d184bf92dac30485656b7e6a790aee146c8c100dd46589485f289e818b26c35"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/dom/fullscreen.js",
+      "sha256": "13268f9257736e5f6a80097e2c056a0c50d401682b57629cf69e51432fa434cc"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/dom/host.js",
+      "sha256": "a6db41717b8666137b536e9b2df90283fc237bdb67b13f2db981647b1916b593"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/dom/nav.js",
+      "sha256": "02c8319501e4192286963c26020f08be8cfda7bc90daeb4c1d9388163e52e180"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/dom/signin.js",
+      "sha256": "fd34f1fdb93d15f2c1bdda4cf81734c9461cb4b41303cd3d3414f034c9f02855"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/dom/timeline.js",
+      "sha256": "416c3ba79fb1a40974476280e8acc1198b6b3a9ea1e5a1910a5d8178af2b8fcd"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/dom/voice-control.js",
+      "sha256": "7ce81361c45ea3a5d5c5252adfb22415d88204562267ae9ea3b98e436020e58e"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/integrity/h7.js",
+      "sha256": "eb79f98a9c84077731f0629ccc106aabb4d3006535035645b68b725cdb1c7272"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/net/client.js",
+      "sha256": "252bbe749d9c7336b879a9c89480e6f09989b22a9b4e7ba596a4224055f12316"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/net/endpoint.js",
+      "sha256": "5d822288a47d4ef73f570283f16042d002ef954973be25c2b9585b79f41bbbde"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/net/project.js",
+      "sha256": "11f31fcb445b52c3152de90fc47d2cca18a4d520ab2f5fb4778bf645d003743c"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/net/session.js",
+      "sha256": "952bd62d40e19288d6ca60f7bd74b599b86480098bf74c97c48a6c255edb5a1b"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/net/types.js",
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/renderer/cells.js",
+      "sha256": "c0487d5e0be38edfb51628d0164e74fe9eb1d14b589fc54655d27ed450b91356"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/renderer/kinds.js",
+      "sha256": "304dc41bb09878cfd5f9fc46e840453a5ebef5fe3f24f97da3517cd0e0c45d71"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/renderer/nodes.js",
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/renderer/render.js",
+      "sha256": "4d3caa689daab0e6194df37d3812aba8f741892c9f84fdb89b6b623cf900fd11"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/renderer/tables.js",
+      "sha256": "b6e75fcee591a630549c65106407c7365083ec5248ec820032d71b45e8bb292e"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/routes/registry.js",
+      "sha256": "6684d9660c2d829817f5b4c0583c52fad53fa0340d0b6a515005386a6c0bdc2d"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/shell/conversation.js",
+      "sha256": "9ff5740de2bce779bc5a3cf4b8d0604d135f726580ee541ba04d2cb96ebcf88d"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/shell/deeplink.js",
+      "sha256": "91661bb980372a955c3a40fdde59b4bf20f4ab6cae8b258472eacc912862db9e"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/shell/dom-port.js",
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/shell/intents.js",
+      "sha256": "d8180fb5c0e0a807315b59efc7b4b5f250de7094e25e143024c1e403d25a1660"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/shell/ports.js",
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/shell/shell.js",
+      "sha256": "4c30eb6ffc440d1573cecbf7136f08faf24cef5439df0d613c43b7d5a06d364e"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/shell/view.js",
+      "sha256": "9faaaa92da86538ce6218bdd0d46d80a860e5964004a3117b2f93e0a6873ba24"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/shell/voice-state.js",
+      "sha256": "a9c7201012bf7d655c24836dbb69a6aaaf9096cc134c2fff4e3b4dfe6d9d6425"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/voice/capture.js",
+      "sha256": "ee5bde165f9dd19e369fdd1b39bf530f6a91745b2b2301a5e8f27dfb9d5c0a18"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/m/a446fbf520af8e11/src/voice/wav.js",
+      "sha256": "c099d535f4d30bc2d16869bd0706bbf1d0dc234ca21ef28671558897437839f1"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/manifest.webmanifest",
+      "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+    },
+    {
+      "path": "maya-chat-shell/dist/web/styles.css",
+      "sha256": "f0e73356b508c4c281ab8e80498736d24d36423b7a73a476675e336e80e147d8"
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/icons/maya-192.png",
+      "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/icons/maya-512-maskable.png",
+      "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/icons/maya-512.png",
+      "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/icons/maya-apple-180.png",
+      "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/index.html",
+      "sha256": "a89f1985f1c32b61af03d017902ef3b55bcec469c122ef3ad85ee02dac56a902"
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/m/031f844087a2dd50/main.js",
+      "sha256": "031f844087a2dd5012e47e3e8a3fae63906f470f73f8ff5fbc05704b3ff2f824"
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/manifest.webmanifest",
+      "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+    },
+    {
+      "path": "maya-carrier-react/dist/capacitor/styles.css",
+      "sha256": "aab5c4b1e87137931a59565697bfd2fed9240a19c08717ce423268b70cc0b504"
+    },
+    {
+      "path": "maya-carrier-react/dist/web/icons/maya-192.png",
+      "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+    },
+    {
+      "path": "maya-carrier-react/dist/web/icons/maya-512-maskable.png",
+      "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+    },
+    {
+      "path": "maya-carrier-react/dist/web/icons/maya-512.png",
+      "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+    },
+    {
+      "path": "maya-carrier-react/dist/web/icons/maya-apple-180.png",
+      "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+    },
+    {
+      "path": "maya-carrier-react/dist/web/index.html",
+      "sha256": "1035515cacd26956b8e9370a50802e797092f62053238d0dce79be86201965f8"
+    },
+    {
+      "path": "maya-carrier-react/dist/web/m/QKWX6FGA/main.js",
+      "sha256": "15c0d6890757417b36c6c9eb1bb3afec60229d3f37464f103a39bbf5c3fc78ca"
+    },
+    {
+      "path": "maya-carrier-react/dist/web/manifest.webmanifest",
+      "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+    },
+    {
+      "path": "maya-carrier-react/dist/web/styles.css",
+      "sha256": "aab5c4b1e87137931a59565697bfd2fed9240a19c08717ce423268b70cc0b504"
+    }
+  ]
+}

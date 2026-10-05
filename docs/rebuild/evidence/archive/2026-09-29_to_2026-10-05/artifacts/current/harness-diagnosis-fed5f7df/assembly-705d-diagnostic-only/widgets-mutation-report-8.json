@@ -1,0 +1,470 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gate8.json": "56de732cbb215edca221b59fea8d752b8ecf64dcd51c47ec97780629a7cf4070"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T17:28:07.807Z",
+  "batteries": [
+    "gate8.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-66abe55257",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-66abe55257",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "8:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gate8.json",
+      "id": "M-NULL-PASS",
+      "files": [
+        "src/widgets/input-validation/input-validation.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-NULL-OBJ",
+        "T-NULL-EMPTY"
+      ],
+      "kills": [
+        {
+          "killer": "T-NULL-OBJ",
+          "test": "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-NULL-OBJ [GW]: a null-schema record carrying `inputs` is REFUSED / selection_out_of_domain at 8, with NO lowering-source read (K12)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T-NULL-EMPTY",
+          "test": "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-NULL-EMPTY [GW]: a null-schema record carrying `inputs` is REFUSED / selection_out_of_domain at 8, with NO lowering-source read (K12)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 2
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8.json",
+      "id": "M-EMPTY-OBJ",
+      "files": [
+        "src/widgets/input-validation/input-validation.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-NULL-EMPTY"
+      ],
+      "kills": [
+        {
+          "killer": "T-NULL-EMPTY",
+          "test": "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-NULL-EMPTY [GW]: a null-schema record carrying `inputs` is REFUSED / selection_out_of_domain at 8, with NO lowering-source read (K12)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8.json",
+      "id": "M-READ-EARLY",
+      "files": [
+        "src/widgets/input-validation/input-validation.gate.ts"
+      ],
+      "edits_applied": 2,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-READ-ONCE",
+        "T-NULL-OBJ"
+      ],
+      "kills": [
+        {
+          "killer": "T-READ-ONCE",
+          "test": "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-READ-ONCE [GW]: over a pass and a refusal on the SAME record, the lowering source is read exactly once — on the pass, after the decision",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T-NULL-OBJ",
+          "test": "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-NULL-OBJ [GW]: a null-schema record carrying `inputs` is REFUSED / selection_out_of_domain at 8, with NO lowering-source read (K12)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 2
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8.json",
+      "id": "M-FACT-SLOT",
+      "files": [
+        "src/widgets/input-validation/input-validation.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-NULL-NULL"
+      ],
+      "kills": [
+        {
+          "killer": "T-NULL-NULL",
+          "test": "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-NULL-NULL [GW]: `inputs: null` passes slot 8 and Gate 9 fails stale without a template",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8.json",
+      "id": "M-TRUNC",
+      "files": [
+        "src/widgets/input-validation/input-validation.gate.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-NULL-OBJ",
+        "T-NULL-EMPTY"
+      ],
+      "kills": [
+        {
+          "killer": "T-NULL-OBJ",
+          "test": "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-NULL-OBJ [GW]: a null-schema record carrying `inputs` is REFUSED / selection_out_of_domain at 8, with NO lowering-source read (K12)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "T-NULL-EMPTY",
+          "test": "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-NULL-EMPTY [GW]: a null-schema record carrying `inputs` is REFUSED / selection_out_of_domain at 8, with NO lowering-source read (K12)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 2
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8.json",
+      "id": "M-UNDECLARED",
+      "files": [
+        "src/widgets/input-validation/input-validation.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-SCHEMA"
+      ],
+      "kills": [
+        {
+          "killer": "T-SCHEMA",
+          "test": "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-SCHEMA [GW, G-SYNTH]: exact emitted schema admits its field-keyed option and rejects undeclared input",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8.json",
+      "id": "M-PER-TOKEN-DOMAIN",
+      "files": [
+        "src/widgets/input-validation/input-validation.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-SCHEMA-OUTSIDE"
+      ],
+      "kills": [
+        {
+          "killer": "T-SCHEMA-OUTSIDE",
+          "test": "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-SCHEMA-OUTSIDE [GW, G-SYNTH]: an option outside this field domain refuses at Gate 8",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8.json",
+      "id": "M-BYTE-CAP",
+      "files": [
+        "src/widgets/input-validation/input-validation.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-SCHEMA-BYTE"
+      ],
+      "kills": [
+        {
+          "killer": "T-SCHEMA-BYTE",
+          "test": "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-SCHEMA-BYTE [GW, G-SYNTH]: canonical UTF-8 bytes over the schema cap refuse before membership",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8.json",
+      "id": "M-HASH-SUPERSEDED",
+      "files": [
+        "src/widgets/input-validation/input-validation.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-SCHEMA-HASH"
+      ],
+      "kills": [
+        {
+          "killer": "T-SCHEMA-HASH",
+          "test": "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-SCHEMA-HASH [GW, G-SYNTH]: emitted schema hash drift is a transaction fault",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gate8.json",
+      "id": "M-ERASED-REFUSE",
+      "files": [
+        "src/widgets/input-validation/input-schema-source.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "T-SCHEMA-ERASED"
+      ],
+      "kills": [
+        {
+          "killer": "T-SCHEMA-ERASED",
+          "test": "Gate 8 — input validation, the null-schema lane [U8a] [GW] the real WidgetsModule over the proof database T-SCHEMA-ERASED [GW, G-SYNTH]: an erased emitted schema supersedes handle_stale",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T17:46:17.588Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 1,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

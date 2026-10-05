@@ -1,0 +1,347 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "jobs": [
+    {
+      "gate": "4",
+      "partition": "",
+      "slot": "4"
+    },
+    {
+      "gate": "6",
+      "partition": "1/4",
+      "slot": "6-part-1-of-4"
+    },
+    {
+      "gate": "6",
+      "partition": "2/4",
+      "slot": "6-part-2-of-4"
+    },
+    {
+      "gate": "6",
+      "partition": "3/4",
+      "slot": "6-part-3-of-4"
+    },
+    {
+      "gate": "6",
+      "partition": "4/4",
+      "slot": "6-part-4-of-4"
+    },
+    {
+      "gate": "7",
+      "partition": "1/4",
+      "slot": "7-part-1-of-4"
+    },
+    {
+      "gate": "7",
+      "partition": "2/4",
+      "slot": "7-part-2-of-4"
+    },
+    {
+      "gate": "7",
+      "partition": "3/4",
+      "slot": "7-part-3-of-4"
+    },
+    {
+      "gate": "7",
+      "partition": "4/4",
+      "slot": "7-part-4-of-4"
+    },
+    {
+      "gate": "8",
+      "partition": "",
+      "slot": "8"
+    },
+    {
+      "gate": "9",
+      "partition": "1/4",
+      "slot": "9-part-1-of-4"
+    },
+    {
+      "gate": "9",
+      "partition": "2/4",
+      "slot": "9-part-2-of-4"
+    },
+    {
+      "gate": "9",
+      "partition": "3/4",
+      "slot": "9-part-3-of-4"
+    },
+    {
+      "gate": "9",
+      "partition": "4/4",
+      "slot": "9-part-4-of-4"
+    },
+    {
+      "gate": "10",
+      "partition": "1/4",
+      "slot": "10-part-1-of-4"
+    },
+    {
+      "gate": "10",
+      "partition": "2/4",
+      "slot": "10-part-2-of-4"
+    },
+    {
+      "gate": "10",
+      "partition": "3/4",
+      "slot": "10-part-3-of-4"
+    },
+    {
+      "gate": "10",
+      "partition": "4/4",
+      "slot": "10-part-4-of-4"
+    },
+    {
+      "gate": "11",
+      "partition": "",
+      "slot": "11"
+    },
+    {
+      "gate": "12",
+      "partition": "",
+      "slot": "12"
+    },
+    {
+      "gate": "13",
+      "partition": "1/4",
+      "slot": "13-part-1-of-4"
+    },
+    {
+      "gate": "13",
+      "partition": "2/4",
+      "slot": "13-part-2-of-4"
+    },
+    {
+      "gate": "13",
+      "partition": "3/4",
+      "slot": "13-part-3-of-4"
+    },
+    {
+      "gate": "13",
+      "partition": "4/4",
+      "slot": "13-part-4-of-4"
+    },
+    {
+      "gate": "1-5",
+      "partition": "",
+      "slot": "1-5"
+    },
+    {
+      "gate": "10a",
+      "partition": "",
+      "slot": "10a"
+    },
+    {
+      "gate": "12b",
+      "partition": "",
+      "slot": "12b"
+    },
+    {
+      "gate": "12k",
+      "partition": "",
+      "slot": "12k"
+    },
+    {
+      "gate": "8c",
+      "partition": "",
+      "slot": "8c"
+    },
+    {
+      "gate": "8r",
+      "partition": "",
+      "slot": "8r"
+    },
+    {
+      "gate": "9a",
+      "partition": "",
+      "slot": "9a"
+    },
+    {
+      "gate": "AB",
+      "partition": "",
+      "slot": "AB"
+    },
+    {
+      "gate": "AR",
+      "partition": "",
+      "slot": "AR"
+    },
+    {
+      "gate": "BS",
+      "partition": "",
+      "slot": "BS"
+    },
+    {
+      "gate": "D8",
+      "partition": "",
+      "slot": "D8"
+    },
+    {
+      "gate": "FB",
+      "partition": "",
+      "slot": "FB"
+    },
+    {
+      "gate": "H-harness",
+      "partition": "",
+      "slot": "H-harness"
+    },
+    {
+      "gate": "NS",
+      "partition": "",
+      "slot": "NS"
+    },
+    {
+      "gate": "P-allowlist",
+      "partition": "",
+      "slot": "P-allowlist"
+    },
+    {
+      "gate": "P-discharge",
+      "partition": "",
+      "slot": "P-discharge"
+    },
+    {
+      "gate": "P-f88",
+      "partition": "",
+      "slot": "P-f88"
+    },
+    {
+      "gate": "P-g15b",
+      "partition": "",
+      "slot": "P-g15b"
+    },
+    {
+      "gate": "P-handle",
+      "partition": "",
+      "slot": "P-handle"
+    },
+    {
+      "gate": "P-ledger",
+      "partition": "",
+      "slot": "P-ledger"
+    },
+    {
+      "gate": "P-mint",
+      "partition": "1/4",
+      "slot": "P-mint-part-1-of-4"
+    },
+    {
+      "gate": "P-mint",
+      "partition": "2/4",
+      "slot": "P-mint-part-2-of-4"
+    },
+    {
+      "gate": "P-mint",
+      "partition": "3/4",
+      "slot": "P-mint-part-3-of-4"
+    },
+    {
+      "gate": "P-mint",
+      "partition": "4/4",
+      "slot": "P-mint-part-4-of-4"
+    },
+    {
+      "gate": "P-mt3",
+      "partition": "",
+      "slot": "P-mt3"
+    },
+    {
+      "gate": "P-pairing",
+      "partition": "",
+      "slot": "P-pairing"
+    },
+    {
+      "gate": "P-principal",
+      "partition": "",
+      "slot": "P-principal"
+    },
+    {
+      "gate": "P-render",
+      "partition": "",
+      "slot": "P-render"
+    },
+    {
+      "gate": "P-rt6",
+      "partition": "",
+      "slot": "P-rt6"
+    },
+    {
+      "gate": "P-seal",
+      "partition": "",
+      "slot": "P-seal"
+    },
+    {
+      "gate": "PI-contract",
+      "partition": "",
+      "slot": "PI-contract"
+    },
+    {
+      "gate": "PI",
+      "partition": "",
+      "slot": "PI"
+    },
+    {
+      "gate": "PU",
+      "partition": "",
+      "slot": "PU"
+    },
+    {
+      "gate": "SB1",
+      "partition": "",
+      "slot": "SB1"
+    },
+    {
+      "gate": "SBV",
+      "partition": "",
+      "slot": "SBV"
+    },
+    {
+      "gate": "SO",
+      "partition": "",
+      "slot": "SO"
+    },
+    {
+      "gate": "SV2",
+      "partition": "",
+      "slot": "SV2"
+    },
+    {
+      "gate": "T-tables",
+      "partition": "",
+      "slot": "T-tables"
+    },
+    {
+      "gate": "TURN",
+      "partition": "",
+      "slot": "TURN"
+    },
+    {
+      "gate": "WF",
+      "partition": "",
+      "slot": "WF"
+    },
+    {
+      "gate": "WR",
+      "partition": "1/4",
+      "slot": "WR-part-1-of-4"
+    },
+    {
+      "gate": "WR",
+      "partition": "2/4",
+      "slot": "WR-part-2-of-4"
+    },
+    {
+      "gate": "WR",
+      "partition": "3/4",
+      "slot": "WR-part-3-of-4"
+    },
+    {
+      "gate": "WR",
+      "partition": "4/4",
+      "slot": "WR-part-4-of-4"
+    }
+  ],
+  "executionEnvironment": "GitHub Actions",
+  "restrictions": "none; canonical unfiltered workflow"
+}

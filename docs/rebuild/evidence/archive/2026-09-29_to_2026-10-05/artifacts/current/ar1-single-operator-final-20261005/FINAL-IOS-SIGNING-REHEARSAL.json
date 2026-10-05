@@ -1,0 +1,34 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "status": "PASS",
+  "buildConfiguration": "Debug development (previously approved first launch); not App Store/Release",
+  "provisioningUuid": "8c3f4496-8527-4c89-84be-5c9f9a15eed7",
+  "provisioningExpiry": "2026-10-05T08:16:21+00:00",
+  "provisioningChanges": 0,
+  "deviceInstalled": false,
+  "actualApp": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261005/ios-final-signed-rehearsal/Build/Products/Debug-iphoneos/App.app",
+  "receipts": [
+    {
+      "name": "ios-canonical-sync",
+      "exit": 0,
+      "seconds": 21.26
+    },
+    {
+      "name": "ios-development-signing",
+      "exit": 0,
+      "seconds": 24.71
+    },
+    {
+      "name": "ios-signature-verify",
+      "exit": 0,
+      "seconds": 0.01
+    },
+    {
+      "name": "ios-signed-payload-verify",
+      "exit": 0,
+      "seconds": 8.48
+    }
+  ],
+  "networkProvisioningUpdates": false,
+  "sourceChanges": []
+}

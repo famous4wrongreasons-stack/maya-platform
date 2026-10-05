@@ -1,0 +1,63 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "priorApprovedRepair": "e180086f",
+  "currentJobBudgetMinutes": 180,
+  "workflowSha256": "80dd75f4cf603dcf921db96927ca60c08e8e0de3f19d6ee91791936c1207e2af",
+  "plannerSha256": "6360208534be7c3eac79561e6c09f9d03250463096dfdc913ccc11cd4e2f9bfa",
+  "currentPlan": [
+    {
+      "gate": "P-mint",
+      "partition": "1/4",
+      "slot": "P-mint-part-1-of-4"
+    },
+    {
+      "gate": "P-mint",
+      "partition": "2/4",
+      "slot": "P-mint-part-2-of-4"
+    },
+    {
+      "gate": "P-mint",
+      "partition": "3/4",
+      "slot": "P-mint-part-3-of-4"
+    },
+    {
+      "gate": "P-mint",
+      "partition": "4/4",
+      "slot": "P-mint-part-4-of-4"
+    }
+  ],
+  "restrictedTests": false,
+  "freshReceipts": "PASS: all four complete P-mint parts and canonical full-corpus assembly",
+  "nativeReceipt": {
+    "path": "receipts/mutation-receipt/widgets-mutation-report-P-mint.json",
+    "sha256": "f003b7f26fd17a956f335c2ec61bb576d89d4f81498cf62d7468ab5f65e6c14f"
+  },
+  "observedLocalTimings": [
+    {
+      "slot": "P-mint-part-1-of-4",
+      "gate": "P-mint",
+      "seconds": 2799.58,
+      "localMarginTo180Minutes": 8000.42
+    },
+    {
+      "slot": "P-mint-part-2-of-4",
+      "gate": "P-mint",
+      "seconds": 2790.54,
+      "localMarginTo180Minutes": 8009.46
+    },
+    {
+      "slot": "P-mint-part-3-of-4",
+      "gate": "P-mint",
+      "seconds": 2149.45,
+      "localMarginTo180Minutes": 8650.55
+    },
+    {
+      "slot": "P-mint-part-4-of-4",
+      "gate": "P-mint",
+      "seconds": 2522.84,
+      "localMarginTo180Minutes": 8277.16
+    }
+  ],
+  "historicalLimitationStatus": "CLOSED for the historical two-part capacity limitation",
+  "scopeLimit": "The approved four-part repair is exercised locally with full tests. No remote GitHub execution, future timing guarantee or timeout increase is claimed."
+}

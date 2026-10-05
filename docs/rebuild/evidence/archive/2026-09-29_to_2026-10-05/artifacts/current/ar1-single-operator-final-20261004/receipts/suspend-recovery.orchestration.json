@@ -1,0 +1,10 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "startedAt": "2026-10-04T18:11:45.772397+00:00",
+  "completedAt": "2026-10-04T21:18:59.828762+00:00",
+  "seconds": 11234.06,
+  "exit": 0,
+  "wholeParts": 16,
+  "unfilteredTests": true,
+  "productionEffects": 0
+}

@@ -1,0 +1,13 @@
+{
+  "candidate": "bf623dfc708f097db31a767505be517f838f0dd4",
+  "name": "runtime-check",
+  "command": [
+    "node",
+    "build.mjs",
+    "--check",
+    "--no-baseline"
+  ],
+  "cwd": "maya-chat-shell",
+  "exit": 0,
+  "seconds": 5.25
+}

@@ -1,0 +1,92 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "checkedAt": "2026-10-04T21:59:48.099309+00:00",
+  "expectedWorkflowIds": [
+    311601892,
+    359168151,
+    360279046,
+    360530612,
+    362140366,
+    374470990
+  ],
+  "runs": [
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T21:19:46Z",
+      "databaseId": 37235646478,
+      "event": "push",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37235646478",
+      "workflowDatabaseId": 360530612,
+      "workflowName": "MAYA Chat Shell"
+    },
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T21:19:46Z",
+      "databaseId": 37235646495,
+      "event": "push",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37235646495",
+      "workflowDatabaseId": 374470990,
+      "workflowName": "Canonical React release packaging"
+    },
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T21:19:46Z",
+      "databaseId": 37235646507,
+      "event": "push",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37235646507",
+      "workflowDatabaseId": 360279046,
+      "workflowName": "Widgets Live"
+    },
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T21:19:46Z",
+      "databaseId": 37235646523,
+      "event": "push",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37235646523",
+      "workflowDatabaseId": 311601892,
+      "workflowName": "Platform CI"
+    },
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T21:19:46Z",
+      "databaseId": 37235646552,
+      "event": "push",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37235646552",
+      "workflowDatabaseId": 359168151,
+      "workflowName": "Widget Contract"
+    },
+    {
+      "attempt": 1,
+      "conclusion": "cancelled",
+      "createdAt": "2026-10-04T21:19:48Z",
+      "databaseId": 37235649336,
+      "event": "workflow_dispatch",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37235649336",
+      "workflowDatabaseId": 362140366,
+      "workflowName": "Widgets Mutation"
+    }
+  ]
+}

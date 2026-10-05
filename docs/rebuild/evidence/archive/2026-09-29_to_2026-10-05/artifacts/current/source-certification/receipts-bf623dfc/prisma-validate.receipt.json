@@ -1,0 +1,12 @@
+{
+  "candidate": "bf623dfc708f097db31a767505be517f838f0dd4",
+  "name": "prisma-validate",
+  "command": [
+    "npx",
+    "prisma",
+    "validate"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 0,
+  "seconds": 0.66
+}

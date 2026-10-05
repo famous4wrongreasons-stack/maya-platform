@@ -1,0 +1,15 @@
+{
+  "candidate": "c3652b79ad7b4b92915d6e6db5b02e5727f38cff",
+  "name": "widgets-live",
+  "command": [
+    "npm",
+    "run",
+    "test:widgets:live",
+    "--",
+    "--json",
+    "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/source-certification/receipts/widgets-live.json"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 0,
+  "seconds": 93.39
+}

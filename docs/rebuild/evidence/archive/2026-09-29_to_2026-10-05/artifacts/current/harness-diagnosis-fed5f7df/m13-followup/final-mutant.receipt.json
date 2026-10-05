@@ -1,0 +1,13 @@
+{
+  "name": "final-mutant",
+  "sourceCandidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "uncommittedHarnessOnly": true,
+  "patchSha256": "df4523929d56df2231b66463a00bfb9b6eac67bc7b5cfb28512b83c6ad899345",
+  "exit": 1,
+  "expectedExit": 1,
+  "seconds": 1.715,
+  "scope": "Pre-commit diagnostic, not final certification",
+  "passed": 6,
+  "failed": 7,
+  "reportSha256": "17001393f142bab31a14fc1945430036887d24c13f834579e28cd87c13a73624"
+}

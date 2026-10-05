@@ -1,0 +1,12 @@
+{
+  "candidate": "667b687c161a03d2d5f3f508f63b8fd0beedfbd9",
+  "name": "carrier-typecheck",
+  "command": [
+    "npm",
+    "run",
+    "typecheck"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-carrier-react",
+  "exit": 0,
+  "seconds": 4.58
+}

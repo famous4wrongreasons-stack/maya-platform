@@ -1,0 +1,54 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "sourceDisposition": "outputs/final-certification-fed5f7df/FBE2E-DISPOSITION.json",
+  "sourceDispositionSha256": "be2f21d4f572dc0c06d81656f7035e839f5e7bea11040f4ae9f55456ede5048d",
+  "sourceDispositionIsNotFreshReceipt": true,
+  "freshSyntheticProbes": "6/6 PASS",
+  "retainedBoundaries": [
+    {
+      "id": "L2",
+      "status": "PARTIAL",
+      "currentBoundary": "Fresh local checker PASS; advisory CI blocking/acceptance policy remains unresolved."
+    },
+    {
+      "id": "L5",
+      "status": "OPEN",
+      "currentBoundary": "Booking tomorrow/day-window policy remains unresolved with L24; the repaired billing fixture clock does not change this product policy."
+    },
+    {
+      "id": "L20",
+      "status": "PARTIAL",
+      "currentBoundary": "Supplying an UNKNOWN verdict is not a provider/Action Engine fault-produced UNKNOWN proof."
+    },
+    {
+      "id": "L23",
+      "status": "OPEN",
+      "currentBoundary": "The carrier network structural-ratchet limitation remains; successful network probes do not replace that assertion."
+    },
+    {
+      "id": "L24",
+      "status": "OPEN",
+      "currentBoundary": "The fixed booking availability window/timezone policy remains unresolved with L5."
+    },
+    {
+      "id": "L25",
+      "status": "OPEN",
+      "currentBoundary": "Tap-as-delivery/render requires the retained lifecycle ruling; no new acceptance inferred."
+    },
+    {
+      "id": "L26",
+      "status": "PARTIAL",
+      "currentBoundary": "Current strict mutation consumer does not retroactively approve the historical manual audit builder."
+    }
+  ],
+  "sourceRecheck": "Product and presentation paths unchanged from the inspected 2141e245 source; only 14 test/harness paths changed from fed5f7df.",
+  "ownerAcceptanceInferred": false,
+  "nativeCorpus": "PASS",
+  "certificateIssued": false,
+  "requirement": "Approved AR-1 requires each FBE2E limitation closed or explicitly owner-accepted with its named boundary.",
+  "newlyClosed": [
+    "L12",
+    "L16"
+  ],
+  "completeDisposition": "FBE2E-DISPOSITION.json"
+}

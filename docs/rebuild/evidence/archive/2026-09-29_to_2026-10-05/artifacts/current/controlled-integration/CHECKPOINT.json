@@ -1,0 +1,91 @@
+{
+  "contract": "maya.controlled-integration-checkpoint/1",
+  "candidateSha": "4f479dce32e6e3595516447a5a6bf8cc6278528a",
+  "createdAt": "2026-09-29T22:07:23.536931+00:00",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "status": "STOP_SCOPE_CONTRACT",
+  "falseBefore": 10,
+  "falseAfter": 10,
+  "evidenceMissing": 7,
+  "integrationOwned": [
+    "9.6"
+  ],
+  "handoffStop": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "tests": {
+    "backend-tests": {
+      "numPassedTests": 5516,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 581,
+      "numFailedTests": 0
+    },
+    "widgets-live": {
+      "numPassedTests": 380,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 30,
+      "numFailedTests": 0
+    },
+    "ar-binary": {
+      "numPassedTests": 1,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 1,
+      "numFailedTests": 0
+    },
+    "carrier-tests": {
+      "tests": 93,
+      "pass": 93,
+      "fail": 0,
+      "skipped": 0
+    },
+    "runtime-tests": {
+      "tests": 361,
+      "pass": 354,
+      "fail": 0,
+      "skipped": 7
+    },
+    "mutation-ci-integrity": {
+      "tests": 35,
+      "pass": 35,
+      "fail": 0,
+      "skipped": 0
+    },
+    "binary-http": {
+      "passed": 18,
+      "failed": 0
+    },
+    "built-shell-integration-only": {
+      "status": "PASS",
+      "name": "R01 live artifact and release/recovery protection [INTEGRATION-ONLY] gates a static shell candidate as strictly as a PHP edge candidate"
+    }
+  },
+  "mutations": {
+    "status": "NOT_RUN_SCOPE_STOP",
+    "batteries": 39,
+    "declarations": 458,
+    "jobs": 60,
+    "freshKillReceipts": 0
+  },
+  "fbe2e": {
+    "progressCountsRetained": {
+      "CLOSED": 13,
+      "PARTIAL": 6,
+      "OPEN": 9
+    },
+    "freshWholeLimitationClosures": 0,
+    "syntheticBackendBookingAndBinaryTests": "PASS",
+    "actualReactCarrierToBackendJourney": "NOT_PROVED"
+  },
+  "ciEquivalent": "INCOMPLETE",
+  "ar1ThresholdSatisfied": false,
+  "readyForSyntheticReleaseCertification": false,
+  "productionActivation": false,
+  "productionDeploy": false,
+  "realOtp": false,
+  "realYclients": false,
+  "iphoneReinstall": false,
+  "chapter10": false,
+  "sourceBranchMutation": false
+}

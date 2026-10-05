@@ -1,0 +1,79 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "name": "l25-browser",
+  "exit": 0,
+  "seconds": 5.24,
+  "command": [
+    "playwright-cli",
+    "--session",
+    "maya-singleop-cert",
+    "run-code",
+    "l25-browser-proof.js"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003",
+  "network": "fresh loopback-only ephemeral port",
+  "result": {
+    "status": "PASS",
+    "first": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        }
+      ],
+      "activations": 0
+    },
+    "tapped": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        }
+      ],
+      "activations": 1
+    },
+    "collapsed": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        }
+      ],
+      "activations": 1
+    },
+    "remounted": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        },
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": false
+        }
+      ],
+      "activations": 1
+    },
+    "mutant": {
+      "observed": [],
+      "activations": 0
+    },
+    "mutantTap": {
+      "observed": [],
+      "activations": 1
+    },
+    "productSourceEdited": false,
+    "realNetworkEffects": false
+  },
+  "logSha256": "1481073be94b3007bbfbc003447c137a11d464d5ffe9abe45a91eea5dd732237"
+}

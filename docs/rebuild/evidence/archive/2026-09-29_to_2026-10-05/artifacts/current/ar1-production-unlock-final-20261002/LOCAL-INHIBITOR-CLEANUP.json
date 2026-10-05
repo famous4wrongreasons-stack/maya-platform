@@ -1,0 +1,10 @@
+{
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "at": "2026-10-03T06:12:02.121835+00:00",
+  "terminatedOwnedInhibitor": {
+    "pid": 35785,
+    "identityBeforeTermination": "35785 58828 Fri Oct  2 21:45:01 2026     caffeinate -i"
+  },
+  "powerSettingsChanged": false,
+  "productionEffects": 0
+}

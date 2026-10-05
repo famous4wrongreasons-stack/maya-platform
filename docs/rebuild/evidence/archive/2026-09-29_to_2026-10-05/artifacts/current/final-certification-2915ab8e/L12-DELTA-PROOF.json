@@ -1,0 +1,73 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "historicalDelta": "6af72aa46e7eff80fa2a4f825ccb2c0c27a0d234",
+  "contract": "maya.l12-delta-classification-proof/1",
+  "sourceFile": "maya-saas-backend/src/widgets/routing/effect-router.ports.ts",
+  "compiler": "TypeScript 5.9.3",
+  "options": "CommonJS, ES2022, removeComments, no sourceMap",
+  "compiled": [
+    {
+      "ref": "6af72aa46e7eff80fa2a4f825ccb2c0c27a0d234^",
+      "sourceSha256": "86fb3ec2207fa34a30c85d5f154bb2ac0b6105dd5ba7cbc3c7702d30d4e2a828",
+      "emittedSha256": "a2f21bf8b4aee4276179713ce48711b6f0ea226f0541b0235a0a481c74bf1eab",
+      "emittedBytes": 569
+    },
+    {
+      "ref": "6af72aa46e7eff80fa2a4f825ccb2c0c27a0d234",
+      "sourceSha256": "0d65b6ff47b2833677bbe0393eb85bf1f9f254fc3934e052ce783d710c5af423",
+      "emittedSha256": "a2f21bf8b4aee4276179713ce48711b6f0ea226f0541b0235a0a481c74bf1eab",
+      "emittedBytes": 569
+    },
+    {
+      "ref": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+      "sourceSha256": "0fad31357c91979b50184744db5acfca65c03d4b407eb3cbb0f7113b9b35a322",
+      "emittedSha256": "a2f21bf8b4aee4276179713ce48711b6f0ea226f0541b0235a0a481c74bf1eab",
+      "emittedBytes": 569
+    }
+  ],
+  "emittedRuntimeIdenticalAcrossAllThree": true,
+  "runtimeHelperPredatesDelta": true,
+  "entireFileIsTypeOnly": false,
+  "runtimeSites": [
+    {
+      "file": "src/widgets/booking/booking-selector.presenter.ts",
+      "sourceSha256": "5de536dd62e10a91c3d6b58aab8e1a563984fad41318c3adc654762623361cb6",
+      "mutationIds": [
+        "WR-M03",
+        "WR-M04",
+        "WR-M05"
+      ]
+    },
+    {
+      "file": "src/widgets/booking/booking-noun-identity.ts",
+      "sourceSha256": "23b87d5718ef910a2555e7aa6f5ec985c0f53d9bd867128ada2cb62af45f6bc0",
+      "mutationIds": [
+        "WR-M20"
+      ]
+    },
+    {
+      "file": "src/widgets/owner-ports/booking-selector.adapter.ts",
+      "sourceSha256": "449e5654fa168de53a8e73d6ccb5cc75af27f983acffb36a0f1dcb12d3aa996a",
+      "mutationIds": [
+        "WR-M01",
+        "WR-M02"
+      ]
+    },
+    {
+      "file": "src/widgets/owner-ports/booking-preview.adapter.ts",
+      "sourceSha256": "844f3e71deb2805bc6308b59cc14efb53e69b9c629a61d69807388123db2155f",
+      "mutationIds": [
+        "WR-M21"
+      ]
+    }
+  ],
+  "fullCurrentTypecheck": "receipts/backend-typecheck.receipt.json",
+  "liveTypecheck": "receipts/live-typecheck.receipt.json",
+  "nativeWRAdmission": "PASS: complete fresh 23/23 WR with green controls",
+  "scope": "Addresses the exact five sites named by historical L12; does not claim exhaustive mutation coverage of every line or of the pre-existing helper.",
+  "nativeWRReceipt": {
+    "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+    "sha256": "07f5db1ee2f64f2a8711330494cfcecdace0b0e867f5a198d97c5c5157439e13"
+  },
+  "historicalLimitationStatus": "CLOSED for the exact uncovered-delta claim"
+}

@@ -1,0 +1,11 @@
+{
+  "candidateSha": "4f479dce32e6e3595516447a5a6bf8cc6278528a",
+  "previousCandidateSha": "e17b4acf12345bf6d6dcaf3e809ef476ad1b023e",
+  "runtimeArtifactBytesIdentical": true,
+  "ignored": "TypeScript .tsbuildinfo build cache only",
+  "fileCounts": {
+    "maya-saas-backend/dist": 2669,
+    "maya-chat-shell/dist": 40,
+    "maya-carrier-react/dist": 6
+  }
+}

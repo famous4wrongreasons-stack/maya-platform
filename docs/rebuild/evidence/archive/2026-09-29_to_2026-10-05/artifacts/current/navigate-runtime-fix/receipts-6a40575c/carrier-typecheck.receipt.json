@@ -1,0 +1,12 @@
+{
+  "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+  "name": "carrier-typecheck",
+  "command": [
+    "npm",
+    "run",
+    "typecheck"
+  ],
+  "cwd": "maya-carrier-react",
+  "exit": 0,
+  "seconds": 4.46
+}

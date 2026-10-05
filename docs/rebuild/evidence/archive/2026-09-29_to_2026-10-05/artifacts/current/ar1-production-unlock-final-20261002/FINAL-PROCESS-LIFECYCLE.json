@@ -1,0 +1,22 @@
+{
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "checkedAt": "2026-10-03T06:11:21.150181+00:00",
+  "status": "PASS",
+  "currentRunPathPrefixes": [
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-production-unlock-final-20261002",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-320ce4ea4c",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-75c1735e48",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-7ff202834a",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-889730b432",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-9b73d272c0",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-c989e90de9"
+  ],
+  "remainingOwnedProcesses": [],
+  "remainingCurrentRunProofDbSessions": [],
+  "dedicatedProofPostgresListener": "COMMAND    PID           USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME\npostgres 20272 stanislavmosin    5u  IPv4 0xcece31f560d5532b      0t0  TCP 127.0.0.1:55729 (LISTEN)\n",
+  "retainedFixtureBoundary": "Dedicated PostgreSQL proof server is intentionally retained. It is not a leaked test listener.",
+  "pidReusePolicy": "No historical PID alone is accepted as ownership; current command/CWD must match a unique current-run path.",
+  "otherServicesChanged": false,
+  "processesTerminatedByThisCheck": 0
+}

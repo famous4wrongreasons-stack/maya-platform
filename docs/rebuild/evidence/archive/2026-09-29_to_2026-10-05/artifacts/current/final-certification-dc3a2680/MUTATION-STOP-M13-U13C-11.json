@@ -1,0 +1,56 @@
+{
+  "candidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "utc": "2026-09-30T20:34:17.251944+00:00",
+  "reason": "M13-U13C-11 SURVIVED with green full controls; investigate test-double masking before changes",
+  "sourceReceipt": "receipts/mutation-parts/widgets-mutation-part-13-part-1-of-4.json",
+  "productDefectEstablished": false,
+  "fullCertification": "INTERRUPTED; no partial receipt admitted as complete",
+  "actions": [
+    {
+      "worker": 1,
+      "pid": 89323,
+      "signal": "SIGTERM",
+      "verifiedOwnedGroup": true
+    },
+    {
+      "worker": 2,
+      "pid": 93291,
+      "signal": "SIGTERM",
+      "verifiedOwnedGroup": true
+    },
+    {
+      "worker": 3,
+      "pid": 8308,
+      "signal": "SIGTERM",
+      "verifiedOwnedGroup": true
+    },
+    {
+      "worker": 4,
+      "pid": 41780,
+      "action": "not running or not matching owned command; not signalled"
+    },
+    {
+      "worker": 5,
+      "pid": 78668,
+      "signal": "SIGTERM",
+      "verifiedOwnedGroup": true
+    },
+    {
+      "worker": 6,
+      "pid": 87718,
+      "signal": "SIGTERM",
+      "verifiedOwnedGroup": true
+    },
+    {
+      "worker": 7,
+      "pid": 71177,
+      "signal": "SIGTERM",
+      "verifiedOwnedGroup": true
+    },
+    {
+      "worker": 8,
+      "pid": 63430,
+      "action": "not running or not matching owned command; not signalled"
+    }
+  ]
+}

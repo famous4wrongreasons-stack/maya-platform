@@ -1,0 +1,382 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "status": "PASS",
+  "checkedAt": "2026-10-05T05:04:35.548753+00:00",
+  "sourceSha256": "9f934ad0d5dc3078379900c12a018892e840a7665b03450f1279bb90322bb93a",
+  "driverSha256": "16c61c83253327d755c3f7e8d560cffd0ca923aa258de3cfb6d5070fa4f64af8",
+  "beforeProof": {
+    "path": "REPORT-FINALIZER-BEFORE.json",
+    "sha256": "7dc82f63852165236af0d4a237c24d08170f95d2f42cbe5c87c272805831a0e8"
+  },
+  "actualParts": [
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-4.json",
+      "sha256": "d3c0304becb69ad27e52c841c3b6797c78a8ce7f764af4d64ca51665de43befe",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-6-part-1-of-4.json",
+      "sha256": "af34f5fbfe92430bff6047b092ae796dc1a75f2e0e103c8fa0e4266169934713",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-6-part-2-of-4.json",
+      "sha256": "6d8c9c5d8f710b0466d4a6fe8e586db083b159258e506af675d9a8d12eb9d207",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-6-part-3-of-4.json",
+      "sha256": "e09878943d093b16fdbd6c3c50c2a2e46ce9364877709763fb85aaa86b10190b",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-6-part-4-of-4.json",
+      "sha256": "b38ea86212ea98a46eaec15989afbe324c3ab903e12a0c516cc9a10a3b29f4ec",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-7-part-1-of-4.json",
+      "sha256": "ca8542005eb823aaf4a206c58897afebef6d59a0515f5b420ddd09350370f2d3",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-7-part-2-of-4.json",
+      "sha256": "b6a609ea4551418a66ab2d1203dc47c53ab63849690c5f66d8c03605afed66ff",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-7-part-3-of-4.json",
+      "sha256": "e96842481440638a79d0841a5ab307121bd3e10bf743f73f123d9ec435bf8d92",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-7-part-4-of-4.json",
+      "sha256": "fe2f143754d9e7f17f6d4bbbcf78322a4b7e82051b083fe8a56e5f4728b83283",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-8.json",
+      "sha256": "365644b228816cfde3b2ff90a975de63980f67f6b327e4439e4c54c83388c90b",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-9-part-1-of-4.json",
+      "sha256": "580110049508103952f926c13975d090739573a921ee20cb9bb0605427d15a1b",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-9-part-2-of-4.json",
+      "sha256": "009b2dc0e29ac9076181a1c46c2d513bace00f55e7a16bddf04aa26f94135e8e",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-9-part-3-of-4.json",
+      "sha256": "b727d05b34fd7a69f99e5e7e8cc7f716d8e057c2eb2904c55ac4976bd119c725",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-9-part-4-of-4.json",
+      "sha256": "2473ddeaaab63bb34f289cbb10a8eac7599476611dc574340bb932f3583986d4",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-10-part-1-of-4.json",
+      "sha256": "c155af85aead2af97fdca83a1596bc72461fecc96f6eab945463730eb57ed0c2",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-10-part-2-of-4.json",
+      "sha256": "b7911e9f0df57632310e1d43dc28b8a9806512fca90be4adbd2b5a953492791e",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-10-part-3-of-4.json",
+      "sha256": "06e24959db491e33a8c562620497957cd82ef30a5632bcab6cf94dbc007c3d26",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-10-part-4-of-4.json",
+      "sha256": "f8d753502b000274bce0e9a17ced40467d1a5fe6fc250876ee4247304d30ad41",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-11.json",
+      "sha256": "493b6ffcd5730eceffc868843c9282f8283b15133b62f1e1598f3e7c7716c609",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-12.json",
+      "sha256": "6565d6435b53d6363d19e1b26e7fdf4d505a834ae4f6993dc8fef0bb93739fcd",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-13-part-1-of-4.json",
+      "sha256": "1aa8dbe28eaba342770b82ec16836a9fbb6696660aa9984a80c54eb2e4603ee4",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-13-part-2-of-4.json",
+      "sha256": "5ee3b86e9e654a284d43ac58e5fcb7e2b76ffe46aaa27ba4ba90325845d6a56f",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-13-part-3-of-4.json",
+      "sha256": "d50add0786f4cbdc96353f97625f393061e909aaf3559eb44e5cab5c4669c597",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-13-part-4-of-4.json",
+      "sha256": "bcf91950d071fccb852f537b135377989b37b115abadd4db11726184a80a3f18",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-1-5.json",
+      "sha256": "3f201e4ed9c34a330e3ee83cc4b57b609871f1716817146ee4a6c91832ff4bd3",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-10a.json",
+      "sha256": "8d9476d1a316439ba3614cf5c4d31d8457a4796262a9d2976b7da58efa3f52cb",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-12b.json",
+      "sha256": "cabf52653c40aff314be451c734f883c97eba7f2ef878c42b1806fe8886b2ce3",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-12k.json",
+      "sha256": "dfb0560d6d7a50a4129ad42274392e9bf2a32d1fc8f477117e2fca18accac283",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-8c.json",
+      "sha256": "f07e0f04677b7c13720be4ad70119b3557f3c9d065e4a6d1fe17d1843c398b3a",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-8r.json",
+      "sha256": "1310122ae4f3ce35a5648b00733fa47f2e54421ddebd483715e090e368f7d0d3",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-9a.json",
+      "sha256": "a6e01bd6f0ff30bf221bd6d1f4131ccc4fb4ec3a8f74c083e91cddee3492d3e8",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-AB.json",
+      "sha256": "15e82ddabef379c9341a801a95ba69756ee3ed28de2fa8ac5d1ef09e25eb6037",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-AR.json",
+      "sha256": "e77eb677e174f24541fc78f9bcfae5a3faa7a55975d8da2288db1499c364caef",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-BS.json",
+      "sha256": "d6aee8a3389cbf41c9b2b5b84df24dfbd391777ea2d57e33464e9b58ce501294",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-D8.json",
+      "sha256": "735f564b46812646dcdfacd3bde122704984e205a3b467a5ba37abe032c3dbd9",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-FB.json",
+      "sha256": "a325c3c005260911943587b2639cf22b32e83bc19d8349391b2f3788e95653f7",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-H-harness.json",
+      "sha256": "5cc57014446ccad35b492f113da1096c11748ccfc4804a8e3d18178f6eeeb7c5",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-NS.json",
+      "sha256": "1c849a89bea9bd583e94949576988d4b37e31d6c8d39fc6cadd5e3f8413c4ec9",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-allowlist.json",
+      "sha256": "2672a56bf2dd4040bdc403e7e1aa5d66394c5f9b155ac6d59947e9040d5e382c",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-discharge.json",
+      "sha256": "7109e83964bd2bf58eb5e7f7109e0b9603559d13df165660f3fe0dffaeb0edef",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-f88.json",
+      "sha256": "beaf7e70f1e15875b3a5516443635725e67b1b0ef7b592b9b5c477bdc1e260a9",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-g15b.json",
+      "sha256": "9840d4ccd154abb03e805744d6c94f7140e650f1d683e20f099cb92b43d5fee6",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-handle.json",
+      "sha256": "6dbe345118a0585d4aca7066e59427178ee24352cced9829014a1300bc68ff92",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-ledger.json",
+      "sha256": "a33cac72c3ce9b70407e2136214a6832b768e9dd13d8cf01fabbb21ae2f41b9c",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-mint-part-1-of-4.json",
+      "sha256": "18cc7e5507cac6b44925f7279dc362de7eaf7ed1ce78ceb6d043365171809979",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-mint-part-2-of-4.json",
+      "sha256": "86dfe73de7328d1eacd363136b181ab193c2223595d701b5b2a485cf95b7bf33",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-mint-part-3-of-4.json",
+      "sha256": "405b4a0d816175a2d5c3c5505bf90a738b88bbc13cfad827bdc05c53a2023634",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-mint-part-4-of-4.json",
+      "sha256": "e60d7bf805adb6baf4d5858ecbc84718c012105c7fb626c2445bbca14d9bbef6",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-mt3.json",
+      "sha256": "e2529b9554cbb15ede9207dcbe24944a55ceb8b6217e62744a24e60e12e30a29",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-pairing.json",
+      "sha256": "8811ef36d74159eb5546d5821561be75442aae58b0edaedce21a9c9ff100b23f",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-principal.json",
+      "sha256": "e4f7e2abb7825769f93cbc04cc5e5bd005539343659c952164af1ef9f21ab240",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-render.json",
+      "sha256": "fe1ccee7e45497d45be47151f479f9c02d1c10151a23d00fd24e137f965d9b33",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-rt6.json",
+      "sha256": "45dcc674941fe2552747a06994ce69c4c7c7ed991bfc760c4083699d3bf44694",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-P-seal.json",
+      "sha256": "132995392c36f786dcf23bfb1c0080a522cc3c756238a8a1573f4c7c06f2cac2",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-PI-contract.json",
+      "sha256": "ba91b1b722e4724a70b9209e09e27531d85c5550595a9c568c499b97e4bef7bc",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-PI.json",
+      "sha256": "e57a07900b3b0416ad92ce3896cafe3b6e52c9cbad41f9e4e363be8af8291727",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-PU.json",
+      "sha256": "2722b361d5873fc4186366f087c1f0fd131b4337952ea7eeb24930d981f6edf1",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-SB1.json",
+      "sha256": "35232c4270813321b11efc4484b1b176bca244f68b63cb25c16bbc22be9e1a50",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-SBV.json",
+      "sha256": "b114590a24b56ec585339df64aac80984f2f5efcc0ff482d1bc0d962810a433c",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-SO.json",
+      "sha256": "7df26634f3be9c800b353ca2ec38990276b833fc5e5b55879401d4d4306823bc",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-SV2.json",
+      "sha256": "f671f9c7efa3f84a2ccfe9e2688381cd76e041aa68542f2d42ddc5ca9b94eb65",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-T-tables.json",
+      "sha256": "eaff173191f3cc43e607117164ff49ead5d09ed6e98f9f22f49b57abfb8b5d1e",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-TURN.json",
+      "sha256": "956d37eac61f10da55752895119b27444a9cd13a51307362e5c62be426d58924",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-WF.json",
+      "sha256": "af30a4ee32934a088669af956d8c24a6bb84b01351e47617a263c87f540e9816",
+      "status": "AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-WR-part-1-of-4.json",
+      "sha256": "27c02a545e3e265d09c50d21b43d476ae46f43447017e8bf7b032b0efee4283f",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-WR-part-2-of-4.json",
+      "sha256": "7f51af9d64f444892aa548b50b8127313f6e962f35aea9231ce39bdbdccb09a6",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-WR-part-3-of-4.json",
+      "sha256": "35beac8acb5ad8258fd395614764c4fc86e96014652dfb604c624004541c0de3",
+      "status": "PARTITION-AS-DECLARED"
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-WR-part-4-of-4.json",
+      "sha256": "c5e74bca213c509f0b9db52d6fb59a2a14741dfff652a345fc5e838e0bede724",
+      "status": "PARTITION-AS-DECLARED"
+    }
+  ],
+  "negativeChecks": [
+    {
+      "name": "partition promoted to whole",
+      "refused": true
+    },
+    {
+      "name": "whole substituted with partition",
+      "refused": true
+    },
+    {
+      "name": "wrong candidate",
+      "refused": true
+    },
+    {
+      "name": "red baseline",
+      "refused": true
+    },
+    {
+      "name": "missing status",
+      "refused": true
+    },
+    {
+      "name": "failed whole result",
+      "refused": true
+    }
+  ],
+  "scope": "Reporting adapter only; raw bytes and canonical strict collector unchanged; complete corpus still mandatory.",
+  "productChanged": false,
+  "productionEffects": 0
+}

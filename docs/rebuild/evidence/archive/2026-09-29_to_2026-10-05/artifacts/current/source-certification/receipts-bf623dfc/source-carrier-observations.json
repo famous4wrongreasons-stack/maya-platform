@@ -1,0 +1,33 @@
+{
+  "contract": "maya.approved-source-carrier-observation/1",
+  "observations": [
+    {
+      "mode": "personal",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: {\"outcome\":\"sentence\",\"sentence\":\"activation_unavailable\",\"submitted\":false}\n+ actual - expected\n\n+ 'sentence'\n- 'dismissed'\n",
+      "counters": {
+        "activations": 7,
+        "stateChanges": 6,
+        "sentences": 1,
+        "submissions": 6
+      }
+    },
+    {
+      "mode": "journal",
+      "backendDetail": true,
+      "fullscreen": null,
+      "refs": [
+        {
+          "kind": "SCHEDULE",
+          "refCount": 3
+        }
+      ],
+      "counters": {
+        "activations": 1,
+        "stateChanges": 1,
+        "sentences": 0,
+        "submissions": 1
+      }
+    }
+  ]
+}

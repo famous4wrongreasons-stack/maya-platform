@@ -1,0 +1,17 @@
+{
+  "AR-1-ENVELOPE.md": "8b1d9c1279795848a3035a67da08fb5590a1753c6aaf0615654da8a818a9d91c",
+  "CHECKPOINT.md": "e57ede37f99dfd007aad18689308f7bc055e0e66c72f61750b35bcf3e9c061e2",
+  "CLAUSE-DISPOSITION.md": "bff0d6d36a8651ab9f5044eeeaca95a7fbbe9f44f5a1a4e6821cf03ca6569c87",
+  "CLAUSE-MATRIX.md": "93a582ead3fe5df66715c1dcc4240b4fc0961f66fe8198dd9ceddc95152de638",
+  "DECISIONS.md": "1a90fc493b67277ba7b7f5a5766c942dfcdd53a2725e336a33332bfdaf61eb8c",
+  "DELIVERY.json": "e161b9a89ec959d3a505c2716abfc7993dbd40774393bcf402d36cbd006c9a29",
+  "FILES-TOUCHED.md": "ae89fc85ff11a3b3bc23f2d00383f3134658ba5f38a230fb3f8861cade477ea9",
+  "current-audit.json": "ba1d2701f230da915531c7e7803693f527c5e85fe20af709937c5443f2f9a88a",
+  "ownership-proof.json": "66d00fff58f4c7ff8cf3949ae30f36356b2119193f033196ab0d9697a4cb968e",
+  "receipts.zip": "16bbc433db4951679b3940a9d6efe8e6764002171d2ba40a51a613a9bf23065c",
+  "recompute.mjs": "4b6acdfdc516557d971001985062a847682c7732331d8c9f75b0c7ac385cf0b6",
+  "recompute.test.mjs": "282bd9a9186d078c8bfc2f6de16461d5545fade763aae503a4de50c5be079bab",
+  "source-inventory.json": "6fbece85a19e7936fb32dc25ee061393703c08a7bedd9cc1797a121cad776313",
+  "u-proofs.json": "3e1c4d1b5be51a57b178c853b0f72cd0d9f0b723cf613f2d69e7a920ea7cd2ff",
+  "verification.json": "d514393d6a18ea08cb6134b4d06c2a7b25adfa8057b4254c401dc5e8d9158e1a"
+}

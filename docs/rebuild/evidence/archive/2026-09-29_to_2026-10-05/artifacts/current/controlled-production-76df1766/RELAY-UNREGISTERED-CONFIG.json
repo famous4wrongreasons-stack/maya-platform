@@ -1,0 +1,10 @@
+{
+  "path": "/home/m/mocine3388/mayaos.ru/public_html/.well-known/.htaccess",
+  "sha256": "ab3175467446655265bcaf284c3d7d9447825a3f4801999996e62bd90e5dd251",
+  "bytes": 1067,
+  "routing": "# The Apple App Site Association file, and only it, lives in this directory.\n#\n# Apple requires it over https, with no redirect, with no authentication, and with a Content-Type of\n# application/json. The file has no extension, so neither nginx nor Apache infers a type for it \u2014\n# measured on 2026-09-29, the response carried NO Content-Type header at all, which with the\n# `nosniff` this site sets is a type the fetcher cannot repair. ForceType supplies it.\n#\n# This lives here rather than in the site's root .htaccess on purpose: that file's sha256 is pinned\n# in relay-release-manifest.json and asserted by the R01 relay gate, and an un-re-pinned edit to it\n# blocks the next backend deploy. Nothing in this directory is pinned.\n<IfModule mod_mime.c>\n  ForceType application/json\n</IfModule>\n\n# Apple's CDN re-fetches periodically; an hour is short enough to correct a mistake quickly and long\n# enough not to matter. It must stay publicly fetchable with no auth of any kind.\n<IfModule mod_headers.c>\n  Header set Cache-Control \"public, max-age=3600\"\n</IfModule>\n",
+  "privateEvidenceDirs": [
+    "r01-20260912",
+    "wave-rc-8bc03454"
+  ]
+}

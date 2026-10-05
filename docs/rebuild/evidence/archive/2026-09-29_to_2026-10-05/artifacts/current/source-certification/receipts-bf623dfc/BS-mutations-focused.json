@@ -1,0 +1,277 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "bf623dfc708f097db31a767505be517f838f0dd4",
+  "battery_hashes": {
+    "gateBS.json": "dbd292e34335351ee905c416e34097bb86fded29e98bddfe69e4afea10101044"
+  },
+  "partition": null,
+  "startedAt": "2026-09-30T07:52:18.852Z",
+  "batteries": [
+    "gateBS.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": "personal-source.live-spec.ts",
+    "live_filter": null,
+    "unit_tests": "src/widgets/owner-ports/personal-schedule.adapter.spec.ts"
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-6e896e7da3",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-6e896e7da3",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gateBS.json",
+      "id": "BS-M01",
+      "files": [
+        "src/widgets/owner-ports/personal-schedule.adapter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "BS-REVOKED"
+      ],
+      "kills": [
+        {
+          "killer": "BS-REVOKED",
+          "test": "BS-1 exact personal schedule source BS-REVOKED absence/revocation of verified personal binding refuses before reading appointments",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateBS.json",
+      "id": "BS-M02",
+      "files": [
+        "src/widgets/owner-ports/personal-schedule.adapter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "BS-IDENTITY"
+      ],
+      "kills": [
+        {
+          "killer": "BS-IDENTITY",
+          "test": "BS-1 exact personal schedule source BS-IDENTITY requires canonical personal context and exact completed owner id, never a matching time",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateBS.json",
+      "id": "BS-M03",
+      "files": [
+        "src/widgets/owner-ports/personal-schedule.adapter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "BS-CHANGED"
+      ],
+      "kills": [
+        {
+          "killer": "BS-CHANGED",
+          "test": "BS-1 exact personal schedule source BS-CHANGED binding replacement or changed exact appointment is revalidated before mint",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateBS.json",
+      "id": "BS-M04",
+      "files": [
+        "src/widgets/booking/personal-schedule.presenter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "BS-SOURCE"
+      ],
+      "kills": [
+        {
+          "killer": "BS-SOURCE",
+          "test": "BS-1 canonical source evidence BS-SOURCE [HTTP] [E-MINT] own-list exact Client source proposes and commits reschedule and cancel through existing owners",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateBS.json",
+      "id": "BS-M05",
+      "files": [
+        "src/widgets/owner-ports/personal-schedule.adapter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "BS-AVAILABILITY"
+      ],
+      "kills": [
+        {
+          "killer": "BS-AVAILABILITY",
+          "test": "BS-1 exact personal schedule source BS-AVAILABILITY only an available exact-staff future slot can become a reschedule target",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [
+    "gateBS.json#BS-M04"
+  ],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-09-30T07:53:34.010Z"
+}

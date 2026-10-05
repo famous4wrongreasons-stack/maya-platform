@@ -1,0 +1,19 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "capturedAt": "2026-09-30T20:42:33.641414+00:00",
+  "os": "Darwin",
+  "osRelease": "25.5.0",
+  "architecture": "arm64",
+  "logicalCpu": 16,
+  "memoryBytes": 137438953472,
+  "node22": "v22.23.2",
+  "node24": "v24.15.0",
+  "pythonTests": "Python 3.11.9",
+  "postgresBinary": "postgres (PostgreSQL) 16.14 (Homebrew)",
+  "postgresAddress": "127.0.0.1:55729",
+  "workers": 8,
+  "testRestrictions": null,
+  "testTimeoutChanges": false,
+  "remoteCiRun": false,
+  "note": "Local CI commands on Darwin, not a remote Ubuntu/GitHub Actions timing receipt. Public test literals and fresh guarded synthetic databases only."
+}

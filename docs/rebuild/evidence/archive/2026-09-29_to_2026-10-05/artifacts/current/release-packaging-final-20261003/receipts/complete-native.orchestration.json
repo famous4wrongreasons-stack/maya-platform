@@ -1,0 +1,26 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "startedAt": "2026-10-03T07:46:40.717386+00:00",
+  "completedAt": "2026-10-03T18:43:27.163333+00:00",
+  "seconds": 39406.45,
+  "exit": 0,
+  "restrictions": null,
+  "historicalReceiptsAdmitted": 0,
+  "originalExecution": {
+    "path": "receipts/suspend-invalidated/20261003-clamshell/complete-native.orchestration.json",
+    "sha256": "958b494775b191903e155d02006ad45bc40188abddf2deed19d9b94caa8073d0",
+    "admission": "65 unaffected partitions retained; two suspend-overlapped partitions fully replaced"
+  },
+  "recovery": {
+    "path": "SUSPEND-RECOVERY-EXECUTION.json",
+    "sha256": "6463bd71306e392a7a08ac11279b1198c0e2ff5339c167d33998200ee6904d25",
+    "wholeCanonicalPartitions": [
+      "WR-part-3-of-4",
+      "WR-part-4-of-4"
+    ]
+  },
+  "reportingCoordinator": {
+    "path": "work/release-packaging-recovery-20261003/complete-recovery.py",
+    "sha256": "0e1dcf75f1d38445c48366ad830279fab391c4486e633438d2ccc4185de6ea7d"
+  }
+}

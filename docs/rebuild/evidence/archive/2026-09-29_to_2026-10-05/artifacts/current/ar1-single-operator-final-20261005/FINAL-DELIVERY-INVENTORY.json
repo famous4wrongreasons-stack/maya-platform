@@ -1,0 +1,25 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "createdAt": "2026-10-05T05:05:13.373315+00:00",
+  "productionEffects": 0,
+  "iosDevelopmentProvisioningExpiry": "2026-10-05T08:16:21+00:00",
+  "iosDevelopmentProvisioningExpiredAtReport": false,
+  "files": [
+    {
+      "path": "FINAL-RELEASE-REPORT.md",
+      "sha256": "888c5588e78892bd13012a9f051bb9dac482d4a46c9d24eba7097b666e9f0978"
+    },
+    {
+      "path": "OPERATOR-RUNBOOK.md",
+      "sha256": "74eb6c38550b7f2af0b620b951e696e521a979e2c9fa3edaafb5ec3e7456ea4d"
+    },
+    {
+      "path": "FINAL-CHECKPOINT.json",
+      "sha256": "a2ea40d8a0a09a376bb0f1d36e8e70b40a9cf3197b25a3ee64254b6b52cf2f45"
+    },
+    {
+      "path": "CERTIFICATION-RECEIPTS.json",
+      "sha256": "5f4d605a0e26ad8249ade9d6d25b3929835be42d40ab20089e426e40f1e459c0"
+    }
+  ]
+}

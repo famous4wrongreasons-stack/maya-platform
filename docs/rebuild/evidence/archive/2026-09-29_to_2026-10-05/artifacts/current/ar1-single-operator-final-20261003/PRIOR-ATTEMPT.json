@@ -1,0 +1,8 @@
+{
+  "previousCandidate": "b5621b1062ba3c7882c725d160f588d3b04e3938",
+  "status": "INADMISSIBLE",
+  "cause": "blocking formatter in test only",
+  "diagnosticDirectory": "outputs/ar1-single-operator-20261003",
+  "historicalReceiptsAdmitted": 0,
+  "newCandidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1"
+}

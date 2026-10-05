@@ -1,0 +1,15 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "name": "mutation-P-principal",
+  "command": [
+    "node",
+    "scripts/widgets-mutation-battery.mjs",
+    "--gate",
+    "P-principal",
+    "--out",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-2915ab8e/receipts/mutation-parts/widgets-mutation-part-P-principal.json"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-2915ab8e/mutation-isolated-worker-4/maya-saas-backend",
+  "exit": 0,
+  "seconds": 3027.23
+}

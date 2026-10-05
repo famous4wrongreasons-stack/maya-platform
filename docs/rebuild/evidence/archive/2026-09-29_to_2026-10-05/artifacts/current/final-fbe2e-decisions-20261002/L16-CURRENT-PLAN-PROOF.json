@@ -1,0 +1,46 @@
+{
+  "candidate": "4509d6f55df62da852740658c69613b113b5a1c1",
+  "status": "PASS",
+  "currentJobBudgetMinutes": 180,
+  "priorApprovedRepair": "e180086f",
+  "nativeReceipt": {
+    "path": "receipts/mutation-receipt/widgets-mutation-report-P-mint.json",
+    "sha256": "86c497758d080df7f3723121faf644cf23a37f09f0a5fea5fa039dfad2f87205"
+  },
+  "observedLocalTimings": [
+    {
+      "slot": "P-mint-part-1-of-4",
+      "gate": "P-mint",
+      "partition": "1/4",
+      "seconds": 2855.24,
+      "localMarginTo180Minutes": 7944.76,
+      "receiptSha256": "ca0dc63eac918d6d2e1e81b1e57a38286999874dced755e401523b1111f09fa3"
+    },
+    {
+      "slot": "P-mint-part-2-of-4",
+      "gate": "P-mint",
+      "partition": "2/4",
+      "seconds": 2839.44,
+      "localMarginTo180Minutes": 7960.5599999999995,
+      "receiptSha256": "3f522dba4a35abcdc6e4edb59c822853a4a6f0d4db19389a88fde2ea9a064fe2"
+    },
+    {
+      "slot": "P-mint-part-3-of-4",
+      "gate": "P-mint",
+      "partition": "3/4",
+      "seconds": 2179.04,
+      "localMarginTo180Minutes": 8620.96,
+      "receiptSha256": "6112f6921123c621763b44b715d8ccaea64828ac6bfae0616b0b10250b6310ca"
+    },
+    {
+      "slot": "P-mint-part-4-of-4",
+      "gate": "P-mint",
+      "partition": "4/4",
+      "seconds": 2714.02,
+      "localMarginTo180Minutes": 8085.98,
+      "receiptSha256": "c2e958eddf7dbb3c21b4c6b7edd7624ce9c95d8d2455e0398b3d3ecbc5ac2b92"
+    }
+  ],
+  "scope": "Four complete unfiltered parts pass below unchanged local budget. No hosted GitHub timing or future capacity guarantee claimed.",
+  "L25AnchorRebaseProvenance": "MINT-M20 tap-driven catch-up superseded by approved L25 independent observation; same six-edge proof remains load-bearing."
+}

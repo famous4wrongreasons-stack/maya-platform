@@ -1,0 +1,170 @@
+[
+  {
+    "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+    "name": "corpus-1",
+    "mode": "native",
+    "command": [
+      "node",
+      "scripts/widgets-mutation-battery.mjs",
+      "--gate",
+      "AR",
+      "--out",
+      "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/corpus-1/not-a-certificate.json"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-fed5f7df/mutation-isolated-worker-1/maya-saas-backend",
+    "exit": 0,
+    "seconds": 178.84610390663147,
+    "database": "maya_widget_gate_proof_diag_corpus_1",
+    "diagnosticOnly": true,
+    "sourceChanged": false,
+    "timeoutsChanged": false,
+    "harnessSha256": "77894f0fc5a1340ff0b4a29eb163e4e46e7dba592cccd73bac90713836dea2c7"
+  },
+  {
+    "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+    "name": "corpus-2",
+    "mode": "native",
+    "command": [
+      "node",
+      "scripts/widgets-mutation-battery.mjs",
+      "--gate",
+      "NS",
+      "--out",
+      "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/corpus-2/not-a-certificate.json"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-fed5f7df/mutation-isolated-worker-2/maya-saas-backend",
+    "exit": 0,
+    "seconds": 184.12680315971375,
+    "database": "maya_widget_gate_proof_diag_corpus_2",
+    "diagnosticOnly": true,
+    "sourceChanged": false,
+    "timeoutsChanged": false,
+    "harnessSha256": "77894f0fc5a1340ff0b4a29eb163e4e46e7dba592cccd73bac90713836dea2c7"
+  },
+  {
+    "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+    "name": "corpus-3",
+    "mode": "native",
+    "command": [
+      "node",
+      "scripts/widgets-mutation-battery.mjs",
+      "--gate",
+      "BS",
+      "--out",
+      "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/corpus-3/not-a-certificate.json"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-fed5f7df/mutation-isolated-worker-3/maya-saas-backend",
+    "exit": 1,
+    "seconds": 184.12643194198608,
+    "database": "maya_widget_gate_proof_diag_corpus_3",
+    "diagnosticOnly": true,
+    "sourceChanged": false,
+    "timeoutsChanged": false,
+    "harnessSha256": "77894f0fc5a1340ff0b4a29eb163e4e46e7dba592cccd73bac90713836dea2c7"
+  },
+  {
+    "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+    "name": "corpus-4",
+    "mode": "native",
+    "command": [
+      "node",
+      "scripts/widgets-mutation-battery.mjs",
+      "--gate",
+      "1-5",
+      "--out",
+      "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/corpus-4/not-a-certificate.json"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-fed5f7df/mutation-isolated-worker-4/maya-saas-backend",
+    "exit": -15,
+    "seconds": 428.15860986709595,
+    "database": "maya_widget_gate_proof_diag_corpus_4",
+    "diagnosticOnly": true,
+    "sourceChanged": false,
+    "timeoutsChanged": false,
+    "harnessSha256": "77894f0fc5a1340ff0b4a29eb163e4e46e7dba592cccd73bac90713836dea2c7"
+  },
+  {
+    "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+    "name": "corpus-5",
+    "mode": "native",
+    "command": [
+      "node",
+      "scripts/widgets-mutation-battery.mjs",
+      "--gate",
+      "TURN",
+      "--out",
+      "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/corpus-5/not-a-certificate.json"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-fed5f7df/mutation-isolated-worker-5/maya-saas-backend",
+    "exit": 1,
+    "seconds": 284.318058013916,
+    "database": "maya_widget_gate_proof_diag_corpus_5",
+    "diagnosticOnly": true,
+    "sourceChanged": false,
+    "timeoutsChanged": false,
+    "harnessSha256": "77894f0fc5a1340ff0b4a29eb163e4e46e7dba592cccd73bac90713836dea2c7"
+  },
+  {
+    "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+    "name": "corpus-6",
+    "mode": "native",
+    "command": [
+      "node",
+      "scripts/widgets-mutation-battery.mjs",
+      "--gate",
+      "SB1",
+      "--out",
+      "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/corpus-6/not-a-certificate.json"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-fed5f7df/mutation-isolated-worker-6/maya-saas-backend",
+    "exit": -15,
+    "seconds": 427.82142901420593,
+    "database": "maya_widget_gate_proof_diag_corpus_6",
+    "diagnosticOnly": true,
+    "sourceChanged": false,
+    "timeoutsChanged": false,
+    "harnessSha256": "77894f0fc5a1340ff0b4a29eb163e4e46e7dba592cccd73bac90713836dea2c7"
+  },
+  {
+    "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+    "name": "corpus-7",
+    "mode": "native",
+    "command": [
+      "node",
+      "scripts/widgets-mutation-battery.mjs",
+      "--gate",
+      "SBV",
+      "--out",
+      "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/corpus-7/not-a-certificate.json"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-fed5f7df/mutation-isolated-worker-7/maya-saas-backend",
+    "exit": -15,
+    "seconds": 428.21636390686035,
+    "database": "maya_widget_gate_proof_diag_corpus_7",
+    "diagnosticOnly": true,
+    "sourceChanged": false,
+    "timeoutsChanged": false,
+    "harnessSha256": "77894f0fc5a1340ff0b4a29eb163e4e46e7dba592cccd73bac90713836dea2c7"
+  },
+  {
+    "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+    "name": "corpus-8",
+    "mode": "native",
+    "command": [
+      "node",
+      "scripts/widgets-mutation-battery.mjs",
+      "--gate",
+      "SV2",
+      "--out",
+      "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/corpus-8/not-a-certificate.json"
+    ],
+    "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-fed5f7df/mutation-isolated-worker-8/maya-saas-backend",
+    "exit": 0,
+    "seconds": 183.87426209449768,
+    "database": "maya_widget_gate_proof_diag_corpus_8",
+    "diagnosticOnly": true,
+    "sourceChanged": false,
+    "timeoutsChanged": false,
+    "harnessSha256": "77894f0fc5a1340ff0b4a29eb163e4e46e7dba592cccd73bac90713836dea2c7"
+  }
+]

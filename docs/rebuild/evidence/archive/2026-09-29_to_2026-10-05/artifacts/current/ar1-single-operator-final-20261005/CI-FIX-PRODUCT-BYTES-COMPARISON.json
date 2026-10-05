@@ -1,0 +1,18 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "status": "PASS",
+  "comparedWith": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "canonicalCompiledBackendBuildDigest": "a1657e9a52a6cbaca9cad701f6233975f377befc63657eb2bf815ad72c60470a",
+  "equal": true,
+  "testOnlyPaths": [
+    "maya-saas-backend/src/entitlements/widget-release-access.spec.ts",
+    "maya-saas-backend/src/entitlements/widget-release-policy.spec.ts",
+    "maya-saas-backend/src/entitlements/widget-release-production.spec.ts",
+    "maya-saas-backend/src/entitlements/widget-release-single-operator.spec.ts",
+    "maya-saas-backend/src/entitlements/widget-release-unit-database.spec.ts",
+    "maya-saas-backend/test/widgets-live/support/widget-release-unit-database.ts"
+  ],
+  "historicalComparisonOnly": true,
+  "certificationInherited": false,
+  "newCertificationStillRequired": true
+}

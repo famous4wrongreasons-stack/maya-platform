@@ -1,0 +1,39 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "scope": "Fresh synthetic/local evidence only; not production evidence or whole-corpus certification",
+  "result": "PASS",
+  "before": [
+    {
+      "id": "a1",
+      "text": "Запись подтверждена."
+    }
+  ],
+  "after": [
+    {
+      "id": "a1",
+      "text": "Запись подтверждена."
+    }
+  ],
+  "serverReceiptUnchanged": true,
+  "durable": {
+    "appointments": [
+      {
+        "id": "appointment-action:47f89ce4-b157-4e60-becb-2e6818c2b451",
+        "status": "confirmed"
+      }
+    ],
+    "executions": 1
+  },
+  "sources": [
+    {
+      "path": "receipts/l27-postcommit-dismiss-observations.json",
+      "sha256": "b7700c27bb14350e457cedf077fa3241e26c481c9fdeefcdce51add5a9f9593a"
+    },
+    {
+      "path": "receipts/l27-runtime-mutations.json",
+      "sha256": "709c4d8113d7e01518869c54c1f49401b1ed2d011cef7ed4407524f3065542ee"
+    }
+  ],
+  "runtimeMutations": "8/8 KILLED",
+  "productionEffects": 0
+}

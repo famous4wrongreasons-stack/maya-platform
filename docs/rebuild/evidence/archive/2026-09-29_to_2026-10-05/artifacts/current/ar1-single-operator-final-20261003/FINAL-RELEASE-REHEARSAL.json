@@ -1,0 +1,28 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "status": "PASS",
+  "scope": "isolated migration clean replay, backup/restore, real canonical test-account login and single-operator grant/revoke on test DB; signed development app verification without installation",
+  "proofs": [
+    {
+      "path": "FINAL-MIGRATION-ROLLBACK-REHEARSAL.json",
+      "sha256": "86177d02cc465ecf85d312ef4e69fd66ad994abc7b7c9d0cbfa51ff5267af19d"
+    },
+    {
+      "path": "FINAL-IOS-SIGNING-REHEARSAL.json",
+      "sha256": "5c788d45a8d168469a0637301026250b9ad7d566e8ede7d814c0add2284916ed"
+    },
+    {
+      "path": "receipts/isolated-production-preflight.receipt.json",
+      "sha256": "449dea6ad42cb648c209cc0c27cfa2aaff0b9fb3e5332ad0c30cd52ce4dae570"
+    },
+    {
+      "path": "receipts/isolated-structural-schema.receipt.json",
+      "sha256": "7abbd45f9c65d7fa528135239b23a1187a7c9f58aa3523d4d36751684d748e33"
+    }
+  ],
+  "productionEffects": 0,
+  "productionPrivateKeysGenerated": 0,
+  "productionTrustInstalled": false,
+  "productionAuthorizationIssued": false,
+  "deviceInstalled": false
+}

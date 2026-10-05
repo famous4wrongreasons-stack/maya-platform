@@ -1,0 +1,11 @@
+{
+  "candidate": "977b814ecf2c41ae2caeca2df1ded812ce926b10",
+  "name": "runtime-test",
+  "command": [
+    "npm",
+    "test"
+  ],
+  "cwd": "maya-chat-shell",
+  "exit": 0,
+  "seconds": 39.76
+}

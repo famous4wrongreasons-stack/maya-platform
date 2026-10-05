@@ -1,0 +1,172 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "@nestjs/swagger": {
+      "name": "@nestjs/swagger",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": [
+        "js-yaml"
+      ],
+      "effects": [],
+      "range": "11.4.6 - 12.0.0",
+      "nodes": [
+        "node_modules/@nestjs/swagger"
+      ],
+      "fixAvailable": {
+        "name": "@nestjs/swagger",
+        "version": "12.0.2",
+        "isSemVerMajor": true
+      }
+    },
+    "ip-address": {
+      "name": "ip-address",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1239948,
+          "name": "ip-address",
+          "dependency": "ip-address",
+          "title": "ip-address: Address6.isLinkLocal() recognizes fe80::/64 rather than fe80::/10, allowing SSRF and trust-boundary bypass to on-link hosts",
+          "url": "https://github.com/advisories/GHSA-rpw4-54j3-4h4q",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-697",
+            "CWE-918"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": "<=10.5.0"
+        },
+        {
+          "source": 1239949,
+          "name": "ip-address",
+          "dependency": "ip-address",
+          "title": "ip-address: no classifier recognizes the NAT64 local-use range 64:ff9b:1::/48, allowing SSRF and trust-boundary bypass",
+          "url": "https://github.com/advisories/GHSA-2vr4-cq9g-pvrc",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-918"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=10.2.0 <=10.5.0"
+        }
+      ],
+      "effects": [],
+      "range": "<=10.5.0",
+      "nodes": [
+        "node_modules/ip-address"
+      ],
+      "fixAvailable": true
+    },
+    "js-yaml": {
+      "name": "js-yaml",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1239991,
+          "name": "js-yaml",
+          "dependency": "js-yaml",
+          "title": "js-yaml: maxTotalMergeKeys does not limit CPU use for empty merge sources",
+          "url": "https://github.com/advisories/GHSA-r3ph-w7gj-g6xm",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-400",
+            "CWE-407"
+          ],
+          "cvss": {
+            "score": 5.3,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+          },
+          "range": ">=5.0.0 <=5.4.0"
+        }
+      ],
+      "effects": [
+        "@nestjs/swagger"
+      ],
+      "range": "5.0.0 - 5.4.0",
+      "nodes": [
+        "node_modules/@nestjs/swagger/node_modules/js-yaml"
+      ],
+      "fixAvailable": {
+        "name": "@nestjs/swagger",
+        "version": "12.0.2",
+        "isSemVerMajor": true
+      }
+    },
+    "nodemailer": {
+      "name": "nodemailer",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": [
+        {
+          "source": 1239931,
+          "name": "nodemailer",
+          "dependency": "nodemailer",
+          "title": "Nodemailer: Process-global DNS cache reuses TLS `servername` across transports, enabling cross-tenant SMTP credential disclosure",
+          "url": "https://github.com/advisories/GHSA-6vj9-mwq6-2f5v",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-295"
+          ],
+          "cvss": {
+            "score": 5.9,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:L/A:N"
+          },
+          "range": ">=5.0.0 <10.0.2"
+        },
+        {
+          "source": 1240033,
+          "name": "nodemailer",
+          "dependency": "nodemailer",
+          "title": "Nodemailer: Nested structured recipient arrays bypass the parser depth limit and cause stack exhaustion DoS",
+          "url": "https://github.com/advisories/GHSA-8vvx-rff5-p5rq",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-674"
+          ],
+          "cvss": {
+            "score": 5.9,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "range": "<10.0.2"
+        }
+      ],
+      "effects": [],
+      "range": "<=10.0.1",
+      "nodes": [
+        "node_modules/nodemailer"
+      ],
+      "fixAvailable": {
+        "name": "nodemailer",
+        "version": "10.0.12",
+        "isSemVerMajor": true
+      }
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 4,
+      "high": 0,
+      "critical": 0,
+      "total": 4
+    },
+    "dependencies": {
+      "prod": 336,
+      "dev": 597,
+      "optional": 59,
+      "peer": 19,
+      "peerOptional": 0,
+      "total": 963
+    }
+  }
+}

@@ -1,0 +1,28 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const cp = require('node:child_process');
+const crypto = require('node:crypto');
+const root = process.cwd();
+const repo = path.join(root, 'work/maya-controlled-integration');
+const be = path.join(repo, 'maya-saas-backend');
+const ts = require(path.join(be, 'node_modules/typescript'));
+const file = 'maya-saas-backend/src/widgets/routing/effect-router.ports.ts';
+const base = '6af72aa46e7eff80fa2a4f825ccb2c0c27a0d234';
+const candidate = '30fa24698f3ae277c22209e8edfd448c29e4f872';
+const sha = value => crypto.createHash('sha256').update(value).digest('hex');
+const source = ref => cp.execFileSync('git', ['show', ref + ':' + file], {cwd:repo, encoding:'utf8'});
+const refs = [base + '^', base, candidate];
+const compiled = refs.map(ref => {
+ const input = source(ref);
+ const result = ts.transpileModule(input, {fileName:'effect-router.ports.ts', compilerOptions:{module:ts.ModuleKind.CommonJS, target:ts.ScriptTarget.ES2022, removeComments:true, sourceMap:false}, reportDiagnostics:true});
+ if (result.diagnostics?.length) throw new Error('Unexpected transpilation diagnostic');
+ if (!result.outputText.includes('bookingPreviewOf')) throw new Error('Runtime helper must be present');
+ return {ref, sourceSha256:sha(input), emittedSha256:sha(result.outputText), emittedBytes:Buffer.byteLength(result.outputText), emitted:result.outputText};
+});
+if (!compiled.every(x => x.emitted === compiled[0].emitted)) throw new Error('Executable delta exists; cannot classify as type-only delta');
+const declared = JSON.parse(fs.readFileSync(path.join(be,'test/widgets-live/mutations/gateWR.json'),'utf8'));
+const runtimeSites = ['src/widgets/booking/booking-selector.presenter.ts','src/widgets/booking/booking-noun-identity.ts','src/widgets/owner-ports/booking-selector.adapter.ts','src/widgets/owner-ports/booking-preview.adapter.ts'].map(file => ({file, sourceSha256:sha(fs.readFileSync(path.join(be,file))), mutationIds:declared.filter(m => (m.edits || (m.file ? [m] : [])).some(e => e.file === file)).map(m => m.id)}));
+if (!runtimeSites.every(x => x.mutationIds.length)) throw new Error('Uncovered new runtime site');
+const report = {candidate, historicalDelta:base, contract:'maya.l12-delta-classification-proof/1', sourceFile:file, compiler:'TypeScript ' + ts.version, options:'CommonJS, ES2022, removeComments, no sourceMap', compiled:compiled.map(({emitted,...row})=>row), emittedRuntimeIdenticalAcrossAllThree:true, runtimeHelperPredatesDelta:true, entireFileIsTypeOnly:false, runtimeSites, fullCurrentTypecheck:'receipts/backend-typecheck.receipt.json', liveTypecheck:'receipts/live-typecheck.receipt.json', nativeWRAdmission:'PENDING complete fresh WR parts', scope:'Addresses the exact five sites named by historical L12; does not claim exhaustive mutation coverage of every line or of the pre-existing helper.'};
+fs.writeFileSync(path.join(root,'outputs/final-certification-30fa2469/L12-DELTA-PROOF.json'),JSON.stringify(report,null,2)+'\n');
+console.log(JSON.stringify({candidate,emittedRuntimeIdentical:true,emittedBytes:compiled[0].emittedBytes,runtimeSites}));

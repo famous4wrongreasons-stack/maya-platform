@@ -1,0 +1,3644 @@
+diff --git a/.github/workflows/widget-contract.yml b/.github/workflows/widget-contract.yml
+index e69627d3..f95ad1e8 100644
+--- a/.github/workflows/widget-contract.yml
++++ b/.github/workflows/widget-contract.yml
+@@ -1,9 +1,7 @@
+ name: Widget Contract
+ 
+-# Wave 1 (K1 + K2) changes no runtime and no deployed byte. Its CI job therefore arrives
+-# NON-BLOCKING: `continue-on-error` on every step that could fail, so a contract finding is
+-# reported and does not stop a release that the contract does not yet govern. It becomes
+-# blocking in wave 2, when the gateway it describes starts running.
++# L2 owner decision: every applicable contract check is blocking. The release
++# collector repeats these checks before admitting the full fresh mutation corpus.
+ on:
+   pull_request:
+   push:
+@@ -17,10 +15,9 @@ concurrency:
+ 
+ jobs:
+   widget-contract:
+-    name: Widget Contract (non-blocking)
++    name: Widget Contract (blocking)
+     runs-on: ubuntu-latest
+     timeout-minutes: 10
+-    continue-on-error: true
+     defaults:
+       run:
+         working-directory: maya-saas-backend
+@@ -34,28 +31,22 @@ jobs:
+       - run: npm ci
+       - name: Generate the canonical Prisma client before contract compilation
+         run: npm run prisma:generate
+-        continue-on-error: true
+       - name: The certified contract compiles
+         run: npx tsc --noEmit --project tsconfig.widget-contract.json
+-        continue-on-error: true
+       - name: Widget Contract checkers
+         run: node scripts/widget-contract-check.mjs
+-        continue-on-error: true
+       - name: Wave 1 fence - the contract module is excluded from the build
+         run: |
+           grep -q '"src/widget-contract"' tsconfig.build.json
+           echo "src/widget-contract is excluded from tsconfig.build.json: deployed bytes unchanged"
+-        continue-on-error: true
+ 
+   k1-dossier:
+-    name: K1 surface dossier (non-blocking)
++    name: K1 surface dossier (blocking)
+     runs-on: ubuntu-latest
+     timeout-minutes: 10
+-    continue-on-error: true
+     steps:
+       - uses: actions/checkout@v4
+       - uses: actions/setup-node@v4
+         with: { node-version: 22 }
+       - name: The dossier covers every surface, and the ledgers are complete
+         run: node docs/rebuild/evidence/maya-chat-first-ux/k1/k1-dossier-check.mjs
+-        continue-on-error: true
+diff --git a/.github/workflows/widgets-live.yml b/.github/workflows/widgets-live.yml
+index b4d07de1..1bbb6649 100644
+--- a/.github/workflows/widgets-live.yml
++++ b/.github/workflows/widgets-live.yml
+@@ -84,6 +84,10 @@ jobs:
+       - run: npm ci
+       - run: npm run prisma:generate
+       - run: npx prisma migrate deploy
++      - name: Build the canonical React pipeline used by L5/L24 live proofs
++        run: |
++          npm ci --prefix ../maya-carrier-react
++          node ../maya-carrier-react/test/build-harness.mjs
+       - run: npm run typecheck:widgets-live
+       - run: npm run test:widgets:live
+       - run: npm run build
+diff --git a/.github/workflows/widgets-mutation.yml b/.github/workflows/widgets-mutation.yml
+index 2b596edc..4759ff65 100644
+--- a/.github/workflows/widgets-mutation.yml
++++ b/.github/workflows/widgets-mutation.yml
+@@ -17,7 +17,7 @@ name: Widgets Mutation
+ # The env block is platform-ci.yml's literals plus the declared widgets-live extras
+ # (`test/widgets-live/support/environment.ts`, IR-H1); `harness.live-spec.ts` (HAR-4) asserts it.
+ #
+-# Not a required check. Making it one is a repository-settings decision for the owner.
++# L2: complete fresh release admission is mandatory; partial diagnostic batteries cannot admit a release.
+ on:
+   # workflow_dispatch cannot discover a workflow absent from the default branch.
+   # A real canonical-branch push receipt is mandatory for Wave 1 closure.
+@@ -63,6 +63,8 @@ jobs:
+       - uses: actions/setup-node@v4
+         with:
+           node-version: 22
++      - run: npm ci
++      - run: npm run prisma:generate
+       - name: Verify scheduling and fail-closed receipt assembly
+         run: node --test scripts/widgets-mutation-ci.test.mjs
+       - id: plan
+@@ -136,6 +138,10 @@ jobs:
+       - run: npm ci
+       - run: npm run prisma:generate
+       - run: npx prisma migrate deploy
++      - name: Build the canonical React pipeline used by L5/L24 live proofs
++        run: |
++          npm ci --prefix ../maya-carrier-react
++          node ../maya-carrier-react/test/build-harness.mjs
+       - name: Run the battery shard
+         env:
+           SHARD: ${{ matrix.gate }}
+@@ -174,10 +180,14 @@ jobs:
+           pattern: widgets-mutation-part-${{ github.sha }}-*
+           path: mutation-parts
+           merge-multiple: true
+-      - name: Verify complete unrestricted declaration coverage
++      - name: Install release-contract checkers
++        run: npm ci --prefix maya-saas-backend
++      - name: Generate the canonical client for release-contract checks
++        run: npm run prisma:generate --prefix maya-saas-backend
++      - name: Verify blocking contract and complete fresh declaration coverage
+         env:
+           REQUESTED_GATES: ${{ inputs.gates }}
+-        run: node maya-saas-backend/scripts/widgets-mutation-ci.mjs assemble mutation-parts mutation-receipt "$GITHUB_SHA" "${REQUESTED_GATES:-}"
++        run: node maya-saas-backend/scripts/widgets-mutation-ci.mjs release mutation-parts mutation-receipt "$GITHUB_SHA" "${REQUESTED_GATES:-}"
+       - uses: actions/upload-artifact@v4
+         with:
+           name: widgets-mutation-complete-${{ github.sha }}
+diff --git a/docs/rebuild/evidence/maya-chat-first-ux/gate-audit-build.mjs b/docs/rebuild/evidence/maya-chat-first-ux/gate-audit-build.mjs
+index a27cd15e..5e151cf2 100644
+--- a/docs/rebuild/evidence/maya-chat-first-ux/gate-audit-build.mjs
++++ b/docs/rebuild/evidence/maya-chat-first-ux/gate-audit-build.mjs
+@@ -227,6 +227,8 @@ const expectedHeadline = phase === 'A-W5'
+   ? 'GATES LIVE CONTRACT-COMPLETE 3/15 · WITH U-CLASS 6/15 · STOPPED CLAUSES 0 · BLOCKED-DISCHARGE CLAUSES 25'
+   : 'GATES LIVE CONTRACT-COMPLETE 3/15 · WITH U-CLASS 6/15 · STOPPED CLAUSES 0 · BLOCKED-DISCHARGE CLAUSES 0';
+ if (audit.headline !== expectedHeadline) usage(`${phase} expected ${expectedHeadline}, built ${audit.headline}`);
++audit.archival_only = true;
++audit.release_admissible = false;
+ audit.builder = {
+   skeleton: false,
+   phase,
+@@ -247,4 +249,4 @@ const text = `${JSON.stringify(audit, null, 2)}\n`;
+ const out = option('--out');
+ if (out) fs.writeFileSync(path.resolve(out), text);
+ else process.stdout.write(text);
+-process.stderr.write(`GATE AUDIT BUILD (${phase}): ${audit.headline}; ${manifest.length} manifest line(s) accepted\n`);
++process.stderr.write(`ARCHIVAL ONLY — NOT RELEASE EVIDENCE: GATE AUDIT BUILD (${phase}): ${audit.headline}; ${manifest.length} manifest line(s) accepted\n`);
+diff --git a/docs/rebuild/widget-release-programme/FINAL-FBE2E-DECISIONS.md b/docs/rebuild/widget-release-programme/FINAL-FBE2E-DECISIONS.md
+new file mode 100644
+index 00000000..6f71aad3
+--- /dev/null
++++ b/docs/rebuild/widget-release-programme/FINAL-FBE2E-DECISIONS.md
+@@ -0,0 +1,93 @@
++# Final FBE2E owner decisions
++
++Owner decision: L2=B, L5=B, L24=B, L20=B, L23=A, L25=B, L26=A.
++
++L2 requires blocking contract checks and complete fresh release admission. The
++`widgets-mutation-ci.mjs release` command runs the contract compiler, structural
++checker and K1 dossier before the existing strict full-corpus collector. A
++diagnostic subset or ordinary `assemble` output is not release authorization.
++GitHub repository branch protection is an external setting; source workflow
++failure must not be represented as proof of that setting.
++
++L5/L24: one next local calendar day, using selected branch/availability timezone
++and tenant.defaultTimezone fallback. No widening, free-text or new input kinds.
++
++L20 requires the real booking owner and Action Engine to receive a provider
++fault naturally, over test infrastructure only. Supplying UNKNOWN is insufficient.
++
++L23 is accepted for the final certified candidate of this bounded pass. The
++structural test does not inspect every extra widget-path literal across all four
++network modules. The exact route allowlist, single fetch call site, build refusal
++fixtures and network ratchets remain mandatory. This acceptance does not extend
++to subsequent network changes and does not authorize any additional endpoint.
++
++L25 preserves literal delivery/render lifecycle; a selector tap alone is not
++render evidence, and render evidence grants no booking or Action Engine authority.
++
++L26: `docs/rebuild/evidence/maya-chat-first-ux/gate-audit-build.mjs` and all audit
++reports it produced are archival-only and inadmissible for release certification,
++including reports predating the explicit archival marker. Original historical
++bytes are preserved. The strict fresh collector is the sole release-admission
++path: exact source, declarations, full coverage, successful controls and normal
++exits are mandatory. Manual audit summaries cannot substitute for raw receipts.
++
++HANDOFF remains globally STOP; full-contract certification remains false.
++These decisions authorize implementation and synthetic proofs only, with no
++production migration, deploy, entitlement grant, OTP or YCLIENTS effect.
++
++
++## Implemented current contracts (supersede limitations; not a certificate)
++
++L5/L24 selects the authenticated tenant's active internal provider and its branch
++through `AvailabilityCalendarService`, a read-only owner. External availability
++uses its existing tenant timezone, which is the canonical fallback. Local date
++arithmetic uses calendar components, not elapsed 24 hours. The canonical slot's
++instant is unchanged; the server formats the displayed slot and confirmation in
++the same timezone. No new input kinds, window widening or text interpretation.
++The eight HTTP/PostgreSQL/React pipeline cases cover UTC, positive and negative
++offsets, a fractional offset, leap/month/year boundaries and both DST changes.
++
++That pipeline exposed an H1 defect: the emitter used the parallel ASCII-sorted
++helper while H6 and carrier H7 use the canonical ActionIdentity codec. Opaque slot
++keys can order differently (observed with Kathmandu). The emitter now imports the
++existing canonical function. `L5-H1` and mutation `FB-H1-CODEC` bind the regression;
++no alternate hash scheme or presentation normalization was introduced.
++
++L25 uses the existing resolve request for an optional exact sealed observation
++(widget_id, body_hash, envelope_seal). The HTTP egress owner records MINTED →
++DELIVERED; the connected carrier's independent post-mount callback records
++DELIVERED → LIVE. Delivery means server handoff to its HTTP channel; LIVE records
++an authenticated carrier observation, not proof of human attention. Neither
++observation grants authority. Current principal, tenant, seal, expiry, retention,
++and release admission are reread. Conversation locking and CAS couple the state
++with the existing AuditLog transaction. Foreign/expired/revoked/missing observations
++refuse; duplicates are idempotent only with their exact existing audit. A selector
++REFINE tap cannot create either observation. No new persistent model or column.
++
++`L25-ATOMIC` injects a failure after the audit append and proves both the state and
++audit roll back. `L25-CONCURRENT` submits eight concurrent observations and a replay,
++proving one transition/audit and zero booking or Action Engine executions. The real
++React browser mount is checked independently of taps, including a disposable
++counterfactual bundle without the observation hook. The synthetic DOM drawer used
++by source-carrier probes is explicitly disclosed; it is not human-attention evidence.
++
++L20 uses a loopback test provider and dedicated PostgreSQL test-provider table,
++without a uniqueness constraint that could conceal duplicate dispatch. The provider
++commits its row and destroys the socket before response bytes. Its test transport
++adapter reports the resulting connection failure via the existing CRM error contract;
++the real booking owner and Action Engine derive UNKNOWN. A failing reconciliation
++read retains safe pending. One ordinary and six simultaneous retries produce one
++provider dispatch/row, one execution, no mirror appointment and no success line.
++No UNKNOWN decision is supplied to Action Engine, and no external provider is used.
++
++## Mutation provenance
++
++The full corpus adds `gateFB`: 15 calendar/hash/lifecycle/provider counterfactuals.
++The P-mint MINT-M20 anchor previously represented tap-induced delivery/render
++catch-up. L25=B explicitly removes that behavior: its current mutant refuses the
++independently rendered LIVE predecessor, killed by the same six-edge booking proof.
++MINT-M15's anchor is disambiguated from the new lifecycle owner. Historical receipts
++and former descriptions remain in Git history; no historic result is relabeled.
++The collector's inventory is now 524 declarations in 45 batteries/66 parts: 521
++applicable kills, two globally stopped HANDOFF declarations and one pre-existing
++equivalence. These are expectations only until the fresh programme executes.
+diff --git a/maya-carrier-react/dev/build-gallery.mjs b/maya-carrier-react/dev/build-gallery.mjs
+index 3f048b99..891548dc 100644
+--- a/maya-carrier-react/dev/build-gallery.mjs
++++ b/maya-carrier-react/dev/build-gallery.mjs
+@@ -8,7 +8,7 @@ const OUT = path.join(HERE, 'dist');
+ fs.rmSync(OUT, { recursive: true, force: true });
+ fs.mkdirSync(OUT, { recursive: true });
+ await esbuild.build({
+-  entryPoints: [path.join(HERE, 'gallery.tsx'), path.join(HERE, 'detail.tsx')],
++  entryPoints: [path.join(HERE, 'gallery.tsx'), path.join(HERE, 'detail.tsx'), path.join(HERE, 'l25-render.tsx')],
+   bundle: true,
+   format: 'esm',
+   target: 'es2022',
+@@ -35,3 +35,22 @@ fs.writeFileSync(
+ <body><main id="maya" class="app"></main></body></html>`,
+ );
+ console.log('gallery -> dev/dist/index.html');
++
++fs.writeFileSync(path.join(OUT, 'l25-render.html'), '<!doctype html><html><head><meta charset="utf-8"><title>L25 mount proof</title><script type="module" src="./l25-render.js"></script></head><body><main id="maya"></main></body></html>');
++
++// L25 counterfactual: remove only the mounted observation from a disposable bundle.
++// The production source is never edited, and neither page performs network calls.
++await esbuild.build({
++  entryPoints: [path.join(HERE, 'l25-render.tsx')], bundle: true, format: 'esm',
++  target: 'es2022', jsx: 'automatic', outfile: path.join(OUT, 'l25-no-observation.js'),
++  loader: { '.json': 'json' }, logLevel: 'warning',
++  plugins: [{ name: 'l25-observation-counterfactual', setup(build) {
++    build.onLoad({ filter: /[/\\]WidgetCard\.tsx$/ }, ({ path: file }) => {
++      const source = fs.readFileSync(file, 'utf8');
++      const anchor = "if (item.display === 'live') rendered?.(item.id);";
++      if (source.split(anchor).length !== 2) throw new Error('L25 counterfactual anchor drift');
++      return { contents: source.replace(anchor, '/* counterfactual: no observation */'), loader: 'tsx' };
++    });
++  } }],
++});
++fs.writeFileSync(path.join(OUT, 'l25-no-observation.html'), '<!doctype html><html><head><meta charset="utf-8"><title>L25 counterfactual</title><script type="module" src="./l25-no-observation.js"></script></head><body><main id="maya"></main></body></html>');
+diff --git a/maya-carrier-react/dev/l25-render.tsx b/maya-carrier-react/dev/l25-render.tsx
+new file mode 100644
+index 00000000..4994c5bd
+--- /dev/null
++++ b/maya-carrier-react/dev/l25-render.tsx
+@@ -0,0 +1,30 @@
++// L25 browser-only proof. No network, credentials or business authority.
++import { useState } from 'react';
++import { createRoot } from 'react-dom/client';
++import { WidgetCard } from '../src/widgets/WidgetCard';
++import { tokens } from '../src/identity/tokens';
++import items from './results.json';
++const entry = (items as unknown as { fixture: string; result: unknown }[]).find(x => x.fixture === 'kind-service-selector')!;
++const observed: unknown[] = [];
++let activations = 0;
++function report() {
++  document.querySelector('#result')!.textContent = JSON.stringify({ observed, activations });
++}
++const rendered = (id: string) => {
++  const article = document.querySelector('article');
++  observed.push({ id, connected: article?.isConnected === true, controls: article?.querySelectorAll('[data-ref]').length ?? 0, beforeAnyTap: activations === 0 });
++  report();
++};
++function Harness() {
++  const [mounted, setMounted] = useState(false);
++  const [display, setDisplay] = useState<'live' | 'collapsed'>('live');
++  const item = { id: 'l25-mounted', result: entry.result as never, display, pending: null, sentence: null };
++  return <>
++    <button onClick={() => { setDisplay('live'); setMounted(true); }}>Mount selector</button>
++    <button onClick={() => setDisplay('collapsed')}>Collapse selector</button>
++    <button onClick={() => setMounted(false)}>Unmount selector</button>
++    <pre id="result">{'{"observed":[],"activations":0}'}</pre>
++    {mounted && <WidgetCard item={item} t={tokens(false)} rendered={rendered} activate={() => { activations++; report(); }} />}
++  </>;
++}
++createRoot(document.querySelector('#maya')!).render(<Harness />);
+diff --git a/maya-carrier-react/src/chat/ChatScreen.tsx b/maya-carrier-react/src/chat/ChatScreen.tsx
+index c3a0fc0c..c717b883 100644
+--- a/maya-carrier-react/src/chat/ChatScreen.tsx
++++ b/maya-carrier-react/src/chat/ChatScreen.tsx
+@@ -213,7 +213,7 @@ function Row({
+         }}
+       >
+         <div style={{ width: '100%', minWidth: 0, flex: '1 1 100%' }}>
+-          <WidgetCard item={item} t={t} activate={widgets.activate} />
++          <WidgetCard item={item} t={t} activate={widgets.activate} rendered={widgets.rendered} />
+         </div>
+       </div>
+     );
+diff --git a/maya-carrier-react/src/widgets/DetailSheet.tsx b/maya-carrier-react/src/widgets/DetailSheet.tsx
+index c4532907..9ca361d5 100644
+--- a/maya-carrier-react/src/widgets/DetailSheet.tsx
++++ b/maya-carrier-react/src/widgets/DetailSheet.tsx
+@@ -41,12 +41,14 @@ export function DetailSheet({
+   view,
+   t,
+   activate,
++  rendered,
+   close,
+   focusFallback,
+ }: {
+   /** The shell's own `ShellView.fullscreen`. A detail opens from this and from nothing else. */
+   readonly view: FullscreenView | null;
+   readonly t: Tokens;
++  readonly rendered?: (itemId: string) => void;
+   readonly activate: (itemId: string, ref: InteractiveRefKey) => void;
+   /** ALWAYS the shell's `closeDetail`. Never `dialog.close()`. */
+   readonly close: () => void;
+@@ -240,6 +242,7 @@ export function DetailSheet({
+             t={t}
+             item={{ id: view.itemId, result: view.result, display: 'live', pending: null, sentence: null }}
+             activate={activate}
++            rendered={rendered}
+           />
+         )}
+       </div>
+diff --git a/maya-carrier-react/src/widgets/FullscreenDetail.tsx b/maya-carrier-react/src/widgets/FullscreenDetail.tsx
+index 15d4b3b2..6456c87f 100644
+--- a/maya-carrier-react/src/widgets/FullscreenDetail.tsx
++++ b/maya-carrier-react/src/widgets/FullscreenDetail.tsx
+@@ -19,6 +19,7 @@ export function FullscreenDetail({
+       view={shell.fullscreen}
+       t={t}
+       activate={(itemId: string, ref: InteractiveRefKey) => widgets.activate(itemId, ref)}
++      rendered={widgets.rendered}
+       close={() => widgets.closeDetail()}
+       focusFallback={focusFallback}
+     />
+diff --git a/maya-carrier-react/src/widgets/WidgetCard.tsx b/maya-carrier-react/src/widgets/WidgetCard.tsx
+index a753083b..25adab13 100644
+--- a/maya-carrier-react/src/widgets/WidgetCard.tsx
++++ b/maya-carrier-react/src/widgets/WidgetCard.tsx
+@@ -30,15 +30,20 @@ export function WidgetCard({
+   item,
+   t,
+   activate,
++  rendered,
+   variant = 'lane',
+ }: {
+   readonly item: WidgetItemView;
+   readonly t: Tokens;
++  readonly rendered?: ((itemId: string) => void) | undefined;
+   readonly activate: (itemId: string, ref: InteractiveRefKey) => void;
+   /** In the lane a card is one turn's width; in the fullscreen sheet it is the whole sheet. */
+   readonly variant?: 'lane' | 'sheet';
+ }) {
+   const result = item.result;
++  useEffect(() => {
++    if (item.display === 'live') rendered?.(item.id);
++  }, [item, rendered]);
+   const c = widgetTheme(t);
+   const cardRef = useRef<ElementOrNone>(null);
+   const seenResultRef = useRef<ResultOrNone>(null);
+diff --git a/maya-chat-shell/dist/manifest.json b/maya-chat-shell/dist/manifest.json
+index aeefdf6a..e94cdf02 100644
+--- a/maya-chat-shell/dist/manifest.json
++++ b/maya-chat-shell/dist/manifest.json
+@@ -58,7 +58,7 @@
+       },
+       {
+         "path": "src/net/client.ts",
+-        "sha256": "ef565c39535d73c8e5c756ad795c154d5236c619cb6127a37293a38bc5130b33"
++        "sha256": "684bd8bed745d0c63600154a46a1dba3ef1b949a5e96af3cec59083afbaada6b"
+       },
+       {
+         "path": "src/net/endpoint.ts",
+@@ -74,7 +74,7 @@
+       },
+       {
+         "path": "src/net/types.ts",
+-        "sha256": "ffa148efbe00d6a7a72ebc7fda8772dd443860588f4606b81bdc4015fb7d68cb"
++        "sha256": "c6caccc4eefb2795f07d1633c04d0e12f6e494eb4200e90526a525f959b8c53a"
+       },
+       {
+         "path": "src/renderer/cells.ts",
+@@ -110,15 +110,15 @@
+       },
+       {
+         "path": "src/shell/intents.ts",
+-        "sha256": "043555d043133e9d9e73d013dcfd5acc135dba142369639471ad49478b390983"
++        "sha256": "795c79edc7f686a5026c1d1ec84f9fc0f86982d34c21729c50fd91b4ebec3a52"
+       },
+       {
+         "path": "src/shell/ports.ts",
+-        "sha256": "63c5feca46ce603bf608d9cd0cd5bc249fcf62a1cae23387f335b2e4e17398a6"
++        "sha256": "1b2237102c642c8a702c1059291904e98e15c8d5a63dadcab39b22aa73a97eff"
+       },
+       {
+         "path": "src/shell/shell.ts",
+-        "sha256": "edb383105100f1008bf6bfb779cdc53c941a4bebe70d390245ac526e98facef3"
++        "sha256": "0334e8004a1abdc852f50e2f04874c2eaa6dbae6cea499d0b6b3a48ce9edf3d0"
+       },
+       {
+         "path": "src/shell/view.ts",
+@@ -130,8 +130,8 @@
+       }
+     ]
+   },
+-  "bytes": 454445,
+-  "digest": "4968feed959da301629c04e26132420238c0099ae38a1abf1aaad29d9ac086ee",
++  "bytes": 457610,
++  "digest": "2d308c178ded8405e92a31e732a42f1a800aab232b373d21c4ca6483e3dbbeaf",
+   "toolchain": {
+     "typescript": "5.9.3",
+     "target": "ES2022",
+@@ -139,8 +139,8 @@
+     "moduleResolution": "Bundler"
+   },
+   "web": {
+-    "digest": "c8f0ff8d50685853b6a0dbd5e454f8f16f437df2719a987fe894ab350b1882f7",
+-    "modulePath": "m/c8f0ff8d50685853/",
++    "digest": "a446fbf520af8e11b77f6c8261f73c7eb2e6625745320f55632396b92ba4e147",
++    "modulePath": "m/a446fbf520af8e11/",
+     "files": [
+       {
+         "path": "entry/main.js",
+@@ -164,8 +164,8 @@
+       },
+       {
+         "path": "src/dom/host.js",
+-        "sha256": "edfaa3aae6b6d2a89e02af10d2fd39bb7315bf26a90429741f5f472c8221c065",
+-        "bytes": 20584
++        "sha256": "a6db41717b8666137b536e9b2df90283fc237bdb67b13f2db981647b1916b593",
++        "bytes": 20828
+       },
+       {
+         "path": "src/dom/nav.js",
+@@ -194,8 +194,8 @@
+       },
+       {
+         "path": "src/net/client.js",
+-        "sha256": "8a45499053a7476d3eb506ad92387b12b7164adfdd1f37d216b750772ac57eac",
+-        "bytes": 20752
++        "sha256": "252bbe749d9c7336b879a9c89480e6f09989b22a9b4e7ba596a4224055f12316",
++        "bytes": 21023
+       },
+       {
+         "path": "src/net/endpoint.js",
+@@ -264,8 +264,8 @@
+       },
+       {
+         "path": "src/shell/intents.js",
+-        "sha256": "8fabc1210c9104a579762fd1857acc1b03911408081373704901e0959246356a",
+-        "bytes": 24281
++        "sha256": "d8180fb5c0e0a807315b59efc7b4b5f250de7094e25e143024c1e403d25a1660",
++        "bytes": 26470
+       },
+       {
+         "path": "src/shell/ports.js",
+@@ -274,8 +274,8 @@
+       },
+       {
+         "path": "src/shell/shell.js",
+-        "sha256": "3d2e36bd76fde493bd148aed74544fd9d9df2c738b4789899fe1e11b1f860bf2",
+-        "bytes": 7462
++        "sha256": "4c30eb6ffc440d1573cecbf7136f08faf24cef5439df0d613c43b7d5a06d364e",
++        "bytes": 7677
+       },
+       {
+         "path": "src/shell/view.js",
+@@ -303,7 +303,7 @@
+       "bytes": 29125
+     },
+     "index": {
+-      "sha256": "64f1037eed0a2204a4e17d6ab957ceaada23e8239f5e694a9c8c5162c5050409",
++      "sha256": "ddf2304dfdc76787308e4b3e5340857a0b0fce172eb5324c3986ae55d485b098",
+       "bytes": 1344
+     },
+     "assets": [
+diff --git a/maya-chat-shell/src/dom/host.ts b/maya-chat-shell/src/dom/host.ts
+index e093236c..8fbfeddf 100644
+--- a/maya-chat-shell/src/dom/host.ts
++++ b/maya-chat-shell/src/dom/host.ts
+@@ -412,7 +412,7 @@ export interface WidgetDrawer {
+ export interface WidgetDrawerDeps {
+   readonly factory: DomFactory;
+   readonly scheduler: Pick<Scheduler, 'now' | 'after' | 'frame'>;
+-  readonly widgets: Pick<WidgetPort, 'activate'>;
++  readonly widgets: Pick<WidgetPort, 'activate' | 'rendered'>;
+ }
+ 
+ /** The neutral sentence an item carries instead of a silent outcome (D9, §1.4). */
+@@ -506,6 +506,9 @@ export function createWidgetDrawer(deps: WidgetDrawerDeps): WidgetDrawer {
+       if (target !== null) deps.scheduler.frame(() => target.focus());
+       else if (focusedRef !== null) (drawn.controls.find((c) => c.ref === focusedRef)?.element ?? drawn.heading)?.focus();
+       else if (headingFocused) drawn.heading?.focus();
++      if (item.display === 'live') deps.scheduler.frame(() => {
++        if (article.isConnected && items.get(item.id)?.item === item) deps.widgets.rendered(item.id);
++      });
+       return article;
+     },
+     control(article, ref) {
+diff --git a/maya-chat-shell/src/net/client.ts b/maya-chat-shell/src/net/client.ts
+index 5411e222..d4718936 100644
+--- a/maya-chat-shell/src/net/client.ts
++++ b/maya-chat-shell/src/net/client.ts
+@@ -597,6 +597,10 @@ export function createTransport(auth: Authorizer, timeouts: Timeouts = { request
+ 
+     async resolveWidgets(request: WidgetResolveRequest, signal: AbortSignal) {
+       const body: WidgetResolveRequest = {
++        ...(request.rendered === undefined ? {} : { rendered: {
++          widget_id: request.rendered.widget_id, body_hash: request.rendered.body_hash,
++          envelope_seal: request.rendered.envelope_seal,
++        } }),
+         thread_page: {
+           limit: request.thread_page.limit,
+           ...(request.thread_page.before === undefined ? {} : { before: request.thread_page.before }),
+diff --git a/maya-chat-shell/src/net/types.ts b/maya-chat-shell/src/net/types.ts
+index 051dea75..45abd563 100644
+--- a/maya-chat-shell/src/net/types.ts
++++ b/maya-chat-shell/src/net/types.ts
+@@ -68,6 +68,7 @@ export interface TranscribeRequest {
+ export type WidgetIntentRequest = WidgetIntentSubmission;
+ 
+ export interface WidgetResolveRequest {
++  readonly rendered?: { readonly widget_id: string; readonly body_hash: string; readonly envelope_seal: string };
+   readonly thread_page: { readonly limit: number; readonly before?: string };
+ }
+ 
+diff --git a/maya-chat-shell/src/shell/intents.ts b/maya-chat-shell/src/shell/intents.ts
+index 2f2a082f..166e0c93 100644
+--- a/maya-chat-shell/src/shell/intents.ts
++++ b/maya-chat-shell/src/shell/intents.ts
+@@ -150,6 +150,7 @@ export interface ActivationCounters {
+ }
+ 
+ export interface WidgetsDeps {
++  readonly recordRender?: (envelope: WidgetEnvelope) => Promise<boolean>;
+   readonly timeline: TimelineWriter;
+   readonly render: RenderFn;
+   readonly environment: Pick<EnvironmentProbe, 'a11y' | 'onA11yChange'>;
+@@ -161,6 +162,7 @@ export interface WidgetsDeps {
+ }
+ 
+ export interface Widgets extends DetailSource {
++  rendered(itemId: string): void;
+   ingest(envelope: WidgetEnvelope): IngestOutcome;
+   /** Assignable to `WidgetPort.activate`; the outcome is for tests and the dev fixture host. */
+   activate(itemId: string, ref: InteractiveRefKey): Promise<ActivationOutcome>;
+@@ -321,9 +323,40 @@ export const inputsForActivation = (
+ 
+ // ── the store ──────────────────────────────────────────────────────────────────────────────────
+ 
++/** Same bounded resolve transport; the carrier never receives envelope secrets. */
++export const createRenderObserver = (transport: Pick<Transport, 'resolveWidgets'>, newAbort: () => AbortHandle) => {
++  const pending = new Set<AbortHandle>();
++  return {
++    async record(envelope: WidgetEnvelope): Promise<boolean> {
++      const abort = newAbort();
++      pending.add(abort);
++      try {
++        const result = await transport.resolveWidgets({ thread_page: { limit: 1 }, rendered: {
++          widget_id: envelope.widget_id, body_hash: envelope.integrity.body_hash,
++          envelope_seal: envelope.integrity.envelope_seal,
++        } }, abort.signal);
++        return result.ok;
++      } finally { pending.delete(abort); }
++    },
++    dispose() { for (const abort of pending) abort.abort(); pending.clear(); },
++  };
++};
++
+ export const createWidgets = (deps: WidgetsDeps): Widgets => {
+   const vault = createTokenVault();
+   const entries = new Map<string, Entry>();
++  const renderObservations = new Map<string, Promise<boolean>>();
++  const rendered = (itemId: string): void => {
++    const entry = entries.get(itemId);
++    if (!entry || entry.verdict !== 'valid' || entry.display !== 'live' ||
++        !['SERVICE_SELECTOR', 'STAFF_SELECTOR'].includes(entry.envelope.kind)) return;
++    const id = entry.envelope.widget_id;
++    if (renderObservations.has(id)) return;
++    const observe = deps.recordRender;
++    const pending = Promise.resolve().then(() => observe ? observe(entry.envelope) : false).catch(() => false);
++    renderObservations.set(id, pending);
++    void pending.then((ok) => { if (!ok && renderObservations.get(id) === pending) renderObservations.delete(id); });
++  };
+   /** Every emission this conversation has drawn or replaced; a repeat renders nothing (P-25, L7). */
+   const seen = new Set<string>();
+   /**
+@@ -640,6 +673,14 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
+ 
+     const inputs = inputsForActivation(intent, ref);
+     if (inputs === undefined) return endInSentence(entry, 'activation_unavailable', false);
++    if (['SERVICE_SELECTOR', 'STAFF_SELECTOR'].includes(entry.envelope.kind) && intent.effect === 'REFINE') {
++      // A tap never creates evidence. Only the mounted carrier callback can.
++      const emission = entry.emission;
++      const observed = await (renderObservations.get(entry.envelope.widget_id) ?? Promise.resolve(false));
++      if (entries.get(itemId) !== entry || entry.emission !== emission || entry.pending !== null)
++        return { outcome: 'ignored', reason: 'in_flight' };
++      if (!observed) return endInSentence(entry, 'activation_unavailable', false);
++    }
+     const submission: WidgetIntentSubmission = {
+       contract: 'maya.widget.intent.submission/1',
+       widget_id: entry.envelope.widget_id,
+@@ -759,11 +800,13 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
+     if (reason === 'cleared') {
+       seen.clear();
+       published.clear();
++      renderObservations.clear();
+     }
+   });
+ 
+   return {
+     ingest,
++    rendered,
+     activate,
+     openDetail,
+     releaseDetail(itemId) {
+@@ -782,6 +825,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
+       vault.clear();
+       seen.clear();
+       published.clear();
++      renderObservations.clear();
+       detailOpeners.clear();
+     },
+   };
+diff --git a/maya-chat-shell/src/shell/ports.ts b/maya-chat-shell/src/shell/ports.ts
+index 3d613f66..76bd8c1d 100644
+--- a/maya-chat-shell/src/shell/ports.ts
++++ b/maya-chat-shell/src/shell/ports.ts
+@@ -277,6 +277,8 @@ export interface ShellView {
+ }
+ 
+ export interface WidgetPort {
++  /** Called by the carrier after mounting an intact RenderResult, never by a tap. */
++  rendered(itemId: string): void;
+   view(): ShellView;
+   subscribe(listener: (view: ShellView) => void): Cancel;
+   navigate(route: PrimaryRoute): void;
+diff --git a/maya-chat-shell/src/shell/shell.ts b/maya-chat-shell/src/shell/shell.ts
+index ad274d0e..89594936 100644
+--- a/maya-chat-shell/src/shell/shell.ts
++++ b/maya-chat-shell/src/shell/shell.ts
+@@ -18,7 +18,7 @@ import type { RenderResult } from '../renderer/nodes.ts';
+ import { BASE_ROUTES } from '../routes/registry.ts';
+ import { createConversation, type AbortHandle, type Conversation } from './conversation.ts';
+ import { landDeepLink, type DeepLinkLanding } from './deeplink.ts';
+-import { createUnavailableSubmission, createWidgets, type Widgets } from './intents.ts';
++import { createRenderObserver, createUnavailableSubmission, createWidgets, type Widgets } from './intents.ts';
+ import type {
+   Cancel,
+   EnvironmentProbe,
+@@ -266,7 +266,7 @@ export const createShell = (deps: ShellDeps): ShellController => {
+ // ── composition, for entry/ ────────────────────────────────────────────────────────────────────
+ 
+ export interface ShellRuntimeDeps {
+-  readonly transport: Pick<Transport, 'chat'>;
++  readonly transport: Pick<Transport, 'chat' | 'resolveWidgets'>;
+   readonly session: Pick<SessionPort, 'view' | 'subscribe'>;
+   readonly render: RenderFn;
+   readonly environment: Pick<EnvironmentProbe, 'a11y' | 'onA11yChange' | 'fragment'>;
+@@ -307,7 +307,9 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
+     ingestResolution: (resolution) => ingestAuthorizedEnvelope?.(resolution),
+   });
+   const shell = createShell({ history: deps.history, session: deps.session });
++  const observations = createRenderObserver(deps.transport, deps.newAbort);
+   const widgets = createWidgets({
++    recordRender: observations.record,
+     timeline: conversation.timeline,
+     render: deps.render,
+     environment: deps.environment,
+@@ -322,6 +324,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
+   };
+   const disconnect = shell.connect(widgets);
+   const widgetPort: WidgetPort = {
++    rendered: widgets.rendered,
+     view: shell.view,
+     subscribe: shell.subscribe,
+     navigate: shell.navigate,
+@@ -341,6 +344,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
+     dispose() {
+       ingestAuthorizedEnvelope = null;
+       disconnect();
++      observations.dispose();
+       widgets.dispose();
+       shell.dispose();
+       conversation.dispose();
+diff --git a/maya-chat-shell/test/dom.test.mjs b/maya-chat-shell/test/dom.test.mjs
+index 392da416..dabd0720 100644
+--- a/maya-chat-shell/test/dom.test.mjs
++++ b/maya-chat-shell/test/dom.test.mjs
+@@ -1215,7 +1215,7 @@ test('in-place successor keeps position and takes heading focus when its row say
+   const dom = createDom();
+   const scheduler = createScheduler(NOW);
+   const activations = [];
+-  const drawer = createWidgetDrawer({ factory: dom.factory, scheduler, widgets: { activate: (id, ref) => activations.push([id, ref]) } });
++  const drawer = createWidgetDrawer({ factory: dom.factory, scheduler, widgets: { rendered: () => undefined, activate: (id, ref) => activations.push([id, ref]) } });
+   const p = page({ voice: false });
+   p.runtime.widgets.ingest(envelopeOf('kind-choice'));
+   const choice = p.runtime.conversation.view().items.find((i) => i.kind === 'widget');
+@@ -1277,7 +1277,7 @@ test('live regions (D7): LIMITATION blocking assertive, non-blocking polite; PRO
+ 
+   const dom = createDom();
+   const scheduler = createScheduler(NOW);
+-  const drawer = createWidgetDrawer({ factory: dom.factory, scheduler, widgets: { activate: () => undefined } });
++  const drawer = createWidgetDrawer({ factory: dom.factory, scheduler, widgets: { rendered: () => undefined, activate: () => undefined } });
+   const p = page({ voice: false });
+   p.runtime.widgets.ingest(envelopeOf('kind-progress'));
+   const base = p.runtime.conversation.view().items.find((i) => i.kind === 'widget');
+diff --git a/maya-chat-shell/test/intents.test.mjs b/maya-chat-shell/test/intents.test.mjs
+index 414fc251..fda48f14 100644
+--- a/maya-chat-shell/test/intents.test.mjs
++++ b/maya-chat-shell/test/intents.test.mjs
+@@ -61,6 +61,7 @@ const setup = (options = {}) => {
+   };
+   const runtime = createShellRuntime({
+     transport: {
++      resolveWidgets: request => options.observe ? options.observe(request) : Promise.resolve({ ok: false, failure: { reason: 'forbidden' } }),
+       chat: (body, signal) => ((counts.chat += 1), (options.chat ?? (() => new Promise(() => undefined)))(body, signal)),
+       transcribe: () => ((counts.transcribe += 1), new Promise(() => undefined)),
+     },
+@@ -1565,3 +1566,46 @@ test('L27: a reference identifies an outcome only on the line class the contract
+   assert.deepEqual(serverLines(s), ['Запись отменена.', CONFIRMED_TEXT], 'two outcome classes are two outcomes');
+   s.runtime.dispose();
+ });
++
++
++test('L25: tap alone never observes rendering; explicit mounted callback is bounded, idempotent and gates selector REFINE', async () => {
++  const calls = [];
++  let acknowledge;
++  const s = setup({ observe: request => { calls.push(request); return new Promise(r => { acknowledge = r; }); } });
++  const env = envelope('kind-service-selector');
++  const { itemId } = s.runtime.widgets.ingest(env);
++  const ref = s.item(itemId).result.readingOrder.find(r => r.startsWith('option:'));
++  assert.deepEqual(await s.runtime.widgets.activate(itemId, ref), { outcome: 'sentence', sentence: 'activation_unavailable', submitted: false });
++  assert.equal(calls.length, 0);
++  assert.equal(s.submissions.length, 0);
++  s.runtime.widgetPort.rendered('foreign-item');
++  assert.equal(calls.length, 0);
++  s.runtime.widgetPort.rendered(itemId);
++  s.runtime.widgetPort.rendered(itemId);
++  await flush();
++  assert.equal(calls.length, 1);
++  assert.deepEqual(calls[0], { thread_page: { limit: 1 }, rendered: { widget_id: env.widget_id, body_hash: env.integrity.body_hash, envelope_seal: env.integrity.envelope_seal } });
++  const activating = s.runtime.widgets.activate(itemId, ref);
++  assert.equal(s.submissions.length, 0, 'tap waits for the independent observation');
++  acknowledge({ ok: true, value: { widgets: [] } });
++  await activating;
++  assert.equal(s.submissions.length, 1);
++  s.runtime.dispose();
++});
++
++test('L25: refused render evidence never opens selector submission and can be retried only after a new mounted observation', async () => {
++  let calls = 0;
++  const s = setup({ observe: async () => { calls++; return { ok: false, failure: { reason: 'forbidden' } }; } });
++  const { itemId } = s.runtime.widgets.ingest(envelope('kind-service-selector'));
++  const ref = s.item(itemId).result.readingOrder.find(r => r.startsWith('option:'));
++  s.runtime.widgetPort.rendered(itemId);
++  await flush();
++  await s.runtime.widgets.activate(itemId, ref);
++  assert.equal(calls, 1);
++  assert.equal(s.submissions.length, 0);
++  s.runtime.widgetPort.rendered(itemId);
++  await flush();
++  assert.equal(calls, 2);
++  assert.equal(s.submissions.length, 0);
++  s.runtime.dispose();
++});
+diff --git a/maya-chat-shell/test/shell.test.mjs b/maya-chat-shell/test/shell.test.mjs
+index 0583e9fd..72c6543e 100644
+--- a/maya-chat-shell/test/shell.test.mjs
++++ b/maya-chat-shell/test/shell.test.mjs
+@@ -239,7 +239,7 @@ test('the runtime: one widget port for the DOM, a real detail at SHEET density,
+     newAbort: () => new AbortController(),
+     submission: { submit: () => ((submits += 1), Promise.resolve({ status: 'unavailable' })) },
+   });
+-  assert.deepEqual(Object.keys(runtime.widgetPort).sort(), ['activate', 'closeDetail', 'navigate', 'subscribe', 'view']);
++  assert.deepEqual(Object.keys(runtime.widgetPort).sort(), ['activate', 'closeDetail', 'navigate', 'rendered', 'subscribe', 'view']);
+   assert.deepEqual(runtime.landFragment(), { landed: 'route', route: 'shell.privacy' });
+   assert.equal(runtime.widgetPort.view().primary, 'shell.privacy');
+ 
+diff --git a/maya-saas-backend/scripts/k3-gateway-check.mjs b/maya-saas-backend/scripts/k3-gateway-check.mjs
+index 1a0688dd..a9ea3166 100755
+--- a/maya-saas-backend/scripts/k3-gateway-check.mjs
++++ b/maya-saas-backend/scripts/k3-gateway-check.mjs
+@@ -707,6 +707,7 @@ const OWNER_MODULES = [
+ const BOUND_PORT_TOKENS = [
+   'PERSONAL_SCHEDULE_SOURCE', // BS-1 canonical personal source only.
+   'USER_TURN_AUDIT', // 9.6 opaque correlation only; canonical owner remains AuditLogService.
++  'SELECTOR_OBSERVATION_AUDIT', // L25 literal lifecycle observations only; no capability authority.
+   'WIDGET_RELEASE_ACCESS', // Approved fixed release profile; no generic owner dispatch.
+   'CANONICAL_READ',
+   'GATE6_OWNERS',
+diff --git a/maya-saas-backend/scripts/widgets-http-proof/gateBS.cases.ts b/maya-saas-backend/scripts/widgets-http-proof/gateBS.cases.ts
+index e69f52e2..53f6667a 100644
+--- a/maya-saas-backend/scripts/widgets-http-proof/gateBS.cases.ts
++++ b/maya-saas-backend/scripts/widgets-http-proof/gateBS.cases.ts
+@@ -91,6 +91,17 @@ export async function personalSource(
+     ['DRAFT', 'slot_ref'],
+     ['COMMIT', null],
+   ] as const) {
++    if (effect === 'REFINE') {
++      const rendered = await post('/widgets/resolve', {
++        thread_page: { limit: 1 },
++        rendered: {
++          widget_id: envelope.widget_id,
++          body_hash: object(envelope.integrity).body_hash,
++          envelope_seal: object(envelope.integrity).envelope_seal,
++        },
++      });
++      assert.equal(rendered.status, 200, 'L25 independent render observation');
++    }
+     const intent = array(envelope.intents).find((v) => v.effect === effect);
+     assert(intent);
+     const selected =
+diff --git a/maya-saas-backend/scripts/widgets-mutation-ci.mjs b/maya-saas-backend/scripts/widgets-mutation-ci.mjs
+index 5b01f966..e2095a64 100644
+--- a/maya-saas-backend/scripts/widgets-mutation-ci.mjs
++++ b/maya-saas-backend/scripts/widgets-mutation-ci.mjs
+@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
+ import fs from 'node:fs';
+ import path from 'node:path';
+ import { fileURLToPath } from 'node:url';
++import { execFileSync } from 'node:child_process';
+ 
+ export const DEFAULT_STEPS = 'per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)';
+ const digest = (text) => crypto.createHash('sha256').update(text).digest('hex');
+@@ -123,6 +124,9 @@ const controlKey = (set, steps) => `${set ?? 'baseline'}|${steps.join(',')}`;
+ export function assemble(declared, receipts, head, requested = '') {
+   assert(/^[0-9a-f]{40}$/.test(head), 'exact source HEAD required');
+   const expected = plan(declared, requested);
++  for (const receipt of receipts)
++    assert(receipt.archival_only !== true && receipt.release_admissible !== false,
++      'archival/unverified evidence is inadmissible for release');
+   exact(receipts.length, expected.matrix.include.length, 'missing or extra partition receipt');
+   const result = [];
+   const used = new Set();
+@@ -235,6 +239,19 @@ export function assemble(declared, receipts, head, requested = '') {
+   return result;
+ }
+ 
++// L2/L26: the only release-admission entry. `assemble` remains useful for
++// diagnostic subsets; neither manual gate audits nor a subset certify a release.
++export function admitRelease(declared, receipts, head, backend) {
++  const build = JSON.parse(fs.readFileSync(path.join(backend, 'tsconfig.build.json'), 'utf8'));
++  assert(build.exclude?.includes('src/widget-contract'), 'contract build-exclusion fence missing');
++  execFileSync(process.execPath, ['node_modules/typescript/bin/tsc', '--noEmit',
++    '--project', 'tsconfig.widget-contract.json', '--incremental', 'false'], { cwd: backend, stdio: 'pipe' });
++  execFileSync(process.execPath, ['scripts/widget-contract-check.mjs'], { cwd: backend, stdio: 'pipe' });
++  execFileSync(process.execPath, ['../docs/rebuild/evidence/maya-chat-first-ux/k1/k1-dossier-check.mjs'],
++    { cwd: backend, stdio: 'pipe' });
++  return assemble(declared, receipts, head);
++}
++
+ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+   try {
+     const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+@@ -244,11 +261,14 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
+       const p = plan(declared, args[0] ?? '');
+       process.stdout.write(`gates=${JSON.stringify(p.gates)}\nmatrix=${JSON.stringify(p.matrix)}\n`);
+     } else {
+-      assert.equal(command, 'assemble', 'expected plan or assemble');
++      assert(['assemble', 'release'].includes(command), 'expected plan, assemble or release');
+       const [input, output, head, requested = ''] = args;
+       const receipts = fs.readdirSync(input).filter((f) => /^widgets-mutation-part-.*\.json$/.test(f)).sort()
+         .map((f) => JSON.parse(fs.readFileSync(path.join(input, f), 'utf8')));
+-      const reports = assemble(declared, receipts, head, requested);
++      if (command === 'release') assert.equal(requested, '', 'release requires the complete corpus');
++      const reports = command === 'release'
++        ? admitRelease(declared, receipts, head, backend)
++        : assemble(declared, receipts, head, requested);
+       fs.mkdirSync(output, { recursive: true });
+       for (const report of reports) fs.writeFileSync(path.join(output, `widgets-mutation-report-${report.batteries[0].slice(4, -5)}.json`), JSON.stringify(report, null, 2) + '\n');
+       process.stdout.write(`COMPLETE BATTERIES: ${reports.length}; mutants: ${reports.reduce((n, r) => n + r.mutants.length, 0)}\n`);
+diff --git a/maya-saas-backend/scripts/widgets-mutation-ci.test.mjs b/maya-saas-backend/scripts/widgets-mutation-ci.test.mjs
+index 3d3574e6..38145c5e 100644
+--- a/maya-saas-backend/scripts/widgets-mutation-ci.test.mjs
++++ b/maya-saas-backend/scripts/widgets-mutation-ci.test.mjs
+@@ -2,11 +2,13 @@ import assert from 'node:assert/strict';
+ import { spawnSync } from 'node:child_process';
+ import fs from 'node:fs';
+ import path from 'node:path';
++import os from 'node:os';
+ import { fileURLToPath } from 'node:url';
+ import test from 'node:test';
+ import ts from 'typescript';
+ import {
+   assemble,
++  admitRelease,
+   DEFAULT_STEPS,
+   describeRedBaselines,
+   plan,
+@@ -20,6 +22,46 @@ const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+ const declared = registry(path.join(backend, 'test/widgets-live/mutations'));
+ const head = 'a'.repeat(40);
+ 
++test('L2 release admission refuses a broken real contract and admits its restored bytes', () => {
++  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'maya-l2-contract-'));
++  const copy = path.join(root, 'maya-saas-backend');
++  fs.mkdirSync(copy);
++  try {
++    for (const item of fs.readdirSync(backend)) {
++      if (item === 'src' || item === 'scripts') continue;
++      if (item === 'tsconfig.build.json') fs.copyFileSync(path.join(backend, item), path.join(copy, item));
++      else fs.symlinkSync(path.join(backend, item), path.join(copy, item));
++    }
++    for (const dir of ['src', 'scripts']) {
++      fs.mkdirSync(path.join(copy, dir));
++      for (const item of fs.readdirSync(path.join(backend, dir))) {
++        const from = path.join(backend, dir, item), to = path.join(copy, dir, item);
++        if (item === 'widget-contract' || item === 'widget-contract-check.mjs') fs.cpSync(from, to, { recursive: true });
++        else fs.symlinkSync(from, to);
++      }
++    }
++    fs.symlinkSync(path.resolve(backend, '../docs'), path.join(root, 'docs'));
++    const target = path.join(copy, 'src/widget-contract/kinds.ts');
++    const original = fs.readFileSync(target, 'utf8');
++    fs.writeFileSync(target, original + '\nconst l2BrokenContract: never = "must refuse";\n');
++    assert.throws(() => admitRelease(declared, fixture(), head, copy), /Command failed/);
++    fs.writeFileSync(target, original);
++    assert.equal(admitRelease(declared, fixture(), head, copy).length, Object.keys(declared).length);
++    const buildPath = path.join(copy, 'tsconfig.build.json');
++    const buildBytes = fs.readFileSync(buildPath, 'utf8');
++    const brokenBuild = JSON.parse(buildBytes);
++    brokenBuild.exclude = brokenBuild.exclude.filter(x => x !== 'src/widget-contract');
++    fs.writeFileSync(buildPath, JSON.stringify(brokenBuild));
++    assert.throws(() => admitRelease(declared, fixture(), head, copy), /build-exclusion fence missing/);
++    fs.writeFileSync(buildPath, buildBytes);
++    assert.equal(admitRelease(declared, fixture(), head, copy).length, Object.keys(declared).length);
++    const workflow = fs.readFileSync(path.resolve(backend, '../.github/workflows/widget-contract.yml'), 'utf8');
++    assert.doesNotMatch(workflow, /continue-on-error:/);
++    assert.match(fs.readFileSync(path.resolve(backend, '../.github/workflows/widgets-mutation.yml'), 'utf8'),
++      /widgets-mutation-ci\.mjs release mutation-parts/);
++  } finally { fs.rmSync(root, { recursive: true, force: true }); }
++});
++
+ // Synthetic receipts exercise rejection logic only; they are never release evidence.
+ function fixture() {
+   return plan(declared).matrix.include.map((job) => {
+@@ -63,9 +105,10 @@ function fixture() {
+   });
+ }
+ 
+-test('44 batteries, 65 jobs: approved scope and harness regressions cover 509 declarations', () => {
++test('45 batteries, 66 jobs: final FBE2E decisions cover 524 declarations', () => {
+   const p = plan(declared);
+-  assert.equal(p.gates.length, 44); assert.equal(p.matrix.include.length, 65);
++  assert.equal(p.gates.length, 45); assert.equal(p.matrix.include.length, 66);
++  assert.equal(declared.FB.mutants.length, 15);
+   assert.deepEqual(declared.SB1.mutants.map(m => m.id), Array.from({ length: 10 }, (_, i) => `SB1-M${String(i + 1).padStart(2, '0')}`));
+   assert.deepEqual(declared.AB.mutants.map(m => m.id), ['AB-M1', 'AB-M2']);
+   assert.deepEqual(declared.SV2.mutants.map(m => m.id), Array.from({ length: 13 }, (_, i) => `SV2-M${i + 1}`));
+@@ -78,7 +121,7 @@ test('44 batteries, 65 jobs: approved scope and harness regressions cover 509 de
+   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-BOOT-LOOPBACK-1').length, 1);
+   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-P408-CLOCK-1').length, 1);
+   const r = assemble(declared, fixture(), head);
+-  assert.equal(r.length, 44); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 509);
++  assert.equal(r.length, 45); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 524);
+   for (const report of r) {
+     assert.equal(report.status, 'AS-DECLARED');
+     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
+@@ -168,6 +211,9 @@ test('invalid partition/gate requests fail before execution', () => {
+ });
+ 
+ const counterfactuals = {
++  'archival receipt': (r) => { r[0].archival_only = true; },
++  'unverified receipt': (r) => { r[0].release_admissible = false; },
++  'manual historical audit': (r) => { r[0] = { contract: 'maya.gate-audit/1', archival_only: true }; },
+   'missing partition': (r) => r.pop(),
+   'duplicate partition': (r) => r.push(structuredClone(r[0])),
+   'substituted partition': (r) => { r[1] = structuredClone(r[0]); },
+@@ -253,7 +299,7 @@ test('gate: a baseline control is red on a non-zero step exit, a failed assertio
+     for (const c of Object.values(r.neutraliser_controls)) { c.exits[c.steps[0]] = 1; c.failed = ['red on the neutralised copy']; }
+     assert.deepEqual(redBaselineControls(r.baseline_controls), []);
+   }
+-  assert.equal(assemble(declared, receipts, head).length, 44, 'a red neutraliser control is not a red baseline');
++  assert.equal(assemble(declared, receipts, head).length, 45, 'a red neutraliser control is not a red baseline');
+ });
+ 
+ test('gate: a red baseline is a distinct shard status and a non-zero exit, and never hides a mismatch', () => {
+diff --git a/maya-saas-backend/src/appointments/client-appointment-create.service.spec.ts b/maya-saas-backend/src/appointments/client-appointment-create.service.spec.ts
+index cd94e281..540fc756 100644
+--- a/maya-saas-backend/src/appointments/client-appointment-create.service.spec.ts
++++ b/maya-saas-backend/src/appointments/client-appointment-create.service.spec.ts
+@@ -36,6 +36,9 @@ function setup() {
+     crmLinks: [] as Array<{ provider: string; externalId: string }>,
+   };
+   const prisma = {
++    internalProvider: {
++      findFirst: jest.fn().mockResolvedValue({ branch: null }),
++    },
+     crmIntegration: {
+       findUnique: jest.fn().mockResolvedValue({
+         provider: 'yclients',
+diff --git a/maya-saas-backend/src/appointments/client-appointment-create.service.ts b/maya-saas-backend/src/appointments/client-appointment-create.service.ts
+index 560afab5..ce11746e 100644
+--- a/maya-saas-backend/src/appointments/client-appointment-create.service.ts
++++ b/maya-saas-backend/src/appointments/client-appointment-create.service.ts
+@@ -240,10 +240,12 @@ export class ClientAppointmentCreateService {
+     const timezone =
+       bound && bound.descriptor.branchId === (dto.branchId ?? null)
+         ? bound.resolutionContext.timezone
+-        : resolveSalonTimezone({
+-            branchTimezone: branch?.timezone,
+-            tenantTimezone: tenant?.defaultTimezone,
+-          });
++        : source === 'internal' && !branch
++          ? (await this.crm.availabilityContext(tenantId, dto.staffId)).timezone
++          : resolveSalonTimezone({
++              branchTimezone: branch?.timezone,
++              tenantTimezone: tenant?.defaultTimezone,
++            });
+     const localStart = normalizeRequestedStart(dto.start, timezone);
+     const start = canonicalAppointmentInstant(localStart, timezone);
+ 
+diff --git a/maya-saas-backend/src/crm/appointment-time.utils.ts b/maya-saas-backend/src/crm/appointment-time.utils.ts
+index 25dfbbef..93e735c7 100644
+--- a/maya-saas-backend/src/crm/appointment-time.utils.ts
++++ b/maya-saas-backend/src/crm/appointment-time.utils.ts
+@@ -49,6 +49,16 @@ function partsInTimezone(value: Date, timezone: string): DateTimeParts {
+   };
+ }
+ 
++/** L5/L24: arithmetic on a local calendar date, never elapsed 24-hour time. */
++export function nextAppointmentDay(now: Date, timezone: string): string {
++  const p = partsInTimezone(now, timezone);
++  return new Date(
++    Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day) + 1),
++  )
++    .toISOString()
++    .slice(0, 10);
++}
++
+ function assertCalendarDate(year: number, month: number, day: number): void {
+   const probe = new Date(Date.UTC(year, month - 1, day));
+ 
+diff --git a/maya-saas-backend/src/crm/availability-calendar.service.ts b/maya-saas-backend/src/crm/availability-calendar.service.ts
+new file mode 100644
+index 00000000..a2b9da29
+--- /dev/null
++++ b/maya-saas-backend/src/crm/availability-calendar.service.ts
+@@ -0,0 +1,54 @@
++import {
++  BadRequestException,
++  Injectable,
++  NotFoundException,
++} from '@nestjs/common';
++import { PrismaService } from '../prisma/prisma.service';
++import { TenantContextService } from '../tenancy/tenant-context.service';
++import { nextAppointmentDay } from './appointment-time.utils';
++import { isUsableTimezone } from '../tenants/salon-timezone';
++
++/** Read-only calendar identity. This owner exposes no provider or booking operations. */
++export async function resolveAvailabilityCalendar(
++  prisma: PrismaService,
++  context: TenantContextService,
++  tenantId: string,
++  staffId: string,
++) {
++  const scopedTenantId = context.assertTenantId(tenantId);
++  const tenant = await prisma.tenant.findUnique({
++    where: { id: scopedTenantId },
++    select: { defaultTimezone: true, calendarSource: true },
++  });
++  if (!tenant) throw new NotFoundException('Tenant not found');
++  const internal = tenant.calendarSource === 'internal';
++  const provider = internal
++    ? await prisma.internalProvider.findFirst({
++        where: { id: staffId, tenantId: scopedTenantId, active: true },
++        select: { branch: { select: { id: true, timezone: true } } },
++      })
++    : null;
++  if (internal && !provider)
++    throw new NotFoundException('Availability provider not found');
++  const timezone = provider?.branch?.timezone ?? tenant.defaultTimezone;
++  if (!isUsableTimezone(timezone))
++    throw new BadRequestException('Invalid availability timezone');
++  return { timezone, branchId: provider?.branch?.id ?? null };
++}
++
++@Injectable()
++export class AvailabilityCalendarService {
++  constructor(
++    private readonly prisma: PrismaService,
++    private readonly tenantContext: TenantContextService,
++  ) {}
++  async nextAvailabilityDay(tenantId: string, staffId: string, now: Date) {
++    const context = await resolveAvailabilityCalendar(
++      this.prisma,
++      this.tenantContext,
++      tenantId,
++      staffId,
++    );
++    return { ...context, date: nextAppointmentDay(now, context.timezone) };
++  }
++}
+diff --git a/maya-saas-backend/src/crm/availability-day.spec.ts b/maya-saas-backend/src/crm/availability-day.spec.ts
+new file mode 100644
+index 00000000..62cd9000
+--- /dev/null
++++ b/maya-saas-backend/src/crm/availability-day.spec.ts
+@@ -0,0 +1,138 @@
++import { PrismaService } from '../prisma/prisma.service';
++import { AvailabilityCalendarService } from './availability-calendar.service';
++import {
++  canonicalAppointmentInstant,
++  nextAppointmentDay,
++} from './appointment-time.utils';
++import { TenantContextService } from '../tenancy/tenant-context.service';
++import { presentBookingSelector } from '../widgets/booking/booking-selector.presenter';
++
++const cases = [
++  ['UTC', '2026-10-01T23:59:59Z', '2026-10-02'],
++  ['Europe/Moscow', '2026-10-01T21:30:00Z', '2026-10-03'],
++  ['America/Los_Angeles', '2026-01-01T02:00:00Z', '2026-01-01'],
++  ['Pacific/Kiritimati', '2026-12-31T12:00:00Z', '2027-01-02'],
++  ['Asia/Kathmandu', '2026-01-31T20:00:00Z', '2026-02-02'],
++  ['UTC', '2028-02-28T12:00:00Z', '2028-02-29'],
++  ['UTC', '2028-02-29T12:00:00Z', '2028-03-01'],
++  // Adding 24 elapsed hours would skip a day (spring) or repeat it (autumn).
++  ['America/New_York', '2026-03-08T04:30:00Z', '2026-03-08'],
++  ['America/New_York', '2026-11-01T04:30:00Z', '2026-11-02'],
++  ['Europe/Berlin', '2026-10-24T22:30:00Z', '2026-10-26'],
++] as const;
++
++describe('L5/L24 canonical one-day availability', () => {
++  it.each(cases)(
++    'L5-CALENDAR %s at %s selects local calendar %s',
++    (timezone, now, date) => {
++      expect(nextAppointmentDay(new Date(now), timezone)).toBe(date);
++    },
++  );
++
++  it.each(cases)(
++    'L24-PROJECTION preserves the exact instant in %s at %s',
++    (timezone, now, date) => {
++      const instant = canonicalAppointmentInstant(`${date}T10:00:00`, timezone);
++      const end = new Date(Date.parse(instant) + 1800000).toISOString();
++      const result = presentBookingSelector({
++        tenantId: 'tenant',
++        kind: 'TIME_SLOT_SELECTOR',
++        source: {
++          timezone,
++          local_date: nextAppointmentDay(new Date(now), timezone),
++          slots: [{ start: instant, end }],
++        },
++        inherited: { staff: 'staff-handle', service: 'service-handle' },
++        mint: () => 'slot-handle',
++      });
++      expect(result?.body).toMatchObject({
++        timezone,
++        more_intent: null,
++        widen_window_intent: null,
++        groups: [
++          {
++            slots: [
++              {
++                slot_ref: 'slot-handle',
++                start: {
++                  value: instant,
++                  formatted: expect.stringContaining(
++                    `10:00 (${timezone})`,
++                  ) as unknown,
++                },
++              },
++            ],
++          },
++        ],
++      });
++    },
++  );
++
++  it.each(['Europe/Moscow', null])(
++    'L5-OWNER resolves selected branch first, tenant fallback (%s)',
++    async (branchTimezone) => {
++      const context = new TenantContextService();
++      const prisma = {
++        tenant: {
++          findUnique: jest.fn().mockResolvedValue({
++            defaultTimezone: 'America/Los_Angeles',
++            calendarSource: 'internal',
++          }),
++        },
++        internalProvider: {
++          findFirst: jest.fn().mockResolvedValue({
++            branch: { id: 'branch', timezone: branchTimezone },
++          }),
++        },
++      };
++      const owner = new AvailabilityCalendarService(
++        prisma as unknown as PrismaService,
++        context,
++      );
++      const result = await context.runAsAuthPrincipal(
++        { tenantId: 'tenant', userId: 'user', role: 'client' },
++        () =>
++          owner.nextAvailabilityDay(
++            'tenant',
++            'staff',
++            new Date('2026-01-01T02:00:00Z'),
++          ),
++      );
++      expect(result).toEqual({
++        date: branchTimezone ? '2026-01-02' : '2026-01-01',
++        timezone: branchTimezone ?? 'America/Los_Angeles',
++        branchId: 'branch',
++      });
++      expect(prisma.internalProvider.findFirst).toHaveBeenCalledWith({
++        where: { tenantId: 'tenant', id: 'staff', active: true },
++        select: { branch: { select: { id: true, timezone: true } } },
++      });
++      await expect(
++        context.runAsAuthPrincipal(
++          { tenantId: 'other', userId: 'user', role: 'client' },
++          () => owner.nextAvailabilityDay('tenant', 'staff', new Date()),
++        ),
++      ).rejects.toThrow();
++    },
++  );
++
++  it.each([{}, { timezone: 'not/a-timezone' }])(
++    'L24-UNKNOWN refuses missing/invalid canonical timezone',
++    (metadata) => {
++      expect(
++        presentBookingSelector({
++          tenantId: 't',
++          kind: 'TIME_SLOT_SELECTOR',
++          source: {
++            ...metadata,
++            slots: [
++              { start: '2026-10-03T10:00:00Z', end: '2026-10-03T11:00:00Z' },
++            ],
++          },
++          inherited: { staff: 'staff' },
++          mint: () => 'slot',
++        }),
++      ).toBeNull();
++    },
++  );
++});
+diff --git a/maya-saas-backend/src/crm/crm.module.ts b/maya-saas-backend/src/crm/crm.module.ts
+index c7d6b6ce..9d0212c8 100644
+--- a/maya-saas-backend/src/crm/crm.module.ts
++++ b/maya-saas-backend/src/crm/crm.module.ts
+@@ -1,3 +1,4 @@
++import { AvailabilityCalendarService } from './availability-calendar.service';
+ import { ClientReverificationController } from './client-reverification.controller';
+ import { ClientReverificationService } from './client-reverification.service';
+ import { ClientReverificationCandidateService } from './client-reverification-candidate.service';
+@@ -101,6 +102,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
+     ShadowIngestionController,
+   ],
+   providers: [
++    AvailabilityCalendarService,
+     ClientReverificationService,
+     ClientReverificationCandidateService,
+     PhoneAuthDeliveryService,
+@@ -192,6 +194,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
+     ShadowIngestionService,
+   ],
+   exports: [
++    AvailabilityCalendarService,
+     ClientWantedSlotService,
+     ClientAppointmentCreateService,
+     ClientLoyaltyReadService,
+diff --git a/maya-saas-backend/src/crm/crm.service.ts b/maya-saas-backend/src/crm/crm.service.ts
+index 75be8f39..c8c7233d 100644
+--- a/maya-saas-backend/src/crm/crm.service.ts
++++ b/maya-saas-backend/src/crm/crm.service.ts
+@@ -1,3 +1,4 @@
++import { resolveAvailabilityCalendar } from './availability-calendar.service';
+ import { createHash } from 'node:crypto';
+ import { clientPrincipalEvidence } from '../action-engine/client-action-principal.contract';
+ 
+@@ -906,6 +907,16 @@ export class CrmService {
+     return this.loadTeamMembers(adapter, scopedTenantId);
+   }
+ 
++  /** The availability owner resolves the selected calendar, not the widget. */
++  async availabilityContext(tenantId: string, staffId: string) {
++    return resolveAvailabilityCalendar(
++      this.prisma,
++      this.tenantContext,
++      tenantId,
++      staffId,
++    );
++  }
++
+   async getAvailableSlots(
+     tenantId: string,
+     query: {
+@@ -1298,7 +1309,10 @@ export class CrmService {
+             : null;
+           if (request.branchId && !branch)
+             throw new BadRequestException('Branch not found for this tenant');
+-          const timezone = await this.bookingTimezone(tenantId, branch);
++          const timezone = branch
++            ? await this.bookingTimezone(tenantId, branch)
++            : (await this.availabilityContext(tenantId, request.staffId))
++                .timezone;
+           const localStart = formatDateTimeInTimeZone(request.start, timezone);
+           const slots = await this.internalCalendarService.getAvailableSlots({
+             tenantId,
+diff --git a/maya-saas-backend/src/widgets/booking/booking-confirmation-minter.port.ts b/maya-saas-backend/src/widgets/booking/booking-confirmation-minter.port.ts
+index 57412114..59d71ff4 100644
+--- a/maya-saas-backend/src/widgets/booking/booking-confirmation-minter.port.ts
++++ b/maya-saas-backend/src/widgets/booking/booking-confirmation-minter.port.ts
+@@ -11,6 +11,7 @@ export interface BookingConfirmationPreview {
+   readonly appointmentRef: string | null;
+   readonly producingIntentTokenHash: string | null;
+   readonly when: string;
++  readonly whenFormatted?: string;
+   readonly whenPrevious: string | null;
+   readonly serviceLabel: string;
+   readonly staffLabel: string;
+diff --git a/maya-saas-backend/src/widgets/booking/booking-selector.presenter.spec.ts b/maya-saas-backend/src/widgets/booking/booking-selector.presenter.spec.ts
+index 0b3756bd..dff14440 100644
+--- a/maya-saas-backend/src/widgets/booking/booking-selector.presenter.spec.ts
++++ b/maya-saas-backend/src/widgets/booking/booking-selector.presenter.spec.ts
+@@ -130,6 +130,7 @@ describe('FBE2E-2 — booking selector presentation', () => {
+       tenantId: 'tenant-a',
+       kind: 'TIME_SLOT_SELECTOR',
+       source: {
++        timezone: 'UTC',
+         slots: [
+           {
+             start: '2026-10-01T10:00:00.000Z',
+diff --git a/maya-saas-backend/src/widgets/booking/booking-selector.presenter.ts b/maya-saas-backend/src/widgets/booking/booking-selector.presenter.ts
+index 3a776316..22e347d5 100644
+--- a/maya-saas-backend/src/widgets/booking/booking-selector.presenter.ts
++++ b/maya-saas-backend/src/widgets/booking/booking-selector.presenter.ts
+@@ -221,6 +221,18 @@ const presentSlots = (
+ ): PresentedSelector | null => {
+   const staff = input.inherited?.staff;
+   if (!staff) return null;
++  const timezone = str(record(input.source)?.timezone);
++  if (!timezone) return null;
++  let formatter: Intl.DateTimeFormat;
++  try {
++    formatter = new Intl.DateTimeFormat('ru-RU', {
++      timeZone: timezone,
++      dateStyle: 'medium',
++      timeStyle: 'short',
++    });
++  } catch {
++    return null;
++  }
+   const slots = list(record(input.source)?.slots);
+   const rendered: TimeSlotSelectorBody['groups'][number]['slots'] = [];
+   for (const slot of slots) {
+@@ -247,7 +259,12 @@ const presentSlots = (
+     });
+     rendered.push({
+       slot_ref: handle,
+-      start: measure('booking.slot.start', start, 'datetime', start),
++      start: measure(
++        'booking.slot.start',
++        start,
++        'datetime',
++        `${formatter.format(new Date(start))} (${timezone})`,
++      ),
+       duration: measure(
+         'booking.slot.duration',
+         minutes,
+@@ -266,7 +283,7 @@ const presentSlots = (
+     kind: 'TIME_SLOT_SELECTOR',
+     body: {
+       prompt: phrase('Choose a time'),
+-      timezone: 'UTC',
++      timezone,
+       window: { from: starts[0], to: starts[starts.length - 1] },
+       grouping: 'flat',
+       groups: [
+diff --git a/maya-saas-backend/src/widgets/di-tokens.ts b/maya-saas-backend/src/widgets/di-tokens.ts
+index 4604faab..e83a455d 100644
+--- a/maya-saas-backend/src/widgets/di-tokens.ts
++++ b/maya-saas-backend/src/widgets/di-tokens.ts
+@@ -91,3 +91,5 @@ export const USER_TURN_AUDIT = 'USER_TURN_AUDIT';
+ 
+ /** BS-1 exact verified personal appointment source. */
+ export const PERSONAL_SCHEDULE_SOURCE = 'PERSONAL_SCHEDULE_SOURCE';
++
++export const SELECTOR_OBSERVATION_AUDIT = 'SELECTOR_OBSERVATION_AUDIT';
+diff --git a/maya-saas-backend/src/widgets/dto/resolve-widget.dto.ts b/maya-saas-backend/src/widgets/dto/resolve-widget.dto.ts
+index 893584e3..c7043c10 100644
+--- a/maya-saas-backend/src/widgets/dto/resolve-widget.dto.ts
++++ b/maya-saas-backend/src/widgets/dto/resolve-widget.dto.ts
+@@ -1,5 +1,6 @@
+ import {
+   IsObject,
++  IsOptional,
+   Validate,
+   ValidatorConstraint,
+   type ValidatorConstraintInterface,
+@@ -35,8 +36,31 @@ class WidgetThreadPageConstraint implements ValidatorConstraintInterface {
+   }
+ }
+ 
++@ValidatorConstraint({ name: 'SelectorRenderEvidence', async: false })
++class SelectorRenderEvidenceConstraint implements ValidatorConstraintInterface {
++  validate(value: unknown): boolean {
++    if (typeof value !== 'object' || value === null || Array.isArray(value))
++      return false;
++    const v = value as Record<string, unknown>;
++    return (
++      Object.keys(v).sort().join(',') === 'body_hash,envelope_seal,widget_id' &&
++      typeof v.widget_id === 'string' &&
++      UUID.test(v.widget_id) &&
++      typeof v.body_hash === 'string' &&
++      /^[0-9a-f]{64}$/.test(v.body_hash) &&
++      typeof v.envelope_seal === 'string' &&
++      /^[0-9a-f]{64}$/.test(v.envelope_seal)
++    );
++  }
++}
++
+ export class ResolveWidgetDto {
+   @IsObject()
+   @Validate(WidgetThreadPageConstraint)
+   thread_page!: WidgetThreadPageDto;
++
++  @IsOptional()
++  @IsObject()
++  @Validate(SelectorRenderEvidenceConstraint)
++  rendered?: import('../rendering/selector-lifecycle.service').SelectorRenderEvidence;
+ }
+diff --git a/maya-saas-backend/src/widgets/emission/booking-confirmation-minter.service.ts b/maya-saas-backend/src/widgets/emission/booking-confirmation-minter.service.ts
+index 54a8b093..8dd77b97 100644
+--- a/maya-saas-backend/src/widgets/emission/booking-confirmation-minter.service.ts
++++ b/maya-saas-backend/src/widgets/emission/booking-confirmation-minter.service.ts
+@@ -121,7 +121,7 @@ export class BookingConfirmationMinterService implements BookingConfirmationMint
+         key: 'booking.when',
+         value: p.when,
+         unit: 'datetime',
+-        formatted: p.when,
++        formatted: p.whenFormatted ?? p.when,
+       }),
+       when_previous:
+         p.whenPrevious === null
+diff --git a/maya-saas-backend/src/widgets/emission/envelope-codec.spec.ts b/maya-saas-backend/src/widgets/emission/envelope-codec.spec.ts
+new file mode 100644
+index 00000000..96c8a61b
+--- /dev/null
++++ b/maya-saas-backend/src/widgets/emission/envelope-codec.spec.ts
+@@ -0,0 +1,30 @@
++import { createHash } from 'node:crypto';
++import { stableActionJson } from '../../action-engine/action-engine.identity';
++import { envelopeBodyHash, envelopeBodyHashTerms } from './envelope.factory';
++
++it('L5-H1: fractional-offset slot names use the same canonical codec as H7, not a parallel ASCII sort', () => {
++  const envelope = {
++    contract: 'maya.widget/1',
++    kind: 'TIME_SLOT_SELECTOR',
++    body_version: 1,
++    body: { timezone: 'Asia/Kathmandu' },
++    integrity: { cell_index_digest: 'cells' },
++    provenance: {},
++    limitations: [],
++    intents: [],
++    render: { render_tier: 'RICH_INTERACTIVE' },
++    presentation: {
++      a11y: {
++        accessible_names: {
++          'slot:a_b': '12:00',
++          'slot:a-b': '12:30',
++          'slot:aB': '13:00',
++        },
++      },
++    },
++  };
++  const bytes = stableActionJson(envelopeBodyHashTerms(envelope));
++  expect(envelopeBodyHash(envelope)).toBe(
++    createHash('sha256').update(bytes).digest('hex'),
++  );
++});
+diff --git a/maya-saas-backend/src/widgets/emission/envelope.factory.ts b/maya-saas-backend/src/widgets/emission/envelope.factory.ts
+index 5f36357b..72269e69 100644
+--- a/maya-saas-backend/src/widgets/emission/envelope.factory.ts
++++ b/maya-saas-backend/src/widgets/emission/envelope.factory.ts
+@@ -9,7 +9,9 @@ import type {
+   InteractiveRef,
+   InteractiveRefKey,
+ } from '../../widget-contract/lifecycle';
+-import { stableActionJson } from '../authority/contract-bindings';
++// H6/H7: the canonical identity owner also defines the carrier's hash bytes.
++// A local code-unit sort disagreed on slot accessible-name keys for fractional offsets.
++import { stableActionJson } from '../../action-engine/action-engine.identity';
+ import type { PrincipalView } from '../gate.types';
+ import { sha256Hex } from '../token.util';
+ import type { FitResult } from '../carriers/fitter';
+diff --git a/maya-saas-backend/src/widgets/emission/successor-minter.service.ts b/maya-saas-backend/src/widgets/emission/successor-minter.service.ts
+index e4a802b5..473097db 100644
+--- a/maya-saas-backend/src/widgets/emission/successor-minter.service.ts
++++ b/maya-saas-backend/src/widgets/emission/successor-minter.service.ts
+@@ -323,7 +323,7 @@ export class SuccessorMinterService implements SuccessorMinterPort {
+         predecessor.turnId,
+         predecessor.deliveryChannel,
+       );
+-    if (!['MINTED', 'LIVE'].includes(predecessor.lifecycleState)) return null;
++    if (predecessor.lifecycleState !== 'LIVE') return null;
+ 
+     const successor = await this.emitter.emitBookingSelector(
+       {
+@@ -354,33 +354,6 @@ export class SuccessorMinterService implements SuccessorMinterPort {
+           request.tenantId,
+           predecessor.turn.conversationId,
+         );
+-        // The first real shell tap is the first server-observed proof that the returned MINTED
+-        // envelope crossed delivery and render. Catch its persisted lifecycle up through the two
+-        // legal contract transitions before superseding it; never weaken the generic successor.
+-        if (predecessor.lifecycleState === 'MINTED') {
+-          const delivered = await tx.widgetEmission.updateMany({
+-            where: {
+-              tenantId: request.tenantId,
+-              widgetId: predecessor.widgetId,
+-              lifecycleState: 'MINTED',
+-              supersededByWidgetId: null,
+-              erasedAt: null,
+-            },
+-            data: { lifecycleState: 'DELIVERED' },
+-          });
+-          if (delivered.count !== 1) throw new SuccessorLinkConflict();
+-          const live = await tx.widgetEmission.updateMany({
+-            where: {
+-              tenantId: request.tenantId,
+-              widgetId: predecessor.widgetId,
+-              lifecycleState: 'DELIVERED',
+-              supersededByWidgetId: null,
+-              erasedAt: null,
+-            },
+-            data: { lifecycleState: 'LIVE' },
+-          });
+-          if (live.count !== 1) throw new SuccessorLinkConflict();
+-        }
+         const closed = await tx.widgetEmission.updateMany({
+           where: {
+             tenantId: request.tenantId,
+@@ -534,7 +507,7 @@ const bookingSuccessorTerms = (
+   const provenance = asObject(envelope?.provenance ?? null);
+   return (
+     expected !== null &&
+-    ['MINTED', 'LIVE', 'SUPERSEDED'].includes(predecessor.lifecycleState) &&
++    ['LIVE', 'SUPERSEDED'].includes(predecessor.lifecycleState) &&
+     predecessor.erasedAt === null &&
+     predecessor.turn.erasedAt === null &&
+     record !== undefined &&
+diff --git a/maya-saas-backend/src/widgets/gates/gate7.ts b/maya-saas-backend/src/widgets/gates/gate7.ts
+index a977efc9..c121783a 100644
+--- a/maya-saas-backend/src/widgets/gates/gate7.ts
++++ b/maya-saas-backend/src/widgets/gates/gate7.ts
+@@ -213,6 +213,19 @@ export const gate7 = async (
+ ): Promise<GateVerdict> => {
+   const r = ctx.record;
+   if (!r) return no('C1', 'no record');
++  // L25: recorded render is a lifecycle prerequisite, never authority. Gates
++  // 1–6 have already run; refusing here precedes the first durable user turn.
++  if (
++    r &&
++    (r.widgetKind === 'SERVICE_SELECTOR' ||
++      r.widgetKind === 'STAFF_SELECTOR') &&
++    r.effect === 'REFINE' &&
++    r.emissionLifecycleState !== 'LIVE'
++  )
++    return refuse(
++      'effect_not_admissible',
++      'L25 selector render evidence required',
++    );
+ 
+   // ── C1 — effect within the kind's declared ceiling, over `widget_kind` ────────────────────────
+   //
+diff --git a/maya-saas-backend/src/widgets/owner-ports/booking-preview.adapter.spec.ts b/maya-saas-backend/src/widgets/owner-ports/booking-preview.adapter.spec.ts
+index dfebc1df..4278e2b2 100644
+--- a/maya-saas-backend/src/widgets/owner-ports/booking-preview.adapter.spec.ts
++++ b/maya-saas-backend/src/widgets/owner-ports/booking-preview.adapter.spec.ts
+@@ -48,6 +48,7 @@ describe('FBE2E-2 — selected slot to canonical booking preview', () => {
+     const create = {
+       quoteForAccount: jest.fn().mockResolvedValue({
+         start: '2026-10-02T10:00:00.000Z',
++        timezone: 'UTC',
+         services: [
+           {
+             id: 'service-1',
+diff --git a/maya-saas-backend/src/widgets/owner-ports/booking-preview.adapter.ts b/maya-saas-backend/src/widgets/owner-ports/booking-preview.adapter.ts
+index 571b16c2..ba795653 100644
+--- a/maya-saas-backend/src/widgets/owner-ports/booking-preview.adapter.ts
++++ b/maya-saas-backend/src/widgets/owner-ports/booking-preview.adapter.ts
+@@ -127,6 +127,12 @@ export class BookingPreviewAdapter
+         appointmentRef: null,
+         producingIntentTokenHash: null,
+         when: quoted.start,
++        whenFormatted:
++          new Intl.DateTimeFormat('ru-RU', {
++            timeZone: quoted.timezone,
++            dateStyle: 'medium',
++            timeStyle: 'short',
++          }).format(new Date(quoted.start)) + ` (${quoted.timezone})`,
+         whenPrevious: null,
+         serviceLabel: service.name,
+         staffLabel: staffId,
+@@ -205,6 +211,12 @@ export class BookingPreviewAdapter
+           appointmentRef: null,
+           producingIntentTokenHash: null,
+           when: quoted.start,
++          whenFormatted:
++            new Intl.DateTimeFormat('ru-RU', {
++              timeZone: quoted.timezone,
++              dateStyle: 'medium',
++              timeStyle: 'short',
++            }).format(new Date(quoted.start)) + ` (${quoted.timezone})`,
+           whenPrevious: null,
+           serviceLabel: service.name,
+           staffLabel: staffId,
+diff --git a/maya-saas-backend/src/widgets/owner-ports/booking-selector.adapter.spec.ts b/maya-saas-backend/src/widgets/owner-ports/booking-selector.adapter.spec.ts
+index 426889de..54503627 100644
+--- a/maya-saas-backend/src/widgets/owner-ports/booking-selector.adapter.spec.ts
++++ b/maya-saas-backend/src/widgets/owner-ports/booking-selector.adapter.spec.ts
+@@ -1,6 +1,12 @@
+ import { SealService } from '../emission/seal.service';
+ import { BookingSelectorAdapter } from './booking-selector.adapter';
+ 
++const availability = {
++  nextAvailabilityDay: jest
++    .fn()
++    .mockResolvedValue({ date: '2026-10-02', timezone: 'UTC', branchId: null }),
++};
++
+ const NOW = new Date('2026-10-01T09:00:00.000Z');
+ const TENANT = '00000000-0000-4000-8000-000000000001';
+ const OTHER_TENANT = '00000000-0000-4000-8000-000000000002';
+@@ -61,7 +67,10 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
+         result: { staff: [{ id: 'staff-1', name: 'Alice' }] },
+       }),
+     };
+-    const adapter = new BookingSelectorAdapter(runtime as never);
++    const adapter = new BookingSelectorAdapter(
++      runtime as never,
++      availability as never,
++    );
+     const service = handle(TENANT, 'service', 'service-1');
+     await expect(
+       adapter.advance({
+@@ -116,7 +125,10 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
+         },
+       }),
+     };
+-    const adapter = new BookingSelectorAdapter(runtime as never);
++    const adapter = new BookingSelectorAdapter(
++      runtime as never,
++      availability as never,
++    );
+     const service = handle(TENANT, 'service', 'service-1');
+     const staff = handle(TENANT, 'staff', 'staff-1');
+     await expect(
+@@ -136,7 +148,7 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
+       'booking.availability.read',
+       {
+         arguments: {
+-          date: '2026-10-02T09:00:00.000Z',
++          date: '2026-10-02',
+           service_ids: ['service-1'],
+           staff_id: 'staff-1',
+         },
+@@ -163,7 +175,10 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
+         .fn()
+         .mockResolvedValue({ status: 'failed', result: { staff: [] } }),
+     };
+-    const adapter = new BookingSelectorAdapter(runtime as never);
++    const adapter = new BookingSelectorAdapter(
++      runtime as never,
++      availability as never,
++    );
+     const service = handle(TENANT, 'service', 'service-1');
+     await expect(
+       adapter.advance({
+@@ -190,7 +205,10 @@ describe('FBE2E-2 — canonical booking selector owner adapter', () => {
+         execute: jest.fn().mockResolvedValue({ status: 'completed', result }),
+       };
+       await expect(
+-        new BookingSelectorAdapter(runtime as never).advance({
++        new BookingSelectorAdapter(
++          runtime as never,
++          availability as never,
++        ).advance({
+           routing: routing as never,
+           actor: actor as never,
+           step: 'service',
+diff --git a/maya-saas-backend/src/widgets/owner-ports/booking-selector.adapter.ts b/maya-saas-backend/src/widgets/owner-ports/booking-selector.adapter.ts
+index 7783483e..d7051ab0 100644
+--- a/maya-saas-backend/src/widgets/owner-ports/booking-selector.adapter.ts
++++ b/maya-saas-backend/src/widgets/owner-ports/booking-selector.adapter.ts
+@@ -1,6 +1,7 @@
+ import { Injectable } from '@nestjs/common';
+ 
+ import { AiToolRuntimeService } from '../../ai-tools/ai-tool-runtime.service';
++import { AvailabilityCalendarService } from '../../crm/availability-calendar.service';
+ import { openWidgetNounHandle } from '../emission/seal.service';
+ import type { BookingSelectorOwnerPort } from '../routing/effect-router.ports';
+ import { isBookingNounIdentity } from '../booking/booking-noun-identity';
+@@ -29,7 +30,10 @@ const fact = (
+ 
+ @Injectable()
+ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
+-  constructor(private readonly runtime: AiToolRuntimeService) {}
++  constructor(
++    private readonly runtime: AiToolRuntimeService,
++    private readonly availability: AvailabilityCalendarService,
++  ) {}
+ 
+   async advance(input: Parameters<BookingSelectorOwnerPort['advance']>[0]) {
+     const opened = new Map<string, string>();
+@@ -45,6 +49,19 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
+       opened.set(noun, value.ownerRef);
+     }
+     if (input.actor.tenantId !== input.routing.tenantId) return null;
++    if (
++      input.step === 'staff' &&
++      (!opened.get('service') || !opened.get('staff'))
++    )
++      return null;
++    const day =
++      input.step === 'staff'
++        ? await this.availability.nextAvailabilityDay(
++            input.routing.tenantId,
++            opened.get('staff')!,
++            input.routing.now,
++          )
++        : null;
+     const name: 'catalog.staff.read' | 'booking.availability.read' =
+       input.step === 'service'
+         ? 'catalog.staff.read'
+@@ -53,11 +70,10 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
+       input.step === 'service'
+         ? {}
+         : {
+-            date: new Date(
+-              input.routing.now.getTime() + 86_400_000,
+-            ).toISOString(),
++            date: day!.date,
+             service_ids: [opened.get('service')],
+             staff_id: opened.get('staff'),
++            ...(day!.branchId ? { branch_id: day!.branchId } : {}),
+           };
+     if (
+       input.step === 'staff' &&
+@@ -92,7 +108,13 @@ export class BookingSelectorAdapter implements BookingSelectorOwnerPort {
+           ? ('STAFF_SELECTOR' as const)
+           : ('TIME_SLOT_SELECTOR' as const),
+       capabilityKey: name,
+-      source,
++      source: day
++        ? {
++            ...(source as Record<string, unknown>),
++            timezone: day.timezone,
++            local_date: day.date,
++          }
++        : source,
+       fact: fact(
+         name,
+         input.routing.record.requestedScopeHash,
+diff --git a/maya-saas-backend/src/widgets/owner-ports/selector-observation-audit.adapter.ts b/maya-saas-backend/src/widgets/owner-ports/selector-observation-audit.adapter.ts
+new file mode 100644
+index 00000000..8dc81384
+--- /dev/null
++++ b/maya-saas-backend/src/widgets/owner-ports/selector-observation-audit.adapter.ts
+@@ -0,0 +1,55 @@
++import { Injectable } from '@nestjs/common';
++import { AuditLogService } from '../../audit-log/audit-log.service';
++import type { RequestTx } from '../authority/principal-view';
++import type {
++  SelectorObservation,
++  SelectorObservationAuditPort,
++} from './selector-observation-audit.port';
++
++@Injectable()
++export class SelectorObservationAuditAdapter implements SelectorObservationAuditPort {
++  constructor(private readonly audit: AuditLogService) {}
++
++  private identity(o: SelectorObservation) {
++    return {
++      tenantId: o.tenantId,
++      userId: o.userId,
++      action:
++        o.state === 'LIVE'
++          ? 'widget.selector.rendered'
++          : 'widget.selector.delivered',
++      entityType: 'WidgetEmission',
++      entityId: o.widgetId,
++    };
++  }
++  private metadata(o: SelectorObservation) {
++    return {
++      contract: 'maya.selector.lifecycle-observation/1',
++      from: o.state === 'LIVE' ? 'DELIVERED' : 'MINTED',
++      to: o.state,
++      bodyHash: o.bodyHash,
++      principalProofHash: o.principalProofHash,
++      deliveryChannel: o.deliveryChannel,
++      authority: 'NONE',
++      humanAttentionProven: false,
++    };
++  }
++  async exists(o: SelectorObservation, tx: RequestTx): Promise<boolean> {
++    const rows = await this.audit.entityEvents(this.identity(o), tx);
++    const expected = this.metadata(o);
++    const actual = rows[0]?.metadataJson;
++    return (
++      rows.length === 1 &&
++      typeof actual === 'object' &&
++      actual !== null &&
++      !Array.isArray(actual) &&
++      Object.entries(expected).every(([key, value]) => actual[key] === value)
++    );
++  }
++  async append(o: SelectorObservation, tx: RequestTx): Promise<void> {
++    await this.audit.log(
++      { ...this.identity(o), metadata: this.metadata(o) },
++      tx,
++    );
++  }
++}
+diff --git a/maya-saas-backend/src/widgets/owner-ports/selector-observation-audit.port.ts b/maya-saas-backend/src/widgets/owner-ports/selector-observation-audit.port.ts
+new file mode 100644
+index 00000000..db8601a1
+--- /dev/null
++++ b/maya-saas-backend/src/widgets/owner-ports/selector-observation-audit.port.ts
+@@ -0,0 +1,17 @@
++import type { RequestTx } from '../authority/principal-view';
++
++export interface SelectorObservation {
++  tenantId: string;
++  userId: string;
++  widgetId: string;
++  bodyHash: string;
++  principalProofHash: string;
++  deliveryChannel: string;
++  state: 'DELIVERED' | 'LIVE';
++}
++
++/** L25: lifecycle evidence only. No business operation or authority writer. */
++export interface SelectorObservationAuditPort {
++  exists(observation: SelectorObservation, tx: RequestTx): Promise<boolean>;
++  append(observation: SelectorObservation, tx: RequestTx): Promise<void>;
++}
+diff --git a/maya-saas-backend/src/widgets/owner-ports/widget-owner-ports.module.spec.ts b/maya-saas-backend/src/widgets/owner-ports/widget-owner-ports.module.spec.ts
+index 4131052c..da0d8011 100644
+--- a/maya-saas-backend/src/widgets/owner-ports/widget-owner-ports.module.spec.ts
++++ b/maya-saas-backend/src/widgets/owner-ports/widget-owner-ports.module.spec.ts
+@@ -1,3 +1,4 @@
++import { SelectorObservationAuditAdapter } from './selector-observation-audit.adapter';
+ import { AppointmentsModule } from '../../appointments/appointments.module';
+ import { PERSONAL_SCHEDULE_SOURCE } from '../di-tokens';
+ import { PersonalScheduleAdapter } from './personal-schedule.adapter';
+@@ -106,6 +107,10 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every
+       TenancyModule,
+     ]);
+     expect(meta(MODULE_METADATA.PROVIDERS, WidgetOwnerPortsModule)).toEqual([
++      {
++        provide: DI_TOKENS.SELECTOR_OBSERVATION_AUDIT,
++        useClass: SelectorObservationAuditAdapter,
++      },
+       { provide: PERSONAL_SCHEDULE_SOURCE, useClass: PersonalScheduleAdapter },
+       { provide: DI_TOKENS.USER_TURN_AUDIT, useClass: UserTurnAuditAdapter },
+       {
+@@ -153,6 +158,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every
+       expect.objectContaining({ provide: DI_TOKENS.NOUN_RESOLUTION_PORTS }),
+     ]);
+     expect(meta(MODULE_METADATA.EXPORTS, WidgetOwnerPortsModule)).toEqual([
++      DI_TOKENS.SELECTOR_OBSERVATION_AUDIT,
+       PERSONAL_SCHEDULE_SOURCE,
+       DI_TOKENS.USER_TURN_AUDIT,
+       DI_TOKENS.WIDGET_RELEASE_ACCESS,
+@@ -200,6 +206,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every
+     // Every token bound so far. A token leaves this list only by being bound, in the commit that binds
+     // it: that is what keeps "unbound" from drifting into "nobody checked".
+     const BOUND: readonly string[] = [
++      DI_TOKENS.SELECTOR_OBSERVATION_AUDIT,
+       DI_TOKENS.PERSONAL_SCHEDULE_SOURCE,
+       DI_TOKENS.USER_TURN_AUDIT,
+       DI_TOKENS.WIDGET_RELEASE_ACCESS,
+diff --git a/maya-saas-backend/src/widgets/owner-ports/widget-owner-ports.module.ts b/maya-saas-backend/src/widgets/owner-ports/widget-owner-ports.module.ts
+index 48579065..da14c78b 100644
+--- a/maya-saas-backend/src/widgets/owner-ports/widget-owner-ports.module.ts
++++ b/maya-saas-backend/src/widgets/owner-ports/widget-owner-ports.module.ts
+@@ -1,3 +1,5 @@
++import { SelectorObservationAuditAdapter } from './selector-observation-audit.adapter';
++import { SELECTOR_OBSERVATION_AUDIT } from '../di-tokens';
+ import { AppointmentsModule } from '../../appointments/appointments.module';
+ import { PersonalScheduleAdapter } from './personal-schedule.adapter';
+ import { PERSONAL_SCHEDULE_SOURCE } from '../di-tokens';
+@@ -82,6 +84,10 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
+     TenancyModule,
+   ],
+   providers: [
++    {
++      provide: SELECTOR_OBSERVATION_AUDIT,
++      useClass: SelectorObservationAuditAdapter,
++    },
+     { provide: PERSONAL_SCHEDULE_SOURCE, useClass: PersonalScheduleAdapter },
+     { provide: USER_TURN_AUDIT, useClass: UserTurnAuditAdapter },
+     { provide: WIDGET_RELEASE_ACCESS, useClass: WidgetReleaseAccessAdapter },
+@@ -126,6 +132,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
+     },
+   ],
+   exports: [
++    SELECTOR_OBSERVATION_AUDIT,
+     PERSONAL_SCHEDULE_SOURCE,
+     USER_TURN_AUDIT,
+     WIDGET_RELEASE_ACCESS,
+diff --git a/maya-saas-backend/src/widgets/rendering/selector-delivery.interceptor.ts b/maya-saas-backend/src/widgets/rendering/selector-delivery.interceptor.ts
+new file mode 100644
+index 00000000..cd0a602c
+--- /dev/null
++++ b/maya-saas-backend/src/widgets/rendering/selector-delivery.interceptor.ts
+@@ -0,0 +1,56 @@
++import {
++  Injectable,
++  type CallHandler,
++  type ExecutionContext,
++  type NestInterceptor,
++} from '@nestjs/common';
++import { mergeMap } from 'rxjs/operators';
++import { SelectorLifecycleService } from './selector-lifecycle.service';
++
++/** Server response handoff. No client request member is delivery evidence. */
++@Injectable()
++export class SelectorDeliveryInterceptor implements NestInterceptor {
++  constructor(private readonly lifecycle: SelectorLifecycleService) {}
++
++  intercept(context: ExecutionContext, next: CallHandler) {
++    if (context.getType() !== 'http') return next.handle();
++    return next.handle().pipe(
++      mergeMap(async (body: unknown) => {
++        const visit = async (value: unknown, depth: number): Promise<void> => {
++          if (depth > 8 || typeof value !== 'object' || value === null) return;
++          if (Array.isArray(value)) {
++            for (const item of value) await visit(item, depth + 1);
++            return;
++          }
++          const row = value as Record<string, unknown>;
++          const integrity = row.integrity as
++            Record<string, unknown> | undefined;
++          if (
++            (row.kind === 'SERVICE_SELECTOR' ||
++              row.kind === 'STAFF_SELECTOR') &&
++            typeof row.widget_id === 'string' &&
++            typeof integrity?.body_hash === 'string' &&
++            typeof integrity?.envelope_seal === 'string'
++          )
++            await this.lifecycle.delivered({
++              widget_id: row.widget_id,
++              body_hash: integrity.body_hash,
++              envelope_seal: integrity.envelope_seal,
++            });
++          // Only the canonical response containers that carry widget envelopes.
++          for (const key of [
++            'resolution',
++            'receipt',
++            'envelope',
++            'next_envelope',
++            'widgets',
++            'widget_resolution',
++          ])
++            if (Object.hasOwn(row, key)) await visit(row[key], depth + 1);
++        };
++        await visit(body, 0);
++        return body;
++      }),
++    );
++  }
++}
+diff --git a/maya-saas-backend/src/widgets/rendering/selector-lifecycle.service.ts b/maya-saas-backend/src/widgets/rendering/selector-lifecycle.service.ts
+new file mode 100644
+index 00000000..6354f765
+--- /dev/null
++++ b/maya-saas-backend/src/widgets/rendering/selector-lifecycle.service.ts
+@@ -0,0 +1,149 @@
++import type {
++  SelectorObservation,
++  SelectorObservationAuditPort,
++} from '../owner-ports/selector-observation-audit.port';
++import { Inject, Injectable } from '@nestjs/common';
++import { PrismaService } from '../../prisma/prisma.service';
++import {
++  PRINCIPAL_RESOLVER,
++  SELECTOR_OBSERVATION_AUDIT,
++  SEAL_VERIFIER,
++  WIDGET_RELEASE_ACCESS,
++} from '../di-tokens';
++import type { PrincipalResolver } from '../authority/principal-view';
++import type { SealVerifier } from '../emission/seal-verifier.service';
++import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
++import { TimelineStore } from '../stores/timeline.store';
++import { digestEquals } from '../token.util';
++
++export interface SelectorRenderEvidence {
++  readonly widget_id: string;
++  readonly body_hash: string;
++  readonly envelope_seal: string;
++}
++
++const SELECTORS = ['SERVICE_SELECTOR', 'STAFF_SELECTOR'];
++
++/** L25: lifecycle observations, never a capability/confirmation/booking owner. */
++@Injectable()
++export class SelectorLifecycleService {
++  constructor(
++    private readonly prisma: PrismaService,
++    @Inject(SELECTOR_OBSERVATION_AUDIT)
++    private readonly audit: SelectorObservationAuditPort,
++    @Inject(PRINCIPAL_RESOLVER) private readonly principals: PrincipalResolver,
++    @Inject(SEAL_VERIFIER) private readonly seals: SealVerifier,
++    @Inject(WIDGET_RELEASE_ACCESS)
++    private readonly release: WidgetReleaseAccessPort,
++  ) {}
++
++  /** Only server HTTP egress may record handing sealed bytes to the channel. */
++  delivered(evidence: SelectorRenderEvidence) {
++    return this.transition(evidence, 'MINTED', 'DELIVERED');
++  }
++
++  /** The mounted carrier reports this independently of any selector action. */
++  rendered(evidence: SelectorRenderEvidence) {
++    return this.transition(evidence, 'DELIVERED', 'LIVE');
++  }
++
++  private async transition(
++    e: SelectorRenderEvidence,
++    from: 'MINTED' | 'DELIVERED',
++    to: 'DELIVERED' | 'LIVE',
++  ): Promise<boolean> {
++    return this.prisma.$transaction(async (tx) => {
++      const principal = await this.principals.resolve(tx);
++      if (!principal || !principal.authority.userId) return false;
++      const tenantId = principal.authority.tenantId;
++      const initial = await tx.widgetEmission.findFirst({
++        where: { tenantId, widgetId: e.widget_id, kind: { in: SELECTORS } },
++        select: { turn: { select: { conversationId: true } } },
++      });
++      if (!initial) return false;
++      await TimelineStore.lockConversation(
++        tx,
++        tenantId,
++        initial.turn.conversationId,
++      );
++      const current = await this.principals.resolve(tx);
++      if (!current || !digestEquals(current.proofHash, principal.proofHash))
++        return false;
++      const now = new Date();
++      const row = await tx.widgetEmission.findFirst({
++        where: {
++          tenantId,
++          widgetId: e.widget_id,
++          kind: { in: SELECTORS },
++          erasedAt: null,
++          bodyDroppedAt: null,
++          supersededByWidgetId: null,
++          expiresAt: { gt: now },
++          retentionUntil: { gt: now },
++          turn: { erasedAt: null },
++          intentRecords: {
++            some: { principalProofHash: current.proofHash, erasedAt: null },
++          },
++        },
++        include: {
++          intentRecords: true,
++          renderReceipts: { where: { erasedAt: null } },
++        },
++      });
++      if (
++        !row ||
++        !digestEquals(row.bodyHash, e.body_hash) ||
++        !digestEquals(row.envelopeSeal, e.envelope_seal) ||
++        !row.renderReceipts.some(
++          (r) => r.deliveryChannel === row.deliveryChannel,
++        )
++      )
++        return false;
++      const token = row.intentRecords.find(
++        (r) => r.principalProofHash === current.proofHash,
++      )?.intentTokenHash;
++      if (!token || !(await this.seals.verify(token, { tenantId }, tx)).ok)
++        return false;
++      for (const intent of row.intentRecords)
++        if (!(await this.release.admits(tenantId, intent, tx))) return false;
++      const userId = current.authority.userId;
++      if (!userId) return false;
++      const observation = (
++        state: 'DELIVERED' | 'LIVE',
++      ): SelectorObservation => ({
++        tenantId,
++        userId,
++        widgetId: row.widgetId,
++        bodyHash: row.bodyHash,
++        principalProofHash: current.proofHash,
++        deliveryChannel: row.deliveryChannel,
++        state,
++      });
++      // Idempotence needs the exact prior observation; legacy LIVE alone is insufficient.
++      if (row.lifecycleState === to)
++        return this.audit.exists(observation(to), tx);
++      if (row.lifecycleState !== from) return false;
++      if (
++        to === 'LIVE' &&
++        !(await this.audit.exists(observation('DELIVERED'), tx))
++      )
++        return false;
++      const changed = await tx.widgetEmission.updateMany({
++        where: {
++          tenantId,
++          widgetId: row.widgetId,
++          lifecycleState: from,
++          erasedAt: null,
++          supersededByWidgetId: null,
++          expiresAt: { gt: now },
++          bodyHash: e.body_hash,
++          envelopeSeal: e.envelope_seal,
++        },
++        data: { lifecycleState: to },
++      });
++      if (changed.count !== 1) throw new Error('SELECTOR_LIFECYCLE_CAS');
++      await this.audit.append(observation(to), tx);
++      return true;
++    });
++  }
++}
+diff --git a/maya-saas-backend/src/widgets/widget-import-graph.architecture.spec.ts b/maya-saas-backend/src/widgets/widget-import-graph.architecture.spec.ts
+index 429f7f88..33aabdcf 100644
+--- a/maya-saas-backend/src/widgets/widget-import-graph.architecture.spec.ts
++++ b/maya-saas-backend/src/widgets/widget-import-graph.architecture.spec.ts
+@@ -88,6 +88,8 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
+     why: "H4/H6: the platform's one keyed-HMAC discipline (`ActionIdentityService.hmac`) and its one canonicaliser (`stableActionJson`); a plain class and a pure function over static code, constructed as values, no DI (D-6 registries)",
+     only: [
+       'emission/seal.service.ts',
++      'emission/envelope.factory.ts', // L5/L24 H1 uses the H6 canonical codec; no parallel sort.
++
+       // U8b-c (IR-8C-1): the input-schema codec reaches the UNKEYED half of the same discipline.
+       // H6 admits no canonicalisation scheme other than `stableActionJson`, and §2.2 rule 3 forbids a
+       // local copy of a shared codec — so the three pure files import it rather than restating it.
+@@ -174,6 +176,14 @@ const NON_WIDGET_DIRECTORIES: Readonly<Record<string, Allowed>> = {
+ /** Packages a widget file may import. Closed, so a provider client or a second database client is refused. */
+ const PACKAGES: Readonly<Record<string, Allowed>> = {
+   '@nestjs/common': { why: 'Nest decorators and the logger' },
++  '@nestjs/core': {
++    why: 'L25 canonical HTTP egress interceptor registration',
++    only: ['widgets.module.ts'],
++  },
++  rxjs: {
++    why: 'L25 awaits delivery observation before HTTP response handoff',
++    only: ['rendering/selector-delivery.interceptor.ts'],
++  },
+   '@nestjs/swagger': {
+     why: 'request documentation on the DTOs and the controller',
+   },
+@@ -260,7 +270,10 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
+   },
+   'audit-log/audit-log.service.ts': {
+     why: '9.6 correlation references only, never conversation content or authority',
+-    only: ['owner-ports/user-turn-audit.adapter.ts'],
++    only: [
++      'owner-ports/user-turn-audit.adapter.ts',
++      'owner-ports/selector-observation-audit.adapter.ts',
++    ],
+   },
+   'entitlements/widget-release.contract.ts': {
+     why: 'The existing unkeyed release digest for the finite server registry binding',
+@@ -281,6 +294,10 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
+     why: "(e)'s owner module, so the boundary can resolve GATE6_OWNERS (R6-2)",
+     only: ['owner-ports/widget-owner-ports.module.ts'],
+   },
++  'crm/availability-calendar.service.ts': {
++    why: 'L5/L24 canonical availability calendar owner; no widget-authored timezone',
++    only: ['owner-ports/booking-selector.adapter.ts'],
++  },
+   'crm/crm.module.ts': {
+     why: 'U11b canonical appointment noun owner module and U13c booking commit owners',
+     only: ['owner-ports/widget-owner-ports.module.ts'],
+@@ -1088,6 +1105,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
+       'entitlements/entitlements.service.ts',
+       'ai-tools/ai-tool-policy.module.ts',
+       'entitlements/entitlements.module.ts',
++      'crm/availability-calendar.service.ts',
+       'crm/crm.module.ts',
+       'marketing/marketing.module.ts',
+       'appointments/client-appointment-create.service.ts',
+@@ -1218,6 +1236,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
+     expect(values.get('BOUND_PORT_TOKENS')).toEqual([
+       'PERSONAL_SCHEDULE_SOURCE',
+       'USER_TURN_AUDIT',
++      'SELECTOR_OBSERVATION_AUDIT',
+       'WIDGET_RELEASE_ACCESS',
+       'CANONICAL_READ',
+       'GATE6_OWNERS',
+diff --git a/maya-saas-backend/src/widgets/widgets.controller.ts b/maya-saas-backend/src/widgets/widgets.controller.ts
+index 6b6f250c..38407556 100644
+--- a/maya-saas-backend/src/widgets/widgets.controller.ts
++++ b/maya-saas-backend/src/widgets/widgets.controller.ts
+@@ -8,7 +8,14 @@
+ // Both are behind `widgets.runtime`, which no plan grants. In wave 2 the runtime composes, seals
+ // and refuses, and delivers to nobody.
+ 
+-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
++import {
++  Body,
++  Controller,
++  ForbiddenException,
++  HttpCode,
++  Post,
++} from '@nestjs/common';
++import { SelectorLifecycleService } from './rendering/selector-lifecycle.service';
+ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+ 
+ import type { AuthenticatedUser } from '../common/authenticated-user.interface';
+@@ -32,11 +39,12 @@ export class WidgetsController {
+   constructor(
+     private readonly gateway: IntentGatewayService,
+     private readonly threadPage: WidgetThreadPageService,
++    private readonly lifecycle: SelectorLifecycleService,
+   ) {}
+ 
+   /**
+-   * Resolve — read a widget's current state. Read-only by construction in wave 2: it reaches no
+-   * capability owner, and §3 requires zero capability calls on the timeline read path.
++   * Resolve — read current state. L25 optionally records a mounted-selector observation through
++   * the lifecycle/audit owners. It grants no authority and calls zero capabilities.
+    */
+   @Post('resolve')
+   @HttpCode(200)
+@@ -45,6 +53,8 @@ export class WidgetsController {
+     @Body() dto: ResolveWidgetDto,
+     @CurrentUser() actor: AuthenticatedUser,
+   ) {
++    if (dto.rendered && !(await this.lifecycle.rendered(dto.rendered)))
++      throw new ForbiddenException('widget_render_evidence_refused');
+     const widgets = await this.threadPage.read(dto.thread_page);
+     return {
+       contract: 'maya.widget.resolve/1',
+diff --git a/maya-saas-backend/src/widgets/widgets.module.ts b/maya-saas-backend/src/widgets/widgets.module.ts
+index 9e6f6fdc..26a34b8d 100644
+--- a/maya-saas-backend/src/widgets/widgets.module.ts
++++ b/maya-saas-backend/src/widgets/widgets.module.ts
+@@ -1,3 +1,6 @@
++import { APP_INTERCEPTOR } from '@nestjs/core';
++import { SelectorLifecycleService } from './rendering/selector-lifecycle.service';
++import { SelectorDeliveryInterceptor } from './rendering/selector-delivery.interceptor';
+ import { Module } from '@nestjs/common';
+ import type { OnModuleInit } from '@nestjs/common';
+ 
+@@ -58,6 +61,8 @@ import { OPERATIONAL_ALERT_WIDGET_TRIGGER } from '../operational-alerts/operatio
+   imports: [PrismaModule, WidgetOwnerPortsModule, WidgetEmissionModule],
+   controllers: [WidgetsController],
+   providers: [
++    SelectorLifecycleService,
++    { provide: APP_INTERCEPTOR, useClass: SelectorDeliveryInterceptor },
+     IntentGatewayService,
+     WidgetStoresService,
+     { provide: GATE10_STORE, useExisting: WidgetStoresService },
+diff --git a/maya-saas-backend/test/widgets-live/availability-calendar.live-spec.ts b/maya-saas-backend/test/widgets-live/availability-calendar.live-spec.ts
+new file mode 100644
+index 00000000..2abd2017
+--- /dev/null
++++ b/maya-saas-backend/test/widgets-live/availability-calendar.live-spec.ts
+@@ -0,0 +1,175 @@
++import {
++  envelopeBodyHash,
++  envelopeBodyHashTerms,
++} from '../../src/widgets/emission/envelope.factory';
++import { stableActionJson } from '../../src/action-engine/action-engine.identity';
++import { spawn } from 'node:child_process';
++import path from 'node:path';
++import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
++import {
++  bootHttp,
++  fixturesForHttp,
++  type HttpHarness,
++} from './support/http-bootstrap';
++import type { Fixtures } from './support/fixtures';
++import {
++  firstOption,
++  firstSlot,
++  object,
++  observe,
++  startBooking,
++  submit,
++} from './support/release-booking-flow';
++
++const cases = [
++  ['UTC', '2028-02-28T23:59:59Z', '2028-02-29', false],
++  ['UTC', '2028-02-29T12:00:00Z', '2028-03-01', false],
++  ['Europe/Moscow', '2027-10-01T21:30:00Z', '2027-10-03', true],
++  ['America/Los_Angeles', '2027-01-01T02:00:00Z', '2027-01-01', true],
++  ['Pacific/Kiritimati', '2027-12-31T12:00:00Z', '2028-01-02', true],
++  ['Asia/Kathmandu', '2027-01-31T20:00:00Z', '2027-02-02', true],
++  ['America/New_York', '2027-03-14T04:30:00Z', '2027-03-14', true],
++  ['America/New_York', '2027-11-07T04:30:00Z', '2027-11-08', true],
++] as const;
++
++async function carrier(
++  envelope: Record<string, unknown>,
++  now: string,
++  formatted: unknown,
++) {
++  expect(envelopeBodyHash(envelope as never)).toBe(
++    object(envelope.integrity).body_hash,
++  );
++  const child = spawn(
++    process.execPath,
++    [path.resolve('test/widgets-live/support/calendar-carrier-proof.mjs')],
++    { stdio: ['pipe', 'pipe', 'pipe'] },
++  );
++  let err = '',
++    out = '';
++  child.stderr.on('data', (v: Buffer) => {
++    err += v.toString();
++  });
++  child.stdout.on('data', (v: Buffer) => {
++    out += v.toString();
++  });
++  const done = new Promise<void>((resolve, reject) => {
++    child.once('error', reject);
++    child.once('close', (code) =>
++      code === 0 ? resolve() : reject(new Error(err)),
++    );
++  });
++  child.stdin.end(
++    JSON.stringify({
++      envelope,
++      now,
++      formatted,
++      canonical: stableActionJson(envelopeBodyHashTerms(envelope)),
++    }),
++  );
++  await done;
++  expect(JSON.parse(out)).toMatchObject({ carrier: 'PASS', formatted });
++}
++
++describe('L5/L24 local calendar through availability → envelope → carrier → confirmation [HTTP] [PostgreSQL]', () => {
++  let db: FixtureContext, http: HttpHarness, fx: Fixtures;
++  beforeAll(async () => {
++    db = await bootFixtureContext();
++    http = await bootHttp();
++    fx = fixturesForHttp(db, http);
++  });
++  afterEach(async () => {
++    jest.useRealTimers();
++    await fx.teardown();
++    http.recorder.clear();
++  });
++  afterAll(async () => {
++    await http?.close();
++    await db?.close();
++  });
++  it.each(cases)(
++    'L5-PIPELINE %s at %s → %s (branch=%s)',
++    async (timezone, now, expectedDate, useBranch) => {
++      jest.useFakeTimers({
++        doNotFake: [
++          'nextTick',
++          'queueMicrotask',
++          'performance',
++          'hrtime',
++          'setTimeout',
++          'clearTimeout',
++          'setInterval',
++          'clearInterval',
++          'setImmediate',
++          'clearImmediate',
++        ],
++      });
++      jest.setSystemTime(new Date(now));
++      const s = await startBooking(fx, http);
++      await db.prisma.tenant.update({
++        where: { id: s.tenant.id },
++        data: { defaultTimezone: useBranch ? 'UTC' : timezone },
++      });
++      if (useBranch) {
++        const branch = await db.prisma.branch.create({
++          data: { tenantId: s.tenant.id, name: 'Calendar proof', timezone },
++        });
++        await db.prisma.internalProvider.update({
++          where: { id: s.source.staffId },
++          data: { branchId: branch.id },
++        });
++      }
++      await observe(http, s.token, s.envelope);
++      const staff = object(
++        (
++          await submit(
++            http,
++            s.token,
++            s.envelope,
++            'REFINE',
++            firstOption(s.envelope),
++          )
++        ).next_envelope,
++      );
++      await observe(http, s.token, staff);
++      const slot = object(
++        (await submit(http, s.token, staff, 'REFINE', firstOption(staff)))
++          .next_envelope,
++      );
++      expect(slot.kind).toBe('TIME_SLOT_SELECTOR');
++      expect(object(slot.body)).toMatchObject({
++        timezone,
++        more_intent: null,
++        widen_window_intent: null,
++      });
++      const selected = firstSlot(slot);
++      const start = object(selected.start);
++      const parts = new Intl.DateTimeFormat('en-CA', {
++        timeZone: timezone,
++        year: 'numeric',
++        month: '2-digit',
++        day: '2-digit',
++      }).format(new Date(String(start.value)));
++      expect(parts).toBe(expectedDate);
++      expect(String(start.formatted)).toContain(timezone);
++      await carrier(slot, new Date(now).toISOString(), start.formatted);
++      const confirmation = object(
++        (await submit(http, s.token, slot, 'DRAFT', selected.slot_ref))
++          .next_envelope,
++      );
++      expect(confirmation.kind).toBe('BOOKING_CONFIRMATION');
++      const when = object(object(confirmation.body).when);
++      expect(when.value).toBe(start.value);
++      expect(when.formatted).toBe(start.formatted);
++      await carrier(confirmation, new Date(now).toISOString(), when.formatted);
++      expect(
++        await db.prisma.appointment.count({ where: { tenantId: s.tenant.id } }),
++      ).toBe(0);
++      expect(
++        await db.prisma.actionExecution.count({
++          where: { tenantId: s.tenant.id },
++        }),
++      ).toBe(0);
++    },
++  );
++});
+diff --git a/maya-saas-backend/test/widgets-live/h2-terminal-line-ownership.live-spec.ts b/maya-saas-backend/test/widgets-live/h2-terminal-line-ownership.live-spec.ts
+index 2234d9aa..c7a075a2 100644
+--- a/maya-saas-backend/test/widgets-live/h2-terminal-line-ownership.live-spec.ts
++++ b/maya-saas-backend/test/widgets-live/h2-terminal-line-ownership.live-spec.ts
+@@ -1,3 +1,4 @@
++import { observe } from './support/release-booking-flow';
+ // H2 — the BOOKING_CONFIRMATION terminal line belongs to the intent that was adjudicated.
+ //
+ // A confirmation carries two separately tokenised intents: the AE COMMIT the primary button submits,
+@@ -130,6 +131,11 @@ describe('H2 — the confirmation terminal line survives the same widget escape
+     option: string;
+     label: string;
+   }): Promise<Envelope> => {
++    if (
++      args.envelope.kind === 'SERVICE_SELECTOR' ||
++      args.envelope.kind === 'STAFF_SELECTOR'
++    )
++      await observe(http, args.accessToken, args.envelope);
+     const selected = intentOf(args.envelope, args.effect);
+     const field = selectionFieldOf(selected);
+     if (field === null)
+diff --git a/maya-saas-backend/test/widgets-live/mutations/gateFB.json b/maya-saas-backend/test/widgets-live/mutations/gateFB.json
+new file mode 100644
+index 00000000..00c17597
+--- /dev/null
++++ b/maya-saas-backend/test/widgets-live/mutations/gateFB.json
+@@ -0,0 +1,152 @@
++[
++  {
++    "id": "FB-DAY-UTC",
++    "file": "src/crm/appointment-time.utils.ts",
++    "find": "const p = partsInTimezone(now, timezone);",
++    "replace": "const p = partsInTimezone(now, 'UTC');",
++    "killers": [
++      "L5-PIPELINE"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "FB-DAY-ELAPSED",
++    "file": "src/crm/appointment-time.utils.ts",
++    "find": "Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day) + 1)",
++    "replace": "now.getTime() + 86400000",
++    "killers": [
++      "L5-PIPELINE"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "FB-DAY-BRANCH",
++    "file": "src/crm/availability-calendar.service.ts",
++    "find": "const timezone = provider?.branch?.timezone ?? tenant.defaultTimezone;",
++    "replace": "const timezone = tenant.defaultTimezone;",
++    "killers": [
++      "L5-PIPELINE"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "FB-DAY-DISPLAY",
++    "file": "src/widgets/booking/booking-selector.presenter.ts",
++    "find": "timeZone: timezone,",
++    "replace": "timeZone: 'UTC',",
++    "killers": [
++      "L5-PIPELINE"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "FB-DAY-CONFIRM",
++    "file": "src/widgets/emission/booking-confirmation-minter.service.ts",
++    "find": "formatted: p.whenFormatted ?? p.when,",
++    "replace": "formatted: p.when,",
++    "killers": [
++      "L5-PIPELINE"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "FB-H1-CODEC",
++    "file": "src/widgets/emission/envelope.factory.ts",
++    "find": "import { stableActionJson } from '../../action-engine/action-engine.identity';",
++    "replace": "import { stableActionJson } from '../authority/contract-bindings';",
++    "killers": [
++      "L5-H1"
++    ],
++    "expect": "build-killed"
++  },
++  {
++    "id": "FB-UNKNOWN",
++    "file": "src/crm/crm.service.ts",
++    "find": "kind: 'unknown',\n            outcomeCode: 'crm_provider_outcome_unknown',",
++    "replace": "kind: 'definitive',\n            outcomeCode: 'crm_provider_outcome_unknown',",
++    "killers": [
++      "L20-LOST-RESPONSE"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "FB-DELIVERY-ONLY",
++    "file": "src/widgets/rendering/selector-lifecycle.service.ts",
++    "find": "return this.transition(evidence, 'MINTED', 'DELIVERED');",
++    "replace": "return this.transition(evidence, 'MINTED', 'LIVE');",
++    "killers": [
++      "L25-OBSERVED"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "FB-RENDER-STATE",
++    "file": "src/widgets/rendering/selector-lifecycle.service.ts",
++    "find": "return this.transition(evidence, 'DELIVERED', 'LIVE');",
++    "replace": "return this.transition(evidence, 'MINTED', 'LIVE');",
++    "killers": [
++      "L25-OBSERVED"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "FB-REPLAY",
++    "file": "src/widgets/rendering/selector-lifecycle.service.ts",
++    "find": "return this.audit.exists(observation(to), tx);",
++    "replace": "return true;",
++    "killers": [
++      "L25-MISSING"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "FB-DELIVERY-AUDIT",
++    "file": "src/widgets/rendering/selector-lifecycle.service.ts",
++    "find": "!(await this.audit.exists(observation('DELIVERED'), tx))",
++    "replace": "false",
++    "killers": [
++      "L25-MISSING"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "FB-RENDER-AUDIT",
++    "file": "src/widgets/rendering/selector-lifecycle.service.ts",
++    "find": "await this.audit.append(observation(to), tx);",
++    "replace": "/* mutation: omit observation */",
++    "killers": [
++      "L25-CONCURRENT"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "FB-AUDIT-ATOMIC",
++    "file": "src/widgets/owner-ports/selector-observation-audit.adapter.ts",
++    "find": "{ ...this.identity(o), metadata: this.metadata(o) },\n      tx,",
++    "replace": "{ ...this.identity(o), metadata: this.metadata(o) },\n      undefined,",
++    "killers": [
++      "L25-ATOMIC"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "FB-TAP-CANNOT-RENDER",
++    "file": "src/widgets/gates/gate7.ts",
++    "find": "r.emissionLifecycleState !== 'LIVE'",
++    "replace": "false",
++    "killers": [
++      "L25-OBSERVED"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "FB-DRAWER-OBSERVATION",
++    "file": "../maya-chat-shell/src/dom/host.ts",
++    "find": "deps.widgets.rendered(item.id);",
++    "replace": "void item.id;",
++    "killers": [
++      "BOOK-1…BOOK-6"
++    ],
++    "expect": "live-killed"
++  }
++]
+diff --git a/maya-saas-backend/test/widgets-live/mutations/gateP-mint.json b/maya-saas-backend/test/widgets-live/mutations/gateP-mint.json
+index c250ebc6..8ab78e78 100644
+--- a/maya-saas-backend/test/widgets-live/mutations/gateP-mint.json
++++ b/maya-saas-backend/test/widgets-live/mutations/gateP-mint.json
+@@ -5,7 +5,9 @@
+     "file": "src/widgets/emission/intent-template.registry.ts",
+     "find": "  'refine.measurement@1': row({\n    key: 'refine.measurement@1',\n    version: 1,\n    effect: 'REFINE',",
+     "replace": "  'refine.measurement@1': row({\n    key: 'refine.measurement@1',\n    version: 1,\n    effect: 'NAVIGATE',",
+-    "killers": ["MINT-1"],
++    "killers": [
++      "MINT-1"
++    ],
+     "expect": "build-killed"
+   },
+   {
+@@ -14,7 +16,9 @@
+     "file": "src/widgets/emission/intent-template.registry.ts",
+     "find": "  'navigate.account@1': row({\n    key: 'navigate.account@1',\n    version: 1,\n    effect: 'NAVIGATE',\n    kinds: ['LIMITATION', 'SOURCE_STATUS', 'SETTINGS_DRAFT'],\n    roles: ['handoff', 'remedy'],\n    subject: null,\n    target: { class: 's', ref: { route: 'shell.account', param: null } },",
+     "replace": "  'navigate.account@1': row({\n    key: 'navigate.account@1',\n    version: 1,\n    effect: 'NAVIGATE',\n    kinds: ['LIMITATION', 'SOURCE_STATUS', 'SETTINGS_DRAFT'],\n    roles: ['handoff', 'remedy'],\n    subject: null,\n    target: { class: 's', ref: { route: 'shell.pay', param: null } },",
+-    "killers": ["MINT-1"],
++    "killers": [
++      "MINT-1"
++    ],
+     "expect": "build-killed"
+   },
+   {
+@@ -23,7 +27,9 @@
+     "file": "src/widgets/emission/intent-template.registry.ts",
+     "find": "  'control.dismiss@1': row({\n    key: 'control.dismiss@1',\n    version: 1,\n    effect: 'CONTROL',\n    kinds: CONTROL_KINDS,\n    roles: ['escape'],\n    subject: DISMISS,\n    target: null,\n    inputSchema: null,\n    selectionDomain: {},\n    selectionDomainLabels: {},\n    priority: 0,\n    singleUse: true,",
+     "replace": "  'control.dismiss@1': row({\n    key: 'control.dismiss@1',\n    version: 1,\n    effect: 'CONTROL',\n    kinds: CONTROL_KINDS,\n    roles: ['escape'],\n    subject: DISMISS,\n    target: null,\n    inputSchema: null,\n    selectionDomain: {},\n    selectionDomainLabels: {},\n    priority: 1,\n    singleUse: true,",
+-    "killers": ["MINT-1"],
++    "killers": [
++      "MINT-1"
++    ],
+     "expect": "build-killed"
+   },
+   {
+@@ -32,7 +38,9 @@
+     "file": "src/widgets/emission/intent-template.registry.ts",
+     "find": "  'control.dismiss@1': row({\n    key: 'control.dismiss@1',\n    version: 1,\n    effect: 'CONTROL',\n    kinds: CONTROL_KINDS,\n    roles: ['escape'],\n    subject: DISMISS,\n    target: null,\n    inputSchema: null,\n    selectionDomain: {},\n    selectionDomainLabels: {},\n    priority: 0,\n    singleUse: true,\n    ttlSeconds: 600,",
+     "replace": "  'control.dismiss@1': row({\n    key: 'control.dismiss@1',\n    version: 1,\n    effect: 'CONTROL',\n    kinds: CONTROL_KINDS,\n    roles: ['escape'],\n    subject: DISMISS,\n    target: null,\n    inputSchema: null,\n    selectionDomain: {},\n    selectionDomainLabels: {},\n    priority: 0,\n    singleUse: false,\n    ttlSeconds: 600,",
+-    "killers": ["MINT-1"],
++    "killers": [
++      "MINT-1"
++    ],
+     "expect": "build-killed"
+   },
+   {
+@@ -41,7 +49,9 @@
+     "file": "src/widgets/emission/intent-template.registry.ts",
+     "find": "      selection_min: 1,\n      selection_max: 1,",
+     "replace": "      selection_min: 1,\n      selection_max: 2,",
+-    "killers": ["MINT-11"],
++    "killers": [
++      "MINT-11"
++    ],
+     "expect": "build-killed"
+   },
+   {
+@@ -50,7 +60,10 @@
+     "file": "src/widgets/emission/intent-template.registry.ts",
+     "find": "    !exactKeys(proposal, [",
+     "replace": "    false && !exactKeys(proposal, [",
+-    "killers": ["MINT-7", "MINT-9"],
++    "killers": [
++      "MINT-7",
++      "MINT-9"
++    ],
+     "expect": "build-killed"
+   },
+   {
+@@ -59,7 +72,9 @@
+     "file": "src/widgets/emission/intent-template.registry.ts",
+     "find": "  if (!sameRef(proposal.capability, expectedCapability ?? null))",
+     "replace": "  if (false && !sameRef(proposal.capability, expectedCapability ?? null))",
+-    "killers": ["MINT-9"],
++    "killers": [
++      "MINT-9"
++    ],
+     "expect": "build-killed"
+   },
+   {
+@@ -68,7 +83,9 @@
+     "file": "src/widgets/emission/intent-template.registry.ts",
+     "find": "  if (\n    !carrierAdmits(",
+     "replace": "  if (\n    false && !carrierAdmits(",
+-    "killers": ["MINT-9"],
++    "killers": [
++      "MINT-9"
++    ],
+     "expect": "build-killed"
+   },
+   {
+@@ -77,7 +94,9 @@
+     "file": "src/widgets/emission/record-writer.ts",
+     "find": "  const token =\n    row.effect === 'NONE' ? null : randomBytes(24).toString('base64url');",
+     "replace": "  const token = randomBytes(24).toString('base64url');",
+-    "killers": ["MINT-2"],
++    "killers": [
++      "MINT-2"
++    ],
+     "expect": "build-killed"
+   },
+   {
+@@ -86,7 +105,9 @@
+     "file": "src/widgets/emission/intent-template.registry.ts",
+     "find": "    'commit.blocked@1': 'COMMIT',",
+     "replace": "    'commit.disabled@1': 'COMMIT',",
+-    "killers": ["MINT-3"],
++    "killers": [
++      "MINT-3"
++    ],
+     "expect": "build-killed"
+   },
+   {
+@@ -95,7 +116,9 @@
+     "file": "src/widgets/emission/record-writer.ts",
+     "find": "          idempotency_key: booking.idempotencyKey,\n        }\n      : null,",
+     "replace": "          idempotency_key: booking.idempotencyKey,\n        }\n      : { readback_text: 'invented' },",
+-    "killers": ["MINT-1"],
++    "killers": [
++      "MINT-1"
++    ],
+     "expect": "live-killed"
+   },
+   {
+@@ -104,7 +127,9 @@
+     "file": "src/widgets/emission/emitter.service.ts",
+     "find": "            slotless: request.piiClass === 'client_identified',",
+     "replace": "            slotless: false,",
+-    "killers": ["MINT-6"],
++    "killers": [
++      "MINT-6"
++    ],
+     "expect": "build-killed"
+   },
+   {
+@@ -113,7 +138,9 @@
+     "file": "src/widgets/emission/record-writer.ts",
+     "find": "    inputSchemaHash: args.material.inputSchemaHash,",
+     "replace": "    inputSchemaHash: null,",
+-    "killers": ["MINT-1"],
++    "killers": [
++      "MINT-1"
++    ],
+     "expect": "build-killed"
+   },
+   {
+@@ -122,16 +149,20 @@
+     "file": "src/widgets/emission/envelope-validator.ts",
+     "find": "  assertSourceClosed(input.source);",
+     "replace": "  void input.source;",
+-    "killers": ["MINT-9"],
++    "killers": [
++      "MINT-9"
++    ],
+     "expect": "build-killed"
+   },
+   {
+     "id": "MINT-M15",
+     "description": "allow successor minting from a non-LIVE predecessor",
+     "file": "src/widgets/emission/successor-minter.service.ts",
+-    "find": "    if (predecessor.lifecycleState !== 'LIVE') return null;",
+-    "replace": "    if (predecessor.lifecycleState !== 'MINTED') return null;",
+-    "killers": ["MINT-8"],
++    "find": "    if (predecessor.lifecycleState !== 'LIVE') return null;\n\n    // AdmissionFacts has an unrelated",
++    "replace": "    if (predecessor.lifecycleState !== 'MINTED') return null;\n\n    // AdmissionFacts has an unrelated",
++    "killers": [
++      "MINT-8"
++    ],
+     "expect": "live-killed"
+   },
+   {
+@@ -140,7 +171,9 @@
+     "file": "src/widgets/emission/envelope.factory.ts",
+     "find": "    if (typeof intentRef === 'string' && intentRef.length > 0)\n      representedIntents.add(intentRef);",
+     "replace": "    void intentRef;",
+-    "killers": ["FBE2E-2 mints a strict service selector"],
++    "killers": [
++      "FBE2E-2 mints a strict service selector"
++    ],
+     "expect": "build-killed"
+   },
+   {
+@@ -149,7 +182,9 @@
+     "file": "src/widgets/emission/booking-confirmation-minter.service.ts",
+     "find": "      p.subject === 'create' ? input.predecessorWidgetId : null,",
+     "replace": "      null,",
+-    "killers": ["FBE2E-2 links create confirmation"],
++    "killers": [
++      "FBE2E-2 links create confirmation"
++    ],
+     "expect": "build-killed"
+   },
+   {
+@@ -158,7 +193,9 @@
+     "file": "src/widgets/owner-ports/noun-resolution.owners.provider.ts",
+     "find": "      const ownerValue = bookingSlot\n        ? decodeBookingSlotOwnerRef(opened.ownerRef)\n        : opened.ownerRef;",
+     "replace": "      const ownerValue = opened.ownerRef;\n      void bookingSlot;",
+-    "killers": ["decodes only the recognized opaque booking slot"],
++    "killers": [
++      "decodes only the recognized opaque booking slot"
++    ],
+     "expect": "build-killed"
+   },
+   {
+@@ -167,16 +204,20 @@
+     "file": "src/widgets/owner-ports/noun-resolution.owners.provider.ts",
+     "find": "      if (\n        key === 'appointments.own.create' &&\n        values.size === 2 &&",
+     "replace": "      if (\n        false &&\n        key === 'appointments.own.create' &&\n        values.size === 2 &&",
+-    "killers": ["defers the exact selector-stage pair"],
++    "killers": [
++      "defers the exact selector-stage pair"
++    ],
+     "expect": "build-killed"
+   },
+   {
+     "id": "MINT-M20",
+-    "description": "refuse the first real selector transition merely because its returned HTTP envelope is still in the legal MINTED lifecycle",
++    "description": "L25 B replaces the historical tap-catchup contract: refuse a real selector transition AFTER independent delivery/render evidence. Provenance: FINAL FBE2E OWNER DECISIONS L25=B.",
+     "file": "src/widgets/emission/successor-minter.service.ts",
+-    "find": "    if (!['MINTED', 'LIVE'].includes(predecessor.lifecycleState)) return null;",
+-    "replace": "    if (predecessor.lifecycleState !== 'LIVE') return null;",
+-    "killers": ["BOOK-1…BOOK-6"],
++    "find": "    if (predecessor.lifecycleState !== 'LIVE') return null;\n\n    const successor = await this.emitter.emitBookingSelector(",
++    "replace": "    if (predecessor.lifecycleState !== 'MINTED') return null;\n\n    const successor = await this.emitter.emitBookingSelector(",
++    "killers": [
++      "BOOK-1…BOOK-6"
++    ],
+     "expect": "live-killed"
+   }
+ ]
+diff --git a/maya-saas-backend/test/widgets-live/provider-unknown.live-spec.ts b/maya-saas-backend/test/widgets-live/provider-unknown.live-spec.ts
+new file mode 100644
+index 00000000..29fbb118
+--- /dev/null
++++ b/maya-saas-backend/test/widgets-live/provider-unknown.live-spec.ts
+@@ -0,0 +1,266 @@
++import { ClientAppointmentCreateService } from '../../src/appointments/client-appointment-create.service';
++import { createServer, type Server } from 'node:http';
++import { randomUUID } from 'node:crypto';
++import { Client as PgClient } from 'pg';
++import {
++  CalendarSource,
++  CrmProvider,
++  UserRole,
++} from '../../src/common/domain.enums';
++import { CrmAdapterFactory } from '../../src/crm/crm-adapter.factory';
++import { MockCRMAdapter } from '../../src/crm/adapters/mock-crm.adapter';
++import { CrmOutcomeUnknownError } from '../../src/crm/crm-request.errors';
++import type {
++  CreateAppointmentParams,
++  CreatedAppointment,
++} from '../../src/crm/crm-adapter.interface';
++import { assertProofDatabase } from './support/proof-db-guard';
++import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
++import {
++  bootHttp,
++  fixturesForHttp,
++  type HttpHarness,
++} from './support/http-bootstrap';
++import type { Fixtures } from './support/fixtures';
++import {
++  firstOption,
++  firstSlot,
++  object,
++  observe,
++  submit,
++} from './support/release-booking-flow';
++
++describe('L20 real lost-response fault → canonical UNKNOWN [HTTP] [test provider PostgreSQL]', () => {
++  let db: FixtureContext,
++    http: HttpHarness,
++    fx: Fixtures,
++    ledger: PgClient,
++    server: Server;
++  let url: string,
++    schema: string,
++    dispatches = 0,
++    reconciliations = 0,
++    socketLosses = 0;
++  beforeAll(async () => {
++    const proof = assertProofDatabase();
++    db = await bootFixtureContext();
++    http = await bootHttp();
++    fx = fixturesForHttp(db, http);
++    ledger = new PgClient({ connectionString: proof.connectionString });
++    await ledger.connect();
++    schema = 'l20_provider_' + randomUUID().replaceAll('-', '');
++    // Test-provider storage only. No product schema/model/migration, no uniqueness that could hide duplicate dispatch.
++    await ledger.query(`CREATE SCHEMA ${schema}`);
++    await ledger.query(
++      `CREATE TABLE ${schema}.bookings (id bigserial primary key, payload jsonb not null)`,
++    );
++    server = createServer((request, response) => {
++      void (async () => {
++        try {
++          if (request.method === 'POST' && request.url === '/bookings') {
++            let raw = '';
++            for await (const part of request) raw += String(part);
++            const body: unknown = JSON.parse(raw);
++            dispatches++;
++            await ledger.query(
++              `INSERT INTO ${schema}.bookings(payload) VALUES ($1::jsonb)`,
++              [JSON.stringify(body)],
++            );
++            // COMMIT completed; the connection is lost BEFORE any response bytes.
++            request.socket.destroy();
++            return;
++          }
++          reconciliations++;
++          // Actual provider read fault, not an empty result or a supplied Action Engine verdict.
++          response.writeHead(503, { 'content-type': 'application/json' });
++          response.end('{"error":"controlled_read_unavailable"}');
++        } catch (error) {
++          response.destroy(error as Error);
++        }
++      })();
++    });
++    await new Promise<void>((resolve) =>
++      server.listen(0, '127.0.0.1', resolve),
++    );
++    const address = server.address();
++    if (!address || typeof address === 'string')
++      throw Error('provider listener missing');
++    url = `http://127.0.0.1:${address.port}`;
++    const adapter = new MockCRMAdapter({
++      provider: CrmProvider.MOCK,
++      apiToken: 'synthetic-test-provider',
++    });
++    adapter.createAppointment = async (
++      params: CreateAppointmentParams,
++    ): Promise<CreatedAppointment> => {
++      try {
++        const response = await fetch(url + '/bookings', {
++          method: 'POST',
++          headers: { 'content-type': 'application/json' },
++          body: JSON.stringify(params),
++        });
++        return (await response.json()) as CreatedAppointment;
++      } catch (error) {
++        // Node fetch errors cross Jest's VM realm. Observe the actual transport failure
++        // structurally; construct only the adapter error in this realm, never an AE verdict.
++        expect(error).toMatchObject({
++          name: 'TypeError',
++          message: 'fetch failed',
++        });
++        socketLosses++;
++        throw new CrmOutcomeUnknownError(
++          'Test provider response lost after durable persistence',
++          error,
++        );
++      }
++    };
++    adapter.getClientAppointments = async () => {
++      const response = await fetch(url + '/bookings');
++      await response.text();
++      if (response.status !== 200)
++        throw new CrmOutcomeUnknownError(
++          'Test provider reconciliation read unavailable',
++        );
++      throw new Error('No successful read was configured');
++    };
++    jest
++      .spyOn(http.app.get(CrmAdapterFactory), 'create')
++      .mockImplementation((provider) => {
++        if (provider !== CrmProvider.MOCK)
++          throw new Error('L20 forbids every external provider');
++        return adapter;
++      });
++  });
++  afterAll(async () => {
++    jest.restoreAllMocks();
++    if (server) {
++      server.closeAllConnections();
++      await new Promise<void>((resolve) => server.close(() => resolve()));
++    }
++    if (ledger) {
++      await ledger.query(`DROP SCHEMA ${schema} CASCADE`);
++      await ledger.end();
++    }
++    await fx?.teardown();
++    await http?.close();
++    await db?.close();
++  });
++  it('L20-LOST-RESPONSE: one persisted booking; UNKNOWN is natural, retries cannot duplicate, unresolved reconciliation stays pending', async () => {
++    const tenant = await fx.tenant(
++      'L20 provider response loss',
++      CalendarSource.EXTERNAL,
++    );
++    const user = await fx.user(tenant, UserRole.CLIENT);
++    await db.prisma.user.update({
++      where: { id: user.id },
++      data: {
++        encryptedName: db.encryption.encrypt('L20 synthetic client'),
++        phone: '[REDACTED PHONE]',
++      },
++    });
++    await fx.client(tenant, user);
++    await db.prisma.crmIntegration.create({
++      data: {
++        tenantId: tenant.id,
++        provider: 'mock',
++        status: 'active',
++        encryptedApiToken: db.encryption.encrypt('L20-test-only'),
++        baseUrl: url,
++      },
++    });
++    for (const f of [
++      'widgets.runtime',
++      'ai.consultant',
++      'booking',
++      'booking.customer_app',
++      'crm.integration',
++    ] as const)
++      await fx.grantFeature(tenant, f);
++    const token = await http.login(tenant.slug, user.email, user.password);
++    const catalog = await http.executeTool(
++      token,
++      'catalog.services.read',
++      { arguments: {}, surface: 'web' },
++      randomUUID(),
++    );
++    expect(catalog.status).toBe(201);
++    const service = object(
++      object(object(object(catalog.body).resolution).receipt).envelope,
++    );
++    await observe(http, token, service);
++    const staff = object(
++      (await submit(http, token, service, 'REFINE', firstOption(service)))
++        .next_envelope,
++    );
++    await observe(http, token, staff);
++    const slots = object(
++      (await submit(http, token, staff, 'REFINE', firstOption(staff)))
++        .next_envelope,
++    );
++    const confirmation = object(
++      (await submit(http, token, slots, 'DRAFT', firstSlot(slots).slot_ref))
++        .next_envelope,
++    );
++    expect(confirmation.kind).toBe('BOOKING_CONFIRMATION');
++    const owner = http.app.get(ClientAppointmentCreateService);
++    const run = owner.forAccount.bind(owner);
++    let ownerError: string | null = null;
++    jest.spyOn(owner, 'forAccount').mockImplementation(async (...args) => {
++      try {
++        return await run(...args);
++      } catch (e) {
++        ownerError = e instanceof Error ? e.message : String(e);
++        throw e;
++      }
++    });
++    const first = await submit(http, token, confirmation, 'COMMIT');
++    if (first.receipt_outcome !== 'ACCEPTED')
++      throw Error(
++        JSON.stringify({ first, ownerError, dispatches, reconciliations }),
++      );
++    expect(first).toMatchObject({
++      receipt_outcome: 'ACCEPTED',
++      owner_decision: { state: 'UNKNOWN' },
++    });
++    const pending = await db.prisma.actionExecution.findFirstOrThrow({
++      where: { tenantId: tenant.id },
++    });
++    expect(pending.state).toBe('UNKNOWN');
++    expect(dispatches).toBe(1);
++    expect(socketLosses).toBe(1);
++    expect(reconciliations).toBeGreaterThan(0);
++    const normal = await submit(http, token, confirmation, 'COMMIT');
++    const concurrent = await Promise.all(
++      Array.from({ length: 6 }, () =>
++        submit(http, token, confirmation, 'COMMIT'),
++      ),
++    );
++    for (const result of [first, normal, ...concurrent])
++      expect(JSON.stringify(result)).not.toContain('Запись подтверждена.');
++    expect(dispatches).toBe(1);
++    expect(
++      (await ledger.query(`SELECT count(*)::int AS n FROM ${schema}.bookings`))
++        .rows,
++    ).toEqual([{ n: 1 }]);
++    expect(
++      await db.prisma.actionExecution.count({ where: { tenantId: tenant.id } }),
++    ).toBe(1);
++    const row = await db.prisma.actionExecution.findUniqueOrThrow({
++      where: { id: pending.id },
++    });
++    expect(row.state).toBe('UNKNOWN');
++    const emission = await db.prisma.widgetEmission.findFirstOrThrow({
++      where: { tenantId: tenant.id, widgetId: String(confirmation.widget_id) },
++    });
++    expect(emission.terminalLinesJson).toEqual([
++      {
++        outcome: 'SUBMITTED',
++        text: 'Запрос принят. Подтверждение ожидается.',
++        action_receipt_ref: null,
++      },
++    ]);
++    expect(
++      await db.prisma.appointment.count({ where: { tenantId: tenant.id } }),
++    ).toBe(0);
++  });
++});
+diff --git a/maya-saas-backend/test/widgets-live/selector-lifecycle.live-spec.ts b/maya-saas-backend/test/widgets-live/selector-lifecycle.live-spec.ts
+new file mode 100644
+index 00000000..5ecb8960
+--- /dev/null
++++ b/maya-saas-backend/test/widgets-live/selector-lifecycle.live-spec.ts
+@@ -0,0 +1,263 @@
++import { SELECTOR_OBSERVATION_AUDIT } from '../../src/widgets/di-tokens';
++import type { SelectorObservationAuditPort } from '../../src/widgets/owner-ports/selector-observation-audit.port';
++import { randomUUID } from 'node:crypto';
++import { UserRole } from '../../src/common/domain.enums';
++import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
++import {
++  bootHttp,
++  fixturesForHttp,
++  type HttpHarness,
++} from './support/http-bootstrap';
++import type { Fixtures } from './support/fixtures';
++import {
++  evidence,
++  firstOption,
++  object,
++  observe,
++  startBooking,
++  submit,
++} from './support/release-booking-flow';
++
++describe('L25 literal selector delivery/render lifecycle [HTTP] [PostgreSQL]', () => {
++  let db: FixtureContext, http: HttpHarness, fx: Fixtures;
++  beforeAll(async () => {
++    db = await bootFixtureContext();
++    http = await bootHttp();
++    fx = fixturesForHttp(db, http);
++  });
++  afterEach(async () => {
++    jest.useRealTimers();
++    await fx.teardown();
++    http.recorder.clear();
++  });
++  afterAll(async () => {
++    await http?.close();
++    await db?.close();
++  });
++  const state = async (widgetId: unknown) =>
++    (
++      await db.prisma.widgetEmission.findFirstOrThrow({
++        where: { widgetId: String(widgetId) },
++        select: { lifecycleState: true },
++      })
++    ).lifecycleState;
++  const audit = (widgetId: unknown) =>
++    db.prisma.auditLog.findMany({
++      where: {
++        entityId: String(widgetId),
++        action: { startsWith: 'widget.selector.' },
++      },
++      orderBy: { createdAt: 'asc' },
++    });
++
++  it('L25-OBSERVED: HTTP delivery alone is DELIVERED; tap cannot create LIVE; render then permits canonical successor', async () => {
++    const s = await startBooking(fx, http);
++    expect(await state(s.envelope.widget_id)).toBe('DELIVERED');
++    const missing = await submit(
++      http,
++      s.token,
++      s.envelope,
++      'REFINE',
++      firstOption(s.envelope),
++    );
++    expect(missing).toMatchObject({
++      outcome: 'refuse',
++      code: 'effect_not_admissible',
++      stopped_at_gate: '7',
++    });
++    expect(await state(s.envelope.widget_id)).toBe('DELIVERED');
++    expect(
++      await db.prisma.widgetIntentReceipt.count({
++        where: { tenantId: s.tenant.id },
++      }),
++    ).toBe(0);
++    expect(
++      await db.prisma.actionExecution.count({
++        where: { tenantId: s.tenant.id },
++      }),
++    ).toBe(0);
++    await observe(http, s.token, s.envelope);
++    expect(await state(s.envelope.widget_id)).toBe('LIVE');
++    const rows = await audit(s.envelope.widget_id);
++    expect(rows.map((r) => r.action)).toEqual([
++      'widget.selector.delivered',
++      'widget.selector.rendered',
++    ]);
++    for (const row of rows) {
++      expect(row.userId).toBe(s.user.id);
++      expect(row.metadataJson).toMatchObject({
++        authority: 'NONE',
++        humanAttentionProven: false,
++      });
++    }
++    const next = await submit(
++      http,
++      s.token,
++      s.envelope,
++      'REFINE',
++      firstOption(s.envelope),
++    );
++    expect(next.outcome).toBe('terminate');
++    expect(object(next.next_envelope).kind).toBe('STAFF_SELECTOR');
++    expect(await state(s.envelope.widget_id)).toBe('SUPERSEDED');
++    expect(await state(object(next.next_envelope).widget_id)).toBe('DELIVERED');
++    const replay = await http.resolveWidgets(s.token, {
++      thread_page: { limit: 1 },
++      rendered: evidence(s.envelope),
++    });
++    expect(replay.status).toBe(403);
++    expect(await state(object(next.next_envelope).widget_id)).toBe('DELIVERED');
++  });
++
++  it('L25-CONCURRENT: repeated and concurrent observations produce exactly one rendered audit and no authority', async () => {
++    const s = await startBooking(fx, http);
++    await Promise.all(
++      Array.from({ length: 8 }, () => observe(http, s.token, s.envelope)),
++    );
++    await observe(http, s.token, s.envelope);
++    expect(await state(s.envelope.widget_id)).toBe('LIVE');
++    expect((await audit(s.envelope.widget_id)).length).toBe(2);
++    expect(
++      await db.prisma.actionExecution.count({
++        where: { tenantId: s.tenant.id },
++      }),
++    ).toBe(0);
++    expect(
++      await db.prisma.appointment.count({ where: { tenantId: s.tenant.id } }),
++    ).toBe(0);
++  });
++
++  it('L25-FOREIGN: foreign principal, tenant and forged bytes cannot attest a selector', async () => {
++    const s = await startBooking(fx, http);
++    const other = await fx.user(s.tenant, UserRole.CLIENT);
++    await fx.client(s.tenant, other);
++    const otherToken = await http.login(
++      s.tenant.slug,
++      other.email,
++      other.password,
++    );
++    const foreign = await startBooking(fx, http);
++    for (const [token, rendered] of [
++      [otherToken, evidence(s.envelope)],
++      [foreign.token, evidence(s.envelope)],
++      [s.token, { ...evidence(s.envelope), widget_id: randomUUID() }],
++      [s.token, { ...evidence(s.envelope), body_hash: 'a'.repeat(64) }],
++      [s.token, { ...evidence(s.envelope), envelope_seal: 'b'.repeat(64) }],
++    ] as const) {
++      expect(
++        (
++          await http.resolveWidgets(token, {
++            thread_page: { limit: 1 },
++            rendered,
++          })
++        ).status,
++      ).toBe(403);
++      expect(await state(s.envelope.widget_id)).toBe('DELIVERED');
++    }
++    expect((await audit(s.envelope.widget_id)).map((r) => r.action)).toEqual([
++      'widget.selector.delivered',
++    ]);
++  });
++  it('L25-MISSING: missing delivery evidence and legacy LIVE cannot manufacture a render observation', async () => {
++    const s = await startBooking(fx, http);
++    await db.prisma.auditLog.deleteMany({
++      where: {
++        tenantId: s.tenant.id,
++        entityId: String(s.envelope.widget_id),
++        action: 'widget.selector.delivered',
++      },
++    });
++    const ack = { thread_page: { limit: 1 }, rendered: evidence(s.envelope) };
++    expect((await http.resolveWidgets(s.token, ack)).status).toBe(403);
++    expect(await state(s.envelope.widget_id)).toBe('DELIVERED');
++    // Controlled archival-state counterfactual in the proof database only.
++    await db.prisma.widgetEmission.updateMany({
++      where: { tenantId: s.tenant.id, widgetId: String(s.envelope.widget_id) },
++      data: { lifecycleState: 'LIVE' },
++    });
++    expect((await http.resolveWidgets(s.token, ack)).status).toBe(403);
++    expect(await audit(s.envelope.widget_id)).toEqual([]);
++    expect(
++      (await http.resolveWidgets(s.token, { ...ack, delivered: true })).status,
++    ).toBe(400);
++  });
++
++  it('L25-EXPIRY: expired or revoked current authority cannot assert LIVE', async () => {
++    const s = await startBooking(fx, http);
++    const emission = await db.prisma.widgetEmission.findFirstOrThrow({
++      where: { tenantId: s.tenant.id, widgetId: String(s.envelope.widget_id) },
++    });
++    jest.useFakeTimers({
++      doNotFake: [
++        'nextTick',
++        'setImmediate',
++        'clearImmediate',
++        'setTimeout',
++        'clearTimeout',
++        'setInterval',
++        'clearInterval',
++        'hrtime',
++        'performance',
++        'queueMicrotask',
++      ],
++    });
++    jest.setSystemTime(new Date(emission.expiresAt.getTime() + 1));
++    expect(
++      (
++        await http.resolveWidgets(s.token, {
++          thread_page: { limit: 1 },
++          rendered: evidence(s.envelope),
++        })
++      ).status,
++    ).toBe(403);
++    expect(await state(s.envelope.widget_id)).toBe('DELIVERED');
++    jest.useRealTimers();
++    const active = await startBooking(fx, http);
++    await db.prisma.tenantEntitlement.deleteMany({
++      where: { tenantId: active.tenant.id, featureKey: 'widgets.runtime' },
++    });
++    expect(
++      (
++        await http.resolveWidgets(active.token, {
++          thread_page: { limit: 1 },
++          rendered: evidence(active.envelope),
++        })
++      ).status,
++    ).toBe(403);
++    expect(await state(active.envelope.widget_id)).toBe('DELIVERED');
++  });
++
++  it('L25-ATOMIC: audit failure rolls back LIVE and its observation together', async () => {
++    const s = await startBooking(fx, http);
++    const port = http.app.get<SelectorObservationAuditPort>(
++      SELECTOR_OBSERVATION_AUDIT,
++    );
++    const append = port.append.bind(port);
++    const fail = jest
++      .spyOn(port, 'append')
++      .mockImplementation(async (value, tx) => {
++        await append(value, tx);
++        if (value.state === 'LIVE')
++          throw new Error('L25 controlled post-audit failure');
++      });
++    try {
++      expect(
++        (
++          await http.resolveWidgets(s.token, {
++            thread_page: { limit: 1 },
++            rendered: evidence(s.envelope),
++          })
++        ).status,
++      ).toBe(500);
++      expect(await state(s.envelope.widget_id)).toBe('DELIVERED');
++      expect((await audit(s.envelope.widget_id)).map((r) => r.action)).toEqual([
++        'widget.selector.delivered',
++      ]);
++    } finally {
++      fail.mockRestore();
++    }
++    await observe(http, s.token, s.envelope);
++    expect(await state(s.envelope.widget_id)).toBe('LIVE');
++    expect((await audit(s.envelope.widget_id)).length).toBe(2);
++  });
++});
+diff --git a/maya-saas-backend/test/widgets-live/support/calendar-carrier-proof.mjs b/maya-saas-backend/test/widgets-live/support/calendar-carrier-proof.mjs
+new file mode 100644
+index 00000000..9b8698c7
+--- /dev/null
++++ b/maya-saas-backend/test/widgets-live/support/calendar-carrier-proof.mjs
+@@ -0,0 +1,14 @@
++import { createHash } from 'node:crypto';
++import { canonicalJson, bodyHashTerms, bodyHash } from '../../../../maya-chat-shell/src/integrity/h7.ts';
++import assert from 'node:assert/strict';
++import { resultOf, markupOf, verify } from '../../../../maya-carrier-react/test/.bundle.mjs';
++let raw = ''; for await (const chunk of process.stdin) raw += chunk;
++const { envelope, now, formatted, canonical } = JSON.parse(raw);
++assert.equal(canonicalJson(bodyHashTerms(envelope)), canonical, 'canonical JSON bytes match backend');
++const result = resultOf(envelope, now);
++assert.equal(result.integrity, undefined); // no envelope authority leaked through rendering
++assert.notEqual(result.mode, 'frozen_prose', JSON.stringify({ native: createHash('sha256').update(canonicalJson(bodyHashTerms(envelope))).digest('hex'), actual: bodyHash(envelope), expected: envelope.integrity.body_hash, verdict: verify(envelope, now), kind: envelope.kind, lifecycle: envelope.lifecycle, render: envelope.render, now }));
++const html = markupOf({ id: 'calendar-proof', result, display: 'live', pending: null, sentence: null });
++assert.ok(html.includes(formatted), 'carrier must render the server-authored local time verbatim');
++assert.ok(result.readingOrder.length > 0, 'canonical controls remain present');
++process.stdout.write(JSON.stringify({ carrier: 'PASS', formatted, controls: result.readingOrder.length }));
+diff --git a/maya-saas-backend/test/widgets-live/support/mounted-runtime-drawer.mjs b/maya-saas-backend/test/widgets-live/support/mounted-runtime-drawer.mjs
+new file mode 100644
+index 00000000..ca596ec1
+--- /dev/null
++++ b/maya-saas-backend/test/widgets-live/support/mounted-runtime-drawer.mjs
+@@ -0,0 +1,18 @@
++// The canonical DOM drawer drives render observations after mount, independently of activation.
++// Its DOM/scheduler are test doubles; React's actual browser mount is separately proved by L25.
++import { createWidgetDrawer } from '../../../../maya-chat-shell/src/dom/host.ts';
++import { createDom, createScheduler } from '../../../../maya-chat-shell/test/dom-double.mjs';
++export function mountRuntimeDrawer(runtime) {
++  const dom = createDom(), scheduler = createScheduler(Date.now());
++  const drawer = createWidgetDrawer({ factory: dom.factory, scheduler, widgets: runtime.widgetPort });
++  const draw = () => {
++    for (const item of runtime.conversation.view().items) if (item.kind === 'widget') {
++      const article = drawer.element(item);
++      if (!article.isConnected) dom.root.append(article);
++    }
++    scheduler.flush();
++  };
++  const off = runtime.conversation.subscribe(draw);
++  draw();
++  return off;
++}
+diff --git a/maya-saas-backend/test/widgets-live/support/release-booking-flow.ts b/maya-saas-backend/test/widgets-live/support/release-booking-flow.ts
+new file mode 100644
+index 00000000..2f333c98
+--- /dev/null
++++ b/maya-saas-backend/test/widgets-live/support/release-booking-flow.ts
+@@ -0,0 +1,88 @@
++import { randomUUID } from 'node:crypto';
++import assert from 'node:assert/strict';
++import { CalendarSource, UserRole } from '../../../src/common/domain.enums';
++import { WIDGET_INTENT_SUBMISSION_CONTRACT } from '../../../src/widgets/dto/submit-intent.dto';
++import type { Fixtures } from './fixtures';
++import type { HttpHarness } from './http-bootstrap';
++
++export const object = (v: unknown): Record<string, unknown> => {
++  assert(v && typeof v === 'object' && !Array.isArray(v));
++  return v as Record<string, unknown>;
++};
++export const list = (v: unknown): unknown[] => {
++  assert(Array.isArray(v));
++  return v;
++};
++export const evidence = (e: Record<string, unknown>) => ({
++  widget_id: e.widget_id,
++  body_hash: object(e.integrity).body_hash,
++  envelope_seal: object(e.integrity).envelope_seal,
++});
++export const firstOption = (e: Record<string, unknown>) =>
++  object(list(object(e.body).options)[0]).option_id;
++export const firstSlot = (e: Record<string, unknown>) =>
++  object(list(object(list(object(e.body).groups)[0]).slots)[0]);
++export const intent = (e: Record<string, unknown>, effect: string) =>
++  object(list(e.intents).find((i) => object(i).effect === effect));
++export async function observe(
++  http: HttpHarness,
++  token: string,
++  e: Record<string, unknown>,
++) {
++  const response = await http.resolveWidgets(token, {
++    thread_page: { limit: 1 },
++    rendered: evidence(e),
++  });
++  assert.equal(response.status, 200, JSON.stringify(response.body));
++}
++export async function submit(
++  http: HttpHarness,
++  token: string,
++  e: Record<string, unknown>,
++  effect: string,
++  option?: unknown,
++) {
++  const i = intent(e, effect);
++  const field = i.input_schema
++    ? object(list(object(i.input_schema).fields)[0]).name
++    : null;
++  const response = await http.postIntent(token, {
++    contract: WIDGET_INTENT_SUBMISSION_CONTRACT,
++    widget_id: e.widget_id,
++    intent_token: i.intent_token,
++    inputs: typeof field === 'string' ? { [field]: option } : null,
++    client_nonce: randomUUID(),
++    profile_id: 'pwa.default',
++  });
++  assert.equal(response.status, 200, JSON.stringify(response.body));
++  return object(response.body);
++}
++export async function startBooking(fx: Fixtures, http: HttpHarness) {
++  const tenant = await fx.tenant(
++    'FBE2E owner decisions',
++    CalendarSource.INTERNAL,
++  );
++  const user = await fx.user(tenant, UserRole.CLIENT);
++  const source = await fx.binView().bookingSource(tenant, user);
++  for (const f of [
++    'widgets.runtime',
++    'ai.consultant',
++    'booking',
++    'booking.customer_app',
++    'crm.integration',
++  ] as const)
++    await fx.grantFeature(tenant, f);
++  const token = await http.login(tenant.slug, user.email, user.password);
++  const catalog = await http.executeTool(
++    token,
++    'catalog.services.read',
++    { arguments: {}, surface: 'web' },
++    randomUUID(),
++  );
++  assert.equal(catalog.status, 201, JSON.stringify(catalog.body));
++  const envelope = object(
++    object(object(object(catalog.body).resolution).receipt).envelope,
++  );
++  assert.equal(envelope.kind, 'SERVICE_SELECTOR');
++  return { tenant, user, source, token, envelope };
++}
+diff --git a/maya-saas-backend/test/widgets-live/support/release-booking-proof.ts b/maya-saas-backend/test/widgets-live/support/release-booking-proof.ts
+index 75602e75..94b8ff24 100644
+--- a/maya-saas-backend/test/widgets-live/support/release-booking-proof.ts
++++ b/maya-saas-backend/test/widgets-live/support/release-booking-proof.ts
+@@ -92,6 +92,21 @@ export async function releaseBookingProof(
+       env.kind === kind,
+       `expected ${kind}, got ${String(env.kind)}`,
+     );
++    // L25 client observation is a separate HTTP request; a selector tap is never its evidence.
++    if (kind === 'SERVICE_SELECTOR' || kind === 'STAFF_SELECTOR') {
++      const rendered = await post('/widgets/resolve', {
++        thread_page: { limit: 1 },
++        rendered: {
++          widget_id: env.widget_id,
++          body_hash: object(env.integrity).body_hash,
++          envelope_seal: object(env.integrity).envelope_seal,
++        },
++      });
++      requireProof(
++        rendered.status === 200,
++        'independent selector render observation',
++      );
++    }
+     const intent = array(env.intents).find((i) => i.effect === effect);
+     requireProof(
+       intent && typeof intent.intent_token === 'string',
+diff --git a/maya-saas-backend/test/widgets-live/support/shell-approved-source-probe.mjs b/maya-saas-backend/test/widgets-live/support/shell-approved-source-probe.mjs
+index 413eeb91..95b763c7 100644
+--- a/maya-saas-backend/test/widgets-live/support/shell-approved-source-probe.mjs
++++ b/maya-saas-backend/test/widgets-live/support/shell-approved-source-probe.mjs
+@@ -1,3 +1,4 @@
++import { mountRuntimeDrawer } from './mounted-runtime-drawer.mjs';
+ // FBE2E-4 — the real shell process. It consumes a server-minted selector, activates only controls
+ // drawn by the production renderer, and reaches the production HTTP gateway through the typed
+ // widget transport projection. The bearer and intent tokens remain process-local and are never
+@@ -117,6 +118,7 @@ const liveSubmission = createLiveSubmission(transport);
+ 
+ const runtime = createShellRuntime({
+   transport: {
++    resolveWidgets: transport.resolveWidgets,
+     chat: async () => ({ ok: false, failure: { reason: 'no_connection' } }),
+   },
+   session: {
+@@ -170,6 +172,7 @@ const runtime = createShellRuntime({
+   },
+   newId: () => crypto.randomUUID(),
+ });
++const unmountDrawer = mountRuntimeDrawer(runtime);
+ const offShell = runtime.shell.subscribe((view) => {
+   fullscreenTransitions.push(view.fullscreen === null ? null : {
+     phase: view.fullscreen.phase,
+@@ -241,4 +244,4 @@ try {
+   }
+ } catch (error) {
+   process.stdout.write(JSON.stringify({mode:input.mode,pass:false,error:String(error),counters:runtime.widgets.counters()}));
+-} finally { offShell(); runtime.dispose(); }
++} finally { offShell(); unmountDrawer(); runtime.dispose(); }
+diff --git a/maya-saas-backend/test/widgets-live/support/shell-booking-flow.mjs b/maya-saas-backend/test/widgets-live/support/shell-booking-flow.mjs
+index 80ed474c..d3daa8a1 100644
+--- a/maya-saas-backend/test/widgets-live/support/shell-booking-flow.mjs
++++ b/maya-saas-backend/test/widgets-live/support/shell-booking-flow.mjs
+@@ -1,3 +1,4 @@
++import { mountRuntimeDrawer } from './mounted-runtime-drawer.mjs';
+ // FBE2E-4 — the real shell process. It consumes a server-minted selector, activates only controls
+ // drawn by the production renderer, and reaches the production HTTP gateway through the typed
+ // widget transport projection. The bearer and intent tokens remain process-local and are never
+@@ -90,6 +91,7 @@ const transport = {
+ 
+ const runtime = createShellRuntime({
+   transport: {
++    resolveWidgets: transport.resolveWidgets,
+     chat: async () => ({ ok: false, failure: { reason: 'no_connection' } }),
+   },
+   session: {
+@@ -129,6 +131,7 @@ const runtime = createShellRuntime({
+   newId: () => crypto.randomUUID(),
+ });
+ 
++const unmountDrawer = mountRuntimeDrawer(runtime);
+ try {
+   const ingested = runtime.widgets.ingest(input.envelope);
+   if (ingested.ingested === 'duplicate')
+@@ -190,5 +193,5 @@ try {
+     }),
+   );
+ } finally {
+-  runtime.dispose();
++  unmountDrawer(); runtime.dispose();
+ }

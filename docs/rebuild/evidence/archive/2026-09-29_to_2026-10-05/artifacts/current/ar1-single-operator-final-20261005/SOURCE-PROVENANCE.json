@@ -1,0 +1,145 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "certifiedBasePreserved": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "checkedAt": "2026-10-04T22:12:35.649852+00:00",
+  "worktreeClean": true,
+  "initialWorkPreservation": {
+    "path": "outputs/ar1-single-operator-20261003/IN-PROGRESS-PRESERVATION/INVENTORY.json",
+    "sha256": "44e1eb1536f980abb3c889c937c94fbd28ee34376977696e2962f95bd5fa1d3e"
+  },
+  "commits": [
+    "b5621b1062ba3c7882c725d160f588d3b04e3938 Extend AR-1 with explicit single-operator platform governance",
+    "a55534bbe10c4318c1e9e21818f64f387f45f8c1 Align single-operator session proof with blocking formatter",
+    "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4 Build mandatory R01 integration artifact before CI controls",
+    "dff728e85a97841dd72bd290992b888344780780 Use the guarded CI database in AR-1 unit fixtures"
+  ],
+  "paths": [
+    {
+      "path": ".github/workflows/platform-ci.yml",
+      "owner": "CI prerequisite",
+      "sha256": "93def8c1ed308dd15e6871280f8337eb56935dae9eb5c700318d8679c04ff870"
+    },
+    {
+      "path": ".github/workflows/widgets-mutation.yml",
+      "owner": "CI prerequisite",
+      "sha256": "79ca1acf563012b122a9a1af4a704ca74eb52143e07258d7a314d4ab097dd895"
+    },
+    {
+      "path": "docs/rebuild/widget-release-programme/AR1-PRODUCTION-EXECUTION-CONTRACT.md",
+      "owner": "canonical release contract/operator procedure",
+      "sha256": "5d87a49586b179fc37fc1082317370ca419588a9a945eccbdd2aea90472b85e9"
+    },
+    {
+      "path": "docs/rebuild/widget-release-programme/RELEASE-PACKAGING-AND-TRUST-RUNBOOK.md",
+      "owner": "canonical release contract/operator procedure",
+      "sha256": "dc396d817363a8835af5fa29a3619f097a3ae32b18482cd4bb0a1bf02b8c8e56"
+    },
+    {
+      "path": "maya-saas-backend/scripts/widget-release-operator.cjs",
+      "owner": "tests/mutations/operator validation",
+      "sha256": "7a3a290a6d7d53c1317c86c1545e6b73bbc67341861461ed53dea5ef0423656e"
+    },
+    {
+      "path": "maya-saas-backend/scripts/widget-release-operator.compiled-test.cjs",
+      "owner": "tests/mutations/operator validation",
+      "sha256": "6944389fbada5fc30c7662ba641cf7755c30ca38fe327c0f70ba4dfc5555e16e"
+    },
+    {
+      "path": "maya-saas-backend/scripts/widget-release-operator.test.cjs",
+      "owner": "tests/mutations/operator validation",
+      "sha256": "367ec33068453d977a46b510a1677c3a1568f8aeb2434038de56ef773dc2fc09"
+    },
+    {
+      "path": "maya-saas-backend/scripts/widgets-mutation-ci.test.mjs",
+      "owner": "tests/mutations/operator validation",
+      "sha256": "58281fba91ad96e4043db604aa7c943e4a1f2e3b6161a00d28cddce2f55a4468"
+    },
+    {
+      "path": "maya-saas-backend/src/entitlements/widget-release-access.spec.ts",
+      "owner": "tests/mutations/operator validation",
+      "sha256": "9fe3b1304d83d693ada335fbe69a3284fde76a7f788e7d53a0ed213f892a2dc2"
+    },
+    {
+      "path": "maya-saas-backend/src/entitlements/widget-release-policy.service.ts",
+      "owner": "existing AR-1 implementation",
+      "sha256": "bcfbbba947a01598a77d1a8ac591188868c6f121384a1fe9e863f01f1ca15a4f"
+    },
+    {
+      "path": "maya-saas-backend/src/entitlements/widget-release-policy.spec.ts",
+      "owner": "tests/mutations/operator validation",
+      "sha256": "8f4b9e8e376ccea5e7d6bf733926538cac1440f9581be63d881ac4d0dfa7d93a"
+    },
+    {
+      "path": "maya-saas-backend/src/entitlements/widget-release-production.contract.ts",
+      "owner": "existing AR-1 implementation",
+      "sha256": "5d6067ed8a8881b73ad647bf478209f18700de9058522c31a52cf8f2938f0b88"
+    },
+    {
+      "path": "maya-saas-backend/src/entitlements/widget-release-production.spec.ts",
+      "owner": "tests/mutations/operator validation",
+      "sha256": "aa0656f28db7e5dcbffa60f10356bf4dfe190a95813f1dab3aa59ed00bfac89c"
+    },
+    {
+      "path": "maya-saas-backend/src/entitlements/widget-release-single-operator.spec.ts",
+      "owner": "tests/mutations/operator validation",
+      "sha256": "3aa45764ad7b42d524cb6a70912da478ffef166d85c63a5700349300b7045721"
+    },
+    {
+      "path": "maya-saas-backend/src/entitlements/widget-release-unit-database.spec.ts",
+      "owner": "tests/mutations/operator validation",
+      "sha256": "68e4039fb9ee7ea80892456e6c3a0c51e9353368d8b02e13cc89fe7b837d125f"
+    },
+    {
+      "path": "maya-saas-backend/src/entitlements/widget-release.contract.ts",
+      "owner": "existing AR-1 implementation",
+      "sha256": "222e7325ac8c8e54da411f89b3d2b20714439bfef47eaf5579b16cabadc8d1bb"
+    },
+    {
+      "path": "maya-saas-backend/src/entitlements/widget-release.service.ts",
+      "owner": "existing AR-1 implementation",
+      "sha256": "61082763f6855e878bf29f60ef1d8420e0261c5443330e58fd4d882bd0391205"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/mutations/gatePU.json",
+      "owner": "tests/mutations/operator validation",
+      "sha256": "57d38d4ccde4d3399168aca3a4935ba35ce2ce167be93680055111f1c4c8b70b"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/mutations/gateSO.json",
+      "owner": "tests/mutations/operator validation",
+      "sha256": "6c9d00dd01a70cb58713e5018323affe0d032a4f14815713c0adc1466e6d589a"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/widget-release-unit-database.ts",
+      "owner": "tests/mutations/operator validation",
+      "sha256": "d2adb00cbcc06364f4ae66e0c06e7bcb9599e46414b4557487ff0f946008db57"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/widget-single-operator-proof.ts",
+      "owner": "tests/mutations/operator validation",
+      "sha256": "e410adbd613e37fb3d834729d117eeda1f1c284b212fe5930ac4e7fc163e95ca"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/widget-single-operator.binary-spec.ts",
+      "owner": "tests/mutations/operator validation",
+      "sha256": "bed9f932201e1098f71c932a5d2307d04901ddb3bc3bd395cd8261a93b5ef723"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/widget-single-operator.live-spec.ts",
+      "owner": "tests/mutations/operator validation",
+      "sha256": "3272bf377350af9c95d8e7d3b6735bc84a930a1ae6d72f8da836492abeb2b419"
+    }
+  ],
+  "latestFixPaths": [
+    "maya-saas-backend/src/entitlements/widget-release-access.spec.ts",
+    "maya-saas-backend/src/entitlements/widget-release-policy.spec.ts",
+    "maya-saas-backend/src/entitlements/widget-release-production.spec.ts",
+    "maya-saas-backend/src/entitlements/widget-release-single-operator.spec.ts",
+    "maya-saas-backend/src/entitlements/widget-release-unit-database.spec.ts",
+    "maya-saas-backend/test/widgets-live/support/widget-release-unit-database.ts"
+  ],
+  "presentationRuntimeCarrierOverlap": [],
+  "schemaMigrationChanges": [],
+  "productionEffectsByThisCheck": 0,
+  "certificateIssuedByThisCheck": false
+}

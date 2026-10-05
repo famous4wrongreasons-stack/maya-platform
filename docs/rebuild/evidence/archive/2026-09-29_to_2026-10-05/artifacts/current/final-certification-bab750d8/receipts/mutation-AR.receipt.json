@@ -1,0 +1,15 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "name": "mutation-AR",
+  "command": [
+    "node",
+    "scripts/widgets-mutation-battery.mjs",
+    "--gate",
+    "AR",
+    "--out",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-bab750d8/receipts/mutation-parts/widgets-mutation-part-AR.json"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-bab750d8/mutation-isolated-worker-3/maya-saas-backend",
+  "exit": 0,
+  "seconds": 6816.06
+}

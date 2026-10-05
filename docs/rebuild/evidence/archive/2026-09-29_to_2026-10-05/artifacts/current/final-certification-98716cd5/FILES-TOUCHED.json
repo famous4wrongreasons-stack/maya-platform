@@ -1,0 +1,22 @@
+{
+  "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+  "parent": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+  "integration": "fast-forward of the exact approved commit; no rewritten commit",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "integratedFiles": [
+    "maya-chat-shell/dist/manifest.json",
+    "maya-chat-shell/src/net/project.ts",
+    "maya-chat-shell/src/net/types.ts",
+    "maya-chat-shell/src/shell/intents.ts",
+    "maya-chat-shell/src/shell/ports.ts",
+    "maya-chat-shell/test/intents.test.mjs",
+    "maya-chat-shell/test/net.test.mjs",
+    "maya-chat-shell/test/ns1-roundtrip-probe.mjs"
+  ],
+  "newCandidateEdits": [],
+  "backendFilesTouched": 0,
+  "visualPresentationFilesTouched": 0,
+  "workingTreeClean": true,
+  "externalCertificationHarnessesOnly": true
+}

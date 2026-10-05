@@ -1,0 +1,43 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "updatedAt": "2026-10-05T05:03:33.059564+00:00",
+  "steps": [
+    {
+      "step": "assemble-complete.py",
+      "exit": 0
+    },
+    {
+      "step": "index-final-proofs.py",
+      "exit": 0
+    },
+    {
+      "step": "finalize-fbe2e.py",
+      "exit": 0
+    },
+    {
+      "step": "index-fresh-artifacts.py",
+      "exit": 0
+    },
+    {
+      "step": "check-final-artifact-stability.py",
+      "exit": 0
+    },
+    {
+      "step": "check-host-environment.py",
+      "exit": 0
+    },
+    {
+      "step": "index-final-orchestration-sources.py",
+      "exit": 0
+    },
+    {
+      "step": "check-final-process-lifecycle.py",
+      "exit": 0
+    },
+    {
+      "step": "finalize-receipts.py",
+      "exit": 1
+    }
+  ],
+  "status": "FAIL"
+}

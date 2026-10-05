@@ -1,0 +1,12 @@
+{
+  "candidate": "bf623dfc708f097db31a767505be517f838f0dd4",
+  "name": "build",
+  "command": [
+    "npm",
+    "run",
+    "build"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 0,
+  "seconds": 24.15
+}

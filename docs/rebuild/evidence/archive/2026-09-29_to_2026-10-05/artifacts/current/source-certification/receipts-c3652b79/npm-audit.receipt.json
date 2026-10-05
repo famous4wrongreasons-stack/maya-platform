@@ -1,0 +1,14 @@
+{
+  "candidate": "c3652b79ad7b4b92915d6e6db5b02e5727f38cff",
+  "name": "npm-audit",
+  "command": [
+    "npm",
+    "audit",
+    "--omit=dev",
+    "--audit-level=high",
+    "--json"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 0,
+  "seconds": 1.04
+}

@@ -1,0 +1,15 @@
+{
+  "candidate": "2b4774178be4fe1d1d1d2b489d49a973d63db755",
+  "name": "release-binary",
+  "command": [
+    "npm",
+    "run",
+    "test:widgets:release-binary",
+    "--",
+    "--json",
+    "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/source-certification/receipts/release-binary.json"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 0,
+  "seconds": 6.68
+}

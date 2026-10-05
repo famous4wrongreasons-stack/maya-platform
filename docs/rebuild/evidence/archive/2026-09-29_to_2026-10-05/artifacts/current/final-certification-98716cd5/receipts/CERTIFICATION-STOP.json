@@ -1,0 +1,204 @@
+{
+  "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+  "stoppedAt": "2026-09-30T13:11:19.534922+00:00",
+  "reason": "Confirmed FBE2E L27: COMMIT then Dismiss duplicates unchanged canonical receipt in runtime conversation (one durable booking/execution). User requires STOP on genuine certification defect.",
+  "roots": [
+    36130,
+    57598,
+    58111
+  ],
+  "terminatedProcessCount": 38,
+  "interruptedIsPass": false,
+  "processes": {
+    "36130": {
+      "ppid": 58828,
+      "pgid": 36130,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python work/final-certification-98716cd5/run-all-mutations.py"
+    },
+    "36420": {
+      "ppid": 36130,
+      "pgid": 36420,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate BS --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/mutation-parts/widgets-mutation-part-BS.json"
+    },
+    "36428": {
+      "ppid": 36130,
+      "pgid": 36428,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate TURN --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/mutation-parts/widgets-mutation-part-TURN.json"
+    },
+    "36429": {
+      "ppid": 36130,
+      "pgid": 36429,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate AR --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/mutation-parts/widgets-mutation-part-AR.json"
+    },
+    "36430": {
+      "ppid": 36130,
+      "pgid": 36430,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate SV2 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/mutation-parts/widgets-mutation-part-SV2.json"
+    },
+    "36434": {
+      "ppid": 36130,
+      "pgid": 36434,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate SB1 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/mutation-parts/widgets-mutation-part-SB1.json"
+    },
+    "36435": {
+      "ppid": 36130,
+      "pgid": 36435,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate SBV --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/mutation-parts/widgets-mutation-part-SBV.json"
+    },
+    "36437": {
+      "ppid": 36130,
+      "pgid": 36437,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 1-5 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/mutation-parts/widgets-mutation-part-1-5.json"
+    },
+    "36438": {
+      "ppid": 36130,
+      "pgid": 36438,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 10 --partition 1/4 --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/mutation-parts/widgets-mutation-part-10-part-1-of-4.json"
+    },
+    "57598": {
+      "ppid": 58828,
+      "pgid": 57598,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python work/final-certification-98716cd5/run-mutations-ns-fresh.py"
+    },
+    "57675": {
+      "ppid": 57598,
+      "pgid": 57598,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate NS --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/mutation-parts/widgets-mutation-part-NS.json"
+    },
+    "58111": {
+      "ppid": 58828,
+      "pgid": 58111,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python work/final-certification-98716cd5/watch-mutation-reports.py"
+    },
+    "61972": {
+      "ppid": 36438,
+      "pgid": 36438,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-8cd37dd063 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-8cd37dd063.json"
+    },
+    "62001": {
+      "ppid": 61972,
+      "pgid": 36438,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-8cd37dd063/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-8cd37dd063 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-8cd37dd063.json"
+    },
+    "62235": {
+      "ppid": 36437,
+      "pgid": 36437,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-ce42ae6dee --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-ce42ae6dee.json"
+    },
+    "62250": {
+      "ppid": 62235,
+      "pgid": 36437,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-ce42ae6dee/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-ce42ae6dee --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-ce42ae6dee.json"
+    },
+    "62309": {
+      "ppid": 36434,
+      "pgid": 36434,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-7837ca29e0 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-7837ca29e0.json"
+    },
+    "62326": {
+      "ppid": 62309,
+      "pgid": 36434,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-7837ca29e0/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-7837ca29e0 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-7837ca29e0.json"
+    },
+    "62503": {
+      "ppid": 36435,
+      "pgid": 36435,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-a35a7a56ab --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-a35a7a56ab.json"
+    },
+    "62519": {
+      "ppid": 62503,
+      "pgid": 36435,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-a35a7a56ab/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-a35a7a56ab --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-a35a7a56ab.json"
+    },
+    "64856": {
+      "ppid": 36430,
+      "pgid": 36430,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-06ba045e11 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-06ba045e11.json"
+    },
+    "64873": {
+      "ppid": 64856,
+      "pgid": 36430,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-06ba045e11/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-06ba045e11 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-06ba045e11.json"
+    },
+    "64895": {
+      "ppid": 36428,
+      "pgid": 36428,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-9ece24892d --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-9ece24892d.json"
+    },
+    "64910": {
+      "ppid": 64895,
+      "pgid": 36428,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-9ece24892d/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-9ece24892d --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-9ece24892d.json"
+    },
+    "64995": {
+      "ppid": 36420,
+      "pgid": 36420,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-25916811fa --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-25916811fa.json"
+    },
+    "65014": {
+      "ppid": 64995,
+      "pgid": 36420,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-25916811fa/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-25916811fa --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-25916811fa.json"
+    },
+    "65550": {
+      "ppid": 36429,
+      "pgid": 36429,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-e26a26e56c --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-e26a26e56c.json"
+    },
+    "65566": {
+      "ppid": 65550,
+      "pgid": 36429,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-e26a26e56c/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-e26a26e56c --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-e26a26e56c.json"
+    },
+    "66068": {
+      "ppid": 57675,
+      "pgid": 57598,
+      "command": "npm exec jest --config ./test/jest-widgets-live.json --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-6e896e7da3 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-live-6e896e7da3.json"
+    },
+    "66085": {
+      "ppid": 66068,
+      "pgid": 57598,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-6e896e7da3/maya-saas-backend/node_modules/.bin/jest --config ./test/jest-widgets-live.json --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-6e896e7da3 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-live-6e896e7da3.json"
+    },
+    "67839": {
+      "ppid": 64873,
+      "pgid": 36430,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python -m unittest test_package5_b23_history_delete_retirement"
+    },
+    "67864": {
+      "ppid": 64910,
+      "pgid": 36428,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python -m unittest test_package5_b23_history_delete_retirement"
+    },
+    "67935": {
+      "ppid": 65014,
+      "pgid": 36420,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python -m unittest test_package5_b23_history_delete_retirement"
+    },
+    "68212": {
+      "ppid": 65566,
+      "pgid": 36429,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python -m unittest test_package5_b23_history_delete_retirement"
+    },
+    "68336": {
+      "ppid": 62250,
+      "pgid": 36437,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-ce42ae6dee/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/package5_control_plane_runtime_guard.py --root /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-ce42ae6dee/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440 --json"
+    },
+    "68361": {
+      "ppid": 62001,
+      "pgid": 36438,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-8cd37dd063/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/package5_control_plane_runtime_guard.py --root /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-8cd37dd063/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440 --json"
+    },
+    "68378": {
+      "ppid": 62326,
+      "pgid": 36434,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-7837ca29e0/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/package5_control_plane_runtime_guard.py --root /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-7837ca29e0/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440 --json"
+    },
+    "68401": {
+      "ppid": 62519,
+      "pgid": 36435,
+      "command": "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python -m unittest test_package5_expense_intake"
+    }
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "candidate": "b5621b1062ba3c7882c725d160f588d3b04e3938",
+  "status": "PASS",
+  "applicable": 12,
+  "killed": 12,
+  "rows": [
+    {
+      "id": "RPK-WEBDIR",
+      "status": "KILLED",
+      "group": "packaging",
+      "source": "maya-carrier-react/tools/release.mjs",
+      "seconds": 17.68,
+      "log": "receipts/mutation-RPK-WEBDIR.log"
+    },
+    {
+      "id": "RPK-FILESET",
+      "status": "KILLED",
+      "group": "packaging",
+      "source": "maya-carrier-react/tools/payload-files.mjs",
+      "seconds": 15.96,
+      "log": "receipts/mutation-RPK-FILESET.log"
+    },
+    {
+      "id": "RPK-BYTES",
+      "status": "KILLED",
+      "group": "packaging",
+      "source": "maya-carrier-react/tools/payload-files.mjs",
+      "seconds": 16.08,
+      "log": "receipts/mutation-RPK-BYTES.log"
+    },
+    {
+      "id": "RPK-ENDPOINT",
+      "status": "KILLED",
+      "group": "packaging",
+      "source": "maya-carrier-react/tools/release.mjs",
+      "seconds": 17.33,
+      "log": "receipts/mutation-RPK-ENDPOINT.log"
+    },
+    {
+      "id": "RPK-BRIDGE",
+      "status": "KILLED",
+      "group": "packaging",
+      "source": "maya-carrier-react/tools/release.mjs",
+      "seconds": 16.87,
+      "log": "receipts/mutation-RPK-BRIDGE.log"
+    },
+    {
+      "id": "RPK-REMOTE",
+      "status": "KILLED",
+      "group": "packaging",
+      "source": "maya-carrier-react/tools/release.mjs",
+      "seconds": 16.62,
+      "log": "receipts/mutation-RPK-REMOTE.log"
+    },
+    {
+      "id": "RPK-VERIFY",
+      "status": "KILLED",
+      "group": "packaging",
+      "source": "maya-carrier-react/build.mjs",
+      "seconds": 16.7,
+      "log": "receipts/mutation-RPK-VERIFY.log"
+    },
+    {
+      "id": "TRUST-TENANT",
+      "status": "KILLED",
+      "group": "trust",
+      "source": "maya-saas-backend/scripts/widget-release-operator.cjs",
+      "seconds": 0.08,
+      "log": "receipts/mutation-TRUST-TENANT.log"
+    },
+    {
+      "id": "TRUST-REVIEWER",
+      "status": "KILLED",
+      "group": "trust",
+      "source": "maya-saas-backend/scripts/widget-release-operator.cjs",
+      "seconds": 0.08,
+      "log": "receipts/mutation-TRUST-REVIEWER.log"
+    },
+    {
+      "id": "TRUST-KEY",
+      "status": "KILLED",
+      "group": "trust",
+      "source": "maya-saas-backend/scripts/widget-release-operator.cjs",
+      "seconds": 0.08,
+      "log": "receipts/mutation-TRUST-KEY.log"
+    },
+    {
+      "id": "TRUST-PRODUCTION",
+      "status": "KILLED",
+      "group": "trust",
+      "source": "maya-saas-backend/scripts/widget-release-operator.cjs",
+      "seconds": 0.08,
+      "log": "receipts/mutation-TRUST-PRODUCTION.log"
+    },
+    {
+      "id": "TRUST-POLICY",
+      "status": "KILLED",
+      "group": "command",
+      "source": "maya-saas-backend/scripts/widget-release-operator.cjs",
+      "seconds": 1.34,
+      "log": "receipts/mutation-TRUST-POLICY.log"
+    }
+  ],
+  "baselineGroups": 3,
+  "restoredGroups": 3,
+  "mainCandidateMutated": false
+}

@@ -1,0 +1,52 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "capturedAt": "2026-09-30T20:51:39.283831+00:00",
+  "workers": [
+    {
+      "worker": 1,
+      "matchedTrackedFiles": 2332,
+      "mismatches": []
+    },
+    {
+      "worker": 2,
+      "matchedTrackedFiles": 2332,
+      "mismatches": []
+    },
+    {
+      "worker": 3,
+      "matchedTrackedFiles": 2332,
+      "mismatches": []
+    },
+    {
+      "worker": 4,
+      "matchedTrackedFiles": 2332,
+      "mismatches": []
+    },
+    {
+      "worker": 5,
+      "matchedTrackedFiles": 2332,
+      "mismatches": []
+    },
+    {
+      "worker": 6,
+      "matchedTrackedFiles": 2332,
+      "mismatches": []
+    },
+    {
+      "worker": 7,
+      "matchedTrackedFiles": 2332,
+      "mismatches": []
+    },
+    {
+      "worker": 8,
+      "matchedTrackedFiles": 2332,
+      "mismatches": []
+    }
+  ],
+  "omittedPublicEnvironmentTemplates": [
+    "maya-saas-backend/.env.example",
+    "maya-saas-backend/.env.staging.example"
+  ],
+  "realEnvironmentFilesLoaded": false,
+  "scope": "Snapshots used by native runners; node_modules shared read-only, runtime/carrier materialized, other repository surfaces linked read-only. Native mutants occur only in runner mirrors."
+}

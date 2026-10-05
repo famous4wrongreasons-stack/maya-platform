@@ -1,0 +1,75 @@
+{
+  "candidate": "4509d6f55df62da852740658c69613b113b5a1c1",
+  "unit": [
+    {
+      "ancestorTitles": [
+        "WidgetStoresService — every existing method sends what it sent before the split",
+        "3. receipt store (shell)"
+      ],
+      "duration": 5,
+      "failing": false,
+      "failureDetails": [],
+      "failureMessages": [],
+      "fullName": "WidgetStoresService — every existing method sends what it sent before the split 3. receipt store (shell) WR-L22 idempotent retries derive the terminal outcome from the existing durable receipt",
+      "invocations": 1,
+      "location": null,
+      "numPassingAsserts": 6,
+      "retryReasons": [],
+      "startAt": 1790931774426,
+      "status": "passed",
+      "title": "WR-L22 idempotent retries derive the terminal outcome from the existing durable receipt"
+    }
+  ],
+  "live": [
+    {
+      "ancestorTitles": [
+        "H2 — the confirmation terminal line survives the same widget escape [HTTP] [PostgreSQL]"
+      ],
+      "duration": 984,
+      "failing": false,
+      "failureDetails": [],
+      "failureMessages": [],
+      "fullName": "H2 — the confirmation terminal line survives the same widget escape [HTTP] [PostgreSQL] WR-H2 escape preserves the receipt boundary (committed=true)",
+      "invocations": 1,
+      "location": null,
+      "numPassingAsserts": 24,
+      "retryReasons": [],
+      "startAt": 1790931475512,
+      "status": "passed",
+      "title": "WR-H2 escape preserves the receipt boundary (committed=true)"
+    },
+    {
+      "ancestorTitles": [
+        "H2 — the confirmation terminal line survives the same widget escape [HTTP] [PostgreSQL]"
+      ],
+      "duration": 552,
+      "failing": false,
+      "failureDetails": [],
+      "failureMessages": [],
+      "fullName": "H2 — the confirmation terminal line survives the same widget escape [HTTP] [PostgreSQL] WR-H2 escape preserves the receipt boundary (committed=false)",
+      "invocations": 1,
+      "location": null,
+      "numPassingAsserts": 12,
+      "retryReasons": [],
+      "startAt": 1790931476496,
+      "status": "passed",
+      "title": "WR-H2 escape preserves the receipt boundary (committed=false)"
+    }
+  ],
+  "unitReceipt": {
+    "path": "receipts/backend-full.json",
+    "sha256": "d6658f0538fd3541b31e619d822c156f4fc5a563024bf544861a5c0d03d8be60"
+  },
+  "liveReceipt": {
+    "path": "receipts/widgets-live-full.json",
+    "sha256": "be61d81d3ee5d4c91b440a948c39bee7115c94d8380fdb5010873dd78db21a06"
+  },
+  "nativeWR": {
+    "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+    "sha256": "69418282892ce0899d3696b82de29bd5ff307efadc1905c368606a3363378bac"
+  },
+  "l27": {
+    "path": "receipts/l27-postcommit-dismiss-observations.json",
+    "sha256": "bfa7520b424f509f05cbbbc06a214eadcab7b678ccadf171418730fe5e264524"
+  }
+}

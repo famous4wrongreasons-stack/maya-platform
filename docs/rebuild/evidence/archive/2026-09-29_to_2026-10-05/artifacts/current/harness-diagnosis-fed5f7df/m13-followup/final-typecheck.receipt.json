@@ -1,0 +1,10 @@
+{
+  "name": "final-typecheck",
+  "sourceCandidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "uncommittedHarnessOnly": true,
+  "patchSha256": "df4523929d56df2231b66463a00bfb9b6eac67bc7b5cfb28512b83c6ad899345",
+  "exit": 0,
+  "expectedExit": 0,
+  "seconds": 7.716,
+  "scope": "Pre-commit diagnostic, not final certification"
+}

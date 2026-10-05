@@ -1,0 +1,15 @@
+{
+  "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "base": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+  "integration": "fast-forward; original commit retained",
+  "files": [
+    "maya-carrier-react/tools/ratchets.mjs",
+    "maya-chat-shell/dist/manifest.json",
+    "maya-chat-shell/src/shell/intents.ts",
+    "maya-chat-shell/test/intents.test.mjs",
+    "maya-chat-shell/test/l27-terminal-outcome-probe.mjs"
+  ],
+  "backendFilesTouched": 0,
+  "additionalCandidateEdits": [],
+  "proofHarnessesOutsideCandidate": true
+}

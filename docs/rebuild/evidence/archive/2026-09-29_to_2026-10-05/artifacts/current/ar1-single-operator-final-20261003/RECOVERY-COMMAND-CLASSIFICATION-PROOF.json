@@ -1,0 +1,26 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "status": "PASS",
+  "checkedAt": "2026-10-04T08:43:05.268538+00:00",
+  "rootCause": "Reporting-only suspend validator demanded exit0 for every command, including eight deliberately killed L27 counterfactuals. Their canonical extra mutation collector had already required green baseline plus named failures.",
+  "fix": "Bind only the exact eight existing L27 negative receipts to the fresh green baseline, identical full test command, raw failure log and declared named killers. All other commands still require exit0; signals and surviving mutants are refused. Every receipt still requires no suspend overlap.",
+  "tests": {
+    "path": "SUSPEND-RECOVERY-VALIDATION-TEST.json",
+    "sha256": "c0684e43e932e53a5a715e03923ef80d3aefd528efaec712129f236e9cd63316"
+  },
+  "nativeReceiptsChanged": false,
+  "productChanged": false,
+  "testExpectationsChanged": false,
+  "timeoutsChanged": false,
+  "productionEffects": 0,
+  "sources": [
+    {
+      "path": "work/ar1-single-operator-final-20261003/suspend-recovery-validation.py",
+      "sha256": "2c76c2d68a97f6edd8987aa06a4bf146799d5be232dd2c9113cd0636ef21584c"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261003/suspend-recovery-validation-test.py",
+      "sha256": "7fae0fff4d941a488d4ee6520596f303032794062a53fff3fefd8cdba2c6050e"
+    }
+  ]
+}

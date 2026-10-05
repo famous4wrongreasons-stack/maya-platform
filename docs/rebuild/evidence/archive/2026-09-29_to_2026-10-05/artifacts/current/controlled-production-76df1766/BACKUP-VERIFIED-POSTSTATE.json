@@ -1,0 +1,32 @@
+{
+  "checkedAt": "2026-10-03T06:57:52.078177+00:00",
+  "backupFilesChecked": 6,
+  "mismatches": [],
+  "backupStatus": "PASS",
+  "currentRelease": "/opt/maya-saas/releases/20260929-recon-fix-eb43bc22",
+  "envUnchanged": true,
+  "health": {
+    "health": {
+      "status": 200,
+      "body": {
+        "status": "ok",
+        "service": "maya-saas-backend",
+        "release": "20260929-recon-fix-eb43bc22",
+        "started_at": "2026-09-29T09:07:19.429Z",
+        "timestamp": "2026-10-03T06:57:52.075Z"
+      }
+    },
+    "health/ready": {
+      "status": 200,
+      "body": {
+        "status": "ready",
+        "service": "maya-saas-backend",
+        "checks": {
+          "database": "ready"
+        },
+        "timestamp": "2026-10-03T06:57:52.077Z"
+      }
+    }
+  },
+  "restoreExecuted": false
+}

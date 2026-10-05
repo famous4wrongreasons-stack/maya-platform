@@ -1,0 +1,20 @@
+{
+  "candidate": "977b814ecf2c41ae2caeca2df1ded812ce926b10",
+  "name": "source-carrier",
+  "command": [
+    "npx",
+    "jest",
+    "--config",
+    "test/jest-widgets-live.json",
+    "--runInBand",
+    "--testRegex",
+    "widgets-live/source-carrier.probe-spec.ts$"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 1,
+  "seconds": 2.78,
+  "workingTreeClean": false,
+  "instrumentationFile": "maya-saas-backend/test/widgets-live/support/shell-approved-source-probe.mjs",
+  "instrumentationSha256": "38ead2bbb66160f744b7b36c02ebfbf751c748be3407d33de8c42ddf87b4231e",
+  "scope": "Diagnostic working-tree run; not an exact-commit certification receipt"
+}

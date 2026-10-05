@@ -1,0 +1,67 @@
+{
+  "utc": "2026-10-01T00:01:49.220267+00:00",
+  "parts": 23,
+  "totalParts": 65,
+  "partStatuses": {
+    "PARTITION-AS-DECLARED": 8,
+    "AS-DECLARED": 15
+  },
+  "completedDeclarations": 183,
+  "declarationStatuses": {
+    "build-killed": 116,
+    "live-killed": 66,
+    "equivalent": 1
+  },
+  "baselineRed": [],
+  "mismatches": 0,
+  "testRuns": 260,
+  "transportFailureAlerts": [],
+  "newRuns": [
+    {
+      "worker": "4",
+      "step": "unit",
+      "passed": 5598,
+      "failed": 3,
+      "failingTitles": [
+        "refuses missing or forged profileDigest",
+        "fails closed for a different-plan active-window prepayment",
+        "does not create a recurring intent before the exact due window"
+      ],
+      "omittedTitles": 0
+    },
+    {
+      "worker": "7",
+      "step": "live",
+      "passed": 406,
+      "failed": 0,
+      "failingTitles": [],
+      "omittedTitles": 0
+    },
+    {
+      "worker": "3",
+      "step": "live",
+      "passed": 406,
+      "failed": 0,
+      "failingTitles": [],
+      "omittedTitles": 0
+    },
+    {
+      "worker": "5",
+      "step": "unit",
+      "passed": 5596,
+      "failed": 5,
+      "failingTitles": [
+        "projects exactly F15’s seven from the record, and the two legal extras beside them",
+        "G11-N15-a: `NounResolverInput` is F15’s seven, read from the certified contract",
+        "G11-N15-e: the projection reads only class-A members of the record, and nothing else does",
+        "fails closed for a different-plan active-window prepayment",
+        "does not create a recurring intent before the exact due window"
+      ],
+      "omittedTitles": 0
+    }
+  ],
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "scope": "Live progress only. Does not admit partial receipts as whole-corpus certification.",
+  "certificateIssued": false,
+  "canonicalAssembly": "PENDING"
+}

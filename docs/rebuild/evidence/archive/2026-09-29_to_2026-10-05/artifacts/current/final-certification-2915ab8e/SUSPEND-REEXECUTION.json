@@ -1,0 +1,120 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "status": "PASS",
+  "completedAt": "2026-10-02T07:42:45.110399+00:00",
+  "restrictions": "none; complete canonical parts and default steps",
+  "requiredSlots": [
+    "WR-part-3-of-4",
+    "WR-part-4-of-4"
+  ],
+  "reexecutedSlots": [
+    "WR-part-3-of-4",
+    "WR-part-4-of-4"
+  ],
+  "admittedParts": [
+    {
+      "slot": "WR-part-3-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-WR-part-3-of-4.json",
+      "sha256": "b64c6ba30ee20c2421c1fe5156a87d7f5e752afce412f938592b9942e3b38595"
+    },
+    {
+      "slot": "WR-part-4-of-4",
+      "path": "receipts/mutation-parts/widgets-mutation-part-WR-part-4-of-4.json",
+      "sha256": "b8dc4a5d2101c123813ebbd824393d48df64ceff508b4b6a5b8124ab11b09462"
+    }
+  ],
+  "originalCohort": "SUSPEND-ORIGINAL-COHORT.json",
+  "originalCohortSha256": "b7de13fcc36e3e82891003e2294ab4eb54e5db7da50de7998c2b36038f7727e3",
+  "invalidatedOriginalsRetained": [
+    {
+      "slot": "WR-part-3-of-4",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-WR-part-3-of-4.json",
+          "retained": "receipts/suspend-invalidated/WR-part-3-of-4/widgets-mutation-part-WR-part-3-of-4.json",
+          "sha256": "cb05279cf330ac960131cd4283c2334b4b8ee655ddcfe8c8348f5ca57afc1649"
+        },
+        {
+          "original": "receipts/mutation-WR-part-3-of-4.receipt.json",
+          "retained": "receipts/suspend-invalidated/WR-part-3-of-4/mutation-WR-part-3-of-4.receipt.json",
+          "sha256": "56da71edcec6caa3593cb2e7dabd918db36f64ae2fe69393ffe8e86ee4eb1016"
+        },
+        {
+          "original": "receipts/mutation-WR-part-3-of-4.log",
+          "retained": "receipts/suspend-invalidated/WR-part-3-of-4/mutation-WR-part-3-of-4.log",
+          "sha256": "cb05279cf330ac960131cd4283c2334b4b8ee655ddcfe8c8348f5ca57afc1649"
+        }
+      ]
+    },
+    {
+      "slot": "WR-part-4-of-4",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-WR-part-4-of-4.json",
+          "retained": "receipts/suspend-invalidated/WR-part-4-of-4/widgets-mutation-part-WR-part-4-of-4.json",
+          "sha256": "5e2307f7e79262dadb97e8ac155514f39a8eda83bf91d77d393b88c5173fcb4d"
+        },
+        {
+          "original": "receipts/mutation-WR-part-4-of-4.receipt.json",
+          "retained": "receipts/suspend-invalidated/WR-part-4-of-4/mutation-WR-part-4-of-4.receipt.json",
+          "sha256": "1679a9ba2b9ca13126b3c8f9a721c3b0c6647c97cfd2bb4263f134891ff5213c"
+        },
+        {
+          "original": "receipts/mutation-WR-part-4-of-4.log",
+          "retained": "receipts/suspend-invalidated/WR-part-4-of-4/mutation-WR-part-4-of-4.log",
+          "sha256": "5e2307f7e79262dadb97e8ac155514f39a8eda83bf91d77d393b88c5173fcb4d"
+        }
+      ]
+    }
+  ],
+  "executions": [
+    {
+      "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+      "name": "mutation-WR-part-4-of-4",
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "WR",
+        "--partition",
+        "4/4",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-2915ab8e/receipts/suspend-reverification/parts/widgets-mutation-part-WR-part-4-of-4.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-2915ab8e/suspend-reverification-worker-2/maya-saas-backend",
+      "exit": 0,
+      "seconds": 2406.22,
+      "startedAt": "2026-10-02T06:59:47.278695+00:00",
+      "completedAt": "2026-10-02T07:39:53.501308+00:00",
+      "pid": 15095,
+      "campaignPhase": "Unrestricted whole-part reexecution after documented host suspension"
+    },
+    {
+      "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+      "name": "mutation-WR-part-3-of-4",
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "WR",
+        "--partition",
+        "3/4",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-2915ab8e/receipts/suspend-reverification/parts/widgets-mutation-part-WR-part-3-of-4.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-2915ab8e/suspend-reverification-worker-1/maya-saas-backend",
+      "exit": 0,
+      "seconds": 2576.6,
+      "startedAt": "2026-10-02T06:59:47.278619+00:00",
+      "completedAt": "2026-10-02T07:42:43.875823+00:00",
+      "pid": 15096,
+      "campaignPhase": "Unrestricted whole-part reexecution after documented host suspension"
+    }
+  ],
+  "timeoutsChanged": false,
+  "candidateChanged": false,
+  "fullSuitesAndControls": true,
+  "newTransportFailures": [],
+  "reexecutionOverlappedSleep": false,
+  "admissionScope": "Complete fresh certification on this single unchanged candidate. Only interrupted whole parts were replaced by full current reexecutions; no historical/restricted receipts admitted."
+}

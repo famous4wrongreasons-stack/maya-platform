@@ -1,0 +1,70 @@
+{
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "scope": "First observed raw result for each worker/step. Diagnostic progress only; complete canonical receipts remain mandatory.",
+  "rows": [
+    {
+      "worker": "6",
+      "step": "live",
+      "pass": 406,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/6-live-1790861271231.json",
+      "sha256": "470a395637dc291005a04b93235f6e89253b56c26361e1a9a717326cd7df3801"
+    },
+    {
+      "worker": "1",
+      "step": "live",
+      "pass": 406,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/1-live-1790861271243.json",
+      "sha256": "7f87867bd1f8e2602436d00726a7cb4d5a81fcd8444ea74dcc568948d65c3f19"
+    },
+    {
+      "worker": "8",
+      "step": "live",
+      "pass": 406,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/8-live-1790861271244.json",
+      "sha256": "277370d63f0370f3a180bc4724287bdfdba1cea9f61083d3cbf1230883590d56"
+    },
+    {
+      "worker": "2",
+      "step": "live",
+      "pass": 406,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/2-live-1790861271247.json",
+      "sha256": "5bbae7bc35250bbed2db1c2d232eed157b285a771922bbdbef9d15d8ea4d1666"
+    },
+    {
+      "worker": "5",
+      "step": "live",
+      "pass": 406,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/5-live-1790861271248.json",
+      "sha256": "1c0e91690647a2e75dedd5eeab6dfa62170567ecd06eea327ce0a3248495b291"
+    },
+    {
+      "worker": "7",
+      "step": "live",
+      "pass": 406,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/7-live-1790861271231.json",
+      "sha256": "5deedaebe24f4118ed4e3a929f5c822845b4e26a54114198248facb84051356e"
+    },
+    {
+      "worker": "4",
+      "step": "unit",
+      "pass": 5603,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/4-unit-1790861271168.json",
+      "sha256": "8f6d0e00a3edfc603a9b05e21b294e5828b47ce606fd41fda677d74e6cdc19d0"
+    },
+    {
+      "worker": "3",
+      "step": "unit",
+      "pass": 5603,
+      "fail": 0,
+      "report": "receipts/mutation-diagnostics/3-unit-1790861271188.json",
+      "sha256": "21aa13f509dced60a18c73be080504c3392930b47a60ebf26703f9c8c7617aad"
+    }
+  ]
+}

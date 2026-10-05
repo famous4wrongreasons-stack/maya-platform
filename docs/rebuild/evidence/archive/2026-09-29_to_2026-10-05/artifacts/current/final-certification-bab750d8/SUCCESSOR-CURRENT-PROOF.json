@@ -1,0 +1,174 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "mechanism": "PASS",
+  "namedSuccessorProofs": "12/12 PASS",
+  "liveReport": {
+    "path": "receipts/widgets-live-full.json",
+    "sha256": "d05ec2836e1f562d5f92688408a68c1e4ad831f62a4205b6341cbfe38248d207"
+  },
+  "cases": [
+    {
+      "title": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-01 happy successor verification creates usable explicit personal context and actual actor audit",
+      "status": "passed",
+      "durationMs": 147
+    },
+    {
+      "title": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-02 wrong OTP has no link or consumption effect",
+      "status": "passed",
+      "durationMs": 147
+    },
+    {
+      "title": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-03 replay fails closed",
+      "status": "passed",
+      "durationMs": 129
+    },
+    {
+      "title": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-04 expired OTP fails under database time",
+      "status": "passed",
+      "durationMs": 103
+    },
+    {
+      "title": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-05 Client substitution cannot transfer a challenge",
+      "status": "passed",
+      "durationMs": 171
+    },
+    {
+      "title": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-06 tenant substitution fails closed",
+      "status": "passed",
+      "durationMs": 158
+    },
+    {
+      "title": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-07 predecessor changed after resolver read is rejected inside identity lock",
+      "status": "passed",
+      "durationMs": 107
+    },
+    {
+      "title": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-08 active predecessor never authorizes issuance or consumption",
+      "status": "passed",
+      "durationMs": 170
+    },
+    {
+      "title": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-09 non-latest revoked predecessor cannot be consumed",
+      "status": "passed",
+      "durationMs": 108
+    },
+    {
+      "title": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-10 revoked episode remains byte-for-byte immutable",
+      "status": "passed",
+      "durationMs": 111
+    },
+    {
+      "title": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-11 successful consume creates exactly one successor and one outcome",
+      "status": "passed",
+      "durationMs": 114
+    },
+    {
+      "title": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-12 concurrent consume serializes to one success and one refusal",
+      "status": "passed",
+      "durationMs": 124
+    }
+  ],
+  "nativeParts": [
+    {
+      "gate": "SB1",
+      "path": "receipts/mutation-parts/widgets-mutation-part-SB1.json",
+      "sha256": "ccbf175edee509797f52b5ddd702bb31de362d59043ef1a910ab0fb284a2c6a7",
+      "declarations": 10,
+      "status": "AS-DECLARED",
+      "controls": {
+        "baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      },
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": null
+      }
+    },
+    {
+      "gate": "SBV",
+      "path": "receipts/mutation-parts/widgets-mutation-part-SBV.json",
+      "sha256": "81106e035001edf5298f0614c0264c8c55408f64b2b1abb46098fbb5d7e04530",
+      "declarations": 8,
+      "status": "AS-DECLARED",
+      "controls": {
+        "baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      },
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": null
+      }
+    },
+    {
+      "gate": "SV2",
+      "path": "receipts/mutation-parts/widgets-mutation-part-SV2.json",
+      "sha256": "5a98f65fbfe527e5b18080c6e2fe583d69a73dd13aaab084b6884d6f653a7da2",
+      "declarations": 13,
+      "status": "AS-DECLARED",
+      "controls": {
+        "baseline|live": {
+          "set": null,
+          "steps": [
+            "live"
+          ],
+          "exits": {
+            "live": 0
+          },
+          "failed": [],
+          "problems": []
+        },
+        "baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      },
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": null
+      }
+    }
+  ],
+  "realOTP": "NOT SENT",
+  "productionBinding": "NOT ISSUED; mechanism proof is not verification of the real owner",
+  "completeReleaseCertification": "PENDING complete corpus and threshold evaluation"
+}

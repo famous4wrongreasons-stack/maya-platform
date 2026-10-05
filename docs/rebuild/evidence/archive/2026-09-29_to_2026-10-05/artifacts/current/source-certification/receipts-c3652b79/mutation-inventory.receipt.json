@@ -1,0 +1,12 @@
+{
+  "candidate": "c3652b79ad7b4b92915d6e6db5b02e5727f38cff",
+  "name": "mutation-inventory",
+  "command": [
+    "node",
+    "--test",
+    "scripts/widgets-mutation-ci.test.mjs"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 0,
+  "seconds": 2.33
+}

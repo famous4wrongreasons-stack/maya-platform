@@ -1,0 +1,82 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "nativePart": "receipts/mutation-parts/widgets-mutation-part-13-part-1-of-4.json",
+  "nativePartSha256": "3c0bb87e32f29e8b5981c85670b2c9f52e2a4833ee00f08b4d6f05fd9412b907",
+  "controls": {
+    "baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mutant": {
+    "battery": "gate13.json",
+    "id": "M13-U13C-11",
+    "files": [
+      "src/widgets/owner-ports/commit-booking.adapter.ts"
+    ],
+    "edits_applied": 1,
+    "neutralisers": [],
+    "steps": [
+      "unit",
+      "typecheck",
+      "k3"
+    ],
+    "expect": "build-killed",
+    "status": "build-killed",
+    "killedBy": [
+      "N11"
+    ],
+    "kills": [
+      {
+        "killer": "N11",
+        "test": "U13c booking COMMIT owner port N11 refuses an owner invocation whose Action Engine request does not preserve source and key",
+        "step": "unit",
+        "entry": "BUILD",
+        "neutralisers": null,
+        "evidence": false,
+        "evidence_basis": null
+      }
+    ],
+    "vacuous": [],
+    "live_evidence": false,
+    "kills_by_entry": {
+      "BUILD": 1
+    },
+    "exits": {
+      "plain": {
+        "unit": 1,
+        "typecheck": 0,
+        "k3": 0
+      }
+    }
+  },
+  "generatedAt": "2026-09-30T21:57:38.885005+00:00",
+  "fullCorpusAdmission": "PENDING"
+}

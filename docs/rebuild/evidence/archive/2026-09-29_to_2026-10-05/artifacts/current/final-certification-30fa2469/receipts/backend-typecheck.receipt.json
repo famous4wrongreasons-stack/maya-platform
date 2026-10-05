@@ -1,0 +1,12 @@
+{
+  "candidate": "30fa24698f3ae277c22209e8edfd448c29e4f872",
+  "name": "backend-typecheck",
+  "command": [
+    "npm",
+    "run",
+    "typecheck"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+  "exit": 0,
+  "seconds": 9.12
+}

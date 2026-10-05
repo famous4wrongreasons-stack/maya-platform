@@ -1,0 +1,19 @@
+{
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "status": "PASS",
+  "classification": "orchestration dependency: smoke started before compiled backend entry existed",
+  "before": {
+    "receipt": "receipts/attempts/prebuild-smoke/platform-http-smoke.receipt.json",
+    "exit": 1,
+    "symptom": "MODULE_NOT_FOUND dist/src/main"
+  },
+  "repair": "smoke explicitly depends on successful exact-candidate backend build and main.js presence",
+  "after": {
+    "receipt": "receipts/platform-http-smoke.receipt.json",
+    "exit": 0
+  },
+  "productCodeChanged": false,
+  "timeoutsChanged": false,
+  "previousCandidateReceiptsAdmitted": 0,
+  "priorMainStatusSha256": "1327bdea1bca03d41e6977d4a09f217ff0c8e6e08e571b7f02fce8ab1566aba9"
+}

@@ -1,0 +1,1441 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "status": "PASS",
+  "contract": "maya.widget-release-production-authorization/1",
+  "candidateSource": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "profile": "closed-input.no-handoff@1",
+  "battery": {
+    "gate": "PU",
+    "declarations": 12,
+    "receipt": {
+      "path": "receipts/mutation-receipt/widgets-mutation-report-PU.json",
+      "sha256": "19c7c8b907d1876080411f82283a9ac2083217df6f6d95018b2722d1079d7c10"
+    },
+    "mutants": [
+      {
+        "battery": "gatePU.json",
+        "id": "PU-M1",
+        "files": [
+          "src/entitlements/widget-release-policy.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "PU-TRUST"
+        ],
+        "kills": [
+          {
+            "killer": "PU-TRUST",
+            "test": "AR1 production execution authorization (ephemeral test keys) PU-TRUST production never falls back to staging keys",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gatePU.json",
+        "id": "PU-M2",
+        "files": [
+          "src/entitlements/widget-release-policy.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "PU-ALLOWLIST"
+        ],
+        "kills": [
+          {
+            "killer": "PU-ALLOWLIST",
+            "test": "AR1 production execution authorization (ephemeral test keys) PU-ALLOWLIST strict current server tenant list [\"other\"]",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gatePU.json",
+        "id": "PU-M3",
+        "files": [
+          "src/entitlements/widget-release-policy.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "PU-ALLOWLIST"
+        ],
+        "kills": [
+          {
+            "killer": "PU-ALLOWLIST",
+            "test": "AR1 production execution authorization (ephemeral test keys) PU-ALLOWLIST strict current server tenant list [\"tenant\",\"*\"]",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gatePU.json",
+        "id": "PU-M4",
+        "files": [
+          "src/entitlements/widget-release-production.contract.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "PU-SCHEMA"
+        ],
+        "kills": [
+          {
+            "killer": "PU-SCHEMA",
+            "test": "AR1 production execution authorization (ephemeral test keys) PU-SCHEMA production fields are mandatory; exact profile cannot be extended by the caller",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gatePU.json",
+        "id": "PU-M5",
+        "files": [
+          "src/entitlements/widget-release-policy.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "PU-BINDING"
+        ],
+        "kills": [
+          {
+            "killer": "PU-BINDING",
+            "test": "AR1 production execution authorization (ephemeral test keys) PU-BINDING valid signature still refuses wrong-evidence",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gatePU.json",
+        "id": "PU-M6",
+        "files": [
+          "src/entitlements/widget-release-production.contract.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "PU-BINDING"
+        ],
+        "kills": [
+          {
+            "killer": "PU-BINDING",
+            "test": "AR1 production execution authorization (ephemeral test keys) PU-BINDING valid signature still refuses grant-after-authorization",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gatePU.json",
+        "id": "PU-M7",
+        "files": [
+          "src/entitlements/widget-release-policy.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "PU-BYTES"
+        ],
+        "kills": [
+          {
+            "killer": "PU-BYTES",
+            "test": "AR1 production execution authorization (ephemeral test keys) PU-BYTES production re-reads bytes after an earlier successful admission",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gatePU.json",
+        "id": "PU-M8",
+        "files": [
+          "src/entitlements/widget-release-policy.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "expect": "build-killed",
+        "status": "build-killed",
+        "killedBy": [
+          "PU-READER"
+        ],
+        "kills": [
+          {
+            "killer": "PU-READER",
+            "test": "AR1 production execution authorization (ephemeral test keys) PU-READER removal of tenant allowlist revokes effective access immediately",
+            "step": "unit",
+            "entry": "BUILD",
+            "neutralisers": null,
+            "evidence": false,
+            "evidence_basis": null
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": false,
+        "kills_by_entry": {
+          "BUILD": 1
+        },
+        "exits": {
+          "plain": {
+            "unit": 1,
+            "typecheck": 0,
+            "k3": 0
+          }
+        }
+      },
+      {
+        "battery": "gatePU.json",
+        "id": "PU-M9",
+        "files": [
+          "src/entitlements/widget-release.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "PU-AUDIT-NOOP"
+        ],
+        "kills": [
+          {
+            "killer": "PU-AUDIT-NOOP",
+            "test": "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL] PU-AUDIT-NOOP silently missing audit cannot commit an entitlement",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gatePU.json",
+        "id": "PU-M10",
+        "files": [
+          "src/entitlements/widget-release.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "PU-REVOKE-BOUND"
+        ],
+        "kills": [
+          {
+            "killer": "PU-REVOKE-BOUND",
+            "test": "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL] PU-REVOKE-BOUND revoke binds exact release, evidence, profile and build; rollback works after allowlist removal and candidate change",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gatePU.json",
+        "id": "PU-M11",
+        "files": [
+          "src/entitlements/widget-release.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "PU-REVOKE-BOUND"
+        ],
+        "kills": [
+          {
+            "killer": "PU-REVOKE-BOUND",
+            "test": "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL] PU-REVOKE-BOUND revoke binds exact release, evidence, profile and build; rollback works after allowlist removal and candidate change",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      },
+      {
+        "battery": "gatePU.json",
+        "id": "PU-M12",
+        "files": [
+          "src/entitlements/widget-release.service.ts"
+        ],
+        "edits_applied": 1,
+        "neutralisers": [],
+        "steps": [
+          "live"
+        ],
+        "expect": "live-killed",
+        "status": "live-killed",
+        "killedBy": [
+          "PU-REVOKE-BOUND"
+        ],
+        "kills": [
+          {
+            "killer": "PU-REVOKE-BOUND",
+            "test": "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL] PU-REVOKE-BOUND revoke binds exact release, evidence, profile and build; rollback works after allowlist removal and candidate change",
+            "step": "live",
+            "entry": "HTTP",
+            "neutralisers": null,
+            "evidence": true,
+            "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+          }
+        ],
+        "vacuous": [],
+        "live_evidence": true,
+        "kills_by_entry": {
+          "HTTP": 1
+        },
+        "exits": {
+          "plain": {
+            "live": 1
+          }
+        }
+      }
+    ],
+    "controls": {
+      "PU:baseline|live": {
+        "set": null,
+        "steps": [
+          "live"
+        ],
+        "exits": {
+          "live": 0
+        },
+        "failed": [],
+        "problems": []
+      },
+      "PU:baseline|unit,typecheck,k3": {
+        "set": null,
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "exits": {
+          "unit": 0,
+          "typecheck": 0,
+          "k3": 0
+        },
+        "failed": [],
+        "problems": []
+      }
+    }
+  },
+  "unit": {
+    "receipt": {
+      "path": "receipts/backend-full.json",
+      "sha256": "4040c072e2027d547214d369ac3f64a2023772fa4c5a600d7bab5d647d5b2c77"
+    },
+    "assertions": [
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 71,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-POSITIVE admits exact fixed profile and all subject/digest bindings",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 4,
+        "retryReasons": [],
+        "startAt": 1791013147621,
+        "status": "passed",
+        "title": "PU-POSITIVE admits exact fixed profile and all subject/digest bindings"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 51,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-MISSING caller JSON without production signature/trust is not authority",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 3,
+        "retryReasons": [],
+        "startAt": 1791013147692,
+        "status": "passed",
+        "title": "PU-MISSING caller JSON without production signature/trust is not authority"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 23,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-DOMAIN refuses synthetic authorization even if its key is mistakenly trusted in production",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013147744,
+        "status": "passed",
+        "title": "PU-DOMAIN refuses synthetic authorization even if its key is mistakenly trusted in production"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 22,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-DOMAIN refuses staging authorization even if its key is mistakenly trusted in production",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013147767,
+        "status": "passed",
+        "title": "PU-DOMAIN refuses staging authorization even if its key is mistakenly trusted in production"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 42,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-TRUST production never falls back to staging keys",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013147789,
+        "status": "passed",
+        "title": "PU-TRUST production never falls back to staging keys"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 41,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-FORGED unsigned releaseId is refused",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013147831,
+        "status": "passed",
+        "title": "PU-FORGED unsigned releaseId is refused"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 40,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-FORGED unsigned profileId is refused",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013147872,
+        "status": "passed",
+        "title": "PU-FORGED unsigned profileId is refused"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 40,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-FORGED unsigned profileDigest is refused",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013147913,
+        "status": "passed",
+        "title": "PU-FORGED unsigned profileDigest is refused"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 40,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-FORGED unsigned evidenceDigest is refused",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013147953,
+        "status": "passed",
+        "title": "PU-FORGED unsigned evidenceDigest is refused"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 40,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-FORGED unsigned tenantId is refused",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013147994,
+        "status": "passed",
+        "title": "PU-FORGED unsigned tenantId is refused"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 41,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-FORGED unsigned candidateSha is refused",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148034,
+        "status": "passed",
+        "title": "PU-FORGED unsigned candidateSha is refused"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 40,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-FORGED unsigned certificateDigest is refused",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148075,
+        "status": "passed",
+        "title": "PU-FORGED unsigned certificateDigest is refused"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 41,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-FORGED unsigned operatorId is refused",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148115,
+        "status": "passed",
+        "title": "PU-FORGED unsigned operatorId is refused"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 40,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-FORGED unsigned approverId is refused",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148156,
+        "status": "passed",
+        "title": "PU-FORGED unsigned approverId is refused"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 40,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-FORGED unsigned reviewerId is refused",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148196,
+        "status": "passed",
+        "title": "PU-FORGED unsigned reviewerId is refused"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 43,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-FORGED unsigned expectedVersion is refused",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148236,
+        "status": "passed",
+        "title": "PU-FORGED unsigned expectedVersion is refused"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 41,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-FORGED unsigned expiresAt is refused",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148279,
+        "status": "passed",
+        "title": "PU-FORGED unsigned expiresAt is refused"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 41,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-BINDING valid signature still refuses wrong-profile",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148320,
+        "status": "passed",
+        "title": "PU-BINDING valid signature still refuses wrong-profile"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 40,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-BINDING valid signature still refuses wrong-profile-digest",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148361,
+        "status": "passed",
+        "title": "PU-BINDING valid signature still refuses wrong-profile-digest"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 41,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-BINDING valid signature still refuses wrong-evidence",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148401,
+        "status": "passed",
+        "title": "PU-BINDING valid signature still refuses wrong-evidence"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 41,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-BINDING valid signature still refuses wrong-certificate",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148443,
+        "status": "passed",
+        "title": "PU-BINDING valid signature still refuses wrong-certificate"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 40,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-BINDING valid signature still refuses wrong-tenant",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148484,
+        "status": "passed",
+        "title": "PU-BINDING valid signature still refuses wrong-tenant"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 40,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-BINDING valid signature still refuses wildcard",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148524,
+        "status": "passed",
+        "title": "PU-BINDING valid signature still refuses wildcard"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 40,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-BINDING valid signature still refuses wrong-operator",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148564,
+        "status": "passed",
+        "title": "PU-BINDING valid signature still refuses wrong-operator"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 40,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-BINDING valid signature still refuses reviewer",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148605,
+        "status": "passed",
+        "title": "PU-BINDING valid signature still refuses reviewer"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 41,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-BINDING valid signature still refuses expired",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148645,
+        "status": "passed",
+        "title": "PU-BINDING valid signature still refuses expired"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 42,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-BINDING valid signature still refuses future",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148686,
+        "status": "passed",
+        "title": "PU-BINDING valid signature still refuses future"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 41,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-BINDING valid signature still refuses over24h",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148728,
+        "status": "passed",
+        "title": "PU-BINDING valid signature still refuses over24h"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 41,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-BINDING valid signature still refuses grant-after-authorization",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148769,
+        "status": "passed",
+        "title": "PU-BINDING valid signature still refuses grant-after-authorization"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 41,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-ALLOWLIST strict current server tenant list []",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148810,
+        "status": "passed",
+        "title": "PU-ALLOWLIST strict current server tenant list []"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 41,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-ALLOWLIST strict current server tenant list [\"other\"]",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148851,
+        "status": "passed",
+        "title": "PU-ALLOWLIST strict current server tenant list [\"other\"]"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 43,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-ALLOWLIST strict current server tenant list [\"*\"]",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148892,
+        "status": "passed",
+        "title": "PU-ALLOWLIST strict current server tenant list [\"*\"]"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 42,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-ALLOWLIST strict current server tenant list [\"tenant\",\"*\"]",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148935,
+        "status": "passed",
+        "title": "PU-ALLOWLIST strict current server tenant list [\"tenant\",\"*\"]"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 42,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-ALLOWLIST strict current server tenant list [\"tenant\",\"tenant\"]",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013148977,
+        "status": "passed",
+        "title": "PU-ALLOWLIST strict current server tenant list [\"tenant\",\"tenant\"]"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 42,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-ALLOWLIST strict current server tenant list {}",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013149019,
+        "status": "passed",
+        "title": "PU-ALLOWLIST strict current server tenant list {}"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 63,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-READER removal of tenant allowlist revokes effective access immediately",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 4,
+        "retryReasons": [],
+        "startAt": 1791013149061,
+        "status": "passed",
+        "title": "PU-READER removal of tenant allowlist revokes effective access immediately"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 43,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-RUNNING jointly resigned candidateSha must match running candidate",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013149124,
+        "status": "passed",
+        "title": "PU-RUNNING jointly resigned candidateSha must match running candidate"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 63,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-RUNNING jointly resigned buildDigest must match running candidate",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013149167,
+        "status": "passed",
+        "title": "PU-RUNNING jointly resigned buildDigest must match running candidate"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 84,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-BYTES production re-reads bytes after an earlier successful admission",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 2,
+        "retryReasons": [],
+        "startAt": 1791013149230,
+        "status": "passed",
+        "title": "PU-BYTES production re-reads bytes after an earlier successful admission"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 64,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-LEGACY full contract certificate remains non-production; production is fixed-profile only",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 4,
+        "retryReasons": [],
+        "startAt": 1791013149314,
+        "status": "passed",
+        "title": "PU-LEGACY full contract certificate remains non-production; production is fixed-profile only"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 42,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-SCHEMA production fields are mandatory; exact profile cannot be extended by the caller",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 6,
+        "retryReasons": [],
+        "startAt": 1791013149378,
+        "status": "passed",
+        "title": "PU-SCHEMA production fields are mandatory; exact profile cannot be extended by the caller"
+      },
+      {
+        "ancestorTitles": [
+          "AR1 production execution authorization (ephemeral test keys)"
+        ],
+        "duration": 42,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR1 production execution authorization (ephemeral test keys) PU-ENV non-production process cannot select production execution",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 1,
+        "retryReasons": [],
+        "startAt": 1791013149420,
+        "status": "passed",
+        "title": "PU-ENV non-production process cannot select production execution"
+      }
+    ]
+  },
+  "live": {
+    "source": "widget-production.live-spec.ts",
+    "count": 8,
+    "receipt": {
+      "path": "receipts/widgets-live-full.json",
+      "sha256": "2a3efede8a6eecf08b7a6a4da564134a8d293bbe8403188e1994d648a1bffb03"
+    },
+    "assertions": [
+      {
+        "ancestorTitles": [
+          "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+        ],
+        "duration": 915,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL] PU-LIFECYCLE validate is read-only; signed grant has atomic audit; same authorization retry never grants twice; revoke refuses an old widget token",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 23,
+        "retryReasons": [],
+        "startAt": 1791012876243,
+        "status": "passed",
+        "title": "PU-LIFECYCLE validate is read-only; signed grant has atomic audit; same authorization retry never grants twice; revoke refuses an old widget token"
+      },
+      {
+        "ancestorTitles": [
+          "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+        ],
+        "duration": 294,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL] PU-CONCURRENT two consumes of one authorization produce one grant and one audit",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 4,
+        "retryReasons": [],
+        "startAt": 1791012877158,
+        "status": "passed",
+        "title": "PU-CONCURRENT two consumes of one authorization produce one grant and one audit"
+      },
+      {
+        "ancestorTitles": [
+          "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+        ],
+        "duration": 342,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL] PU-STALE two independently signed grants with the same prestate cannot both win CAS",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 3,
+        "retryReasons": [],
+        "startAt": 1791012877452,
+        "status": "passed",
+        "title": "PU-STALE two independently signed grants with the same prestate cannot both win CAS"
+      },
+      {
+        "ancestorTitles": [
+          "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+        ],
+        "duration": 243,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL] PU-AUDIT failure rolls back the entitlement mutation",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 4,
+        "retryReasons": [],
+        "startAt": 1791012877794,
+        "status": "passed",
+        "title": "PU-AUDIT failure rolls back the entitlement mutation"
+      },
+      {
+        "ancestorTitles": [
+          "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+        ],
+        "duration": 242,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL] PU-AUDIT-NOOP silently missing audit cannot commit an entitlement",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 4,
+        "retryReasons": [],
+        "startAt": 1791012878037,
+        "status": "passed",
+        "title": "PU-AUDIT-NOOP silently missing audit cannot commit an entitlement"
+      },
+      {
+        "ancestorTitles": [
+          "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+        ],
+        "duration": 290,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL] PU-REVOKE-BOUND revoke binds exact release, evidence, profile and build; rollback works after allowlist removal and candidate change",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 9,
+        "retryReasons": [],
+        "startAt": 1791012878279,
+        "status": "passed",
+        "title": "PU-REVOKE-BOUND revoke binds exact release, evidence, profile and build; rollback works after allowlist removal and candidate change"
+      },
+      {
+        "ancestorTitles": [
+          "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+        ],
+        "duration": 329,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL] PU-HANDOFF production profile refuses HANDOFF at mint and admission owners",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 6,
+        "retryReasons": [],
+        "startAt": 1791012878569,
+        "status": "passed",
+        "title": "PU-HANDOFF production profile refuses HANDOFF at mint and admission owners"
+      },
+      {
+        "ancestorTitles": [
+          "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL]"
+        ],
+        "duration": 298,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 production execution contract with ephemeral test keys [HTTP] [PostgreSQL] PU-REPLAY-BOUND rebinding an already consumed authorization cannot renew or overwrite",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 4,
+        "retryReasons": [],
+        "startAt": 1791012878899,
+        "status": "passed",
+        "title": "PU-REPLAY-BOUND rebinding an already consumed authorization cannot renew or overwrite"
+      }
+    ]
+  },
+  "binary": {
+    "receipt": {
+      "receipt": {
+        "path": "receipts/release-binary.receipt.json",
+        "sha256": "e5e563f131bb920e54e957242fa15c2d8594373c856199d847bf539f200630bf"
+      },
+      "log": {
+        "path": "receipts/release-binary.log",
+        "sha256": "ce279cb7a5cff5adebed5fa1657368546d95ec824149b977e93b7a0b16a5cc73"
+      }
+    },
+    "json": {
+      "path": "receipts/release-binary.json",
+      "sha256": "843f2010870edab1341d350a12d3247e6eca39d9765178de525810dde2975fd0"
+    },
+    "assertions": [
+      {
+        "ancestorTitles": [
+          "AR-1 production execution (ephemeral keys, guarded proof DB) [HTTP] [PostgreSQL]"
+        ],
+        "duration": 3320,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "AR-1 production execution (ephemeral keys, guarded proof DB) [HTTP] [PostgreSQL] PU-BIN [BIN] two production binaries observe the same grant, revoke and expiry without stale process state",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 14,
+        "retryReasons": [],
+        "startAt": 1791012969699,
+        "status": "passed",
+        "title": "PU-BIN [BIN] two production binaries observe the same grant, revoke and expiry without stale process state"
+      }
+    ]
+  },
+  "boundary": "Actual production mode and configuration validation on guarded loopback PostgreSQL, ephemeral test signers and synthetic subjects; no actual production authorization issued.",
+  "productionAuthorizationIssued": false,
+  "productionEffects": 0,
+  "planTrialBypass": "REFUSED",
+  "handoff": "STOP; production mint/admission refusal proven; complete profile suite remains mandatory"
+}

@@ -1,0 +1,54 @@
+{
+  "candidate": "4509d6f55df62da852740658c69613b113b5a1c1",
+  "backend": {
+    "pass": 5628,
+    "fail": 0,
+    "suites": 589
+  },
+  "widgetsLive": {
+    "pass": 421,
+    "fail": 0,
+    "suites": 40
+  },
+  "runtime": {
+    "pass": 424,
+    "skip": 7,
+    "fail": 0,
+    "nodes": [
+      22,
+      24
+    ]
+  },
+  "carrier": {
+    "pass": 93,
+    "skip": 0,
+    "fail": 0
+  },
+  "python": {
+    "pass": 613,
+    "fail": 0
+  },
+  "extraRuntimeL27": "8/8 KILLED",
+  "nativeMutationCorpus": "521/521 applicable kills; 45 batteries; 66 parts; 524 declarations",
+  "nonKillDeclarations": [
+    {
+      "battery": "gate10.json",
+      "id": "M10-5",
+      "status": "equivalent",
+      "reason": "RI-killed / equivalent on conformant input: row 1 exact subject agreement precedes effect comparison, so changing a matched record's effect while retaining the exact subject cannot alter the outcome table"
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M17b",
+      "status": "pending",
+      "reason": null
+    },
+    {
+      "battery": "gate6.json",
+      "id": "M18b",
+      "status": "pending",
+      "reason": null
+    }
+  ],
+  "historicalReceiptsAdmitted": 0
+}

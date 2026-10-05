@@ -1,0 +1,24 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "workers": 2,
+  "priority": [
+    "PU",
+    "9",
+    "H-harness",
+    "13",
+    "AR",
+    "NS",
+    "BS",
+    "TURN",
+    "SV2",
+    "SB1",
+    "SBV",
+    "PI-contract",
+    "PI"
+  ],
+  "slots": [
+    "WR-part-3-of-4",
+    "WR-part-4-of-4"
+  ],
+  "restriction": "none; scheduling only"
+}

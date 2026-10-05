@@ -1,0 +1,186 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "status": "PASS",
+  "userWriter": {
+    "path": "receipts/mutation-receipt/widgets-mutation-report-9.json",
+    "sha256": "1a293a7fe9ceca69d305e56b2ec191133cec3712f21235961622814ccf3790ba"
+  },
+  "turnWriter": {
+    "path": "receipts/mutation-receipt/widgets-mutation-report-TURN.json",
+    "sha256": "ba0cfff4259d314fa69d8f01eedee36cdc172cc20d18f56f49fbf514d29f112a"
+  },
+  "repairedUserMutations": [
+    {
+      "battery": "gate9.json",
+      "id": "M9-27",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate9.json",
+      "id": "M9-28",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "T9-WRITE-1"
+      ],
+      "kills": [
+        {
+          "killer": "T9-WRITE-1",
+          "test": "TimelineStore.lowerToUserTurn — Gate 9 transaction writer T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "assistantIsolationMutations": [
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M13",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TURN-ASSISTANT-INDEX"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-ASSISTANT-INDEX",
+          "test": "TimelineStore.ensureAssistantExecutionTurn — conversation index TURN-ASSISTANT-INDEX ignores larger indices in another tenant or conversation",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M14",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TURN-ASSISTANT-INDEX"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-ASSISTANT-INDEX",
+          "test": "TimelineStore.ensureAssistantExecutionTurn — conversation index TURN-ASSISTANT-INDEX ignores larger indices in another tenant or conversation",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "productChanges": 0,
+  "historicalReceiptSubstitution": false
+}

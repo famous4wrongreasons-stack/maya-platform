@@ -1,0 +1,26 @@
+{
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "readOnly": true,
+  "defaultNativeWebDir": "../maya-chat-shell/dist/capacitor",
+  "defaultSyncCommand": "npm run shell && cap sync ios",
+  "defaultShellCommand": "node ../maya-chat-shell/build.mjs --target=capacitor",
+  "requestedCertifiedAChatPayload": "maya-carrier-react/dist/capacitor",
+  "defaultSelectsRequestedPayload": false,
+  "artifactTrees": [
+    {
+      "root": "maya-carrier-react/dist/web",
+      "files": 3,
+      "inventorySha256": "b9a0e049f36a4517526a8ec3ad02e5a3674768df7f1df4d2064044b515b162ae"
+    },
+    {
+      "root": "maya-carrier-react/dist/capacitor",
+      "files": 3,
+      "inventorySha256": "b925115f9286dafbe548a62b9c69792f37688c453f6b9b8317b478f586172e8d"
+    }
+  ],
+  "status": "DEFAULT_SYNC_TARGET_MISMATCH",
+  "customPackagingAttempted": false,
+  "nativeBuildAttempted": false,
+  "iphoneInstallAttempted": false,
+  "limitation": "Default sync would rebuild and select maya-chat-shell. Selection of the certified React AChat payload needs a canonical packaging route before device acceptance; no alternate packaging or source change has been made."
+}

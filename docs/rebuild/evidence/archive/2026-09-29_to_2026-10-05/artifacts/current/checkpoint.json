@@ -1,0 +1,83 @@
+{
+  "contract": "maya.widget-release-local-check/1",
+  "head": "223d81c25aa8fb59863e72b96c7927a096eccb9d",
+  "baseline": "62bb81b871b772efe43cc566423727b653a9635a",
+  "claudeHead": "5dc6b7047322ff379a4c3b49cf46865e9c288d3a",
+  "canonicalCheckout": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent",
+  "claudeUncommittedPaths": [
+    "maya-carrier-react/.gitignore",
+    "maya-carrier-react/src/widgets/WidgetCard.tsx",
+    "maya-carrier-react/src/widgets/nodes.tsx",
+    "docs/rebuild/PRESENTATION-CARRIER-MIGRATION-SPEC.md",
+    "maya-carrier-react/dev/build-gallery.mjs",
+    "maya-carrier-react/dev/gallery.tsx",
+    "maya-carrier-react/dev/make-results.mjs"
+  ],
+  "changed": [
+    "docs/rebuild/widget-release-programme/BASELINE.md",
+    "docs/rebuild/widget-release-programme/CHECKPOINT.md",
+    "docs/rebuild/widget-release-programme/DECISIONS.md",
+    "docs/rebuild/widget-release-programme/baseline.json",
+    "docs/rebuild/widget-release-programme/check.mjs",
+    "docs/rebuild/widget-release-programme/fbe2e-disposition.json",
+    "docs/rebuild/widget-release-programme/gate-recomputations.json",
+    "docs/rebuild/widget-release-programme/verification.json",
+    "maya-saas-backend/scripts/widgets-mutation-battery.mjs",
+    "maya-saas-backend/scripts/widgets-mutation-ci.mjs",
+    "maya-saas-backend/scripts/widgets-mutation-ci.test.mjs",
+    "maya-saas-backend/src/widgets/booking/booking-noun-identity.spec.ts",
+    "maya-saas-backend/src/widgets/booking/booking-selector.presenter.spec.ts",
+    "maya-saas-backend/src/widgets/booking/booking-selector.presenter.ts",
+    "maya-saas-backend/src/widgets/composition/chat-read.trigger.spec.ts",
+    "maya-saas-backend/src/widgets/emission/booking-successor-boundary.spec.ts",
+    "maya-saas-backend/src/widgets/owner-ports/booking-selector.adapter.spec.ts",
+    "maya-saas-backend/src/widgets/owner-ports/booking-selector.adapter.ts",
+    "maya-saas-backend/src/widgets/resolve/thread-page.service.spec.ts",
+    "maya-saas-backend/src/widgets/resolve/thread-page.service.ts",
+    "maya-saas-backend/src/widgets/routing/effect-router.service.spec.ts",
+    "maya-saas-backend/src/widgets/routing/effect-router.service.ts",
+    "maya-saas-backend/src/widgets/stores/intent-audit.store.ts",
+    "maya-saas-backend/src/widgets/stores/widget-stores.service.spec.ts",
+    "maya-saas-backend/test/widgets-live/e2-booking.live-spec.ts",
+    "maya-saas-backend/test/widgets-live/gate13-routing.live-spec.ts",
+    "maya-saas-backend/test/widgets-live/h2-terminal-line-ownership.live-spec.ts",
+    "maya-saas-backend/test/widgets-live/mutations/gateWR.json"
+  ],
+  "ownershipOverlap": [],
+  "clauseStates": {
+    "L-T": 4,
+    "L": 113,
+    "U": 17,
+    "false": 31
+  },
+  "classificationCounts": {
+    "IMPLEMENTATION_MISSING": 3,
+    "EVIDENCE_MISSING": 24,
+    "OWNER_DECISION_REQUIRED": 4
+  },
+  "headline": "GATES LIVE CONTRACT-COMPLETE 3/15 · WITH U-CLASS 6/15 · STOPPED CLAUSES 0 · BLOCKED-DISCHARGE CLAUSES 0",
+  "productionActivation": "FORBIDDEN",
+  "clientRolesUnchanged": true,
+  "shellSubmissionDriftConfirmed": true,
+  "level": "read-only source/inventory proof; not live gate promotion or production acceptance",
+  "branch": "codex/widget-release-programme-20260929",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/widget-release",
+  "clean": true,
+  "safe_to_integrate": "NO",
+  "integration_blockers": [
+    "One full-regression failure: absent Claude-owned maya-chat-shell/dist/web build artifact",
+    "Current-branch CI not run",
+    "Full unfiltered 394-mutant certification unavailable with this missing unit-baseline artifact"
+  ],
+  "production_activation": "FORBIDDEN",
+  "proof_cluster": "STOPPED",
+  "commits": [
+    "4e023cf30e9557fb90e09dd79b039ca560d1c590 docs(widgets): baseline isolated release programme and clause dispositions",
+    "bf995d1d020079f7dffb77f4aa915a0e089a19be fix(widgets): enforce truthful selector facts and booking authority boundaries",
+    "9085c2bbbe256c670a2836445a2c92265d139cb7 fix(widgets): preserve confirmed receipt ownership across replay and reconciliation",
+    "e180086fb8dde6568696b8a8ef50e9f6389ad3eb test(widgets): cover selector boundaries and require plain mutation baselines",
+    "d4f47594531cf2ad01223653be7f487b88653cbd test(widgets): remove redundant assertions in evidence fixtures",
+    "67166a247d5b191ef5a3e32ef5077e30c1a4ff36 test(widgets): model AE uncertainty in the reconciliation fixture",
+    "223d81c25aa8fb59863e72b96c7927a096eccb9d docs(widgets): record release decisions, evidence and remaining integration blockers"
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "status": "PASS",
+  "checkedAt": "2026-10-05T01:09:17.363463+00:00",
+  "source": "work/ar1-single-operator-final-20261005/import-hosted-mutations.py",
+  "sourceSha256": "b12387aa39663f7a47c1f0c8c33e3f6a3548ad9ecb7b181e42092615431cb4be",
+  "proofDriverSha256": "80a4ce358a0522d69aa1dee21baa5e3ad726227efcf48859ba703b7cf33e55eb",
+  "checks": [
+    {
+      "name": "complete exact candidate control",
+      "admitted": true,
+      "expected": true
+    },
+    {
+      "name": "pending publication refused",
+      "admitted": false,
+      "expected": false
+    },
+    {
+      "name": "missing publication result refused",
+      "admitted": false,
+      "expected": false
+    },
+    {
+      "name": "wrong candidate refused",
+      "admitted": false,
+      "expected": false
+    },
+    {
+      "name": "production effect refused",
+      "admitted": false,
+      "expected": false
+    },
+    {
+      "name": "wrong hosted head refused",
+      "admitted": false,
+      "expected": false
+    },
+    {
+      "name": "failed workflow refused",
+      "admitted": false,
+      "expected": false
+    },
+    {
+      "name": "incomplete job set refused",
+      "admitted": false,
+      "expected": false
+    },
+    {
+      "name": "failed job refused",
+      "admitted": false,
+      "expected": false
+    },
+    {
+      "name": "in-progress job refused",
+      "admitted": false,
+      "expected": false
+    },
+    {
+      "name": "missing job conclusion refused",
+      "admitted": false,
+      "expected": false
+    }
+  ],
+  "partChecks": [
+    {
+      "name": "complete battery control",
+      "admittedForStrictReassembly": true,
+      "expected": true
+    },
+    {
+      "name": "partition control",
+      "admittedForStrictReassembly": true,
+      "expected": true
+    },
+    {
+      "name": "partition promoted to whole refused",
+      "admittedForStrictReassembly": false,
+      "expected": false
+    },
+    {
+      "name": "whole substituted with partition refused",
+      "admittedForStrictReassembly": false,
+      "expected": false
+    },
+    {
+      "name": "red baseline refused",
+      "admittedForStrictReassembly": false,
+      "expected": false
+    },
+    {
+      "name": "mismatched outcomes refused",
+      "admittedForStrictReassembly": false,
+      "expected": false
+    },
+    {
+      "name": "filtered tests refused",
+      "admittedForStrictReassembly": false,
+      "expected": false
+    },
+    {
+      "name": "foreign source refused",
+      "admittedForStrictReassembly": false,
+      "expected": false
+    },
+    {
+      "name": "missing part result refused",
+      "admittedForStrictReassembly": false,
+      "expected": false
+    }
+  ],
+  "actualHostedPartChecks": [
+    {
+      "slot": "NS",
+      "status": "AS-DECLARED",
+      "artifactSha256": "1c849a89bea9bd583e94949576988d4b37e31d6c8d39fc6cadd5e3f8413c4ec9"
+    },
+    {
+      "slot": "6-part-1-of-4",
+      "status": "PARTITION-AS-DECLARED",
+      "artifactSha256": "af34f5fbfe92430bff6047b092ae796dc1a75f2e0e103c8fa0e4266169934713"
+    }
+  ],
+  "adapterBeforeProof": "work/ar1-single-operator-final-20261005/hosted-shape-inspection/PARTITION-IMPORT-BEFORE.json",
+  "admissionOfPartialReport": false,
+  "scope": "Actual current importer assertion AST with synthetic metadata. This creates no real evidence or certificate; complete fresh raw parts and unchanged canonical strict release collector remain mandatory.",
+  "productionEffects": 0
+}

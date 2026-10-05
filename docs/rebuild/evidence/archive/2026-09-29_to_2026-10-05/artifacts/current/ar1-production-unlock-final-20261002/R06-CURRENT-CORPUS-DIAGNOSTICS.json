@@ -1,0 +1,61 @@
+{
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "status": "PASS",
+  "currentCorpus": [
+    {
+      "file": {
+        "path": "receipts/r06-native-worker-1.jsonl",
+        "sha256": "015f5316170fa5da947d6063af8b2c62e641d8f3077431d7d793467c3fd18937"
+      },
+      "executions": 70,
+      "maxElapsedMs": 8591
+    },
+    {
+      "file": {
+        "path": "receipts/r06-native-worker-2.jsonl",
+        "sha256": "20a236204e5446d1f80ae048527847fe593b3bd01182b29360ded551a53d8544"
+      },
+      "executions": 69,
+      "maxElapsedMs": 10043
+    },
+    {
+      "file": {
+        "path": "receipts/r06-native-worker-3.jsonl",
+        "sha256": "74c086ec819c1704befd1d075b68cbc4403bf86fc19e330003a422f78abdd482"
+      },
+      "executions": 58,
+      "maxElapsedMs": 16992
+    },
+    {
+      "file": {
+        "path": "receipts/r06-native-worker-4.jsonl",
+        "sha256": "2e7647de42973793bb799bedecbf2b37ccf7b1536d4707706477d4c826ea2f3e"
+      },
+      "executions": 76,
+      "maxElapsedMs": 18235
+    },
+    {
+      "file": {
+        "path": "receipts/r06-native-worker-5.jsonl",
+        "sha256": "025ad290e40c1fea8b29f35e93e5f9dc42bd441fd1572e79f27828085e431567"
+      },
+      "executions": 69,
+      "maxElapsedMs": 9869
+    },
+    {
+      "file": {
+        "path": "receipts/r06-native-worker-6.jsonl",
+        "sha256": "3c991318e9b41d65ef62bd962f193c1112e0354ac44a654f0291323220ebf8ef"
+      },
+      "executions": 75,
+      "maxElapsedMs": 17086
+    }
+  ],
+  "originalTimeoutMs": 20000,
+  "timeoutsChanged": false,
+  "excludedAttempt": {
+    "path": "NATIVE-RESTART-PROVENANCE.json",
+    "sha256": "cedbc7235894a338ebe25a1d087c93b1523946501c95a04951abd8679f0333b3"
+  },
+  "historicalFailureCause": "Undetermined; no claim of a product or harness repair. Abandoned corpus is not admitted. Every current unmutated baseline must independently pass the strict collector."
+}

@@ -1,0 +1,17 @@
+{
+  "candidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "name": "mutation-13-part-3-of-4",
+  "command": [
+    "node",
+    "scripts/widgets-mutation-battery.mjs",
+    "--gate",
+    "13",
+    "--partition",
+    "3/4",
+    "--out",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-dc3a2680/receipts/mutation-parts/widgets-mutation-part-13-part-3-of-4.json"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-dc3a2680/mutation-isolated-worker-7/maya-saas-backend",
+  "exit": -15,
+  "seconds": 3456.51
+}

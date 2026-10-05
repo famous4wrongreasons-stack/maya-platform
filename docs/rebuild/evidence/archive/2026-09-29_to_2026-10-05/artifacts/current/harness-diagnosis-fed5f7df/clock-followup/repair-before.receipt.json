@@ -1,0 +1,24 @@
+{
+  "name": "repair-before",
+  "exit": 1,
+  "seconds": 2.123,
+  "passed": 2,
+  "failed": 3,
+  "runtimeErrors": 0,
+  "ambientClock": null,
+  "sourceSha256": "de3de3e1878df0af86f48c3e400591413cfcaf60017a1db6aa047bd812308861",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "--runInBand",
+    "--runTestsByPath",
+    "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
+    "--json",
+    "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/clock-followup/repair-before.json"
+  ],
+  "failedTests": [
+    "P408TenantBillingCanonicalCutoverService P408-HARNESS-CLOCK anchors implicit billing reads to the fixture clock",
+    "P408TenantBillingCanonicalCutoverService fails closed for a different-plan active-window prepayment",
+    "P408TenantBillingCanonicalCutoverService does not create a recurring intent before the exact due window"
+  ]
+}

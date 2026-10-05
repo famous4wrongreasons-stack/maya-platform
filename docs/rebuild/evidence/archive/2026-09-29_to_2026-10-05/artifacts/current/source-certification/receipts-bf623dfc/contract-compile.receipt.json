@@ -1,0 +1,14 @@
+{
+  "candidate": "bf623dfc708f097db31a767505be517f838f0dd4",
+  "name": "contract-compile",
+  "command": [
+    "npx",
+    "tsc",
+    "--noEmit",
+    "--project",
+    "tsconfig.widget-contract.json"
+  ],
+  "cwd": "maya-saas-backend",
+  "exit": 0,
+  "seconds": 4.07
+}

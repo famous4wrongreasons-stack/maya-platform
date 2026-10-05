@@ -1,0 +1,169 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "policy": {
+    "path": "docs/rebuild/widget-release-programme/approved-release/OWNER-DECISIONS.md",
+    "sha256": "80835e05dd6fe7134cae8aeadbb140afd980668d7516b9a7a628bd4b60dba504"
+  },
+  "approvedProfile": {
+    "path": "docs/rebuild/widget-release-programme/profile-isolation/DESIGN.md",
+    "sha256": "074b242ca3f891dddbf5b2f8d1b87e09f34aac480089b1638fa0401144e84710"
+  },
+  "freshLiveReceipt": {
+    "path": "receipts/widgets-live-full.json",
+    "sha256": "b4e40a9bc8a28140e142e25846e4c03d33700d5444f9a2ad9ceff6fee1332715"
+  },
+  "currentAssertions": [
+    {
+      "source": "e1-production-trigger.live-spec.ts",
+      "assertions": [
+        {
+          "ancestorTitles": [
+            "E1 \u2014 production-triggered evidence records"
+          ],
+          "duration": 730,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "E1 \u2014 production-triggered evidence records E1-T2B-CLEAN [HTTP] [E-MINT] mints through the journal owner and traverses the real gate pipeline",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 21,
+          "retryReasons": [],
+          "startAt": 1791059737191,
+          "status": "passed",
+          "title": "E1-T2B-CLEAN [HTTP] [E-MINT] mints through the journal owner and traverses the real gate pipeline"
+        },
+        {
+          "ancestorTitles": [
+            "E1 \u2014 production-triggered evidence records"
+          ],
+          "duration": 220,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "E1 \u2014 production-triggered evidence records E1-G1-SEAL [HTTP] [E-TAMPER:WidgetEmission.bodyHash] rejects a production record whose sealed body is altered",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 3,
+          "retryReasons": [],
+          "startAt": 1791059737921,
+          "status": "passed",
+          "title": "E1-G1-SEAL [HTTP] [E-TAMPER:WidgetEmission.bodyHash] rejects a production record whose sealed body is altered"
+        },
+        {
+          "ancestorTitles": [
+            "E1 \u2014 production-triggered evidence records"
+          ],
+          "duration": 232,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "E1 \u2014 production-triggered evidence records E1-G5-FLOOR [HTTP] [E-TAMPER:WidgetIntentRecord.verificationFloor] rejects policy-floor drift without writes",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 2,
+          "retryReasons": [],
+          "startAt": 1791059738141,
+          "status": "passed",
+          "title": "E1-G5-FLOOR [HTTP] [E-TAMPER:WidgetIntentRecord.verificationFloor] rejects policy-floor drift without writes"
+        },
+        {
+          "ancestorTitles": [
+            "E1 \u2014 production-triggered evidence records"
+          ],
+          "duration": 218,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "E1 \u2014 production-triggered evidence records E1-G6-TOOL [HTTP] [E-TAMPER:capabilitySpace=TOOL] stays fail-closed while N6-FLOOR exposes the independent Gate 6 refusal",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 3,
+          "retryReasons": [],
+          "startAt": 1791059738373,
+          "status": "passed",
+          "title": "E1-G6-TOOL [HTTP] [E-TAMPER:capabilitySpace=TOOL] stays fail-closed while N6-FLOOR exposes the independent Gate 6 refusal"
+        },
+        {
+          "ancestorTitles": [
+            "E1 \u2014 production-triggered evidence records"
+          ],
+          "duration": 351,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "E1 \u2014 production-triggered evidence records E1-G4-INDEP [HTTP] [E-INDEP] keeps a foreign tenant outside the record while the N4 battery exposes Gate 4",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 3,
+          "retryReasons": [],
+          "startAt": 1791059738591,
+          "status": "passed",
+          "title": "E1-G4-INDEP [HTTP] [E-INDEP] keeps a foreign tenant outside the record while the N4 battery exposes Gate 4"
+        },
+        {
+          "ancestorTitles": [
+            "E1 \u2014 production-triggered evidence records"
+          ],
+          "duration": 9,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "E1 \u2014 production-triggered evidence records E1-U [HTTP] [U-proof] records the frozen unreachable-class duties without treating them as live evidence",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryReasons": [],
+          "startAt": 1791059738942,
+          "status": "passed",
+          "title": "E1-U [HTTP] [U-proof] records the frozen unreachable-class duties without treating them as live evidence"
+        }
+      ]
+    },
+    {
+      "source": "closed-release-scope.live-spec.ts",
+      "assertions": [
+        {
+          "ancestorTitles": [
+            "Approved closed-input U ledger [HTTP ledger; RI]"
+          ],
+          "duration": 2,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "Approved closed-input U ledger [HTTP ledger; RI] D8-U records all four duties without claiming a live open-input traversal",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 19,
+          "retryReasons": [],
+          "startAt": 1791059773436,
+          "status": "passed",
+          "title": "D8-U records all four duties without claiming a live open-input traversal"
+        }
+      ]
+    },
+    {
+      "source": "final-u-scope.live-spec.ts",
+      "assertions": [
+        {
+          "ancestorTitles": [
+            "Final U scope ledger; typed HTTP proof is WF-READBACK"
+          ],
+          "duration": 1,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "Final U scope ledger; typed HTTP proof is WF-READBACK WF-U-R1A [HTTP ledger; SPOKEN RI] quotes the approved partial scope and proves the excluded branch fails closed",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 12,
+          "retryReasons": [],
+          "startAt": 1791059773455,
+          "status": "passed",
+          "title": "WF-U-R1A [HTTP ledger; SPOKEN RI] quotes the approved partial scope and proves the excluded branch fails closed"
+        }
+      ]
+    }
+  ],
+  "meaning": "The named current tests jointly exercise OD-3 absence/refusal/mechanism duties. Policy files supply approved scope only; historical receipts are not admitted."
+}

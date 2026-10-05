@@ -1,0 +1,442 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gateP-discharge.json": "a4ad611ddb78ded1b0b22ca83464f0a750a6a2a73ea94134b10884d4e56ae0fd"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T18:48:01.661Z",
+  "batteries": [
+    "gateP-discharge.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-8ec4c18637",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-8ec4c18637",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "P-discharge:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gateP-discharge.json",
+      "id": "DIS-M1",
+      "files": [
+        "src/widgets/booking/booking-discharge.runtime.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "DIS-2"
+      ],
+      "kills": [
+        {
+          "killer": "DIS-2",
+          "test": "P-DISCHARGE — exact A2.7 booking discharge DIS-2 admits only the nine closed server-owned booking and selector templates",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-discharge.json",
+      "id": "DIS-M2",
+      "files": [
+        "src/widgets/widgets.controller.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "DIS-1"
+      ],
+      "kills": [
+        {
+          "killer": "DIS-1",
+          "test": "P-DISCHARGE — exact A2.7 booking discharge DIS-1 pins each named mechanism to its canonical path",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-discharge.json",
+      "id": "DIS-M3",
+      "files": [
+        "src/widgets/routing/effect-router.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "DIS-1"
+      ],
+      "kills": [
+        {
+          "killer": "DIS-1",
+          "test": "P-DISCHARGE — exact A2.7 booking discharge DIS-1 pins each named mechanism to its canonical path",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-discharge.json",
+      "id": "DIS-M4",
+      "files": [
+        "src/widgets/control/control-registry.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "DIS-1"
+      ],
+      "kills": [
+        {
+          "killer": "DIS-1",
+          "test": "P-DISCHARGE — exact A2.7 booking discharge DIS-1 pins each named mechanism to its canonical path",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-discharge.json",
+      "id": "DIS-M5",
+      "files": [
+        "src/widgets/emission/record-writer.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "DIS-1"
+      ],
+      "kills": [
+        {
+          "killer": "DIS-1",
+          "test": "P-DISCHARGE — exact A2.7 booking discharge DIS-1 pins each named mechanism to its canonical path",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-discharge.json",
+      "id": "DIS-M6",
+      "files": [
+        "src/widgets/authority/ae-commit-allowlist.runtime.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "DIS-2"
+      ],
+      "kills": [
+        {
+          "killer": "DIS-2",
+          "test": "P-DISCHARGE — exact A2.7 booking discharge DIS-2 admits only the nine closed server-owned booking and selector templates",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-discharge.json",
+      "id": "DIS-M7",
+      "files": [
+        "src/widgets/authority/propose-pairing.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "DIS-2"
+      ],
+      "kills": [
+        {
+          "killer": "DIS-2",
+          "test": "P-DISCHARGE — exact A2.7 booking discharge DIS-2 admits only the nine closed server-owned booking and selector templates",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-discharge.json",
+      "id": "DIS-M8",
+      "files": [
+        "src/widgets/gates/gate6.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "DIS-1"
+      ],
+      "kills": [
+        {
+          "killer": "DIS-1",
+          "test": "P-DISCHARGE — exact A2.7 booking discharge DIS-1 pins each named mechanism to its canonical path",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-discharge.json",
+      "id": "DIS-M9",
+      "files": [
+        "src/widgets/emission/intent-template.registry.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "DIS-3"
+      ],
+      "kills": [
+        {
+          "killer": "DIS-3",
+          "test": "P-DISCHARGE — exact A2.7 booking discharge DIS-3 generic mutation templates and voice/spoken siblings remain unavailable",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T20:10:09.077Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 1,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

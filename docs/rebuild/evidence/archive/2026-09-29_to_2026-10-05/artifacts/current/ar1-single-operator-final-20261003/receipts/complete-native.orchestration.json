@@ -1,0 +1,20 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "startedAt": "2026-10-03T20:49:18.322937+00:00",
+  "completedAt": "2026-10-04T08:43:05.418098+00:00",
+  "exit": 0,
+  "restrictions": null,
+  "historicalReceiptsAdmitted": 0,
+  "retainedCurrentProgrammeWholeParts": 55,
+  "freshRecoveryWholeParts": 13,
+  "admittedSleepOverlaps": 0,
+  "originalInterruptedOrchestration": "receipts/suspend-invalidated/original-complete-native.orchestration.json",
+  "recoveryExecution": {
+    "path": "SUSPEND-RECOVERY-EXECUTION.json",
+    "sha256": "4ffa851f3bf4ec7cc0e0d0c90ae2d175db2c92aaddb394edc6dffff50c89dbd7"
+  },
+  "recoveryProof": {
+    "path": "SUSPEND-RECOVERY-CLOSURE-PROOF.json",
+    "sha256": "d443e9006ea4d37b5d80da45ff632a81db2092938117da0872bcabaddafa41aa"
+  }
+}

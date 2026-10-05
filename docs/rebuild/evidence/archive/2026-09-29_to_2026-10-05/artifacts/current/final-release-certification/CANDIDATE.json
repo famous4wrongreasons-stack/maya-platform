@@ -1,0 +1,32 @@
+{
+  "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+  "parent": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+  "alreadyIntegrated": true,
+  "worktreeClean": true,
+  "productionFilesEdited": false,
+  "sourceHarnesses": [
+    {
+      "path": "maya-saas-backend/test/widgets-live/source-carrier.probe-spec.ts",
+      "sha256": "f0332ae786b59ddd1ad8169cdd54b57fb756b5dc7505ee2cd808de8a68c32aa5"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/shell-approved-source-probe.mjs",
+      "sha256": "38ead2bbb66160f744b7b36c02ebfbf751c748be3407d33de8c42ddf87b4231e"
+    }
+  ],
+  "externalProbeFiles": [
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-release-certification/probes/source-return.mjs",
+      "sha256": "e4cc3f892b873ece152f63072e03b2a539e1b8b631db1361bc4bdc07d1fb11f2"
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-release-certification/probes/source-return.probe-spec.ts",
+      "sha256": "c02c07879ff19e97ecf3c030649d679f0d8f7dc29514a14fef5a4aed53de0afd"
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-release-certification/jest-return.json",
+      "sha256": "bd03d89d30c29fda385ed66ffa989db1174573be5d62cc1d3ec147b12a5281c6"
+    }
+  ],
+  "scope": "Extend the existing guarded source probe with the actual drawn canonical parent-return activation. No production or candidate source edit."
+}

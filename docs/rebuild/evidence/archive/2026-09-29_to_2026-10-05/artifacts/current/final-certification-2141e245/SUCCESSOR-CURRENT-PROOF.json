@@ -1,0 +1,450 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "scope": "Fresh synthetic/local evidence only; not production evidence or whole-corpus certification",
+  "result": "12/12 PASS",
+  "proofs": [
+    {
+      "title": "SV2-01 happy successor verification creates usable explicit personal context and actual actor audit",
+      "status": "passed",
+      "durationMs": 198
+    },
+    {
+      "title": "SV2-02 wrong OTP has no link or consumption effect",
+      "status": "passed",
+      "durationMs": 162
+    },
+    {
+      "title": "SV2-03 replay fails closed",
+      "status": "passed",
+      "durationMs": 148
+    },
+    {
+      "title": "SV2-04 expired OTP fails under database time",
+      "status": "passed",
+      "durationMs": 122
+    },
+    {
+      "title": "SV2-05 Client substitution cannot transfer a challenge",
+      "status": "passed",
+      "durationMs": 201
+    },
+    {
+      "title": "SV2-06 tenant substitution fails closed",
+      "status": "passed",
+      "durationMs": 176
+    },
+    {
+      "title": "SV2-07 predecessor changed after resolver read is rejected inside identity lock",
+      "status": "passed",
+      "durationMs": 131
+    },
+    {
+      "title": "SV2-08 active predecessor never authorizes issuance or consumption",
+      "status": "passed",
+      "durationMs": 195
+    },
+    {
+      "title": "SV2-09 non-latest revoked predecessor cannot be consumed",
+      "status": "passed",
+      "durationMs": 127
+    },
+    {
+      "title": "SV2-10 revoked episode remains byte-for-byte immutable",
+      "status": "passed",
+      "durationMs": 133
+    },
+    {
+      "title": "SV2-11 successful consume creates exactly one successor and one outcome",
+      "status": "passed",
+      "durationMs": 144
+    },
+    {
+      "title": "SV2-12 concurrent consume serializes to one success and one refusal",
+      "status": "passed",
+      "durationMs": 141
+    }
+  ],
+  "additional": [
+    {
+      "title": "SV2-JSON all four V2 fields are mandatory, exact and immutable",
+      "status": "passed",
+      "durationMs": 136
+    },
+    {
+      "title": "SV2-CHANNEL canonical channel changed after issuance invalidates exact Client proof",
+      "status": "passed",
+      "durationMs": 131
+    },
+    {
+      "title": "SV2-SESSION current revocation is checked on consume",
+      "status": "passed",
+      "durationMs": 104
+    },
+    {
+      "title": "SV2-LIMIT failed OTP attempts survive rollback and cannot be reset with correct code",
+      "status": "passed",
+      "durationMs": 200
+    },
+    {
+      "title": "SV2-DELIVERY failed SMS grants nothing and discloses no OTP",
+      "status": "passed",
+      "durationMs": 103
+    },
+    {
+      "title": "SV2-V1 historical V1 remains immutable and initial-only; V1 consumption still works for a fresh subject",
+      "status": "passed",
+      "durationMs": 121
+    },
+    {
+      "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+      "status": "passed",
+      "durationMs": 898
+    }
+  ],
+  "source": {
+    "path": "receipts/widgets-live-full.json",
+    "sha256": "eb2d76be8ebe0631985bf1c9c366cb77eda747e9eb015a8f6233ffef9d4f9140"
+  },
+  "realOtpSent": false,
+  "nativeMutationAdmission": "31/31 across complete SV2,SB1,SBV batteries PASS; canonical whole-corpus assembly remains pending",
+  "freshNativeBatteries": [
+    {
+      "gate": "SV2",
+      "count": 13,
+      "status": "AS-DECLARED",
+      "path": "outputs/final-certification-2141e245/receipts/mutation-parts/widgets-mutation-part-SV2.json",
+      "sha256": "86f5c3a54c6caa70b6a6200467ba8f81c449f6a9723a951e61db290a8a9d08d5",
+      "baselineControls": {
+        "baseline|live": {
+          "set": null,
+          "steps": [
+            "live"
+          ],
+          "exits": {
+            "live": 0
+          },
+          "failed": [],
+          "problems": []
+        },
+        "baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      },
+      "mutants": [
+        {
+          "id": "SV2-M1",
+          "status": "build-killed",
+          "killers": [
+            "SV2-U-OTP"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SV2-M2",
+          "status": "build-killed",
+          "killers": [
+            "SV2-U-BINDING"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SV2-M3",
+          "status": "build-killed",
+          "killers": [
+            "SV2-U-EXPIRY"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SV2-M4",
+          "status": "build-killed",
+          "killers": [
+            "SV2-U-REPLAY"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SV2-M5",
+          "status": "build-killed",
+          "killers": [
+            "SV2-U-OUTCOME"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SV2-M6",
+          "status": "build-killed",
+          "killers": [
+            "SV2-U-LIMIT"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SV2-M7",
+          "status": "live-killed",
+          "killers": [
+            "SV2-07"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SV2-M8",
+          "status": "build-killed",
+          "killers": [
+            "SV2-U-POLICY"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SV2-M9",
+          "status": "build-killed",
+          "killers": [
+            "SV2-U-POLICY"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SV2-M10",
+          "status": "build-killed",
+          "killers": [
+            "SV2-U-POLICY"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SV2-M11",
+          "status": "build-killed",
+          "killers": [
+            "SV2-U-HAPPY"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SV2-M12",
+          "status": "build-killed",
+          "killers": [
+            "SV2-U-HAPPY"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SV2-M13",
+          "status": "build-killed",
+          "killers": [
+            "SV2-U-SESSION"
+          ],
+          "vacuous": []
+        }
+      ]
+    },
+    {
+      "gate": "SB1",
+      "count": 10,
+      "status": "AS-DECLARED",
+      "path": "outputs/final-certification-2141e245/receipts/mutation-parts/widgets-mutation-part-SB1.json",
+      "sha256": "d92f1a6631703606d1d80ac7484a81a2533ce60fc57727f56d99bf23bddfefff",
+      "baselineControls": {
+        "baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      },
+      "mutants": [
+        {
+          "id": "SB1-M01",
+          "status": "build-killed",
+          "killers": [
+            "SB1-SELECTION"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SB1-M02",
+          "status": "build-killed",
+          "killers": [
+            "SB1-SESSION"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SB1-M03",
+          "status": "build-killed",
+          "killers": [
+            "SB1-SESSION"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SB1-M04",
+          "status": "build-killed",
+          "killers": [
+            "SB1-LINK"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SB1-M05",
+          "status": "build-killed",
+          "killers": [
+            "SB1-LINK"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SB1-M06",
+          "status": "build-killed",
+          "killers": [
+            "SB1-RECHECK"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SB1-M07",
+          "status": "build-killed",
+          "killers": [
+            "SB1-NOSELECT"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SB1-M08",
+          "status": "build-killed",
+          "killers": [
+            "SB1-DISPATCH"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SB1-M09",
+          "status": "build-killed",
+          "killers": [
+            "SB1-BOUND"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SB1-M10",
+          "status": "build-killed",
+          "killers": [
+            "SB1-CREATE"
+          ],
+          "vacuous": []
+        }
+      ]
+    },
+    {
+      "gate": "SBV",
+      "count": 8,
+      "status": "AS-DECLARED",
+      "path": "outputs/final-certification-2141e245/receipts/mutation-parts/widgets-mutation-part-SBV.json",
+      "sha256": "193cae0c28c42082a6f1f66d0905eb60fc5c9964a9d9a5a48ec18c04d81adf1f",
+      "baselineControls": {
+        "baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      },
+      "mutants": [
+        {
+          "id": "SBV-M1",
+          "status": "build-killed",
+          "killers": [
+            "RV-PREDECESSOR"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SBV-M2",
+          "status": "build-killed",
+          "killers": [
+            "RV-PREDECESSOR"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SBV-M3",
+          "status": "build-killed",
+          "killers": [
+            "RV-DRIFT"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SBV-M4",
+          "status": "build-killed",
+          "killers": [
+            "RV-CANDIDATE"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SBV-M5",
+          "status": "build-killed",
+          "killers": [
+            "RV-CHANNEL"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SBV-M6",
+          "status": "build-killed",
+          "killers": [
+            "RV-CHANNEL"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SBV-M7",
+          "status": "build-killed",
+          "killers": [
+            "RV-TRANSPORT"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "SBV-M8",
+          "status": "build-killed",
+          "killers": [
+            "RV-TRANSPORT"
+          ],
+          "vacuous": []
+        }
+      ]
+    }
+  ],
+  "certificateIssued": false
+}

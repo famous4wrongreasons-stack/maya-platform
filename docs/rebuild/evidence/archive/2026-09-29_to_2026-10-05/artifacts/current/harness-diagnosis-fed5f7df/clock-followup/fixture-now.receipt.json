@@ -1,0 +1,23 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "clock": "2026-09-02T12:00:00.000Z",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "--runInBand",
+    "--runTestsByPath",
+    "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
+    "--json",
+    "--outputFile",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/clock-followup/fixture-now.json",
+    "--setupFilesAfterEnv",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/clock-fixture-diagnosis/ambient-clock.cjs"
+  ],
+  "exit": 0,
+  "expectedExit": 0,
+  "seconds": 1.1,
+  "passed": 4,
+  "failed": 0,
+  "sourceUnchanged": true,
+  "setupSha256": "f64750750c2e4d9774dbc818e729a074b9ee42402185cfd8ed1e3c83a8de495f"
+}

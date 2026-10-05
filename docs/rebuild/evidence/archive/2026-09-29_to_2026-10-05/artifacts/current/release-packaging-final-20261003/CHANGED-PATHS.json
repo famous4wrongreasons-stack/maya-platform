@@ -1,0 +1,22 @@
+[
+  ".github/workflows/release-packaging.yml",
+  "docs/rebuild/widget-release-programme/RELEASE-PACKAGING-AND-TRUST-RUNBOOK.md",
+  "maya-carrier-react/build.mjs",
+  "maya-carrier-react/index.html",
+  "maya-carrier-react/package.json",
+  "maya-carrier-react/test/release.test.mjs",
+  "maya-carrier-react/tools/payload-files.mjs",
+  "maya-carrier-react/tools/release.mjs",
+  "maya-ios-carrier/.gitignore",
+  "maya-ios-carrier/README.md",
+  "maya-ios-carrier/capacitor.config.json",
+  "maya-ios-carrier/ios/App/App.xcodeproj/project.pbxproj",
+  "maya-ios-carrier/package.json",
+  "maya-saas-backend/deploy/platform/beget-edge/RELAY-RELEASE.md",
+  "maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json",
+  "maya-saas-backend/scripts/widget-release-operator.cjs",
+  "maya-saas-backend/scripts/widget-release-operator.compiled-test.cjs",
+  "maya-saas-backend/scripts/widget-release-operator.test.cjs",
+  "maya-saas-backend/src/action-engine/beget-public-relay-coverage.architecture.spec.ts",
+  "maya-saas-backend/src/action-engine/beget-relay-release.architecture.spec.ts"
+]

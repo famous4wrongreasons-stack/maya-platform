@@ -1,0 +1,12 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "name": "backend-build",
+  "command": [
+    "npm",
+    "run",
+    "build"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+  "exit": 0,
+  "seconds": 19.22
+}

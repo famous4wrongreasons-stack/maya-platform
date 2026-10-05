@@ -1,0 +1,202 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "status": "AS-DECLARED",
+  "declarations": 19,
+  "nativePart": {
+    "path": "receipts/mutation-parts/widgets-mutation-part-AR.json",
+    "sha256": "71598741ace5507de3d67a3814f325ddfb1203bd6637e849200241f606ce4c5a",
+    "status": "AS-DECLARED",
+    "baselineControls": {
+      "baseline|live": {
+        "set": null,
+        "steps": [
+          "live"
+        ],
+        "exits": {
+          "live": 0
+        },
+        "failed": [],
+        "problems": []
+      },
+      "baseline|unit,typecheck,k3": {
+        "set": null,
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "exits": {
+          "unit": 0,
+          "typecheck": 0,
+          "k3": 0
+        },
+        "failed": [],
+        "problems": []
+      }
+    },
+    "restrictions": {
+      "live_tests": null,
+      "live_filter": null,
+      "unit_tests": null
+    },
+    "baselineRed": [],
+    "mismatches": 0,
+    "declarations": 19
+  },
+  "mutants": [
+    {
+      "id": "AR-M1",
+      "expected": "build-killed",
+      "actual": "build-killed",
+      "killedBy": [
+        "AR1-FORGED"
+      ]
+    },
+    {
+      "id": "AR-M2",
+      "expected": "build-killed",
+      "actual": "build-killed",
+      "killedBy": [
+        "AR1-CONTEXT"
+      ]
+    },
+    {
+      "id": "AR-M3",
+      "expected": "build-killed",
+      "actual": "build-killed",
+      "killedBy": [
+        "AR1-NEGATIVE"
+      ]
+    },
+    {
+      "id": "AR-M4",
+      "expected": "build-killed",
+      "actual": "build-killed",
+      "killedBy": [
+        "AR1-RUNNING"
+      ]
+    },
+    {
+      "id": "AR-M5",
+      "expected": "build-killed",
+      "actual": "build-killed",
+      "killedBy": [
+        "AR1-THRESHOLD"
+      ]
+    },
+    {
+      "id": "AR-M6",
+      "expected": "build-killed",
+      "actual": "build-killed",
+      "killedBy": [
+        "AR1-NEGATIVE"
+      ]
+    },
+    {
+      "id": "AR-M7",
+      "expected": "build-killed",
+      "actual": "build-killed",
+      "killedBy": [
+        "AR1-PRODUCTION"
+      ]
+    },
+    {
+      "id": "AR-M8",
+      "expected": "build-killed",
+      "actual": "build-killed",
+      "killedBy": [
+        "AR1-TRIAL"
+      ]
+    },
+    {
+      "id": "AR-M9",
+      "expected": "build-killed",
+      "actual": "build-killed",
+      "killedBy": [
+        "AR1-PLAN"
+      ]
+    },
+    {
+      "id": "AR-M10",
+      "expected": "build-killed",
+      "actual": "build-killed",
+      "killedBy": [
+        "AR1-UNSIGNED"
+      ]
+    },
+    {
+      "id": "AR-M11",
+      "expected": "live-killed",
+      "actual": "live-killed",
+      "killedBy": [
+        "AR1-STALE"
+      ]
+    },
+    {
+      "id": "AR-M12",
+      "expected": "live-killed",
+      "actual": "live-killed",
+      "killedBy": [
+        "AR1-CONCURRENT"
+      ]
+    },
+    {
+      "id": "AR-M13",
+      "expected": "live-killed",
+      "actual": "live-killed",
+      "killedBy": [
+        "AR1-ADVERSARIAL"
+      ]
+    },
+    {
+      "id": "AR-M14",
+      "expected": "live-killed",
+      "actual": "live-killed",
+      "killedBy": [
+        "AR1-AUDIT"
+      ]
+    },
+    {
+      "id": "AR-M15",
+      "expected": "live-killed",
+      "actual": "live-killed",
+      "killedBy": [
+        "AR1-LIFECYCLE"
+      ]
+    },
+    {
+      "id": "AR-M16",
+      "expected": "live-killed",
+      "actual": "live-killed",
+      "killedBy": [
+        "AR1-EXPIRY"
+      ]
+    },
+    {
+      "id": "AR-M17",
+      "expected": "live-killed",
+      "actual": "live-killed",
+      "killedBy": [
+        "AR1-REVOKE-WAIT"
+      ]
+    },
+    {
+      "id": "AR-M18",
+      "expected": "live-killed",
+      "actual": "live-killed",
+      "killedBy": [
+        "AR-G6-REVOCATION"
+      ]
+    },
+    {
+      "id": "AR-M19",
+      "expected": "live-killed",
+      "actual": "live-killed",
+      "killedBy": [
+        "AR-G6-REVOCATION"
+      ]
+    }
+  ],
+  "activation": "NOT PERFORMED; synthetic proof database only",
+  "completeReleaseCertification": "PENDING full corpus and threshold evaluation"
+}

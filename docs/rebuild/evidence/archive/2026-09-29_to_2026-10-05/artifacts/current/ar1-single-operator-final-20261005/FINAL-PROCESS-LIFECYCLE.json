@@ -1,0 +1,18 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "checkedAt": "2026-10-05T05:04:54.989233+00:00",
+  "status": "PASS",
+  "currentRunPathPrefixes": [
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261005",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-recovery-20261003",
+    "/private/tmp/widgets-mutation-mirror-cfdb82c740"
+  ],
+  "remainingOwnedProcesses": [],
+  "remainingCurrentRunProofDbSessions": [],
+  "dedicatedProofPostgresListener": "COMMAND    PID           USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME\npostgres 20272 stanislavmosin    5u  IPv4 0xcece31f560d5532b      0t0  TCP 127.0.0.1:55729 (LISTEN)\n",
+  "retainedFixtureBoundary": "Dedicated PostgreSQL proof server is intentionally retained. It is not a leaked test listener.",
+  "pidReusePolicy": "No historical PID alone is accepted as ownership; current command/CWD must match a unique current-run path.",
+  "otherServicesChanged": false,
+  "processesTerminatedByThisCheck": 0
+}

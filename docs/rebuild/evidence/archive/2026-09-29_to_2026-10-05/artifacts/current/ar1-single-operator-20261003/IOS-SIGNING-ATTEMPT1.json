@@ -1,0 +1,23 @@
+{
+  "status": "BLOCKED",
+  "buildConfiguration": "Debug development (previously approved first launch); not App Store/Release",
+  "provisioningUuid": "8c3f4496-8527-4c89-84be-5c9f9a15eed7",
+  "provisioningExpiry": "2026-10-05T08:16:21",
+  "provisioningChanges": 0,
+  "deviceInstalled": false,
+  "actualApp": null,
+  "receipts": [
+    {
+      "name": "ios-canonical-sync",
+      "exit": 0,
+      "seconds": 22.68
+    },
+    {
+      "name": "ios-development-signing",
+      "exit": 65,
+      "seconds": 6.48
+    }
+  ],
+  "networkProvisioningUpdates": false,
+  "sourceChanges": []
+}

@@ -1,0 +1,53 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "gate13Total": 25,
+  "nativeReceipt": {
+    "path": "receipts/mutation-receipt/widgets-mutation-report-13.json",
+    "sha256": "96664e857d7b34b83814431e92fd43351f5056e15a3e496dfcf774155655edfa"
+  },
+  "exactPriorSurvivor": {
+    "battery": "gate13.json",
+    "id": "M13-U13C-11",
+    "files": [
+      "src/widgets/owner-ports/commit-booking.adapter.ts"
+    ],
+    "edits_applied": 1,
+    "neutralisers": [],
+    "steps": [
+      "unit",
+      "typecheck",
+      "k3"
+    ],
+    "expect": "build-killed",
+    "status": "build-killed",
+    "killedBy": [
+      "N11"
+    ],
+    "kills": [
+      {
+        "killer": "N11",
+        "test": "U13c booking COMMIT owner port N11 refuses an owner invocation whose Action Engine request does not preserve source and key",
+        "step": "unit",
+        "entry": "BUILD",
+        "neutralisers": null,
+        "evidence": false,
+        "evidence_basis": null
+      }
+    ],
+    "vacuous": [],
+    "live_evidence": false,
+    "kills_by_entry": {
+      "BUILD": 1
+    },
+    "exits": {
+      "plain": {
+        "unit": 1,
+        "typecheck": 0,
+        "k3": 0
+      }
+    }
+  },
+  "historicalReceiptSubstitution": false,
+  "scope": "Complete fresh native Gate 13 on current candidate, admitted with complete whole-corpus assembly.",
+  "completeNativeReceiptSha256": "afa124cffe9455071feab13b7b508cabcb5c59830f3ec34f54a59770393ddb8a"
+}

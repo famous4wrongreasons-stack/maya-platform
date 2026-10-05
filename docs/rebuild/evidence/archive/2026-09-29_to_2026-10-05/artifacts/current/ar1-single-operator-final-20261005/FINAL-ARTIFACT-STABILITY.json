@@ -1,0 +1,37 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "status": "PASS",
+  "checkedAt": "2026-10-05T05:03:31.527491+00:00",
+  "initialReceiptSha256": "54aad0e07172ab3a9ed7d3eaadc0895b310093dee9d681eec5801125300c3394",
+  "finalReceiptSha256": "cc5106480800e743ce44cb87aa5255b80bbe8b9e620bd0afd60f77d235cb3c6a",
+  "trees": [
+    {
+      "root": "maya-saas-backend/dist",
+      "files": 2721,
+      "initialInventorySha256": "17468df25f4fe8dc2fdc6df4197d3bd3d8066cd5e2de4513d68b5521c08042ea",
+      "finalInventorySha256": "17468df25f4fe8dc2fdc6df4197d3bd3d8066cd5e2de4513d68b5521c08042ea",
+      "identical": true
+    },
+    {
+      "root": "maya-chat-shell/dist",
+      "files": 40,
+      "initialInventorySha256": "74b7c3f434a923e1838d0602ba34c888058abcdc777f4874fc3041b2d81ed86b",
+      "finalInventorySha256": "74b7c3f434a923e1838d0602ba34c888058abcdc777f4874fc3041b2d81ed86b",
+      "identical": true
+    },
+    {
+      "root": "maya-carrier-react/dist/web",
+      "files": 8,
+      "initialInventorySha256": "56ab3915011c38010df3043da240c52170d67573b77dce993ce1c3cb36bce9a5",
+      "finalInventorySha256": "56ab3915011c38010df3043da240c52170d67573b77dce993ce1c3cb36bce9a5",
+      "identical": true
+    },
+    {
+      "root": "maya-carrier-react/dist/capacitor",
+      "files": 8,
+      "initialInventorySha256": "84cb51ee6eb182a600a75402c035d06b41a7b8e6bb66f57f88fb36ec1c1216c4",
+      "finalInventorySha256": "84cb51ee6eb182a600a75402c035d06b41a7b8e6bb66f57f88fb36ec1c1216c4",
+      "identical": true
+    }
+  ]
+}

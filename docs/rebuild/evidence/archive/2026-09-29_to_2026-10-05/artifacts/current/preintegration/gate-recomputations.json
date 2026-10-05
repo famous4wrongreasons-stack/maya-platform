@@ -1,0 +1,53 @@
+{
+  "contract": "maya.widget-release-preintegration-recomputations/1",
+  "source_head": "000ed08f3769f8ec78f634c7c10f4643e2d3fe11",
+  "units": [
+    {
+      "head": "223d81c25aa8fb59863e72b96c7927a096eccb9d",
+      "unit": "pre-integration baseline",
+      "false": 31
+    },
+    {
+      "head": "bacf04db1d7e6cb7c6590568dd15c619f08b4e54",
+      "unit": "backend/integration profile separation",
+      "false": 31
+    },
+    {
+      "head": "d962d7ace221c8983467f81c7efc3133e2843123",
+      "unit": "production-trigger lineage and HTTP/BIN proof added; admission pending verification",
+      "false": 31
+    },
+    {
+      "head": "000ed08f3769f8ec78f634c7c10f4643e2d3fe11",
+      "unit": "fresh paired evidence admitted with green WR/H mutation controls",
+      "false": 19,
+      "states": {
+        "L": 125,
+        "L-T": 4,
+        "U": 17,
+        "false": 19
+      }
+    },
+    {
+      "head": "b147b0d46a09f57a24440901892a3b2f1aca7809",
+      "unit": "Prisma CI preparation; current overlay recomputed unchanged",
+      "false": 19
+    },
+    {
+      "unit": "checkpoint documentation working tree",
+      "false": 19,
+      "runtime_delta_from_proof_head": false
+    },
+    {
+      "head": "17c2c30f1f9e0ba60751142b8d162140151f5223",
+      "unit": "committed current evidence/decision checkpoint",
+      "false": 19
+    },
+    {
+      "head": "d7eaf17c153929bbf01f86aae13753bacd955e84",
+      "unit": "canonical OD-3 option IDs preserved; recomputation unchanged",
+      "false": 19
+    }
+  ],
+  "activation": "FORBIDDEN"
+}

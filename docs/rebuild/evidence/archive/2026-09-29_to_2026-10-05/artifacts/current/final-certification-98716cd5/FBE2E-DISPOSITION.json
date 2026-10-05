@@ -1,0 +1,304 @@
+{
+  "contract": "maya.fbe2e-final-certification-disposition/1",
+  "scope": "Fresh candidate evidence disposition. Overall FBE2E FAIL on L27; not a complete release certificate. Historical file left unchanged.",
+  "limitations": [
+    {
+      "id": "L1",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_EVIDENCE",
+      "disposition": "HTTP tags corrected; targeted MINT-M20 and P-M11 receipts now record HTTP kills. This is not a whole-clause L claim.",
+      "historical_before": "CLOSED",
+      "previousDisposition": "CLOSED",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L2",
+      "before": "PARTIAL",
+      "after": "PARTIAL",
+      "classification": "OWNER_DECISION",
+      "disposition": "Add explicit Prisma generation before the contract compiler/checker. Local generate, contract typecheck and 31/31 checker pass. Advisory policy remains unchanged; no fresh remote CI run, and its blocking/acceptance status is still an owner decision.",
+      "historical_before": "OPEN",
+      "current_note": "Contract checker freshly passes 31/31; remote CI and advisory acceptance policy remain unproved/unapproved.",
+      "previousDisposition": "PARTIAL",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L3",
+      "before": "OPEN",
+      "after": "CLOSED",
+      "classification": "INTEGRATION_EVIDENCE",
+      "disposition": "Real shell network transport belongs to Claude. Backend HTTP proof does not close this.",
+      "historical_before": "OPEN",
+      "previousDisposition": "OPEN",
+      "current_note": "Unchanged createNet/session/client performs password authentication, intent submissions and resolve over real loopback HTTP into the built backend.",
+      "freshProof": "receipts/canonical-net-bin-observations.json"
+    },
+    {
+      "id": "L4",
+      "before": "PARTIAL",
+      "after": "CLOSED",
+      "classification": "INTEGRATION_EVIDENCE",
+      "disposition": "WR-BOOKING-CREATE now executes the built backend binary through real HTTP: catalog → service → staff → slot → DRAFT → COMMIT → durable canonical ActionExecution, plus replay refusal. BIN 16/16 passes. Compiled carrier artifact and real carrier network/conversation acceptance remain Claude integration dependencies; no whole FBE2E BIN closure.",
+      "historical_before": "OPEN",
+      "current_note": "Fresh emitted runtime JavaScript modules execute create/reschedule/cancel and NS-1 return against dist/src/main; compiled React DetailSheet helper renders the return control. This is a local built-artifact proof, not browser/device/production evidence.",
+      "previousDisposition": "PARTIAL",
+      "freshProof": "receipts/compiled-net-bin-observations.json"
+    },
+    {
+      "id": "L5",
+      "before": "OPEN",
+      "after": "OPEN",
+      "classification": "OWNER_DECISION",
+      "disposition": "Fixed tomorrow/tenant-local window ownership and policy must be settled with L24 before a policy-preserving date fix.",
+      "historical_before": "OPEN",
+      "previousDisposition": "OPEN",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L6",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_IMPLEMENTATION",
+      "disposition": "Unknown enabled/consultation/slot availability are NOT_MEASURED/NOT_COLLECTED, without fact refs. No fabricated FREE/true/false. Totals are null without completeness evidence.",
+      "historical_before": "CLOSED",
+      "previousDisposition": "CLOSED",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L7",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_IMPLEMENTATION",
+      "disposition": "All three actor/authority/tenant fences restored before quote; selector no longer fabricates A1/no-divergence. Three negative tests and three mutants.",
+      "historical_before": "CLOSED",
+      "previousDisposition": "CLOSED",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L8",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_IMPLEMENTATION",
+      "disposition": "PARTIAL, totalCount null, hasMore true, NOT_COLLECTED; malformed list refuses. No second invented COMPLETE fact.",
+      "historical_before": "CLOSED",
+      "previousDisposition": "CLOSED",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L9",
+      "before": "OPEN",
+      "after": "CLOSED",
+      "classification": "INTEGRATION_EVIDENCE",
+      "disposition": "Shell child harness does not return its COMMIT gate trace. Existing backend H2 asserts 14 gates but cannot substitute for this path.",
+      "historical_before": "OPEN",
+      "previousDisposition": "OPEN",
+      "current_note": "Every actual runtime-issued create/reschedule/cancel COMMIT asserts gates_run exactly 14 and canonical SUCCEEDED execution.",
+      "freshProof": "receipts/compiled-net-bin-observations.json"
+    },
+    {
+      "id": "L10",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_EVIDENCE",
+      "disposition": "Runner executes a plain live baseline even for exclusively neutralised live mutants; independent neutraliser-only self-test passes.",
+      "historical_before": "CLOSED",
+      "previousDisposition": "CLOSED",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L11",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_EVIDENCE",
+      "disposition": "Three selector kinds assert the selector emission path and no generic emit; WR-M17 detects substitution.",
+      "historical_before": "CLOSED",
+      "previousDisposition": "CLOSED",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L12",
+      "before": "PARTIAL",
+      "after": "PARTIAL",
+      "classification": "ACCEPTED_LIMITATION",
+      "disposition": "Presenter, selector adapter, noun identity, preview adapter and router now have targeted mutants. The ports file has type declarations, not an executable branch; typecheck covers their use. This is targeted coverage, not exhaustive mutation certification. Fresh WR battery: 23/23 as declared with green controls; its runtime sites are covered, but type-only port additions have no dedicated type mutation. Not relabelled as complete.",
+      "historical_before": "PARTIAL",
+      "current_note": "Fresh WR 23, AB 2, H-harness 21, SB1 10, SBV 8 and V2 13 mutations pass their declared controls. This is targeted coverage, not full remote/exhaustive port certification.",
+      "previousDisposition": "PARTIAL",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L13",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_EVIDENCE",
+      "disposition": "Foreign-principal and lock-time-principal-change cases plus WR-M18/M19. BUILD-level recording-store tests, not a new HTTP admission claim.",
+      "historical_before": "CLOSED",
+      "previousDisposition": "CLOSED",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L14",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_IMPLEMENTATION",
+      "disposition": "Confirmed publication excludes any different confirmed COMMIT. Same-token immutable retry remains allowed. PostgreSQL injected-record test proves a second receipt cannot substitute the first line.",
+      "historical_before": "CLOSED",
+      "previousDisposition": "CLOSED",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L15",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_EVIDENCE",
+      "disposition": "WR-M12/M13/M14 remove ownership, effect/space narrowing and monotonicity respectively; additional WR-M15 tests same-token exception.",
+      "historical_before": "CLOSED",
+      "previousDisposition": "CLOSED",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L16",
+      "before": "PARTIAL",
+      "after": "PARTIAL",
+      "classification": "ACCEPTED_LIMITATION",
+      "disposition": "P-mint now has four disjoint shards; full tests/controls retained. Planner and assembler pass. Remote elapsed-time/headroom is unmeasured; no timing guarantee.",
+      "historical_before": "PARTIAL",
+      "current_note": "Current programme: 502 declarations / 44 batteries / 65 CI jobs. Ten new source mutants have focused diagnostics only. No full-corpus or remote timing claim.",
+      "previousDisposition": "PARTIAL",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L17",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_IMPLEMENTATION",
+      "disposition": "Reconciliation receipt query requires its record be tenant-scoped AE COMMIT. PostgreSQL CONTROL-token call returns false; WR-M16 pins it.",
+      "historical_before": "CLOSED",
+      "previousDisposition": "CLOSED",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L18",
+      "before": "OPEN",
+      "after": "CLOSED",
+      "classification": "INTEGRATION_EVIDENCE",
+      "disposition": "Same dependency as L9; literal gate count from the shell-owned submission remains absent.",
+      "historical_before": "OPEN",
+      "previousDisposition": "OPEN",
+      "current_note": "Same fresh compiled-runtime network trace as L9; literal gate count is asserted on each runtime submission.",
+      "freshProof": "receipts/compiled-net-bin-observations.json"
+    },
+    {
+      "id": "L19",
+      "before": "OPEN",
+      "after": "CLOSED",
+      "classification": "INTEGRATION_EVIDENCE",
+      "disposition": "Receipt-to-chat network/React acceptance belongs to Claude; server thread-page validation is now stronger but does not close this hop.",
+      "historical_before": "OPEN",
+      "previousDisposition": "OPEN",
+      "current_note": "Three canonical confirmed receipt lines are read through createNet, appear once each in conversation, render through the actual React reply helper, and enter the next real /ai/chat request history.",
+      "freshProof": "receipts/compiled-receipt-net-bin-observations.json"
+    },
+    {
+      "id": "L20",
+      "before": "PARTIAL",
+      "after": "PARTIAL",
+      "classification": "PRODUCTION_EFFECT_PROOF",
+      "disposition": "Nearest-availability unknown branch and unknown cells now asserted and mutation-tested. Actual Action Engine uncertainty/fault-produced UNKNOWN is still not proven by the supplied-verdict trace.",
+      "historical_before": "PARTIAL",
+      "previousDisposition": "PARTIAL",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L21",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_IMPLEMENTATION",
+      "disposition": "Server thread reader enforces seven terminal outcomes and nonempty receipt iff CONFIRMED; malformed storage is filtered before the wire. WR-M06/M07/M08.",
+      "historical_before": "CLOSED",
+      "previousDisposition": "CLOSED",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L22",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_EVIDENCE",
+      "disposition": "Recording double keys existing receipts by upsert identity and checks empty update. Test explicitly proves immutable retry, not rejection of caller-shaped input on a first write.",
+      "historical_before": "CLOSED",
+      "previousDisposition": "CLOSED",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L23",
+      "before": "OPEN",
+      "after": "OPEN",
+      "classification": "PRESENTATION_DEPENDENCY",
+      "disposition": "Shell network ratchet is Claude-owned.",
+      "historical_before": "OPEN",
+      "previousDisposition": "OPEN",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L24",
+      "before": "OPEN",
+      "after": "OPEN",
+      "classification": "OWNER_DECISION",
+      "disposition": "Specify canonical date/window/timezone policy owner; no tenant policy invented in widgets.",
+      "historical_before": "OPEN",
+      "previousDisposition": "OPEN",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L25",
+      "before": "OPEN",
+      "after": "OPEN",
+      "classification": "OWNER_DECISION",
+      "disposition": "Tap-as-delivered/rendered semantics need a lifecycle ruling; existing fences unchanged.",
+      "historical_before": "OPEN",
+      "previousDisposition": "OPEN",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L26",
+      "before": "PARTIAL",
+      "after": "PARTIAL",
+      "classification": "OWNER_DECISION",
+      "disposition": "The new current-audit consumer refuses red/missing controls, non-green mutation receipts, wrong code targets, changed declaration/manifest bytes and unpaired claims. 13 counterfactual tests pass. Historical builder and already recorded admissions stay unchanged pending the owner historical-evidence ruling.",
+      "historical_before": "OPEN",
+      "current_note": "Current decision/boundary admission adds rejection tests (32 combined audit tests). Approval of U-class does not retroactively approve red/missing historical controls.",
+      "previousDisposition": "PARTIAL",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    },
+    {
+      "id": "L27",
+      "before": "OPEN",
+      "after": "OPEN",
+      "classification": "RUNTIME_CERTIFICATION_DEFECT",
+      "disposition": "Conversation append deduplication is Claude-owned.",
+      "historical_before": "OPEN",
+      "current_note": "The prior CLOSED disposition used TURN-CANONICAL user-turn identity evidence for an assistant-receipt duplication duty. That evidence is not sufficient. Fresh built runtime + binary proof shows one identical canonical receipt before/after Dismiss, one ActionExecution, but conversation grows from one assistant line to two. Existing defect, not an NS-1 regression.",
+      "previousDisposition": "CLOSED",
+      "freshProof": "receipts/l27-postcommit-dismiss-observations.json"
+    },
+    {
+      "id": "L28",
+      "before": "CLOSED",
+      "after": "CLOSED",
+      "classification": "BACKEND_EVIDENCE",
+      "disposition": "HTTP dismiss before COMMIT now executed: terminal storage null/page lines empty, control dismissed, ActionExecution count zero.",
+      "historical_before": "CLOSED",
+      "previousDisposition": "CLOSED",
+      "freshCertificationNote": "Retains disclosed disposition; full applicable mutation certification is interrupted. No new owner acceptance inferred."
+    }
+  ],
+  "counts": {
+    "CLOSED": 18,
+    "PARTIAL": 5,
+    "OPEN": 5
+  },
+  "currentCandidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+  "integrationBoundary": "NS-1 and BS-1 source/carrier paths PASS. L27 confirmed OPEN: COMMIT then Dismiss duplicates the same canonical receipt in conversation.",
+  "freshFullCertification": false
+}

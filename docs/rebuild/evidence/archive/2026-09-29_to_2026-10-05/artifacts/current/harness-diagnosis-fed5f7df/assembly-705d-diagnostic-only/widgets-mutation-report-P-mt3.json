@@ -1,0 +1,353 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gateP-mt3.json": "899982cf8b2530639b36b6c05957f573c550fd8b1887209d4c8ff239506c0a4f"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T19:28:17.037Z",
+  "batteries": [
+    "gateP-mt3.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-c2409726d3",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-c2409726d3",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "P-mt3:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "P-mt3:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gateP-mt3.json",
+      "id": "MT3-M1",
+      "files": [
+        "src/widgets/composition/moment.trigger.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "MT3-2"
+      ],
+      "kills": [
+        {
+          "killer": "MT3-2",
+          "test": "P-MT3 — canonical K13 moment trigger [GW, PostgreSQL] MT3-2 a non-entitled tenant creates no Widget row",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-mt3.json",
+      "id": "MT3-M2",
+      "files": [
+        "src/widgets/composition/moment.trigger.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "MT3-1"
+      ],
+      "kills": [
+        {
+          "killer": "MT3-1",
+          "test": "P-MT3 — canonical K13 moment trigger [GW, PostgreSQL] MT3-1 mints one web-push widget, two typed intents and one render receipt",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-mt3.json",
+      "id": "MT3-M3",
+      "files": [
+        "src/widgets/composition/moment.trigger.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "rejects a final body with any hidden projector payload"
+      ],
+      "kills": [
+        {
+          "killer": "rejects a final body with any hidden projector payload",
+          "test": "P-MT3 MomentTriggerService rejects a final body with any hidden projector payload",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-mt3.json",
+      "id": "MT3-M4",
+      "files": [
+        "src/widgets/composition/moment.trigger.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "MT3-1 emits one strict web-push SCHEDULE from canonical typed facts"
+      ],
+      "kills": [
+        {
+          "killer": "MT3-1 emits one strict web-push SCHEDULE from canonical typed facts",
+          "test": "P-MT3 MomentTriggerService MT3-1 emits one strict web-push SCHEDULE from canonical typed facts",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-mt3.json",
+      "id": "MT3-M5",
+      "files": [
+        "src/widgets/composition/moment.trigger.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "refuses an expired artefact and a stale retained turn without emission"
+      ],
+      "kills": [
+        {
+          "killer": "refuses an expired artefact and a stale retained turn without emission",
+          "test": "P-MT3 MomentTriggerService refuses an expired artefact and a stale retained turn without emission",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-mt3.json",
+      "id": "MT3-M6",
+      "files": [
+        "src/widgets/composition/moment.trigger.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "MT3-3 same-tenant foreign principal"
+      ],
+      "kills": [
+        {
+          "killer": "MT3-3 same-tenant foreign principal",
+          "test": "P-MT3 — canonical K13 moment trigger [GW, PostgreSQL] MT3-3 same-tenant foreign principal cannot acquire another recipient's moment",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-mt3.json",
+      "id": "MT3-M7",
+      "files": [
+        "src/widgets/emission/intent-template.registry.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "MT3-1"
+      ],
+      "kills": [
+        {
+          "killer": "MT3-1",
+          "test": "P-MT3 — canonical K13 moment trigger [GW, PostgreSQL] MT3-1 mints one web-push widget, two typed intents and one render receipt",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T20:07:59.906Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 1,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

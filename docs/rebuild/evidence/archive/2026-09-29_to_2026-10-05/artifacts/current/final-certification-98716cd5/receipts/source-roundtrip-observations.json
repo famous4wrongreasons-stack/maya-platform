@@ -1,0 +1,2304 @@
+{
+  "contract": "maya.approved-source-carrier-observation/1",
+  "observations": [
+    {
+      "mode": "personal",
+      "createRescheduleCancel": true,
+      "refs": [
+        {
+          "kind": "SERVICE_SELECTOR",
+          "refCount": 2
+        },
+        {
+          "kind": "SCHEDULE",
+          "refCount": 3
+        },
+        {
+          "kind": "SCHEDULE",
+          "refCount": 3
+        }
+      ],
+      "counters": {
+        "activations": 8,
+        "stateChanges": 8,
+        "sentences": 0,
+        "submissions": 8
+      }
+    },
+    {
+      "mode": "journal",
+      "backendDetail": true,
+      "fullscreen": null,
+      "refs": [
+        {
+          "kind": "SCHEDULE",
+          "refCount": 3
+        }
+      ],
+      "counters": {
+        "activations": 2,
+        "stateChanges": 2,
+        "sentences": 0,
+        "submissions": 2
+      },
+      "roundTripPassed": true,
+      "parentReturn": {
+        "requestedParentWidgetId": "3b2b171e-641a-40cb-ad7d-26dda5a59e72",
+        "returnIntent": {
+          "rawJsonSha256": "c36b61274499d52a006767ac665ba00c6323dc8cec995d689cfbbb4f30da3885",
+          "value": {
+            "intent_ref": "i4",
+            "intent_token": "[redacted:sha256:0dcb590b320b8f43cf3fcd71a123001af9e22a8e17433a51655587ea1a7e8c92]",
+            "role": "secondary",
+            "label": "Return to journal",
+            "utterance_preview": "Return to journal",
+            "speech_aliases": [
+              "return to journal"
+            ],
+            "ordinal": 4,
+            "priority": 1,
+            "effect": "NAVIGATE",
+            "capability": null,
+            "handoff_capability_ref": null,
+            "target": {
+              "class": "w",
+              "ref": "3b2b171e-641a-40cb-ad7d-26dda5a59e72"
+            },
+            "input_schema": null,
+            "verification_floor": "ANONYMOUS",
+            "confirmation": null,
+            "authority_hint": {
+              "emphasis": "secondary",
+              "disabled_because": null
+            },
+            "enabled": {
+              "state": "KNOWN",
+              "value": true,
+              "label": "Return to journal",
+              "reason_code": null,
+              "fact_ref": null,
+              "as_of": null,
+              "evidence_refs": [],
+              "next_intent_ref": null
+            },
+            "expires_at": "2026-09-30T12:26:08.361Z",
+            "single_use": false
+          }
+        },
+        "resolvedParentWidgetId": "3b2b171e-641a-40cb-ad7d-26dda5a59e72",
+        "before": {
+          "fullscreen": {
+            "phase": "open",
+            "itemId": "d2",
+            "result": {
+              "kind": "SCHEDULE",
+              "tier": "RICH_INTERACTIVE",
+              "density": "SHEET",
+              "mode": "prose",
+              "roleHint": "grid",
+              "label": "Расписание · 1 мастер",
+              "description": "Все мастера: нет записей",
+              "nodes": [
+                {
+                  "t": "heading",
+                  "level": 2,
+                  "text": "Расписание · 1 мастер",
+                  "focusTarget": false
+                },
+                {
+                  "t": "block",
+                  "block": "paragraph",
+                  "roleHint": null,
+                  "label": null,
+                  "children": [
+                    {
+                      "t": "text",
+                      "text": "Все мастера: нет записей"
+                    }
+                  ]
+                },
+                {
+                  "t": "block",
+                  "block": "list",
+                  "roleHint": null,
+                  "label": null,
+                  "children": [
+                    {
+                      "t": "block",
+                      "block": "item",
+                      "roleHint": null,
+                      "label": null,
+                      "children": [
+                        {
+                          "t": "text",
+                          "text": "Все мастера: нет записей"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "t": "action",
+                  "ref": "intent:i1",
+                  "intent_ref": "i1",
+                  "name": "Open journal detail",
+                  "label": "Open journal detail",
+                  "role": "primary",
+                  "effect": "NAVIGATE",
+                  "enabled": "KNOWN",
+                  "explanation": null
+                },
+                {
+                  "t": "action",
+                  "ref": "intent:i2",
+                  "intent_ref": "i2",
+                  "name": "Refresh journal",
+                  "label": "Refresh journal",
+                  "role": "secondary",
+                  "effect": "REFINE",
+                  "enabled": "KNOWN",
+                  "explanation": null
+                },
+                {
+                  "t": "action",
+                  "ref": "intent:i3",
+                  "intent_ref": "i3",
+                  "name": "Dismiss",
+                  "label": "Dismiss",
+                  "role": "escape",
+                  "effect": "CONTROL",
+                  "enabled": "KNOWN",
+                  "explanation": null
+                },
+                {
+                  "t": "action",
+                  "ref": "intent:i4",
+                  "intent_ref": "i4",
+                  "name": "Return to journal",
+                  "label": "Return to journal",
+                  "role": "secondary",
+                  "effect": "NAVIGATE",
+                  "enabled": "KNOWN",
+                  "explanation": null
+                }
+              ],
+              "textEquivalent": {
+                "headline": "Расписание · 1 мастер",
+                "body": "Все мастера: нет записей",
+                "itemized": [
+                  "Все мастера: нет записей"
+                ],
+                "completeness_sentence": null,
+                "unknowns_sentence": null
+              },
+              "readingOrder": [
+                "intent:i1",
+                "intent:i2",
+                "intent:i3",
+                "intent:i4"
+              ],
+              "accessibleNames": {
+                "intent:i1": "Open journal detail",
+                "intent:i2": "Refresh journal",
+                "intent:i3": "Dismiss",
+                "intent:i4": "Return to journal"
+              },
+              "liveRegion": "off",
+              "announceIntervalMs": 0,
+              "focus": "none",
+              "motion": "standard",
+              "lifecycle": {
+                "state": "MINTED",
+                "input_lock": "none",
+                "on_expiry": "collapse_to_summary"
+              }
+            }
+          },
+          "timeline": [
+            {
+              "id": "w1",
+              "kind": "widget"
+            }
+          ]
+        },
+        "after": {
+          "fullscreen": null,
+          "timeline": [
+            {
+              "id": "w1",
+              "kind": "widget"
+            }
+          ]
+        }
+      },
+      "diagnostic": {
+        "initialEnvelope": {
+          "rawJsonSha256": "def7f307f3cbcc16764d47d538777deda9b96c1d1463fd670e0ebf3c309f8ced",
+          "value": {
+            "contract": "maya.widget.envelope/1",
+            "widget_id": "3b2b171e-641a-40cb-ad7d-26dda5a59e72",
+            "kind": "SCHEDULE",
+            "body_version": 1,
+            "tenant_id": "cmuo2k5kt001crnc9k3o1wad0",
+            "correlation": {
+              "run_id": null,
+              "turn_id": "0890ae64-c857-4e0a-81f5-71585a4f9dec",
+              "message_id": null,
+              "agent_id": null,
+              "parent_widget_id": "cmuo2k5pw001lrnc989987e0e",
+              "step_index": null,
+              "step_total": null,
+              "trace_id": "47e9b9b56bbe5219e3f45f25e6393f5c"
+            },
+            "source": {
+              "from": "capability_envelope",
+              "capability": "operations.journal.read",
+              "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+              "fact_index": 0
+            },
+            "origin": {
+              "trigger": "system_reply",
+              "emitter": "capability_read",
+              "moment_key": null,
+              "proactive_provenance": null
+            },
+            "authority": {
+              "verification_level": "SESSION_VERIFIED",
+              "pii_class": "none",
+              "data_scope": {
+                "masked_fields": []
+              }
+            },
+            "body": {
+              "range": {
+                "from": "2026-09-24T00:00:00",
+                "to": "2026-09-24T23:59:59"
+              },
+              "timezone": "Europe/Moscow",
+              "lanes": [
+                {
+                  "lane_id": "lane-1",
+                  "label": {
+                    "state": "KNOWN",
+                    "value": "Все мастера",
+                    "label": "Все мастера",
+                    "reason_code": null,
+                    "fact_ref": 0,
+                    "as_of": "2026-09-30T12:16:08.193Z",
+                    "evidence_refs": [
+                      {
+                        "ref": "h_be73924af50c1e3beffe3069048fec8c38ce3faf2c9076e0e1913141df0cf851",
+                        "class": "c9_invocation_handle",
+                        "dereferenceable_until": null
+                      }
+                    ],
+                    "next_intent_ref": null
+                  },
+                  "staff_ref": null
+                }
+              ],
+              "buckets": [
+                {
+                  "bucket_id": "bucket-day",
+                  "start": "2026-09-24T00:00:00",
+                  "end": "2026-09-24T23:59:59"
+                }
+              ],
+              "entries": [],
+              "gaps": [],
+              "detail_intent": "i1"
+            },
+            "intents": [
+              {
+                "intent_ref": "i1",
+                "intent_token": "[redacted:sha256:ef8643dbc9d363b79bf61ce90b923c7fe039224bf6aba061fd1b5278ca59b797]",
+                "role": "primary",
+                "label": "Open journal detail",
+                "utterance_preview": "Open journal detail",
+                "speech_aliases": [
+                  "open journal detail"
+                ],
+                "ordinal": 1,
+                "priority": 1,
+                "effect": "NAVIGATE",
+                "capability": null,
+                "handoff_capability_ref": null,
+                "target": {
+                  "class": "detail",
+                  "ref": "fs.calendar"
+                },
+                "input_schema": null,
+                "verification_floor": "ANONYMOUS",
+                "confirmation": null,
+                "authority_hint": {
+                  "emphasis": "secondary",
+                  "disabled_because": null
+                },
+                "enabled": {
+                  "state": "KNOWN",
+                  "value": true,
+                  "label": "Open journal detail",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "expires_at": "2026-09-30T12:26:08.193Z",
+                "single_use": false
+              },
+              {
+                "intent_ref": "i2",
+                "intent_token": "[redacted:sha256:555c69ac0f117a078680bed5827192e99eb44a768b854b28b2f597929e603d64]",
+                "role": "secondary",
+                "label": "Refresh journal",
+                "utterance_preview": "Refresh journal",
+                "speech_aliases": [
+                  "refresh journal"
+                ],
+                "ordinal": 2,
+                "priority": 1,
+                "effect": "REFINE",
+                "capability": {
+                  "space": "C9",
+                  "key": "operations.journal.read"
+                },
+                "handoff_capability_ref": null,
+                "target": null,
+                "input_schema": null,
+                "verification_floor": "SESSION_VERIFIED",
+                "confirmation": null,
+                "authority_hint": {
+                  "emphasis": "secondary",
+                  "disabled_because": null
+                },
+                "enabled": {
+                  "state": "KNOWN",
+                  "value": true,
+                  "label": "Refresh journal",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "expires_at": "2026-09-30T12:26:08.193Z",
+                "single_use": false
+              },
+              {
+                "intent_ref": "i3",
+                "intent_token": "[redacted:sha256:493beb10ebc59f0f21786adb8264e437ad12ba7da29023144588561c179822a9]",
+                "role": "escape",
+                "label": "Dismiss",
+                "utterance_preview": "Dismiss",
+                "speech_aliases": [
+                  "dismiss",
+                  "close"
+                ],
+                "ordinal": 3,
+                "priority": 0,
+                "effect": "CONTROL",
+                "capability": {
+                  "space": "CONTROL",
+                  "key": "control.widget.dismiss"
+                },
+                "handoff_capability_ref": null,
+                "target": null,
+                "input_schema": null,
+                "verification_floor": "ANONYMOUS",
+                "confirmation": null,
+                "authority_hint": {
+                  "emphasis": "muted",
+                  "disabled_because": null
+                },
+                "enabled": {
+                  "state": "KNOWN",
+                  "value": true,
+                  "label": "Dismiss",
+                  "reason_code": null,
+                  "fact_ref": null,
+                  "as_of": null,
+                  "evidence_refs": [],
+                  "next_intent_ref": null
+                },
+                "expires_at": "2026-09-30T12:26:08.193Z",
+                "single_use": true
+              }
+            ],
+            "provenance": {
+              "source_capability": "operations.journal.read",
+              "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+              "projector_id": "operations.journal.read@1",
+              "source_kind": "capability_read",
+              "facts_used": [
+                {
+                  "capability": "operations.journal.read",
+                  "status": "measured",
+                  "as_of": "2026-09-30T12:16:08.193Z",
+                  "evidence_refs": [
+                    "h_be73924af50c1e3beffe3069048fec8c38ce3faf2c9076e0e1913141df0cf851"
+                  ],
+                  "completeness": {
+                    "status": "PARTIAL",
+                    "requestedScopeHash": "be73924af50c1e3beffe3069048fec8c38ce3faf2c9076e0e1913141df0cf851",
+                    "returnedCount": 1,
+                    "totalCount": null,
+                    "hasMore": true,
+                    "cursorRef": null,
+                    "truncated": false,
+                    "reasonCodes": [
+                      "NOT_COLLECTED"
+                    ]
+                  }
+                }
+              ],
+              "facts_origin": [
+                "synthesised"
+              ],
+              "facts_digest": "92eff8de36b3bc5a4ed165b18d242a5fb0de346813a78d6ad7c0987821d2f305",
+              "completeness": {
+                "status": "PARTIAL",
+                "requestedScopeHash": "be73924af50c1e3beffe3069048fec8c38ce3faf2c9076e0e1913141df0cf851",
+                "returnedCount": 1,
+                "totalCount": null,
+                "hasMore": true,
+                "cursorRef": null,
+                "truncated": false,
+                "reasonCodes": [
+                  "NOT_COLLECTED"
+                ]
+              },
+              "completeness_envelope_hash": "9a0ea6fc68c92661dbdfb6f244294baef3e16e1f11718745e20f4e6b359e4ada",
+              "evidence_refs": [
+                {
+                  "ref": "h_be73924af50c1e3beffe3069048fec8c38ce3faf2c9076e0e1913141df0cf851",
+                  "class": "c9_invocation_handle",
+                  "dereferenceable_until": null
+                }
+              ],
+              "confidence": "medium",
+              "authorship": {
+                "body_values": "server_formatter",
+                "body_phrases": "server_catalogue",
+                "narrative": "none",
+                "narrative_template_id": null,
+                "narrative_template_version": null,
+                "model_contribution": "none",
+                "model_contribution_ref": null
+              }
+            },
+            "limitations": [],
+            "lifecycle": {
+              "freshness_class": "live",
+              "state": "MINTED",
+              "issued_at": "2026-09-30T12:16:08.193Z",
+              "expires_at": "2026-09-30T12:26:08.193Z",
+              "flow_ttl_s": null,
+              "input_lock": "none",
+              "on_expiry": "collapse_to_summary",
+              "supersedes_widget_id": null,
+              "superseded_by_widget_id": null,
+              "delivery": {
+                "delivery_state": "live",
+                "answered_at": null,
+                "answering_channel": null,
+                "action_receipt_ref": null
+              },
+              "historised_form": "summary_bubble",
+              "timeline_placement": "chronological",
+              "dedupe_key": "SCHEDULE:3b2b171e-641a-40cb-ad7d-26dda5a59e72",
+              "retention_sec": 600,
+              "delivery_channel": "pwa"
+            },
+            "presentation": {
+              "presentation_mode": "owner",
+              "density": "CARD",
+              "text_equivalent": {
+                "headline": "Расписание · 1 мастер",
+                "body": "Все мастера: нет записей",
+                "itemized": [
+                  "Все мастера: нет записей"
+                ],
+                "completeness_sentence": null,
+                "unknowns_sentence": null
+              },
+              "speech": null,
+              "a11y": {
+                "role_hint": "grid",
+                "label": "Расписание · 1 мастер",
+                "description": "Все мастера: нет записей",
+                "reading_order": [
+                  {
+                    "k": "intent",
+                    "id": "i1"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i2"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i3"
+                  }
+                ],
+                "live_region": "off",
+                "accessible_names": {
+                  "intent:i1": "Open journal detail",
+                  "intent:i2": "Refresh journal",
+                  "intent:i3": "Dismiss"
+                }
+              },
+              "fullscreen_detail": {
+                "route_key": "fs.calendar",
+                "reason": "exceeds_chat_density"
+              }
+            },
+            "render": {
+              "contract": "maya.render.receipt/1",
+              "profile_id": "pwa/1",
+              "profile_version": 1,
+              "render_tier": "RICH_INTERACTIVE",
+              "intents_minted": 3,
+              "intents_emitted": 3,
+              "intents_withheld": [],
+              "body_reductions": [],
+              "text_equivalent_is_canonical": false,
+              "escalation": null,
+              "degraded_at": "2026-09-30T12:16:08.193Z"
+            },
+            "integrity": {
+              "body_hash": "500c6375bd39049b312e3777e54f1ceec4e8629c897c99c7e157e490a0ed3d1b",
+              "cell_index_digest": "7b4184adb82d5acf632b900b10b2de9949fb961176fc2fa15ae63f4512f84a08",
+              "envelope_seal": "22af13df6c4cc240c20f8b41e65ceed0f81ad81cce2aaa98946c632021e569b6",
+              "seal_key_version": 1,
+              "principal_proof_hash": "825415eea339ecb07c21eb942d145b28589f4e32fee8153e8671d7ff78cd0cb5",
+              "approval_echo": null,
+              "policy_context_echo": null
+            }
+          }
+        },
+        "exchanges": [
+          {
+            "status": 200,
+            "request": {
+              "rawJsonSha256": "5df43634325447bb9fddbebcb9a93a8e2b79cbc91ce9a5ef761f84bae09e9d83",
+              "value": {
+                "contract": "maya.widget.intent.submission/1",
+                "widget_id": "3b2b171e-641a-40cb-ad7d-26dda5a59e72",
+                "intent_token": "[redacted:sha256:ef8643dbc9d363b79bf61ce90b923c7fe039224bf6aba061fd1b5278ca59b797]",
+                "inputs": null,
+                "client_nonce": "592fdfb4-bd81-4abb-827e-b4f420f51999",
+                "profile_id": "pwa/1"
+              }
+            },
+            "response": {
+              "rawJsonSha256": "a62bfcad589c283b2b5a7f3ea217839d49b70787645ba2ff17e49dfaf339e610",
+              "value": {
+                "contract": "maya.widget.intent/1",
+                "outcome": "terminate",
+                "code": null,
+                "reason_text": null,
+                "stopped_at_gate": "13",
+                "gates_run": 14,
+                "gates_total": 15,
+                "next_envelope": {
+                  "contract": "maya.widget.envelope/1",
+                  "widget_id": "9b5ed62e-a9f2-4470-9537-2f8f7c9a267f",
+                  "kind": "SCHEDULE",
+                  "body_version": 1,
+                  "tenant_id": "cmuo2k5kt001crnc9k3o1wad0",
+                  "correlation": {
+                    "run_id": null,
+                    "turn_id": "0890ae64-c857-4e0a-81f5-71585a4f9dec",
+                    "message_id": null,
+                    "agent_id": null,
+                    "parent_widget_id": "3b2b171e-641a-40cb-ad7d-26dda5a59e72",
+                    "step_index": null,
+                    "step_total": null,
+                    "trace_id": "f3a3c84e3e0c9e3312f0b9e191ec8088"
+                  },
+                  "source": {
+                    "from": "capability_envelope",
+                    "capability": "operations.journal.read",
+                    "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                    "fact_index": 0
+                  },
+                  "origin": {
+                    "trigger": "system_reply",
+                    "emitter": "capability_read",
+                    "moment_key": null,
+                    "proactive_provenance": null
+                  },
+                  "authority": {
+                    "verification_level": "SESSION_VERIFIED",
+                    "pii_class": "none",
+                    "data_scope": {
+                      "masked_fields": []
+                    }
+                  },
+                  "body": {
+                    "range": {
+                      "from": "2026-09-24T00:00:00",
+                      "to": "2026-09-24T23:59:59"
+                    },
+                    "timezone": "Europe/Moscow",
+                    "lanes": [
+                      {
+                        "lane_id": "lane-1",
+                        "label": {
+                          "state": "KNOWN",
+                          "value": "Все мастера",
+                          "label": "Все мастера",
+                          "reason_code": null,
+                          "fact_ref": 0,
+                          "as_of": "2026-09-30T12:16:08.395Z",
+                          "evidence_refs": [],
+                          "next_intent_ref": null
+                        },
+                        "staff_ref": null
+                      }
+                    ],
+                    "buckets": [
+                      {
+                        "bucket_id": "bucket-day",
+                        "start": "2026-09-24T00:00:00",
+                        "end": "2026-09-24T23:59:59"
+                      }
+                    ],
+                    "entries": [],
+                    "gaps": [],
+                    "detail_intent": "i4"
+                  },
+                  "intents": [
+                    {
+                      "intent_ref": "i1",
+                      "intent_token": "[redacted:sha256:3dba0f277adfd2ec0ed969a72900da41c1a8ed38c0af4f3526a73ea2f78b49ff]",
+                      "role": "primary",
+                      "label": "Open journal detail",
+                      "utterance_preview": "Open journal detail",
+                      "speech_aliases": [
+                        "open journal detail"
+                      ],
+                      "ordinal": 1,
+                      "priority": 1,
+                      "effect": "NAVIGATE",
+                      "capability": null,
+                      "handoff_capability_ref": null,
+                      "target": {
+                        "class": "detail",
+                        "ref": "fs.calendar"
+                      },
+                      "input_schema": null,
+                      "verification_floor": "ANONYMOUS",
+                      "confirmation": null,
+                      "authority_hint": {
+                        "emphasis": "secondary",
+                        "disabled_because": null
+                      },
+                      "enabled": {
+                        "state": "KNOWN",
+                        "value": true,
+                        "label": "Open journal detail",
+                        "reason_code": null,
+                        "fact_ref": null,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "expires_at": "2026-09-30T12:26:08.361Z",
+                      "single_use": false
+                    },
+                    {
+                      "intent_ref": "i2",
+                      "intent_token": "[redacted:sha256:aabf79b52e8d1e94e77c65bd7be63bb348a767e618514de5662e858d8680fc05]",
+                      "role": "secondary",
+                      "label": "Refresh journal",
+                      "utterance_preview": "Refresh journal",
+                      "speech_aliases": [
+                        "refresh journal"
+                      ],
+                      "ordinal": 2,
+                      "priority": 1,
+                      "effect": "REFINE",
+                      "capability": {
+                        "space": "C9",
+                        "key": "operations.journal.read"
+                      },
+                      "handoff_capability_ref": null,
+                      "target": null,
+                      "input_schema": null,
+                      "verification_floor": "SESSION_VERIFIED",
+                      "confirmation": null,
+                      "authority_hint": {
+                        "emphasis": "secondary",
+                        "disabled_because": null
+                      },
+                      "enabled": {
+                        "state": "KNOWN",
+                        "value": true,
+                        "label": "Refresh journal",
+                        "reason_code": null,
+                        "fact_ref": null,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "expires_at": "2026-09-30T12:26:08.361Z",
+                      "single_use": false
+                    },
+                    {
+                      "intent_ref": "i3",
+                      "intent_token": "[redacted:sha256:05123e52fe0f310d2996754235825a440baaec03565844857bfb93c2b04f0d11]",
+                      "role": "escape",
+                      "label": "Dismiss",
+                      "utterance_preview": "Dismiss",
+                      "speech_aliases": [
+                        "dismiss",
+                        "close"
+                      ],
+                      "ordinal": 3,
+                      "priority": 0,
+                      "effect": "CONTROL",
+                      "capability": {
+                        "space": "CONTROL",
+                        "key": "control.widget.dismiss"
+                      },
+                      "handoff_capability_ref": null,
+                      "target": null,
+                      "input_schema": null,
+                      "verification_floor": "ANONYMOUS",
+                      "confirmation": null,
+                      "authority_hint": {
+                        "emphasis": "muted",
+                        "disabled_because": null
+                      },
+                      "enabled": {
+                        "state": "KNOWN",
+                        "value": true,
+                        "label": "Dismiss",
+                        "reason_code": null,
+                        "fact_ref": null,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "expires_at": "2026-09-30T12:26:08.361Z",
+                      "single_use": true
+                    },
+                    {
+                      "intent_ref": "i4",
+                      "intent_token": "[redacted:sha256:0dcb590b320b8f43cf3fcd71a123001af9e22a8e17433a51655587ea1a7e8c92]",
+                      "role": "secondary",
+                      "label": "Return to journal",
+                      "utterance_preview": "Return to journal",
+                      "speech_aliases": [
+                        "return to journal"
+                      ],
+                      "ordinal": 4,
+                      "priority": 1,
+                      "effect": "NAVIGATE",
+                      "capability": null,
+                      "handoff_capability_ref": null,
+                      "target": {
+                        "class": "w",
+                        "ref": "3b2b171e-641a-40cb-ad7d-26dda5a59e72"
+                      },
+                      "input_schema": null,
+                      "verification_floor": "ANONYMOUS",
+                      "confirmation": null,
+                      "authority_hint": {
+                        "emphasis": "secondary",
+                        "disabled_because": null
+                      },
+                      "enabled": {
+                        "state": "KNOWN",
+                        "value": true,
+                        "label": "Return to journal",
+                        "reason_code": null,
+                        "fact_ref": null,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "expires_at": "2026-09-30T12:26:08.361Z",
+                      "single_use": false
+                    }
+                  ],
+                  "provenance": {
+                    "source_capability": "operations.journal.read",
+                    "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                    "projector_id": "operations.journal.read@1",
+                    "source_kind": "capability_read",
+                    "facts_used": [
+                      {
+                        "capability": "operations.journal.read",
+                        "status": "measured",
+                        "as_of": "2026-09-30T12:16:08.395Z",
+                        "evidence_refs": [],
+                        "completeness": {
+                          "status": "PARTIAL",
+                          "requestedScopeHash": "9d95e2971948ed31fb0cd762c15dea6434b13f1e4923ae08f16179df28bde169",
+                          "returnedCount": 1,
+                          "totalCount": null,
+                          "hasMore": true,
+                          "cursorRef": null,
+                          "truncated": false,
+                          "reasonCodes": [
+                            "NOT_COLLECTED"
+                          ]
+                        }
+                      }
+                    ],
+                    "facts_origin": [
+                      "synthesised"
+                    ],
+                    "facts_digest": "364f143d8d3fc9ab3ae97417209636df370bccb10dfa061115961421bfe23949",
+                    "completeness": {
+                      "status": "PARTIAL",
+                      "requestedScopeHash": "9d95e2971948ed31fb0cd762c15dea6434b13f1e4923ae08f16179df28bde169",
+                      "returnedCount": 1,
+                      "totalCount": null,
+                      "hasMore": true,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": [
+                        "NOT_COLLECTED"
+                      ]
+                    },
+                    "completeness_envelope_hash": "a830f8e88810ab46cdd09fecd624e5e9952b55b42de7f27ad3de0f2114c69c84",
+                    "evidence_refs": [],
+                    "confidence": "medium",
+                    "authorship": {
+                      "body_values": "server_formatter",
+                      "body_phrases": "server_catalogue",
+                      "narrative": "none",
+                      "narrative_template_id": null,
+                      "narrative_template_version": null,
+                      "model_contribution": "none",
+                      "model_contribution_ref": null
+                    }
+                  },
+                  "limitations": [],
+                  "lifecycle": {
+                    "freshness_class": "live",
+                    "state": "MINTED",
+                    "issued_at": "2026-09-30T12:16:08.361Z",
+                    "expires_at": "2026-09-30T12:26:08.361Z",
+                    "flow_ttl_s": null,
+                    "input_lock": "none",
+                    "on_expiry": "collapse_to_summary",
+                    "supersedes_widget_id": null,
+                    "superseded_by_widget_id": null,
+                    "delivery": {
+                      "delivery_state": "live",
+                      "answered_at": null,
+                      "answering_channel": null,
+                      "action_receipt_ref": null
+                    },
+                    "historised_form": "summary_bubble",
+                    "timeline_placement": "chronological",
+                    "dedupe_key": "SCHEDULE:9b5ed62e-a9f2-4470-9537-2f8f7c9a267f",
+                    "retention_sec": 600,
+                    "delivery_channel": "pwa"
+                  },
+                  "presentation": {
+                    "presentation_mode": "owner",
+                    "density": "CARD",
+                    "text_equivalent": {
+                      "headline": "Расписание · 1 мастер",
+                      "body": "Все мастера: нет записей",
+                      "itemized": [
+                        "Все мастера: нет записей"
+                      ],
+                      "completeness_sentence": null,
+                      "unknowns_sentence": null
+                    },
+                    "speech": null,
+                    "a11y": {
+                      "role_hint": "grid",
+                      "label": "Расписание · 1 мастер",
+                      "description": "Все мастера: нет записей",
+                      "reading_order": [
+                        {
+                          "k": "intent",
+                          "id": "i1"
+                        },
+                        {
+                          "k": "intent",
+                          "id": "i2"
+                        },
+                        {
+                          "k": "intent",
+                          "id": "i3"
+                        },
+                        {
+                          "k": "intent",
+                          "id": "i4"
+                        }
+                      ],
+                      "live_region": "off",
+                      "accessible_names": {
+                        "intent:i1": "Open journal detail",
+                        "intent:i2": "Refresh journal",
+                        "intent:i3": "Dismiss",
+                        "intent:i4": "Return to journal"
+                      }
+                    },
+                    "fullscreen_detail": {
+                      "route_key": "fs.calendar",
+                      "reason": "exceeds_chat_density"
+                    }
+                  },
+                  "render": {
+                    "contract": "maya.render.receipt/1",
+                    "profile_id": "pwa/1",
+                    "profile_version": 1,
+                    "render_tier": "RICH_INTERACTIVE",
+                    "intents_minted": 4,
+                    "intents_emitted": 4,
+                    "intents_withheld": [],
+                    "body_reductions": [],
+                    "text_equivalent_is_canonical": false,
+                    "escalation": null,
+                    "degraded_at": "2026-09-30T12:16:08.361Z"
+                  },
+                  "integrity": {
+                    "body_hash": "268cb3e4d6fca3b98d6fe684f31840663437adbf70604bc003b17e387a2c04b4",
+                    "cell_index_digest": "3ffc16131b43485870d5e4010e1ed443a1023e68b7356847d06518765998151e",
+                    "envelope_seal": "1df1dc1be9ccb6dfdeb3ab7bc8f5f35532e75d676ac29f3e69c644e9aae85acc",
+                    "seal_key_version": 1,
+                    "principal_proof_hash": "825415eea339ecb07c21eb942d145b28589f4e32fee8153e8671d7ff78cd0cb5",
+                    "approval_echo": null,
+                    "policy_context_echo": null
+                  }
+                },
+                "resolved_widget": null,
+                "owner_decision": null,
+                "receipt_outcome": "ACCEPTED"
+              }
+            },
+            "projection": {
+              "rawJsonSha256": "5636c5c0c4beb962068937912b218bad5e848ef70d4bd46a451caa64a44c44e2",
+              "value": {
+                "outcome": "terminate",
+                "code": null,
+                "next_envelope": {
+                  "contract": "maya.widget.envelope/1",
+                  "widget_id": "9b5ed62e-a9f2-4470-9537-2f8f7c9a267f",
+                  "kind": "SCHEDULE",
+                  "body_version": 1,
+                  "tenant_id": "cmuo2k5kt001crnc9k3o1wad0",
+                  "correlation": {
+                    "run_id": null,
+                    "turn_id": "0890ae64-c857-4e0a-81f5-71585a4f9dec",
+                    "message_id": null,
+                    "agent_id": null,
+                    "parent_widget_id": "3b2b171e-641a-40cb-ad7d-26dda5a59e72",
+                    "step_index": null,
+                    "step_total": null,
+                    "trace_id": "f3a3c84e3e0c9e3312f0b9e191ec8088"
+                  },
+                  "source": {
+                    "from": "capability_envelope",
+                    "capability": "operations.journal.read",
+                    "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                    "fact_index": 0
+                  },
+                  "origin": {
+                    "trigger": "system_reply",
+                    "emitter": "capability_read",
+                    "moment_key": null,
+                    "proactive_provenance": null
+                  },
+                  "authority": {
+                    "verification_level": "SESSION_VERIFIED",
+                    "pii_class": "none",
+                    "data_scope": {
+                      "masked_fields": []
+                    }
+                  },
+                  "body": {
+                    "range": {
+                      "from": "2026-09-24T00:00:00",
+                      "to": "2026-09-24T23:59:59"
+                    },
+                    "timezone": "Europe/Moscow",
+                    "lanes": [
+                      {
+                        "lane_id": "lane-1",
+                        "label": {
+                          "state": "KNOWN",
+                          "value": "Все мастера",
+                          "label": "Все мастера",
+                          "reason_code": null,
+                          "fact_ref": 0,
+                          "as_of": "2026-09-30T12:16:08.395Z",
+                          "evidence_refs": [],
+                          "next_intent_ref": null
+                        },
+                        "staff_ref": null
+                      }
+                    ],
+                    "buckets": [
+                      {
+                        "bucket_id": "bucket-day",
+                        "start": "2026-09-24T00:00:00",
+                        "end": "2026-09-24T23:59:59"
+                      }
+                    ],
+                    "entries": [],
+                    "gaps": [],
+                    "detail_intent": "i4"
+                  },
+                  "intents": [
+                    {
+                      "intent_ref": "i1",
+                      "intent_token": "[redacted:sha256:3dba0f277adfd2ec0ed969a72900da41c1a8ed38c0af4f3526a73ea2f78b49ff]",
+                      "role": "primary",
+                      "label": "Open journal detail",
+                      "utterance_preview": "Open journal detail",
+                      "speech_aliases": [
+                        "open journal detail"
+                      ],
+                      "ordinal": 1,
+                      "priority": 1,
+                      "effect": "NAVIGATE",
+                      "capability": null,
+                      "handoff_capability_ref": null,
+                      "target": {
+                        "class": "detail",
+                        "ref": "fs.calendar"
+                      },
+                      "input_schema": null,
+                      "verification_floor": "ANONYMOUS",
+                      "confirmation": null,
+                      "authority_hint": {
+                        "emphasis": "secondary",
+                        "disabled_because": null
+                      },
+                      "enabled": {
+                        "state": "KNOWN",
+                        "value": true,
+                        "label": "Open journal detail",
+                        "reason_code": null,
+                        "fact_ref": null,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "expires_at": "2026-09-30T12:26:08.361Z",
+                      "single_use": false
+                    },
+                    {
+                      "intent_ref": "i2",
+                      "intent_token": "[redacted:sha256:aabf79b52e8d1e94e77c65bd7be63bb348a767e618514de5662e858d8680fc05]",
+                      "role": "secondary",
+                      "label": "Refresh journal",
+                      "utterance_preview": "Refresh journal",
+                      "speech_aliases": [
+                        "refresh journal"
+                      ],
+                      "ordinal": 2,
+                      "priority": 1,
+                      "effect": "REFINE",
+                      "capability": {
+                        "space": "C9",
+                        "key": "operations.journal.read"
+                      },
+                      "handoff_capability_ref": null,
+                      "target": null,
+                      "input_schema": null,
+                      "verification_floor": "SESSION_VERIFIED",
+                      "confirmation": null,
+                      "authority_hint": {
+                        "emphasis": "secondary",
+                        "disabled_because": null
+                      },
+                      "enabled": {
+                        "state": "KNOWN",
+                        "value": true,
+                        "label": "Refresh journal",
+                        "reason_code": null,
+                        "fact_ref": null,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "expires_at": "2026-09-30T12:26:08.361Z",
+                      "single_use": false
+                    },
+                    {
+                      "intent_ref": "i3",
+                      "intent_token": "[redacted:sha256:05123e52fe0f310d2996754235825a440baaec03565844857bfb93c2b04f0d11]",
+                      "role": "escape",
+                      "label": "Dismiss",
+                      "utterance_preview": "Dismiss",
+                      "speech_aliases": [
+                        "dismiss",
+                        "close"
+                      ],
+                      "ordinal": 3,
+                      "priority": 0,
+                      "effect": "CONTROL",
+                      "capability": {
+                        "space": "CONTROL",
+                        "key": "control.widget.dismiss"
+                      },
+                      "handoff_capability_ref": null,
+                      "target": null,
+                      "input_schema": null,
+                      "verification_floor": "ANONYMOUS",
+                      "confirmation": null,
+                      "authority_hint": {
+                        "emphasis": "muted",
+                        "disabled_because": null
+                      },
+                      "enabled": {
+                        "state": "KNOWN",
+                        "value": true,
+                        "label": "Dismiss",
+                        "reason_code": null,
+                        "fact_ref": null,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "expires_at": "2026-09-30T12:26:08.361Z",
+                      "single_use": true
+                    },
+                    {
+                      "intent_ref": "i4",
+                      "intent_token": "[redacted:sha256:0dcb590b320b8f43cf3fcd71a123001af9e22a8e17433a51655587ea1a7e8c92]",
+                      "role": "secondary",
+                      "label": "Return to journal",
+                      "utterance_preview": "Return to journal",
+                      "speech_aliases": [
+                        "return to journal"
+                      ],
+                      "ordinal": 4,
+                      "priority": 1,
+                      "effect": "NAVIGATE",
+                      "capability": null,
+                      "handoff_capability_ref": null,
+                      "target": {
+                        "class": "w",
+                        "ref": "3b2b171e-641a-40cb-ad7d-26dda5a59e72"
+                      },
+                      "input_schema": null,
+                      "verification_floor": "ANONYMOUS",
+                      "confirmation": null,
+                      "authority_hint": {
+                        "emphasis": "secondary",
+                        "disabled_because": null
+                      },
+                      "enabled": {
+                        "state": "KNOWN",
+                        "value": true,
+                        "label": "Return to journal",
+                        "reason_code": null,
+                        "fact_ref": null,
+                        "as_of": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "expires_at": "2026-09-30T12:26:08.361Z",
+                      "single_use": false
+                    }
+                  ],
+                  "provenance": {
+                    "source_capability": "operations.journal.read",
+                    "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                    "projector_id": "operations.journal.read@1",
+                    "source_kind": "capability_read",
+                    "facts_used": [
+                      {
+                        "capability": "operations.journal.read",
+                        "status": "measured",
+                        "as_of": "2026-09-30T12:16:08.395Z",
+                        "evidence_refs": [],
+                        "completeness": {
+                          "status": "PARTIAL",
+                          "requestedScopeHash": "9d95e2971948ed31fb0cd762c15dea6434b13f1e4923ae08f16179df28bde169",
+                          "returnedCount": 1,
+                          "totalCount": null,
+                          "hasMore": true,
+                          "cursorRef": null,
+                          "truncated": false,
+                          "reasonCodes": [
+                            "NOT_COLLECTED"
+                          ]
+                        }
+                      }
+                    ],
+                    "facts_origin": [
+                      "synthesised"
+                    ],
+                    "facts_digest": "364f143d8d3fc9ab3ae97417209636df370bccb10dfa061115961421bfe23949",
+                    "completeness": {
+                      "status": "PARTIAL",
+                      "requestedScopeHash": "9d95e2971948ed31fb0cd762c15dea6434b13f1e4923ae08f16179df28bde169",
+                      "returnedCount": 1,
+                      "totalCount": null,
+                      "hasMore": true,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "reasonCodes": [
+                        "NOT_COLLECTED"
+                      ]
+                    },
+                    "completeness_envelope_hash": "a830f8e88810ab46cdd09fecd624e5e9952b55b42de7f27ad3de0f2114c69c84",
+                    "evidence_refs": [],
+                    "confidence": "medium",
+                    "authorship": {
+                      "body_values": "server_formatter",
+                      "body_phrases": "server_catalogue",
+                      "narrative": "none",
+                      "narrative_template_id": null,
+                      "narrative_template_version": null,
+                      "model_contribution": "none",
+                      "model_contribution_ref": null
+                    }
+                  },
+                  "limitations": [],
+                  "lifecycle": {
+                    "freshness_class": "live",
+                    "state": "MINTED",
+                    "issued_at": "2026-09-30T12:16:08.361Z",
+                    "expires_at": "2026-09-30T12:26:08.361Z",
+                    "flow_ttl_s": null,
+                    "input_lock": "none",
+                    "on_expiry": "collapse_to_summary",
+                    "supersedes_widget_id": null,
+                    "superseded_by_widget_id": null,
+                    "delivery": {
+                      "delivery_state": "live",
+                      "answered_at": null,
+                      "answering_channel": null,
+                      "action_receipt_ref": null
+                    },
+                    "historised_form": "summary_bubble",
+                    "timeline_placement": "chronological",
+                    "dedupe_key": "SCHEDULE:9b5ed62e-a9f2-4470-9537-2f8f7c9a267f",
+                    "retention_sec": 600,
+                    "delivery_channel": "pwa"
+                  },
+                  "presentation": {
+                    "presentation_mode": "owner",
+                    "density": "CARD",
+                    "text_equivalent": {
+                      "headline": "Расписание · 1 мастер",
+                      "body": "Все мастера: нет записей",
+                      "itemized": [
+                        "Все мастера: нет записей"
+                      ],
+                      "completeness_sentence": null,
+                      "unknowns_sentence": null
+                    },
+                    "speech": null,
+                    "a11y": {
+                      "role_hint": "grid",
+                      "label": "Расписание · 1 мастер",
+                      "description": "Все мастера: нет записей",
+                      "reading_order": [
+                        {
+                          "k": "intent",
+                          "id": "i1"
+                        },
+                        {
+                          "k": "intent",
+                          "id": "i2"
+                        },
+                        {
+                          "k": "intent",
+                          "id": "i3"
+                        },
+                        {
+                          "k": "intent",
+                          "id": "i4"
+                        }
+                      ],
+                      "live_region": "off",
+                      "accessible_names": {
+                        "intent:i1": "Open journal detail",
+                        "intent:i2": "Refresh journal",
+                        "intent:i3": "Dismiss",
+                        "intent:i4": "Return to journal"
+                      }
+                    },
+                    "fullscreen_detail": {
+                      "route_key": "fs.calendar",
+                      "reason": "exceeds_chat_density"
+                    }
+                  },
+                  "render": {
+                    "contract": "maya.render.receipt/1",
+                    "profile_id": "pwa/1",
+                    "profile_version": 1,
+                    "render_tier": "RICH_INTERACTIVE",
+                    "intents_minted": 4,
+                    "intents_emitted": 4,
+                    "intents_withheld": [],
+                    "body_reductions": [],
+                    "text_equivalent_is_canonical": false,
+                    "escalation": null,
+                    "degraded_at": "2026-09-30T12:16:08.361Z"
+                  },
+                  "integrity": {
+                    "body_hash": "268cb3e4d6fca3b98d6fe684f31840663437adbf70604bc003b17e387a2c04b4",
+                    "cell_index_digest": "3ffc16131b43485870d5e4010e1ed443a1023e68b7356847d06518765998151e",
+                    "envelope_seal": "1df1dc1be9ccb6dfdeb3ab7bc8f5f35532e75d676ac29f3e69c644e9aae85acc",
+                    "seal_key_version": 1,
+                    "principal_proof_hash": "825415eea339ecb07c21eb942d145b28589f4e32fee8153e8671d7ff78cd0cb5",
+                    "approval_echo": null,
+                    "policy_context_echo": null
+                  }
+                },
+                "resolved_widget": null,
+                "receipt_outcome": "ACCEPTED"
+              }
+            }
+          },
+          {
+            "status": 200,
+            "request": {
+              "rawJsonSha256": "e4f7a8746b7960feb90b90d6f6a4e7d4c2147c9bf2c8b68d75d0dedce350f176",
+              "value": {
+                "contract": "maya.widget.intent.submission/1",
+                "widget_id": "9b5ed62e-a9f2-4470-9537-2f8f7c9a267f",
+                "intent_token": "[redacted:sha256:0dcb590b320b8f43cf3fcd71a123001af9e22a8e17433a51655587ea1a7e8c92]",
+                "inputs": null,
+                "client_nonce": "1aeea04d-2678-4b0f-a8e6-cf767d1379da",
+                "profile_id": "pwa/1"
+              }
+            },
+            "response": {
+              "rawJsonSha256": "e29df6b345f3300cd3b0bb42cee760d432b9981ac5695327b500e1a5bc1926e5",
+              "value": {
+                "contract": "maya.widget.intent/1",
+                "outcome": "terminate",
+                "code": null,
+                "reason_text": null,
+                "stopped_at_gate": "13",
+                "gates_run": 14,
+                "gates_total": 15,
+                "next_envelope": null,
+                "resolved_widget": {
+                  "body": {
+                    "gaps": [],
+                    "lanes": [
+                      {
+                        "label": {
+                          "as_of": "2026-09-30T12:16:08.193Z",
+                          "label": "Все мастера",
+                          "state": "KNOWN",
+                          "value": "Все мастера",
+                          "fact_ref": 0,
+                          "reason_code": null,
+                          "evidence_refs": [
+                            {
+                              "ref": "h_be73924af50c1e3beffe3069048fec8c38ce3faf2c9076e0e1913141df0cf851",
+                              "class": "c9_invocation_handle",
+                              "dereferenceable_until": null
+                            }
+                          ],
+                          "next_intent_ref": null
+                        },
+                        "lane_id": "lane-1",
+                        "staff_ref": null
+                      }
+                    ],
+                    "range": {
+                      "to": "2026-09-24T23:59:59",
+                      "from": "2026-09-24T00:00:00"
+                    },
+                    "buckets": [
+                      {
+                        "end": "2026-09-24T23:59:59",
+                        "start": "2026-09-24T00:00:00",
+                        "bucket_id": "bucket-day"
+                      }
+                    ],
+                    "entries": [],
+                    "timezone": "Europe/Moscow",
+                    "detail_intent": "i1"
+                  },
+                  "kind": "SCHEDULE",
+                  "origin": {
+                    "emitter": "capability_read",
+                    "trigger": "system_reply",
+                    "moment_key": null,
+                    "proactive_provenance": null
+                  },
+                  "render": {
+                    "contract": "maya.render.receipt/1",
+                    "escalation": null,
+                    "profile_id": "pwa/1",
+                    "degraded_at": "2026-09-30T12:16:08.193Z",
+                    "render_tier": "RICH_INTERACTIVE",
+                    "intents_minted": 3,
+                    "body_reductions": [],
+                    "intents_emitted": 3,
+                    "profile_version": 1,
+                    "intents_withheld": [],
+                    "text_equivalent_is_canonical": false
+                  },
+                  "source": {
+                    "from": "capability_envelope",
+                    "capability": "operations.journal.read",
+                    "fact_index": 0,
+                    "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63"
+                  },
+                  "intents": [
+                    {
+                      "role": "primary",
+                      "label": "Open journal detail",
+                      "effect": "NAVIGATE",
+                      "target": {
+                        "ref": "fs.calendar",
+                        "class": "detail"
+                      },
+                      "enabled": {
+                        "as_of": null,
+                        "label": "Open journal detail",
+                        "state": "KNOWN",
+                        "value": true,
+                        "fact_ref": null,
+                        "reason_code": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "ordinal": 1,
+                      "priority": 1,
+                      "capability": null,
+                      "expires_at": "2026-09-30T12:26:08.193Z",
+                      "intent_ref": "i1",
+                      "single_use": false,
+                      "confirmation": null,
+                      "input_schema": null,
+                      "intent_token": "[redacted:sha256:ef8643dbc9d363b79bf61ce90b923c7fe039224bf6aba061fd1b5278ca59b797]",
+                      "authority_hint": {
+                        "emphasis": "secondary",
+                        "disabled_because": null
+                      },
+                      "speech_aliases": [
+                        "open journal detail"
+                      ],
+                      "utterance_preview": "Open journal detail",
+                      "verification_floor": "ANONYMOUS",
+                      "handoff_capability_ref": null
+                    },
+                    {
+                      "role": "secondary",
+                      "label": "Refresh journal",
+                      "effect": "REFINE",
+                      "target": null,
+                      "enabled": {
+                        "as_of": null,
+                        "label": "Refresh journal",
+                        "state": "KNOWN",
+                        "value": true,
+                        "fact_ref": null,
+                        "reason_code": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "ordinal": 2,
+                      "priority": 1,
+                      "capability": {
+                        "key": "operations.journal.read",
+                        "space": "C9"
+                      },
+                      "expires_at": "2026-09-30T12:26:08.193Z",
+                      "intent_ref": "i2",
+                      "single_use": false,
+                      "confirmation": null,
+                      "input_schema": null,
+                      "intent_token": "[redacted:sha256:555c69ac0f117a078680bed5827192e99eb44a768b854b28b2f597929e603d64]",
+                      "authority_hint": {
+                        "emphasis": "secondary",
+                        "disabled_because": null
+                      },
+                      "speech_aliases": [
+                        "refresh journal"
+                      ],
+                      "utterance_preview": "Refresh journal",
+                      "verification_floor": "SESSION_VERIFIED",
+                      "handoff_capability_ref": null
+                    },
+                    {
+                      "role": "escape",
+                      "label": "Dismiss",
+                      "effect": "CONTROL",
+                      "target": null,
+                      "enabled": {
+                        "as_of": null,
+                        "label": "Dismiss",
+                        "state": "KNOWN",
+                        "value": true,
+                        "fact_ref": null,
+                        "reason_code": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "ordinal": 3,
+                      "priority": 0,
+                      "capability": {
+                        "key": "control.widget.dismiss",
+                        "space": "CONTROL"
+                      },
+                      "expires_at": "2026-09-30T12:26:08.193Z",
+                      "intent_ref": "i3",
+                      "single_use": true,
+                      "confirmation": null,
+                      "input_schema": null,
+                      "intent_token": "[redacted:sha256:493beb10ebc59f0f21786adb8264e437ad12ba7da29023144588561c179822a9]",
+                      "authority_hint": {
+                        "emphasis": "muted",
+                        "disabled_because": null
+                      },
+                      "speech_aliases": [
+                        "dismiss",
+                        "close"
+                      ],
+                      "utterance_preview": "Dismiss",
+                      "verification_floor": "ANONYMOUS",
+                      "handoff_capability_ref": null
+                    }
+                  ],
+                  "contract": "maya.widget.envelope/1",
+                  "authority": {
+                    "pii_class": "none",
+                    "data_scope": {
+                      "masked_fields": []
+                    },
+                    "verification_level": "SESSION_VERIFIED"
+                  },
+                  "integrity": {
+                    "body_hash": "500c6375bd39049b312e3777e54f1ceec4e8629c897c99c7e157e490a0ed3d1b",
+                    "approval_echo": null,
+                    "envelope_seal": "22af13df6c4cc240c20f8b41e65ceed0f81ad81cce2aaa98946c632021e569b6",
+                    "seal_key_version": 1,
+                    "cell_index_digest": "7b4184adb82d5acf632b900b10b2de9949fb961176fc2fa15ae63f4512f84a08",
+                    "policy_context_echo": null,
+                    "principal_proof_hash": "825415eea339ecb07c21eb942d145b28589f4e32fee8153e8671d7ff78cd0cb5"
+                  },
+                  "lifecycle": {
+                    "state": "MINTED",
+                    "delivery": {
+                      "answered_at": null,
+                      "delivery_state": "live",
+                      "answering_channel": null,
+                      "action_receipt_ref": null
+                    },
+                    "issued_at": "2026-09-30T12:16:08.193Z",
+                    "on_expiry": "collapse_to_summary",
+                    "dedupe_key": "SCHEDULE:3b2b171e-641a-40cb-ad7d-26dda5a59e72",
+                    "expires_at": "2026-09-30T12:26:08.193Z",
+                    "flow_ttl_s": null,
+                    "input_lock": "none",
+                    "retention_sec": 600,
+                    "freshness_class": "live",
+                    "historised_form": "summary_bubble",
+                    "delivery_channel": "pwa",
+                    "timeline_placement": "chronological",
+                    "supersedes_widget_id": null,
+                    "superseded_by_widget_id": null
+                  },
+                  "tenant_id": "cmuo2k5kt001crnc9k3o1wad0",
+                  "widget_id": "3b2b171e-641a-40cb-ad7d-26dda5a59e72",
+                  "provenance": {
+                    "authorship": {
+                      "narrative": "none",
+                      "body_values": "server_formatter",
+                      "body_phrases": "server_catalogue",
+                      "model_contribution": "none",
+                      "narrative_template_id": null,
+                      "model_contribution_ref": null,
+                      "narrative_template_version": null
+                    },
+                    "confidence": "medium",
+                    "facts_used": [
+                      {
+                        "as_of": "2026-09-30T12:16:08.193Z",
+                        "status": "measured",
+                        "capability": "operations.journal.read",
+                        "completeness": {
+                          "status": "PARTIAL",
+                          "hasMore": true,
+                          "cursorRef": null,
+                          "truncated": false,
+                          "totalCount": null,
+                          "reasonCodes": [
+                            "NOT_COLLECTED"
+                          ],
+                          "returnedCount": 1,
+                          "requestedScopeHash": "be73924af50c1e3beffe3069048fec8c38ce3faf2c9076e0e1913141df0cf851"
+                        },
+                        "evidence_refs": [
+                          "h_be73924af50c1e3beffe3069048fec8c38ce3faf2c9076e0e1913141df0cf851"
+                        ]
+                      }
+                    ],
+                    "source_kind": "capability_read",
+                    "completeness": {
+                      "status": "PARTIAL",
+                      "hasMore": true,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "totalCount": null,
+                      "reasonCodes": [
+                        "NOT_COLLECTED"
+                      ],
+                      "returnedCount": 1,
+                      "requestedScopeHash": "be73924af50c1e3beffe3069048fec8c38ce3faf2c9076e0e1913141df0cf851"
+                    },
+                    "facts_digest": "92eff8de36b3bc5a4ed165b18d242a5fb0de346813a78d6ad7c0987821d2f305",
+                    "facts_origin": [
+                      "synthesised"
+                    ],
+                    "projector_id": "operations.journal.read@1",
+                    "evidence_refs": [
+                      {
+                        "ref": "h_be73924af50c1e3beffe3069048fec8c38ce3faf2c9076e0e1913141df0cf851",
+                        "class": "c9_invocation_handle",
+                        "dereferenceable_until": null
+                      }
+                    ],
+                    "source_capability": "operations.journal.read",
+                    "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                    "completeness_envelope_hash": "9a0ea6fc68c92661dbdfb6f244294baef3e16e1f11718745e20f4e6b359e4ada"
+                  },
+                  "correlation": {
+                    "run_id": null,
+                    "turn_id": "0890ae64-c857-4e0a-81f5-71585a4f9dec",
+                    "agent_id": null,
+                    "trace_id": "47e9b9b56bbe5219e3f45f25e6393f5c",
+                    "message_id": null,
+                    "step_index": null,
+                    "step_total": null,
+                    "parent_widget_id": "cmuo2k5pw001lrnc989987e0e"
+                  },
+                  "limitations": [],
+                  "body_version": 1,
+                  "presentation": {
+                    "a11y": {
+                      "label": "Расписание · 1 мастер",
+                      "role_hint": "grid",
+                      "description": "Все мастера: нет записей",
+                      "live_region": "off",
+                      "reading_order": [
+                        {
+                          "k": "intent",
+                          "id": "i1"
+                        },
+                        {
+                          "k": "intent",
+                          "id": "i2"
+                        },
+                        {
+                          "k": "intent",
+                          "id": "i3"
+                        }
+                      ],
+                      "accessible_names": {
+                        "intent:i1": "Open journal detail",
+                        "intent:i2": "Refresh journal",
+                        "intent:i3": "Dismiss"
+                      }
+                    },
+                    "speech": null,
+                    "density": "CARD",
+                    "text_equivalent": {
+                      "body": "Все мастера: нет записей",
+                      "headline": "Расписание · 1 мастер",
+                      "itemized": [
+                        "Все мастера: нет записей"
+                      ],
+                      "unknowns_sentence": null,
+                      "completeness_sentence": null
+                    },
+                    "fullscreen_detail": {
+                      "reason": "exceeds_chat_density",
+                      "route_key": "fs.calendar"
+                    },
+                    "presentation_mode": "owner"
+                  }
+                },
+                "owner_decision": null,
+                "receipt_outcome": "ACCEPTED"
+              }
+            },
+            "projection": {
+              "rawJsonSha256": "be2d5d32f67cc9a1f1ad87d66d8df98e18f2d4b3ae7b2928d072664c73201368",
+              "value": {
+                "outcome": "terminate",
+                "code": null,
+                "next_envelope": null,
+                "resolved_widget": {
+                  "body": {
+                    "gaps": [],
+                    "lanes": [
+                      {
+                        "label": {
+                          "as_of": "2026-09-30T12:16:08.193Z",
+                          "label": "Все мастера",
+                          "state": "KNOWN",
+                          "value": "Все мастера",
+                          "fact_ref": 0,
+                          "reason_code": null,
+                          "evidence_refs": [
+                            {
+                              "ref": "h_be73924af50c1e3beffe3069048fec8c38ce3faf2c9076e0e1913141df0cf851",
+                              "class": "c9_invocation_handle",
+                              "dereferenceable_until": null
+                            }
+                          ],
+                          "next_intent_ref": null
+                        },
+                        "lane_id": "lane-1",
+                        "staff_ref": null
+                      }
+                    ],
+                    "range": {
+                      "to": "2026-09-24T23:59:59",
+                      "from": "2026-09-24T00:00:00"
+                    },
+                    "buckets": [
+                      {
+                        "end": "2026-09-24T23:59:59",
+                        "start": "2026-09-24T00:00:00",
+                        "bucket_id": "bucket-day"
+                      }
+                    ],
+                    "entries": [],
+                    "timezone": "Europe/Moscow",
+                    "detail_intent": "i1"
+                  },
+                  "kind": "SCHEDULE",
+                  "origin": {
+                    "emitter": "capability_read",
+                    "trigger": "system_reply",
+                    "moment_key": null,
+                    "proactive_provenance": null
+                  },
+                  "render": {
+                    "contract": "maya.render.receipt/1",
+                    "escalation": null,
+                    "profile_id": "pwa/1",
+                    "degraded_at": "2026-09-30T12:16:08.193Z",
+                    "render_tier": "RICH_INTERACTIVE",
+                    "intents_minted": 3,
+                    "body_reductions": [],
+                    "intents_emitted": 3,
+                    "profile_version": 1,
+                    "intents_withheld": [],
+                    "text_equivalent_is_canonical": false
+                  },
+                  "source": {
+                    "from": "capability_envelope",
+                    "capability": "operations.journal.read",
+                    "fact_index": 0,
+                    "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63"
+                  },
+                  "intents": [
+                    {
+                      "role": "primary",
+                      "label": "Open journal detail",
+                      "effect": "NAVIGATE",
+                      "target": {
+                        "ref": "fs.calendar",
+                        "class": "detail"
+                      },
+                      "enabled": {
+                        "as_of": null,
+                        "label": "Open journal detail",
+                        "state": "KNOWN",
+                        "value": true,
+                        "fact_ref": null,
+                        "reason_code": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "ordinal": 1,
+                      "priority": 1,
+                      "capability": null,
+                      "expires_at": "2026-09-30T12:26:08.193Z",
+                      "intent_ref": "i1",
+                      "single_use": false,
+                      "confirmation": null,
+                      "input_schema": null,
+                      "intent_token": "[redacted:sha256:ef8643dbc9d363b79bf61ce90b923c7fe039224bf6aba061fd1b5278ca59b797]",
+                      "authority_hint": {
+                        "emphasis": "secondary",
+                        "disabled_because": null
+                      },
+                      "speech_aliases": [
+                        "open journal detail"
+                      ],
+                      "utterance_preview": "Open journal detail",
+                      "verification_floor": "ANONYMOUS",
+                      "handoff_capability_ref": null
+                    },
+                    {
+                      "role": "secondary",
+                      "label": "Refresh journal",
+                      "effect": "REFINE",
+                      "target": null,
+                      "enabled": {
+                        "as_of": null,
+                        "label": "Refresh journal",
+                        "state": "KNOWN",
+                        "value": true,
+                        "fact_ref": null,
+                        "reason_code": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "ordinal": 2,
+                      "priority": 1,
+                      "capability": {
+                        "key": "operations.journal.read",
+                        "space": "C9"
+                      },
+                      "expires_at": "2026-09-30T12:26:08.193Z",
+                      "intent_ref": "i2",
+                      "single_use": false,
+                      "confirmation": null,
+                      "input_schema": null,
+                      "intent_token": "[redacted:sha256:555c69ac0f117a078680bed5827192e99eb44a768b854b28b2f597929e603d64]",
+                      "authority_hint": {
+                        "emphasis": "secondary",
+                        "disabled_because": null
+                      },
+                      "speech_aliases": [
+                        "refresh journal"
+                      ],
+                      "utterance_preview": "Refresh journal",
+                      "verification_floor": "SESSION_VERIFIED",
+                      "handoff_capability_ref": null
+                    },
+                    {
+                      "role": "escape",
+                      "label": "Dismiss",
+                      "effect": "CONTROL",
+                      "target": null,
+                      "enabled": {
+                        "as_of": null,
+                        "label": "Dismiss",
+                        "state": "KNOWN",
+                        "value": true,
+                        "fact_ref": null,
+                        "reason_code": null,
+                        "evidence_refs": [],
+                        "next_intent_ref": null
+                      },
+                      "ordinal": 3,
+                      "priority": 0,
+                      "capability": {
+                        "key": "control.widget.dismiss",
+                        "space": "CONTROL"
+                      },
+                      "expires_at": "2026-09-30T12:26:08.193Z",
+                      "intent_ref": "i3",
+                      "single_use": true,
+                      "confirmation": null,
+                      "input_schema": null,
+                      "intent_token": "[redacted:sha256:493beb10ebc59f0f21786adb8264e437ad12ba7da29023144588561c179822a9]",
+                      "authority_hint": {
+                        "emphasis": "muted",
+                        "disabled_because": null
+                      },
+                      "speech_aliases": [
+                        "dismiss",
+                        "close"
+                      ],
+                      "utterance_preview": "Dismiss",
+                      "verification_floor": "ANONYMOUS",
+                      "handoff_capability_ref": null
+                    }
+                  ],
+                  "contract": "maya.widget.envelope/1",
+                  "authority": {
+                    "pii_class": "none",
+                    "data_scope": {
+                      "masked_fields": []
+                    },
+                    "verification_level": "SESSION_VERIFIED"
+                  },
+                  "integrity": {
+                    "body_hash": "500c6375bd39049b312e3777e54f1ceec4e8629c897c99c7e157e490a0ed3d1b",
+                    "approval_echo": null,
+                    "envelope_seal": "22af13df6c4cc240c20f8b41e65ceed0f81ad81cce2aaa98946c632021e569b6",
+                    "seal_key_version": 1,
+                    "cell_index_digest": "7b4184adb82d5acf632b900b10b2de9949fb961176fc2fa15ae63f4512f84a08",
+                    "policy_context_echo": null,
+                    "principal_proof_hash": "825415eea339ecb07c21eb942d145b28589f4e32fee8153e8671d7ff78cd0cb5"
+                  },
+                  "lifecycle": {
+                    "state": "MINTED",
+                    "delivery": {
+                      "answered_at": null,
+                      "delivery_state": "live",
+                      "answering_channel": null,
+                      "action_receipt_ref": null
+                    },
+                    "issued_at": "2026-09-30T12:16:08.193Z",
+                    "on_expiry": "collapse_to_summary",
+                    "dedupe_key": "SCHEDULE:3b2b171e-641a-40cb-ad7d-26dda5a59e72",
+                    "expires_at": "2026-09-30T12:26:08.193Z",
+                    "flow_ttl_s": null,
+                    "input_lock": "none",
+                    "retention_sec": 600,
+                    "freshness_class": "live",
+                    "historised_form": "summary_bubble",
+                    "delivery_channel": "pwa",
+                    "timeline_placement": "chronological",
+                    "supersedes_widget_id": null,
+                    "superseded_by_widget_id": null
+                  },
+                  "tenant_id": "cmuo2k5kt001crnc9k3o1wad0",
+                  "widget_id": "3b2b171e-641a-40cb-ad7d-26dda5a59e72",
+                  "provenance": {
+                    "authorship": {
+                      "narrative": "none",
+                      "body_values": "server_formatter",
+                      "body_phrases": "server_catalogue",
+                      "model_contribution": "none",
+                      "narrative_template_id": null,
+                      "model_contribution_ref": null,
+                      "narrative_template_version": null
+                    },
+                    "confidence": "medium",
+                    "facts_used": [
+                      {
+                        "as_of": "2026-09-30T12:16:08.193Z",
+                        "status": "measured",
+                        "capability": "operations.journal.read",
+                        "completeness": {
+                          "status": "PARTIAL",
+                          "hasMore": true,
+                          "cursorRef": null,
+                          "truncated": false,
+                          "totalCount": null,
+                          "reasonCodes": [
+                            "NOT_COLLECTED"
+                          ],
+                          "returnedCount": 1,
+                          "requestedScopeHash": "be73924af50c1e3beffe3069048fec8c38ce3faf2c9076e0e1913141df0cf851"
+                        },
+                        "evidence_refs": [
+                          "h_be73924af50c1e3beffe3069048fec8c38ce3faf2c9076e0e1913141df0cf851"
+                        ]
+                      }
+                    ],
+                    "source_kind": "capability_read",
+                    "completeness": {
+                      "status": "PARTIAL",
+                      "hasMore": true,
+                      "cursorRef": null,
+                      "truncated": false,
+                      "totalCount": null,
+                      "reasonCodes": [
+                        "NOT_COLLECTED"
+                      ],
+                      "returnedCount": 1,
+                      "requestedScopeHash": "be73924af50c1e3beffe3069048fec8c38ce3faf2c9076e0e1913141df0cf851"
+                    },
+                    "facts_digest": "92eff8de36b3bc5a4ed165b18d242a5fb0de346813a78d6ad7c0987821d2f305",
+                    "facts_origin": [
+                      "synthesised"
+                    ],
+                    "projector_id": "operations.journal.read@1",
+                    "evidence_refs": [
+                      {
+                        "ref": "h_be73924af50c1e3beffe3069048fec8c38ce3faf2c9076e0e1913141df0cf851",
+                        "class": "c9_invocation_handle",
+                        "dereferenceable_until": null
+                      }
+                    ],
+                    "source_capability": "operations.journal.read",
+                    "capability_version": "4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63",
+                    "completeness_envelope_hash": "9a0ea6fc68c92661dbdfb6f244294baef3e16e1f11718745e20f4e6b359e4ada"
+                  },
+                  "correlation": {
+                    "run_id": null,
+                    "turn_id": "0890ae64-c857-4e0a-81f5-71585a4f9dec",
+                    "agent_id": null,
+                    "trace_id": "47e9b9b56bbe5219e3f45f25e6393f5c",
+                    "message_id": null,
+                    "step_index": null,
+                    "step_total": null,
+                    "parent_widget_id": "cmuo2k5pw001lrnc989987e0e"
+                  },
+                  "limitations": [],
+                  "body_version": 1,
+                  "presentation": {
+                    "a11y": {
+                      "label": "Расписание · 1 мастер",
+                      "role_hint": "grid",
+                      "description": "Все мастера: нет записей",
+                      "live_region": "off",
+                      "reading_order": [
+                        {
+                          "k": "intent",
+                          "id": "i1"
+                        },
+                        {
+                          "k": "intent",
+                          "id": "i2"
+                        },
+                        {
+                          "k": "intent",
+                          "id": "i3"
+                        }
+                      ],
+                      "accessible_names": {
+                        "intent:i1": "Open journal detail",
+                        "intent:i2": "Refresh journal",
+                        "intent:i3": "Dismiss"
+                      }
+                    },
+                    "speech": null,
+                    "density": "CARD",
+                    "text_equivalent": {
+                      "body": "Все мастера: нет записей",
+                      "headline": "Расписание · 1 мастер",
+                      "itemized": [
+                        "Все мастера: нет записей"
+                      ],
+                      "unknowns_sentence": null,
+                      "completeness_sentence": null
+                    },
+                    "fullscreen_detail": {
+                      "reason": "exceeds_chat_density",
+                      "route_key": "fs.calendar"
+                    },
+                    "presentation_mode": "owner"
+                  }
+                },
+                "receipt_outcome": "ACCEPTED"
+              }
+            }
+          }
+        ],
+        "renderCalls": [
+          {
+            "verdict": "valid",
+            "density": "CARD",
+            "presentation": {
+              "presentation_mode": "owner",
+              "density": "CARD",
+              "text_equivalent": {
+                "headline": "Расписание · 1 мастер",
+                "body": "Все мастера: нет записей",
+                "itemized": [
+                  "Все мастера: нет записей"
+                ],
+                "completeness_sentence": null,
+                "unknowns_sentence": null
+              },
+              "speech": null,
+              "a11y": {
+                "role_hint": "grid",
+                "label": "Расписание · 1 мастер",
+                "description": "Все мастера: нет записей",
+                "reading_order": [
+                  {
+                    "k": "intent",
+                    "id": "i1"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i2"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i3"
+                  }
+                ],
+                "live_region": "off",
+                "accessible_names": {
+                  "intent:i1": "Open journal detail",
+                  "intent:i2": "Refresh journal",
+                  "intent:i3": "Dismiss"
+                }
+              },
+              "fullscreen_detail": {
+                "route_key": "fs.calendar",
+                "reason": "exceeds_chat_density"
+              }
+            },
+            "readingOrder": [
+              "intent:i1",
+              "intent:i2",
+              "intent:i3"
+            ]
+          },
+          {
+            "verdict": "valid",
+            "density": "SHEET",
+            "presentation": {
+              "presentation_mode": "owner",
+              "density": "CARD",
+              "text_equivalent": {
+                "headline": "Расписание · 1 мастер",
+                "body": "Все мастера: нет записей",
+                "itemized": [
+                  "Все мастера: нет записей"
+                ],
+                "completeness_sentence": null,
+                "unknowns_sentence": null
+              },
+              "speech": null,
+              "a11y": {
+                "role_hint": "grid",
+                "label": "Расписание · 1 мастер",
+                "description": "Все мастера: нет записей",
+                "reading_order": [
+                  {
+                    "k": "intent",
+                    "id": "i1"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i2"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i3"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i4"
+                  }
+                ],
+                "live_region": "off",
+                "accessible_names": {
+                  "intent:i1": "Open journal detail",
+                  "intent:i2": "Refresh journal",
+                  "intent:i3": "Dismiss",
+                  "intent:i4": "Return to journal"
+                }
+              },
+              "fullscreen_detail": {
+                "route_key": "fs.calendar",
+                "reason": "exceeds_chat_density"
+              }
+            },
+            "readingOrder": [
+              "intent:i1",
+              "intent:i2",
+              "intent:i3",
+              "intent:i4"
+            ]
+          },
+          {
+            "verdict": "valid",
+            "density": "CARD",
+            "presentation": {
+              "a11y": {
+                "label": "Расписание · 1 мастер",
+                "role_hint": "grid",
+                "description": "Все мастера: нет записей",
+                "live_region": "off",
+                "reading_order": [
+                  {
+                    "k": "intent",
+                    "id": "i1"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i2"
+                  },
+                  {
+                    "k": "intent",
+                    "id": "i3"
+                  }
+                ],
+                "accessible_names": {
+                  "intent:i1": "Open journal detail",
+                  "intent:i2": "Refresh journal",
+                  "intent:i3": "Dismiss"
+                }
+              },
+              "speech": null,
+              "density": "CARD",
+              "text_equivalent": {
+                "body": "Все мастера: нет записей",
+                "headline": "Расписание · 1 мастер",
+                "itemized": [
+                  "Все мастера: нет записей"
+                ],
+                "unknowns_sentence": null,
+                "completeness_sentence": null
+              },
+              "fullscreen_detail": {
+                "reason": "exceeds_chat_density",
+                "route_key": "fs.calendar"
+              },
+              "presentation_mode": "owner"
+            },
+            "readingOrder": [
+              "intent:i1",
+              "intent:i2",
+              "intent:i3"
+            ]
+          }
+        ],
+        "submissionOutcomes": [
+          {
+            "status": "advanced",
+            "widgetId": "9b5ed62e-a9f2-4470-9537-2f8f7c9a267f"
+          },
+          {
+            "status": "returned",
+            "widgetId": "3b2b171e-641a-40cb-ad7d-26dda5a59e72"
+          }
+        ],
+        "activationOutcomes": [
+          {
+            "itemId": "w1",
+            "ref": "intent:i1",
+            "outcome": {
+              "outcome": "dismissed"
+            }
+          },
+          {
+            "itemId": "d2",
+            "ref": "intent:i4",
+            "outcome": {
+              "outcome": "dismissed"
+            }
+          }
+        ],
+        "fullscreenTransitions": [
+          {
+            "phase": "progress",
+            "itemId": "w1"
+          },
+          {
+            "phase": "open",
+            "itemId": "d2"
+          },
+          {
+            "phase": "open",
+            "itemId": "d2"
+          },
+          null
+        ],
+        "timelineBefore": [
+          {
+            "id": "w1",
+            "kind": "widget"
+          }
+        ],
+        "timelineAfter": [
+          {
+            "id": "w1",
+            "kind": "widget"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,689 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gateTURN.json": "867a05f481f07b5b2bde99db7df35589a1b97525c4129b10ccf80825b4f1c30c"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T14:36:51.351Z",
+  "batteries": [
+    "gateTURN.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-41a1587482",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-41a1587482",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "TURN:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "TURN:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M1",
+      "files": [
+        "src/widgets/stores/user-turn-binding.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TURN-CORRELATION"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-CORRELATION",
+          "test": "Canonical user turn correlation TURN-CORRELATION binds tenant, actual actor, ingress kind and exact untruncated request id",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M2",
+      "files": [
+        "src/widgets/stores/user-turn-binding.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TURN-CORRELATION"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-CORRELATION",
+          "test": "Canonical user turn correlation TURN-CORRELATION binds tenant, actual actor, ingress kind and exact untruncated request id",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M3",
+      "files": [
+        "src/widgets/stores/user-turn-binding.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TURN-CORRELATION"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-CORRELATION",
+          "test": "Canonical user turn correlation TURN-CORRELATION binds tenant, actual actor, ingress kind and exact untruncated request id",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M4",
+      "files": [
+        "src/widgets/stores/user-turn-binding.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TURN-AUDIT"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-AUDIT",
+          "test": "Canonical user turn correlation TURN-AUDIT accepts only one exact immutable binding and never includes transcript data",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M5",
+      "files": [
+        "src/widgets/owner-ports/user-turn-audit.adapter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TURN-AUDIT-TX"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-AUDIT-TX",
+          "test": "TURN-AUDIT-TX uses the canonical audit owner and the exact existing transaction for both operations",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M6",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TURN-REPLAY-REFUSE"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-REPLAY-REFUSE",
+          "test": "Canonical USER writer replay TURN-REPLAY-REFUSE refuses every mismatched or unavailable retained identity: {\"retentionUntil\":\"2026-09-30T00:00:00.000Z\"}",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M7",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TURN-REPLAY-REFUSE"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-REPLAY-REFUSE",
+          "test": "Canonical USER writer replay TURN-REPLAY-REFUSE refuses every mismatched or unavailable retained identity: {\"principalProofHash\":\"other\"}",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M8",
+      "files": [
+        "src/widgets/composition/typed-step0.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "TURN-ORDINARY",
+        "TURN-CANONICAL"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-ORDINARY",
+          "test": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-ORDINARY persists exactly one USER row on concurrent same-request retries and carries its conversation forward",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        },
+        {
+          "killer": "TURN-CANONICAL",
+          "test": "9.6 canonical source evidence TURN-CANONICAL [HTTP] [E-MINT] ordinary typed, widget typed and native tap persist byte-identical USER content through the same writer",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 2
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M9",
+      "files": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "TURN-WIDGET",
+        "TURN-CANONICAL"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-WIDGET",
+          "test": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-WIDGET uses the same persisted writer for production-minted typed and tapped controls; expired retry never falls through to ordinary chat",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        },
+        {
+          "killer": "TURN-CANONICAL",
+          "test": "9.6 canonical source evidence TURN-CANONICAL [HTTP] [E-MINT] ordinary typed, widget typed and native tap persist byte-identical USER content through the same writer",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 2
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M10",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "TURN-SCOPE"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-SCOPE",
+          "test": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-SCOPE refuses a foreign current actor or tenant conversation; request IDs alone never confer identity",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M11",
+      "files": [
+        "src/widgets/composition/typed-step0.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "TURN-ORDINARY",
+        "TURN-ATOMIC",
+        "TURN-CANONICAL"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-ORDINARY",
+          "test": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-ORDINARY persists exactly one USER row on concurrent same-request retries and carries its conversation forward",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        },
+        {
+          "killer": "TURN-ATOMIC",
+          "test": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-ATOMIC rolls back the USER row when its immutable correlation cannot be committed",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        },
+        {
+          "killer": "TURN-CANONICAL",
+          "test": "9.6 canonical source evidence TURN-CANONICAL [HTTP] [E-MINT] ordinary typed, widget typed and native tap persist byte-identical USER content through the same writer",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 3
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M12",
+      "files": [
+        "src/widgets/composition/chat-read.trigger.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "TURN-READ"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-READ",
+          "test": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-READ keeps an actual chat read, its widget emission and the next typed widget turn in one conversation",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M13",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TURN-ASSISTANT-INDEX"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-ASSISTANT-INDEX",
+          "test": "TimelineStore.ensureAssistantExecutionTurn — conversation index TURN-ASSISTANT-INDEX ignores larger indices in another tenant or conversation",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateTURN.json",
+      "id": "TURN-M14",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "TURN-ASSISTANT-INDEX"
+      ],
+      "kills": [
+        {
+          "killer": "TURN-ASSISTANT-INDEX",
+          "test": "TimelineStore.ensureAssistantExecutionTurn — conversation index TURN-ASSISTANT-INDEX ignores larger indices in another tenant or conversation",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [
+    "gateTURN.json#TURN-M8",
+    "gateTURN.json#TURN-M9",
+    "gateTURN.json#TURN-M10",
+    "gateTURN.json#TURN-M11",
+    "gateTURN.json#TURN-M12"
+  ],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T16:01:57.038Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 1,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

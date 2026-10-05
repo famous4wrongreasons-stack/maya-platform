@@ -1,0 +1,42 @@
+{
+  "candidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "approvedBaseIsAncestor": true,
+  "trackedWorktreeClean": true,
+  "changedFiles": [
+    {
+      "path": "maya-saas-backend/scripts/widgets-mutation-ci.test.mjs",
+      "sha256": "510af10c2ada7e17811b935e340fa85a0b663eea8d10d7b18d9e6b433849b860"
+    },
+    {
+      "path": "maya-saas-backend/src/admin/admin.controller.spec.ts",
+      "sha256": "299410ace02b8d2e4c399d8431837f8fd410e14133631157849360da5826eb6c"
+    },
+    {
+      "path": "maya-saas-backend/src/auth/legacy-staff-principal.http.spec.ts",
+      "sha256": "1de532c505a6852994801277cad417a171acaa78b0a393d8a13a298eef72e011"
+    },
+    {
+      "path": "maya-saas-backend/src/bootstrap/configure-http-app.spec.ts",
+      "sha256": "250b525c06c47308546b9d590c506e222c6937b35e47fe34f36b0e1eab8a282e"
+    },
+    {
+      "path": "maya-saas-backend/test/app.e2e-spec.ts",
+      "sha256": "8628637d46fea6d88139f2985d306b99cf638439cd3bc3f29c739b5549b00310"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/http-listener.live-spec.ts",
+      "sha256": "5a95fb9918c88de7b0b7f4d81a12699c8a104185bac5acad658df5160200e38b"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/mutations/gateH-harness.json",
+      "sha256": "721f85d6b2312ddd559c131db405929122886365eb9c6f908a77f7b75391c7c1"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/http-bootstrap.ts",
+      "sha256": "7b5cc34c41505a6326bc684708f29a94f968e4ea09511077be19c516f934f140"
+    }
+  ],
+  "productCodeOverlap": [],
+  "presentationOverlap": [],
+  "effectScope": "Synthetic loopback proof environments only. No production apply, deploy, grant, real OTP, YCLIENTS booking, device reinstall or Chapter 10 work."
+}

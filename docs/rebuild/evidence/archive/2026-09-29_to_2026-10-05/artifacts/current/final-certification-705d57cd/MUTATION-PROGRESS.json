@@ -1,0 +1,47 @@
+{
+  "utc": "2026-10-01T21:39:21.961841+00:00",
+  "parts": 65,
+  "totalParts": 65,
+  "partStatuses": {
+    "PARTITION-AS-DECLARED": 28,
+    "AS-DECLARED": 37
+  },
+  "completedDeclarations": 509,
+  "declarationStatuses": {
+    "live-killed": 162,
+    "build-killed": 344,
+    "pending": 2,
+    "equivalent": 1
+  },
+  "baselineRed": [],
+  "mismatches": 0,
+  "testRuns": 607,
+  "transportFailureAlerts": [
+    {
+      "report": "8-live-1790878197603.json",
+      "title": "AR1-EXPIRY expires without renewal and denies the old authorization"
+    },
+    {
+      "report": "8-live-1790878197603.json",
+      "title": "SV2-01 happy successor verification creates usable explicit personal context and actual actor audit"
+    }
+  ],
+  "newRuns": [
+    {
+      "worker": "7",
+      "step": "live",
+      "passed": 403,
+      "failed": 3,
+      "failingTitles": [
+        "PROFILE-BOOKING admits the actual HTTP catalog → selectors → DRAFT → COMMIT source under a signed restricted grant",
+        "WR-CREATE [E-MINT] DRAFT and COMMIT traverse the canonical owners with a traced production predecessor",
+        "AR-G6-REVOCATION [E-MINT] real post-Gate6 revoke refuses at canonical admission and increments metric"
+      ],
+      "omittedTitles": 0
+    }
+  ],
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "scope": "Live progress only. Does not admit partial receipts as whole-corpus certification.",
+  "certificateIssued": false,
+  "canonicalAssembly": "PENDING"
+}

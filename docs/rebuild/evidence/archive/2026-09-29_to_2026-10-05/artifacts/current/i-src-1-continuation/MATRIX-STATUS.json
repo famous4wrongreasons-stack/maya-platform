@@ -1,0 +1,22 @@
+{
+  "candidate": "1d519822bb92343f1bf4efdf92cbc4264eace48a",
+  "basis": "Inherited backend clause progress disposition, not a new certification audit",
+  "baseline": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/source-certification/MATRIX-REVIEW.json",
+  "baselineSha256": "b3f11abd8a8dcc28348790c9a60c7fe9d10aa3b8735fb6dc99605aabde81d1d0",
+  "clauses": 165,
+  "byState": {
+    "L-T": 4,
+    "L": 137,
+    "U": 22,
+    "false": 2
+  },
+  "globalFalse": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "profileApplicableFalse": 0,
+  "backendProductionFilesChanged": [],
+  "freshIntegrationGate": "FAIL: I-SRC-1 NAVIGATE runtime lifecycle",
+  "fullCertificate": false,
+  "profileCertificate": false
+}

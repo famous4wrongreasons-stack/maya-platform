@@ -1,0 +1,15 @@
+{
+  "name": "old-fixture-original-guard",
+  "sourceCandidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "diagnosticOnly": true,
+  "isolatedProductMutation": null,
+  "exit": 0,
+  "expectedExit": 0,
+  "seconds": 1.545,
+  "passed": 11,
+  "failed": 0,
+  "failures": [],
+  "specSha256": "1966e300dc5a51bcf2d24ac3bc44448d7c10aeb4d59f84dab52ba66f1a0546c9",
+  "adapterSha256": "b12f109df9c47fcfd2846f67abf272e72c69156ef3a5a24873d7a46cdf888e4f",
+  "reportSha256": "8533b8b455f73bce207d44d26c3a288654850b370cc865733510b921326ec525"
+}

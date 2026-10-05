@@ -1,0 +1,65 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "status": "PASS",
+  "programmeStart": "2026-10-04T09:17:53.237517+00:00",
+  "checkedAt": "2026-10-04T21:19:05.466145+00:00",
+  "powerEvents": [
+    {
+      "utc": "2026-10-04T17:45:22+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Clamshell Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 396 secs"
+    },
+    {
+      "utc": "2026-10-04T17:51:58+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using BATT (Charge:100%) 45 secs"
+    },
+    {
+      "utc": "2026-10-04T17:52:43+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 486 secs"
+    },
+    {
+      "utc": "2026-10-04T18:00:49+00:00",
+      "event": "DarkWake",
+      "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty E_PFN_NET_FOUND ARPT/ Using BATT (Charge:100%) 45 secs"
+    },
+    {
+      "utc": "2026-10-04T18:01:34+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 143 secs"
+    },
+    {
+      "utc": "2026-10-04T18:03:57+00:00",
+      "event": "Wake",
+      "details": "Wake from Deep Idle [CDNVA] : due to smc.sysState.Wake(0x70070000) lid SMC.OutboxNotEmpty RTP.multi-touch/HID Activity Using BATT (Charge:100%)"
+    }
+  ],
+  "sleepEvents": [
+    {
+      "utc": "2026-10-04T17:45:22+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Clamshell Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 396 secs"
+    },
+    {
+      "utc": "2026-10-04T17:52:43+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 486 secs"
+    },
+    {
+      "utc": "2026-10-04T18:01:34+00:00",
+      "event": "Sleep",
+      "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 143 secs"
+    }
+  ],
+  "reexecutionRequired": false,
+  "timeoutsChanged": false,
+  "powerSettingsChanged": false,
+  "method": "Actual padded Sleep/Wake/DarkWake event column; scheduler Wake Requests are excluded. Any sleep during this fresh programme requires overlap analysis before admission.",
+  "idleSleepInhibitor": "caffeinate -is attached to programme lifetime",
+  "recoveryProof": {
+    "path": "SUSPEND-RECOVERY-PROOF.json",
+    "sha256": "7aef75a938d1640931dcc607d66d33e46305789f908dd2b794e0fdbe5288e40c"
+  },
+  "admittedSleepOverlaps": 0
+}

@@ -1,0 +1,24 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "recordedAt": "2026-10-04T06:42:21.242283+00:00",
+  "sourceTransforms": {
+    "(out/'mutation-plan.json')": "(out/'mutation-recovery-plan.json')",
+    "(out/'mutation-execution-order.json')": "(out/'mutation-recovery-execution-order.json')",
+    "mutation-final2-worker-": "mutation-suspend-worker-",
+    "singleopcertiso2_worker": "singleopcertiso3_worker",
+    "r06-native-worker-": "r06-recovery-worker-",
+    "mutation-worker-": "mutation-recovery-worker-",
+    "work/('worker-'": "work/('recovery-worker-'"
+  },
+  "selection": "13 entire declared jobs; no steps/test filtering; 55 SHA/hash-bound pre-sleep complete parts retained.",
+  "sources": [
+    {
+      "path": "work/ar1-single-operator-final-20261003/suspend-recovery-runner.py",
+      "sha256": "c895d347627fa0c29d565193f03892fc5af307aef53d3547fc62d5e46c7463ab"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261003/suspend-recovery-controller.py",
+      "sha256": "bcfd969a747b05f7995060bbfc3c3b7a19afc64157a2580efef059da425bcd86"
+    }
+  ]
+}

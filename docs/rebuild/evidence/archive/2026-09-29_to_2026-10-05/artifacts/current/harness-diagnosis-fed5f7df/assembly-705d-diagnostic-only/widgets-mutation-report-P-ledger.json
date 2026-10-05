@@ -1,0 +1,502 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gateP-ledger.json": "cde5c02be0f19b39af9c498a9ff9dd8be0e105c933aad9b8f769af99c09ed2f0"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T19:13:09.191Z",
+  "batteries": [
+    "gateP-ledger.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-66abe55257",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-66abe55257",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "P-ledger:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M1",
+      "files": [
+        "src/widget-contract/mechanism-gap-ledger.runtime.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "LED-1a",
+        "LED-1b",
+        "LED-1d",
+        "LED-3a",
+        "LED-4a"
+      ],
+      "kills": [
+        {
+          "killer": "LED-1a",
+          "test": "P-LEDGER — the runtime mechanism-gap and capability-gap ledgers LED-1a the ledger carries K1’s thirty-nine rows, and F92’s declared count",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "LED-1b",
+          "test": "P-LEDGER — the runtime mechanism-gap and capability-gap ledgers LED-1b the ledger is K1’s rows field for field, in K1’s order",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "LED-1d",
+          "test": "P-LEDGER — the runtime mechanism-gap and capability-gap ledgers LED-1d the ledger covers F35’s declared range P-01 … P-39, once each",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "LED-3a",
+          "test": "P-LEDGER — the runtime mechanism-gap and capability-gap ledgers LED-3a the assertion binds on the ledgers this build ships",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "LED-4a",
+          "test": "P-LEDGER — the runtime mechanism-gap and capability-gap ledgers LED-4a emit-ledgers.mjs --check regenerates both committed modules with no diff",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 5
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M2",
+      "files": [
+        "src/widgets/authority/ledger-startup.assert.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "LED-3b"
+      ],
+      "kills": [
+        {
+          "killer": "LED-3b",
+          "test": "P-LEDGER — the runtime mechanism-gap and capability-gap ledgers LED-3b a §A1 row bound to no gap key fails the assertion (A2.4, drop MG-P-01)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M3",
+      "files": [
+        "src/widgets/authority/ledger-startup.assert.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "LED-3c"
+      ],
+      "kills": [
+        {
+          "killer": "LED-3c",
+          "test": "P-LEDGER — the runtime mechanism-gap and capability-gap ledgers LED-3c a [PARTIAL] row that does not resolve under its own gap key fails (A2.6 (3))",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M4",
+      "files": [
+        "src/widgets/authority/ledger-startup.assert.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "LED-3f"
+      ],
+      "kills": [
+        {
+          "killer": "LED-3f",
+          "test": "P-LEDGER — the runtime mechanism-gap and capability-gap ledgers LED-3f the capability ledger fails on a mechanism-shaped key, a lost reserved act, and an uncommitted withdrawal",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M5",
+      "files": [
+        "scripts/widget-contract/emit-ledgers.mjs"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "LED-4a",
+        "LED-4b",
+        "LED-4c"
+      ],
+      "kills": [
+        {
+          "killer": "LED-4a",
+          "test": "P-LEDGER — the runtime mechanism-gap and capability-gap ledgers LED-4a emit-ledgers.mjs --check regenerates both committed modules with no diff",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "LED-4b",
+          "test": "P-LEDGER — the runtime mechanism-gap and capability-gap ledgers LED-4b the build prints the ledger’s own per-status counts (F92, §A5)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "LED-4c",
+          "test": "P-LEDGER — the runtime mechanism-gap and capability-gap ledgers LED-4c the build prints P-07’s key count and owner-state split",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 3
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M6",
+      "files": [
+        "scripts/widget-contract/emit-ledgers.mjs"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "LED-4b"
+      ],
+      "kills": [
+        {
+          "killer": "LED-4b",
+          "test": "P-LEDGER — the runtime mechanism-gap and capability-gap ledgers LED-4b the build prints the ledger’s own per-status counts (F92, §A5)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M7",
+      "files": [
+        "src/widget-contract/capability-gap-ledger.runtime.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "LED-2b"
+      ],
+      "kills": [
+        {
+          "killer": "LED-2b",
+          "test": "P-LEDGER — the runtime mechanism-gap and capability-gap ledgers LED-2b P-07 registers exactly the GAP- keys the certified text names",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M8",
+      "files": [
+        "src/widgets/authority/ledger-startup.assert.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "LED-3e2"
+      ],
+      "kills": [
+        {
+          "killer": "LED-3e2",
+          "test": "P-LEDGER — the runtime mechanism-gap and capability-gap ledgers LED-3e2 a missing or invented clause→row binding fails in either direction",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-ledger.json",
+      "id": "LED-M9",
+      "files": [
+        "src/widgets/authority/ledger-startup.assert.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "LED-3e2"
+      ],
+      "kills": [
+        {
+          "killer": "LED-3e2",
+          "test": "P-LEDGER — the runtime mechanism-gap and capability-gap ledgers LED-3e2 a missing or invented clause→row binding fails in either direction",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T20:31:19.214Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 1,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "candidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "rows": [
+    {
+      "worker": 1,
+      "trackedFilesCompared": 2332,
+      "missing": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "different": [],
+      "runtimeMaterialized": true,
+      "carrierMaterialized": true
+    },
+    {
+      "worker": 2,
+      "trackedFilesCompared": 2332,
+      "missing": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "different": [],
+      "runtimeMaterialized": true,
+      "carrierMaterialized": true
+    },
+    {
+      "worker": 3,
+      "trackedFilesCompared": 2332,
+      "missing": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "different": [],
+      "runtimeMaterialized": true,
+      "carrierMaterialized": true
+    },
+    {
+      "worker": 4,
+      "trackedFilesCompared": 2332,
+      "missing": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "different": [],
+      "runtimeMaterialized": true,
+      "carrierMaterialized": true
+    },
+    {
+      "worker": 5,
+      "trackedFilesCompared": 2332,
+      "missing": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "different": [],
+      "runtimeMaterialized": true,
+      "carrierMaterialized": true
+    },
+    {
+      "worker": 6,
+      "trackedFilesCompared": 2332,
+      "missing": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "different": [],
+      "runtimeMaterialized": true,
+      "carrierMaterialized": true
+    },
+    {
+      "worker": 7,
+      "trackedFilesCompared": 2332,
+      "missing": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "different": [],
+      "runtimeMaterialized": true,
+      "carrierMaterialized": true
+    },
+    {
+      "worker": 8,
+      "trackedFilesCompared": 2332,
+      "missing": [
+        "maya-saas-backend/.env.example",
+        "maya-saas-backend/.env.staging.example"
+      ],
+      "different": [],
+      "runtimeMaterialized": true,
+      "carrierMaterialized": true
+    }
+  ],
+  "environmentSanitizer": "Two public .env* templates omitted; public literals and guarded proof DB injected, no real provider credentials."
+}

@@ -1,0 +1,12 @@
+{
+  "candidate": "dac4072dd17ec222fe36cc603863965919039708",
+  "name": "runtime-typecheck",
+  "command": [
+    "npm",
+    "run",
+    "typecheck"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+  "exit": 0,
+  "seconds": 6.5
+}

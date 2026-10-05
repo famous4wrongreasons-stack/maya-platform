@@ -1,0 +1,12 @@
+{
+  "candidate": "977b814ecf2c41ae2caeca2df1ded812ce926b10",
+  "name": "carrier-build",
+  "command": [
+    "npm",
+    "run",
+    "build"
+  ],
+  "cwd": "maya-carrier-react",
+  "exit": 0,
+  "seconds": 4.48
+}

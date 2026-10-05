@@ -1,0 +1,40 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "recordedAt": "2026-10-01T23:34:29.087959+00:00",
+  "classification": "INTENTIONAL_HARNESS_MUTANT_EFFECT",
+  "mutant": {
+    "id": "H-R02-LOOPBACK-1",
+    "edits": [
+      {
+        "file": "src/auth/legacy-staff-principal.http.spec.ts",
+        "find": "await app.listen(0, '127.0.0.1');",
+        "replace": "await app.init();"
+      }
+    ],
+    "killers": [
+      "R02-LOOPBACK"
+    ],
+    "expect": "build-killed"
+  },
+  "declarationSha256": "411acdbd360de2f2e33c42a20e43906383098ba4879cb2f6e2f86695818ecd63",
+  "report": "receipts/mutation-diagnostics/7-unit-1790897123770.json",
+  "reportSha256": "9dfd1013b14d64458a7753ed7a2c792c2ffc4b8b4a425aaf71e872462a205b2b",
+  "plainControl": "receipts/mutation-diagnostics/7-unit-1790896642797.json",
+  "plainControlSha256": "264de2cdd3eefd6b8bc96640bbe19c7317399088dfd6c07a960b74583fdd82cc",
+  "plainControlPass": 5603,
+  "plainControlFailures": 0,
+  "namedKiller": "R02-LOOPBACK",
+  "alerts": [
+    {
+      "report": "7-unit-1790897123770.json",
+      "title": "rejects wrong-session-tenant before read admission"
+    },
+    {
+      "report": "7-unit-1790897123770.json",
+      "title": "uses current membership role rather than a role supplied in signed claims"
+    }
+  ],
+  "rationale": "This deliberate mutation removes the repaired ready IPv4 listener, reproducing the harness failure mode. The named listener invariant fails in the same report; preceding unmutated control is fully green. Neither raw receipt nor declared kill is modified.",
+  "finalNativeAdmission": "PASS: named intentional mutant killed; plain controls green; complete corpus assembled",
+  "suppressionScope": "Only the two exact alerts in this immutable raw mutant report. No baseline or other transport alert is ignored."
+}

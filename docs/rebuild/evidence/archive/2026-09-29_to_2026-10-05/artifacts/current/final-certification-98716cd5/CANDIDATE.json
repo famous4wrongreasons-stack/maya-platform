@@ -1,0 +1,88 @@
+{
+  "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+  "parent": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+  "alreadyIntegrated": true,
+  "worktreeClean": true,
+  "productionFilesEdited": false,
+  "sourceHarnesses": [
+    {
+      "path": "maya-saas-backend/test/widgets-live/source-carrier.probe-spec.ts",
+      "sha256": "f0332ae786b59ddd1ad8169cdd54b57fb756b5dc7505ee2cd808de8a68c32aa5"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/shell-approved-source-probe.mjs",
+      "sha256": "38ead2bbb66160f744b7b36c02ebfbf751c748be3407d33de8c42ddf87b4231e"
+    }
+  ],
+  "externalProbeFiles": [
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-98716cd5/probes/source-return.mjs",
+      "sha256": "e4cc3f892b873ece152f63072e03b2a539e1b8b631db1361bc4bdc07d1fb11f2"
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-98716cd5/probes/source-return.probe-spec.ts",
+      "sha256": "775e2e0ae027f98166bb201e2856bc83de1033bc73a0b7e7de4277c17e7dd750"
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-98716cd5/jest-return.json",
+      "sha256": "6c838b1f68721ab0c3efbf71bcac77ca6cd1e464245accb5592ceda2e75a2e28"
+    }
+  ],
+  "scope": "Extend the existing guarded source probe with the actual drawn canonical parent-return activation. No production or candidate source edit.",
+  "finalCandidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+  "trackedWorktreeClean": true,
+  "externalProbeHashes": [
+    {
+      "path": "work/final-certification-98716cd5/probes/compiled-net-receipt.mjs",
+      "sha256": "bb723eebbd1b68e6911dd3b26d8e44e7ba982754b50946068df1419e3fba8831"
+    },
+    {
+      "path": "work/final-certification-98716cd5/probes/compiled-net-return.mjs",
+      "sha256": "f2a60d848f79a8526e42974340eaff3d8a9132a00101568f6f9e4b6d121e3de8"
+    },
+    {
+      "path": "work/final-certification-98716cd5/probes/compiled-postcommit-dismiss.mjs",
+      "sha256": "d0a81d66e1e5286ee09cc14f6063083120459f2c1a8c80a50f05b522e247b861"
+    },
+    {
+      "path": "work/final-certification-98716cd5/probes/source-net-return.mjs",
+      "sha256": "369b3f1a1ae5dee0d3699e218ac86aca03f99bf0470f1870df20561e0bcfcf23"
+    },
+    {
+      "path": "work/final-certification-98716cd5/probes/source-net-return.probe-spec.ts",
+      "sha256": "df87ac5984c28388676aa2874f308626a7f0997705d276138d5def2c3fc1f048"
+    },
+    {
+      "path": "work/final-certification-98716cd5/probes/source-net-turn.mjs",
+      "sha256": "765485845cda61c2f55aaf73be0519270c1b5a991ee7dccbc6b3c92c5adc50d0"
+    },
+    {
+      "path": "work/final-certification-98716cd5/probes/source-net-turn.probe-spec.ts",
+      "sha256": "139022cd519b28089980dc0e9cd79cbfde2d286d5c0ada60f8bc26f222ed7a72"
+    },
+    {
+      "path": "work/final-certification-98716cd5/probes/source-return.mjs",
+      "sha256": "e4cc3f892b873ece152f63072e03b2a539e1b8b631db1361bc4bdc07d1fb11f2"
+    },
+    {
+      "path": "work/final-certification-98716cd5/probes/source-return.probe-spec.ts",
+      "sha256": "775e2e0ae027f98166bb201e2856bc83de1033bc73a0b7e7de4277c17e7dd750"
+    },
+    {
+      "path": "work/final-certification-98716cd5/bin-cases/gateNETBIN.cases.ts",
+      "sha256": "3d11275390e11bf21b95f38424d9fef4ae302f92f3cba1327800da4008614aae"
+    },
+    {
+      "path": "work/final-certification-98716cd5/compiled-bin-cases/gateCOMPILEDBIN.cases.ts",
+      "sha256": "6fc9e255c3ad4a540360dbc32140d9857fe2eb25ac4e614f8d76ada973634d09"
+    },
+    {
+      "path": "work/final-certification-98716cd5/compiled-receipt-bin-cases/gateRECEIPTBIN.cases.ts",
+      "sha256": "1c0a2cccd14e093be5d9e9189ffeb7d546069c764addeb3c3bae589e805c4c5b"
+    },
+    {
+      "path": "work/final-certification-98716cd5/postcommit-bin-cases/gateL27.cases.ts",
+      "sha256": "1fefffb1dc74bf01b0baf52a8fefb6c3be3d596121dd502b135d56f00cdc91a4"
+    }
+  ]
+}

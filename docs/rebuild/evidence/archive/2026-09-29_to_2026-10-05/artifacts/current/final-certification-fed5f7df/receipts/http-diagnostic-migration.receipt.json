@@ -1,0 +1,13 @@
+{
+  "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "name": "http-diagnostic-migration",
+  "command": [
+    "npx",
+    "prisma",
+    "migrate",
+    "deploy"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-fed5f7df/mutation-isolated-worker-1/maya-saas-backend",
+  "exit": 0,
+  "seconds": 2.59
+}

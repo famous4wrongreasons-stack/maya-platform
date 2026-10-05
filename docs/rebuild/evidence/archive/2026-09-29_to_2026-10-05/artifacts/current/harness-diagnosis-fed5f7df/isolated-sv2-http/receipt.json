@@ -1,0 +1,27 @@
+{
+  "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "name": "isolated-sv2-http",
+  "mode": "SV2-HTTP",
+  "command": [
+    "npx",
+    "jest",
+    "--config",
+    "./test/jest-widgets-live.json",
+    "--runInBand",
+    "--forceExit",
+    "--json",
+    "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/isolated-sv2-http/jest.json",
+    "--runTestsByPath",
+    "test/widgets-live/sb1-successor.live-spec.ts",
+    "-t",
+    "SV2-HTTP "
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+  "exit": 0,
+  "seconds": 5.21282696723938,
+  "database": "maya_widget_gate_proof_diag_isolated_sv2_http",
+  "diagnosticOnly": true,
+  "sourceChanged": false,
+  "timeoutsChanged": false,
+  "harnessSha256": "db381cd1c8b110099845659ea1fe665a24130b6670b4d8e82f2ebe56be71bcbe"
+}

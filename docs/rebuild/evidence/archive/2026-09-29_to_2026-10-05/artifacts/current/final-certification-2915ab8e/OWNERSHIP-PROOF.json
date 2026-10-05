@@ -1,0 +1,23 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "base": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "files": [
+    "maya-saas-backend/scripts/widgets-mutation-ci.mjs",
+    "maya-saas-backend/scripts/widgets-mutation-ci.test.mjs",
+    "maya-saas-backend/src/admin/admin.controller.spec.ts",
+    "maya-saas-backend/src/auth/legacy-staff-principal.http.spec.ts",
+    "maya-saas-backend/src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
+    "maya-saas-backend/src/bootstrap/configure-http-app.spec.ts",
+    "maya-saas-backend/src/widgets/owner-ports/commit-booking.adapter.spec.ts",
+    "maya-saas-backend/src/widgets/stores/timeline.store.spec.ts",
+    "maya-saas-backend/test/app.e2e-spec.ts",
+    "maya-saas-backend/test/widgets-live/http-listener.live-spec.ts",
+    "maya-saas-backend/test/widgets-live/mutations/gate9.json",
+    "maya-saas-backend/test/widgets-live/mutations/gateH-harness.json",
+    "maya-saas-backend/test/widgets-live/mutations/gateTURN.json",
+    "maya-saas-backend/test/widgets-live/support/http-bootstrap.ts"
+  ],
+  "claudePathOverlap": 0,
+  "productPathsChanged": [],
+  "timeoutsIncreased": false
+}

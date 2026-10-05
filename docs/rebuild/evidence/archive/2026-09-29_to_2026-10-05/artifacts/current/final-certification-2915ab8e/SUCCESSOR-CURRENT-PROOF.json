@@ -1,0 +1,111 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "scope": "Fresh synthetic/local evidence only; not production evidence or whole-corpus certification",
+  "result": "12/12 PASS",
+  "proofs": [
+    {
+      "title": "SV2-01 happy successor verification creates usable explicit personal context and actual actor audit",
+      "status": "passed",
+      "durationMs": 152
+    },
+    {
+      "title": "SV2-02 wrong OTP has no link or consumption effect",
+      "status": "passed",
+      "durationMs": 166
+    },
+    {
+      "title": "SV2-03 replay fails closed",
+      "status": "passed",
+      "durationMs": 128
+    },
+    {
+      "title": "SV2-04 expired OTP fails under database time",
+      "status": "passed",
+      "durationMs": 108
+    },
+    {
+      "title": "SV2-05 Client substitution cannot transfer a challenge",
+      "status": "passed",
+      "durationMs": 183
+    },
+    {
+      "title": "SV2-06 tenant substitution fails closed",
+      "status": "passed",
+      "durationMs": 167
+    },
+    {
+      "title": "SV2-07 predecessor changed after resolver read is rejected inside identity lock",
+      "status": "passed",
+      "durationMs": 111
+    },
+    {
+      "title": "SV2-08 active predecessor never authorizes issuance or consumption",
+      "status": "passed",
+      "durationMs": 181
+    },
+    {
+      "title": "SV2-09 non-latest revoked predecessor cannot be consumed",
+      "status": "passed",
+      "durationMs": 121
+    },
+    {
+      "title": "SV2-10 revoked episode remains byte-for-byte immutable",
+      "status": "passed",
+      "durationMs": 120
+    },
+    {
+      "title": "SV2-11 successful consume creates exactly one successor and one outcome",
+      "status": "passed",
+      "durationMs": 128
+    },
+    {
+      "title": "SV2-12 concurrent consume serializes to one success and one refusal",
+      "status": "passed",
+      "durationMs": 130
+    }
+  ],
+  "additional": [
+    {
+      "title": "SV2-JSON all four V2 fields are mandatory, exact and immutable",
+      "status": "passed",
+      "durationMs": 123
+    },
+    {
+      "title": "SV2-CHANNEL canonical channel changed after issuance invalidates exact Client proof",
+      "status": "passed",
+      "durationMs": 117
+    },
+    {
+      "title": "SV2-SESSION current revocation is checked on consume",
+      "status": "passed",
+      "durationMs": 99
+    },
+    {
+      "title": "SV2-LIMIT failed OTP attempts survive rollback and cannot be reset with correct code",
+      "status": "passed",
+      "durationMs": 173
+    },
+    {
+      "title": "SV2-DELIVERY failed SMS grants nothing and discloses no OTP",
+      "status": "passed",
+      "durationMs": 92
+    },
+    {
+      "title": "SV2-V1 historical V1 remains immutable and initial-only; V1 consumption still works for a fresh subject",
+      "status": "passed",
+      "durationMs": 108
+    },
+    {
+      "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+      "status": "passed",
+      "durationMs": 780
+    }
+  ],
+  "source": {
+    "path": "receipts/widgets-live-full.json",
+    "sha256": "e46f24cdba590004ecde7f7106aa80fba2d3d66fd14494c3fdd6787e7114ac65"
+  },
+  "realOtpSent": false,
+  "nativeMutationAdmission": "31/31 across complete SV2,SB1,SBV batteries PASS; canonical whole-corpus assembly PASS",
+  "completeNativeReceiptSha256": "afa124cffe9455071feab13b7b508cabcb5c59830f3ec34f54a59770393ddb8a"
+}

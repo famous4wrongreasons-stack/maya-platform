@@ -1,0 +1,193 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "status": "PASS",
+  "receipts": [
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "clean-ci-install-maya-saas-backend",
+      "exit": 0,
+      "command": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/clean-packaging-ci/maya-saas-backend",
+      "seconds": 3.72
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "clean-ci-install-maya-carrier-react",
+      "exit": 0,
+      "command": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/clean-packaging-ci/maya-carrier-react",
+      "seconds": 0.3
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "clean-ci-install-maya-ios-carrier",
+      "exit": 0,
+      "command": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/clean-packaging-ci/maya-ios-carrier",
+      "seconds": 0.36
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "clean-ci-sync",
+      "exit": 0,
+      "command": [
+        "npm",
+        "run",
+        "sync"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/clean-packaging-ci/maya-ios-carrier",
+      "seconds": 15.86
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "clean-ci-carrier",
+      "exit": 0,
+      "command": [
+        "npm",
+        "test"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/clean-packaging-ci/maya-carrier-react",
+      "seconds": 0.32
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "clean-ci-packaging",
+      "exit": 0,
+      "command": [
+        "npm",
+        "run",
+        "test:release"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/clean-packaging-ci/maya-carrier-react",
+      "seconds": 9.84
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "clean-ci-trust",
+      "exit": 0,
+      "command": [
+        "node",
+        "--test",
+        "scripts/widget-release-operator.test.cjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/clean-packaging-ci/maya-saas-backend",
+      "seconds": 0.08
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "clean-ci-prisma",
+      "exit": 0,
+      "command": [
+        "npx",
+        "prisma",
+        "generate"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/clean-packaging-ci/maya-saas-backend",
+      "seconds": 2.77
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "clean-ci-backend-build",
+      "exit": 0,
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/clean-packaging-ci/maya-saas-backend",
+      "seconds": 21.55
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "clean-ci-trust-compiled",
+      "exit": 0,
+      "command": [
+        "node",
+        "--test",
+        "scripts/widget-release-operator.compiled-test.cjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/clean-packaging-ci/maya-saas-backend",
+      "seconds": 1.06
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "clean-ci-xcode",
+      "exit": 0,
+      "command": [
+        "xcodebuild",
+        "-project",
+        "maya-ios-carrier/ios/App/App.xcodeproj",
+        "-scheme",
+        "App",
+        "-configuration",
+        "Debug",
+        "-sdk",
+        "iphonesimulator",
+        "-derivedDataPath",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/ios-clean-ci",
+        "CODE_SIGNING_ALLOWED=NO",
+        "build"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/clean-packaging-ci",
+      "seconds": 27.92
+    },
+    {
+      "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "name": "clean-ci-actual-app",
+      "exit": 0,
+      "command": [
+        "node",
+        "maya-carrier-react/tools/release.mjs",
+        "verify-app",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/ios-clean-ci/Build/Products/Debug-iphonesimulator/App.app"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-final-20261003/clean-packaging-ci",
+      "seconds": 9.22
+    }
+  ],
+  "databaseUrlProvided": false,
+  "freshIndependentInstalls": 3,
+  "hostedRunClaimed": false,
+  "sourceChanged": false,
+  "productionEffects": 0,
+  "independentRebuildEquality": [
+    {
+      "tree": "maya-carrier-react/dist/web",
+      "filesCompared": 8,
+      "byteEqual": true,
+      "extraOriginalNonruntimeCompilerCache": []
+    },
+    {
+      "tree": "maya-carrier-react/dist/capacitor",
+      "filesCompared": 8,
+      "byteEqual": true,
+      "extraOriginalNonruntimeCompilerCache": []
+    },
+    {
+      "tree": "maya-saas-backend/dist",
+      "filesCompared": 2720,
+      "byteEqual": true,
+      "extraOriginalNonruntimeCompilerCache": [
+        "tsconfig.widget-contract.tsbuildinfo"
+      ]
+    }
+  ]
+}

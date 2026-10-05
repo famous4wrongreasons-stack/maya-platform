@@ -1,0 +1,10 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "name": "suspend-reverification",
+  "startedAt": "2026-10-02T06:59:43.769652+00:00",
+  "completedAt": "2026-10-02T07:42:45.116235+00:00",
+  "exit": 0,
+  "seconds": 2581.35,
+  "sourceManifest": "SUSPEND-EXECUTION-SOURCES.json",
+  "sourceManifestSha256": "9f4df3f01aa29468d740a2bf72b740ad1f796f65fd3619bd606f45ad94ec127d"
+}

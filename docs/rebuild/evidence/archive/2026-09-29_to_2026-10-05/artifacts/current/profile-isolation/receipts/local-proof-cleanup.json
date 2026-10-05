@@ -1,0 +1,14 @@
+{
+  "loopbackPort": 55729,
+  "results": [
+    {
+      "database": "maya_widget_gate_proof_profile_20260930",
+      "leftoverFaultTriggersOrFunctions": []
+    },
+    {
+      "database": "maya_widget_gate_proof_profile_mutation_20260930",
+      "leftoverFaultTriggersOrFunctions": []
+    }
+  ],
+  "productionContacted": false
+}

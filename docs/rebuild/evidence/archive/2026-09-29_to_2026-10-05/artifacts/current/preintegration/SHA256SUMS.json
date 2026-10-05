@@ -1,0 +1,19 @@
+{
+  "CHECKPOINT.md": "f3adb6e3bd4b5574c41c5e7dacb152b5701c95a882e50939977a985f8480943c",
+  "CLAUSE-MATRIX.md": "822f021de5905293c06fb99b8a778e05cb346d1855c20d40649ab65e6888c83f",
+  "DECISIONS.md": "86d6e78305704694cbe6f6768304bd5c8a245d210c4601e636c12c2efad2e805",
+  "NAVIGATE-CURRENT-EVIDENCE.md": "e3cfe4c88bc56517dddfbb0c81168b646450f03a95247fd6f67c6cc3446174ec",
+  "README.md": "c9744d7ea22f9ac9bca9975146fede89e137fcde5d15daed4768538d037572f8",
+  "RECEIPTS.zip": "3c1a308f14da234c2de61eeb8d02e7fd12bd84724ab0de6bde938036d0205ce7",
+  "checkpoint.json": "0106c59d12c821bd95625158d451554c607f1b24f497fc37c14d164436971cfa",
+  "clause-disposition.json": "6bc4e1517dc79297ca6d7f0120c3e2f5beb32c3df55696b9208704156ac94d44",
+  "current-audit.json": "cf729d14fc8f5d0d9caa0299853596d0cc2aa67a234f8a01e071c294b2581da7",
+  "current-audit.mjs": "e35f8207bb314a4006c22be2de3fcdb78f79eba3d77cccdedf8f4908efff1811",
+  "current-audit.test.mjs": "6c0c3f2902152f2bccc14b22bff976120de63ee28096d91565ecfa0687c2c002",
+  "fbe2e-disposition.json": "d5ae321dccfaabaed409b782a090c9e2fdaec63afd4ae96325ff99a80d744afb",
+  "gate-recomputations.json": "77a224341d358463d36d63a9e2bee0fefa89d42810aa3bbe0126c6dc67f5beb5",
+  "owner-identity-readonly.cjs": "194039f93d3ac771bdd148b65de42cea455110cada231bf142dfbc0a11c22cdd",
+  "owner-identity.json": "d7650b5eebb7b5693bbc07ffc02f9bd789329605c8adbc67ee00971202a59b37",
+  "ownership-proof.json": "699207bcb460b97d45d914720caeaaf8bf2c94fc965d99e92add96195bac6a9b",
+  "verification.json": "e9a7b79dc4d7ca03daadd2ef487ffb0c2bf36484665b752545efbec962903886"
+}

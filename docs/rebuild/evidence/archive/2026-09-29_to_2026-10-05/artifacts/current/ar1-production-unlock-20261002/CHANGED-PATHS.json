@@ -1,0 +1,14 @@
+[
+  "docs/rebuild/widget-release-programme/AR1-PRODUCTION-EXECUTION-CONTRACT.md",
+  "maya-saas-backend/src/entitlements/widget-release-policy.service.ts",
+  "maya-saas-backend/src/entitlements/widget-release-production.contract.ts",
+  "maya-saas-backend/src/entitlements/widget-release-production.spec.ts",
+  "maya-saas-backend/src/entitlements/widget-release-profile.contract.ts",
+  "maya-saas-backend/src/entitlements/widget-release.contract.ts",
+  "maya-saas-backend/src/entitlements/widget-release.service.ts",
+  "maya-saas-backend/test/widgets-live/mutations/gatePU.json",
+  "maya-saas-backend/test/widgets-live/support/widget-production-proof.ts",
+  "maya-saas-backend/test/widgets-live/support/widget-profile-proof.ts",
+  "maya-saas-backend/test/widgets-live/widget-production.binary-spec.ts",
+  "maya-saas-backend/test/widgets-live/widget-production.live-spec.ts"
+]

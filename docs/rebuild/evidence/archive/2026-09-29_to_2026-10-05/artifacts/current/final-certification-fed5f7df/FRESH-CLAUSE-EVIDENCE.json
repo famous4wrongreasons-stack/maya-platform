@@ -1,0 +1,4888 @@
+{
+  "contract": "maya.fresh-profile-clause-evidence/1",
+  "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "profile": "closed-input.no-handoff@1",
+  "sourceDispositionReference": "outputs/source-certification/MATRIX-REVIEW.json (row identities/state only; no historical proof admitted)",
+  "fullContractCertified": false,
+  "certifiedForProfile": false,
+  "counts": {
+    "L-T": 4,
+    "L": 137,
+    "U": 22,
+    "false": 2
+  },
+  "profileApplicableFalse": 0,
+  "globalFalse": 2,
+  "manifestSha256": "a207af1a14f815d8ba5d430576d282b5dc08febf47da097c18be965bd1f1a49f",
+  "completeMutationCertification": "STOP: repeated red native unmutated AR live baselines; programme incomplete",
+  "rows": [
+    {
+      "gate": "1",
+      "id": "G1-a",
+      "state": "L-T",
+      "classification": "ADMITTED",
+      "text": "HMAC valid: seal verified, keyed, before Gate 1 proceeds",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 2,
+          "test_id": "E1-G1-SEAL",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L-T",
+          "recorded_at": "2026-09-30T14:19:17.483Z",
+          "record_hash": "218577daaedef36eb0ef738b3cbc01e50be0c66c13ffef2e693d13665247c172"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "1",
+      "id": "G1-b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`widget_id` matches",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "1",
+      "id": "G1-c",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "not expired",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "1",
+      "id": "G1-d",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "not consumed when `single_use`",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "1",
+      "id": "G1-e",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "not superseded",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "1",
+      "id": "G1-f",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`EXPIRED`/`SUPERSEDED` are response outcomes, with the R3.9.4 successor or the code alone (including A4's three fail-closed conditions)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "1",
+      "id": "G1-g",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the successor reads nothing canonical (no projector or owner port; `EP-BUILD`)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "2",
+      "id": "G2-a",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "session resolved exactly as for a typed message (JWT + Membership, or a verified ClientChannelLink): the same transport chain as `POST /api/ai/chat`, proven by G2-EQ (D-16). `C9Authority.current` in `T` is the K1/K3 principal of Gates 1, 3, 5 and 6, not this clause",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        },
+        {
+          "manifestLine": 27,
+          "test_id": "PR-G2EQ-BIN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateP-principal.cases.ts",
+          "claim": null,
+          "recorded_at": "2026-09-30T14:24:15.105Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "2",
+      "id": "G2-b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "no credential comes from the widget",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "2",
+      "id": "G2-c",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`REFUSED/unauthenticated`",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "3",
+      "id": "G3-a",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`principal_proof_hash === c9PrincipalHash(live)`, constant time",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "3",
+      "id": "G3-b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "a token minted for A and replayed by B fails",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "3",
+      "id": "G3-c1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "membership re-create or role change invalidates outstanding envelopes (the membership branch of K4, C11:2546)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "3",
+      "id": "G3-c2",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "client-link unlink/relink invalidates outstanding envelopes (the CLIENT_CHANNEL branch; U candidate, K14-10)",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "3",
+      "id": "G3-d",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`REFUSED/widget_principal_mismatch`",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "3",
+      "id": "G3-e",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "a shared push is inert: a web-push token minted for A and submitted by B is refused, NW (T-3)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "3",
+      "id": "G3-f",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "a forwarded Telegram message is inert (U candidate: K14-10 PKT:485, R-03/P-33)",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "4",
+      "id": "G4-a",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`TenantContextService.assertTenantId` over the record's tenant and the live principal's",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "4",
+      "id": "G4-b",
+      "state": "L-T",
+      "classification": "ADMITTED",
+      "text": "`REFUSED/tenant_mismatch`",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 5,
+          "test_id": "E1-G4-INDEP",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L-T",
+          "recorded_at": "2026-09-30T14:19:19.766Z",
+          "record_hash": "f89881d139b7b8922e6453f6496dde19c0cfc879bcd5993af17958ceb860d08d"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "5",
+      "id": "G5-a",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "floor re-derived from the live registry and policy tables",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "5",
+      "id": "G5-b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "compared with the server-derived level (K1/K2, in `T`)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "5",
+      "id": "G5-c",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "capped by `profile.max_verification_level`",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "5",
+      "id": "G5-d",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "branch per effect class",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "5",
+      "id": "G5-e",
+      "state": "L-T",
+      "classification": "ADMITTED",
+      "text": "any stored/recomputed difference → `SUPERSEDED/policy_floor_changed` + successor or the code alone, with the non-durable `widget_floor_divergence` counter",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 3,
+          "test_id": "E1-G5-FLOOR",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L-T",
+          "recorded_at": "2026-09-30T14:19:18.130Z",
+          "record_hash": "ec08b8b393aed6c5c85b56c9026df4ca7fc76fc10c653ee8e6b5f35e1357aa34"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "5",
+      "id": "G5-f",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "`NEEDS_SECOND_CHANNEL`/`HANDOFF_REQUIRED` + deep link (U candidate, K6/F53; mechanism blocked on OD-4 + P-12; never Gate 13's `HandoffTarget`)",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "dispatch on `subjectCapability(record)`, bound once",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`authority_hint` not read",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "a never-rendered widget still cannot act",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`REFUSED/insufficient_authority`, AuthorityResolver",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "null subject → proceeds with no owner call",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-6",
+      "state": "false",
+      "classification": "HANDOFF_STOP",
+      "text": "HANDOFF: destination fences only (registration, F48, `targetFloor('s')`, landing ingress)",
+      "freshEvidence": [],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": false
+    },
+    {
+      "gate": "6",
+      "id": "G6-7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "HANDOFF never resolves `assertCanExecute`, `c9Capability` or the allowlist",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "(a) allowlist row",
+      "freshEvidence": [
+        {
+          "manifestLine": 13,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.998Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 31,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-9",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "(b) `policyDecision === 'ALLOW'`",
+      "freshEvidence": [
+        {
+          "manifestLine": 13,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.998Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 31,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-10",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "(c) `authenticated_request`",
+      "freshEvidence": [
+        {
+          "manifestLine": 13,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.998Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 31,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-11",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "(d) live principal role ∈ `allowedActorRoles`",
+      "freshEvidence": [
+        {
+          "manifestLine": 13,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.998Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 31,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-12",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "(e) entitlements grant `requiredFeatures`",
+      "freshEvidence": [
+        {
+          "manifestLine": 13,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.998Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 31,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-13",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "Gate 14 governs; a disagreement is refused and counted",
+      "freshEvidence": [
+        {
+          "manifestLine": 7,
+          "test_id": "AR-G6-REVOCATION",
+          "entry": "HTTP",
+          "source": "test/widgets-live/release-revocation.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:39.771Z",
+          "record_hash": "8ea944fba8a336b3c4757cc447e10875d177276ac864de8639f7fd12661bf5b7"
+        },
+        {
+          "manifestLine": 21,
+          "test_id": "AR-G6-REVOCATION",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateAR-revocation.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:07.348Z",
+          "record_hash": "4a2e2ca7e07426bbcc0a6ddd867f9709eb2bed70e71063fa23fca8d01e438b60"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-14",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the 47: `assertCanExecute(principal, def)` with surface `'web'`",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-15",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "non-catalogue: `WIDGET_CAPABILITY_POLICY` row (build totality + positive)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-16",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`c9Capability` when `c9_domain !== null`, including BI non-READ",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-17",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "run-less: `c9Capability` not applied",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-18",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "CONTROL: `CONTROL_FLOOR[ref.key]` at Gate 5, Gate 3's principal binding, Gate 4's tenant assertion, then the one registered handler's own principal and tenant check (R3.2.4, C11:4771-4773); no execute-admission test",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-19",
+      "state": "L-T",
+      "classification": "ADMITTED",
+      "text": "TOOL unreachable/refused",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 4,
+          "test_id": "E1-G6-TOOL",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L-T",
+          "recorded_at": "2026-09-30T14:19:18.695Z",
+          "record_hash": "ea22928bc22222dec122ec7a2295116a0187eb5043e6dbcf38e80fe5b6bfba0a"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-20",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "a raise is the refusal",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "6",
+      "id": "G6-FR14",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "reads Membership/Staff/Client binding, never `presentation_mode`/`profile_id`/`a11y_env` (FR-14 C11:1798)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "effect within the kind's ceiling over `widget_kind`",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "key space matches effect (R3.2.2)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "CONTROL keys in the control registry",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "COMMIT carries a non-null `confirmation_of_ref`",
+      "freshEvidence": [
+        {
+          "manifestLine": 13,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.998Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 31,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "kind ≠ draft → non-null `produced_by_intent_token_hash` satisfying §3.10.2",
+      "freshEvidence": [
+        {
+          "manifestLine": 8,
+          "test_id": "BS-SOURCE-RESCHEDULE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/personal-source.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:13.187Z",
+          "record_hash": "7f12eba78c228f42d62dd8a120ad7df28cd12bdb58abe1e1030fa282f8a6e8e1"
+        },
+        {
+          "manifestLine": 9,
+          "test_id": "BS-SOURCE-CANCEL",
+          "entry": "HTTP",
+          "source": "test/widgets-live/personal-source.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:14.721Z",
+          "record_hash": "54dc07624beec6fcc7bdb1e5adcc3f7121f35bca088a87826ec7ab33dbbc0f07"
+        },
+        {
+          "manifestLine": 22,
+          "test_id": "BS-SOURCE-RESCHEDULE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateBS.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:09.790Z",
+          "record_hash": "d86bd2d69f3685e7291df986bb257e2a5d3d4fd5b91f2c9840ea236b8fd2f3dc"
+        },
+        {
+          "manifestLine": 23,
+          "test_id": "BS-SOURCE-CANCEL",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateBS.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:10.643Z",
+          "record_hash": "9d7978c6c01bf9c0bd8211ee440f34a80724d133fc98d94087b4b0d1263a2a0d"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`requiredConfirmationKind(subject) === widget_kind`, re-read live (F72)",
+      "freshEvidence": [
+        {
+          "manifestLine": 13,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.998Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 31,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the delivering tier was permitted this effect (§3.12)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the two codes",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-BOOK1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "BOOK.1 subject = `confirmation_subject` (C11:3109)",
+      "freshEvidence": [
+        {
+          "manifestLine": 8,
+          "test_id": "BS-SOURCE-RESCHEDULE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/personal-source.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:13.187Z",
+          "record_hash": "7f12eba78c228f42d62dd8a120ad7df28cd12bdb58abe1e1030fa282f8a6e8e1"
+        },
+        {
+          "manifestLine": 9,
+          "test_id": "BS-SOURCE-CANCEL",
+          "entry": "HTTP",
+          "source": "test/widgets-live/personal-source.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:14.721Z",
+          "record_hash": "54dc07624beec6fcc7bdb1e5adcc3f7121f35bca088a87826ec7ab33dbbc0f07"
+        },
+        {
+          "manifestLine": 22,
+          "test_id": "BS-SOURCE-RESCHEDULE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateBS.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:09.790Z",
+          "record_hash": "d86bd2d69f3685e7291df986bb257e2a5d3d4fd5b91f2c9840ea236b8fd2f3dc"
+        },
+        {
+          "manifestLine": 23,
+          "test_id": "BS-SOURCE-CANCEL",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateBS.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:10.643Z",
+          "record_hash": "9d7978c6c01bf9c0bd8211ee440f34a80724d133fc98d94087b4b0d1263a2a0d"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-FR6b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "exactly one pairing (C11:1786)",
+      "freshEvidence": [
+        {
+          "manifestLine": 15,
+          "test_id": "WF-PAIRING",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.998Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 33,
+          "test_id": "WF-PAIRING",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "7",
+      "id": "G7-FR6d",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "no MONEY actuation; `PAYMENT_HANDOFF` gap-blocked; F80 (C11:1788, 1524)",
+      "freshEvidence": [
+        {
+          "manifestLine": 16,
+          "test_id": "AR-FR6D-NONMONEY",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.998Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 34,
+          "test_id": "AR-FR6D-NONMONEY",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "closed-domain membership (per field)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "cardinality",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-3",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "bounds re-read from `bounds_source`",
+      "freshEvidence": [
+        {
+          "manifestLine": 19,
+          "test_id": "D8-U",
+          "entry": "HTTP",
+          "source": "test/widgets-live/closed-release-scope.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:21:48.350Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-4",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "normalizers applied",
+      "freshEvidence": [
+        {
+          "manifestLine": 19,
+          "test_id": "D8-U",
+          "entry": "HTTP",
+          "source": "test/widgets-live/closed-release-scope.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:21:48.350Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-5t",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "`c9SafeText` over **text** values",
+      "freshEvidence": [
+        {
+          "manifestLine": 19,
+          "test_id": "D8-U",
+          "entry": "HTTP",
+          "source": "test/widgets-live/closed-release-scope.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:21:48.350Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-5p",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "`c9SafeText` over **phone** values (U candidate, PKT:469)",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`max_total_bytes` by refusal",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "inputs on a null schema refused",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the four codes",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-SCHEMA",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "server-held and hash-bound; erased or absent → `SUPERSEDED/handle_stale`; hash failure is a fault (B-10)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-SHAPE",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "undeclared keys and kind conformance",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-LABELS",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "labels from validated members; no write before 9 (R3.9.1/R3.9.2)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8",
+      "id": "G8-DENY",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "a `c9Deny` is a verdict (R3.9.3)",
+      "freshEvidence": [
+        {
+          "manifestLine": 19,
+          "test_id": "D8-U",
+          "entry": "HTTP",
+          "source": "test/widgets-live/closed-release-scope.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:21:48.350Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-0",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "reachable on the live path",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "applies exactly when `confirmation?.requires_readback === true`",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-1a",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "recomputed at ingress from effect and tier (B-17)",
+      "freshEvidence": [
+        {
+          "manifestLine": 12,
+          "test_id": "WF-READBACK-DIVERGENCE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L-T",
+          "recorded_at": "2026-09-30T14:20:57.997Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 17,
+          "test_id": "WF-READBACK-POSITIVE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.998Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 20,
+          "test_id": "WF-U-R1A",
+          "entry": "HTTP",
+          "source": "test/widgets-live/final-u-scope.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:21:48.411Z",
+          "record_hash": null
+        },
+        {
+          "manifestLine": 30,
+          "test_id": "WF-READBACK-DIVERGENCE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L-T",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        },
+        {
+          "manifestLine": 35,
+          "test_id": "WF-READBACK-POSITIVE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-2",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "ack present (`readback_missing`)",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-3",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "`readback_ref` matches",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-4",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "`body_hash` matches (H4 integrity)",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-5",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "affirmation ∈ the closed vocabulary for the locale",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "an ack on a record that does not require one (including a null confirmation) is refused",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "8-R",
+      "id": "R-7",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "refuses, never repairs; the affirmation is never logged or echoed",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "render",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.1a",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "R3.9.2 labels only, no `inputs` parameter",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.1b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "one slot",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "appended to the conversation",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "as a USER turn",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "authority NONE (E10)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "first durable write (R3.9.1, E11)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "byte-identical to a typed message from here",
+      "freshEvidence": [
+        {
+          "manifestLine": 10,
+          "test_id": "TURN-CANONICAL",
+          "entry": "HTTP",
+          "source": "test/widgets-live/user-turn-canonical.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:21.277Z",
+          "record_hash": "133b7257d0715d14eba980e8258d3c5f27b31fb330b654f599e2951e9cab76a7"
+        },
+        {
+          "manifestLine": 28,
+          "test_id": "TURN-CANONICAL",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateTURN.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:16.600Z",
+          "record_hash": "ff65697ab29d8dead93ac00c6633aa7a755765854ddf2f116f20aaa2ee79ad89"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "DS-03 A: superseded/handle_stale, no turn, no effect, no guessed label",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "runs in chat ingress",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.9",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`rendered_utterance`/`selected_labels` persisted",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "9",
+      "id": "9.10",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "F15: lowered content read only by Gate 10",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "router over the lowering against live intents",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`routeUtterance` (pure, pre-LLM, escape first)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`liveCandidates`",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`u`, `s`, `q`",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`ownerSet`/`sameOwner`, undefined fails closed",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the first row that holds decides",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "exactly one audit record per non-AGREE, in `T`, with its members",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "REFUSE → `intent_divergence`; NULL/AUDIT recorded, not refused",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.9",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "widget-layer records only; never substitutes",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.10",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the R3.12.4 fixture duty at `EP-BUILD`",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.11",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "intent router",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.R1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "row 1 of «Gate 10 in full»",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.R2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "row 2 of «Gate 10 in full»",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.R3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "row 3 of «Gate 10 in full»",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.R4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "row 4 of «Gate 10 in full»",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.R5",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "row 5 of «Gate 10 in full» (null subject with a non-null match of the same effect)",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.R6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "row 6 of «Gate 10 in full»",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "10",
+      "id": "10.R7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "row 7 of «Gate 10 in full»",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-R1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "fresh read from the canonical owner",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-R2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "witnesses compared, not re-read",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-R3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "value divergence → SUPERSEDED with a rendered diff",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-R4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`handle_stale`",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-R5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "IntentGateway + owner",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "R3.7.3 nouns never travel to the client",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "R3.7.4 Handle/Witness types",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "F15 exactly seven inputs",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I4",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "R3.11.1 approval decision reads nouns from the decision record",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I5",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "R3.11.3 reject and re-mint",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I6",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "R3.11.4 both checks in order",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "RT3(b)/B-21",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "R3.9.3 rendering",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I9",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "BOOK.4 booking nouns",
+      "freshEvidence": [
+        {
+          "manifestLine": 8,
+          "test_id": "BS-SOURCE-RESCHEDULE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/personal-source.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:13.187Z",
+          "record_hash": "7f12eba78c228f42d62dd8a120ad7df28cd12bdb58abe1e1030fa282f8a6e8e1"
+        },
+        {
+          "manifestLine": 9,
+          "test_id": "BS-SOURCE-CANCEL",
+          "entry": "HTTP",
+          "source": "test/widgets-live/personal-source.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:14.721Z",
+          "record_hash": "54dc07624beec6fcc7bdb1e5adcc3f7121f35bca088a87826ec7ab33dbbc0f07"
+        },
+        {
+          "manifestLine": 22,
+          "test_id": "BS-SOURCE-RESCHEDULE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateBS.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:09.790Z",
+          "record_hash": "d86bd2d69f3685e7291df986bb257e2a5d3d4fd5b91f2c9840ea236b8fd2f3dc"
+        },
+        {
+          "manifestLine": 23,
+          "test_id": "BS-SOURCE-CANCEL",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateBS.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:10.643Z",
+          "record_hash": "9d7978c6c01bf9c0bd8211ee440f34a80724d133fc98d94087b4b0d1263a2a0d"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "11",
+      "id": "G11-I10",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "E13 re-enters approval",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-R1a",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "REFINE body by the projector",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-R1b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "NAVIGATE body by the projector",
+      "freshEvidence": [
+        {
+          "manifestLine": 18,
+          "test_id": "NS-SOURCE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/navigation-source.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:21:05.801Z",
+          "record_hash": "4fded6a34d66e4e44528f698490ce79e643067ca8f49acfab687516e96e36306"
+        },
+        {
+          "manifestLine": 25,
+          "test_id": "NS-SOURCE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateNS.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.755Z",
+          "record_hash": "198062f7e91cbe37f277026ea8603c9048d5e6e9208cb2985a8dd7e7ed7ed40c"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-R2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the same projector",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-R3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the same enforcement call sites (F95 remainder)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-R4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "no widget PII path",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-R5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "masked body, never a leak",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-R6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "runs in the projector (pointer slot)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "F7",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "L2",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "B-16",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "P9/P10",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "K18",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`allowedKinds`/B-27",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "B-02/F18",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "B-03",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I9",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "RT4/RT4a",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I10",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "FR-14/R3.8.3",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "12",
+      "id": "G12-I11",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "K16",
+      "freshEvidence": [
+        {
+          "manifestLine": 18,
+          "test_id": "NS-SOURCE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/navigation-source.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:21:05.801Z",
+          "record_hash": "4fded6a34d66e4e44528f698490ce79e643067ca8f49acfab687516e96e36306"
+        },
+        {
+          "manifestLine": 25,
+          "test_id": "NS-SOURCE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateNS.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.755Z",
+          "record_hash": "198062f7e91cbe37f277026ea8603c9048d5e6e9208cb2985a8dd7e7ed7ed40c"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R1",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "NONE unreachable",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R2",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "NAVIGATE → projector → `next_envelope`",
+      "freshEvidence": [
+        {
+          "manifestLine": 18,
+          "test_id": "NS-SOURCE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/navigation-source.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:21:05.801Z",
+          "record_hash": "4fded6a34d66e4e44528f698490ce79e643067ca8f49acfab687516e96e36306"
+        },
+        {
+          "manifestLine": 25,
+          "test_id": "NS-SOURCE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateNS.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.755Z",
+          "record_hash": "198062f7e91cbe37f277026ea8603c9048d5e6e9208cb2985a8dd7e7ed7ed40c"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "REFINE → projector → `next_envelope`",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "terminates; no business effect from a selector",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "CONTROL → the one registered control handler, which performs its own principal and tenant check; no Action Engine edge (row 13, C11:4733; R3.2.4). Sub-cases: dismiss, `run.cancel`, `delivery.resolve` (the last needs P-17)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R5b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the R3.2.4 source test: each handler module imports no Prisma model outside the widget layer's own except through its owner endpoint (`EP-BUILD`, C11:3852-3861)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "DRAFT → draft owner",
+      "freshEvidence": [
+        {
+          "manifestLine": 11,
+          "test_id": "WR-DRAFT-CREATE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.997Z",
+          "record_hash": "7e897ff83f6f11df19a599f679dfdb457bd96cc9e61272b221ed00fca412cde0"
+        },
+        {
+          "manifestLine": 29,
+          "test_id": "WR-DRAFT-CREATE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.895Z",
+          "record_hash": "4ba6b60c7b8bf1dad5e9b7cd51447d0091d8b473c3c9c87f82cd6d81d11bba51"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R7",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "REQUEST_APPROVAL → approval object → PENDING",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R8",
+      "state": "false",
+      "classification": "HANDOFF_STOP",
+      "text": "HANDOFF → one `HandoffTarget`, no capability invoked",
+      "freshEvidence": [],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": false
+    },
+    {
+      "gate": "13",
+      "id": "G13-R9",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "COMMIT → Gate 14 with a server-minted key",
+      "freshEvidence": [
+        {
+          "manifestLine": 13,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.998Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 31,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-R10",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "closed per-class switch (FR-1/B-28)",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I1",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "`approval_decision` routing",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I2",
+      "state": "U",
+      "classification": "ACCEPTABLE_U_CLASS",
+      "text": "R3.11.3",
+      "freshEvidence": [
+        {
+          "manifestLine": 6,
+          "test_id": "E1-U-CLASS",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "U",
+          "recorded_at": "2026-09-30T14:19:19.867Z",
+          "record_hash": null
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I3",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "F74/F75 consumption",
+      "freshEvidence": [
+        {
+          "manifestLine": 8,
+          "test_id": "BS-SOURCE-RESCHEDULE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/personal-source.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:13.187Z",
+          "record_hash": "7f12eba78c228f42d62dd8a120ad7df28cd12bdb58abe1e1030fa282f8a6e8e1"
+        },
+        {
+          "manifestLine": 9,
+          "test_id": "BS-SOURCE-CANCEL",
+          "entry": "HTTP",
+          "source": "test/widgets-live/personal-source.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:14.721Z",
+          "record_hash": "54dc07624beec6fcc7bdb1e5adcc3f7121f35bca088a87826ec7ab33dbbc0f07"
+        },
+        {
+          "manifestLine": 22,
+          "test_id": "BS-SOURCE-RESCHEDULE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateBS.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:09.790Z",
+          "record_hash": "d86bd2d69f3685e7291df986bb257e2a5d3d4fd5b91f2c9840ea236b8fd2f3dc"
+        },
+        {
+          "manifestLine": 23,
+          "test_id": "BS-SOURCE-CANCEL",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateBS.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:10.643Z",
+          "record_hash": "9d7978c6c01bf9c0bd8211ee440f34a80724d133fc98d94087b4b0d1263a2a0d"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I4",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "L7/L8/L10",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I5",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "FR2/B-29 receipts",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I6",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "F15 AUDIT_RETAINED only",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I7",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "F33/F76",
+      "freshEvidence": [
+        {
+          "manifestLine": 14,
+          "test_id": "WR-COMMIT-ACTION-BOUNDARY",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.998Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 32,
+          "test_id": "WR-COMMIT-ACTION-BOUNDARY",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I8",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "FR-11/R3.9.3",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "13",
+      "id": "G13-I9",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "R3.11.6 approver test / P-27",
+      "freshEvidence": [
+        {
+          "manifestLine": 1,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "HTTP",
+          "source": "test/widgets-live/e1-production-trigger.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:19:16.703Z",
+          "record_hash": "dd9d75d341f10430ae4e5135465c12986e03a60ec2f834aa6346d2e1de0b5a7c"
+        },
+        {
+          "manifestLine": 24,
+          "test_id": "E1-T2B-CLEAN",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateE1-production.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:12.093Z",
+          "record_hash": "96229a558b6f5b1b7ac862f7d4ea7af457544db6328c32d656b4513f75d04fd3"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "14",
+      "id": "G14-a",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "`prepare()` receives the key, normalized input, server-minted idempotency key and evidence refs (every G14 key is BLOCKED-DISCHARGE until a live widget COMMIT reaches `prepare()`, E2)",
+      "freshEvidence": [
+        {
+          "manifestLine": 13,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.998Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 31,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "14",
+      "id": "G14-b",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the policy resolver owns the decision (`assertNoCallerAuthority`, `assertResolverOwnsDecision`)",
+      "freshEvidence": [
+        {
+          "manifestLine": 13,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.998Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 31,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    },
+    {
+      "gate": "14",
+      "id": "G14-c",
+      "state": "L",
+      "classification": "ADMITTED",
+      "text": "the Action Engine, never the widget, calls the provider owner",
+      "freshEvidence": [
+        {
+          "manifestLine": 13,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "HTTP",
+          "source": "test/widgets-live/wr-release.live-spec.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:20:57.998Z",
+          "record_hash": "b052863e9a002e008f5382cc7868a4b7e1dca5ba949ee5847bfb207e6eff1e8e"
+        },
+        {
+          "manifestLine": 31,
+          "test_id": "WR-COMMIT-CREATE",
+          "entry": "BIN",
+          "source": "scripts/widgets-http-proof/gateWR-release.cases.ts",
+          "claim": "L",
+          "recorded_at": "2026-09-30T14:24:17.896Z",
+          "record_hash": "d32178f4a24d0523a60f6048604e85f57280bfd9cfc84c0c31b63785baa9fff7"
+        }
+      ],
+      "certified": false,
+      "mutationCertification": "PENDING full unrestricted native aggregation",
+      "profileApplicable": true
+    }
+  ],
+  "countMeaning": "Source/contract disposition with fresh manifest coverage; not a completed release-certificate threshold."
+}

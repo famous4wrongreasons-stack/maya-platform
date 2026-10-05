@@ -1,0 +1,298 @@
+{
+  "candidate": "30fa24698f3ae277c22209e8edfd448c29e4f872",
+  "templatesOnly": true,
+  "priorResultsCopied": false,
+  "substitutions": {
+    "2141e24544b5157c6341b649661d0cd3a2c21c48": "30fa24698f3ae277c22209e8edfd448c29e4f872",
+    "final-certification-2141e245": "final-certification-30fa2469",
+    "final2141": "final30fa"
+  },
+  "files": [
+    {
+      "template": "work/final-certification-2141e245/assemble-complete.py",
+      "target": "work/final-certification-30fa2469/assemble-complete.py",
+      "templateSha256": "da496aa3c55615a5753949b51503147a4b2288b8bab55fb0e9495decf9af5ba5",
+      "targetSha256": "403f99d50697f5fdd2e240441aa2180b3102720e2b05cc51ed6c2862e21d6d04"
+    },
+    {
+      "template": "work/final-certification-2141e245/bin-cases/gateNETBIN.cases.ts",
+      "target": "work/final-certification-30fa2469/bin-cases/gateNETBIN.cases.ts",
+      "templateSha256": "dd28ca189998cb162d9f1445713e13986db5b71950526c3f199be3caf84d5e15",
+      "targetSha256": "d842646b6f54af9ad92d84679b729d701cf655f69f0f9afa485fe78618b2cca1"
+    },
+    {
+      "template": "work/final-certification-2141e245/check-ci-postconditions.py",
+      "target": "work/final-certification-30fa2469/check-ci-postconditions.py",
+      "templateSha256": "118529b89c2a57aeca5469e33883d878be89e9f1635ac92dac3186630a2818b8",
+      "targetSha256": "b3a40317415a217c4d2a20ed5aee8256fad6426136db7af7699f12215cde65cd"
+    },
+    {
+      "template": "work/final-certification-2141e245/compiled-bin-cases/gateCOMPILEDBIN.cases.ts",
+      "target": "work/final-certification-30fa2469/compiled-bin-cases/gateCOMPILEDBIN.cases.ts",
+      "templateSha256": "d20c097aa881ec67590338f3b77af66573d270e6a4239f3231078b40d4fc993b",
+      "targetSha256": "08bd40989d626288994f4becdf702781be751e674f32fc2e9f8568bc62b45ae8"
+    },
+    {
+      "template": "work/final-certification-2141e245/compiled-receipt-bin-cases/gateRECEIPTBIN.cases.ts",
+      "target": "work/final-certification-30fa2469/compiled-receipt-bin-cases/gateRECEIPTBIN.cases.ts",
+      "templateSha256": "cc3d4692abf6d9d33d07a8bb95616c4aafdb229febedd276a6ec1165d15a2c84",
+      "targetSha256": "989720988b3c29cf1541e8fae4b709a0e1ea676d01ff888c77a5b12ef4f193e8"
+    },
+    {
+      "template": "work/final-certification-2141e245/finalize-fbe2e.py",
+      "target": "work/final-certification-30fa2469/finalize-fbe2e.py",
+      "templateSha256": "fa6e8eae1c9b7f0466c729d83d3425e998092ae5990cd2d2e56751d48bfea2ae",
+      "targetSha256": "dc40a126b042c2a9d21058d322fed27b9a29d034131d5c43a28fbbf4c57d3f3b"
+    },
+    {
+      "template": "work/final-certification-2141e245/finalize-receipts.py",
+      "target": "work/final-certification-30fa2469/finalize-receipts.py",
+      "templateSha256": "0cd5f1dffd02f3f343a6f2661a587ffab22565bae71b77b9394b88730adb5206",
+      "targetSha256": "2062b6519aa83491f9ed864c7758a1c3310c82b16fe8edc8bf53a7c205f12a5b"
+    },
+    {
+      "template": "work/final-certification-2141e245/index-fresh-artifacts.py",
+      "target": "work/final-certification-30fa2469/index-fresh-artifacts.py",
+      "templateSha256": "e6d445a88823908d6f3f1814bfb32062dcc4359fb16bc3cca1f36939896eb737",
+      "targetSha256": "3d508ef1942a6eac7bdbaeee91c0d5df5d5958d96b8c30fe0b6df32f20b3dfbd"
+    },
+    {
+      "template": "work/final-certification-2141e245/index-integration-proofs.py",
+      "target": "work/final-certification-30fa2469/index-integration-proofs.py",
+      "templateSha256": "98060680e2171d37b89c1db8c0df7d0610acb2d113612fdfb5128da3114c2c63",
+      "targetSha256": "da278a9eb02fc49b14d36a5aea7b058c0be304adeb80c2a6335f8e9253b546d0"
+    },
+    {
+      "template": "work/final-certification-2141e245/jest-net-return.json",
+      "target": "work/final-certification-30fa2469/jest-net-return.json",
+      "templateSha256": "5d4888dd1909555117faaf3866cba04e6ab827cd1ae6383c4587bca269d8eb3b",
+      "targetSha256": "9a22223f77a27cd6d0d3fa19c470413abc19f299769ee4ad4ef062004bb4641e"
+    },
+    {
+      "template": "work/final-certification-2141e245/jest-net-turn.json",
+      "target": "work/final-certification-30fa2469/jest-net-turn.json",
+      "templateSha256": "3b2e4e1c2fd3b9470d3a401222208b89f5bae701b39f5f491b62651fed5a4c60",
+      "targetSha256": "2672b55adfd3a3d1b6c3ded63f6bb6910eff83040c610be11e82b1552cf7bbf2"
+    },
+    {
+      "template": "work/final-certification-2141e245/jest-return.json",
+      "target": "work/final-certification-30fa2469/jest-return.json",
+      "templateSha256": "862632d7fda50e5d11bf6d71b8f35a608ca52447ef63ad6a46f443db2ed910bb",
+      "targetSha256": "7393843001d2b5ba9c2d4bce470e30e962532d60cff044ad6167973fa1edaa52"
+    },
+    {
+      "template": "work/final-certification-2141e245/launch-native.py",
+      "target": "work/final-certification-30fa2469/launch-native.py",
+      "templateSha256": "df62fae7f66903399b0759e4d7561979c3c951ff224eb7a7ee5534556c03ffd2",
+      "targetSha256": "f4cf2fa041faa4ada30efcec1e640ae07d28cb53b93dd72b5e4c276ddfff38a3"
+    },
+    {
+      "template": "work/final-certification-2141e245/postcommit-bin-cases/gateL27.cases.ts",
+      "target": "work/final-certification-30fa2469/postcommit-bin-cases/gateL27.cases.ts",
+      "templateSha256": "b57ea82dce8ec25bbe5d1762970eb5b1d037307fb04ec13c503f38fc2a337d8f",
+      "targetSha256": "9cc062d026e804f19fe8e44555407c4156da94c8e4f4c3a0da28150bfb721e6b"
+    },
+    {
+      "template": "work/final-certification-2141e245/preflight-l27.py",
+      "target": "work/final-certification-30fa2469/preflight-l27.py",
+      "templateSha256": "67243ad009a0d2b5610f07eb0168753cdba7267e9e81dba7bd905a72ee7153b0",
+      "targetSha256": "baffaeeb40a327bfa0225830d3d99c99e9579e8038c0e77bebaa93b5de175a08"
+    },
+    {
+      "template": "work/final-certification-2141e245/prepare-extra-dbs.py",
+      "target": "work/final-certification-30fa2469/prepare-extra-dbs.py",
+      "templateSha256": "1de9acbc17dd80df58ba7a50125056784607517c37bc10c758edb3e10374bcaf",
+      "targetSha256": "a4a41f2d3a154775a69a11eba00345c1c31802aa6ce4dee66de88825b0b33989"
+    },
+    {
+      "template": "work/final-certification-2141e245/probes/compiled-net-receipt.mjs",
+      "target": "work/final-certification-30fa2469/probes/compiled-net-receipt.mjs",
+      "templateSha256": "34add2526b3328992f80f83c3f20e7c9eb7a98d1bc9348bfffb37f592c8950d0",
+      "targetSha256": "34add2526b3328992f80f83c3f20e7c9eb7a98d1bc9348bfffb37f592c8950d0"
+    },
+    {
+      "template": "work/final-certification-2141e245/probes/compiled-net-return.mjs",
+      "target": "work/final-certification-30fa2469/probes/compiled-net-return.mjs",
+      "templateSha256": "cc7b61be0964ee7a9542bcd9ae48b671c876df1e26443187969172638366c54e",
+      "targetSha256": "cc7b61be0964ee7a9542bcd9ae48b671c876df1e26443187969172638366c54e"
+    },
+    {
+      "template": "work/final-certification-2141e245/probes/compiled-postcommit-dismiss.mjs",
+      "target": "work/final-certification-30fa2469/probes/compiled-postcommit-dismiss.mjs",
+      "templateSha256": "b17dae22400e024cb96af4cfd0f89a4cce1c5060e5da12ff87e96c5c8937940b",
+      "targetSha256": "b17dae22400e024cb96af4cfd0f89a4cce1c5060e5da12ff87e96c5c8937940b"
+    },
+    {
+      "template": "work/final-certification-2141e245/probes/source-net-return.mjs",
+      "target": "work/final-certification-30fa2469/probes/source-net-return.mjs",
+      "templateSha256": "369b3f1a1ae5dee0d3699e218ac86aca03f99bf0470f1870df20561e0bcfcf23",
+      "targetSha256": "369b3f1a1ae5dee0d3699e218ac86aca03f99bf0470f1870df20561e0bcfcf23"
+    },
+    {
+      "template": "work/final-certification-2141e245/probes/source-net-return.probe-spec.ts",
+      "target": "work/final-certification-30fa2469/probes/source-net-return.probe-spec.ts",
+      "templateSha256": "f348d518f7c0a456819fd44e81e07b533a5b4a988c2b01dd13cdedad3a5916b4",
+      "targetSha256": "6795251c883c980ef263b69d4bc768f4a7bf70ca7caad558ff03a02ea32fd4b0"
+    },
+    {
+      "template": "work/final-certification-2141e245/probes/source-net-turn.mjs",
+      "target": "work/final-certification-30fa2469/probes/source-net-turn.mjs",
+      "templateSha256": "765485845cda61c2f55aaf73be0519270c1b5a991ee7dccbc6b3c92c5adc50d0",
+      "targetSha256": "765485845cda61c2f55aaf73be0519270c1b5a991ee7dccbc6b3c92c5adc50d0"
+    },
+    {
+      "template": "work/final-certification-2141e245/probes/source-net-turn.probe-spec.ts",
+      "target": "work/final-certification-30fa2469/probes/source-net-turn.probe-spec.ts",
+      "templateSha256": "0185925d5db5fd8c788471e6a4612a1161b3e10cd92f809b115b1ebc28379b91",
+      "targetSha256": "073367995132dcdf739a4c6c328f3a9e4014232299c15a8a59c46e09d9c224b8"
+    },
+    {
+      "template": "work/final-certification-2141e245/probes/source-return.mjs",
+      "target": "work/final-certification-30fa2469/probes/source-return.mjs",
+      "templateSha256": "e4cc3f892b873ece152f63072e03b2a539e1b8b631db1361bc4bdc07d1fb11f2",
+      "targetSha256": "e4cc3f892b873ece152f63072e03b2a539e1b8b631db1361bc4bdc07d1fb11f2"
+    },
+    {
+      "template": "work/final-certification-2141e245/probes/source-return.probe-spec.ts",
+      "target": "work/final-certification-30fa2469/probes/source-return.probe-spec.ts",
+      "templateSha256": "d6c614077c09ab86b87a7bd90f071db5c6d05e64d07387a569bedd569e55dc24",
+      "targetSha256": "4dea5ea5ef6b39b79bf256f35be8e99daf158c0aa531e279672e4380b43b1e73"
+    },
+    {
+      "template": "work/final-certification-2141e245/prove-l12-delta.cjs",
+      "target": "work/final-certification-30fa2469/prove-l12-delta.cjs",
+      "templateSha256": "2d815ecb5c59715b88faba4c0d3a74e2c718e1c615d7d09da0e1aa17c4564cb8",
+      "targetSha256": "2f13f9d9538f7ee07c683be8ac96fb717f8e36857b5a38261f7b73d8e74d5449"
+    },
+    {
+      "template": "work/final-certification-2141e245/prove-requested-baselines.py",
+      "target": "work/final-certification-30fa2469/prove-requested-baselines.py",
+      "templateSha256": "632906c71681028b65be13e9eb890a5d4563594f769786e8a92549c5ba657145",
+      "targetSha256": "a9e4248afa661f28ea869ecc5e1e734dc32697c8cc5a186aeff7c5a151f2d411"
+    },
+    {
+      "template": "work/final-certification-2141e245/run-after-surfaces.py",
+      "target": "work/final-certification-30fa2469/run-after-surfaces.py",
+      "templateSha256": "75a5945a27b827a35fe33e2b6d754716126ad4bceb550c9e25967371411d447a",
+      "targetSha256": "599772936385188dbdf2f184a6b61edc1ec0d84618be80e397333dbfa57816de"
+    },
+    {
+      "template": "work/final-certification-2141e245/run-all-mutations-isolated.py",
+      "target": "work/final-certification-30fa2469/run-all-mutations-isolated.py",
+      "templateSha256": "2aa8b77ccc55b26a766ff26dba726ef414eb78c191af1ac7510ac037416d06d0",
+      "targetSha256": "0774874f410939abd3ea28cf08a47acc3bee41d447bf064726721bebe3edfb72"
+    },
+    {
+      "template": "work/final-certification-2141e245/run-baseline.py",
+      "target": "work/final-certification-30fa2469/run-baseline.py",
+      "templateSha256": "f79b648a37baccb44d296959710842c36487bdd36bd00b44a99b1c1a7dce1871",
+      "targetSha256": "8c8393669465892f3661dd6f519e71a235e9fa733aadad7b83df4691cc62eb44"
+    },
+    {
+      "template": "work/final-certification-2141e245/run-carrier-selftest.py",
+      "target": "work/final-certification-30fa2469/run-carrier-selftest.py",
+      "templateSha256": "abfdf04b668ccd2681771d24def2ecdf3e716dd4b18de4be7543839d55b6014e",
+      "targetSha256": "a3ab6efd5a3874df3009d3e3537228bd2598b015c0d7eab5b2b27a7e91e7eac4"
+    },
+    {
+      "template": "work/final-certification-2141e245/run-compiled-bin.py",
+      "target": "work/final-certification-30fa2469/run-compiled-bin.py",
+      "templateSha256": "24ae12d0f1f0c6f17df81773ba88963778b731f3b7d058ca6e0094ecb3b6050f",
+      "targetSha256": "4ea939fa38e24574c46cb5ecfd30cf182a9f93c9f2949d949950539fdcca1081"
+    },
+    {
+      "template": "work/final-certification-2141e245/run-compiled-receipt-bin.py",
+      "target": "work/final-certification-30fa2469/run-compiled-receipt-bin.py",
+      "templateSha256": "4e27c9182b27bfaff33b9f481928f64f22bc8ca215d33847a975e45d2bfe4742",
+      "targetSha256": "60a19602dffd038445d0d5dd3a0ae69cd6310f1d91739dc8b0d103af07d08f3c"
+    },
+    {
+      "template": "work/final-certification-2141e245/run-extra.py",
+      "target": "work/final-certification-30fa2469/run-extra.py",
+      "templateSha256": "a8e4c0fc670144ddd5678df76ca564f819ebc350a40473faff3f815f5cb76bf5",
+      "targetSha256": "3d0f4b4d33f140570822cddee6872db0fdd3a877ecaf26364b998582298b5bf4"
+    },
+    {
+      "template": "work/final-certification-2141e245/run-l27-mutations.py",
+      "target": "work/final-certification-30fa2469/run-l27-mutations.py",
+      "templateSha256": "5044db9b34b1f08844f862afa35ef4f757ca6a973ba30234d13e75fa21c2d7c8",
+      "targetSha256": "49ab2a59ad74a85e11c21cd3acd686848828d9bc1e5697dc8d98b58d543c63dd"
+    },
+    {
+      "template": "work/final-certification-2141e245/run-net-bin.py",
+      "target": "work/final-certification-30fa2469/run-net-bin.py",
+      "templateSha256": "6bc39bea70a33539e40473573220dd3b03b1d8f131c4417634791ef3a7ca4eab",
+      "targetSha256": "20c0cac02e9eff655ab888981abfd0facd63263372efdf9da34834ac69a98d60"
+    },
+    {
+      "template": "work/final-certification-2141e245/run-net-proof.py",
+      "target": "work/final-certification-30fa2469/run-net-proof.py",
+      "templateSha256": "75f0cd7e0bf9472769bcb6cdfbc51be54ea9ced8727404b9dfd7920f68f1a1bb",
+      "targetSha256": "8e05ed45cd377e666ad0bf0b2263d829993ad13ddcb564d6a41953bf5bb4cb5c"
+    },
+    {
+      "template": "work/final-certification-2141e245/run-net-turn-proof.py",
+      "target": "work/final-certification-30fa2469/run-net-turn-proof.py",
+      "templateSha256": "9308fdf7f8dd5e88cd3541d54798614de7ddd9315fc1709ab709c288ab3269de",
+      "targetSha256": "7ce0b12fa5026338a846bc5a3e6b369f7e45a8b9e9ef2a7abd2e6c55c64d4b20"
+    },
+    {
+      "template": "work/final-certification-2141e245/run-parity.py",
+      "target": "work/final-certification-30fa2469/run-parity.py",
+      "templateSha256": "e55d3aca64b36cd1d0b744bcd686ec16bffe5b84af0631e65bbd1e2727795c14",
+      "targetSha256": "b7a4b11e2fdaa680c7ed9b0e3fa376820ac6d9735820d8be3d8b0c9535dddfa9"
+    },
+    {
+      "template": "work/final-certification-2141e245/run-postcommit-bin.py",
+      "target": "work/final-certification-30fa2469/run-postcommit-bin.py",
+      "templateSha256": "3fb0803e41e13168614ad471e9fbbe5b954a3610b53b4166f62fad863ec8108d",
+      "targetSha256": "d5a2c5ee7e7f15f28c83375603ced432d1cae6a879f4bd8d194b726a92d09464"
+    },
+    {
+      "template": "work/final-certification-2141e245/run-rest.py",
+      "target": "work/final-certification-30fa2469/run-rest.py",
+      "templateSha256": "45d8953f4e33d17493babc5aa52fab316f4597c78a267777a47133f449f5e437",
+      "targetSha256": "668c0373368f079988337ba76d9e6dca0b49ead62737097c5030ed3526cf4e5e"
+    },
+    {
+      "template": "work/final-certification-2141e245/snapshot-processes.py",
+      "target": "work/final-certification-30fa2469/snapshot-processes.py",
+      "templateSha256": "fe4ec3b19b32a850c188aba75f34c187a040af58625b16f2a392fa81aa434650",
+      "targetSha256": "0d62640ec35a60081bb32c84d6b266d43c22627e83376de36861874f00d96202"
+    },
+    {
+      "template": "work/final-certification-2141e245/status.py",
+      "target": "work/final-certification-30fa2469/status.py",
+      "templateSha256": "53f0012892a15be5a4dd9c001ba4fd4515a76dcdf72f75f0506dad6f0f31b82e",
+      "targetSha256": "8c0c217a6345827aa328f56ae168a4f98d6eeb32e3dfc73909ea03e10d645e26"
+    },
+    {
+      "template": "work/final-certification-2141e245/watch-isolated-mutation-reports.py",
+      "target": "work/final-certification-30fa2469/watch-isolated-mutation-reports.py",
+      "templateSha256": "d52d534f3de11626f4f7f3cf2e6ab890c75320c51838c6f5c9adee561a0ce5c4",
+      "targetSha256": "29c1bf912945bb9ed28872ae99b0632fac5cd8f614ba785978025543e736fb76"
+    }
+  ],
+  "adjustments": [
+    {
+      "path": "work/final-certification-30fa2469/launch-native.py",
+      "sha256": "8f7119cc68514a74832eb2d7a9092671d59d8a91203368b8cd622c0d3c0008a2",
+      "purpose": "Wait for green diagnostic anchor preflight; full final corpus remains unrestricted"
+    },
+    {
+      "path": "work/final-certification-30fa2469/run-anchor-preflight.py",
+      "sha256": "73305f4bd2e09588c76243a42facc302c18d7b4376039d05f2dcab1a1b1378e5",
+      "purpose": "Four isolated diagnostic workers, named-killer filters on remaining gates, never a certification receipt"
+    },
+    {
+      "path": "work/final-certification-30fa2469/launch-l27-after-ordinary.py",
+      "sha256": "ef690ddd72800c8922e7e5f7dd6d49b40deaa08a086cb3462eea5e0aba60bd2b",
+      "purpose": "Avoid overlap between backend rebuild and full runtime mutation proofs"
+    },
+    {
+      "path": "work/final-certification-30fa2469/run-all-mutations-isolated.py",
+      "sha256": "9c20bc07298675f4f15aaaeed43b58ff0cd34e476750ffe65ae0518c6fc7a2f9",
+      "purpose": "Schedule repaired Gate9 first, then existing priorities; preserve all65parts/fulltests/defaultsteps/eightworkers; record exact planned dispatch order"
+    }
+  ]
+}

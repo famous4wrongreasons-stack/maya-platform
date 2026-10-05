@@ -1,0 +1,75 @@
+{
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "independentRepeats": [
+    {
+      "iteration": 1,
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+          "status": "passed",
+          "durationMs": 411
+        },
+        {
+          "title": "F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+          "status": "passed",
+          "durationMs": 207
+        },
+        {
+          "title": "F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+          "status": "passed",
+          "durationMs": 18
+        }
+      ]
+    },
+    {
+      "iteration": 2,
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+          "status": "passed",
+          "durationMs": 404
+        },
+        {
+          "title": "F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+          "status": "passed",
+          "durationMs": 204
+        },
+        {
+          "title": "F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+          "status": "passed",
+          "durationMs": 16
+        }
+      ]
+    },
+    {
+      "iteration": 3,
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+          "status": "passed",
+          "durationMs": 401
+        },
+        {
+          "title": "F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+          "status": "passed",
+          "durationMs": 204
+        },
+        {
+          "title": "F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+          "status": "passed",
+          "durationMs": 16
+        }
+      ]
+    }
+  ],
+  "nativeCorpusControl": "PENDING; targeted repetitions do not replace unrestricted native baseline"
+}

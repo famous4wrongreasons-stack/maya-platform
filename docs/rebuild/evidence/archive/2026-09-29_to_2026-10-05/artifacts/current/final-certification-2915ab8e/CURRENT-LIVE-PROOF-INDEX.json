@@ -1,0 +1,2042 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "source": {
+    "path": "receipts/widgets-live-full.json",
+    "sha256": "e46f24cdba590004ecde7f7106aa80fba2d3d66fd14494c3fdd6787e7114ac65"
+  },
+  "fullLivePass": 406,
+  "proofs": [
+    {
+      "title": "G15-1 [GW] a forged token answers code-less EXPIRED and writes nothing",
+      "status": "passed",
+      "durationMs": 226
+    },
+    {
+      "title": "G15-2 [GW] tampering with the stored body hash invalidates the seal",
+      "status": "passed",
+      "durationMs": 107
+    },
+    {
+      "title": "G15-3 [GW] a mismatched widget id answers code-less EXPIRED",
+      "status": "passed",
+      "durationMs": 117
+    },
+    {
+      "title": "G15-4 [GW] floor drift answers SUPERSEDED, increments only the process metric and writes nothing",
+      "status": "passed",
+      "durationMs": 109
+    },
+    {
+      "title": "G15-1 [HTTP] a forged token answers code-less EXPIRED and writes nothing",
+      "status": "passed",
+      "durationMs": 199
+    },
+    {
+      "title": "G15-2 [HTTP] tampering with the stored body hash invalidates the seal",
+      "status": "passed",
+      "durationMs": 163
+    },
+    {
+      "title": "G15-3 [HTTP] a mismatched widget id answers code-less EXPIRED",
+      "status": "passed",
+      "durationMs": 159
+    },
+    {
+      "title": "G15-4 [HTTP] floor drift answers SUPERSEDED, increments only the process metric and writes nothing",
+      "status": "passed",
+      "durationMs": 176
+    },
+    {
+      "title": "G15-7 [GW] own expired returns one stored-text remedy whose tap passes Gates 1\u201313",
+      "status": "passed",
+      "durationMs": 191
+    },
+    {
+      "title": "G15-8 [GW] own superseded returns the already linked successor without minting another",
+      "status": "passed",
+      "durationMs": 140
+    },
+    {
+      "title": "G15-9 [GW] a foreign principal receives code alone",
+      "status": "passed",
+      "durationMs": 158
+    },
+    {
+      "title": "G15-10/G15-11 [GW] unreadable text and a non-REFINE kind return code alone",
+      "status": "passed",
+      "durationMs": 186
+    },
+    {
+      "title": "G15-11b [GW] unregistered and wrong-owner source capabilities return code alone",
+      "status": "passed",
+      "durationMs": 181
+    },
+    {
+      "title": "G15-12 [GW] policy-floor drift returns one remedy",
+      "status": "passed",
+      "durationMs": 98
+    },
+    {
+      "title": "G15-14 [GW] code-alone branches execute an equal store-operation class",
+      "status": "passed",
+      "durationMs": 194
+    },
+    {
+      "title": "G15-13 [GW] successor and code-alone refusal branches call no projector or canonical owner",
+      "status": "passed",
+      "durationMs": 114
+    },
+    {
+      "title": "G15-7 [HTTP] own expired returns one stored-text remedy whose tap passes Gates 1\u201313",
+      "status": "passed",
+      "durationMs": 228
+    },
+    {
+      "title": "G15-8 [HTTP] own superseded returns the already linked successor without minting another",
+      "status": "passed",
+      "durationMs": 170
+    },
+    {
+      "title": "G15-9 [HTTP] a foreign principal receives code alone",
+      "status": "passed",
+      "durationMs": 277
+    },
+    {
+      "title": "G15-10/G15-11 [HTTP] unreadable text and a non-REFINE kind return code alone",
+      "status": "passed",
+      "durationMs": 312
+    },
+    {
+      "title": "G15-11b [HTTP] unregistered and wrong-owner source capabilities return code alone",
+      "status": "passed",
+      "durationMs": 307
+    },
+    {
+      "title": "G15-12 [HTTP] policy-floor drift returns one remedy",
+      "status": "passed",
+      "durationMs": 158
+    },
+    {
+      "title": "G15-14 [HTTP] code-alone branches execute an equal store-operation class",
+      "status": "passed",
+      "durationMs": 302
+    },
+    {
+      "title": "PROFILE-INGRESS refuses an old HANDOFF at HTTP/typed/internal ingress and direct dispatch, with zero signer, turn, consumption or owner effect",
+      "status": "passed",
+      "durationMs": 443
+    },
+    {
+      "title": "PROFILE-EGRESS refuses new/mixed HANDOFF mint and suppresses every old mixed control from resolve without rewriting history",
+      "status": "passed",
+      "durationMs": 390
+    },
+    {
+      "title": "PROFILE-GRANT passes allowed navigation through scope admission, rejects old grants, and rolls back a failed binding",
+      "status": "passed",
+      "durationMs": 417
+    },
+    {
+      "title": "PROFILE-LOCK serializes concurrent revoke with an in-flight profile admission under the existing AR-1 lock",
+      "status": "passed",
+      "durationMs": 331
+    },
+    {
+      "title": "PROFILE-BOOKING admits the actual HTTP catalog \u2192 selectors \u2192 DRAFT \u2192 COMMIT source under a signed restricted grant",
+      "status": "passed",
+      "durationMs": 929
+    },
+    {
+      "title": "PROFILE-SOURCE NS admits only the exact new source under a signed restricted grant",
+      "status": "passed",
+      "durationMs": 586
+    },
+    {
+      "title": "PROFILE-SOURCE BS admits only the exact new source under a signed restricted grant",
+      "status": "passed",
+      "durationMs": 1233
+    },
+    {
+      "title": "refuses missing",
+      "status": "passed",
+      "durationMs": 15
+    },
+    {
+      "title": "refuses blank",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "refuses not a URL",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses mysql",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "refuses localhost",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses another host",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses a host parameter",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "refuses a dbname parameter",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses no port (the driver would use 5432)",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "refuses an empty port",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses port 5432 locally",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses port 05432 locally",
+      "status": "passed",
+      "durationMs": 4
+    },
+    {
+      "title": "refuses maya_saas",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses postgres",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses a prod clone with the prefix",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "refuses a clone with the prefix",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses no prefix",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses an upper-case name",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "refuses maya_ci without CI mode",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses maya_ci with CI but no WIDGET_GATEWAY_PG",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses maya_ci with CI and WIDGET_GATEWAY_PG but not on GitHub Actions",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "refuses the workflows' maya_ci URL (port 5432) without GITHUB_ACTIONS",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses maya_ci without a port in CI mode",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses a proof name in CI mode",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses a prod name in CI mode",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses the shell workstream's database",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses the shell workstream's database in CI mode",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "refuses the shell workstream's database upper-cased",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "admits a proof database on 127.0.0.1 and a dedicated port locally, and maya_ci (port 5432 included) only in CI mode",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "admits widgets-live.yml's DATABASE_URL in CI mode, and refuses it once GITHUB_ACTIONS is absent",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "admits widgets-mutation.yml's DATABASE_URL in CI mode, and refuses it once GITHUB_ACTIONS is absent",
+      "status": "passed",
+      "durationMs": 2
+    },
+    {
+      "title": "never echoes the password in a refusal",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "HAR-4 Platform HTTP smoke declares the same explicit AppModule prerequisites",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "HAR-4 carries exactly platform-ci.yml's platform-backend literals (DATABASE_URL excepted), plus the declared widgets-live extras",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "HAR-4 widgets-live.yml carries exactly the widgets-live literals (platform-ci \u222a extras), its CI DATABASE_URL and WIDGET_GATEWAY_PG",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "HAR-4 widgets-mutation.yml carries exactly the widgets-live literals (platform-ci \u222a extras), its CI DATABASE_URL and WIDGET_GATEWAY_PG",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "scrubs every variable that is neither a process variable nor a literal, and admits DATABASE_URL only through the guard",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "builds a child process's environment by the same scrub, on a copy, plus fixed settings",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "the BIN runner spawns the binary with the child environment, never the raw shell",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "this suite's own environment was scrubbed before it loaded",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "refuses to boot AppModule next to an .env or .env.local file (existence only)",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "classifies raw \"SELECT 1\" as read (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "classifies raw \"  with x as (select 1) select * from x\" as read (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "classifies raw \"SELECT \\\"shareCount\\\", \\\"advisory\\\" FROM \\\"WidgetDraft\\\"\" as read (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "classifies raw \"SELECT \\\"forUpdate\\\" FROM \\\"WidgetDraft\\\"\" as read (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "classifies raw \"SELECT pg_advisory_xact_lock(1)\" as lock (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "classifies raw \"select pg_try_advisory_xact_lock(1)\" as lock (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "classifies raw \"SELECT pg_advisory_xact_lock_shared(hashtextextended('k', 0))::text\" as lock (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "classifies raw \"SELECT pg_advisory_unlock_all()\" as lock (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "classifies raw \"SELECT id FROM \\\"Tenant\\\" WHERE id = $1 FOR SHARE\" as lock (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "classifies raw \"SELECT id FROM \\\"Tenant\\\" WHERE id = $1 FOR KEY SHARE\" as lock (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "classifies raw \"SELECT id FROM \\\"Tenant\\\" WHERE id = $1 FOR UPDATE\" as lock (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "classifies raw \"SELECT id FROM \\\"Tenant\\\" WHERE id = $1 FOR NO KEY UPDATE\" as lock (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "classifies raw \"SELECT id FROM \\\"Tenant\\\" FOR UPDATE SKIP LOCKED\" as lock (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "classifies raw \"SET TRANSACTION READ ONLY\" as write (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "classifies raw \"LOCK TABLE \\\"Tenant\\\" IN SHARE MODE\" as write (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "classifies raw \"INSERT INTO \\\"WidgetDraft\\\" VALUES (1)\" as write (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "classifies raw \"WITH d AS (DELETE FROM \\\"WidgetDraft\\\" RETURNING *) SELECT * FROM d\" as write (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "classifies raw \"WITH d AS (UPDATE \\\"Tenant\\\" SET name = name RETURNING id) SELECT id FROM d FOR SHARE\" as write (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "classifies raw \"SELECT nextval('s')\" as write (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "classifies raw undefined as write (D-12: a lock is not a write)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "the gateway's store client is the recorded one, and the hook changes no result",
+      "status": "passed",
+      "durationMs": 49
+    },
+    {
+      "title": "sees a model write, a raw write and a record change, and reports the row delta",
+      "status": "passed",
+      "durationMs": 132
+    },
+    {
+      "title": "HAR-3 [GW] the recorder records a FOR SHARE and an advisory lock as locks, not writes, and NW turns red on a durable write in the same request",
+      "status": "passed",
+      "durationMs": 82
+    },
+    {
+      "title": "HAR-9 [GW] the verifier rejects a manifest line whose record is missing from the server's mint provenance lines, or from the database before teardown (a Fixtures.widget record)",
+      "status": "passed",
+      "durationMs": 135
+    },
+    {
+      "title": "cover exactly G12 \u00a76.2's owner reads (an emptied or shortened set would make every spy assertion vacuous)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "count a call made through any instance, and restore every owner method unchanged",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "override no guard, and bind nothing but the recorded store client",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "the gateway level imports exactly Config, Prisma, Tenancy and Widgets; the HTTP level exactly AppModule",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "HAR-6 the evidence manifest is written only when WIDGETS_EVIDENCE=1, and a malformed line is refused either way",
+      "status": "passed",
+      "durationMs": 6
+    },
+    {
+      "title": "HAR-14 parses the server's WidgetMintProvenance line as the BIN runner reads the binary's stdout and as the HTTP sink receives it; other contexts and malformed lines are never captured",
+      "status": "passed",
+      "durationMs": 2
+    },
+    {
+      "title": "HAR-14 the HTTP sink refuses a provenance line logged from test code, the reviewer forgery included, and the writer refuses a line no capture point registered",
+      "status": "passed",
+      "durationMs": 2
+    },
+    {
+      "title": "HAR-10 the verifier rejects an E-TAMPER label on a column the SealVerifier reads, except for key G1-a",
+      "status": "passed",
+      "durationMs": 44
+    },
+    {
+      "title": "rejects nothing on an empty evidence directory, and passes the real harness support files through its override allowlist",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 admits a clean L pair: an HTTP half and a BIN half, each with its own production-minted record, trace and process",
+      "status": "passed",
+      "durationMs": 43
+    },
+    {
+      "title": "WR-H1 accepts a successor only through its durable captured predecessor",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "WR-H1 rejects a missing predecessor chain",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "title": "WR-H1 rejects a foreign-process predecessor chain",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "WR-H1 rejects a not-durable predecessor chain",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "WR-H1 rejects a cycle predecessor chain",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "WR-H1 rejects a duplicate predecessor chain",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-L-PAIR turns red on an HTTP half with no BIN half",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "title": "HAR-13 V-L-PAIR turns red on halves offered for different clauses",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-L-PAIR turns red on a BIN half that claims nothing",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-PROV-RECORD turns red on an L claim that names no record",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-PROV-MINT turns red on a record with no server mint line",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-PROV-MINT turns red on a record with two server mint lines",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-PROV-DB turns red on a record missing from the database before teardown",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-PROV-TRIGGER turns red on a mint line whose trigger is not a production trigger",
+      "status": "passed",
+      "durationMs": 37
+    },
+    {
+      "title": "HAR-13 V-PROV-TRIGGER turns red on a successor mint whose predecessor is not traced",
+      "status": "passed",
+      "durationMs": 37
+    },
+    {
+      "title": "HAR-13 V-PROV-TRACE turns red on a trace id that is not the mint line's request id",
+      "status": "passed",
+      "durationMs": 42
+    },
+    {
+      "title": "HAR-13 V-PROV-TRACE turns red on a claim with no trace id",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "title": "HAR-13 V-PROV-PID turns red on a line written by another process than the capture",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-PROV-FORGED turns red on a capture point that refused a provenance line",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-ENTRY-SOURCE turns red on an HTTP claim from a support file",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-ENTRY-SOURCE turns red on a BIN claim from a live spec",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-PROCESS turns red on one process writing both the HTTP and the BIN half",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-LABEL-CLASS turns red on an E-INDEP label on an L claim",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-LABEL-CLASS turns red on an E-TAMPER label on an L claim",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-LABEL-CLASS turns red on an L claim whose only label is an L-T class",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-SCHEMA turns red on a claim with no evidence label",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-SYNTH-CLAIM turns red on a G-SYNTH label on an L claim",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-SYNTH-CLAIM turns red on a synthetic label in another case",
+      "status": "passed",
+      "durationMs": 36
+    },
+    {
+      "title": "HAR-13 V-GW turns red on a claim on a GW line",
+      "status": "passed",
+      "durationMs": 37
+    },
+    {
+      "title": "HAR-13 V-INVENTORY turns red on a clause key that is not in the inventory",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-LT-G9-G10 turns red on an L-T claim on a Gate 9 key",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-U-PROOF turns red on a live-shaped U claim without the frozen proof duties",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-TAMPER-SHAPE turns red on an E-TAMPER naming two columns besides the floor",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on Fixtures.widget through a variable argument",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on Fixtures.synthetic",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on a widget model write",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on the emitter",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on raw SQL",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on its own database client",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on a logger with a provenance context assembled at run time",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on the evidence directory's files",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on code loaded dynamically",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on a helper it imports that writes",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a module mock",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a providers-array binding",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a replaced property",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a spy replaced in a second statement",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a member assigned on a resolved provider",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a member assigned through a variable holding a resolved provider",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a guard override",
+      "status": "passed",
+      "durationMs": 42
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a prototype member assigned",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on an override in a nested support directory",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on an allowlisted target overridden from a file the allowlist does not name",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-MODEL-STUB turns red on a module mock of the model transport",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-MODEL-STUB turns red on the model transport replaced on its resolved provider",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-MODEL-STUB turns red on a spy on decide replaced in a second statement",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-MODEL-STUB turns red on a providers-array binding of the model transport in a support file",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-CONTROLLED turns red on controlledFixtureMode",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-12 [BUILD] no labelled evidence test in a live spec or cases file names the provenance context or calls Fixtures.widget, Fixtures.synthetic, the emitter or the record writer",
+      "status": "passed",
+      "durationMs": 102
+    },
+    {
+      "title": "HAR-12 [BUILD] the scan goes red on every forbidden construct in a labelled test, through a helper too, and stays quiet on unlabelled tests",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "HAR-5 gate-audit-check passes on the committed /2 audit, and its self-test turns every check red, the SHA compare included",
+      "status": "passed",
+      "durationMs": 172
+    },
+    {
+      "title": "HAR-11 probe [GW]: the target of the mutation runner self-test, red only when its neutraliser set and both mutant edits are applied (not a gate test)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "HAR-1 [HTTP] AppModule boots with the widgets-live literals: the widget route is mapped behind the global guards, and the mint provenance sink is installed and empty",
+      "status": "passed",
+      "durationMs": 6
+    },
+    {
+      "title": "HAR-1b [HTTP] a harness login consumes exactly the loopback subject's password-login preflight bucket the hygiene mirror computes, and the reset removes it",
+      "status": "passed",
+      "durationMs": 184
+    },
+    {
+      "title": "HAR-8 [HTTP] the call-through wrappers return byte-identical results to the unwrapped call (the recorded store client and the submit scope spy)",
+      "status": "passed",
+      "durationMs": 123
+    },
+    {
+      "title": "AR1-LIFECYCLE validate is read-only; signed grant has atomic audit; same authorization retry never grants twice; revoke refuses an old widget token",
+      "status": "passed",
+      "durationMs": 501
+    },
+    {
+      "title": "AR1-CONCURRENT two consumes of one authorization produce one grant and one audit",
+      "status": "passed",
+      "durationMs": 164
+    },
+    {
+      "title": "AR1-STALE two independently signed grants with the same prestate cannot both win CAS",
+      "status": "passed",
+      "durationMs": 173
+    },
+    {
+      "title": "AR1-AUDIT failure rolls back the entitlement mutation",
+      "status": "passed",
+      "durationMs": 161
+    },
+    {
+      "title": "AR1-EXPIRY expires without renewal and denies the old authorization",
+      "status": "passed",
+      "durationMs": 1975
+    },
+    {
+      "title": "AR1-ADVERSARIAL forged, expired, tenant-substituted and rebound authorizations have no grant effect",
+      "status": "passed",
+      "durationMs": 348
+    },
+    {
+      "title": "AR1-SUSPENDED rollback remains available after a tenant is suspended",
+      "status": "passed",
+      "durationMs": 328
+    },
+    {
+      "title": "AR1-ROLE tenant owner and revoked platform session never gain release authority",
+      "status": "passed",
+      "durationMs": 333
+    },
+    {
+      "title": "AR1-REVOKE-WAIT active admitted work and revoke serialize on the tenant release lock",
+      "status": "passed",
+      "durationMs": 348
+    },
+    {
+      "title": "PR-2 [GW]: a membership re-created for the same user invalidates the old principal, and the new one hashes differently (K4, C11:2546)",
+      "status": "passed",
+      "durationMs": 154
+    },
+    {
+      "title": "PR-3 [GW]: a role change invalidates outstanding envelopes and is visible as the live role (B-02, C11:7189-7191)",
+      "status": "passed",
+      "durationMs": 121
+    },
+    {
+      "title": "PR-6 [GW]: the B-02 presentation table, over real memberships resolved by C9Authority",
+      "status": "passed",
+      "durationMs": 565
+    },
+    {
+      "title": "PR-7 [GW]: K1 levels \u2014 a first-party session is SESSION_VERIFIED, and STEP_UP_VERIFIED stays unreachable (C11:2536-2539, K6)",
+      "status": "passed",
+      "durationMs": 75
+    },
+    {
+      "title": "PR-8 [GW]: the tenancy Membership read receives the SAME transaction client as C9Authority.current (D-1, B-02)",
+      "status": "passed",
+      "durationMs": 78
+    },
+    {
+      "title": "PR-1 [GW RI; U-proof duty (2) for G3-c2]: unlink then relink invalidates, over the real C9Authority.current(T, proof) with A18 synthetic verifiers \u2014 the JWT route has no channel proof, so this is NOT live evidence (K14-10, PKT:485)",
+      "status": "passed",
+      "durationMs": 99
+    },
+    {
+      "title": "PR-10 [GW]: forged, expired, replayed and foreign tokens are refused at latency the sample cannot tell apart",
+      "status": "passed",
+      "durationMs": 526
+    },
+    {
+      "title": "PR-4 [GW]: a staff-class role with no Staff row is admitted by the transport chain and refused at slot 3, never at slot 2 (D-16)",
+      "status": "passed",
+      "durationMs": 152
+    },
+    {
+      "title": "PR-5 [GW]: a tenant that goes inactive leaves no live principal, and the refusal is slot 3\u2019s",
+      "status": "passed",
+      "durationMs": 100
+    },
+    {
+      "title": "PR-9a [GW]: T-TX \u2014 a refusal at or before slot 10 commits `T`, and a throw rolls it back (D-1)",
+      "status": "passed",
+      "durationMs": 132
+    },
+    {
+      "title": "PR-9b [XF\u2192merge][XF\u2192U10b][GW]: a pg_locks probe from a second connection at a slot-11 spy shows no lock held by the request",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "PR-12 [GW]: every refusal performs one principal resolution and the two required record reads",
+      "status": "passed",
+      "durationMs": 97
+    },
+    {
+      "title": "G2-IN [GW]: with no transport session on the request, slot 2 refuses `unauthenticated` IN-ARRAY and writes nothing (NW)",
+      "status": "passed",
+      "durationMs": 94
+    },
+    {
+      "title": "G2-EQ: nine principal rows answer the same at the transport stage on POST /api/ai/chat and POST /api/widgets/intent",
+      "status": "passed",
+      "durationMs": 894
+    },
+    {
+      "title": "TURN-ORDINARY persists exactly one USER row on concurrent same-request retries and carries its conversation forward",
+      "status": "passed",
+      "durationMs": 271
+    },
+    {
+      "title": "TURN-WIDGET uses the same persisted writer for production-minted typed and tapped controls; expired retry never falls through to ordinary chat",
+      "status": "passed",
+      "durationMs": 360
+    },
+    {
+      "title": "TURN-ERASURE refuses replay of an erased row without restoring content or extending retention",
+      "status": "passed",
+      "durationMs": 167
+    },
+    {
+      "title": "TURN-ATOMIC rolls back the USER row when its immutable correlation cannot be committed",
+      "status": "passed",
+      "durationMs": 201
+    },
+    {
+      "title": "TURN-READ keeps an actual chat read, its widget emission and the next typed widget turn in one conversation",
+      "status": "passed",
+      "durationMs": 218
+    },
+    {
+      "title": "TURN-SCOPE refuses a foreign current actor or tenant conversation; request IDs alone never confer identity",
+      "status": "passed",
+      "durationMs": 462
+    },
+    {
+      "title": "TURN-BROKEN-BINDING refuses duplicate evidence, orphan rows and expired history without recreating either half",
+      "status": "passed",
+      "durationMs": 187
+    },
+    {
+      "title": "T-NULL-NULL [GW]: `inputs: null` passes slot 8 and Gate 9 fails stale without a template",
+      "status": "passed",
+      "durationMs": 159
+    },
+    {
+      "title": "T-NULL-PASS [GW]: an ABSENT `inputs` never reaches the gate \u2014 \u00a73.8 makes the member required, so the shape stage refuses it (P-F88)",
+      "status": "passed",
+      "durationMs": 113
+    },
+    {
+      "title": "T-NULL-OBJ [GW]: a null-schema record carrying `inputs` is REFUSED / selection_out_of_domain at 8, with NO lowering-source read (K12)",
+      "status": "passed",
+      "durationMs": 100
+    },
+    {
+      "title": "T-NULL-EMPTY [GW]: a null-schema record carrying `inputs` is REFUSED / selection_out_of_domain at 8, with NO lowering-source read (K12)",
+      "status": "passed",
+      "durationMs": 102
+    },
+    {
+      "title": "T-SCHEMA [GW, G-SYNTH]: exact emitted schema admits its field-keyed option and rejects undeclared input",
+      "status": "passed",
+      "durationMs": 111
+    },
+    {
+      "title": "T-SCHEMA-OUTSIDE [GW, G-SYNTH]: an option outside this field domain refuses at Gate 8",
+      "status": "passed",
+      "durationMs": 93
+    },
+    {
+      "title": "T-SCHEMA-BYTE [GW, G-SYNTH]: canonical UTF-8 bytes over the schema cap refuse before membership",
+      "status": "passed",
+      "durationMs": 91
+    },
+    {
+      "title": "T-SCHEMA-ERASED [GW, G-SYNTH]: an erased emitted schema supersedes handle_stale",
+      "status": "passed",
+      "durationMs": 93
+    },
+    {
+      "title": "T-SCHEMA-HASH [GW, G-SYNTH]: emitted schema hash drift is a transaction fault",
+      "status": "passed",
+      "durationMs": 132
+    },
+    {
+      "title": "T-READ-ONCE [GW]: over a pass and a refusal on the SAME record, the lowering source is read exactly once \u2014 on the pass, after the decision",
+      "status": "passed",
+      "durationMs": 105
+    },
+    {
+      "title": "T-F11 [GW]: slot 8 is the eighth slot, 7 < 8 < 8-R < 9, and the stop MOVES from 8 to 9 exactly when the lane passes",
+      "status": "passed",
+      "durationMs": 96
+    },
+    {
+      "title": "T-WIRED [GW]: slot 8 carries no `pendingOn` and a null-schema submission passes it",
+      "status": "passed",
+      "durationMs": 90
+    },
+    {
+      "title": "SMOKE-G8-SHAPE [HTTP]: the \u00a73.8 stage admits `null`, `{}` and a valued `inputs` and refuses an ABSENT one \u2014 so Gate 8\u2019s lanes are reachable at the route, and the absent case never is",
+      "status": "passed",
+      "durationMs": 206
+    },
+    {
+      "title": "SMOKE-G8-NULL-INPUTS [HTTP]: on the wired route, the lane answers `selection_out_of_domain` for `{}` and `{a:1}`, and passes slot 8 for `null`",
+      "status": "passed",
+      "durationMs": 177
+    },
+    {
+      "title": "P-NULL [GW]: an `i` or `s` NAVIGATE has no subject, passes slot 6 and reaches no owner",
+      "status": "passed",
+      "durationMs": 60
+    },
+    {
+      "title": "P-NAV-SOURCE [GW]: detail/w use sealed source evidence and recheck current authority",
+      "status": "passed",
+      "durationMs": 54
+    },
+    {
+      "title": "P-CONTROL / P-CONTROL-HANDLER [GW]: a CONTROL subject passes slot 6 with NO execute-admission test (G6-18, C11:4771-4773)",
+      "status": "passed",
+      "durationMs": 42
+    },
+    {
+      "title": "N-HANDOFF-UNREG-CONTROL [GW]: an unregistered CONTROL destination is Gate 6\u2019s first refusal, because FLOOR_EXEMPT waived Gate 5",
+      "status": "passed",
+      "durationMs": 18
+    },
+    {
+      "title": "P-HANDOFF-A22 / P-HANDOFF-BI / P-HANDOFF-NOEXEC / P-HANDOFF-SCHEDULE-UPDATE [GW]: a reachable HANDOFF resolves the destination fences ONLY (G6-6, G6-7)",
+      "status": "passed",
+      "durationMs": 73
+    },
+    {
+      "title": "P-HANDOFF-W-NONSENS [GW]: a NON-sensitive destination is admitted at a `w` target \u2014 F48 constrains the class only where the destination is sensitive",
+      "status": "passed",
+      "durationMs": 19
+    },
+    {
+      "title": "N-HANDOFF-SENS-C9 / N-HANDOFF-SENS-C9b [GW]: a SENSITIVE destination admits a class-`s` target and nothing else (R3.5.1 at Gate 6, F48)",
+      "status": "passed",
+      "durationMs": 50
+    },
+    {
+      "title": "P-F48-NONHANDOFF [GW]: a SENSITIVE subject OUTSIDE a HANDOFF passes slot 6 \u2014 A1\u2019s change, and the reason the old slot-6 predicate had to go",
+      "status": "passed",
+      "durationMs": 18
+    },
+    {
+      "title": "P-C9-9-RUNLESS [GW]: on a run-less mint path `c9_domain` is null and `c9Capability` is NOT called (G6-17, R3.7.1)",
+      "status": "passed",
+      "durationMs": 19
+    },
+    {
+      "title": "P-C9-9-RUN [GW]: with `c9_domain` non-null `c9Capability` IS called, with the record\u2019s domain and the registry hash (G6-16)",
+      "status": "passed",
+      "durationMs": 21
+    },
+    {
+      "title": "N-C9-DOMAIN / N-OWNER-THROW-C9 [GW]: a domain the key is not registered for refuses, and the RAISE is the refusal (G6-20, C11:4779-4781)",
+      "status": "passed",
+      "durationMs": 15
+    },
+    {
+      "title": "N-C9-BI [GW]: a non-`READ` destination under BUSINESS_INTELLIGENCE is refused OUTSIDE a HANDOFF, and admitted as a destination inside one",
+      "status": "passed",
+      "durationMs": 35
+    },
+    {
+      "title": "P-C9-47 [GW]: C20 admits through the real policy owner using the in-T principal role",
+      "status": "passed",
+      "durationMs": 24
+    },
+    {
+      "title": "S-TOOL [GW]: a TOOL-spaced subject stops at slot 5 (Gate 5 shadows it) or at slot 6, never past 6, and at 6 it is the TOOL refusal",
+      "status": "passed",
+      "durationMs": 15
+    },
+    {
+      "title": "S-REG [GW]: an unregistered C9 key stops at slot 5 or at slot 6, never past 6, and at 6 it is the REGISTRY refusal and not the policy-row one",
+      "status": "passed",
+      "durationMs": 15
+    },
+    {
+      "title": "N-CONTROL-FOREIGN [GW]: a CONTROL record submitted by another principal never reaches slot 6 \u2014 Gate 3 binds it first (R3.2.4 is the handler\u2019s, at Gate 13)",
+      "status": "passed",
+      "durationMs": 79
+    },
+    {
+      "title": "SMOKE-G6-HANDOFF-SENS [HTTP]: behind every guard, a sensitive destination at a `w` target stops at slot 6 with no write",
+      "status": "passed",
+      "durationMs": 172
+    },
+    {
+      "title": "SMOKE-G6-HANDOFF-BI / SMOKE-G6-C9-9-DOMAIN [HTTP]: a BI destination is admitted and a BI-unregistered subject is refused, on the same key",
+      "status": "passed",
+      "durationMs": 175
+    },
+    {
+      "title": "SMOKE-G6-BODY [HTTP]: an `authority_hint` or a `role` in the body is refused at the shape stage, before any gate runs (F88, G6-2)",
+      "status": "passed",
+      "durationMs": 167
+    },
+    {
+      "title": "FR14-VAR [HTTP]: the same subject under a client-, staff- and owner-class principal gives the SAME Gate 6 verdict (FR-14, C11:1798)",
+      "status": "passed",
+      "durationMs": 434
+    },
+    {
+      "title": "NS-CHECK admits exact detail date and preserves REFINE; all near-miss shapes remain forbidden",
+      "status": "passed",
+      "durationMs": 295
+    },
+    {
+      "title": "NS-REFUSE date cannot project a historical source",
+      "status": "passed",
+      "durationMs": 221
+    },
+    {
+      "title": "NS-REFUSE erased cannot project a historical source",
+      "status": "passed",
+      "durationMs": 197
+    },
+    {
+      "title": "NS-REFUSE expired cannot project a historical source",
+      "status": "passed",
+      "durationMs": 190
+    },
+    {
+      "title": "NS-REFUSE body cannot project a historical source",
+      "status": "passed",
+      "durationMs": 189
+    },
+    {
+      "title": "NS-REFUSE seal cannot project a historical source",
+      "status": "passed",
+      "durationMs": 173
+    },
+    {
+      "title": "NS-REFUSE foreign-principal cannot project a historical source",
+      "status": "passed",
+      "durationMs": 296
+    },
+    {
+      "title": "NS-PARENT rechecks parent availability when the new exact return link is used",
+      "status": "passed",
+      "durationMs": 248
+    },
+    {
+      "title": "G12-L00 [GW] holds by absence: client A's and staff S's tokens for the emitter's five kinds reach no owner read, answer with the controller's six keys only, add no AiToolExecution row, carry no owner byte and write nothing",
+      "status": "passed",
+      "durationMs": 435
+    },
+    {
+      "title": "G12-L00 [HTTP] holds by absence: behind every global guard, the route is dark until widgets.runtime is granted; then client A's and staff S's tokens reach no owner read, answer with the controller's six keys only, add no AiToolExecution row, carry no owner byte and write nothing",
+      "status": "passed",
+      "durationMs": 939
+    },
+    {
+      "title": "T4-INDEP-3 (control): the principal proof hash covers `tenantId`, which is why a readable foreign record stops at slot 3 and not at slot 4 \u2014 slot 4's refusal needs slot 3 neutralised too",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "T4-POS [GW]: an own-tenant record is asserted against `TenantContextService.assertTenantId` exactly once, with the record\u2019s tenant, and passes slot 4",
+      "status": "passed",
+      "durationMs": 240
+    },
+    {
+      "title": "T4-INDEP [GW]: tenant A submitting tenant B's record never gets past slot 4 \u2014 it stops at 1 (never read), at 3 (the hash covers the tenant) or at 4 (`tenant_mismatch`), each with no write",
+      "status": "passed",
+      "durationMs": 203
+    },
+    {
+      "title": "T4-NW [GW]: neither the admitted nor the foreign submission writes anything durable; the one store operation is the record read",
+      "status": "passed",
+      "durationMs": 185
+    },
+    {
+      "title": "T4-POS [HTTP]: behind every global guard, an own-tenant record is asserted against the tenancy owner with the record\u2019s tenant and passes slot 4",
+      "status": "passed",
+      "durationMs": 344
+    },
+    {
+      "title": "T4-INDEP [HTTP]: behind every global guard, tenant A submitting tenant B's record never gets past slot 4 \u2014 stop 1, 3 or 4, each with no write",
+      "status": "passed",
+      "durationMs": 319
+    },
+    {
+      "title": "T4-NW [HTTP]: neither submission writes anything durable; the one store operation is the record read",
+      "status": "passed",
+      "durationMs": 322
+    },
+    {
+      "title": "T7-POS-NONE [GW]: a synthetic `NONE` on `METRIC`, delivered to `pwa`, passes slot 7 on all four of C1, C2, C3 and C7",
+      "status": "passed",
+      "durationMs": 153
+    },
+    {
+      "title": "T7-POS-ESCAPE [GW]: the one F60 escape passes on `web-push` \u2014 CH1 admits it on every tier whose cell does not reach CONTROL, `ANNOUNCEMENT` included (AMB-11 reverses G7\u2019s A1 interim)",
+      "status": "passed",
+      "durationMs": 119
+    },
+    {
+      "title": "T7-C7 [GW]: a `NONE` record whose envelope was minted for `web-push` is refused at slot 7 \u2014 `NONE` is carried by `RICH_INTERACTIVE` alone (R3.2.3), and before U7a this passed",
+      "status": "passed",
+      "durationMs": 97
+    },
+    {
+      "title": "T7-C7-TIER [GW]: the same clause over three more tiers \u2014 `sms` (TEXT_ONLY), `guest-chat` (ANONYMOUS_CHAT) and `web-public` (PUBLIC_READ) each refuse a `NONE`",
+      "status": "passed",
+      "durationMs": 143
+    },
+    {
+      "title": "T7-C7-CARRIER [GW]: the refusal is keyed on the EMISSION\u2019s minted channel, not on the submitting carrier \u2014 the route hard-codes `carrier: pwa` and `web-push` still refuses",
+      "status": "passed",
+      "durationMs": 98
+    },
+    {
+      "title": "T7-C7-ALLOWLIST [GW]: `ANONYMOUS_CHAT` carries `REFINE` and `HANDOFF`; a `NAVIGATE` on `guest-chat` is refused, although every richer tier carries it \u2014 the cell is an ALLOWLIST, not an ordered ceiling (CH1)",
+      "status": "passed",
+      "durationMs": 100
+    },
+    {
+      "title": "T7-C7-ESC-P1 [GW]: the F60 escape is ONE intent \u2014 `control.widget.dismiss` at priority 0. The same key at priority 1 is refused on `web-push`",
+      "status": "passed",
+      "durationMs": 94
+    },
+    {
+      "title": "T7-C1 [GW]: an effect outside the kind\u2019s cell is refused \u2014 `DRAFT` on `METRIC`, whose cell is `NONE, NAVIGATE, REFINE, CONTROL`",
+      "status": "passed",
+      "durationMs": 94
+    },
+    {
+      "title": "T7-C1-MEMBERSHIP [GW]: the cell is an ALLOWLIST, not an ordered rank \u2014 `REFINE` is refused on `LIMITATION`, whose cell lists the off-order `HANDOFF` above it",
+      "status": "passed",
+      "durationMs": 98
+    },
+    {
+      "title": "T7-C2 [GW]: a `REFINE` that names no capability is refused \u2014 F69 gives REFINE a `C9` ref, and \"names nothing\" is not one of its cells",
+      "status": "passed",
+      "durationMs": 97
+    },
+    {
+      "title": "T7-C2-NONE [GW]: a `NONE` that names a capability never gets past slot 7 \u2014 F69\u2019s first row is \"nothing (`capability: null`)\", and Gate 6 SHADOWS this shape because the subject is non-null",
+      "status": "passed",
+      "durationMs": 102
+    },
+    {
+      "title": "T7-NW [GW]: neither the admitted nor the refused submission writes anything durable; the one store operation is the record read",
+      "status": "passed",
+      "durationMs": 113
+    },
+    {
+      "title": "SMOKE-G7-TIER [HTTP]: the tier rule on the real route \u2014 a `NONE` minted for `web-push` stops at slot 7, with no write",
+      "status": "passed",
+      "durationMs": 107
+    },
+    {
+      "title": "SMOKE-G7-ESCAPE [HTTP]: the F60 escape is admitted on `web-push` \u2014 `control.widget.dismiss` at priority 0 passes slot 7",
+      "status": "passed",
+      "durationMs": 103
+    },
+    {
+      "title": "SMOKE-G7-KIND [HTTP]: the kind rule on the real route \u2014 `DRAFT` on `METRIC` stops at slot 7",
+      "status": "passed",
+      "durationMs": 97
+    },
+    {
+      "title": "WR-H2 escape preserves the receipt boundary (committed=true)",
+      "status": "passed",
+      "durationMs": 804
+    },
+    {
+      "title": "WR-H2 escape preserves the receipt boundary (committed=false)",
+      "status": "passed",
+      "durationMs": 416
+    },
+    {
+      "title": "E1-T2B-CLEAN [HTTP] [E-MINT] mints through the journal owner and traverses the real gate pipeline",
+      "status": "passed",
+      "durationMs": 664
+    },
+    {
+      "title": "E1-G1-SEAL [HTTP] [E-TAMPER:WidgetEmission.bodyHash] rejects a production record whose sealed body is altered",
+      "status": "passed",
+      "durationMs": 203
+    },
+    {
+      "title": "E1-G5-FLOOR [HTTP] [E-TAMPER:WidgetIntentRecord.verificationFloor] rejects policy-floor drift without writes",
+      "status": "passed",
+      "durationMs": 208
+    },
+    {
+      "title": "E1-G6-TOOL [HTTP] [E-TAMPER:capabilitySpace=TOOL] stays fail-closed while N6-FLOOR exposes the independent Gate 6 refusal",
+      "status": "passed",
+      "durationMs": 196
+    },
+    {
+      "title": "E1-G4-INDEP [HTTP] [E-INDEP] keeps a foreign tenant outside the record while the N4 battery exposes Gate 4",
+      "status": "passed",
+      "durationMs": 323
+    },
+    {
+      "title": "E1-U [HTTP] [U-proof] records the frozen unreachable-class duties without treating them as live evidence",
+      "status": "passed",
+      "durationMs": 8
+    },
+    {
+      "title": "BOOK-1\u2026BOOK-6: create, reschedule and cancel each propose then COMMIT through Gate 14",
+      "status": "passed",
+      "durationMs": 1206
+    },
+    {
+      "title": "BS-SOURCE [HTTP] [E-MINT] own-list exact Client source proposes and commits reschedule and cancel through existing owners",
+      "status": "passed",
+      "durationMs": 1245
+    },
+    {
+      "title": "T9-POS-5 [GW] appends the lowered USER turn and hands Gate 10 byte-identical content",
+      "status": "passed",
+      "durationMs": 171
+    },
+    {
+      "title": "T9-NEG-8 [GW] an erased source returns handle_stale and writes no turn",
+      "status": "passed",
+      "durationMs": 133
+    },
+    {
+      "title": "T9-INV24-1 [GW] an unrenderable template returns stale and appends no turn",
+      "status": "passed",
+      "durationMs": 105
+    },
+    {
+      "title": "T9-NEG-2 [GW] an unrenderable template returns stale and appends no turn",
+      "status": "passed",
+      "durationMs": 104
+    },
+    {
+      "title": "T9-INV24-4 [GW] an unrenderable template returns stale and appends no turn",
+      "status": "passed",
+      "durationMs": 106
+    },
+    {
+      "title": "T9-CONC-1 [GW] serialises concurrent appends and allocates distinct ordered indices",
+      "status": "passed",
+      "durationMs": 126
+    },
+    {
+      "title": "T9-HTTP-1 lowers through the guarded route and appends the USER turn",
+      "status": "passed",
+      "durationMs": 220
+    },
+    {
+      "title": "T9-HTTP-2 an absent template fails stale and appends no turn",
+      "status": "passed",
+      "durationMs": 185
+    },
+    {
+      "title": "T9-HTTP-3 an erased source fails stale and appends no turn",
+      "status": "passed",
+      "durationMs": 184
+    },
+    {
+      "title": "T9-HTTP-4 a different principal is refused before Gate 9 and cannot write",
+      "status": "passed",
+      "durationMs": 314
+    },
+    {
+      "title": "T9-ATOM-1 [GW] a writer failure rolls the record update and turn append back together",
+      "status": "passed",
+      "durationMs": 145
+    },
+    {
+      "title": "WR-CREATE [E-MINT] DRAFT and COMMIT traverse the canonical owners with a traced production predecessor",
+      "status": "passed",
+      "durationMs": 773
+    },
+    {
+      "title": "SB1-HTTP [HTTP] explicit owner personal context reaches canonical booking with durable actor attribution",
+      "status": "passed",
+      "durationMs": 352
+    },
+    {
+      "title": "G8R-WORLD: the control \u2014 a minted record with no ack reaches at least slot 8, and this run\u2019s world is recorded in the assertion",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "T3 (R-0/R-1): an unrequired record with no ack is not held by 8-R",
+      "status": "passed",
+      "durationMs": 19
+    },
+    {
+      "title": "T3d (R-1): a stored `requires_readback: \"true\"` is a string, not the boolean true, so the record requires nothing and nothing diverges",
+      "status": "passed",
+      "durationMs": 64
+    },
+    {
+      "title": "T10 (R-6): an object ack on a record whose confirmation is NULL is refused, and writes nothing",
+      "status": "passed",
+      "durationMs": 35
+    },
+    {
+      "title": "T11-today (R-6): an object ack on a record whose stored `requires_readback` is FALSE is refused, and writes nothing",
+      "status": "passed",
+      "durationMs": 36
+    },
+    {
+      "title": "T-DIV-1 (R-1a): a record that is not a SPOKEN COMMIT but carries a stored duty DIVERGES from the recompute and is refused, with no ack sent at all",
+      "status": "passed",
+      "durationMs": 30
+    },
+    {
+      "title": "T15 (R-7): a marker affirmation reaches no log line, no response member and no verdict detail",
+      "status": "passed",
+      "durationMs": 21
+    },
+    {
+      "title": "T16 (E15/INV-30): a claimed render profile changes nothing \u2014 the answer is byte-identical whatever `profile_id` says",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "T3-ri (R-1): a real record with NO confirmation column and no ack passes 8-R",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "T3d-ri (R-1): a stored `requires_readback: \"true\"` is a string, so the record requires nothing and nothing diverges",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "T10-ri (R-6): an object ack on a real record whose confirmation is null is refused",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "T15-ri (R-7): the gate itself writes no log line carrying the affirmation, on either branch",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "RI-PROJ (D-3): the stored confirmation reaches the gate as exactly two members \u2014 `readback_text` and `idempotency_key` never do",
+      "status": "passed",
+      "durationMs": 14
+    },
+    {
+      "title": "T5 (R-2): on a real SPOKEN COMMIT that requires a readback, an absent ack refuses `readback_missing`",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "T-DEF3 (R-5): a correct ref and a correct body hash still refuse while the production vocabulary owner is null \u2014 fail closed, not fail open",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "T1-stub (R-3, R-4, R-5): the correct ref, the record\u2019s own body hash and an owner-accepted affirmation pass, and the owner is asked exactly once",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "T6-stub (R-3): a foreign `readback_ref` refuses",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "T7-stub (R-4): a `body_hash` that is not this record\u2019s refuses \u2014 affirming a body other than the one read out does not pass",
+      "status": "passed",
+      "durationMs": 2
+    },
+    {
+      "title": "T9-stub (R-5, R-7): the affirmation reaches the owner VERBATIM \u2014 no trim, no case fold, no normalisation",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "T13a (R-7): an object ack whose members are wrongly typed refuses, and never throws",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "T13b-direct (R-7): a non-object ack that reaches the gate below the route refuses, and never throws",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "T13d (R-7): a NULL ack on a record that requires a readback refuses rather than throwing (`null.readback_ref` would be a 500)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "T13c-stub (R-3): a null `readback_ref` on BOTH sides is not a match, and the owner is never asked",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "T-DIV-2 (R-1a): a real COMMIT fitted for the SPOKEN tier with the duty ERASED from its row is refused \u2014 the recompute is the second half of the antecedent",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "SMOKE-G8R-UNREQUIRED-ACK (R-6, R-7): behind every guard, an OBJECT ack on a record whose confirmation is null and on one whose `requires_readback` is false is refused, and neither writes",
+      "status": "passed",
+      "durationMs": 76
+    },
+    {
+      "title": "T-DIV-1-http (R-1a): behind every guard, a record that is not a SPOKEN COMMIT but carries a stored readback duty is refused for the DIVERGENCE alone, with no ack sent at all, and writes nothing",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "title": "T13b-http / T12-http (AMB-02c, \u00a73.8): a non-object ack and a NULL ack are 400s at the shape stage, never a \u00a73.9 readback code \u2014 and the record is untouched",
+      "status": "passed",
+      "durationMs": 46
+    },
+    {
+      "title": "T16-http (E15/INV-30, C3): a claimed render-profile HEADER and a claimed `profile_id` change nothing about the answer",
+      "status": "passed",
+      "durationMs": 42
+    },
+    {
+      "title": "AR-G6-REVOCATION [E-MINT] real post-Gate6 revoke refuses at canonical admission and increments metric",
+      "status": "passed",
+      "durationMs": 646
+    },
+    {
+      "title": "the registries the gate specs read load, and the base fixture is a live-shaped record",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "G13-R5/N06/N10 [U] claims the exact record, cancels the live widget and writes one echo-free B-29 receipt",
+      "status": "passed",
+      "durationMs": 162
+    },
+    {
+      "title": "G13-NAV-W [U] returns the exact stored sealed widget under the current tenant/principal",
+      "status": "passed",
+      "durationMs": 144
+    },
+    {
+      "title": "G13-NAV-FOREIGN [U] never returns a stored envelope to a foreign current proof",
+      "status": "passed",
+      "durationMs": 120
+    },
+    {
+      "title": "G1-d/AMB-54 [U] concurrent single-use routing has one winner, one expired result and one receipt",
+      "status": "passed",
+      "durationMs": 104
+    },
+    {
+      "title": "N-CTRL-FOREIGN-P/T [U] a foreign principal or tenant receives the same neutral refusal and cannot mutate the target widget",
+      "status": "passed",
+      "durationMs": 119
+    },
+    {
+      "title": "B-29 [U] reconciles the same ACCEPTED receipt once instead of creating a second adjudication",
+      "status": "passed",
+      "durationMs": 105
+    },
+    {
+      "title": "N09/F75 [U] atomically consumes an exact approve/reject sibling pair with one concurrent winner",
+      "status": "passed",
+      "durationMs": 144
+    },
+    {
+      "title": "G13-P01/N02/N03/N05 [GW][G-SYNTH][XF\u2192U10b] reaches the closed router only after Gate 10 is built",
+      "status": "passed",
+      "durationMs": 112
+    },
+    {
+      "title": "T10-R1/T10-CAND [GW] exact subject agreement proceeds without a divergence row",
+      "status": "passed",
+      "durationMs": 181
+    },
+    {
+      "title": "T10-R4/T10-ESC [GW] an escape-first effect divergence refuses and writes exactly one audit",
+      "status": "passed",
+      "durationMs": 127
+    },
+    {
+      "title": "T10-TX [GW] an audit failure rolls the Gate 9 user turn back with the same request transaction",
+      "status": "passed",
+      "durationMs": 125
+    },
+    {
+      "title": "T10-HTTP-1/2 exact agreement proceeds while divergence returns the canonical refusal",
+      "status": "passed",
+      "durationMs": 423
+    },
+    {
+      "title": "NS-SOURCE [HTTP] [E-MINT] production journal detail rereads exact retained date and resolves exact parent",
+      "status": "passed",
+      "durationMs": 410
+    },
+    {
+      "title": "accepts the exact NAVIGATE(detail) pair",
+      "status": "passed",
+      "durationMs": 140
+    },
+    {
+      "title": "accepts the exact NAVIGATE(w) pair",
+      "status": "passed",
+      "durationMs": 118
+    },
+    {
+      "title": "refuses missing pair at the PostgreSQL boundary",
+      "status": "passed",
+      "durationMs": 137
+    },
+    {
+      "title": "refuses half pair at the PostgreSQL boundary",
+      "status": "passed",
+      "durationMs": 103
+    },
+    {
+      "title": "refuses foreign space at the PostgreSQL boundary",
+      "status": "passed",
+      "durationMs": 101
+    },
+    {
+      "title": "refuses non navigate at the PostgreSQL boundary",
+      "status": "passed",
+      "durationMs": 98
+    },
+    {
+      "title": "refuses other target at the PostgreSQL boundary",
+      "status": "passed",
+      "durationMs": 98
+    },
+    {
+      "title": "MINT-1/MINT-4/MINT-5 stores exact typed records, one receipt and a verifiable keyed seal",
+      "status": "passed",
+      "durationMs": 143
+    },
+    {
+      "title": "MINT-2 stores an emission and receipt for NONE but no token or record",
+      "status": "passed",
+      "durationMs": 110
+    },
+    {
+      "title": "MINT-3 refuses a generic actuating key with no token, record or emission",
+      "status": "passed",
+      "durationMs": 96
+    },
+    {
+      "title": "MINT-6 stores no interpolated label template for client-identified content",
+      "status": "passed",
+      "durationMs": 91
+    },
+    {
+      "title": "MINT-8 links a same-turn, same-channel successor only from LIVE",
+      "status": "passed",
+      "durationMs": 132
+    },
+    {
+      "title": "TURN-CANONICAL [HTTP] [E-MINT] ordinary typed, widget typed and native tap persist byte-identical USER content through the same writer",
+      "status": "passed",
+      "durationMs": 494
+    },
+    {
+      "title": "MT3-1 mints one web-push widget, two typed intents and one render receipt",
+      "status": "passed",
+      "durationMs": 151
+    },
+    {
+      "title": "MT3-2 a non-entitled tenant creates no Widget row",
+      "status": "passed",
+      "durationMs": 89
+    },
+    {
+      "title": "MT3-3 same-tenant foreign principal cannot acquire another recipient's moment",
+      "status": "passed",
+      "durationMs": 151
+    },
+    {
+      "title": "G3-e a web-push token minted for A is inert when submitted by B",
+      "status": "passed",
+      "durationMs": 163
+    },
+    {
+      "title": "G11-N4d-CONTROL [GW]: today BOTH twins stop stale at slot 9 before Gate 11 is reached",
+      "status": "passed",
+      "durationMs": 196
+    },
+    {
+      "title": "G11-N4d [GW] [G-SYNTH] [XF\u2192U10b]: a witnessed record refuses `superseded/handle_stale` at slot 11 with no owner call, and its twin passes slot 11",
+      "status": "passed",
+      "durationMs": 139
+    },
+    {
+      "title": "G11-N4d-NW [GW]: neither twin writes anything durable, at whatever slot the pipeline stops",
+      "status": "passed",
+      "durationMs": 119
+    },
+    {
+      "title": "G11-N4d-SHAPE: the \u00a73.8 body a witnessed record is submitted with carries no noun, handle or witness",
+      "status": "passed",
+      "durationMs": 103
+    },
+    {
+      "title": "G11-N4d-SHAPE-CF: structural noun/witness material is refused without treating opaque token bytes as a handle",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "T-F11/B-1 (a): the gateway the real WidgetsModule constructs holds \u00a73.9's fifteen slots in the contract's order; 7 < 8 < 8-R < 9 and index('8') === 7",
+      "status": "passed",
+      "durationMs": 3
+    },
+    {
+      "title": "T-F11/B-1 (b): live stops at 0, 1, 3, 5 [synthetic record], 7 [synthetic record] and 8 each report ran equal to the slot's position, over records the real writers minted for JwtStrategy-validated principals",
+      "status": "passed",
+      "durationMs": 393
+    },
+    {
+      "title": "T-F11/B-1 (c): only slot 9 may produce the lowering facts (J-1 producer map)",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "RT6-1 [GW/PG] serialises erasure with lowering and never leaves a readable user turn",
+      "status": "passed",
+      "durationMs": 162
+    },
+    {
+      "title": "RT6-2 [PG] erases every C/X store field while canonical booking, consent and loyalty reads remain byte-identical",
+      "status": "passed",
+      "durationMs": 168
+    },
+    {
+      "title": "RT6-3 [GW/PG] an erased predecessor yields code alone until P-G15b",
+      "status": "passed",
+      "durationMs": 131
+    },
+    {
+      "title": "REN-5a [HTTP] control: a refusal whose code carries a row renders from THAT row, and the response carries no error token",
+      "status": "passed",
+      "durationMs": 26
+    },
+    {
+      "title": "REN-5 [HTTP] every refusal carries a reason_text minted from its OWN row, and no error token",
+      "status": "passed",
+      "durationMs": 44
+    },
+    {
+      "title": "SV2-01 happy successor verification creates usable explicit personal context and actual actor audit",
+      "status": "passed",
+      "durationMs": 152
+    },
+    {
+      "title": "SV2-02 wrong OTP has no link or consumption effect",
+      "status": "passed",
+      "durationMs": 166
+    },
+    {
+      "title": "SV2-03 replay fails closed",
+      "status": "passed",
+      "durationMs": 128
+    },
+    {
+      "title": "SV2-04 expired OTP fails under database time",
+      "status": "passed",
+      "durationMs": 108
+    },
+    {
+      "title": "SV2-05 Client substitution cannot transfer a challenge",
+      "status": "passed",
+      "durationMs": 183
+    },
+    {
+      "title": "SV2-06 tenant substitution fails closed",
+      "status": "passed",
+      "durationMs": 167
+    },
+    {
+      "title": "SV2-07 predecessor changed after resolver read is rejected inside identity lock",
+      "status": "passed",
+      "durationMs": 111
+    },
+    {
+      "title": "SV2-08 active predecessor never authorizes issuance or consumption",
+      "status": "passed",
+      "durationMs": 181
+    },
+    {
+      "title": "SV2-09 non-latest revoked predecessor cannot be consumed",
+      "status": "passed",
+      "durationMs": 121
+    },
+    {
+      "title": "SV2-10 revoked episode remains byte-for-byte immutable",
+      "status": "passed",
+      "durationMs": 120
+    },
+    {
+      "title": "SV2-11 successful consume creates exactly one successor and one outcome",
+      "status": "passed",
+      "durationMs": 128
+    },
+    {
+      "title": "SV2-12 concurrent consume serializes to one success and one refusal",
+      "status": "passed",
+      "durationMs": 130
+    },
+    {
+      "title": "SV2-JSON all four V2 fields are mandatory, exact and immutable",
+      "status": "passed",
+      "durationMs": 123
+    },
+    {
+      "title": "SV2-CHANNEL canonical channel changed after issuance invalidates exact Client proof",
+      "status": "passed",
+      "durationMs": 117
+    },
+    {
+      "title": "SV2-SESSION current revocation is checked on consume",
+      "status": "passed",
+      "durationMs": 99
+    },
+    {
+      "title": "SV2-LIMIT failed OTP attempts survive rollback and cannot be reset with correct code",
+      "status": "passed",
+      "durationMs": 173
+    },
+    {
+      "title": "SV2-DELIVERY failed SMS grants nothing and discloses no OTP",
+      "status": "passed",
+      "durationMs": 92
+    },
+    {
+      "title": "SV2-V1 historical V1 remains immutable and initial-only; V1 consumption still works for a fresh subject",
+      "status": "passed",
+      "durationMs": 108
+    },
+    {
+      "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+      "status": "passed",
+      "durationMs": 780
+    },
+    {
+      "title": "HAR-LOOPBACK owns one ready IPv4 listener across requests and closes it at teardown",
+      "status": "passed",
+      "durationMs": 558
+    },
+    {
+      "title": "F88-0 [HTTP] control: a conformant \u00a73.8 body passes the shape stage and is refused at slot 1, so a 400 below is about its own violation",
+      "status": "passed",
+      "durationMs": 22
+    },
+    {
+      "title": "F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+      "status": "passed",
+      "durationMs": 436
+    },
+    {
+      "title": "F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+      "status": "passed",
+      "durationMs": 37
+    },
+    {
+      "title": "F88-3 [HTTP] a body without `contract` is not a submission",
+      "status": "passed",
+      "durationMs": 8
+    },
+    {
+      "title": "F88-4 [HTTP] `readback_ack: null` is refused at the shape stage, not as `readback_mismatch` (AMB-02c)",
+      "status": "passed",
+      "durationMs": 8
+    },
+    {
+      "title": "F88-5 [HTTP] `spoken_transcript` is refused at the shape stage on this carrier, and the value is not echoed back",
+      "status": "passed",
+      "durationMs": 8
+    },
+    {
+      "title": "F88-6 [HTTP] the other \u00a73.8 members are enforced as declared: required-nullable `inputs`, a UUID `widget_id`, a non-null `readback_ack` shape",
+      "status": "passed",
+      "durationMs": 78
+    },
+    {
+      "title": "G12-L01 projects SERVICE_SELECTOR from exactly one canonical source fact",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "G12-L02 projects STAFF_SELECTOR from exactly one canonical source fact",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "G12-L03 projects TIME_SLOT_SELECTOR from exactly one canonical source fact",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "G12-L05 projects SCHEDULE from exactly one canonical source fact",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "G12-L06 projects STRATEGY_OPTIONS from exactly one canonical source fact",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "G12-L07 no principal or mismatched authority performs zero owner reads",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "G12-L09 owner denial maps through limitation_codes without leaking its message",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "G12-L13 the owner-composed SCHED.2 row proposes only the A2-blocked COMMIT",
+      "status": "passed",
+      "durationMs": 6
+    },
+    {
+      "title": "G12-L15 an unregistered subject degrades without a fallback read",
+      "status": "passed",
+      "durationMs": 3
+    },
+    {
+      "title": "G12-L16 an L2 missing owner field degrades instead of making a partial body",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "G12-L17/L18 only the approved journal row binds its typed date scalar",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "G12-L19 one composition cannot issue a second read",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "G12-L20 NAVIGATE detail reprojects only from its sealed source capability",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "G12-L18-PORT calls only the closed tool set without an idempotency key",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "G12-L09-PORT maps a canonical owner exception and rethrows an infrastructure fault",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "D8-U records all four duties without claiming a live open-input traversal",
+      "status": "passed",
+      "durationMs": 3
+    },
+    {
+      "title": "WF-U-R1A [HTTP ledger; SPOKEN RI] quotes the approved partial scope and proves the excluded branch fails closed",
+      "status": "passed",
+      "durationMs": 1
+    }
+  ],
+  "nativeMutationAdmission": "PASS",
+  "completeNativeReceiptSha256": "afa124cffe9455071feab13b7b508cabcb5c59830f3ec34f54a59770393ddb8a"
+}

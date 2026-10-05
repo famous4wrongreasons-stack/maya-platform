@@ -1,0 +1,21 @@
+{
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "name": "mutation-7-part-3-of-4",
+  "command": [
+    "node",
+    "scripts/widgets-mutation-battery.mjs",
+    "--gate",
+    "7",
+    "--partition",
+    "3/4",
+    "--out",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/suspend-reverification/parts/widgets-mutation-part-7-part-3-of-4.json"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/suspend-reverification-worker-8/maya-saas-backend",
+  "exit": 0,
+  "seconds": 3871.84,
+  "startedAt": "2026-10-01T21:39:10.296776+00:00",
+  "completedAt": "2026-10-01T22:43:42.138306+00:00",
+  "pid": 34179,
+  "campaignPhase": "Unrestricted whole-part reexecution after documented host suspension"
+}

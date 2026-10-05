@@ -1,0 +1,8 @@
+{
+  "reason": "Both HTTP failure mechanisms captured to foreign IPv4 listeners; stop diagnostic-only unit load controls before harness verification. No certification result admitted.",
+  "processGroups": [
+    31526,
+    31530,
+    31539
+  ]
+}

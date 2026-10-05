@@ -1,0 +1,97 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "status": "PASS",
+  "productionReadOnlyInventory": "PRODUCTION-PRESTATE-READONLY.json",
+  "appliedChecksumsMatch": 99,
+  "pending": [
+    "20260929190000_client_link_challenge_json_v2",
+    "20260930120000_journal_detail_retained_date"
+  ],
+  "newGovernanceMigrations": 0,
+  "exactHistoricalBaselineMatches": [
+    {
+      "migration_name": "20260814210000_outbound_messaging_delivery",
+      "checksum": "96f6210472602f178d19913c6c53868470f657336d0f785f38d72ad0ea5ba3d4",
+      "finished_at": null,
+      "rolled_back_at": "2026-08-14T18:00:59.130Z"
+    },
+    {
+      "migration_name": "20260814205000_marketing_tenant_compound_keys",
+      "checksum": "f3c4723292f71ab20cf66aaf5a82b8bc8645edcd7458c5110c3ebcdce8d4eaf4",
+      "finished_at": "2026-08-14T18:05:15.941Z",
+      "rolled_back_at": null
+    },
+    {
+      "migration_name": "20260814210000_outbound_messaging_delivery",
+      "checksum": "d320dca78ee6847bf97438fdef6f01db6f3b9e20e94d372f21747912c49dcc28",
+      "finished_at": "2026-08-14T18:05:16.206Z",
+      "rolled_back_at": null
+    },
+    {
+      "migration_name": "20260814223000_marketing_campaign_scheduling",
+      "checksum": "30af1fe46221d71459db7f88b9a82fb4d3565f4d6c7a0ba5d3f504fe3dbd1c24",
+      "finished_at": "2026-08-14T18:05:16.229Z",
+      "rolled_back_at": null
+    }
+  ],
+  "historicalReconstructionOwner": "20260816160000_reconcile_marketing_schema",
+  "syntheticBackupSha256": "1db08c9094164984a1804aa8c559bf974a3e5933fdea58ad602a465aeed6246f",
+  "rollbackRestoresPrestateAndCanary": true,
+  "constraintComparison": "all 793 definitions via PostgreSQL pretty deparser; normalizes dump/restore parser parentheses, no constraint excluded",
+  "scope": "synthetic schema based on observed migration history; no production data copied",
+  "receipts": [
+    {
+      "name": "create-maya_widget_gate_proof_so_cert_pre_20261005",
+      "exit": 0,
+      "seconds": 0.08
+    },
+    {
+      "name": "create-maya_widget_gate_proof_so_cert_upgrade_20261005",
+      "exit": 0,
+      "seconds": 0.05
+    },
+    {
+      "name": "create-maya_widget_gate_proof_so_cert_rollback_20261005",
+      "exit": 0,
+      "seconds": 0.06
+    },
+    {
+      "name": "apply-observed-prestate",
+      "exit": 0,
+      "seconds": 1.08
+    },
+    {
+      "name": "synthetic-canary",
+      "exit": 0,
+      "seconds": 0.02
+    },
+    {
+      "name": "backup",
+      "exit": 0,
+      "seconds": 0.1
+    },
+    {
+      "name": "restore-maya_widget_gate_proof_so_cert_upgrade_20261005",
+      "exit": 0,
+      "seconds": 0.53
+    },
+    {
+      "name": "restore-maya_widget_gate_proof_so_cert_rollback_20261005",
+      "exit": 0,
+      "seconds": 0.54
+    },
+    {
+      "name": "apply-only-certified-pending",
+      "exit": 0,
+      "seconds": 0.54
+    },
+    {
+      "name": "upgraded-http-rehearsal",
+      "exit": 0,
+      "seconds": 6.8
+    }
+  ],
+  "productionMutations": 0,
+  "realOtp": 0,
+  "realYclients": 0
+}

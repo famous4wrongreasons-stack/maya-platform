@@ -1,0 +1,962 @@
+diff --git a/.github/workflows/release-packaging.yml b/.github/workflows/release-packaging.yml
+new file mode 100644
+index 00000000..9a1cc255
+--- /dev/null
++++ b/.github/workflows/release-packaging.yml
+@@ -0,0 +1,38 @@
++name: Canonical React release packaging
++on:
++  pull_request:
++  push:
++  workflow_dispatch:
++permissions:
++  contents: read
++jobs:
++  release-packaging:
++    runs-on: macos-latest
++    timeout-minutes: 30
++    steps:
++      - uses: actions/checkout@v4
++        with:
++          persist-credentials: false
++      - uses: actions/setup-node@v4
++        with:
++          node-version: 22
++      - run: npm ci --ignore-scripts --no-audit --no-fund
++        working-directory: maya-saas-backend
++      - run: npm ci --ignore-scripts --no-audit --no-fund
++        working-directory: maya-carrier-react
++      - run: npm ci --ignore-scripts --no-audit --no-fund
++        working-directory: maya-ios-carrier
++      - run: npm run sync
++        working-directory: maya-ios-carrier
++      - run: npm test && npm run test:release
++        working-directory: maya-carrier-react
++      - run: node --test scripts/widget-release-operator.test.cjs
++        working-directory: maya-saas-backend
++      - run: npx prisma generate && npm run build
++        working-directory: maya-saas-backend
++      - run: node --test scripts/widget-release-operator.compiled-test.cjs
++        working-directory: maya-saas-backend
++      - name: Unsigned local build, no device install or account provisioning
++        run: xcodebuild -project maya-ios-carrier/ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -derivedDataPath "$RUNNER_TEMP/maya-ios" CODE_SIGNING_ALLOWED=NO build
++      - name: Verify the actual app bundle, not just the sync input
++        run: node maya-carrier-react/tools/release.mjs verify-app "$RUNNER_TEMP/maya-ios/Build/Products/Debug-iphonesimulator/App.app"
+diff --git a/docs/rebuild/widget-release-programme/RELEASE-PACKAGING-AND-TRUST-RUNBOOK.md b/docs/rebuild/widget-release-programme/RELEASE-PACKAGING-AND-TRUST-RUNBOOK.md
+new file mode 100644
+index 00000000..228c58de
+--- /dev/null
++++ b/docs/rebuild/widget-release-programme/RELEASE-PACKAGING-AND-TRUST-RUNBOOK.md
+@@ -0,0 +1,92 @@
++# Certified React release packaging and AR-1 operator procedure
++
++This procedure prepares a release; it does not authorize execution. The packaging/trust pass permits local builds, synthetic proofs and read-only verification only. Production deployment, migration, trust installation/restart, login/session issuance, entitlement grant, OTP, provider actions and device installation require the separate execution boundary. An unsigned certificate proposal is evidence for review, never release authority.
++
++## One delivered web payload
++
++`maya-carrier-react/src/main.tsx` is the fixed entrypoint for both production PWA and Capacitor. From `maya-ios-carrier`, run `npm run sync`; from `maya-carrier-react`, run `npm run release:verify` and `npm run test:release`. The first command builds the headless runtime, builds the React web/Capacitor artifacts, verifies both, syncs the latter, and checks the copied native bytes. It does not install an app or deploy anything.
++
++Publish only `maya-carrier-react/dist/web/`, mounted at `/maya-chat-shell/`. The existing manifest install ID, start URL, scope and approved icons retain that identity. The name of the URL is not a shell selection. `maya-chat-shell/dist/web` and `dist/capacitor` are runtime/reference artifacts, never the selected release UI. No legacy application screens are copied.
++
++`maya-ios-carrier/capacitor.config.json` pins `webDir` to `../maya-carrier-react/dist/capacitor`. Only the existing API endpoint string, content-addressed script path and CSP endpoint differ between targets. Styles, metadata and icons are identical. The verifier reconstructs expected bytes from source, rejects extra/missing/changed files and symlinks, and never repairs a failed verification. Only the two empty Capacitor Cordova placeholders are allowed in native output. Generated native configuration and plugin set must match.
++
++Xcode runs the same verifier before every build. After an authorized build, verify the actual `.app` with `node maya-carrier-react/tools/release.mjs verify-app /absolute/path/App.app` from the repository root. A local unsigned simulator build proves packaging, not device installation or signed device acceptance. Record source SHA plus backend, web, Capacitor and actual-app inventories. Any code/runtime-byte change invalidates the candidate.
++
++## R01 provenance
++
++The release manifest now includes the existing `.well-known/.htaccess` and `apple-app-site-association` at their existing production paths and committed bytes. Their contents are unchanged from `aecd770b91e94b74b26f76f6dc9e69775dc6bcab`. The same R01 gate checks all 44 rows and all four committed sources. Follow `maya-saas-backend/deploy/platform/beget-edge/RELAY-RELEASE.md`; the existing off-root archive is selected with `MAYA_R01_ARCHIVE_DIR=legacy-bundle-archive`. Run `node deploy/platform/beget-edge/relay-release.cjs verify` from the backend. This verify mode makes no repairs and does not evaluate PHP source or send business requests.
++
++## 1. Obtain identities and public trust material from the real custodians
++
++The owner/approver and independent security reviewer supply their own Ed25519 public keys, key IDs and stable principal IDs through the operator's authenticated channel. The reviewer must differ from both approver and platform operator. They must control different private keys. Private keys remain in their existing custody/signing service; do not generate production keys in this repository, send them to chat, copy them to the application, or use the ephemeral test keys. Verify public-key fingerprints directly with each custodian.
++
++The platform operator is a real active global `platform_owner` User, with `tenantId=null` and `membershipId=null`. Product `tenant_owner` is not this role. Do not promote the business owner, insert an AuthSession, mint a JWT manually, or reuse a tenant token. If the actual account credentials are unavailable, stop this execution step; use the established account recovery owner outside this release unit.
++
++Before actual installation, the operator prepares a private configuration file outside the repository, excluded from logs/backups exposed to users. It contains these exact settings, with supplied values (not these placeholders):
++
++```dotenv
++NODE_ENV=production
++WIDGET_RELEASE_ENVIRONMENT=production
++WIDGET_RELEASE_CANDIDATE_SHA=<exact newly certified 40-character SHA>
++WIDGET_RELEASE_PRODUCTION_TENANTS_JSON='["<exact authorized tenant id>"]'
++WIDGET_RELEASE_PRODUCTION_TRUST_JSON='{"<owner key id>":{"principalId":"<approver id>","purpose":"owner","publicKey":"<Ed25519 SPKI PEM with JSON escaped newlines>"},"<reviewer key id>":{"principalId":"<reviewer id>","purpose":"security","publicKey":"<different Ed25519 SPKI PEM with JSON escaped newlines>"}}'
++```
++
++No wildcard/additional tenant, staging trust fallback, private PEM or shared signer is admissible. The public settings themselves do not grant authority. Validate offline from the exact built backend:
++
++```sh
++node scripts/widget-release-operator.cjs check-config "$AR1_ENV_FILE" "$AR1_TENANT" "$AR1_CANDIDATE_SHA"
++```
++
++This prints only fingerprints/identities and `authorityGranted:false`, `sessionVerified:false`. Installation is a separate authorized operator action: first capture the current service/environment and rollback; then insert only these reviewed settings into the service's actual environment source, preserving unrelated settings and file ownership/mode. The tracked deployment unit names `/etc/maya-saas/live-widgets.env`; verify the running unit's EnvironmentFile before using that path. Use proper systemd environment quoting and verify effective parsed values/fingerprints without printing secrets. Never replace the entire production environment with the five-field preflight file. No restart or installation is performed by the offline checker.
++
++## 2. Independent certificate review and signature
++
++Use only the new candidate's complete fresh strict-collector evidence and artifact hashes. The reviewer verifies all 163 applicable clauses, isolation, revocation, FBE2E and packaging; the two global HANDOFF duties remain STOP. Full-contract certification remains false. Inspect the production backend artifact with the existing compiled `WidgetReleasePolicy.buildDigest()` from its backend working directory; this hashes executable backend JS and its package lock. Compare web/native inventories separately to the certified carrier digest. A candidate label alone is insufficient.
++
++The reviewer creates a production certificate payload satisfying `profileCertificate` in `src/entitlements/widget-release-profile.contract.ts`. Preserve the exact candidate/build/carrier/registry/evidence/integration/FBE2E/revocation/isolation/dependency digests, matrix and global audit digest from reviewed receipts; use the fixed `closed-input.no-handoff@1` profile digest. Set `environment=production` and an actual reviewed issuance/expiry window. Do not simply relabel or sign an expired synthetic proposal without that review.
++
++Sign the UTF-8 bytes returned by the existing compiled `canonical(payload)` function using Ed25519 (no prehash). Wrap as exactly `{payload,keyId,signature}`, where `signature` is unpadded base64url (86 characters). `releaseHash(signedCertificate)` is SHA-256 of the canonical entire signed wrapper, not the raw JSON file and not just its payload. The operator may prepare bytes for review, but may not manufacture the reviewer's signature. The repository ships no production signing command or private key.
++
++## 3. Real platform-owner session and current CAS
++
++After separate execution authorization, the operator uses the existing `POST /api/auth/login` password route with `{email,password}` and **omits `tenantSlug`**. This is the global platform-owner login; it issues the canonical AuthSession. It is not SMS verification. Keep credentials, response/token and HTTP header files in the operator's private directory with mode 0600; do not put them in command-line arguments, chat, git or logs. Use an authenticated HTTPS client, no TLS bypass. Verify the returned User is the expected global platform owner. A decoded token alone is not session evidence.
++
++Use that session to call `GET /api/platform/widget-release/<exact-tenant>/status`. The controller and writer verify the actual User/AuthSession in the database. Record the exact returned `version` (possibly `absent`), tenant, current enabled state and expiry. Never invent or derive the CAS from a historical report. Session issuance and status execution are deliberately not automated by this preparation pass.
++
++## 4. Separate owner execution authorization
++
++The owner signs exactly the production contract `maya.widget-release-production-authorization/1`, not a staging authorization. All fields below are mandatory:
++
++| Field | Binding |
++| --- | --- |
++| `authorizationId`, `releaseId` | Fresh execution identity and identified release |
++| `operation` | `grant` |
++| `tenantId`, `environment` | Exact single authorized tenant; `production` |
++| `candidateSha`, `buildDigest` | Exact newly certified source and running compiled bytes |
++| `certificateDigest`, `evidenceDigest` | Canonical signed certificate hash; its reviewed evidence digest |
++| `profileId`, `profileDigest` | Fixed `closed-input.no-handoff@1`; canonical fixed digest |
++| `operatorId` | Actual authenticated global platform User |
++| `approverId`, `reviewerId` | Principals bound to installed owner/security keys |
++| `rollbackOwnerId` | Real designated rollback owner |
++| `expectedVersion` | Current canonical status version |
++| `notBefore`, `expiresAt` | UTC ISO instants; positive window of at most 24 hours |
++| `grantExpiresAt` | Future instant, no later than authorization/certificate expiry and at most 24 hours after application |
++
++The owner signs canonical UTF-8 bytes with the same wrapper convention. Package the grant command as exactly `{authorization:<signed owner wrapper>,certificate:<signed reviewer wrapper>}`. Changing any field requires a new appropriate signature. No plan/trial grant or automatic renewal exists. The offline validation is:
++
++```sh
++node scripts/widget-release-operator.cjs check-command "$AR1_ENV_FILE" "$AR1_TENANT" "$AR1_CANDIDATE_SHA" "$AR1_SIGNED_COMMAND_FILE" "$AR1_PLATFORM_OPERATOR_ID"
++```
++
++This delegates to the **compiled canonical policy**, verifies current time/signatures/digests/operator binding, but cannot attest the real session, CAS or database. Next, under the separately authorized execution, POST the same command to `/api/platform/widget-release/<tenant>/validate` with that actual platform session. Require `dryRun:true` and the exact candidate/profile/version/expiry. Dry-run acquires/checks the existing authority locks without granting. It is not permission to bypass a later refusal. Only after the release execution authorization and all preflight checks may the operator POST the unchanged signed command to `/grant`. Retain its atomic `AuditLog` receipt, then reread status/effective feature and prove HANDOFF refusal. A timeout requires status/audit inspection; do not create a second authorization to guess success.
++
++## 5. Revocation and expiry readiness
++
++Keep the designated rollback operator/session and owner signer available for the window. Revoke uses a new owner-signed production authorization with `operation=revoke`, `grantExpiresAt=null`, a fresh authorization ID/window and the **current** entitlement version. Preserve exact stored candidate/build/certificate/release/profile/evidence bindings and designated identities. Submit exactly `{authorization:<signed wrapper>}` to `/revoke`; the canonical writer validates the stored release binding in its transaction and writes AuditLog atomically. The offline checker can validate revoke syntax/signature but cannot replace that stored-binding check. There is no revoke dry-run endpoint; do not send revoke to the grant-only `/validate` route.
++
++After authorized revoke, status must be disabled and old widget tokens refused. Natural expiry also fails closed; no auto-renew. Revoke the entitlement before rolling the backend back to an artifact that cannot interpret this state. Retain the independent database/runtime rollback artifacts and the exact migration plan. Do not roll back unrelated production data. Readiness for this procedure is distinct from performing a grant/revoke or asserting an unobserved production result.
++
++## Remaining external inputs
++
++Real owner public key/identity/custody confirmation; independent reviewer public key/identity and reviewed production certificate signature; actual global platform-owner login/session; separately signed execution authorization tied to the **new** candidate and current CAS. If any is missing, stop that execution step. No tenant authority, caller-authored JSON, test signature or historical receipt substitutes for it.
+diff --git a/maya-carrier-react/build.mjs b/maya-carrier-react/build.mjs
+index 561e4da5..4e2c3d2c 100644
+--- a/maya-carrier-react/build.mjs
++++ b/maya-carrier-react/build.mjs
+@@ -15,6 +15,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
+ import { createHash } from 'node:crypto';
+ import { createRequire } from 'node:module';
+ import * as R from './tools/ratchets.mjs';
++import { assertTree, writeTree } from './tools/payload-files.mjs';
+ 
+ const ROOT = path.dirname(fileURLToPath(import.meta.url));
+ const SHELL = path.join(ROOT, '..', 'maya-chat-shell');
+@@ -182,7 +183,6 @@ if (!flags.has('--typecheck')) {
+   }
+   const dist = path.join(ROOT, 'dist');
+   const out = path.join(dist, target);
+-  fs.rmSync(out, { recursive: true, force: true });
+   const built = await esbuild.build({
+     entryPoints: [path.join(ROOT, 'src', 'main.tsx')],
+     bundle: true,
+@@ -193,63 +193,57 @@ if (!flags.has('--typecheck')) {
+     entryNames: 'm/[hash]/main',
+     assetNames: 'a/[hash]/[name]',
+     metafile: true,
++    write: false,
+     minify: false,
+     sourcemap: false,
+     legalComments: 'none',
+   });
+-  void built;
+-  const jsFiles = [];
+-  const collect = (dir) => {
+-    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+-      const p2 = path.join(dir, e.name);
+-      if (e.isDirectory()) collect(p2);
+-      else if (e.name.endsWith('.js')) jsFiles.push(p2);
+-    }
+-  };
+-  collect(out);
+-
+-  // The endpoint substitution: one string, on the emitted bytes, so nothing else in the tree has to
+-  // know which carrier it is running on.
+-  let mainJs = jsFiles[0];
+-  const webJs = fs.readFileSync(mainJs, 'utf8');
++  // Build the expected payload in memory even for verification. A caller-authored inventory
++  // cannot substitute an older shell, and --verify-output never repairs a failing artifact.
++  const javascript = built.outputFiles.filter((f) => f.path.endsWith('.js'));
++  if (javascript.length !== 1) throw new Error('React payload must have exactly one entry chunk');
++  const webJs = javascript[0].text;
+   const capJs = webJs.replace(API_NEEDLE(TARGETS.web.apiBase), API_NEEDLE(TARGETS.capacitor.apiBase));
+-  if (target === 'capacitor') {
+-    fs.writeFileSync(mainJs, capJs);
+-    // RE-ADDRESS after substituting. esbuild hashed the pre-substitution bytes, so without this the
+-    // two targets would sit at the SAME content address with DIFFERENT payloads — which is the one
+-    // thing a content-addressed path must never do.
+-    const digest = createHash('sha256').update(capJs).digest('hex').slice(0, 16);
+-    const oldDir = path.dirname(mainJs);
+-    const newDir = path.join(path.dirname(oldDir), digest);
+-    fs.renameSync(oldDir, newDir);
+-    mainJs = path.join(newDir, path.basename(mainJs));
+-    jsFiles[0] = mainJs;
+-  }
++  const webRel = path.relative(out, javascript[0].path).split(path.sep).join('/');
++  const capRel = 'm/' + createHash('sha256').update(capJs).digest('hex').slice(0, 16) + '/main.js';
++  const rel = target === 'capacitor' ? capRel : webRel;
++  const payloadJs = target === 'capacitor' ? capJs : webJs;
++  const expected = new Map([[rel, Buffer.from(payloadJs)]]);
+ 
+   // The emitted bundle is scanned too, against the narrower BUNDLE_BANS: a dependency can carry
+   // what a source file may not, and those names have no legitimate reason to exist in the artefact.
+   const post = [];
+-  for (const abs of jsFiles) post.push(...R.scanBundle(path.relative(ROOT, abs).split(path.sep).join('/'), fs.readFileSync(abs, 'utf8')));
++  post.push(...R.scanBundle(`dist/${target}/${rel}`, payloadJs));
+   report(post);
+ 
+-  const rel = jsFiles.length ? path.relative(out, jsFiles[0]).split(path.sep).join('/') : '';
+   // The stylesheet is emitted beside the page and re-checked as EMITTED bytes, because that is what
+   // a browser loads — the source check would miss anything the copy step could do.
+   const cssText = fs.readFileSync(path.join(ROOT, 'src', 'styles.css'), 'utf8');
+-  fs.writeFileSync(path.join(out, 'styles.css'), cssText);
++  expected.set('styles.css', Buffer.from(cssText));
+   report(R.checkCss(`dist/${target}/styles.css`, cssText));
+ 
+   const template = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+   const html = template
+     .replace('%MAIN%', './' + rel)
+     .replace(`connect-src ${TARGETS.web.connectSrc}`, `connect-src ${TARGETS[target].connectSrc}`);
+-  fs.writeFileSync(path.join(out, 'index.html'), html);
++  expected.set('index.html', Buffer.from(html));
+   report(R.checkHtml(`dist/${target}/index.html`, html));
+ 
+   if (target === 'capacitor') {
+-    const webHtml = template.replace('%MAIN%', './' + rel);
++    const webHtml = template.replace('%MAIN%', './' + webRel);
+     report(targetProof(webJs, capJs, webHtml, html, cssText, cssText));
+     console.log('capacitor proof: PASS (one endpoint string differs; index.html differs only in digest path and connect-src; styles.css identical; no other origin in the artefact)');
+   }
+-  console.log(`built -> dist/${target}/${rel}  (${jsFiles.length} chunk(s), ${(fs.statSync(jsFiles[0]).size / 1024).toFixed(1)} KB)`);
++  // Retain the already-approved install identity and artwork, not the shell's entry or UI.
++  expected.set('manifest.webmanifest', fs.readFileSync(path.join(SHELL, 'entry/manifest.webmanifest')));
++  for (const name of ['maya-192.png', 'maya-512.png', 'maya-512-maskable.png', 'maya-apple-180.png'])
++    expected.set('icons/' + name, fs.readFileSync(path.join(SHELL, 'brand/icons', name)));
++  if (!html.includes('<link rel="manifest" href="./manifest.webmanifest">'))
++    throw new Error('React PWA manifest must be linked from the delivered page');
++  if (flags.has('--verify-output')) assertTree(out, expected);
++  else writeTree(out, expected);
++  const require = createRequire(import.meta.url);
++  const { verifyShellCandidate } = require('../maya-saas-backend/deploy/platform/beget-edge/verify-edge-candidate.cjs');
++  verifyShellCandidate(out, { publishPath: '/maya-chat-shell/' });
++  console.log(`${flags.has('--verify-output') ? 'verified' : 'built'} React AChat -> dist/${target}/${rel} (${expected.size} files)`);
+ }
+diff --git a/maya-carrier-react/index.html b/maya-carrier-react/index.html
+index df267227..4a2c360a 100644
+--- a/maya-carrier-react/index.html
++++ b/maya-carrier-react/index.html
+@@ -8,6 +8,7 @@
+ <meta name="color-scheme" content="light dark">
+ <title>MAYA</title>
+ <link rel="icon" href="data:,">
++<link rel="manifest" href="./manifest.webmanifest">
+ <link rel="stylesheet" href="./styles.css">
+ <script type="module" src="%MAIN%"></script>
+ </head>
+diff --git a/maya-carrier-react/package.json b/maya-carrier-react/package.json
+index 9630d692..155ee415 100644
+--- a/maya-carrier-react/package.json
++++ b/maya-carrier-react/package.json
+@@ -12,7 +12,10 @@
+     "check": "node build.mjs --typecheck",
+     "typecheck": "node build.mjs --typecheck",
+     "serve": "node tools/serve.mjs",
+-    "test": "node test/build-harness.mjs && node --test test/parity.test.mjs test/reply-link.test.mjs test/voice.test.mjs test/detail.test.mjs"
++    "test": "node test/build-harness.mjs && node --test test/parity.test.mjs test/reply-link.test.mjs test/voice.test.mjs test/detail.test.mjs",
++    "release:build": "node tools/release.mjs build",
++    "release:verify": "node tools/release.mjs verify",
++    "test:release": "node --test test/release.test.mjs"
+   },
+   "dependencies": {
+     "react": "19.2.8",
+diff --git a/maya-carrier-react/test/release.test.mjs b/maya-carrier-react/test/release.test.mjs
+new file mode 100644
+index 00000000..9d8837e8
+--- /dev/null
++++ b/maya-carrier-react/test/release.test.mjs
+@@ -0,0 +1,68 @@
++import assert from 'node:assert/strict';
++import fs from 'node:fs';
++import path from 'node:path';
++import os from 'node:os';
++import test from 'node:test';
++import { fileURLToPath } from 'node:url';
++import { spawnSync } from 'node:child_process';
++import { checkNativeConfig, verifyParity, verifyNativeFiles } from '../tools/release.mjs';
++import { readTree, assertFiles, assertTree } from '../tools/payload-files.mjs';
++const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'), REPO=path.dirname(ROOT);
++const web=readTree(path.join(ROOT,'dist/web')),cap=readTree(path.join(ROOT,'dist/capacitor'));
++const config=JSON.parse(fs.readFileSync(path.join(REPO,'maya-ios-carrier/capacitor.config.json')));
++test('RPK positive: complete real React PWA and native payload parity',()=>{
++  checkNativeConfig(config);verifyParity(web,cap);
++  const manifest=web.get('manifest.webmanifest');
++  assert.ok(manifest.equals(fs.readFileSync(path.join(REPO,'maya-chat-shell/entry/manifest.webmanifest'))));
++  assert.equal(JSON.parse(manifest).id,'/maya-chat-shell/');
++  assert.ok(web.get('index.html').toString().includes('<link rel="manifest" href="./manifest.webmanifest">'));
++  for(const [n,b] of web)if(n.startsWith('icons/'))assert.ok(b.equals(fs.readFileSync(path.join(REPO,'maya-chat-shell/brand',n))));
++});
++for(const dir of ['../maya-chat-shell/dist/capacitor','../maya-chat-shell/dist/web','www','../maya-carrier-react/dist/web'])
++  test('RPK old/alternate native payload refused: '+dir,()=>assert.throws(()=>checkNativeConfig({...config,webDir:dir})));
++test('RPK remote server override refuses',()=>assert.throws(()=>checkNativeConfig({...config,server:{url:'https://mayaos.ru'}})));
++test('RPK legacy shell replacing native www refuses even if supplied with an inventory',()=>{
++  const old=readTree(path.join(REPO,'maya-chat-shell/dist/web'));
++  assert.throws(()=>verifyNativeFiles(old,cap));
++  old.set('release-inventory.json',Buffer.from(JSON.stringify([...old.keys()])));
++  assert.throws(()=>verifyNativeFiles(old,cap));
++});
++for(const [name,edit] of [
++  ['missing manifest',m=>m.delete('manifest.webmanifest')],
++  ['altered icon',m=>m.set('icons/maya-192.png',Buffer.from('changed'))],
++  ['extra script',m=>m.set('unexpected.js',Buffer.from('old shell'))],
++  ['altered main',m=>m.set([...m.keys()].find(k=>k.endsWith('/main.js')),Buffer.from('old shell'))],
++])test('RPK '+name+' refuses',()=>{const m=new Map(cap);edit(m);assert.throws(()=>verifyNativeFiles(m,cap));});
++test('RPK only empty generated bridge placeholders admitted',()=>{
++  const m=new Map(cap);m.set('cordova.js',Buffer.alloc(0));m.set('cordova_plugins.js',Buffer.alloc(0));verifyNativeFiles(m,cap);
++  m.set('cordova.js',Buffer.from('unexpected executable'));assert.throws(()=>verifyNativeFiles(m,cap));
++});
++test('RPK endpoint/CSS/identity divergence refuses',()=>{
++  for(const name of ['styles.css','manifest.webmanifest', [...cap.keys()].find(k=>k.endsWith('/main.js'))]){
++    const m=new Map(cap);m.set(name,Buffer.concat([m.get(name),Buffer.from('changed')]));assert.throws(()=>verifyParity(web,m));
++  }
++});
++test('RPK symlink payload refuses',()=>{
++  const d=fs.mkdtempSync(path.join(os.tmpdir(),'maya-payload-'));try{fs.symlinkSync(path.join(ROOT,'dist/web/index.html'),path.join(d,'index.html'));assert.throws(()=>readTree(d));}finally{fs.rmSync(d,{recursive:true,force:true});}
++});
++test('RPK Xcode and sync are bound to the same refusing release entry',()=>{
++  const pkg=JSON.parse(fs.readFileSync(path.join(REPO,'maya-ios-carrier/package.json')));
++  assert.equal(pkg.scripts.sync,'node ../maya-carrier-react/tools/release.mjs sync');
++  const x=fs.readFileSync(path.join(REPO,'maya-ios-carrier/ios/App/App.xcodeproj/project.pbxproj'),'utf8');
++  assert.ok(x.includes('maya-carrier-react/tools/release.mjs\\\" verify-native'));
++  assert.ok(x.includes('A11AFE0001000000000000A2 /* Verify canonical React AChat payload */,'));
++});
++test('RPK verifier rebuilds expected bytes, refuses a swapped artifact, does not repair it',()=>{
++  const d=fs.mkdtempSync(path.join(os.tmpdir(),'maya-packaging-'));try{
++    const carrier=path.join(d,'maya-carrier-react');fs.cpSync(ROOT,carrier,{recursive:true,filter:p=>!p.includes('/node_modules')&&!p.includes('/dev/dist')});
++    fs.symlinkSync(path.join(ROOT,'node_modules'),path.join(carrier,'node_modules'),'dir');
++    for(const n of ['maya-saas-backend','maya-chat-shell'])fs.symlinkSync(path.join(REPO,n),path.join(d,n),'dir');
++    const build=spawnSync(process.execPath,['build.mjs','--target=web'],{cwd:carrier,encoding:'utf8'});
++    assert.equal(build.status,0,build.stderr);
++    const good=spawnSync(process.execPath,['build.mjs','--target=web','--verify-output'],{cwd:carrier,encoding:'utf8'});
++    assert.equal(good.status,0,good.stderr);
++    const file=path.join(carrier,'dist/web/index.html');fs.writeFileSync(file,'old shell');
++    const r=spawnSync(process.execPath,['build.mjs','--target=web','--verify-output'],{cwd:carrier,encoding:'utf8'});
++    assert.notEqual(r.status,0);assert.match(r.stderr,/payload bytes differ/);assert.equal(fs.readFileSync(file,'utf8'),'old shell');
++  }finally{fs.rmSync(d,{recursive:true,force:true});}
++});
+diff --git a/maya-carrier-react/tools/payload-files.mjs b/maya-carrier-react/tools/payload-files.mjs
+new file mode 100644
+index 00000000..2a70124d
+--- /dev/null
++++ b/maya-carrier-react/tools/payload-files.mjs
+@@ -0,0 +1,42 @@
++import fs from 'node:fs';
++import path from 'node:path';
++import assert from 'node:assert/strict';
++
++/** Closed file inventory. A receipt supplied beside a payload is never its authority. */
++export function readTree(directory) {
++  assert.ok(fs.existsSync(directory) && !fs.lstatSync(directory).isSymbolicLink(), 'payload directory missing or symlink');
++  const files = new Map();
++  function walk(dir) {
++    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
++      assert.ok(!entry.isSymbolicLink(), 'payload symlink refused');
++      const file = path.join(dir, entry.name);
++      if (entry.isDirectory()) walk(file);
++      else {
++        assert.ok(entry.isFile(), 'non-file payload entry refused');
++        files.set(path.relative(directory, file).split(path.sep).join('/'), fs.readFileSync(file));
++      }
++    }
++  }
++  walk(directory);
++  return files;
++}
++
++export function assertFiles(actual, expected) {
++  assert.deepEqual([...actual.keys()].sort(), [...expected.keys()].sort(), 'payload file set differs from the canonical React build');
++  for (const [name, bytes] of expected)
++    assert.ok(actual.get(name).equals(Buffer.from(bytes)), `payload bytes differ: ${name}`);
++}
++
++export function assertTree(directory, expected) {
++  assertFiles(readTree(directory), expected);
++}
++
++export function writeTree(directory, expected) {
++  fs.rmSync(directory, { recursive: true, force: true });
++  for (const [name, bytes] of expected) {
++    const target = path.join(directory, name);
++    fs.mkdirSync(path.dirname(target), { recursive: true });
++    fs.writeFileSync(target, bytes);
++  }
++  assertTree(directory, expected);
++}
+diff --git a/maya-carrier-react/tools/release.mjs b/maya-carrier-react/tools/release.mjs
+new file mode 100644
+index 00000000..5d1c9a6b
+--- /dev/null
++++ b/maya-carrier-react/tools/release.mjs
+@@ -0,0 +1,88 @@
++#!/usr/bin/env node
++/** Sole release payload owner. This tool builds/verifies/copies locally; it never deploys. */
++import fs from 'node:fs';
++import path from 'node:path';
++import assert from 'node:assert/strict';
++import { fileURLToPath } from 'node:url';
++import { spawnSync } from 'node:child_process';
++import { assertFiles, readTree } from './payload-files.mjs';
++
++const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
++const REPO = path.dirname(ROOT);
++const IOS = path.join(REPO, 'maya-ios-carrier');
++export const WEB_DIR = '../maya-carrier-react/dist/capacitor';
++
++export function checkNativeConfig(config) {
++  assert.equal(config.webDir, WEB_DIR, 'native webDir must select the canonical React AChat payload');
++  assert.equal(config.appId, 'ru.mayaos.app', 'native app identity changed');
++  assert.equal(config.appName, 'MAYA', 'native app name changed');
++  assert.equal(config.server, undefined, 'remote/alternate native server is forbidden');
++}
++
++function run(file, args, cwd = ROOT) {
++  const result = spawnSync(process.execPath, [file, ...args], { cwd, stdio: 'inherit' });
++  assert.equal(result.status, 0, 'release command failed: ' + path.basename(file));
++}
++
++export function verifyParity(web, cap) {
++  const js = (files) => [...files.keys()].filter((n) => n.endsWith('.js'));
++  assert.equal(js(web).length, 1); assert.equal(js(cap).length, 1);
++  const webPath = js(web)[0], capPath = js(cap)[0];
++  const w = web.get(webPath).toString(), c = cap.get(capPath).toString();
++  const from = 'API_BASE = "/api"', to = 'API_BASE = "https://mayaos.ru/api"';
++  assert.equal(w.split(from).length, 2); assert.equal(c.split(to).length, 2);
++  assert.equal(w.replace(from, to), c, 'PWA/Capacitor JS differs beyond the approved endpoint');
++  const normalized = new Map(cap);
++  normalized.delete(capPath); normalized.set(webPath, web.get(webPath));
++  normalized.set('index.html', Buffer.from(cap.get('index.html').toString()
++    .replace(capPath, webPath).replace("connect-src 'self' https://mayaos.ru", "connect-src 'self'")));
++  assertFiles(normalized, web);
++}
++
++export function verifyNativeFiles(actual, expected) {
++  // Capacitor's Cordova compatibility placeholders are generated empty with zero Cordova plugins.
++  // They are not an allowance for unchecked executable payloads.
++  const clean = new Map(actual);
++  for (const name of ['cordova.js', 'cordova_plugins.js']) {
++    if (clean.has(name)) {
++      assert.equal(clean.get(name).length, 0, 'nonempty native bridge placeholder refused');
++      clean.delete(name);
++    }
++  }
++  assertFiles(clean, expected);
++}
++
++export function main(mode, appDirectory) {
++  assert.ok(['build', 'verify', 'sync', 'verify-native', 'verify-app'].includes(mode), 'expected build, verify, sync, verify-native or verify-app');
++  assert.equal(Boolean(appDirectory), mode === 'verify-app', 'app directory is required only for verify-app');
++  const config = JSON.parse(fs.readFileSync(path.join(IOS, 'capacitor.config.json'), 'utf8'));
++  checkNativeConfig(config);
++  if (mode === 'build' || mode === 'sync') {
++    // Headless runtime compilation only: its DOM entry is never selected as the release payload.
++    run('build.mjs', [], path.join(REPO, 'maya-chat-shell'));
++    for (const target of ['web', 'capacitor']) run('build.mjs', ['--target=' + target]);
++  }
++  // Reconstruct from the fixed React entrypoint; don't trust a self-declared payload manifest.
++  for (const target of ['web', 'capacitor']) run('build.mjs', ['--target=' + target, '--verify-output']);
++  const web = readTree(path.join(ROOT, 'dist/web')), cap = readTree(path.join(ROOT, 'dist/capacitor'));
++  verifyParity(web, cap);
++  if (mode === 'sync')
++    run(path.join(IOS, 'node_modules/@capacitor/cli/bin/capacitor'), ['sync', 'ios'], IOS);
++  if (mode === 'sync' || mode === 'verify-native' || mode === 'verify-app') {
++    const nativeDirectory = mode === 'verify-app' ? path.resolve(appDirectory) : path.join(IOS, 'ios/App/App');
++    const generated = JSON.parse(fs.readFileSync(path.join(nativeDirectory, 'capacitor.config.json'), 'utf8'));
++    checkNativeConfig(generated);
++    // Capacitor adds packageClassList during sync. Compare all actual native settings too.
++    const { packageClassList: _plugins, ...settings } = generated;
++    assert.deepEqual(_plugins, ['AppPlugin', 'KeyboardPlugin', 'StatusBarPlugin'], 'native plugin set changed');
++    assert.deepEqual(settings, config, 'generated native configuration differs');
++    verifyNativeFiles(readTree(path.join(nativeDirectory, 'public')), cap);
++  }
++  console.log(JSON.stringify({ status: 'PASS', owner: 'React AChat', mode, files: cap.size,
++    profileAuthority: 'server only', nativeVerified: ['sync', 'verify-native', 'verify-app'].includes(mode) }));
++}
++
++if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
++  try { assert.equal(process.argv.length, process.argv[2] === 'verify-app' ? 4 : 3); main(process.argv[2], process.argv[3]); }
++  catch (error) { console.error('RELEASE PACKAGING REFUSED: ' + error.message); process.exitCode = 1; }
++}
+diff --git a/maya-ios-carrier/.gitignore b/maya-ios-carrier/.gitignore
+index d32cbb53..bff52894 100644
+--- a/maya-ios-carrier/.gitignore
++++ b/maya-ios-carrier/.gitignore
+@@ -1,5 +1,5 @@
+-# The carrier carries the shell; it never stores a copy of it.
+-# `npm run sync` rebuilds maya-chat-shell for the capacitor target and copies it in,
++# The carrier carries React AChat; it never stores a copy of it.
++# `npm run sync` rebuilds maya-carrier-react for the capacitor target and copies it in,
+ # so a committed copy could silently drift from the shared source. It is build output.
+ ios/App/App/public/
+ ios/App/App/capacitor.config.json
+diff --git a/maya-ios-carrier/README.md b/maya-ios-carrier/README.md
+index 54a7516f..841f2dcf 100644
+--- a/maya-ios-carrier/README.md
++++ b/maya-ios-carrier/README.md
+@@ -1,32 +1,33 @@
+ # The iOS carrier
+ 
+-This carries MAYA onto iPhone. **It is not a second Maya.** It owns no booking, no CRM, no widgets,
+-no authority and no product UI — those live once, in `../maya-chat-shell`, and both carriers load the
+-same bytes.
++The single release web payload owner is `../maya-carrier-react`: the certified React AChat over
++Maya's headless runtime. `maya-chat-shell` remains a runtime library and test harness; its DOM shell
++is not the production PWA or native payload.
+ 
+-```
+-                  MAYA BACKEND
+-                       ↑
+-                mayaos.ru/api
+-                       ↑
+-             SHARED CHAT-FIRST SHELL          ../maya-chat-shell
+-                ↙             ↘
+-             PWA            iOS               this directory
+-                           Capacitor
+-```
+-
+-## Build it
++## Build and verify locally
+ 
+ ```
+-npm install
+-npm run sync      # rebuilds the shell for the capacitor target, then copies it in
+-npm run open      # opens Xcode
++npm ci
++npm run sync
++npm run verify
++npm run open
+ ```
+ 
+-`npm run sync` is the only supported way to put web assets here. It runs
+-`node ../maya-chat-shell/build.mjs --target=capacitor`, whose **capacitor proof** refuses any
+-difference between the two targets except the one line that is allowed to differ. So a drift between
+-the PWA and the app cannot survive a sync — it fails the build instead.
++`sync` invokes `maya-carrier-react/tools/release.mjs`. It compiles the runtime dependency, builds both
++React targets, verifies their exact file sets and approved endpoint substitution, invokes Capacitor,
++and verifies the actual generated `App/public` and native configuration. Xcode also runs that refusing
++verifier before every build. Use `node ../maya-carrier-react/tools/release.mjs verify-app PATH/App.app`
++after a build to check the packaged resources. No command above installs, publishes, grants, or logs in.
++
++Web and native share the React entrypoint, CSS, approved manifest and icons. The existing PWA install
++identity `/maya-chat-shell/` is retained as identity metadata; it does not select the old shell's code.
++The production web artifact is `../maya-carrier-react/dist/web`, published at that approved path.
++The native artifact is `../maya-carrier-react/dist/capacitor`. Only the one approved API endpoint string,
++its content address and the corresponding CSP connect-src differ. No application behavior is native-owned.
++
++Verification reconstructs expected bytes from the fixed React source. It does not trust an inventory
++supplied with a candidate. Extra files, nonempty bridge placeholders, remote-server overrides, old-shell
++selection, missing manifest or changed generated assets fail closed. A failed check does not repair assets.
+ 
+ ## What may live here, and what may not
+ 
+diff --git a/maya-ios-carrier/capacitor.config.json b/maya-ios-carrier/capacitor.config.json
+index 52326813..4dc0d211 100644
+--- a/maya-ios-carrier/capacitor.config.json
++++ b/maya-ios-carrier/capacitor.config.json
+@@ -1,7 +1,7 @@
+ {
+   "appId": "ru.mayaos.app",
+   "appName": "MAYA",
+-  "webDir": "../maya-chat-shell/dist/capacitor",
++  "webDir": "../maya-carrier-react/dist/capacitor",
+   "ios": {
+     "contentInset": "never",
+     "scrollEnabled": true,
+diff --git a/maya-ios-carrier/ios/App/App.xcodeproj/project.pbxproj b/maya-ios-carrier/ios/App/App.xcodeproj/project.pbxproj
+index 8f154430..563121d1 100644
+--- a/maya-ios-carrier/ios/App/App.xcodeproj/project.pbxproj
++++ b/maya-ios-carrier/ios/App/App.xcodeproj/project.pbxproj
+@@ -84,6 +84,7 @@
+ 			isa = PBXNativeTarget;
+ 			buildConfigurationList = 504EC3161FED79650016851F /* Build configuration list for PBXNativeTarget "App" */;
+ 			buildPhases = (
++				A11AFE0001000000000000A2 /* Verify canonical React AChat payload */,
+ 				504EC3001FED79650016851F /* Sources */,
+ 				504EC3011FED79650016851F /* Frameworks */,
+ 				504EC3021FED79650016851F /* Resources */,
+@@ -170,6 +171,19 @@
+ 			shellPath = /bin/sh;
+ 			shellScript = "set -euo pipefail\n# 🔴 A release build must not carry the development-only mayaos:// auth transport.\n# Universal Links are the real transport; the custom scheme exists solely because Associated\n# Domains is unavailable to a personal team. This refuses the build rather than shipping an app\n# that accepts a callback over a scheme any other app may also claim.\n#\n# It reads the SCHEMES only. An earlier version grepped the whole CFBundleURLTypes dump and\n# matched CFBundleURLName (ru.mayaos.app.devauth), refusing a release that was in fact clean.\nPLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n[ -f \"$PLIST\" ] || exit 0\nSCHEMES=$(/usr/bin/plutil -extract CFBundleURLTypes json -o - \"$PLIST\" 2>/dev/null | /usr/bin/python3 -c '\nimport json, sys\ntry:\n    types = json.load(sys.stdin)\nexcept Exception:\n    types = []\nfor entry in types or []:\n    for scheme in entry.get(\"CFBundleURLSchemes\") or []:\n        if scheme:\n            print(scheme)\n' || true)\nif [ \"${CONFIGURATION}\" = \"Debug\" ]; then\n  case \"$SCHEMES\" in *mayaos*) echo \"note: Debug carries the development-only mayaos:// auth transport.\" ;;\n    *) echo \"warning: this Debug build declares no mayaos:// scheme, so the development Telegram callback cannot reach the app\" ;; esac\n  exit 0\nfi\nif [ -n \"$SCHEMES\" ]; then\n  echo \"error: configuration ${CONFIGURATION} declares the URL scheme(s): ${SCHEMES}. A release build must carry none: its callback is the Universal Link https://mayaos.ru/api/auth/oauth/native/callback, which requires the Associated Domains entitlement.\" >&2\n  exit 1\nfi\nENT=\"${SRCROOT}/${CODE_SIGN_ENTITLEMENTS:-}\"\nif [ -z \"${CODE_SIGN_ENTITLEMENTS:-}\" ] || [ ! -f \"$ENT\" ] || ! /usr/libexec/PlistBuddy -c \"Print :com.apple.developer.associated-domains\" \"$ENT\" >/dev/null 2>&1; then\n  echo \"error: configuration ${CONFIGURATION} declares no associated-domains entitlement, so it has no auth callback at all. Release requires applinks:mayaos.ru.\" >&2\n  exit 1\nfi\necho \"note: ${CONFIGURATION} carries no dev auth scheme and declares applinks:mayaos.ru.\"\n";
+ 		};
++
++		A11AFE0001000000000000A2 /* Verify canonical React AChat payload */ = {
++			isa = PBXShellScriptBuildPhase;
++			alwaysOutOfDate = 1;
++			buildActionMask = 2147483647;
++			files = ();
++			inputPaths = ();
++			name = "Verify canonical React AChat payload";
++			outputPaths = ();
++			runOnlyForDeploymentPostprocessing = 0;
++			shellPath = /bin/bash;
++			shellScript = "set -euo pipefail\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\"\nnode \"${SRCROOT}/../../../maya-carrier-react/tools/release.mjs\" verify-native\n";
++		};
+ /* End PBXShellScriptBuildPhase section */
+ 
+ /* Begin PBXSourcesBuildPhase section */
+diff --git a/maya-ios-carrier/package.json b/maya-ios-carrier/package.json
+index da184337..a4ceef6d 100644
+--- a/maya-ios-carrier/package.json
++++ b/maya-ios-carrier/package.json
+@@ -4,10 +4,11 @@
+   "private": true,
+   "description": "The canonical iOS carrier for MAYA. It carries the shared chat-first shell and owns no product logic.",
+   "scripts": {
+-    "shell": "node ../maya-chat-shell/build.mjs --target=capacitor",
+-    "sync": "npm run shell && cap sync ios",
++    "shell": "node ../maya-carrier-react/tools/release.mjs build",
++    "sync": "node ../maya-carrier-react/tools/release.mjs sync",
+     "open": "cap open ios",
+-    "doctor": "cap doctor ios"
++    "doctor": "cap doctor ios",
++    "verify": "node ../maya-carrier-react/tools/release.mjs verify-native"
+   },
+   "dependencies": {
+     "@capacitor/app": "^8.1.0",
+diff --git a/maya-saas-backend/deploy/platform/beget-edge/RELAY-RELEASE.md b/maya-saas-backend/deploy/platform/beget-edge/RELAY-RELEASE.md
+index 99f29da3..745b1d38 100644
+--- a/maya-saas-backend/deploy/platform/beget-edge/RELAY-RELEASE.md
++++ b/maya-saas-backend/deploy/platform/beget-edge/RELAY-RELEASE.md
+@@ -25,7 +25,7 @@ The existing R01 registered-overlay checks remain mandatory for alias
+ changes. `relay-release-manifest.json` pins the 26 inspected PHP artifacts in three mapped roots (10 active,
+ 16 denied), seven preserved HTML/backup files — two served maintenance pages and
+ five `archived_offroot` bundles the owner-approved R3 ruling moved out of the
+-served roots — and nine local routing files. Archive content
++served roots — and ten local routing files. Archive content
+ is historical evidence, not a permitted rollback target.
+ 
+ `node deploy/platform/beget-edge/relay-release.cjs verify` reads the live manifest,
+@@ -112,3 +112,10 @@ pre-state. An `archived_offroot` artifact is absent by ruling, so it is pinned b
+ absence in `validateObserved` and by hash in the private archive, never by
+ presence in that pre-state. `verify` never accepts the incident pre-state. A failed post-state check blocks backend cutover; never
+ restore unsafe bytes as a rollback. No business/provider/message proof is used.
++
++## AASA release inventory
++
++The existing Apple association and its `.well-known/.htaccess` content-type rule are both registered
++with their unchanged committed hashes and `committedSource`. The nested rule is part of the finite
++routing inventory even though it is outside the site-root `.htaccess`. Unknown nested routing still
++fails closed; its location is never an exemption. The AASA content is a pinned `hosting_asset`.
+diff --git a/maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json b/maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json
+index 0da22b53..bdc7fc61 100644
+--- a/maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json
++++ b/maya-saas-backend/deploy/platform/beget-edge/relay-release-manifest.json
+@@ -214,6 +214,18 @@
+       "path": "/home/m/mocine3388/muzhskayaestetika.rf/public_html/app/backups/.htaccess",
+       "sha256": "c4491dbf4a323734d29ec036ce17e4cd74425962c5481c93c1297287c342f851",
+       "role": "hosting_config"
++    },
++    {
++      "path": "/home/m/mocine3388/mayaos.ru/public_html/.well-known/.htaccess",
++      "sha256": "ab3175467446655265bcaf284c3d7d9447825a3f4801999996e62bd90e5dd251",
++      "role": "hosting_config",
++      "committedSource": "well-known/.htaccess"
++    },
++    {
++      "path": "/home/m/mocine3388/mayaos.ru/public_html/.well-known/apple-app-site-association",
++      "sha256": "c4dac0d3f673977bfc3959a680212a07759bc2744573029b94003a75b884d017",
++      "role": "hosting_asset",
++      "committedSource": "well-known/apple-app-site-association"
+     }
+   ],
+   "archive": {
+diff --git a/maya-saas-backend/scripts/widget-release-operator.cjs b/maya-saas-backend/scripts/widget-release-operator.cjs
+new file mode 100644
+index 00000000..dcfcdf98
+--- /dev/null
++++ b/maya-saas-backend/scripts/widget-release-operator.cjs
+@@ -0,0 +1,61 @@
++#!/usr/bin/env node
++/** Offline operator checks only. No key generation, signing, HTTP, login, DB or writes. */
++const fs = require('node:fs');
++const assert = require('node:assert/strict');
++const { createPublicKey, createHash } = require('node:crypto');
++const { parse } = require('dotenv');
++
++const id = (v) => typeof v === 'string' && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$/.test(v);
++function checkConfig(env, tenantId, candidateSha) {
++  assert.ok(id(tenantId) && /^[0-9a-f]{40}$/.test(candidateSha), 'exact tenant and candidate required');
++  assert.equal(env.NODE_ENV, 'production', 'production runtime required');
++  assert.equal(env.WIDGET_RELEASE_ENVIRONMENT, 'production', 'separate production environment required');
++  assert.equal(env.WIDGET_RELEASE_CANDIDATE_SHA, candidateSha, 'candidate mismatch');
++  assert.deepEqual(JSON.parse(env.WIDGET_RELEASE_PRODUCTION_TENANTS_JSON || '[]'), [tenantId], 'one exact production tenant required');
++  const trust = JSON.parse(env.WIDGET_RELEASE_PRODUCTION_TRUST_JSON || '{}');
++  assert.ok(trust && !Array.isArray(trust) && typeof trust === 'object');
++  assert.equal(Object.keys(trust).length, 2, 'narrow initial installation requires exactly owner and security keys');
++  const entries = Object.entries(trust).map(([keyId, value]) => {
++    assert.ok(id(keyId) && value && typeof value === 'object');
++    assert.deepEqual(Object.keys(value).sort(), ['principalId', 'publicKey', 'purpose']);
++    assert.ok(id(value.principalId) && ['owner', 'security'].includes(value.purpose));
++    assert.ok(typeof value.publicKey === 'string' && !/PRIVATE KEY/.test(value.publicKey), 'public keys only');
++    const key = createPublicKey(value.publicKey);
++    assert.equal(key.asymmetricKeyType, 'ed25519', 'Ed25519 required');
++    return { keyId, principalId: value.principalId, purpose: value.purpose,
++      fingerprint: createHash('sha256').update(key.export({ format: 'der', type: 'spki' })).digest('hex') };
++  });
++  assert.deepEqual(entries.map((x) => x.purpose).sort(), ['owner', 'security']);
++  assert.equal(new Set(entries.map((x) => x.principalId)).size, 2, 'independent reviewer identity required');
++  assert.equal(new Set(entries.map((x) => x.fingerprint)).size, 2, 'independent reviewer key required');
++  return { status: 'PASS', tenantId, candidateSha, keys: entries, authorityGranted: false, sessionVerified: false };
++}
++
++function main(argv) {
++  const [mode, configFile, tenantId, candidateSha, commandFile, operatorId] = argv;
++  assert.ok((mode === 'check-config' && argv.length === 4) || (mode === 'check-command' && argv.length === 6),
++    'usage: check-config ENV TENANT SHA | check-command ENV TENANT SHA SIGNED_COMMAND PLATFORM_OPERATOR_ID');
++  const env = parse(fs.readFileSync(configFile));
++  const result = checkConfig(env, tenantId, candidateSha);
++  if (mode === 'check-command') {
++    assert.ok(id(operatorId), 'exact operator required');
++    const { ConfigService } = require('@nestjs/config');
++    const { WidgetReleasePolicy } = require('../dist/src/entitlements/widget-release-policy.service.js');
++    const command = JSON.parse(fs.readFileSync(commandFile, 'utf8'));
++    const operation = command?.authorization?.payload?.operation;
++    assert.ok(['grant', 'revoke'].includes(operation));
++    const policy = new WidgetReleasePolicy(new ConfigService(env));
++    const parsed = policy.read(command, tenantId, operation, operatorId, new Date());
++    result.operation = operation;
++    result.authorizationId = parsed.a.authorizationId;
++    result.authorizationHash = parsed.authorizationHash;
++    result.note = 'Offline signatures/bindings only; canonical HTTP validate must recheck the real session, tenant, CAS and database clock. Revoke additionally rechecks stored release binding in its writer transaction.';
++  }
++  console.log(JSON.stringify(result));
++}
++
++module.exports = { checkConfig, main };
++if (require.main === module) {
++  try { main(process.argv.slice(2)); }
++  catch { console.error('AR1 OPERATOR CHECK REFUSED — no authority, secret values or signature bytes emitted'); process.exitCode = 1; }
++}
+diff --git a/maya-saas-backend/scripts/widget-release-operator.compiled-test.cjs b/maya-saas-backend/scripts/widget-release-operator.compiled-test.cjs
+new file mode 100644
+index 00000000..44a6e2dc
+--- /dev/null
++++ b/maya-saas-backend/scripts/widget-release-operator.compiled-test.cjs
+@@ -0,0 +1,52 @@
++// Offline CLI integration: ephemeral test-only keys, no database, transport or real identity.
++const { test } = require('node:test');
++const assert = require('node:assert/strict');
++const fs = require('node:fs');
++const os = require('node:os');
++const path = require('node:path');
++const { spawnSync } = require('node:child_process');
++const { generateKeyPairSync, sign } = require('node:crypto');
++const { ConfigService } = require('@nestjs/config');
++const { WidgetReleasePolicy } = require('../dist/src/entitlements/widget-release-policy.service');
++const { canonical, releaseHash } = require('../dist/src/entitlements/widget-release.contract');
++const { WIDGET_RELEASE_CLAUSES } = require('../dist/src/entitlements/widget-release-clauses');
++const { PROFILE_CERT, PROFILE_DIGEST, PROFILE_REGISTRY_DIGEST, NO_HANDOFF_PROFILE } = require('../dist/src/entitlements/widget-release-profile.contract');
++const { PRODUCTION_RELEASE_AUTH } = require('../dist/src/entitlements/widget-release-production.contract');
++const candidate = 'a'.repeat(40), tenant = 'test-tenant', operator = 'test-operator';
++const keys = { owner: generateKeyPairSync('ed25519'), security: generateKeyPairSync('ed25519') };
++const signed = (purpose, payload) => ({ payload, keyId: purpose, signature: sign(null, Buffer.from(canonical(payload)), keys[purpose].privateKey).toString('base64url') });
++const env = { NODE_ENV: 'production', WIDGET_RELEASE_ENVIRONMENT: 'production', WIDGET_RELEASE_CANDIDATE_SHA: candidate,
++  WIDGET_RELEASE_PRODUCTION_TENANTS_JSON: JSON.stringify([tenant]), WIDGET_RELEASE_PRODUCTION_TRUST_JSON: JSON.stringify(Object.fromEntries(Object.entries(keys).map(([purpose, key]) => [purpose, { purpose, principalId: 'test-'+purpose, publicKey: key.publicKey.export({ type: 'spki', format: 'pem' }) }])))};
++function command() {
++  const now=Date.now(), expiresAt=new Date(now+600000).toISOString();
++  const matrix=WIDGET_RELEASE_CLAUSES.map(id=>({id,state:['G6-6','G13-R8'].includes(id)?'STOP':'L',evidenceDigest:releaseHash('synthetic '+id)}));
++  const payload={contract:PROFILE_CERT,environment:'production',scope:NO_HANDOFF_PROFILE,certification:'CERTIFIED_FOR_PROFILE',candidateSha:candidate,
++    profileDigest:PROFILE_DIGEST,registryDigest:PROFILE_REGISTRY_DIGEST,matrix,globalAuditDigest:releaseHash(matrix),
++    issuedAt:new Date(now-1000).toISOString(),expiresAt,buildDigest:new WidgetReleasePolicy(new ConfigService(env)).buildDigest()};
++  for(const k of ['carrierDigest','evidenceDigest','integrationDigest','fbe2eDigest','revocationProofDigest','isolationProofDigest','dependencyProofDigest'])payload[k]=releaseHash('synthetic '+k);
++  const certificate=signed('security',payload);
++  const authorization=signed('owner',{contract:PRODUCTION_RELEASE_AUTH,authorizationId:'synthetic-operator-proof',operation:'grant',tenantId:tenant,environment:'production',
++    candidateSha:candidate,buildDigest:payload.buildDigest,certificateDigest:releaseHash(certificate),operatorId:operator,approverId:'test-owner',reviewerId:'test-security',rollbackOwnerId:operator,
++    expectedVersion:'absent',notBefore:new Date(now-1000).toISOString(),expiresAt,grantExpiresAt:expiresAt,releaseId:'synthetic-only',profileId:NO_HANDOFF_PROFILE,profileDigest:PROFILE_DIGEST,evidenceDigest:payload.evidenceDigest});
++  return {certificate,authorization};
++}
++function check(c, actor=operator) {
++  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'maya-operator-offline-'));
++  try {
++    fs.writeFileSync(path.join(dir,'public.env'),Object.entries(env).map(([k,v])=>k+"='"+v+"'").join('\n'),{mode:0o600});
++    fs.writeFileSync(path.join(dir,'test-command.json'),JSON.stringify(c),{mode:0o600});
++    return spawnSync(process.execPath,[path.join(__dirname,'widget-release-operator.cjs'),'check-command',path.join(dir,'public.env'),tenant,candidate,path.join(dir,'test-command.json'),actor],
++      {cwd:path.resolve(__dirname,'..'),env:{PATH:process.env.PATH,HOME:process.env.HOME},encoding:'utf8'});
++  } finally { fs.rmSync(dir,{recursive:true,force:true}); }
++}
++test('compiled operator CLI validates both signatures, exact compiled bytes and bindings without granting authority',()=>{
++  const r=check(command());assert.equal(r.status,0,r.stderr);const p=JSON.parse(r.stdout);assert.equal(p.operation,'grant');assert.equal(p.authorityGranted,false);assert.equal(p.sessionVerified,false);
++});
++for(const [name,edit] of [
++  ['missing execution signature',c=>delete c.authorization],
++  ['forged certificate',c=>c.certificate.payload.carrierDigest='b'.repeat(64)],
++  ['wrong candidate signed by owner',c=>c.authorization=signed('owner',{...c.authorization.payload,candidateSha:'b'.repeat(40)})],
++  ['wrong compiled build signed by owner',c=>c.authorization=signed('owner',{...c.authorization.payload,buildDigest:'b'.repeat(64)})],
++  ['expired authorization',c=>c.authorization=signed('owner',{...c.authorization.payload,notBefore:new Date(Date.now()-20000).toISOString(),expiresAt:new Date(Date.now()-10000).toISOString(),grantExpiresAt:new Date(Date.now()-10000).toISOString()})],
++])test('compiled operator CLI refuses '+name,()=>{const c=command();edit(c);const r=check(c);assert.equal(r.status,1);assert.equal(r.stdout,'');assert.match(r.stderr,/REFUSED/);});
++test('compiled operator CLI refuses substituted platform operator',()=>assert.equal(check(command(),'other-operator').status,1));
+diff --git a/maya-saas-backend/scripts/widget-release-operator.test.cjs b/maya-saas-backend/scripts/widget-release-operator.test.cjs
+new file mode 100644
+index 00000000..d920c540
+--- /dev/null
++++ b/maya-saas-backend/scripts/widget-release-operator.test.cjs
+@@ -0,0 +1,37 @@
++const { test } = require('node:test');
++const assert = require('node:assert/strict');
++const { generateKeyPairSync } = require('node:crypto');
++const { checkConfig } = require('./widget-release-operator.cjs');
++// Ephemeral test public keys only. No production identities or persistent key files.
++const publicKey = () => generateKeyPairSync('ed25519').publicKey.export({ format: 'pem', type: 'spki' });
++const trust = { owner: { principalId: 'test-owner', purpose: 'owner', publicKey: publicKey() },
++  security: { principalId: 'test-reviewer', purpose: 'security', publicKey: publicKey() } };
++const valid = () => ({ NODE_ENV: 'production', WIDGET_RELEASE_ENVIRONMENT: 'production',
++  WIDGET_RELEASE_CANDIDATE_SHA: 'a'.repeat(40), WIDGET_RELEASE_PRODUCTION_TENANTS_JSON: '["test-tenant"]',
++  WIDGET_RELEASE_PRODUCTION_TRUST_JSON: JSON.stringify(trust) });
++const check = (e) => checkConfig(e, 'test-tenant', 'a'.repeat(40));
++test('operator preflight confirms narrow public provisioning and explicitly grants no authority/session', () => {
++  const r = check(valid()); assert.equal(r.status, 'PASS'); assert.equal(r.authorityGranted, false); assert.equal(r.sessionVerified, false);
++  assert.equal(r.keys.length, 2); assert.ok(!JSON.stringify(r).includes('PUBLIC KEY'));
++});
++for (const field of Object.keys(valid())) test('missing '+field+' refuses', () => {
++  const e=valid(); delete e[field]; assert.throws(()=>check(e));
++});
++for (const [name, edit] of [
++  ['staging', e=>e.WIDGET_RELEASE_ENVIRONMENT='staging'],
++  ['wrong build', e=>e.WIDGET_RELEASE_CANDIDATE_SHA='b'.repeat(40)],
++  ['wildcard tenant', e=>e.WIDGET_RELEASE_PRODUCTION_TENANTS_JSON='["*"]'],
++  ['another tenant', e=>e.WIDGET_RELEASE_PRODUCTION_TENANTS_JSON='["other"]'],
++  ['extra tenant', e=>e.WIDGET_RELEASE_PRODUCTION_TENANTS_JSON='["test-tenant","other"]'],
++  ['duplicate tenant', e=>e.WIDGET_RELEASE_PRODUCTION_TENANTS_JSON='["test-tenant","test-tenant"]'],
++  ['staging trust fallback', e=>{e.WIDGET_RELEASE_TRUST_JSON=e.WIDGET_RELEASE_PRODUCTION_TRUST_JSON;delete e.WIDGET_RELEASE_PRODUCTION_TRUST_JSON;}],
++]) test(name+' refuses',()=>{const e=valid();edit(e);assert.throws(()=>check(e));});
++for (const [name, edit] of [
++  ['same identity', t=>t.security.principalId=t.owner.principalId],
++  ['same key', t=>t.security.publicKey=t.owner.publicKey],
++  ['no reviewer', t=>delete t.security],
++  ['extra trust key', t=>t.extra=t.owner],
++  ['caller key metadata', t=>t.owner.authorized=true],
++  ['private key material', t=>t.owner.publicKey='-----BEGIN PRIVATE KEY-----'],
++  ['invalid public key', t=>t.owner.publicKey='invalid'],
++]) test(name+' refuses',()=>{const e=valid(),t=structuredClone(trust);edit(t);e.WIDGET_RELEASE_PRODUCTION_TRUST_JSON=JSON.stringify(t);assert.throws(()=>check(e));});
+diff --git a/maya-saas-backend/src/action-engine/beget-public-relay-coverage.architecture.spec.ts b/maya-saas-backend/src/action-engine/beget-public-relay-coverage.architecture.spec.ts
+index 1ebd4838..7afd790a 100644
+--- a/maya-saas-backend/src/action-engine/beget-public-relay-coverage.architecture.spec.ts
++++ b/maya-saas-backend/src/action-engine/beget-public-relay-coverage.architecture.spec.ts
+@@ -294,7 +294,7 @@ describe('R01 archived-off-root reconciliation — mutation rows', () => {
+ 
+   it('fails closed when a pinned hash is edited to match a changed file', () => {
+     const owned = entries().filter((e) => e.committedSource);
+-    expect(owned).toHaveLength(2);
++    expect(owned).toHaveLength(4);
+     // Committed bytes unchanged, pin moved to a new "live" hash: manifest-only weakening.
+     for (const entry of owned)
+       expect(() =>
+@@ -307,6 +307,9 @@ describe('R01 archived-off-root reconciliation — mutation rows', () => {
+     try {
+       mkdirSync(join(home, 'rc'), { recursive: true });
+       for (const entry of owned) {
++        mkdirSync(resolve(home, entry.committedSource!, '..'), {
++          recursive: true,
++        });
+         writeFileSync(
+           join(home, entry.committedSource!),
+           readFileSync(join(gateDir, entry.committedSource!)),
+diff --git a/maya-saas-backend/src/action-engine/beget-relay-release.architecture.spec.ts b/maya-saas-backend/src/action-engine/beget-relay-release.architecture.spec.ts
+index b05a93ea..cd417564 100644
+--- a/maya-saas-backend/src/action-engine/beget-relay-release.architecture.spec.ts
++++ b/maya-saas-backend/src/action-engine/beget-relay-release.architecture.spec.ts
+@@ -120,8 +120,8 @@ describe('R01 live artifact and release/recovery protection', () => {
+ 
+   it('registers every live alias, PWA backup and inaccessible historical relay copy', () => {
+     const entries = release.manifest.entries;
+-    expect(entries).toHaveLength(42);
+-    expect(new Set(entries.map((e) => e.path)).size).toBe(42);
++    expect(entries).toHaveLength(44);
++    expect(new Set(entries.map((e) => e.path)).size).toBe(44);
+     expect(entries.filter((e) => e.role.endsWith('php'))).toHaveLength(10);
+     expect(entries.filter((e) => e.role === 'preserved_html')).toHaveLength(2);
+     expect(entries.filter((e) => e.role === 'preserved_backup')).toHaveLength(
+@@ -142,7 +142,7 @@ describe('R01 live artifact and release/recovery protection', () => {
+     expect(entries.filter((e) => e.role === 'blocked_archive')).toHaveLength(
+       16,
+     );
+-    expect(entries.filter((e) => e.role === 'hosting_config')).toHaveLength(9);
++    expect(entries.filter((e) => e.role === 'hosting_config')).toHaveLength(10);
+     expect(() => release.validateObserved({ found: [], rows: [] })).toThrow();
+     expect(() =>
+       release.validateObserved({
+@@ -159,6 +159,42 @@ describe('R01 live artifact and release/recovery protection', () => {
+     ).toThrow();
+   });
+ 
++  it('registers the unchanged AASA and its content-type rule with committed/live hash equality', () => {
++    const expected = [
++      [
++        'well-known/.htaccess',
++        'hosting_config',
++        'ab3175467446655265bcaf284c3d7d9447825a3f4801999996e62bd90e5dd251',
++      ],
++      [
++        'well-known/apple-app-site-association',
++        'hosting_asset',
++        sha(
++          read(
++            'deploy/platform/beget-edge/well-known/apple-app-site-association',
++          ),
++        ),
++      ],
++    ];
++    for (const [file, role, hash] of expected) {
++      const entry = release.manifest.entries.find(
++        (e) => e.committedSource === file,
++      );
++      expect(entry).toEqual({
++        path: '/home/m/mocine3388/mayaos.ru/public_html/.' + file,
++        role,
++        sha256: hash,
++        committedSource: file,
++      });
++      expect(release.validateCommittedSources([entry!])).toBe(1);
++      expect(() =>
++        release.validateCommittedSources([
++          { ...entry!, sha256: '0'.repeat(64) },
++        ]),
++      ).toThrow();
++    }
++  });
++
+   it('blocks backend upload/activation and checks post-state; the backend cannot replace Beget pages', () => {
+     const deploy = read('deploy/vps/deploy.sh');
+     const calls = [...deploy.matchAll(/verify_live_relays \|\| fail/g)].map(
+@@ -237,18 +273,20 @@ describe('R01 live artifact and release/recovery protection', () => {
+     );
+   });
+ 
+-  it('pins the two repository-owned routing files against their committed bytes', () => {
++  it('pins all four repository-owned routing and AASA files against their committed bytes', () => {
+     const owned = release.manifest.entries.filter((e) => e.committedSource);
+-    expect(owned).toHaveLength(2);
++    expect(owned).toHaveLength(4);
+     expect(owned.map((e) => e.committedSource).sort()).toEqual([
+       '.htaccess',
+       'rc/r12-legacy-team-media.htaccess',
++      'well-known/.htaccess',
++      'well-known/apple-app-site-association',
+     ]);
+     for (const entry of owned)
+       expect(
+         sha(read('deploy/platform/beget-edge/' + entry.committedSource!)),
+       ).toBe(entry.sha256);
+-    expect(release.validateCommittedSources(release.manifest.entries)).toBe(2);
++    expect(release.validateCommittedSources(release.manifest.entries)).toBe(4);
+   });
+ 
+   // Integration-only: consumes the separately built presentation artifact. Backend verification

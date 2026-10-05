@@ -1,0 +1,249 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "profile": "closed-input.no-handoff@1",
+  "registryDigest": "21ffeb2426d9629e8e9110bbecdbdc7b45c0869e70f9395024e0fa728418a49a",
+  "status": "22/22 PASS",
+  "scope": "Complete PI and PI-contract batteries only; whole native corpus still running. Not a signed release certificate.",
+  "batteries": [
+    {
+      "gate": "PI",
+      "declarations": 6,
+      "status": "AS-DECLARED",
+      "path": "outputs/final-certification-2141e245/receipts/mutation-parts/widgets-mutation-part-PI.json",
+      "sha256": "47442f58f0ccf33418941e6c51b4cab8071c32191d253a376ede1e0e9bf39764",
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": null
+      },
+      "baselineControls": {
+        "baseline|live": {
+          "set": null,
+          "steps": [
+            "live"
+          ],
+          "exits": {
+            "live": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      },
+      "mutants": [
+        {
+          "id": "PI-M01",
+          "status": "live-killed",
+          "killers": [
+            "PROFILE-INGRESS"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M02",
+          "status": "live-killed",
+          "killers": [
+            "PROFILE-INGRESS"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M03",
+          "status": "live-killed",
+          "killers": [
+            "PROFILE-EGRESS"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M04",
+          "status": "live-killed",
+          "killers": [
+            "PROFILE-EGRESS"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M05",
+          "status": "live-killed",
+          "killers": [
+            "PROFILE-EGRESS"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M10",
+          "status": "live-killed",
+          "killers": [
+            "PROFILE-LOCK"
+          ],
+          "vacuous": []
+        }
+      ]
+    },
+    {
+      "gate": "PI-contract",
+      "declarations": 16,
+      "status": "AS-DECLARED",
+      "path": "outputs/final-certification-2141e245/receipts/mutation-parts/widgets-mutation-part-PI-contract.json",
+      "sha256": "d415ed32300da7e7b9d6cd633fe701f720cf5ac9af7fa9c3b3b9cc2228e8d5eb",
+      "restrictions": {
+        "live_tests": null,
+        "live_filter": null,
+        "unit_tests": null
+      },
+      "baselineControls": {
+        "baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      },
+      "mutants": [
+        {
+          "id": "PI-M06",
+          "status": "build-killed",
+          "killers": [
+            "PROFILE-CACHE"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M07",
+          "status": "build-killed",
+          "killers": [
+            "PROFILE-PREDECESSOR"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M08",
+          "status": "build-killed",
+          "killers": [
+            "PROFILE-SELECTOR"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M09",
+          "status": "build-killed",
+          "killers": [
+            "PROFILE-LINKED"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M11",
+          "status": "build-killed",
+          "killers": [
+            "refuses"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M12",
+          "status": "build-killed",
+          "killers": [
+            "refuses old-profile tokens"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M13",
+          "status": "build-killed",
+          "killers": [
+            "refuses changed durable binding:"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M14",
+          "status": "build-killed",
+          "killers": [
+            "refuses changed durable binding:"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M15",
+          "status": "build-killed",
+          "killers": [
+            "refuses sealed fact substitution:"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M16",
+          "status": "build-killed",
+          "killers": [
+            "refuses missing and ambiguous bindings"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M17",
+          "status": "build-killed",
+          "killers": [
+            "PROFILE-TUPLE"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M18",
+          "status": "build-killed",
+          "killers": [
+            "does not exclude"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M19",
+          "status": "build-killed",
+          "killers": [
+            "refuses caller exclusions"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M20",
+          "status": "build-killed",
+          "killers": [
+            "PROFILE-AUDIT"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M21",
+          "status": "build-killed",
+          "killers": [
+            "refuses missing or forged"
+          ],
+          "vacuous": []
+        },
+        {
+          "id": "PI-M22",
+          "status": "build-killed",
+          "killers": [
+            "refuses missing or forged"
+          ],
+          "vacuous": []
+        }
+      ]
+    }
+  ],
+  "globalStops": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "fullContractCertified": false,
+  "certificateIssued": false
+}

@@ -1,0 +1,20 @@
+{
+  "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "cause": "K5 canonical script transiently plants/restores source mutations. Concurrent backend full suite/native controls could read the original linked runtime. Those attempts are inadmissible, not product defects.",
+  "invalidated": [
+    "backend-full ongoing attempt",
+    "all eight original native mutation attempts"
+  ],
+  "k5RestoredClean": true,
+  "replacement": "Independent materialized runtime/carrier input snapshots for each backend mutation worker; fresh dedicated databases; no filtered tests. Rerun full backend with original now read-only.",
+  "stoppedWorkerProcessGroups": [
+    95587,
+    95568,
+    95567,
+    95555,
+    95551,
+    95565,
+    95546,
+    95566
+  ]
+}

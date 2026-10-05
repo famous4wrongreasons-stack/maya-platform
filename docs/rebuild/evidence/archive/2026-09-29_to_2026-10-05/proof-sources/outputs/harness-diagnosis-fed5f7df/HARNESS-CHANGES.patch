@@ -1,0 +1,462 @@
+diff --git a/maya-saas-backend/scripts/widgets-mutation-ci.test.mjs b/maya-saas-backend/scripts/widgets-mutation-ci.test.mjs
+index 5e16a536..56a9d726 100644
+--- a/maya-saas-backend/scripts/widgets-mutation-ci.test.mjs
++++ b/maya-saas-backend/scripts/widgets-mutation-ci.test.mjs
+@@ -1,8 +1,10 @@
+ import assert from 'node:assert/strict';
+ import { spawnSync } from 'node:child_process';
++import fs from 'node:fs';
+ import path from 'node:path';
+ import { fileURLToPath } from 'node:url';
+ import test from 'node:test';
++import ts from 'typescript';
+ import {
+   assemble,
+   DEFAULT_STEPS,
+@@ -56,7 +58,7 @@ function fixture() {
+   });
+ }
+ 
+-test('44 batteries, 65 jobs: profile, turn and approved source scope covers 502 declarations', () => {
++test('44 batteries, 65 jobs: approved scope, listener and clock regressions cover 507 declarations', () => {
+   const p = plan(declared);
+   assert.equal(p.gates.length, 44); assert.equal(p.matrix.include.length, 65);
+   assert.deepEqual(declared.SB1.mutants.map(m => m.id), Array.from({ length: 10 }, (_, i) => `SB1-M${String(i + 1).padStart(2, '0')}`));
+@@ -64,14 +66,40 @@ test('44 batteries, 65 jobs: profile, turn and approved source scope covers 502
+   assert.deepEqual(declared.SV2.mutants.map(m => m.id), Array.from({ length: 13 }, (_, i) => `SV2-M${i + 1}`));
+   assert.deepEqual(declared.SBV.mutants.map(m => m.id), Array.from({ length: 8 }, (_, i) => `SBV-M${i + 1}`));
+   assert.deepEqual(declared.WF.mutants.map(m => m.id), ['WF-M1', 'WF-M2', 'WF-M3']);
++  assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-LOOPBACK-1').length, 1);
++  assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-R02-LOOPBACK-1').length, 1);
++  assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-ADMIN-LOOPBACK-1').length, 1);
++  assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-BOOT-LOOPBACK-1').length, 1);
++  assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-P408-CLOCK-1').length, 1);
+   const r = assemble(declared, fixture(), head);
+-  assert.equal(r.length, 44); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 502);
++  assert.equal(r.length, 44); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 507);
+   for (const report of r) {
+     assert.equal(report.status, 'AS-DECLARED');
+     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
+   }
+ });
+ 
++for (const id of Array.from({ length: 7 }, (_, i) => `M9-${i + 27}`)) test(`${id} changes the canonical USER writer, never a similar assistant query`, () => {
++  const mutant = declared['9'].mutants.find(m => m.id === id);
++  assert.equal(mutant.file, 'src/widgets/stores/timeline.store.ts');
++  assert.equal(mutant.expect, id === 'M9-30' ? 'live-killed' : 'build-killed');
++  assert.ok(mutant.killers.includes('T9-WRITE-1'));
++  const source = fs.readFileSync(path.join(backend, mutant.file), 'utf8');
++  const parsed = ts.createSourceFile(mutant.file, source, ts.ScriptTarget.Latest, true);
++  const store = parsed.statements.find(n => ts.isClassDeclaration(n) && n.name?.text === 'TimelineStore');
++  const writer = store?.members.find(n => ts.isMethodDeclaration(n) && n.name?.getText(parsed) === 'appendUserTurn');
++  assert.ok(writer?.body, 'the canonical USER writer must exist');
++  const at = source.indexOf(mutant.find);
++  assert.ok(at >= 0 && source.indexOf(mutant.find, at + 1) === -1, 'the edit must have one exact target');
++  assert.ok(at >= writer.body.getStart(parsed) && at + mutant.find.length <= writer.body.end,
++    `${id} must edit appendUserTurn; a matching assistant query is the wrong mutation`);
++  const changed = source.replace(mutant.find, () => mutant.replace);
++  assert.equal(changed.slice(0, writer.body.getStart(parsed)), source.slice(0, writer.body.getStart(parsed)));
++  const sizeDelta = mutant.replace.length - mutant.find.length;
++  assert.equal(changed.slice(writer.body.end + sizeDelta), source.slice(writer.body.end),
++    'the mutation must leave all other methods unchanged');
++});
++
+ test('runner dry-run independently executes the same disjoint partition selection', () => {
+   for (const [gate, count] of [['6', 4], ['7', 4], ['9', 4], ['10', 4], ['13', 4], ['P-mint', 4], ['WR', 4]]) {
+     const seen = [];
+diff --git a/maya-saas-backend/src/admin/admin.controller.spec.ts b/maya-saas-backend/src/admin/admin.controller.spec.ts
+index 8a447139..bb33fa8a 100644
+--- a/maya-saas-backend/src/admin/admin.controller.spec.ts
++++ b/maya-saas-backend/src/admin/admin.controller.spec.ts
+@@ -26,7 +26,8 @@ describe('AdminController logo upload', () => {
+ 
+     app = moduleFixture.createNestApplication();
+     app.setGlobalPrefix('api');
+-    await app.init();
++    await app.listen(0, '127.0.0.1');
++    expect(await app.getUrl()).toMatch(/^http:\/\/127\.0\.0\.1:\d+$/);
+   });
+ 
+   afterEach(async () => {
+diff --git a/maya-saas-backend/src/auth/legacy-staff-principal.http.spec.ts b/maya-saas-backend/src/auth/legacy-staff-principal.http.spec.ts
+index b941d1d2..3a09e660 100644
+--- a/maya-saas-backend/src/auth/legacy-staff-principal.http.spec.ts
++++ b/maya-saas-backend/src/auth/legacy-staff-principal.http.spec.ts
+@@ -152,7 +152,8 @@ describe('R02 canonical principal through actual Nest JWT/tenant/role guards', (
+     app.use((_req: unknown, _res: unknown, next: () => void) =>
+       context.run('r02-http-test', next),
+     );
+-    await app.init();
++    // Supertest must use an owned IPv4 listener, not an implicit wildcard port.
++    await app.listen(0, '127.0.0.1');
+   });
+   afterAll(async () => {
+     await app?.close();
+@@ -192,6 +193,16 @@ describe('R02 canonical principal through actual Nest JWT/tenant/role guards', (
+     return call.send(body);
+   };
+ 
++  it('R02-LOOPBACK owns one ready IPv4 listener across requests', async () => {
++    const server = app.getHttpServer() as Server;
++    const address = server.address();
++    expect(address).toMatchObject({ address: '127.0.0.1', family: 'IPv4' });
++    await read(token()).expect(201);
++    await read().expect(401);
++    expect(server.listening).toBe(true);
++    expect(server.address()).toEqual(address);
++  });
++
+   it('requires a real signed session; raw channel identity is not authentication', async () => {
+     await read().expect(401);
+     await read('not-a-jwt').expect(401);
+diff --git a/maya-saas-backend/src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts b/maya-saas-backend/src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts
+index 4d74b27c..108ce0c3 100644
+--- a/maya-saas-backend/src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts
++++ b/maya-saas-backend/src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts
+@@ -131,6 +131,20 @@ function harness() {
+ }
+ 
+ describe('P408TenantBillingCanonicalCutoverService', () => {
++  // These scenarios use fixed billing windows; wall-clock passage must not change them.
++  beforeEach(() => {
++    jest.useFakeTimers({ now: NOW });
++  });
++
++  afterEach(() => {
++    jest.useRealTimers();
++  });
++
++  it('P408-HARNESS-CLOCK anchors implicit billing reads to the fixture clock', () => {
++    expect(new Date()).toEqual(NOW);
++    expect(Date.now()).toBe(NOW.getTime());
++  });
++
+   it('derives checkout amount/currency/policy and sends one canonical action', async () => {
+     const h = harness();
+     await expect(
+diff --git a/maya-saas-backend/src/bootstrap/configure-http-app.spec.ts b/maya-saas-backend/src/bootstrap/configure-http-app.spec.ts
+index f1e9f5e1..ea6ce242 100644
+--- a/maya-saas-backend/src/bootstrap/configure-http-app.spec.ts
++++ b/maya-saas-backend/src/bootstrap/configure-http-app.spec.ts
+@@ -81,7 +81,8 @@ describe('configureHttpApp — the parsers, the api prefix and the validation pi
+       logger: false,
+     });
+     configureHttpApp(app);
+-    await app.init();
++    await app.listen(0, '127.0.0.1');
++    expect(await app.getUrl()).toMatch(/^http:\/\/127\.0\.0\.1:\d+$/);
+   });
+ 
+   afterAll(async () => {
+diff --git a/maya-saas-backend/src/widgets/owner-ports/commit-booking.adapter.spec.ts b/maya-saas-backend/src/widgets/owner-ports/commit-booking.adapter.spec.ts
+index 8d777742..ebd0354b 100644
+--- a/maya-saas-backend/src/widgets/owner-ports/commit-booking.adapter.spec.ts
++++ b/maya-saas-backend/src/widgets/owner-ports/commit-booking.adapter.spec.ts
+@@ -40,6 +40,14 @@ const execution = { id: 'execution-1' } as ActionExecution;
+ 
+ const fixture = () => {
+   let observedInvocation: unknown;
++  const transaction = {} as never;
++  const entitlements = {
++    assertWidgetRuntimeAdmission: jest.fn().mockResolvedValue(undefined),
++    withWidgetRuntimeAdmission: jest.fn(
++      (_tenantId: string, admit: (transaction: never) => Promise<unknown>) =>
++        admit(transaction),
++    ),
++  };
+   const create = {
+     forAccount: jest.fn(),
+     executionResult: jest.fn().mockResolvedValue({
+@@ -72,14 +80,14 @@ const fixture = () => {
+     create,
+     cancel,
+     reschedule,
++    entitlements,
++    transaction,
+     observedInvocation: () => observedInvocation,
+     adapter: new CommitBookingAdapter(
+       create as unknown as ClientAppointmentCreateService,
+       cancel as unknown as ClientAppointmentCancelService,
+       reschedule as unknown as ClientAppointmentRescheduleService,
+-      {
+-        assertWidgetRuntimeAdmission: jest.fn().mockResolvedValue(undefined),
+-      } as unknown as EntitlementsService,
++      entitlements as unknown as EntitlementsService,
+     ),
+   };
+ };
+@@ -158,6 +166,60 @@ describe('U13c booking COMMIT owner port', () => {
+     expect(built.create.executionResult).not.toHaveBeenCalled();
+   });
+ 
++  it('N11-HARNESS a canonical invocation without an existing transaction reaches persistence', async () => {
++    const built = fixture();
++    const persist = jest.fn().mockResolvedValue(execution);
++    const request = {
++      source: { type: 'authenticated_request' },
++      callerIdempotency: {
++        scope: 'maya.widgets.booking.commit.v1',
++        key: 'server-confirmation-key',
++      },
++    };
++    built.create.forAccount.mockImplementation(() =>
++      admitWithInvocationReceipt(request as never, persist),
++    );
++    await expect(built.adapter.commit(input())).resolves.toMatchObject({
++      receiptOutcome: 'ACCEPTED',
++      actionReceiptRef: 'execution-1',
++    });
++    expect(built.entitlements.withWidgetRuntimeAdmission).toHaveBeenCalledWith(
++      'tenant-1',
++      expect.any(Function),
++    );
++    expect(persist).toHaveBeenCalledTimes(1);
++    expect(persist).toHaveBeenCalledWith(request, built.transaction);
++  });
++
++  it('N11-KEY refuses a substituted confirmation key with the correct authenticated source', async () => {
++    const built = fixture();
++    const persist = jest.fn().mockResolvedValue(execution);
++    built.create.forAccount.mockImplementation(() =>
++      admitWithInvocationReceipt(
++        {
++          source: { type: 'authenticated_request' },
++          callerIdempotency: {
++            scope: 'maya.widgets.booking.commit.v1',
++            key: 'different-key',
++          },
++        } as never,
++        persist,
++      ),
++    );
++    await expect(built.adapter.commit(input())).resolves.toMatchObject({
++      receiptOutcome: 'REFUSED',
++      actionReceiptRef: null,
++    });
++    expect(persist).not.toHaveBeenCalled();
++    expect(
++      built.entitlements.withWidgetRuntimeAdmission,
++    ).not.toHaveBeenCalled();
++    expect(
++      built.entitlements.assertWidgetRuntimeAdmission,
++    ).not.toHaveBeenCalled();
++    expect(built.create.executionResult).not.toHaveBeenCalled();
++  });
++
+   it.each([
+     'agent_task',
+     'scheduler',
+diff --git a/maya-saas-backend/test/app.e2e-spec.ts b/maya-saas-backend/test/app.e2e-spec.ts
+index 95f2d9c1..5dac6193 100644
+--- a/maya-saas-backend/test/app.e2e-spec.ts
++++ b/maya-saas-backend/test/app.e2e-spec.ts
+@@ -27,7 +27,8 @@ describe('AppController (e2e)', () => {
+ 
+     app = moduleFixture.createNestApplication();
+     app.setGlobalPrefix('api');
+-    await app.init();
++    await app.listen(0, '127.0.0.1');
++    expect(await app.getUrl()).toMatch(/^http:\/\/127\.0\.0\.1:\d+$/);
+   });
+ 
+   it('/api/health (GET)', () => {
+diff --git a/maya-saas-backend/test/widgets-live/http-listener.live-spec.ts b/maya-saas-backend/test/widgets-live/http-listener.live-spec.ts
+new file mode 100644
+index 00000000..128e2099
+--- /dev/null
++++ b/maya-saas-backend/test/widgets-live/http-listener.live-spec.ts
+@@ -0,0 +1,41 @@
++import type { Server } from 'node:http';
++
++import { bootHttp } from './support/http-bootstrap';
++
++describe('HTTP harness listener ownership', () => {
++  it('HAR-LOOPBACK owns one ready IPv4 listener across requests and closes it at teardown', async () => {
++    const http = await bootHttp();
++    const server: Server = http.app.getHttpServer();
++    let requests = 0;
++    server.on('request', () => requests++);
++    try {
++      // Supertest must never select its own wildcard listener before a request:
++      // on Darwin an existing IPv4 loopback listener can shadow that same port.
++      const address = server.address();
++      expect(address).toMatchObject({
++        address: '127.0.0.1',
++        family: 'IPv4',
++        port: expect.any(Number) as unknown,
++      });
++      const [first, second] = await Promise.all([
++        http.listenLoopback(),
++        http.listenLoopback(),
++      ]);
++      expect(first).toBe(second);
++      expect(first).toBe(
++        `http://127.0.0.1:${(address as { port: number }).port}`,
++      );
++      for (let i = 0; i < 2; i++) {
++        expect((await http.postIntentUnauthenticated({})).status).toBe(401);
++        expect(server.address()).toEqual(address);
++        expect(server.listening).toBe(true);
++      }
++      // The intended server received both requests; no neighboring listener did.
++      expect(requests).toBe(2);
++    } finally {
++      await http.close();
++    }
++    expect(server.listening).toBe(false);
++    expect(server.address()).toBeNull();
++  });
++});
+diff --git a/maya-saas-backend/test/widgets-live/mutations/gate9.json b/maya-saas-backend/test/widgets-live/mutations/gate9.json
+index a6f1f6ba..fbf50733 100644
+--- a/maya-saas-backend/test/widgets-live/mutations/gate9.json
++++ b/maya-saas-backend/test/widgets-live/mutations/gate9.json
+@@ -304,8 +304,8 @@
+     "id": "M9-27",
+     "description": "turn index lookup loses tenant qualification",
+     "file": "src/widgets/stores/timeline.store.ts",
+-    "find": "      where: scoped(input.tenantId, { conversationId: input.conversationId }),",
+-    "replace": "      where: { conversationId: input.conversationId },",
++    "find": "        ? await timeline.aggregate({\n            where: scoped(input.tenantId, {\n              conversationId: input.conversationId,\n            }),\n            _max: { turnIndex: true },\n          })",
++    "replace": "        ? await timeline.aggregate({\n            where: { conversationId: input.conversationId },\n            _max: { turnIndex: true },\n          })",
+     "killers": [
+       "T9-WRITE-1"
+     ],
+@@ -315,8 +315,8 @@
+     "id": "M9-28",
+     "description": "turn index lookup loses conversation qualification",
+     "file": "src/widgets/stores/timeline.store.ts",
+-    "find": "      where: scoped(input.tenantId, { conversationId: input.conversationId }),",
+-    "replace": "      where: scoped(input.tenantId, {}),",
++    "find": "        ? await timeline.aggregate({\n            where: scoped(input.tenantId, {\n              conversationId: input.conversationId,\n            }),\n            _max: { turnIndex: true },\n          })",
++    "replace": "        ? await timeline.aggregate({\n            where: scoped(input.tenantId, {}),\n            _max: { turnIndex: true },\n          })",
+     "killers": [
+       "T9-WRITE-1"
+     ],
+diff --git a/maya-saas-backend/test/widgets-live/mutations/gateH-harness.json b/maya-saas-backend/test/widgets-live/mutations/gateH-harness.json
+index 380dc45c..a54f034c 100644
+--- a/maya-saas-backend/test/widgets-live/mutations/gateH-harness.json
++++ b/maya-saas-backend/test/widgets-live/mutations/gateH-harness.json
+@@ -1,4 +1,68 @@
+ [
++  {
++    "id": "H-LOOPBACK-1",
++    "description": "the HTTP harness binds a wildcard listener that can be shadowed by another IPv4 loopback process",
++    "file": "test/widgets-live/support/http-bootstrap.ts",
++    "find": "  await app.listen(0, '127.0.0.1');",
++    "replace": "  await app.listen(0, '::');",
++    "killers": [
++      "HAR-LOOPBACK"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "H-R02-LOOPBACK-1",
++    "edits": [
++      {
++        "file": "src/auth/legacy-staff-principal.http.spec.ts",
++        "find": "await app.listen(0, '127.0.0.1');",
++        "replace": "await app.init();"
++      }
++    ],
++    "killers": [
++      "R02-LOOPBACK"
++    ],
++    "expect": "build-killed"
++  },
++  {
++    "id": "H-ADMIN-LOOPBACK-1",
++    "edits": [
++      {
++        "file": "src/admin/admin.controller.spec.ts",
++        "find": "await app.listen(0, '127.0.0.1');",
++        "replace": "await app.init();"
++      }
++    ],
++    "killers": [
++      "accepts a logo in the multipart field"
++    ],
++    "expect": "build-killed"
++  },
++  {
++    "id": "H-BOOT-LOOPBACK-1",
++    "edits": [
++      {
++        "file": "src/bootstrap/configure-http-app.spec.ts",
++        "find": "await app.listen(0, '127.0.0.1');",
++        "replace": "await app.init();"
++      }
++    ],
++    "killers": [
++      "a route is served under /api, and not without it"
++    ],
++    "expect": "build-killed"
++  },
++  {
++    "id": "H-P408-CLOCK-1",
++    "description": "billing fixtures lose their fixed clock and change meaning when the active window expires",
++    "file": "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
++    "find": "jest.useFakeTimers({ now: NOW });",
++    "replace": "jest.useRealTimers();",
++    "killers": [
++      "P408-HARNESS-CLOCK"
++    ],
++    "expect": "build-killed"
++  },
+   {
+     "id": "H-M1",
+     "description": "the recorder counts a lock as a durable write (D-12)",
+diff --git a/maya-saas-backend/test/widgets-live/support/http-bootstrap.ts b/maya-saas-backend/test/widgets-live/support/http-bootstrap.ts
+index 8eb1a9f9..fce34748 100644
+--- a/maya-saas-backend/test/widgets-live/support/http-bootstrap.ts
++++ b/maya-saas-backend/test/widgets-live/support/http-bootstrap.ts
+@@ -24,6 +24,7 @@ import { ConsoleLogger } from '@nestjs/common';
+ import type { NestExpressApplication } from '@nestjs/platform-express';
+ import { ConfigService } from '@nestjs/config';
+ import { Test, type TestingModule } from '@nestjs/testing';
++import type { Server } from 'node:http';
+ import request from 'supertest';
+ 
+ import { AppModule } from '../../../src/app.module';
+@@ -52,7 +53,7 @@ export interface HttpResponse {
+ export interface HttpHarness {
+   readonly app: NestExpressApplication;
+   readonly recorder: WriteRecorder;
+-  /** Bind the already initialized application to an ephemeral loopback port for the real shell process. */
++  /** Return the ready, owned loopback listener shared with the real shell process. */
+   listenLoopback(): Promise<string>;
+   /** `POST /api/auth/login` for a tenant user; returns the access token. */
+   login(tenantSlug: string, email: string, password: string): Promise<string>;
+@@ -149,22 +150,19 @@ export async function bootHttp(
+       recorder.within(GATEWAY_SCOPE, () => submit(args)),
+     );
+ 
+-  const server = app.getHttpServer() as Parameters<typeof request>[0];
+-  let loopbackUrl: string | null = null;
++  const server: Server = app.getHttpServer();
++  // Own one ready IPv4 listener before Supertest sees the server. Its implicit
++  // listen(0) uses a wildcard address that can be shadowed by an existing IPv4
++  // loopback listener on Darwin, sending a test request to another process.
++  await app.listen(0, '127.0.0.1');
++  const address = server.address();
++  if (typeof address !== 'object' || address === null)
++    throw new Error('widgets-live loopback listener returned no TCP address');
++  const loopbackUrl = `http://127.0.0.1:${address.port}`;
+   return {
+     app,
+     recorder,
+-    listenLoopback: async () => {
+-      if (loopbackUrl !== null) return loopbackUrl;
+-      await app.listen(0, '127.0.0.1');
+-      const address = app.getHttpServer().address();
+-      if (typeof address !== 'object' || address === null)
+-        throw new Error(
+-          'widgets-live loopback listener returned no TCP address',
+-        );
+-      loopbackUrl = `http://127.0.0.1:${address.port}`;
+-      return loopbackUrl;
+-    },
++    listenLoopback: () => Promise.resolve(loopbackUrl),
+     login: async (tenantSlug, email, password) => {
+       await recorder.within(LOGIN_RATE_LIMIT_SCOPE, () =>
+         resetLoopbackLoginPreflight(app.get(PrismaService)),

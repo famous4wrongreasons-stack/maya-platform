@@ -1,0 +1,19 @@
+{
+  "status": "VERIFIED_FROM_EXECUTED_LOCAL_RECEIPT",
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "exactCertificateReceiptHash": "5f4d605a0e26ad8249ade9d6d25b3929835be42d40ab20089e426e40f1e459c0",
+  "profileApplicableFalse": 0,
+  "globalFalse": 2,
+  "certifiedForProfile": true,
+  "productionOperations": 0,
+  "actualHostedCiRuns": [
+    37238710215,
+    37238710218,
+    37238710222,
+    37238710226,
+    37238710237,
+    37238713168
+  ],
+  "checkedDuringArchival": true,
+  "testsRerunDuringArchival": false
+}

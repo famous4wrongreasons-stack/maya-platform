@@ -1,0 +1,76 @@
+{
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "name": "l25-browser",
+  "command": [
+    "playwright-cli",
+    "-s=ar1-unlock",
+    "run-code",
+    "l25-browser-proof.js"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-production-unlock-final-20261002",
+  "exit": 0,
+  "seconds": 1.99,
+  "freshObservation": {
+    "status": "PASS",
+    "first": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        }
+      ],
+      "activations": 0
+    },
+    "tapped": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        }
+      ],
+      "activations": 1
+    },
+    "collapsed": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        }
+      ],
+      "activations": 1
+    },
+    "remounted": {
+      "observed": [
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": true
+        },
+        {
+          "id": "l25-mounted",
+          "connected": true,
+          "controls": 5,
+          "beforeAnyTap": false
+        }
+      ],
+      "activations": 1
+    },
+    "mutant": {
+      "observed": [],
+      "activations": 0
+    },
+    "mutantTap": {
+      "observed": [],
+      "activations": 1
+    },
+    "productSourceEdited": false,
+    "realNetworkEffects": false
+  }
+}

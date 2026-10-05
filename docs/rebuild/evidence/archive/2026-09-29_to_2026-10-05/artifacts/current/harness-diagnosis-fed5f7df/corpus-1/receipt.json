@@ -1,0 +1,21 @@
+{
+  "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "name": "corpus-1",
+  "mode": "native",
+  "command": [
+    "node",
+    "scripts/widgets-mutation-battery.mjs",
+    "--gate",
+    "AR",
+    "--out",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/corpus-1/not-a-certificate.json"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-fed5f7df/mutation-isolated-worker-1/maya-saas-backend",
+  "exit": 0,
+  "seconds": 178.84610390663147,
+  "database": "maya_widget_gate_proof_diag_corpus_1",
+  "diagnosticOnly": true,
+  "sourceChanged": false,
+  "timeoutsChanged": false,
+  "harnessSha256": "77894f0fc5a1340ff0b4a29eb163e4e46e7dba592cccd73bac90713836dea2c7"
+}

@@ -1,0 +1,42 @@
+{
+  "base": "5230bd9e23903941b8f7c4b814c2a326d14a3cbf",
+  "diagnosticOnly": true,
+  "restriction": "exact timeline store spec; unit step",
+  "before": "Previous committed test file; prior USER named-killer T9-WRITE-1, same assistant source edits",
+  "after": "New assistant index test and correct named killer TURN-ASSISTANT-INDEX",
+  "productSourceUnchanged": true,
+  "records": [
+    {
+      "name": "before",
+      "exit": 1,
+      "seconds": 3.069,
+      "baselineRed": [],
+      "mutants": [
+        {
+          "id": "TURN-M13",
+          "status": "SURVIVED"
+        },
+        {
+          "id": "TURN-M14",
+          "status": "SURVIVED"
+        }
+      ]
+    },
+    {
+      "name": "after",
+      "exit": 0,
+      "seconds": 3.06,
+      "baselineRed": [],
+      "mutants": [
+        {
+          "id": "TURN-M13",
+          "status": "build-killed"
+        },
+        {
+          "id": "TURN-M14",
+          "status": "build-killed"
+        }
+      ]
+    }
+  ]
+}

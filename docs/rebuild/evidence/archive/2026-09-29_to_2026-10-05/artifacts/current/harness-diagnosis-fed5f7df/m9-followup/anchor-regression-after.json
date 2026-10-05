@@ -1,0 +1,12 @@
+{
+  "base": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "name": "anchor-regression-after",
+  "command": [
+    "node",
+    "--test",
+    "--test-name-pattern=M9-28",
+    "scripts/widgets-mutation-ci.test.mjs"
+  ],
+  "exit": 0,
+  "seconds": 0.209
+}

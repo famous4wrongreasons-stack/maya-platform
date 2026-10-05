@@ -1,0 +1,436 @@
+{
+  "contract": "maya.fbe2e-final-certification-disposition/1",
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "generatedAt": "2026-10-03T18:44:56.005785+00:00",
+  "historicalReceiptsAdmitted": 0,
+  "counts": {
+    "CLOSED": 26,
+    "ACCEPTED": 2
+  },
+  "limitations": [
+    {
+      "id": "L1",
+      "after": "CLOSED",
+      "currentProof": "HTTP evidence tags and declared HTTP kills are verified in the complete current mutation programme.",
+      "freshEvidence": [
+        {
+          "path": "COMPLETE-MUTATIONS.json",
+          "sha256": "28bec2038e29ac30b36943d8daf341a8df37d61cdb7c1f93e03c49ed2d58dd60"
+        },
+        {
+          "path": "CURRENT-LIVE-PROOF-INDEX.json",
+          "sha256": "90367a346bbfb5af4edff2811e4ffafb83d4addbc408c040a44297f29aa63006"
+        }
+      ]
+    },
+    {
+      "id": "L2",
+      "after": "CLOSED",
+      "currentProof": "Blocking workflow commands and strict admission are proven locally; remote GitHub branch-protection configuration is not claimed.",
+      "freshEvidence": [
+        {
+          "path": "FINAL-OWNER-DECISIONS-PROOF.json",
+          "sha256": "73609bb0ff6981d17eceda4ad75193a0228180107bf221ada752a62ee2eaa5ae"
+        },
+        {
+          "path": "receipts/widgets-live-full.json",
+          "sha256": "2a3efede8a6eecf08b7a6a4da564134a8d293bbe8403188e1994d648a1bffb03"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-FB.json",
+          "sha256": "30fcbd9fb14201cf9a488d0d1cc2d0bef8d5f59c9f52b8ef54d1df4b8701bd21"
+        }
+      ]
+    },
+    {
+      "id": "L3",
+      "after": "CLOSED",
+      "currentProof": "Canonical network transport executes authentication, widget submissions and resolve over loopback into the built backend.",
+      "freshEvidence": [
+        {
+          "path": "receipts/canonical-net-bin-observations.json",
+          "sha256": "4dfe52fc09155b679960df97840feb93532228b1a5e8d22e688b572b7e1ad072"
+        }
+      ]
+    },
+    {
+      "id": "L4",
+      "after": "CLOSED",
+      "currentProof": "Emitted runtime JavaScript executes create/reschedule/cancel and NS-1 return against the built backend; compiled React helper is exercised. This is not browser/device/production proof.",
+      "freshEvidence": [
+        {
+          "path": "receipts/compiled-net-bin-observations.json",
+          "sha256": "0ec6fa9816c4c2d84a4e6cc26712adbf08a25791233c2ec57777ee283a3b3b75"
+        }
+      ]
+    },
+    {
+      "id": "L5",
+      "after": "CLOSED",
+      "currentProof": "One next local calendar day only; no widening/free-text/new input kinds.",
+      "freshEvidence": [
+        {
+          "path": "FINAL-OWNER-DECISIONS-PROOF.json",
+          "sha256": "73609bb0ff6981d17eceda4ad75193a0228180107bf221ada752a62ee2eaa5ae"
+        },
+        {
+          "path": "receipts/widgets-live-full.json",
+          "sha256": "2a3efede8a6eecf08b7a6a4da564134a8d293bbe8403188e1994d648a1bffb03"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-FB.json",
+          "sha256": "30fcbd9fb14201cf9a488d0d1cc2d0bef8d5f59c9f52b8ef54d1df4b8701bd21"
+        }
+      ]
+    },
+    {
+      "id": "L6",
+      "after": "CLOSED",
+      "currentProof": "Canonical unknown fields and incomplete totals remain unknown; current presenter assertions and named WR mutations pass.",
+      "freshEvidence": [
+        {
+          "path": "receipts/backend-full.json",
+          "sha256": "4040c072e2027d547214d369ac3f64a2023772fa4c5a600d7bab5d647d5b2c77"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+          "sha256": "2f5af902fa8f20696bb6fc01a761b5d9141fd7f5dc8b8fe9bd9d451784e4f496"
+        }
+      ]
+    },
+    {
+      "id": "L7",
+      "after": "CLOSED",
+      "currentProof": "Authority user/tenant and actor tenant fences before booking quote/store are asserted and mutation-protected.",
+      "freshEvidence": [
+        {
+          "path": "receipts/backend-full.json",
+          "sha256": "4040c072e2027d547214d369ac3f64a2023772fa4c5a600d7bab5d647d5b2c77"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+          "sha256": "2f5af902fa8f20696bb6fc01a761b5d9141fd7f5dc8b8fe9bd9d451784e4f496"
+        }
+      ]
+    },
+    {
+      "id": "L8",
+      "after": "CLOSED",
+      "currentProof": "Malformed canonical staff results refuse; incomplete lists cannot be relabelled COMPLETE by an undetected mutation.",
+      "freshEvidence": [
+        {
+          "path": "receipts/backend-full.json",
+          "sha256": "4040c072e2027d547214d369ac3f64a2023772fa4c5a600d7bab5d647d5b2c77"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+          "sha256": "2f5af902fa8f20696bb6fc01a761b5d9141fd7f5dc8b8fe9bd9d451784e4f496"
+        }
+      ]
+    },
+    {
+      "id": "L9",
+      "after": "CLOSED",
+      "currentProof": "Actual runtime-issued create/reschedule/cancel COMMIT observations assert all fourteen gates.",
+      "freshEvidence": [
+        {
+          "path": "receipts/compiled-net-bin-observations.json",
+          "sha256": "0ec6fa9816c4c2d84a4e6cc26712adbf08a25791233c2ec57777ee283a3b3b75"
+        }
+      ]
+    },
+    {
+      "id": "L10",
+      "after": "CLOSED",
+      "currentProof": "The current complete native programme requires green plain baselines including neutralised live batteries; harness regression controls pass.",
+      "freshEvidence": [
+        {
+          "path": "COMPLETE-MUTATIONS.json",
+          "sha256": "28bec2038e29ac30b36943d8daf341a8df37d61cdb7c1f93e03c49ed2d58dd60"
+        },
+        {
+          "path": "HTTP-HARNESS-NATIVE-PROOF.json",
+          "sha256": "6e220d919c62f88c438929b91c657448a42cc003ff571f35cbcfd91bd66cbf24"
+        }
+      ]
+    },
+    {
+      "id": "L11",
+      "after": "CLOSED",
+      "currentProof": "Three canonical selector read kinds assert the selector minter dispatch; WR-M17 is killed.",
+      "freshEvidence": [
+        {
+          "path": "receipts/backend-full.json",
+          "sha256": "4040c072e2027d547214d369ac3f64a2023772fa4c5a600d7bab5d647d5b2c77"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+          "sha256": "2f5af902fa8f20696bb6fc01a761b5d9141fd7f5dc8b8fe9bd9d451784e4f496"
+        }
+      ]
+    },
+    {
+      "id": "L12",
+      "after": "CLOSED",
+      "currentProof": "Every new runtime site named by historical L12 has a killed WR mutation. The exact ports delta emits no new runtime bytes; the pre-existing helper is not mislabelled type-only. No exhaustive line-coverage claim.",
+      "freshEvidence": [
+        {
+          "path": "L12-DELTA-PROOF.json",
+          "sha256": "ae865ff4614047c7590f02d038688ff5d6ab2b70f754d0eaf1f215ca588dfb3d"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+          "sha256": "2f5af902fa8f20696bb6fc01a761b5d9141fd7f5dc8b8fe9bd9d451784e4f496"
+        }
+      ]
+    },
+    {
+      "id": "L13",
+      "after": "CLOSED",
+      "currentProof": "Both booking principal fences are covered by foreign-principal and lock-time change tests, with WR-M18/M19 killed.",
+      "freshEvidence": [
+        {
+          "path": "receipts/backend-full.json",
+          "sha256": "4040c072e2027d547214d369ac3f64a2023772fa4c5a600d7bab5d647d5b2c77"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+          "sha256": "2f5af902fa8f20696bb6fc01a761b5d9141fd7f5dc8b8fe9bd9d451784e4f496"
+        }
+      ]
+    },
+    {
+      "id": "L14",
+      "after": "CLOSED",
+      "currentProof": "Current immutable receipt/retry contract and exclusive confirmed publication are preserved. The injected second COMMIT remains a defensive store proof, not a manufactured production re-reference.",
+      "freshEvidence": [
+        {
+          "path": "L14-CURRENT-CLOSURE.json",
+          "sha256": "8bec0fed51ae43c31a69c2b579a8073798e8cba26f6cea59e1156133e82182c5"
+        },
+        {
+          "path": "receipts/l14-fresh-proofs.json",
+          "sha256": "e9f0395b3d2eb71cca89ccb681e7024dd87bf66f6a601847ed82762fc60ff389"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+          "sha256": "2f5af902fa8f20696bb6fc01a761b5d9141fd7f5dc8b8fe9bd9d451784e4f496"
+        }
+      ]
+    },
+    {
+      "id": "L15",
+      "after": "CLOSED",
+      "currentProof": "Ownership, effect/space narrowing, monotonicity and same-token exception mutations WR-M12..M15 are killed with green controls.",
+      "freshEvidence": [
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+          "sha256": "2f5af902fa8f20696bb6fc01a761b5d9141fd7f5dc8b8fe9bd9d451784e4f496"
+        }
+      ]
+    },
+    {
+      "id": "L16",
+      "after": "CLOSED",
+      "currentProof": "The existing four-part P-mint repair passes full fresh local execution and canonical assembly below the unchanged per-job budget. Remote GitHub timing is not claimed.",
+      "freshEvidence": [
+        {
+          "path": "L16-CURRENT-PLAN-PROOF.json",
+          "sha256": "a3af5856270f50c8efa0462cc00ed55b563f3dc516cc7a40a302d6d11fec65f2"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-P-mint.json",
+          "sha256": "d5df066fdeb6fe8d1090394c1dec049fd072426337d2e9524629b9152844fd8f"
+        }
+      ]
+    },
+    {
+      "id": "L17",
+      "after": "CLOSED",
+      "currentProof": "Canonical reconciliation lookup is fenced to AE COMMIT and WR-M16 is killed.",
+      "freshEvidence": [
+        {
+          "path": "receipts/widgets-live-full.json",
+          "sha256": "2a3efede8a6eecf08b7a6a4da564134a8d293bbe8403188e1994d648a1bffb03"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+          "sha256": "2f5af902fa8f20696bb6fc01a761b5d9141fd7f5dc8b8fe9bd9d451784e4f496"
+        }
+      ]
+    },
+    {
+      "id": "L18",
+      "after": "CLOSED",
+      "currentProof": "Fresh compiled-runtime network observations assert the actual COMMIT gate count, as for L9.",
+      "freshEvidence": [
+        {
+          "path": "receipts/compiled-net-bin-observations.json",
+          "sha256": "0ec6fa9816c4c2d84a4e6cc26712adbf08a25791233c2ec57777ee283a3b3b75"
+        }
+      ]
+    },
+    {
+      "id": "L19",
+      "after": "CLOSED",
+      "currentProof": "Canonical confirmed receipt lines traverse createNet, conversation, the compiled React reply helper and subsequent chat request history.",
+      "freshEvidence": [
+        {
+          "path": "receipts/compiled-receipt-net-bin-observations.json",
+          "sha256": "fc0a86b4a7da7a03a7324416ba4a5886bbd0b7428f12e27b4b7e291cb5266f6d"
+        }
+      ]
+    },
+    {
+      "id": "L20",
+      "after": "CLOSED",
+      "currentProof": "Test provider persisted one row then destroyed socket. Real AE derives UNKNOWN; ordinary and six concurrent retries dispatch no duplicate. Reconciliation read fault remains safely pending; successful production reconciliation is not claimed.",
+      "freshEvidence": [
+        {
+          "path": "FINAL-OWNER-DECISIONS-PROOF.json",
+          "sha256": "73609bb0ff6981d17eceda4ad75193a0228180107bf221ada752a62ee2eaa5ae"
+        },
+        {
+          "path": "receipts/widgets-live-full.json",
+          "sha256": "2a3efede8a6eecf08b7a6a4da564134a8d293bbe8403188e1994d648a1bffb03"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-FB.json",
+          "sha256": "30fcbd9fb14201cf9a488d0d1cc2d0bef8d5f59c9f52b8ef54d1df4b8701bd21"
+        }
+      ]
+    },
+    {
+      "id": "L21",
+      "after": "CLOSED",
+      "currentProof": "Server thread reader filters invalid terminal outcomes and receipt-reference bindings; WR-M06..M08 are killed.",
+      "freshEvidence": [
+        {
+          "path": "receipts/backend-full.json",
+          "sha256": "4040c072e2027d547214d369ac3f64a2023772fa4c5a600d7bab5d647d5b2c77"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+          "sha256": "2f5af902fa8f20696bb6fc01a761b5d9141fd7f5dc8b8fe9bd9d451784e4f496"
+        }
+      ]
+    },
+    {
+      "id": "L22",
+      "after": "CLOSED",
+      "currentProof": "The recording store keys by canonical upsert identity and asserts immutable retry. It does not claim rejection of arbitrary first-write owner input.",
+      "freshEvidence": [
+        {
+          "path": "receipts/backend-full.json",
+          "sha256": "4040c072e2027d547214d369ac3f64a2023772fa4c5a600d7bab5d647d5b2c77"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-WR.json",
+          "sha256": "2f5af902fa8f20696bb6fc01a761b5d9141fd7f5dc8b8fe9bd9d451784e4f496"
+        }
+      ]
+    },
+    {
+      "id": "L23",
+      "after": "ACCEPTED",
+      "ownerDecision": "A; explicit current user decision",
+      "exactCandidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "remainingBoundary": "Structural network test does not inspect every extra widget-path literal in all four network modules. Existing exact endpoint allowlist, single fetch site, build counterfactuals and network tests remain required.",
+      "freshEvidence": [
+        {
+          "path": "FINAL-OWNER-DECISIONS-PROOF.json",
+          "sha256": "73609bb0ff6981d17eceda4ad75193a0228180107bf221ada752a62ee2eaa5ae"
+        }
+      ],
+      "admissionRefusal": null
+    },
+    {
+      "id": "L24",
+      "after": "CLOSED",
+      "currentProof": "One next local calendar day only; no widening/free-text/new input kinds.",
+      "freshEvidence": [
+        {
+          "path": "FINAL-OWNER-DECISIONS-PROOF.json",
+          "sha256": "73609bb0ff6981d17eceda4ad75193a0228180107bf221ada752a62ee2eaa5ae"
+        },
+        {
+          "path": "receipts/widgets-live-full.json",
+          "sha256": "2a3efede8a6eecf08b7a6a4da564134a8d293bbe8403188e1994d648a1bffb03"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-FB.json",
+          "sha256": "30fcbd9fb14201cf9a488d0d1cc2d0bef8d5f59c9f52b8ef54d1df4b8701bd21"
+        }
+      ]
+    },
+    {
+      "id": "L25",
+      "after": "CLOSED",
+      "currentProof": "DELIVERED means server HTTP handoff; LIVE means authenticated post-mount carrier observation, not human attention. Observation grants no action/booking authority.",
+      "freshEvidence": [
+        {
+          "path": "FINAL-OWNER-DECISIONS-PROOF.json",
+          "sha256": "73609bb0ff6981d17eceda4ad75193a0228180107bf221ada752a62ee2eaa5ae"
+        },
+        {
+          "path": "receipts/widgets-live-full.json",
+          "sha256": "2a3efede8a6eecf08b7a6a4da564134a8d293bbe8403188e1994d648a1bffb03"
+        },
+        {
+          "path": "receipts/mutation-receipt/widgets-mutation-report-FB.json",
+          "sha256": "30fcbd9fb14201cf9a488d0d1cc2d0bef8d5f59c9f52b8ef54d1df4b8701bd21"
+        }
+      ]
+    },
+    {
+      "id": "L26",
+      "after": "ACCEPTED",
+      "ownerDecision": "A; explicit current user decision",
+      "exactCandidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+      "remainingBoundary": "Historical/manual audit builder and all its reports are archival-only. Fresh complete raw native receipts alone enter release admission.",
+      "freshEvidence": [
+        {
+          "path": "FINAL-OWNER-DECISIONS-PROOF.json",
+          "sha256": "73609bb0ff6981d17eceda4ad75193a0228180107bf221ada752a62ee2eaa5ae"
+        }
+      ],
+      "admissionRefusal": "PASS"
+    },
+    {
+      "id": "L27",
+      "after": "CLOSED",
+      "currentProof": "Built-runtime/binary COMMIT to Dismiss preserves one visible terminal outcome, one durable receipt and one synthetic execution; eight separate runtime mutations are killed.",
+      "freshEvidence": [
+        {
+          "path": "L27-CURRENT-PROOF.json",
+          "sha256": "9760a77c2ec9d1ce7b2da10394a21a09ba0e520884c3f1d8074ad8bbe2c858dc"
+        },
+        {
+          "path": "receipts/l27-runtime-mutations.json",
+          "sha256": "365986e8e8a43dc000592d64ed1c873818a1f0be538bc7afa68f5770de38aab8"
+        },
+        {
+          "path": "receipts/l27-postcommit-dismiss-observations.json",
+          "sha256": "a335042fcc48a8a81f694fe167e6fd1d5a7103744ba56548dcb3f41bad465e76"
+        }
+      ]
+    },
+    {
+      "id": "L28",
+      "after": "CLOSED",
+      "currentProof": "Live dismiss before COMMIT leaves no terminal storage/thread line and no ActionExecution.",
+      "freshEvidence": [
+        {
+          "path": "receipts/widgets-live-full.json",
+          "sha256": "2a3efede8a6eecf08b7a6a4da564134a8d293bbe8403188e1994d648a1bffb03"
+        }
+      ]
+    }
+  ],
+  "freshSyntheticIntegrationProbes": "6/6 PASS",
+  "completeApplicableNativeCorpus": "PASS",
+  "overall": "PASS: 26 closed with fresh proofs; L23 and L26 explicitly owner-accepted for this exact candidate with retained boundaries",
+  "productionProofClaimed": false,
+  "ownerAcceptanceInferred": false,
+  "fullContractCertified": false
+}

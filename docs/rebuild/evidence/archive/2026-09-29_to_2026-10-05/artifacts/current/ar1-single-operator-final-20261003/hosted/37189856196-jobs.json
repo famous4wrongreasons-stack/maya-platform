@@ -1,0 +1,335 @@
+[
+  {
+    "total_count": 2,
+    "jobs": [
+      {
+        "id": 111399594336,
+        "run_id": 37189856196,
+        "workflow_name": "MAYA Chat Shell",
+        "head_branch": "codex/maya-controlled-integration-20260930",
+        "run_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/runs/37189856196",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOTH5eO88AAAAZ7-7pYA",
+        "head_sha": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/jobs/111399594336",
+        "html_url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37189856196/job/111399594336",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-04T08:43:44Z",
+        "started_at": "2026-10-04T08:43:46Z",
+        "completed_at": "2026-10-04T08:45:53Z",
+        "name": "Chat shell build, gates and tests (node 22)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-04T08:43:46Z",
+            "completed_at": "2026-10-04T08:43:47Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-04T08:43:47Z",
+            "completed_at": "2026-10-04T08:43:53Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-04T08:43:53Z",
+            "completed_at": "2026-10-04T08:43:54Z"
+          },
+          {
+            "name": "Node is at least 22.18 (tests import .ts through type stripping)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-04T08:43:54Z",
+            "completed_at": "2026-10-04T08:43:54Z"
+          },
+          {
+            "name": "Install the backend toolchain (npm ci, install scripts off)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-04T08:43:54Z",
+            "completed_at": "2026-10-04T08:44:02Z"
+          },
+          {
+            "name": "Reproducible - a fresh build equals the committed manifest (and build-baseline/ is gone)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-04T08:44:02Z",
+            "completed_at": "2026-10-04T08:44:09Z"
+          },
+          {
+            "name": "Build - dist/web for the tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-04T08:44:09Z",
+            "completed_at": "2026-10-04T08:44:15Z"
+          },
+          {
+            "name": "Self-test - every refuse fixture refused, every admit fixture admitted",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-04T08:44:15Z",
+            "completed_at": "2026-10-04T08:44:21Z"
+          },
+          {
+            "name": "Brand icons - the committed bytes are a fresh generation (brand/ is not typechecked; it is not TypeScript and not in the emitted graph)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-04T08:44:21Z",
+            "completed_at": "2026-10-04T08:44:26Z"
+          },
+          {
+            "name": "Typecheck",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-04T08:44:26Z",
+            "completed_at": "2026-10-04T08:44:31Z"
+          },
+          {
+            "name": "Node test suite",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-10-04T08:44:31Z",
+            "completed_at": "2026-10-04T08:45:21Z"
+          },
+          {
+            "name": "Skip audit - every skip says it is not a PASS",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-10-04T08:45:21Z",
+            "completed_at": "2026-10-04T08:45:21Z"
+          },
+          {
+            "name": "K5 exit gate (src self-mount 0, entry exactly 1, renderer and DOM mutations refused)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-10-04T08:45:21Z",
+            "completed_at": "2026-10-04T08:45:50Z"
+          },
+          {
+            "name": "K15 census over src + entry (successor authority values 0, client storage never)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-10-04T08:45:50Z",
+            "completed_at": "2026-10-04T08:45:51Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27,
+            "started_at": "2026-10-04T08:45:51Z",
+            "completed_at": "2026-10-04T08:45:51Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 28,
+            "started_at": "2026-10-04T08:45:51Z",
+            "completed_at": "2026-10-04T08:45:51Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 29,
+            "started_at": "2026-10-04T08:45:51Z",
+            "completed_at": "2026-10-04T08:45:51Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/check-runs/111399594336",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000005502,
+        "runner_name": "GitHub Actions 1000005502",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 111399594549,
+        "run_id": 37189856196,
+        "workflow_name": "MAYA Chat Shell",
+        "head_branch": "codex/maya-controlled-integration-20260930",
+        "run_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/runs/37189856196",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOTH5eO88AAAAZ7-7qNQ",
+        "head_sha": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/jobs/111399594549",
+        "html_url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37189856196/job/111399594549",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-04T08:43:44Z",
+        "started_at": "2026-10-04T08:43:46Z",
+        "completed_at": "2026-10-04T08:46:50Z",
+        "name": "Chat shell build, gates and tests (node 24)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-04T08:43:47Z",
+            "completed_at": "2026-10-04T08:43:47Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-04T08:43:47Z",
+            "completed_at": "2026-10-04T08:43:53Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-04T08:43:53Z",
+            "completed_at": "2026-10-04T08:43:54Z"
+          },
+          {
+            "name": "Node is at least 22.18 (tests import .ts through type stripping)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-04T08:43:54Z",
+            "completed_at": "2026-10-04T08:43:54Z"
+          },
+          {
+            "name": "Install the backend toolchain (npm ci, install scripts off)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-04T08:43:54Z",
+            "completed_at": "2026-10-04T08:44:10Z"
+          },
+          {
+            "name": "Reproducible - a fresh build equals the committed manifest (and build-baseline/ is gone)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-04T08:44:10Z",
+            "completed_at": "2026-10-04T08:44:19Z"
+          },
+          {
+            "name": "Build - dist/web for the tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-04T08:44:19Z",
+            "completed_at": "2026-10-04T08:44:27Z"
+          },
+          {
+            "name": "Self-test - every refuse fixture refused, every admit fixture admitted",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-04T08:44:27Z",
+            "completed_at": "2026-10-04T08:44:37Z"
+          },
+          {
+            "name": "Brand icons - the committed bytes are a fresh generation (brand/ is not typechecked; it is not TypeScript and not in the emitted graph)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-04T08:44:37Z",
+            "completed_at": "2026-10-04T08:44:45Z"
+          },
+          {
+            "name": "Typecheck",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-04T08:44:45Z",
+            "completed_at": "2026-10-04T08:44:53Z"
+          },
+          {
+            "name": "Node test suite",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-10-04T08:44:53Z",
+            "completed_at": "2026-10-04T08:46:06Z"
+          },
+          {
+            "name": "Skip audit - every skip says it is not a PASS",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-10-04T08:46:06Z",
+            "completed_at": "2026-10-04T08:46:06Z"
+          },
+          {
+            "name": "K5 exit gate (src self-mount 0, entry exactly 1, renderer and DOM mutations refused)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-10-04T08:46:06Z",
+            "completed_at": "2026-10-04T08:46:47Z"
+          },
+          {
+            "name": "K15 census over src + entry (successor authority values 0, client storage never)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-10-04T08:46:47Z",
+            "completed_at": "2026-10-04T08:46:48Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27,
+            "started_at": "2026-10-04T08:46:48Z",
+            "completed_at": "2026-10-04T08:46:49Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 28,
+            "started_at": "2026-10-04T08:46:49Z",
+            "completed_at": "2026-10-04T08:46:49Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 29,
+            "started_at": "2026-10-04T08:46:49Z",
+            "completed_at": "2026-10-04T08:46:49Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/check-runs/111399594549",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000005503,
+        "runner_name": "GitHub Actions 1000005503",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  }
+]

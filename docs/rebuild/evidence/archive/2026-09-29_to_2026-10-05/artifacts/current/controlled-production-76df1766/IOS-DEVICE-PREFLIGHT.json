@@ -1,0 +1,13 @@
+{
+  "readOnly": true,
+  "device": [
+    {
+      "identifier": "FF6F8003-99D2-5AED-A4CA-05BAE3877929",
+      "name": "iPhone Mo",
+      "model": "iPhone 17 Pro Max",
+      "pairingState": "paired",
+      "tunnelState": "disconnected"
+    }
+  ],
+  "installed": false
+}

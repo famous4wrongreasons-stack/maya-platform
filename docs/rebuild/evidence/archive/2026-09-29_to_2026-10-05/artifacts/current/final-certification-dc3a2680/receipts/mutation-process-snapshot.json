@@ -1,0 +1,251 @@
+{
+  "candidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "utc": "2026-09-30T16:40:11.479789+00:00",
+  "scope": "Read-only synthetic corpus worker processes, no environment or request payload collected",
+  "processes": [
+    {
+      "pid": 11119,
+      "ppid": 81960,
+      "cpu": 0.0,
+      "rssKB": 80320,
+      "elapsed": "06:15",
+      "executable": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-cc1da1ea3e --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-cc1da1ea3e.json"
+    },
+    {
+      "pid": 11137,
+      "ppid": 11119,
+      "cpu": 140.6,
+      "rssKB": 826816,
+      "elapsed": "06:15",
+      "executable": "node"
+    },
+    {
+      "pid": 11154,
+      "ppid": 81961,
+      "cpu": 0.0,
+      "rssKB": 81072,
+      "elapsed": "06:15",
+      "executable": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-3079cf3315 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-3079cf3315.json"
+    },
+    {
+      "pid": 11173,
+      "ppid": 11154,
+      "cpu": 153.6,
+      "rssKB": 1746496,
+      "elapsed": "06:15",
+      "executable": "node"
+    },
+    {
+      "pid": 13177,
+      "ppid": 94592,
+      "cpu": 0.0,
+      "rssKB": 80624,
+      "elapsed": "04:41",
+      "executable": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-3cdad4f1ad --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-3cdad4f1ad.json"
+    },
+    {
+      "pid": 13195,
+      "ppid": 13177,
+      "cpu": 0.0,
+      "rssKB": 516992,
+      "elapsed": "04:41",
+      "executable": "node"
+    },
+    {
+      "pid": 13315,
+      "ppid": 81958,
+      "cpu": 0.0,
+      "rssKB": 80048,
+      "elapsed": "04:37",
+      "executable": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-9aa96d6f74 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-9aa96d6f74.json"
+    },
+    {
+      "pid": 13331,
+      "ppid": 13315,
+      "cpu": 0.0,
+      "rssKB": 427312,
+      "elapsed": "04:36",
+      "executable": "node"
+    },
+    {
+      "pid": 13573,
+      "ppid": 81939,
+      "cpu": 0.0,
+      "rssKB": 80576,
+      "elapsed": "04:28",
+      "executable": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-d1afdc8909 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-d1afdc8909.json"
+    },
+    {
+      "pid": 13590,
+      "ppid": 13573,
+      "cpu": 1.6,
+      "rssKB": 468464,
+      "elapsed": "04:28",
+      "executable": "node"
+    },
+    {
+      "pid": 13769,
+      "ppid": 81959,
+      "cpu": 0.0,
+      "rssKB": 80368,
+      "elapsed": "04:19",
+      "executable": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-72f2ac9a6d --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-72f2ac9a6d.json"
+    },
+    {
+      "pid": 13785,
+      "ppid": 13769,
+      "cpu": 0.0,
+      "rssKB": 448240,
+      "elapsed": "04:19",
+      "executable": "node"
+    },
+    {
+      "pid": 13803,
+      "ppid": 81957,
+      "cpu": 0.0,
+      "rssKB": 80464,
+      "elapsed": "04:19",
+      "executable": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-a9b70dc96b --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-a9b70dc96b.json"
+    },
+    {
+      "pid": 13819,
+      "ppid": 13803,
+      "cpu": 0.0,
+      "rssKB": 2317824,
+      "elapsed": "04:18",
+      "executable": "node"
+    },
+    {
+      "pid": 14517,
+      "ppid": 81936,
+      "cpu": 0.0,
+      "rssKB": 80640,
+      "elapsed": "02:50",
+      "executable": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-ab4b8c0166 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-ab4b8c0166.json"
+    },
+    {
+      "pid": 14535,
+      "ppid": 14517,
+      "cpu": 0.0,
+      "rssKB": 262064,
+      "elapsed": "02:50",
+      "executable": "node"
+    },
+    {
+      "pid": 16279,
+      "ppid": 14535,
+      "cpu": 100.0,
+      "rssKB": 344480,
+      "elapsed": "00:27",
+      "executable": "/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 16557,
+      "ppid": 13195,
+      "cpu": 87.9,
+      "rssKB": 328640,
+      "elapsed": "00:15",
+      "executable": "/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 16584,
+      "ppid": 13785,
+      "cpu": 100.0,
+      "rssKB": 252720,
+      "elapsed": "00:13",
+      "executable": "/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 16597,
+      "ppid": 13819,
+      "cpu": 100.0,
+      "rssKB": 239648,
+      "elapsed": "00:13",
+      "executable": "/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 16656,
+      "ppid": 13331,
+      "cpu": 99.6,
+      "rssKB": 292624,
+      "elapsed": "00:10",
+      "executable": "/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 16765,
+      "ppid": 13590,
+      "cpu": 97.8,
+      "rssKB": 144160,
+      "elapsed": "00:01",
+      "executable": "/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python"
+    },
+    {
+      "pid": 81936,
+      "ppid": 81650,
+      "cpu": 0.0,
+      "rssKB": 93920,
+      "elapsed": "32:53",
+      "executable": "node"
+    },
+    {
+      "pid": 81939,
+      "ppid": 81650,
+      "cpu": 0.0,
+      "rssKB": 93952,
+      "elapsed": "32:53",
+      "executable": "node"
+    },
+    {
+      "pid": 81957,
+      "ppid": 81650,
+      "cpu": 0.0,
+      "rssKB": 93456,
+      "elapsed": "32:52",
+      "executable": "node"
+    },
+    {
+      "pid": 81958,
+      "ppid": 81650,
+      "cpu": 0.0,
+      "rssKB": 96432,
+      "elapsed": "32:52",
+      "executable": "node"
+    },
+    {
+      "pid": 81959,
+      "ppid": 81650,
+      "cpu": 0.0,
+      "rssKB": 93504,
+      "elapsed": "32:52",
+      "executable": "node"
+    },
+    {
+      "pid": 81960,
+      "ppid": 81650,
+      "cpu": 0.0,
+      "rssKB": 91904,
+      "elapsed": "32:52",
+      "executable": "node"
+    },
+    {
+      "pid": 81961,
+      "ppid": 81650,
+      "cpu": 0.0,
+      "rssKB": 94880,
+      "elapsed": "32:52",
+      "executable": "node"
+    },
+    {
+      "pid": 94592,
+      "ppid": 81650,
+      "cpu": 0.0,
+      "rssKB": 104016,
+      "elapsed": "22:00",
+      "executable": "node"
+    }
+  ],
+  "cpuSum": 881.1,
+  "rssSumKB": 10022656,
+  "tcpSockets": "",
+  "lsofExit": 1
+}

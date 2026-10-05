@@ -1,0 +1,23 @@
+{
+  "checkpoint": "d9799b2a8b1505870b6ba63c54c6050b25ea82f1",
+  "origin": "d9799b2a8b1505870b6ba63c54c6050b25ea82f1",
+  "headEqualsOrigin": true,
+  "sourceWorktreeClean": true,
+  "productionRuntime": "20260904-c06-p5-wave6-cutover-3b545671",
+  "schemaSource": "77c611c79248fce887c6aa22fb817958ef672c8d",
+  "pendingMigrations": 0,
+  "drift": "NONE",
+  "runtimeRemediationDeployed": false,
+  "package5Complete": false,
+  "wavesComplete": "6/6",
+  "stop": "new production AI onboarding A26/A28 bypass",
+  "hygiene": {
+    "preExistingLocalDatabases": 17,
+    "preExistingDatabasesTouched": 0,
+    "unrelatedDirtyFilesUnchanged": 18,
+    "ownedTempProcesses": 0,
+    "ownedWatchers": 0,
+    "ownedPlaywrightChromeProcesses": 0,
+    "ownedTempDatabases": 0
+  }
+}

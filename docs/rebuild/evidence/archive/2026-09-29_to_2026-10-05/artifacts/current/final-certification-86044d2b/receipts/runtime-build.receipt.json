@@ -1,0 +1,12 @@
+{
+  "candidate": "86044d2b5ce4800c277314ff39e849ece3e63acb",
+  "name": "runtime-build",
+  "command": [
+    "npm",
+    "run",
+    "build"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+  "exit": 0,
+  "seconds": 5.2
+}

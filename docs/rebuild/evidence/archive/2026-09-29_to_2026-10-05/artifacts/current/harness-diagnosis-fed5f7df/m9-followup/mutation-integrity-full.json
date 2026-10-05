@@ -1,0 +1,11 @@
+{
+  "base": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "name": "mutation-integrity-full",
+  "command": [
+    "node",
+    "--test",
+    "scripts/widgets-mutation-ci.test.mjs"
+  ],
+  "exit": 0,
+  "seconds": 2.126
+}

@@ -1,0 +1,12 @@
+{
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "recordedAt": "2026-10-02T19:40:52.454265+00:00",
+  "oldAttempt": "receipts/attempts/native-1-unadmitted-r06",
+  "oldAttemptAdmissible": false,
+  "oldCompletedPartsAdmitted": 0,
+  "cause": "R06 unmutated Python child null status; signal/error unavailable in original assertion. Not reproduced in 3 isolated, 16 concurrent direct, 8 concurrent Jest controls. Exact original cause remains undetermined.",
+  "change": "Fresh complete canonical corpus in new copies and databases; 6 rather than 8 local executors; passive child status/error/signal/timing capture; original test timeouts and source unchanged.",
+  "claim": "Controlled clean rerun, not a proven product or harness repair. Any new failure remains blocking.",
+  "productCodeChanged": false,
+  "timeoutsChanged": false
+}

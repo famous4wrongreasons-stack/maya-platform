@@ -1,0 +1,16 @@
+{
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "scope": "Progress-monitor acknowledgement only. Never admission; all overlapping whole parts require unrestricted reexecution.",
+  "report": "8-live-1790878197603.json",
+  "reportSha256": "33733820883197624fef30d7ad26b25748dabe26a345b7ec09a90a5e920fec52",
+  "alerts": [
+    {
+      "report": "8-live-1790878197603.json",
+      "title": "AR1-EXPIRY expires without renewal and denies the old authorization"
+    },
+    {
+      "report": "8-live-1790878197603.json",
+      "title": "SV2-01 happy successor verification creates usable explicit personal context and actual actor audit"
+    }
+  ]
+}

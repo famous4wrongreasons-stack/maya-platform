@@ -1,0 +1,15 @@
+{
+  "candidate": "86044d2b5ce4800c277314ff39e849ece3e63acb",
+  "name": "fbe2e-l27-postcommit-dismiss",
+  "command": [
+    "npm",
+    "run",
+    "test:widgets:http",
+    "--",
+    "--cases-dir",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-86044d2b/postcommit-bin-cases"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+  "exit": 0,
+  "seconds": 7.69
+}

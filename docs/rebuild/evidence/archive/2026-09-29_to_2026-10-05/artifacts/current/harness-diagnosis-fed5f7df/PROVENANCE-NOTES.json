@@ -1,0 +1,25 @@
+{
+  "diagnosticOnly": true,
+  "corrections": [
+    {
+      "run": "regression-before",
+      "admitted": false,
+      "reason": "Initial diagnostic selector referenced f88-shape rather than new listener spec; no HAR-LOOPBACK test ran. Replaced by separately retained regression-before-v2 with one actual failing test."
+    },
+    {
+      "runs": [
+        "regression-before-v2",
+        "regression-after",
+        "fixed-sv2-http",
+        "fixed-f88-1",
+        "fixed-f88-2"
+      ],
+      "reason": "Receipt candidate names base HEAD before atomic commit, and generic sourceChanged:false refers to product code only; harness source was added/edited. Before-v2 used old bootstrap + new regression. After/fixed used new bootstrap + new regression. Exact final committed source is dac4072d."
+    },
+    {
+      "run": "native-isolated-1",
+      "reason": "Early observer recorded its path hash at completion, after changing only the diagnostic stop predicate from live Jest to any Jest. Original AR parent loaded original observer; both predicates are equivalent for AR live baseline. Later runs use immutable per-run observer copies.",
+      "originalObserverSha256": "db381cd1c8b110099845659ea1fe665a24130b6670b4d8e82f2ebe56be71bcbe"
+    }
+  ]
+}

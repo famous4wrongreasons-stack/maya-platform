@@ -1,0 +1,518 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "source": "receipts/widgets-live-full.json",
+  "fullLivePass": 406,
+  "proofs": [
+    {
+      "title": "PROFILE-INGRESS refuses an old HANDOFF at HTTP/typed/internal ingress and direct dispatch, with zero signer, turn, consumption or owner effect",
+      "status": "passed",
+      "durationMs": 540
+    },
+    {
+      "title": "PROFILE-EGRESS refuses new/mixed HANDOFF mint and suppresses every old mixed control from resolve without rewriting history",
+      "status": "passed",
+      "durationMs": 410
+    },
+    {
+      "title": "PROFILE-GRANT passes allowed navigation through scope admission, rejects old grants, and rolls back a failed binding",
+      "status": "passed",
+      "durationMs": 440
+    },
+    {
+      "title": "PROFILE-LOCK serializes concurrent revoke with an in-flight profile admission under the existing AR-1 lock",
+      "status": "passed",
+      "durationMs": 343
+    },
+    {
+      "title": "PROFILE-BOOKING admits the actual HTTP catalog \u2192 selectors \u2192 DRAFT \u2192 COMMIT source under a signed restricted grant",
+      "status": "passed",
+      "durationMs": 990
+    },
+    {
+      "title": "PROFILE-SOURCE NS admits only the exact new source under a signed restricted grant",
+      "status": "passed",
+      "durationMs": 611
+    },
+    {
+      "title": "PROFILE-SOURCE BS admits only the exact new source under a signed restricted grant",
+      "status": "passed",
+      "durationMs": 1271
+    },
+    {
+      "title": "HAR-4 Platform HTTP smoke declares the same explicit AppModule prerequisites",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "HAR-4 carries exactly platform-ci.yml's platform-backend literals (DATABASE_URL excepted), plus the declared widgets-live extras",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "HAR-4 widgets-live.yml carries exactly the widgets-live literals (platform-ci \u222a extras), its CI DATABASE_URL and WIDGET_GATEWAY_PG",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "HAR-4 widgets-mutation.yml carries exactly the widgets-live literals (platform-ci \u222a extras), its CI DATABASE_URL and WIDGET_GATEWAY_PG",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "HAR-3 [GW] the recorder records a FOR SHARE and an advisory lock as locks, not writes, and NW turns red on a durable write in the same request",
+      "status": "passed",
+      "durationMs": 81
+    },
+    {
+      "title": "HAR-9 [GW] the verifier rejects a manifest line whose record is missing from the server's mint provenance lines, or from the database before teardown (a Fixtures.widget record)",
+      "status": "passed",
+      "durationMs": 132
+    },
+    {
+      "title": "HAR-6 the evidence manifest is written only when WIDGETS_EVIDENCE=1, and a malformed line is refused either way",
+      "status": "passed",
+      "durationMs": 5
+    },
+    {
+      "title": "HAR-14 parses the server's WidgetMintProvenance line as the BIN runner reads the binary's stdout and as the HTTP sink receives it; other contexts and malformed lines are never captured",
+      "status": "passed",
+      "durationMs": 3
+    },
+    {
+      "title": "HAR-14 the HTTP sink refuses a provenance line logged from test code, the reviewer forgery included, and the writer refuses a line no capture point registered",
+      "status": "passed",
+      "durationMs": 4
+    },
+    {
+      "title": "HAR-10 the verifier rejects an E-TAMPER label on a column the SealVerifier reads, except for key G1-a",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "title": "HAR-13 admits a clean L pair: an HTTP half and a BIN half, each with its own production-minted record, trace and process",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "title": "HAR-13 V-L-PAIR turns red on an HTTP half with no BIN half",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-L-PAIR turns red on halves offered for different clauses",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-L-PAIR turns red on a BIN half that claims nothing",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-PROV-RECORD turns red on an L claim that names no record",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-PROV-MINT turns red on a record with no server mint line",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-PROV-MINT turns red on a record with two server mint lines",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-PROV-DB turns red on a record missing from the database before teardown",
+      "status": "passed",
+      "durationMs": 42
+    },
+    {
+      "title": "HAR-13 V-PROV-TRIGGER turns red on a mint line whose trigger is not a production trigger",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-PROV-TRIGGER turns red on a successor mint whose predecessor is not traced",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-PROV-TRACE turns red on a trace id that is not the mint line's request id",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-PROV-TRACE turns red on a claim with no trace id",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-PROV-PID turns red on a line written by another process than the capture",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "title": "HAR-13 V-PROV-FORGED turns red on a capture point that refused a provenance line",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-ENTRY-SOURCE turns red on an HTTP claim from a support file",
+      "status": "passed",
+      "durationMs": 42
+    },
+    {
+      "title": "HAR-13 V-ENTRY-SOURCE turns red on a BIN claim from a live spec",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-PROCESS turns red on one process writing both the HTTP and the BIN half",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "title": "HAR-13 V-LABEL-CLASS turns red on an E-INDEP label on an L claim",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-LABEL-CLASS turns red on an E-TAMPER label on an L claim",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-LABEL-CLASS turns red on an L claim whose only label is an L-T class",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-SCHEMA turns red on a claim with no evidence label",
+      "status": "passed",
+      "durationMs": 42
+    },
+    {
+      "title": "HAR-13 V-SYNTH-CLAIM turns red on a G-SYNTH label on an L claim",
+      "status": "passed",
+      "durationMs": 42
+    },
+    {
+      "title": "HAR-13 V-SYNTH-CLAIM turns red on a synthetic label in another case",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-GW turns red on a claim on a GW line",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "title": "HAR-13 V-INVENTORY turns red on a clause key that is not in the inventory",
+      "status": "passed",
+      "durationMs": 42
+    },
+    {
+      "title": "HAR-13 V-LT-G9-G10 turns red on an L-T claim on a Gate 9 key",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-U-PROOF turns red on a live-shaped U claim without the frozen proof duties",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-TAMPER-SHAPE turns red on an E-TAMPER naming two columns besides the floor",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on Fixtures.widget through a variable argument",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on Fixtures.synthetic",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on a widget model write",
+      "status": "passed",
+      "durationMs": 42
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on the emitter",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on raw SQL",
+      "status": "passed",
+      "durationMs": 42
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on its own database client",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on a logger with a provenance context assembled at run time",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on the evidence directory's files",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on code loaded dynamically",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-FIXTURE-WRITE turns red on a helper it imports that writes",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a module mock",
+      "status": "passed",
+      "durationMs": 42
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a providers-array binding",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a replaced property",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a spy replaced in a second statement",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a member assigned on a resolved provider",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a member assigned through a variable holding a resolved provider",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a guard override",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on a prototype member assigned",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on an override in a nested support directory",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-OVERRIDE turns red on an allowlisted target overridden from a file the allowlist does not name",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-13 V-MODEL-STUB turns red on a module mock of the model transport",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-MODEL-STUB turns red on the model transport replaced on its resolved provider",
+      "status": "passed",
+      "durationMs": 39
+    },
+    {
+      "title": "HAR-13 V-MODEL-STUB turns red on a spy on decide replaced in a second statement",
+      "status": "passed",
+      "durationMs": 38
+    },
+    {
+      "title": "HAR-13 V-MODEL-STUB turns red on a providers-array binding of the model transport in a support file",
+      "status": "passed",
+      "durationMs": 41
+    },
+    {
+      "title": "HAR-13 V-CONTROLLED turns red on controlledFixtureMode",
+      "status": "passed",
+      "durationMs": 40
+    },
+    {
+      "title": "HAR-12 [BUILD] no labelled evidence test in a live spec or cases file names the provenance context or calls Fixtures.widget, Fixtures.synthetic, the emitter or the record writer",
+      "status": "passed",
+      "durationMs": 106
+    },
+    {
+      "title": "HAR-12 [BUILD] the scan goes red on every forbidden construct in a labelled test, through a helper too, and stays quiet on unlabelled tests",
+      "status": "passed",
+      "durationMs": 1
+    },
+    {
+      "title": "HAR-5 gate-audit-check passes on the committed /2 audit, and its self-test turns every check red, the SHA compare included",
+      "status": "passed",
+      "durationMs": 171
+    },
+    {
+      "title": "HAR-11 probe [GW]: the target of the mutation runner self-test, red only when its neutraliser set and both mutant edits are applied (not a gate test)",
+      "status": "passed",
+      "durationMs": 0
+    },
+    {
+      "title": "HAR-1 [HTTP] AppModule boots with the widgets-live literals: the widget route is mapped behind the global guards, and the mint provenance sink is installed and empty",
+      "status": "passed",
+      "durationMs": 3
+    },
+    {
+      "title": "HAR-1b [HTTP] a harness login consumes exactly the loopback subject's password-login preflight bucket the hygiene mirror computes, and the reset removes it",
+      "status": "passed",
+      "durationMs": 183
+    },
+    {
+      "title": "HAR-8 [HTTP] the call-through wrappers return byte-identical results to the unwrapped call (the recorded store client and the submit scope spy)",
+      "status": "passed",
+      "durationMs": 141
+    },
+    {
+      "title": "AR-G6-REVOCATION [E-MINT] real post-Gate6 revoke refuses at canonical admission and increments metric",
+      "status": "passed",
+      "durationMs": 742
+    },
+    {
+      "title": "TURN-CANONICAL [HTTP] [E-MINT] ordinary typed, widget typed and native tap persist byte-identical USER content through the same writer",
+      "status": "passed",
+      "durationMs": 543
+    },
+    {
+      "title": "SB1-HTTP [HTTP] explicit owner personal context reaches canonical booking with durable actor attribution",
+      "status": "passed",
+      "durationMs": 424
+    },
+    {
+      "title": "SV2-01 happy successor verification creates usable explicit personal context and actual actor audit",
+      "status": "passed",
+      "durationMs": 198
+    },
+    {
+      "title": "SV2-02 wrong OTP has no link or consumption effect",
+      "status": "passed",
+      "durationMs": 162
+    },
+    {
+      "title": "SV2-03 replay fails closed",
+      "status": "passed",
+      "durationMs": 148
+    },
+    {
+      "title": "SV2-04 expired OTP fails under database time",
+      "status": "passed",
+      "durationMs": 122
+    },
+    {
+      "title": "SV2-05 Client substitution cannot transfer a challenge",
+      "status": "passed",
+      "durationMs": 201
+    },
+    {
+      "title": "SV2-06 tenant substitution fails closed",
+      "status": "passed",
+      "durationMs": 176
+    },
+    {
+      "title": "SV2-07 predecessor changed after resolver read is rejected inside identity lock",
+      "status": "passed",
+      "durationMs": 131
+    },
+    {
+      "title": "SV2-08 active predecessor never authorizes issuance or consumption",
+      "status": "passed",
+      "durationMs": 195
+    },
+    {
+      "title": "SV2-09 non-latest revoked predecessor cannot be consumed",
+      "status": "passed",
+      "durationMs": 127
+    },
+    {
+      "title": "SV2-10 revoked episode remains byte-for-byte immutable",
+      "status": "passed",
+      "durationMs": 133
+    },
+    {
+      "title": "SV2-11 successful consume creates exactly one successor and one outcome",
+      "status": "passed",
+      "durationMs": 144
+    },
+    {
+      "title": "SV2-12 concurrent consume serializes to one success and one refusal",
+      "status": "passed",
+      "durationMs": 141
+    },
+    {
+      "title": "SV2-JSON all four V2 fields are mandatory, exact and immutable",
+      "status": "passed",
+      "durationMs": 136
+    },
+    {
+      "title": "SV2-CHANNEL canonical channel changed after issuance invalidates exact Client proof",
+      "status": "passed",
+      "durationMs": 131
+    },
+    {
+      "title": "SV2-SESSION current revocation is checked on consume",
+      "status": "passed",
+      "durationMs": 104
+    },
+    {
+      "title": "SV2-LIMIT failed OTP attempts survive rollback and cannot be reset with correct code",
+      "status": "passed",
+      "durationMs": 200
+    },
+    {
+      "title": "SV2-DELIVERY failed SMS grants nothing and discloses no OTP",
+      "status": "passed",
+      "durationMs": 103
+    },
+    {
+      "title": "SV2-V1 historical V1 remains immutable and initial-only; V1 consumption still works for a fresh subject",
+      "status": "passed",
+      "durationMs": 121
+    },
+    {
+      "title": "SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+      "status": "passed",
+      "durationMs": 898
+    },
+    {
+      "title": "HAR-LOOPBACK owns one ready IPv4 listener across requests and closes it at teardown",
+      "status": "passed",
+      "durationMs": 629
+    },
+    {
+      "title": "F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+      "status": "passed",
+      "durationMs": 544
+    },
+    {
+      "title": "F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+      "status": "passed",
+      "durationMs": 51
+    }
+  ],
+  "nativeMutationAdmission": "PENDING"
+}

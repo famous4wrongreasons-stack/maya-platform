@@ -1,0 +1,17 @@
+{
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "name": "evidence-verifier",
+  "command": [
+    "node",
+    "scripts/widgets-evidence-verify.mjs",
+    "--dir",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/evidence",
+    "--audit",
+    "../docs/rebuild/widget-release-programme/approved-release/current-audit.json",
+    "--u-proofs",
+    "../docs/rebuild/widget-release-programme/approved-release/u-proofs.json"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+  "exit": 0,
+  "seconds": 0.04
+}

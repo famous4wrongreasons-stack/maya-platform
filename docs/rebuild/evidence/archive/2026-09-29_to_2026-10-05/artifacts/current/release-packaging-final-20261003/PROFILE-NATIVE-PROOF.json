@@ -1,0 +1,1235 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "status": "PASS",
+  "profile": "closed-input.no-handoff@1",
+  "batteries": [
+    {
+      "gate": "PI",
+      "declarations": 6,
+      "receipt": {
+        "path": "receipts/mutation-receipt/widgets-mutation-report-PI.json",
+        "sha256": "635cc1a9675721917654643533cc8a1bb8d94ead91e20b5ecad821f990179080"
+      },
+      "mutants": [
+        {
+          "battery": "gatePI.json",
+          "id": "PI-M01",
+          "files": [
+            "src/widgets/intent-gateway.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "live"
+          ],
+          "expect": "live-killed",
+          "status": "live-killed",
+          "killedBy": [
+            "PROFILE-INGRESS"
+          ],
+          "kills": [
+            {
+              "killer": "PROFILE-INGRESS",
+              "test": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-INGRESS refuses an old HANDOFF at HTTP/typed/internal ingress and direct dispatch, with zero signer, turn, consumption or owner effect",
+              "step": "live",
+              "entry": "HTTP",
+              "neutralisers": null,
+              "evidence": true,
+              "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": true,
+          "kills_by_entry": {
+            "HTTP": 1
+          },
+          "exits": {
+            "plain": {
+              "live": 1
+            }
+          }
+        },
+        {
+          "battery": "gatePI.json",
+          "id": "PI-M02",
+          "files": [
+            "src/widgets/routing/effect-router.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "live"
+          ],
+          "expect": "live-killed",
+          "status": "live-killed",
+          "killedBy": [
+            "PROFILE-INGRESS"
+          ],
+          "kills": [
+            {
+              "killer": "PROFILE-INGRESS",
+              "test": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-INGRESS refuses an old HANDOFF at HTTP/typed/internal ingress and direct dispatch, with zero signer, turn, consumption or owner effect",
+              "step": "live",
+              "entry": "HTTP",
+              "neutralisers": null,
+              "evidence": true,
+              "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": true,
+          "kills_by_entry": {
+            "HTTP": 1
+          },
+          "exits": {
+            "plain": {
+              "live": 1
+            }
+          }
+        },
+        {
+          "battery": "gatePI.json",
+          "id": "PI-M03",
+          "files": [
+            "src/widgets/emission/emitter.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "live"
+          ],
+          "expect": "live-killed",
+          "status": "live-killed",
+          "killedBy": [
+            "PROFILE-EGRESS"
+          ],
+          "kills": [
+            {
+              "killer": "PROFILE-EGRESS",
+              "test": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-EGRESS refuses new/mixed HANDOFF mint and suppresses every old mixed control from resolve without rewriting history",
+              "step": "live",
+              "entry": "HTTP",
+              "neutralisers": null,
+              "evidence": true,
+              "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": true,
+          "kills_by_entry": {
+            "HTTP": 1
+          },
+          "exits": {
+            "plain": {
+              "live": 1
+            }
+          }
+        },
+        {
+          "battery": "gatePI.json",
+          "id": "PI-M04",
+          "files": [
+            "src/widgets/resolve/thread-page.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "live"
+          ],
+          "expect": "live-killed",
+          "status": "live-killed",
+          "killedBy": [
+            "PROFILE-EGRESS"
+          ],
+          "kills": [
+            {
+              "killer": "PROFILE-EGRESS",
+              "test": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-EGRESS refuses new/mixed HANDOFF mint and suppresses every old mixed control from resolve without rewriting history",
+              "step": "live",
+              "entry": "HTTP",
+              "neutralisers": null,
+              "evidence": true,
+              "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": true,
+          "kills_by_entry": {
+            "HTTP": 1
+          },
+          "exits": {
+            "plain": {
+              "live": 1
+            }
+          }
+        },
+        {
+          "battery": "gatePI.json",
+          "id": "PI-M05",
+          "files": [
+            "src/widgets/resolve/thread-page.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "live"
+          ],
+          "expect": "live-killed",
+          "status": "live-killed",
+          "killedBy": [
+            "PROFILE-EGRESS"
+          ],
+          "kills": [
+            {
+              "killer": "PROFILE-EGRESS",
+              "test": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-EGRESS refuses new/mixed HANDOFF mint and suppresses every old mixed control from resolve without rewriting history",
+              "step": "live",
+              "entry": "HTTP",
+              "neutralisers": null,
+              "evidence": true,
+              "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": true,
+          "kills_by_entry": {
+            "HTTP": 1
+          },
+          "exits": {
+            "plain": {
+              "live": 1
+            }
+          }
+        },
+        {
+          "battery": "gatePI.json",
+          "id": "PI-M10",
+          "files": [
+            "src/entitlements/widget-release-access.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "live"
+          ],
+          "expect": "live-killed",
+          "status": "live-killed",
+          "killedBy": [
+            "PROFILE-LOCK"
+          ],
+          "kills": [
+            {
+              "killer": "PROFILE-LOCK",
+              "test": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-LOCK serializes concurrent revoke with an in-flight profile admission under the existing AR-1 lock",
+              "step": "live",
+              "entry": "HTTP",
+              "neutralisers": null,
+              "evidence": true,
+              "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": true,
+          "kills_by_entry": {
+            "HTTP": 1
+          },
+          "exits": {
+            "plain": {
+              "live": 1
+            }
+          }
+        }
+      ],
+      "controls": {
+        "PI:baseline|live": {
+          "set": null,
+          "steps": [
+            "live"
+          ],
+          "exits": {
+            "live": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      }
+    },
+    {
+      "gate": "PI-contract",
+      "declarations": 16,
+      "receipt": {
+        "path": "receipts/mutation-receipt/widgets-mutation-report-PI-contract.json",
+        "sha256": "d609941ffa6a6b1e7a088a40981e5712ca5a6eb8c7040e0d455c514ad6b9fa70"
+      },
+      "mutants": [
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M06",
+          "files": [
+            "src/widgets/composition/chat-read.trigger.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "PROFILE-CACHE"
+          ],
+          "kills": [
+            {
+              "killer": "PROFILE-CACHE",
+              "test": "P-MT2a ChatReadTriggerService PROFILE-CACHE refuses a cached read envelope after its release admission is withdrawn",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M07",
+          "files": [
+            "src/widgets/emission/successor-minter.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "PROFILE-PREDECESSOR"
+          ],
+          "kills": [
+            {
+              "killer": "PROFILE-PREDECESSOR",
+              "test": "PROFILE stored successor release admission [BUILD] PROFILE-PREDECESSOR refuses a withdrawn predecessor without following its stored successor",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M08",
+          "files": [
+            "src/widgets/emission/successor-minter.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "PROFILE-SELECTOR"
+          ],
+          "kills": [
+            {
+              "killer": "PROFILE-SELECTOR",
+              "test": "Booking successor principal boundary [BUILD] PROFILE-SELECTOR refuses a successor whose predecessor release admission was withdrawn",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M09",
+          "files": [
+            "src/widgets/emission/successor-minter.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "PROFILE-LINKED"
+          ],
+          "kills": [
+            {
+              "killer": "PROFILE-LINKED",
+              "test": "PROFILE stored successor release admission [BUILD] PROFILE-LINKED refuses the stored successor when its own grant is no longer current",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M11",
+          "files": [
+            "src/entitlements/widget-release-access.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "refuses"
+          ],
+          "kills": [
+            {
+              "killer": "refuses",
+              "test": "profile current admission and immutable emission binding refuses new-registry-row before writing a binding",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M12",
+          "files": [
+            "src/entitlements/widget-release-access.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "refuses old-profile tokens"
+          ],
+          "kills": [
+            {
+              "killer": "refuses old-profile tokens",
+              "test": "profile current admission and immutable emission binding refuses old-profile tokens after a new grant even at the same timestamp",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M13",
+          "files": [
+            "src/entitlements/widget-release-access.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "refuses changed durable binding:"
+          ],
+          "kills": [
+            {
+              "killer": "refuses changed durable binding:",
+              "test": "profile current admission and immutable emission binding refuses changed durable binding: certificateDigest",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M14",
+          "files": [
+            "src/entitlements/widget-release-access.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "refuses changed durable binding:"
+          ],
+          "kills": [
+            {
+              "killer": "refuses changed durable binding:",
+              "test": "profile current admission and immutable emission binding refuses changed durable binding: profileDigest",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M15",
+          "files": [
+            "src/entitlements/widget-release-access.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "refuses sealed fact substitution:"
+          ],
+          "kills": [
+            {
+              "killer": "refuses sealed fact substitution:",
+              "test": "profile current admission and immutable emission binding refuses sealed fact substitution: widgetId",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "refuses sealed fact substitution:",
+              "test": "profile current admission and immutable emission binding refuses sealed fact substitution: intentTokenHash",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "refuses sealed fact substitution:",
+              "test": "profile current admission and immutable emission binding refuses sealed fact substitution: bodyHash",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "refuses sealed fact substitution:",
+              "test": "profile current admission and immutable emission binding refuses sealed fact substitution: principalProofHash",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "refuses sealed fact substitution:",
+              "test": "profile current admission and immutable emission binding refuses sealed fact substitution: sourceCapabilityKey",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "refuses sealed fact substitution:",
+              "test": "profile current admission and immutable emission binding refuses sealed fact substitution: sourceCapabilitySpace",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "refuses sealed fact substitution:",
+              "test": "profile current admission and immutable emission binding refuses sealed fact substitution: selectionDomain",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 7
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M16",
+          "files": [
+            "src/entitlements/widget-release-access.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "refuses missing and ambiguous bindings"
+          ],
+          "kills": [
+            {
+              "killer": "refuses missing and ambiguous bindings",
+              "test": "profile current admission and immutable emission binding refuses missing and ambiguous bindings without reacquiring authority from matching timestamps",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M17",
+          "files": [
+            "src/entitlements/widget-release-access.service.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "PROFILE-TUPLE"
+          ],
+          "kills": [
+            {
+              "killer": "PROFILE-TUPLE",
+              "test": "profile current admission and immutable emission binding PROFILE-TUPLE refuses a known template with substituted widgetKind at mint",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "PROFILE-TUPLE",
+              "test": "profile current admission and immutable emission binding PROFILE-TUPLE refuses a known template with substituted capabilitySpace at mint",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "PROFILE-TUPLE",
+              "test": "profile current admission and immutable emission binding PROFILE-TUPLE refuses a known template with substituted targetJson at mint",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "PROFILE-TUPLE",
+              "test": "profile current admission and immutable emission binding PROFILE-TUPLE refuses a known template with substituted inputSchemaHash at mint",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 4
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M18",
+          "files": [
+            "src/entitlements/widget-release-profile.contract.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "does not exclude"
+          ],
+          "kills": [
+            {
+              "killer": "does not exclude",
+              "test": "fixed no-handoff certificate threshold does not exclude 9.6",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "does not exclude",
+              "test": "fixed no-handoff certificate threshold does not exclude G7-5",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "does not exclude",
+              "test": "fixed no-handoff certificate threshold does not exclude G7-BOOK1",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "does not exclude",
+              "test": "fixed no-handoff certificate threshold does not exclude G11-I9",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "does not exclude",
+              "test": "fixed no-handoff certificate threshold does not exclude G13-I3",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "does not exclude",
+              "test": "fixed no-handoff certificate threshold does not exclude G12-R1b",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "does not exclude",
+              "test": "fixed no-handoff certificate threshold does not exclude G12-I11",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            },
+            {
+              "killer": "does not exclude",
+              "test": "fixed no-handoff certificate threshold does not exclude G13-R2",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 8
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M19",
+          "files": [
+            "src/entitlements/widget-release-profile.contract.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "refuses caller exclusions"
+          ],
+          "kills": [
+            {
+              "killer": "refuses caller exclusions",
+              "test": "fixed no-handoff certificate threshold refuses caller exclusions, duplicate/missing rows and STOP relabelling",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M20",
+          "files": [
+            "src/entitlements/widget-release-profile.contract.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "PROFILE-AUDIT"
+          ],
+          "kills": [
+            {
+              "killer": "PROFILE-AUDIT",
+              "test": "fixed no-handoff certificate threshold PROFILE-AUDIT refuses a well-formed but substituted global audit digest",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M21",
+          "files": [
+            "src/entitlements/widget-release-profile.contract.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "refuses missing or forged"
+          ],
+          "kills": [
+            {
+              "killer": "refuses missing or forged",
+              "test": "fixed no-handoff certificate threshold refuses missing or forged profileDigest",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        },
+        {
+          "battery": "gatePI-contract.json",
+          "id": "PI-M22",
+          "files": [
+            "src/entitlements/widget-release-profile.contract.ts"
+          ],
+          "edits_applied": 1,
+          "neutralisers": [],
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "expect": "build-killed",
+          "status": "build-killed",
+          "killedBy": [
+            "refuses missing or forged"
+          ],
+          "kills": [
+            {
+              "killer": "refuses missing or forged",
+              "test": "fixed no-handoff certificate threshold refuses missing or forged registryDigest",
+              "step": "unit",
+              "entry": "BUILD",
+              "neutralisers": null,
+              "evidence": false,
+              "evidence_basis": null
+            }
+          ],
+          "vacuous": [],
+          "live_evidence": false,
+          "kills_by_entry": {
+            "BUILD": 1
+          },
+          "exits": {
+            "plain": {
+              "unit": 1,
+              "typecheck": 0,
+              "k3": 0
+            }
+          }
+        }
+      ],
+      "controls": {
+        "PI-contract:baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": []
+        }
+      }
+    }
+  ],
+  "live": {
+    "source": "profile-isolation.live-spec.ts",
+    "count": 7,
+    "receipt": {
+      "path": "receipts/widgets-live-full.json",
+      "sha256": "2a3efede8a6eecf08b7a6a4da564134a8d293bbe8403188e1994d648a1bffb03"
+    },
+    "assertions": [
+      {
+        "ancestorTitles": [
+          "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate]"
+        ],
+        "duration": 446,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-INGRESS refuses an old HANDOFF at HTTP/typed/internal ingress and direct dispatch, with zero signer, turn, consumption or owner effect",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 14,
+        "retryReasons": [],
+        "startAt": 1791012859881,
+        "status": "passed",
+        "title": "PROFILE-INGRESS refuses an old HANDOFF at HTTP/typed/internal ingress and direct dispatch, with zero signer, turn, consumption or owner effect"
+      },
+      {
+        "ancestorTitles": [
+          "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate]"
+        ],
+        "duration": 388,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-EGRESS refuses new/mixed HANDOFF mint and suppresses every old mixed control from resolve without rewriting history",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 8,
+        "retryReasons": [],
+        "startAt": 1791012860328,
+        "status": "passed",
+        "title": "PROFILE-EGRESS refuses new/mixed HANDOFF mint and suppresses every old mixed control from resolve without rewriting history"
+      },
+      {
+        "ancestorTitles": [
+          "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate]"
+        ],
+        "duration": 419,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-GRANT passes allowed navigation through scope admission, rejects old grants, and rolls back a failed binding",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 11,
+        "retryReasons": [],
+        "startAt": 1791012860716,
+        "status": "passed",
+        "title": "PROFILE-GRANT passes allowed navigation through scope admission, rejects old grants, and rolls back a failed binding"
+      },
+      {
+        "ancestorTitles": [
+          "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate]"
+        ],
+        "duration": 339,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-LOCK serializes concurrent revoke with an in-flight profile admission under the existing AR-1 lock",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 7,
+        "retryReasons": [],
+        "startAt": 1791012861135,
+        "status": "passed",
+        "title": "PROFILE-LOCK serializes concurrent revoke with an in-flight profile admission under the existing AR-1 lock"
+      },
+      {
+        "ancestorTitles": [
+          "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate]"
+        ],
+        "duration": 1067,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-BOOKING admits the actual HTTP catalog → selectors → DRAFT → COMMIT source under a signed restricted grant",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 3,
+        "retryReasons": [],
+        "startAt": 1791012861474,
+        "status": "passed",
+        "title": "PROFILE-BOOKING admits the actual HTTP catalog → selectors → DRAFT → COMMIT source under a signed restricted grant"
+      },
+      {
+        "ancestorTitles": [
+          "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate]"
+        ],
+        "duration": 590,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-SOURCE NS admits only the exact new source under a signed restricted grant",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 2,
+        "retryReasons": [],
+        "startAt": 1791012862541,
+        "status": "passed",
+        "title": "PROFILE-SOURCE NS admits only the exact new source under a signed restricted grant"
+      },
+      {
+        "ancestorTitles": [
+          "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate]"
+        ],
+        "duration": 1307,
+        "failing": false,
+        "failureDetails": [],
+        "failureMessages": [],
+        "fullName": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-SOURCE BS admits only the exact new source under a signed restricted grant",
+        "invocations": 1,
+        "location": null,
+        "numPassingAsserts": 2,
+        "retryReasons": [],
+        "startAt": 1791012863131,
+        "status": "passed",
+        "title": "PROFILE-SOURCE BS admits only the exact new source under a signed restricted grant"
+      }
+    ]
+  },
+  "globalStops": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "fullContractCertified": false
+}

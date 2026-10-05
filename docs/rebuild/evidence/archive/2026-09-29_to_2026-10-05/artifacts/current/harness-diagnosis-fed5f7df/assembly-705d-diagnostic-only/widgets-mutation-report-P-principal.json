@@ -1,0 +1,584 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gateP-principal.json": "b493ae4a0a7a485095fb4f44416d7093704f727e58cde48bb9e2383826be0dfc"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T20:01:53.039Z",
+  "batteries": [
+    "gateP-principal.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-87bd47f2ea",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-87bd47f2ea",
+  "neutraliser_controls": {
+    "P-principal:N2|live": {
+      "set": "N2",
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 1
+      },
+      "failed": [
+        "widgets-live harness HTTP level [HTTP] HAR-1 [HTTP] AppModule boots with the widgets-live literals: the widget route is mapped behind the global guards, and the mint provenance sink is installed and empty",
+        "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+        "E1 — production-triggered evidence records E1-T2B-CLEAN [HTTP] [E-MINT] mints through the journal owner and traverses the real gate pipeline",
+        "HTTP harness listener ownership HAR-LOOPBACK owns one ready IPv4 listener across requests and closes it at teardown"
+      ],
+      "problems": []
+    }
+  },
+  "baseline_controls": {
+    "P-principal:baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "P-principal:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M1",
+      "files": [
+        "src/widgets/authority/principal-view.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "PR-6"
+      ],
+      "kills": [
+        {
+          "killer": "PR-6",
+          "test": "P-PRINCIPAL — the live principal in T [GW] PR-6 [GW]: the B-02 presentation table, over real memberships resolved by C9Authority",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M2",
+      "files": [
+        "src/widgets/authority/principal-view.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "PR-6U-2"
+      ],
+      "kills": [
+        {
+          "killer": "PR-6U-2",
+          "test": "PR-6 [U] — B-02 presentation_mode (C11:7189-7191) PR-6U-2 [U]: client and customer are client; tenant_owner and business_owner are owner; every other role is staff",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M3",
+      "files": [
+        "src/widgets/authority/principal-view.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "PR-7U-1"
+      ],
+      "kills": [
+        {
+          "killer": "PR-7U-1",
+          "test": "PR-7 [U] — K1 verification levels (C11:2536-2539) PR-7U-1 [U]: USER is SESSION_VERIFIED and CLIENT_CHANNEL is BOUND_CLIENT",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M4",
+      "files": [
+        "src/widgets/owner-ports/principal.adapter.ts"
+      ],
+      "edits_applied": 2,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "PR-7"
+      ],
+      "kills": [
+        {
+          "killer": "PR-7",
+          "test": "P-PRINCIPAL — the live principal in T [GW] PR-7 [GW]: K1 levels — a first-party session is SESSION_VERIFIED, and STEP_UP_VERIFIED stays unreachable (C11:2536-2539, K6)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M5",
+      "files": [
+        "src/widgets/owner-ports/principal.adapter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "PR-3",
+        "PR-6"
+      ],
+      "kills": [
+        {
+          "killer": "PR-3",
+          "test": "P-PRINCIPAL — the live principal in T [GW] PR-3 [GW]: a role change invalidates outstanding envelopes and is visible as the live role (B-02, C11:7189-7191)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "PR-6",
+          "test": "P-PRINCIPAL — the live principal in T [GW] PR-6 [GW]: the B-02 presentation table, over real memberships resolved by C9Authority",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 2
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M6",
+      "files": [
+        "src/tenancy/memberships.service.ts"
+      ],
+      "edits_applied": 2,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "PR-8"
+      ],
+      "kills": [
+        {
+          "killer": "PR-8",
+          "test": "P-PRINCIPAL — the live principal in T [GW] PR-8 [GW]: the tenancy Membership read receives the SAME transaction client as C9Authority.current (D-1, B-02)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M7",
+      "files": [
+        "src/widgets/owner-ports/principal.adapter.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "PR-2"
+      ],
+      "kills": [
+        {
+          "killer": "PR-2",
+          "test": "P-PRINCIPAL — the live principal in T [GW] PR-2 [GW]: a membership re-created for the same user invalidates the old principal, and the new one hashes differently (K4, C11:2546)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M8",
+      "files": [
+        "src/widgets/authority/principal-view.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "PR-VIEW-1"
+      ],
+      "kills": [
+        {
+          "killer": "PR-VIEW-1",
+          "test": "principalView [U] — the assembled view PR-VIEW-1 [U]: carries the resolver’s answer, the read role, the mapped mode and level, and the owner’s hash",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M9",
+      "files": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [
+        "N2"
+      ],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "G2-IN"
+      ],
+      "kills": [
+        {
+          "killer": "G2-IN",
+          "test": "P-PRINCIPAL — the wired pipeline [merge-step exits, D-18] G2-IN [GW]: with no transport session on the request, slot 2 refuses `unauthenticated` IN-ARRAY and writes nothing (NW)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": "N2",
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "N2": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M10",
+      "files": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "PR-4",
+        "PR-5"
+      ],
+      "kills": [
+        {
+          "killer": "PR-4",
+          "test": "P-PRINCIPAL — the wired pipeline [merge-step exits, D-18] PR-4 [GW]: a staff-class role with no Staff row is admitted by the transport chain and refused at slot 3, never at slot 2 (D-16)",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "PR-5",
+          "test": "P-PRINCIPAL — the wired pipeline [merge-step exits, D-18] PR-5 [GW]: a tenant that goes inactive leaves no live principal, and the refusal is slot 3’s",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 2
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M11",
+      "files": [
+        "src/widgets/intent-gateway.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "BOOK-1"
+      ],
+      "kills": [
+        {
+          "killer": "BOOK-1",
+          "test": "E2 — BOOK-1…BOOK-6 and live Gate 14 booking COMMIT [HTTP] [PostgreSQL] BOOK-1…BOOK-6: create, reschedule and cancel each propose then COMMIT through Gate 14",
+          "step": "live",
+          "entry": "HTTP",
+          "neutralisers": null,
+          "evidence": true,
+          "evidence_basis": "http-entry; §0.5 L also requires a trigger-minted record (D-17 provenance) and a BIN line for the same test id — NEITHER is verified by this runner"
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": true,
+      "kills_by_entry": {
+        "HTTP": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateP-principal.json",
+      "id": "P-M12",
+      "files": [
+        "test/widgets-live/support/bootstrap.ts"
+      ],
+      "edits_applied": 2,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "PR-12"
+      ],
+      "kills": [
+        {
+          "killer": "PR-12",
+          "test": "P-PRINCIPAL — the wired pipeline [merge-step exits, D-18] PR-12 [GW]: every refusal performs one principal resolution and the two required record reads",
+          "step": "live",
+          "entry": "GW",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "GW": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [
+    "gateP-principal.json#P-M11"
+  ],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T20:53:53.483Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 1,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

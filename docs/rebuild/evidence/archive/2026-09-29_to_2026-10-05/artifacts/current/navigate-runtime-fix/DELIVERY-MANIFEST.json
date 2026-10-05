@@ -1,0 +1,161 @@
+{
+  "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+  "files": [
+    {
+      "path": "CHECKPOINT.json",
+      "sha256": "da8678515c1d644f8c1182ed0c00bfb4a8d5b600942249543d2749d71b45fcd4"
+    },
+    {
+      "path": "CHECKPOINT.md",
+      "sha256": "a3bd523029836a5e86e0e4e3de9dcfb82bd3e114423056f05c6a443b618e871c"
+    },
+    {
+      "path": "I-SRC-1-NAVIGATE.patch",
+      "sha256": "62c410cc2185cb12a6cee48408d0927a26e3c3d9cde17a27f8efb23981cba65c"
+    },
+    {
+      "path": "PROOFS.md",
+      "sha256": "d8c42594729e61a2d7ff00427b7a1464ff09f357d38bbaa56f20eef6a9ec89d9"
+    },
+    {
+      "path": "receipts-6a40575c/carrier-build.log",
+      "sha256": "63b2301ccc1445554942696ff881e120aef5fee47126ac85991b0e485fab2588"
+    },
+    {
+      "path": "receipts-6a40575c/carrier-build.receipt.json",
+      "sha256": "afb8fb44496e1a8517a158cb2e3effabaceb1c644bc4c24654e2024c870822fe"
+    },
+    {
+      "path": "receipts-6a40575c/carrier-test.log",
+      "sha256": "b3514a4826f3ce0740c29a8eed470005144fc331dd5a6f8c9348a0c253b306f9"
+    },
+    {
+      "path": "receipts-6a40575c/carrier-test.receipt.json",
+      "sha256": "23101d264aafd062c20cb4a94889b6117325ee8a1c4413ac8a281f1aae75e0e8"
+    },
+    {
+      "path": "receipts-6a40575c/carrier-typecheck.log",
+      "sha256": "098d7979705a493c7532687ff6eb4b1de29f773636338ca38ec2ec93d7cb93c4"
+    },
+    {
+      "path": "receipts-6a40575c/carrier-typecheck.receipt.json",
+      "sha256": "5bc65e782ed33eb3ee853b6691e0c6c207111a624c6ab75b6bce295506d0a076"
+    },
+    {
+      "path": "receipts-6a40575c/runtime-build.log",
+      "sha256": "d7536f5e4c9fc7d5c42df8edd9457ebe3167b1b64589fb6e11a80e406fda5a72"
+    },
+    {
+      "path": "receipts-6a40575c/runtime-build.receipt.json",
+      "sha256": "b50f85a48b80cda3a2eeb58feb944522a2556c3f0dacf547c35e06f219335919"
+    },
+    {
+      "path": "receipts-6a40575c/runtime-check.log",
+      "sha256": "7a6f33420c5a0468a5eea66d5423ffe4a9539206e16e2ccff0e7b3fe42876b9f"
+    },
+    {
+      "path": "receipts-6a40575c/runtime-check.receipt.json",
+      "sha256": "b7718cf4a0d1c026fa7cf805aa2382e2f8695d179d7755dcfe082baba45937c8"
+    },
+    {
+      "path": "receipts-6a40575c/runtime-test.log",
+      "sha256": "fe8019d7e6ca0a0ed756d615a7e7d2fecd85b1c7928bb071aa368b8d16c94b05"
+    },
+    {
+      "path": "receipts-6a40575c/runtime-test.receipt.json",
+      "sha256": "761166e18b87d367637e8408d49619af67626215224a6a122d7036549bf9c529"
+    },
+    {
+      "path": "receipts-6a40575c/runtime-typecheck.log",
+      "sha256": "3fe0757a1c0cac7fc3e929c5d0eda1d96e943476e929800630015b969dd9d6af"
+    },
+    {
+      "path": "receipts-6a40575c/runtime-typecheck.receipt.json",
+      "sha256": "2a2f4a957b7e5e0a010253447b823ee813bfe3b61fd73ebb08a64b5be93ee4ba"
+    },
+    {
+      "path": "receipts-6a40575c/source-carrier-observations.json",
+      "sha256": "dccbca670ce14bc9e6df4cabac30de6c161121cabd5ff100612091c91148fff9"
+    },
+    {
+      "path": "receipts-6a40575c/source-carrier.log",
+      "sha256": "fa81f0e38fe6b7a6374d0d8266cff9565b903bf655267b218715987a80d369c0"
+    },
+    {
+      "path": "receipts-6a40575c/source-carrier.receipt.json",
+      "sha256": "9514d9051155778b3a024b6b4babd08f2369eadddbc2636530187de9ee26ee57"
+    },
+    {
+      "path": "receipts-precommit/runtime-build.log",
+      "sha256": "d013f6bee3226caa8f0a1f471f4c89b936e5a1b95c64450b48ee3d5e9ae52ad8"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/carrier-build.log",
+      "sha256": "63b2301ccc1445554942696ff881e120aef5fee47126ac85991b0e485fab2588"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/carrier-build.receipt.json",
+      "sha256": "06cec093d351b084a37799a53bc6b0e748e1ab8fe1bc13a5de395eeccf96f43f"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/carrier-test.log",
+      "sha256": "01d0d4f8f7cf0591dc7f83a5c71dce5c18afb7664deb3fa4b5dd70fede58afb4"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/carrier-test.receipt.json",
+      "sha256": "f6e15b5c07464eeb03889a39250fa1f9f651b6764c36c072f77099e9376e19a2"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/carrier-typecheck.log",
+      "sha256": "098d7979705a493c7532687ff6eb4b1de29f773636338ca38ec2ec93d7cb93c4"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/carrier-typecheck.receipt.json",
+      "sha256": "9b0a446def1398ccf8501eba8739d89c21c09b220c6f0fd4511bd7ef5f3a56ab"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/runtime-build.log",
+      "sha256": "d7536f5e4c9fc7d5c42df8edd9457ebe3167b1b64589fb6e11a80e406fda5a72"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/runtime-build.receipt.json",
+      "sha256": "77b483fdd809d60b03a750d563fc3a44d1059cced038d8f4b0218190a8ef9830"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/runtime-check.log",
+      "sha256": "7a6f33420c5a0468a5eea66d5423ffe4a9539206e16e2ccff0e7b3fe42876b9f"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/runtime-check.receipt.json",
+      "sha256": "466fc5542358a4fe1af157994ed3900038d9c68e98d669c98729cd191b5996d3"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/runtime-test.log",
+      "sha256": "c918116cab7e622c4bffb4255bde373393106b94cf512c08ff099f18ebc30168"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/runtime-test.receipt.json",
+      "sha256": "2aded838644916f860981b595093d0fe290432ee3d137a19a2d1f406b0cb7004"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/runtime-typecheck.log",
+      "sha256": "3fe0757a1c0cac7fc3e929c5d0eda1d96e943476e929800630015b969dd9d6af"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/runtime-typecheck.receipt.json",
+      "sha256": "cbd79f146e8643e80e1d729a666f7092d15c83ca1dfec97fb961bab1584f5f99"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/source-carrier-observations.json",
+      "sha256": "3e3281efb900aaafd357121c2af380a0c08c42fb4407701c20f9aaef2934f6b6"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/source-carrier.log",
+      "sha256": "cd7d60f4a2a9b5433473b1c5f454b55d45568398501f3d182a2de24b7cef8cb9"
+    },
+    {
+      "path": "receipts-precommit/working-tree-run/source-carrier.receipt.json",
+      "sha256": "2cc4eba41788ca089d20ffdb3bacabd0e3429a373852d6caae94a874ac8dfb66"
+    }
+  ]
+}

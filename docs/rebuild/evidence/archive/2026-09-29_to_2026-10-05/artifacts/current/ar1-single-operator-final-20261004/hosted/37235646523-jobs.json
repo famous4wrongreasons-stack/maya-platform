@@ -1,0 +1,443 @@
+[
+  {
+    "total_count": 3,
+    "jobs": [
+      {
+        "id": 111534079267,
+        "run_id": 37235646523,
+        "workflow_name": "Platform CI",
+        "head_branch": "codex/maya-controlled-integration-20260930",
+        "run_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/runs/37235646523",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOTH5eO88AAAAZ9_L9Iw",
+        "head_sha": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/jobs/111534079267",
+        "html_url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37235646523/job/111534079267",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-04T21:19:46Z",
+        "started_at": "2026-10-04T21:19:48Z",
+        "completed_at": "2026-10-04T21:32:01Z",
+        "name": "Legacy Python",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-04T21:19:49Z",
+            "completed_at": "2026-10-04T21:19:50Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-04T21:19:50Z",
+            "completed_at": "2026-10-04T21:19:57Z"
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-04T21:19:57Z",
+            "completed_at": "2026-10-04T21:20:02Z"
+          },
+          {
+            "name": "Run python -m pip install --disable-pip-version-check -r \"ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/requirements.txt\"",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-04T21:20:02Z",
+            "completed_at": "2026-10-04T21:20:12Z"
+          },
+          {
+            "name": "Run cp \"ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/config.example.py\" \"ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/config.py\"",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-04T21:20:12Z",
+            "completed_at": "2026-10-04T21:20:12Z"
+          },
+          {
+            "name": "Run python -m compileall -q \"ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440\"",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-04T21:20:12Z",
+            "completed_at": "2026-10-04T21:20:12Z"
+          },
+          {
+            "name": "Run python -u -m unittest discover -v -s \"ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440\" -p \"test_*.py\"",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-04T21:20:12Z",
+            "completed_at": "2026-10-04T21:31:58Z"
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-10-04T21:31:58Z",
+            "completed_at": "2026-10-04T21:31:58Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-10-04T21:31:58Z",
+            "completed_at": "2026-10-04T21:31:58Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-10-04T21:31:58Z",
+            "completed_at": "2026-10-04T21:31:58Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/check-runs/111534079267",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000005539,
+        "runner_name": "GitHub Actions 1000005539",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 111534079326,
+        "run_id": 37235646523,
+        "workflow_name": "Platform CI",
+        "head_branch": "codex/maya-controlled-integration-20260930",
+        "run_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/runs/37235646523",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOTH5eO88AAAAZ9_L9Xg",
+        "head_sha": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/jobs/111534079326",
+        "html_url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37235646523/job/111534079326",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-04T21:19:46Z",
+        "started_at": "2026-10-04T21:19:48Z",
+        "completed_at": "2026-10-04T21:20:02Z",
+        "name": "Frontend bundles",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-04T21:19:49Z",
+            "completed_at": "2026-10-04T21:19:50Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-04T21:19:50Z",
+            "completed_at": "2026-10-04T21:19:56Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-04T21:19:56Z",
+            "completed_at": "2026-10-04T21:19:57Z"
+          },
+          {
+            "name": "Parse inline scripts",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-04T21:19:57Z",
+            "completed_at": "2026-10-04T21:19:57Z"
+          },
+          {
+            "name": "Verify prepublication safety contracts",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-04T21:19:57Z",
+            "completed_at": "2026-10-04T21:19:57Z"
+          },
+          {
+            "name": "Prove prepublication isolation and routing counterfactuals",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-04T21:19:57Z",
+            "completed_at": "2026-10-04T21:19:58Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-10-04T21:19:58Z",
+            "completed_at": "2026-10-04T21:19:58Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-10-04T21:19:58Z",
+            "completed_at": "2026-10-04T21:19:58Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-10-04T21:19:58Z",
+            "completed_at": "2026-10-04T21:19:58Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/check-runs/111534079326",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000005540,
+        "runner_name": "GitHub Actions 1000005540",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 111534079359,
+        "run_id": 37235646523,
+        "workflow_name": "Platform CI",
+        "head_branch": "codex/maya-controlled-integration-20260930",
+        "run_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/runs/37235646523",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOTH5eO88AAAAZ9_L9fw",
+        "head_sha": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+        "url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/actions/jobs/111534079359",
+        "html_url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37235646523/job/111534079359",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-10-04T21:19:46Z",
+        "started_at": "2026-10-04T21:19:50Z",
+        "completed_at": "2026-10-04T21:42:52Z",
+        "name": "NestJS and Prisma",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-04T21:19:51Z",
+            "completed_at": "2026-10-04T21:19:51Z"
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-04T21:19:51Z",
+            "completed_at": "2026-10-04T21:20:03Z"
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-04T21:20:03Z",
+            "completed_at": "2026-10-04T21:20:09Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-04T21:20:09Z",
+            "completed_at": "2026-10-04T21:20:13Z"
+          },
+          {
+            "name": "Install architectural scanner prerequisite",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-04T21:20:13Z",
+            "completed_at": "2026-10-04T21:20:23Z"
+          },
+          {
+            "name": "Run npm ci",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-04T21:20:23Z",
+            "completed_at": "2026-10-04T21:20:38Z"
+          },
+          {
+            "name": "Run npm audit --omit=dev --audit-level=high",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-04T21:20:38Z",
+            "completed_at": "2026-10-04T21:20:39Z"
+          },
+          {
+            "name": "Run npm run prisma:generate",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-04T21:20:39Z",
+            "completed_at": "2026-10-04T21:20:44Z"
+          },
+          {
+            "name": "Run npx prisma validate",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-04T21:20:44Z",
+            "completed_at": "2026-10-04T21:20:46Z"
+          },
+          {
+            "name": "Run npx prisma migrate deploy",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-04T21:20:46Z",
+            "completed_at": "2026-10-04T21:20:51Z"
+          },
+          {
+            "name": "Run npm run prisma:seed",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-10-04T21:20:51Z",
+            "completed_at": "2026-10-04T21:20:52Z"
+          },
+          {
+            "name": "Run npm run typecheck",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-10-04T21:20:52Z",
+            "completed_at": "2026-10-04T21:21:12Z"
+          },
+          {
+            "name": "Run npm run typecheck:scripts",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-10-04T21:21:12Z",
+            "completed_at": "2026-10-04T21:22:02Z"
+          },
+          {
+            "name": "Run npm run lint",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-10-04T21:22:02Z",
+            "completed_at": "2026-10-04T21:24:52Z"
+          },
+          {
+            "name": "Run node scripts/k3-gateway-check.mjs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-10-04T21:24:52Z",
+            "completed_at": "2026-10-04T21:25:02Z"
+          },
+          {
+            "name": "Build the runtime artifact required by the R01 integration proof",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16,
+            "started_at": "2026-10-04T21:25:02Z",
+            "completed_at": "2026-10-04T21:25:18Z"
+          },
+          {
+            "name": "Run npm test -- --runInBand",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17,
+            "started_at": "2026-10-04T21:25:18Z",
+            "completed_at": "2026-10-04T21:41:36Z"
+          },
+          {
+            "name": "Run npm run test:e2e -- --runInBand",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18,
+            "started_at": "2026-10-04T21:41:36Z",
+            "completed_at": "2026-10-04T21:41:38Z"
+          },
+          {
+            "name": "Run npm run test:events:live",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-10-04T21:41:38Z",
+            "completed_at": "2026-10-04T21:41:40Z"
+          },
+          {
+            "name": "Run npm run build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-10-04T21:41:40Z",
+            "completed_at": "2026-10-04T21:42:35Z"
+          },
+          {
+            "name": "HTTP smoke with explicit AppModule test prerequisites",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-10-04T21:42:35Z",
+            "completed_at": "2026-10-04T21:42:48Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 40,
+            "started_at": "2026-10-04T21:42:48Z",
+            "completed_at": "2026-10-04T21:42:48Z"
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 41,
+            "started_at": "2026-10-04T21:42:48Z",
+            "completed_at": "2026-10-04T21:42:48Z"
+          },
+          {
+            "name": "Stop containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 42,
+            "started_at": "2026-10-04T21:42:48Z",
+            "completed_at": "2026-10-04T21:42:49Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 43,
+            "started_at": "2026-10-04T21:42:49Z",
+            "completed_at": "2026-10-04T21:42:49Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/famous4wrongreasons-stack/maya-platform/check-runs/111534079359",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000005541,
+        "runner_name": "GitHub Actions 1000005541",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  }
+]

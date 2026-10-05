@@ -1,0 +1,657 @@
+{
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "capturedAt": "2026-10-01T21:39:04.030973+00:00",
+  "requiredSlots": [
+    "7-part-1-of-4",
+    "7-part-2-of-4",
+    "7-part-3-of-4",
+    "7-part-4-of-4",
+    "8c",
+    "8r",
+    "AB",
+    "D8",
+    "P-allowlist"
+  ],
+  "reason": "Every complete part overlapping the observed clamshell/maintenance suspension window is invalidated for this admission, whether or not the runner reported a mismatch.",
+  "observation": {
+    "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+    "capturedAt": "2026-10-01T21:39:03.134942+00:00",
+    "powerEvents": [
+      {
+        "utc": "2026-10-01T18:10:27+00:00",
+        "event": "Sleep",
+        "details": "Entering Sleep state due to 'Clamshell Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 233 secs"
+      },
+      {
+        "utc": "2026-10-01T18:14:20+00:00",
+        "event": "DarkWake",
+        "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using BATT (Charge:100%) 45 secs"
+      },
+      {
+        "utc": "2026-10-01T18:15:05+00:00",
+        "event": "Sleep",
+        "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 488 secs"
+      },
+      {
+        "utc": "2026-10-01T18:23:13+00:00",
+        "event": "DarkWake",
+        "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty E_PFN_NET_FOUND ARPT/ Using BATT (Charge:100%) 45 secs"
+      },
+      {
+        "utc": "2026-10-01T18:23:58+00:00",
+        "event": "Sleep",
+        "details": "Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:100%) 919 secs"
+      },
+      {
+        "utc": "2026-10-01T18:39:17+00:00",
+        "event": "DarkWake",
+        "details": "DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) USB-C_plug SMC.OutboxNotEmpty nub-spmi-a0.0x3F/ Using BATT (Charge:100%) 0 secs"
+      },
+      {
+        "utc": "2026-10-01T18:39:17+00:00",
+        "event": "Wake",
+        "details": "DarkWake to FullWake from Deep Idle [CDNVAP] : due to Notification Using AC (Charge:100%)"
+      }
+    ],
+    "suspensionWindows": [
+      {
+        "from": "2026-10-01T18:10:27+00:00",
+        "to": "2026-10-01T18:39:17+00:00",
+        "fullWakeObserved": true
+      }
+    ],
+    "windowScope": "Conservative first Sleep through actual FullWake, including short maintenance DarkWakes.",
+    "potentiallyOverlappingTestRuns": [
+      {
+        "path": "receipts/mutation-diagnostics/3-unit-1790877798471.json",
+        "sha256": "7a44fd0087e106d661b0a3f6af0c37578e6859d6dc15af7725522c6d004b008c",
+        "worker": "3",
+        "step": "unit",
+        "startTime": "2026-10-01T18:03:18.471000+00:00",
+        "capturedAt": "2026-10-01T18:39:54.864446+00:00",
+        "success": false,
+        "passed": 5602,
+        "failed": 1,
+        "failureTitles": [
+          "S-G7-TIER: Gate 7\u2019s own code names no channel id and no tier"
+        ]
+      },
+      {
+        "path": "receipts/mutation-diagnostics/4-unit-1790877816168.json",
+        "sha256": "80bdde85a0cc9eb9fc70d401916ff1b6034440e8cd08ec6efa0bc1086a920681",
+        "worker": "4",
+        "step": "unit",
+        "startTime": "2026-10-01T18:03:36.168000+00:00",
+        "capturedAt": "2026-10-01T18:40:13.875229+00:00",
+        "success": false,
+        "passed": 5602,
+        "failed": 1,
+        "failureTitles": [
+          "S-G7-F72-K7: K7\u2019s guard CALLS the one owner for each of F72 and F74, and keeps no comparison of its own"
+        ]
+      },
+      {
+        "path": "receipts/mutation-diagnostics/7-unit-1790877828180.json",
+        "sha256": "aa500d727e37df49c1137117e1e6a3e62a15424c80eaa302dfba7a030d02006e",
+        "worker": "7",
+        "step": "unit",
+        "startTime": "2026-10-01T18:03:48.180000+00:00",
+        "capturedAt": "2026-10-01T18:40:09.204204+00:00",
+        "success": false,
+        "passed": 5602,
+        "failed": 1,
+        "failureTitles": [
+          "SD-4 [U] refuses a non-canonical stored spelling rather than accepting it"
+        ]
+      },
+      {
+        "path": "receipts/mutation-diagnostics/6-unit-1790878067783.json",
+        "sha256": "a0b6faf0e3ca6d03cdece81f3160642d83fc362ac7161c739d179e4c2a46d765",
+        "worker": "6",
+        "step": "unit",
+        "startTime": "2026-10-01T18:07:47.783000+00:00",
+        "capturedAt": "2026-10-01T18:44:05.519459+00:00",
+        "success": true,
+        "passed": 5603,
+        "failed": 0,
+        "failureTitles": []
+      },
+      {
+        "path": "receipts/mutation-diagnostics/1-unit-1790878079495.json",
+        "sha256": "5e23edce08147badf45cdaaaed9c77e8205462de99dbab6f86c1ea99965a369f",
+        "worker": "1",
+        "step": "unit",
+        "startTime": "2026-10-01T18:07:59.495000+00:00",
+        "capturedAt": "2026-10-01T18:44:27.984536+00:00",
+        "success": false,
+        "passed": 5570,
+        "failed": 33,
+        "failureTitles": [
+          "no file in the gates directory casts to the bottom type",
+          "no non-spec gate file writes a refusal code the compiler was told not to check",
+          "D-10-PIPE-b: no file a slot calls writes a refusal code the compiler was told not to check",
+          "S-G7-VOCAB: `refuse` is called with `effect_not_admissible` or `booking_confirmation_required`, and with nothing else",
+          "S-G7-VOCAB-NEVER: there is no cast to the bottom type anywhere in Gate 7\u2019s closure",
+          "G7-N1a: a DRAFT on METRIC \u2014 the cell is the fence, and METRIC\u2019s does not list DRAFT",
+          "G7-N1b: a REFINE on APPROVAL \u2014 MEMBERSHIP, not an ordered rank. APPROVAL\u2019s cell is `NONE, NAVIGATE, CONTROL, COMMIT, HANDOFF`, so an ordered comparison would admit this and the contract does not",
+          "G7-N1c: a HANDOFF on METRIC \u2014 METRIC\u2019s cell has no HANDOFF, and HANDOFF is off-order",
+          "G7-N1d: a COMMIT on METRIC \u2014 K11\u2019s four COMMIT-bearing kinds do not include it",
+          "an unknown kind and an unknown effect both refuse: the lookup has no default branch",
+          "G7-N2a: a HANDOFF whose destination is CONTROL-spaced \u2014 R3.2.2 admits C9 and AE only",
+          "G7-N2b: a NAVIGATE carrying a `capability` \u2014 F69 gives NAVIGATE the class-`c` target and no other member",
+          "G7-N2c: a CONTROL carrying a C9 ref",
+          "G7-N2d: a REFINE carrying an AE ref \u2014 the widget layer never bridges a key space (F70)",
+          "G7-N2e: a COMMIT with a half-populated ref \u2014 F21 says a half pair is not a ref",
+          "an effect that must name a capability and names none refuses; a `NONE` that names one refuses too",
+          "no effect may name a TOOL ref (F69\u2019s closing sentence), including one spelled like a C9 key",
+          "G7-N3a: an unregistered CONTROL key \u2014 F27 closes the space at three keys, and Gate 7 is the fence",
+          "an unregistered C9 key refuses at the same membership check, reported as C2",
+          "a class-`c` target on an effect F69 does not give one refuses",
+          "G7-N-ESC-P1: the escape is that ONE intent \u2014 this key, at priority 0. Priority 1 is not it",
+          "G7-A1c: another registered CONTROL key is not the escape, even at priority 0",
+          "G7-N7a/N7b/N7c: a class the cell does not list is refused, whichever tier it is",
+          "G7-N7-GUEST-NAV: `ANONYMOUS_CHAT` carries REFINE and HANDOFF \u2014 an ALLOWLIST, so NAVIGATE is refused although a richer tier carries it",
+          "G7-N-NONE-PUSH: `NONE` is carried by `RICH_INTERACTIVE` alone (R3.2.3)",
+          "G7-N7e: a channel outside `ChannelId`, and one that is a property of `Object.prototype`, admit nothing",
+          "G7-N9a: C9a refuses a MONEY capability \u2014 FR-6d\u2019s fence is that no money-mutating key is actuatable from a widget at all (fixture-only)",
+          "G7-N9b: C9a is FR-6d\u2019s predicate, not F31\u2019s VETO \u2014 the same MONEY key refuses on `PAYMENT_HANDOFF`, which F31 admits (F82 routes this very key there), so an F31-shaped C9a would pass it down to C9b (fixture-only)",
+          "G7-N6e: a key whose row was WITHDRAWN resolves to no confirmation kind at all \u2014 F72 has no default branch (fixture-only)",
+          "G7-N6g: F80 \u2014 the same COMMIT whose pairing\u2019s propose key is `personal_data` refuses at C6a (fixture-only)",
+          "G7-N6g-2: a `SETTINGS_DRAFT` COMMIT with no single pairing row refuses at C6a too \u2014 the propose key is what F80 reads (fixture-only)",
+          "G7-FC4: C9b \u2014 `PAYMENT_HANDOFF` is gap-blocked, and the block is READ from K20\u2019s derived `emittable`, not hard-coded (fixture-only)",
+          "no record at all refuses, and reports C1"
+        ]
+      },
+      {
+        "path": "receipts/mutation-diagnostics/8-live-1790878197603.json",
+        "sha256": "33733820883197624fef30d7ad26b25748dabe26a345b7ec09a90a5e920fec52",
+        "worker": "8",
+        "step": "live",
+        "startTime": "2026-10-01T18:09:57.603000+00:00",
+        "capturedAt": "2026-10-01T18:40:25.162915+00:00",
+        "success": false,
+        "passed": 403,
+        "failed": 3,
+        "failureTitles": [
+          "T6-stub (R-3): a foreign `readback_ref` refuses",
+          "AR1-EXPIRY expires without renewal and denies the old authorization",
+          "SV2-01 happy successor verification creates usable explicit personal context and actual actor audit"
+        ]
+      },
+      {
+        "path": "receipts/mutation-diagnostics/2-unit-1790878227441.json",
+        "sha256": "b0bc170e3a3253c5a8f08c91ccd1f1ca314d5ee777de85cee7b50741b9e9ecd0",
+        "worker": "2",
+        "step": "unit",
+        "startTime": "2026-10-01T18:10:27.441000+00:00",
+        "capturedAt": "2026-10-01T18:46:29.381814+00:00",
+        "success": false,
+        "passed": 5601,
+        "failed": 2,
+        "failureTitles": [
+          "G7-A1c: another registered CONTROL key is not the escape, even at priority 0",
+          "S-G7-F27-ONE: Gate 7 uses that one function rather than a membership set of its own"
+        ]
+      },
+      {
+        "path": "receipts/mutation-diagnostics/5-unit-1790879018642.json",
+        "sha256": "193c5769b8491ad079d42caddfcad920d478275dcd7a6511dda5db3a560fc9e2",
+        "worker": "5",
+        "step": "unit",
+        "startTime": "2026-10-01T18:23:38.642000+00:00",
+        "capturedAt": "2026-10-01T18:46:55.079564+00:00",
+        "success": true,
+        "passed": 5603,
+        "failed": 0,
+        "failureTitles": []
+      }
+    ],
+    "completedOverlappingJobs": [
+      {
+        "slot": "7-part-1-of-4",
+        "gate": "7",
+        "partition": "1/4",
+        "receipt": "receipts/mutation-7-part-1-of-4.receipt.json",
+        "receiptSha256": "e099c280d7833b13aa4e8fc97ab9cb47a3e7108d22c718c8d999ec93b8dcaf3f",
+        "startInferredFromReceipt": "2026-10-01T17:00:30.852790+00:00",
+        "completedAt": "2026-10-01T18:48:01.472790+00:00",
+        "wallSeconds": 6450.62,
+        "exit": 0,
+        "command": [
+          "node",
+          "scripts/widgets-mutation-battery.mjs",
+          "--gate",
+          "7",
+          "--partition",
+          "1/4",
+          "--out",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-7-part-1-of-4.json"
+        ],
+        "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-3/maya-saas-backend"
+      },
+      {
+        "slot": "7-part-2-of-4",
+        "gate": "7",
+        "partition": "2/4",
+        "receipt": "receipts/mutation-7-part-2-of-4.receipt.json",
+        "receiptSha256": "ea1666124d731af832df5b12d762b25c1027422aecc077cb8ef57c94c56de24f",
+        "startInferredFromReceipt": "2026-10-01T17:07:55.306735+00:00",
+        "completedAt": "2026-10-01T18:54:47.266735+00:00",
+        "wallSeconds": 6411.96,
+        "exit": 0,
+        "command": [
+          "node",
+          "scripts/widgets-mutation-battery.mjs",
+          "--gate",
+          "7",
+          "--partition",
+          "2/4",
+          "--out",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-7-part-2-of-4.json"
+        ],
+        "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-2/maya-saas-backend"
+      },
+      {
+        "slot": "7-part-3-of-4",
+        "gate": "7",
+        "partition": "3/4",
+        "receipt": "receipts/mutation-7-part-3-of-4.receipt.json",
+        "receiptSha256": "b98770f1089c16ea81b4b15654885fedb373c10aee0316833cc0174dab9a7229",
+        "startInferredFromReceipt": "2026-10-01T17:09:32.141920+00:00",
+        "completedAt": "2026-10-01T18:48:41.201920+00:00",
+        "wallSeconds": 5949.06,
+        "exit": 0,
+        "command": [
+          "node",
+          "scripts/widgets-mutation-battery.mjs",
+          "--gate",
+          "7",
+          "--partition",
+          "3/4",
+          "--out",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-7-part-3-of-4.json"
+        ],
+        "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-4/maya-saas-backend"
+      },
+      {
+        "slot": "7-part-4-of-4",
+        "gate": "7",
+        "partition": "4/4",
+        "receipt": "receipts/mutation-7-part-4-of-4.receipt.json",
+        "receiptSha256": "7355b4995682bd8c889745c41675a58a4602b3fdc239b723acfaba8dc843b505",
+        "startInferredFromReceipt": "2026-10-01T17:14:03.503205+00:00",
+        "completedAt": "2026-10-01T18:52:56.423205+00:00",
+        "wallSeconds": 5932.92,
+        "exit": 0,
+        "command": [
+          "node",
+          "scripts/widgets-mutation-battery.mjs",
+          "--gate",
+          "7",
+          "--partition",
+          "4/4",
+          "--out",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-7-part-4-of-4.json"
+        ],
+        "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-1/maya-saas-backend"
+      },
+      {
+        "slot": "8c",
+        "gate": "8c",
+        "partition": null,
+        "receipt": "receipts/mutation-8c.receipt.json",
+        "receiptSha256": "03538998de6e5566f781b19948274a8a899323de79e953dad873e7cc8bd2b603",
+        "startInferredFromReceipt": "2026-10-01T17:31:02.658761+00:00",
+        "completedAt": "2026-10-01T19:13:40.688761+00:00",
+        "wallSeconds": 6158.03,
+        "exit": 0,
+        "command": [
+          "node",
+          "scripts/widgets-mutation-battery.mjs",
+          "--gate",
+          "8c",
+          "--out",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-8c.json"
+        ],
+        "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-7/maya-saas-backend"
+      },
+      {
+        "slot": "8r",
+        "gate": "8r",
+        "partition": null,
+        "receipt": "receipts/mutation-8r.receipt.json",
+        "receiptSha256": "198d0e4ef8226b26e693c7f830490f8622000b023e19451f1a8909ad580f2a8a",
+        "startInferredFromReceipt": "2026-10-01T17:33:56.356251+00:00",
+        "completedAt": "2026-10-01T19:27:26.536251+00:00",
+        "wallSeconds": 6810.18,
+        "exit": 0,
+        "command": [
+          "node",
+          "scripts/widgets-mutation-battery.mjs",
+          "--gate",
+          "8r",
+          "--out",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-8r.json"
+        ],
+        "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-8/maya-saas-backend"
+      },
+      {
+        "slot": "AB",
+        "gate": "AB",
+        "partition": null,
+        "receipt": "receipts/mutation-AB.receipt.json",
+        "receiptSha256": "20c5018e6126024948b0e354fbb3151c938b2d8ce4f1a39a6185161e63604c16",
+        "startInferredFromReceipt": "2026-10-01T17:46:17.608778+00:00",
+        "completedAt": "2026-10-01T18:23:28.438778+00:00",
+        "wallSeconds": 2230.83,
+        "exit": 0,
+        "command": [
+          "node",
+          "scripts/widgets-mutation-battery.mjs",
+          "--gate",
+          "AB",
+          "--out",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-AB.json"
+        ],
+        "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-5/maya-saas-backend"
+      },
+      {
+        "slot": "D8",
+        "gate": "D8",
+        "partition": null,
+        "receipt": "receipts/mutation-D8.receipt.json",
+        "receiptSha256": "e4c951a714192961e51475657ee25eae1059228d0801a328c6375349998d8061",
+        "startInferredFromReceipt": "2026-10-01T18:07:46.799196+00:00",
+        "completedAt": "2026-10-01T19:26:14.129196+00:00",
+        "wallSeconds": 4707.33,
+        "exit": 0,
+        "command": [
+          "node",
+          "scripts/widgets-mutation-battery.mjs",
+          "--gate",
+          "D8",
+          "--out",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-D8.json"
+        ],
+        "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-6/maya-saas-backend"
+      },
+      {
+        "slot": "P-allowlist",
+        "gate": "P-allowlist",
+        "partition": null,
+        "receipt": "receipts/mutation-P-allowlist.receipt.json",
+        "receiptSha256": "b605766bf6795e3d1f699756f4f97d7506d7011ca60a342997d4f39f3db776a0",
+        "startInferredFromReceipt": "2026-10-01T18:23:28.435580+00:00",
+        "completedAt": "2026-10-01T19:13:09.105580+00:00",
+        "wallSeconds": 2980.67,
+        "exit": 0,
+        "command": [
+          "node",
+          "scripts/widgets-mutation-battery.mjs",
+          "--gate",
+          "P-allowlist",
+          "--out",
+          "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-705d57cd/receipts/mutation-parts/widgets-mutation-part-P-allowlist.json"
+        ],
+        "originalSource": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-705d57cd/mutation-isolated-worker-5/maya-saas-backend"
+      }
+    ],
+    "jobTimestampMethod": "Receipt filesystem completion timestamp minus its recorded wall seconds; overlap widened by one second.",
+    "nativeOriginalExecutionComplete": true,
+    "nativeOriginalExecutionExit": 0,
+    "admissionAssessment": "All overlapping whole parts will be withheld and rerun with canonical unrestricted steps on the identical candidate. Unaffected fresh parts remain in this same certification programme.",
+    "timeoutsChanged": false,
+    "productSourceChanged": false,
+    "powerSettingsChanged": false,
+    "parserCorrection": "Wake Requests scheduler hints in the initial diagnostic were not actual wake events and are excluded here."
+  },
+  "originalParts": [
+    {
+      "slot": "7-part-1-of-4",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-7-part-1-of-4.json",
+          "retained": "receipts/suspend-invalidated/7-part-1-of-4/widgets-mutation-part-7-part-1-of-4.json",
+          "sha256": "4ea47f5c37cab84929890aec01f2cd64d3a8a10dbf0dd41495ff050b9eccb23b"
+        },
+        {
+          "original": "receipts/mutation-7-part-1-of-4.receipt.json",
+          "retained": "receipts/suspend-invalidated/7-part-1-of-4/mutation-7-part-1-of-4.receipt.json",
+          "sha256": "e099c280d7833b13aa4e8fc97ab9cb47a3e7108d22c718c8d999ec93b8dcaf3f"
+        },
+        {
+          "original": "receipts/mutation-7-part-1-of-4.log",
+          "retained": "receipts/suspend-invalidated/7-part-1-of-4/mutation-7-part-1-of-4.log",
+          "sha256": "4ea47f5c37cab84929890aec01f2cd64d3a8a10dbf0dd41495ff050b9eccb23b"
+        }
+      ]
+    },
+    {
+      "slot": "7-part-2-of-4",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-7-part-2-of-4.json",
+          "retained": "receipts/suspend-invalidated/7-part-2-of-4/widgets-mutation-part-7-part-2-of-4.json",
+          "sha256": "a30fce3360629a5bff0bdcf0c6f0b0fd63ecb43906dbcc95203d5f65839ec6e6"
+        },
+        {
+          "original": "receipts/mutation-7-part-2-of-4.receipt.json",
+          "retained": "receipts/suspend-invalidated/7-part-2-of-4/mutation-7-part-2-of-4.receipt.json",
+          "sha256": "ea1666124d731af832df5b12d762b25c1027422aecc077cb8ef57c94c56de24f"
+        },
+        {
+          "original": "receipts/mutation-7-part-2-of-4.log",
+          "retained": "receipts/suspend-invalidated/7-part-2-of-4/mutation-7-part-2-of-4.log",
+          "sha256": "a30fce3360629a5bff0bdcf0c6f0b0fd63ecb43906dbcc95203d5f65839ec6e6"
+        }
+      ]
+    },
+    {
+      "slot": "7-part-3-of-4",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-7-part-3-of-4.json",
+          "retained": "receipts/suspend-invalidated/7-part-3-of-4/widgets-mutation-part-7-part-3-of-4.json",
+          "sha256": "ada325182de5bd37933b063b13960d22b84cc8b6d18acd86245efbe5ccb4acbd"
+        },
+        {
+          "original": "receipts/mutation-7-part-3-of-4.receipt.json",
+          "retained": "receipts/suspend-invalidated/7-part-3-of-4/mutation-7-part-3-of-4.receipt.json",
+          "sha256": "b98770f1089c16ea81b4b15654885fedb373c10aee0316833cc0174dab9a7229"
+        },
+        {
+          "original": "receipts/mutation-7-part-3-of-4.log",
+          "retained": "receipts/suspend-invalidated/7-part-3-of-4/mutation-7-part-3-of-4.log",
+          "sha256": "ada325182de5bd37933b063b13960d22b84cc8b6d18acd86245efbe5ccb4acbd"
+        }
+      ]
+    },
+    {
+      "slot": "7-part-4-of-4",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-7-part-4-of-4.json",
+          "retained": "receipts/suspend-invalidated/7-part-4-of-4/widgets-mutation-part-7-part-4-of-4.json",
+          "sha256": "faea6462eef6812bbc5a47e57667f44f5d8dd61af01ce025a74f2fe36d8a5f5f"
+        },
+        {
+          "original": "receipts/mutation-7-part-4-of-4.receipt.json",
+          "retained": "receipts/suspend-invalidated/7-part-4-of-4/mutation-7-part-4-of-4.receipt.json",
+          "sha256": "7355b4995682bd8c889745c41675a58a4602b3fdc239b723acfaba8dc843b505"
+        },
+        {
+          "original": "receipts/mutation-7-part-4-of-4.log",
+          "retained": "receipts/suspend-invalidated/7-part-4-of-4/mutation-7-part-4-of-4.log",
+          "sha256": "faea6462eef6812bbc5a47e57667f44f5d8dd61af01ce025a74f2fe36d8a5f5f"
+        }
+      ]
+    },
+    {
+      "slot": "8c",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-8c.json",
+          "retained": "receipts/suspend-invalidated/8c/widgets-mutation-part-8c.json",
+          "sha256": "7b2864ee26586422df2b6917a325407603c250c7eb3af0b862225d0a4ce975e7"
+        },
+        {
+          "original": "receipts/mutation-8c.receipt.json",
+          "retained": "receipts/suspend-invalidated/8c/mutation-8c.receipt.json",
+          "sha256": "03538998de6e5566f781b19948274a8a899323de79e953dad873e7cc8bd2b603"
+        },
+        {
+          "original": "receipts/mutation-8c.log",
+          "retained": "receipts/suspend-invalidated/8c/mutation-8c.log",
+          "sha256": "7b2864ee26586422df2b6917a325407603c250c7eb3af0b862225d0a4ce975e7"
+        }
+      ]
+    },
+    {
+      "slot": "8r",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-8r.json",
+          "retained": "receipts/suspend-invalidated/8r/widgets-mutation-part-8r.json",
+          "sha256": "78d19f53d1b6f0f278f3691704dd5bc190deeb9f1ba1881db708cdc9873e84b3"
+        },
+        {
+          "original": "receipts/mutation-8r.receipt.json",
+          "retained": "receipts/suspend-invalidated/8r/mutation-8r.receipt.json",
+          "sha256": "198d0e4ef8226b26e693c7f830490f8622000b023e19451f1a8909ad580f2a8a"
+        },
+        {
+          "original": "receipts/mutation-8r.log",
+          "retained": "receipts/suspend-invalidated/8r/mutation-8r.log",
+          "sha256": "78d19f53d1b6f0f278f3691704dd5bc190deeb9f1ba1881db708cdc9873e84b3"
+        }
+      ]
+    },
+    {
+      "slot": "AB",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-AB.json",
+          "retained": "receipts/suspend-invalidated/AB/widgets-mutation-part-AB.json",
+          "sha256": "8aee6c646b12a7ffe3c8e6c95fb7b188bf2e0bf4fbf16a876024a8bc2182e7aa"
+        },
+        {
+          "original": "receipts/mutation-AB.receipt.json",
+          "retained": "receipts/suspend-invalidated/AB/mutation-AB.receipt.json",
+          "sha256": "20c5018e6126024948b0e354fbb3151c938b2d8ce4f1a39a6185161e63604c16"
+        },
+        {
+          "original": "receipts/mutation-AB.log",
+          "retained": "receipts/suspend-invalidated/AB/mutation-AB.log",
+          "sha256": "8aee6c646b12a7ffe3c8e6c95fb7b188bf2e0bf4fbf16a876024a8bc2182e7aa"
+        }
+      ]
+    },
+    {
+      "slot": "D8",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-D8.json",
+          "retained": "receipts/suspend-invalidated/D8/widgets-mutation-part-D8.json",
+          "sha256": "f0b9bf8b046da1e9283a44a854ae076fae9fa5a26afe0185eda8f33dc7a13c36"
+        },
+        {
+          "original": "receipts/mutation-D8.receipt.json",
+          "retained": "receipts/suspend-invalidated/D8/mutation-D8.receipt.json",
+          "sha256": "e4c951a714192961e51475657ee25eae1059228d0801a328c6375349998d8061"
+        },
+        {
+          "original": "receipts/mutation-D8.log",
+          "retained": "receipts/suspend-invalidated/D8/mutation-D8.log",
+          "sha256": "f0b9bf8b046da1e9283a44a854ae076fae9fa5a26afe0185eda8f33dc7a13c36"
+        }
+      ]
+    },
+    {
+      "slot": "P-allowlist",
+      "files": [
+        {
+          "original": "receipts/mutation-parts/widgets-mutation-part-P-allowlist.json",
+          "retained": "receipts/suspend-invalidated/P-allowlist/widgets-mutation-part-P-allowlist.json",
+          "sha256": "dd2516027b9c22ab119f3161e88f1fb515bbbadda7ce895bc33ef851e07305c7"
+        },
+        {
+          "original": "receipts/mutation-P-allowlist.receipt.json",
+          "retained": "receipts/suspend-invalidated/P-allowlist/mutation-P-allowlist.receipt.json",
+          "sha256": "b605766bf6795e3d1f699756f4f97d7506d7011ca60a342997d4f39f3db776a0"
+        },
+        {
+          "original": "receipts/mutation-P-allowlist.log",
+          "retained": "receipts/suspend-invalidated/P-allowlist/mutation-P-allowlist.log",
+          "sha256": "dd2516027b9c22ab119f3161e88f1fb515bbbadda7ce895bc33ef851e07305c7"
+        }
+      ]
+    }
+  ],
+  "allOriginalPartHashes": {
+    "4": "fd7fa196a03dfa81339ab3921c9d1ad3f08c0d3eb6a6ccdcead633bd1f6c173a",
+    "6-part-1-of-4": "03b43fdffec25616ea0c95e7377536f268d15496568eedc278e0802a5247d89d",
+    "6-part-2-of-4": "602dae7259fe003313e6d769e67b7c82c920708f45e2dfa5b9a5ffd3954b3c5b",
+    "6-part-3-of-4": "6cb3b539a325e7cf80c42a8250bba5e32d23503ad570200b281771967ceb1611",
+    "6-part-4-of-4": "6282aa965f80c5d7ca3557644f0397856d77b5f360632f713d79b38b4928b28b",
+    "7-part-1-of-4": "4ea47f5c37cab84929890aec01f2cd64d3a8a10dbf0dd41495ff050b9eccb23b",
+    "7-part-2-of-4": "a30fce3360629a5bff0bdcf0c6f0b0fd63ecb43906dbcc95203d5f65839ec6e6",
+    "7-part-3-of-4": "ada325182de5bd37933b063b13960d22b84cc8b6d18acd86245efbe5ccb4acbd",
+    "7-part-4-of-4": "faea6462eef6812bbc5a47e57667f44f5d8dd61af01ce025a74f2fe36d8a5f5f",
+    "8": "0e6e200d27bfdf334d78a8125077abf6e7f3a8e6f11b5ac8ed28f53b0def001e",
+    "9-part-1-of-4": "e81cc7937d00fa853491b6ad92f3f91ff0906649e058ca99f58642839b2b17be",
+    "9-part-2-of-4": "2017a7a645732c17593bdc98af059030aca65798c4b9446bd3fbd99011c0a6e1",
+    "9-part-3-of-4": "7e034dda5fd99d548de73e4ffb2200e8cd0b2ae44b34ca089b099e10f39784b7",
+    "9-part-4-of-4": "67e7af43c437cbd32eeabc7723257f0e7a3d386c7f344e202382881a851efe0a",
+    "10-part-1-of-4": "d93cba727d808bedd02c1c2db7624cafcf544b10571f7014b68ac5acfda53c51",
+    "10-part-2-of-4": "80319f3f14cef62f43a30051dd459a859e6a99462c64857b3e0ccb39d7cb5578",
+    "10-part-3-of-4": "72004947b1c0e3e6c4786dfbab1155f28bbd22c1e32fe231e4e7641a83de0c75",
+    "10-part-4-of-4": "2b1db0a62cd4088f41bc371e335ae8e1f6dec9d1597ddce04a3ed089f49f402d",
+    "11": "2cd3d65fe772ae31bf11152d359c3959716fd895b5e8f11470f32ead2669b331",
+    "12": "c97bf06cf3b445f6cd55298880d0f6e30b5f572de5ad5effacc8998b46b3cfba",
+    "13-part-1-of-4": "8547d619ba34bf4979643159337cb6cde4f5edabfb4d15cdc32b14fb033cc14c",
+    "13-part-2-of-4": "890c0bfea86316b4333c61e20127400f74ce64ec4732134fb3c12edd7c9ceb8f",
+    "13-part-3-of-4": "9d81990948f6a0f04f0f503702a2fd6cd3b09d3c74c3a04b30af57b11786ec2d",
+    "13-part-4-of-4": "4306738e4f966cbfb6841ae523cdb36b9a7371da3f1a7ea1750023c4cdbeafa8",
+    "1-5": "8fcecdd0038591b6c0a3f33ae61d425c6aba160cb3e2e9ee5148dd5bc896dd5b",
+    "10a": "4fa867260dbbc7905c24cb149ac4af15193ca0747959288560e5c1545f89d7a7",
+    "12b": "8fd4f2c926fa3670b7d817ed554d80fb84142138218846523e795455579b453f",
+    "12k": "93ca6f029f0dc34e2d845cbe03137db29af5e82ef00231e0fd1c2cfe2daf5478",
+    "8c": "7b2864ee26586422df2b6917a325407603c250c7eb3af0b862225d0a4ce975e7",
+    "8r": "78d19f53d1b6f0f278f3691704dd5bc190deeb9f1ba1881db708cdc9873e84b3",
+    "9a": "4077c083fadc32409921427cecdd122838008fa31df175a3f8b8a82a95162e13",
+    "AB": "8aee6c646b12a7ffe3c8e6c95fb7b188bf2e0bf4fbf16a876024a8bc2182e7aa",
+    "AR": "95186bc3da8e60fd2e684bb7533507e93ae2d705187368f32539513d9f85b264",
+    "BS": "5ca28be90e2f31ec3ded14e517630972a6e570b8f1e5d73de0845b1b2d9f473d",
+    "D8": "f0b9bf8b046da1e9283a44a854ae076fae9fa5a26afe0185eda8f33dc7a13c36",
+    "H-harness": "0492730f19d9d614be4f0169eede1b14ca8e8b918c1e35f353000d2a1ced5502",
+    "NS": "b13b93df436ae69a93b72ac931d54da19c4be746b589b68cb08723bfdbe22484",
+    "P-allowlist": "dd2516027b9c22ab119f3161e88f1fb515bbbadda7ce895bc33ef851e07305c7",
+    "P-discharge": "76da0d1f0b05292638e223898186655cf15c4c4a55724cbb86ca5523af21eb64",
+    "P-f88": "dee475b545f49f38c680ef9b60528356de0ab5ba6b944118f00570214bac5711",
+    "P-g15b": "6c4a435d0927ac54632fe22b2b42e9bfd77da8bdf191be1b9b0bbb9ded024c81",
+    "P-handle": "4b63f88b3beb469025fa95044d05b899b091200c34dfa1f1333d8e65e377f7f9",
+    "P-ledger": "901e948a93171c3670b1c07084528051718dd9ee714dc1ee19b064982ffd6728",
+    "P-mint-part-1-of-4": "49447b7c88b4849e858a09c80b20d1a1d3a29f15dbd73ae1a9adc367135603c0",
+    "P-mint-part-2-of-4": "482c677eedd5e5c79345bae2054766937a5f07b6c29fd082058f9df8cad21c4d",
+    "P-mint-part-3-of-4": "f1366dc1e9a33963ab8b1675877e5c5bd82d09836c13e9e207a9509374121420",
+    "P-mint-part-4-of-4": "3d67cda6e6bee2c0a66b31db0eb8bad327f5649150af1493769337213f4846ea",
+    "P-mt3": "a2a90cd85f48e0eeb18d2b11e8476b3ab91765cd5453959c168b3711b990375c",
+    "P-pairing": "32efbee4e89d6400419efd40a4b4d910df948cc5748e897e5c12e8f0b6eeb644",
+    "P-principal": "5b5fb5841296fbc405fb054ff262eaeb1ce6a20eb45cf8ada434c8e348763231",
+    "P-render": "e2fd23e941de5445d2dc6a2f2ecf14e0a4db53b14ac795440e037c2399c2b622",
+    "P-rt6": "4ca968cfe7acbe6dff494f218a25c7b1ca92d3ba54181ad0952eb09e8a00305a",
+    "P-seal": "5473c043b7fd1b7dd0915253601db0035bc98d4c949a85e8a8f3f66e8f543c5d",
+    "PI-contract": "9fdbc379366f816ce6e2a4181a59178d9ccdf8f2f36ad77c6352dcc9fec4612e",
+    "PI": "4c5b6b0ad1ca78d522f78bc221d576203e1de383bee7f81976cf23f7add6fbe7",
+    "SB1": "5bed04c770afe67cc7016d861500d98b967a3dabe055ba2200450a7899daac47",
+    "SBV": "b9a176fd28583083af428357f645f3819787fe903d25a970ccfaf16734e770ac",
+    "SV2": "94f709f430e829de31757f038e25235e17ac27578119c25f3a7213d32fc70a06",
+    "T-tables": "d4401f592fd83e2f31ed6a6c78b5c46624be7aeba685c3bc4adedc946bae4e5a",
+    "TURN": "dc563335cb51fd6e885dc6834fcc601adb1bc2d0f13dc2e94d929b026521a3dc",
+    "WF": "969292879c3c0cfa44b09f17fecab758278b392a1dc33307e25b327454a056af",
+    "WR-part-1-of-4": "23b04a74021f075f7ff50f949d5ac53f260611f9b291cdb8148e38544c208587",
+    "WR-part-2-of-4": "8167b3846fd5c97b4e77e08b2a001c69b38bf7d84375c8b12355a2d5d23b7e59",
+    "WR-part-3-of-4": "d63dd1f30f1ab867ee92e26b899250012599dbbd2772582adaf1219847ddc007",
+    "WR-part-4-of-4": "237f146832557d34d056869e335ff97d9cbee323ef81abe6c5c5233138634ded"
+  }
+}

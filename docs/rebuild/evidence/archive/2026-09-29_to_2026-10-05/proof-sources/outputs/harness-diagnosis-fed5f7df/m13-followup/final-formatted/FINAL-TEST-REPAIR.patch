@@ -1,0 +1,98 @@
+diff --git a/maya-saas-backend/src/widgets/owner-ports/commit-booking.adapter.spec.ts b/maya-saas-backend/src/widgets/owner-ports/commit-booking.adapter.spec.ts
+index 8d777742..ebd0354b 100644
+--- a/maya-saas-backend/src/widgets/owner-ports/commit-booking.adapter.spec.ts
++++ b/maya-saas-backend/src/widgets/owner-ports/commit-booking.adapter.spec.ts
+@@ -40,6 +40,14 @@ const execution = { id: 'execution-1' } as ActionExecution;
+ 
+ const fixture = () => {
+   let observedInvocation: unknown;
++  const transaction = {} as never;
++  const entitlements = {
++    assertWidgetRuntimeAdmission: jest.fn().mockResolvedValue(undefined),
++    withWidgetRuntimeAdmission: jest.fn(
++      (_tenantId: string, admit: (transaction: never) => Promise<unknown>) =>
++        admit(transaction),
++    ),
++  };
+   const create = {
+     forAccount: jest.fn(),
+     executionResult: jest.fn().mockResolvedValue({
+@@ -72,14 +80,14 @@ const fixture = () => {
+     create,
+     cancel,
+     reschedule,
++    entitlements,
++    transaction,
+     observedInvocation: () => observedInvocation,
+     adapter: new CommitBookingAdapter(
+       create as unknown as ClientAppointmentCreateService,
+       cancel as unknown as ClientAppointmentCancelService,
+       reschedule as unknown as ClientAppointmentRescheduleService,
+-      {
+-        assertWidgetRuntimeAdmission: jest.fn().mockResolvedValue(undefined),
+-      } as unknown as EntitlementsService,
++      entitlements as unknown as EntitlementsService,
+     ),
+   };
+ };
+@@ -158,6 +166,60 @@ describe('U13c booking COMMIT owner port', () => {
+     expect(built.create.executionResult).not.toHaveBeenCalled();
+   });
+ 
++  it('N11-HARNESS a canonical invocation without an existing transaction reaches persistence', async () => {
++    const built = fixture();
++    const persist = jest.fn().mockResolvedValue(execution);
++    const request = {
++      source: { type: 'authenticated_request' },
++      callerIdempotency: {
++        scope: 'maya.widgets.booking.commit.v1',
++        key: 'server-confirmation-key',
++      },
++    };
++    built.create.forAccount.mockImplementation(() =>
++      admitWithInvocationReceipt(request as never, persist),
++    );
++    await expect(built.adapter.commit(input())).resolves.toMatchObject({
++      receiptOutcome: 'ACCEPTED',
++      actionReceiptRef: 'execution-1',
++    });
++    expect(built.entitlements.withWidgetRuntimeAdmission).toHaveBeenCalledWith(
++      'tenant-1',
++      expect.any(Function),
++    );
++    expect(persist).toHaveBeenCalledTimes(1);
++    expect(persist).toHaveBeenCalledWith(request, built.transaction);
++  });
++
++  it('N11-KEY refuses a substituted confirmation key with the correct authenticated source', async () => {
++    const built = fixture();
++    const persist = jest.fn().mockResolvedValue(execution);
++    built.create.forAccount.mockImplementation(() =>
++      admitWithInvocationReceipt(
++        {
++          source: { type: 'authenticated_request' },
++          callerIdempotency: {
++            scope: 'maya.widgets.booking.commit.v1',
++            key: 'different-key',
++          },
++        } as never,
++        persist,
++      ),
++    );
++    await expect(built.adapter.commit(input())).resolves.toMatchObject({
++      receiptOutcome: 'REFUSED',
++      actionReceiptRef: null,
++    });
++    expect(persist).not.toHaveBeenCalled();
++    expect(
++      built.entitlements.withWidgetRuntimeAdmission,
++    ).not.toHaveBeenCalled();
++    expect(
++      built.entitlements.assertWidgetRuntimeAdmission,
++    ).not.toHaveBeenCalled();
++    expect(built.create.executionResult).not.toHaveBeenCalled();
++  });
++
+   it.each([
+     'agent_task',
+     'scheduler',

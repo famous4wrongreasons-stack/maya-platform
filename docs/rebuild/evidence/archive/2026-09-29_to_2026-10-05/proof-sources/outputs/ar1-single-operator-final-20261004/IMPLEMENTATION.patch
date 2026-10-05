@@ -1,0 +1,2016 @@
+diff --git a/.github/workflows/platform-ci.yml b/.github/workflows/platform-ci.yml
+index b1e62e2e..1ec6c2f7 100644
+--- a/.github/workflows/platform-ci.yml
++++ b/.github/workflows/platform-ci.yml
+@@ -77,6 +77,10 @@ jobs:
+       # K3 structural checks (widget gate pipeline): one ordered array, no silent pass, the owner-ports
+       # boundary, the dark entitlement. Blocking: a red check fails the job.
+       - run: node scripts/k3-gateway-check.mjs
++      # The unfiltered R01 integration proof consumes this generated runtime fixture.
++      # This does not select a release payload: PWA/iOS packaging remains React AChat.
++      - name: Build the runtime artifact required by the R01 integration proof
++        run: node ../maya-chat-shell/build.mjs
+       - run: npm test -- --runInBand
+       - run: npm run test:e2e -- --runInBand
+       # 🔴 Регрессия на дефект приёма фактов (2026-09-20..28): повтор внутри чужой
+diff --git a/.github/workflows/widgets-mutation.yml b/.github/workflows/widgets-mutation.yml
+index 4759ff65..3425a6e5 100644
+--- a/.github/workflows/widgets-mutation.yml
++++ b/.github/workflows/widgets-mutation.yml
+@@ -142,6 +142,10 @@ jobs:
+         run: |
+           npm ci --prefix ../maya-carrier-react
+           node ../maya-carrier-react/test/build-harness.mjs
++      # Full unmutated unit controls include R01's integration-only artifact proof.
++      # Build its fixture from this SHA; do not copy a historical carrier artifact.
++      - name: Build the runtime artifact required by the R01 integration proof
++        run: node ../maya-chat-shell/build.mjs
+       - name: Run the battery shard
+         env:
+           SHARD: ${{ matrix.gate }}
+diff --git a/docs/rebuild/widget-release-programme/AR1-PRODUCTION-EXECUTION-CONTRACT.md b/docs/rebuild/widget-release-programme/AR1-PRODUCTION-EXECUTION-CONTRACT.md
+index 9c9091e0..21268b88 100644
+--- a/docs/rebuild/widget-release-programme/AR1-PRODUCTION-EXECUTION-CONTRACT.md
++++ b/docs/rebuild/widget-release-programme/AR1-PRODUCTION-EXECUTION-CONTRACT.md
+@@ -26,7 +26,7 @@ missing lists and tenants outside the list refuse grant and effective access.
+ Every signed command still names exactly one tenant. Removing a tenant disables
+ effective access immediately; an explicitly signed revoke remains available.
+ 
+-## Signed execution authorization
++## V1 independent-review execution authorization (preserved)
+ 
+ Contract: `maya.widget-release-production-authorization/1`.
+ Canonical sorted JSON and Ed25519 verification use the existing AR-1 primitives.
+@@ -105,3 +105,20 @@ profile, source and revocation corpus. A complete fresh corpus and CI/FBE2E
+ programme on the committed candidate are required before declaring this unit
+ certified. L23 and L26 owner acceptances remain explicit; historical reports
+ remain inadmissible. Production execution still needs a separate owner decision.
++
++
++## V2 single-operator governance — owner decision, 2026-10-03
++
++Certified checkpoint `77ecb3f5696583389e75592141f46fd0664d33d8` remains historical and unchanged. The owner authorizes this minimal governance extension, not production execution. A new candidate must pass fresh release admission. No prior certificate is inherited.
++
++`maya.widget-release-production-authorization/2` uses the same controller, policy, writer, current global platform User/AuthSession, locks, CAS, TenantEntitlement configJson and atomic AuditLog. There is no schema change and no second release engine. The sole signer is the actual global platform operator: `approverId = operatorId = installed owner-key principalId`. The exact mandatory additional fields are `governance: "single-operator"` and `independentHumanReview: false`; `reviewerId` is explicitly `null`. Omitted disclosure, claimed independent review, fabricated reviewer or a second self-signature are refused.
++
++The V2 grant command is exactly `{authorization: <one owner-signed V2 wrapper>, certificate: <raw canonical ProfileCertificate>}`. The certificate is the existing production fixed-profile shape. It has no security-signature wrapper in V2. The owner execution signature binds `certificateDigest = releaseHash(rawCertificate)`, the full certificate contents, all reviewed fresh evidence, the exact candidate/build/profile, one tenant, CAS and time window. This is an explicit single-operator attestation, not independent security review. An unsigned certificate or caller-authored JSON alone never grants authority. The strict fresh evidence collector remains the only release-admission evidence path; historical/unverified reports remain inadmissible.
++
++All V1 production restrictions apply: exact running bytes reread, production-only trust (no staging fallback), current server allowlist, max 24 hours, no auto-renew, no plan/trial grants, HANDOFF unavailable, only the two approved HANDOFF duties outside the profile threshold. Every other applicable clause is mandatory. Synthetic/staging and V1 independent-review behavior are unchanged.
++
++V2 status, dry-run, receipt and audit explicitly retain single-operator governance and absence of independent human review. Receipt `reviewerId` is null; actor, approver, operator, session identity hash and rollback owner remain real and auditable. Revoke uses a fresh signed V2 authorization and current CAS bound to the exact stored V2 release and its identities/disclosure. It cannot use a V1 authorization to revoke a V2 release or vice versa. Revoke after allowlist removal/build change, effective expiry and old-token refusal remain available and mandatory.
++
++Maya remains multi-tenant. No real founder or salon ID is embedded in this implementation. A global platform operator can authorize separate releases for separate ordinary tenants, each with its own signed authorization, CAS and audit; no command transfers between tenants. The single-tenant offline preparation check is explicitly the first-launch operational boundary. It does not replace the server's multi-tenant authority model. A product tenant_owner never gains platform privileges, including when the same human operates the platform.
++
++Executable evidence: `widget-release-single-operator.spec.ts`, `widget-single-operator.live-spec.ts`, `widget-single-operator.binary-spec.ts`, operator CLI tests and `gateSO.json` supplement the preserved V1/AR1/profile/plan/trial corpus. Only ephemeral test signers, synthetic identities and guarded loopback proof databases are used. No real production key/signature/session is generated by these tests.
+diff --git a/docs/rebuild/widget-release-programme/RELEASE-PACKAGING-AND-TRUST-RUNBOOK.md b/docs/rebuild/widget-release-programme/RELEASE-PACKAGING-AND-TRUST-RUNBOOK.md
+index 228c58de..52cd3d7b 100644
+--- a/docs/rebuild/widget-release-programme/RELEASE-PACKAGING-AND-TRUST-RUNBOOK.md
++++ b/docs/rebuild/widget-release-programme/RELEASE-PACKAGING-AND-TRUST-RUNBOOK.md
+@@ -16,9 +16,9 @@ Xcode runs the same verifier before every build. After an authorized build, veri
+ 
+ The release manifest now includes the existing `.well-known/.htaccess` and `apple-app-site-association` at their existing production paths and committed bytes. Their contents are unchanged from `aecd770b91e94b74b26f76f6dc9e69775dc6bcab`. The same R01 gate checks all 44 rows and all four committed sources. Follow `maya-saas-backend/deploy/platform/beget-edge/RELAY-RELEASE.md`; the existing off-root archive is selected with `MAYA_R01_ARCHIVE_DIR=legacy-bundle-archive`. Run `node deploy/platform/beget-edge/relay-release.cjs verify` from the backend. This verify mode makes no repairs and does not evaluate PHP source or send business requests.
+ 
+-## 1. Obtain identities and public trust material from the real custodians
++## 1. Single-operator identities and public trust material (owner decision 2026-10-03)
+ 
+-The owner/approver and independent security reviewer supply their own Ed25519 public keys, key IDs and stable principal IDs through the operator's authenticated channel. The reviewer must differ from both approver and platform operator. They must control different private keys. Private keys remain in their existing custody/signing service; do not generate production keys in this repository, send them to chat, copy them to the application, or use the ephemeral test keys. Verify public-key fingerprints directly with each custodian.
++One actual founder may be release approver and platform operator. No second human is required for V2. The operator supplies one Ed25519 public key, key ID and the actual global platform User ID through an authenticated channel. Its private key stays under their control in a secure signer outside this repository and chat. Do not generate production keys during preparation, use ephemeral test keys, invent a reviewer, or produce a second self-signature. Verify the public-key fingerprint with the real custodian. Record `governance=single-operator`, `independentHumanReview=false`, `reviewerId=null`. V1 independent-review remains available under its unchanged contract; this procedure describes V2.
+ 
+ The platform operator is a real active global `platform_owner` User, with `tenantId=null` and `membershipId=null`. Product `tenant_owner` is not this role. Do not promote the business owner, insert an AuthSession, mint a JWT manually, or reuse a tenant token. If the actual account credentials are unavailable, stop this execution step; use the established account recovery owner outside this release unit.
+ 
+@@ -29,24 +29,24 @@ NODE_ENV=production
+ WIDGET_RELEASE_ENVIRONMENT=production
+ WIDGET_RELEASE_CANDIDATE_SHA=<exact newly certified 40-character SHA>
+ WIDGET_RELEASE_PRODUCTION_TENANTS_JSON='["<exact authorized tenant id>"]'
+-WIDGET_RELEASE_PRODUCTION_TRUST_JSON='{"<owner key id>":{"principalId":"<approver id>","purpose":"owner","publicKey":"<Ed25519 SPKI PEM with JSON escaped newlines>"},"<reviewer key id>":{"principalId":"<reviewer id>","purpose":"security","publicKey":"<different Ed25519 SPKI PEM with JSON escaped newlines>"}}'
++WIDGET_RELEASE_PRODUCTION_TRUST_JSON='{"<owner key id>":{"principalId":"<actual global platform User id>","purpose":"owner","publicKey":"<Ed25519 SPKI PEM with JSON escaped newlines>"}}'
+ ```
+ 
+-No wildcard/additional tenant, staging trust fallback, private PEM or shared signer is admissible. The public settings themselves do not grant authority. Validate offline from the exact built backend:
++No wildcard/additional tenant, staging trust fallback, private PEM or fabricated reviewer is admissible. The public settings themselves do not grant authority. Validate offline from the exact built backend:
+ 
+ ```sh
+-node scripts/widget-release-operator.cjs check-config "$AR1_ENV_FILE" "$AR1_TENANT" "$AR1_CANDIDATE_SHA"
++node scripts/widget-release-operator.cjs check-config "$AR1_ENV_FILE" "$AR1_TENANT" "$AR1_CANDIDATE_SHA" single-operator
+ ```
+ 
+ This prints only fingerprints/identities and `authorityGranted:false`, `sessionVerified:false`. Installation is a separate authorized operator action: first capture the current service/environment and rollback; then insert only these reviewed settings into the service's actual environment source, preserving unrelated settings and file ownership/mode. The tracked deployment unit names `/etc/maya-saas/live-widgets.env`; verify the running unit's EnvironmentFile before using that path. Use proper systemd environment quoting and verify effective parsed values/fingerprints without printing secrets. Never replace the entire production environment with the five-field preflight file. No restart or installation is performed by the offline checker.
+ 
+-## 2. Independent certificate review and signature
++## 2. Review exact fresh evidence; prepare an unsigned canonical certificate
+ 
+-Use only the new candidate's complete fresh strict-collector evidence and artifact hashes. The reviewer verifies all 163 applicable clauses, isolation, revocation, FBE2E and packaging; the two global HANDOFF duties remain STOP. Full-contract certification remains false. Inspect the production backend artifact with the existing compiled `WidgetReleasePolicy.buildDigest()` from its backend working directory; this hashes executable backend JS and its package lock. Compare web/native inventories separately to the certified carrier digest. A candidate label alone is insufficient.
++Use only the newly certified candidate's complete strict-collector receipts and artifact hashes. The owner/operator reviews all 163 applicable clauses, isolation, revocation, FBE2E and packaging; the two global HANDOFF duties remain STOP, full-contract certification remains false. This is explicitly not independent human review. Inspect the exact production backend artifact with compiled `WidgetReleasePolicy.buildDigest()` from its backend working directory. Compare web/native inventories to the certified carrier digest; a SHA label alone is insufficient.
+ 
+-The reviewer creates a production certificate payload satisfying `profileCertificate` in `src/entitlements/widget-release-profile.contract.ts`. Preserve the exact candidate/build/carrier/registry/evidence/integration/FBE2E/revocation/isolation/dependency digests, matrix and global audit digest from reviewed receipts; use the fixed `closed-input.no-handoff@1` profile digest. Set `environment=production` and an actual reviewed issuance/expiry window. Do not simply relabel or sign an expired synthetic proposal without that review.
++Prepare the existing production `ProfileCertificate` payload validated by `profileCertificate`. Preserve exact candidate/build/carrier/registry/evidence/integration/FBE2E/revocation/isolation/dependency digests, matrix and global audit digest from the newly reviewed receipts, plus the fixed profile and registry digests. Set a current reviewed issuance/expiry window and `environment=production`; an expired synthetic proposal cannot simply be relabelled as fresh evidence. Do not change certified artifact bytes.
+ 
+-Sign the UTF-8 bytes returned by the existing compiled `canonical(payload)` function using Ed25519 (no prehash). Wrap as exactly `{payload,keyId,signature}`, where `signature` is unpadded base64url (86 characters). `releaseHash(signedCertificate)` is SHA-256 of the canonical entire signed wrapper, not the raw JSON file and not just its payload. The operator may prepare bytes for review, but may not manufacture the reviewer's signature. The repository ships no production signing command or private key.
++For V2 there is NO separate certificate signature. `certificateDigest=releaseHash(rawCertificate)` hashes canonical sorted certificate JSON, not raw file formatting. The sole owner execution signature in step 4 binds that exact digest and therefore the whole certificate. An unsigned certificate by itself grants nothing. An old V1 signed certificate wrapper is refused in a V2 command.
+ 
+ ## 3. Real platform-owner session and current CAS
+ 
+@@ -56,7 +56,7 @@ Use that session to call `GET /api/platform/widget-release/<exact-tenant>/status
+ 
+ ## 4. Separate owner execution authorization
+ 
+-The owner signs exactly the production contract `maya.widget-release-production-authorization/1`, not a staging authorization. All fields below are mandatory:
++The owner signs exactly the production contract `maya.widget-release-production-authorization/2`, not a staging authorization. All fields below are mandatory:
+ 
+ | Field | Binding |
+ | --- | --- |
+@@ -64,16 +64,18 @@ The owner signs exactly the production contract `maya.widget-release-production-
+ | `operation` | `grant` |
+ | `tenantId`, `environment` | Exact single authorized tenant; `production` |
+ | `candidateSha`, `buildDigest` | Exact newly certified source and running compiled bytes |
+-| `certificateDigest`, `evidenceDigest` | Canonical signed certificate hash; its reviewed evidence digest |
++| `certificateDigest`, `evidenceDigest` | Canonical raw certificate hash; its reviewed evidence digest |
+ | `profileId`, `profileDigest` | Fixed `closed-input.no-handoff@1`; canonical fixed digest |
+ | `operatorId` | Actual authenticated global platform User |
+-| `approverId`, `reviewerId` | Principals bound to installed owner/security keys |
++| `approverId` | Same actual global User as operatorId and installed owner-key principal |
++| `reviewerId` | Literal null; no reviewer or second self-signature |
++| `governance`, `independentHumanReview` | Literal single-operator and false |
+ | `rollbackOwnerId` | Real designated rollback owner |
+ | `expectedVersion` | Current canonical status version |
+ | `notBefore`, `expiresAt` | UTC ISO instants; positive window of at most 24 hours |
+ | `grantExpiresAt` | Future instant, no later than authorization/certificate expiry and at most 24 hours after application |
+ 
+-The owner signs canonical UTF-8 bytes with the same wrapper convention. Package the grant command as exactly `{authorization:<signed owner wrapper>,certificate:<signed reviewer wrapper>}`. Changing any field requires a new appropriate signature. No plan/trial grant or automatic renewal exists. The offline validation is:
++The one real owner/operator signs the UTF-8 bytes returned by compiled `canonical(authorizationPayload)` using Ed25519 with no prehash. Wrap exactly `{payload,keyId,signature}`; signature is unpadded base64url (86 characters). Package the grant command as exactly `{authorization:<one signed owner wrapper>,certificate:<raw ProfileCertificate>}`. Changing a signed field or certificate requires a new owner signature. Keep signing material outside Git, chat and logs; the checker never generates keys or signs. No plan/trial grant or automatic renewal exists. The offline validation is:
+ 
+ ```sh
+ node scripts/widget-release-operator.cjs check-command "$AR1_ENV_FILE" "$AR1_TENANT" "$AR1_CANDIDATE_SHA" "$AR1_SIGNED_COMMAND_FILE" "$AR1_PLATFORM_OPERATOR_ID"
+@@ -87,6 +89,13 @@ Keep the designated rollback operator/session and owner signer available for the
+ 
+ After authorized revoke, status must be disabled and old widget tokens refused. Natural expiry also fails closed; no auto-renew. Revoke the entitlement before rolling the backend back to an artifact that cannot interpret this state. Retain the independent database/runtime rollback artifacts and the exact migration plan. Do not roll back unrelated production data. Readiness for this procedure is distinct from performing a grant/revoke or asserting an unobserved production result.
+ 
+-## Remaining external inputs
++## Unified owner actions before execution
+ 
+-Real owner public key/identity/custody confirmation; independent reviewer public key/identity and reviewed production certificate signature; actual global platform-owner login/session; separately signed execution authorization tied to the **new** candidate and current CAS. If any is missing, stop that execution step. No tenant authority, caller-authored JSON, test signature or historical receipt substitutes for it.
++1. Confirm access to the existing global platform_owner account (not the salon tenant_owner). If credentials are unavailable, complete established account recovery outside this unit. Do not fabricate/promote an account or mint a session manually.
++2. Supply one controlled Ed25519 signer's public key, key ID and fingerprint, with principal equal to that global User. Keep the private key in a secure signing location; no private secret belongs in Git or chat. If no signer exists, prepare it outside the repository after explicit owner approval.
++3. Review the new exact candidate, fresh certificate evidence, tenant, runtime bytes, current CAS, max-24-hour window and rollback owner. Provide separate production execution authorization and the single V2 execution signature. No independent reviewer is required; absence of review is explicitly recorded.
++4. For the later iPhone installation, connect/unlock the correct device and permit local developer access. Confirm the existing Apple development signing identity/profile is valid and covers that device. Renew expired provisioning through the actual Apple account owner; no silent certificate/profile generation during preparation.
++
++After separate execution permission, the agent can capture backup/pre-state, validate trust configuration, apply only the certified pending migrations, deploy exact artifacts, obtain the actual canonical session using privately supplied credentials, perform health checks, dry-run/grant/revoke, sync/build and install as authorized. Passwords, private keys and token values must not enter chat or logs. Owner-controlled signing/interactive account access cannot be fabricated by the agent. Stop if any necessary external input is absent; technical certification alone does not mean READY for production.
++
++Before execution, rehearse backup/restore, migration, canonical global login, trust validation, exact signed dry-run/grant/revoke/expiry/old-token refusal and packaging in an isolated test database with ephemeral keys. Real production state is read-only during preparation. Record all actual manual prerequisites in the release checkpoint and do not perform deploy, migration, grant, real OTP/provider effects or iPhone installation until separately authorized.
+diff --git a/maya-saas-backend/scripts/widget-release-operator.cjs b/maya-saas-backend/scripts/widget-release-operator.cjs
+index dcfcdf98..9fe3e744 100644
+--- a/maya-saas-backend/scripts/widget-release-operator.cjs
++++ b/maya-saas-backend/scripts/widget-release-operator.cjs
+@@ -6,7 +6,9 @@ const { createPublicKey, createHash } = require('node:crypto');
+ const { parse } = require('dotenv');
+ 
+ const id = (v) => typeof v === 'string' && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$/.test(v);
+-function checkConfig(env, tenantId, candidateSha) {
++function checkConfig(env, tenantId, candidateSha, governance = 'independent-review') {
++  assert.ok(['independent-review', 'single-operator'].includes(governance), 'explicit governance required');
++  const single = governance === 'single-operator';
+   assert.ok(id(tenantId) && /^[0-9a-f]{40}$/.test(candidateSha), 'exact tenant and candidate required');
+   assert.equal(env.NODE_ENV, 'production', 'production runtime required');
+   assert.equal(env.WIDGET_RELEASE_ENVIRONMENT, 'production', 'separate production environment required');
+@@ -14,7 +16,7 @@ function checkConfig(env, tenantId, candidateSha) {
+   assert.deepEqual(JSON.parse(env.WIDGET_RELEASE_PRODUCTION_TENANTS_JSON || '[]'), [tenantId], 'one exact production tenant required');
+   const trust = JSON.parse(env.WIDGET_RELEASE_PRODUCTION_TRUST_JSON || '{}');
+   assert.ok(trust && !Array.isArray(trust) && typeof trust === 'object');
+-  assert.equal(Object.keys(trust).length, 2, 'narrow initial installation requires exactly owner and security keys');
++  assert.equal(Object.keys(trust).length, single ? 1 : 2, 'exact initial-launch trust set required');
+   const entries = Object.entries(trust).map(([keyId, value]) => {
+     assert.ok(id(keyId) && value && typeof value === 'object');
+     assert.deepEqual(Object.keys(value).sort(), ['principalId', 'publicKey', 'purpose']);
+@@ -25,23 +27,26 @@ function checkConfig(env, tenantId, candidateSha) {
+     return { keyId, principalId: value.principalId, purpose: value.purpose,
+       fingerprint: createHash('sha256').update(key.export({ format: 'der', type: 'spki' })).digest('hex') };
+   });
+-  assert.deepEqual(entries.map((x) => x.purpose).sort(), ['owner', 'security']);
+-  assert.equal(new Set(entries.map((x) => x.principalId)).size, 2, 'independent reviewer identity required');
+-  assert.equal(new Set(entries.map((x) => x.fingerprint)).size, 2, 'independent reviewer key required');
+-  return { status: 'PASS', tenantId, candidateSha, keys: entries, authorityGranted: false, sessionVerified: false };
++  assert.deepEqual(entries.map((x) => x.purpose).sort(), single ? ['owner'] : ['owner', 'security']);
++  assert.equal(new Set(entries.map((x) => x.principalId)).size, single ? 1 : 2, 'distinct configured identities required');
++  assert.equal(new Set(entries.map((x) => x.fingerprint)).size, single ? 1 : 2, 'distinct configured keys required');
++  return { status: 'PASS', tenantId, candidateSha, keys: entries, governance,
++    ...(single ? { independentHumanReview: false } : {}), authorityGranted: false, sessionVerified: false };
+ }
+ 
+ function main(argv) {
+   const [mode, configFile, tenantId, candidateSha, commandFile, operatorId] = argv;
+-  assert.ok((mode === 'check-config' && argv.length === 4) || (mode === 'check-command' && argv.length === 6),
+-    'usage: check-config ENV TENANT SHA | check-command ENV TENANT SHA SIGNED_COMMAND PLATFORM_OPERATOR_ID');
++  assert.ok((mode === 'check-config' && [4, 5].includes(argv.length)) || (mode === 'check-command' && argv.length === 6),
++    'usage: check-config ENV TENANT SHA [single-operator] | check-command ENV TENANT SHA SIGNED_COMMAND PLATFORM_OPERATOR_ID');
+   const env = parse(fs.readFileSync(configFile));
+-  const result = checkConfig(env, tenantId, candidateSha);
++  const command = mode === 'check-command' ? JSON.parse(fs.readFileSync(commandFile, 'utf8')) : null;
++  const single = command?.authorization?.payload?.contract === 'maya.widget-release-production-authorization/2';
++  const result = checkConfig(env, tenantId, candidateSha,
++    mode === 'check-config' ? commandFile : single ? 'single-operator' : 'independent-review');
+   if (mode === 'check-command') {
+     assert.ok(id(operatorId), 'exact operator required');
+     const { ConfigService } = require('@nestjs/config');
+     const { WidgetReleasePolicy } = require('../dist/src/entitlements/widget-release-policy.service.js');
+-    const command = JSON.parse(fs.readFileSync(commandFile, 'utf8'));
+     const operation = command?.authorization?.payload?.operation;
+     assert.ok(['grant', 'revoke'].includes(operation));
+     const policy = new WidgetReleasePolicy(new ConfigService(env));
+diff --git a/maya-saas-backend/scripts/widget-release-operator.compiled-test.cjs b/maya-saas-backend/scripts/widget-release-operator.compiled-test.cjs
+index 44a6e2dc..9be9cbe7 100644
+--- a/maya-saas-backend/scripts/widget-release-operator.compiled-test.cjs
++++ b/maya-saas-backend/scripts/widget-release-operator.compiled-test.cjs
+@@ -11,29 +11,30 @@ const { WidgetReleasePolicy } = require('../dist/src/entitlements/widget-release
+ const { canonical, releaseHash } = require('../dist/src/entitlements/widget-release.contract');
+ const { WIDGET_RELEASE_CLAUSES } = require('../dist/src/entitlements/widget-release-clauses');
+ const { PROFILE_CERT, PROFILE_DIGEST, PROFILE_REGISTRY_DIGEST, NO_HANDOFF_PROFILE } = require('../dist/src/entitlements/widget-release-profile.contract');
+-const { PRODUCTION_RELEASE_AUTH } = require('../dist/src/entitlements/widget-release-production.contract');
++const { PRODUCTION_RELEASE_AUTH, SINGLE_OPERATOR_RELEASE_AUTH } = require('../dist/src/entitlements/widget-release-production.contract');
+ const candidate = 'a'.repeat(40), tenant = 'test-tenant', operator = 'test-operator';
+ const keys = { owner: generateKeyPairSync('ed25519'), security: generateKeyPairSync('ed25519') };
+ const signed = (purpose, payload) => ({ payload, keyId: purpose, signature: sign(null, Buffer.from(canonical(payload)), keys[purpose].privateKey).toString('base64url') });
+ const env = { NODE_ENV: 'production', WIDGET_RELEASE_ENVIRONMENT: 'production', WIDGET_RELEASE_CANDIDATE_SHA: candidate,
+   WIDGET_RELEASE_PRODUCTION_TENANTS_JSON: JSON.stringify([tenant]), WIDGET_RELEASE_PRODUCTION_TRUST_JSON: JSON.stringify(Object.fromEntries(Object.entries(keys).map(([purpose, key]) => [purpose, { purpose, principalId: 'test-'+purpose, publicKey: key.publicKey.export({ type: 'spki', format: 'pem' }) }])))};
+-function command() {
++function command(single=false) {
+   const now=Date.now(), expiresAt=new Date(now+600000).toISOString();
+   const matrix=WIDGET_RELEASE_CLAUSES.map(id=>({id,state:['G6-6','G13-R8'].includes(id)?'STOP':'L',evidenceDigest:releaseHash('synthetic '+id)}));
+   const payload={contract:PROFILE_CERT,environment:'production',scope:NO_HANDOFF_PROFILE,certification:'CERTIFIED_FOR_PROFILE',candidateSha:candidate,
+     profileDigest:PROFILE_DIGEST,registryDigest:PROFILE_REGISTRY_DIGEST,matrix,globalAuditDigest:releaseHash(matrix),
+     issuedAt:new Date(now-1000).toISOString(),expiresAt,buildDigest:new WidgetReleasePolicy(new ConfigService(env)).buildDigest()};
+   for(const k of ['carrierDigest','evidenceDigest','integrationDigest','fbe2eDigest','revocationProofDigest','isolationProofDigest','dependencyProofDigest'])payload[k]=releaseHash('synthetic '+k);
+-  const certificate=signed('security',payload);
+-  const authorization=signed('owner',{contract:PRODUCTION_RELEASE_AUTH,authorizationId:'synthetic-operator-proof',operation:'grant',tenantId:tenant,environment:'production',
+-    candidateSha:candidate,buildDigest:payload.buildDigest,certificateDigest:releaseHash(certificate),operatorId:operator,approverId:'test-owner',reviewerId:'test-security',rollbackOwnerId:operator,
++  const certificate=single?payload:signed('security',payload);
++  const authorization=signed('owner',{contract:single?SINGLE_OPERATOR_RELEASE_AUTH:PRODUCTION_RELEASE_AUTH,...(single?{governance:'single-operator',independentHumanReview:false}:{}),authorizationId:'synthetic-operator-proof',operation:'grant',tenantId:tenant,environment:'production',
++    candidateSha:candidate,buildDigest:payload.buildDigest,certificateDigest:releaseHash(certificate),operatorId:operator,approverId:single?operator:'test-owner',reviewerId:single?null:'test-security',rollbackOwnerId:operator,
+     expectedVersion:'absent',notBefore:new Date(now-1000).toISOString(),expiresAt,grantExpiresAt:expiresAt,releaseId:'synthetic-only',profileId:NO_HANDOFF_PROFILE,profileDigest:PROFILE_DIGEST,evidenceDigest:payload.evidenceDigest});
+   return {certificate,authorization};
+ }
+ function check(c, actor=operator) {
+   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'maya-operator-offline-'));
+   try {
+-    fs.writeFileSync(path.join(dir,'public.env'),Object.entries(env).map(([k,v])=>k+"='"+v+"'").join('\n'),{mode:0o600});
++    const settings=structuredClone(env); if(c.authorization?.payload?.contract===SINGLE_OPERATOR_RELEASE_AUTH) settings.WIDGET_RELEASE_PRODUCTION_TRUST_JSON=JSON.stringify({owner:{purpose:'owner',principalId:operator,publicKey:keys.owner.publicKey.export({type:'spki',format:'pem'})}});
++    fs.writeFileSync(path.join(dir,'public.env'),Object.entries(settings).map(([k,v])=>k+"='"+v+"'").join('\n'),{mode:0o600});
+     fs.writeFileSync(path.join(dir,'test-command.json'),JSON.stringify(c),{mode:0o600});
+     return spawnSync(process.execPath,[path.join(__dirname,'widget-release-operator.cjs'),'check-command',path.join(dir,'public.env'),tenant,candidate,path.join(dir,'test-command.json'),actor],
+       {cwd:path.resolve(__dirname,'..'),env:{PATH:process.env.PATH,HOME:process.env.HOME},encoding:'utf8'});
+@@ -50,3 +51,9 @@ for(const [name,edit] of [
+   ['expired authorization',c=>c.authorization=signed('owner',{...c.authorization.payload,notBefore:new Date(Date.now()-20000).toISOString(),expiresAt:new Date(Date.now()-10000).toISOString(),grantExpiresAt:new Date(Date.now()-10000).toISOString()})],
+ ])test('compiled operator CLI refuses '+name,()=>{const c=command();edit(c);const r=check(c);assert.equal(r.status,1);assert.equal(r.stdout,'');assert.match(r.stderr,/REFUSED/);});
+ test('compiled operator CLI refuses substituted platform operator',()=>assert.equal(check(command(),'other-operator').status,1));
++
++test('compiled single-operator CLI validates one execution signature and raw certificate; declares no independent review',()=>{
++ const c=command(true),r=check(c);assert.equal(r.status,0,r.stderr);const p=JSON.parse(r.stdout);assert.equal(p.governance,'single-operator');assert.equal(p.independentHumanReview,false);assert.equal(p.keys.length,1);assert.equal(p.authorityGranted,false);assert.equal(p.sessionVerified,false);
++ for(const edit of [x=>x.certificate.carrierDigest='b'.repeat(64),x=>x.authorization.signature='a'.repeat(86),x=>x.authorization=signed('owner',{...x.authorization.payload,independentHumanReview:true}),x=>x.authorization=signed('owner',{...x.authorization.payload,reviewerId:operator}),x=>x.certificate=signed('owner',x.certificate)]){const x=command(true);edit(x);assert.equal(check(x).status,1);}
++ assert.equal(check(command(true),'other-operator').status,1);
++});
+diff --git a/maya-saas-backend/scripts/widget-release-operator.test.cjs b/maya-saas-backend/scripts/widget-release-operator.test.cjs
+index d920c540..ddf49e1c 100644
+--- a/maya-saas-backend/scripts/widget-release-operator.test.cjs
++++ b/maya-saas-backend/scripts/widget-release-operator.test.cjs
+@@ -35,3 +35,10 @@ for (const [name, edit] of [
+   ['private key material', t=>t.owner.publicKey='-----BEGIN PRIVATE KEY-----'],
+   ['invalid public key', t=>t.owner.publicKey='invalid'],
+ ]) test(name+' refuses',()=>{const e=valid(),t=structuredClone(trust);edit(t);e.WIDGET_RELEASE_PRODUCTION_TRUST_JSON=JSON.stringify(t);assert.throws(()=>check(e));});
++
++test('single-operator preflight accepts one real owner key and explicitly records absent independent review',()=>{
++ const e=valid();e.WIDGET_RELEASE_PRODUCTION_TRUST_JSON=JSON.stringify({owner:trust.owner});
++ const r=checkConfig(e,'test-tenant','a'.repeat(40),'single-operator');
++ assert.equal(r.independentHumanReview,false);assert.equal(r.keys.length,1);assert.equal(r.authorityGranted,false);assert.equal(r.sessionVerified,false);
++ for(const t of [{},trust,{security:trust.security}]) {e.WIDGET_RELEASE_PRODUCTION_TRUST_JSON=JSON.stringify(t);assert.throws(()=>checkConfig(e,'test-tenant','a'.repeat(40),'single-operator'));}
++});
+diff --git a/maya-saas-backend/scripts/widgets-mutation-ci.test.mjs b/maya-saas-backend/scripts/widgets-mutation-ci.test.mjs
+index fd6b610f..c75f1e48 100644
+--- a/maya-saas-backend/scripts/widgets-mutation-ci.test.mjs
++++ b/maya-saas-backend/scripts/widgets-mutation-ci.test.mjs
+@@ -22,6 +22,36 @@ const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+ const declared = registry(path.join(backend, 'test/widgets-live/mutations'));
+ const head = 'a'.repeat(40);
+ 
++test('R01 integration artifact is built before unfiltered backend and mutation controls', () => {
++  const command = '        run: node ../maya-chat-shell/build.mjs';
++  function requireBefore(source, consumer) {
++    const lines = source.split('\n');
++    const builds = lines.flatMap((line, index) => line === command ? [index] : []);
++    const target = lines.indexOf(consumer);
++    const install = lines.indexOf('      - run: npm ci');
++    assert.equal(builds.length, 1, 'R01 artifact builder must execute exactly once');
++    assert.ok(install >= 0 && builds[0] > install && builds[0] < target,
++      'R01 artifact must follow dependency installation and precede unfiltered tests');
++  }
++  for (const [file, job, consumer] of [
++    ['platform-ci.yml', 'platform-backend', '      - run: npm test -- --runInBand'],
++    ['widgets-mutation.yml', 'widgets-mutation', '      - name: Run the battery shard'],
++  ]) {
++    const workflow = fs.readFileSync(path.resolve(backend, '../.github/workflows', file), 'utf8');
++    const marker = `  ${job}:\n`;
++    const start = workflow.indexOf(marker);
++    assert.ok(start >= 0, 'Required CI job must exist');
++    const tail = workflow.slice(start + marker.length);
++    const nextJob = tail.search(/^  [A-Za-z][\w-]*:\s*$/m);
++    const source = nextJob < 0 ? tail : tail.slice(0, nextJob);
++    requireBefore(source, consumer);
++    assert.throws(() => requireBefore(source.replace(command, ''), consumer),
++      /R01 artifact builder must execute exactly once/);
++    assert.throws(() => requireBefore(source.replace(command, '').replace(consumer, consumer + '\n' + command), consumer),
++      /precede unfiltered tests/);
++  }
++});
++
+ test('L2 release admission refuses a broken real contract and admits its restored bytes', () => {
+   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'maya-l2-contract-'));
+   const copy = path.join(root, 'maya-saas-backend');
+@@ -105,10 +135,11 @@ function fixture() {
+   });
+ }
+ 
+-test('46 batteries, 67 jobs: AR1 production unlock covers 536 declarations', () => {
++test('47 batteries, 68 jobs: AR1 single-operator governance covers 545 declarations', () => {
+   const p = plan(declared);
+-  assert.equal(p.gates.length, 46); assert.equal(p.matrix.include.length, 67);
++  assert.equal(p.gates.length, 47); assert.equal(p.matrix.include.length, 68);
+   assert.deepEqual(declared.PU.mutants.map(m => m.id), Array.from({ length: 12 }, (_, i) => `PU-M${i + 1}`));
++  assert.deepEqual(declared.SO.mutants.map(m => m.id), Array.from({ length: 9 }, (_, i) => `SO-M${i + 1}`));
+   assert.equal(declared.FB.mutants.length, 15);
+   assert.deepEqual(declared.SB1.mutants.map(m => m.id), Array.from({ length: 10 }, (_, i) => `SB1-M${String(i + 1).padStart(2, '0')}`));
+   assert.deepEqual(declared.AB.mutants.map(m => m.id), ['AB-M1', 'AB-M2']);
+@@ -122,7 +153,7 @@ test('46 batteries, 67 jobs: AR1 production unlock covers 536 declarations', ()
+   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-BOOT-LOOPBACK-1').length, 1);
+   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-P408-CLOCK-1').length, 1);
+   const r = assemble(declared, fixture(), head);
+-  assert.equal(r.length, 46); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 536);
++  assert.equal(r.length, 47); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 545);
+   for (const report of r) {
+     assert.equal(report.status, 'AS-DECLARED');
+     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
+@@ -300,7 +331,7 @@ test('gate: a baseline control is red on a non-zero step exit, a failed assertio
+     for (const c of Object.values(r.neutraliser_controls)) { c.exits[c.steps[0]] = 1; c.failed = ['red on the neutralised copy']; }
+     assert.deepEqual(redBaselineControls(r.baseline_controls), []);
+   }
+-  assert.equal(assemble(declared, receipts, head).length, 46, 'a red neutraliser control is not a red baseline');
++  assert.equal(assemble(declared, receipts, head).length, 47, 'a red neutraliser control is not a red baseline');
+ });
+ 
+ test('gate: a red baseline is a distinct shard status and a non-zero exit, and never hides a mismatch', () => {
+diff --git a/maya-saas-backend/src/entitlements/widget-release-policy.service.ts b/maya-saas-backend/src/entitlements/widget-release-policy.service.ts
+index 99ed9b95..ab696e0b 100644
+--- a/maya-saas-backend/src/entitlements/widget-release-policy.service.ts
++++ b/maya-saas-backend/src/entitlements/widget-release-policy.service.ts
+@@ -8,8 +8,10 @@ import {
+ import { widgetProofEnvironment } from './widget-release-environment';
+ import {
+   productionAuthorization,
+-  PRODUCTION_RELEASE_AUTH,
+-  type ProductionReleaseAuthorization,
++  isProductionAuthorization,
++  SINGLE_OPERATOR_RELEASE_AUTH,
++  SINGLE_OPERATOR,
++  type AnyReleaseAuthorization,
+ } from './widget-release-production.contract';
+ import { Injectable } from '@nestjs/common';
+ import { ConfigService } from '@nestjs/config';
+@@ -29,7 +31,6 @@ import {
+   RELEASE_STATE,
+   releaseDeny,
+   releaseHash,
+-  type ReleaseAuthorization,
+   type ReleaseCertificate,
+   type ReleaseCommand,
+   type Signed,
+@@ -40,6 +41,8 @@ export interface VerifiedReleaseView {
+   readonly version: string;
+   readonly certificateDigest: string;
+   readonly profileDigest: string | null;
++  readonly governance?: typeof SINGLE_OPERATOR;
++  readonly independentHumanReview?: false;
+ }
+ 
+ type TrustKey = {
+@@ -123,7 +126,7 @@ export class WidgetReleasePolicy {
+     if (!tenants.includes(tenantId)) releaseDeny('production_tenant');
+   }
+   private readAuthorization(value: unknown) {
+-    return this.signed<ReleaseAuthorization | ProductionReleaseAuthorization>(
++    return this.signed<AnyReleaseAuthorization>(
+       value,
+       'owner',
+       this.environment() === 'production'
+@@ -201,8 +204,7 @@ export class WidgetReleasePolicy {
+       releaseDeny('authorization_expired');
+     let c: ReleaseCertificate | ProfileCertificate | undefined;
+     if (operation === 'grant') {
+-      if (a.contract === PRODUCTION_RELEASE_AUTH)
+-        this.productionTenant(tenantId);
++      if (isProductionAuthorization(a)) this.productionTenant(tenantId);
+       c = this.checkCertificate(input.certificate, a, now);
+       if (
+         instant(a.grantExpiresAt) <= now.getTime() ||
+@@ -220,17 +222,19 @@ export class WidgetReleasePolicy {
+   }
+   private checkCertificate(
+     value: unknown,
+-    a: ReleaseAuthorization | ProductionReleaseAuthorization,
++    a: AnyReleaseAuthorization,
+     now: Date,
+   ) {
+-    const { payload: c, principalId } = this.signed(
+-      value,
+-      'security',
+-      (value) =>
+-        object(value).contract === PROFILE_CERT
+-          ? profileCertificate(value)
+-          : certificate(value),
+-    );
++    const { payload: c, principalId } =
++      a.contract === SINGLE_OPERATOR_RELEASE_AUTH
++        ? // Exactly one owner execution signature binds this raw certificate's digest.
++          // A second self-signature is neither needed nor represented as security review.
++          { payload: profileCertificate(value), principalId: null }
++        : this.signed(value, 'security', (value) =>
++            object(value).contract === PROFILE_CERT
++              ? profileCertificate(value)
++              : certificate(value),
++          );
+     if (
+       principalId !== a.reviewerId ||
+       releaseHash(value) !== a.certificateDigest ||
+@@ -240,7 +244,7 @@ export class WidgetReleasePolicy {
+     )
+       releaseDeny('certificate_binding');
+     if (
+-      a.contract === PRODUCTION_RELEASE_AUTH &&
++      isProductionAuthorization(a) &&
+       (c.contract !== PROFILE_CERT ||
+         c.scope !== a.profileId ||
+         c.profileDigest !== a.profileDigest ||
+@@ -299,8 +303,7 @@ export class WidgetReleasePolicy {
+         a.environment !== this.environment()
+       )
+         return null;
+-      if (a.contract === PRODUCTION_RELEASE_AUTH)
+-        this.productionTenant(tenantId);
++      if (isProductionAuthorization(a)) this.productionTenant(tenantId);
+       if (
+         instant(state.appliedAt) < instant(a.notBefore) ||
+         instant(state.appliedAt) >= instant(a.expiresAt) ||
+@@ -316,6 +319,12 @@ export class WidgetReleasePolicy {
+         version: state.version,
+         certificateDigest: a.certificateDigest,
+         profileDigest: cert.contract === PROFILE_CERT ? PROFILE_DIGEST : null,
++        ...(a.contract === SINGLE_OPERATOR_RELEASE_AUTH
++          ? {
++              governance: SINGLE_OPERATOR,
++              independentHumanReview: false as const,
++            }
++          : {}),
+       });
+     } catch {
+       return null;
+diff --git a/maya-saas-backend/src/entitlements/widget-release-production.contract.ts b/maya-saas-backend/src/entitlements/widget-release-production.contract.ts
+index f810d267..739957cf 100644
+--- a/maya-saas-backend/src/entitlements/widget-release-production.contract.ts
++++ b/maya-saas-backend/src/entitlements/widget-release-production.contract.ts
+@@ -16,6 +16,9 @@ import {
+ /** A separate owner execution decision. A certificate, legacy authorization or config flag is insufficient. */
+ export const PRODUCTION_RELEASE_AUTH =
+   'maya.widget-release-production-authorization/1' as const;
++export const SINGLE_OPERATOR_RELEASE_AUTH =
++  'maya.widget-release-production-authorization/2' as const;
++export const SINGLE_OPERATOR = 'single-operator' as const;
+ export interface ProductionReleaseAuthorization extends Omit<
+   ReleaseAuthorization,
+   'contract' | 'environment'
+@@ -28,23 +31,56 @@ export interface ProductionReleaseAuthorization extends Omit<
+   evidenceDigest: string;
+ }
+ 
++/** One actual platform principal signs execution and binds the unsigned evidence certificate.
++ * No reviewer identity or second self-signature is manufactured. V1 remains unchanged. */
++export interface SingleOperatorReleaseAuthorization extends Omit<
++  ProductionReleaseAuthorization,
++  'contract' | 'reviewerId'
++> {
++  contract: typeof SINGLE_OPERATOR_RELEASE_AUTH;
++  reviewerId: null;
++  governance: typeof SINGLE_OPERATOR;
++  independentHumanReview: false;
++}
++export type ProductionAuthorization =
++  ProductionReleaseAuthorization | SingleOperatorReleaseAuthorization;
++export type AnyReleaseAuthorization =
++  ReleaseAuthorization | ProductionAuthorization;
++export function isProductionAuthorization(
++  a: AnyReleaseAuthorization,
++): a is ProductionAuthorization {
++  return (
++    a.contract === PRODUCTION_RELEASE_AUTH ||
++    a.contract === SINGLE_OPERATOR_RELEASE_AUTH
++  );
++}
++
+ export function productionAuthorization(
+   value: unknown,
+-): ProductionReleaseAuthorization {
++): ProductionAuthorization {
++  const single =
++    (value as { contract?: unknown } | null)?.contract ===
++    SINGLE_OPERATOR_RELEASE_AUTH;
+   const v = exact(value, [
+     ...RELEASE_AUTHORIZATION_KEYS,
+     'releaseId',
+     'profileId',
+     'profileDigest',
+     'evidenceDigest',
++    ...(single ? ['governance', 'independentHumanReview'] : []),
+   ]);
+   if (
+-    v.contract !== PRODUCTION_RELEASE_AUTH ||
++    (!single && v.contract !== PRODUCTION_RELEASE_AUTH) ||
+     v.environment !== 'production' ||
+     !['grant', 'revoke'].includes(String(v.operation))
+   )
+     releaseDeny('production_authorization');
+-  validateAuthorizationFields(v);
++  if (
++    single &&
++    (v.governance !== SINGLE_OPERATOR || v.independentHumanReview !== false)
++  )
++    releaseDeny('single_operator_disclosure');
++  validateAuthorizationFields(v, single ? 'single-operator' : 'independent');
+   identifier(v.releaseId);
+   digest(v.evidenceDigest);
+   if (v.profileId !== NO_HANDOFF_PROFILE || v.profileDigest !== PROFILE_DIGEST)
+@@ -54,5 +90,5 @@ export function productionAuthorization(
+     instant(v.grantExpiresAt) > instant(v.expiresAt)
+   )
+     releaseDeny('production_execution_window');
+-  return v as unknown as ProductionReleaseAuthorization;
++  return v as unknown as ProductionAuthorization;
+ }
+diff --git a/maya-saas-backend/src/entitlements/widget-release-single-operator.spec.ts b/maya-saas-backend/src/entitlements/widget-release-single-operator.spec.ts
+new file mode 100644
+index 00000000..8a476c27
+--- /dev/null
++++ b/maya-saas-backend/src/entitlements/widget-release-single-operator.spec.ts
+@@ -0,0 +1,215 @@
++import { singleOperatorProof } from '../../test/widgets-live/support/widget-single-operator-proof';
++import { productionProof } from '../../test/widgets-live/support/widget-production-proof';
++import { productionAuthorization } from './widget-release-production.contract';
++import {
++  releaseHash,
++  RELEASE_STATE,
++  MAX_RELEASE_MS,
++} from './widget-release.contract';
++import fs from 'node:fs';
++const db =
++  '[REDACTED DATABASE URL]';
++const read = (p: ReturnType<typeof singleOperatorProof>, c: unknown) =>
++  p.policy.read(c, 'tenant', 'grant', 'operator', new Date());
++describe('AR1 V2 one real platform signer; independent review explicitly absent', () => {
++  it('SO-POSITIVE single signature binds raw certificate and disclosure; no security identity exists', () => {
++    const p = singleOperatorProof(db, 'tenant'),
++      c = p.command();
++    expect(
++      Object.keys(
++        JSON.parse(
++          p.config.getOrThrow<string>('WIDGET_RELEASE_PRODUCTION_TRUST_JSON'),
++        ) as object,
++      ),
++    ).toEqual(['owner']);
++    expect(read(p, c).a).toMatchObject({
++      approverId: 'operator',
++      operatorId: 'operator',
++      reviewerId: null,
++      governance: 'single-operator',
++      independentHumanReview: false,
++    });
++    expect(
++      c.certificate.matrix
++        .filter((x) => x.state === 'STOP')
++        .map((x) => x.id)
++        .sort(),
++    ).toEqual(['G13-R8', 'G6-6']);
++  });
++  it('SO-CONTRACT no reviewer identity, explicit absence of review and same actual approver/operator are mandatory before signing', () => {
++    const a = singleOperatorProof(db, 'tenant').command().authorization.payload;
++    for (const over of [
++      { reviewerId: 'operator' },
++      { reviewerId: 'invented' },
++      { approverId: 'other' },
++      { independentHumanReview: true },
++      { governance: 'independent-review' },
++    ])
++      expect(() => productionAuthorization({ ...a, ...over })).toThrow();
++  });
++  it.each(['governance', 'independentHumanReview', 'reviewerId'])(
++    'SO-DISCLOSURE mandatory %s',
++    (field) => {
++      const a = {
++        ...singleOperatorProof(db, 'tenant').command().authorization.payload,
++      } as Record<string, unknown>;
++      delete a[field];
++      expect(() => productionAuthorization(a)).toThrow();
++    },
++  );
++  it.each([
++    ['fabricated-reviewer', { reviewerId: 'invented-reviewer' }],
++    ['self-reviewer', { reviewerId: 'operator' }],
++    ['claimed-review', { independentHumanReview: true }],
++    ['missing-mode', { governance: 'independent-review' }],
++    ['different-approver', { approverId: 'other' }],
++    ['different-operator', { operatorId: 'other' }],
++    ['wrong-tenant', { tenantId: 'other' }],
++    ['wildcard', { tenantId: '*' }],
++    ['wrong-profile', { profileId: 'full165.closed-input' }],
++    ['wrong-profile-digest', { profileDigest: 'b'.repeat(64) }],
++    ['wrong-evidence', { evidenceDigest: 'b'.repeat(64) }],
++    ['wrong-certificate', { certificateDigest: 'b'.repeat(64) }],
++    ['staging', { environment: 'staging' }],
++    ['extra-exclusion', { extraExclusions: ['G7-5'] }],
++  ])('SO-BINDING signed %s is refused', (_name, over) => {
++    const p = singleOperatorProof(db, 'tenant'),
++      c = p.command();
++    c.authorization = p.signOwner({
++      ...c.authorization.payload,
++      ...(over as object),
++    });
++    expect(() => read(p, c)).toThrow();
++  });
++  it.each(['expired', 'future', 'over24h', 'grant-after-authorization'])(
++    'SO-WINDOW %s',
++    (which) => {
++      const p = singleOperatorProof(db, 'tenant'),
++        c = p.command(),
++        a = c.authorization.payload;
++      if (which === 'expired')
++        a.grantExpiresAt = a.expiresAt = new Date(Date.now() - 1).toISOString();
++      if (which === 'future')
++        a.notBefore = new Date(Date.now() + 30000).toISOString();
++      if (which === 'over24h')
++        a.grantExpiresAt = a.expiresAt = new Date(
++          Date.now() + MAX_RELEASE_MS + 1000,
++        ).toISOString();
++      if (which === 'grant-after-authorization')
++        a.grantExpiresAt = new Date(Date.parse(a.expiresAt) + 1).toISOString();
++      c.authorization = p.signOwner(a);
++      expect(() => read(p, c)).toThrow();
++    },
++  );
++  it('SO-SIGNATURE missing signature, caller JSON, tampered certificate and staging fallback refuse', () => {
++    const p = singleOperatorProof(db, 'tenant'),
++      c = p.command();
++    expect(() => read(p, { certificate: c.certificate })).toThrow();
++    expect(() =>
++      read(p, { ...c, authorization: c.authorization.payload }),
++    ).toThrow();
++    expect(() =>
++      read(p, {
++        ...c,
++        certificate: { ...c.certificate, carrierDigest: 'b'.repeat(64) },
++      }),
++    ).toThrow();
++    p.config.set(
++      'WIDGET_RELEASE_TRUST_JSON',
++      p.config.get('WIDGET_RELEASE_PRODUCTION_TRUST_JSON'),
++    );
++    p.config.set('WIDGET_RELEASE_PRODUCTION_TRUST_JSON', '{}');
++    expect(() => read(p, c)).toThrow();
++  });
++  it('SO-NO-SELF-SIGNATURE second certificate signature and V1 downgrade cannot substitute', () => {
++    const p = singleOperatorProof(db, 'tenant'),
++      c = p.command(),
++      old = productionProof(db, 'tenant').command();
++    expect(() => read(p, { ...c, certificate: old.certificate })).toThrow();
++    const a = {
++      ...c.authorization.payload,
++      contract: 'maya.widget-release-production-authorization/1',
++    };
++    expect(() => productionAuthorization(a)).toThrow();
++  });
++  it.each(['candidateSha', 'buildDigest'] as const)(
++    'SO-RUNNING correctly signed wrong %s refuses',
++    (field) => {
++      const p = singleOperatorProof(db, 'tenant'),
++        c = p.command();
++      c.certificate[field] = 'b'.repeat(field === 'candidateSha' ? 40 : 64);
++      c.authorization = p.signOwner({
++        ...c.authorization.payload,
++        [field]: c.certificate[field],
++        certificateDigest: releaseHash(c.certificate),
++      });
++      expect(() => read(p, c)).toThrow('running_candidate');
++    },
++  );
++  it('SO-BYTES re-reads bytes and refuses a changed build after admission', () => {
++    const p = singleOperatorProof(db, 'tenant'),
++      c = p.command();
++    read(p, c);
++    const original = fs.readFileSync;
++    const spy = jest.spyOn(fs, 'readFileSync').mockImplementation(((
++      path: fs.PathOrFileDescriptor,
++      ...args: unknown[]
++    ) => {
++      const bytes = (original as (...a: unknown[]) => unknown)(path, ...args);
++      return String(path).endsWith('widget-release-policy.service.ts') &&
++        Buffer.isBuffer(bytes)
++        ? Buffer.concat([bytes, Buffer.from('changed')])
++        : bytes;
++    }) as typeof fs.readFileSync);
++    try {
++      expect(() => read(p, c)).toThrow('running_candidate');
++    } finally {
++      spy.mockRestore();
++    }
++  });
++  it('SO-MULTITENANT same global principal supports distinct ordinary tenants with separately bound grants', () => {
++    const p = singleOperatorProof(db, 'tenant');
++    p.config.set(
++      'WIDGET_RELEASE_PRODUCTION_TENANTS_JSON',
++      '["tenant","another-tenant"]',
++    );
++    for (const tenant of ['tenant', 'another-tenant']) {
++      const c = p.command('absent', tenant);
++      expect(
++        p.policy.read(c, tenant, 'grant', 'operator', new Date()).a.tenantId,
++      ).toBe(tenant);
++      expect(() =>
++        p.policy.read(
++          c,
++          tenant === 'tenant' ? 'another-tenant' : 'tenant',
++          'grant',
++          'operator',
++          new Date(),
++        ),
++      ).toThrow();
++    }
++  });
++  it('SO-READER disclosure survives persistence; expiry, foreign row and allowlist removal disable access', () => {
++    const p = singleOperatorProof(db, 'tenant'),
++      c = p.command(),
++      now = new Date();
++    const row = {
++      enabled: true,
++      expiresAt: new Date(c.authorization.payload.grantExpiresAt!),
++      configJson: {
++        contract: RELEASE_STATE,
++        version: releaseHash('version'),
++        appliedAt: now.toISOString(),
++        command: c,
++      },
++    };
++    expect(p.policy.view('tenant', row, now)).toMatchObject({
++      governance: 'single-operator',
++      independentHumanReview: false,
++    });
++    expect(p.policy.view('other', row, now)).toBeNull();
++    expect(p.policy.view('tenant', row, row.expiresAt)).toBeNull();
++    p.config.set('WIDGET_RELEASE_PRODUCTION_TENANTS_JSON', '[]');
++    expect(p.policy.view('tenant', row, now)).toBeNull();
++  });
++});
+diff --git a/maya-saas-backend/src/entitlements/widget-release.contract.ts b/maya-saas-backend/src/entitlements/widget-release.contract.ts
+index c23367c1..763f0394 100644
+--- a/maya-saas-backend/src/entitlements/widget-release.contract.ts
++++ b/maya-saas-backend/src/entitlements/widget-release.contract.ts
+@@ -1,5 +1,5 @@
+ import type { ProfileCertificate } from './widget-release-profile.contract';
+-import type { ProductionReleaseAuthorization } from './widget-release-production.contract';
++import type { AnyReleaseAuthorization } from './widget-release-production.contract';
+ import { createHash } from 'node:crypto';
+ import { ForbiddenException } from '@nestjs/common';
+ import { WIDGET_RELEASE_CLAUSES } from './widget-release-clauses';
+@@ -62,8 +62,9 @@ export interface ReleaseCertificate {
+   matrix: ReleaseClause[];
+ }
+ export interface ReleaseCommand {
+-  authorization: Signed<ReleaseAuthorization | ProductionReleaseAuthorization>;
+-  certificate?: Signed<ReleaseCertificate | ProfileCertificate>;
++  authorization: Signed<AnyReleaseAuthorization>;
++  certificate?:
++    Signed<ReleaseCertificate | ProfileCertificate> | ProfileCertificate;
+ }
+ export interface ReleaseReceipt {
+   contract: 'maya.widget-release-receipt/1';
+@@ -74,13 +75,15 @@ export interface ReleaseReceipt {
+   certificateDigest: string;
+   actorId: string;
+   approverId: string;
+-  reviewerId: string;
++  reviewerId: string | null;
+   rollbackOwnerId: string;
+   previousVersion: string;
+   version: string;
+   appliedAt: string;
+   expiresAt: string | null;
+   auditId: string;
++  governance?: 'single-operator';
++  independentHumanReview?: false;
+   execution?: {
+     releaseId: string;
+     environment: 'production';
+@@ -168,13 +171,15 @@ export function authorization(value: unknown): ReleaseAuthorization {
+ }
+ 
+ /** Shared syntax/window rules only. Each version separately admits its environment and keys. */
+-export function validateAuthorizationFields(v: Record<string, unknown>): void {
++export function validateAuthorizationFields(
++  v: Record<string, unknown>,
++  review: 'independent' | 'single-operator' = 'independent',
++): void {
+   for (const k of [
+     'authorizationId',
+     'tenantId',
+     'operatorId',
+     'approverId',
+-    'reviewerId',
+     'rollbackOwnerId',
+   ])
+     identifier(v[k]);
+@@ -193,8 +198,14 @@ export function validateAuthorizationFields(v: Record<string, unknown>): void {
+     releaseDeny('authorization_window');
+   if (v.operation === 'grant') instant(v.grantExpiresAt);
+   else if (v.grantExpiresAt !== null) releaseDeny('revoke_expiry');
+-  if (v.reviewerId === v.approverId || v.reviewerId === v.operatorId)
+-    releaseDeny('independent_reviewer');
++  if (review === 'single-operator') {
++    if (v.reviewerId !== null || v.approverId !== v.operatorId)
++      releaseDeny('single_operator_identity');
++  } else {
++    identifier(v.reviewerId);
++    if (v.reviewerId === v.approverId || v.reviewerId === v.operatorId)
++      releaseDeny('independent_reviewer');
++  }
+ }
+ export function certificate(value: unknown): ReleaseCertificate {
+   const v = exact(value, [
+diff --git a/maya-saas-backend/src/entitlements/widget-release.service.ts b/maya-saas-backend/src/entitlements/widget-release.service.ts
+index ed9c6cfb..6e1ff782 100644
+--- a/maya-saas-backend/src/entitlements/widget-release.service.ts
++++ b/maya-saas-backend/src/entitlements/widget-release.service.ts
+@@ -1,5 +1,9 @@
+ import { NO_HANDOFF_PROFILE } from './widget-release-profile.contract';
+-import { PRODUCTION_RELEASE_AUTH } from './widget-release-production.contract';
++import {
++  isProductionAuthorization,
++  SINGLE_OPERATOR_RELEASE_AUTH,
++  SINGLE_OPERATOR,
++} from './widget-release-production.contract';
+ import { ConflictException, Injectable } from '@nestjs/common';
+ import { randomUUID } from 'node:crypto';
+ import type { Prisma, TenantEntitlement } from '@prisma/client';
+@@ -70,6 +74,9 @@ export class WidgetReleaseService {
+         candidateSha: row?.configJson
+           ? (object(row.configJson).candidateSha ?? null)
+           : null,
++        ...(view?.governance === SINGLE_OPERATOR
++          ? { governance: SINGLE_OPERATOR, independentHumanReview: false }
++          : {}),
+       };
+     });
+   }
+@@ -154,17 +161,23 @@ export class WidgetReleaseService {
+             state.certificateDigest !== a.certificateDigest
+           )
+             releaseDeny('revoke_target');
+-          if (a.contract === PRODUCTION_RELEASE_AUTH) {
++          if (isProductionAuthorization(a)) {
+             const granted = object(
+               object(object(state.command).authorization).payload,
+             );
+             if (
+-              granted.contract !== PRODUCTION_RELEASE_AUTH ||
++              granted.contract !== a.contract ||
+               granted.releaseId !== a.releaseId ||
+               granted.profileId !== a.profileId ||
+               granted.profileDigest !== a.profileDigest ||
+               granted.evidenceDigest !== a.evidenceDigest ||
+-              granted.buildDigest !== a.buildDigest
++              granted.buildDigest !== a.buildDigest ||
++              (a.contract === SINGLE_OPERATOR_RELEASE_AUTH &&
++                (granted.governance !== SINGLE_OPERATOR ||
++                  granted.independentHumanReview !== false ||
++                  granted.reviewerId !== null ||
++                  granted.approverId !== a.approverId ||
++                  granted.operatorId !== a.operatorId))
+             )
+               releaseDeny('production_revoke_target');
+           }
+@@ -177,6 +190,9 @@ export class WidgetReleaseService {
+             previousVersion,
+             candidateSha: a.candidateSha,
+             certificateDigest: a.certificateDigest,
++            ...(a.contract === SINGLE_OPERATOR_RELEASE_AUTH
++              ? { governance: SINGLE_OPERATOR, independentHumanReview: false }
++              : {}),
+           };
+         const data = {
+           enabled: operation === 'grant',
+@@ -213,7 +229,13 @@ export class WidgetReleaseService {
+           appliedAt: now.toISOString(),
+           expiresAt: updated.expiresAt?.toISOString() ?? null,
+           auditId,
+-          ...(a.contract === PRODUCTION_RELEASE_AUTH
++          ...(a.contract === SINGLE_OPERATOR_RELEASE_AUTH
++            ? {
++                governance: SINGLE_OPERATOR,
++                independentHumanReview: false as const,
++              }
++            : {}),
++          ...(isProductionAuthorization(a)
+             ? {
+                 execution: {
+                   releaseId: a.releaseId,
+@@ -256,7 +278,7 @@ export class WidgetReleaseService {
+           tx,
+         );
+         // Production must fail closed even if an audit adapter silently drops the write.
+-        if (a.contract === PRODUCTION_RELEASE_AUTH) {
++        if (isProductionAuthorization(a)) {
+           const recorded = await tx.auditLog.findUnique({
+             where: { id: auditId },
+           });
+diff --git a/maya-saas-backend/test/widgets-live/mutations/gatePU.json b/maya-saas-backend/test/widgets-live/mutations/gatePU.json
+index a6eb648b..e59d408c 100644
+--- a/maya-saas-backend/test/widgets-live/mutations/gatePU.json
++++ b/maya-saas-backend/test/widgets-live/mutations/gatePU.json
+@@ -80,7 +80,7 @@
+     "id": "PU-M8",
+     "description": "PU-READER",
+     "file": "src/entitlements/widget-release-policy.service.ts",
+-    "find": "return null;\n      if (a.contract === PRODUCTION_RELEASE_AUTH)\n        this.productionTenant(tenantId);",
++    "find": "return null;\n      if (isProductionAuthorization(a)) this.productionTenant(tenantId);",
+     "replace": "return null;\n      // mutation: reader no longer checks current allowlist",
+     "killers": [
+       "PU-READER"
+@@ -91,7 +91,7 @@
+     "id": "PU-M9",
+     "description": "PU-AUDIT-NOOP",
+     "file": "src/entitlements/widget-release.service.ts",
+-    "find": "if (a.contract === PRODUCTION_RELEASE_AUTH) {\n          const recorded",
++    "find": "if (isProductionAuthorization(a)) {\n          const recorded",
+     "replace": "if (false) {\n          const recorded",
+     "killers": [
+       "PU-AUDIT-NOOP"
+diff --git a/maya-saas-backend/test/widgets-live/mutations/gateSO.json b/maya-saas-backend/test/widgets-live/mutations/gateSO.json
+new file mode 100644
+index 00000000..1eafd1c9
+--- /dev/null
++++ b/maya-saas-backend/test/widgets-live/mutations/gateSO.json
+@@ -0,0 +1,101 @@
++[
++  {
++    "id": "SO-M1",
++    "description": "SO-CONTRACT",
++    "file": "src/entitlements/widget-release-production.contract.ts",
++    "find": "v.independentHumanReview !== false",
++    "replace": "false",
++    "killers": [
++      "SO-CONTRACT"
++    ],
++    "expect": "build-killed"
++  },
++  {
++    "id": "SO-M2",
++    "description": "SO-CONTRACT",
++    "file": "src/entitlements/widget-release-production.contract.ts",
++    "find": "v.governance !== SINGLE_OPERATOR",
++    "replace": "false",
++    "killers": [
++      "SO-CONTRACT"
++    ],
++    "expect": "build-killed"
++  },
++  {
++    "id": "SO-M3",
++    "description": "SO-CONTRACT",
++    "file": "src/entitlements/widget-release.contract.ts",
++    "find": "v.reviewerId !== null",
++    "replace": "false",
++    "killers": [
++      "SO-CONTRACT"
++    ],
++    "expect": "build-killed"
++  },
++  {
++    "id": "SO-M4",
++    "description": "SO-CONTRACT",
++    "file": "src/entitlements/widget-release.contract.ts",
++    "find": "v.approverId !== v.operatorId",
++    "replace": "false",
++    "killers": [
++      "SO-CONTRACT"
++    ],
++    "expect": "build-killed"
++  },
++  {
++    "id": "SO-M5",
++    "description": "SO-SIGNATURE",
++    "file": "src/entitlements/widget-release-policy.service.ts",
++    "find": "releaseHash(value) !== a.certificateDigest",
++    "replace": "false",
++    "killers": [
++      "SO-SIGNATURE"
++    ],
++    "expect": "build-killed"
++  },
++  {
++    "id": "SO-M6",
++    "description": "SO-READER",
++    "file": "src/entitlements/widget-release-policy.service.ts",
++    "find": "if (isProductionAuthorization(a)) this.productionTenant(tenantId);\n      if (",
++    "replace": "if (false) this.productionTenant(tenantId);\n      if (",
++    "killers": [
++      "SO-READER"
++    ],
++    "expect": "build-killed"
++  },
++  {
++    "id": "SO-M7",
++    "description": "SO-AUDIT-NOOP",
++    "file": "src/entitlements/widget-release.service.ts",
++    "find": "if (isProductionAuthorization(a)) {\n          const recorded",
++    "replace": "if (a.contract !== SINGLE_OPERATOR_RELEASE_AUTH && isProductionAuthorization(a)) {\n          const recorded",
++    "killers": [
++      "SO-AUDIT-NOOP"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "SO-M8",
++    "description": "SO-LIFECYCLE",
++    "file": "src/entitlements/widget-release.service.ts",
++    "find": "independentHumanReview: false as const",
++    "replace": "independentHumanReview: true as never",
++    "killers": [
++      "SO-LIFECYCLE"
++    ],
++    "expect": "live-killed"
++  },
++  {
++    "id": "SO-M9",
++    "description": "SO-REVOKE-VERSION",
++    "file": "src/entitlements/widget-release.service.ts",
++    "find": "granted.contract !== a.contract ||",
++    "replace": "false ||",
++    "killers": [
++      "SO-REVOKE-VERSION"
++    ],
++    "expect": "live-killed"
++  }
++]
+diff --git a/maya-saas-backend/test/widgets-live/support/widget-single-operator-proof.ts b/maya-saas-backend/test/widgets-live/support/widget-single-operator-proof.ts
+new file mode 100644
+index 00000000..3c017bef
+--- /dev/null
++++ b/maya-saas-backend/test/widgets-live/support/widget-single-operator-proof.ts
+@@ -0,0 +1,122 @@
++// One ephemeral test signer. No reviewer, production key, real identity or transport.
++import { ConfigService } from '@nestjs/config';
++import { generateKeyPairSync, sign, randomUUID } from 'node:crypto';
++import { assertProofDatabase } from './proof-db-guard';
++import { WIDGET_RELEASE_CLAUSES } from '../../../src/entitlements/widget-release-clauses';
++import { WidgetReleasePolicy } from '../../../src/entitlements/widget-release-policy.service';
++import {
++  canonical,
++  releaseHash,
++  type Signed,
++} from '../../../src/entitlements/widget-release.contract';
++import {
++  SINGLE_OPERATOR,
++  SINGLE_OPERATOR_RELEASE_AUTH,
++  type SingleOperatorReleaseAuthorization,
++} from '../../../src/entitlements/widget-release-production.contract';
++import {
++  NO_HANDOFF_PROFILE,
++  PROFILE_CERT,
++  PROFILE_DIGEST,
++  PROFILE_REGISTRY_DIGEST,
++  type ProfileCertificate,
++} from '../../../src/entitlements/widget-release-profile.contract';
++
++export function singleOperatorProof(
++  databaseUrl: string,
++  tenant: string,
++  operator = 'operator',
++) {
++  assertProofDatabase({ ...process.env, DATABASE_URL: databaseUrl });
++  const owner = generateKeyPairSync('ed25519');
++  const config = new ConfigService({
++    NODE_ENV: 'production',
++    DATABASE_URL: databaseUrl,
++    WIDGET_RELEASE_ENVIRONMENT: 'production',
++    WIDGET_RELEASE_CANDIDATE_SHA: 'a'.repeat(40),
++    WIDGET_RELEASE_TRUST_JSON: '{}',
++    WIDGET_RELEASE_PRODUCTION_TENANTS_JSON: JSON.stringify([tenant]),
++    WIDGET_RELEASE_PRODUCTION_TRUST_JSON: JSON.stringify({
++      owner: {
++        principalId: operator,
++        purpose: 'owner',
++        publicKey: owner.publicKey.export({ type: 'spki', format: 'pem' }),
++      },
++    }),
++  });
++  const policy = new WidgetReleasePolicy(config);
++  const signOwner = (
++    payload: SingleOperatorReleaseAuthorization,
++  ): Signed<SingleOperatorReleaseAuthorization> => ({
++    payload,
++    keyId: 'owner',
++    signature: sign(
++      null,
++      Buffer.from(canonical(payload)),
++      owner.privateKey,
++    ).toString('base64url'),
++  });
++  const command = (expectedVersion = 'absent', tenantId = tenant) => {
++    const now = Date.now(),
++      expiresAt = new Date(now + 600000).toISOString();
++    const matrix: ProfileCertificate['matrix'] = WIDGET_RELEASE_CLAUSES.map(
++      (id) =>
++        id === 'G6-6' || id === 'G13-R8'
++          ? {
++              id,
++              state: 'STOP',
++              evidenceDigest: releaseHash('synthetic ' + id),
++            }
++          : { id, state: 'L', evidenceDigest: releaseHash('synthetic ' + id) },
++    );
++    const certificate: ProfileCertificate = {
++      contract: PROFILE_CERT,
++      environment: 'production',
++      scope: NO_HANDOFF_PROFILE,
++      certification: 'CERTIFIED_FOR_PROFILE',
++      candidateSha: 'a'.repeat(40),
++      buildDigest: policy.buildDigest(),
++      profileDigest: PROFILE_DIGEST,
++      registryDigest: PROFILE_REGISTRY_DIGEST,
++      carrierDigest: releaseHash('synthetic carrier'),
++      evidenceDigest: releaseHash('synthetic evidence'),
++      integrationDigest: releaseHash('synthetic integration'),
++      fbe2eDigest: releaseHash('synthetic fbe2e'),
++      revocationProofDigest: releaseHash('synthetic revocation'),
++      isolationProofDigest: releaseHash('synthetic isolation'),
++      dependencyProofDigest: releaseHash('synthetic dependency'),
++      matrix,
++      globalAuditDigest: releaseHash(matrix),
++      issuedAt: new Date(now - 1000).toISOString(),
++      expiresAt,
++    };
++    return {
++      certificate,
++      authorization: signOwner({
++        contract: SINGLE_OPERATOR_RELEASE_AUTH,
++        governance: SINGLE_OPERATOR,
++        independentHumanReview: false,
++        reviewerId: null,
++        authorizationId: randomUUID(),
++        releaseId: 'synthetic-release',
++        operation: 'grant',
++        tenantId,
++        environment: 'production',
++        candidateSha: certificate.candidateSha,
++        buildDigest: certificate.buildDigest,
++        certificateDigest: releaseHash(certificate),
++        evidenceDigest: certificate.evidenceDigest,
++        profileId: NO_HANDOFF_PROFILE,
++        profileDigest: PROFILE_DIGEST,
++        approverId: operator,
++        operatorId: operator,
++        rollbackOwnerId: operator,
++        expectedVersion,
++        notBefore: certificate.issuedAt,
++        expiresAt,
++        grantExpiresAt: expiresAt,
++      }),
++    };
++  };
++  return { config, policy, command, signOwner };
++}
+diff --git a/maya-saas-backend/test/widgets-live/widget-single-operator.binary-spec.ts b/maya-saas-backend/test/widgets-live/widget-single-operator.binary-spec.ts
+new file mode 100644
+index 00000000..ede2b919
+--- /dev/null
++++ b/maya-saas-backend/test/widgets-live/widget-single-operator.binary-spec.ts
+@@ -0,0 +1,295 @@
++import request from 'supertest';
++import type { ReleaseReceipt } from '../../src/entitlements/widget-release.contract';
++const resultBody = (r: { body: unknown }) =>
++  r.body as {
++    access_token: string;
++    replayed: boolean;
++    enabled: boolean;
++    receipt: ReleaseReceipt;
++  };
++import { ConfigService } from '@nestjs/config';
++import { spawn } from 'node:child_process';
++import { once } from 'node:events';
++import { createServer } from 'node:net';
++import { resolve } from 'node:path';
++import {
++  assertNoEnvFiles,
++  widgetsLiveChildEnvironment,
++} from './support/environment';
++import type { WidgetReleasePolicy } from '../../src/entitlements/widget-release-policy.service';
++import { randomUUID } from 'node:crypto';
++import { releaseHash } from '../../src/entitlements/widget-release.contract';
++import { CalendarSource, UserRole } from '../../src/common/domain.enums';
++import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
++import {
++  bootHttp,
++  fixturesForHttp,
++  type HttpHarness,
++} from './support/http-bootstrap';
++import type { Fixtures } from './support/fixtures';
++import { assertProofDatabase } from './support/proof-db-guard';
++import { singleOperatorProof } from './support/widget-single-operator-proof';
++import type { SingleOperatorReleaseAuthorization } from '../../src/entitlements/widget-release-production.contract';
++
++// Full production guards, writer, reader and real PostgreSQL; ephemeral synthetic signing keys.
++describe('AR-1 single-operator production execution (ephemeral keys, guarded proof DB) [HTTP] [PostgreSQL]', () => {
++  let db: FixtureContext, http: HttpHarness, fx: Fixtures;
++  const users: string[] = [],
++    tenants: string[] = [];
++  beforeAll(async () => {
++    assertProofDatabase();
++    db = await bootFixtureContext();
++    http = await bootHttp();
++    fx = fixturesForHttp(db, http);
++  });
++  afterAll(async () => {
++    if (db) {
++      await db.prisma.auditLog.deleteMany({
++        where: { action: 'widget.release', entityId: { in: tenants } },
++      });
++    }
++    await fx?.teardown();
++    if (db)
++      await db.prisma.user.deleteMany({
++        where: { id: { in: users }, tenantId: null },
++      });
++    await http?.close();
++    await db?.close();
++  });
++  async function fixture() {
++    const tenant = await fx.tenant('AR1 synthetic', CalendarSource.INTERNAL);
++    tenants.push(tenant.id);
++    const operator = await fx.user(tenant, UserRole.PLATFORM_OWNER);
++    users.push(operator.id);
++    await db.prisma.user.update({
++      where: { id: operator.id },
++      data: { tenantId: null },
++    });
++    const login = await request(http.app.getHttpServer())
++      .post('/api/auth/login')
++      .send({ email: operator.email, password: operator.password });
++    expect(login.status).toBe(201);
++    const token = resultBody(login).access_token;
++    // Registration is not an entitlement grant; the writer is the only grant in this fixture.
++    await db.prisma.feature.upsert({
++      where: { key: 'widgets.runtime' },
++      update: {},
++      create: {
++        key: 'widgets.runtime',
++        name: 'Widget runtime',
++        description: 'synthetic',
++        module: 'platform',
++        status: 'active',
++      },
++    });
++    const p = singleOperatorProof(
++      process.env.DATABASE_URL!,
++      tenant.id,
++      operator.id,
++    );
++    const cfg = http.app.get(ConfigService);
++    for (const key of [
++      'WIDGET_RELEASE_ENVIRONMENT',
++      'WIDGET_RELEASE_CANDIDATE_SHA',
++      'WIDGET_RELEASE_TRUST_JSON',
++      'WIDGET_RELEASE_PRODUCTION_TRUST_JSON',
++      'WIDGET_RELEASE_PRODUCTION_TENANTS_JSON',
++    ])
++      cfg.set(key, p.config.get(key));
++    const route = '/api/platform/widget-release/' + tenant.id;
++    const post = (action: string, body: unknown, override = token) =>
++      request(http.app.getHttpServer())
++        .post(route + '/' + action)
++        .set('Authorization', 'Bearer ' + override)
++        .send(body as object);
++    const status = () =>
++      request(http.app.getHttpServer())
++        .get(route + '/status')
++        .set('Authorization', 'Bearer ' + token);
++    const command = p.command();
++    const revoke = (
++      version: string,
++      over: Partial<SingleOperatorReleaseAuthorization> = {},
++    ) => ({
++      authorization: p.signOwner({
++        ...command.authorization.payload,
++        authorizationId: randomUUID(),
++        operation: 'revoke',
++        expectedVersion: version,
++        grantExpiresAt: null,
++        ...over,
++      }),
++    });
++    return { tenant, operator, p, token, post, status, command, revoke };
++  }
++  const audits = (tenantId: string) =>
++    db.prisma.auditLog.findMany({
++      where: { action: 'widget.release', entityId: tenantId },
++    });
++  it('SO-BIN [BIN] two production binaries observe the same grant, revoke and expiry without stale process state', async () => {
++    assertNoEnvFiles();
++    const f = await fixture();
++    // The separately built artifact computes its own bytes, not the ts-jest application digest.
++    // eslint-disable-next-line @typescript-eslint/no-require-imports
++    const compiled = require(
++      resolve(
++        process.cwd(),
++        'dist/src/entitlements/widget-release-policy.service.js',
++      ),
++    ) as { WidgetReleasePolicy: new (c: ConfigService) => WidgetReleasePolicy };
++    const buildDigest = new compiled.WidgetReleasePolicy(
++      f.p.config,
++    ).buildDigest();
++    const command = f.p.command();
++    command.certificate = {
++      ...command.certificate,
++      buildDigest,
++    };
++    command.authorization = f.p.signOwner({
++      ...command.authorization.payload,
++      buildDigest,
++      certificateDigest: releaseHash(command.certificate),
++    });
++    async function binary() {
++      const socket = createServer();
++      socket.listen(0, '127.0.0.1');
++      await once(socket, 'listening');
++      const address = socket.address();
++      if (!address || typeof address === 'string')
++        throw new Error('loopback port');
++      const port = address.port;
++      await new Promise<void>((r) => socket.close(() => r()));
++      const settings: Record<string, string> = {
++        HOST: '127.0.0.1',
++        PORT: String(port),
++        NODE_ENV: 'production',
++        CLIENT_IDENTITY_HASH_SECRET:
++          'ephemeral-client-identity-domain-for-ar1-binary-proof',
++        CORS_ALLOWED_ORIGINS: 'capacitor://localhost',
++        AUTH_TRUST_PROXY: '127.0.0.1',
++        PHONE_LOGIN_ENABLED: 'false',
++        EMAIL_LOGIN_ENABLED: 'false',
++        SWAGGER_ENABLED: 'false',
++        AI_CORE_PROVIDER: 'safe',
++      };
++      for (const key of [
++        'WIDGET_RELEASE_ENVIRONMENT',
++        'WIDGET_RELEASE_CANDIDATE_SHA',
++        'WIDGET_RELEASE_TRUST_JSON',
++        'WIDGET_RELEASE_PRODUCTION_TRUST_JSON',
++        'WIDGET_RELEASE_PRODUCTION_TENANTS_JSON',
++      ])
++        settings[key] = f.p.config.getOrThrow<string>(key);
++      const { env } = widgetsLiveChildEnvironment(process.env, settings);
++      const child = spawn(process.execPath, ['dist/src/main'], {
++        cwd: process.cwd(),
++        env,
++        stdio: ['ignore', 'pipe', 'pipe'],
++      });
++      let diagnostic = '';
++      for (const stream of [child.stdout, child.stderr])
++        stream.on('data', (chunk: Buffer) => {
++          diagnostic = (diagnostic + chunk.toString()).slice(-12000);
++        });
++      const stop = async () => {
++        if (child.exitCode !== null || child.signalCode !== null) return;
++        const done = once(child, 'exit');
++        child.kill('SIGTERM');
++        const timer = setTimeout(() => child.kill('SIGKILL'), 3000);
++        try {
++          await done;
++        } finally {
++          clearTimeout(timer);
++        }
++      };
++      try {
++        const until = Date.now() + 20000;
++        let ready = false;
++        while (Date.now() < until) {
++          if (child.exitCode !== null)
++            throw new Error('binary exited: ' + diagnostic);
++          try {
++            ready = (await fetch('http://127.0.0.1:' + port + '/api/health'))
++              .ok;
++          } catch {
++            /* Loopback process is still starting. */
++          }
++          if (ready) break;
++          await new Promise((r) => setTimeout(r, 50));
++        }
++        if (!ready) throw new Error('binary health deadline: ' + diagnostic);
++        const call = async (action: string, body?: unknown) => {
++          const response = await fetch(
++            'http://127.0.0.1:' +
++              port +
++              '/api/platform/widget-release/' +
++              f.tenant.id +
++              '/' +
++              action,
++            {
++              method: body ? 'POST' : 'GET',
++              headers: {
++                authorization: '[REDACTED]' + f.token,
++                'content-type': 'application/json',
++              },
++              ...(body ? { body: JSON.stringify(body) } : {}),
++            },
++          );
++          return {
++            status: response.status,
++            body: (await response.json()) as unknown,
++          };
++        };
++        return { call, stop };
++      } catch (error) {
++        await stop();
++        throw error;
++      }
++    }
++    const one = await binary();
++    let two: Awaited<ReturnType<typeof binary>> | undefined;
++    try {
++      two = await binary();
++      expect(
++        (await one.call('grant', { certificate: command.certificate })).status,
++      ).toBe(403);
++      const grant = await one.call('grant', command);
++      expect(grant).toMatchObject({ status: 201 });
++      expect(resultBody(grant).receipt.execution?.environment).toBe(
++        'production',
++      );
++      expect(resultBody(await two.call('status')).enabled).toBe(true);
++      const revoke = {
++        authorization: f.p.signOwner({
++          ...command.authorization.payload,
++          authorizationId: randomUUID(),
++          operation: 'revoke',
++          expectedVersion: resultBody(grant).receipt.version,
++          grantExpiresAt: null,
++        }),
++      };
++      const revoked = await two.call('revoke', revoke);
++      expect(revoked.status).toBe(201);
++      expect(resultBody(await one.call('status')).enabled).toBe(false);
++      expect((await one.call('grant', command)).status).toBe(201);
++      expect(resultBody(await two.call('status')).enabled).toBe(false);
++      const expiryCommand = structuredClone(command);
++      const expiry = new Date(Date.now() + 1200).toISOString();
++      expiryCommand.authorization = f.p.signOwner({
++        ...command.authorization.payload,
++        authorizationId: randomUUID(),
++        expectedVersion: resultBody(revoked).receipt.version,
++        grantExpiresAt: expiry,
++      });
++      expect((await one.call('grant', expiryCommand)).status).toBe(201);
++      expect(resultBody(await two.call('status')).enabled).toBe(true);
++      await new Promise((r) => setTimeout(r, 1400));
++      expect(resultBody(await one.call('status')).enabled).toBe(false);
++      expect(resultBody(await two.call('status')).enabled).toBe(false);
++      expect(await audits(f.tenant.id)).toHaveLength(3);
++    } finally {
++      await two?.stop();
++      await one.stop();
++    }
++  });
++});
+diff --git a/maya-saas-backend/test/widgets-live/widget-single-operator.live-spec.ts b/maya-saas-backend/test/widgets-live/widget-single-operator.live-spec.ts
+new file mode 100644
+index 00000000..e0b8a855
+--- /dev/null
++++ b/maya-saas-backend/test/widgets-live/widget-single-operator.live-spec.ts
+@@ -0,0 +1,518 @@
++import request from 'supertest';
++import {
++  releaseHash,
++  type ReleaseReceipt,
++} from '../../src/entitlements/widget-release.contract';
++const resultBody = (r: { body: unknown }) =>
++  r.body as {
++    access_token: string;
++    replayed: boolean;
++    enabled: boolean;
++    receipt: ReleaseReceipt;
++  };
++import { ConfigService } from '@nestjs/config';
++import { randomUUID } from 'node:crypto';
++import { WidgetReleaseService } from '../../src/entitlements/widget-release.service';
++import { AuditLogService } from '../../src/audit-log/audit-log.service';
++import { CalendarSource, UserRole } from '../../src/common/domain.enums';
++import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
++import {
++  bootHttp,
++  fixturesForHttp,
++  type HttpHarness,
++} from './support/http-bootstrap';
++import type { Fixtures } from './support/fixtures';
++import { assertProofDatabase } from './support/proof-db-guard';
++import { singleOperatorProof } from './support/widget-single-operator-proof';
++import { productionProof } from './support/widget-production-proof';
++import type { SingleOperatorReleaseAuthorization } from '../../src/entitlements/widget-release-production.contract';
++import { WidgetReleaseAccessService } from '../../src/entitlements/widget-release-access.service';
++import { PROFILE_REGISTRY_DIGEST } from '../../src/entitlements/widget-release-profile.contract';
++
++// Full production guards, writer, reader and real PostgreSQL; ephemeral synthetic signing keys.
++describe('AR-1 single-operator production execution contract with ephemeral test keys [HTTP] [PostgreSQL]', () => {
++  let db: FixtureContext, http: HttpHarness, fx: Fixtures;
++  const users: string[] = [],
++    tenants: string[] = [];
++  afterEach(() => {
++    if (http) http.app.get(ConfigService).set('NODE_ENV', 'test');
++  });
++  beforeAll(async () => {
++    assertProofDatabase();
++    db = await bootFixtureContext();
++    http = await bootHttp();
++    fx = fixturesForHttp(db, http);
++  });
++  afterAll(async () => {
++    if (db) {
++      await db.prisma.auditLog.deleteMany({
++        where: { action: 'widget.release', entityId: { in: tenants } },
++      });
++    }
++    await fx?.teardown();
++    if (db)
++      await db.prisma.user.deleteMany({
++        where: { id: { in: users }, tenantId: null },
++      });
++    await http?.close();
++    await db?.close();
++  });
++  async function fixture() {
++    const tenant = await fx.tenant('AR1 synthetic', CalendarSource.INTERNAL);
++    tenants.push(tenant.id);
++    const operator = await fx.user(tenant, UserRole.PLATFORM_OWNER);
++    users.push(operator.id);
++    await db.prisma.user.update({
++      where: { id: operator.id },
++      data: { tenantId: null },
++    });
++    const login = await request(http.app.getHttpServer())
++      .post('/api/auth/login')
++      .send({ email: operator.email, password: operator.password });
++    expect(login.status).toBe(201);
++    const token = resultBody(login).access_token;
++    // Registration is not an entitlement grant; the writer is the only grant in this fixture.
++    await db.prisma.feature.upsert({
++      where: { key: 'widgets.runtime' },
++      update: {},
++      create: {
++        key: 'widgets.runtime',
++        name: 'Widget runtime',
++        description: 'synthetic',
++        module: 'platform',
++        status: 'active',
++      },
++    });
++    const p = singleOperatorProof(
++      process.env.DATABASE_URL!,
++      tenant.id,
++      operator.id,
++    );
++    const cfg = http.app.get(ConfigService);
++    for (const key of [
++      'WIDGET_RELEASE_ENVIRONMENT',
++      'WIDGET_RELEASE_CANDIDATE_SHA',
++      'WIDGET_RELEASE_TRUST_JSON',
++      'WIDGET_RELEASE_PRODUCTION_TRUST_JSON',
++      'WIDGET_RELEASE_PRODUCTION_TENANTS_JSON',
++      'NODE_ENV',
++    ])
++      cfg.set(key, p.config.get(key));
++    const route = '/api/platform/widget-release/' + tenant.id;
++    const post = (action: string, body: unknown, override = token) =>
++      request(http.app.getHttpServer())
++        .post(route + '/' + action)
++        .set('Authorization', 'Bearer ' + override)
++        .send(body as object);
++    const status = () =>
++      request(http.app.getHttpServer())
++        .get(route + '/status')
++        .set('Authorization', 'Bearer ' + token);
++    const command = p.command();
++    const revoke = (
++      version: string,
++      over: Partial<SingleOperatorReleaseAuthorization> = {},
++    ) => ({
++      authorization: p.signOwner({
++        ...command.authorization.payload,
++        authorizationId: randomUUID(),
++        operation: 'revoke',
++        expectedVersion: version,
++        grantExpiresAt: null,
++        ...over,
++      }),
++    });
++    return { tenant, operator, p, token, post, status, command, revoke };
++  }
++  const row = (tenantId: string) =>
++    db.prisma.tenantEntitlement.findUnique({
++      where: {
++        tenantId_featureKey: { tenantId, featureKey: 'widgets.runtime' },
++      },
++    });
++  const audits = (tenantId: string) =>
++    db.prisma.auditLog.findMany({
++      where: { action: 'widget.release', entityId: tenantId },
++    });
++  it('SO-LIFECYCLE validate is read-only; signed grant has atomic audit; same authorization retry never grants twice; revoke refuses an old widget token', async () => {
++    const f = await fixture();
++    expect((await f.post('validate', f.command)).status).toBe(201);
++    expect(await row(f.tenant.id)).toBeNull();
++    expect(await audits(f.tenant.id)).toHaveLength(0);
++    const g = await f.post('grant', f.command);
++    expect(g.status).toBe(201);
++    expect(resultBody(g).replayed).toBe(false);
++    expect(resultBody(g).receipt.execution).toEqual({
++      releaseId: 'synthetic-release',
++      environment: 'production',
++      profileId: 'closed-input.no-handoff@1',
++      profileDigest: f.command.authorization.payload.profileDigest,
++      evidenceDigest: f.command.certificate.evidenceDigest,
++    });
++    const disclosure = {
++      governance: 'single-operator',
++      independentHumanReview: false,
++      reviewerId: null,
++      approverId: f.operator.id,
++      actorId: f.operator.id,
++    };
++    expect(resultBody(g).receipt).toMatchObject(disclosure);
++    expect((await audits(f.tenant.id))[0].metadataJson).toMatchObject({
++      receipt: disclosure,
++    });
++    expect(await audits(f.tenant.id)).toHaveLength(1);
++    expect((await f.status()).body).toMatchObject({
++      enabled: true,
++      governance: 'single-operator',
++      independentHumanReview: false,
++    });
++    const replay = await f.post('grant', f.command);
++    expect(replay.status).toBe(201);
++    expect(resultBody(replay).replayed).toBe(true);
++    expect(resultBody(replay).receipt).toEqual(resultBody(g).receipt);
++    expect(await audits(f.tenant.id)).toHaveLength(1);
++    const client = await fx.user(f.tenant, UserRole.CLIENT);
++    await fx.bookingSource(f.tenant, client);
++    for (const key of [
++      'ai.consultant',
++      'booking',
++      'booking.customer_app',
++      'crm.integration',
++    ] as const)
++      await fx.grantFeature(f.tenant, key);
++    const login = await http.login(
++      f.tenant.slug,
++      client.email,
++      client.password,
++    );
++    const catalog = await http.executeTool(
++      login,
++      'catalog.services.read',
++      { arguments: {}, surface: 'web' },
++      'ar1-' + randomUUID(),
++    );
++    expect([200, 201]).toContain(catalog.status);
++    const envelope = (
++      catalog.body as {
++        resolution: {
++          receipt: {
++            envelope: {
++              widget_id: string;
++              intents: Array<{ intent_token: string }>;
++              body: { options: Array<{ option_id: string }> };
++            };
++          };
++        };
++      }
++    ).resolution.receipt.envelope;
++    const body = {
++      contract: 'maya.widget.intent.submission/1',
++      widget_id: envelope.widget_id,
++      intent_token: envelope.intents[0].intent_token,
++      inputs: { service_ref: envelope.body.options[0].option_id },
++      client_nonce: randomUUID(),
++      profile_id: 'pwa.default',
++    };
++    const revoke = f.revoke(resultBody(g).receipt.version);
++    expect((await f.post('revoke', revoke)).status).toBe(201);
++    expect(resultBody(await f.status()).enabled).toBe(false);
++    expect((await row(f.tenant.id))?.enabled).toBe(false);
++    expect(await audits(f.tenant.id)).toHaveLength(2);
++    const denied = await http.postIntent(login, body);
++    expect(denied.status).toBe(403);
++    expect(denied.body).toMatchObject({ error: { code: 'feature_locked' } });
++    expect(
++      await db.prisma.actionExecution.count({
++        where: { tenantId: f.tenant.id },
++      }),
++    ).toBe(0);
++    await f.post('grant', f.command);
++    expect(resultBody(await f.status()).enabled).toBe(false);
++    expect(await audits(f.tenant.id)).toHaveLength(2);
++  });
++  it('SO-CONCURRENT two consumes of one authorization produce one grant and one audit', async () => {
++    const f = await fixture();
++    const result = await Promise.all([
++      f.post('grant', f.command),
++      f.post('grant', f.command),
++    ]);
++    expect(result.map((r) => r.status)).toEqual([201, 201]);
++    expect(result.map((r) => resultBody(r).replayed).sort()).toEqual([
++      false,
++      true,
++    ]);
++    expect(await audits(f.tenant.id)).toHaveLength(1);
++  });
++  it('SO-STALE two independently signed grants with the same prestate cannot both win CAS', async () => {
++    const f = await fixture(),
++      second = f.p.command();
++    const results = await Promise.all([
++      f.post('grant', f.command),
++      f.post('grant', second),
++    ]);
++    expect(results.map((r) => r.status).sort()).toEqual([201, 409]);
++    expect(await audits(f.tenant.id)).toHaveLength(1);
++  });
++  it('SO-AUDIT failure rolls back the entitlement mutation', async () => {
++    const f = await fixture();
++    const audit = http.app.get(AuditLogService);
++    const original = audit.logPlatformAction.bind(audit);
++    const spy = jest
++      .spyOn(audit, 'logPlatformAction')
++      .mockImplementationOnce(async (...args) => {
++        await original(...args);
++        throw new Error('synthetic audit failure after insert');
++      });
++    try {
++      expect((await f.post('grant', f.command)).status).toBe(500);
++    } finally {
++      spy.mockRestore();
++    }
++    expect(await row(f.tenant.id)).toBeNull();
++    expect(await audits(f.tenant.id)).toHaveLength(0);
++  });
++
++  it('SO-AUDIT-NOOP silently missing audit cannot commit an entitlement', async () => {
++    const f = await fixture();
++    const spy = jest
++      .spyOn(http.app.get(AuditLogService), 'logPlatformAction')
++      .mockResolvedValueOnce(undefined as never);
++    try {
++      expect((await f.post('grant', f.command)).status).toBe(403);
++    } finally {
++      spy.mockRestore();
++    }
++    expect(await row(f.tenant.id)).toBeNull();
++    expect(await audits(f.tenant.id)).toHaveLength(0);
++  });
++  it('SO-REVOKE-BOUND revoke binds exact release, evidence, profile and build; rollback works after allowlist removal and candidate change', async () => {
++    const f = await fixture(),
++      g = await f.post('grant', f.command);
++    expect(g.status).toBe(201);
++    const version = resultBody(g).receipt.version;
++    for (const over of [
++      { releaseId: 'other' },
++      { evidenceDigest: 'b'.repeat(64) },
++      { buildDigest: 'b'.repeat(64) },
++    ]) {
++      expect((await f.post('revoke', f.revoke(version, over))).status).toBe(
++        403,
++      );
++    }
++    const cfg = http.app.get(ConfigService);
++    cfg.set('WIDGET_RELEASE_PRODUCTION_TENANTS_JSON', '[]');
++    cfg.set('WIDGET_RELEASE_CANDIDATE_SHA', 'b'.repeat(40));
++    expect(resultBody(await f.status()).enabled).toBe(false);
++    expect((await f.post('revoke', f.revoke(version))).status).toBe(201);
++    expect((await row(f.tenant.id))?.enabled).toBe(false);
++    expect(await audits(f.tenant.id)).toHaveLength(2);
++  });
++  it('SO-HANDOFF production profile refuses HANDOFF at mint and admission owners', async () => {
++    const f = await fixture();
++    expect((await f.post('grant', f.command)).status).toBe(201);
++    const access = http.app.get(WidgetReleaseAccessService);
++    await db.prisma.$transaction(async (tx) => {
++      expect((await access.current(f.tenant.id, tx))?.scope).toBe(
++        'closed-input.no-handoff@1',
++      );
++      expect(
++        await access.admits(
++          f.tenant.id,
++          { tenantId: f.tenant.id, effect: 'HANDOFF' } as never,
++          PROFILE_REGISTRY_DIGEST,
++          tx,
++        ),
++      ).toBe(false);
++    });
++    await expect(
++      db.prisma.$transaction((tx) =>
++        access.bindMint(
++          f.tenant.id,
++          [
++            {
++              template: 'handoff.settings@1',
++              record: { tenantId: f.tenant.id, effect: 'HANDOFF' } as never,
++            },
++          ],
++          PROFILE_REGISTRY_DIGEST,
++          tx,
++        ),
++      ),
++    ).rejects.toThrow('profile_unavailable');
++    expect(
++      await db.prisma.actionExecution.count({
++        where: { tenantId: f.tenant.id },
++      }),
++    ).toBe(0);
++  });
++  it('SO-REPLAY-BOUND rebinding an already consumed authorization cannot renew or overwrite', async () => {
++    const f = await fixture();
++    expect((await f.post('grant', f.command)).status).toBe(201);
++    const rebound = structuredClone(f.command);
++    rebound.authorization = f.p.signOwner({
++      ...rebound.authorization.payload,
++      releaseId: 'new-release',
++    });
++    expect((await f.post('grant', rebound)).status).toBe(409);
++    expect(await audits(f.tenant.id)).toHaveLength(1);
++  });
++  it('SO-ROLE tenant owner and revoked platform session never gain release authority', async () => {
++    const f = await fixture();
++    const owner = await fx.user(f.tenant, UserRole.TENANT_OWNER);
++    const token = await http.login(f.tenant.slug, owner.email, owner.password);
++    expect((await f.post('grant', f.command, token)).status).toBe(403);
++    await db.prisma.authSession.updateMany({
++      where: { userId: f.operator.id },
++      data: { revokedAt: new Date() },
++    });
++    expect((await f.post('grant', f.command)).status).toBe(401);
++    expect(await row(f.tenant.id)).toBeNull();
++  });
++  it('SO-TWO-TENANTS one global session manages two ordinary tenants; grants and revoke never cross scopes', async () => {
++    const f = await fixture(),
++      second = await fx.tenant(
++        'AR1 another ordinary tenant',
++        CalendarSource.INTERNAL,
++      );
++    tenants.push(second.id);
++    http.app
++      .get(ConfigService)
++      .set(
++        'WIDGET_RELEASE_PRODUCTION_TENANTS_JSON',
++        JSON.stringify([f.tenant.id, second.id]),
++      );
++    const secondCommand = f.p.command('absent', second.id);
++    const secondPost = (body: unknown) =>
++      request(http.app.getHttpServer())
++        .post('/api/platform/widget-release/' + second.id + '/grant')
++        .set('Authorization', 'Bearer ' + f.token)
++        .send(body as object);
++    expect((await secondPost(f.command)).status).toBe(403);
++    const firstGrant = await f.post('grant', f.command);
++    expect(firstGrant.status).toBe(201);
++    expect((await secondPost(secondCommand)).status).toBe(201);
++    expect(await audits(f.tenant.id)).toHaveLength(1);
++    expect(await audits(second.id)).toHaveLength(1);
++    expect(
++      (await f.post('revoke', f.revoke(resultBody(firstGrant).receipt.version)))
++        .status,
++    ).toBe(201);
++    expect((await row(f.tenant.id))?.enabled).toBe(false);
++    expect((await row(second.id))?.enabled).toBe(true);
++  });
++  it('SO-TENANT-SESSION a tenant session cannot substitute for a global session, even with forged platform actor claims', async () => {
++    const f = await fixture(),
++      owner = await fx.user(f.tenant, UserRole.TENANT_OWNER);
++    const token = await http.login(f.tenant.slug, owner.email, owner.password);
++    const session = await db.prisma.authSession.findFirstOrThrow({
++      where: { userId: owner.id, tenantId: f.tenant.id, revokedAt: null },
++    });
++    expect((await f.post('grant', f.command, token)).status).toBe(403);
++    await expect(
++      http.app.get(WidgetReleaseService).grant(
++        {
++          userId: f.operator.id,
++          sessionId: session.id,
++          tenantId: null,
++          role: UserRole.PLATFORM_OWNER,
++          email: f.operator.email,
++          branchId: null,
++          membershipId: null,
++          membershipStatus: null,
++        },
++        f.tenant.id,
++        f.command,
++      ),
++    ).rejects.toThrow('platform_actor');
++    // The schema additionally refuses manufacturing a tenant-scoped session for the global User.
++    await expect(
++      db.prisma.authSession.updateMany({
++        where: { userId: f.operator.id },
++        data: { tenantId: f.tenant.id },
++      }),
++    ).rejects.toThrow();
++    expect(await row(f.tenant.id)).toBeNull();
++    expect(await audits(f.tenant.id)).toHaveLength(0);
++  });
++  it.each(['V1-revokes-V2', 'V2-revokes-V1'] as const)(
++    'SO-REVOKE-VERSION %s is refused even with a valid signer and matching stored release digests',
++    async (which) => {
++      const f = await fixture(),
++        v1 = productionProof(
++          process.env.DATABASE_URL!,
++          f.tenant.id,
++          f.operator.id,
++        ),
++        v2 = f.p;
++      const first = which === 'V1-revokes-V2' ? v2 : v1,
++        second = which === 'V1-revokes-V2' ? v1 : v2;
++      const trust = (p: typeof first) =>
++        http.app
++          .get(ConfigService)
++          .set(
++            'WIDGET_RELEASE_PRODUCTION_TRUST_JSON',
++            p.config.get('WIDGET_RELEASE_PRODUCTION_TRUST_JSON'),
++          );
++      trust(first);
++      const command = first.command(),
++        grant = await f.post('grant', command);
++      expect(grant.status).toBe(201);
++      const payload = {
++        ...second.command().authorization.payload,
++        operation: 'revoke' as const,
++        authorizationId: randomUUID(),
++        expectedVersion: resultBody(grant).receipt.version,
++        grantExpiresAt: null,
++        certificateDigest: command.authorization.payload.certificateDigest,
++        evidenceDigest: command.authorization.payload.evidenceDigest,
++      };
++      trust(second);
++      const denied = await f.post('revoke', {
++        authorization: second.signOwner(payload as never),
++      });
++      expect(denied.status).toBe(403);
++      expect((await row(f.tenant.id))?.enabled).toBe(true);
++      expect(await audits(f.tenant.id)).toHaveLength(1);
++      trust(first);
++      expect(
++        (
++          await f.post('revoke', {
++            authorization: first.signOwner({
++              ...command.authorization.payload,
++              authorizationId: randomUUID(),
++              operation: 'revoke',
++              expectedVersion: resultBody(grant).receipt.version,
++              grantExpiresAt: null,
++            } as never),
++          })
++        ).status,
++      ).toBe(201);
++    },
++  );
++  it('SO-REVOKE-EXPIRED-CERT a fresh signed revoke remains available after certificate expiry', async () => {
++    const f = await fixture(),
++      c = f.command;
++    c.certificate.expiresAt = new Date(Date.now() + 1200).toISOString();
++    c.authorization = f.p.signOwner({
++      ...c.authorization.payload,
++      certificateDigest: releaseHash(c.certificate),
++      grantExpiresAt: c.certificate.expiresAt,
++    });
++    const g = await f.post('grant', c);
++    expect(g.status).toBe(201);
++    await new Promise((r) => setTimeout(r, 1400));
++    expect(resultBody(await f.status()).enabled).toBe(false);
++    const revoke = {
++      authorization: f.p.signOwner({
++        ...c.authorization.payload,
++        authorizationId: randomUUID(),
++        operation: 'revoke',
++        grantExpiresAt: null,
++        expectedVersion: resultBody(g).receipt.version,
++      }),
++    };
++    expect((await f.post('revoke', revoke)).status).toBe(201);
++    expect((await row(f.tenant.id))?.enabled).toBe(false);
++    expect(await audits(f.tenant.id)).toHaveLength(2);
++  });
++});

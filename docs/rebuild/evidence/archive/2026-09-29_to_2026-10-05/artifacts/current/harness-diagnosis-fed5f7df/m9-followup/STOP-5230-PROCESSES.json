@@ -1,0 +1,195 @@
+{
+  "candidate": "5230bd9e23903941b8f7c4b814c2a326d14a3cbf",
+  "reason": "Preserve the accidentally tested assistant mutations as explicit covered mutations before full certification; product unchanged.",
+  "roots": [
+    {
+      "pid": 6231,
+      "ppid": 58828,
+      "pgid": 6231,
+      "command": "python3 work/final-certification-5230bd9e/launch-diagnostic-preflight.py"
+    },
+    {
+      "pid": 6310,
+      "ppid": 6231,
+      "pgid": 6231,
+      "command": "python3 /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-5230bd9e/run-anchor-preflight.py"
+    }
+  ],
+  "before": [
+    {
+      "pid": 6231,
+      "ppid": 58828,
+      "pgid": 6231,
+      "command": "python3 work/final-certification-5230bd9e/launch-diagnostic-preflight.py"
+    },
+    {
+      "pid": 6310,
+      "ppid": 6231,
+      "pgid": 6231,
+      "command": "python3 /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-5230bd9e/run-anchor-preflight.py"
+    },
+    {
+      "pid": 6440,
+      "ppid": 6310,
+      "pgid": 6440,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 9 --partition 1/4 --unit-filter (?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-]) --live-filter (?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-]) --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-5230bd9e/diagnostics/anchor-preflight/mutation-parts/widgets-mutation-part-9-part-1-of-4.json"
+    },
+    {
+      "pid": 6444,
+      "ppid": 6310,
+      "pgid": 6444,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 9 --partition 2/4 --unit-filter (?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-]) --live-filter (?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-]) --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-5230bd9e/diagnostics/anchor-preflight/mutation-parts/widgets-mutation-part-9-part-2-of-4.json"
+    },
+    {
+      "pid": 6445,
+      "ppid": 6310,
+      "pgid": 6445,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 9 --partition 3/4 --unit-filter (?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-]) --live-filter (?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-]) --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-5230bd9e/diagnostics/anchor-preflight/mutation-parts/widgets-mutation-part-9-part-3-of-4.json"
+    },
+    {
+      "pid": 6446,
+      "ppid": 6310,
+      "pgid": 6446,
+      "command": "node scripts/widgets-mutation-battery.mjs --gate 9 --partition 4/4 --unit-filter (?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-]) --live-filter (?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-]) --out /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-5230bd9e/diagnostics/anchor-preflight/mutation-parts/widgets-mutation-part-9-part-4-of-4.json"
+    },
+    {
+      "pid": 7448,
+      "ppid": 6444,
+      "pgid": 6444,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-00f67202b2 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-00f67202b2.json -t (?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-])"
+    },
+    {
+      "pid": 7449,
+      "ppid": 6445,
+      "pgid": 6445,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-134a4f8449 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-134a4f8449.json -t (?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-])"
+    },
+    {
+      "pid": 7465,
+      "ppid": 7448,
+      "pgid": 6444,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-00f67202b2/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-00f67202b2 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-00f67202b2.json -t (?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-])"
+    },
+    {
+      "pid": 7482,
+      "ppid": 7449,
+      "pgid": 6445,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-134a4f8449/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-134a4f8449 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-134a4f8449.json -t (?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-])"
+    },
+    {
+      "pid": 7579,
+      "ppid": 6446,
+      "pgid": 6446,
+      "command": "npm exec jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-738a0690f1 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-738a0690f1.json -t (?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-])"
+    },
+    {
+      "pid": 7595,
+      "ppid": 7579,
+      "pgid": 6446,
+      "command": "node /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-738a0690f1/maya-saas-backend/node_modules/.bin/jest --runInBand --forceExit --cacheDirectory=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-738a0690f1 --json --outputFile=/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-738a0690f1.json -t (?:^|\\s)(?:T\\-ARCH\\-TX|T9\\-BYTE\\-1|T9\\-CONC\\-2|T9\\-CONC\\-3|T9\\-DEF\\-1|T9\\-HTTP\\-3|T9\\-INV24\\-1|T9\\-INV24\\-4|T9\\-NEG\\-3|T9\\-NEG\\-8|T9\\-POS\\-1|T9\\-POS\\-5|T9\\-WRITE\\-1|T9\\-WRITE\\-INDEX|T9\\-WRITE\\-STALE)(?=$|[^A-Za-z0-9_.-])"
+    },
+    {
+      "pid": 7703,
+      "ppid": 6440,
+      "pgid": 6440,
+      "command": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-p01-option-a-940ddd51/node-v22.23.2-darwin-arm64/bin/node scripts/k3-gateway-check.mjs"
+    },
+    {
+      "pid": 7718,
+      "ppid": 7703,
+      "pgid": 6440,
+      "command": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-p01-option-a-940ddd51/node-v22.23.2-darwin-arm64/bin/node /Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend/node_modules/jest/bin/jest.js --ci --runTestsByPath /private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-581806eecb/maya-saas-backend/src/widgets/projection/projector-fences.architecture.spec.ts --testNamePattern ARCH-12-9 \\[BUILD\\] the projector is referenced only by the module that provides it and Gate 13, and called only by Gate 13|ARCH-12-10 \\[BUILD\\] slot 12 is a pointer: it references nothing, returns only pass, and liveGateCount excludes it --json --outputFile /var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/k3-arch-12-pSs72P/result.json"
+    },
+    {
+      "pid": 7726,
+      "ppid": 7718,
+      "pgid": 6440,
+      "command": "<defunct>"
+    },
+    {
+      "pid": 7727,
+      "ppid": 7718,
+      "pgid": 6440,
+      "command": "<defunct>"
+    },
+    {
+      "pid": 7728,
+      "ppid": 7718,
+      "pgid": 6440,
+      "command": "<defunct>"
+    },
+    {
+      "pid": 7729,
+      "ppid": 7718,
+      "pgid": 6440,
+      "command": "<defunct>"
+    },
+    {
+      "pid": 7730,
+      "ppid": 7718,
+      "pgid": 6440,
+      "command": "<defunct>"
+    },
+    {
+      "pid": 7731,
+      "ppid": 7718,
+      "pgid": 6440,
+      "command": "<defunct>"
+    },
+    {
+      "pid": 7732,
+      "ppid": 7718,
+      "pgid": 6440,
+      "command": "<defunct>"
+    },
+    {
+      "pid": 7736,
+      "ppid": 7718,
+      "pgid": 6440,
+      "command": "<defunct>"
+    },
+    {
+      "pid": 7737,
+      "ppid": 7718,
+      "pgid": 6440,
+      "command": "<defunct>"
+    },
+    {
+      "pid": 7738,
+      "ppid": 7718,
+      "pgid": 6440,
+      "command": "<defunct>"
+    },
+    {
+      "pid": 7739,
+      "ppid": 7718,
+      "pgid": 6440,
+      "command": "<defunct>"
+    },
+    {
+      "pid": 7740,
+      "ppid": 7718,
+      "pgid": 6440,
+      "command": "<defunct>"
+    },
+    {
+      "pid": 7741,
+      "ppid": 7718,
+      "pgid": 6440,
+      "command": "<defunct>"
+    },
+    {
+      "pid": 7742,
+      "ppid": 7718,
+      "pgid": 6440,
+      "command": "<defunct>"
+    },
+    {
+      "pid": 7743,
+      "ppid": 7718,
+      "pgid": 6440,
+      "command": "<defunct>"
+    }
+  ],
+  "after": []
+}

@@ -1,0 +1,29 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "checkedAt": "2026-10-04T08:43:18.356588+00:00",
+  "status": "PASS",
+  "currentRunPathPrefixes": [
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/ar1-single-operator-final-20261003",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/release-packaging-recovery-20261003",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-00fcc22782",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-0fc5734169",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-158df8eb30",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-6bc15dc77f",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-957382b66e",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-9ac24e443c",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-c2602e5b33",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-c721b349b9",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-d186ca775c",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-e051296de0",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-e2f35fecd6",
+    "/private/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-f9cf9a2d40"
+  ],
+  "remainingOwnedProcesses": [],
+  "remainingCurrentRunProofDbSessions": [],
+  "dedicatedProofPostgresListener": "COMMAND    PID           USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME\npostgres 20272 stanislavmosin    5u  IPv4 0xcece31f560d5532b      0t0  TCP 127.0.0.1:55729 (LISTEN)\n",
+  "retainedFixtureBoundary": "Dedicated PostgreSQL proof server is intentionally retained. It is not a leaked test listener.",
+  "pidReusePolicy": "No historical PID alone is accepted as ownership; current command/CWD must match a unique current-run path.",
+  "otherServicesChanged": false,
+  "processesTerminatedByThisCheck": 0
+}

@@ -1,0 +1,16 @@
+from pathlib import Path
+import os,subprocess,json
+root=Path(__file__).resolve().parents[2]; backend=root/'work/widget-release/maya-saas-backend'; out=root/'work/sb1-reverification/receipts/mutations'
+env=dict(os.environ,DATABASE_URL='[REDACTED DATABASE URL]')
+env['PATH']='/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/chapter7-p01-option-a-940ddd51/node-v22.23.2-darwin-arm64/bin:/opt/homebrew/bin:/usr/bin:/bin'
+env.pop('WIDGETS_EVIDENCE',None); env.pop('WIDGETS_EVIDENCE_DIR',None)
+for gate in ['SBV','WR','H-harness','AB']:
+ if gate=='SBV': restrictions={'unit_tests':'(auth/client-verification-delivery|crm/client-reverification-candidate.service).spec.ts','unit_filter':'RV-'}
+ else: restrictions=json.load(open(root/f'work/postdecision/receipts/mutations/{gate}.json'))['restrictions']
+ args=['node','scripts/widgets-mutation-battery.mjs','--gate',gate,'--out',str(out/f'{gate}.json')]
+ for key,val in restrictions.items():
+  if val: args+=['--'+key.replace('_','-'),val]
+ with (out/f'{gate}.log').open('w') as f: p=subprocess.run(args,cwd=backend,env=env,stdout=f,stderr=subprocess.STDOUT)
+ d=json.load(open(out/f'{gate}.json'))
+ print(json.dumps({'gate':gate,'exit':p.returncode,'status':d['status'],'mismatches':d['mismatches'],'baseline_red':d['baseline_red']}),flush=True)
+ if p.returncode:raise SystemExit(p.returncode)

@@ -1,0 +1,28 @@
+{
+  "candidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "approvedBase": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "changedPaths": [
+    "maya-saas-backend/scripts/widgets-mutation-ci.test.mjs",
+    "maya-saas-backend/src/admin/admin.controller.spec.ts",
+    "maya-saas-backend/src/auth/legacy-staff-principal.http.spec.ts",
+    "maya-saas-backend/src/bootstrap/configure-http-app.spec.ts",
+    "maya-saas-backend/test/app.e2e-spec.ts",
+    "maya-saas-backend/test/widgets-live/http-listener.live-spec.ts",
+    "maya-saas-backend/test/widgets-live/mutations/gateH-harness.json",
+    "maya-saas-backend/test/widgets-live/support/http-bootstrap.ts"
+  ],
+  "harnessCommits": [
+    "dac4072dd17ec222fe36cc603863965919039708 test(widgets): own an IPv4 loopback listener for live proofs",
+    "41906e0c0f48392cc0fef2dc199688d74aa8662d test(widgets): satisfy listener harness lint rules",
+    "86044d2b5ce4800c277314ff39e849ece3e63acb test(widgets): pin the expanded listener mutation inventory",
+    "dc3a26806b273631e8c6150acfa3e9cacdde91a1 test(http): own loopback listeners in remaining Supertest harnesses"
+  ],
+  "productCodeChanges": 0,
+  "presentationChanges": 0,
+  "timeoutChanges": 0,
+  "previousPartialCertificationAdmitted": false,
+  "profile": "closed-input.no-handoff@1",
+  "fullContractCertified": false
+}

@@ -1,0 +1,23 @@
+{
+  "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "status": "STOP: repeated red unmutated baseline; root cause unresolved",
+  "part": "AR",
+  "firstFailure": "SV2-HTTP full-live baseline timeout at 120000ms, subsequent Socket errors after Jest environment teardown",
+  "details": "mutation-diagnostics/1-live-1790778318690.json",
+  "action": "All certification runners stopped. No AR result, complete mutation aggregate or release certificate admitted.",
+  "knownControls": "Main full 405-test live run and four independent full live baseline runs pass on the same candidate. Need distinguish harness/network scheduling from deterministic candidate defect.",
+  "fullUnmodifiedDiagnostic": {
+    "exit": 0,
+    "passed": 405,
+    "failed": 0,
+    "receipt": "ar-baseline-diagnostic-full-live.receipt.json"
+  },
+  "retryBaseline": {
+    "passed": 403,
+    "failed": 2,
+    "details": "mutation-diagnostics/1-live-1790779347865.json",
+    "firstFailure": "F88-1 120000ms timeout; F88-2 socket hang up",
+    "admitted": false
+  },
+  "instrumentation": "A separate HTTP preload diagnostic failed because its required variable was scrubbed in an E2 child process. Excluded as diagnostic tooling error; not a third candidate failure or root-cause proof."
+}

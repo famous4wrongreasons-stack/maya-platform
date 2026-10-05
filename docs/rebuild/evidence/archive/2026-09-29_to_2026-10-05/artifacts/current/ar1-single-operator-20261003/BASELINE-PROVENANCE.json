@@ -1,0 +1,31 @@
+{
+  "base": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "clean": true,
+  "governanceWorkAlreadyStarted": false,
+  "checkedAt": "2026-10-03T19:56:10.449450+00:00",
+  "priorCheckpointPreserved": [
+    {
+      "path": "outputs/release-packaging-final-20261003/CERTIFICATION-RECEIPTS.json",
+      "sha256": "fd3a541502c9a05b65276b114f7b01f18e26bd917b992760455b9d0f388ebb1a"
+    },
+    {
+      "path": "outputs/release-packaging-final-20261003/RELEASE-CHECKPOINT.json",
+      "sha256": "840d864ef462ca1c2d6e1e63dc4108df76ee565eb8186cdbacf7a8f58f8d682c"
+    },
+    {
+      "path": "outputs/release-packaging-final-20261003/PROFILE-CERTIFICATE-PROPOSAL.json",
+      "sha256": "7e8ca38d359290861052e79e173655dd3c6acd0070a72f281a3d847c38627457"
+    },
+    {
+      "path": "outputs/release-packaging-final-20261003/COMPLETE-MUTATIONS.json",
+      "sha256": "28bec2038e29ac30b36943d8daf341a8df37d61cdb7c1f93e03c49ed2d58dd60"
+    },
+    {
+      "path": "outputs/release-packaging-final-20261003/ARTIFACT-HASH-PARITY.json",
+      "sha256": "6c3407036a7c97eff24a98dc856729ad454354ef8252972474aece76e69414d7"
+    }
+  ],
+  "certificateInherited": false,
+  "productionEffects": 0
+}

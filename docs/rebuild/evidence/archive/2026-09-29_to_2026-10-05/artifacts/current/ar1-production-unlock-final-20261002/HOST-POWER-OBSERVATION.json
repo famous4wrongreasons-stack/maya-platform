@@ -1,0 +1,14 @@
+{
+  "observedAt": "2026-10-02T21:23:49.579240+00:00",
+  "candidate": "76df1766a74212f2c8a06ab879386fc8e4468d73",
+  "battery": "Now drawing from 'Battery Power'\n -InternalBattery-0 (id=22413411)\t24%; discharging; 0:43 remaining present: true\n",
+  "modes": "Battery Power:\n Sleep On Power Button 1\n powermode            1\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         30\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n powermode            0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         30\n womp                 1\n networkoversleep     0\n sleep                1\n tcpkeepalive         1\n disksleep            10\n",
+  "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded\n",
+  "powerSettingsChanged": false,
+  "ownerAskedToConnectPower": true,
+  "originalR06FailureCause": "not established by this observation",
+  "externalPowerObservedAt": "2026-10-02T21:33:51.447454+00:00",
+  "externalPowerObservation": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=22413411)\t25%; charging; 1:56 remaining present: true\n",
+  "externalPowerResolved": true,
+  "certificationInterruptedForPower": false
+}

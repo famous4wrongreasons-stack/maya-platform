@@ -1,0 +1,948 @@
+{
+  "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "worktree": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "workingTreeClean": true,
+  "integration": {
+    "commit": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+    "base": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+    "method": "fast-forward; exact provenance preserved"
+  },
+  "profile": "closed-input.no-handoff@1",
+  "profileApplicableFalse": 0,
+  "globalFalse": 2,
+  "globalStops": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "matrixQualification": "Source/evidence disposition only: all 163 applicable duties have fresh manifest coverage. FBE2E L27 and incomplete mutation aggregation prevent certification.",
+  "backend": {
+    "suites": 587,
+    "passed": 5598,
+    "failed": 0
+  },
+  "widgetsLive": {
+    "suites": 36,
+    "passed": 405,
+    "failed": 0
+  },
+  "runtime": {
+    "node22": {
+      "passed": 408,
+      "skipped": 7,
+      "failed": 0
+    },
+    "node24": {
+      "passed": 408,
+      "skipped": 7,
+      "failed": 0
+    },
+    "skipNote": "Local API prerequisites absent in the standard suite; each skip explicitly NOT a PASS. Additional canonical network proofs are separately identified."
+  },
+  "carrier": {
+    "passed": 93,
+    "failed": 0
+  },
+  "httpBin": {
+    "passed": 21,
+    "failed": 0
+  },
+  "python": {
+    "passed": 613,
+    "failed": 0
+  },
+  "NS1Roundtrip": "PASS — 16/16; fresh base counterfactual 9 failures; actual compiled runtime + binary return also passes",
+  "BS1": "PASS",
+  "selfBookingSuccessor": "PASS — all 12 required proofs plus 7 additional V2 proofs; no real OTP",
+  "9.6": "PASS — same persisted USER-turn writer/identity; distinct from L27 assistant receipt duplication",
+  "profileIsolation": "PASS",
+  "revocationExpiryOldToken": "PASS",
+  "fullMutations": {
+    "status": "NOT COMPLETE / NOT CERTIFIED — stopped on confirmed FBE2E defect",
+    "declarations": 502,
+    "canonicalParts": 65,
+    "validCompletedParts": 0,
+    "firstNSAttempt": "BASELINE-RED on BS-SOURCE; 5 observed kills do not count as certification",
+    "freshNSRerun": "new dedicated proof DB, 405/405 unmutated baseline; interrupted with programme",
+    "restrictions": "none; canonical default steps; no filtered tests",
+    "interruptedProcessesRemaining": 0,
+    "receipt": "receipts/CERTIFICATION-STOP.json"
+  },
+  "ciEquivalent": "NOT CERTIFIED — FBE2E FAIL and full mutation programme interrupted",
+  "fbe2e": "FAIL — L27 post-COMMIT Dismiss duplicates the unchanged canonical receipt in runtime conversation",
+  "pwaCarrierParity": "PASS — web/Capacitor artifact comparison, runtime manifest/hash checks and 93 carrier tests",
+  "certifiedForProfile": false,
+  "fullContractCertified": false,
+  "readyForReleaseAuthorization": false,
+  "releaseCertificateIssued": false,
+  "productionEffects": 0,
+  "productionMigrationApplied": false,
+  "realOtp": 0,
+  "realYclients": 0,
+  "iPhoneReinstall": false,
+  "chapter10": false,
+  "remainingBlockers": [
+    "L27: close the runtime duplicate-receipt defect or obtain explicit named owner acceptance under AR-1; its prior CLOSED evidence was for a different identity duty. No fix implemented in this pass.",
+    "After the boundary is resolved, finish the complete fresh applicable mutation/CI/FBE2E programme on the exact resulting candidate. No incomplete or red-baseline receipt can substitute.",
+    "AR-1 named closure/acceptance remains required for the disclosed residuals: L2, L5, L12, L16, L20, L23, L24, L25, L26, L27. These are not silently waived; this pass issues no production authorization."
+  ],
+  "freshReceipts": [
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "backend-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 36.13
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "backend-full",
+      "command": [
+        "npm",
+        "test",
+        "--",
+        "--runInBand",
+        "--json",
+        "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/backend-full.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 914.7
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "backend-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 8.59
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "carrier-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-carrier-react",
+      "exit": 0,
+      "seconds": 6.66
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "carrier-capacitor-build",
+      "command": [
+        "node",
+        "build.mjs",
+        "--target=capacitor"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-carrier-react",
+      "exit": 0,
+      "seconds": 15.9
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "carrier-full",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-carrier-react",
+      "exit": 0,
+      "seconds": 0.58
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "carrier-harness",
+      "command": [
+        "node",
+        "test/build-harness.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-carrier-react",
+      "exit": 0,
+      "seconds": 0.07
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "carrier-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-carrier-react",
+      "exit": 0,
+      "seconds": 9.67
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "contract-check",
+      "command": [
+        "node",
+        "scripts/widget-contract-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 1.93
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "contract-compile",
+      "command": [
+        "npx",
+        "tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.widget-contract.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 8.72
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "e2e",
+      "command": [
+        "npm",
+        "run",
+        "test:e2e",
+        "--",
+        "--runInBand"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 1.2
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "events-live",
+      "command": [
+        "npm",
+        "run",
+        "test:events:live"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 1.04
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "evidence-verifier",
+      "command": [
+        "node",
+        "scripts/widgets-evidence-verify.mjs",
+        "--dir",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/evidence",
+        "--audit",
+        "../docs/rebuild/widget-release-programme/approved-release/current-audit.json",
+        "--u-proofs",
+        "../docs/rebuild/widget-release-programme/approved-release/u-proofs.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 0.06
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "fbe2e-canonical-net-bin",
+      "command": [
+        "npm",
+        "run",
+        "test:widgets:http",
+        "--",
+        "--cases-dir",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-98716cd5/bin-cases"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 18.37
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "fbe2e-canonical-net-roundtrip",
+      "command": [
+        "npx",
+        "jest",
+        "--config",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-98716cd5/jest-net-return.json",
+        "--runInBand",
+        "--json",
+        "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/fbe2e-canonical-net-roundtrip.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 25.75
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "fbe2e-canonical-net-turn",
+      "command": [
+        "npx",
+        "jest",
+        "--config",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-98716cd5/jest-net-turn.json",
+        "--runInBand",
+        "--json",
+        "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/fbe2e-canonical-net-turn.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 32.48
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "fbe2e-compiled-net-bin",
+      "command": [
+        "npm",
+        "run",
+        "test:widgets:http",
+        "--",
+        "--cases-dir",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-98716cd5/compiled-bin-cases"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 17.48
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "fbe2e-compiled-receipt-net-bin",
+      "command": [
+        "npm",
+        "run",
+        "test:widgets:http",
+        "--",
+        "--cases-dir",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-98716cd5/compiled-receipt-bin-cases"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 17.12
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "fbe2e-l27-postcommit-dismiss",
+      "command": [
+        "npm",
+        "run",
+        "test:widgets:http",
+        "--",
+        "--cases-dir",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-98716cd5/postcommit-bin-cases"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 1,
+      "seconds": 14.83
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "fbe2e-source-roundtrip",
+      "command": [
+        "npx",
+        "jest",
+        "--config",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/final-certification-98716cd5/jest-return.json",
+        "--runInBand",
+        "--json",
+        "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/fbe2e-source-roundtrip.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 9.64
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "frontend-inline",
+      "command": [
+        "node",
+        "scripts/verify-frontend-bundles.mjs",
+        "сайт и приложение/app.html",
+        "сайт и приложение/maya-admin.html",
+        "сайт и приложение/maya-start.html",
+        "сайт и приложение/oauth-callback.html"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+      "exit": 0,
+      "seconds": 0.07
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "http-bin",
+      "command": [
+        "npm",
+        "run",
+        "test:widgets:http"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 16.27
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "icons",
+      "command": [
+        "node",
+        "brand/make-icons.mjs",
+        "--check"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+      "exit": 0,
+      "seconds": 6.43
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "k1-dossier",
+      "command": [
+        "node",
+        "docs/rebuild/evidence/maya-chat-first-ux/k1/k1-dossier-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+      "exit": 0,
+      "seconds": 0.05
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "k15-census",
+      "command": [
+        "node",
+        "docs/rebuild/evidence/maya-chat-first-ux/k15-bundle-census.mjs",
+        "--json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+      "exit": 0,
+      "seconds": 0.35
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "k3",
+      "command": [
+        "node",
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 5.82
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "k5-exit",
+      "command": [
+        "bash",
+        "docs/rebuild/evidence/maya-chat-first-ux/k5-exit-gate.sh"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+      "exit": 0,
+      "seconds": 49.72
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "legacy-python-full",
+      "command": [
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/wave1-closure-20260919/python-venv/bin/python",
+        "-u",
+        "-m",
+        "unittest",
+        "discover",
+        "-v",
+        "-s",
+        "ai администратор",
+        "-p",
+        "test_*.py"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+      "exit": 0,
+      "seconds": 842.04
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "lint",
+      "command": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 95.93
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "live-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck:widgets-live"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 14.68
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "mutation-ci-integrity",
+      "command": [
+        "node",
+        "--test",
+        "scripts/widgets-mutation-ci.test.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 4.06
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "mutation-db-migration",
+      "command": [
+        "npx",
+        "prisma",
+        "migrate",
+        "deploy"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 0.95
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "mutation-inventory",
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--dry-run",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/mutation-inventory.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 0.23
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "mutations-NS-full",
+      "command": [
+        "node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--gate",
+        "NS",
+        "--out",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/mutations-NS-full.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 1,
+      "seconds": 1625.51
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "node24-icons",
+      "command": [
+        "node",
+        "brand/make-icons.mjs",
+        "--check"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+      "exit": 0,
+      "seconds": 5.61
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "node24-runtime-check",
+      "command": [
+        "node",
+        "build.mjs",
+        "--check",
+        "--no-baseline"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+      "exit": 0,
+      "seconds": 6.85
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "node24-runtime-full",
+      "command": [
+        "node",
+        "--test",
+        "conformance.test.mjs",
+        "test/brand.test.mjs",
+        "test/build.selftest.test.mjs",
+        "test/conversation.test.mjs",
+        "test/deeplink.test.mjs",
+        "test/dom.test.mjs",
+        "test/integrity.parity.test.mjs",
+        "test/intents.test.mjs",
+        "test/k15-census.test.mjs",
+        "test/local-api.history.test.mjs",
+        "test/net.test.mjs",
+        "test/renderer.conformance.test.mjs",
+        "test/routes.conformance.test.mjs",
+        "test/serve.test.mjs",
+        "test/shell.test.mjs",
+        "test/view.tokenfree.test.mjs",
+        "test/voice.test.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+      "exit": 0,
+      "seconds": 61.3
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "node24-runtime-selftest",
+      "command": [
+        "node",
+        "build.mjs",
+        "--self-test"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+      "exit": 0,
+      "seconds": 8.02
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "node24-runtime-typecheck",
+      "command": [
+        "node",
+        "build.mjs",
+        "--typecheck"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+      "exit": 0,
+      "seconds": 5.21
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "npm-audit",
+      "command": [
+        "npm",
+        "audit",
+        "--omit=dev",
+        "--audit-level=high",
+        "--json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 2.48
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "ns-baseline-diagnostic-full",
+      "command": [
+        "npm",
+        "run",
+        "test:widgets:live",
+        "--",
+        "--json",
+        "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/ns-baseline-diagnostic-full.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 233.75
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "ns-fresh-db-migration",
+      "command": [
+        "npx",
+        "prisma",
+        "migrate",
+        "deploy"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 3.53
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "ns1-16-step",
+      "command": [
+        "node",
+        "test/ns1-roundtrip-probe.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+      "exit": 0,
+      "seconds": 0.13
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "controlSource": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+      "harnessSha256": "b899bfc46e9b03ac985b599853259d3e11660c3e271ac31602da440ca1d278d7",
+      "name": "ns1-fresh-counterfactual",
+      "exit": 0,
+      "observedControlExit": 1,
+      "expectedFailures": 9,
+      "totalProbeSteps": 16,
+      "result": "PASS — fresh pre-fix control fails precisely nine steps; exact candidate passes all sixteen",
+      "seconds": 0.29
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "platform-http-smoke",
+      "command": [
+        "npm",
+        "run",
+        "test:http"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 10.0
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "prepublication-contracts",
+      "command": [
+        "node",
+        "scripts/verify-prepublication-contracts.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+      "exit": 0,
+      "seconds": 0.09
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "prepublication-counterfactuals",
+      "command": [
+        "node",
+        "--test",
+        "scripts/verify-prepublication-contracts.test.mjs"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+      "exit": 0,
+      "seconds": 0.48
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "prisma-generate",
+      "command": [
+        "npm",
+        "run",
+        "prisma:generate"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 3.0
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "prisma-validate",
+      "command": [
+        "npx",
+        "prisma",
+        "validate"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 0.81
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "python-compile",
+      "command": [
+        "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/wave1-closure-20260919/python-venv/bin/python",
+        "-m",
+        "compileall",
+        "ai администратор"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+      "exit": 0,
+      "seconds": 0.05
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "release-binary",
+      "command": [
+        "npm",
+        "run",
+        "test:widgets:release-binary",
+        "--",
+        "--json",
+        "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/release-binary.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 8.59
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "runtime-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+      "exit": 0,
+      "seconds": 7.18
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "runtime-full",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+      "exit": 0,
+      "seconds": 67.55
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "runtime-hash-check",
+      "command": [
+        "node",
+        "build.mjs",
+        "--check",
+        "--no-baseline"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+      "exit": 0,
+      "seconds": 7.46
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "runtime-self-test",
+      "command": [
+        "npm",
+        "run",
+        "self-test"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+      "exit": 0,
+      "seconds": 9.9
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "runtime-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+      "exit": 0,
+      "seconds": 7.19
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "scripts-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck:scripts"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 22.92
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "synthetic-smoke-migration",
+      "command": [
+        "npx",
+        "prisma",
+        "migrate",
+        "deploy"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 0.96
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "synthetic-smoke-seed",
+      "command": [
+        "npm",
+        "run",
+        "prisma:seed"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 0.83
+    },
+    {
+      "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "name": "widgets-live-full",
+      "command": [
+        "npm",
+        "run",
+        "test:widgets:live",
+        "--",
+        "--json",
+        "--outputFile=/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/final-certification-98716cd5/receipts/widgets-live-full.json"
+      ],
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-saas-backend",
+      "exit": 0,
+      "seconds": 132.01
+    }
+  ],
+  "remainingFbe2eDisclosures": [
+    {
+      "id": "L2",
+      "status": "PARTIAL",
+      "classification": "OWNER_DECISION",
+      "note": "Contract checker freshly passes 31/31; remote CI and advisory acceptance policy remain unproved/unapproved."
+    },
+    {
+      "id": "L5",
+      "status": "OPEN",
+      "classification": "OWNER_DECISION",
+      "note": "Fixed tomorrow/tenant-local window ownership and policy must be settled with L24 before a policy-preserving date fix."
+    },
+    {
+      "id": "L12",
+      "status": "PARTIAL",
+      "classification": "ACCEPTED_LIMITATION",
+      "note": "Fresh WR 23, AB 2, H-harness 21, SB1 10, SBV 8 and V2 13 mutations pass their declared controls. This is targeted coverage, not full remote/exhaustive port certification."
+    },
+    {
+      "id": "L16",
+      "status": "PARTIAL",
+      "classification": "ACCEPTED_LIMITATION",
+      "note": "Current programme: 502 declarations / 44 batteries / 65 CI jobs. Ten new source mutants have focused diagnostics only. No full-corpus or remote timing claim."
+    },
+    {
+      "id": "L20",
+      "status": "PARTIAL",
+      "classification": "PRODUCTION_EFFECT_PROOF",
+      "note": "Nearest-availability unknown branch and unknown cells now asserted and mutation-tested. Actual Action Engine uncertainty/fault-produced UNKNOWN is still not proven by the supplied-verdict trace."
+    },
+    {
+      "id": "L23",
+      "status": "OPEN",
+      "classification": "PRESENTATION_DEPENDENCY",
+      "note": "Shell network ratchet is Claude-owned."
+    },
+    {
+      "id": "L24",
+      "status": "OPEN",
+      "classification": "OWNER_DECISION",
+      "note": "Specify canonical date/window/timezone policy owner; no tenant policy invented in widgets."
+    },
+    {
+      "id": "L25",
+      "status": "OPEN",
+      "classification": "OWNER_DECISION",
+      "note": "Tap-as-delivered/rendered semantics need a lifecycle ruling; existing fences unchanged."
+    },
+    {
+      "id": "L26",
+      "status": "PARTIAL",
+      "classification": "OWNER_DECISION",
+      "note": "Current decision/boundary admission adds rejection tests (32 combined audit tests). Approval of U-class does not retroactively approve red/missing historical controls."
+    },
+    {
+      "id": "L27",
+      "status": "OPEN",
+      "classification": "RUNTIME_CERTIFICATION_DEFECT",
+      "note": "The prior CLOSED disposition used TURN-CANONICAL user-turn identity evidence for an assistant-receipt duplication duty. That evidence is not sufficient. Fresh built runtime + binary proof shows one identical canonical receipt before/after Dismiss, one ActionExecution, but conversation grows from one assistant line to two. Existing defect, not an NS-1 regression."
+    }
+  ]
+}

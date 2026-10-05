@@ -1,0 +1,81 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "30fa24698f3ae277c22209e8edfd448c29e4f872",
+  "battery_hashes": {
+    "gate9.json": "a7118c39564b69a5d2eb4b0f4d0eac37020c9b7297068d19e879ceb307e6bb7f"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T12:29:54.112Z",
+  "batteries": [
+    "gate9.json"
+  ],
+  "neutraliser_sets": [],
+  "steps": [
+    "unit"
+  ],
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": "src/widgets/stores/timeline.store.spec.ts"
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-6e896e7da3",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-6e896e7da3",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "baseline|unit": {
+      "set": null,
+      "steps": [
+        "unit"
+      ],
+      "exits": {
+        "unit": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gate9.json",
+      "id": "M9-27",
+      "files": [
+        "src/widgets/stores/timeline.store.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit"
+      ],
+      "expect": "build-killed",
+      "status": "SURVIVED",
+      "killedBy": [],
+      "kills": [],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {},
+      "exits": {
+        "plain": {
+          "unit": 0
+        }
+      },
+      "tails": {
+        "plain": {
+          "unit": "PASS src/widgets/stores/timeline.store.spec.ts\n  TimelineStore.lowerToUserTurn — Gate 9 transaction writer\n    ✓ T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript (2 ms)\n    ✓ T9-WRITE-STALE returns null before allocation when the exact source fence loses (1 ms)\n    ✓ T9-WRITE-INDEX starts at zero when the conversation has no prior turn (1 ms)\n    ✓ T9-CONC-3 length-prefixes adversarial tuples so concatenation cannot collide\n    ✓ T9-BYTE-1 persists the lowered utterance byte-identically in record and USER turn\n\nTest Suites: 1 passed, 1 total\nTests:       5 passed, 5 total\nSnapshots:   0 total\nTime:        0.236 s, estimated 1 s\nRan all test suites matching src/widgets/stores/timeline.store.spec.ts.\nTest results written to: ../../../../../../../../var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-unit-6e896e7da3.json\nForce exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?\n"
+        }
+      }
+    }
+  ],
+  "status": "MISMATCH",
+  "mismatches": 1,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T12:29:56.122Z"
+}

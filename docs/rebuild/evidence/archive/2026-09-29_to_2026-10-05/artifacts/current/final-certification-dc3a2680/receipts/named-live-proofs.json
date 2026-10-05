@@ -1,0 +1,263 @@
+{
+  "candidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "reportSha256": "d3a88aa7a262cb5653679728635407fa6d4c70f66033d370690d12aaa8182358",
+  "groups": {
+    "requested_baselines": [
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+        "status": "passed",
+        "durationMs": 557
+      },
+      {
+        "name": "P-F88 \u2014 the \u00a73.8 submission and F88\u2019s walk, at the shape stage [HTTP] F88-1 [HTTP] every one of the 28 forbidden keys is refused at depth 0 and at depth 3, with the location named",
+        "status": "passed",
+        "durationMs": 599
+      },
+      {
+        "name": "P-F88 \u2014 the \u00a73.8 submission and F88\u2019s walk, at the shape stage [HTTP] F88-2 [HTTP] no F88.2 location reaches the ingress: each of the six, transplanted onto a submission at its own path and depth, is still refused",
+        "status": "passed",
+        "durationMs": 57
+      },
+      {
+        "name": "HTTP harness listener ownership HAR-LOOPBACK owns one ready IPv4 listener across requests and closes it at teardown",
+        "status": "passed",
+        "durationMs": 766
+      }
+    ],
+    "successor_v2": [
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-01 happy successor verification creates usable explicit personal context and actual actor audit",
+        "status": "passed",
+        "durationMs": 163
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-02 wrong OTP has no link or consumption effect",
+        "status": "passed",
+        "durationMs": 163
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-03 replay fails closed",
+        "status": "passed",
+        "durationMs": 125
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-04 expired OTP fails under database time",
+        "status": "passed",
+        "durationMs": 105
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-05 Client substitution cannot transfer a challenge",
+        "status": "passed",
+        "durationMs": 174
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-06 tenant substitution fails closed",
+        "status": "passed",
+        "durationMs": 160
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-07 predecessor changed after resolver read is rejected inside identity lock",
+        "status": "passed",
+        "durationMs": 108
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-08 active predecessor never authorizes issuance or consumption",
+        "status": "passed",
+        "durationMs": 172
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-09 non-latest revoked predecessor cannot be consumed",
+        "status": "passed",
+        "durationMs": 106
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-10 revoked episode remains byte-for-byte immutable",
+        "status": "passed",
+        "durationMs": 117
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-11 successful consume creates exactly one successor and one outcome",
+        "status": "passed",
+        "durationMs": 124
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-12 concurrent consume serializes to one success and one refusal",
+        "status": "passed",
+        "durationMs": 125
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-JSON all four V2 fields are mandatory, exact and immutable",
+        "status": "passed",
+        "durationMs": 126
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-CHANNEL canonical channel changed after issuance invalidates exact Client proof",
+        "status": "passed",
+        "durationMs": 113
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-SESSION current revocation is checked on consume",
+        "status": "passed",
+        "durationMs": 102
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-LIMIT failed OTP attempts survive rollback and cannot be reset with correct code",
+        "status": "passed",
+        "durationMs": 160
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-DELIVERY failed SMS grants nothing and discloses no OTP",
+        "status": "passed",
+        "durationMs": 86
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-V1 historical V1 remains immutable and initial-only; V1 consumption still works for a fresh subject",
+        "status": "passed",
+        "durationMs": 100
+      },
+      {
+        "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+        "status": "passed",
+        "durationMs": 557
+      }
+    ],
+    "release_profile": [
+      {
+        "name": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-INGRESS refuses an old HANDOFF at HTTP/typed/internal ingress and direct dispatch, with zero signer, turn, consumption or owner effect",
+        "status": "passed",
+        "durationMs": 638
+      },
+      {
+        "name": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-EGRESS refuses new/mixed HANDOFF mint and suppresses every old mixed control from resolve without rewriting history",
+        "status": "passed",
+        "durationMs": 412
+      },
+      {
+        "name": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-GRANT passes allowed navigation through scope admission, rejects old grants, and rolls back a failed binding",
+        "status": "passed",
+        "durationMs": 424
+      },
+      {
+        "name": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-LOCK serializes concurrent revoke with an in-flight profile admission under the existing AR-1 lock",
+        "status": "passed",
+        "durationMs": 331
+      },
+      {
+        "name": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-BOOKING admits the actual HTTP catalog \u2192 selectors \u2192 DRAFT \u2192 COMMIT source under a signed restricted grant",
+        "status": "passed",
+        "durationMs": 943
+      },
+      {
+        "name": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-SOURCE NS admits only the exact new source under a signed restricted grant",
+        "status": "passed",
+        "durationMs": 570
+      },
+      {
+        "name": "PROFILE fixed no-handoff [HTTP] [PostgreSQL] [synthetic certificate] PROFILE-SOURCE BS admits only the exact new source under a signed restricted grant",
+        "status": "passed",
+        "durationMs": 1185
+      }
+    ],
+    "release_authority": [
+      {
+        "name": "AR release revocation [HTTP] [PostgreSQL] AR-G6-REVOCATION [E-MINT] real post-Gate6 revoke refuses at canonical admission and increments metric",
+        "status": "passed",
+        "durationMs": 774
+      }
+    ],
+    "approved_sources": [
+      {
+        "name": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-CHECK admits exact detail date and preserves REFINE; all near-miss shapes remain forbidden",
+        "status": "passed",
+        "durationMs": 325
+      },
+      {
+        "name": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-REFUSE date cannot project a historical source",
+        "status": "passed",
+        "durationMs": 238
+      },
+      {
+        "name": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-REFUSE erased cannot project a historical source",
+        "status": "passed",
+        "durationMs": 217
+      },
+      {
+        "name": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-REFUSE expired cannot project a historical source",
+        "status": "passed",
+        "durationMs": 207
+      },
+      {
+        "name": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-REFUSE body cannot project a historical source",
+        "status": "passed",
+        "durationMs": 201
+      },
+      {
+        "name": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-REFUSE seal cannot project a historical source",
+        "status": "passed",
+        "durationMs": 185
+      },
+      {
+        "name": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-REFUSE foreign-principal cannot project a historical source",
+        "status": "passed",
+        "durationMs": 312
+      },
+      {
+        "name": "NS-1 retained journal date migration and adversarial source [HTTP] [PostgreSQL] NS-PARENT rechecks parent availability when the new exact return link is used",
+        "status": "passed",
+        "durationMs": 298
+      },
+      {
+        "name": "BS-1 canonical source evidence BS-SOURCE [HTTP] [E-MINT] own-list exact Client source proposes and commits reschedule and cancel through existing owners",
+        "status": "passed",
+        "durationMs": 1458
+      },
+      {
+        "name": "NS-1 canonical source evidence NS-SOURCE [HTTP] [E-MINT] production journal detail rereads exact retained date and resolves exact parent",
+        "status": "passed",
+        "durationMs": 484
+      }
+    ],
+    "turn_identity": [
+      {
+        "name": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-ORDINARY persists exactly one USER row on concurrent same-request retries and carries its conversation forward",
+        "status": "passed",
+        "durationMs": 348
+      },
+      {
+        "name": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-WIDGET uses the same persisted writer for production-minted typed and tapped controls; expired retry never falls through to ordinary chat",
+        "status": "passed",
+        "durationMs": 458
+      },
+      {
+        "name": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-ERASURE refuses replay of an erased row without restoring content or extending retention",
+        "status": "passed",
+        "durationMs": 200
+      },
+      {
+        "name": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-ATOMIC rolls back the USER row when its immutable correlation cannot be committed",
+        "status": "passed",
+        "durationMs": 250
+      },
+      {
+        "name": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-READ keeps an actual chat read, its widget emission and the next typed widget turn in one conversation",
+        "status": "passed",
+        "durationMs": 282
+      },
+      {
+        "name": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-SCOPE refuses a foreign current actor or tenant conversation; request IDs alone never confer identity",
+        "status": "passed",
+        "durationMs": 536
+      },
+      {
+        "name": "9.6 canonical USER identity [HTTP] [PostgreSQL] TURN-BROKEN-BINDING refuses duplicate evidence, orphan rows and expired history without recreating either half",
+        "status": "passed",
+        "durationMs": 227
+      },
+      {
+        "name": "9.6 canonical source evidence TURN-CANONICAL [HTTP] [E-MINT] ordinary typed, widget typed and native tap persist byte-identical USER content through the same writer",
+        "status": "passed",
+        "durationMs": 625
+      }
+    ]
+  }
+}

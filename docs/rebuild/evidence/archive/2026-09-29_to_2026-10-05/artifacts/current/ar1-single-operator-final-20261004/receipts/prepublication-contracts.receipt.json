@@ -1,0 +1,11 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "name": "prepublication-contracts",
+  "command": [
+    "node",
+    "scripts/verify-prepublication-contracts.mjs"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "exit": 0,
+  "seconds": 0.04
+}

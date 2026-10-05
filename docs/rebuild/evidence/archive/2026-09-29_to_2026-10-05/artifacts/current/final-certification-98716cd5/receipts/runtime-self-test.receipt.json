@@ -1,0 +1,12 @@
+{
+  "candidate": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+  "name": "runtime-self-test",
+  "command": [
+    "npm",
+    "run",
+    "self-test"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration/maya-chat-shell",
+  "exit": 0,
+  "seconds": 9.9
+}

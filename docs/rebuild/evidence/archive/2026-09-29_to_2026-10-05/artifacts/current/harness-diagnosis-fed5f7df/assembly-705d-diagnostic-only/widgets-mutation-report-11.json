@@ -1,0 +1,428 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gate11.json": "42e52dfd55a7d9f623e140e5d830d3be0632e186a701916d22d2e35877950a23"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T16:04:48.996Z",
+  "batteries": [
+    "gate11.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-63913e5261",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-63913e5261",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "11:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gate11.json",
+      "id": "MUT-1",
+      "files": [
+        "src/widgets/gates/gate11.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G11-N9-c",
+        "G11-N9-d",
+        "G11-N10-g",
+        "INTERIM"
+      ],
+      "kills": [
+        {
+          "killer": "G11-N9-c",
+          "test": "G11-N9 [U] — the applicability table is six rows, total, and each answers as ruled G11-N9-c: ROW W, witness lane UNBOUND → superseded/handle_stale with ZERO owner calls (AMB-01a)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "G11-N9-d",
+          "test": "G11-N9 [U] — the applicability table is six rows, total, and each answers as ruled G11-N9-d: ROW W with no ports at all, and a revision whose run is missing, take the same branch",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "G11-N10-g",
+          "test": "G11-N10 [U] — what Gate 11 decides, and what it refuses to decide G11-N10-g: the gate holds NO reader of its own — with the ports removed, no branch invents one",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "INTERIM",
+          "test": "G11-N10-P [U] — the slot-11 projection, and the INTERIM context overload INTERIM: the context overload is the same gate — same views, and no port bound",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 4
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate11.json",
+      "id": "MUT-3",
+      "files": [
+        "src/widgets/noun-resolution/noun-resolution.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G11-N9-b"
+      ],
+      "kills": [
+        {
+          "killer": "G11-N9-b",
+          "test": "G11-N9 [U] — the applicability table is six rows, total, and each answers as ruled G11-N9-b: row W wins over the noun rows — a stale world is stale whatever the nouns say",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate11.json",
+      "id": "MUT-9",
+      "files": [
+        "src/widgets/noun-resolution/noun-handles.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G11-N9-f"
+      ],
+      "kills": [
+        {
+          "killer": "G11-N9-f",
+          "test": "G11-N9 [U] — the applicability table is six rows, total, and each answers as ruled G11-N9-f: ROW W — a moved revision, and an owner with no current revision, both supersede",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate11.json",
+      "id": "MUT-11",
+      "files": [
+        "src/widgets/gates/gate11.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G11-N9-i",
+        "G11-N10-g"
+      ],
+      "kills": [
+        {
+          "killer": "G11-N9-i",
+          "test": "G11-N9 [U] — the applicability table is six rows, total, and each answers as ruled G11-N9-i: ROWS A0 and N0 throw — a missing owner is a construction defect, never drift (D-11)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "G11-N10-g",
+          "test": "G11-N10 [U] — what Gate 11 decides, and what it refuses to decide G11-N10-g: the gate holds NO reader of its own — with the ports removed, no branch invents one",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate11.json",
+      "id": "MUT-12",
+      "files": [
+        "src/widgets/gates/gate11.ts"
+      ],
+      "edits_applied": 2,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G11-N10-a",
+        "G11-ARCH-5"
+      ],
+      "kills": [
+        {
+          "killer": "G11-N10-a",
+          "test": "G11-N10 [U] — what Gate 11 decides, and what it refuses to decide G11-N10-a: a value divergence is SUPERSEDED, never `refuse` (row 11, C11:4731)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "G11-ARCH-5",
+          "test": "G11-ARCH [BUILD] — Gate 11 takes views, fences the handle, and re-reads no witness G11-ARCH-5: the replaced body is gone — no `FreshRead`, no `bodyHash`, and no `refuse`",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate11.json",
+      "id": "MUT-16",
+      "files": [
+        "src/widgets/noun-resolution/noun-resolution.ts"
+      ],
+      "edits_applied": 3,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G11-N15-a",
+        "G11-N15-e"
+      ],
+      "kills": [
+        {
+          "killer": "G11-N15-a",
+          "test": "G11-N15 [BUILD] — F15: the noun resolver reads AUDIT_RETAINED fields, and exactly seven G11-N15-a: `NounResolverInput` is F15’s seven, read from the certified contract",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "G11-N15-e",
+          "test": "G11-N15 [BUILD] — F15: the noun resolver reads AUDIT_RETAINED fields, and exactly seven G11-N15-e: the projection reads only class-A members of the record, and nothing else does",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gate11.json",
+      "id": "MUT-19",
+      "files": [
+        "src/widgets/noun-resolution/noun-resolution.ports.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G11-ARCH-2",
+        "typecheck:widgets-live"
+      ],
+      "kills": [
+        {
+          "killer": "G11-ARCH-2",
+          "test": "G11-ARCH [BUILD] — Gate 11 takes views, fences the handle, and re-reads no witness G11-ARCH-2: no port method anywhere in this unit takes a `Witness` (R3.7.4, no re-read path)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "typecheck:widgets-live",
+          "test": null,
+          "step": "typecheck",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 2,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T17:09:32.134Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 1,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

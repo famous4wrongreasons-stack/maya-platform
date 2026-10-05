@@ -1,0 +1,17 @@
+{
+  "candidate": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+  "at": "2026-09-30T14:57:53.203116+00:00",
+  "reason": "Repeated red unmutated native AR baseline controls: SV2-HTTP timeout on first isolated attempt, F88-1 timeout and F88-2 socket hang up on fresh retry. Main full controls pass; underlying intermittent HTTP harness cause not established. A green retry is not used to erase those failures.",
+  "runtimeL27": "PASS, exact former failing FBE2E and 8/8 fresh full-suite counterfactuals",
+  "stoppedProcessGroups": [
+    2320,
+    2326,
+    2362,
+    2395,
+    2363,
+    2328
+  ],
+  "fullMutationCertificateIssued": false,
+  "candidateSourceChanged": false,
+  "productionEffects": 0
+}

@@ -1,0 +1,83 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "scope": "Fresh synthetic/local evidence only; not production evidence or whole-corpus certification",
+  "result": "PASS",
+  "liveEntry": [
+    {
+      "title": "TURN-CANONICAL [HTTP] [E-MINT] ordinary typed, widget typed and native tap persist byte-identical USER content through the same writer",
+      "status": "passed",
+      "durationMs": 543
+    }
+  ],
+  "persistedTurnProof": [
+    {
+      "turnId": "b8e7e1eb-759f-473b-a518-4bef25f358b4",
+      "conversationId": "91c58590-dabd-47c1-8e12-a562f4dfe43c",
+      "canonicalRows": 1,
+      "bindingAudits": 1,
+      "actualActor": true
+    },
+    {
+      "turnId": "bfbf173c-eecb-4db4-a50a-d1b3ea559d81",
+      "conversationId": "91c58590-dabd-47c1-8e12-a562f4dfe43c",
+      "canonicalRows": 1,
+      "bindingAudits": 1,
+      "actualActor": true
+    }
+  ],
+  "sources": [
+    {
+      "path": "receipts/widgets-live-full.json",
+      "sha256": "eb2d76be8ebe0631985bf1c9c366cb77eda747e9eb015a8f6233ffef9d4f9140"
+    },
+    {
+      "path": "receipts/canonical-net-turn-observations.json",
+      "sha256": "81008af058d6c99965bdbb9629fe0d65429b4562f39230db6e3a07e371c50a9d"
+    }
+  ],
+  "boundary": "Persisted turn probe inspects the journal typed turns. Ordinary typed, widget typed and native tap share the writer in the named full-live proof. The personal observation does not itself inspect persisted turn rows.",
+  "nativeTURN": {
+    "path": "receipts/mutation-parts/widgets-mutation-part-TURN.json",
+    "sha256": "21904e2b0c5fb9ff86687f0ce375319d5c3f4e30407569a9e4448c90c4898221",
+    "status": "AS-DECLARED",
+    "mutants": 12,
+    "counts": {
+      "build-killed": 7,
+      "live-killed": 5
+    },
+    "restrictions": {
+      "live_tests": null,
+      "live_filter": null,
+      "unit_tests": null
+    },
+    "baselineControls": {
+      "baseline|live": {
+        "set": null,
+        "steps": [
+          "live"
+        ],
+        "exits": {
+          "live": 0
+        },
+        "failed": [],
+        "problems": []
+      },
+      "baseline|unit,typecheck,k3": {
+        "set": null,
+        "steps": [
+          "unit",
+          "typecheck",
+          "k3"
+        ],
+        "exits": {
+          "unit": 0,
+          "typecheck": 0,
+          "k3": 0
+        },
+        "failed": [],
+        "problems": []
+      }
+    }
+  },
+  "wholeCorpusAdmission": "PENDING"
+}

@@ -1,0 +1,110 @@
+{
+  "candidate": "dff728e85a97841dd72bd290992b888344780780",
+  "branch": "codex/maya-controlled-integration-20260930",
+  "repository": "famous4wrongreasons-stack/maya-platform",
+  "startedAt": "2026-10-04T22:05:57.761387+00:00",
+  "productionOperations": 0,
+  "status": "PASS",
+  "certificationIssued": false,
+  "prepublicationRunIds": [],
+  "pushCompletedAt": "2026-10-04T22:06:01.340517+00:00",
+  "requiredWorkflows": {
+    "311601892": "Platform CI",
+    "359168151": "Widget Contract (blocking)",
+    "360279046": "Widgets Live",
+    "360530612": "MAYA Chat Shell",
+    "362140366": "Widgets Mutation",
+    "374470990": "Canonical React release packaging"
+  },
+  "packagingWorkflowSource": {
+    "path": ".github/workflows/release-packaging.yml",
+    "sha256": "d4f2260e46f9c2bfba999ef3c02ae34be4557e7a1b2ecbe9a18942a08d24a3e0",
+    "workflowId": 374470990
+  },
+  "mutationDispatchStartedAt": "2026-10-04T22:06:03.979395+00:00",
+  "mutationDispatchedAt": "2026-10-04T22:06:06.029829+00:00",
+  "finishedAt": "2026-10-05T05:03:11.047197+00:00",
+  "headEqualsOrigin": true,
+  "worktreeClean": true,
+  "unpublishedRequiredSourceWork": 0,
+  "hostedRuns": [
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T22:06:03Z",
+      "databaseId": 37238710215,
+      "event": "push",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dff728e85a97841dd72bd290992b888344780780",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238710215",
+      "workflowDatabaseId": 360530612,
+      "workflowName": "MAYA Chat Shell"
+    },
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T22:06:03Z",
+      "databaseId": 37238710218,
+      "event": "push",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dff728e85a97841dd72bd290992b888344780780",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238710218",
+      "workflowDatabaseId": 374470990,
+      "workflowName": "Canonical React release packaging"
+    },
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T22:06:03Z",
+      "databaseId": 37238710222,
+      "event": "push",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dff728e85a97841dd72bd290992b888344780780",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238710222",
+      "workflowDatabaseId": 359168151,
+      "workflowName": "Widget Contract"
+    },
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T22:06:03Z",
+      "databaseId": 37238710226,
+      "event": "push",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dff728e85a97841dd72bd290992b888344780780",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238710226",
+      "workflowDatabaseId": 360279046,
+      "workflowName": "Widgets Live"
+    },
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T22:06:03Z",
+      "databaseId": 37238710237,
+      "event": "push",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dff728e85a97841dd72bd290992b888344780780",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238710237",
+      "workflowDatabaseId": 311601892,
+      "workflowName": "Platform CI"
+    },
+    {
+      "attempt": 1,
+      "conclusion": "success",
+      "createdAt": "2026-10-04T22:06:05Z",
+      "databaseId": 37238713168,
+      "event": "workflow_dispatch",
+      "headBranch": "codex/maya-controlled-integration-20260930",
+      "headSha": "dff728e85a97841dd72bd290992b888344780780",
+      "status": "completed",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/37238713168",
+      "workflowDatabaseId": 362140366,
+      "workflowName": "Widgets Mutation"
+    }
+  ]
+}

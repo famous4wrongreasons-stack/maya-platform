@@ -1,0 +1,17 @@
+{
+  "candidate": "bab750d8d43a61aeb1d994b0914fd396e2b527d3",
+  "utc": "2026-10-01T00:02:36.148472+00:00",
+  "command": [
+    "node",
+    "node_modules/jest/bin/jest.js",
+    "--runInBand",
+    "--runTestsByPath",
+    "src/billing/p4-08-tenant-billing-canonical-cutover.service.spec.ts",
+    "--json",
+    "--outputFile",
+    "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/harness-diagnosis-fed5f7df/clock-followup/unmutated-current-clock.json"
+  ],
+  "exit": 1,
+  "seconds": 0.71,
+  "scope": "Unmutated narrow diagnosis; synthetic unit doubles; no product edits"
+}

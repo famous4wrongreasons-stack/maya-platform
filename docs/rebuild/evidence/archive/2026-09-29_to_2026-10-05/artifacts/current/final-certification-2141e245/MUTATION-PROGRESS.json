@@ -1,0 +1,50 @@
+{
+  "utc": "2026-10-01T12:11:58.713570+00:00",
+  "parts": 42,
+  "totalParts": 65,
+  "partStatuses": {
+    "PARTITION-AS-DECLARED": 18,
+    "AS-DECLARED": 23,
+    "MISMATCH": 1
+  },
+  "completedDeclarations": 351,
+  "declarationStatuses": {
+    "live-killed": 125,
+    "build-killed": 222,
+    "SURVIVED": 1,
+    "pending": 2,
+    "equivalent": 1
+  },
+  "baselineRed": [],
+  "mismatches": 1,
+  "testRuns": 456,
+  "transportFailureAlerts": [],
+  "newRuns": [
+    {
+      "worker": "5",
+      "step": "unit",
+      "passed": 5600,
+      "failed": 2,
+      "failingTitles": [
+        "appendTurn creates one WidgetTimelineTurn, 180 days of retention, nulls for absent text",
+        "T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript"
+      ],
+      "omittedTitles": 0
+    },
+    {
+      "worker": "6",
+      "step": "unit",
+      "passed": 5600,
+      "failed": 2,
+      "failingTitles": [
+        "appendTurn creates one WidgetTimelineTurn, 180 days of retention, nulls for absent text",
+        "T9-WRITE-1 uses the exact transaction, lock identity, source fence and USER transcript"
+      ],
+      "omittedTitles": 0
+    }
+  ],
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "scope": "Live progress only. Does not admit partial receipts as whole-corpus certification.",
+  "certificateIssued": false,
+  "canonicalAssembly": "PENDING"
+}

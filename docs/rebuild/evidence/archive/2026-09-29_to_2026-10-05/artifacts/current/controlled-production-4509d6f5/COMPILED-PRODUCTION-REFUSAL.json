@@ -1,0 +1,30 @@
+{
+  "candidate": "4509d6f55df62da852740658c69613b113b5a1c1",
+  "compiledPolicyProof": [
+    {
+      "name": "NODE_ENV production; release environment production",
+      "result": "REFUSED",
+      "reason": "widget_release_production_not_authorized"
+    },
+    {
+      "name": "NODE_ENV production; release environment staging",
+      "result": "REFUSED",
+      "reason": "widget_release_production_not_authorized"
+    },
+    {
+      "name": "NODE_ENV production; release environment synthetic",
+      "result": "REFUSED",
+      "reason": "widget_release_production_not_authorized"
+    },
+    {
+      "name": "Production profile certificate",
+      "result": "REFUSED",
+      "reason": "widget_release_certificate"
+    }
+  ],
+  "syntheticShapeControl": "PASS",
+  "networkCalls": 0,
+  "databaseCalls": 0,
+  "productFilesChanged": 0,
+  "checkedAt": "2026-10-02T17:46:40.317349+00:00"
+}

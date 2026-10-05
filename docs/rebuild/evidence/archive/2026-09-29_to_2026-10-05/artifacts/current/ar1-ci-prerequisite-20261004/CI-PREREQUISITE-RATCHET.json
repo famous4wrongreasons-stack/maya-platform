@@ -1,0 +1,11 @@
+{
+  "candidateBeforeFix": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "status": "PASS",
+  "tests": 59,
+  "failures": 0,
+  "logSha256": "091a7da80e0185a514112e703a880402b3d091195b241352dbca1cde1bd56c65",
+  "cases": "Required builder in same CI job, after install and before full suite; missing/reordered builder refused",
+  "productChanges": 0,
+  "testFiltersAdded": 0,
+  "timeoutsChanged": false
+}

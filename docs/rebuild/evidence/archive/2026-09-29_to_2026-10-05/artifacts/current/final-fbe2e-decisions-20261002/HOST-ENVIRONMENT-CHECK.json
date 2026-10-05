@@ -1,0 +1,13 @@
+{
+  "candidate": "4509d6f55df62da852740658c69613b113b5a1c1",
+  "status": "PASS",
+  "programmeStart": "2026-10-02T08:53:53.617983+00:00",
+  "checkedAt": "2026-10-02T17:22:25.387992+00:00",
+  "powerEvents": [],
+  "sleepEvents": [],
+  "reexecutionRequired": false,
+  "timeoutsChanged": false,
+  "powerSettingsChanged": false,
+  "method": "Actual padded Sleep/Wake/DarkWake event column; scheduler Wake Requests are excluded. Any sleep during this fresh programme requires overlap analysis before admission.",
+  "idleSleepInhibitor": "caffeinate -i attached to programme lifetime"
+}

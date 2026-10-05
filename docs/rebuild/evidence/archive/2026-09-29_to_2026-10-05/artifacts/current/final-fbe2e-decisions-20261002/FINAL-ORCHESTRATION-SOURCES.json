@@ -1,0 +1,168 @@
+{
+  "candidate": "4509d6f55df62da852740658c69613b113b5a1c1",
+  "status": "PASS",
+  "checkedAt": "2026-10-02T17:22:26.293434+00:00",
+  "snapshot": {
+    "path": "ORCHESTRATION-SOURCES.json",
+    "sha256": "c42d7a75689ed88f33bc6628fae535bfa0dc9b39d9c50fb7ee52c9925711f35a",
+    "capturedAt": "2026-10-02T09:09:14.568993+00:00"
+  },
+  "snapshotBoundary": "Current orchestration source snapshot. Ordinary suites already executed; full native corpus not yet admitted. No retroactive pre-execution claim.",
+  "executionSourcesChangedSinceCapture": [],
+  "reportingOnlyChanges": [
+    {
+      "path": "index-final-proofs.py",
+      "before": "2b226941ccbdc91f3ad4a346f81c7d0aac4af83f1a0d368385f899bd6f251b99",
+      "after": "5dc42ec3c2244113e1ee1ad6838469211791ff580a35e1c0ada46674b1b158e3"
+    }
+  ],
+  "additionalReportingHelpers": [
+    {
+      "path": "capture-native-progress.py",
+      "sha256": "85454046765b2c4735344d4f76167970946336e6fc5962e55b4b3eaf283632c3"
+    },
+    {
+      "path": "check-final-artifact-stability.py",
+      "sha256": "da0fbfbeb20cbbd7d6f0e15c072c2261862084bc06db6764c270ae547d89a05c"
+    },
+    {
+      "path": "check-final-process-lifecycle.py",
+      "sha256": "560e4f22726fdc45cd01a75f22a1ee380794a9b2f4d7a1b7d0ed8e2eb8910d61"
+    },
+    {
+      "path": "check-host-environment.py",
+      "sha256": "b2087b6daa218e366a017495b89ae423ef1bba63fa3bcdb563b124cf2b9172d2"
+    },
+    {
+      "path": "finalize-fbe2e.py",
+      "sha256": "6249fbe2baa9e556a391784b07f1d08e8c00cf0bc8591cbff0fe92bd7e057d63"
+    },
+    {
+      "path": "finalize-receipts.py",
+      "sha256": "b5db289b47857e587a27fa68cc3773d9f24ad8197db28c6139b6359ed5bd9729"
+    },
+    {
+      "path": "finish-programme.py",
+      "sha256": "29710e54ccaa6165cedb8d11040c83981a0c3997b32122916d89783fa1171be3"
+    },
+    {
+      "path": "index-final-orchestration-sources.py",
+      "sha256": "b006fb9b116f05da9ec19039d943855ed67c94029bcf901e4109cee4cc8dc339"
+    },
+    {
+      "path": "status.py",
+      "sha256": "0de39f7ad987271c4a04e42d802cc9f7095216f8e902a12497c7b8b2a7bc3fd5"
+    }
+  ],
+  "files": [
+    {
+      "path": "PROBE-ADAPTATION.json",
+      "sha256": "339623d9bdf6623b7caa52f61209105f547ac13cb5abe7c7c774a9fb693d12c1"
+    },
+    {
+      "path": "assemble-complete.py",
+      "sha256": "31fc039d69daeec7ac700c3aadcad10d2b602409679dec4d5cd443dbef74cb78"
+    },
+    {
+      "path": "check-ci-postconditions.py",
+      "sha256": "a1d9fa65455949054f4e03838db3e134d71c22eaef8df035a6208a8c419edaae"
+    },
+    {
+      "path": "index-final-proofs.py",
+      "sha256": "5dc42ec3c2244113e1ee1ad6838469211791ff580a35e1c0ada46674b1b158e3"
+    },
+    {
+      "path": "index-fresh-artifacts.py",
+      "sha256": "951120d1ef4fb41437b5a14b8e33edf5fdfec34318979f5751ff6f9ba4ce4eca"
+    },
+    {
+      "path": "jest-net-return.json",
+      "sha256": "c203e56c90934f271e0257f6178ad5c3b42d6124893a438bc9a6c1733e7e3490"
+    },
+    {
+      "path": "jest-net-turn.json",
+      "sha256": "13ac835518c3650cd0acb19b134286a2af08ec7d50cefa1b3e89f9ca2396739c"
+    },
+    {
+      "path": "l25-browser-proof.js",
+      "sha256": "d07e2dcf1e0d491ad48a67c3f2997c50b6b6f4cc05ac5d98104e755de0cfb578"
+    },
+    {
+      "path": "prepare-extra-dbs.py",
+      "sha256": "99176445e074417e3348b0a6041e62622f60fcbc1779d28e7468b4f56adb7601"
+    },
+    {
+      "path": "prepare-final.py",
+      "sha256": "cafa8f34b38db9d83c99ce5e0aeffbafe59cd74b4c6ed3cc3097ff6d3fcf4547"
+    },
+    {
+      "path": "prove-requested-baselines.py",
+      "sha256": "696dce9c230a49b5e9a275999dabb2546f577ca47c5fdf8a39c8e7d6d2c07cb2"
+    },
+    {
+      "path": "run-additional-carrier-harness.py",
+      "sha256": "b23e9444720098b74340e293f4eb1a0bce625878290102e86fc88596edcd8e0c"
+    },
+    {
+      "path": "run-all-mutations-isolated.py",
+      "sha256": "5d21d60112fa4a55a6cb6deada293a1b9649b07fbb0a13bf249f0b004832e621"
+    },
+    {
+      "path": "run-baseline.py",
+      "sha256": "0cdc1f4fe63f173db16064c594428f531e368bc45ea6da9a49aa6bfdd8960a53"
+    },
+    {
+      "path": "run-carrier-selftest.py",
+      "sha256": "8586b803fe0635286056e8a17a05077be02ce574e7ff8eac409ecf6f80b48f99"
+    },
+    {
+      "path": "run-compiled-bin.py",
+      "sha256": "10c2e3d623e09b7f66d5f93fb2410832cac47d804f59dca5fcba2bda659a3404"
+    },
+    {
+      "path": "run-compiled-receipt-bin.py",
+      "sha256": "004bc3167386ca5df56fd9bd26c35c4be56c5f64aa41a0ca8914bcc071013133"
+    },
+    {
+      "path": "run-complete-native.py",
+      "sha256": "d3e0f4249d130a651a49557f300dce249d9e069dc750854fa3ff031a6af7de3b"
+    },
+    {
+      "path": "run-extra.py",
+      "sha256": "a1a269a82dad8bcfa6a122a315e4db319eeb22ff9b6fe60133365c47bf08b540"
+    },
+    {
+      "path": "run-l27-mutations.py",
+      "sha256": "b55d8170f933d09c4e5b446bef0ca0caa920683d74bbdd85caced01d23bcab71"
+    },
+    {
+      "path": "run-net-bin.py",
+      "sha256": "51413d422b723a78eb0724d87cfeccdb8d8f7f78f32889853ae78270cfb1b580"
+    },
+    {
+      "path": "run-net-proof.py",
+      "sha256": "9ca84968c09e4aebcfd99c835c9610d547931247c5ff8ed37749b23ad2b852bf"
+    },
+    {
+      "path": "run-net-turn-proof.py",
+      "sha256": "5fe75594cbf69c60f5bb94390933a92236a0342cfc1b4b404589985a0ab47a70"
+    },
+    {
+      "path": "run-parity.py",
+      "sha256": "ddc888b08995ef6ff21520e15be85a532ca1486a57c7ceb72609a858134f48e1"
+    },
+    {
+      "path": "run-postcommit-bin.py",
+      "sha256": "0c8368ce0f586c083670edfaf45ccb1f3340f80e8293198bd19996944bb117e6"
+    },
+    {
+      "path": "run-programme.py",
+      "sha256": "defe4a117cda0b6fd3784b7c71b006515fdaa7bf900c85bef0475c92561b700b"
+    },
+    {
+      "path": "run-rest.py",
+      "sha256": "c33ed81a9a6363a28ac6e58ec97b84ae09b6d66358ae2cfa77673fedd027262d"
+    }
+  ],
+  "productCandidateChanged": false
+}

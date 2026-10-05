@@ -1,0 +1,363 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "battery_hashes": {
+    "gateP-seal.json": "783d696d5aa4d13bd63ee47dc92fb6119d8285f633156e6a65446067757dbe02"
+  },
+  "partition": null,
+  "startedAt": "2026-10-01T20:10:09.175Z",
+  "batteries": [
+    "gateP-seal.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": null
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-8ec4c18637",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-8ec4c18637",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "P-seal:baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gateP-seal.json",
+      "id": "SEAL-M1",
+      "files": [
+        "src/widgets/emission/seal.service.ts"
+      ],
+      "edits_applied": 2,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SEAL-1",
+        "SEAL-4"
+      ],
+      "kills": [
+        {
+          "killer": "SEAL-1",
+          "test": "P-SEAL — SealService (H4 at EP-MINT) SEAL-1 [U] the seal is the keyed hmac of H4: one key one value, another key another value",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "SEAL-4",
+          "test": "P-SEAL — SEAL-4: the H6 hashing ratchet SEAL-4 [BUILD] every hashing site under src/widgets is on the list",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "SEAL-4",
+          "test": "P-SEAL — SEAL-4: the H6 hashing ratchet SEAL-4 [BUILD] the seal introduces no second scheme of its own",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 3
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-seal.json",
+      "id": "SEAL-M2",
+      "files": [
+        "src/widgets/emission/seal.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SEAL-1",
+        "SEAL-2"
+      ],
+      "kills": [
+        {
+          "killer": "SEAL-1",
+          "test": "P-SEAL — SealService (H4 at EP-MINT) SEAL-1 [U] the seal is the keyed hmac of H4: one key one value, another key another value",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "SEAL-1",
+          "test": "P-SEAL — SealService (H4 at EP-MINT) SEAL-1 [U] every H4 term is covered, and the terms are positional",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "SEAL-2",
+          "test": "P-SEAL — SealVerifier (H4 at EP-INGRESS) SEAL-2 [U] verification fails for each tampered term (7 cases)",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 3
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-seal.json",
+      "id": "SEAL-M3",
+      "files": [
+        "src/widgets/emission/seal-verifier.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SEAL-6"
+      ],
+      "kills": [
+        {
+          "killer": "SEAL-6",
+          "test": "P-SEAL — SealVerifier (H4 at EP-INGRESS) SEAL-6 [U] the seal is compared in constant time, never with ===",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-seal.json",
+      "id": "SEAL-M4",
+      "files": [
+        "src/widgets/emission/seal-verifier.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SEAL-2"
+      ],
+      "kills": [
+        {
+          "killer": "SEAL-2",
+          "test": "P-SEAL — SealVerifier (H4 at EP-INGRESS) SEAL-2 [U] an absent row or an absent term never verifies",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-seal.json",
+      "id": "SEAL-M5",
+      "files": [
+        "src/widgets/emission/seal-verifier.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SEAL-3"
+      ],
+      "kills": [
+        {
+          "killer": "SEAL-3",
+          "test": "P-SEAL — SealVerifier (H4 at EP-INGRESS) SEAL-3 [U] an unknown key version is refused, and nothing is read first",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateP-seal.json",
+      "id": "SEAL-M6",
+      "files": [
+        "src/widgets/emission/seal-h6.architecture.spec.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "SEAL-4"
+      ],
+      "kills": [
+        {
+          "killer": "SEAL-4",
+          "test": "P-SEAL — SEAL-4: the H6 hashing ratchet SEAL-4 [BUILD] a listed file that no longer hashes has left the list",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "SEAL-4",
+          "test": "P-SEAL — SEAL-4: the H6 hashing ratchet SEAL-4 [BUILD] the list may only shrink",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-01T21:05:07.411Z",
+  "assembly": {
+    "contract": "maya.widgets-mutation-ci/1",
+    "partitions": 1,
+    "all_declared_mutants": true,
+    "unrestricted_tests": true
+  }
+}

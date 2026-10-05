@@ -1,0 +1,17 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "checkedAt": "2026-10-04T21:59:11.604079+00:00",
+  "status": "NOT ADMITTED",
+  "hostedRun": 37235649336,
+  "failedJob": 111534331287,
+  "rootCause": "Unit release fixtures hard-code local proof DB names while CI=true + GITHUB_ACTIONS=true + WIDGET_GATEWAY_PG=required correctly admit only maya_ci. All 105 hosted failed baseline assertions reproduced exactly by changing only these environment settings.",
+  "productDefectProven": false,
+  "harnessFixtureDefectProven": true,
+  "localModePassed": 142,
+  "ciModeFailed": 105,
+  "exactHostedFailureSetReproduced": true,
+  "productFilesChangedForDiagnosis": 0,
+  "productionEffects": 0,
+  "oldLocalReceiptPreserved": true,
+  "nextRequired": "Test-only canonical fixture DB selection, keep both DB guards unchanged; new committed candidate and full fresh final-HEAD admission required."
+}

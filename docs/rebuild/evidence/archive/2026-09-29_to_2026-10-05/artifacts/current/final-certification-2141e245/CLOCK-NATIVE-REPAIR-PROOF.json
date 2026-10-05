@@ -1,0 +1,19 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "mutation": "H-P408-CLOCK-1",
+  "observation": {
+    "path": "receipts/mutation-diagnostics/1-unit-1790839489182.json",
+    "indexSha256": "ddfaee43e1d9aeb59d6f5208cbceefba1db3cd610cd4e9032a03a762ebb22afa",
+    "passed": 5599,
+    "failed": 3,
+    "failingTitles": [
+      "P408-HARNESS-CLOCK anchors implicit billing reads to the fixture clock",
+      "fails closed for a different-plan active-window prepayment",
+      "does not create a recurring intent before the exact due window"
+    ]
+  },
+  "targetedBeforeAfter": "../harness-diagnosis-fed5f7df/clock-followup/REPAIR-REGRESSION.json",
+  "nativeBatteryAdmission": "Complete H-harness AS-DECLARED, 26/26 killed; whole corpus pending",
+  "productChanges": 0,
+  "nativeProof": "HTTP-HARNESS-NATIVE-REPAIR-PROOF.json"
+}

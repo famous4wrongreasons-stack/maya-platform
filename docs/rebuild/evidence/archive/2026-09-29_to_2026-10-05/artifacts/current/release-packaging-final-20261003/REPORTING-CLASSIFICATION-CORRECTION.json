@@ -1,0 +1,43 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "status": "PASS",
+  "classificationOnly": true,
+  "recordedAt": "2026-10-03T12:59:23.935924+00:00",
+  "reportingScript": "work/release-packaging-final-20261003/finalize-receipts.py",
+  "beforeSha256": "cfb1bb880c78e7b76a16c5f6b2674f210033fb02767e6b1a5deff41d4e3cf8d6",
+  "afterSha256": "95f4747025d9b60fdfe60fa857002b74b1c93aeecd1f073af9720ea22af8475b",
+  "changedField": {
+    "before": {
+      "handoffPending": 2
+    },
+    "after": {
+      "preexistingPending": 2,
+      "pendingDeclarations": [
+        "gate6.json#M17b",
+        "gate6.json#M18b"
+      ]
+    }
+  },
+  "canonicalDeclarations": [
+    {
+      "id": "M17b",
+      "expect": "pending",
+      "description": "(b) `policyDecision === 'ALLOW'` is deleted (C11:4751). PENDING, and the reason is stated rather than hidden: every registered capability whose decision is not ALLOW is also outside the allowlist, so (a) shadows (b) over today's registry and NO input distinguishes this build. Its killer is the E-INDEP pair (neutraliser M17a\u2032 = (a) neutralised, IR-G6-BATT) on an E-MINT COMMIT record, which D-4 defers to E2."
+    },
+    {
+      "id": "M18b",
+      "expect": "pending",
+      "description": "(c) `allowedSourceTypes` includes `authenticated_request` is deleted (C11:4752, F33). PENDING for the same reason as M17b: (a) shadows it over today's registry. Its killer is the E-INDEP pair (neutraliser M18a\u2032) at E2."
+    }
+  ],
+  "testsChanged": false,
+  "admissionRulesChanged": false,
+  "countsChanged": false,
+  "productCandidateChanged": false,
+  "globalHandoffStopsUnchanged": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "wholeCorpusStillRunning": true,
+  "explanation": "Corrects a reporting label only. Canonical inventory and strict collector already require the two named pending measurements, not two HANDOFF mutant exclusions. Pending declarations are never counted as kills. Full-contract HANDOFF STOP is a separate dimension."
+}

@@ -1,0 +1,10 @@
+{
+  "reason": "R02 unmutated unit baseline exposed same independent implicit wildcard listener hazard. Controlled exact-suite reproduction misroutes 21 requests. Harness-only repair required; no product change. Entire fresh candidate certification must restart.",
+  "stoppedPids": [
+    61102,
+    72332,
+    72338,
+    72629
+  ],
+  "utc": "2026-09-30T15:52:00.421155+00:00"
+}

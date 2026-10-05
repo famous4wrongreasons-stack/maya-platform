@@ -1,0 +1,20 @@
+{
+  "candidate": "667b687c161a03d2d5f3f508f63b8fd0beedfbd9",
+  "reason": "Mutation inventory guard expected 45 batteries, actual 46 after approved PU additions. Test inventory correction required. No receipts from this attempt enter final admission.",
+  "ownedProcessesSignalled": [
+    35376,
+    35385,
+    35413,
+    36410,
+    36411,
+    36417,
+    36439,
+    36491,
+    36671,
+    37837,
+    37853,
+    37854
+  ],
+  "certifiedForProfile": false,
+  "historicalReceiptsAdmitted": 0
+}

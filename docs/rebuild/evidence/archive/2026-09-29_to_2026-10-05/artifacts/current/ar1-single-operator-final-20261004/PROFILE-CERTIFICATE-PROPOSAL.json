@@ -1,0 +1,988 @@
+{
+  "candidate": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+  "payload": {
+    "contract": "maya.widget-release-profile-certificate/2",
+    "environment": "synthetic",
+    "scope": "closed-input.no-handoff@1",
+    "certification": "CERTIFIED_FOR_PROFILE",
+    "candidateSha": "dcf51e1e8b3e0c5e118bf0f111cbbc6bfd3287e4",
+    "profileDigest": "310931e32e0d7d6e23449eb1016b3db99e807eca1c7a310cb9c814182f42be59",
+    "registryDigest": "21ffeb2426d9629e8e9110bbecdbdc7b45c0869e70f9395024e0fa728418a49a",
+    "matrix": [
+      {
+        "id": "G1-a",
+        "state": "L-T",
+        "evidenceDigest": "54209c73249c7cf9f71a98530d8ba01d56db406530393710c8de1cc4acbfa035"
+      },
+      {
+        "id": "G1-b",
+        "state": "L",
+        "evidenceDigest": "31429fb6b0e1be58636bbd4d93cb508470f8dc9ac1ea6812620e41aa33751b89"
+      },
+      {
+        "id": "G1-c",
+        "state": "L",
+        "evidenceDigest": "b4dd4673520e02a85db6eea00c4193f8aad207a434403a35752d9f5d46a7cd9c"
+      },
+      {
+        "id": "G1-d",
+        "state": "L",
+        "evidenceDigest": "c9bd8bcefabf79fe751d00270f798627d79c660fb5bd2bd77f48a7b39e2b648d"
+      },
+      {
+        "id": "G1-e",
+        "state": "L",
+        "evidenceDigest": "c052f435948f9393524ef4ea5eb91f770d8480f9a88df78ee1364c924ab64c8e"
+      },
+      {
+        "id": "G1-f",
+        "state": "L",
+        "evidenceDigest": "e8bb36097eec03fb4cc4888187eb4c6024fde0de001229d8feef9597960a9196"
+      },
+      {
+        "id": "G1-g",
+        "state": "L",
+        "evidenceDigest": "05ef668b269de44937ea9358ed01695ebf74f885a6ef6ea08a6b556674c1c88e"
+      },
+      {
+        "id": "G2-a",
+        "state": "L",
+        "evidenceDigest": "c4028434c2903830106f3f9a86a9605cb55fb398481800c1656b272c427a5fef"
+      },
+      {
+        "id": "G2-b",
+        "state": "L",
+        "evidenceDigest": "ebe12878b3576de655c88a728d79e25dd3c90f1e14195078cf5d67fbd0a5ee34"
+      },
+      {
+        "id": "G2-c",
+        "state": "L",
+        "evidenceDigest": "01643ab7961d78d0586b89cb52271603d4de856309549a18786a333141a673f1"
+      },
+      {
+        "id": "G3-a",
+        "state": "L",
+        "evidenceDigest": "f915afde9c7cba5011d000537abb468cac9df76ff875fcc5daf08baf95108b27"
+      },
+      {
+        "id": "G3-b",
+        "state": "L",
+        "evidenceDigest": "0425b1f6b651109d45baf620cd69f01d29f1b5e3e84568260d404fe805e244b5"
+      },
+      {
+        "id": "G3-c1",
+        "state": "L",
+        "evidenceDigest": "5abb4c78f38fa161a4a0bf532e17a5e496f4cc23fc96c025c3e1f7c5084c5421"
+      },
+      {
+        "id": "G3-c2",
+        "state": "U",
+        "evidenceDigest": "7a5644f26b1ce3246a839a876fc66f7cbc9d8a888a02a71f7051baea3102a8d6",
+        "u": {
+          "decisionDigest": "9cc5b7b5d5e66ba909f2b8ec7a21e49089c5e91a431e9b275c97f04e78eebd0a",
+          "absence": "8c74971e1acba7c70e7344334af577b0fef3023e649781d3eda23901974db091",
+          "refusal": "078a70d74ba069592d57f02392ec8b06b6be97cddbc8e8032f3615a7c920d3cf",
+          "mechanism": "5322d94720bd52130acffa1c99d0099551d6b7e7495d3bb59d8bf2ff52d94271"
+        }
+      },
+      {
+        "id": "G3-d",
+        "state": "L",
+        "evidenceDigest": "23f73f3850a405417a9ea2e44faed828baa8c4d3a5c19dcc70f53dbdd71fec1b"
+      },
+      {
+        "id": "G3-e",
+        "state": "L",
+        "evidenceDigest": "b34a571e47a03d5d1078c859ba732744b8838709431c8cd4b91e9c5c3fa40a43"
+      },
+      {
+        "id": "G3-f",
+        "state": "U",
+        "evidenceDigest": "442be8742c70334768c3c1af7b8695110ca02bc1a5ec26894771fbc765824f5f",
+        "u": {
+          "decisionDigest": "f39ae740068baab8c728d227d0717c5b4fb64cde3ae6a0fe8fa342fd7b10a9fb",
+          "absence": "1c908ae4829ba8207e6762eec3d64e5e6e158164cc13889c374b35d2f05f729e",
+          "refusal": "1c7e8b7b2eb79dc05a5ca434ded53159f8efd02b570173d570b5e1efbb159f46",
+          "mechanism": "d638607e90c0bb7129ce67d421616fa67efbfe268fd1b74ddd52ece8be58f19e"
+        }
+      },
+      {
+        "id": "G4-a",
+        "state": "L",
+        "evidenceDigest": "8ca3dca0e3d741db6e548b30a8a0096691e24213fabecbf420673dd176435cbb"
+      },
+      {
+        "id": "G4-b",
+        "state": "L-T",
+        "evidenceDigest": "313ca095b6f5335d2c9696a3024acbd39d71f71b332404c322da93e9a5cd3c9f"
+      },
+      {
+        "id": "G5-a",
+        "state": "L",
+        "evidenceDigest": "a8fdcc8acfd03a63d73280f9a650a8fc3e3bff1af81e28eefd72664bc54e4507"
+      },
+      {
+        "id": "G5-b",
+        "state": "L",
+        "evidenceDigest": "6f68bdf627dab74366a41adeb7fe091d4fa4376ee1203bce6cb25a0fc80e6507"
+      },
+      {
+        "id": "G5-c",
+        "state": "L",
+        "evidenceDigest": "99a915de42b5b266e31f4a6079312b4180876f0cb262fe06959c52ee5b6e7c67"
+      },
+      {
+        "id": "G5-d",
+        "state": "L",
+        "evidenceDigest": "28c1e97d535ff057449e0db2d12a66017489707d77c4e57de348606ce5ed9bbb"
+      },
+      {
+        "id": "G5-e",
+        "state": "L-T",
+        "evidenceDigest": "6278ac09779240cd469eb73678ae4d8b60684a672f59dbf7ed0b076b839ca0d7"
+      },
+      {
+        "id": "G5-f",
+        "state": "U",
+        "evidenceDigest": "c514372dde22c8a40a1ece00ac7ec440ae2c5b3542fd3f2bd1a60680c15318e2",
+        "u": {
+          "decisionDigest": "cafc6af2b4904464135cf99f28385db9a3eb722797abfe45cb5930d1db164ab4",
+          "absence": "519d9ced46ed2abfc178ac2eefa35bdeebb3b16c132de4b023f6ac49344b0e35",
+          "refusal": "142dad632c8fccc50c26087f1a686659706e6ecbae084a7b6a99870931e960c9",
+          "mechanism": "1861e5a3059e97b76f1e6d9a2675518074f6a99b8e7b4be54a58336aabe753f0"
+        }
+      },
+      {
+        "id": "G6-1",
+        "state": "L",
+        "evidenceDigest": "6c3c82d87b8bad0c6502c21317506c9fcea81e0619e42216c24fba397a4c754c"
+      },
+      {
+        "id": "G6-2",
+        "state": "L",
+        "evidenceDigest": "ec81002108bfe2f01f1fa7a44ae42f0b3a21b99ebfa6679f4799db6cc4e873d1"
+      },
+      {
+        "id": "G6-3",
+        "state": "L",
+        "evidenceDigest": "b5804d07cec26510a8f72a6ef1778e4929c146e5427165c2850121acd0bdbfd9"
+      },
+      {
+        "id": "G6-4",
+        "state": "L",
+        "evidenceDigest": "1486fe1fa3ef72ce6c116f48ebb291a009275ca3de7c10c432b00efb89b36c03"
+      },
+      {
+        "id": "G6-5",
+        "state": "L",
+        "evidenceDigest": "bb7ad10927a66770de13612470fd55f52694b155901233698902740adcf77766"
+      },
+      {
+        "id": "G6-6",
+        "state": "STOP",
+        "evidenceDigest": "0d24d7cce67130e61741a42b1fcd8aa55d51fd13a069b34b174f6d75071e5831"
+      },
+      {
+        "id": "G6-7",
+        "state": "L",
+        "evidenceDigest": "75d4868c6e4398f272e80d45cd3338243a160ed4b656a47af970e3f42ecc4313"
+      },
+      {
+        "id": "G6-8",
+        "state": "L",
+        "evidenceDigest": "5fc7de18a1cd11f78c92a02c48bbcb53349a258443cf19bfabdecf755fad98f8"
+      },
+      {
+        "id": "G6-9",
+        "state": "L",
+        "evidenceDigest": "5e92a0078d7256ecb40ea323bf7ee1f2f06923a6fdef5a86d747a02e8a79b197"
+      },
+      {
+        "id": "G6-10",
+        "state": "L",
+        "evidenceDigest": "da0afccc3ab0e7e78b23cce59146874ff61fcb8c07da2b74e4bde8e943e248b0"
+      },
+      {
+        "id": "G6-11",
+        "state": "L",
+        "evidenceDigest": "bdf9353b36f8d47ed7e4ab318aa33694f7851513317343951870bd0f6b9aaadc"
+      },
+      {
+        "id": "G6-12",
+        "state": "L",
+        "evidenceDigest": "a0018b0b78453ffcd4f069dca432f0c69abb3a853d3060222aad25c8794f758e"
+      },
+      {
+        "id": "G6-13",
+        "state": "L",
+        "evidenceDigest": "e6b7e2100a15d3ebe90795238e767826f2c246410614682187354cecb3240ad8"
+      },
+      {
+        "id": "G6-14",
+        "state": "L",
+        "evidenceDigest": "8cf88fe339db63b2f148eb23a8f83894220f55aded4725baf2518350a8c1d7ed"
+      },
+      {
+        "id": "G6-15",
+        "state": "L",
+        "evidenceDigest": "c321e29d061cffaddfe11b637300f5022989a79a6f1e726746b54d1c73be0644"
+      },
+      {
+        "id": "G6-16",
+        "state": "L",
+        "evidenceDigest": "6212e9ecfc054268687966bbd9e39ee5b00cb2d2b9e950fd043c26c4ef82138d"
+      },
+      {
+        "id": "G6-17",
+        "state": "L",
+        "evidenceDigest": "b4bb34441a70a1e63a3f81fe1de9336ca3f5d243deab98d326023cfa884c3dfa"
+      },
+      {
+        "id": "G6-18",
+        "state": "L",
+        "evidenceDigest": "dbfa8c3cd174b6c7314f356d21116c61928111d9590c8b7269aef8536ad19075"
+      },
+      {
+        "id": "G6-19",
+        "state": "L-T",
+        "evidenceDigest": "b7ad4fd112861f473ea44368c9f023f369d7f60ff54dbb16b7eeee12740a7595"
+      },
+      {
+        "id": "G6-20",
+        "state": "L",
+        "evidenceDigest": "b4557a88edc780d79225245c6cbaba7a1dca108a452797778063be133e3d1d82"
+      },
+      {
+        "id": "G6-FR14",
+        "state": "L",
+        "evidenceDigest": "418069707dea8a002a96c991f0607024ebfdecd0ffe952442e3604c36cc5a74a"
+      },
+      {
+        "id": "G7-1",
+        "state": "L",
+        "evidenceDigest": "201c19ca5a07b41daa1201077c1f54e880aa2f45249b46b3b660a5b8c4dd128d"
+      },
+      {
+        "id": "G7-2",
+        "state": "L",
+        "evidenceDigest": "9546a78a2e05c73b6be01cadc66300cced690bf1e67e31bcc08a5230a2548b38"
+      },
+      {
+        "id": "G7-3",
+        "state": "L",
+        "evidenceDigest": "5577c36103df78331259def1dd2b6463e05420089e88b9aa20e909c548374cd7"
+      },
+      {
+        "id": "G7-4",
+        "state": "L",
+        "evidenceDigest": "43ce23e5f2d1f8b5b2a0b43f234821d6b53c314983da6f0e2f27f0f5269163be"
+      },
+      {
+        "id": "G7-5",
+        "state": "L",
+        "evidenceDigest": "dce2efa8517f37a67bdfa3927d5f86dd98f120b013be4251cf9c23c92e7d11b3"
+      },
+      {
+        "id": "G7-6",
+        "state": "L",
+        "evidenceDigest": "183f1a073a84897e416b19d244843cce8fe34cd7b7392a09fd63245c4a7f1c87"
+      },
+      {
+        "id": "G7-7",
+        "state": "L",
+        "evidenceDigest": "3388a1e9a5cb4b4208ac955150bb627aba7c9a0f453ca377c61dac0a2200e2b7"
+      },
+      {
+        "id": "G7-8",
+        "state": "L",
+        "evidenceDigest": "b060ec230700dd407a321c974c7e16258dbb1ab32a02f231257e8eb1b00f032a"
+      },
+      {
+        "id": "G7-BOOK1",
+        "state": "L",
+        "evidenceDigest": "df00a095d38eff2c170b3f67124237ccb97be9e4e8e34fee6c453534af9bec95"
+      },
+      {
+        "id": "G7-FR6b",
+        "state": "L",
+        "evidenceDigest": "708a399a46aa12ba383e313ad57ab78a49cfe2289f11a5f6e15aae229979d714"
+      },
+      {
+        "id": "G7-FR6d",
+        "state": "L",
+        "evidenceDigest": "50ed14964e30c872ed53e82ba05f78238efe1fe113d6e48f0b7532dc1dcea279"
+      },
+      {
+        "id": "G8-1",
+        "state": "L",
+        "evidenceDigest": "8460fa71371873da3042d2a2326c1e5a98e0f1ce5a900da5014812b76d118049"
+      },
+      {
+        "id": "G8-2",
+        "state": "L",
+        "evidenceDigest": "a18877ca49fc3fab4e1e8a8f1a70d04a3ba579ab661aeee245e3c88eb30b671a"
+      },
+      {
+        "id": "G8-3",
+        "state": "U",
+        "evidenceDigest": "8e2ed3bd1420918f913bed3f2aedcacde0c15c16f3e105d01bfec649cc8cb2a1",
+        "u": {
+          "decisionDigest": "68bb8c36ea0dff06d36a814fb65b1d2d886fb526b9a583e1daa5cc283fe74def",
+          "absence": "2bf45d08ddbf897417ba5745bc4b5830d3e09fcfd09c92ee5aa8068e5d882bc5",
+          "refusal": "5499a9773f3598c56cbd6960f3a6f86ee15e8897e4914f9d5b28dc3a10881af4",
+          "mechanism": "5fb98415221a2629c687f7a60518eb76df9e89edfab77b3e6ec501b5a128010f"
+        }
+      },
+      {
+        "id": "G8-4",
+        "state": "U",
+        "evidenceDigest": "09be785b4a483cd1ab9e6d1c802175e048f3b7e1373556b9d7a22f4bdf467747",
+        "u": {
+          "decisionDigest": "114ea2ebededb4fc732b5d4f49f9e943b0f9175986f0ba6dacad0ac69da6453c",
+          "absence": "9bb10ec91c6f074eb5c756d9b21dbaa66d8d3ee32e78b8d9c79244327adaa581",
+          "refusal": "a7874e7e0f486c08b22d10d9a43bf782b949408d584e186a1827b3f4741e465a",
+          "mechanism": "df9f122ec3433932731bb9233335ad65fd07a6ff1917ee847426607e674960af"
+        }
+      },
+      {
+        "id": "G8-5t",
+        "state": "U",
+        "evidenceDigest": "86869ea44c02af45a2190676ab8666131af08aac0499dc26c913922c1435069c",
+        "u": {
+          "decisionDigest": "ae71ea9f6640d93358ce16659d7fd0e107a7e81268a057dd9e7b0b1fa5fe73d8",
+          "absence": "5aff41853ed7c520615745460ea35e1797813a354cfbbb63db15bc53ac255045",
+          "refusal": "da9f504957016f4a1a1e374fea7e2216524a3979563b1c73da6adbf9d4d7cf58",
+          "mechanism": "eeb20d90b3d0b14f296e8d1d54b3c8403a1d8d12a8b956a9f51324b2018f1771"
+        }
+      },
+      {
+        "id": "G8-5p",
+        "state": "U",
+        "evidenceDigest": "68e237573089ddc1eba0f1565b84282de7d9921b55f5f3586d8f37eb651926b4",
+        "u": {
+          "decisionDigest": "219189ffbea6c657e554d877eac41e5337053b2eeb807430f62fefa494df8135",
+          "absence": "48bfde6998bc8180b6001163de4b80e5f240e3e16c989a1b3cc10c9fbb05b497",
+          "refusal": "367322483615e868e89ed06c80ac3ab9ef6292ed826b2e5f89cb0d026c73b8cb",
+          "mechanism": "c8a07b3341ddabdf6634c7dd0cd6fabe87fcb12afa1b285766d14359a1e062ae"
+        }
+      },
+      {
+        "id": "G8-6",
+        "state": "L",
+        "evidenceDigest": "a118ec96a044bf5605b2244299cd860108108fd3bec0046b30500325d5f6cc69"
+      },
+      {
+        "id": "G8-7",
+        "state": "L",
+        "evidenceDigest": "c7ec360462b0d2108c67e2ea4e3a45b2141e69633372ffc18fd30ad9ea3ffe2c"
+      },
+      {
+        "id": "G8-8",
+        "state": "L",
+        "evidenceDigest": "6491a183faed2093ff9c86d3109e0f2881043de5d18672b0e303fa2202585f7a"
+      },
+      {
+        "id": "G8-SCHEMA",
+        "state": "L",
+        "evidenceDigest": "195e7b5206fdc659652b7f103a44365b44e0b22634bb1708bf3c8a83457670b9"
+      },
+      {
+        "id": "G8-SHAPE",
+        "state": "L",
+        "evidenceDigest": "0416692d9e85353c8e11c30f254a4334b4b073e00acf9fbaee96acc03947e8b8"
+      },
+      {
+        "id": "G8-LABELS",
+        "state": "L",
+        "evidenceDigest": "ea3f18fce64d773737283da23f68db91aee5e2eeeb8b2b8edde15ff67d05b8c8"
+      },
+      {
+        "id": "G8-DENY",
+        "state": "U",
+        "evidenceDigest": "a972c8ac3dee182fe53ac644c51afbed576d2454e4fb4dbb7418c01d2573c284",
+        "u": {
+          "decisionDigest": "dc5bf8f9563806f922a3a63f54ca842e6313e41dbf94c4944f34daafefaa3974",
+          "absence": "4e662b837d0d9380b9c3f3dd98f9696e7af2289d1b12e21309fd4eefda9781a1",
+          "refusal": "35af8f6fe2017dc4e83fa78a9d4972fc12600526ae42981b1c92e641d50b29c9",
+          "mechanism": "491d950d9b39d9e7d6d2d21e4368cae33adc41bfea7a110b1529935d7a300140"
+        }
+      },
+      {
+        "id": "R-0",
+        "state": "L",
+        "evidenceDigest": "a1637b055395639908238dc09e6839204307d0ba56d8cda21ba476f8a2319c7b"
+      },
+      {
+        "id": "R-1",
+        "state": "L",
+        "evidenceDigest": "ca8408848372cf4824abe6fa21fca375911cfe8914d5fc097522b01db4121f00"
+      },
+      {
+        "id": "R-1a",
+        "state": "U",
+        "evidenceDigest": "029574a1c38ce5ea822123f02a910172dd339ebe82aa2916810c154557352469",
+        "u": {
+          "decisionDigest": "af080998dba634b97ef7cf0c1aa00783282e2fd57dbe20acaa6a2011733c56ce",
+          "absence": "0bc11f07d900b0ec925f39ae8c100f119cbb17b80049bea2b96dd80945b881e3",
+          "refusal": "79df0703d97ed57be4c1a1209c817650db231d4cc2b8b15963a5645a2e9d4f7c",
+          "mechanism": "f6496106eb351f70796f24c4704d124f43819a4ae73241ef4b13694a74a7f1fa"
+        }
+      },
+      {
+        "id": "R-2",
+        "state": "U",
+        "evidenceDigest": "5f0d8318e42cc0557e0c08ef119f2d7c27d97c67a318a2caf3f9786bcfe0aaa5",
+        "u": {
+          "decisionDigest": "da2873ed8f104230bf59ae2edd153f0912810ffc0f5e173b9f5347b12745fbea",
+          "absence": "8a07dea99f4db3acc79868f454866ad859d9cd775c50ca34534584284afed169",
+          "refusal": "fff463439a25f2d9ab6f1f2234f9880f69aed63ff86a54db78591075677d4329",
+          "mechanism": "faa3bd46bee49223485da59d0afea568408d668adda1ca7a4774804b9dcbe4d2"
+        }
+      },
+      {
+        "id": "R-3",
+        "state": "U",
+        "evidenceDigest": "9d5d301d0629a4cf5dea8b1aed676bd443d7839f4987b2d407232e40508abb9d",
+        "u": {
+          "decisionDigest": "a94bc36908d63d7d74abb1ab9fc0f8e8e2252208cbc52cd7aea9f521a0125f70",
+          "absence": "f0a8235c95d57f71514a6fe363a53b79bb43c42db322134168f796111bed17ef",
+          "refusal": "e4ee152e6bcccaa2ee5c12b46f04d9aad410802ae742bd882b042f25890cbb3b",
+          "mechanism": "e8e8df8edccdb7c79e3ffb059688be139a53a68886fdc22ac272cfcf9f35e697"
+        }
+      },
+      {
+        "id": "R-4",
+        "state": "U",
+        "evidenceDigest": "32376a975257e089ddcde4b47df09a6eb4c8200ac48bb025a1286d8953678ef0",
+        "u": {
+          "decisionDigest": "f56d35f67f863f54a8a06a8f2e7478341b6c3fbe5eba07aa089e849a1106c041",
+          "absence": "4a27406bbe927e964496fd81b141abeb0bef0e80c7b61f0c4e5b864f5810cd21",
+          "refusal": "28d0b2ca0f61d5e9fc9572129c28303e014d4183e28445dc0be7d0fce5c68607",
+          "mechanism": "f7663ce4f9c28d12d0cf4846245810dca7e2d15683c59ac2250effdab025c49d"
+        }
+      },
+      {
+        "id": "R-5",
+        "state": "U",
+        "evidenceDigest": "3098ecee491cef960d24fdfd7914e19271a44e2c84b8eb05a8ab36ed550004b0",
+        "u": {
+          "decisionDigest": "e1a6e3c95195915aa63ff2c55dba6b03e2a21e6034a39af8b99673daa9055f6e",
+          "absence": "3449b81adaf69e0ff981ba8712824e4d5aea5c144db890fb8d3a8779bede30f0",
+          "refusal": "d4a8a2fb3650a25cf8910b22d5771cb8f22e2213ee97aed32a99fa48e61fc3b4",
+          "mechanism": "965c843f9de6cc53bbd4cbde2586b4220c4233023027f9740e1b3a30db7127c6"
+        }
+      },
+      {
+        "id": "R-6",
+        "state": "L",
+        "evidenceDigest": "7af8dc59627c9a99b11d58b80e11f611abffafe1647bbe6ffc95b1426f05346e"
+      },
+      {
+        "id": "R-7",
+        "state": "U",
+        "evidenceDigest": "e0a3ab7a59097ec4022904fd6d2179e84952474338feb3c3c29c8a50af03f122",
+        "u": {
+          "decisionDigest": "54f225471ea946b35397cc05463ac42e72e77d12dc23a88f76a2696492952661",
+          "absence": "6e5852748f61d3a351a7e3f79277c229fb0a364eb302c4fc7798e499ddfe3fc1",
+          "refusal": "b3dbd02a88319ce2dff66b1c9fb5cb5449d3af2230f280af4c79bc93aa48d885",
+          "mechanism": "75f26a046c7aa5c2d2ea54fa422396ca0bc292d53ca6d9cd1f41a49311d8c25f"
+        }
+      },
+      {
+        "id": "9.1",
+        "state": "L",
+        "evidenceDigest": "5861a692534c45232f6f81fc5adeb6fffaa021b02a7f91af26141860047f2d08"
+      },
+      {
+        "id": "9.1a",
+        "state": "L",
+        "evidenceDigest": "7f2a18f4bf45e1784a87e69e97807e1c9890e16d25dbe69634f94b66ad85300f"
+      },
+      {
+        "id": "9.1b",
+        "state": "L",
+        "evidenceDigest": "8a845c87c4246673cdc77a22e544f0db558d383d79de66c16ac0922bdc9fc38f"
+      },
+      {
+        "id": "9.2",
+        "state": "L",
+        "evidenceDigest": "152344c30d6a81e99b7c214e38d5f8f352a29b57e2ea9953fce965d38d5d4a4c"
+      },
+      {
+        "id": "9.3",
+        "state": "L",
+        "evidenceDigest": "b4793e86440e93b4600f0c2a0f24d513c32e3baa018c48f9754e5ce78c2831b6"
+      },
+      {
+        "id": "9.4",
+        "state": "L",
+        "evidenceDigest": "421845caa520003d3e18fb3c66fd24adc081ef0b8c95d73109db2e81368c8df3"
+      },
+      {
+        "id": "9.5",
+        "state": "L",
+        "evidenceDigest": "4dd539d9155a503871fad48436dfb41d07c623595c0a120811a187d667462fe5"
+      },
+      {
+        "id": "9.6",
+        "state": "L",
+        "evidenceDigest": "99c5e16c23d69385a84b17fa7ee8c1ab37c6e613667f3fd6ac723b6a862e121e"
+      },
+      {
+        "id": "9.7",
+        "state": "L",
+        "evidenceDigest": "286ab6a9fd4b21f9d53fbe6af4e895ac906e52cd866707942ab0c3e5417ec5b7"
+      },
+      {
+        "id": "9.8",
+        "state": "L",
+        "evidenceDigest": "d6a03c7e87e8d5f8e0d1d999f3dbe2406d7ef0d0c490feccfcbf6f4bbbd12fcf"
+      },
+      {
+        "id": "9.9",
+        "state": "L",
+        "evidenceDigest": "bf61f50cc3923eda29aea2a6f577c4413a0d4d3e8f665dd161f5695e5a926253"
+      },
+      {
+        "id": "9.10",
+        "state": "L",
+        "evidenceDigest": "961a17c2a3154bdd88f05760f4a8d515efcf4169a112e0756cf11319e2da5fa9"
+      },
+      {
+        "id": "10.1",
+        "state": "L",
+        "evidenceDigest": "e1272653315cdafc012577e9c7b5e69970c2537a30a2ee0ff58c0c1d689304f4"
+      },
+      {
+        "id": "10.2",
+        "state": "L",
+        "evidenceDigest": "4d7f793f0c4fe12299929dca270705f7f0a0e9eb65fe5f21dfc47dcaa9a1c016"
+      },
+      {
+        "id": "10.3",
+        "state": "L",
+        "evidenceDigest": "5d5bcf93759cbae6c0d393333230709c2a8342e2ece82fbadc9671ab933f2133"
+      },
+      {
+        "id": "10.4",
+        "state": "L",
+        "evidenceDigest": "2e46eff055c02c482ca0d2728751f83a5a16c18b3c14a49db66fc10afdbd6fe1"
+      },
+      {
+        "id": "10.5",
+        "state": "L",
+        "evidenceDigest": "fd88db56515da9987521e6b013add12cf86a1845906b65de50479f7334a68d09"
+      },
+      {
+        "id": "10.6",
+        "state": "L",
+        "evidenceDigest": "9e74b5b373a525afc34a05b5e170a48406dda7b914414947b9c0a706e478995c"
+      },
+      {
+        "id": "10.7",
+        "state": "L",
+        "evidenceDigest": "edae0f60fa1a651a8ca64db0f245028014cccdf1a00e6fcc70582b9f38710f23"
+      },
+      {
+        "id": "10.8",
+        "state": "L",
+        "evidenceDigest": "52f330f2700bb8d60a9aca35865e274b0ec3d593e41eec2fa8407ed3ad7ee1d5"
+      },
+      {
+        "id": "10.9",
+        "state": "L",
+        "evidenceDigest": "8bece7ab447bbdd5f18301b881f3dfa1e3acd3588ebf3a5764784a195d786a40"
+      },
+      {
+        "id": "10.10",
+        "state": "L",
+        "evidenceDigest": "ad25b557ecd358d493cb637b2e22ac259cea02f3cca970aa4d5a76e1d1ef1333"
+      },
+      {
+        "id": "10.11",
+        "state": "L",
+        "evidenceDigest": "d5e0e7b6f6915fd5cb24dbdb9c55d59e2ad64428506e86a3718d79aa5e702e30"
+      },
+      {
+        "id": "10.R1",
+        "state": "L",
+        "evidenceDigest": "f8bc28d00acc941f6b3a7e60cdd172352c2b99cdf7e0eaf986dcaefe7866211a"
+      },
+      {
+        "id": "10.R2",
+        "state": "L",
+        "evidenceDigest": "24627e87c16ec7309549eced54a7551843b8407470ec9568bb11ed337a4512f3"
+      },
+      {
+        "id": "10.R3",
+        "state": "L",
+        "evidenceDigest": "d34f80b382d3bf2cd039ed9c155f8e879240ee88c020db8117e95e90f53ddafb"
+      },
+      {
+        "id": "10.R4",
+        "state": "L",
+        "evidenceDigest": "d7940754fb7480f4368569b0508cb91ca1bbb348e6fba59355f5deb9b91e74c2"
+      },
+      {
+        "id": "10.R5",
+        "state": "U",
+        "evidenceDigest": "4f51d21aaf67f9f3c092e00f990204d9534d106a3148037ecd010131d4f2ebb9",
+        "u": {
+          "decisionDigest": "4a9f4afbfcf3fcadd49e49d474b9778be92d1efba73cf02ab7b3e37d65605e64",
+          "absence": "2a4393c215eb0b7a49eb5139aab6bd066aa995ce12dd345cc29bcaec4ba3bdf9",
+          "refusal": "87dd9133ee8b365a87596bb38b388d1ad4a03ceab409f1c7baa005436f84e743",
+          "mechanism": "362a100fbad176d9d20c7ccde7ec27567d2a2e774ca12bf0159edcf77833e470"
+        }
+      },
+      {
+        "id": "10.R6",
+        "state": "L",
+        "evidenceDigest": "e29f14829f20530a83508740fde6ff71590df298b364ca622d3292c1506b0321"
+      },
+      {
+        "id": "10.R7",
+        "state": "L",
+        "evidenceDigest": "139b3e9f2d4f824b5308712a6bb85f08f371dfd6e5aca3c8858b855723e0d578"
+      },
+      {
+        "id": "G11-R1",
+        "state": "L",
+        "evidenceDigest": "f3cd1bd19ac59bad07a250835f9525618b5bf881e9fd3a38d5fd1e42448ed959"
+      },
+      {
+        "id": "G11-R2",
+        "state": "L",
+        "evidenceDigest": "10ff9216e627bfed91dee43f7befe5c6808571278605d4e08010b07bc6cd569e"
+      },
+      {
+        "id": "G11-R3",
+        "state": "L",
+        "evidenceDigest": "5b7609152197f45560df96f4a69f186a76b3b1d8be71d95a9b6d45e2a7541bb2"
+      },
+      {
+        "id": "G11-R4",
+        "state": "L",
+        "evidenceDigest": "11e2c0d5588aa14ccdd307cfe84d901da1d7b6c94abb01505a0d78eb28a6fdcf"
+      },
+      {
+        "id": "G11-R5",
+        "state": "L",
+        "evidenceDigest": "cce9c3f865a15b5112e7da3d41ae686e5882518b274956477dd284d5b5067bd6"
+      },
+      {
+        "id": "G11-I1",
+        "state": "L",
+        "evidenceDigest": "ce1b16b0f086df63d6a6360504e03b06f8b5b048e9402d4da835070856edc097"
+      },
+      {
+        "id": "G11-I2",
+        "state": "L",
+        "evidenceDigest": "b94c126ce8b61e60a3aacbda0180f93e3b9654c53949a7069c7b21d51e469f7c"
+      },
+      {
+        "id": "G11-I3",
+        "state": "L",
+        "evidenceDigest": "6538d847d2923698114dd1228e2030e2186f382685404e9b2225cc8d1739ee70"
+      },
+      {
+        "id": "G11-I4",
+        "state": "U",
+        "evidenceDigest": "6ef23ac0dc339374f7dc452b32f941af1267e0f29156164730e2c9536cd29fe1",
+        "u": {
+          "decisionDigest": "668dba44d472e628e68774b20d582cf26b7d1bcceccf49e112331367cbb47717",
+          "absence": "f8f6134b05b63e9bb398794c0318848668f0799360779d664ef9e637e892d9b7",
+          "refusal": "e3d557904e99458d582df22d1ce2d1918dd3d69ed5df9e4c266cde120937806b",
+          "mechanism": "ba34da08002c15be1d2785dbeaef68b53468cb3005e7db7df54768da3b768f6a"
+        }
+      },
+      {
+        "id": "G11-I5",
+        "state": "U",
+        "evidenceDigest": "8d3c4321337321491afc8406504fb202e4cc1e972c78586ab807170c6112a973",
+        "u": {
+          "decisionDigest": "14fd2f94d0e945743c601e5da23869e7b74c3ee0576449d58732b31da54360c6",
+          "absence": "40af1babab75277e8a887b69353bec450c944b38188073f285ae2de0b005a905",
+          "refusal": "d8890824ec9ca0bd5404d547bd35ada2c39309618a549a39e236eb47e58e1cba",
+          "mechanism": "7fd1cf7bef2b5c4368882ec4c27c9a8c74349c059495871a40272f5b17fea17a"
+        }
+      },
+      {
+        "id": "G11-I6",
+        "state": "U",
+        "evidenceDigest": "6e5267e86045775e792e3aaadb20555fc8a9ba3050ffa408c2f5a2941e6d8c82",
+        "u": {
+          "decisionDigest": "8bdfc1452f3d3306393f540fd3289b8de8998868e5dab8e2d37e1cc54763cc42",
+          "absence": "8bc2a3c3888078d0a8a7cbf8471feddbbf4a4ea6143f82a18f8ea1a9e5541f19",
+          "refusal": "ac75de10b4e132c92a1e945bea661cda6ba0305696898aa1b0bb4857d890d977",
+          "mechanism": "0f310db1cb93273f4d3c0e1e9df9b40516d4fc4feede844fcc41e8c0675051f8"
+        }
+      },
+      {
+        "id": "G11-I7",
+        "state": "L",
+        "evidenceDigest": "242202688996482d6478eedcfed0e3cc6c40cd2f758af7cd2f588dbf6620410c"
+      },
+      {
+        "id": "G11-I8",
+        "state": "L",
+        "evidenceDigest": "97400c56f6fe11072a929b160237a3a5d05ffec1a04be8d9b24edf975ac9f63b"
+      },
+      {
+        "id": "G11-I9",
+        "state": "L",
+        "evidenceDigest": "b6da2d320821645713ea81c601ab8cb538170f011ca914d5e23699a24de46ae1"
+      },
+      {
+        "id": "G11-I10",
+        "state": "U",
+        "evidenceDigest": "5f5e0ba81e9d50e1cbf506c3aff64384e833e6de4c69d3e8dd6f46755909890e",
+        "u": {
+          "decisionDigest": "2a57e1f38745132e231f167e8a0da3fb73b0015b5e4f35b55e1da0f62b9a5a0a",
+          "absence": "092acaae81879af3723ef2d4cf181cc7ef1e247608dd9363860bf74d3a4909d2",
+          "refusal": "d423fb1c92c942bf473db88337ae431777c9f5b59cc9507b5829c07c703c74e0",
+          "mechanism": "319c915b1dcd814fe93ace6489af1351278c5a7175376b636a151a9e70fd4dd8"
+        }
+      },
+      {
+        "id": "G12-R1a",
+        "state": "L",
+        "evidenceDigest": "ad7046a8ff547085779d57b387fa703181ceb7b41214570c31c6aaf25f2f558e"
+      },
+      {
+        "id": "G12-R1b",
+        "state": "L",
+        "evidenceDigest": "cce951d7b956fc50671e9f073517a079d63ce7d052f80359e4bf0637831d5b04"
+      },
+      {
+        "id": "G12-R2",
+        "state": "L",
+        "evidenceDigest": "79af27748d1cbaf6cf10e6ec662bc160e4758c11478398b7888013965e5f48c6"
+      },
+      {
+        "id": "G12-R3",
+        "state": "L",
+        "evidenceDigest": "4ea3082f191f723f315a69fde731c7ff90e0c1ed79ec056599ea049fe51f8403"
+      },
+      {
+        "id": "G12-R4",
+        "state": "L",
+        "evidenceDigest": "e906b7c3fbc949519c9a4a4a25c6d0ef0ac97789766d40d998cf23363377f984"
+      },
+      {
+        "id": "G12-R5",
+        "state": "L",
+        "evidenceDigest": "62ad9d34aea58aeeaaba2923f50dc29ae5ce536207a008ee843cc31d9e914281"
+      },
+      {
+        "id": "G12-R6",
+        "state": "L",
+        "evidenceDigest": "ec97e9d0f55f649eff19726f8e40c7de4710ea479b343ab05a5d56c03c05d0b2"
+      },
+      {
+        "id": "G12-I1",
+        "state": "L",
+        "evidenceDigest": "b2fc98b1e1210f665aa82de21d39a290f184347e6e2b8d49559ba72282598452"
+      },
+      {
+        "id": "G12-I2",
+        "state": "L",
+        "evidenceDigest": "f919f1556918b1b9fcbbafe7405ef002d459ff0fefbdac7b5eac84aaf5a5be0a"
+      },
+      {
+        "id": "G12-I3",
+        "state": "L",
+        "evidenceDigest": "88f73744935fcfa72255edb6b7870e0c312af125eb3dbaf2bcf3d67e8d336691"
+      },
+      {
+        "id": "G12-I4",
+        "state": "L",
+        "evidenceDigest": "064df3374b3934766fb2e2865c43830ed34e2a58b4354ef900eca8cabc1b8345"
+      },
+      {
+        "id": "G12-I5",
+        "state": "L",
+        "evidenceDigest": "a6e0e5aa72dd1c504e444c3e7beef228e543006f433990a3e5d1db11813c3665"
+      },
+      {
+        "id": "G12-I6",
+        "state": "L",
+        "evidenceDigest": "920340c0264223e38b6d5f3af675122ecff614622b2e13001351642635088045"
+      },
+      {
+        "id": "G12-I7",
+        "state": "L",
+        "evidenceDigest": "dad12b5f3edb51430e5e67951c8707bc6ab1fb861ad78d57c1c6e6f545ecdf5a"
+      },
+      {
+        "id": "G12-I8",
+        "state": "L",
+        "evidenceDigest": "9c946a14a173800636bd8bc12c7cb9f998d65ee763d44af6d3170647bd095e53"
+      },
+      {
+        "id": "G12-I9",
+        "state": "L",
+        "evidenceDigest": "51b537c25405c087024fcf48890a88bbfe8d2f0dce7a72fcb8da337bec5d0b9b"
+      },
+      {
+        "id": "G12-I10",
+        "state": "L",
+        "evidenceDigest": "4dcf05c72ef7317bc11353b8327bdbe00152f645b2bc0288ccb9f3676ca3a619"
+      },
+      {
+        "id": "G12-I11",
+        "state": "L",
+        "evidenceDigest": "dbf847dc1344689523238a3cca840ea5945e1adeeb2df3026b3059c9c2e0b433"
+      },
+      {
+        "id": "G13-R1",
+        "state": "L",
+        "evidenceDigest": "96aeb8cbd57ed4e7bf8110fb0842c287485e7e8692664bca966c6605bc970cc8"
+      },
+      {
+        "id": "G13-R2",
+        "state": "L",
+        "evidenceDigest": "1626660c5e7b14d9fef137a581c4c33efe7eaf01bd5f807b08832cb7d9f725b0"
+      },
+      {
+        "id": "G13-R3",
+        "state": "L",
+        "evidenceDigest": "97642605fd4848967f41eba02d65955ea166bd4cc256e0d3c70d6f7dc6002ace"
+      },
+      {
+        "id": "G13-R4",
+        "state": "L",
+        "evidenceDigest": "2f728f1ceb0a62bb24e3091ad05ab18a5f741b89457b6f6430c8da1d3ba0fba8"
+      },
+      {
+        "id": "G13-R5",
+        "state": "L",
+        "evidenceDigest": "e4fb9fc22fd82384e760717b30fb45751f779e051c5b6ba332b80dd73a48f290"
+      },
+      {
+        "id": "G13-R5b",
+        "state": "L",
+        "evidenceDigest": "5d5f66f84fa351642d6285fb7b8b87e8baaec57e119f0c9091911faab821f20d"
+      },
+      {
+        "id": "G13-R6",
+        "state": "L",
+        "evidenceDigest": "e53a2d2e37b22b562673ff51a3dc56fcfffcf472a28eb3d26b5167fa7fb5473a"
+      },
+      {
+        "id": "G13-R7",
+        "state": "U",
+        "evidenceDigest": "0452b872b1b7e877b66d9ceef664426446c21c81c136741a7118c8ed8d91259d",
+        "u": {
+          "decisionDigest": "a4ac5a7d2577a6399c43f564e611f5a9a7ff807b264747f269fd88f3d99a1f6c",
+          "absence": "403a53ada4a6d1f5a4fd7024cf6fabc8e0d29b1907f59aad0db7874e02aab3bc",
+          "refusal": "8f8022965c5f542d5d41b18001c9664119b4f3921c07c5c50bbe4f795214842b",
+          "mechanism": "526fb43e23aee2af7ba9eed4f9f000607b108c21773ec87231493162ac69cd34"
+        }
+      },
+      {
+        "id": "G13-R8",
+        "state": "STOP",
+        "evidenceDigest": "3a6a565303414cc1a7939d95f66691f084db11686549f187c3f7344ee70fae60"
+      },
+      {
+        "id": "G13-R9",
+        "state": "L",
+        "evidenceDigest": "bf3fb59dfa1ee717b91d91283268458d3da94597d0bbd7ae075d013979573bee"
+      },
+      {
+        "id": "G13-R10",
+        "state": "L",
+        "evidenceDigest": "a2d5833f9a2b571dab656bf7d601a71fde23f797dd8c8070255b8735a2f3e32e"
+      },
+      {
+        "id": "G13-I1",
+        "state": "U",
+        "evidenceDigest": "f84d2e5ef3171baecffc6326439e2d75836463373cd4572bab7e4c427f68f721",
+        "u": {
+          "decisionDigest": "c07067b037177f0030aa294dbb43b4ab8bcfb1be8f7f6e43876adb3cad99cde8",
+          "absence": "f80ba4b69d77a9243605be126035f9d70637373ec992e80cd6bd2234b51bffa9",
+          "refusal": "e34f10362a0c4b4549e22fce2dc506efe7836f19888ff333657787f7a508fb71",
+          "mechanism": "4c8510ada938f1d6fd1d8955a5fea69e5881687151c0aa6c4ef46277ecd3a074"
+        }
+      },
+      {
+        "id": "G13-I2",
+        "state": "U",
+        "evidenceDigest": "b4ccb72f4c8429c6765b15eb8b611885ba318af9a72de1ed0f31b3e16941e761",
+        "u": {
+          "decisionDigest": "76a45373d4062b94965f897bc8fb193c158d211caae49b590a1f1fd914b3cad0",
+          "absence": "a5af5c9afaf4301cb3c41fcdc3704491b77caa01bbd89bd60c8d547deae67b65",
+          "refusal": "10605209f6fb7586b3cd85eee24b8d6c8f833366de83b780ae193f093e022ab7",
+          "mechanism": "43e77b7918ab4d9d67e4a8d69f59f0fe6b6b71a6ad0940ee289ca30de9e93f0b"
+        }
+      },
+      {
+        "id": "G13-I3",
+        "state": "L",
+        "evidenceDigest": "2ff2f2b979a383bba6ddba5c50f2ee6eaf93d68e16de72fb9bc8abdde2a5e878"
+      },
+      {
+        "id": "G13-I4",
+        "state": "L",
+        "evidenceDigest": "958e14a12d794b3a21f6ac78118062d8581a59b53fd97abfb035ce0de95c170f"
+      },
+      {
+        "id": "G13-I5",
+        "state": "L",
+        "evidenceDigest": "9b52d27b0bda9ce81d724d80ecc03d3c53abffd1a5d176b069774956150cf611"
+      },
+      {
+        "id": "G13-I6",
+        "state": "L",
+        "evidenceDigest": "f29152428746ea848618d8feb45643d3a132078fdfca3b2f9950e68aad9c17c3"
+      },
+      {
+        "id": "G13-I7",
+        "state": "L",
+        "evidenceDigest": "00dcfbb4b2e6788dcef1ddc089ce64b5e9970fd943b0ff9d3b850965d6387d43"
+      },
+      {
+        "id": "G13-I8",
+        "state": "L",
+        "evidenceDigest": "769615feda9469de22481f46c3dc2451e99003e05fcbc63c297c6c7285001b38"
+      },
+      {
+        "id": "G13-I9",
+        "state": "L",
+        "evidenceDigest": "29ff4b324f0e448e2af47016740dd96655fe5c646b7735e53f14c991e673b43e"
+      },
+      {
+        "id": "G14-a",
+        "state": "L",
+        "evidenceDigest": "5bfc8f015ef9c6b1c7f99f59dd6e361941e48f044847fcd437e8dcfde3051cee"
+      },
+      {
+        "id": "G14-b",
+        "state": "L",
+        "evidenceDigest": "8d93a6e88d71a55986562c4109c836e8b8619261fef9506194171b683a483e7e"
+      },
+      {
+        "id": "G14-c",
+        "state": "L",
+        "evidenceDigest": "bd789a7d9c9e5b9efc13906a0d5415dc0659625a270d3c6fb6851c73afe497c8"
+      }
+    ],
+    "globalAuditDigest": "5d2c0cf51e24239d382e9cd3575260ef701878a95e9c51e25f84253d416c91b6",
+    "issuedAt": "2026-10-04T21:19:06.855Z",
+    "expiresAt": "2026-10-05T21:19:06.855Z",
+    "buildDigest": "a1657e9a52a6cbaca9cad701f6233975f377befc63657eb2bf815ad72c60470a",
+    "carrierDigest": "56ab3915011c38010df3043da240c52170d67573b77dce993ce1c3cb36bce9a5",
+    "evidenceDigest": "b694b27f443e70c3630fdc6e02597d422890def9fdba500f0af712c890c590f9",
+    "integrationDigest": "ae244bcf1a692941d6eff68610ce9b5611feda1a44c0d37f6deb0204bc2f658e",
+    "fbe2eDigest": "3ed1b606831ede80b7bfa4018d5514656a7404542dc05ea906e72719fa8ab5dd",
+    "revocationProofDigest": "9125773da40354b9d01870a06ebaac251935fbdfc39d244249adc7909bc42cbe",
+    "isolationProofDigest": "89eb79cf243c0407c01c088fb14baf97f39d40e0f5a652ec92376657a874e119",
+    "dependencyProofDigest": "8fcba6870469de598c5b4764e84ecde88865930dac4f67307fbd21ad7059fe5b"
+  },
+  "digest": "c71226bd4ade9da54468fc47a1d8aa5614c5b17fea71eb4cdbdc7243ceeb26fa",
+  "profileParser": "PASS",
+  "fullContractParser": "REFUSED",
+  "signed": false,
+  "authorizationIssued": false,
+  "entitlementMutation": false
+}

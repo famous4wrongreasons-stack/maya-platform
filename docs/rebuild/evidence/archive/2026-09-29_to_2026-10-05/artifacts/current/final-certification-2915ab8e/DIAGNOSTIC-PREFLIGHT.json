@@ -1,0 +1,7 @@
+{
+  "candidate": "2915ab8e7c089e2c1f39848cb795940e5267c119",
+  "kind": "mandatory-live-assembly",
+  "status": "PASS",
+  "checks": "54 collector/integrity regression tests; no prior receipts admitted",
+  "scope": "Diagnostic only; the complete fresh 509-declaration corpus is still mandatory."
+}

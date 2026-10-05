@@ -1,0 +1,11 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "name": "k1-dossier",
+  "command": [
+    "node",
+    "docs/rebuild/evidence/maya-chat-first-ux/k1/k1-dossier-check.mjs"
+  ],
+  "cwd": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/work/maya-controlled-integration",
+  "exit": 0,
+  "seconds": 0.03
+}

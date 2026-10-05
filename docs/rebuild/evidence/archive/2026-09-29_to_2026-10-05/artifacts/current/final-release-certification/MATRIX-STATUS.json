@@ -1,0 +1,16 @@
+{
+  "candidate": "6a40575cc0dc841a84f42367a45364ff7e626f09",
+  "profile": "closed-input.no-handoff@1",
+  "profileApplicableFalse": 0,
+  "globalFalse": 2,
+  "globalFalseIds": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "basis": "Inherited backend progress disposition only; unchanged backend, NOT a freshly certified complete clause audit",
+  "basisFile": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/source-certification/MATRIX-REVIEW.json",
+  "basisSha256": "b3f11abd8a8dcc28348790c9a60c7fe9d10aa3b8735fb6dc99605aabde81d1d0",
+  "freshIntegrationFailure": "NS-1 canonical NAVIGATE(w) parent-return result is dropped by runtime projection",
+  "fullContractCertified": false,
+  "certifiedForProfile": false
+}

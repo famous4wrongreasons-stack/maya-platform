@@ -1,0 +1,78 @@
+{
+  "candidate": "2141e24544b5157c6341b649661d0cd3a2c21c48",
+  "gate13Parts": [
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-13-part-1-of-4.json",
+      "sha256": "6078cf807b25921e2696d3656bbd1317bca2bebcd2f0c6c5f00a4de7effb3af1",
+      "status": "PARTITION-AS-DECLARED",
+      "mutants": 7
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-13-part-2-of-4.json",
+      "sha256": "c65f0c11fa12eb4f6cdb2620c1e3f7008cf77c4193abfe10c97817c988ee81cb",
+      "status": "PARTITION-AS-DECLARED",
+      "mutants": 6
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-13-part-3-of-4.json",
+      "sha256": "80dcaa6c0a71a5a54d647fafd174f6139604f888823d64ece7e44300733d208d",
+      "status": "PARTITION-AS-DECLARED",
+      "mutants": 6
+    },
+    {
+      "path": "receipts/mutation-parts/widgets-mutation-part-13-part-4-of-4.json",
+      "sha256": "ecbd239296a9a79b2e7c9aadd03c447d6d285233372238d074952740bb7bee4b",
+      "status": "PARTITION-AS-DECLARED",
+      "mutants": 6
+    }
+  ],
+  "gate13Total": 25,
+  "counts": {
+    "live-killed": 3,
+    "build-killed": 22
+  },
+  "exactPriorSurvivor": {
+    "battery": "gate13.json",
+    "id": "M13-U13C-11",
+    "files": [
+      "src/widgets/owner-ports/commit-booking.adapter.ts"
+    ],
+    "edits_applied": 1,
+    "neutralisers": [],
+    "steps": [
+      "unit",
+      "typecheck",
+      "k3"
+    ],
+    "expect": "build-killed",
+    "status": "build-killed",
+    "killedBy": [
+      "N11"
+    ],
+    "kills": [
+      {
+        "killer": "N11",
+        "test": "U13c booking COMMIT owner port N11 refuses an owner invocation whose Action Engine request does not preserve source and key",
+        "step": "unit",
+        "entry": "BUILD",
+        "neutralisers": null,
+        "evidence": false,
+        "evidence_basis": null
+      }
+    ],
+    "vacuous": [],
+    "live_evidence": false,
+    "kills_by_entry": {
+      "BUILD": 1
+    },
+    "exits": {
+      "plain": {
+        "unit": 1,
+        "typecheck": 0,
+        "k3": 0
+      }
+    }
+  },
+  "scope": "Complete fresh native Gate 13 on current candidate; whole corpus remains pending",
+  "historicalReceiptSubstitution": false
+}

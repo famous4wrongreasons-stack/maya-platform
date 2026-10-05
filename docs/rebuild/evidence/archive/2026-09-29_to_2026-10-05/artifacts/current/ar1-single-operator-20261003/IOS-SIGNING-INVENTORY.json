@@ -1,0 +1,26 @@
+{
+  "readOnly": true,
+  "validSigningIdentities": 1,
+  "profiles": [
+    {
+      "profileUuid": "8c3f4496-8527-4c89-84be-5c9f9a15eed7",
+      "applicationIdentifier": "YCL5U4L56W.ru.mayaos.app",
+      "team": [
+        "YCL5U4L56W"
+      ],
+      "expiresAt": "2026-10-05T08:16:21",
+      "development": true,
+      "associatedDomains": null,
+      "deviceIncluded": true,
+      "deviceCount": 1,
+      "privateIdentityAvailable": true,
+      "sha256": "6c28b9d07491b0ab210cdb00b6f36e73c4387e7076a7b117cf636b40ac0fa6a1",
+      "path": "/Users/stanislavmosin/Library/Developer/Xcode/UserData/Provisioning Profiles/8c3f4496-8527-4c89-84be-5c9f9a15eed7.mobileprovision"
+    }
+  ],
+  "provisioningChanges": 0,
+  "deviceInstalled": false,
+  "deviceIdentifier": "FF6F8003-99D2-5AED-A4CA-05BAE3877929",
+  "developerMode": "enabled",
+  "tunnel": "disconnected"
+}

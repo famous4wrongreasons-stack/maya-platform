@@ -1,0 +1,161 @@
+{
+  "contract": "maya.runtime-l27-counterfactuals/1",
+  "candidate": "705d57cd787e24d8944dbe764789e27fd9af3708",
+  "restrictions": "none: full runtime test suite per baseline and mutant",
+  "mutations": [
+    {
+      "id": "L27-M01",
+      "purpose": "Remove terminal identity guard",
+      "source": "maya-chat-shell/src/shell/intents.ts",
+      "before": "if (published.has(key)) continue;",
+      "after": "if (false) continue;",
+      "namedKillerPrefix": "L27: COMMIT",
+      "actualFailedTests": [
+        "L27: COMMIT \u2192 CONFIRMED \u2192 Dismiss leaves one business effect, one receipt and ONE visible terminal outcome",
+        "L27: repeated Dismiss keeps the visible terminal outcome at one, however many times it is pressed",
+        "L27: two genuinely different terminal outcomes both remain representable",
+        "L27: identity is the canonical reference, never the sentence \u2014 in BOTH directions",
+        "L27: an ordinary assistant message and a terminal outcome never deduplicate each other, in either order",
+        "L27: UNKNOWN \u2192 reconciliation \u2192 CONFIRMED keeps the later canonical transition visible",
+        "L27: a successor emission carrying its predecessor's confirmation states it once",
+        "L27: the record survives the display cap, on the path where that is reachable",
+        "L27: one canonical receipt is stated once ACROSS widgets, even after the first statement is evicted",
+        "L27: a settled submission whose thread page failed loses nothing \u2014 the next one writes the outcome",
+        "L27: two identical lines inside ONE response are one outcome, and two different ones are two"
+      ],
+      "namedKillers": [
+        "L27: COMMIT \u2192 CONFIRMED \u2192 Dismiss leaves one business effect, one receipt and ONE visible terminal outcome"
+      ],
+      "exit": 1,
+      "status": "KILLED",
+      "mutatedSourceSha256": "565aad236d764c944ee253ea91f7575ec1121e9c14d77069f9488669036bd16b"
+    },
+    {
+      "id": "L27-M02",
+      "purpose": "Use text as terminal identity",
+      "source": "maya-chat-shell/src/shell/intents.ts",
+      "before": "const key = outcomeKey(submission.widget_id, line);",
+      "after": "const key = line.text;",
+      "namedKillerPrefix": "L27: identity is",
+      "actualFailedTests": [
+        "L27: two genuinely different terminal outcomes both remain representable",
+        "L27: identity is the canonical reference, never the sentence \u2014 in BOTH directions"
+      ],
+      "namedKillers": [
+        "L27: identity is the canonical reference, never the sentence \u2014 in BOTH directions"
+      ],
+      "exit": 1,
+      "status": "KILLED",
+      "mutatedSourceSha256": "5ea94b113d025a179f8ce6415a6e3dc946d9e82cb71641e552e99bd7fe582cde"
+    },
+    {
+      "id": "L27-M03",
+      "purpose": "Scope canonical receipts per widget",
+      "source": "maya-chat-shell/src/shell/intents.ts",
+      "before": "`receipt:${line.action_receipt_ref}`",
+      "after": "`receipt:${widgetId}:${line.action_receipt_ref}`",
+      "namedKillerPrefix": "L27: a successor emission",
+      "actualFailedTests": [
+        "L27: a successor emission carrying its predecessor's confirmation states it once",
+        "L27: one canonical receipt is stated once ACROSS widgets, even after the first statement is evicted"
+      ],
+      "namedKillers": [
+        "L27: a successor emission carrying its predecessor's confirmation states it once"
+      ],
+      "exit": 1,
+      "status": "KILLED",
+      "mutatedSourceSha256": "ff3dd557bf1fe528a300c07a1e417466f9a06c8a0b6681d85a258fe8268b9e74"
+    },
+    {
+      "id": "L27-M04",
+      "purpose": "Conflate independent nonconfirmed widgets",
+      "source": "maya-chat-shell/src/shell/intents.ts",
+      "before": "`${line.outcome}:${widgetId}`",
+      "after": "`${line.outcome}`",
+      "namedKillerPrefix": "L27: identity is",
+      "actualFailedTests": [
+        "L27: identity is the canonical reference, never the sentence \u2014 in BOTH directions"
+      ],
+      "namedKillers": [
+        "L27: identity is the canonical reference, never the sentence \u2014 in BOTH directions"
+      ],
+      "exit": 1,
+      "status": "KILLED",
+      "mutatedSourceSha256": "efff655ba8da034f97d02ce39028effc373d550115e6965249964a1ea191ba68"
+    },
+    {
+      "id": "L27-M05",
+      "purpose": "Trust receipt on wrong outcome class",
+      "source": "maya-chat-shell/src/shell/intents.ts",
+      "before": "line.outcome === 'CONFIRMED' && typeof",
+      "after": "typeof",
+      "namedKillerPrefix": "L27: a reference identifies",
+      "actualFailedTests": [
+        "L27: a reference identifies an outcome only on the line class the contract gives it to"
+      ],
+      "namedKillers": [
+        "L27: a reference identifies an outcome only on the line class the contract gives it to"
+      ],
+      "exit": 1,
+      "status": "KILLED",
+      "mutatedSourceSha256": "bc834c8937a0ce18418be2acb0d36a34a01c29e09ff3f9366142cceb0f3d806c"
+    },
+    {
+      "id": "L27-M06",
+      "purpose": "Retain publication ledger after sign-out",
+      "source": "maya-chat-shell/src/shell/intents.ts",
+      "before": "seen.clear();\n      published.clear();",
+      "after": "seen.clear();",
+      "namedKillerPrefix": "L27: a cleared conversation",
+      "actualFailedTests": [
+        "L27: a cleared conversation starts again"
+      ],
+      "namedKillers": [
+        "L27: a cleared conversation starts again"
+      ],
+      "exit": 1,
+      "status": "KILLED",
+      "mutatedSourceSha256": "88d5fd19998b192400fa705b58545cdc30b2c86956b26aa3031962b146ede1cf"
+    },
+    {
+      "id": "L27-M07",
+      "purpose": "Clear publication ledger on display cap",
+      "source": "maya-chat-shell/src/shell/intents.ts",
+      "before": "for (const id of ids) release(id);",
+      "after": "for (const id of ids) release(id);\n    published.clear();",
+      "namedKillerPrefix": "L27: the record survives",
+      "actualFailedTests": [
+        "L27: the record survives the display cap, on the path where that is reachable",
+        "L27: one canonical receipt is stated once ACROSS widgets, even after the first statement is evicted"
+      ],
+      "namedKillers": [
+        "L27: the record survives the display cap, on the path where that is reachable"
+      ],
+      "exit": 1,
+      "status": "KILLED",
+      "mutatedSourceSha256": "f0db4cc3c95fb14b657712fc1c4d8c37cfbe796d9c47cf5d72732d3117772362"
+    },
+    {
+      "id": "L27-M08",
+      "purpose": "Deduplicate text in common timeline writer",
+      "source": "maya-chat-shell/src/shell/conversation.ts",
+      "before": "appendServerLine(text) {",
+      "after": "appendServerLine(text) {\n      if (items.some((item) => item.kind === 'assistant' && item.text === text)) return;",
+      "namedKillerPrefix": "L27: an ordinary assistant",
+      "actualFailedTests": [
+        "L27: two genuinely different terminal outcomes both remain representable",
+        "L27: identity is the canonical reference, never the sentence \u2014 in BOTH directions",
+        "L27: an ordinary assistant message and a terminal outcome never deduplicate each other, in either order"
+      ],
+      "namedKillers": [
+        "L27: an ordinary assistant message and a terminal outcome never deduplicate each other, in either order"
+      ],
+      "exit": 1,
+      "status": "KILLED",
+      "mutatedSourceSha256": "34af45e0fb8a1500ad7769ce548efba1e7030956642bf4e245ad3c31f9483ec6"
+    }
+  ],
+  "status": "PASS",
+  "baseline": "GREEN",
+  "mutants": 8
+}

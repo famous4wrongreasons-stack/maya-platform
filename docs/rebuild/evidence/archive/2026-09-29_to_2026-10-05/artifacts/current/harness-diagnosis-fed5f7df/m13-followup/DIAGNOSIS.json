@@ -1,0 +1,92 @@
+{
+  "sourceCandidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+  "cases": [
+    {
+      "name": "old-fixture-original-guard",
+      "sourceCandidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+      "diagnosticOnly": true,
+      "isolatedProductMutation": null,
+      "exit": 0,
+      "expectedExit": 0,
+      "seconds": 1.545,
+      "passed": 11,
+      "failed": 0,
+      "failures": [],
+      "specSha256": "1966e300dc5a51bcf2d24ac3bc44448d7c10aeb4d59f84dab52ba66f1a0546c9",
+      "adapterSha256": "b12f109df9c47fcfd2846f67abf272e72c69156ef3a5a24873d7a46cdf888e4f",
+      "reportSha256": "8533b8b455f73bce207d44d26c3a288654850b370cc865733510b921326ec525"
+    },
+    {
+      "name": "old-fixture-removed-guard",
+      "sourceCandidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+      "diagnosticOnly": true,
+      "isolatedProductMutation": "M13-U13C-11",
+      "exit": 0,
+      "expectedExit": 0,
+      "seconds": 1.404,
+      "passed": 11,
+      "failed": 0,
+      "failures": [],
+      "specSha256": "1966e300dc5a51bcf2d24ac3bc44448d7c10aeb4d59f84dab52ba66f1a0546c9",
+      "adapterSha256": "17009d624e08d911017506c7275d33d6845a0b7e375d747301b6ac0677d25269",
+      "reportSha256": "94c63a21a219f75948320d9e9ae8095dd948fe2442b0687ba06d3c8f799c7b86"
+    },
+    {
+      "name": "healthy-regression-before",
+      "sourceCandidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+      "diagnosticOnly": true,
+      "isolatedProductMutation": null,
+      "exit": 1,
+      "expectedExit": 1,
+      "seconds": 1.435,
+      "passed": 11,
+      "failed": 1,
+      "failures": [
+        "N11-HARNESS a canonical invocation without an existing transaction reaches persistence"
+      ],
+      "specSha256": "e00341a83345f480d675e837f104e0ef0cab5f05e114d37eb4f3f59cb21b15c3",
+      "adapterSha256": "b12f109df9c47fcfd2846f67abf272e72c69156ef3a5a24873d7a46cdf888e4f",
+      "reportSha256": "078ef0d8db0bf30878366ba8d969e4a73c32e71b69e9a63e7dac0f3740f313c9"
+    },
+    {
+      "name": "healthy-regression-after",
+      "sourceCandidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+      "diagnosticOnly": true,
+      "isolatedProductMutation": null,
+      "exit": 0,
+      "expectedExit": 0,
+      "seconds": 1.48,
+      "passed": 12,
+      "failed": 0,
+      "failures": [],
+      "specSha256": "28d13d7e6480ea24a6f2adae519c431d1044c9c5b38eff1683b562aaa9f48b16",
+      "adapterSha256": "b12f109df9c47fcfd2846f67abf272e72c69156ef3a5a24873d7a46cdf888e4f",
+      "reportSha256": "23f552112a367021f787250a7fb7ac63d9fafb376b3da50c5c7c5d46a86a54b3"
+    },
+    {
+      "name": "fixed-fixture-removed-guard",
+      "sourceCandidate": "dc3a26806b273631e8c6150acfa3e9cacdde91a1",
+      "diagnosticOnly": true,
+      "isolatedProductMutation": "M13-U13C-11",
+      "exit": 1,
+      "expectedExit": 1,
+      "seconds": 1.602,
+      "passed": 6,
+      "failed": 6,
+      "failures": [
+        "U13c booking COMMIT owner port N11 refuses an owner invocation whose Action Engine request does not preserve source and key",
+        "U13c booking COMMIT owner port WR-F33 refuses a forged agent_task source even with the correct server key",
+        "U13c booking COMMIT owner port WR-F33 refuses a forged scheduler source even with the correct server key",
+        "U13c booking COMMIT owner port WR-F33 refuses a forged webhook source even with the correct server key",
+        "U13c booking COMMIT owner port WR-F33 refuses a forged legacy_bridge source even with the correct server key",
+        "U13c booking COMMIT owner port WR-F33 refuses a forged synthetic_shadow source even with the correct server key"
+      ],
+      "specSha256": "28d13d7e6480ea24a6f2adae519c431d1044c9c5b38eff1683b562aaa9f48b16",
+      "adapterSha256": "17009d624e08d911017506c7275d33d6845a0b7e375d747301b6ac0677d25269",
+      "reportSha256": "26544ef9bedccbd46af83ac4b8f3edf41391a36afb663694975c7e3b6ee069fc"
+    }
+  ],
+  "productSourceChangedInCanonicalWorktree": false,
+  "testTimeoutChanged": false,
+  "scope": "Diagnostic copies only; never a complete mutation or certification receipt."
+}

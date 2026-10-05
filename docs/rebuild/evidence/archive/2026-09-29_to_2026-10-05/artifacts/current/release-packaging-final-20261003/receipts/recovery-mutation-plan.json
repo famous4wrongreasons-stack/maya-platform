@@ -1,0 +1,17 @@
+{
+  "candidate": "77ecb3f5696583389e75592141f46fd0664d33d8",
+  "jobs": [
+    {
+      "gate": "WR",
+      "partition": "3/4",
+      "slot": "WR-part-3-of-4"
+    },
+    {
+      "gate": "WR",
+      "partition": "4/4",
+      "slot": "WR-part-4-of-4"
+    }
+  ],
+  "workers": 2,
+  "restrictions": "none; canonical default steps; full unfiltered tests"
+}

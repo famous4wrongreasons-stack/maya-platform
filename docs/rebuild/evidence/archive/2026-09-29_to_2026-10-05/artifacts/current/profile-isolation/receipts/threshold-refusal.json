@@ -1,0 +1,42 @@
+{
+  "sourceHead": "a65aa04d10500f1b32a25234d922462a0414fc2e",
+  "profile": "closed-input.no-handoff@1",
+  "syntheticPositiveControl": true,
+  "profileNeverAcceptedByV1": true,
+  "applicableFalse": [
+    {
+      "clause": "G7-5",
+      "falseDutyRefused": true
+    },
+    {
+      "clause": "G7-BOOK1",
+      "falseDutyRefused": true
+    },
+    {
+      "clause": "G11-I9",
+      "falseDutyRefused": true
+    },
+    {
+      "clause": "G12-R1b",
+      "falseDutyRefused": true
+    },
+    {
+      "clause": "G12-I11",
+      "falseDutyRefused": true
+    },
+    {
+      "clause": "G13-R2",
+      "falseDutyRefused": true
+    },
+    {
+      "clause": "G13-I3",
+      "falseDutyRefused": true
+    }
+  ],
+  "currentThresholdSatisfied": false,
+  "certifiedForProfile": false,
+  "fullContractCertified": false,
+  "signedCommandPublished": false,
+  "databaseConnections": 0,
+  "externalEffects": 0
+}

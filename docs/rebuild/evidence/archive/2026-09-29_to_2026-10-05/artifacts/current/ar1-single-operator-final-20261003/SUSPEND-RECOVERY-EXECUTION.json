@@ -1,0 +1,163 @@
+{
+  "candidate": "a55534bbe10c4318c1e9e21818f64f387f45f8c1",
+  "status": "PASS",
+  "startedAt": "2026-10-04T06:42:26.412822+00:00",
+  "completedAt": "2026-10-04T08:41:14.240100+00:00",
+  "jobs": [
+    {
+      "gate": "P-ledger",
+      "partition": "",
+      "slot": "P-ledger",
+      "receipt": {
+        "path": "receipts/mutation-P-ledger.receipt.json",
+        "sha256": "75b9706ed7d4c96d917d17e882a3ae59eff5992f77f927d97bc5f01c9e9ecfbf"
+      }
+    },
+    {
+      "gate": "P-mt3",
+      "partition": "",
+      "slot": "P-mt3",
+      "receipt": {
+        "path": "receipts/mutation-P-mt3.receipt.json",
+        "sha256": "c894f01359affcade6c6c4e6dbc44b654209ee7513ec635dd7b567954d661fa6"
+      }
+    },
+    {
+      "gate": "P-pairing",
+      "partition": "",
+      "slot": "P-pairing",
+      "receipt": {
+        "path": "receipts/mutation-P-pairing.receipt.json",
+        "sha256": "c05c1a0bf11acefec0fbdf2a75914d51ef579fc032fea6db49a9c1e4a0b5d09a"
+      }
+    },
+    {
+      "gate": "P-principal",
+      "partition": "",
+      "slot": "P-principal",
+      "receipt": {
+        "path": "receipts/mutation-P-principal.receipt.json",
+        "sha256": "44e6b300346b58f00f4d6b9eeceff7e58f3c4658aacfc7444899e91c7727af86"
+      }
+    },
+    {
+      "gate": "P-render",
+      "partition": "",
+      "slot": "P-render",
+      "receipt": {
+        "path": "receipts/mutation-P-render.receipt.json",
+        "sha256": "2750ade5274399bb060b3757e346d87806909e44f770f5de060a63ca196556ea"
+      }
+    },
+    {
+      "gate": "P-rt6",
+      "partition": "",
+      "slot": "P-rt6",
+      "receipt": {
+        "path": "receipts/mutation-P-rt6.receipt.json",
+        "sha256": "2c35be5ffb2e357e2e05b46ec21644ebb52d5955ff9abe3fea8ca3ed66b513f1"
+      }
+    },
+    {
+      "gate": "P-seal",
+      "partition": "",
+      "slot": "P-seal",
+      "receipt": {
+        "path": "receipts/mutation-P-seal.receipt.json",
+        "sha256": "c18c6ccf91a005373a76caadd20acad5d442b9e924afbaf3d5d7dfb554efc8e9"
+      }
+    },
+    {
+      "gate": "T-tables",
+      "partition": "",
+      "slot": "T-tables",
+      "receipt": {
+        "path": "receipts/mutation-T-tables.receipt.json",
+        "sha256": "4b2ff62d78d4c5f46f2f78d0510690c4f935627f9cdcd0ad6cfdab78146eb00d"
+      }
+    },
+    {
+      "gate": "WF",
+      "partition": "",
+      "slot": "WF",
+      "receipt": {
+        "path": "receipts/mutation-WF.receipt.json",
+        "sha256": "818c5e8ce3bc2912184a8964d3e22c7b261ac9c764a3da6ae6305532bb7f13ce"
+      }
+    },
+    {
+      "gate": "WR",
+      "partition": "1/4",
+      "slot": "WR-part-1-of-4",
+      "receipt": {
+        "path": "receipts/mutation-WR-part-1-of-4.receipt.json",
+        "sha256": "d3f138fe6a23d37d2ac6893829cf78e594f58ab1779ecd6a9feb0e9602a743d0"
+      }
+    },
+    {
+      "gate": "WR",
+      "partition": "2/4",
+      "slot": "WR-part-2-of-4",
+      "receipt": {
+        "path": "receipts/mutation-WR-part-2-of-4.receipt.json",
+        "sha256": "7d58dff7204da63f4d5b4ede7aef8a95fbc8be17fbc928a2ea96c6b184bbd877"
+      }
+    },
+    {
+      "gate": "WR",
+      "partition": "3/4",
+      "slot": "WR-part-3-of-4",
+      "receipt": {
+        "path": "receipts/mutation-WR-part-3-of-4.receipt.json",
+        "sha256": "c59b07381aec4a3f63397bc2cb33e8ab71ddf1b514bd75985cc32146b9f78784"
+      }
+    },
+    {
+      "gate": "WR",
+      "partition": "4/4",
+      "slot": "WR-part-4-of-4",
+      "receipt": {
+        "path": "receipts/mutation-WR-part-4-of-4.receipt.json",
+        "sha256": "997ad25bbca2a38655a736d3790da01a258d15228e150e16bc5b3873fd5d270a"
+      }
+    }
+  ],
+  "retainedWholeParts": 55,
+  "sleepAffectedWholePartsReexecuted": 6,
+  "interruptedPostWakePartReexecuted": 1,
+  "neverStartedPartsExecuted": 6,
+  "sources": [
+    {
+      "path": "work/ar1-single-operator-final-20261003/suspend-recovery-runner.py",
+      "sha256": "c895d347627fa0c29d565193f03892fc5af307aef53d3547fc62d5e46c7463ab"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261003/suspend-recovery-controller.py",
+      "sha256": "bcfd969a747b05f7995060bbfc3c3b7a19afc64157a2580efef059da425bcd86"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261003/suspend-recovery-validation.py",
+      "sha256": "2c76c2d68a97f6edd8987aa06a4bf146799d5be232dd2c9113cd0636ef21584c"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261003/suspend-recovery-validation-test.py",
+      "sha256": "7fae0fff4d941a488d4ee6520596f303032794062a53fff3fefd8cdba2c6050e"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261003/complete-suspend-recovery.py",
+      "sha256": "00703cadc262ade44fdeac8bee0ee80fb38c58e8b45c966b37c7c64adb874316"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261003/finalize-receipts.py",
+      "sha256": "2aafd9e3e913ef6135738419a54fe941b37aa023c8c5d23b93992ac7082eb1ba"
+    },
+    {
+      "path": "work/ar1-single-operator-final-20261003/index-final-orchestration-sources.py",
+      "sha256": "da615f1c291fe87b4dab0679878daccab62d728bda5c8e54d90e1f927984681e"
+    }
+  ],
+  "restrictions": null,
+  "timeoutsChanged": false,
+  "productChanged": false,
+  "productionEffects": 0
+}
