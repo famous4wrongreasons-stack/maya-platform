@@ -10,6 +10,7 @@ import {
   ForbiddenException,
   HttpException,
   Injectable,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 
 import { OperationsAnalyticsService } from '../analytics/operations-analytics.service';
@@ -413,6 +414,8 @@ export class AiToolHandlerService {
         return this.readBusinessHours(principal.tenantId);
       case 'settings.read':
         return this.readSettings(principal);
+      case 'business.rules.read':
+        return this.readBusinessRules(principal);
       case 'settings.update':
         return this.updateSettings(principal, args, idempotencyKey);
       case 'tasks.list':
@@ -1107,6 +1110,32 @@ export class AiToolHandlerService {
       schedule: profile.schedule,
       schedule_available:
         typeof profile.schedule === 'string' && profile.schedule.trim() !== '',
+    };
+  }
+
+  private async readBusinessRules(principal: AiToolPrincipal) {
+    if (!this.governedSettings)
+      throw new ServiceUnavailableException(
+        'Business guidance reader unavailable',
+      );
+    const current = await this.governedSettings.read(
+      principal.tenantId,
+      principal.userId,
+      'business_rules',
+    );
+    // The canonical reader verifies the immutable revision/hash and current
+    // staff membership. Do not copy the store or reinterpret guidance as policy.
+    const rules = current.content?.rules;
+    if (!Array.isArray(rules))
+      throw new ServiceUnavailableException(
+        'Business guidance payload unavailable',
+      );
+    return {
+      source: 'tenant_confirmed_business_rules',
+      status: rules.length ? 'configured' : 'not_configured',
+      revision: current.revision,
+      audience: 'staff_only',
+      rules,
     };
   }
 

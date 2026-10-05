@@ -898,6 +898,50 @@
     "missing_tools": []
   },
   {
+    "intent": "clients.dormant_list",
+    "domain": "clients",
+    "sub_intent": "clients.dormant_list",
+    "description": "List by name the guests who stopped coming.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "clients.registry.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "The server composes this answer with real names; never repeat client names or phones into any other tool call.",
+    "candidate_tools": [
+      "clients.dormant.list"
+    ],
+    "registered_tools": [
+      {
+        "name": "clients.dormant.list",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "customers.core"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
     "intent": "clients.dossier",
     "domain": "clients",
     "sub_intent": "clients.dossier",
@@ -911,6 +955,9 @@
     "execution_status": "tool_routable",
     "permission": "clients.dossier.read",
     "allowed_roles": [
+      "provider",
+      "employee",
+      "staff",
       "tenant_owner",
       "business_owner",
       "tenant_admin",
@@ -2630,8 +2677,7 @@
     "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
     "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
     "candidate_tools": [
-      "loyalty.own.read",
-      "booking.upsell.suggest"
+      "loyalty.own.read"
     ],
     "registered_tools": [
       {
@@ -2640,15 +2686,6 @@
         "approval_policy": "none",
         "required_features": [
           "loyalty"
-        ],
-        "fallback_policy": "fail_closed"
-      },
-      {
-        "name": "booking.upsell.suggest",
-        "risk_tier": "read",
-        "approval_policy": "none",
-        "required_features": [
-          "booking"
         ],
         "fallback_policy": "fail_closed"
       }
@@ -2847,50 +2884,6 @@
     "missing_tools": []
   },
   {
-    "intent": "marketing.find_audience",
-    "domain": "marketing",
-    "sub_intent": "marketing.find_audience",
-    "description": "Build a consent-safe audience.",
-    "action": "analyze",
-    "data_class": "D",
-    "data_source": "calculated_from_verified_data",
-    "risk": "medium",
-    "readiness": "ready",
-    "readiness_note": null,
-    "execution_status": "tool_routable",
-    "permission": "marketing.audience.read",
-    "allowed_roles": [
-      "tenant_owner",
-      "business_owner",
-      "tenant_admin",
-      "administrator"
-    ],
-    "required_slots": [
-      "audience_rule"
-    ],
-    "optional_slots": [
-      "minimum_visits",
-      "max_recipients"
-    ],
-    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
-    "response_rule": "Return only aggregate counts and the opaque audience reference. Never expose names, phones or CRM identifiers.",
-    "candidate_tools": [
-      "marketing.audience.find"
-    ],
-    "registered_tools": [
-      {
-        "name": "marketing.audience.find",
-        "risk_tier": "read",
-        "approval_policy": "none",
-        "required_features": [
-          "tg_marketing"
-        ],
-        "fallback_policy": "fail_closed"
-      }
-    ],
-    "missing_tools": []
-  },
-  {
     "intent": "marketing.draft_message",
     "domain": "messaging",
     "sub_intent": "marketing.draft_message",
@@ -2924,89 +2917,6 @@
     "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
     "candidate_tools": [],
     "registered_tools": [],
-    "missing_tools": []
-  },
-  {
-    "intent": "marketing.preview_campaign",
-    "domain": "messaging",
-    "sub_intent": "marketing.preview_campaign",
-    "description": "Preview campaign impact.",
-    "action": "preview",
-    "data_class": "D",
-    "data_source": "calculated_from_verified_data",
-    "risk": "medium",
-    "readiness": "ready",
-    "readiness_note": null,
-    "execution_status": "tool_routable",
-    "permission": "marketing.campaign.preview",
-    "allowed_roles": [
-      "tenant_owner",
-      "business_owner",
-      "tenant_admin",
-      "administrator"
-    ],
-    "required_slots": [
-      "audience",
-      "message"
-    ],
-    "optional_slots": [],
-    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
-    "response_rule": "Show the final message and exact recipient count, then request explicit confirmation. Do not claim that anything was sent.",
-    "candidate_tools": [
-      "marketing.campaign.preview"
-    ],
-    "registered_tools": [
-      {
-        "name": "marketing.campaign.preview",
-        "risk_tier": "low_write",
-        "approval_policy": "none",
-        "required_features": [
-          "tg_marketing"
-        ],
-        "fallback_policy": "fail_closed"
-      }
-    ],
-    "missing_tools": []
-  },
-  {
-    "intent": "marketing.send_campaign",
-    "domain": "messaging",
-    "sub_intent": "marketing.send_campaign",
-    "description": "Send a consent-safe campaign.",
-    "action": "execute",
-    "data_class": "E",
-    "data_source": "confirmed_external_action",
-    "risk": "high",
-    "readiness": "ready",
-    "readiness_note": null,
-    "execution_status": "tool_routable",
-    "permission": "marketing.campaign.execute",
-    "allowed_roles": [
-      "tenant_owner",
-      "business_owner",
-      "tenant_admin",
-      "administrator"
-    ],
-    "required_slots": [
-      "approved_preview"
-    ],
-    "optional_slots": [],
-    "clarification_rule": "Require an explicit confirmation of the persisted campaign preview. Never construct a new audience or message during execution.",
-    "response_rule": "Report server-confirmed delivered, skipped and failed counts. Never say sent before the tool succeeds.",
-    "candidate_tools": [
-      "marketing.campaign.send"
-    ],
-    "registered_tools": [
-      {
-        "name": "marketing.campaign.send",
-        "risk_tier": "high_write",
-        "approval_policy": "actor",
-        "required_features": [
-          "tg_marketing"
-        ],
-        "fallback_policy": "fail_closed"
-      }
-    ],
     "missing_tools": []
   },
   {
@@ -3046,6 +2956,93 @@
         "approval_policy": "actor",
         "required_features": [
           "notifications.core"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "notifications.appointments_read",
+    "domain": "notifications",
+    "sub_intent": "notifications.appointments_read",
+    "description": "Read current appointment notice settings.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "notifications.settings.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "notifications.appointments.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "notifications.appointments.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "notifications.core"
+        ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "operations.journal_day",
+    "domain": "schedule",
+    "sub_intent": "operations.journal_day",
+    "description": "Read the exact appointment journal of the team for a day or range.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "operations.journal.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager"
+    ],
+    "required_slots": [],
+    "optional_slots": [
+      "period",
+      "employee",
+      "branch"
+    ],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+    "candidate_tools": [
+      "operations.journal.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "operations.journal.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [
+          "booking"
         ],
         "fallback_policy": "fail_closed"
       }
@@ -3332,6 +3329,49 @@
         "required_features": [
           "booking"
         ],
+        "fallback_policy": "fail_closed"
+      }
+    ],
+    "missing_tools": []
+  },
+  {
+    "intent": "company.business_rules",
+    "domain": "company",
+    "sub_intent": "company.business_rules",
+    "description": "Read tenant-confirmed internal business guidance for staff.",
+    "action": "read",
+    "data_class": "C",
+    "data_source": "yclients_or_maya_tool",
+    "risk": "low",
+    "readiness": "ready",
+    "readiness_note": null,
+    "execution_status": "tool_routable",
+    "permission": "business.rules.read",
+    "allowed_roles": [
+      "tenant_owner",
+      "business_owner",
+      "tenant_admin",
+      "administrator",
+      "manager",
+      "branch_manager",
+      "provider",
+      "employee",
+      "staff",
+      "accountant"
+    ],
+    "required_slots": [],
+    "optional_slots": [],
+    "clarification_rule": "Clarify only a missing slot that materially changes the answer or action.",
+    "response_rule": "Quote only the current tenant-confirmed rules. State when not configured. These are internal guidance, not public customer policy, permission, or authority to execute an action.",
+    "candidate_tools": [
+      "business.rules.read"
+    ],
+    "registered_tools": [
+      {
+        "name": "business.rules.read",
+        "risk_tier": "read",
+        "approval_policy": "none",
+        "required_features": [],
         "fallback_policy": "fail_closed"
       }
     ],

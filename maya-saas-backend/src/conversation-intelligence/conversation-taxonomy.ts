@@ -1155,6 +1155,29 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
         examples: ['До скольки вы сегодня работаете?'],
       },
     ),
+    intent(
+      'company.business_rules',
+      'company',
+      'Read tenant-confirmed internal business guidance for staff.',
+      {
+        action: 'read',
+        dataClass: 'C',
+        roles: [...TEAM_ROLES, UserRole.ACCOUNTANT],
+        permission: 'business.rules.read',
+        tools: ['business.rules.read'],
+        responseRule:
+          'Quote only the current tenant-confirmed rules. State when not configured. These are internal guidance, not public customer policy, permission, or authority to execute an action.',
+        synonyms: [
+          'правила салона',
+          'регламент бизнеса',
+          'инструкции для команды',
+        ],
+        examples: [
+          'Покажи утверждённые правила салона',
+          'Что записано в регламенте для сотрудников?',
+        ],
+      },
+    ),
     intent('settings.read', 'settings', 'Read available MAYA settings.', {
       action: 'read',
       dataClass: 'B',

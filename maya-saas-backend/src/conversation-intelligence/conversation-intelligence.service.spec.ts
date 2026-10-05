@@ -79,8 +79,8 @@ describe('ConversationIntelligenceService', () => {
     const encoded = JSON.stringify(contract);
 
     // CF5: три legacy marketing/opportunity decision path удалены. Runtime
-    // contract обязан содержать только оставшиеся 85 canonical intents.
-    expect(contract.intents).toHaveLength(85);
+    // contract обязан содержать 85 прежних canonical intents плюс staff-only A22 read.
+    expect(contract.intents).toHaveLength(86);
     expect(contract.intents.map((item) => item.intent)).not.toEqual(
       expect.arrayContaining([
         'marketing.find_audience',

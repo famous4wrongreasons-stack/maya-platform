@@ -89,6 +89,7 @@ export class AiToolRegistryService {
       case 'loyalty.own.read':
       case 'company.business-hours.read':
       case 'settings.read':
+      case 'business.rules.read':
       case 'notifications.appointments.read':
       case 'support.integration-status.read':
         this.assertAllowedKeys(args, []);

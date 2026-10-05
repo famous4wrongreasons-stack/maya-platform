@@ -7,8 +7,8 @@ The implementation is semantic rather than phrase-routed:
 
 ## Current Contract
 
-- 33 product domains and 83 canonical intents.
-- 69 entity slots with Russian normalization guidance.
+- 33 product domains and 86 canonical intents.
+- 65 entity slots with Russian normalization guidance.
 - Role-aware routing for owner, administrator, employee and client roles.
 - Data classes A-F, risk levels and immutable runtime approval policies.
 - Compound requests with up to five ordered tasks and explicit dependencies.
@@ -17,10 +17,10 @@ The implementation is semantic rather than phrase-routed:
 - Capability readiness (`ready`, `partial`, `planned`) propagated to the final response.
 
 Generated artifacts live in `datasets/conversation-intelligence/` and are
-recreated with:
+reconciled with the current source without regenerating unaffected examples:
 
 ```bash
-npm run ci:dataset:generate
+npm run ci:dataset:sync
 npm run ci:dataset:validate
 ```
 

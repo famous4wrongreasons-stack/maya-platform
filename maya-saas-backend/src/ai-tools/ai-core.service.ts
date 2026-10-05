@@ -471,6 +471,9 @@ const PII_SENSITIVE_TOOLS = new Set([
  * когорт и границы периодов, а свободный пересказ не должен менять цифры.
  */
 const SERVER_COMPOSED_REPLY_TOOLS = new Set([
+  // Quoted internal guidance is data. Keep free-form rules out of model
+  // instructions and preserve the confirmed wording for authorized staff.
+  'business.rules.read',
   ...PII_SENSITIVE_TOOLS,
   'clients.retention.scan',
   // График — точный факт по дате. Его нельзя пересказывать из аналитики
@@ -2604,6 +2607,22 @@ export class AiCoreService {
       );
     }
     switch (evidence.name) {
+      case 'business.rules.read': {
+        const data = this.record(evidence.result);
+        if (
+          data.source !== 'tenant_confirmed_business_rules' ||
+          typeof data.revision !== 'number' ||
+          !Array.isArray(data.rules)
+        )
+          return null;
+        if (data.status === 'not_configured')
+          return 'Утверждённые правила бизнеса пока не настроены. Уточните нужное правило у владельца.';
+        const rules = data.rules
+          .map((value) => this.record(value).text)
+          .filter((value): value is string => typeof value === 'string');
+        if (!rules.length) return null;
+        return `Внутренние правила бизнеса, редакция ${data.revision}:\n\n${rules.map((rule) => `• ${rule}`).join('\n')}`;
+      }
       case 'analytics.business.query':
       case 'analytics.employee.query': {
         const reply = this.deterministicAnalyticsQueryReply(
@@ -4918,6 +4937,7 @@ export class AiCoreService {
   }
 
   private isBusinessOnlyTool(toolName: string): boolean {
+    if (toolName === 'business.rules.read') return true;
     return (
       toolName.startsWith('analytics.') ||
       toolName.startsWith('expenses.') ||

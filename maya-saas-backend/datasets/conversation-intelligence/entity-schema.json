@@ -52,19 +52,6 @@
       ]
     },
     {
-      "name": "approved_preview",
-      "value_type": "string",
-      "sensitivity": "operational",
-      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
-      "examples": [
-        "current_preview"
-      ],
-      "required_by_intents": [
-        "marketing.send_campaign"
-      ],
-      "optional_for_intents": []
-    },
-    {
       "name": "assignee",
       "value_type": "string",
       "sensitivity": "tenant_scoped_reference",
@@ -89,26 +76,10 @@
         "inactive_60_days",
         "at_risk_clients"
       ],
-      "required_by_intents": [
-        "marketing.preview_campaign"
-      ],
+      "required_by_intents": [],
       "optional_for_intents": [
         "general.write_text"
       ]
-    },
-    {
-      "name": "audience_rule",
-      "value_type": "string",
-      "sensitivity": "operational",
-      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
-      "examples": [
-        "inactive_60_days",
-        "at_risk"
-      ],
-      "required_by_intents": [
-        "marketing.find_audience"
-      ],
-      "optional_for_intents": []
     },
     {
       "name": "available_time",
@@ -165,6 +136,7 @@
         "finance.revenue_forecast",
         "inventory.stock",
         "kpi.team",
+        "operations.journal_day",
         "payments.breakdown",
         "payments.refunds",
         "products.sales",
@@ -405,6 +377,7 @@
         "employees.revenue",
         "employees.salary",
         "kpi.team",
+        "operations.journal_day",
         "reviews.analyze_topics",
         "reviews.list_recent",
         "schedule.get_team",
@@ -530,33 +503,6 @@
       ]
     },
     {
-      "name": "max_recipients",
-      "value_type": "number",
-      "sensitivity": "operational",
-      "resolution": "Normalize spoken numbers and units, preserve precision, and validate the range before a tool call.",
-      "examples": [
-        50,
-        75
-      ],
-      "required_by_intents": [],
-      "optional_for_intents": [
-        "marketing.find_audience"
-      ]
-    },
-    {
-      "name": "message",
-      "value_type": "string",
-      "sensitivity": "tenant_sensitive",
-      "resolution": "Normalize from the utterance and active dialogue context, then validate against the canonical intent contract.",
-      "examples": [
-        "Персональное предложение без персональных данных"
-      ],
-      "required_by_intents": [
-        "marketing.preview_campaign"
-      ],
-      "optional_for_intents": []
-    },
-    {
       "name": "metric",
       "value_type": "string",
       "sensitivity": "operational",
@@ -589,20 +535,6 @@
         "analytics.root_cause"
       ],
       "optional_for_intents": []
-    },
-    {
-      "name": "minimum_visits",
-      "value_type": "number",
-      "sensitivity": "operational",
-      "resolution": "Normalize spoken numbers and units, preserve precision, and validate the range before a tool call.",
-      "examples": [
-        2,
-        3
-      ],
-      "required_by_intents": [],
-      "optional_for_intents": [
-        "marketing.find_audience"
-      ]
     },
     {
       "name": "new_date",
@@ -735,6 +667,7 @@
         "analytics.recommendations",
         "analytics.root_cause",
         "booking.list_own",
+        "clients.dormant_list",
         "clients.high_value",
         "clients.no_show_risk",
         "employees.performance_own",
@@ -742,6 +675,7 @@
         "employees.retention",
         "employees.workload",
         "kpi.team",
+        "operations.journal_day",
         "reports.recovered",
         "reviews.analyze_topics",
         "reviews.list_recent",

@@ -40,6 +40,7 @@ const domains: Record<string, readonly C9Domain[]> = {
   'expenses.period.complete': ['ADMIN'],
   'company.business-hours.read': ['OCCUPANCY'],
   'settings.read': ['ADMIN'],
+  'business.rules.read': ['ADMIN'],
   'settings.update': ['ADMIN'],
   'tasks.list': ['ADMIN'],
   'tasks.create': ['ADMIN'],

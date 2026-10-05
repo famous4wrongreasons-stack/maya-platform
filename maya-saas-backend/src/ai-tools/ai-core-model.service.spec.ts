@@ -223,6 +223,80 @@ describe('AiCoreModelService', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it('refuses to finish a ready business-rule plan without its source even when no lexical hint required a tool', async () => {
+    const plan = semanticPlan();
+    plan.tasks[0].intent = 'company.business_rules';
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(
+        deepSeekResponse(JSON.stringify(toolPlan(null, plan))),
+      );
+    const service = createService({
+      AI_CORE_PROVIDER: 'deepseek',
+      DEEPSEEK_API_KEY: 'test-only-key',
+    });
+    await expect(
+      service.decide({
+        ...input,
+        requiredToolNames: [],
+        messages: [{ role: 'user', content: 'Какой у нас регламент?' }],
+        tools: [
+          {
+            name: 'business.rules.read',
+            description: 'Read internal guidance',
+            input_schema: { type: 'object' },
+            risk_tier: 'read',
+            approval_policy: 'none',
+          },
+        ],
+      }),
+    ).rejects.toMatchObject({ status: 503 });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('allows a compound clarification before a ready read without looping or claiming facts', async () => {
+    const plan = semanticPlan('company.business_rules', {});
+    plan.tasks.push({
+      ...semanticPlan(
+        'booking.find_availability',
+        {},
+        {
+          requires_clarification: true,
+          clarification_question: 'На какой день проверить окна?',
+        },
+      ).tasks[0],
+      id: 'task_2',
+    });
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(
+        deepSeekResponse(JSON.stringify(toolPlan(null, plan))),
+      );
+    const service = createService({
+      AI_CORE_PROVIDER: 'deepseek',
+      DEEPSEEK_API_KEY: 'test-only-key',
+    });
+    await expect(
+      service.decide({
+        ...input,
+        requiredToolNames: [],
+        tools: ['business.rules.read', 'booking.availability.read'].map(
+          (name) => ({
+            name,
+            description: 'Read',
+            input_schema: { type: 'object' },
+            risk_tier: 'read',
+            approval_policy: 'none',
+          }),
+        ),
+      }),
+    ).resolves.toMatchObject({
+      reply: 'На какой день проверить окна?',
+      toolCall: null,
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('separates a null tool plan from the natural final DeepSeek reply', async () => {
     const fetchMock = jest
       .spyOn(global, 'fetch')
@@ -327,10 +401,14 @@ describe('AiCoreModelService', () => {
   it('accepts any matching evidence tool from a required alternative list', async () => {
     const fetchMock = jest
       .spyOn(global, 'fetch')
-      .mockResolvedValueOnce(deepSeekResponse(JSON.stringify(toolPlan(null))))
       .mockResolvedValueOnce(
         deepSeekResponse(
-          'Аналитика по мастерам за август подтверждена данными CRM.',
+          JSON.stringify(toolPlan(null, semanticPlan('employees.salary'))),
+        ),
+      )
+      .mockResolvedValueOnce(
+        deepSeekResponse(
+          'Начисления по мастерам за август подтверждены данными CRM.',
         ),
       );
     const service = createService({
@@ -341,19 +419,23 @@ describe('AiCoreModelService', () => {
     await expect(
       service.decide({
         ...input,
+        tools: [
+          ...input.tools,
+          { ...input.tools[0], name: 'analytics.business.profit' },
+        ],
         requiredToolNames: [
           'analytics.business.query',
-          'analytics.employee.query',
+          'analytics.business.profit',
         ],
         toolResults: [
           {
-            name: 'analytics.employee.query',
+            name: 'analytics.business.profit',
             result: { period: 'август', employees: [] },
           },
         ],
       }),
     ).resolves.toMatchObject({
-      reply: 'Аналитика по мастерам за август подтверждена данными CRM.',
+      reply: 'Начисления по мастерам за август подтверждены данными CRM.',
       toolCall: null,
     });
     expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -376,7 +458,16 @@ describe('AiCoreModelService', () => {
     });
 
     await expect(
-      service.decide({ ...input, requiredToolNames: [] }),
+      service.decide({
+        ...input,
+        requiredToolNames: [],
+        toolResults: [
+          {
+            name: 'analytics.business.query',
+            result: { revenue_kopecks: 42_000_000 },
+          },
+        ],
+      }),
     ).resolves.toMatchObject({
       reply: 'За август подтверждённая касса составляет 420 000 ₽.',
       provider: 'deepseek',

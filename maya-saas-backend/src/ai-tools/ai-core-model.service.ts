@@ -1121,7 +1121,12 @@ export class AiCoreModelService {
     }
     if (record.tool_call === null || record.tool_call === undefined) {
       if (
-        this.requiredToolPending(input) &&
+        !this.semanticClarification(semanticPlan) &&
+        (this.requiredToolPending(input) ||
+          this.conversationIntelligence.hasPendingToolTasks(
+            semanticPlan,
+            input.toolResults.map((result) => result.name),
+          )) &&
         !this.semanticPlanMayFinishWithoutTool(semanticPlan)
       ) {
         throw new Error('ai_core_required_tool_missing');
