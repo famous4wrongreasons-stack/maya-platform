@@ -120,6 +120,32 @@ describe('Gate 5 — the floor is recomputed, not read', () => {
     expect(code(v)).toBe('handoff_required');
   });
 
+  it.each(['BOUND_CLIENT', 'SESSION_VERIFIED'] as const)(
+    'Telegram cannot carry bound-client control even with a %s principal',
+    (verificationLevel) => {
+      const control = rec({
+        effect: 'CONTROL',
+        capabilitySpace: 'CONTROL',
+        capabilityKey: 'control.run.cancel',
+        priority: 0,
+      });
+      const record = {
+        ...control,
+        verificationFloor: recomputeFloor(control),
+      };
+      expect(record.verificationFloor).toBe('BOUND_CLIENT');
+      // This live control floor must remain reachable on a first-party carrier.
+      expect(gate5(ctx(record, { verificationLevel })).outcome).toBe('pass');
+      const telegram = ctx(record, {
+        verificationLevel,
+        carrier: 'telegram-bot',
+        channelMaxLevel: channelMaxLevel('telegram-bot'),
+      });
+      expect(effectiveLevel(telegram)).toBe('CHANNEL_IDENTITY');
+      expect(code(gate5(telegram))).toBe('needs_second_channel');
+    },
+  );
+
   it('effectiveLevel(ctx) is the session level capped by the channel ceiling, and Gate 5 compares it', () => {
     const r = rec({ verificationFloor: recomputeFloor(rec()) });
     expect(effectiveLevel(ctx(r))).toBe('SESSION_VERIFIED');
@@ -182,7 +208,7 @@ describe('Gate 5 — the floor is recomputed, not read', () => {
   });
 
   it('the carrier ceiling is keyed by ChannelId, and a channel with no row caps at the bottom', () => {
-    expect(channelMaxLevel('telegram-bot')).toBe('BOUND_CLIENT');
+    expect(channelMaxLevel('telegram-bot')).toBe('CHANNEL_IDENTITY');
     expect(channelMaxLevel('sms')).toBe('CHANNEL_IDENTITY');
     expect(channelMaxLevel('native-shell')).toBe('SESSION_VERIFIED');
     // A ChannelId the table has no row for fails closed.

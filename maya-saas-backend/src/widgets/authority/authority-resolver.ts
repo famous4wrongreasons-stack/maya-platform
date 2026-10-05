@@ -61,9 +61,10 @@ export const CHANNEL_MAX_LEVEL: Readonly<
 > = Object.freeze({
   pwa: 'SESSION_VERIFIED',
   'native-shell': 'SESSION_VERIFIED',
-  // A Telegram chat id identifies a channel, not a person with business authority — the
-  // fundamental rule this programme exists to enforce.
-  'telegram-bot': 'BOUND_CLIENT',
+  // K7 and R3.12.7: the polling bot establishes channel identity only. An A18
+  // login/link does not raise this carrier's ceiling; first-party handoff
+  // resolves the live principal again at its own boundary.
+  'telegram-bot': 'CHANNEL_IDENTITY',
   'web-push': 'CHANNEL_IDENTITY',
   sms: 'CHANNEL_IDENTITY',
   email: 'CHANNEL_IDENTITY',

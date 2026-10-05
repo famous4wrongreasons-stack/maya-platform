@@ -1,0 +1,41 @@
+# MAYA customer inbound: next executable slice
+
+Date: 2026-10-05. Source baseline: `70ebc4037af3aecad832a03a3fb1e94c4bcdda99` plus the local Telegram ceiling correction. This is an implementation proposal, not release authorization or evidence of a working customer channel.
+
+## Verified owners and the missing connection
+
+| Requirement | Existing owner / evidence | Consequence |
+|---|---|---|
+| One Telegram command/message door | [Widget contract R3.12.7](MAYA-WIDGET-CONTRACT-V1.md), lines 5220–5317; P-33 remains absent in source | Do not add another legacy bridge or a competing Telegram command endpoint. Existing ruling allows HANDOFF only and a credential bound to one tenant. |
+| Channel identity and Client authority | `src/crm/client-channel-authenticator.service.ts`, `client-channel-runtime.service.ts`, `ClientChannelLink` | Telegram Login/widget proof is supported; a Bot API update is not such a proof. An authenticated adapter identifies its installation, not a Client or staff member. Never resolve business authority directly from `from.id`, a phone or a display name. |
+| Business task ownership | `src/orchestration/c9.registry.ts`, `c9.agents.ts` | ADMIN remains the primary owner. Channel-specific parsing and transport stay outside the agent. |
+| Business guidance | A22 immutable `business_rules`; current staff `business.rules.read` | Current rules are internal staff guidance. Customer visibility is not implied. `AiKnowledgeSource`/`AiKnowledgeChunk` also exist in Prisma, but no current runtime reader was found; do not create another knowledge store without reconciling these owners. |
+| Outbound mutation | `src/communication-delivery/communication-delivery.service.ts` and Action Engine | Replies must use the current delivery/action owners. The existing outbound envelope is not an inbound record. UNKNOWN never authorizes another send. |
+| Conversation content lifecycle | Widget contract RT1/RT6; `widgets/stores/timeline.store.ts`; `widgets/consent/erasure.job.ts` | Widget content has a 180-day ceiling and atomic erasure mechanism. Current ordinary chat persistence is web-only. The erasure job is a dark provider, with no production caller found. These are precedents, not proof that a new inbound store is covered. |
+| Business events and quarantine | `events/event-store.service.ts` | EventStore and quarantine are for canonical facts / PII-free diagnostics. Customer text does not belong there. |
+
+Paths in this table are relative to `maya-saas-backend/`. The R3.12.7 scope is narrower than the owner's current desired Admin vertical. That product request establishes the goal; it does not itself establish a channel credential, Client binding, or storage lifecycle.
+
+## Concrete implementation after resolving the two choices below
+
+1. **Installation admission.** One channel-neutral installation reference binds tenant, channel, optional branch, credential reference/version and active state. Tenant and branch are loaded server-side. No inbound JSON tenant, role, Client or approval claim supplies authority. No pilot-specific code.
+2. **One Telegram door.** Implement/version the existing P-33 door and its adapter together. A versioned normalized receipt needs thread and provider-message identity, which the old closed P-33 DTO does not contain. Do not silently add fields to version 1. Retain one command/message path and explicitly deny the internal path in every committed public backend proxy. A public webhook, if selected later, terminates in the authenticated adapter rather than exposing the internal door.
+3. **Canonical receipt.** The proposed record contains opaque receipt/installation references, tenant, optional server-resolved branch, channel, keyed sender/thread/message references, provider timestamp, receipt timestamp, encrypted bounded content and allowlisted encrypted delivery metadata, content hash, lifecycle policy reference/expiry and processing state. The full raw Update is not stored or logged. Unknown/unsupported media produces an explicit state, not fabricated text.
+4. **Idempotency.** Uniqueness includes `(tenant, installation, channel, providerThread, providerMessage)`. Same identity + same content reuses the receipt; changed content is an explicit edit/conflict, not a second command. Telegram message IDs are scoped within a chat; webhook secret headers authenticate configured webhook delivery, not business authority. [Telegram Bot API](https://core.telegram.org/bots/api#message), [setWebhook](https://core.telegram.org/bots/api#setwebhook).
+5. **Client binding.** Preserve `unlinked` until an exact current A18 verified link and a channel proof supported by that owner resolve. Recheck revocation before each protected read/action. A new Bot API proof type requires an explicit A18 extension; do not fake a Login proof or raise the polling-carrier ceiling.
+6. **Admin task.** Receipt → existing C9 ADMIN → allowed current sources. An unlinked sender can be handed to staff; personal history and booking authority remain unavailable. Internal A22 rules cannot become a customer reply. A staff-approved action uses the actual live staff principal and canonical Action Engine contract; the agent cannot approve itself.
+7. **Original-channel reply.** Persist a reply intent through the current Action Engine and delivery owner, with the admitted installation/thread endpoint. Retain delivery status separately from task completion. Reply success is claimed only from an authoritative outcome. Sender text cannot supply a destination URL or provider credential.
+8. **Lifecycle.** Wire expiry and authorized erasure for encrypted content and linkable transport metadata; retain only the approved minimal idempotency/audit tombstone. Never silently delete unresolved action evidence. A receipt schema without a reachable maintenance/erasure path does not complete this slice.
+
+## Two decisions needed before a durable receipt schema
+
+These choices affect tenant routing and data lifecycle; they are not additional release governance.
+
+1. **Pilot channel topology.** Recommended: each salon connects its own Telegram bot/account installation, using one common implementation. Alternative: one shared MAYA bot, which additionally requires an explicit tenant-selection/binding flow before routing a new conversation. Current code has a global polling token and no canonical installation registry; a CRM integration does not identify a Telegram installation. The generic installation model should support both, but the first real inbound path must choose one.
+2. **Receipt retention/erasure.** Recommended for review: apply the existing conversation-content ceiling (180 days, configurable shorter per tenant) to inbound text and linkable transport metadata, including unlinked messages; authorized erasure removes content and linkable metadata while retaining a minimal non-content dedupe/audit tombstone under an explicit existing or approved policy. Alternative: a shorter default or refusal to retain unlinked content. The tombstone horizon and unresolved-action evidence must be settled with the chosen lifecycle; do not copy an unrelated auth/quarantine policy.
+
+No schema, migration, externally reachable route or provider call was added by this proposal. After those choices, the first deliverable is executable HTTP/PostgreSQL proof of two installations/two tenants, duplicate and concurrent delivery, edit/conflict handling, invalid credential and tenant-override refusal, revoked/unlinked Client behavior, expiry and erasure. Model selection may be scripted for that wiring proof and must be labeled as such. A later separately authorized real customer/provider run establishes actual acceptance.
+
+## Existing authority correction
+
+`telegram-bot` was incorrectly capped at `BOUND_CLIENT` in code since `6dc37bc89472d255628a4b32d0ca8e1729a602ee`; `c751709dbcf36bede948c56cebbea427c341fa60` only moved/typed the same value. K7 already required `CHANNEL_IDENTITY`, and later owner ruling R-03 confirmed it. No later increase was found. The local correction restores that approved ceiling. A regression reproduces the former admission of bound-client control and verifies refusal on Telegram while retaining first-party access. This does not implement P-33 or the Admin inbound vertical.
