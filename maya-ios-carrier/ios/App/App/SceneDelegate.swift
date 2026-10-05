@@ -56,7 +56,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = CAPBridgeViewController()
+        window?.rootViewController = MAYABridgeViewController()
         window?.makeKeyAndVisible()
 
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
@@ -149,5 +149,75 @@ private extension String {
         guard let data = try? JSONSerialization.data(withJSONObject: [self], options: []),
               let array = String(data: data, encoding: .utf8) else { return "\"\"" }
         return String(array.dropFirst().dropLast())
+    }
+}
+
+/// UIKit's keyboard guide supplies geometry and timing. WKWebView lays out its DOM at the
+/// animation's destination immediately if constrained directly, so follow the guide's presentation
+/// frame each display tick instead. This keeps web content and keyboard on the same moving edge.
+private final class MAYABridgeViewController: CAPBridgeViewController {
+    private let viewport = UIView()
+    private var displayLink: CADisplayLink?
+    private var trackingUntil: CFTimeInterval = 0
+
+    override func capacitorDidLoad() {
+        super.capacitorDidLoad()
+        guard let webView else { return }
+        let container = UIView(frame: webView.frame)
+        container.backgroundColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .black : UIColor(red: 244/255, green: 240/255, blue: 235/255, alpha: 1)
+        }
+        view = container
+        viewport.isUserInteractionEnabled = false
+        viewport.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(viewport)
+        container.addSubview(webView)
+        webView.autoresizingMask = []
+        let keyboard = container.keyboardLayoutGuide
+        if #available(iOS 17.0, *) { keyboard.usesBottomSafeArea = false }
+        NSLayoutConstraint.activate([
+            viewport.topAnchor.constraint(equalTo: container.topAnchor),
+            viewport.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            viewport.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            viewport.bottomAnchor.constraint(equalTo: keyboard.topAnchor)
+        ])
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillChange(_:)),
+            name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if displayLink == nil { webView?.frame = viewport.frame }
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        displayLink?.invalidate()
+        displayLink = nil
+    }
+
+    @objc private func keyboardWillChange(_ notification: Notification) {
+        let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double ?? 0
+        trackingUntil = CACurrentMediaTime() + duration
+        if displayLink == nil {
+            let link = CADisplayLink(target: self, selector: #selector(followKeyboard))
+            displayLink = link
+            link.add(to: .main, forMode: .common)
+        }
+    }
+
+    @objc private func followKeyboard() {
+        let frame = viewport.layer.presentation()?.frame ?? viewport.frame
+        UIView.performWithoutAnimation { webView?.frame = frame }
+        if CACurrentMediaTime() >= trackingUntil && abs(frame.height - viewport.frame.height) < 0.5 {
+            displayLink?.invalidate()
+            displayLink = nil
+            webView?.frame = viewport.frame
+        }
+    }
+
+    deinit {
+        displayLink?.invalidate()
+        NotificationCenter.default.removeObserver(self)
     }
 }

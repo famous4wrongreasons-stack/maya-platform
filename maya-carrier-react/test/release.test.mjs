@@ -98,5 +98,5 @@ test('RPK verifier rebuilds expected bytes, refuses a swapped artifact, does not
 
 test('RPK refuses keyboard-overlay and outer-scroll regressions', () => {
   assert.throws(() => checkNativeConfig({ ...config, ios: { ...config.ios, scrollEnabled: true } }), /outer scrolling/);
-  assert.throws(() => checkNativeConfig({ ...config, plugins: { ...config.plugins, Keyboard: { resize: 'none' } } }), /resize the WebView/);
+  assert.throws(() => checkNativeConfig({ ...config, plugins: { ...config.plugins, Keyboard: { resize: 'native' } } }), /layout guide/);
 });

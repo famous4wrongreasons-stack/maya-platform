@@ -26,10 +26,10 @@ function useDark(): boolean {
   );
 }
 
-/** One visible frame for chat and sign-in. Native resize already shrinks the WebView;
- * Safari may shrink only VisualViewport. Never subtract the keyboard twice. */
+/** UIKit owns native geometry; only browsers need a VisualViewport correction. */
 export function useVisibleViewport(): void {
   useEffect(() => {
+    if (window.location.protocol === 'capacitor:') return;
     const visual = window.visualViewport;
     const measure = (): void => {
       const height = Math.min(window.innerHeight, visual?.height ?? window.innerHeight);

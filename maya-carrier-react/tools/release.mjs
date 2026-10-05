@@ -19,7 +19,7 @@ export function checkNativeConfig(config) {
   assert.equal(config.appName, 'MAYA', 'native app name changed');
   assert.equal(config.server, undefined, 'remote/alternate native server is forbidden');
   assert.equal(config.ios?.scrollEnabled, false, 'only the chat lane may scroll; native outer scrolling is forbidden');
-  assert.equal(config.plugins?.Keyboard?.resize, 'native', 'native keyboard must resize the WebView exactly once');
+  assert.equal(config.plugins?.Keyboard?.resize, 'none', 'UIKit keyboard layout guide owns the WebView; plugin resize must stay disabled');
 }
 
 function run(file, args, cwd = ROOT) {
