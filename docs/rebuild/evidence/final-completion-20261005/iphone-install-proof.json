@@ -35,8 +35,20 @@
     "evidence": "devicectl device install app exited 0, 2026-10-05; before/after bundle ru.mayaos.app 1.0 (1)"
   },
   "launch": {
-    "status": "blocked",
-    "evidence": "devicectl launch exited 1: iOS Security denied opening (signature/entitlements/profile trust group). Strict local codesign verification and profile entitlement matching passed. User trust on iPhone not verified."
+    "status": "confirmed",
+    "processLaunchSucceeded": true,
+    "evidence": "Existing devicectl JSON receipt reports success launching ru.mayaos.app after owner-reported developer profile trust; no device command was rerun by the isolated B35 task.",
+    "sourceReceipt": "/tmp/maya-phone-launch-after-trust.json",
+    "sourceReceiptSha256": "c3fd079428f8c3a6f45098f60c83f79631de9d0fc6eb8d945d5e8e8ef197e83d",
+    "processIdentifier": 32663,
+    "previousAttempt": {
+      "status": "blocked",
+      "evidence": "devicectl launch exited 1: iOS Security denied opening (signature/entitlements/profile trust group). Strict local codesign verification and profile entitlement matching passed. User trust on iPhone not verified."
+    },
+    "uiObserved": false,
+    "loginVerified": false,
+    "realCrmAcceptanceVerified": false,
+    "ownerScreenshotPending": true
   },
   "productionBackendChanged": false,
   "realCrmActionsPerformed": false

@@ -1,0 +1,80 @@
+{
+  "date": "2026-10-05",
+  "sourceCommit": "33e564f8ba741f6d537b6f15cdc2880ac813503d",
+  "baseCommit": "c9a6f0237108295dea02486dd2d202b365841eb5",
+  "source": "maya-saas-backend/test/widgets-live/b35-campaign-restart.live-spec.ts",
+  "database": {
+    "host": "127.0.0.1",
+    "port": 55539,
+    "name": "maya_widget_gate_proof_b35_completion",
+    "newIsolatedCluster": true,
+    "committedMigrationsApplied": true,
+    "sharedDatabaseTouched": false
+  },
+  "restart": {
+    "prepareProcessId": 1765,
+    "resumeProcessId": 1755,
+    "postgresBefore": "2026-10-05 15:05:35.847814+03",
+    "postgresAfter": "2026-10-05 15:06:30.81946+03",
+    "differentApplicationProcesses": true,
+    "differentPostgresStartTimesAssertedByTest": true
+  },
+  "phases": {
+    "prepare": "PASS",
+    "resume": "PASS"
+  },
+  "checks": [
+    "HTTP preview duplicate returns original campaign; changed intent conflicts",
+    "Concurrent HTTP confirm reuses one admitted root and one provider attempt per started Client",
+    "Action Engine root SUCCEEDED proves admission only; campaign retains UNRESOLVED",
+    "HTTP 408 stays UNKNOWN/MANUAL_REQUIRED; retry and process/database restart never resend it",
+    "Pending independent Client resumes exactly once under concurrent HTTP retry",
+    "Original logical recipient IDs and original attempt IDs survive restart",
+    "Real Inbox upsert commits before injected PostgreSQL finalization fault",
+    "Expired delivery claim recovers to UNKNOWN then real canonical reread reconciles",
+    "Inbox ends COMPLETED with one Inbox row, one execution attempt and one reconciliation attempt",
+    "Wrong intent 409, foreign tenant owner 404, suspended membership 401; attempts/sends unchanged"
+  ],
+  "substitutions": [
+    "fetch replaced only at configured Telegram provider bridge edge; unexpected external fetch refuses",
+    "A18 verified channel fixture created through real ClientChannelLinkService with synthetic verifier",
+    "Proof-only PostgreSQL trigger injects finalization exception after real Inbox commit; trigger/function removed before restart",
+    "Synthetic logical lease hold/expiry models an interrupted worker without a 90-second sleep"
+  ],
+  "realOwners": [
+    "AppModule HTTP guards and login",
+    "TenantEntitlement/EntitlementsService",
+    "CanonicalBulkService immutable intent/approval",
+    "Canonical Action Ingress and Action Engine kernel/runtime",
+    "CommunicationBulkPolicyService and CommunicationDeliveryKernel",
+    "PostgreSQL rows, constraints, attempts and reconciliation"
+  ],
+  "rawLogs": {
+    "prepare": {
+      "path": "/tmp/maya-b35-completion-pg.rponbg/http-prepare.log",
+      "sha256": "4074b5980747b5261bf274464e972efb8efba5a7c9a2423448b19211b7d9faae"
+    },
+    "resume": {
+      "path": "/tmp/maya-b35-completion-pg.rponbg/http-resume.log",
+      "sha256": "ff8155962693b18c53fe47ef37db618d33fc4b1d560f649946d93fd77043adca"
+    }
+  },
+  "limits": {
+    "realProviderAcceptance": false,
+    "productionMessages": 0,
+    "crmWrites": 0,
+    "payments": 0,
+    "phoneOperations": 0,
+    "productionDeployment": false,
+    "productionMigrations": false,
+    "productionBackendChanged": false,
+    "oldRuntimeScriptRerun": false
+  },
+  "phoneLaunchCorrection": "Existing receipt verified; process launch YES. UI/login/CRM not observed. No device command rerun.",
+  "liveAcceptanceBlockers": [
+    "No authorization to deploy backend or send real campaign messages",
+    "Pilot tenant/branch, owner session and controlled verified Client with owner-controlled channels not established",
+    "Provider automation/reminder behavior must be established; disabling SMS alone is insufficient",
+    "Installed iOS points at unchanged production API; phone UI/login observation still pending"
+  ]
+}
