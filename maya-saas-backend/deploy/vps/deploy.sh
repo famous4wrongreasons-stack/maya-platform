@@ -27,6 +27,28 @@ set -euo pipefail
 
 BE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Local source inspection only. Exit before temp files, builds, relay probes,
+# SSH/upload, dependency installs, database access or any remote command.
+# PREPARE_ONLY retains its established schema-preparation (write) contract.
+if [ "${MAYA_DEPLOY_INSPECT_ONLY:-0}" = "1" ]; then
+  if [ "${MAYA_DEPLOY_PREPARE_ONLY:-0}" != "0" ]; then
+    echo "INSPECTION REFUSED: do not combine INSPECT_ONLY with PREPARE_ONLY" >&2
+    exit 2
+  fi
+  echo "LOCAL INSPECTION ONLY: no deployment, build, network or database access"
+  GIT_OPTIONAL_LOCKS=0 git -C "$BE" rev-parse HEAD
+  GIT_OPTIONAL_LOCKS=0 git -C "$BE" status --porcelain -- .
+  echo "Target inventory, pending migrations, build digest, grants and backup/rollback: NOT CHECKED"
+  echo "PREPARE_ONLY=1 performs remote writes and migrations; it is not a dry run."
+  exit 0
+fi
+# Refuse mistyped modes before doing work instead of falling through to deploy.
+if [ "${MAYA_DEPLOY_INSPECT_ONLY:-0}" != "0" ] || \
+   { [ "${MAYA_DEPLOY_PREPARE_ONLY:-0}" != "0" ] && [ "$MAYA_DEPLOY_PREPARE_ONLY" != "1" ]; }; then
+  echo "Invalid inspection/preparation mode (expected 0 or 1)" >&2
+  exit 2
+fi
+
 JUMP="ssh -i $HOME/.ssh/beget_deploy -o BatchMode=yes -o ConnectTimeout=20 -o ConnectionAttempts=5 -o ServerAliveInterval=15 -o ServerAliveCountMax=12 -W %h:%p mocine3388@prime.beget.com"
 SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=25 -o ConnectionAttempts=5 -o ServerAliveInterval=15
           -o StrictHostKeyChecking=accept-new -o "ProxyCommand=$JUMP"
@@ -195,7 +217,8 @@ run "set -e
   || fail "генерация клиента"
 
 # Approved incident cutovers may need a canonical correction between schema
-# preparation and public runtime activation. This mode keeps the old unit and
+# preparation and public runtime activation. This mode WRITES remote files and
+# APPLIES ALL PENDING MIGRATIONS; it is NOT a dry run. This mode keeps the old unit and
 # symlink unchanged; activation/recovery follows the incident cutover runbook.
 if [ "${MAYA_DEPLOY_PREPARE_ONLY:-0}" = "1" ]; then
   echo "PREPARED ONLY: $STAMP; schema verified; runtime not activated"

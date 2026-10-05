@@ -99,3 +99,63 @@ After authorized revoke, status must be disabled and old widget tokens refused. 
 After separate execution permission, the agent can capture backup/pre-state, validate trust configuration, apply only the certified pending migrations, deploy exact artifacts, obtain the actual canonical session using privately supplied credentials, perform health checks, dry-run/grant/revoke, sync/build and install as authorized. Passwords, private keys and token values must not enter chat or logs. Owner-controlled signing/interactive account access cannot be fabricated by the agent. Stop if any necessary external input is absent; technical certification alone does not mean READY for production.
 
 Before execution, rehearse backup/restore, migration, canonical global login, trust validation, exact signed dry-run/grant/revoke/expiry/old-token refusal and packaging in an isolated test database with ephemeral keys. Real production state is read-only during preparation. Record all actual manual prerequisites in the release checkpoint and do not perform deploy, migration, grant, real OTP/provider effects or iPhone installation until separately authorized.
+
+## Local inspection versus preparation with writes
+
+`MAYA_DEPLOY_INSPECT_ONLY=1 bash maya-saas-backend/deploy/vps/deploy.sh`
+performs **local source inspection only**: Git HEAD and backend working-tree status,
+then exits before temporary files, build commands, relay probes, SSH, upload,
+dependency installation or database access. No release stamp or credentials are
+required. This does not qualify an artifact or inspect the actual target, migration
+inventory, grants, backups or rollback. Combining inspection with preparation, or
+using an invalid mode value, fails before work. The fake-command regression is:
+
+```sh
+node --test maya-saas-backend/deploy/vps/deploy-inspect.test.cjs
+```
+
+`MAYA_DEPLOY_PREPARE_ONLY=1` retains its documented incident-cutover semantics:
+remote release files and fresh dependencies are written, **all pending migrations
+are applied**, schema/drift checks and Prisma generation run, then it exits before
+spare-port startup and public activation. It is not a dry run and must not be run
+under read-only inspection permission. Before authorizing it, inventory and certify
+the complete actual pending migration list; four known guest migrations do not
+prove they are the only pending migrations. A local build is a separate action.
+
+## Profile cutover and rollback order
+
+Before replacing a runtime with a different profile digest, inspect the durable
+current grant and CAS version. Revoke any active old-profile grant **on its matching
+old runtime**, using a separately signed revoke authorization, exact original
+candidate/build/certificate/release/profile/evidence bindings and current
+`expectedVersion`. The authorization parser requires the running profile digest;
+the writer also requires the original stored grant digest. A new runtime cannot
+normally revoke an old-profile grant. Revoke does not require the running-build
+certificate check that applies to grant.
+
+Retain the atomic revoke audit/receipt and confirm the durable row is disabled.
+`status.enabled=false` alone is insufficient: an incompatible profile can make the
+policy view unavailable while the stored entitlement remains `enabled=true`.
+Expiry is distinct from revocation. An unrevoked old grant may become effective
+again if its runtime is restored inside its original validity window.
+
+For rollback, first revoke the new grant **on the new matching runtime**, then
+restore the recorded compatible artifact. Keep signer/operator availability for
+both directions. Never cross the digest boundary first and assume revoke can be
+performed afterward. A new grant/certificate needs its own exact candidate and
+profile evidence; an old certificate or source hash is not a fresh runtime digest.
+
+Before cutover or rollback, close admission of new guest POST attempts; retain
+status GET, cookie scope and access to original in-flight Action Engine receipts
+and reconciliation. UNKNOWN stays unknown: do not mint a replacement nonce,
+resend create, clear the original intent or fall back to PHP booking. The retired
+`create_record` relay remains 410. Restore a guest-compatible runtime and website;
+otherwise keep admission closed for investigation.
+
+Record actual previous artifacts/configuration references, encryption-key-reference
+continuity and a rehearsed backup/restore procedure. A symlink rollback changes
+runtime, not schema. Preserve encrypted history, AE/nonce/receipt state and retention;
+no down-migration, source-constraint shrink or generic database restore over newer
+effects. The stable/current chat codecs are structurally compatible, but rolling
+back loses newer semantic continuity and fixes; source compatibility is not proof
+of an operational rollback rehearsal. Recheck this against each actual release set.
