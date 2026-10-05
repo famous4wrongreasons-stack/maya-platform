@@ -4,6 +4,8 @@ Local development branch `codex/maya-client-readiness-20261005`, isolated from
 accepted checkpoint `98dc6121b714c51bedb70e396f5ad35cd0f9c346`.
 Frozen website frontend remains `d5b310e9a3dc13051eb7f5ccd1e23bf28e8884d6`.
 This is not production, provider or phone acceptance and is not a release approval.
+Later reconciliation and the corrected registry-hash diagnosis are recorded in
+[READINESS-RECONCILIATION-20261005.md](READINESS-RECONCILIATION-20261005.md).
 
 ## Product and owner corrections
 
@@ -64,7 +66,7 @@ Code checkpoint: `2e76a589ff40eb1b503c4ed52339ab3d4125a412`.
 
 The 11 backend failures retain the same assertion identities as the prior baseline:
 registry/verification-floor/proactive/consent census (5), denial-map coverage (3),
-fixed release profile (1), migration census (1), non-widget schema fingerprint (1).
+fixed release profile (1), migration census (1), C9 registry fingerprint (1).
 No Client or consent prohibition check was removed. The consent-named failure is
 its exact catalog-length assertion, not evidence that a consent capability was
 registered.
@@ -91,9 +93,9 @@ and local PostgreSQL; it is not real CRM or provider acceptance.
 - Certified P10 reason map has 118 codes versus 127 runtime codes. Nine existing
   conversation/source-read codes require canonical reconciliation. Unknown codes
   still use the existing UNAVAILABLE/PROVIDER_SILENT limitation fallback.
-- The migration census and non-widget Prisma schema fingerprint predate four
-  frozen website migrations. They are retained for the owner-approved website
-  integration process, not reset here merely to obtain green checks.
+- The migration census predates four frozen website migrations. The separate
+  ARCH-12-11 fingerprint is C9_REGISTRY_HASH (corrected in the reconciliation
+  report), not a Prisma schema fingerprint.
 - Full lint has pre-existing failures in package5 runtime proof, owner-money
   acceptance tests and the YClients adapter test. Their baseline classification
   and prior identical output are in CHAT-AGGREGATE-READINESS-20261005.md.
