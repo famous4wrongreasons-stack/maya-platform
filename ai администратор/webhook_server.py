@@ -1120,6 +1120,7 @@ _PACKAGE2_TELEGRAM_MESSAGE_TYPES = frozenset({
     "birthday_alert",
     "review_alert",
     "marketing_broadcast",
+    "wanted_slot_available",
 })
 _PACKAGE2_TELEGRAM_PARSE_MODES = frozenset({"Markdown", "MarkdownV2", "HTML"})
 
