@@ -510,7 +510,7 @@ describe('КОРПУС: живые формулировки владельца �
     expect(result.answer.reply).not.toContain('260');
     expect(result.answer.reply).toContain('Прогноз возврата пока недоступен');
     expect(result.answer.reply).not.toContain('430');
-    expect(result.modelCalls).toBe(0);
+    expect(result.modelCalls).toBe(1);
   });
 
   it('удерживает retention-сегмент в реплике «как их вернуть»', async () => {
@@ -527,7 +527,7 @@ describe('КОРПУС: живые формулировки владельца �
     expect(result.answer.reply).toMatch(/оценки Maya в кабинете/i);
     expect(result.answer.reply).toMatch(/не даёт разрешения на контакт/i);
     expect(result.answer.reply).not.toMatch(/снизить отмены/i);
-    expect(result.modelCalls).toBe(0);
+    expect(result.modelCalls).toBe(1);
   });
 
   it('«сколько визитов у клиента» — точное обезличенное CRM-досье', async () => {
@@ -540,7 +540,7 @@ describe('КОРПУС: живые формулировки владельца �
     expect(result.answer.reply).not.toContain('Иван');
     expect(result.answer.source).toBe('safe_fallback');
     expect(result.arguments).toEqual({ query: 'Ивана' });
-    expect(result.modelCalls).toBe(0);
+    expect(result.modelCalls).toBe(1);
   });
 
   it('«сколько бонусов у клиента» — не баланс самого владельца', async () => {
@@ -564,7 +564,7 @@ describe('КОРПУС: живые формулировки владельца �
     expect(result.tools).toEqual(['clients.dossier.read']);
     expect(result.arguments).toEqual({ query: 'Ивана' });
     expect(result.answer.reply).toMatch(/Стрижка, Борода/);
-    expect(result.modelCalls).toBe(0);
+    expect(result.modelCalls).toBe(1);
   });
 });
 

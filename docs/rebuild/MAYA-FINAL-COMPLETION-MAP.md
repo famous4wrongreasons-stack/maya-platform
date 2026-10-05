@@ -228,3 +228,36 @@ A reproduced defect allowed caller-supplied prior assistant text to whitelist an
   this device run is iOS 26.5 only.
 - No further phone installation was performed. This is a bounded candidate checkpoint, with motion and
   full integrated acceptance still requiring qualification before a coherent release.
+
+### Scope narrowing supersedes blanket API coverage — owner 2026-10-05
+
+The [product requirement](../product/README.md) now records the owner's later narrowing:
+YCLIENTS only, own app chat; goods from invoice/order photo with explicit price/quantity
+semantics; no full procurement/supplier module, telephony, content publishing, universal
+accounting/payroll/fiscalization or new external messaging integrations. Bounded autopilot
+remains required; unsupported numeric predictions/growth guarantees are excluded. The 304-operation
+API inventory is a coverage input, not a mandate to implement excluded domains. Telegram topology
+and new inbound lifecycle decisions are deferred, not blockers of this YCLIENTS-first delivery.
+No real provider mutation is authorized by this product scope.
+
+### Semantic-first candidate — systemic booking/report substitution regression
+
+Reproduced five failures: an owner booking dialogue followed by a date/correction executed an
+analytics read before semantic planning, and a failed planner could be masked by the unrelated
+report. Removed that pre-planner execution. Existing server argument normalization remains usable
+only after the planner explicitly selects the same tool. Validated denied/unavailable/clarification
+and non-data tasks no longer trigger forced metric reads. Model unavailability is not reported as
+CRM unavailability. No role, audience, Client binding or action authority was widened.
+
+HTTP/auth/C9/PostgreSQL proof now exercises a three-turn booking request/correction with no
+analytics call and no ActionExecution, plus an actual 503 model-failure boundary. Existing reporting,
+PII and number-grounding tests now explicitly script the planner's read before the continuation;
+they no longer encode the obsolete server preload as an acceptance criterion. Executed 234 focused
+mechanics tests, six HTTP cases, backend TypeScript and widgets-live TypeScript, changed-file ESLint.
+All model choices and CRM facts here are synthetic. This proves ordering/authority/outcome mechanics,
+not language generalization or the owner's 99% real-model criterion. PersonalClientContextService
+and reverification remain the next canonical wiring dependency, not a reason to grant Client role
+from user text.
+
+Official YCLIENTS artifacts were materialized through Library onto this Mac; all three SHA256
+checks matched the research handoff. They remain source evidence, not proof of provider execution.

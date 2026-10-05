@@ -1,4 +1,6 @@
 import { randomUUID } from 'node:crypto';
+import { ServiceUnavailableException } from '@nestjs/common';
+import { ConversationIntelligenceService } from '../../src/conversation-intelligence/conversation-intelligence.service';
 import request from 'supertest';
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
@@ -15,6 +17,16 @@ import {
   type HttpHarness,
 } from './support/http-bootstrap';
 import type { Fixtures } from './support/fixtures';
+
+/** Typed test projection; assertions below verify the endpoint values. */
+function payload(response: { body: unknown }) {
+  return response.body as {
+    id: string;
+    reply: string;
+    error: { code: string };
+    coordination: { run_id: string; state: string; scope: string };
+  };
+}
 
 /** Real HTTP/auth/C9/C7/C8/AE/PostgreSQL. Scripted model selection; synthetic source facts only. */
 describe('Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]', () => {
@@ -68,18 +80,106 @@ describe('Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]', () 
   function select(tool: string, args: Record<string, unknown> = {}) {
     return jest
       .spyOn(http.app.get(AiCoreModelService), 'decide')
-      .mockImplementation(async (input) =>
-        input.toolResults.length
-          ? null
-          : {
-              reply: 'Проверяю.',
-              toolCall: { name: tool, arguments: args },
-              provider: 'openai',
-              model: 'scripted-owner-path-proof',
-              usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-            },
+      .mockImplementation((input) =>
+        Promise.resolve(
+          input.toolResults.length
+            ? null
+            : {
+                reply: 'Проверяю.',
+                toolCall: { name: tool, arguments: args },
+                provider: 'openai',
+                model: 'scripted-owner-path-proof',
+                usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+              },
+        ),
       );
   }
+
+  it('keeps a multi-turn owner booking request out of analytics and never invents Client authority', async () => {
+    const f = await salon();
+    const model = jest
+      .spyOn(http.app.get(AiCoreModelService), 'decide')
+      .mockImplementation((input) =>
+        Promise.resolve({
+          reply: 'Для личной записи нужен подтверждённый клиентский доступ.',
+          toolCall: null,
+          semanticPlan: new ConversationIntelligenceService().validatePlan(
+            {
+              parent_request: 'Личная запись на стрижку',
+              tasks: [
+                {
+                  intent: 'booking.create_own',
+                  confidence: 0.98,
+                  entities: {
+                    service: 'стрижка',
+                    date: 'today',
+                    time: '16:30',
+                  },
+                },
+              ],
+            },
+            input.principalRole!,
+            input.tools.map((tool) => tool.name),
+          ),
+          provider: 'openai',
+          model: 'scripted-owner-context-boundary',
+          usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+        }),
+      );
+    const source = jest.spyOn(http.app.get(AiToolHandlerService), 'execute');
+    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+    for (const text of [
+      'Я хочу записаться как клиент',
+      'На сегодня на 16:30',
+      'Нет, лучше завтра вечером',
+    ]) {
+      messages.push({ role: 'user', content: text });
+      const response = await request(http.app.getHttpServer())
+        .post('/api/ai/chat')
+        .set('Authorization', `Bearer ${f.token}`)
+        .send({ surface: 'native', requestId: randomUUID(), messages });
+      expect(response.status).toBe(201);
+      expect(payload(response).reply).toContain(
+        'подтверждённый клиентский доступ',
+      );
+      messages.push({ role: 'assistant', content: payload(response).reply });
+    }
+    expect(model).toHaveBeenCalledTimes(3);
+    expect(
+      model.mock.calls[2][0].messages
+        .filter((m) => m.role === 'user')
+        .map((m) => m.content),
+    ).toEqual([
+      'Я хочу записаться как клиент',
+      'На сегодня на 16:30',
+      'Нет, лучше завтра вечером',
+    ]);
+    expect(source).not.toHaveBeenCalled();
+    expect(
+      await db.prisma.actionExecution.count({
+        where: { tenantId: f.tenant.id },
+      }),
+    ).toBe(0);
+  });
+
+  it('reports planner unavailability without an unrelated CRM report or invented CRM outage', async () => {
+    const f = await salon();
+    jest.spyOn(http.app.get(AiCoreModelService), 'decide').mockRejectedValue(
+      new ServiceUnavailableException({
+        error: { code: 'ai_model_unavailable' },
+      }),
+    );
+    const source = jest.spyOn(http.app.get(AiToolHandlerService), 'execute');
+    const response = await f.chat('На сегодня на 16:30');
+    expect(response.status).toBe(503);
+    expect(payload(response).error.code).toBe('ai_model_unavailable');
+    expect(source).not.toHaveBeenCalled();
+    expect(
+      await db.prisma.actionExecution.count({
+        where: { tenantId: f.tenant.id },
+      }),
+    ).toBe(0);
+  });
 
   it.each([
     ['Как сегодня дела?', 'today', 'none'],
@@ -94,27 +194,29 @@ describe('Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]', () 
       const response = await f.chat(text);
       expect(response.status).toBe(201);
       expect(source).toHaveBeenCalled();
-      expect(response.body.coordination).toMatchObject({
+      expect(payload(response).coordination).toMatchObject({
         state: 'COMPLETED',
         scope: 'deterministic_reads',
       });
-      const result = await source.mock.results[0].value;
+      const result: unknown = await source.mock.results[0].value;
       expect(result).toHaveProperty(
         'measurement.contract',
         'c7.measurement.read/1',
       );
-      expect(response.body.reply).toBeTruthy();
+      expect(payload(response).reply).toBeTruthy();
       if (text === 'Как сегодня дела?')
-        expect(response.body.reply).toContain('за сегодня');
+        expect(payload(response).reply).toContain('за сегодня');
       if (text === 'Почему просела выручка?') {
-        expect(response.body.reply).toContain(
+        expect(payload(response).reply).toContain(
           'Причина изменения выручки не установлена',
         );
-        expect(response.body.reply).toContain('не измерено');
+        expect(payload(response).reply).toContain('не измерено');
       }
       if (text === 'Что мне сейчас сделать?') {
-        expect(response.body.reply).not.toMatch(/^Записанное рабочее время:/);
-        expect(response.body.reply).toContain('Уточните цель');
+        expect(payload(response).reply).not.toMatch(
+          /^Записанное рабочее время:/,
+        );
+        expect(payload(response).reply).toContain('Уточните цель');
       }
       expect(
         await db.prisma.actionExecution.count({
@@ -206,7 +308,7 @@ describe('Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]', () 
         branchIds: [],
       });
     expect(computed.status).toBe(201);
-    expect(computed.body).toMatchObject({
+    expect(payload(computed)).toMatchObject({
       available: true,
       current: true,
       kind: 'POLICY_SIGNAL',
@@ -219,15 +321,17 @@ describe('Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]', () 
     const requestId = randomUUID();
     const response = await f.chat('Кто давно не приходил?', requestId);
     expect(response.status).toBe(201);
-    expect(response.body.reply).toContain('c8.dormancy/barber_cadence');
-    expect(response.body.reply).toContain('PARTIAL');
-    expect(response.body.reply).not.toContain(client.id);
-    expect(response.body.coordination).toMatchObject({
+    expect(payload(response).reply).toContain('c8.dormancy/barber_cadence');
+    expect(payload(response).reply).toContain('PARTIAL');
+    expect(payload(response).reply).not.toContain(client.id);
+    expect(payload(response).coordination).toMatchObject({
       state: 'COMPLETED',
       scope: 'deterministic_reads',
     });
     const replay = await f.chat('Кто давно не приходил?', requestId);
-    expect(replay.body.coordination).toEqual(response.body.coordination);
+    expect(payload(replay).coordination).toEqual(
+      payload(response).coordination,
+    );
     expect(source).toHaveBeenCalledTimes(1);
     expect(
       await db.prisma.actionExecution.count({
@@ -235,7 +339,7 @@ describe('Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]', () 
       }),
     ).toBe(before);
     const receipts = await db.prisma.c9WorkReceipt.findMany({
-      where: { runId: response.body.coordination.run_id },
+      where: { runId: payload(response).coordination.run_id },
     });
     expect(receipts).toHaveLength(1);
     expect(receipts[0]).toMatchObject({
@@ -243,17 +347,17 @@ describe('Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]', () 
       state: 'SETTLED',
     });
     const denied = await request(http.app.getHttpServer())
-      .get('/api/analytics/valuations/' + computed.body.id)
+      .get('/api/analytics/valuations/' + payload(computed).id)
       .set('Authorization', `Bearer ${foreign.token}`);
     expect(denied.status).toBe(404);
     const empty = await foreign.chat('Кто давно не приходил?');
-    expect(empty.body.reply).toContain('недоступны');
+    expect(payload(empty).reply).toContain('недоступны');
     await db.prisma.appointment.updateMany({
       where: { tenantId: f.tenant.id },
       data: { attendance: 'no_show' },
     });
     const stale = await f.chat('Кто давно не приходил?');
-    expect(stale.body.reply).toContain('недоступны');
+    expect(payload(stale).reply).toContain('недоступны');
     expect(
       await db.prisma.c8ResultRevision.count({
         where: { tenantId: f.tenant.id },

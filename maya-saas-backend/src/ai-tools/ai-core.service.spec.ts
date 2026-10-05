@@ -110,6 +110,78 @@ describe('AiCoreService', () => {
     expect(result.reply).not.toContain('30 дней');
   });
 
+  it.each([
+    'На сегодня на 16:30 к Стасу',
+    'Нет, лучше завтра к другому мастеру',
+    'Хочу на стрижку в пятницу вечером',
+    'Давай вместо завтра послезавтра',
+  ])(
+    'plans the complete booking dialogue before heuristic data preloads: %s',
+    async (text) => {
+      const toolNames = ['analytics.business.query', 'catalog.services.read'];
+      const mocks = createService(toolNames);
+      const semanticPlan = new ConversationIntelligenceService().validatePlan(
+        {
+          parent_request: 'Я хочу записаться как клиент',
+          tasks: [
+            {
+              intent: 'booking.create_own',
+              confidence: 0.98,
+              entities: { service: 'стрижка', date: 'tomorrow', time: '16:30' },
+            },
+          ],
+        },
+        user.role,
+        toolNames,
+      );
+      mocks.model.decide.mockResolvedValue(
+        decision({
+          reply: 'Для личной записи нужен подтверждённый клиентский доступ.',
+          toolCall: null,
+          semanticPlan,
+        }),
+      );
+      mocks.runtime.execute.mockResolvedValue({
+        status: 'completed',
+        result: { appointments_count: 13 },
+      });
+      const messages = [
+        { role: 'user' as const, content: 'Я хочу записаться как клиент' },
+        { role: 'assistant' as const, content: 'На какой день и время?' },
+        { role: 'user' as const, content: text },
+      ];
+      const result = await mocks.service.chat(user, { ...dto, messages });
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      expect(mocks.model.decide.mock.calls[0]?.[0].messages).toEqual(messages);
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      expect(result.reply).toContain('подтверждённый клиентский доступ');
+    },
+  );
+
+  it('does not substitute a heuristic analytics read when semantic planning is unavailable', async () => {
+    const mocks = createService(['analytics.business.query']);
+    mocks.model.decide.mockRejectedValue(
+      new ServiceUnavailableException({
+        error: { code: 'ai_model_unavailable' },
+      }),
+    );
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      result: { appointments_count: 13 },
+    });
+    await expect(
+      mocks.service.chat(user, {
+        ...dto,
+        messages: [
+          { role: 'user', content: 'Я хочу записаться как клиент' },
+          { role: 'assistant', content: 'На какой день и время?' },
+          { role: 'user', content: 'На сегодня на 16:30 к Стасу' },
+        ],
+      }),
+    ).rejects.toBeInstanceOf(ServiceUnavailableException);
+    expect(mocks.runtime.execute).not.toHaveBeenCalled();
+  });
+
   it('persists an explicit REMEMBER command without invoking the model', async () => {
     const mocks = createService();
     mocks.memory.handleExplicitCommand.mockResolvedValue({
@@ -209,6 +281,13 @@ describe('AiCoreService', () => {
 
   it('redacts PII, executes an allowed read tool and lets the model answer from its result', async () => {
     const mocks = createService();
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.model.decide.mockResolvedValue(
       decision({
         reply:
@@ -238,7 +317,7 @@ describe('AiCoreService', () => {
       ],
     });
 
-    const modelInput = mocks.model.decide.mock.calls[0]?.[0];
+    const modelInput = mocks.model.decide.mock.calls[1]?.[0];
     // 152-ФЗ: имя, телефон и почта клиента не пересекают внешнюю границу
     // модели. Это единственный контур, который вообще нельзя обсуждать.
     expect(JSON.stringify(modelInput)).not.toContain('Иван');
@@ -249,7 +328,7 @@ describe('AiCoreService', () => {
     // Телефон обязан быть вырезан и там.
     expect(JSON.stringify(modelInput)).not.toContain('+79180000000');
     // Суть схемы: модель пишет ответ, ГЛЯДЯ на цифры инструмента, а не по
-    // памяти. Данные подгружены заранее, поэтому доедут на первом же ходу.
+    // памяти. Данные поступают после явного выбора инструмента планировщиком.
     expect(modelInput?.toolResults?.[0]?.name).toBe('analytics.business.query');
     expect(result).toMatchObject({
       reply: 'Выручка по бизнесу за период выросла, считаю по данным CRM.',
@@ -268,9 +347,8 @@ describe('AiCoreService', () => {
         },
       ],
     });
-    // Данные предзагружены сервером, поэтому лишнего обращения к провайдеру за
-    // вызовом инструмента больше нет: модель вызывается ровно один раз.
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    // Сначала выбор инструмента, затем ответ на основе его результата.
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(result.reply).not.toContain('+79180000000');
     // Разметку из ответа модели по-прежнему вычищаем перед выдачей наружу.
     expect(result.reply).not.toContain('<b>');
@@ -776,6 +854,13 @@ describe('AiCoreService', () => {
       'catalog.staff.read',
       'catalog.services.read',
     ]);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'catalog.staff.read', arguments: {} },
+      }),
+    );
     mocks.model.decide.mockResolvedValueOnce(
       decision({
         reply:
@@ -805,7 +890,7 @@ describe('AiCoreService', () => {
     });
 
     expect(mocks.runtime.listTools).toHaveBeenCalled();
-    const firstModelInput = mocks.model.decide.mock.calls[0]?.[0];
+    const firstModelInput = mocks.model.decide.mock.calls[1]?.[0];
     expect(firstModelInput?.persona).toBe('admin');
     expect(
       firstModelInput?.tools?.map((tool: { name: string }) => tool.name),
@@ -1147,6 +1232,13 @@ describe('AiCoreService', () => {
       role: UserRole.EMPLOYEE,
     };
     const mocks = createService(['analytics.employee.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.employee.query', arguments: {} },
+      }),
+    );
     mocks.model.decide.mockResolvedValue(
       decision({ reply: 'Ваша выручка: 99 400 ₽.', toolCall: null }),
     );
@@ -1171,7 +1263,7 @@ describe('AiCoreService', () => {
 
     // Сотруднику разрешён только его личный срез. Бизнес-итоги не должны
     // появиться среди фактически вызванных инструментов.
-    const modelInput = mocks.model.decide.mock.calls[0]?.[0];
+    const modelInput = mocks.model.decide.mock.calls[1]?.[0];
     expect(modelInput?.toolResults?.[0]?.name).toBe('analytics.employee.query');
     expect(result).toMatchObject({
       reply: 'Ваша выручка: 99 400 ₽.',
@@ -1184,11 +1276,18 @@ describe('AiCoreService', () => {
     expect(mocks.runtime.execute.mock.calls.map((call) => call[1])).toEqual([
       'analytics.employee.query',
     ]);
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
   });
 
   it('loads verified CRM context for an open-ended owner business question', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-open-owner-query',
@@ -1364,6 +1463,13 @@ describe('AiCoreService', () => {
 
   it('lets the native model explain a weakest-service query from verified data', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-business-query',
@@ -1449,6 +1555,13 @@ describe('AiCoreService', () => {
 
   it('answers from verified business data when the model is temporarily unavailable', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-business-fallback',
@@ -1506,6 +1619,13 @@ describe('AiCoreService', () => {
 
   it('keeps a weak-spots follow-up comprehensive when the model is unavailable', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-business-full-review',
@@ -1577,6 +1697,13 @@ describe('AiCoreService', () => {
 
   it('answers a compound year comparison without bypassing canonical opportunities', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-business-action-plan',
@@ -1638,6 +1765,13 @@ describe('AiCoreService', () => {
 
   it('does not invent an action when an owner asks what to do about a revenue decline', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-revenue-action-plan',
@@ -1693,6 +1827,13 @@ describe('AiCoreService', () => {
 
   it('explains the strongest verified factor when an owner asks why business declined', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-business-diagnosis',
@@ -1757,6 +1898,13 @@ describe('AiCoreService', () => {
 
   it('distinguishes a CRM outage from a Maya reasoning failure', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockRejectedValue(new Error('crm_timeout'));
 
     const result = await mocks.service.chat(user, {
@@ -1776,7 +1924,7 @@ describe('AiCoreService', () => {
     });
     expect(result.reply).toContain('не отвечает источник бизнес-данных CRM');
     expect(result.reply).not.toContain('не получилось связаться с MAYA');
-    expect(mocks.model.decide).not.toHaveBeenCalled();
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
   });
 
   it('uses only the current employee query to give a master performance advice', async () => {
@@ -1786,6 +1934,13 @@ describe('AiCoreService', () => {
       role: UserRole.EMPLOYEE,
     };
     const mocks = createService(['analytics.employee.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.employee.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-employee-query',
@@ -2001,6 +2156,13 @@ describe('AiCoreService', () => {
 
   it('returns verified payroll by master when the model is unavailable', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.model.decide.mockResolvedValue(null);
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
@@ -2066,6 +2228,13 @@ describe('AiCoreService', () => {
 
   it('never substitutes payroll for money brought in by each master', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.model.decide.mockResolvedValue(null);
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
@@ -2185,6 +2354,13 @@ describe('AiCoreService', () => {
 
   it('answers exact appointment statuses without asking the model to recalculate', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-appointment-count',
@@ -2228,11 +2404,18 @@ describe('AiCoreService', () => {
       status: 'verified',
       domain: 'business_query',
     });
-    expect(mocks.model.decide).not.toHaveBeenCalled();
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
   });
 
   it('answers a daily breakdown from exact CRM status buckets', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-daily-breakdown',
@@ -2292,7 +2475,7 @@ describe('AiCoreService', () => {
     expect(result.reply).toContain('12.08: всего 8');
     expect(result.reply).toContain('ожидают 4');
     expect(result.source).toBe('safe_fallback');
-    expect(mocks.model.decide).not.toHaveBeenCalled();
+    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
   });
 
   /**
@@ -2305,6 +2488,13 @@ describe('AiCoreService', () => {
    */
   it('answers a year-over-year question from the universal business query', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.model.decide.mockResolvedValue(
       decision({
         reply:
@@ -2357,7 +2547,7 @@ describe('AiCoreService', () => {
     });
     // Устаревший снимок нельзя выдавать за свежие данные. Признак протухания
     // доезжает до модели вместе с цифрами, и она обязана назвать его вслух.
-    const modelInput = mocks.model.decide.mock.calls[0]?.[0];
+    const modelInput = mocks.model.decide.mock.calls[1]?.[0];
     expect(modelInput?.toolResults?.[0]?.name).toBe('analytics.business.query');
     expect(
       (
@@ -2368,7 +2558,7 @@ describe('AiCoreService', () => {
     expect(result.reply).toContain('последний подтверждённый снимок');
     expect(result.reply).toContain('06.08.2026');
     expect(result.reply).toContain('данные не обнулены');
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
   });
 
   /**
@@ -2380,6 +2570,13 @@ describe('AiCoreService', () => {
    */
   it('names last year revenue in the deterministic year-over-year summary', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     // Провайдер молчит: текст собирает сервер, и проверяется именно он.
     mocks.model.decide.mockResolvedValue(null);
     mocks.runtime.execute.mockResolvedValue({
@@ -2421,6 +2618,13 @@ describe('AiCoreService', () => {
 
   it('keeps a customer-count follow-up inside the same year-over-year window', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.model.decide.mockResolvedValue(
       decision({
         reply: 'Уникальных клиентов 80 против 100 годом ранее: −20 (−20%).',
@@ -2480,6 +2684,13 @@ describe('AiCoreService', () => {
 
   it('recognizes a direct customer decline comparison with the previous year', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.model.decide.mockResolvedValue(
       decision({ reply: 'Клиентов 80 против 100.', toolCall: null }),
     );
@@ -2547,6 +2758,13 @@ describe('AiCoreService', () => {
 
   it('asks the model to rewrite an unsourced number and ships the corrected answer', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-number-retry',
@@ -2595,8 +2813,8 @@ describe('AiCoreService', () => {
     // Раньше одно неподтверждённое число молча стирало весь ответ. Теперь
     // модели называют виновную цифру и дают переписать — так живой текст
     // сохраняется, а выдуманная сумма всё равно не доходит до владельца.
-    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
-    const second = mocks.model.decide.mock.calls[1]?.[0];
+    expect(mocks.model.decide).toHaveBeenCalledTimes(3);
+    const second = mocks.model.decide.mock.calls[2]?.[0];
     expect(second?.corrections?.[0]).toContain('999999');
     expect(second?.toolResults?.[0]?.name).toBe('analytics.business.query');
     expect(result).toMatchObject({
@@ -2612,6 +2830,13 @@ describe('AiCoreService', () => {
     'treats conversation as context, with explicit user scenario=%s, not assistant numeric evidence',
     async (explicitUserScenario) => {
       const mocks = createService(['analytics.business.query']);
+      // Explicit planner choice: no data source may run before this decision.
+      mocks.model.decide.mockResolvedValueOnce(
+        decision({
+          reply: null,
+          toolCall: { name: 'analytics.business.query', arguments: {} },
+        }),
+      );
       mocks.runtime.execute.mockResolvedValue({
         status: 'completed',
         execution_id: 'execution-history-grounding',
@@ -2663,18 +2888,18 @@ describe('AiCoreService', () => {
         ],
       });
       // Keep conversational continuity; only its authority changes.
-      expect(mocks.model.decide.mock.calls[0]?.[0].messages).toContainEqual({
+      expect(mocks.model.decide.mock.calls[1]?.[0].messages).toContainEqual({
         role: 'assistant',
         content: earlierAssistant,
       });
       expect(mocks.model.decide).toHaveBeenCalledTimes(
-        explicitUserScenario ? 1 : 2,
+        explicitUserScenario ? 2 : 3,
       );
       if (explicitUserScenario) {
         expect(result.reply).toContain('Ваш план — 999999 ₽');
       } else {
         expect(
-          mocks.model.decide.mock.calls[1]?.[0].corrections?.[0],
+          mocks.model.decide.mock.calls[2]?.[0].corrections?.[0],
         ).toContain('999999');
         expect(result.reply).not.toContain('999999');
       }
@@ -2746,6 +2971,13 @@ describe('AiCoreService', () => {
 
   it('lets the model say a decline in words while the server keeps the minus sign', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-negative-percent',
@@ -2788,7 +3020,7 @@ describe('AiCoreService', () => {
     // Направление изменения по-русски несут слова, а не знак: сервер отдал
     // −9.2, модель пишет «снизились на 9,2%». Сверка идёт по модулю, иначе
     // сторож ловил бы добросовестные ответы и подменял их шаблоном.
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(result).toMatchObject({
       reply:
         'Поступления снизились на 9,2% к прошлому году. Это подтверждённая динамика CRM.',
@@ -2799,6 +3031,13 @@ describe('AiCoreService', () => {
 
   it('does not mistake decline wording next to an absolute figure for an error', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-absolute-decline',
@@ -2846,7 +3085,7 @@ describe('AiCoreService', () => {
     // видел слово «просел» рядом с числом 1436.17 и объявлял его ошибкой
     // направления. Но абсолютная величина направления не несёт — падает не
     // число, а показатель. Проверка направления имеет смысл только для дельт.
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(result.source).toBe('deepseek');
     expect(result.reply).toContain('1 436,17 ₽');
     expect(result.reply).toContain('141 против 171');
@@ -2854,6 +3093,13 @@ describe('AiCoreService', () => {
 
   it('catches a decline described as growth even though the figure itself is real', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-direction',
@@ -2903,7 +3149,7 @@ describe('AiCoreService', () => {
     // «выросли» на падении это не ошибка в цифре, а перевёрнутый смысл, и
     // владелец принял бы решение по несуществующему росту. Ловим по словам
     // рядом с числом и требуем переписать.
-    const correction = mocks.model.decide.mock.calls[1]?.[0]?.corrections?.[0];
+    const correction = mocks.model.decide.mock.calls[2]?.[0]?.corrections?.[0];
     expect(correction).toContain('снижение, а не рост');
     expect(result.reply).toContain('снизились на 9,2%');
     expect(result.reply).not.toContain('выросли');
@@ -2912,6 +3158,13 @@ describe('AiCoreService', () => {
 
   it('lets the model name a money change in roubles when the server counted it in kopecks', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-kopecks-delta',
@@ -2950,13 +3203,20 @@ describe('AiCoreService', () => {
     // дельту в копейках (−1 000 000), человек говорит «10 000 ₽», и сторож
     // считал верную сумму выдумкой. Та же величина в правильной единице —
     // не выдумка; переписывать ответ незачем.
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(result.reply).toContain('10 000 ₽');
     expect(result.source).toBe('deepseek');
   });
 
   it('still rejects a money figure that is not in the data at any scale', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-invented-money',
@@ -2996,7 +3256,7 @@ describe('AiCoreService', () => {
 
     // Послабление касается только единиц измерения. Округление «примерно»
     // остаётся выдумкой и по-прежнему отправляется на переписывание.
-    expect(mocks.model.decide.mock.calls[1]?.[0]?.corrections?.[0]).toContain(
+    expect(mocks.model.decide.mock.calls[2]?.[0]?.corrections?.[0]).toContain(
       '12345',
     );
     expect(result.reply).toContain('10 000 ₽');
@@ -3004,6 +3264,13 @@ describe('AiCoreService', () => {
 
   it('does not treat an hour inside a timestamp as a confirmed metric', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-timestamp',
@@ -3040,7 +3307,7 @@ describe('AiCoreService', () => {
     // 🔴 Разбирая строки дат на числа, сторож считал бы подтверждёнными часы,
     // минуты и дни месяца — и пропустил бы любой процент от 0 до 59. Из таких
     // строк берём только год.
-    expect(mocks.model.decide.mock.calls[1]?.[0]?.corrections?.[0]).toContain(
+    expect(mocks.model.decide.mock.calls[2]?.[0]?.corrections?.[0]).toContain(
       '21',
     );
     expect(result.reply).toBe('Записей за период: 40.');
@@ -3048,6 +3315,13 @@ describe('AiCoreService', () => {
 
   it('lets a per-master service drop through the number guard by name', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue({
       status: 'completed',
       execution_id: 'execution-staff-names',
@@ -3119,7 +3393,7 @@ describe('AiCoreService', () => {
     });
 
     // Имя уходит в модель напрямую — иначе назвать мастера она не сможет.
-    const modelInput = JSON.stringify(mocks.model.decide.mock.calls[0]?.[0]);
+    const modelInput = JSON.stringify(mocks.model.decide.mock.calls[1]?.[0]);
     expect(modelInput).toContain('Илья');
     expect(modelInput).toContain('Борода');
     // Разбор доходит до пользователя дословно: ни сторож чисел, ни подстановка
@@ -3133,6 +3407,13 @@ describe('AiCoreService', () => {
 
   it('lets a salon-wide sentence without any master name through untouched', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue(perMasterExecution());
     // Общие показатели салона названы без имени рядом — придираться не к чему.
     // Ложные тревоги тут дороже пропусков: прошлая проверка направления
@@ -3147,7 +3428,7 @@ describe('AiCoreService', () => {
       messages: [{ role: 'user', content: 'Что у нас по записям за месяц?' }],
     });
 
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(result.reply).toBe(reply);
     expect(result.source).not.toBe('safe_fallback');
     expect(result.grounding).toMatchObject({ status: 'verified' });
@@ -3155,6 +3436,13 @@ describe('AiCoreService', () => {
 
   it('keeps a full three-part answer with per-master detail intact', async () => {
     const mocks = createService(['analytics.business.query']);
+    // Explicit planner choice: no data source may run before this decision.
+    mocks.model.decide.mockResolvedValueOnce(
+      decision({
+        reply: null,
+        toolCall: { name: 'analytics.business.query', arguments: {} },
+      }),
+    );
     mocks.runtime.execute.mockResolvedValue(perMasterExecution());
     // Живой ответ директора: имена, их числа, салонный итог отдельной фразой и
     // рекомендация. Каждое число стоит у своего владельца — придираться не к
@@ -3171,7 +3459,7 @@ describe('AiCoreService', () => {
       ],
     });
 
-    expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    expect(mocks.model.decide).toHaveBeenCalledTimes(2);
     expect(result.reply).toBe(reply);
     expect(result.source).not.toBe('safe_fallback');
   });

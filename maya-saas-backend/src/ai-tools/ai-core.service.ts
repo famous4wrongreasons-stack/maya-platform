@@ -694,7 +694,7 @@ export class AiCoreService {
     // Список для модели: вероятный инструмент первым, за ним — остальные
     // доступные инструменты данных. Первый — рекомендация, любой другой из
     // списка тоже принимается как доказательство.
-    const requiredToolNames = requirement?.evidenceToolNames ?? [];
+    let requiredToolNames = requirement?.evidenceToolNames ?? [];
     let groundingRetries = 0;
     let numberRetries = 0;
     let corrections: string[] = [];
@@ -829,90 +829,11 @@ export class AiCoreService {
           toolResults,
         );
       }
-      if (requirement?.presetToolCall) {
-        const preset = requirement.presetToolCall;
-        const execution = this.record(
-          await this.executeChatTool(
-            dto,
-            toolUser,
-            preset.name,
-            {
-              surface: dto.surface,
-              arguments: preset.arguments,
-              idempotencyKey: this.toolIdempotencyKey(
-                tenantId,
-                user.userId,
-                dto.requestId,
-                // 🔴 НЕ 0: нулевой шаг занимает первая итерация цикла. Ключ
-                // считается по паре «шаг + инструмент», поэтому чужой инструмент
-                // на шаге 0 конфликта не даёт, а вот тот же самый — дал бы:
-                // рантайм сверяет аргументы и на расхождении бросает конфликт
-                // идемпотентности. Вопрос вида «а за прошлый месяц целиком?»
-                // падал бы вместо ответа.
-                -1,
-                preset.name,
-              ),
-            },
-            {
-              widgetTrigger: 'T-2a',
-              requestId: dto.requestId,
-              userTurn: this.persistedUserTurns.get(dto),
-            },
-          ),
-        );
-        const status =
-          typeof execution.status === 'string' ? execution.status : 'unknown';
-        toolsUsed.push({
-          name: preset.name,
-          status,
-          execution_id:
-            typeof execution.execution_id === 'string'
-              ? execution.execution_id
-              : null,
-          ...this.widgetResolution(execution),
-        });
-        if (status !== 'completed' || !('result' in execution)) {
-          this.modelFailure('ai_tool_result_unavailable');
-        }
-        toolResults.push({
-          name: preset.name,
-          result: this.sanitizeToolResult(execution.result),
-        });
-        signatures.add(this.toolSignature(preset.name, preset.arguments));
-        // ПД и точные retention-когорты форматирует сервер. Остальная бизнес-
-        // аналитика продолжает ход: смысл вопроса и составные задачи разбирает
-        // Conversation Intelligence слой.
-        const contextualText = this.contextualUserText(sanitized.messages);
-        if (this.requiresServerComposedReply(preset.name, contextualText)) {
-          const fastReply = this.deterministicGroundedReply(
-            toolResults,
-            contextualText,
-          );
-          if (fastReply) {
-            return this.complete(
-              user,
-              dto,
-              brain,
-              sanitized.redacted,
-              toolsUsed,
-              decisions,
-              {
-                reply: fastReply,
-                source: 'safe_fallback',
-                action: null,
-                grounding: this.groundingReport(
-                  requirement,
-                  'verified',
-                  toolResults,
-                ),
-              },
-              toolResults,
-            );
-          }
-        }
-      }
+      // A heuristic can suggest arguments, never execute a tool before semantic planning.
+      // Otherwise a booking follow-up containing a date can become an unrelated CRM report,
+      // especially when the model is unavailable and that report becomes the fallback answer.
       for (let step = 0; step <= maxToolSteps; step += 1) {
-        const requirementSatisfied = this.groundingSatisfied(
+        let requirementSatisfied = this.groundingSatisfied(
           requirement,
           toolResults,
         );
@@ -1009,16 +930,10 @@ export class AiCoreService {
         decisions.push(decision);
         if (decision.semanticPlan) {
           activeSemanticPlan = decision.semanticPlan;
-          // 🔴 Болтовню требовать подтверждать источником нельзя. «Че ты как?»
-          // разбиралось так: смысловой планировщик верно помечал ход как
-          // small_talk, а требование источника ставилось РАНЬШЕ него — по
-          // регулярке, где «че как» есть, а «че ТЫ как» уже нет. Модель
-          // отвечала по-человечески, сторож видел ответ без единого инструмента
-          // и подменял его заготовкой. Спор двух слоёв выигрывал тот, что
-          // глупее. Теперь вердикт умного слоя старше: он видел саму фразу,
-          // а не её совпадение с шаблоном.
-          if (requirement && this.isSmallTalkPlan(activeSemanticPlan)) {
+          if (this.semanticPlanNeedsNoData(activeSemanticPlan)) {
             requirement = null;
+            requiredToolNames = [];
+            requirementSatisfied = true;
           }
         }
         if (!decision.toolCall) {
@@ -1195,7 +1110,12 @@ export class AiCoreService {
         // перебивает period/day/month до подписи и до execute.
         const hardenedArguments = ReportingPeriodResolver.hardenToolArguments(
           decision.toolCall.name,
-          decision.toolCall.arguments,
+          requirement?.presetToolCall?.name === decision.toolCall.name
+            ? {
+                ...decision.toolCall.arguments,
+                ...requirement.presetToolCall.arguments,
+              }
+            : decision.toolCall.arguments,
           this.latestUserText(sanitized.messages),
           this.previousUserText(sanitized.messages),
           new Date(),
@@ -1435,6 +1355,7 @@ export class AiCoreService {
       const failedDomain = requirement?.fallbackDomain;
       if (
         toolResults.length === 0 &&
+        this.safeErrorCode(error) !== 'ai_model_unavailable' &&
         (failedDomain === 'business_query' || failedDomain === 'employee_query')
       ) {
         return this.complete(
@@ -1965,16 +1886,21 @@ export class AiCoreService {
     );
   }
 
-  /**
-   * Ход целиком про болтовню: ни одной задачи о данных салона.
-   *
-   * Пустой план сюда НЕ попадает — отсутствие разбора не повод снимать сторожа,
-   * иначе любой сбой планировщика открывал бы дорогу ответу без источника.
-   */
-  private isSmallTalkPlan(plan: ConversationSemanticPlan | null): boolean {
+  /** A validated non-data, denied, unavailable or clarification plan must not be
+   * replaced by a heuristic read requirement. Absence of a plan never lifts grounding. */
+  private semanticPlanNeedsNoData(
+    plan: ConversationSemanticPlan | null,
+  ): boolean {
     const tasks = plan?.tasks ?? [];
     return (
-      tasks.length > 0 && tasks.every((task) => task.domain === 'small_talk')
+      tasks.length > 0 &&
+      tasks.every(
+        (task) =>
+          task.data_class === 'A' ||
+          task.permission.status === 'denied' ||
+          task.tool.status === 'not_available' ||
+          task.requires_clarification,
+      )
     );
   }
 

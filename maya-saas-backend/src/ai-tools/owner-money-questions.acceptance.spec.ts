@@ -2,7 +2,7 @@ import type { C9Orchestrator } from '../orchestration/c9.orchestrator';
 import { measurementReaderDouble } from '../../test/helpers/measurement-reader';
 import { canonicalReceiptFixture } from '../../test/fixtures/ai-tool-receipt.fixture';
 /**
- * ПРИЁМКА ЖИВЫМИ ВОПРОСАМИ ВЛАДЕЛЬЦА.
+ * DETERMINISTIC MECHANICS FOR OWNER QUESTIONS — NOT LIVE-MODEL ACCEPTANCE.
  *
  * Настоящие AiCoreService, рантайм, реестр, политика, обработчик, движок
  * аналитики и сервис расходов. Подменены только внешние границы: база,
@@ -462,6 +462,7 @@ function createHarness(
       Buffer.from(value.slice(4), 'base64url').toString('utf8'),
   } as unknown as EncryptionService;
   const auditLog = {
+    tryLog: jest.fn().mockResolvedValue(undefined),
     log: jest.fn().mockResolvedValue({ id: 'audit-a' }),
   } as unknown as AuditLogService;
   const entitlements = {
@@ -556,6 +557,17 @@ function createHarness(
     },
   );
   const crmService = {
+    getServices: jest
+      .fn()
+      .mockResolvedValue([
+        {
+          id: 'service-synthetic',
+          name: 'Стрижка',
+          price: 2000,
+          duration_minutes: 60,
+          currency: 'RUB',
+        },
+      ]),
     getFinancialSummary,
     getJournal,
     getRevenueSummary: jest.fn(),
@@ -773,9 +785,24 @@ function createHarness(
   };
 }
 
-/** Модель молчит: провайдер недоступен, текст обязан собрать сервер. */
-function silentModel(harness: ReturnType<typeof createHarness>) {
-  harness.decide.mockResolvedValue(null);
+/** Planner selects the read; only continuation is unavailable. No natural-language acceptance claim. */
+function unavailableAfterPlannedRead(
+  harness: ReturnType<typeof createHarness>,
+  tool = 'analytics.business.profit',
+) {
+  harness.decide.mockImplementation((input) =>
+    Promise.resolve(
+      input.toolResults.length
+        ? null
+        : {
+            reply: null,
+            toolCall: { name: tool, arguments: {} },
+            provider: 'deepseek',
+            model: 'scripted-read-before-outage',
+            usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+          },
+    ),
+  );
 }
 
 /** Модель повторяет собранный сервером текст — проверяем сторож чисел. */
@@ -783,7 +810,9 @@ function echoModel(harness: ReturnType<typeof createHarness>, reply: string) {
   harness.decide.mockImplementation((input: AiCoreModelInput) =>
     Promise.resolve({
       reply: input.toolResults.length > 0 ? reply : 'Смотрю данные.',
-      toolCall: null,
+      toolCall: input.toolResults.length
+        ? null
+        : { name: 'analytics.business.profit', arguments: {} },
       provider: 'deepseek' as const,
       model: 'test-model',
       usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
@@ -839,7 +868,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
 
   it('«какая была прибыль в июле» — июль целиком, прибыль от кассы', async () => {
     const h = createHarness({ expenses: fullLedger, declaredPeriods });
-    silentModel(h);
+    unavailableAfterPlannedRead(h);
 
     const answer = await h.ask('какая была прибыль в июле');
 
@@ -875,7 +904,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
 
   it('«я в плюсе?» — тот же инструмент прибыли, а не обзор записей', async () => {
     const h = createHarness({ expenses: fullLedger, declaredPeriods });
-    silentModel(h);
+    unavailableAfterPlannedRead(h);
 
     const answer = await h.ask('я в плюсе?');
 
@@ -888,7 +917,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
 
   it('«сколько стоит привести нового клиента» — экономика, а не прайс', async () => {
     const h = createHarness({ expenses: fullLedger, declaredPeriods });
-    silentModel(h);
+    unavailableAfterPlannedRead(h);
 
     const answer = await h.ask('сколько стоит привести нового клиента');
 
@@ -905,7 +934,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
 
   it('«какая прибыль в августе» — месяц ещё идёт, и MAYA это говорит', async () => {
     const h = createHarness({ expenses: fullLedger, declaredPeriods });
-    silentModel(h);
+    unavailableAfterPlannedRead(h);
 
     const answer = await h.ask('какая прибыль в августе');
 
@@ -924,7 +953,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
 
   it('«сколько стоит стрижка» по-прежнему уходит в прайс', async () => {
     const h = createHarness({ expenses: fullLedger, declaredPeriods });
-    silentModel(h);
+    unavailableAfterPlannedRead(h, 'catalog.services.read');
 
     const answer = await h.ask('сколько стоит стрижка');
 
@@ -933,7 +962,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
 
   it('«сколько стоит стрижка» не отвечает средним чеком и не тащит прибыль', async () => {
     const h = createHarness({ expenses: fullLedger, declaredPeriods });
-    silentModel(h);
+    unavailableAfterPlannedRead(h, 'catalog.services.read');
 
     const answer = await h.ask('сколько стоит стрижка');
 
@@ -981,7 +1010,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
 
   it('«сколько ушло на расходники» — разрез по статьям от сервера', async () => {
     const h = createHarness({ expenses: fullLedger, declaredPeriods });
-    silentModel(h);
+    unavailableAfterPlannedRead(h, 'expenses.read');
 
     const answer = await h.ask('сколько ушло на расходники в июле');
 
@@ -994,7 +1023,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
 
   it('«на что больше всего тратим» — называет статью-лидера', async () => {
     const h = createHarness({ expenses: fullLedger, declaredPeriods });
-    silentModel(h);
+    unavailableAfterPlannedRead(h, 'expenses.read');
 
     const answer = await h.ask('на что больше всего тратим');
 
@@ -1066,7 +1095,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
         ),
       ],
     });
-    silentModel(h);
+    unavailableAfterPlannedRead(h);
 
     const answer = await h.askMessages([
       { role: 'user', content: 'какая была прибыль в июле' },
@@ -1106,7 +1135,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
           ),
         ],
       });
-      silentModel(h);
+      unavailableAfterPlannedRead(h);
 
       const answer = await h.askMessages([
         { role: 'user', content: 'какая была прибыль в июле' },
@@ -1130,7 +1159,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
 
   it('валовый доход показывается без аренды и не смешивается с чистой прибылью', async () => {
     const h = createHarness({ expenses: [] });
-    silentModel(h);
+    unavailableAfterPlannedRead(h);
 
     const answer = await h.ask('какая валовая прибыль в июле');
 
@@ -1146,7 +1175,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
       ],
       declaredPeriods: [{ from: '2026-07-01', to: '2026-07-31' }],
     });
-    silentModel(h);
+    unavailableAfterPlannedRead(h);
 
     const answer = await h.ask('какая была прибыль в июле');
 
@@ -1161,7 +1190,7 @@ describe('ПРИЁМКА: живые денежные вопросы владе�
       payrollAvailable: false,
       declaredPeriods,
     });
-    silentModel(h);
+    unavailableAfterPlannedRead(h);
 
     const answer = await h.ask('какая была прибыль в июле');
 
