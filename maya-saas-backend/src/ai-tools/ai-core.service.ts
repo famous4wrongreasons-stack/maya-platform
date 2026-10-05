@@ -1096,12 +1096,7 @@ export class AiCoreService {
                 reply,
                 requirement,
                 toolResults,
-                // 🔴 Весь диалог, а не последняя реплика. Собеседник ссылается
-                // на цифры, названные ходом раньше — «а кто из мастеров в
-                // просадке?» после разбора выручки. Эти числа уже проходили
-                // сверку тогда, но сторож видел только текущий ход и объявлял
-                // их выдуманными, обрывая разговор на втором вопросе.
-                this.conversationText(sanitized.messages),
+                this.userConversationText(sanitized.messages),
               )
             : [];
           if (unsourced.length > 0) {
@@ -4315,14 +4310,16 @@ export class AiCoreService {
   }
 
   /**
-   * Весь диалог одной строкой — источник уже подтверждённых чисел.
-   *
-   * Числа в прошлых репликах MAYA не могли появиться из воздуха: каждое из них
-   * либо прошло эту же сверку, либо было собрано сервером из результата
-   * инструмента. Поэтому ссылаться на них в следующем ходе безопасно.
+   * Preserve the user's scenario inputs across follow-ups. Assistant history
+   * arrives from the caller too: it is conversational context, never proof
+   * that a business number was verified. Current tool evidence remains the
+   * authority for business facts; model context still includes both roles.
    */
-  private conversationText(messages: AiCoreMessage[]): string {
-    return messages.map((message) => message.content).join(' \n ');
+  private userConversationText(messages: AiCoreMessage[]): string {
+    return messages
+      .filter((message) => message.role === 'user')
+      .map((message) => message.content)
+      .join(' \n ');
   }
 
   private previousUserText(messages: AiCoreMessage[]): string {

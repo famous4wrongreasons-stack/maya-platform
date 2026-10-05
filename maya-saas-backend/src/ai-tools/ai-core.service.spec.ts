@@ -2532,6 +2532,80 @@ describe('AiCoreService', () => {
     expect(result.reply).not.toContain('999 999');
   });
 
+  it.each([false, true])(
+    'treats conversation as context, with explicit user scenario=%s, not assistant numeric evidence',
+    async (explicitUserScenario) => {
+      const mocks = createService(['analytics.business.query']);
+      mocks.runtime.execute.mockResolvedValue({
+        status: 'completed',
+        execution_id: 'execution-history-grounding',
+        result: {
+          verified: true,
+          source: 'crm',
+          comparison: { mode: 'none' },
+          metrics: { revenue_amount_kopecks: 7_000_000 },
+          changes: {},
+          current: {
+            revenue: [
+              {
+                currency: 'RUB',
+                amount_kopecks: 7_000_000,
+                amount_major_units: 70_000,
+              },
+            ],
+          },
+          service_changes: [],
+        },
+      });
+      const earlierAssistant = 'Ранее выручка составила 999999 ₽.';
+      mocks.model.decide
+        .mockResolvedValueOnce(
+          decision({
+            reply: explicitUserScenario
+              ? 'Ваш план — 999999 ₽. Поступления по CRM — 70 000 ₽.'
+              : 'Выручка — 999999 ₽.',
+            toolCall: null,
+          }),
+        )
+        .mockResolvedValueOnce(
+          decision({
+            reply: 'Поступления по CRM — 70 000 ₽.',
+            toolCall: null,
+          }),
+        );
+      const result = await mocks.service.chat(user, {
+        ...dto,
+        messages: [
+          {
+            role: 'user',
+            content: explicitUserScenario
+              ? 'Если мой план 999999 ₽, что проверить?'
+              : 'Покажи выручку.',
+          },
+          { role: 'assistant', content: earlierAssistant },
+          { role: 'user', content: 'Что сейчас требует моего внимания?' },
+        ],
+      });
+      // Keep conversational continuity; only its authority changes.
+      expect(mocks.model.decide.mock.calls[0]?.[0].messages).toContainEqual({
+        role: 'assistant',
+        content: earlierAssistant,
+      });
+      expect(mocks.model.decide).toHaveBeenCalledTimes(
+        explicitUserScenario ? 1 : 2,
+      );
+      if (explicitUserScenario) {
+        expect(result.reply).toContain('Ваш план — 999999 ₽');
+      } else {
+        expect(
+          mocks.model.decide.mock.calls[1]?.[0].corrections?.[0],
+        ).toContain('999999');
+        expect(result.reply).not.toContain('999999');
+      }
+      expect(result.reply).toContain('70 000 ₽');
+    },
+  );
+
   it('falls back to the deterministic text when the model repeats an unsourced number', async () => {
     const mocks = createService(['analytics.business.query']);
     mocks.model.decide
