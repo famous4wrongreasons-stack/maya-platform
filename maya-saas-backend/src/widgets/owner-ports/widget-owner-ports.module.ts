@@ -1,3 +1,5 @@
+import { ScheduleApprovalAdapter } from './schedule-approval.adapter';
+import { SCHEDULE_APPROVAL_OWNER } from '../di-tokens';
 import { SelectorObservationAuditAdapter } from './selector-observation-audit.adapter';
 import { SELECTOR_OBSERVATION_AUDIT } from '../di-tokens';
 import { AppointmentsModule } from '../../appointments/appointments.module';
@@ -84,6 +86,8 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     TenancyModule,
   ],
   providers: [
+    ScheduleApprovalAdapter,
+    { provide: SCHEDULE_APPROVAL_OWNER, useExisting: ScheduleApprovalAdapter },
     {
       provide: SELECTOR_OBSERVATION_AUDIT,
       useClass: SelectorObservationAuditAdapter,
@@ -132,6 +136,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
     },
   ],
   exports: [
+    SCHEDULE_APPROVAL_OWNER,
     SELECTOR_OBSERVATION_AUDIT,
     PERSONAL_SCHEDULE_SOURCE,
     USER_TURN_AUDIT,

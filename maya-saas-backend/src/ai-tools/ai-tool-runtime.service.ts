@@ -352,6 +352,118 @@ export class AiToolRuntimeService {
     };
   }
 
+  async hasPendingScheduleApproval(
+    tenantId: string,
+    userId: string,
+    id: string,
+    hash: string,
+  ): Promise<boolean> {
+    this.tenantContext.assertTenantId(tenantId);
+    return (
+      (await this.prisma.aiApprovalRequest.findFirst({
+        where: {
+          id,
+          tenantId,
+          requestedByUserId: userId,
+          toolName: 'staff.schedule.update',
+          payloadHash: hash,
+          status: 'pending',
+          expiresAt: { gt: new Date() },
+        },
+        select: { id: true },
+      })) !== null
+    );
+  }
+
+  /** Widget bridge reads an existing immutable schedule draft, never client arguments. */
+  /** Observe only the durable canonical receipt. Never approve, resume or redispatch. */
+  async observeScheduleApproval(
+    user: AuthenticatedUser,
+    approvalId: string,
+    payloadHash: string,
+  ) {
+    const approval = await this.findApproval(user, approvalId);
+    if (
+      approval.toolName !== 'staff.schedule.update' ||
+      approval.requestedByUserId !== user.userId
+    )
+      throw new ForbiddenException('Schedule approval actor mismatch');
+    this.assertPayloadHash(approval, payloadHash);
+    const principal = this.principal(
+      user,
+      this.assertSurface(approval.surface),
+    );
+    await this.policy.assertCanExecute(
+      principal,
+      this.registry.get(approval.toolName),
+    );
+    const execution = await this.prisma.aiToolExecution.findUnique({
+      where: {
+        tenantId_idempotencyKey: {
+          tenantId: approval.tenantId,
+          idempotencyKey: approval.idempotencyKey,
+        },
+      },
+    });
+    if (!execution)
+      return {
+        status:
+          approval.status === 'pending' &&
+          approval.expiresAt.getTime() <= Date.now()
+            ? 'expired'
+            : approval.status,
+        canonical_actions: [],
+      };
+    if (
+      execution.toolName !== approval.toolName ||
+      execution.actorUserId !== user.userId ||
+      execution.inputHash !== payloadHash ||
+      execution.approvalRequestId !== approval.id
+    )
+      this.approvalConflict('ai_approval_payload_mismatch');
+    const invocation = {
+      id: execution.id,
+      principal,
+      toolName: execution.toolName,
+      inputHash: execution.inputHash,
+      idempotencyKey: execution.idempotencyKey!,
+    };
+    const existing = await this.receipts.inspect(invocation);
+    return this.receipts.project(
+      invocation,
+      execution.status === EXECUTION_STATUS.FAILED &&
+        existing.executions.length === 0
+        ? { handlerSettled: true, errorCode: execution.errorCode ?? undefined }
+        : undefined,
+    );
+  }
+
+  async scheduleApprovalPreview(
+    user: AuthenticatedUser,
+    approvalId: string,
+    payloadHash: string,
+  ) {
+    const approval = await this.findApproval(user, approvalId);
+    if (
+      approval.toolName !== 'staff.schedule.update' ||
+      approval.requestedByUserId !== user.userId
+    )
+      throw new ForbiddenException('Schedule approval actor mismatch');
+    this.assertPayloadHash(approval, payloadHash);
+    const principal = this.principal(
+      user,
+      this.assertSurface(approval.surface),
+    );
+    await this.policy.assertCanExecute(
+      principal,
+      this.registry.get(approval.toolName),
+    );
+    this.assertPendingApproval(approval);
+    if (approval.expiresAt.getTime() <= Date.now())
+      this.approvalConflict('ai_approval_expired');
+    return this.serializeApproval(approval);
+  }
+
   async approve(
     user: AuthenticatedUser,
     approvalId: string,

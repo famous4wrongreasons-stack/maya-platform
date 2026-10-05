@@ -314,6 +314,12 @@ export const projectWidgetIntent = (body: unknown): WidgetIntentProjection | nul
     next_envelope: next as WidgetIntentProjection['next_envelope'],
     resolved_widget: (isIngestibleEnvelope(resolved) ? resolved : null) as WidgetIntentProjection['resolved_widget'],
     receipt_outcome: receipt as WidgetIntentProjection['receipt_outcome'],
+    ...(() => {
+      const decision = own(body, 'owner_decision');
+      if (!isRecord(decision) || own(decision, 'domain') !== 'staff_schedule') return {};
+      const state = own(decision, 'state');
+      return state === 'SUCCEEDED' || state === 'FAILED' || state === 'UNKNOWN' ? {schedule_outcome: state} : {};
+    })(),
   };
 };
 

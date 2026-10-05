@@ -1,6 +1,10 @@
+import { SCHEDULE_APPROVAL_OWNER } from '../di-tokens';
+import type { ScheduleApprovalAdapter } from '../owner-ports/schedule-approval.adapter';
+import type { AuthenticatedUser } from '../../common/authenticated-user.interface';
+import { SCHEDULE_AE } from '../emission/schedule-intent-template';
 import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
 import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import type {
@@ -36,6 +40,9 @@ export class WidgetThreadPageService {
     private readonly seals: SealVerifier,
     @Inject(WIDGET_RELEASE_ACCESS)
     private readonly releaseAccess: WidgetReleaseAccessPort,
+    @Optional()
+    @Inject(SCHEDULE_APPROVAL_OWNER)
+    private readonly schedule?: ScheduleApprovalAdapter,
   ) {}
 
   async read(request: ThreadPageRequest): Promise<readonly HistorisedWidget[]> {
@@ -106,7 +113,18 @@ export class WidgetThreadPageService {
         if (!available) continue;
         page.push({
           envelope: envelope as unknown as HistorisedWidget['envelope'],
-          terminal_lines: terminalLines(row.terminalLinesJson),
+          terminal_lines:
+            this.schedule &&
+            row.intentRecords.some((r) => r.capabilityKey === SCHEDULE_AE)
+              ? await this.schedule.terminalForWidget(
+                  {
+                    userId: principal.authority.userId!,
+                    tenantId,
+                    role: principal.role,
+                  } as AuthenticatedUser,
+                  row.intentRecords[0].widgetId,
+                )
+              : terminalLines(row.terminalLinesJson),
           // Fresh reread tokens are owned by the later projector edge.
           reread_intent: null,
         });

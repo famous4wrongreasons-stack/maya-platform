@@ -1,0 +1,6 @@
+
+Test Suites: 11 passed, 11 total
+Tests:       186 passed, 186 total
+Snapshots:   0 total
+Time:        2.805 s, estimated 3 s
+Ran all test suites within paths "src/ai-tools/staff-schedule-command.service.spec.ts", "src/ai-tools/ai-tool-canonical-receipt.spec.ts", "src/widgets/owner-ports/schedule-approval.adapter.spec.ts", "src/widgets/emission/schedule-intent-template.spec.ts", "src/widgets/emission/emitter.spec.ts", "src/entitlements/widget-release-access.spec.ts", "src/widgets/resolve/thread-page.service.spec.ts", "src/widgets/composition/typed-step0.spec.ts", "src/widgets/gates/r353-readers.source.spec.ts", "src/widgets/gates/facts.architecture.spec.ts", "src/widgets/owner-ports/widget-owner-ports.module.spec.ts".

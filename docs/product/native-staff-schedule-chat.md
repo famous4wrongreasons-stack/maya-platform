@@ -1,16 +1,13 @@
 # Native Staff Schedule Chat Commands
 
-> Development delta (2026-10-05): the isolated development branch now admits
-> `web` as well as `native` at the parser/catalog boundary. This is **not yet a
-> carrier-ready release**: the canonical React/headless carrier intentionally
-> drops legacy approval authority. See
-> [development evidence and remaining gate](../rebuild/YCLIENTS-SCHEDULE-CHAT-DEVELOPMENT-DELTA.md).
-> The native pilot description below records the previous contract; it is not
-> evidence that canonical app/web confirmation is implemented.
+> Development branch (2026-10-05): canonical app/web chat now carries the existing
+> single-day schedule approval through SETTINGS_DRAFT and the existing Wave3 AE owner.
+> Synthetic HTTP + actual carrier/React-render proof is complete; no production promotion.
+> See [delta, evidence and remaining release limitations](../rebuild/YCLIENTS-SCHEDULE-CHAT-DEVELOPMENT-DELTA.md).
 
 ## Статус И Область
 
-Команды управления графиком являются ограниченным native-only сценарием Maya
+Команды управления графиком являются ограниченным app/web сценарием Maya
 OS. Они доступны в нативном приложении и не меняют production PWA. Источником
 архитектурных правил является спецификация Maya OS из PR #21.
 
@@ -32,7 +29,7 @@ Maya задаёт уточняющий вопрос и ничего не изм�
 
 ## Доступ
 
-Tool `staff.schedule.update` разрешён только на поверхности `native` ролям:
+Tool `staff.schedule.update` разрешён на поверхностях `native` и `web` ролям:
 
 - `tenant_owner`;
 - `business_owner`;
@@ -50,7 +47,7 @@ Tool `staff.schedule.update` разрешён только на поверхно
 | Свойство | Значение |
 |---|---|
 | Имя | `staff.schedule.update` |
-| Surface | `native` |
+| Surface | `native`, `web` |
 | Risk tier | `medium_write` |
 | Approval | подтверждение инициатора (`actor`) |
 | Idempotency | обязательна |
@@ -72,7 +69,7 @@ Tool `staff.schedule.update` разрешён только на поверхно
 ## Поток Выполнения
 
 1. Детерминированный parser проверяет команду до обращения к LLM и работает
-   только при `surface=native`.
+   при `surface=native` и `surface=web`.
 2. Backend проверяет роль, tenant, entitlement и доступность tool.
 3. Имя мастера сопоставляется локально со списком сотрудников tenant. Исходное
    имя не отправляется модели.
@@ -104,7 +101,7 @@ Tool `staff.schedule.update` разрешён только на поверхно
 
 После успешного подтверждения приложение показывает `График обновлён.`. При
 ошибке чтения, preview, конфликте, устаревшей revision или недоступном CRM Maya
-сообщает, что ничего не изменила. Догадки и частичное выполнение запрещены.
+показывает подтверждённый отказ только при наличии такого результата. UNKNOWN, timeout и неоднозначный readback остаются неподтверждёнными; последующее чтение canonical receipt может показать поздний результат без повторной записи.
 
 ## CRM И Ограничения Пилота
 
@@ -117,7 +114,7 @@ Adapter без методов чтения, preview и применения гр
 - повторяющиеся смены и перерывы;
 - перенос или отмена конфликтующих записей;
 - создание смены с нуля без существующего рабочего интервала;
-- production PWA, Telegram и voice surfaces.
+- production promotion, Telegram и voice surfaces.
 
 ## Feature Switch И Откат
 

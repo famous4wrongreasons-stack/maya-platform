@@ -1,138 +1,64 @@
 # YCLIENTS schedule chat — isolated development delta
 
-Status: **INCOMPLETE / NOT READY TO PROMOTE**. No deployment, push, merge, real
-CRM writes, notifications, credentials or paid model calls.
+Status: **narrow implementation and synthetic end-to-end proof complete; development only, not a booking release or production promotion**.
 
-## Isolation
+## Isolation and source
 
-- Source: `dcba8c8f4d230de31fb93f3d613f7524c3310df9`.
-- Source checkout: `/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/maya-platform`.
-- Separate clone/checkout (no source Git metadata mutations), branch
-  `development/yclients-schedule-chat`:
-  `/Users/stanislavmosin/Documents/Codex/2026-10-05/task-10/maya-platform-dev`.
-- Source was clean at entry. No source files were edited. Local dependencies are
-  a read-only-use symlink to the installed source backend node_modules; no install
-  or generate was performed.
-- Read AGENTS.md, docs/README.md, docs/Engineering/README.md,
-  docs/AI/README.md and docs/product/native-staff-schedule-chat.md.
-  No repository `.agents` directory or SKILL.md was found.
+Source SHA: `dcba8c8f4d230de31fb93f3d613f7524c3310df9`.
+Stable checkout `/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/maya-platform` remains clean at that SHA.
+Development clone `/Users/stanislavmosin/Documents/Codex/2026-10-05/task-10/maya-platform-dev`, branch `development/yclients-schedule-chat`.
+Initial preview/parser delta: `f22df56848768ceaf0e4da490c3b1642b0f37c76`; historical report/archive commit: `13d8ce2a38af81b59e38c90f998b7bcef57a9a12`. Subsequent bridge commit on this branch contains the completed implementation below.
+Backend and React dependencies were reused through local read-only-use symlinks; no install or generate modified the source checkout.
+Read AGENTS.md and canonical docs; no repository `.agents` or SKILL.md found. Canonical carrier is React over headless shell.
 
-## Implemented development changes
+## Implementation
 
-The existing StaffScheduleCommandService now accepts web/native and passes the
-actual surface into tool listing and execution. The existing catalog permits
-those two surfaces with unchanged roles, booking entitlement, actor approval,
-required idempotency, timeout and no-retry policy. No executor or raw API added.
+Existing single-day commands (`close_day`, `set_break`, `set_hours`) accept web/native, resolve real tenant staff and current slots, clarify missing material across contiguous turns, and preserve existing appointment conflict facts. Questions continue through the ordinary model/tool route. Owner accounts in client audience cannot invoke schedule writes.
 
-A contiguous exchange of existing material-clarification prompts can supply date,
-staff and time over multiple turns. It is draft text only; the tenant staff list,
-current schedule, conflicts, revision and immutable approval are resolved afresh.
-Finished previews, unrelated assistant replies and cancellation do not revive a
-previous draft. Common exit-day wording and question-vs-command handling improved.
-Client audience is now passed CLIENT authority at the schedule boundary even when
-the authenticated account has owner privileges.
+The missing link was more than parser/catalog: canonical carrier drops legacy `action.approval`. Added exact server-owned `commit.schedule.day@1` SETTINGS_DRAFT emission with immutable approval/hash handles. Generic intent mint remains closed. Chat returns the existing resolution envelope; React renders current/proposed times and confirmation, and its existing SubmissionPort posts the sealed intent. App/native and web use the same PWA presentation carrier while runtime retains the actual tool surface.
 
-## Critical finding: parser/catalog was not the only missing link
+Execution remains:
+`StaffScheduleCommandService → AiToolRuntime approval → staff.schedule.update → AiToolHandler → Package5Wave3CanonicalCutoverService.updateExternalStaffScheduleDay → update_staff_schedule_day → existing provider adapter`.
+No executor, action capability, schema migration, raw API, mass schedule, new absence type, or inferred staff/branch was added. StaffProviderLink, active branch, current role, entitlement, revision and immutable payload checks remain with existing owners.
 
-The canonical carrier is `maya-carrier-react` over `maya-chat-shell`, per AGENTS.
-It deliberately drops `action.approval` in `src/net/project.ts` and accepts only
-`action_status`. `src/shell/conversation.ts` shows `approval_not_here` on an
-approval response. `maya-chat-shell/build.mjs` forbids `/ai/approvals` routes.
-Its tests explicitly enforce this contract (V2-5 / SH-06).
+The presentation adapter only calls existing approval execution. Receipt observation never approve/resume/dispatches. UNKNOWN/timeout and divergent readback remain unconfirmed; late canonical success appears on subsequent widget resolution. Observation preserves failed pre-admission executions. Carrier renders schedule-specific failure lines on clicks; typed confirmation uses the same owner. Existing restricted booking profile digest is unchanged; the new template is refused by that profile. Full admissible release scopes can use it. Architecture inventories enumerate only the exact new boundary/validator/fact-container sites, with tests.
 
-The existing widget `ApprovalRequestAdapter` delegates only
-`communication.bulk-campaign.admit.v2` to CanonicalBulkService. The widget
-intent-template registry refuses generic REQUEST_APPROVAL/COMMIT; booking has
-its own exact approved templates. There is no schedule confirmation mint/owner
-bridge in this source commit. Therefore opening web in the backend alone cannot
-satisfy canonical app/web preview → confirmation → AE → outcome.
+## Evidence
 
-Do not restore a retired approval endpoint in the carrier or repurpose bulk or
-booking authority. A next development delta must provide an exact schedule
-widget template/mint and bounded bridge to the existing immutable approval and
-Wave3 owner, then prove Gate/actor/tenant/surface/payload binding and outcome
-projection. This is still the existing execution owner, not a new executor.
-No architecture gate was bypassed in this patch.
+All logs below are under `docs/rebuild/evidence/yclients-schedule-chat-dev/`.
 
-## Evidence and limits
+- `live-final.txt`: 16/16 real HTTP/auth/PostgreSQL cases. Stateful synthetic provider only; actual carrier child process and React SSR rendering, including immediate chat response projection. Off-day, web break, native hours, multi-turn material, tenant/client denial, owner client audience, role downgrade, confirmed appointment conflict, missing provider link, sequential/concurrent idempotency, expiry, stale revision observed twice, 15-second timeout then late success without another write, divergent readback, typed web/native confirmation.
+- `focused-final.txt`: 11 suites / 186 tests passed.
+- `architecture.txt`: 4 suites / 102 tests passed (included in focused final where applicable).
+- `typecheck-final.txt`: backend production typecheck passed.
+- `shell-targeted.txt`: 142 carrier net/intents tests passed. `shell-typecheck.txt`: passed.
+- `react.txt`: 93 canonical React carrier tests passed.
+- `broad-final.txt`: widgets/ai-tools 144 suites, 134 passed / 10 failed; 1950 tests passed / 16 failed. Exact same 10 failing suite names and 16 failures as pre-bridge baseline in `baseline-unit-tests.txt` (142 suites, 1937 passed / 16 failed); 13 added tests, no new broad failures.
+- `independent-review-final.txt`: read-only independent source review found no new blockers; its earlier findings were fixed.
 
-- `StaffScheduleCommandService`: 26 tests passed (web/native preview, all three
-  existing operations, missing material multi-turn, role denial, no invented
-  staff, questions, cancellation, appointment conflicts).
-- Combined final run: 9 focused suites, 254 tests passed, including added controller→AiCore→real
-  schedule service→runtime-boundary preview regressions and client audience denial.
-- Backend typecheck (`tsc --noEmit --project tsconfig.build.json --incremental false`) passed.
-- Existing focused coverage also includes registry/policy/runtime, canonical
-  receipts (idempotency/timeout/UNKNOWN), handler Wave3 delegation, provider
-  adapter readback/conflicts, Wave3 canonical cutover and ambiguous reconciliation.
-- The new controller tests use an in-memory CRM and mocked runtime approval.
-  They are NOT HTTP auth tests and NOT a complete conversation-to-provider write
-  proof. Existing receipt/adapter coverage is separate; it must not be conflated
-  with a new end-to-end schedule confirmation test.
-- No live model was called. These tests establish runtime mechanics only, not
-  arbitrary-language model quality or a real-model 99% result.
+No live model was called. The model fixture rejects unexpected model invocation. This proves bounded runtime mechanics and the named free-language/scripted cases, **not real-model 99% language understanding**. No production CRM, real notification, secret/key access, deployment, push or merge.
 
-## Remaining acceptance gates
+## Remaining promotion limitations
 
-1. Canonical carrier schedule confirmation bridge and bounded templates.
-2. App/web conversation-route regression through confirmation and actual existing
-   AE owner to synthetic provider side effects, including branch identity and
-   StaffProviderLink failure, tenant/role/entitlement denial, material ambiguity,
-   duplicate requests, UNKNOWN, late timeout and exact readback facts.
-3. Broader free-language/scripted-model cases without replacing ordinary reasoning
-   with an intent-only bot; safe handling of multiple dates/staff and corrections.
-4. Full backend/carrier checks before promotion; this branch is not a booking
-   release candidate.
+Full repository acceptance is not green at the source baseline. Existing backend failures include stale C9/schema/denial inventories, encryption import/hash inventories, and legacy store expectations. The unchanged release-profile contract test also fails on the pre-existing business.rules.read registry discrepancy (`baseline-profile.txt`). The live test typecheck fails on unchanged `public-booking.live-spec.ts:153`, identically in baseline and branch (`baseline-live-typecheck.txt`, `live-typecheck.txt`). Production source typecheck is green.
 
-Logs: `docs/rebuild/evidence/yclients-schedule-chat-dev/`.
+Full shell run was interrupted after named failures and lingering suites; no full-suite pass claimed (`shell-final.txt`). Its self-test fixture shape mismatches and session-revocation test's missing `/api/ai/conversation` expectation reproduce on the isolated baseline (`baseline-shell-selftest.txt`, `baseline-shell-dom.txt`). Focused changed shell tests and React tests pass. A real browser/device visual pass and live YCLIENTS/model qualification were not performed.
 
+Promotion must preserve the restricted booking profile, carry backend + headless carrier changes together, resolve or explicitly disposition source-baseline release failures, and rebuild the React payload. This task does not authorize promotion or production qualification.
 
-## Continuation attempt: actual environment denial and independent review
+## Local environment record
 
-On the explicitly authorized continuation, a minimal exact A15 SETTINGS_DRAFT
-bridge was implemented as WIP: a closed `commit.schedule.day@1` recipe, server
-approval ID/payload-hash handles, real runtime.approve delegation, noun owner
-read, and AiCore→widget minter connection. No second AE or UI raw invocation.
-Build typecheck passed; seven new exact-template tests passed.
+Original unprivileged initdb failed `shmget: Operation not permitted`. Parent explicitly authorized normal escalation of the same local test command; initdb, proof-only pg_ctl/createdb and migrate deploy then succeeded. Database: `maya_widget_gate_proof_schedule_chat`, loopback `127.0.0.1:55627`; 105 migrations applied. Environment harness scrubs credentials and uses synthetic literals. No IPC workaround or OS/security changes.
+A later `ps` inspection was denied by the sandbox; that exact action stopped and was not retried or bypassed. Evidence was read through test sessions/logs instead.
 
-**Actual permission denial:** starting a new isolated proof PostgreSQL cluster
-using `initdb -D /tmp/maya-schedule-chat-pg -A trust --no-locale` failed with
-`FATAL: could not create shared memory segment: Operation not permitted`,
-`shmget(key=164255987, size=56, 03600)`. `initdb` removed its new directory. No
-server started. Per explicit instruction, no escalation, alternate shared-memory
-mode, external database, or other workaround was attempted. Actual-carrier →
-confirmation → synthetic-provider E2E is therefore not executed.
+Historical `bridge-wip.patch` and older logs remain an archive of the earlier incomplete attempt; they are superseded by current source and the final logs above.
 
-Independent static review (subagent `schedule_bridge_review`) found:
+## Reproduction
 
-- P1: adding schedule to the global registry digest without a matching restricted
-  profile update breaks existing `closed-input.no-handoff@1` widget admission.
-  Its exact profile also forbids HANDOFF, while SETTINGS_DRAFT requires an editor
-  handoff. This is a restricted-profile conflict, not a universal prohibition:
-  full release infrastructure exists. Preserve the restricted booking profile;
-  use a properly evidenced admissible development scope for this bridge.
-- P1: UNKNOWN needs durable approval/AE linkage and later reconciliation into
-  the same carrier card. A consumed token and pending-only noun resolution are
-  insufficient. Carrier does not render owner_decision directly.
-- P2: blanket catch around runtime.approve must not label uncertain post-dispatch
-  infrastructure faults as authority denial.
-- P2: add schedule-specific terminal presentation; current terminal persistence
-  targets BOOKING_CONFIRMATION, not SETTINGS_DRAFT. Do not reuse booking wording.
-- Preview field mismatch (`slots` vs actual `proposed_slots`) was found and fixed
-  in the saved WIP before review concluded.
+Build the existing React test harness first (`cd maya-carrier-react && node test/build-harness.mjs`). Against an initialized isolated database accepted by the existing proof guard, run from backend:
 
-No general contract/product prohibition of this bridge was found. The immediate
-execution blocker is the environment permission denial; implementation also has
-these unresolved review findings and is **not promoteable**.
+```sh
+DATABASE_URL=postgresql://LOCAL_USER@127.0.0.1:55627/maya_widget_gate_proof_schedule_chat DOTENV_CONFIG_PATH=/dev/null node node_modules/jest/bin/jest.js --config test/jest-widgets-live.json --runInBand --runTestsByPath test/widgets-live/schedule-chat.live-spec.ts
+```
 
-To keep the active development tree free of this incomplete bridge, its entire
-source/test diff is preserved in `evidence/yclients-schedule-chat-dev/bridge-wip.patch`
-and in a local Git stash named `WIP schedule canonical bridge before PostgreSQL
-permission denial`. It is not applied. Do not promote or apply without completing
-review corrections and E2E.
-
-Affected unit run during WIP: 142 suites, 13 failing / 129 passing, 20 failing /
-1933 passing tests. Isolated f22df568 baseline run: 142 suites, 10 failing / 132
-passing, 16 failing / 1937 passing tests. Thus there are pre-existing failures,
-plus WIP regressions; neither run is a green acceptance gate. Full logs are
-retained. Source stable checkout was not changed or used as a test workspace.
+Use normal environment permission approval if loopback/PostgreSQL is sandbox-blocked. Do not point this suite at another or production database.

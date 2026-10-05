@@ -1,0 +1,36 @@
+FAIL src/entitlements/widget-release-profile.contract.spec.ts
+  ● fixed no-handoff certificate threshold › pins every allowed template/effect/kind/capability/target/closed-schema combination
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 0
+
+    @@ -13,11 +13,10 @@
+        "b35.confirm",
+        "b35.preview",
+        "b35.status",
+        "booking.availability.read",
+        "booking.group-availability.read",
+    -   "business.rules.read",
+        "c7.measurement.read",
+        "c8.result.read",
+        "c9.no_action",
+        "catalog.services.read",
+        "catalog.staff.read",
+
+       96 |     );
+       97 |     expect(PROFILE_REGISTRY.tuples).toEqual(tuples);
+    >  98 |     expect(PROFILE_REGISTRY.successorCapabilities).toEqual(
+          |                                                    ^
+       99 |       C9_CAPABILITIES.map((row) => row.capabilityKey).sort(),
+      100 |     );
+      101 |   });
+
+      at Object.<anonymous> (entitlements/widget-release-profile.contract.spec.ts:98:52)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 21 passed, 22 total
+Snapshots:   0 total
+Time:        0.921 s
+Ran all test suites within paths "src/entitlements/widget-release-profile.contract.spec.ts".

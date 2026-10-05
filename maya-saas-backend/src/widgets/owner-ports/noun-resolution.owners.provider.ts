@@ -1,8 +1,11 @@
+import { ScheduleApprovalAdapter } from './schedule-approval.adapter';
+import { SCHEDULE_AE } from '../emission/schedule-intent-template';
 import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
+  Optional,
   NotFoundException,
 } from '@nestjs/common';
 import { openWidgetNounHandle } from '../emission/seal.service';
@@ -30,6 +33,7 @@ export class NounResolutionOwnersProvider implements NounReadPort {
     private readonly cancel: BookingCancelNounAdapter,
     private readonly reschedule: BookingRescheduleNounAdapter,
     private readonly readOwner: ClientAppointmentReadNounAdapter,
+    @Optional() private readonly schedule?: ScheduleApprovalAdapter,
   ) {}
 
   async read(
@@ -53,10 +57,26 @@ export class NounResolutionOwnersProvider implements NounReadPort {
         ? decodeBookingSlotOwnerRef(opened.ownerRef)
         : opened.ownerRef;
       if (ownerValue === null) return { kind: 'gone', reason: 'not_found' };
+      if (
+        input.capability?.key === SCHEDULE_AE &&
+        opened.ownerKind !== 'schedule_approval'
+      )
+        return { kind: 'gone', reason: 'not_found' };
       values.set(noun, ownerValue);
     }
     try {
       const key = input.capability?.key ?? '';
+      if (key === SCHEDULE_AE) {
+        const id = values.get('approval'),
+          hash = values.get('payload');
+        return id &&
+          hash &&
+          values.size === 2 &&
+          this.schedule &&
+          (await this.schedule.read(input.tenantId, actor.userId, id, hash))
+          ? { kind: 'resolved', values }
+          : { kind: 'gone', reason: 'not_found' };
+      }
       // A TIME_SLOT_SELECTOR record freezes the server-minted service/staff handles at mint and
       // receives the selected slot only after Gate 8 validates it against the closed domain. Gate
       // 11 therefore cannot quote the complete proposal from its retained seven-field view. The

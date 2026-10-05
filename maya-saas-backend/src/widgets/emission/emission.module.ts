@@ -1,3 +1,5 @@
+import { AI_SCHEDULE_WIDGET } from '../../ai-tools/ai-schedule-widget.port';
+import { ScheduleConfirmationMinterService } from './schedule-confirmation-minter.service';
 import { WidgetOwnerPortsModule } from '../owner-ports/widget-owner-ports.module';
 import { Module } from '@nestjs/common';
 
@@ -19,6 +21,11 @@ import { BookingConfirmationMinterService } from './booking-confirmation-minter.
 @Module({
   imports: [WidgetOwnerPortsModule],
   providers: [
+    ScheduleConfirmationMinterService,
+    {
+      provide: AI_SCHEDULE_WIDGET,
+      useExisting: ScheduleConfirmationMinterService,
+    },
     WidgetEmitterService,
     SealService,
     SealVerifierService,
@@ -35,6 +42,7 @@ import { BookingConfirmationMinterService } from './booking-confirmation-minter.
     { provide: HANDOFF_SIGNER, useExisting: HandoffTargetSigner },
   ],
   exports: [
+    AI_SCHEDULE_WIDGET,
     WidgetEmitterService,
     SealService,
     SEAL_VERIFIER,

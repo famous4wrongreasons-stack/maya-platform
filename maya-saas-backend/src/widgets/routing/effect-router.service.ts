@@ -1,7 +1,9 @@
+import { SCHEDULE_APPROVAL_OWNER } from '../di-tokens';
+import type { ScheduleApprovalAdapter } from '../owner-ports/schedule-approval.adapter';
 import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
 import { presentJournalSchedule } from '../composition/journal-schedule.presenter';
 import type { WidgetReleaseAccessPort } from '../owner-ports/release-access.port';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 
 import type { EffectClass } from '../../widget-contract/intent';
 import type {
@@ -116,6 +118,9 @@ export class EffectRouterService {
     private readonly threadPage: WidgetThreadPageService,
     @Inject(WIDGET_RELEASE_ACCESS)
     private readonly releaseAccess: WidgetReleaseAccessPort,
+    @Optional()
+    @Inject(SCHEDULE_APPROVAL_OWNER)
+    private readonly schedule?: ScheduleApprovalAdapter,
   ) {}
 
   async route(
@@ -207,6 +212,12 @@ export class EffectRouterService {
       case 'HANDOFF':
         return this.signedDestination(ctx);
       case 'COMMIT':
+        if (ctx.record?.widgetKind === 'SETTINGS_DRAFT') {
+          const input = actuatingInputOf(ctx, resolvedNouns);
+          return input && this.schedule
+            ? () => this.schedule!.commit(input)
+            : null;
+        }
         return ctx.record?.widgetKind === 'APPROVAL'
           ? approvalDecisionDestination(ctx, resolvedNouns, this.approvals)
           : bookingCommitDestination(ctx, resolvedNouns, this.bookingCommit);

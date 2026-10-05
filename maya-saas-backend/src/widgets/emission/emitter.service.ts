@@ -1,3 +1,7 @@
+import {
+  scheduleTemplate,
+  SCHEDULE_TEMPLATE,
+} from './schedule-intent-template';
 import { presentPersonalSchedule } from '../booking/personal-schedule.presenter';
 import type { PersonalScheduleSource } from '../owner-ports/personal-schedule.port';
 import { WIDGET_RELEASE_ACCESS } from '../di-tokens';
@@ -295,6 +299,33 @@ export class WidgetEmitterService {
     return this.emitInternal(request, now, null, linkage, supersedesWidgetId);
   }
 
+  /** A15 only: durable approval is the draft; all linkage comes from its owner. */
+  async emitScheduleConfirmation(
+    request: MintRequest,
+    linkage: BookingConfirmationEmissionContext,
+    now = new Date(),
+  ): Promise<SealedEmission> {
+    if (
+      request.kind !== 'SETTINGS_DRAFT' ||
+      request.composerInput.capability !== 'staff.schedule.update' ||
+      request.composerInput.intent_proposals[0]?.intent_template_key !==
+        SCHEDULE_TEMPLATE ||
+      linkage.commitIntentIndex !== 0 ||
+      linkage.confirmationOfKind !== 'draft'
+    )
+      throw new IntentTemplateRefusal('schedule_confirmation_context_required');
+    return this.emitInternal(
+      request,
+      now,
+      null,
+      null,
+      null,
+      null,
+      null,
+      linkage,
+    );
+  }
+
   private async emitInternal(
     request: MintRequest,
     now: Date,
@@ -303,6 +334,7 @@ export class WidgetEmitterService {
     supersedesWidgetId: string | null,
     journalParentWidgetId: string | null = null,
     personalSchedule: PersonalScheduleSource | null = null,
+    schedule: BookingConfirmationEmissionContext | null = null,
   ): Promise<SealedEmission> {
     const input = request.composerInput;
     if (
@@ -334,6 +366,23 @@ export class WidgetEmitterService {
       throw new IntentTemplateRefusal('journal_navigation_source_required');
 
     const resolved = input.intent_proposals.map((proposal) => {
+      if (proposal.intent_template_key === SCHEDULE_TEMPLATE) {
+        if (schedule === null)
+          throw new IntentTemplateRefusal(
+            'schedule_confirmation_context_required',
+          );
+        return {
+          proposal,
+          resolved: {
+            kind: 'intent' as const,
+            row: scheduleTemplate(
+              proposal,
+              input.kind_proposal,
+              request.deliveryChannel,
+            ),
+          },
+        };
+      }
       const bookingKey =
         proposal.intent_template_key.startsWith('draft.booking.') ||
         proposal.intent_template_key.startsWith('refine.booking.') ||
@@ -503,7 +552,7 @@ export class WidgetEmitterService {
         retainedLocalBusinessDate,
         revisionId: request.runWitness?.revisionId ?? null,
         c9Domain: request.runWitness?.c9Domain ?? null,
-        bookingLinkage: booking,
+        bookingLinkage: booking ?? schedule,
       }) as never,
     }));
     await this.prisma.$transaction(async (tx) => {

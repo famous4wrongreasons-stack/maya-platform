@@ -228,6 +228,7 @@ export interface TranscribeProjection {
 }
 
 export interface WidgetIntentProjection {
+  readonly schedule_outcome?: 'SUCCEEDED' | 'FAILED' | 'UNKNOWN' | null;
   readonly outcome: 'terminate' | 'refuse' | 'expired' | 'superseded';
   readonly code: string | null;
   readonly next_envelope: WidgetEnvelope | null;

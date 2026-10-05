@@ -1,3 +1,4 @@
+import { ScheduleApprovalAdapter } from './schedule-approval.adapter';
 import { SelectorObservationAuditAdapter } from './selector-observation-audit.adapter';
 import { AppointmentsModule } from '../../appointments/appointments.module';
 import { PERSONAL_SCHEDULE_SOURCE } from '../di-tokens';
@@ -107,6 +108,11 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       TenancyModule,
     ]);
     expect(meta(MODULE_METADATA.PROVIDERS, WidgetOwnerPortsModule)).toEqual([
+      ScheduleApprovalAdapter,
+      {
+        provide: DI_TOKENS.SCHEDULE_APPROVAL_OWNER,
+        useExisting: ScheduleApprovalAdapter,
+      },
       {
         provide: DI_TOKENS.SELECTOR_OBSERVATION_AUDIT,
         useClass: SelectorObservationAuditAdapter,
@@ -158,6 +164,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       expect.objectContaining({ provide: DI_TOKENS.NOUN_RESOLUTION_PORTS }),
     ]);
     expect(meta(MODULE_METADATA.EXPORTS, WidgetOwnerPortsModule)).toEqual([
+      DI_TOKENS.SCHEDULE_APPROVAL_OWNER,
       DI_TOKENS.SELECTOR_OBSERVATION_AUDIT,
       PERSONAL_SCHEDULE_SOURCE,
       DI_TOKENS.USER_TURN_AUDIT,
@@ -206,6 +213,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
     // Every token bound so far. A token leaves this list only by being bound, in the commit that binds
     // it: that is what keeps "unbound" from drifting into "nobody checked".
     const BOUND: readonly string[] = [
+      DI_TOKENS.SCHEDULE_APPROVAL_OWNER,
       DI_TOKENS.SELECTOR_OBSERVATION_AUDIT,
       DI_TOKENS.PERSONAL_SCHEDULE_SOURCE,
       DI_TOKENS.USER_TURN_AUDIT,

@@ -1,0 +1,5 @@
+Independent reviewer: /root/schedule_bridge_review; read-only review.
+Final result: no new blockers found. Reviewed source and scenarios; did not rerun tests independently.
+Findings fixed: restricted registry digest regression, preview proposed_slots field, failed invocation becoming executing on observation, opaque click failure instead of schedule outcome, missing late receipt observation.
+Final follow-up verified exact inventories and pending approval lookup through existing runtime (tenant/actor/tool/hash/status/expiry).
+16/16 E2E count is primary agent execution evidence, not an independently rerun count. No real-model quality claim.

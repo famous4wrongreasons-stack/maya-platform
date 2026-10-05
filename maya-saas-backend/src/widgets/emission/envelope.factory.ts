@@ -27,10 +27,17 @@ const CELL_PATHS_BY_KIND: Readonly<
     | 'SOURCE_STATUS'
     | 'PROGRESS'
     | 'LIMITATION'
-    | 'BOOKING_CONFIRMATION',
+    | 'BOOKING_CONFIRMATION'
+    | 'SETTINGS_DRAFT',
     readonly string[]
   >
 > = Object.freeze({
+  SETTINGS_DRAFT: Object.freeze([
+    'body.scope_label',
+    'body.diff[].from',
+    'body.diff[].to',
+    'body.diff[].reversible',
+  ]),
   METRIC: Object.freeze(['body.metrics']),
   SCHEDULE: Object.freeze([
     'body.lanes[].label',
