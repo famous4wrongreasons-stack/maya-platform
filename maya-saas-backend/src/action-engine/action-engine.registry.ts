@@ -3324,6 +3324,9 @@ function appointmentCapability(input: {
       'authenticated_request',
       'agent_task',
       'legacy_bridge',
+      ...(input.capability === 'crm.appointment.create.v1'
+        ? ['public_booking' as const]
+        : []),
     ],
     identityVersion: 1,
     riskProfileVersion: 1,

@@ -1,10 +1,10 @@
-# Website guest booking port v1 — implementation contract proposal
+# Website guest booking port v1 — implementation contract
 
-Status: **PROPOSED, NOT IMPLEMENTED OR RELEASED**. Prepared for the existing styled wizard in
+Status: **IMPLEMENTED LOCALLY, NOT RELEASED**. Prepared for the existing styled wizard in
 `/Users/stanislavmosin/Desktop/Projects/maya-web/app/booking/page.js`. Preserve that presentation.
 This is a guest website port, not a MAYA chat redirect or a Client-login token. Frontend may build
 an adapter and isolated fixtures against these shapes; production activation waits for backend
-implementation and matching integration proof. The old `appointment-create` and retired raw
+matching frontend integration proof and approved production configuration. The old `appointment-create` and retired raw
 `create_record` routes are not changed or reopened by this proposal.
 
 ## Ownership and admission
@@ -13,7 +13,7 @@ implementation and matching integration proof. The old `appointment-create` and 
 - Existing CRM appointment owner and Action Engine remain the only provider mutation path.
   `YclientsCrmAdapter.createAppointment` already uses `book_record/{companyId}` in client mode;
   a second direct HTTP implementation must not be added to the website or controller.
-- No executable anonymous booking admission owner was found. Current canonical Client create
+- At the proposal baseline no executable anonymous booking admission owner was found. Current canonical Client create
   requires a verified Client link; existing A18 issuance requires an active link and SB-1/V2
   requires a revoked predecessor. Neither is a guest admission mechanism.
 - Implement a narrow **public booking intent** admission under the appointment owner, with a
@@ -102,3 +102,54 @@ provider response; reload/status recovery; no re-dispatch from UNKNOWN; exact pr
 no fabricated Client link or account; no raw PII in logs. A fake adapter cannot certify real YCLIENTS
 delivery, notifications, guest-contact requirements or reconciliation. Production configuration,
 schema migration and activation remain part of the separately approved release boundary.
+
+
+## Implemented v1 additions and terminal reset (2026-10-05)
+
+- All six routes exist under the existing AppointmentsModule. `PUBLIC_BOOKING_SITES` is a
+  server-only JSON array of `{siteKey,tenantId,branchId,origins,consentVersion,consentUrl}`;
+  unset/invalid mapping fails closed. Live booking mode plus `booking`, `booking.public`,
+  `crm.integration`, active external YCLIENTS target and matching branch are mandatory.
+- Secure/HttpOnly/SameSite=Strict cookie is `__Host-maya_guest_booking`, Path=/, lifetime 24h.
+  Session bootstrap reuses a valid cookie; status lookup needs that same cookie, never login.
+  Forward the exact trusted website Origin on **every** backend call, including GET; the
+  same-origin server adapter must also forward Cookie and Set-Cookie without logging them.
+  HTTP localhost/127.0.0.1 origins are accepted only in NODE_ENV=test for isolated previews.
+- Bootstrap adds `dateWindow={from,through,availability:"query_required"}` (today through
+  today+59 in tenant timezone). These are selectable dates, not claimed available dates.
+  Per-date availability comes from existing CRM slot owner. No available-date calendar claim.
+- Successful `booking` is exactly `{staffName,serviceNames,startsAt,endsAt,timezone,totalMinor,
+  currency,receiptLabel}`. `receiptLabel` is a non-authorizing display string. No provider ID,
+  name/phone/contact, Client ID, account grant or management credential is returned.
+- `FAILED / REJECTED_BEFORE_DISPATCH` is the **only reset-safe failure**: a durable immutable
+  nonce receipt establishes no provider entry and releases only the same-intent guard. The
+  browser may explicitly clear its active attempt under its WebLock, fetch a fresh quote and
+  request visible confirmation. The old nonce still returns that same refusal forever within
+  the session; it never retries. This code is distinct from HTTP status.
+- `VALIDATION_REFUSED` (before durable admission) and `ACTION_REJECTED` are fail-closed UI codes;
+  do not infer safe reset from them, generic FAILED, 4xx, 5xx, missing status row or timeout.
+  `IDEMPOTENCY_CONFLICT` (409) also preserves the lock. Unknown/non-enumerating status returns
+  404 `PUBLIC_BOOKING_ATTEMPT_UNAVAILABLE`, without a fabricated failure envelope.
+- PENDING/UNKNOWN (`OUTCOME_UNRESOLVED`) remain locked. GET status never dispatches. Every
+  exception after guest provider entry, including malformed response, is conservatively UNKNOWN.
+  Phone/time matching cannot prove this request did not execute, so guest reconciliation never
+  returns PROVEN_NOT_EXECUTED from an empty phone lookup. Exact provider-correlated readback
+  recovery is **not implemented**; UNKNOWN may require owner/provider investigation.
+- SUCCEEDED (`BOOKED`) preserves the receipt. A separate explicit “Новая запись” may archive
+  the public terminal receipt and atomically clear the browser active pointer under the same
+  WebLock. A different nonce for the same still-active session/phone/staff/services/time/source
+  intent remains blocked server-side; changing quote alone cannot bypass UNKNOWN/duplicate guard.
+- Staff-specific YCLIENTS `book_services` supplies duration and fixed price. Range/discounted prices,
+  invalid duration and required/unknown prepayment policies are not offered. Paid checkout and
+  provider phone challenge are not synthesized by this guest create-only release.
+
+Local synthetic integration preview (from `maya-saas-backend`, no provider credentials):
+
+```sh
+DATABASE_URL=postgresql://maya_b35_proof@127.0.0.1:55539/maya_widget_gate_proof_b35_completion npx ts-node --project tsconfig.scripts.json --transpile-only scripts/public-booking-preview.ts http://localhost:3000
+```
+
+It emits its random loopback baseURL, siteKey `proof-site`, and one synthetic available date.
+Use synthetic contact data only. It scrubs inherited secrets, refuses dotenv, blocks outbound fetch,
+creates its own proof tenant, and cleans it up on SIGINT/SIGTERM or after 30 minutes. It is an
+integration fixture, never a production server or evidence of real YCLIENTS booking acceptance.

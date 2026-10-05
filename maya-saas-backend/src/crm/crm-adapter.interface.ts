@@ -495,6 +495,10 @@ export interface CRMAdapter {
   discoverCompanies?(): Promise<CrmCompanyOption[]>;
   getCompanyProfile?(): Promise<CrmCompanyProfile | null>;
   getServices(tenantId: string): Promise<ServiceItem[]>;
+  getPublicBookingServices?(
+    tenantId: string,
+    staffId: string,
+  ): Promise<ServiceItem[]>;
   getStaff(tenantId: string): Promise<StaffMember[]>;
   getTeamMembers?(tenantId: string): Promise<CrmTeamMember[]>;
   getAvailableSlots(params: {

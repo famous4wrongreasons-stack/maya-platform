@@ -448,6 +448,56 @@ export class YclientsCRMAdapter implements CRMAdapter {
     }));
   }
 
+  /** Official staff-specific online booking catalog. No guessed duration or range price. */
+  async getPublicBookingServices(
+    tenantId: string,
+    staffId: string,
+  ): Promise<ServiceItem[]> {
+    void tenantId;
+    const query = new URLSearchParams({
+      staff_id: String(this.toNumericId(staffId, 'staffId')),
+    });
+    const response = await this.request<{
+      services: Array<{
+        id: number;
+        title: string;
+        price_min: number;
+        price_max: number;
+        seance_length: number;
+        prepaid?: unknown;
+        discount?: number;
+      }>;
+    }>(`book_services/${this.getCompanyId()}`, { query });
+    if (!Array.isArray(response.data?.services))
+      throw new Error('Public booking catalog unavailable');
+    return response.data.services.flatMap((service) => {
+      if (
+        !Number.isFinite(service.price_min) ||
+        service.price_min < 0 ||
+        service.price_min !== service.price_max ||
+        (service.discount !== undefined && service.discount !== 0) ||
+        !Number.isInteger(service.seance_length) ||
+        service.seance_length <= 0 ||
+        service.seance_length % 60 !== 0 ||
+        (service.prepaid !== undefined &&
+          service.prepaid !== false &&
+          service.prepaid !== 0 &&
+          service.prepaid !== 'forbidden' &&
+          service.prepaid !== 'allowed')
+      )
+        return [];
+      return [
+        {
+          id: String(service.id),
+          name: service.title,
+          price: service.price_min,
+          duration_minutes: service.seance_length / 60,
+          currency: this.settings.currency || 'RUB',
+        },
+      ];
+    });
+  }
+
   async getStaff(tenantId: string): Promise<StaffMember[]> {
     void tenantId;
 

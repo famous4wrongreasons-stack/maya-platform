@@ -21,6 +21,7 @@ export const ACTION_EXECUTION_PREVIEW_CONTRACT =
 export type ActionSourceType =
   | 'agent_task'
   | 'authenticated_request'
+  | 'public_booking'
   | 'scheduler'
   | 'webhook'
   | 'legacy_bridge'

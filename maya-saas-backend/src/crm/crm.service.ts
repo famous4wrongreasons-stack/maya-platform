@@ -875,6 +875,30 @@ export class CrmService {
     return adapter.getServices(scopedTenantId);
   }
 
+  async getPublicBookingServices(tenantId: string, staffId: string) {
+    this.tenantContext.assertTenantId(tenantId);
+    await this.assertExternalSource(tenantId);
+    const adapter = await this.getAdapterForTenant(tenantId);
+    if (!adapter.getPublicBookingServices)
+      throw new ConflictException('Public booking catalog unavailable');
+    return adapter.getPublicBookingServices(tenantId, staffId);
+  }
+
+  /** Guest contact grants authority only for this new intent, never a canonical Client. */
+  async preparePublicBooking(
+    tenantId: string,
+    params: CreateAppointmentRequest,
+    attemptId: string,
+    authorizationCheck: () => Promise<void>,
+  ) {
+    return this.createAppointmentActionPlan(tenantId, params, {
+      sourceType: 'public_booking',
+      sourceRef: attemptId,
+      callerIdempotency: { scope: 'public-booking-v1', key: attemptId },
+      authorizationCheck,
+    });
+  }
+
   async getStaff(tenantId: string) {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
 
@@ -1058,9 +1082,15 @@ export class CrmService {
     const actionInput: CreateAppointmentRequest = {
       ...params,
       start: canonicalAppointmentInstant(params.start, timezone),
-      clientId: verifiedCanonicalClient
-        ? params.clientId
-        : this.appointmentClientIdentity(params.clientId, params.clientPhone),
+      clientId:
+        invocation.sourceType === 'public_booking'
+          ? `guest-intent/${this.encryptionService.opaqueReference('guest-intent-v1', invocation.sourceRef!)}`
+          : verifiedCanonicalClient
+            ? params.clientId
+            : this.appointmentClientIdentity(
+                params.clientId,
+                params.clientPhone,
+              ),
       clientPhone: params.clientPhone || undefined,
       branchId: params.branchId || undefined,
       notes: params.notes || undefined,
@@ -1100,6 +1130,9 @@ export class CrmService {
           return { value, safeResult: this.createdAppointmentSafe(value) };
         },
         reconcile: async (input) => {
+          // Phone/time matching cannot prove this guest request's outcome or non-execution.
+          if (invocation.sourceType === 'public_booking')
+            return { outcome: 'STILL_UNKNOWN' };
           const durable = this.createAppointmentInput(input);
           if (!durable.clientPhone) return { outcome: 'STILL_UNKNOWN' };
           const candidates = await adapter.getClientAppointments({
@@ -1123,7 +1156,13 @@ export class CrmService {
         },
         restore: (safe) => this.restoreCreatedAppointment(safe),
         classifyError: (error, phase) =>
-          this.classifyAppointmentActionError(error, phase),
+          invocation.sourceType === 'public_booking' && phase === 'dispatch'
+            ? {
+                kind: 'unknown',
+                outcomeCode: 'crm_provider_outcome_unknown',
+                errorClass: 'crm_outcome_unknown',
+              }
+            : this.classifyAppointmentActionError(error, phase),
       },
     };
   }

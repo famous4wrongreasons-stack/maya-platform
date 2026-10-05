@@ -32,6 +32,62 @@ describe('YclientsCRMAdapter', () => {
     jest.restoreAllMocks();
   });
 
+  it('guest catalog uses staff-specific book_services and refuses guessed ranges, duration and required prepayment', async () => {
+    const service = {
+      id: 201,
+      title: 'Haircut',
+      price_min: 1500,
+      price_max: 1500,
+      seance_length: 1800,
+      prepaid: 'forbidden',
+    };
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: {
+              services: [
+                service,
+                { ...service, id: 202, price_max: 2000 },
+                { ...service, id: 203, prepaid: 'required' },
+                { ...service, id: 204, seance_length: 0 },
+              ],
+            },
+          }),
+      });
+    const adapter = new YclientsCRMAdapter({
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'synthetic-token',
+      settings: { companyId: 123 },
+    });
+    await expect(
+      adapter.getPublicBookingServices('tenant', '101'),
+    ).resolves.toEqual([
+      {
+        id: '201',
+        name: 'Haircut',
+        price: 1500,
+        duration_minutes: 30,
+        currency: 'RUB',
+      },
+    ]);
+    expect(
+      requestUrl((global.fetch as jest.Mock).mock.calls[0][0] as string),
+    ).toContain('/book_services/123?staff_id=101');
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ success: true, data: {} }),
+      });
+    await expect(
+      adapter.getPublicBookingServices('tenant', '101'),
+    ).rejects.toThrow('Public booking catalog unavailable');
+  });
+
   it('🔴 Cycle 04 P0: статус и канон присутствия не расходятся на одной записи', async () => {
     // Найдено скептиком при проверке P0 и воспроизведено запуском адаптера.
     // Раньше `recordStatus` считал присутствие объединением полей через ИЛИ, а

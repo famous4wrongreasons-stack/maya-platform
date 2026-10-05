@@ -282,3 +282,42 @@ Local evidence: `/tmp/maya-qualification-client-offline-20261005-a/` and
 in this dry run: zero. This is **not** real-model qualification. The live runner still needs an
 isolated server DB/environment and actual HTTP/transport integration; do not weaken the existing
 widgets-live secret refusal. See `maya-saas-backend/scripts/conversation-qualification/README.md`.
+
+
+## Website guest booking backend checkpoint — 2026-10-05
+
+Implemented on isolated `codex/maya-b35-completion-20261005`, preserving parent checkpoint
+`2da0f90d414c911dc3142f004eee04ef219207c4`. Contract and local launch instructions:
+[WEBSITE-GUEST-BOOKING-PORT-V1.md](WEBSITE-GUEST-BOOKING-PORT-V1.md).
+
+- Six real HTTP ports: session, staff-specific services, per-date availability, immutable quote,
+  durable idempotent create attempt and read-only status. Exact server site/tenant/branch/origin
+  mapping, secure cookie, CSRF, rate limits, features/live-mode checks; no MAYA account required.
+- Existing CRM appointment owner and existing Action Engine execute the only provider mutation.
+  Explicit `public_booking` source is limited to create, with application policy and SQL binding
+  to active session/quote/tenant/payload hash/target. No synthetic User, Client or verified link.
+- Four additive local migrations create immutable guest evidence, preserve nonce receipts while
+  releasing only definitively rejected intent guards, narrowly extend AE source constraints,
+  and enforce UTC expiry/defaults independently of PostgreSQL session timezone.
+- Guest UNKNOWN never retries by empty phone lookup; generic post-dispatch errors remain UNKNOWN.
+  Status never dispatches. Contact is confined to existing encrypted AE payload; evidence tables
+  store hashes and public quote facts, including consent document version/URL.
+- Seven guest HTTP/PostgreSQL tests and four canonical Client HTTP regression tests passed
+  (four suites / eleven tests); `/tmp/maya-guest-release-http.log`. Sixty-five policy/registry/
+  YCLIENTS adapter unit tests passed; `/tmp/maya-guest-unit.log`. TypeScript, targeted ESLint,
+  Prisma validation and git diff whitespace checks passed. No generated Prisma client was written
+  through the shared node_modules symlink.
+- `scripts/public-booking-preview.ts` supplies a bounded 30-minute loopback with its own synthetic
+  proof tenant, no inherited provider secrets and outbound fetch denied. Website worker can use
+  the emitted baseURL/siteKey/date via the existing same-origin adapter. This is synthetic CRM
+  integration evidence, **not real YCLIENTS, customer, notification, phone or scale acceptance**.
+
+Remaining release dependencies: actual styled frontend/backend browser integration, approved
+production mapping/schema/config/deployment with rollback, and source-qualified real YCLIENTS
+acceptance. Exact provider-correlated UNKNOWN recovery is not implemented; fail-closed UNKNOWN
+is preserved for investigation. Paid/server pilot setup remains independently blocked; this
+checkpoint performs no production writes, migrations, notifications, payments, publish or merge.
+
+Separately, the authorized offline HTTP conversation replay completed after parent clarification:
+36 canned provider attempts, zero paid requests, qualification not evaluated. Evidence lives in
+`/tmp/maya-http-pilot-resume-20261005-a/` and `/tmp/maya-http-pilot-resume.log`.

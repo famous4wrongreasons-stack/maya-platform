@@ -5,7 +5,11 @@ import {
 } from './client-action-principal.contract';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
-import { ActionPolicyDecision, type PrismaClient } from '@prisma/client';
+import {
+  Prisma,
+  ActionPolicyDecision,
+  type PrismaClient,
+} from '@prisma/client';
 
 import {
   assertConsentChannelBinding,
@@ -66,7 +70,7 @@ const TRUSTED_SERVICE_SOURCE_TYPES = new Set<TrustedServiceSourceType>([
 
 type TrustedServiceSourceType = Exclude<
   ActionSourceType,
-  'authenticated_request'
+  'authenticated_request' | 'public_booking'
 >;
 
 export interface CanonicalActionPolicyDefinitionV1 {
@@ -140,7 +144,11 @@ type PolicyPrisma = Pick<PrismaClient, 'tenant' | 'membership'> &
   Partial<
     Pick<
       PrismaClient,
-      'clientChannelLink' | 'client' | 'appointment' | 'crmIntegration'
+      | 'clientChannelLink'
+      | 'client'
+      | 'appointment'
+      | 'crmIntegration'
+      | '$queryRaw'
     >
   >;
 type PolicyEntitlements = Pick<
@@ -381,7 +389,9 @@ export class CanonicalActionPolicyResolver {
     const entitlementDecision =
       await this.entitlements.resolveFeatureRequirements(
         request.tenantId,
-        policy.requiredFeatures,
+        request.sourceType === 'public_booking'
+          ? [...policy.requiredFeatures, 'booking', 'booking.public']
+          : policy.requiredFeatures,
         evaluatedAt,
       );
     if (entitlementDecision.tenantId !== tenant.id) {
@@ -623,7 +633,8 @@ export class CanonicalActionPolicyResolver {
   ): Promise<{
     allowed: boolean;
     reasonCodes: string[];
-    principalKind: 'actor' | 'trusted_service' | 'client_channel';
+    principalKind:
+      'actor' | 'trusted_service' | 'client_channel' | 'public_booking';
     actorRef: string | null;
     membershipRef: string | null;
     role: string | null;
@@ -632,6 +643,42 @@ export class CanonicalActionPolicyResolver {
     userStatus: string | null;
     clientEvidence?: Record<string, unknown>;
   }> {
+    if (request.sourceType === 'public_booking') {
+      if (
+        request.capability !== 'crm.appointment.create.v1' ||
+        request.actorUserId ||
+        request.clientPrincipal ||
+        request.clientChannel ||
+        !this.prisma.$queryRaw
+      )
+        throw new ActionContractError('Invalid public booking principal');
+      const rows = await this.prisma.$queryRaw<
+        Array<{ id: string }>
+      >(Prisma.sql`
+        SELECT a.id FROM "PublicBookingAttempt" a
+        JOIN "PublicBookingSession" s ON s.id = a."sessionId" AND s."tenantId" = a."tenantId"
+        JOIN "PublicBookingQuote" q ON q.id = a."quoteId" AND q."sessionId" = s.id
+        WHERE a.id = ${request.sourceRef} AND a."tenantId" = ${request.tenantId}
+          AND a."normalizedInputHash" = ${request.normalizedInputHash} AND a."targetRef" = ${request.targetRef}
+          AND NOT a."preDispatchFailure" AND s."revokedAt" IS NULL
+          AND s."expiresAt" > ${this.now()} AND q."expiresAt" > ${this.now()}
+      `);
+      if (rows.length !== 1)
+        throw new ActionContractError(
+          'Active bound public booking intent required',
+        );
+      return {
+        allowed: true,
+        reasonCodes: [],
+        principalKind: 'public_booking',
+        actorRef: this.refHash('public-booking', request.sourceRef),
+        membershipRef: null,
+        role: null,
+        branchScopeRef: null,
+        membershipStatus: null,
+        userStatus: null,
+      };
+    }
     if (request.clientPrincipal) {
       const principal = request.clientPrincipal;
       if (

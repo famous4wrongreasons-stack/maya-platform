@@ -28,12 +28,14 @@ bytes plus framing allowance as a conservative input-token bound. Price/token as
 still match the provider at dispatch. Existing ledger causes fail-closed restart; no resume or
 remaining-budget inference is implemented. Never start a second ledger as a budget reset.
 
-`http-dry-run.ts` is a separate, **not yet execution-verified** offline HTTP adapter. It boots the
-canonical AppModule/auth pipeline against the guarded local proof DB and feeds canned DeepSeek
-responses through the real model parser and budget gate. It admits no inherited provider key and
-has no live mode. TypeScript validation passed; its first local execution was refused by automatic
-approval review because pilot/runner execution is paused pending environment confirmation. Do not
-use another launch path to bypass that refusal. This file is preparation, not a completed HTTP proof.
+`http-dry-run.ts` boots the canonical AppModule/auth HTTP pipeline against the guarded local
+proof DB and feeds canned DeepSeek responses through the real model parser and budget gate.
+After parent clarified that the pause concerned paid/server execution, the same local-only run
+was explicitly admitted and completed: 36 provider attempts, zero actual paid requests,
+`replayed_ungraded`, qualification `not_evaluated`. Evidence:
+`/tmp/maya-http-pilot-resume-20261005-a/` and `/tmp/maya-http-pilot-resume.log`.
+It admits no inherited provider key and has no live mode. This is HTTP/parser proof with canned
+transport, not real-model or YCLIENTS acceptance. Isolated paid/server setup remains separately blocked.
 
 Before live execution, the dedicated adapter must use the canonical authenticated HTTP route in
 an isolated synthetic tenant/DB and wrap every actual model fetch (including retries) in this gate.

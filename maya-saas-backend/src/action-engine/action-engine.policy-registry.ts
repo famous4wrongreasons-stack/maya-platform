@@ -187,7 +187,8 @@ export function canonicalProductionPolicyDefinitions(
       const trustedServiceSourceTypes = capability.allowedSourceTypes.filter(
         (sourceType) =>
           sourceType !== 'authenticated_request' &&
-          sourceType !== 'synthetic_shadow',
+          sourceType !== 'synthetic_shadow' &&
+          sourceType !== 'public_booking',
       );
       return {
         capability: capability.capability,

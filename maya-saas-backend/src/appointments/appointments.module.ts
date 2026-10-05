@@ -1,3 +1,9 @@
+import { EntitlementsModule } from '../entitlements/entitlements.module';
+import { ActionEngineModule } from '../action-engine';
+import { AuthRateLimitRepository } from '../auth/auth-rate-limit.repository';
+import { PublicBookingController } from './public-booking.controller';
+import { PublicBookingService } from './public-booking.service';
+import { PublicBookingRepository } from './public-booking.repository';
 import { Module } from '@nestjs/common';
 
 import { AuditLogModule } from '../audit-log/audit-log.module';
@@ -16,6 +22,8 @@ import { TenantAppointmentRepository } from './tenant-appointment.repository';
 
 @Module({
   imports: [
+    ActionEngineModule,
+    EntitlementsModule,
     CrmModule,
     InternalCalendarModule,
     TenantsModule,
@@ -25,11 +33,15 @@ import { TenantAppointmentRepository } from './tenant-appointment.repository';
     RecoveryModule,
   ],
   controllers: [
+    PublicBookingController,
     AppointmentsController,
     AvailabilityController,
     PersonalClientController,
   ],
   providers: [
+    PublicBookingService,
+    PublicBookingRepository,
+    AuthRateLimitRepository,
     AppointmentsService,
     TenantAppointmentRepository,
     PersonalClientContextService,

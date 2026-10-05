@@ -168,6 +168,7 @@ enum CommunicationCampaignState {
 }
 
 model Tenant {
+  publicBookingSessions PublicBookingSession[]
   // MAYA widget layer (D12). Back-relations only: Tenant gains no column, and no business
   // table references a widget table. The only direction that crosses the boundary is
   // widget -> Tenant, which is what makes a widget row tenant-fenceable at all.
@@ -4422,3 +4423,48 @@ model WidgetErasureTombstone {
 }
 
 // ── 4. LEDGERS AND REGISTRIES — wave 1; no tenant subject, no erasure class ──
+
+
+// Guest contact claims authorize only a new intent, never a Client/account.
+model PublicBookingSession {
+  id String @id
+  tenantId String
+  siteKey String
+  configHash String
+  secretHash String @unique
+  expiresAt DateTime @db.Timestamp(3)
+  revokedAt DateTime? @db.Timestamp(3)
+  createdAt DateTime @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text)")) @db.Timestamp(3)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  quotes PublicBookingQuote[]
+  @@unique([id, tenantId])
+  @@index([expiresAt], map: "PublicBookingSession_expiry")
+}
+model PublicBookingQuote {
+  id String @id
+  tenantId String
+  sessionId String
+  snapshotJson Json @db.JsonB
+  expiresAt DateTime @db.Timestamp(3)
+  createdAt DateTime @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text)")) @db.Timestamp(3)
+  session PublicBookingSession @relation(fields: [sessionId, tenantId], references: [id, tenantId], onDelete: Restrict, onUpdate: NoAction)
+  attempts PublicBookingAttempt[]
+  @@unique([id, sessionId, tenantId])
+}
+model PublicBookingAttempt {
+  id String @id
+  tenantId String
+  sessionId String
+  quoteId String
+  nonce String
+  requestHash String
+  intentHash String
+  normalizedInputHash String
+  targetRef String
+  preDispatchFailure Boolean @default(false)
+  createdAt DateTime @default(dbgenerated("(CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text)")) @db.Timestamp(3)
+  quote PublicBookingQuote @relation(fields: [quoteId, sessionId, tenantId], references: [id, sessionId, tenantId], onDelete: Restrict, onUpdate: NoAction)
+  @@unique([sessionId, nonce])
+  // SQL adds a partial unique guard WHERE NOT preDispatchFailure.
+  @@index([sessionId, intentHash], map: "PublicBookingAttempt_intent_lookup")
+}
