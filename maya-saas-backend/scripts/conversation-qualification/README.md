@@ -28,6 +28,13 @@ bytes plus framing allowance as a conservative input-token bound. Price/token as
 still match the provider at dispatch. Existing ledger causes fail-closed restart; no resume or
 remaining-budget inference is implemented. Never start a second ledger as a budget reset.
 
+`http-dry-run.ts` is a separate, **not yet execution-verified** offline HTTP adapter. It boots the
+canonical AppModule/auth pipeline against the guarded local proof DB and feeds canned DeepSeek
+responses through the real model parser and budget gate. It admits no inherited provider key and
+has no live mode. TypeScript validation passed; its first local execution was refused by automatic
+approval review because pilot/runner execution is paused pending environment confirmation. Do not
+use another launch path to bypass that refusal. This file is preparation, not a completed HTTP proof.
+
 Before live execution, the dedicated adapter must use the canonical authenticated HTTP route in
 an isolated synthetic tenant/DB and wrap every actual model fetch (including retries) in this gate.
 Keep the existing widgets-live credential refusal unchanged. The live profile must deny all other
