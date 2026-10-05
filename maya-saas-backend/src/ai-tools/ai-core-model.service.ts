@@ -86,6 +86,8 @@ const TOOL_PLAN_SCHEMA = {
               },
               entities_json: {
                 type: 'string',
+                description:
+                  'Flat semantic entities using the selected intent required_slots and optional_slots; use canonical slot_aliases keys, not tool argument names. Preserve known values across follow-ups.',
                 minLength: 2,
                 maxLength: 4_096,
               },

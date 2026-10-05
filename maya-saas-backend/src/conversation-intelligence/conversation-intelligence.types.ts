@@ -129,6 +129,7 @@ export interface ConversationPlannerIntent {
   ready_tools: string[];
   required_slots: readonly string[];
   optional_slots: readonly string[];
+  slot_aliases: Record<string, readonly string[]>;
   language_hints: readonly string[];
 }
 

@@ -105,3 +105,65 @@ was also observed and is a separate entity-resolution limitation, not a producti
 Evidence: task-3/pilot-evidence/final-pilot-summary.json and final-evidence.tar.gz. Paid permit is
 closed, writer lock absent, all pilot processes stopped. Production PID21721 and release
 20260929-recon-fix-eb43bc22 remained unchanged. No production deploy, real CRM effects or notifications.
+
+
+## Semantic contract repair candidate (2026-10-05)
+
+Separate branch `codex/maya-chat-semantic-contract-20261005`, based on
+`3a5388aafc3fc9cb19024e7430e82c0001ac3d66`; stable guest backend remains
+`dcba8c8f4d230de31fb93f3d613f7524c3310df9`. The original six cases and corpus
+are unchanged. Eight raw synthetic DeepSeek responses are immutable parser fixtures.
+
+The taxonomy's declared slots now publish finite aliases in the planner contract.
+Normalization accepts date/period only when the selected intent declares date_or_period,
+and service only when it declares services. Conflicting, missing and invalid values
+still refuse execution. Tool arguments, identity and Action Engine authority are unchanged.
+No user-phrase routing, date invention, provider-name bypass or permissive catch was added.
+The prompt/schema explicitly distinguish semantic slot names from tool argument names;
+follow-up context uses canonical keys where unambiguous across all tasks.
+
+The pilot runner now consumes canonical HTTP `user_turn.conversationId` rather than
+nonexistent camelCase `userTurn`; it refuses missing correlation and retains the same
+conversation across actual assistant replies. This makes repeat follow-up evidence useful.
+
+Validation: 61 tests across four unit suites; one actual AppModule/auth/HTTP/PostgreSQL
+regression using captured transport and actual parser/read owner; zero mutation executions.
+TypeScript/script compilation, targeted lint and diff checks pass. The regression's second
+response is explicitly constructed, so it is not live-model or live-provider evidence.
+Server canned preflight then completed 18 original turns without a paid request.
+Runtime patch archive SHA256: 8efbbd0164bcb66146a7f06aef5381287c54139f593755d327cdd968941c1680.
+
+Live recheck uses the original ledger, unchanged $20/30-attempt cap and original proof
+autostop; no production candidate promotion, deploy or real CRM writes. Its outcome is
+recorded separately below after closing the paid permit.
+
+### Bounded recheck outcome (22:07–22:10 Moscow)
+
+Only original cases0 and2 were repeated: six new real model calls, six HTTP responses,
+no contract mismatch. Same-intent follow-up kept services and moved today to tomorrow.
+Business staff names still collapse to `[name removed]`, and labels were emitted in
+provider-ID arguments; no availability result was confirmed. The cross-intent transition
+to create at17:00 dropped the known date. Its final clarification said
+“Подтверждаю запись ... Всё верно?” with no tool call or action receipt: misleading
+confirmation wording is a quality failure, not a completed booking.
+
+Overall semantic qualification remains NOT_PASSED. Do not promote this diagnostic as
+booking acceptance or broaden the paid run merely because all six HTTP calls completed.
+The additional six calls cost an estimated $0.062510712. Cumulative24 real DeepSeek calls
+used375,689 input and5,627 output tokens (55,552 cache hit;320,137 cache miss), estimated
+$0.223654024 at the previously verified off-peak rates. This is usage-based estimation,
+not an account debit query. The original ledger now conservatively counts25 attempts
+of30 and reserves$2.72331312 of$20; initial rejection remains counted/reserved.
+No new dialogues were added to the original six-case set.
+
+Permit closed and writer lock absent at19:10:14UTC; both recheck units inactive/PID0,
+production PID21721 and proof DB PID152549 unchanged. TTL was not extended.
+Evidence: task-3/pilot-evidence/semantic-final-summary.json and
+semantic-final-evidence.tar.gz, SHA256
+04508d420917c9711395e6376263a5d94e04facffebb53dfc79c099650b62f1c.
+
+Next independent gaps: tenant-scoped business-reference resolution without exposing PII
+or trusting arbitrary IDs; grounded slot transfer between availability/create intents;
+evidence-bound confirmation language. Their fixes need regression coverage before any
+further bounded live test. Original corpus, production service, CRM and notifications
+remain unchanged.

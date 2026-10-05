@@ -1,4 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import {
+  normalizeSemanticSlots,
+  semanticSlotAliases,
+} from './semantic-slot-normalization';
 
 import { UserRole } from '../common/domain.enums';
 import {
@@ -56,6 +60,10 @@ export class ConversationIntelligenceService {
             : definition.toolCandidates.filter((tool) => available.has(tool)),
         required_slots: definition.requiredSlots,
         optional_slots: definition.optionalSlots,
+        slot_aliases: semanticSlotAliases([
+          ...definition.requiredSlots,
+          ...definition.optionalSlots,
+        ]),
         language_hints: [
           ...definition.synonyms.slice(0, 3),
           ...definition.examples.slice(0, 2),
@@ -71,6 +79,9 @@ export class ConversationIntelligenceService {
       'CONVERSATION INTELLIGENCE CONTRACT maya-ci/1:',
       'First understand the complete parent request, then decompose it into up to five ordered tasks.',
       'For every task choose exactly one canonical intent from conversation_contract.intents.',
+      'Entity keys must use the selected intent required_slots and optional_slots. slot_aliases lists equivalent input keys; always emit the canonical key. A known date/period fills date_or_period, and one service is a one-item services array when those slots are declared.',
+      'Semantic entity keys and tool argument keys are different contracts: date_or_period belongs to the plan; date belongs to an availability tool call. Do not omit known required semantic slots just because the tool arguments contain them.',
+      'Carry canonical entity keys from previous_semantic_plan, replacing only the corrected values. Never invent a missing date, identity, service or confirmation to satisfy required_slots.',
       'Extract flat entities from the current utterance and relevant prior turns. Keep dates, periods, people, services, branches, amounts, percentages and statuses distinct.',
       'Use conversation_contract.language as semantic normalization guidance, never as exact-match routing. Resolve relative time in the tenant business timezone.',
       'Classify the intended business meaning, not the presence or absence of a keyword from examples.',
@@ -132,7 +143,10 @@ export class ConversationIntelligenceService {
         allowed && definition.readiness !== 'planned'
           ? definition.toolCandidates.filter((tool) => available.has(tool))
           : [];
-      const entities = this.sanitizeEntities(rawTask.entities);
+      const entities = normalizeSemanticSlots(
+        this.sanitizeEntities(rawTask.entities),
+        [...definition.requiredSlots, ...definition.optionalSlots],
+      );
       const candidateClarification = rawTask.requires_clarification === true;
       const confidence = this.confidence(rawTask.confidence);
       const missingSlots = definition.requiredSlots.filter(
@@ -205,7 +219,7 @@ export class ConversationIntelligenceService {
       language: this.shortString(candidate.language, 24) || 'ru',
       dialogue_act: this.shortString(candidate.dialogue_act, 64) || 'request',
       tasks,
-      context: this.context(candidate.context),
+      context: this.context(candidate.context, tasks),
     };
   }
 
@@ -370,7 +384,10 @@ export class ConversationIntelligenceService {
     return undefined;
   }
 
-  private context(value: unknown): ConversationSemanticPlan['context'] {
+  private context(
+    value: unknown,
+    tasks: ConversationSemanticTask[],
+  ): ConversationSemanticPlan['context'] {
     if (value === null || value === undefined) {
       return {
         carried_slots: [],
@@ -379,9 +396,21 @@ export class ConversationIntelligenceService {
       };
     }
     const record = this.plainRecord(value, 'conversation_context_invalid');
+    const slots = tasks.flatMap((task) => {
+      const d = MAYA_CONVERSATION_INTENTS.get(task.intent)!;
+      return [...d.requiredSlots, ...d.optionalSlots];
+    });
+    const aliases = semanticSlotAliases(slots);
+    const canonicalKeys = (input: unknown) =>
+      this.stringArray(input).map(
+        (key) =>
+          Object.entries(aliases).find(([, names]) =>
+            names.includes(key),
+          )?.[0] ?? key,
+      );
     return {
-      carried_slots: this.stringArray(record.carried_slots),
-      replaced_slots: this.stringArray(record.replaced_slots),
+      carried_slots: canonicalKeys(record.carried_slots),
+      replaced_slots: canonicalKeys(record.replaced_slots),
       unresolved_references: this.stringArray(record.unresolved_references),
     };
   }

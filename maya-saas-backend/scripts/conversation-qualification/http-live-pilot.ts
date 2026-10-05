@@ -33,7 +33,7 @@ async function main() {
   if (
     caseIndex !== null &&
     (!Number.isInteger(caseIndex) ||
-      caseIndex < 1 ||
+      caseIndex < 0 ||
       caseIndex > 5 ||
       !paid ||
       !resume)
@@ -337,11 +337,13 @@ async function main() {
             const answer = await json('/ai/chat', body, token);
             if (typeof answer.reply !== 'string')
               throw new Error('chat_reply_required');
+            const userTurn = answer.user_turn as
+              { conversationId?: unknown } | undefined;
+            if (typeof userTurn?.conversationId !== 'string')
+              throw new Error('canonical_conversation_required');
             return {
               reply: answer.reply,
-              ...(answer.userTurn
-                ? { userTurn: answer.userTurn as { conversationId: string } }
-                : {}),
+              userTurn: { conversationId: userTurn.conversationId },
               evidence: {
                 actionStatus:
                   (answer.action as { status?: string } | undefined)?.status ??

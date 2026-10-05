@@ -369,3 +369,29 @@ qualified negative response envelopes; a provider specification/redacted exact r
 single-item atomic no-create semantics are needed before adding a safe reset code. An exact record
 later moved/cancelled is not proof that create failed. No blind retry, forced FAILED, destructive
 cleanup, notification, real CRM mutation, production change or paid model request was performed.
+
+
+## Separate chat semantic-contract candidate — 2026-10-05
+
+Branch `codex/maya-chat-semantic-contract-20261005` starts from
+`3a5388aafc3fc9cb19024e7430e82c0001ac3d66`; the stable guest backend remains
+`dcba8c8f4d230de31fb93f3d613f7524c3310df9`. Finite taxonomy-scoped date/period
+and service aliases now normalize before required-slot checks; planner/schema and
+follow-up context share that vocabulary. Missing/conflicting values still refuse,
+execution/identity/tool argument authority is unchanged. The runner uses canonical
+HTTP user_turn correlation. Original six dialogues and dataset are frozen.
+
+61 unit tests, one AppModule/HTTP/PostgreSQL captured-transport regression, script
+compilation and lint PASS. Two previously failing dialogues were rechecked through
+real DeepSeek, same ledger/cap/TTL: six HTTP responses without the previous plan
+mismatch. Semantic qualification is NOT_PASSED: redacted staff labels cannot resolve
+provider references, availability-to-create loses the date, and a clarification
+implies confirmation without an Action Engine receipt. No booking success claimed.
+
+Cumulative24 real calls, estimated$0.223654024;25 conservatively counted attempts
+of30; reserved$2.72331312 of$20. Permit closed and pilots stopped, production
+PID21721 unchanged. See scripts/conversation-qualification/README.md in backend and
+task-3/pilot-evidence/semantic-final-summary.json. No deploy, real CRM mutation,
+notification, merge or phone operation. Next path is grounded entity resolution,
+cross-intent slot carry and receipt-bound confirmation language; no phrase routing
+or weaker identity/UNKNOWN safety. This remains separate from guest website release.
