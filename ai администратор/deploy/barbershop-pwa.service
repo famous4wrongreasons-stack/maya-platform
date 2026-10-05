@@ -1,0 +1,19 @@
+[Unit]
+Description=MAYA legacy-compatible PWA API (no Telegram polling or jobs)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=botadmin
+WorkingDirectory=/home/botadmin/barbershop-bot
+EnvironmentFile=-/home/botadmin/barbershop-bot/.env
+ExecStart=/home/botadmin/barbershop-bot/venv/bin/python /home/botadmin/barbershop-bot/pwa_api.py
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -57,6 +57,8 @@ import memory
 import owner_ai
 from privacy_policy import PRIVACY_TEXT
 import reputation
+import site_engagement
+import site_publications
 import subscriptions
 import web_auth
 import yukassa_api
@@ -1940,7 +1942,6 @@ def _load_cabinet_yclients(phone: str) -> dict:
     }
 
 
-
 async def cabinet_me_handler(request: web.Request) -> web.Response:
     """GET /api/cabinet/me — B20 canonical read-only Client projection."""
     return await _build_full_cabinet(request, {})
@@ -2173,7 +2174,6 @@ def _verify_telegram_login_widget(auth_data: dict, bot_token: str,
     }
 
 
-
 async def cabinet_me_via_login_handler(request: web.Request) -> web.Response:
     """Telegram Login Widget is channel proof, never raw Client authority."""
     try:
@@ -2183,7 +2183,6 @@ async def cabinet_me_via_login_handler(request: web.Request) -> web.Response:
     if not isinstance(body, dict) or set(body) != {"auth_data"} or not isinstance(body.get("auth_data"), dict):
         return _cabinet_response({"error": "invalid_login_proof"}, status=400)
     return await _build_full_cabinet(request, body)
-
 
 
 def _unlinked_cabinet_projection(*, needs_consent: bool = False) -> dict:
@@ -2254,6 +2253,13 @@ async def _build_full_cabinet(request: web.Request, body: dict) -> web.Response:
     # is permitted here because it would reintroduce a second Client/PII owner.
     return _cabinet_response(result)
 
+
+# ─────────────────────────────────────────────────────────────────────
+# ПАНЕЛЬ УПРАВЛЕНИЯ (ролевой интерфейс в приложении)
+# Роли: owner (полный доступ) / manager (аналитика + операционка, без
+# управления правами и выгрузки ПД) / master (свои инструменты, +кассир).
+# Роль и права определяются ТОЛЬКО на сервере — фронт ничего не решает.
+# ─────────────────────────────────────────────────────────────────────
 
 def _panel_resolve_role(tg_id: int) -> dict:
     """Resolve only legacy owner access; staff/manager authority is canonical A16."""
@@ -4909,12 +4915,6 @@ def _god_gate(request: web.Request, body: dict):
     return int(tg_id), None
 
 
-
-
-
-
-
-
 def _god_ai_spent_usd(days: int = 30) -> float:
     try:
         return float((ai_billing.build_cost_data(days) or {}).get("ai_usd") or 0.0)
@@ -6159,6 +6159,139 @@ def _client_record_failure(error: client_record_actions.ClientRecordError) -> we
     if error.reference:
         payload["execution_id"] = error.reference
     return _client_record_response(payload, status=error.status)
+
+
+async def _site_event_body(request: web.Request) -> dict:
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    return body if isinstance(body, dict) else {}
+
+
+async def site_guest_chat_handler(request: web.Request) -> web.Response:
+    from site_guest_chat import GuestError, guest_chat
+
+    if os.getenv("SITE_GUEST_CHAT_ENABLED", "0") != "1":
+        return _cabinet_response({"ok": False, "error": "chat_unavailable"}, status=503)
+    try:
+        payload = await guest_chat.send(await _site_event_body(request))
+        response = _cabinet_response(payload)
+    except GuestError as exc:
+        response = _cabinet_response({"ok": False, "error": exc.code}, status=exc.status)
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+def _site_event_slug(body: dict) -> str | None:
+    return site_engagement.normalize_slug(body.get("slug"))
+
+
+async def site_event_status_handler(request: web.Request) -> web.Response:
+    body = await _site_event_body(request)
+    slug = _site_event_slug(body)
+    if not slug:
+        return _cabinet_response({"ok": False, "error": "event_not_found"}, status=404)
+    user_id = _authed_chat_id(request, body)
+    payload = await asyncio.to_thread(site_engagement.event_status, slug, user_id)
+    response = _cabinet_response(payload)
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+async def site_event_view_handler(request: web.Request) -> web.Response:
+    body = await _site_event_body(request)
+    slug = _site_event_slug(body)
+    if not slug:
+        return _cabinet_response({"ok": False, "error": "event_not_found"}, status=404)
+    viewer_hint = str(body.get("viewer_hint") or "")[:160]
+    if not viewer_hint:
+        viewer_hint = "|".join(
+            (request.remote or "unknown", request.headers.get("User-Agent", "")[:200])
+        )
+    viewer_hash = hashlib.sha256(
+        f"{WEBHOOK_SECRET}|{viewer_hint}".encode("utf-8", errors="ignore")
+    ).hexdigest()
+    await asyncio.to_thread(site_engagement.record_view, slug, viewer_hash)
+    payload = await asyncio.to_thread(site_engagement.event_status, slug, None)
+    return _cabinet_response(payload)
+
+
+async def site_event_like_handler(request: web.Request) -> web.Response:
+    body = await _site_event_body(request)
+    slug = _site_event_slug(body)
+    if not slug:
+        return _cabinet_response({"ok": False, "error": "event_not_found"}, status=404)
+    user_id = _authed_chat_id(request, body)
+    if not user_id:
+        return _cabinet_response(
+            {"ok": False, "error": "unauthorized", "message": "Войдите, чтобы поставить отметку."},
+            status=401,
+        )
+    await asyncio.to_thread(site_engagement.toggle_like, slug, user_id)
+    payload = await asyncio.to_thread(site_engagement.event_status, slug, user_id)
+    return _cabinet_response(payload)
+
+
+async def site_event_comment_handler(request: web.Request) -> web.Response:
+    body = await _site_event_body(request)
+    slug = _site_event_slug(body)
+    if not slug:
+        return _cabinet_response({"ok": False, "error": "event_not_found"}, status=404)
+    user_id = _authed_chat_id(request, body)
+    if not user_id:
+        return _cabinet_response(
+            {"ok": False, "error": "unauthorized", "message": "Войдите, чтобы оставить комментарий."},
+            status=401,
+        )
+    try:
+        text = site_engagement.normalize_comment(body.get("text"))
+    except ValueError as exc:
+        message = (
+            "Комментарий слишком длинный."
+            if str(exc) == "too_long"
+            else "Напишите хотя бы несколько слов."
+        )
+        return _cabinet_response({"ok": False, "error": str(exc), "message": message}, status=400)
+
+    decision, reason = await asyncio.to_thread(site_engagement.moderate_comment, text)
+    if decision == "reject":
+        message = (
+            "Не публикуйте личные данные в открытом обсуждении."
+            if reason == "personal_data"
+            else "Комментарий не опубликован: уберите мат, оскорбления или спам."
+        )
+        return _cabinet_response(
+            {"ok": False, "error": "moderation_rejected", "message": message},
+            status=422,
+        )
+
+    status = "approved" if decision == "approve" else "pending"
+    comment_id = await asyncio.to_thread(
+        site_engagement.add_comment,
+        slug,
+        user_id,
+        body.get("display_name"),
+        text,
+        status,
+        reason,
+    )
+    if status == "approved":
+        try:
+            reply = await asyncio.wait_for(
+                asyncio.to_thread(site_engagement.generate_brand_reply, slug, text),
+                timeout=20,
+            )
+            if reply:
+                await asyncio.to_thread(
+                    site_engagement.add_brand_reply, slug, comment_id, reply
+                )
+        except Exception as exc:
+            logger.warning("site event reply failed slug=%s: %s", slug, exc)
+
+    payload = await asyncio.to_thread(site_engagement.event_status, slug, user_id)
+    payload.update({"status": status, "comment_id": comment_id})
+    return _cabinet_response(payload, status=202 if status == "pending" else 201)
 
 
 async def _client_record_request_context(
@@ -10245,7 +10378,6 @@ async def auth_yandex_handler(request: web.Request) -> web.Response:
     return _cabinet_response(res)
 
 
-
 async def cabinet_me_via_session_handler(request: web.Request) -> web.Response:
     """B20 session parity: only a Maya JWT with an active maya_user link works.
 
@@ -12157,6 +12289,7 @@ async def panel_journal_attendance_handler(request: web.Request) -> web.Response
     }, status=410)
 
 
+
 async def panel_journal_record_handler(request: web.Request) -> web.Response:
     """POST /api/panel/journal_record {record_id} — детали визита для карточки-чека.
     Персонал; телефон клиента — только владельцу (152-ФЗ)."""
@@ -12321,6 +12454,7 @@ async def panel_journal_add_service_handler(request: web.Request) -> web.Respons
     }, status=410)
 
 
+
 async def panel_journal_set_services_handler(request: web.Request) -> web.Response:
     """B18: legacy journal service mutation retired."""
     del request
@@ -12332,6 +12466,7 @@ async def panel_journal_set_services_handler(request: web.Request) -> web.Respon
         "canonical_action": "set_appointment_services",
         "business_mutations": 0,
     }, status=410)
+
 
 
 async def panel_journal_set_duration_handler(request: web.Request) -> web.Response:
@@ -12347,6 +12482,7 @@ async def panel_journal_set_duration_handler(request: web.Request) -> web.Respon
     }, status=410)
 
 
+
 async def panel_journal_set_client_name_handler(request: web.Request) -> web.Response:
     """B18: legacy journal Client-field mutation retired."""
     del request
@@ -12360,7 +12496,12 @@ async def panel_journal_set_client_name_handler(request: web.Request) -> web.Res
     }, status=410)
 
 
-async def start_webhook_server(bot_app: Application):
+
+async def start_webhook_server(
+    bot_app: Application,
+    *,
+    start_background_tasks: bool = True,
+):
     """
     Запускает aiohttp-сервер на WEBHOOK_PORT в том же event loop, что и бот.
     Вызывается из post_init() бота.
@@ -12374,6 +12515,9 @@ async def start_webhook_server(bot_app: Application):
     # голоса с iPhone отбивается 413 ещё до распознавания.
     web_app = web.Application(client_max_size=10 * 1024 * 1024)
     web_app["bot_app"] = bot_app
+    await asyncio.to_thread(site_engagement.init_schema)
+    await asyncio.to_thread(site_publications.init_schema)
+    site_publications.register_routes(web_app)
 
     web_app.router.add_post("/yclients-webhook", handle_yclients_webhook)
     web_app.router.add_get("/yclients-webhook", health_handler)
@@ -12442,11 +12586,26 @@ async def start_webhook_server(bot_app: Application):
     web_app.router.add_options("/api/chat/history", chat_options_handler)
     web_app.router.add_post("/api/chat/delete", chat_delete_handler)
     web_app.router.add_options("/api/chat/delete", chat_options_handler)
+    from site_community import register_routes as register_site_community
+    register_site_community(web_app, _authed_chat_id)
     web_app.router.add_post("/api/chat", chat_handler)
     web_app.router.add_options("/api/chat", chat_options_handler)
     web_app.router.add_post("/api/chat/stream", chat_stream_handler)
     web_app.router.add_options("/api/chat/stream", chat_options_handler)
     web_app.router.add_get("/api/realtime", realtime_handler)   # голос «как ChatGPT» (WS)
+
+    # Public journal. The internal assistant moderates and replies while the
+    # only public identity is «Мужская Эстетика».
+    web_app.router.add_post("/api/site/events/status", site_event_status_handler)
+    web_app.router.add_post("/api/site/events/guest-chat", site_guest_chat_handler)
+    web_app.router.add_options("/api/site/events/guest-chat", chat_options_handler)
+    web_app.router.add_options("/api/site/events/status", chat_options_handler)
+    web_app.router.add_post("/api/site/events/view", site_event_view_handler)
+    web_app.router.add_options("/api/site/events/view", chat_options_handler)
+    web_app.router.add_post("/api/site/events/like", site_event_like_handler)
+    web_app.router.add_options("/api/site/events/like", chat_options_handler)
+    web_app.router.add_post("/api/site/events/comment", site_event_comment_handler)
+    web_app.router.add_options("/api/site/events/comment", chat_options_handler)
 
     # API push-уведомлений для мастеров
     web_app.router.add_post("/api/push/subscribe", push_subscribe_handler)
@@ -12604,10 +12763,11 @@ async def start_webhook_server(bot_app: Application):
     await site.start()
     globals()["_WEBHOOK_RUNNER"] = runner
     globals()["_WEBHOOK_SITE"] = site
-    asyncio.create_task(master_day_brief_loop(bot_app))
-    asyncio.create_task(client_retention_refresh_loop(bot_app))
-    asyncio.create_task(reputation_monitor_loop(bot_app))
-    asyncio.create_task(master_shift_reminder_loop(bot_app))
-    asyncio.create_task(waitlist_admin_alert_loop(bot_app))
-    asyncio.create_task(maya_operating_rhythm_loop(bot_app))
+    if start_background_tasks:
+        asyncio.create_task(master_day_brief_loop(bot_app))
+        asyncio.create_task(client_retention_refresh_loop(bot_app))
+        asyncio.create_task(reputation_monitor_loop(bot_app))
+        asyncio.create_task(master_shift_reminder_loop(bot_app))
+        asyncio.create_task(waitlist_admin_alert_loop(bot_app))
+        asyncio.create_task(maya_operating_rhythm_loop(bot_app))
     logger.info(f"📡 Webhook-сервер слушает {bind_host}:{WEBHOOK_PORT}")
