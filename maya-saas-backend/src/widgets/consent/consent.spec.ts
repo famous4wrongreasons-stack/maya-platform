@@ -336,8 +336,8 @@ describe('K12 — CONSENT.1 … CONSENT.6', () => {
 
 describe('K12 — both kinds are blocked on capability registration', () => {
   it('no consent, identity or privacy READ key is registered', () => {
-    // P-09 and K23. 47 catalogue names, zero of them.
-    expect(MAYA_AI_TOOL_CATALOG).toHaveLength(47);
+    // P-09 and K23. 48 catalogue names, zero of them.
+    expect(MAYA_AI_TOOL_CATALOG).toHaveLength(48);
     expect(
       MAYA_AI_TOOL_CATALOG.filter((t: { name: string }) =>
         /consent|identity|privacy/.test(t.name),

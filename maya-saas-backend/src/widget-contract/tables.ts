@@ -133,7 +133,7 @@ export const CONTROL_FLOOR: Readonly<
   'control.delivery.resolve': 'BOUND_CLIENT',
 });
 
-// F28 - WIDGET_CAPABILITY_POLICY, total over C9-CAP's 56 rows AND OVER THOSE ONLY. The three
+// F28 - WIDGET_CAPABILITY_POLICY, total over C9-CAP's 57 rows AND OVER THOSE ONLY. The three
 // columns are C9/TOOL concepts and have no meaning over AE-CAP; AE totality is carried by
 // AE_WIDGET_COMMIT_ALLOWLIST union AE_CAPABILITY_GAP_LEDGER under F31.
 export interface WidgetCapabilityPolicyRow {

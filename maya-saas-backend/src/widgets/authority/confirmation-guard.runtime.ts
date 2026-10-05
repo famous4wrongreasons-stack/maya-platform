@@ -15,7 +15,7 @@ import { refuseMint, AE_WIDGET_COMMIT_ALLOWLIST } from './contract-bindings';
 import type { CapabilityRef } from '../../widget-contract/capability-ref';
 import type { WidgetKind } from '../../widget-contract/kinds';
 
-// --- section 0.13 (contract line 1393) ---
+// --- section 0.13 (contract line 1402) ---
 export function requiredConfirmationKind(ref: CapabilityRef): WidgetKind {
   if (ref.space !== 'AE') refuseMint('wrong_space'); // FAIL CLOSED — F21
   const row = AE_WIDGET_COMMIT_ALLOWLIST[ref.key];

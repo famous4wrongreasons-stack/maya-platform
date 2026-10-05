@@ -291,8 +291,8 @@ const MECHANISM_GAP_LEDGER_SOURCE: MechanismGap[] = [
     status: '[ABSENT]',
     package: 'K2',
     blocking_rules: [
-      'NP-12da373e00c0e596',
       'NP-2ded496dfa94a8a9',
+      'NP-3ae73cc7e9297d87',
       'NP-910daee079c2fb1a',
       'NP-ea396e0385e57f6f',
     ],
@@ -410,16 +410,16 @@ export const NORMATIVE_PENDING_BINDINGS = Object.freeze([
     p_refs: Object.freeze(['P-27']),
   }),
   Object.freeze({
-    clause_id: 'NP-12da373e00c0e596',
-    p_refs: Object.freeze(['P-24']),
-  }),
-  Object.freeze({
     clause_id: 'NP-2ded496dfa94a8a9',
     p_refs: Object.freeze(['P-24']),
   }),
   Object.freeze({
     clause_id: 'NP-3967577d0093a34f',
     p_refs: Object.freeze(['P-11', 'P-19']),
+  }),
+  Object.freeze({
+    clause_id: 'NP-3ae73cc7e9297d87',
+    p_refs: Object.freeze(['P-24']),
   }),
   Object.freeze({
     clause_id: 'NP-60285de7e4a83ec3',

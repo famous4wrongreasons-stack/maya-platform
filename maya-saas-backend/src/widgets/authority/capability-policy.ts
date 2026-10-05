@@ -1,4 +1,4 @@
-// `WIDGET_CAPABILITY_POLICY` — 56 rows, under the owner's SHEET 01 / OPTION A ruling.
+// `WIDGET_CAPABILITY_POLICY` — 57 rows, under the owner's SHEET 01 / OPTION A ruling.
 //
 // Two columns, two different kinds of thing, and the file keeps them apart on purpose:
 //

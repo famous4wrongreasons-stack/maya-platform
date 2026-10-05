@@ -1247,10 +1247,11 @@ describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
   });
 
   it('ARCH-12-11 [BUILD] F3/FR-16: this change adds no capability, no capability field and no column to a non-Widget table', () => {
-    // The registry's hash, frozen at U12a. A Gate 12 change never moves it; a unit that legitimately
+    // F36b (owner approved 2026-10-05): existing staff read admitted; all other rows unchanged.
+    // The registry's reviewed hash. A Gate 12 change never moves it; a unit that legitimately
     // changes the C9 canon moves this line in its own commit, with the reason in the message.
     expect(C9_REGISTRY_HASH).toBe(
-      '4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63',
+      'd88986622d4226015298ba8b2255994ec7684bcbb5bde79883fdd2dd13732918',
     );
     const contract = parse(
       'action-engine/action-engine.contract.ts',

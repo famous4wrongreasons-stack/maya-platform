@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Contract V1.2 — Annexes C/D are records, not rules. This checks that the record is exactly what the owner
+// Contract V1.3 — Annexes C/D/E are records, not rules. This checks that the record is exactly what the owner
 // approved and that it cannot be read as rule. Proposed location:
 //   docs/rebuild/evidence/maya-chat-first-ux/contract-version-record-check.mjs
 // Paths resolve from this file, so it runs in CI and in a scratch copy alike.
@@ -20,19 +20,34 @@ const top = lines.map((l, i) => [l, i]).filter(([l]) => /^# /.test(l));
 const iB = lines.findIndex((l) => l.startsWith('# Annex B'));
 const iC = lines.findIndex((l) => l.startsWith('# Annex C'));
 const iD = lines.findIndex((l) => l.startsWith('# Annex D'));
-chk('exactly one Annex B, C and D, in order, Annex D last',
+const iE = lines.findIndex((l) => l.startsWith('# Annex E'));
+chk('exactly one Annex B, C, D and E, in order, Annex E last',
   top.filter(([l]) => l.startsWith('# Annex B')).length === 1 &&
   top.filter(([l]) => l.startsWith('# Annex C')).length === 1 &&
   top.filter(([l]) => l.startsWith('# Annex D')).length === 1 &&
-  iB >= 0 && iC > iB && iD > iC && top[top.length - 1][1] === iD,
+  top.filter(([l]) => l.startsWith('# Annex E')).length === 1 &&
+  iB >= 0 && iC > iB && iD > iC && iE > iD && top[top.length - 1][1] === iE,
   `B@${iB + 1} C@${iC + 1} D@${iD + 1}`);
 const annex = lines.slice(iC, iD).join('\n');
-const annexD = lines.slice(iD).join('\n');
+const annexD = lines.slice(iD, iE).join('\n');
+const annexE = lines.slice(iE).join('\n');
 
-chk('header pins Version 1.1 by commit and SHA-256 and points to Annexes C/D',
-  new RegExp('Version 1\\.2\\. Version 1\\.1 is this file at commit `17b5dc0b` ' +
-    '\\(SHA-256 `4629f8762bd47245cfd90078c329439ddd8bbb7fa15439ad76adee49d5105d09`\\)').test(lines[2]) &&
-  lines[2].includes('Annexes C and D') && lines[0] === '# MAYA WIDGET CONTRACT v1.2', 'line 1 and line 3');
+chk('header pins previous Versions 1.1/1.2 and records Version 1.3',
+  lines[0] === '# MAYA WIDGET CONTRACT v1.3' &&
+  lines[2].includes('Version 1.2 is this file at commit `ec350790b737c2a57e112ef72ca39500fed36df2`') &&
+  lines[2].includes('d2a97b17c0e121d366939be4ff1142c4b9b09b06ff17b7eb8f05bafc4f61b271') &&
+  lines[2].includes('Version 1.1 is this file at commit `17b5dc0b`') &&
+  lines[2].includes('4629f8762bd47245cfd90078c329439ddd8bbb7fa15439ad76adee49d5105d09') &&
+  lines[2].includes('Annexes C, D and E'), 'exact previous versions and hashes');
+const decision = fs.readFileSync(path.join(ROOT, 'docs/rebuild/MAYA-WIDGET-CONTRACT-V1.3-DECISION-RECORD.md'), 'utf8');
+chk('Annex E records only the two approved decisions and preserves their provenance',
+  annexE.includes('Existing staff-only business guidance') &&
+  annexE.includes('Nine existing denial reasons, unchanged public outcome') &&
+  annexE.includes('seven proposed display changes are not approved') &&
+  !/```|\*Mechanism|\*Evaluation point/.test(annexE) &&
+  decision.includes('Sentinel_cbf98449a0508191ab5a69542b831ca3') &&
+  decision.includes('2026-10-05 22:38 UTC') && decision.includes('> Разрешаю'),
+  'recorded owner approval, no added rule layer');
 
 const A_BLOCK = PK.slice(210, 286).join('\n');
 const B_BLOCK = PK.slice(289, 355).join('\n');

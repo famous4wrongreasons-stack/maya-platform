@@ -307,6 +307,7 @@ const snapshot = {
     'b35.status',
     'booking.availability.read',
     'booking.group-availability.read',
+    'business.rules.read',
     'c7.measurement.read',
     'c8.result.read',
     'c9.no_action',

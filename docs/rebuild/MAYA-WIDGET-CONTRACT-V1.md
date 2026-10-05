@@ -1,6 +1,6 @@
-# MAYA WIDGET CONTRACT v1.2
+# MAYA WIDGET CONTRACT v1.3
 
-*Canonical. Normative. Version 1.2. Version 1.1 is this file at commit `17b5dc0b` (SHA-256 `4629f8762bd47245cfd90078c329439ddd8bbb7fa15439ad76adee49d5105d09`), consolidated 2026-09-25 on branch `codex/maya-identity-consent-20260913`. The owner decisions carried by Versions 1.1 and 1.2 are recorded in Annexes C and D, which state no rule.*
+*Canonical. Normative. Version 1.3. Version 1.2 is this file at commit `ec350790b737c2a57e112ef72ca39500fed36df2` (SHA-256 `d2a97b17c0e121d366939be4ff1142c4b9b09b06ff17b7eb8f05bafc4f61b271`). Version 1.1 is this file at commit `17b5dc0b` (SHA-256 `4629f8762bd47245cfd90078c329439ddd8bbb7fa15439ad76adee49d5105d09`), consolidated 2026-09-25 on branch `codex/maya-identity-consent-20260913`. The owner decisions carried by Versions 1.1, 1.2 and 1.3 are recorded in Annexes C, D and E, which state no rule.*
 
 **One document, one place per rule.** This contract has no errata layer and no precedence
 chain. Every rule is stated once, where it belongs, in its final form. A reader never needs to
@@ -21,7 +21,7 @@ admits**.
 **What this contract does not do.** `[NON-NORMATIVE — this preamble is a summary; every figure
 in it is declared, and governs, in the section named beside it.]` It adds no Action Engine
 capability and no registry field. It adds exactly the fifteen C9 read keys of **§0.7 F36a**, under
-owner ruling R-01; when that set registers, `C9_REGISTRY_HASH` changes to the value F36a pins. Under
+owner ruling R-01, and admits the existing staff-only read of **§0.7 F36b** under the 2026-10-05 owner decision; when the R-01 set registers, `C9_REGISTRY_HASH` changes to the value F36a pins. Under
 owner ruling R-04 it adds one staff-revoke branch to the actor policy and the executable input
 contract of the existing consent capability, stated in **§3.5 R3.5.5 (j)**; no other C6–C9 canonical
 business contract is modified. It introduces exactly **two** deliberate
@@ -33,7 +33,7 @@ and is stated in **§3.12 R3.12.7**. Owner ruling R-04 authorises exactly **one*
 counted beside those three: a staff door onto the existing canonical consent owner that can only
 withdraw marketing consent, which is not a widget route and which neither the widget gateway nor that
 Telegram ingress reaches; it is built under **§A1.3 P-34** and stated in **§3.5 R3.5.5**. Beyond the
-R-01 read set, that door's revoke-only staff authority is the only backend authority this contract adds.
+R-01 read set, that door's revoke-only staff authority is the only new backend authority this contract adds; F36b admits existing staff authority without expanding it.
 
 ---
 
@@ -59,11 +59,11 @@ resolves every identifier cited in a normative sentence against a declaration. *
 point:* `EP-BUILD`.
 
 **F3 — what this contract requires of the running system.** The C9 contract changes by exactly
-the enumerated read set of §0.7 F36a, registered as one unit, and by nothing else; the keys, members
+the enumerated read set of §0.7 F36a, registered as one unit, and the existing staff-only read of §0.7 F36b, and by nothing else; the keys, members
 and hash of that change, and the registry pin test that asserts them, are stated in F36a.
 `C9Capability` gains no field. `RegisteredActionCapabilityV1` gains no field. No change to any
 canonical business schema. It does commission additive widget-layer stores (§0.21 residual 1). Any
-C9 change outside F36a is a version bump of this contract carrying a recorded owner decision (§1.8
+C9 change outside F36a and F36b is a version bump of this contract carrying a recorded owner decision (§1.8
 K11). *Mechanism:* the registry pin test of §0.7 F36a; plus a CI test asserting that `C9Capability`
 and `RegisteredActionCapabilityV1` gain no field and that no canonical table gains a column.
 *Evaluation point:* `EP-BUILD`.
@@ -306,7 +306,7 @@ is closed at three keys and has no registry row anywhere in the backend.
 |---|---|---|---|
 | **Identifier type** | `C9Capability.capabilityKey: string` | `AiToolDefinition.name: string` | `RegisteredActionCapabilityV1.capability: string` |
 | **Declared at** | `src/orchestration/c9.registry.ts:52–70` (type), `:110–160` (population) | `src/ai-tools/ai-tool.types.ts` (type), `src/ai-tools/ai-tool.catalog.ts` (`MAYA_AI_TOOL_CATALOG`) | `src/action-engine/action-engine.contract.ts:170–195` (type), `action-engine.registry.ts:3444` (`CAPABILITIES`), `:3889` (`ActionCapabilityRegistry`) |
-| **Cardinality (verified by enumeration)** | **56** = the 47 catalogue names + 9 extras; **71** = the 47 + 24 C9-only keys once §0.7 F36a registers its fifteen as one unit | **47** | **226** |
+| **Cardinality (verified by enumeration)** | **57** = the 48 catalogue names + 9 extras; **72** = the 48 + 24 C9-only keys once §0.7 F36a registers its fifteen as one unit | **48** | **226** |
 | **Lookup** | `c9Capability(key, domain, registryHash)` — `c9.registry.ts:180` | `AiToolRegistryService.get(name)` | `ActionCapabilityRegistry.get(key)` — `:3894`; `.list()` — `:3913` |
 | **Governs** | the **C9 orchestration run**: `mode` (`READ`/`PROPOSE_ONLY`/`OWNER_HANDOFF`), `resourceClass` (`LOCAL`/`SOURCE_READ`/`SOURCE_HANDOFF`), `domains`, `principalKinds`, timeouts, byte caps, `evidencePolicy`, `approvalAdapter`, `idempotencyAdapter` | the **AI-tool surface**: which tool names an LLM principal may see and call — `allowedRoles`, `allowedSurfaces`, `riskTier`, `approvalPolicy`, `requiredFeatures`, enforced by `AiToolPolicyService.listAllowed` / `.assertCanExecute` / `.assertCanDecide` | **whether an effect happens.** `actionClass`, `targetKind`, `allowedSourceTypes`, `riskFacets`, `policyKey`/`policyVersion`, `policyDecision`, `autonomyLevel`, `approvalRequirement`, `approvalTtlMs`, `executorKey`, `normalizeInput`, retention — enforced by `CanonicalActionPolicyResolver.resolve()` and `ActionEngineKernel` |
 | **Does NOT govern** | **whether any effect happens.** `mode` is a run mode of a C9 capability, read by no Action Engine code path and appearing nowhere under `src/action-engine/` | **whether any effect happens**, and anything about an Action Engine capability: `assertCanExecute(principal, definition)` **cannot be called with an AE-CAP key at all**, because no `AiToolDefinition` exists for one | the widget layer's presentation, the C9 run, or the AI-tool surface. `RegisteredActionCapabilityV1` carries no role, no surface, no `riskTier`, no `approvalPolicy` and no `mode` |
@@ -330,8 +330,8 @@ sentence is void.**
 type CapabilitySpace = 'C9' | 'TOOL' | 'AE' | 'CONTROL';
 
 type CapabilityRef =
-  | { space: 'C9';      key: string }          // C9Capability.capabilityKey              — 56; 71 once §0.7 F36a registers
-  | { space: 'TOOL';    key: string }          // AiToolDefinition.name                   — 47
+  | { space: 'C9';      key: string }          // C9Capability.capabilityKey              — 57; 72 once §0.7 F36a registers
+  | { space: 'TOOL';    key: string }          // AiToolDefinition.name                   — 48
   | { space: 'AE';      key: string }          // RegisteredActionCapabilityV1.capability — 226
   | { space: 'CONTROL'; key: ControlKey };     // §0.7, closed at 3
 
@@ -396,7 +396,7 @@ Each is a `ReadonlyMap` and is read through `.get`, never bracket-indexed. `C9_C
 rather than of any map derived from it, so F3 holds. *Status:* `NORMATIVE-PENDING` on **P-24**.
 
 **F24 — the spelling relationships, verified by enumeration.** TOOL-DEF ⊂ C9-CAP **by
-spelling**: all 47 catalogue names are C9-CAP keys. The 9 C9-only extras are
+spelling**: all 48 catalogue names are C9-CAP keys. The 9 C9-only extras are
 `c7.measurement.read`, `c8.result.read`, `b35.preview`, `b35.status`, `b35.confirm`,
 `a22.configuration`, `owner_report.status`, `owner_report.download`, `c9.no_action`. Once §0.7 F36a
 registers its set, its fifteen keys are C9-only keys as well, twenty-four in all.
@@ -432,13 +432,13 @@ trusted.
 
 A missing `CONTROL_FLOOR` row fails the build.
 
-**F28 — `WIDGET_CAPABILITY_POLICY` is keyed on `capKey(ref)` and is total over C9-CAP's 56 rows,
+**F28 — `WIDGET_CAPABILITY_POLICY` is keyed on `capKey(ref)` and is total over C9-CAP's 57 rows,
 and over those only.** Its columns — `min_verification`, `consent_class` and `dispatch_is_synchronous` (R3.11.5's flag: false where the owner queues dispatch after `APPROVED`, so a `REQUEST_APPROVAL` or `COMMIT` **whose pairing row names that key as `propose`** refuses until the owner declares it — the flag is read through the propose key, never through the AE key, because this table has no AE rows) — are C9/TOOL
 concepts and have no meaning over AE-CAP. A C9 key with no row fails the build; the 226 AE keys
 are covered instead by F31's totality assertion. Any change to a row's `consent_class` or a
 lowering of a `min_verification` is a contract version bump. Once §0.7 F36a registers its set, the
-table is total over the seventy-one keys that registration leaves, and over those only, with F36a's
-rows for its fifteen. A row for a key of §0.7 F36a, absent from Version 1's table, is that set's
+table is total over the seventy-two keys that registration leaves, and over those only, with F36a's
+rows for its fifteen. A row for a key of §0.7 F36a, absent from the previous table, or the explicitly admitted row of §0.7 F36b, is an
 admission and not a lowering; for every other key the monotonicity test compares against the
 previous contract version's row, and a key with no row there fails it. *Mechanism:* a totality test
 enumerating `C9_CAPABILITIES` against the table, and a monotonicity test. *Evaluation point:*
@@ -497,7 +497,7 @@ every AE_PROPOSE_PAIRING row: propose.space === 'C9'                            
                           and ae.space === 'AE'                                           else fail
                           and ae.key resolves in ActionCapabilityRegistry                 else fail
        // the SPACE tags are asserted, not only the spellings. TOOL-DEF ⊂ C9-CAP by
-       // spelling (F24: all 47 catalogue names are C9-CAP keys), so a ref written
+       // spelling (F24: all 48 catalogue names are C9-CAP keys), so a ref written
        // { space: 'TOOL', key: <a C9 spelling> } would satisfy a key-only assertion and
        // then resolve against the wrong table's independently-set fields.
 SETTINGS_DRAFT's resolved key set ∩ { cap : MONEY(cap) } === ∅                           else fail
@@ -625,9 +625,9 @@ Verified by enumeration over the working tree at branch
 | every other key cited in §2 — `catalog.services.read`, `catalog.staff.read`, `booking.availability.read`, `booking.group-availability.read`, `appointments.own.{create,reschedule,cancel,list}`, `staff.schedule.{read,own.read,update}`, `operations.journal.read`, `company.business-hours.read`, `clients.*`, `customers.count`, `b35.{preview,status,confirm}`, `c7.measurement.read`, `analytics.team-kpi.read`, `c8.result.read`, `analytics.business.{query,profit}`, `analytics.revenue.forecast`, `analytics.branches.compare`, `reports.recovered`, `expenses.{read,create}`, `clients.dossier.read`, `support.{integration-status.read,contact-admin.request}`, `settings.{read,update}`, `notifications.appointments.{read,update}`, `tasks.create`, `a22.configuration`, `owner_report.{download,status}`, `c9.no_action` | **resolve** | unchanged |
 | the fifteen keys of F36a — `billing.subscription.read`, `tenant.status.read`, `crm.providers.catalog.read`, `staff.journal.own.read`, `team.feed.read`, `calendar.internal.setup.read`, `customers.list.read`, `tenant.client-invite.read`, `inbox.items.read`, `native_feedback.management.read`, `commerce.memberships.own.read`, `referrals.own.read`, `loyalty.own.transactions.read`, `owner_report.list`, `owner_report.snapshot` | **resolve** once F36a registers them | registered as one unit by F36a under owner ruling R-01 |
 
-**F36a — the R-01 read set: the only C9 registry change this contract makes.** `OWNER RULING R-01.`
+**F36a — the R-01 read set: one separately enumerated C9 registry change.** `OWNER RULING R-01.`
 This contract registers one enumerated set of read-only C9 keys over canonical owners that already
-exist, and nothing else. *Mechanism:* the registry pin test below. *Evaluation point:* `EP-BUILD`.
+exist; this set is separate from the existing read admitted by F36b. *Mechanism:* the registry pin test below. *Evaluation point:* `EP-BUILD`.
 `[NON-NORMATIVE]` The set contains no CRM mutation, no money write, no new business owner, no generic
 CRM write and no capability added only to raise G2, and it does not replace the future
 Conversational CRM Control / YCLIENTS Full API Capability Audit (Decision Sheet 04, ruling R-01).
@@ -722,13 +722,13 @@ the row (§0.8 F46), so no row of this set is a floor reduction.
    the registry pin test runs this fence test.
 
 **The registry pin test.** It asserts that:
-- (i) the sorted `capabilityKey` list equals the fifty-six C9-CAP keys registered before this set
-  (the forty-seven catalogue names and the nine C9-only keys §0.6 F24 names first), plus the
+- (i) the sorted `capabilityKey` list equals the fifty-seven C9-CAP keys registered before this set
+  (the forty-eight catalogue names and the nine C9-only keys §0.6 F24 names first), plus the
   fifteen keys above;
 - (ii) each F36a key's full `C9Capability` object equals `entry()`'s `READ` object built from its
   row;
 - (iii) every previously registered object, `catalog.staff.read` among them, is unchanged;
-- (iv) `MAYA_AI_TOOL_CATALOG` holds the same forty-seven entries, each unchanged;
+- (iv) `MAYA_AI_TOOL_CATALOG` holds the same forty-eight entries, each unchanged;
 - (v) `C9_REGISTRY_HASH === C9_REGISTRY_HASH_R01`;
 - (vi) `WIDGET_CAPABILITY_POLICY` and `C9_FLOOR_BASELINE` carry exactly the rows above for these
   keys, and their previous rows unchanged;
@@ -736,8 +736,18 @@ the row (§0.8 F46), so no row of this set is a floor reduction.
 
 It lands in the commit that registers the set, as one unit, and replaces FR-16's unchanged-hash
 assertion in that same commit. *Evaluation point:* `EP-BUILD`. *Status:* `[ABSENT]` as a test.
-`[NON-NORMATIVE]` Until that commit the registry holds the fifty-six keys, which is why every count
+`[NON-NORMATIVE]` Until that commit the registry holds the fifty-seven keys, which is why every count
 this contract gives for the registered set names both figures.
+
+**F36b — existing staff-only business guidance.** The owner decision of 2026-10-05 admits exactly `business.rules.read`, already implemented through the existing AI-tool runtime and `GovernedSettingsReadService.read` over the existing `business_rules` configuration owner. No owner, role, tenant scope, route, write or business schema is added.
+
+| key | domains / mode / resource | principal / policy | existing roles | returned data |
+|---|---|---|---|---|
+| `business.rules.read` | `ADMIN` / `READ` / `SOURCE_READ` | `USER`; `min_verification` and `C9_FLOOR_BASELINE` = `SESSION_VERIFIED`; `consent_class` = `none`; `dispatch_is_synchronous` = `true` | `tenant_owner`, `business_owner`, `tenant_admin`, `administrator`, `manager`, `branch_manager`, `accountant`, `provider`, `employee`, `staff` | `source`, configured/not-configured `status`, `revision`, `audience: staff_only`, and existing bounded `{id, text}` rules |
+
+The current session and exact active membership in the same tenant remain required; the existing owner rechecks active user/tenant/membership and bounded content/hash. Client/customer, foreign tenant and revoked membership remain refused. At most forty rules of 8–500 characters retain the existing personal-data, secret and permission-override exclusions. Guidance confers no authority, mutates no rule and grants no client-record, booking or payment access. F36a's fifteen-key set and its fences are unchanged and not admitted by this row. *Mechanisms:* existing owner and AI-tool policy checks; the exact admission/profile/role/floor pin test and retained business-guidance isolation tests. *Evaluation points:* `EP-REGISTRY-LOAD`, `EP-COMPOSE`, `EP-BUILD`.
+
+The current C9 registry hash is `d88986622d4226015298ba8b2255994ec7684bcbb5bde79883fdd2dd13732918`. Removing only this admitted row for comparison MUST reproduce the previous hash `4a6aaf7e7507af6f1ae9ed128cd6820fec2827596baa0cd2aabc66486a05ab63`. No other C9 object changes; the reviewed no-handoff profile admits only this additional successor key. *Mechanism:* the exact admission pin test. *Evaluation point:* `EP-BUILD`.
 
 **F37 — the AE-CAP gap keys.** `GAP-APPOINTMENT-DETAIL-COMMIT`
 (`crm.appointment.{attendance,duration,services,fields}.v1` — no propose key exists in any space
@@ -899,14 +909,14 @@ function subjectFloor(ref: CapabilityRef | null): VerificationLevel {
 **F46 — the C9 branch reads C9-CAP's own mandatory fields and calls no throwing accessor.**
 
 ```ts
-// Total over all 56 C9-CAP keys; 71 once §0.7 F36a registers its set.
+// Total over all 57 C9-CAP keys; 72 once §0.7 F36a registers its set.
 function c9Floor(ref: CapabilityRef): VerificationLevel {
   const cap = c9Registry.tryGet(ref.key);                 // pure lookup over C9_CAPABILITIES
   if (cap === undefined)  return 'STEP_UP_VERIFIED';      // FAIL CLOSED — unregistered
   const row = WIDGET_CAPABILITY_POLICY[capKey(ref)];
   if (row === undefined)  return 'STEP_UP_VERIFIED';      // FAIL CLOSED — unclassified
 
-  // TOOL-DEF's risk term applies to the 47 C9-CAP keys that are also catalogue names and to no
+  // TOOL-DEF's risk term applies to the 48 C9-CAP keys that are also catalogue names and to no
   // others. Where it does not apply it is REPLACED by terms that do — it is neither silently
   // strictest nor silently weakest.
   const def  = MAYA_AI_TOOL_CATALOG_BY_NAME.get(ref.key);  // ReadonlyMap.get — never throws
@@ -943,11 +953,11 @@ function C9_RESOURCE_FLOOR(rc: string): VerificationLevel {
 
 `mode` and `resourceClass` are closed unions in the type system (`c9.registry.ts:56,68`), so both
 tables are total **by type**; the `default:` branches are fail-closed guards against a future
-widening. Observed distributions over the 56, by enumeration: `mode` READ 41 / PROPOSE_ONLY 13 /
-OWNER_HANDOFF 2; `resourceClass` SOURCE_READ 40 / SOURCE_HANDOFF 15 / LOCAL 1. Once §0.7 F36a
-registers its fifteen `READ` / `SOURCE_READ` rows, `mode` READ is 56 and `resourceClass` SOURCE_READ
-55. The catalogue's
-47 `riskTier` values are read 35 / medium_write 7 / low_write 3 / high_write 2 — **zero
+widening. Observed distributions over the 57, by enumeration: `mode` READ 42 / PROPOSE_ONLY 13 /
+OWNER_HANDOFF 2; `resourceClass` SOURCE_READ 41 / SOURCE_HANDOFF 15 / LOCAL 1. Once §0.7 F36a
+registers its fifteen `READ` / `SOURCE_READ` rows, `mode` READ is 57 and `resourceClass` SOURCE_READ
+56. The catalogue's
+48 `riskTier` values are read 36 / medium_write 7 / low_write 3 / high_write 2 — **zero
 `restricted`** — so the risk term never yielded `STEP_UP_VERIFIED` for a catalogue name.
 
 **F47 — the AE branch is total over AE-CAP and reads only AE-CAP's own mandatory fields.**
@@ -1104,12 +1114,12 @@ intent. There is no default-to-zero path and no `undefined.min_verification` rea
 **F51 — no floor may be lowered without changing a reviewed constant.**
 
 ```
-declare const C9_FLOOR_BASELINE: Readonly<Record<string, VerificationLevel>>;   // 56 rows, pinned; 71 once §0.7 F36a registers its set
+declare const C9_FLOOR_BASELINE: Readonly<Record<string, VerificationLevel>>;   // 57 rows, pinned; 72 once §0.7 F36a registers its set
 ∀ ref ∈ C9-CAP : c9Floor(ref) ≥ C9_FLOOR_BASELINE[ref.key]                      // build assertion
 ∀ ref ∈ C9-CAP : c9Floor(ref) !== 'STEP_UP_VERIFIED' ∨ ref.key ∈ DELIBERATELY_WITHHELD
 ```
 
-`C9_FLOOR_BASELINE` is the vector this contract pins, so no later edit may lower any of the 56 (71 once §0.7 F36a registers its set)
+`C9_FLOOR_BASELINE` is the vector this contract pins, so no later edit may lower any of the 57 (72 once §0.7 F36a registers its set)
 without a reviewed diff. `DELIBERATELY_WITHHELD` is **the empty set in this contract version**,
 so any key evaluating to the fail-closed level fails the build rather than silently withholding.
 *Evaluation point:* `EP-BUILD`.
@@ -1161,7 +1171,7 @@ mismatch, a domain mismatch and a non-`READ` mode under `BUSINESS_INTELLIGENCE`,
 `min_verification` and `consent_class`, carried through `c9Floor` at Gate 5 — a real fence, and a
 different one — and for the fifteen of §0.7 F36a the owner's own role fence also runs inside the
 owner read at `EP-COMPOSE` (F36a, fences 3 and 4). And because `WIDGET_CAPABILITY_POLICY` is total
-over all 56 (71 once F36a registers) with a build-time failure on a missing row, the
+over all 57 (72 once F36a registers) with a build-time failure on a missing row, the
 policy-row test above can never fire at runtime: it is a build-time totality restatement, not a
 second runtime check. *Evaluation point:* `EP-INGRESS` Gate 6. *Status:* `[EXISTS]`.
 
@@ -1796,7 +1806,7 @@ running fence.
 | **FR-13** | **CHAT-FIRST ≠ CHAT-ONLY** | — | The emission validator requires a non-null `presentation.fullscreen_detail` on every `FORM` body, every settings-class body and every envelope whose `InputSchema` carries a non-closed field | `EP-MINT` | `[ABSENT]` |
 | **FR-14** | **Role removal from UX ≠ role removal from security** | — | Gate 6 reads Membership / Staff / Client binding and never `presentation_mode`, `profile_id` or `a11y_env` | `EP-INGRESS` Gate 6 | policy `[EXISTS]`; wiring `[ABSENT]` |
 | **FR-15** | **One interaction contract across platforms** | — | One gateway, one gate pipeline, one profile registry; a `native-shell` profile that differs from `pwa` in any field other than `native_bridge`, `a11y_env`, `motion`, `text_scale`, `color_scheme`, `viewport_min_css_px` is refused | `EP-REGISTRY-LOAD` | `[ABSENT]` |
-| **FR-16** | **No C9 contract change beyond the enumerated R-01 read set, no canonical schema change** | C9-CAP | The registry pin test of §0.7 F36a, plus the build test that `RegisteredActionCapabilityV1` gains no field and no canonical table gains a column | `EP-BUILD` | `[ABSENT]` as a test; this contract adds no field to either registry, and F36a's keys are not registered until that test lands |
+| **FR-16** | **No C9 contract change beyond F36a and the existing staff read F36b, no canonical schema change** | C9-CAP | The registry pin tests of §0.7 F36a and F36b, plus the build test that `RegisteredActionCapabilityV1` gains no field and no canonical table gains a column | `EP-BUILD` | `[ABSENT]` as a test; this contract adds no field to either registry, and F36a's keys are not registered until that test lands |
 
 **F90 — four honest limits of the AE-CAP role and approver fences, recorded so nobody over-reads
 them.**
@@ -1951,7 +1961,7 @@ about the running system. No implementation may cite one as an enforcing mechani
     — read through the one declared non-throwing accessor, with a fail-closed default that makes
     an unregistered C9 key satisfy the predicate. The emission validator refuses any intent whose
     `subjectCapability(i)` satisfies `RUN_OPENING` on an envelope whose `origin.trigger` is
-    `'proactive'`. Membership is **15 of 56**, and 15 of 71 once §0.7 F36a registers its `READ` keys (13 `PROPOSE_ONLY` + 2 `OWNER_HANDOFF`), enumerated
+    `'proactive'`. Membership is **15 of 57**, and 15 of 72 once §0.7 F36a registers its `READ` keys (13 `PROPOSE_ONLY` + 2 `OWNER_HANDOFF`), enumerated
     in process; `READ` keys are provenance, and a proactive envelope legitimately names
     `c7.measurement.read` as the source of a metric. *Evaluation point:* `EP-MINT`. **No field is
     added, so this rule leaves `C9_REGISTRY_HASH` unchanged.**
@@ -2507,7 +2517,9 @@ interface DenialProjection {
 declare const C9_DENIAL_PROJECTION: Readonly<Record<string, DenialProjection>>;
 ```
 
-`C9_DENIAL_PROJECTION` maps each `c9Deny(...)` code to `{ cell_state, reason_code, limitation_severity }`. Most such denials are **policy fences, not faults** — `paid_capability_not_activated`, `capability_not_registered`, `review_stale`, `run_expired_or_terminal`, `use_secure_surface`, `no_delegated_domain_required` — and each MUST project to a Cell state and a `Limitation`, never to an error surface. *Mechanisms:* (a) an `EP-BUILD` ratchet that enumerates the `c9Deny('…')` literals under `maya-saas-backend/src/orchestration/` — **118 distinct codes**, verified — and fails the build if any code has no row; (b) at runtime, an unmapped code projects to `state: 'UNAVAILABLE'`, `reason_code: 'PROVIDER_SILENT'` and a `limitation`-severity `Limitation`, so a new upstream code degrades to an honest unknown rather than to a red box. *Evaluation points:* `EP-COMPOSE` (projection happens before anything reaches a renderer), `EP-BUILD` (totality).
+`C9_DENIAL_PROJECTION` maps each `c9Deny(...)` code to `{ cell_state, reason_code, limitation_severity }`. Most such denials are **policy fences, not faults** — `paid_capability_not_activated`, `capability_not_registered`, `review_stale`, `run_expired_or_terminal`, `use_secure_surface`, `no_delegated_domain_required` — and each MUST project to a Cell state and a `Limitation`, never to an error surface. *Mechanisms:* (a) an `EP-BUILD` ratchet that enumerates the `c9Deny('…')` literals under `maya-saas-backend/src/orchestration/` — **127 distinct codes**, verified — and fails the build if any code has no row; (b) at runtime, an unmapped code projects to `state: 'UNAVAILABLE'`, `reason_code: 'PROVIDER_SILENT'` and a `limitation`-severity `Limitation`, so a new upstream code degrades to an honest unknown rather than to a red box. *Evaluation points:* `EP-COMPOSE` (projection happens before anything reaches a renderer), `EP-BUILD` (totality).
+
+The nine existing codes `conversation_intent_hash`, `conversation_read_only`, `conversation_read_run_required`, `conversation_turn_unavailable`, `read_work_in_progress_or_unknown`, `source_read_receipt`, `source_read_replay_changed`, `source_read_unconfirmed`, and `source_replay_owner_required` each have the explicit projection `{ cell_state: 'UNAVAILABLE', reason_code: 'PROVIDER_SILENT', limitation_severity: 'limitation' }`, with the existing public phrase «Источник пока не отвечает.». This registers their existing neutral outcome; it changes no gate, role, scope, retry or action. Other proposed public reasons/states are not admitted. *Mechanism:* exact nine-row projection/phrase regression and the complete literal-census ratchet. *Evaluation points:* `EP-COMPOSE`, `EP-BUILD`.
 
 **P1 — no second backend contract per widget.** Every `body` field MUST be a subset of the response projection of `provenance.source_capability`. A widget kind may not introduce a field its source capability cannot produce. *Mechanism:* a projector contract test per kind, run against recorded capability responses. *Evaluation point:* `EP-BUILD`.
 
@@ -2923,7 +2935,7 @@ Approve and reject are two mutually exclusive decisions on **one** approval obje
 
 **K19 — `retention_sec` is derived from the pii class the composed body actually carries.** A kind whose `pii_ceiling` is `'inherited'` resolves at MINT/COMPOSE to the pii class present in the composed body; where nothing resolves, it resolves to `client_identified` — the shortest window, which is the fail-closed direction. `retention_sec` is then read from the contract's single retention classification, under its minimum rule: where more than one window applies, the shortest wins. A tenant may lower a window, never raise it. *Mechanism:* the historisation job reads `KIND_REGISTRY[kind].retention_sec` as resolved for that emission. *Evaluated at:* MINT/COMPOSE (the resolution) and historisation (the drop). Dropping a body never touches an `IntentRecord`, an Action Engine receipt, an appointment, a consent record or a loyalty balance.
 
-**K20 — `emittable` is derived, never authored.** At `EP-REGISTRY-LOAD`, `emittable(kind) = ∃ k ∈ ownerClassKeys(kind) : k ∈ REGISTERED_KEYS`, where `REGISTERED_KEYS` is the space-qualified union of the three registries §0.6 F23 declares the lookups for — `{space:'C9'} × C9_CAPABILITIES`, `{space:'AE'} × ActionCapabilityRegistry.list()`, `{space:'CONTROL'} × CONTROL_REGISTRY` — and **never** a bare name: an intersection against an unqualified key set would match a **TOOL**-space key against a **C9** spelling, which §0.6 F24 shows is a real collision and not a hypothetical one — all 47 catalogue names are also C9-CAP keys, carrying independently-set fields. `composeEnvelope` refuses a kind whose `emittable` is false and instead emits a `LIMITATION` carrying the `capability_gap_ref` mapped from that owner class, with no intent (fail closed, say so in text). No renderer may synthesise a control for a capability the registry does not contain, and a gap-blocked control is rendered as prose, never as a disabled-styled button. *Evaluated at:* REGISTRY LOAD, and at MINT/COMPOSE on every emission.
+**K20 — `emittable` is derived, never authored.** At `EP-REGISTRY-LOAD`, `emittable(kind) = ∃ k ∈ ownerClassKeys(kind) : k ∈ REGISTERED_KEYS`, where `REGISTERED_KEYS` is the space-qualified union of the three registries §0.6 F23 declares the lookups for — `{space:'C9'} × C9_CAPABILITIES`, `{space:'AE'} × ActionCapabilityRegistry.list()`, `{space:'CONTROL'} × CONTROL_REGISTRY` — and **never** a bare name: an intersection against an unqualified key set would match a **TOOL**-space key against a **C9** spelling, which §0.6 F24 shows is a real collision and not a hypothetical one — all 48 catalogue names are also C9-CAP keys, carrying independently-set fields. `composeEnvelope` refuses a kind whose `emittable` is false and instead emits a `LIMITATION` carrying the `capability_gap_ref` mapped from that owner class, with no intent (fail closed, say so in text). No renderer may synthesise a control for a capability the registry does not contain, and a gap-blocked control is rendered as prose, never as a disabled-styled button. *Evaluated at:* REGISTRY LOAD, and at MINT/COMPOSE on every emission.
 
 **K25 — every per-kind lifecycle constant is compiled, total and unauthored.** `expires_at_ceiling_s` and the matching `on_expiry` behaviour are populated per kind from the contract's single lifecycle ceiling table and from nothing else; they are never members of a composer input. Where more than one clock bounds an emission, the soonest governs. Because `KIND_REGISTRY` is a mapped type over `WidgetKind`, a kind missing from that table fails compilation rather than defaulting. *Evaluated at:* REGISTRY LOAD, MINT/VALIDATE.
 
@@ -4030,7 +4042,7 @@ already in flight, including tokens sitting in a Telegram message from an hour a
 
 **R3.4.3 — the policy table is total, and unmapped fails closed in two independent ways.**
 `WIDGET_CAPABILITY_POLICY` is keyed on `CapabilityRef` and is total over `C9_CAPABILITIES`
-(56 rows; 71 once §0.7 F36a registers its set); a key with no row fails the build, and a lowered row without a contract version bump
+(57 rows; 72 once §0.7 F36a registers its set); a key with no row fails the build, and a lowered row without a contract version bump
 fails the monotonicity test. Totality over AE-CAP is carried instead by
 `AE_WIDGET_COMMIT_ALLOWLIST` ∪ `AE_CAPABILITY_GAP_LEDGER`, jointly total over all 226
 registered capabilities. At runtime an unmapped ref yields `STEP_UP_VERIFIED`, which is
@@ -4786,7 +4798,7 @@ ref.space === 'AE'   (COMMIT, REQUEST_APPROVAL):
 
 ref.space === 'C9'   (REFINE, DRAFT, class-'c' NAVIGATE):
   def = MAYA_AI_TOOL_CATALOG_BY_NAME.get(ref.key)
-  if (def !== undefined) → AiToolPolicyService.assertCanExecute(principal, def)      // the 47
+  if (def !== undefined) → AiToolPolicyService.assertCanExecute(principal, def)      // the 48
   else                   → WIDGET_CAPABILITY_POLICY[capKey(ref)] must exist, AND      // the 9; 24 once F36a registers
                            when record.c9_domain !== null,
                            c9Capability(ref.key, record.c9_domain, C9_REGISTRY_HASH)
@@ -4816,7 +4828,7 @@ twenty-four once §0.7 F36a registers its set — the role and risk fences are t
 at Gate 5, plus `CONSENT_CLASS_FLOOR` — not Gate 6; for the fifteen of §0.7 F36a the owner's own
 fence also applies inside the owner read.
 The `WIDGET_CAPABILITY_POLICY` row test is likewise a build-time totality restatement rather
-than a second runtime check: the table is total over all 56 C9 keys (71 once F36a registers) and a missing row fails the
+than a second runtime check: the table is total over all 57 C9 keys (72 once F36a registers) and a missing row fails the
 **build**, so at runtime the row always exists for a registered C9 ref and that refusal can
 never fire. Scoping by effect matters for the same reason: applying an execute-admission test
 to a `HANDOFF` destination would make `c9Capability`'s `BUSINESS_INTELLIGENCE`/non-`READ`
@@ -5382,7 +5394,7 @@ second rule.
 | INV-26 | No fitted `render_tier === 'ANNOUNCEMENT'` delivery carries an intent whose effect is outside `{NAVIGATE, HANDOFF}`, other than the one §0.9 F60 escape carrying `control.widget.dismiss` | mint-per-delivery + Gate 7 |
 | INV-27 | The availability enum has no `HELD` member and no hold field exists anywhere in the contract | the types themselves |
 | INV-28 | `FLOOR_EXEMPT(i) ⟹ i.effect ∉ {NAVIGATE, DRAFT, REQUEST_APPROVAL, COMMIT}`; a `priority: 0` `CONTROL` intent carries `control.widget.dismiss` and no other key; `\|{c ∈ C9_CAPABILITIES : c.resourceClass === 'LOCAL'}\| === 1` | three build vetoes |
-| INV-29 | `c9Floor` is total over all 56 C9-CAP keys (71 once §0.7 F36a registers its set), calls no throwing accessor, and no key evaluates to the fail-closed `STEP_UP_VERIFIED`; `∀ key : c9Floor(ref) ≥ C9_FLOOR_BASELINE[key]` | two build assertions over a pinned vector |
+| INV-29 | `c9Floor` is total over all 57 C9-CAP keys (72 once §0.7 F36a registers its set), calls no throwing accessor, and no key evaluates to the fail-closed `STEP_UP_VERIFIED`; `∀ key : c9Floor(ref) ≥ C9_FLOOR_BASELINE[key]` | two build assertions over a pinned vector |
 | INV-30 | No gate keys its antecedent on a client-supplied value; Gate 8-R keys on `record.confirmation?.requires_readback`, which is server-set and sealed inside `body_hash` | source test over gate antecedents |
 | INV-31 | `max_commit_intents === 2` holds for `APPROVAL` alone; both commits carry the same `confirmation_of_ref.ref` and the same AE capability, and consuming either marks the other consumed | build veto + mint pairing check |
 
@@ -6497,7 +6509,7 @@ RUN_OPENING(r: CapabilityRef | null) :=
 *Mechanism:* (a) the emission validator refuses any intent whose `subjectCapability(i)` satisfies `RUN_OPENING` on an envelope whose `origin.trigger` is `'proactive'`. `subjectCapability(i)` returns `null` for a `NONE` effect and for a `w`/`i`/`s`/`detail` `NAVIGATE`, which is why `RUN_OPENING` is stated ref-nullably and is total over what it is passed. **No field is added to any C9 contract**: `mode` is an existing mandatory closed-union member of `C9Capability`, and this rule leaves `C9_REGISTRY_HASH` unchanged. (b) A standing query — *any `IntentRecord` with a non-null `run_ref` whose emitting envelope had `trigger: 'proactive'`* — is one of the named leak tests, run in CI against recorded emissions.
 *Evaluated at:* `EP-MINT` (a), `EP-BUILD` over recorded emissions (b).
 
-`[NON-NORMATIVE]` `mode` distinguishes exactly the right set: `READ` keys are provenance — a proactive envelope legitimately names a measurement read as the source of a metric — while `PROPOSE_ONLY` and `OWNER_HANDOFF` can only be exercised *inside* a run, so an intent naming one is a run-opener by construction. Membership is 15 of the 56 registered keys (13 `PROPOSE_ONLY` + 2 `OWNER_HANDOFF`), verified by enumerating the live registry; once §0.7 F36a registers its set, which adds only `READ` keys, it is 15 of 71.
+`[NON-NORMATIVE]` `mode` distinguishes exactly the right set: `READ` keys are provenance — a proactive envelope legitimately names a measurement read as the source of a metric — while `PROPOSE_ONLY` and `OWNER_HANDOFF` can only be exercised *inside* a run, so an intent naming one is a run-opener by construction. Membership is 15 of the 57 registered keys (13 `PROPOSE_ONLY` + 2 `OWNER_HANDOFF`), verified by enumerating the live registry; once §0.7 F36a registers its set, which adds only `READ` keys, it is 15 of 72.
 
 Companion leak queries, named now and run later: a proactive envelope that produced a run with no human-actuated intent; an `AgentTask` persisted with an autonomy level above shadow; any `IntentRecord` with effect `DRAFT` or `COMMIT` whose emitting envelope was proactive.
 
@@ -6667,7 +6679,7 @@ Columns: **Component** — the named artefact. **Depends on it** — the contrac
 | **P-07** | **Capability-gap ledger** — the 8 gap keys as first-class entries with `owner: NONE`, plus the gaps §0.7 F37 and §4.3 DR4 add | §1.6.7 P2; §1.3 C5; §2 K20; §2.6.14 LIMIT.1; §2.6.18 CONSENT.5; §2.6.20 PAY.4; §2.6.22 ARTIFACT.4; **§A2's entire mechanism** | `[ABSENT]` — `capability_gap_ref` 0 hits | **K1** (wave 1 — the only wave executable under this cycle's fence) |
 | **P-08** | **Server-owned draft store** — the canonical draft owner's draft, named by `confirmation_of_ref.kind === 'draft'` | §0.12 F69's key-space rule (the draft owner names the Action Engine key); §0.13 F74; §3.2's effect table ("draft store only"); FR-6b, FR-7 | `[EXISTS]` — `src/widgets/booking/booking-preview.adapter.ts` and the canonical appointment draft owners used by the typed booking chain | **K3** (store) + **K7** (booking draft owner, wave 3) |
 | **P-09** | **Consent-register read projection** — the `CONSENT_REGISTER` owner class resolving to a registered `consent.*` **read** capability, and `register_ref` as an append-only handle | `CONSENT_STATE` emittability (§2.7, §2 K23); §2.6.18 CONSENT.1–6; the `scope_text` / `change_effect_text` body | `[PARTIAL]` — the canonical facts **do** exist: `prisma/schema.prisma:1593 model ClientConsentFact`, `:1573-1574 privacyConsentAt/marketingConsentAt`, `:2584 MarketingConsentEvidence`, and a reader `effectiveClientConsents` (`src/crm/client-effective-consent.ts:53`, used at `client-profile-read.service.ts:177`). What is absent is a **registered read key**: `MAYA_AI_TOOL_CATALOG` has 47 names, **zero** containing `consent`, `identity` or `privacy`, so `ownerClassKeys(CONSENT_STATE) ∩ REGISTERED_KEYS = ∅` and K20 derives `emittable = false` | **K12** (wave 5) |
-| **P-10** | **`WIDGET_CAPABILITY_POLICY`** (`min_verification`, `consent_class` and `dispatch_is_synchronous` per key, total over `C9_CAPABILITIES`'s 56 keys (71 once §0.7 F36a registers its set) **and over those only** — §0.7 F28; AE-CAP totality is carried instead by `AE_WIDGET_COMMIT_ALLOWLIST` ∪ `AE_CAPABILITY_GAP_LEDGER` under F31) and **`CONTROL_REGISTRY`** (closed at three keys) | §0.8 F45 `subjectFloor`; §0.8 F45's totality and monotonicity; §0.8 F50's fail-closed default; §0.8 F54 Gate 6 for `CONTROL`; §0.14 F80's `consent_class` fence; FR-4, FR-6d | `[ABSENT]` — both 0 hits | **K2** (the tables, wave 1) over **K1**'s canon |
+| **P-10** | **`WIDGET_CAPABILITY_POLICY`** (`min_verification`, `consent_class` and `dispatch_is_synchronous` per key, total over `C9_CAPABILITIES`'s 57 keys (72 once §0.7 F36a registers its set) **and over those only** — §0.7 F28; AE-CAP totality is carried instead by `AE_WIDGET_COMMIT_ALLOWLIST` ∪ `AE_CAPABILITY_GAP_LEDGER` under F31) and **`CONTROL_REGISTRY`** (closed at three keys) | §0.8 F45 `subjectFloor`; §0.8 F45's totality and monotonicity; §0.8 F50's fail-closed default; §0.8 F54 Gate 6 for `CONTROL`; §0.14 F80's `consent_class` fence; FR-4, FR-6d | `[ABSENT]` — both 0 hits | **K2** (the tables, wave 1) over **K1**'s canon |
 
 ### A1.2 The derivations, and the floor that cannot be reached
 
@@ -6733,7 +6745,7 @@ Columns: **Component** — the named artefact. **Depends on it** — the contrac
 
 **Corrected figure: three acts with no owner at all, one with an owner unreachable from the widget source type, four with a reachable registered owner under a different name.** That residual's operative consequence is unchanged — none of the eight reserved names is a registry member — but its *stake* is larger than stated, and this must be carried into §0.7 F37's registration gate:
 
-> **A1.6.2 — NORMATIVE.** `package5.wave3.record-client-consent.execute.v1` is registered today with `policyDecision: ALLOW`, `approvalRequirement: 'NONE'`, `targetKind: 'client_consent'` and `allowedSourceTypes` including `authenticated_request`. It is therefore the *reachable* canonical owner of all four consent acts, under a name none of the eight reserved names matches. **The fence that keeps it out of the widget layer is already declared, and it is not a policy row.** §0.7 F32's `CONSENT(cap)` — a two-disjunct predicate, restated nowhere — holds for this key on its `targetKind` disjunct; §0.7 F31's start-up assertion set carries `row ⇒ CONSENT(cap) ∨ IDENTITY(cap) ⇒ fail`, so the key can **never** hold a row in `AE_WIDGET_COMMIT_ALLOWLIST`; and §0.13 F72's `requiredConfirmationKind` is a lookup with **no default branch**, so an un-allowlisted key resolves to no confirmation kind at all and `refuseMint('capability_not_allowlisted')` fires. No `COMMIT` naming it is mintable onto `SETTINGS_DRAFT` or onto any other kind. **No `WIDGET_CAPABILITY_POLICY` row is required or permitted for it**: §0.7 F28 makes that table total over C9-CAP's 56 rows (71 once §0.7 F36a registers its set) *and over those only*, and this is an AE-CAP key. *Mechanism:* F31's `EP-REGISTRY-LOAD` veto, F72's `EP-MINT` refusal, and Gate 7's re-check. *Evaluation points:* `EP-REGISTRY-LOAD`, `EP-MINT`, `EP-INGRESS` Gate 7. This is what FR-6a holding **fail-closed and non-vacuously** looks like once the owner is named: the act has a reachable owner, and the widget layer still cannot reach it. *(§2.7's own `[NON-NORMATIVE]` note anticipates the other half: the marketing-consent change path can be routed to that owner from a shell surface — a class-`s` `HANDOFF`, which confers nothing — well before any `consent.*` read key is registered.)*
+> **A1.6.2 — NORMATIVE.** `package5.wave3.record-client-consent.execute.v1` is registered today with `policyDecision: ALLOW`, `approvalRequirement: 'NONE'`, `targetKind: 'client_consent'` and `allowedSourceTypes` including `authenticated_request`. It is therefore the *reachable* canonical owner of all four consent acts, under a name none of the eight reserved names matches. **The fence that keeps it out of the widget layer is already declared, and it is not a policy row.** §0.7 F32's `CONSENT(cap)` — a two-disjunct predicate, restated nowhere — holds for this key on its `targetKind` disjunct; §0.7 F31's start-up assertion set carries `row ⇒ CONSENT(cap) ∨ IDENTITY(cap) ⇒ fail`, so the key can **never** hold a row in `AE_WIDGET_COMMIT_ALLOWLIST`; and §0.13 F72's `requiredConfirmationKind` is a lookup with **no default branch**, so an un-allowlisted key resolves to no confirmation kind at all and `refuseMint('capability_not_allowlisted')` fires. No `COMMIT` naming it is mintable onto `SETTINGS_DRAFT` or onto any other kind. **No `WIDGET_CAPABILITY_POLICY` row is required or permitted for it**: §0.7 F28 makes that table total over C9-CAP's 57 rows (72 once §0.7 F36a registers its set) *and over those only*, and this is an AE-CAP key. *Mechanism:* F31's `EP-REGISTRY-LOAD` veto, F72's `EP-MINT` refusal, and Gate 7's re-check. *Evaluation points:* `EP-REGISTRY-LOAD`, `EP-MINT`, `EP-INGRESS` Gate 7. This is what FR-6a holding **fail-closed and non-vacuously** looks like once the owner is named: the act has a reachable owner, and the widget layer still cannot reach it. *(§2.7's own `[NON-NORMATIVE]` note anticipates the other half: the marketing-consent change path can be routed to that owner from a shell surface — a class-`s` `HANDOFF`, which confers nothing — well before any `consent.*` read key is registered.)*
 
 ---
 
@@ -6803,7 +6815,7 @@ The owner's hard constraint reads: **"The contract must require NO C9 contract c
 
 Verified: the canonical repository's working tree at branch `codex/maya-identity-consent-20260913` carries exactly **one** modified file — `docs/rebuild/MAYA-CHAT-FIRST-UX-OWNER-DECISIONS.md`, a documentation file. **Zero** changes to `maya-saas-backend/prisma/schema.prisma`; **zero** new entries under `prisma/migrations` (97, unchanged, latest `20260913160000_chapter9_orchestration_foundation`). The primary working tree carries no Prisma or migration change either. §3's and §4's own scope discipline states it: *"Architecture only. Runtime changes: 0. Schema changes: 0. Migrations: 0."* **This is not a promise about the future; it is a verified property of the present.**
 
-The C9 half is likewise verified and is not in question: §0.7 F36 deletes every capability key §§1–4 invented (`orchestration.run.read`, `orchestration.run.cancel`, `booking.reschedule.propose` — 0 hits each); the `booking_effect` registry flag is void (0 hits); §0.13 F72 and §0.7 F33 derive the confirmation kind from **existing** `RegisteredActionCapabilityV1` fields (`targetKind`, `riskFacets`, `policyDecision`); the three control keys are widget-layer-only by design; and FR-16 asserts, through §0.7 F36a's registry pin test, that `C9_REGISTRY_HASH` (`src/orchestration/c9.registry.ts:177`) equals the value that set pins once it registers, at `EP-BUILD`. `C9_CAPABILITIES` = 47 catalogue names + 9 extras = **56 keys**, and 47 + 24 = **71 keys** once §0.7 F36a registers its set.
+The C9 half is likewise verified and is not in question: §0.7 F36 deletes every capability key §§1–4 invented (`orchestration.run.read`, `orchestration.run.cancel`, `booking.reschedule.propose` — 0 hits each); the `booking_effect` registry flag is void (0 hits); §0.13 F72 and §0.7 F33 derive the confirmation kind from **existing** `RegisteredActionCapabilityV1` fields (`targetKind`, `riskFacets`, `policyDecision`); the three control keys are widget-layer-only by design; and FR-16 asserts, through §0.7 F36a's registry pin test, that `C9_REGISTRY_HASH` (`src/orchestration/c9.registry.ts:177`) equals the value that set pins once it registers, at `EP-BUILD`. `C9_CAPABILITIES` = 48 catalogue names + 9 extras = **57 keys**, and 48 + 24 = **72 keys** once §0.7 F36a registers its set.
 
 **A3.2 — the IMPLEMENTATION requires additive widget-layer stores. They touch no canonical business table and hold no business state.**
 
@@ -7480,3 +7492,17 @@ implementation permission beyond the normative body.
 
 Version 1.2 changes no business owner, adds no generic client-controlled authority, and does not claim voice or
 spoken readiness. The full decision wording is preserved in `MAYA-WIDGET-CONTRACT-V1.2-DECISION-RECORD.md`.
+
+
+# Annex E — Version 1.3 owner decisions record
+
+**Non-normative record.** This annex records provenance only and states no additional rule.
+
+## E.1 Decisions carried by Version 1.3
+
+| Decision | Owner answer | Body consequence |
+|---|---|---|
+| Existing staff-only business guidance | Approved 2026-10-05 22:38 UTC | F3/F28/F36b admit the existing bounded staff read without expanding roles, tenant scope or data |
+| Nine existing denial reasons, unchanged public outcome | Approved 2026-10-05 22:38 UTC | P10 registers all nine as the existing neutral outcome; the seven proposed display changes are not approved |
+
+The exact request and answer, message identifiers and baseline hash are recorded in `MAYA-WIDGET-CONTRACT-V1.3-DECISION-RECORD.md`. Release, production, paid calls and server restart were not authorized by these decisions.

@@ -1,7 +1,7 @@
 // P-RENDER exit test REN-2 (GATES-PLAN-V11, Wave 1). Class BUILD: §1.6.7 P10's ratchet.
 //
 // P10(a) states the mechanism in so many words: "an `EP-BUILD` ratchet that enumerates the
-// `c9Deny('…')` literals under `maya-saas-backend/src/orchestration/` — **118 distinct codes**,
+// `c9Deny('…')` literals under `maya-saas-backend/src/orchestration/` — **127 distinct codes**,
 // verified — and fails the build if any code has no row" (C11:2509). This file is that ratchet.
 //
 // Three things make it a ratchet rather than a count:
@@ -10,7 +10,7 @@
 //   - it refuses a row for a code that no longer exists, so the map cannot rot in the other
 //     direction either;
 //   - it asserts that every `c9Deny` call site in the enumerated tree passes a LITERAL. A call with
-//     a variable would be a code the enumeration cannot see, which would make the 118 a number
+//     a variable would be a code the enumeration cannot see, which would make the 127 a number
 //     about the regex rather than about the code space.
 //
 // Not live proof: nothing is submitted and no gate runs.
@@ -68,9 +68,9 @@ describe('P-RENDER — P10: every canonical denial code has a rendering, and non
     expect(opaque).toEqual([]);
   });
 
-  it('REN-2 the contract counts 118 distinct codes, and the source still has exactly those', () => {
+  it('REN-2 the contract counts 127 distinct codes, and the source still has exactly those', () => {
     // C11:2509 pins the number. A change in either direction is a contract event, not a merge.
-    expect(denyLiterals()).toHaveLength(118);
+    expect(denyLiterals()).toHaveLength(127);
   });
 
   it('REN-2 C9_DENIAL_PROJECTION has a row for every code, and no row for a code that is gone', () => {

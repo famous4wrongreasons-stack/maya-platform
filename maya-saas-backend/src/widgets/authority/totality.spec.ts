@@ -34,8 +34,8 @@ import { SENSITIVE_DEST } from './verification-floor.runtime';
 describe('K4 — the four key spaces, bound to the live registries', () => {
   it('counts what the registries actually contain', () => {
     const c = census();
-    expect(c.C9).toBe(56);
-    expect(c.TOOL).toBe(47);
+    expect(c.C9).toBe(57);
+    expect(c.TOOL).toBe(48);
     expect(c.AE).toBe(226);
     expect(c.CONTROL).toBe(CONTROL_KEYS.size);
     expect(c.registryHash).toMatch(/^[0-9a-f]{64}$/);
@@ -73,7 +73,7 @@ describe('K4 — the four key spaces, bound to the live registries', () => {
 describe('K4 — verificationFloor is TOTAL over all four spaces', () => {
   it('returns a floor on the ladder for every key in every space, with no default branch', () => {
     const refs = allRefs();
-    expect(refs.length).toBe(56 + 47 + 226 + CONTROL_KEYS.size);
+    expect(refs.length).toBe(57 + 48 + 226 + CONTROL_KEYS.size);
     const offLadder: string[] = [];
     for (const ref of refs) {
       const floor = subjectFloorFor(ref);
@@ -178,7 +178,7 @@ describe('K4 — exactly two floor reductions, and the LOCAL row is unique', () 
       a[c.resourceClass] = (a[c.resourceClass] ?? 0) + 1;
       return a;
     }, {});
-    expect(counts.LOCAL + counts.SOURCE_READ + counts.SOURCE_HANDOFF).toBe(56);
+    expect(counts.LOCAL + counts.SOURCE_READ + counts.SOURCE_HANDOFF).toBe(57);
   });
 
   it('BUILD VETO: no third floor reduction exists in code', () => {

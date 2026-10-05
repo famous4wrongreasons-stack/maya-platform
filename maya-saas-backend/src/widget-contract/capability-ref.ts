@@ -18,8 +18,8 @@ import type { C9Capability } from '../orchestration/c9.registry';
 export type CapabilitySpace = 'C9' | 'TOOL' | 'AE' | 'CONTROL';
 
 export type CapabilityRef =
-  | { space: 'C9'; key: string } // C9Capability.capabilityKey              — 56; 71 once §0.7 F36a registers
-  | { space: 'TOOL'; key: string } // AiToolDefinition.name                   — 47
+  | { space: 'C9'; key: string } // C9Capability.capabilityKey              — 57; 72 once §0.7 F36a registers
+  | { space: 'TOOL'; key: string } // AiToolDefinition.name                   — 48
   | { space: 'AE'; key: string } // RegisteredActionCapabilityV1.capability — 226
   | { space: 'CONTROL'; key: ControlKey }; // §0.7, closed at 3
 

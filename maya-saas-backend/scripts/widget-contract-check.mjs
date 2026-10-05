@@ -766,7 +766,7 @@ try {
   ).trim();
   chk(
     'the three registries load at their declared cardinalities',
-    got === '226/221/47/56',
+    got === '226/221/48/57',
     got,
     'EXECUTED',
   );
@@ -793,7 +793,7 @@ const PENDING = [
     'needs a live envelope; P-01, built by K3',
   ],
   [
-    'WIDGET_CAPABILITY_POLICY totality over C9-CAP’s 56 rows',
+    'WIDGET_CAPABILITY_POLICY totality over C9-CAP’s 57 rows',
     'the table is `declare const` until K2 fills it; P-10',
   ],
 ];

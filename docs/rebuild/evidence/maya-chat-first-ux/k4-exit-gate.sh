@@ -52,13 +52,13 @@ cat > src/widgets/authority/.gate.spec.ts <<'EOF'
 import { census, spaceOverlap } from './registry-binding';
 it('bound', () => {
   const c = census();
-  expect(c.C9).toBe(56); expect(c.TOOL).toBe(47); expect(c.AE).toBe(226);
+  expect(c.C9).toBe(57); expect(c.TOOL).toBe(48); expect(c.AE).toBe(226);
   expect(spaceOverlap().toolSubsetOfC9).toBe(true);
   expect(spaceOverlap().aeIntersectC9).toBe(0);
 });
 EOF
 if npx jest --silent --testPathPatterns "authority/.gate" >/dev/null 2>&1; then
-  say "REGISTRIES BOUND (executed, not declared):" "C9 56 · TOOL 47 · AE 226 · TOOL⊂C9 · AE∩C9=0"
+  say "REGISTRIES BOUND (executed, not declared):" "C9 57 · TOOL 48 · AE 226 · TOOL⊂C9 · AE∩C9=0"
 else say "REGISTRIES BOUND:" "FAIL"; fail=1; fi
 rm -f src/widgets/authority/.gate.spec.ts
 

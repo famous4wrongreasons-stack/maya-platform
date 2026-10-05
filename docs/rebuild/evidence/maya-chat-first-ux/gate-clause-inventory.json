@@ -3,9 +3,9 @@
   "source": "GATES-PLAN-V11 §3.1 (plan lines 1388-1564); the 10.R1…10.R7 bullet expanded to one key per row of «Gate 10 in full», with the texts of the /2 audit",
   "against": {
     "document": "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md",
-    "version": "1.1",
-    "sha256": "d2a97b17c0e121d366939be4ff1142c4b9b09b06ff17b7eb8f05bafc4f61b271",
-    "lines": 7433
+    "version": "1.3",
+    "sha256": "b84b3e7303e1a655bf47c436075089ce51d79e315128e8cafb9325c64f19c36c",
+    "lines": 7508
   },
   "note": "The key set of gate-conformance-audit.json must equal this inventory, gate by gate and in order, with identical clause texts; gate-audit-check.mjs enforces it. The inventory changes only with the contract (C-V12) or a re-audit commit that records why.",
   "gates": [

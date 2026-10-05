@@ -1,7 +1,8 @@
 // K2 — extract the certified contract's TypeScript into modules.
 // The contract IS the source. Nothing is retyped by hand, so nothing can drift from it.
 import fs from 'node:fs';
-const F='/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md';
+import { fileURLToPath } from 'node:url';
+const F=fileURLToPath(new URL('../../../docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md', import.meta.url));
 const lines=fs.readFileSync(F,'utf8').split('\n');
 const annexB=lines.findIndex(l=>l.startsWith('# Annex B'));
 const blocks=[]; let sec=null;

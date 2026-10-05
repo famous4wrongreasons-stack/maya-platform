@@ -1,16 +1,22 @@
 # Regenerating the compiled Widget Contract
 
-`src/widget-contract` is **generated from the certified contract**, not hand-maintained. The
-contract is the source, so nothing here can drift from it.
+The fenced modules and derived tables in `src/widget-contract` are generated from the
+certified contract. The directory also contains hand-maintained runtime/projection files.
+`emit.mjs` clears its output directory: emit into a fresh temporary directory and copy only
+the emitted files back, preserving those other files. Run from `maya-saas-backend`:
 
 ```sh
-node scripts/widget-contract/extract.mjs      /tmp/blocks.json
-node scripts/widget-contract/emit.mjs         /tmp/blocks.json src/widget-contract
-node scripts/widget-contract/build-tables.mjs src/widget-contract/tables.ts
-cp   scripts/widget-contract/derived-shapes.ts.tmpl src/widget-contract/derived-shapes.ts
-node scripts/widget-contract/postprocess.mjs  src/widget-contract
-npx prettier --write 'src/widget-contract/**/*.ts'
+contract_tmp=$(mktemp -d)
+node scripts/widget-contract/extract.mjs "$contract_tmp/blocks.json"
+node scripts/widget-contract/emit.mjs "$contract_tmp/blocks.json" "$contract_tmp/modules"
+node scripts/widget-contract/build-tables.mjs "$contract_tmp/modules/tables.ts"
+cp scripts/widget-contract/derived-shapes.ts.tmpl "$contract_tmp/modules/derived-shapes.ts"
+node scripts/widget-contract/postprocess.mjs "$contract_tmp/modules"
+npx prettier --config .prettierrc --write "$contract_tmp/modules/"*.ts
+cp "$contract_tmp/modules/"*.ts src/widget-contract/
 node scripts/widget-contract/emit-runtime-floor.mjs
+node scripts/widget-contract/emit-confirmation-guard.mjs
+node scripts/widget-contract/emit-ledgers.mjs
 node scripts/widget-contract/emit-runtime-floor.mjs --check
 npx tsc --noEmit --project tsconfig.widget-contract.json
 node scripts/widget-contract-check.mjs

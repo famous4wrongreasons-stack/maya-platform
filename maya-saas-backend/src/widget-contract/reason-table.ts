@@ -243,8 +243,8 @@ export const UNMAPPED_DENIAL_PROJECTION: DenialProjection = Object.freeze({
 });
 
 /**
- * The projection families. P10 requires a row for each of the **118 distinct** `c9Deny('…')` codes
- * under `src/orchestration/`; it does not require 118 distinct projections, and inventing 118 would
+ * The projection families. P10 requires a row for each of the **127 distinct** `c9Deny('…')` codes
+ * under `src/orchestration/`; it does not require 127 distinct projections, and inventing 127 would
  * be inventing meaning the contract does not carry. So the codes are grouped by what the denial
  * says about the CELL, and the rule for each group is written down where a reviewer can disagree
  * with it. `denial-projection.ratchet.spec.ts` holds the totality; the grouping is the judgement.
@@ -259,6 +259,24 @@ const PROJECTION_FAMILIES: readonly {
   readonly why: string;
   readonly codes: readonly string[];
 }[] = [
+  {
+    // P10, owner decision 2026-10-05: explicit rows preserving the existing neutral outcome.
+    cell_state: 'UNAVAILABLE',
+    reason_code: 'PROVIDER_SILENT',
+    limitation_severity: 'limitation',
+    why: 'The nine existing conversation/source-read denials retain their previously certified neutral fallback; no new explanation or behavior is inferred.',
+    codes: [
+      'conversation_intent_hash',
+      'conversation_read_only',
+      'conversation_read_run_required',
+      'conversation_turn_unavailable',
+      'read_work_in_progress_or_unknown',
+      'source_read_receipt',
+      'source_read_replay_changed',
+      'source_read_unconfirmed',
+      'source_replay_owner_required',
+    ],
+  },
   {
     // R3.9.3 names five of these by name as "policy fences, not faults".
     cell_state: 'UNAVAILABLE',

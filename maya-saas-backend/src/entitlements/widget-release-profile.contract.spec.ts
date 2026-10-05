@@ -9,6 +9,7 @@ import {
   NO_HANDOFF_PROFILE,
   PROFILE_CERT,
   PROFILE_DIGEST,
+  PROFILE_MANIFEST,
   PROFILE_REGISTRY_DIGEST,
   profileCertificate,
 } from './widget-release-profile.contract';
@@ -98,6 +99,24 @@ describe('fixed no-handoff certificate threshold', () => {
     expect(PROFILE_REGISTRY.successorCapabilities).toEqual(
       C9_CAPABILITIES.map((row) => row.capabilityKey).sort(),
     );
+  });
+  it('requires a new profile digest after the one owner-approved successor admission', () => {
+    const previousProfileDigest = releaseHash({
+      ...PROFILE_MANIFEST,
+      combinations: {
+        ...PROFILE_REGISTRY,
+        successorCapabilities: PROFILE_REGISTRY.successorCapabilities.filter(
+          (key) => key !== 'business.rules.read',
+        ),
+      },
+    });
+    expect(previousProfileDigest).not.toBe(PROFILE_DIGEST);
+    expect(() =>
+      profileCertificate({
+        ...profileCertificate(fixture()),
+        profileDigest: previousProfileDigest,
+      }),
+    ).toThrow();
   });
   it.each([
     '9.6',

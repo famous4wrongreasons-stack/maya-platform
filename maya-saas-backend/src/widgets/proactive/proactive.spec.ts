@@ -427,11 +427,11 @@ describe('K13 — no C10 autonomy', () => {
     const openers = rows.filter(
       (c) => c.mode === 'PROPOSE_ONLY' || c.mode === 'OWNER_HANDOFF',
     );
-    // The contract states the membership: "15 of the 56 registered keys (13 PROPOSE_ONLY +
+    // The contract states the membership: "15 of the 57 registered keys (13 PROPOSE_ONLY +
     // 2 OWNER_HANDOFF), verified by enumerating the live registry." Enumerated here, it
-    // reproduces — 56 keys, 41 READ, 13 + 2.
-    expect(rows).toHaveLength(56);
-    expect(reads).toHaveLength(41);
+    // reproduces — 57 keys, 42 READ, 13 + 2.
+    expect(rows).toHaveLength(57);
+    expect(reads).toHaveLength(42);
     expect(rows.filter((c) => c.mode === 'PROPOSE_ONLY')).toHaveLength(13);
     expect(rows.filter((c) => c.mode === 'OWNER_HANDOFF')).toHaveLength(2);
     expect(openers).toHaveLength(15);
