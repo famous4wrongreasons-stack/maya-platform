@@ -540,8 +540,8 @@ export class AiToolHandlerService {
 
   /**
    * Публичный список мастеров для гостевого чата и записи.
-   * Имена на витрине уже публичны — обезличивать specialist_N нельзя,
-   * иначе MAYA не может рассказать клиенту о барберах.
+   * Display labels stay available to authorized server presentation/catalog
+   * binding. AiCore projects request-local aliases at the external model boundary.
    */
   private async readStaff(tenantId: string) {
     const [staff, tenant] = await Promise.all([

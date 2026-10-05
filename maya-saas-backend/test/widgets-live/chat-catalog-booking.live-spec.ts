@@ -113,6 +113,7 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
     );
     const prompts: string[] = [];
     const plans: unknown[] = [];
+    const serializedRequests: string[] = [];
     jest
       .spyOn(http.app.get(AiCoreModelService), 'decide')
       .mockImplementation((input) => {
@@ -121,7 +122,10 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
         return model.decide(input);
       });
     let index = 0;
-    jest.spyOn(global, 'fetch').mockImplementation(() => {
+    jest.spyOn(global, 'fetch').mockImplementation((_url, init) => {
+      if (typeof init?.body !== 'string')
+        throw new Error('Expected serialized body');
+      serializedRequests.push(init.body);
       // Scripted variants use the saved live response shape and real parser; only
       // the separate raw-capture regression claims exact transcript replay.
       const output = JSON.parse(captured[index === 9 ? 1 : 0].content) as {
@@ -133,7 +137,7 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
       const mentions =
         prompts.at(-1)!.match(/\[name removed\]@[a-f0-9]{32}_\d+/g) ?? [];
       const entities = [
-        { employee: mentions[0] },
+        { employee: mentions[0], branch: 'private-branch-synthetic' },
         { date_or_period: day, services: ['борода'] },
         { employee: mentions[0] },
         { employee: mentions.at(-1) },
@@ -229,13 +233,55 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
     }
     expect(prompts.every((p) => !/Стас|Александр/.test(p))).toBe(true);
     expect(index).toBe(10);
+    // Actual provider request bodies, not only the messages passed to decide.
+    // Every turn resumes encrypted history, including negation, replacement,
+    // self-name and a multi-service clarification. No network is used.
+    expect(serializedRequests).toHaveLength(10);
+    for (const body of serializedRequests) {
+      const data = JSON.stringify(
+        (JSON.parse(body) as { messages: { role: string }[] }).messages.filter(
+          (m) => m.role !== 'system',
+        ),
+      );
+      expect(/Стас|Стаса|Александр|Александра/.test(data)).toBe(false);
+      expect(data.includes('private-branch-synthetic')).toBe(false);
+      for (const id of [
+        source.staffId,
+        other.id,
+        source.serviceId,
+        tenant.id,
+        user.id,
+      ])
+        expect(body).not.toContain(id);
+    }
+    const previousAliases = plans
+      .slice(1)
+      .map(
+        (plan) =>
+          (plan as { tasks: { entities: { employee: string } }[] }).tasks[0]
+            .entities.employee,
+      );
+    expect(new Set(previousAliases).size).toBe(previousAliases.length);
+
+    const branchAliases = plans
+      .slice(1)
+      .map(
+        (plan) =>
+          (plan as { tasks: { entities: { branch: string } }[] }).tasks[0]
+            .entities.branch,
+      );
+    expect(
+      branchAliases.every((alias) =>
+        /^\[reference removed\]@[a-f0-9]{32}_\d+$/.test(alias),
+      ),
+    ).toBe(true);
+    expect(new Set(branchAliases).size).toBe(branchAliases.length);
     expect(plans[2]).toMatchObject({
       tasks: [
         {
           entities: {
             date_or_period: day,
             services: ['Борода'],
-            employee: 'Стас',
           },
         },
       ],
@@ -246,7 +292,6 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
           entities: {
             date_or_period: day,
             services: ['Стрижка', 'Борода'],
-            employee: 'Александр',
           },
         },
       ],
@@ -257,7 +302,6 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
           entities: {
             date_or_period: tomorrow,
             services: ['Борода'],
-            employee: 'Александр',
             time_of_day: 'evening',
           },
         },
@@ -368,7 +412,12 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
       ),
     ).toBe(true);
   });
-  it.each(['foreign_staff', 'foreign_service', 'duplicate_name'] as const)(
+  it.each([
+    'foreign_staff',
+    'foreign_service',
+    'duplicate_name',
+    'stale_alias',
+  ] as const)(
     'refuses %s before availability, approval or booking execution',
     async (scenario) => {
       const tenant = await fx.tenant(
@@ -422,7 +471,11 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
           return model.decide(input);
         });
       const employee =
-        scenario === 'foreign_staff' ? foreign.staffId : '[name removed]';
+        scenario === 'foreign_staff'
+          ? foreign.staffId
+          : scenario === 'stale_alias'
+            ? '[name removed]@00000000000000000000000000000000_1'
+            : '[name removed]';
       const services = [
         scenario === 'foreign_service'
           ? foreign.serviceId
@@ -443,7 +496,7 @@ describe('Natural booking catalog binding [HTTP] [PostgreSQL] [scripted model] [
         service_ids: services,
       });
       jest.spyOn(global, 'fetch').mockImplementation(() => {
-        if (scenario !== 'foreign_staff')
+        if (scenario !== 'foreign_staff' && scenario !== 'stale_alias')
           output.semantic_plan.tasks[0].entities_json = JSON.stringify({
             date_or_period: 'tomorrow',
             employee: currentMention,

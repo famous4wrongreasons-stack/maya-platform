@@ -848,7 +848,7 @@ export class AiCoreService {
           principalRole: toolUser.role,
           messages: sanitized.messages,
           tools,
-          toolResults: [...toolResults],
+          toolResults: sanitized.project(toolResults, true),
           // После подтверждённого результата CRM отдельный этап планирования
           // больше не нужен: он мог выбрать несуществующий инструмент и
           // уничтожить уже готовые данные. Следующий вызов сразу формулирует
@@ -863,9 +863,9 @@ export class AiCoreService {
             requirement && !requirementSatisfied ? requiredToolNames : [],
           nowUtc: new Date().toISOString(),
           businessTimezone,
-          memoryFacts,
-          corrections: pendingCorrections,
-          conversationPlan: activeSemanticPlan,
+          memoryFacts: sanitized.project(memoryFacts),
+          corrections: sanitized.project(pendingCorrections),
+          conversationPlan: sanitized.project(activeSemanticPlan),
         });
         if (!decision) {
           const deterministicReply = this.deterministicGroundedReply(
@@ -914,6 +914,19 @@ export class AiCoreService {
             toolResults,
           );
         }
+        // Resolve only references minted for this request; canonical tool and
+        // catalog owners still validate tenant, permissions and every argument.
+        if (decision.toolCall)
+          decision.toolCall.arguments = sanitized.resolveReferences(
+            decision.toolCall.arguments,
+          );
+        if (decision.semanticPlan)
+          decision.semanticPlan = sanitized.resolveReferences(
+            decision.semanticPlan,
+            true,
+          );
+        if (typeof decision.reply === 'string')
+          decision.reply = sanitized.present(decision.reply);
         decisions.push(decision);
         if (decision.semanticPlan) {
           activeSemanticPlan = decision.semanticPlan;
@@ -5031,6 +5044,9 @@ export class AiCoreService {
     messages: AiCoreMessage[];
     redacted: boolean;
     nameReferences: ReadonlyMap<string, string>;
+    project: <T>(value: T, catalog?: boolean) => T;
+    resolveReferences: <T>(value: T, semantic?: boolean) => T;
+    present: (value: string) => string;
   } {
     let redacted = false;
     const nameReferences = new Map<string, string>();
@@ -5077,7 +5093,153 @@ export class AiCoreService {
         error: { code: 'ai_chat_input_too_large' },
       });
     }
-    return { messages: trimmed, redacted, nameReferences };
+    // Same request-local mention owner as current text. Private values never
+    // become model context; aliases expire with this chat invocation. Keep the
+    // encrypted semantic owner unchanged and revalidate selections in its tenant.
+    const references = new Map<string, string | number>();
+    const serviceLabels = new Map<string, string>();
+    const alias = (value: string, names: boolean) => {
+      if (/^\[name removed\]@[a-f0-9]{32}_\d+$/.test(value)) return value;
+      const map = names ? nameReferences : references;
+      for (const [token, raw] of map) if (raw === value) return token;
+      const token = `[${names ? 'name' : 'reference'} removed]@${nonce}_${++mention}`;
+      map.set(token, value);
+      return token;
+    };
+    const safeText = (value: string) => {
+      // Re-project private values returned by this request's model. Never let a
+      // canonical argument restored for validation escape on a later iteration.
+      for (const [token, raw] of references)
+        if (typeof raw === 'string' && value === raw) return token;
+      for (const [token, raw] of nameReferences)
+        if (value === raw) return token;
+      // Do not redact the random digits of an existing opaque mention as a phone.
+      return value
+        .split(/(\[(?:name|reference) removed\]@[a-f0-9]{32}_\d+)/g)
+        .map((part) =>
+          /^\[(?:name|reference) removed\]@/.test(part)
+            ? part
+            : this.redactLikelyProperNames(
+                this.redactSensitiveText(part, (name) => alias(name, true))
+                  .content,
+                (name) => alias(name, true),
+              ).content,
+        )
+        .join('');
+    };
+    const walk = (
+      value: unknown,
+      catalog: boolean,
+      key = '',
+      staff = false,
+    ): unknown => {
+      if (Array.isArray(value))
+        return value.map((item) => walk(item, catalog, key, staff));
+      if (value !== null && typeof value === 'object') {
+        const row = value as Record<string, unknown>;
+        return Object.fromEntries(
+          Object.entries(row).map(([field, item]) => [
+            field,
+            walk(
+              item,
+              catalog,
+              field,
+              (staff && field !== 'services') ||
+                (field === 'result' && row.name === 'catalog.staff.read') ||
+                /^(staff|staff_scope|staff_summary|staff_changes|masters|employees|provider)$/.test(
+                  field,
+                ),
+            ),
+          ]),
+        );
+      }
+      if (typeof value === 'string') {
+        if (
+          /^(employee|staff_name|employee_name|provider_name|client_name|display_name)$/.test(
+            key,
+          ) ||
+          (staff && key === 'name')
+        )
+          return alias(value, true);
+        if (
+          (catalog && /^(id|ids)$|_ids?$|Id$|Ids$/.test(key)) ||
+          /^(branch|appointment|client|customer)$/.test(key) ||
+          /_ids?$|Id$|Ids$/.test(key) ||
+          /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(value) ||
+          (['service', 'services'].includes(key) && /^\d+$/.test(value))
+        )
+          return alias(value, false);
+        return safeText(value);
+      }
+      if (
+        typeof value === 'number' &&
+        ((catalog && /^(id|ids)$/.test(key)) ||
+          /_ids?$|Id$|Ids$/.test(key) ||
+          /^(branch|appointment|client|customer|service|services)$/.test(key))
+      ) {
+        const token = alias(String(value), false);
+        references.set(token, value);
+        return token;
+      }
+      return value;
+    };
+    const restore = (value: unknown, semantic: boolean, key = ''): unknown => {
+      if (typeof value === 'string') {
+        const raw = references.get(value);
+        // Persist service meaning, not provider IDs. Use only this request's
+        // canonical catalog; the next booking bind rechecks label uniqueness.
+        // A reference from another source is not a service selection.
+        if (
+          raw !== undefined &&
+          semantic &&
+          ['service', 'services'].includes(key)
+        )
+          return serviceLabels.get(String(raw)) ?? '[reference unavailable]';
+        return raw ?? value;
+      }
+      if (Array.isArray(value))
+        return value.map((item) => restore(item, semantic, key));
+      if (value !== null && typeof value === 'object')
+        return Object.fromEntries(
+          Object.entries(value).map(([key, item]) => [
+            key,
+            restore(item, semantic, key),
+          ]),
+        );
+      return value;
+    };
+    return {
+      messages: trimmed,
+      redacted,
+      nameReferences,
+      project: <T>(value: T, catalog = false): T => {
+        if (catalog && Array.isArray(value)) {
+          for (const entry of value as AiCoreToolResult[]) {
+            if (entry.name !== 'catalog.services.read') continue;
+            const rows = this.record(entry.result).services;
+            if (!Array.isArray(rows)) continue;
+            for (const item of rows) {
+              const row = this.record(item);
+              if (
+                typeof row.id === 'string' &&
+                typeof row.name === 'string' &&
+                rows.filter((other) => this.record(other).id === row.id)
+                  .length === 1
+              )
+                serviceLabels.set(row.id, row.name);
+            }
+          }
+        }
+        return walk(value, catalog) as T;
+      },
+      resolveReferences: <T>(value: T, semantic = false): T =>
+        restore(value, semantic) as T,
+      present: (value: string) =>
+        value.replace(
+          /\[name removed\]@[a-f0-9]{32}_\d+/g,
+          (token) => nameReferences.get(token) ?? '[name removed]',
+        ),
+    };
   }
 
   private redactSensitiveText(

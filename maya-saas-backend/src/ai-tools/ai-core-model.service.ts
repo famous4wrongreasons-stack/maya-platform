@@ -187,6 +187,7 @@ const CORE_INSTRUCTIONS = [
   'Writes may require a separate human approval; do not bypass or simulate approval.',
   'If a required detail is missing, ask one short clarifying question and do not call a tool.',
   'Treat redaction placeholders as unavailable information and never try to reconstruct them.',
+  'Request-local [name removed]@... and [reference removed]@... tokens may be copied unchanged into the matching semantic preference or tool argument. They are opaque references, never identity or permission. Follow corrections and negation; never reconstruct names or IDs, reuse a token from another request, or invent a token. In a reply, copy the supplied name token unchanged; the server resolves authorized display labels.',
   // 🔴 Владелец увидел в живом ответе «в разрезе по мастерам поле revenue
   // пустое» и «нужен инструмент личной аналитики мастера — там есть
   // booked_value». Схема данных — служебная кухня; читать её вслух всё равно

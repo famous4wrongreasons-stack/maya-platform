@@ -13,7 +13,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
 import { AiCoreModelService } from './ai-core-model.service';
 import { AiCoreService } from './ai-core.service';
 import { AiMemoryService } from './ai-memory.service';
-import type { AiCoreModelDecision } from './ai-core.types';
+import type { AiCoreModelDecision, AiCoreModelInput } from './ai-core.types';
 import { AiToolRuntimeService } from './ai-tool-runtime.service';
 import { StaffScheduleCommandService } from './staff-schedule-command.service';
 
@@ -3401,9 +3401,10 @@ describe('AiCoreService', () => {
       ],
     });
 
-    // Имя уходит в модель напрямую — иначе назвать мастера она не сможет.
+    // Model sees request-local mentions; presentation resolves labels on the server.
     const modelInput = JSON.stringify(mocks.model.decide.mock.calls[1]?.[0]);
-    expect(modelInput).toContain('Илья');
+    expect(modelInput).not.toContain('Илья');
+    expect(modelInput).toContain('[name removed]@');
     expect(modelInput).toContain('Борода');
     // Разбор доходит до пользователя дословно: ни сторож чисел, ни подстановка
     // имён его больше не трогают.
@@ -3412,6 +3413,240 @@ describe('AiCoreService', () => {
     );
     expect(result.source).not.toBe('safe_fallback');
     expect(result.grounding).toMatchObject({ status: 'verified' });
+  });
+
+  it('projects actual serialized model requests through read, correction and server label presentation', async () => {
+    const mocks = createService(['analytics.business.query']);
+    const provider = new AiCoreModelService(
+      new ConfigService({
+        AI_CORE_PROVIDER: 'deepseek',
+        DEEPSEEK_API_KEY: 'offline-placeholder',
+        DEEPSEEK_BASE_URL: 'https://model.example.invalid',
+      }),
+    );
+    mocks.model.decide.mockImplementation((input) => provider.decide(input));
+    mocks.memory.listForModel.mockResolvedValue([
+      'Мастер Илья предпочитает утро',
+    ]);
+    mocks.runtime.execute.mockResolvedValue({
+      status: 'completed',
+      execution_id: 'private-execution-id',
+      result: {
+        verified: true,
+        metrics: { appointments_total: 40 },
+        changes: {},
+        staff_scope: { name: 'Рустам Ахметов', title: 'Мастер' },
+        current: {
+          staff_summary: [
+            {
+              id: 'private-staff-id',
+              name: 'Рустам Ахметов',
+              appointments: 40,
+            },
+          ],
+        },
+      },
+    });
+    const bodies: string[] = [];
+    const transport = jest
+      .spyOn(global, 'fetch')
+      .mockImplementation((_url, init) => {
+        if (typeof init?.body !== 'string')
+          throw new Error('Expected serialized body');
+        const body = init.body;
+        bodies.push(body);
+        const envelope = JSON.parse(body) as {
+          messages: { content: string }[];
+        };
+        const input = JSON.parse(envelope.messages.at(-1)!.content) as {
+          tool_results: {
+            result: { current: { staff_summary: { name: string }[] } };
+          }[];
+        };
+        let content: string;
+        if (bodies.length === 1) {
+          content = JSON.stringify({
+            semantic_plan: {
+              parent_request: 'Анализ записей',
+              language: 'ru',
+              dialogue_act: 'request',
+              tasks: [
+                {
+                  id: 't1',
+                  intent: 'analytics.business_summary',
+                  entities: {},
+                  confidence: 0.99,
+                },
+              ],
+            },
+            tool_call: {
+              name: 'analytics.business.query',
+              arguments_json: '{}',
+            },
+          });
+        } else {
+          const alias =
+            input.tool_results[0].result.current.staff_summary[0].name;
+          content =
+            bodies.length === 2
+              ? `${alias}: 999 записей.`
+              : `${alias}: 40 записей.`;
+        }
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              choices: [{ finish_reason: 'stop', message: { content } }],
+              usage: {
+                prompt_tokens: 1,
+                completion_tokens: 1,
+                total_tokens: 2,
+              },
+            }),
+            { status: 200 },
+          ),
+        );
+      });
+    try {
+      const result = await mocks.service.chat(user, {
+        ...dto,
+        messages: [
+          {
+            role: 'user',
+            content: 'Кто из мастеров просел по сравнению с прошлым месяцем?',
+          },
+        ],
+      });
+      expect(bodies.length).toBe(3);
+      expect(bodies[2]).toContain('grounding_corrections');
+      for (const body of bodies) {
+        const data = JSON.stringify(
+          (
+            JSON.parse(body) as { messages: { role: string }[] }
+          ).messages.filter((m) => m.role !== 'system'),
+        );
+        expect(
+          /Илья|Ильи|Рустам|Ахметов|private-staff-id|private-execution-id/.test(
+            data,
+          ),
+        ).toBe(false);
+      }
+      expect(bodies[1]).toContain('[name removed]@');
+      expect(bodies[1]).toContain('[reference removed]@');
+      expect(result.reply).toBe('Рустам Ахметов: 40 записей.');
+      expect(result.grounding.status).toBe('verified');
+    } finally {
+      transport.mockRestore();
+    }
+  });
+
+  it('keeps nonnumeric catalog service IDs out of serialized resumed semantic context', async () => {
+    const { service } = createService();
+    const provider = new AiCoreModelService(
+      new ConfigService({
+        AI_CORE_PROVIDER: 'deepseek',
+        DEEPSEEK_API_KEY: 'offline-placeholder',
+        DEEPSEEK_BASE_URL: 'https://model.example.invalid',
+      }),
+    );
+    const first = service['sanitizeMessages']([
+      { role: 'user', content: 'Хочу эту услугу' },
+    ]);
+    const catalog = first.project(
+      [
+        {
+          name: 'catalog.services.read',
+          result: {
+            services: [{ id: 'svc-standard-private', name: 'Борода' }],
+          },
+        },
+      ],
+      true,
+    );
+    const alias = catalog[0].result.services[0].id;
+    const bodies: string[] = [];
+    const transport = jest
+      .spyOn(global, 'fetch')
+      .mockImplementation((_url, init) => {
+        if (typeof init?.body !== 'string')
+          throw new Error('Expected serialized body');
+        bodies.push(init.body);
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              choices: [
+                {
+                  finish_reason: 'stop',
+                  message: {
+                    content: JSON.stringify({
+                      semantic_plan: {
+                        parent_request: 'Выбрать время',
+                        language: 'ru',
+                        dialogue_act: 'request',
+                        tasks: [
+                          {
+                            id: 't1',
+                            intent: 'booking.find_availability',
+                            confidence: 0.99,
+                            entities: {
+                              services: [
+                                bodies.length === 1 ? alias : 'Борода',
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                      tool_call: null,
+                    }),
+                  },
+                },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      });
+    const input: AiCoreModelInput = {
+      surface: 'web',
+      persona: 'admin',
+      principalRole: UserRole.CLIENT,
+      messages: first.messages,
+      tools: [
+        {
+          name: 'booking.availability.read',
+          description: 'Read availability',
+          input_schema: { type: 'object' },
+          risk_tier: 'read',
+          approval_policy: 'none',
+        },
+      ],
+      toolResults: catalog,
+      allowToolCall: true,
+      requiredToolNames: [],
+    };
+    try {
+      const selected = await provider.decide(input);
+      const retained = first.resolveReferences(selected!.semanticPlan!, true);
+      expect(retained.tasks[0].entities.services).toEqual(['Борода']);
+      expect(first.resolveReferences({ service_ids: [alias] })).toEqual({
+        service_ids: ['svc-standard-private'],
+      });
+      const resumed = service['sanitizeMessages']([
+        { role: 'user', content: 'А завтра?' },
+      ]);
+      await provider.decide({
+        ...input,
+        messages: resumed.messages,
+        toolResults: [],
+        conversationPlan: resumed.project(retained),
+      });
+      expect(bodies.length).toBe(2);
+      for (const body of bodies)
+        expect(body.includes('svc-standard-private')).toBe(false);
+      expect(bodies[1]).toContain('Борода');
+      expect(bodies[1]).not.toContain(alias);
+    } finally {
+      transport.mockRestore();
+    }
   });
 
   it('lets a salon-wide sentence without any master name through untouched', async () => {
