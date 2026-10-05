@@ -4,12 +4,12 @@
   "webDir": "../maya-carrier-react/dist/capacitor",
   "ios": {
     "contentInset": "never",
-    "scrollEnabled": true,
+    "scrollEnabled": false,
     "limitsNavigationsToAppBoundDomains": true
   },
   "plugins": {
     "Keyboard": {
-      "resize": "none"
+      "resize": "native"
     },
     "StatusBar": {
       "overlaysWebView": true,

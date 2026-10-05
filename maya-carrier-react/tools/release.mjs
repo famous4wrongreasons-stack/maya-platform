@@ -18,6 +18,8 @@ export function checkNativeConfig(config) {
   assert.equal(config.appId, 'ru.mayaos.app', 'native app identity changed');
   assert.equal(config.appName, 'MAYA', 'native app name changed');
   assert.equal(config.server, undefined, 'remote/alternate native server is forbidden');
+  assert.equal(config.ios?.scrollEnabled, false, 'only the chat lane may scroll; native outer scrolling is forbidden');
+  assert.equal(config.plugins?.Keyboard?.resize, 'native', 'native keyboard must resize the WebView exactly once');
 }
 
 function run(file, args, cwd = ROOT) {

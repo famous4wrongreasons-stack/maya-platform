@@ -8,7 +8,7 @@
 @media (prefers-color-scheme: dark) {
   :root { --bg: #000000; --text: #f4f0eb; }
 }
-html, body { margin: 0; background: var(--bg); color: var(--text); overscroll-behavior: none; }
+html, body { width: 100%; height: 100%; overflow: hidden; margin: 0; background: var(--bg); color: var(--text); overscroll-behavior: none; }
 /*
  * Visually hidden, from the shell's entry/styles.css:92-100 verbatim. The carrier's earlier rule
  * dropped `margin`, `padding`, `clip` and `!important`; without them a hidden live region can still
@@ -26,7 +26,19 @@ html, body { margin: 0; background: var(--bg); color: var(--text); overscroll-be
   white-space: nowrap !important;
   border: 0 !important;
 }
-.app { min-height: 100dvh; overflow-wrap: anywhere; }
+body { position: fixed; inset: 0; }
+.app {
+  position: fixed;
+  top: var(--maya-viewport-top, 0px);
+  left: 0;
+  width: 100%;
+  height: var(--maya-viewport-height, 100dvh);
+  min-height: 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+button, input, textarea { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid #0A84FF; outline-offset: 3px; }
 @media (forced-colors: active) { :root { --text: CanvasText; } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

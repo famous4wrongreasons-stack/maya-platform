@@ -1,9 +1,7 @@
 // The signed-out surface.
 //
-// 🔴 This is NOT a port of the owner's canonical sign-in screen — that screen is its own surface and
-// has not been asked for. It is the least-invented thing that can reach a session: the runtime's own
-// first-run path, in the same tokens, with the runtime's own sentences. It is deliberately plain so
-// that nothing here reads as a design decision.
+// Presentation uses the same Aurora tokens, Maya mark and pill controls as the chat.
+// Session and business selection remain owned by the shared runtime.
 //
 // Two paths, both the runtime's: hand this browser to Telegram for a chosen business, or a one-time
 // code by email. The email path needs an `<input>`, which the carrier's closed tag set did not have
@@ -57,6 +55,7 @@ export function SignIn({
 }) {
   const dark = t.dark;
   const [term, setTerm] = useState('');
+  const [emailMode, setEmailMode] = useState(false);
   const [matches, setMatches] = useState<Matches>([]);
   const [failure, setFailure] = useState<Failure>(null);
   const [busy, setBusy] = useState(false);
@@ -165,21 +164,22 @@ export function SignIn({
           inset: 0,
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
-          gap: 18,
-          padding: 'calc(env(safe-area-inset-top, 0px) + 32px) 26px calc(env(safe-area-inset-bottom, 0px) + 32px)',
+          alignItems: 'center',
+          padding: 'calc(env(safe-area-inset-top, 0px) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px)',
           boxSizing: 'border-box',
-          overflow: 'auto',
+          overflowY: 'auto',
+          overscrollBehavior: 'contain',
         }}
       >
+        <div style={{ width: '100%', maxWidth: 400, margin: 'auto', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 18 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: t.ink }}>
-          <MayaMark size={30} />
+          <MayaMark size={40} />
           <h2
             style={{
               margin: 0,
               fontFamily: READING,
               fontWeight: 500,
-              fontSize: 19,
+              fontSize: 28,
               letterSpacing: '-0.01em',
               color: t.ink,
             }}
@@ -188,12 +188,17 @@ export function SignIn({
           </h2>
         </div>
 
+        <p style={{ margin: '0 0 10px', fontFamily: READING, fontSize: 16, lineHeight: '24px', color: t.ink, opacity: 0.62 }}>
+          {emailMode ? 'Получите код для входа на вашу почту.' : 'Найдите свой салон и продолжите через Telegram.'}
+        </p>
+
         {landing.state === 'running' ? (
-          <p style={{ margin: 0, fontFamily: READING, fontSize: 15, lineHeight: '22px', color: t.ink }}>
+          <p style={{ margin: 0, fontFamily: READING, fontSize: 16, lineHeight: '22px', color: t.ink }}>
             Заканчиваем вход…
           </p>
         ) : (
           <>
+            {!emailMode ? <>
             <label
               style={{
                 display: 'flex',
@@ -222,17 +227,17 @@ export function SignIn({
                 }}
                 style={{
                   width: '100%',
-                  height: 48,
+                  height: 52,
                   boxSizing: 'border-box',
                   padding: '13px 15px',
                   margin: 0,
                   resize: 'none',
                   overflow: 'hidden',
-                  borderRadius: 14,
+                  borderRadius: 24,
                   border: '1px solid ' + (dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.16)'),
                   background: dark ? 'rgba(18,18,20,0.9)' : 'rgba(252,249,244,0.9)',
                   fontFamily: READING,
-                  fontSize: 15,
+                  fontSize: 16,
                   lineHeight: '20px',
                   color: t.ink,
                   outline: 'none',
@@ -245,19 +250,19 @@ export function SignIn({
               aria-disabled={busy}
               onClick={() => find()}
               style={{
-                height: 48,
-                borderRadius: 14,
+                height: 52,
+                borderRadius: 24,
                 border: '0',
                 background: MAYA_ACCENT,
                 color: MAYA_ACCENT_ON,
                 fontFamily: READING,
-                fontSize: 15,
+                fontSize: 16,
                 fontWeight: 500,
                 cursor: busy ? 'default' : 'pointer',
                 opacity: busy ? 0.55 : 1,
               }}
             >
-              Найти
+              Найти салон
             </button>
 
             {matches.length > 0 ? (
@@ -272,17 +277,18 @@ export function SignIn({
                         width: '100%',
                         textAlign: 'left',
                         padding: '13px 15px',
-                        borderRadius: 14,
+                        borderRadius: 24,
                         border: '1px solid ' + (dark ? 'rgba(244,240,235,0.18)' : 'rgba(24,22,15,0.14)'),
                         background: 'transparent',
                         color: t.ink,
                         fontFamily: READING,
-                        fontSize: 15,
+                        fontSize: 16,
                         lineHeight: '20px',
                         cursor: busy ? 'default' : 'pointer',
                       }}
                     >
                       {match.name}
+                      <span style={{ display: 'block', fontSize: 13, color: MAYA_ACCENT, marginTop: 4 }}>Продолжить через Telegram →</span>
                       {match.address === null ? null : (
                         <span
                           style={{
@@ -302,15 +308,13 @@ export function SignIn({
               </ul>
             ) : null}
 
-            <div
-              aria-hidden="true"
-              style={{
-                height: 1,
-                margin: '6px 0',
-                background: dark ? 'rgba(244,240,235,0.14)' : 'rgba(24,22,15,0.12)',
-              }}
-            />
+            </> : null}
+            <button type="button" aria-disabled={busy} onClick={() => { if (!busy) setEmailMode(!emailMode); }}
+              style={{ minHeight: 48, borderRadius: 26, border: '1px solid ' + (dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.16)'), background: 'transparent', color: t.ink, fontFamily: READING, fontSize: 16, cursor: 'pointer' }}>
+              {emailMode ? 'Найти салон вместо этого' : 'Войти по email'}
+            </button>
 
+            {emailMode ? <>
             {phase === 'business' ? (
               <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {choices.map((choice) => (
@@ -323,12 +327,12 @@ export function SignIn({
                         width: '100%',
                         textAlign: 'left',
                         padding: '13px 15px',
-                        borderRadius: 14,
+                        borderRadius: 24,
                         border: '1px solid ' + (dark ? 'rgba(244,240,235,0.18)' : 'rgba(24,22,15,0.14)'),
                         background: 'transparent',
                         color: t.ink,
                         fontFamily: READING,
-                        fontSize: 15,
+                        fontSize: 16,
                         lineHeight: '20px',
                         cursor: busy ? 'default' : 'pointer',
                       }}
@@ -368,15 +372,15 @@ export function SignIn({
                     }}
                     style={{
                   width: '100%',
-                  height: 48,
+                  height: 52,
                   boxSizing: 'border-box',
                   padding: '13px 15px',
                   margin: 0,
-                  borderRadius: 14,
+                  borderRadius: 24,
                   border: '1px solid ' + (dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.16)'),
                   background: dark ? 'rgba(18,18,20,0.9)' : 'rgba(252,249,244,0.9)',
                   fontFamily: READING,
-                  fontSize: 15,
+                  fontSize: 16,
                   lineHeight: '20px',
                   color: t.ink,
                   outline: 'none',
@@ -388,13 +392,13 @@ export function SignIn({
                   aria-disabled={busy}
                   onClick={() => verify(null)}
                   style={{
-                    height: 48,
-                    borderRadius: 14,
+                    height: 52,
+                    borderRadius: 24,
                     border: '0',
                     background: MAYA_ACCENT,
                     color: MAYA_ACCENT_ON,
                     fontFamily: READING,
-                    fontSize: 15,
+                    fontSize: 16,
                     fontWeight: 500,
                     cursor: busy ? 'default' : 'pointer',
                     opacity: busy ? 0.55 : 1,
@@ -432,15 +436,15 @@ export function SignIn({
                     }}
                     style={{
                   width: '100%',
-                  height: 48,
+                  height: 52,
                   boxSizing: 'border-box',
                   padding: '13px 15px',
                   margin: 0,
-                  borderRadius: 14,
+                  borderRadius: 24,
                   border: '1px solid ' + (dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.16)'),
                   background: dark ? 'rgba(18,18,20,0.9)' : 'rgba(252,249,244,0.9)',
                   fontFamily: READING,
-                  fontSize: 15,
+                  fontSize: 16,
                   lineHeight: '20px',
                   color: t.ink,
                   outline: 'none',
@@ -452,13 +456,13 @@ export function SignIn({
                   aria-disabled={busy}
                   onClick={() => startEmail()}
                   style={{
-                    height: 48,
-                    borderRadius: 14,
+                    height: 52,
+                    borderRadius: 24,
                     border: '1px solid ' + (dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.16)'),
                     background: 'transparent',
                     color: t.ink,
                     fontFamily: READING,
-                    fontSize: 15,
+                    fontSize: 16,
                     fontWeight: 500,
                     cursor: busy ? 'default' : 'pointer',
                     opacity: busy ? 0.55 : 1,
@@ -468,6 +472,7 @@ export function SignIn({
                 </button>
               </>
             )}
+            </> : null}
           </>
         )}
 
@@ -485,6 +490,7 @@ export function SignIn({
             {sentence}
           </p>
         )}
+        </div>
       </main>
     </div>
   );

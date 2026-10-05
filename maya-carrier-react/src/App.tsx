@@ -26,24 +26,25 @@ function useDark(): boolean {
   );
 }
 
-/**
- * The visual viewport inset, published as one custom property — exactly what entry/main.ts:210 does
- * with it. This is presentation, not runtime: no factory receives it.
- */
-function useKeyboardInset(): void {
+/** One visible frame for chat and sign-in. Native resize already shrinks the WebView;
+ * Safari may shrink only VisualViewport. Never subtract the keyboard twice. */
+export function useVisibleViewport(): void {
   useEffect(() => {
     const visual = window.visualViewport;
-    if (visual === null) return;
     const measure = (): void => {
-      const inset = Math.max(0, Math.round(window.innerHeight - visual.height - visual.offsetTop));
-      document.documentElement.style.setProperty('--maya-keyboard-inset', `${inset}px`);
+      const height = Math.min(window.innerHeight, visual?.height ?? window.innerHeight);
+      const top = visual?.offsetTop ?? 0;
+      document.documentElement.style.setProperty('--maya-viewport-height', `${height}px`);
+      document.documentElement.style.setProperty('--maya-viewport-top', `${top}px`);
     };
-    visual.addEventListener('resize', measure);
-    visual.addEventListener('scroll', measure);
+    window.addEventListener('resize', measure);
+    visual?.addEventListener('resize', measure);
+    visual?.addEventListener('scroll', measure);
     measure();
     return () => {
-      visual.removeEventListener('resize', measure);
-      visual.removeEventListener('scroll', measure);
+      window.removeEventListener('resize', measure);
+      visual?.removeEventListener('resize', measure);
+      visual?.removeEventListener('scroll', measure);
     };
   }, []);
 }
@@ -67,7 +68,7 @@ export function App() {
   const dark = useDark();
   const sessionView = usePortView(session);
   const chat = usePortView(conversation);
-  useKeyboardInset();
+  useVisibleViewport();
   useLandedFragment();
 
   const t = tokens(dark);

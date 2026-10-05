@@ -95,3 +95,8 @@ test('RPK verifier rebuilds expected bytes, refuses a swapped artifact, does not
     assert.notEqual(r.status,0);assert.match(r.stderr,/payload bytes differ/);assert.equal(fs.readFileSync(file,'utf8'),'old shell');
   }finally{fs.rmSync(d,{recursive:true,force:true});}
 });
+
+test('RPK refuses keyboard-overlay and outer-scroll regressions', () => {
+  assert.throws(() => checkNativeConfig({ ...config, ios: { ...config.ios, scrollEnabled: true } }), /outer scrolling/);
+  assert.throws(() => checkNativeConfig({ ...config, plugins: { ...config.plugins, Keyboard: { resize: 'none' } } }), /resize the WebView/);
+});

@@ -355,13 +355,14 @@ export function ChatScreen({
 }) {
   const dark = t.dark;
   const [draft, setDraft] = useState('');
+  const [composerHeight, setComposerHeight] = useState(50);
   const [refused, setRefused] = useState<Refusal>(null);
   const hasDraft = draft.trim().length > 0;
   const noteId = useId();
   const tooLong = draft.length > COMPOSER_LIMIT;
 
   const focusComposer = useCallback(() => {
-    composerRef.current?.focus();
+    composerRef.current?.focus({ preventScroll: true });
   }, []);
   const now = useCountdownClock(view);
   const voiceView = usePortView(voice);
@@ -376,6 +377,15 @@ export function ChatScreen({
   const stickRef = useRef(true);
   const newestUserRef = useRef<ItemId>(null);
   const awaitingRef = useRef<{ itemId: string; text: string } | null>(null);
+
+  useLayoutEffect(() => {
+    const input = composerRef.current;
+    if (!input) return;
+    input.style.height = '0px';
+    const height = Math.max(50, Math.min(138, input.scrollHeight));
+    input.style.height = `${height}px`;
+    setComposerHeight(height);
+  }, [draft]);
 
   const canSend = view.composer.enabled && !view.inFlight && hasDraft;
 
@@ -462,10 +472,7 @@ export function ChatScreen({
           top: 0,
           left: 0,
           right: 0,
-          // The canonical container shrinks by the keyboard rather than sliding under it:
-          // `calc(var(--me-app-height,100dvh) - var(--me-kbd-height,0px))` (app.html:21646). The
-          // property defaults to 0px, so on a desktop this is identical to `inset: 0`.
-          bottom: 'var(--maya-keyboard-inset, 0px)',
+          bottom: 0,
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
@@ -568,10 +575,12 @@ export function ChatScreen({
           aria-label="Сообщения"
           style={{
             flex: 1,
+            minHeight: 0,
+            boxSizing: 'border-box',
             overflow: 'auto',
             overscrollBehavior: 'contain',
             WebkitOverflowScrolling: 'touch',
-            padding: 'calc(env(safe-area-inset-top, 0px) + 84px) 18px calc(env(safe-area-inset-bottom, 0px) + 212px)',
+            padding: `calc(env(safe-area-inset-top, 0px) + 84px) 18px calc(env(safe-area-inset-bottom, 0px) + ${composerHeight + 62}px)`,
           }}
         >
           {view.items.length === 0 ? <ChromeLine t={t} text={COLD_START_HINT} /> : null}
@@ -662,7 +671,7 @@ export function ChatScreen({
               alignItems: 'stretch',
               gap: 8,
               position: 'relative',
-              padding: '8px 14px calc(74px + env(safe-area-inset-bottom, 0px))',
+              padding: '8px 14px calc(12px + env(safe-area-inset-bottom, 0px))',
               background: 'transparent',
               pointerEvents: 'auto',
             }}
@@ -703,7 +712,7 @@ export function ChatScreen({
               </p>
             )}
 
-            <div style={{ position: 'relative', zIndex: 1, width: '100%', height: 52 }}>
+            <div style={{ position: 'relative', zIndex: 1, width: '100%', height: composerHeight + 2 }}>
               <div
                 style={{
                   display: 'flex',
@@ -809,30 +818,29 @@ export function ChatScreen({
                     // accepting a candidate, not the person sending.
                     if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
                     if (event.key !== 'Enter') return;
-                    // Canonically this was an <input>, so a newline was never possible. The pill is
-                    // a fixed 52px with overflow hidden, so a Shift+Enter newline would be typed
-                    // into a box that cannot show it. Enter sends, with or without a modifier.
+                    if (event.shiftKey) return;
                     event.preventDefault();
-                    if (event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return;
+                    if (event.altKey || event.ctrlKey || event.metaKey) return;
                     send();
                   }}
                   style={{
                     flex: listening ? '0 0 0px' : 1,
                     minWidth: 0,
                     width: listening ? 0 : '100%',
-                    height: 50,
+                    height: composerHeight,
                     opacity: listening ? 0 : 1,
                     border: 'none',
                     appearance: 'none',
                     WebkitAppearance: 'none',
                     background: 'transparent',
-                    padding: '15px 4px 0',
+                    padding: '14px 4px',
+                    boxSizing: 'border-box',
                     margin: 0,
                     resize: 'none',
-                    overflow: 'hidden',
+                    overflowY: 'auto',
                     fontFamily: DISPLAY,
-                    fontSize: 13,
-                    lineHeight: '20px',
+                    fontSize: 16,
+                    lineHeight: '22px',
                     color: t.ink,
                     outline: 'none',
                   }}
