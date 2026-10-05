@@ -5,7 +5,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const ts = require('../../../node_modules/typescript');
+const ts = require('./typescript-toolchain.cjs');
 
 const MESSAGE = 'Для записи откройте MAYA в приложении и подтвердите привязку клиента.';
 const CODE = 'verified_client_channel_required';

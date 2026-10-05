@@ -360,12 +360,16 @@ export const formatRefusal = (r) => `${r.rule.padEnd(18)} ${r.file}${r.line ? `:
 // ── 2. toolchain and contract declarations ───────────────────────────────────────────────────────
 
 export function loadTypeScript() {
-  const dir = path.join(BE, 'node_modules', 'typescript');
+  // React AChat is the release payload and pins the same compiler. A clean carrier checkout
+  // must not need the entire backend dependency tree merely to package PWA and Capacitor.
+  const carrier = path.join(ROOT, '..', 'maya-carrier-react', 'node_modules', 'typescript');
+  const backend = path.join(BE, 'node_modules', 'typescript');
+  const dir = fs.existsSync(path.join(carrier, 'package.json')) ? carrier : backend;
   if (!fs.existsSync(path.join(dir, 'package.json')))
-    throw new BuildRefused([refusal('typecheck', 'maya-saas-backend/node_modules/typescript', 0, '', 'TypeScript is not installed (npm --prefix maya-saas-backend ci)')]);
+    throw new BuildRefused([refusal('typecheck', 'typescript', 0, '', 'TypeScript is not installed (npm --prefix maya-carrier-react ci)')]);
   const ts = createRequire(import.meta.url)(dir);
   if (ts.version !== TS_VERSION)
-    throw new BuildRefused([refusal('typecheck', 'maya-saas-backend/node_modules/typescript', 0, '', `TypeScript ${ts.version}; the build requires exactly ${TS_VERSION}`)]);
+    throw new BuildRefused([refusal('typecheck', dir, 0, '', `TypeScript ${ts.version}; the build requires exactly ${TS_VERSION}`)]);
   return ts;
 }
 

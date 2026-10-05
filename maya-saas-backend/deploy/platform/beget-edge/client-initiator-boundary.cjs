@@ -5,7 +5,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const {Script} = require('node:vm');
-const ts = require('../../../node_modules/typescript');
+const ts = require('./typescript-toolchain.cjs');
 const {retirePhp, retirePwa, sha256, MESSAGE, CODE} = require('./retire-legacy-client-create.cjs');
 
 function phpCase(source) {

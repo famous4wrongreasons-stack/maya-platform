@@ -58,8 +58,8 @@ function report(refusals) {
 }
 
 async function typecheck() {
-  const require = createRequire(import.meta.url);
-  const ts = require(path.join(SHELL, '..', 'maya-saas-backend', 'node_modules', 'typescript'));
+  const shellBuild = await import(pathToFileURL(path.join(SHELL, 'build.mjs')).href);
+  const ts = shellBuild.loadTypeScript();
   const cfgPath = path.join(ROOT, 'tsconfig.json');
   const cfg = ts.parseJsonConfigFileContent(ts.readConfigFile(cfgPath, ts.sys.readFile).config, ts.sys, ROOT);
 
@@ -73,7 +73,6 @@ async function typecheck() {
   // certified source, rather than suppressing the error or stubbing the types.
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'maya-carrier-'));
   try {
-    const shellBuild = await import(pathToFileURL(path.join(SHELL, 'build.mjs')).href);
     const contract = shellBuild.emitContract(ts, tmp);
     const options = { ...cfg.options, paths: { '#contract': [contract.index] } };
     const program = ts.createProgram({ rootNames: cfg.fileNames, options });
