@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 
 const repo = path.resolve(__dirname, '../../..');
@@ -56,7 +57,7 @@ describe('I-MIG2 migration-2 fold', () => {
     expect(physical.every((line) => /\/\/ A(?:\s|$)/.test(line))).toBe(true);
   });
 
-  it('MIG-4 retains the baseline migrations plus exact approved SB-1 JSON V2 and NS-1 CHECK extensions', () => {
+  it('MIG-4 retains the baseline plus exact SB-1, NS-1 and existing public-booking owner migrations', () => {
     const dirs = fs
       .readdirSync(path.join(repo, 'maya-saas-backend/prisma/migrations'), {
         withFileTypes: true,
@@ -68,8 +69,39 @@ describe('I-MIG2 migration-2 fold', () => {
     expect(dirs.filter((name) => name === successor)).toEqual([successor]);
     const navigation = '20260930120000_journal_detail_retained_date';
     expect(dirs.filter((name) => name === navigation)).toEqual([navigation]);
+    // Separate website owner checkpoint b3fdbfe1a70ef1bb3232f1a3895a89c32e811f64.
+    // These existing bytes are pinned, not a wildcard allowance for new migrations.
+    // The widget baseline stays 99; this test never changes or applies website SQL.
+    const publicBookingOwnerMigrations: Readonly<Record<string, string>> = {
+      '20261005160000_public_booking_guest':
+        'e02cd1b34c3c1a70e2c038e77e800926776aaa5b837a78dfe646c59a52366a42',
+      '20261005160100_public_booking_rejected_intent':
+        '85ee849ad4bcbce80c582b8f0a3b562d4e48812c85f609e3c5a463f1bacb752a',
+      '20261005160200_public_booking_action_source':
+        '8c7fab5a9bef40d719d2c7bb164609bbfafb072402fbee046552f4bfa9cc6766',
+      '20261005160300_public_booking_utc_clock':
+        '678d2accbbef88a17b3f766bd39aa41143fb872ae7d7d0d8d75beaa4d7edca52',
+    };
+    for (const [name, digest] of Object.entries(publicBookingOwnerMigrations)) {
+      expect(dirs.filter((entry) => entry === name)).toEqual([name]);
+      expect(
+        createHash('sha256')
+          .update(
+            read(`maya-saas-backend/prisma/migrations/${name}/migration.sql`),
+          )
+          .digest('hex'),
+      ).toBe(digest);
+    }
     expect(
-      dirs.filter((name) => name !== successor && name !== navigation),
+      dirs.filter(
+        (name) =>
+          name !== successor &&
+          name !== navigation &&
+          !Object.prototype.hasOwnProperty.call(
+            publicBookingOwnerMigrations,
+            name,
+          ),
+      ),
     ).toHaveLength(99);
     const nav = read(
       `maya-saas-backend/prisma/migrations/${navigation}/migration.sql`,

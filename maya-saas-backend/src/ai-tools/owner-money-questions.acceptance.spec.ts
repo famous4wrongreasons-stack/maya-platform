@@ -557,17 +557,15 @@ function createHarness(
     },
   );
   const crmService = {
-    getServices: jest
-      .fn()
-      .mockResolvedValue([
-        {
-          id: 'service-synthetic',
-          name: 'Стрижка',
-          price: 2000,
-          duration_minutes: 60,
-          currency: 'RUB',
-        },
-      ]),
+    getServices: jest.fn().mockResolvedValue([
+      {
+        id: 'service-synthetic',
+        name: 'Стрижка',
+        price: 2000,
+        duration_minutes: 60,
+        currency: 'RUB',
+      },
+    ]),
     getFinancialSummary,
     getJournal,
     getRevenueSummary: jest.fn(),

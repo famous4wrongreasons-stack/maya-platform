@@ -51,25 +51,23 @@ describe('YclientsCRMAdapter', () => {
       notifyBySmsHours: 0,
       providerRequestId: `maya-guest-${'a'.repeat(64)}`,
     };
-    const fetchMock = jest.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ data: [{ id: 1 }] }),
-    });
+    const fetchMock = jest
+      .fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+      .mockResolvedValue(new Response(JSON.stringify({ data: [{ id: 1 }] })));
     global.fetch = fetchMock;
     await expect(adapter.createAppointment(params)).rejects.toBeInstanceOf(
       CrmOutcomeUnknownError,
     );
-    const payload = requestJsonBody(fetchMock.mock.calls[0][1] as RequestInit);
+    const payload = requestJsonBody(fetchMock.mock.calls[0][1]);
     expect(payload).toMatchObject({
       api_id: Number.parseInt('a'.repeat(13), 16) + 1,
       comment: `MAYA guest booking ${params.providerRequestId}`,
       notify_by_sms: 0,
       notify_by_email: 0,
     });
-    fetchMock.mockResolvedValue({
-      ok: true,
-      json: () =>
-        Promise.resolve({
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
           data: [
             {
               id: 1,
@@ -78,7 +76,8 @@ describe('YclientsCRMAdapter', () => {
             },
           ],
         }),
-    });
+      ),
+    );
     await expect(adapter.createAppointment(params)).resolves.toMatchObject({
       external_id: '777',
     });
@@ -123,16 +122,16 @@ describe('YclientsCRMAdapter', () => {
         apiToken: 'synthetic',
         settings: { companyId: 123 },
       });
-      const fetched = jest.fn().mockImplementation((input: string | URL) =>
-        Promise.resolve({
-          ok: true,
-          json: () =>
-            Promise.resolve({
+      const fetched = jest.fn((input: Parameters<typeof fetch>[0]) =>
+        Promise.resolve(
+          new Response(
+            JSON.stringify({
               data: requestUrl(input).includes('/records/')
                 ? [record]
-                : { ...record, ...(overrides as object) },
+                : { ...record, ...overrides },
             }),
-        }),
+          ),
+        ),
       );
       global.fetch = fetched;
       const result = await adapter.findPublicBookingByRequestId(params);
@@ -143,12 +142,8 @@ describe('YclientsCRMAdapter', () => {
         });
       else expect(result).toBeNull();
       expect(fetched).toHaveBeenCalledTimes(2);
-      expect(requestUrl(fetched.mock.calls[0][0] as string)).toContain(
-        'with_deleted=1',
-      );
-      expect(requestUrl(fetched.mock.calls[1][0] as string)).toContain(
-        '/record/123/777',
-      );
+      expect(requestUrl(fetched.mock.calls[0][0])).toContain('with_deleted=1');
+      expect(requestUrl(fetched.mock.calls[1][0])).toContain('/record/123/777');
     });
     it('repeated full pages cannot establish unique correlation', async () => {
       const adapter = new YclientsCRMAdapter({
@@ -165,12 +160,10 @@ describe('YclientsCRMAdapter', () => {
           comment: '',
         })),
       ];
-      global.fetch = jest
-        .fn()
-        .mockResolvedValue({
-          ok: true,
-          json: () => Promise.resolve({ data: fullPage }),
-        });
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ data: fullPage }),
+      });
       await expect(
         adapter.findPublicBookingByRequestId(params),
       ).resolves.toBeNull();
@@ -204,21 +197,24 @@ describe('YclientsCRMAdapter', () => {
       seance_length: 1800,
       prepaid: 'forbidden',
     };
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: true,
-      json: () =>
-        Promise.resolve({
-          success: true,
-          data: {
-            services: [
-              service,
-              { ...service, id: 202, price_max: 2000 },
-              { ...service, id: 203, prepaid: 'required' },
-              { ...service, id: 204, seance_length: 0 },
-            ],
-          },
-        }),
-    });
+    const catalogFetch = jest
+      .fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>()
+      .mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            success: true,
+            data: {
+              services: [
+                service,
+                { ...service, id: 202, price_max: 2000 },
+                { ...service, id: 203, prepaid: 'required' },
+                { ...service, id: 204, seance_length: 0 },
+              ],
+            },
+          }),
+        ),
+      );
+    global.fetch = catalogFetch;
     const adapter = new YclientsCRMAdapter({
       provider: CrmProvider.YCLIENTS,
       apiToken: 'synthetic-token',
@@ -235,9 +231,9 @@ describe('YclientsCRMAdapter', () => {
         currency: 'RUB',
       },
     ]);
-    expect(
-      requestUrl((global.fetch as jest.Mock).mock.calls[0][0] as string),
-    ).toContain('/book_services/123?staff_id=101');
+    expect(requestUrl(catalogFetch.mock.calls[0][0])).toContain(
+      '/book_services/123?staff_id=101',
+    );
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ success: true, data: {} }),
