@@ -180,12 +180,16 @@ export class AiToolRegistryService {
       case 'clients.dormant.list': {
         this.assertAllowedKeys(args, ['inactive_days', 'limit']);
         return {
-          inactive_days: this.assertIntegerRange(
-            args.inactive_days,
-            'inactive_days',
-            14,
-            3650,
-          ),
+          ...(args.inactive_days === undefined
+            ? {}
+            : {
+                inactive_days: this.assertIntegerRange(
+                  args.inactive_days,
+                  'inactive_days',
+                  14,
+                  3650,
+                ),
+              }),
           limit: this.assertIntegerRange(args.limit ?? 20, 'limit', 1, 50),
         };
       }

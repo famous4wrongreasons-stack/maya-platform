@@ -537,20 +537,21 @@ export const MAYA_AI_TOOL_CATALOG = [
     inputSchema: {
       type: 'object',
       additionalProperties: false,
-      required: ['inactive_days'],
+      required: [],
       properties: {
         inactive_days: {
           type: 'integer',
           minimum: 14,
           maximum: 3650,
           description:
-            'Minimum days since the last visit: 30 for a month, 90 for long gone.',
+            'Deprecated compatibility input; ignored. Omit it: confirmed C8 business policy owns dormancy thresholds.',
         },
         limit: {
           type: 'integer',
           minimum: 1,
           maximum: 50,
-          description: 'How many guests to list. Default 20.',
+          description:
+            'Legacy compatibility input; canonical C8 AI projection remains bounded to 20 results.',
         },
       },
     },

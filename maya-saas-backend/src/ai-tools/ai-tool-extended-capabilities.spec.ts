@@ -99,6 +99,56 @@ describe('AiTool extended capabilities', () => {
     });
   });
 
+  it.each([{}, { inactive_days: 90 }])(
+    'reads confirmed dormancy without inventing a caller threshold: %j',
+    async (input) => {
+      const registry = new AiToolRegistryService();
+      const getClientRegistry = jest.fn();
+      const service = createService({
+        crmService: { getClientRegistry } as unknown as CrmService,
+      });
+      const payload = {
+        contract: 'c8.valuation.ai/1',
+        configured: false,
+        items: [],
+        numericPredictionsAvailable: false,
+        canContact: false,
+      };
+      const forAi = jest.fn().mockResolvedValue(payload);
+      Object.assign(service, { valuationRead: { forAi } });
+      const args = registry.validateArguments('clients.dormant.list', input);
+      expect(
+        await service.execute(
+          'clients.dormant.list',
+          owner,
+          args,
+          'dormancy-read',
+        ),
+      ).toEqual(payload);
+      expect(forAi).toHaveBeenCalledWith(owner.tenantId, owner.userId, {
+        kind: 'POLICY_SIGNAL',
+      });
+      expect(getClientRegistry).not.toHaveBeenCalled();
+    },
+  );
+
+  it('does not require a universal dormancy threshold but rejects malformed legacy input', () => {
+    const registry = new AiToolRegistryService();
+    expect(
+      registry.get('clients.dormant.list').inputSchema.required ?? [],
+    ).not.toContain('inactive_days');
+    for (const inactive_days of [null, '90', 13, 3651, 1.5]) {
+      expect(() =>
+        registry.validateArguments('clients.dormant.list', { inactive_days }),
+      ).toThrow();
+    }
+    expect(() =>
+      registry.validateArguments('clients.dormant.list', {
+        tenant_id: 'foreign',
+      }),
+    ).toThrow();
+  });
+
   it('delegates ranking to C8 without legacy CRM scoring or identifiers', async () => {
     const getClientRegistry = jest.fn().mockResolvedValue({
       provider: 'yclients',

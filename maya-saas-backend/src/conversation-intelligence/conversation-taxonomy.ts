@@ -390,7 +390,7 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
     intent(
       'clients.dormant_list',
       'clients',
-      'List by name the guests who stopped coming.',
+      'Read qualified dormancy signals from confirmed C8 business policy.',
       {
         action: 'read',
         dataClass: 'C',
@@ -399,7 +399,7 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
         tools: ['clients.dormant.list'],
         optionalSlots: ['period'],
         responseRule:
-          'The server composes this answer with real names; never repeat client names or phones into any other tool call.',
+          'Use privacy-safe C8 presentation labels and confirmed rules only. No names, phones, contact export, invented inactivity threshold or return probability. Unknown history is not dormancy; unavailable stays unavailable.',
         synonyms: [
           'кто давно не приходил',
           'кого можно вернуть',
