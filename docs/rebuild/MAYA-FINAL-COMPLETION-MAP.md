@@ -510,3 +510,26 @@ service-label ambiguity, daypart limits and multi-service contract remain visibl
 qualification boundaries. No paid calls or server-proof restart; all old ledgers/TTL
 unchanged. Local proof DB stopped. Stable website/backend pair untouched; no push,
 merge, production writes, deploy, migrations, notifications, payments or phone actions.
+
+
+## Chat aggregate regression checkpoint — 2026-10-05
+
+Code `15b88f52bf39a544ba2448970731f3c3b6d528fa`, based on accepted
+`d2168e737321a6c2708262e388ec6762483b3ea6`; compared with stable backend
+`dcba8c8f4d230de31fb93f3d613f7524c3310df9`. Two new regression details fixed:
+pilot fixture grants now stay with the existing Fixtures owner; semantic-context
+size checking uses the existing canonical serializer. Ratchets/allowlists/counts
+were not relaxed. Three new UTF-8 boundary tests pass.
+
+Full backend:5816 PASS/17 FAIL; all17 assertions reproduce on baseline, with the two
+additional failure details now removed. Full HTTP/PostgreSQL on the code checkpoint:
+487 PASS/3 FAIL; all3 failure bodies exactly reproduce on baseline. Documented runner:
+20/27 PASS on both versions. React:93/93 PASS. Shell:428 PASS/2 baseline FAIL/7 explicit
+skips. Types/build/Prisma/e2e/event SQL checks pass; full lint's22 errors are unchanged
+from baseline. **Aggregate is not green; this is not release or real-model acceptance.**
+
+Detailed matrix, evidence paths, remaining Client gaps, six-case/twenty-turn bounded
+live proposal and website-only release blockers are in
+[CHAT-AGGREGATE-READINESS-20261005.md](CHAT-AGGREGATE-READINESS-20261005.md).
+Owned local proof PostgreSQL is stopped. No paid calls, remote-proof restart,
+production writes, phone work, push, merge or deployment occurred in this pass.
