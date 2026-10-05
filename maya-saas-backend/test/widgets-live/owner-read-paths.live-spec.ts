@@ -81,8 +81,7 @@ describe('Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]', () 
       );
   }
 
-  // Pending backend regressions: deferred by owner priority change to iPhone UI.
-  it.skip.each([
+  it.each([
     ['Как сегодня дела?', 'today', 'none'],
     ['Почему просела выручка?', 'month_to_date', 'previous_period'],
     ['Что мне сейчас сделать?', 'today', 'none'],
@@ -157,26 +156,24 @@ describe('Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]', () 
     await http.app
       .get(TenantContextService)
       .runAsSystemTenant(f.tenant.id, async () =>
-        http.app
-          .get(Package5Wave1ExecutableService)
-          .execute(
-            await http.app
-              .get(Package5Wave1ShadowService)
-              .buildGoverned(
-                f.tenant.id,
-                f.user.id,
-                'tenant_business_configuration',
-                'owner-read-' + randomUUID(),
-                randomUUID(),
-                {
-                  confirmed: true,
-                  namespace: 'c8_valuation',
-                  expectedRevision: 0,
-                  previousRevisionId: null,
-                  content: policy,
-                },
-              ),
-          ),
+        http.app.get(Package5Wave1ExecutableService).execute(
+          await http.app
+            .get(Package5Wave1ShadowService)
+            .buildGoverned(
+              f.tenant.id,
+              f.user.id,
+              'tenant_business_configuration',
+              'owner-read-' + randomUUID(),
+              randomUUID(),
+              {
+                confirmed: true,
+                namespace: 'c8_valuation',
+                expectedRevision: 0,
+                previousRevisionId: null,
+                content: policy,
+              },
+            ),
+        ),
       );
     const client = await db.prisma.client.create({
       data: { tenantId: f.tenant.id },

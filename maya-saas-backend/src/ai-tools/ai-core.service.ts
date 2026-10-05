@@ -2616,8 +2616,14 @@ export class AiCoreService {
         : /валов[а-я]*\s+прибыл/.test(text)
           ? 'Валовая прибыль не измерена: нужна подтверждённая прямая себестоимость услуг. '
           : '';
+      const causeBoundary =
+        BUSINESS_EXPLANATION_REQUEST_PATTERN.test(text) &&
+        /выруч|оборот|поступлен/.test(text)
+          ? 'Причина изменения выручки не установлена: измерения показывают факты, но не доказывают причинную связь. '
+          : '';
       return (
         qualification +
+        causeBoundary +
         notice +
         measurementText(measured as unknown as MeasurementPresentation)
       );
@@ -3744,7 +3750,7 @@ export class AiCoreService {
         );
       }
     }
-    if (/(загруз|час|минут|занятост)/i.test(text)) {
+    if (/(загруз|(?<![а-яёa-z])час|минут|занятост)/i.test(text)) {
       const minutes = metric('booked_minutes');
       if (minutes !== null) {
         return withDiagnosis(
@@ -3818,7 +3824,13 @@ export class AiCoreService {
     ].filter((part): part is string => Boolean(part));
     const body = summary.join(', ');
     const changesSentence = changeBits.length ? ` ${changeBits.join(' ')}` : '';
-    return `${lead}${body}.${changesSentence}${insight ? ` ${insight}` : ' Если нужно — разберём, что за этим стоит.'}`;
+    const nextActionQuestion =
+      /^что\s+(?:(?:мне|нам)\s+)?(?:сейчас\s+)?(?:сделать|делать)\s*[?!.]*$/i.test(
+        text,
+      )
+        ? ' Уточните цель: загрузка, возврат клиентов или финансы? По одной сводке нельзя обоснованно выбрать приоритет действия.'
+        : '';
+    return `${lead}${body}.${changesSentence}${nextActionQuestion || (insight ? ` ${insight}` : ' Если нужно — разберём, что за этим стоит.')}`;
   }
 
   private deterministicComprehensiveAnalyticsReview(
