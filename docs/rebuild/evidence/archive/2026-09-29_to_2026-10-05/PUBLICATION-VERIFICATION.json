@@ -1,0 +1,843 @@
+{
+  "verifiedAt": "2026-10-05T07:06:00.223223+00:00",
+  "repository": "https://github.com/famous4wrongreasons-stack/maya-platform",
+  "defaultBranch": "main",
+  "defaultBranchChanged": false,
+  "canonicalBranches": [
+    {
+      "branch": "codex-wave2-pg15-staging",
+      "sha": "c010e9fbeba7ebb222f7e73e22dee22f6b45c14e",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex-wave2-pg15-staging",
+      "remoteSha": "c010e9fbeba7ebb222f7e73e22dee22f6b45c14e",
+      "localSha": "c010e9fbeba7ebb222f7e73e22dee22f6b45c14e",
+      "match": true
+    },
+    {
+      "branch": "codex-wave2-u13-staging",
+      "sha": "d065513ca751212028559cea1ce095eb5a7d35d9",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex-wave2-u13-staging",
+      "remoteSha": "d065513ca751212028559cea1ce095eb5a7d35d9",
+      "localSha": "d065513ca751212028559cea1ce095eb5a7d35d9",
+      "match": true
+    },
+    {
+      "branch": "codex-wave2-u13-staging-v2",
+      "sha": "70b935ea7ea77a2d953d9dfe25befbf6798541b7",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex-wave2-u13-staging-v2",
+      "remoteSha": "70b935ea7ea77a2d953d9dfe25befbf6798541b7",
+      "localSha": "70b935ea7ea77a2d953d9dfe25befbf6798541b7",
+      "match": true
+    },
+    {
+      "branch": "codex-wave2-u13-staging-v3",
+      "sha": "f29002dd33de88e8e7a50e6dd8796e2deb47ce8c",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex-wave2-u13-staging-v3",
+      "remoteSha": "f29002dd33de88e8e7a50e6dd8796e2deb47ce8c",
+      "localSha": "f29002dd33de88e8e7a50e6dd8796e2deb47ce8c",
+      "match": true
+    },
+    {
+      "branch": "codex-wave2-u7-staging",
+      "sha": "44b001a796ff3c3bcf7ec339ddba9af4e9d6ac90",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex-wave2-u7-staging",
+      "remoteSha": "44b001a796ff3c3bcf7ec339ddba9af4e9d6ac90",
+      "localSha": "44b001a796ff3c3bcf7ec339ddba9af4e9d6ac90",
+      "match": true
+    },
+    {
+      "branch": "codex-wave2-u9-staging",
+      "sha": "d3c629f6ff9e307025b3c31c60b795f03c5c1b97",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex-wave2-u9-staging",
+      "remoteSha": "d3c629f6ff9e307025b3c31c60b795f03c5c1b97",
+      "localSha": "d3c629f6ff9e307025b3c31c60b795f03c5c1b97",
+      "match": true
+    },
+    {
+      "branch": "codex-wave2-u9-staging-v2",
+      "sha": "a697bd066634d7817169c6ddb503e84326c64959",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex-wave2-u9-staging-v2",
+      "remoteSha": "a697bd066634d7817169c6ddb503e84326c64959",
+      "localSha": "a697bd066634d7817169c6ddb503e84326c64959",
+      "match": true
+    },
+    {
+      "branch": "codex/maya-identity-consent-20260913",
+      "sha": "36fc31d7fa1ba5af758254912fa324093b4d954b",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex/maya-identity-consent-20260913",
+      "remoteSha": "36fc31d7fa1ba5af758254912fa324093b4d954b",
+      "localSha": "36fc31d7fa1ba5af758254912fa324093b4d954b",
+      "match": true
+    },
+    {
+      "branch": "codex/widget-release-programme-20260929",
+      "sha": "f9e703e3265f31aa6f3e16eb0774b3349abf1fc0",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "codex/widget-release-programme-20260929",
+      "remoteSha": "f9e703e3265f31aa6f3e16eb0774b3349abf1fc0",
+      "localSha": "f9e703e3265f31aa6f3e16eb0774b3349abf1fc0",
+      "match": true
+    },
+    {
+      "branch": "contour/c7-recovery-cd157b66",
+      "sha": "a7389950346355c589816fdbbc055b09d5ef79ea",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "contour/c7-recovery-cd157b66",
+      "remoteSha": "a7389950346355c589816fdbbc055b09d5ef79ea",
+      "localSha": "a7389950346355c589816fdbbc055b09d5ef79ea",
+      "match": true
+    },
+    {
+      "branch": "fix/i-src-1-runtime",
+      "sha": "f531367f00d62bbf5e27c4df8c64ba9695f9c968",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "fix/i-src-1-runtime",
+      "remoteSha": "f531367f00d62bbf5e27c4df8c64ba9695f9c968",
+      "localSha": "f531367f00d62bbf5e27c4df8c64ba9695f9c968",
+      "match": true
+    },
+    {
+      "branch": "fix/l27-terminal-outcome-duplication",
+      "sha": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "fix/l27-terminal-outcome-duplication",
+      "remoteSha": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+      "localSha": "fed5f7dfa0a5611dba24b40a8143b354c22151e5",
+      "match": true
+    },
+    {
+      "branch": "fix/ns-1-parent-return",
+      "sha": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "fix/ns-1-parent-return",
+      "remoteSha": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "localSha": "98716cd5b9440d01e4272ea0778f93db26f065e6",
+      "match": true
+    },
+    {
+      "branch": "hotfix/native-consent-first-party-20260911",
+      "sha": "a1db797855c226148354a9a9942f7740879ef31e",
+      "purpose": "Preserve original development branch and commit provenance",
+      "sourceBranch": "hotfix/native-consent-first-party-20260911",
+      "remoteSha": "a1db797855c226148354a9a9942f7740879ef31e",
+      "localSha": "a1db797855c226148354a9a9942f7740879ef31e",
+      "match": true
+    },
+    {
+      "branch": "archive/test-http-own-loopback-listeners-in-remaining-s-0332dcc6-20261005",
+      "sha": "0332dcc66a172d891b7de53b31ce353c1821105c",
+      "purpose": "test(http): own loopback listeners in remaining Supertest harnesses",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "0332dcc66a172d891b7de53b31ce353c1821105c",
+      "localSha": "0332dcc66a172d891b7de53b31ce353c1821105c",
+      "match": true
+    },
+    {
+      "branch": "archive/feat-widgets-implement-gate-10-divergence-audit-ae499631-20261005",
+      "sha": "ae49963147753dee684955c9101767551d1bd6a9",
+      "purpose": "feat(widgets): implement Gate 10 divergence audit",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "ae49963147753dee684955c9101767551d1bd6a9",
+      "localSha": "ae49963147753dee684955c9101767551d1bd6a9",
+      "match": true
+    },
+    {
+      "branch": "archive/docs-cycle-06-record-p4-04-production-schema-ap-0892de75-20261005",
+      "sha": "0892de75fb10704f244ddbd5bd6b6274ba7cf12c",
+      "purpose": "docs(cycle-06): record p4-04 production schema apply",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "0892de75fb10704f244ddbd5bd6b6274ba7cf12c",
+      "localSha": "0892de75fb10704f244ddbd5bd6b6274ba7cf12c",
+      "match": true
+    },
+    {
+      "branch": "archive/snapshot-7db55441-20261005",
+      "sha": "7db5544124d9920b2071bc00c7734340dae05056",
+      "purpose": "WIP on main: 0c3af3f Stop voice player error banner flashing on idle",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "7db5544124d9920b2071bc00c7734340dae05056",
+      "localSha": "7db5544124d9920b2071bc00c7734340dae05056",
+      "match": true
+    },
+    {
+      "branch": "archive/snapshot-40c55cc7-20261005",
+      "sha": "40c55cc7dbd5a03858184f6adde89a96ae103c94",
+      "purpose": "WIP on codex/maya-identity-consent-20260913: 149af90a docs(platform): Telegram login is configured by the bot's domain, nothing else",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "40c55cc7dbd5a03858184f6adde89a96ae103c94",
+      "localSha": "40c55cc7dbd5a03858184f6adde89a96ae103c94",
+      "match": true
+    },
+    {
+      "branch": "archive/feat-ai-complete-grounded-maya-business-intelli-87c6ea71-20261005",
+      "sha": "87c6ea718756a9f864f88aef930746782675ad61",
+      "purpose": "feat(ai): complete grounded MAYA business intelligence",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "87c6ea718756a9f864f88aef930746782675ad61",
+      "localSha": "87c6ea718756a9f864f88aef930746782675ad61",
+      "match": true
+    },
+    {
+      "branch": "archive/feat-widgets-implement-gate-10-divergence-audit-56d994b8-20261005",
+      "sha": "56d994b8952fdb6fef4898173974c81a4aa24399",
+      "purpose": "feat(widgets): implement Gate 10 divergence audit",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "56d994b8952fdb6fef4898173974c81a4aa24399",
+      "localSha": "56d994b8952fdb6fef4898173974c81a4aa24399",
+      "match": true
+    },
+    {
+      "branch": "archive/fix-reports-restore-telegram-owner-delivery-4ff7dc7c-20261005",
+      "sha": "4ff7dc7c95eadf498cd7c8b828f183c47aaf6ae2",
+      "purpose": "fix(reports): restore Telegram owner delivery",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "4ff7dc7c95eadf498cd7c8b828f183c47aaf6ae2",
+      "localSha": "4ff7dc7c95eadf498cd7c8b828f183c47aaf6ae2",
+      "match": true
+    },
+    {
+      "branch": "archive/feat-widgets-reauthorize-navigate-source-projec-cf0303c6-20261005",
+      "sha": "cf0303c6a4145c348841d5ef189aa2337140a1a8",
+      "purpose": "feat(widgets): reauthorize navigate source projections",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "cf0303c6a4145c348841d5ef189aa2337140a1a8",
+      "localSha": "cf0303c6a4145c348841d5ef189aa2337140a1a8",
+      "match": true
+    },
+    {
+      "branch": "archive/fix-r01-gate-relay-recovery-and-record-unregist-e46dbdf3-20261005",
+      "sha": "e46dbdf3b91ccbe307b583a8194c2e6469e38c13",
+      "purpose": "fix(r01): gate relay recovery and record unregistered production alias stop",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "e46dbdf3b91ccbe307b583a8194c2e6469e38c13",
+      "localSha": "e46dbdf3b91ccbe307b583a8194c2e6469e38c13",
+      "match": true
+    },
+    {
+      "branch": "archive/snapshot-e96d3922-20261005",
+      "sha": "e96d3922340b74cb7515f213f2cc9de27c1b8a40",
+      "purpose": "WIP on main: 2649737 Add Telegram-style hold-to-record voice input in team chat",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "e96d3922340b74cb7515f213f2cc9de27c1b8a40",
+      "localSha": "e96d3922340b74cb7515f213f2cc9de27c1b8a40",
+      "match": true
+    },
+    {
+      "branch": "archive/feat-widgets-certify-wave-4-live-moments-c0809b7b-20261005",
+      "sha": "c0809b7b9caccd0b14f4151a904b3ad87fb67a28",
+      "purpose": "feat(widgets): certify Wave 4 live moments",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "c0809b7b9caccd0b14f4151a904b3ad87fb67a28",
+      "localSha": "c0809b7b9caccd0b14f4151a904b3ad87fb67a28",
+      "match": true
+    },
+    {
+      "branch": "archive/test-wave2-align-live-fixtures-with-keyed-seal--279c6508-20261005",
+      "sha": "279c6508c0dbf19fdce5a861fd4b2cf5a0dbf04e",
+      "purpose": "test(wave2): align live fixtures with keyed seal verification",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "279c6508c0dbf19fdce5a861fd4b2cf5a0dbf04e",
+      "localSha": "279c6508c0dbf19fdce5a861fd4b2cf5a0dbf04e",
+      "match": true
+    },
+    {
+      "branch": "archive/snapshot-a7a345fa-20261005",
+      "sha": "a7a345fae20ab7e7ddbacf1367ed47389ee31ce0",
+      "purpose": "WIP on fix/ns-1-parent-return: 6a40575c fix(runtime): resolve accepted NAVIGATE detail into owned fullscreen",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "a7a345fae20ab7e7ddbacf1367ed47389ee31ce0",
+      "localSha": "a7a345fae20ab7e7ddbacf1367ed47389ee31ce0",
+      "match": true
+    },
+    {
+      "branch": "archive/test-wave2-align-live-fixtures-with-keyed-seal--ddac21d5-20261005",
+      "sha": "ddac21d5325ba72f3b9b7dbedc089ee465dac6f3",
+      "purpose": "test(wave2): align live fixtures with keyed seal verification",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "ddac21d5325ba72f3b9b7dbedc089ee465dac6f3",
+      "localSha": "ddac21d5325ba72f3b9b7dbedc089ee465dac6f3",
+      "match": true
+    },
+    {
+      "branch": "archive/snapshot-00d91bcb-20261005",
+      "sha": "00d91bcb797a3fc13d9b9b5faf2c7c82f8712f95",
+      "purpose": "WIP on fix/ns-1-parent-return: 6a40575c fix(runtime): resolve accepted NAVIGATE detail into owned fullscreen",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "00d91bcb797a3fc13d9b9b5faf2c7c82f8712f95",
+      "localSha": "00d91bcb797a3fc13d9b9b5faf2c7c82f8712f95",
+      "match": true
+    },
+    {
+      "branch": "archive/snapshot-63da592d-20261005",
+      "sha": "63da592d66a8017a99f4c7cf4260baff37d0f7c9",
+      "purpose": "WIP on fix/ns-1-parent-return: 6a40575c fix(runtime): resolve accepted NAVIGATE detail into owned fullscreen",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "63da592d66a8017a99f4c7cf4260baff37d0f7c9",
+      "localSha": "63da592d66a8017a99f4c7cf4260baff37d0f7c9",
+      "match": true
+    },
+    {
+      "branch": "archive/feat-widgets-implement-gate-10-divergence-audit-20dc397a-20261005",
+      "sha": "20dc397a620cf5814a66d639d68e4457bdc22b3f",
+      "purpose": "feat(widgets): implement Gate 10 divergence audit",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "20dc397a620cf5814a66d639d68e4457bdc22b3f",
+      "localSha": "20dc397a620cf5814a66d639d68e4457bdc22b3f",
+      "match": true
+    },
+    {
+      "branch": "archive/snapshot-5af2c9f0-20261005",
+      "sha": "5af2c9f0ed63a7498bb8613d122e13e78be9137a",
+      "purpose": "WIP on fix/i-src-1-runtime: 2b477417 Correct the approved journal constraint reference",
+      "sourceBranch": "formerly unreachable; safety bundle retained",
+      "remoteSha": "5af2c9f0ed63a7498bb8613d122e13e78be9137a",
+      "localSha": "5af2c9f0ed63a7498bb8613d122e13e78be9137a",
+      "match": true
+    },
+    {
+      "branch": "archive/repository-ignore-state-20261005",
+      "sha": "8ca93d4d8547574999bd7ad972e49a9e4c8943aa",
+      "purpose": "repository-ignore-state WIP snapshot",
+      "sourceBranch": "refs/heads/codex/maya-brain-systemic-release-20260815",
+      "sourceWorktree": "/Users/stanislavmosin/Desktop/Projects/maya-platform",
+      "files": [
+        {
+          "path": ".gitignore",
+          "sha256": "1cd6b9fcf98f55193110d376ceec2d1e77447d45688ed616f9a253180dad7eba"
+        }
+      ],
+      "remoteSha": "8ca93d4d8547574999bd7ad972e49a9e4c8943aa",
+      "localSha": "8ca93d4d8547574999bd7ad972e49a9e4c8943aa",
+      "match": true
+    },
+    {
+      "branch": "archive/site-community-backend-20261005",
+      "sha": "78f197d39108843de1e3a0bdd57bdfd87a4e0022",
+      "purpose": "site-community-backend WIP snapshot",
+      "sourceBranch": "refs/heads/codex/maya-brain-systemic-release-20260815",
+      "sourceWorktree": "/Users/stanislavmosin/Desktop/Projects/maya-platform",
+      "files": [
+        {
+          "path": "ai администратор/bot.py",
+          "sha256": "cf0ca8d140aefcee0cb78b9a8c00caeaa8899c002fb777689f307af85f2800e7"
+        },
+        {
+          "path": "ai администратор/webhook_server.py",
+          "sha256": "3af3827135c2cdb68bc67b780f4124e56744b3c665d6c5f6d92e37b0258248a1"
+        },
+        {
+          "path": "ai администратор/deploy/barbershop-pwa.service",
+          "sha256": "d04f3d6efb6a52bf061495f014d79658aa50048213a5cae4cf017c3d6066c049"
+        },
+        {
+          "path": "ai администратор/pwa_api.py",
+          "sha256": "c17ccd82d2cc4e7a94538c7b40cdfab7a0f98797e8399c6064abaa1d2af2828f"
+        },
+        {
+          "path": "ai администратор/site_community.py",
+          "sha256": "f631935b676ac26614206b91d8448e415b1db6883e11fcea445e103d731fba65"
+        },
+        {
+          "path": "ai администратор/site_engagement.py",
+          "sha256": "96bc5a18df899670746ea2dcc3055c6cd7a5feb21885ebc2b5da26a5327ea6ac"
+        },
+        {
+          "path": "ai администратор/site_guest_chat.py",
+          "sha256": "035541c84fbefa4f38af9ca30c86fca1f21ac2acbd023accc4195544b1af981a"
+        },
+        {
+          "path": "ai администратор/site_publication_bot.py",
+          "sha256": "afc8c01d8a77878002442d2030103266c45896cc519f5da257f58d73004b6aa5"
+        },
+        {
+          "path": "ai администратор/site_publications.py",
+          "sha256": "846b04430d2f81abc62bb1f0ff37384e27631ce7c23b286f1dadb86344ff4bb5"
+        },
+        {
+          "path": "ai администратор/test_site_community.py",
+          "sha256": "f22224b6ef1c805f6a97bf58180ac5319c4f17cf6b4ce21f794aaa2a98422f83"
+        },
+        {
+          "path": "ai администратор/test_site_engagement.py",
+          "sha256": "c9d58a5f3df0cf9c28bb135b050f623df740b3d932370a1d793eed1b42a3b8ca"
+        },
+        {
+          "path": "ai администратор/test_site_guest_chat.py",
+          "sha256": "fd6d15f20b85320c381433d8292c448d8a6a6bc013f36e595bd28aa5f98b3894"
+        },
+        {
+          "path": "ai администратор/test_site_publications.py",
+          "sha256": "198fef3473a3da3debc90efd9185a159ea3133a6f08342faae990b5355cda130"
+        },
+        {
+          "path": "docs/SITE_COMMUNITY.md",
+          "sha256": "f7e1fd3c630ac482494c39f8962a724a97d2db7a669accce5f0cdba525e6babc"
+        },
+        {
+          "path": "docs/SITE_PUBLICATIONS.md",
+          "sha256": "9b24196825de53d376dce81ed3fdfe381f5a653e257f83cdb7b5cc93ccac9081"
+        }
+      ],
+      "remoteSha": "78f197d39108843de1e3a0bdd57bdfd87a4e0022",
+      "localSha": "78f197d39108843de1e3a0bdd57bdfd87a4e0022",
+      "match": true
+    },
+    {
+      "branch": "archive/maya-website-20261005",
+      "sha": "33cff162204a683e2117aa9746027a3ac3159d51",
+      "purpose": "maya-website WIP snapshot",
+      "sourceBranch": "refs/heads/codex/maya-brain-systemic-release-20260815",
+      "sourceWorktree": "/Users/stanislavmosin/Desktop/Projects/maya-platform",
+      "files": [
+        {
+          "path": "maya-os-site/index.html",
+          "sha256": "e43193ffb0d8b0b18f464d20ec613688c5ad9415ea249eff706b1fa7db37322e"
+        }
+      ],
+      "remoteSha": "33cff162204a683e2117aa9746027a3ac3159d51",
+      "localSha": "33cff162204a683e2117aa9746027a3ac3159d51",
+      "match": true
+    },
+    {
+      "branch": "archive/legacy-pwa-community-assets-20261005",
+      "sha": "530d68c7678d1eaf140c3fa8e5238afc8b5a201c",
+      "purpose": "legacy-pwa-community-assets WIP snapshot",
+      "sourceBranch": "refs/heads/codex/maya-brain-systemic-release-20260815",
+      "sourceWorktree": "/Users/stanislavmosin/Desktop/Projects/maya-platform",
+      "files": [
+        {
+          "path": "сайт и приложение/app.html",
+          "sha256": "9e7f34e6d413f686694e23f0d36badc6db6af273a626ff98cddedef79bc37aef"
+        },
+        {
+          "path": "сайт и приложение/assets/maya-intro.webp",
+          "sha256": "bd8d578d35f97a00cfba67a09647d22369d7f2ae5ff903187b36df5b5d983e6c"
+        },
+        {
+          "path": "сайт и приложение/assets/maya-recording.webp",
+          "sha256": "fc4cd25a8fea2cd8160ce2cd33dba75128816cf45995253e32c8fd2ff7b69bdf"
+        },
+        {
+          "path": "сайт и приложение/pwa-assets/tg-auth/site-community-proxy.php",
+          "sha256": "94e8960b5fd9d3b9148cca65e72286a3565fb102348aa97f29aa2fae352d8bf0"
+        },
+        {
+          "path": "сайт и приложение/pwa-assets/tg-auth/site-publications-proxy.php",
+          "sha256": "e0c930b3e4bb6ee35289c075097a5e9b6a5ab179a5e1f10fc00f4fbbd0071f97"
+        }
+      ],
+      "remoteSha": "530d68c7678d1eaf140c3fa8e5238afc8b5a201c",
+      "localSha": "530d68c7678d1eaf140c3fa8e5238afc8b5a201c",
+      "match": true
+    },
+    {
+      "branch": "archive/claude-frontend-evidence-20261005",
+      "sha": "1ff5750a808cd154a505663534e6394ee91e8239",
+      "purpose": "claude-frontend-evidence WIP snapshot",
+      "sourceBranch": "refs/heads/claude/prepublication-frontend",
+      "sourceWorktree": "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-os-final-integration",
+      "files": [
+        {
+          "path": "CLAUDE_WEEK_CARD.png",
+          "sha256": "f15302f7c9a1aea2b40776072eed4c76012d80a7f0a3a8515e2a649d336baa86"
+        }
+      ],
+      "remoteSha": "1ff5750a808cd154a505663534e6394ee91e8239",
+      "localSha": "1ff5750a808cd154a505663534e6394ee91e8239",
+      "match": true
+    },
+    {
+      "branch": "archive/claude-booking-carrier-20261005",
+      "sha": "5a195f03f750639e9e772a7e9825658fe756369c",
+      "purpose": "claude-booking-carrier WIP snapshot",
+      "sourceBranch": "refs/heads/claude/chat-booking-widget",
+      "sourceWorktree": "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-os-prepublication-review",
+      "files": [
+        {
+          "path": "сайт и приложение/app.html",
+          "sha256": "4db144950527fd14957d0e934c03350911b0a4887fb501a38e69b4067cc73d2f"
+        }
+      ],
+      "remoteSha": "5a195f03f750639e9e772a7e9825658fe756369c",
+      "localSha": "5a195f03f750639e9e772a7e9825658fe756369c",
+      "match": true
+    },
+    {
+      "branch": "archive/carrier-migration-spec-20261005",
+      "sha": "34bc68871366ab0cd73d553e558a4a5928e22acf",
+      "purpose": "carrier-migration-spec WIP snapshot",
+      "sourceBranch": "refs/heads/codex/maya-identity-consent-20260913",
+      "sourceWorktree": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent",
+      "files": [
+        {
+          "path": "docs/rebuild/PRESENTATION-CARRIER-MIGRATION-SPEC.md",
+          "sha256": "0e750a9e3c22961a8db7572dc263a3603f454ccfe9b0e86727b4b87a596f2cf9"
+        }
+      ],
+      "remoteSha": "34bc68871366ab0cd73d553e558a4a5928e22acf",
+      "localSha": "34bc68871366ab0cd73d553e558a4a5928e22acf",
+      "match": true
+    },
+    {
+      "branch": "archive/workspace-development-20261005",
+      "sha": "e951694f2bd5fa34b1515fc73bd863d0e274bd41",
+      "purpose": "Independent workspace metadata history and uncommitted Android/handoff documents",
+      "sourceWorktree": "/Users/stanislavmosin/Desktop/Projects/maya-platform/MAYA_WORKSPACE",
+      "remoteSha": "e951694f2bd5fa34b1515fc73bd863d0e274bd41",
+      "localSha": "e951694f2bd5fa34b1515fc73bd863d0e274bd41",
+      "match": true
+    },
+    {
+      "branch": "archive/wave2-detached-f2cb0820-20261005",
+      "sha": "f2cb082022e99994d5f8f55cfc5b5c8461fc643a",
+      "purpose": "Preserve detached registered Wave 2 staging worktree HEAD",
+      "sourceWorktrees": [
+        "/private/tmp/maya-mint-core",
+        "/private/tmp/maya-pg15-fix"
+      ],
+      "remoteSha": "f2cb082022e99994d5f8f55cfc5b5c8461fc643a",
+      "localSha": "f2cb082022e99994d5f8f55cfc5b5c8461fc643a",
+      "match": true
+    },
+    {
+      "branch": "archive/wave2-detached-cfe9878b-20261005",
+      "sha": "cfe9878b92b0e4c51f6e88685e240f44aa992a49",
+      "purpose": "Preserve detached registered Wave 2 staging worktree HEAD",
+      "sourceWorktrees": [
+        "/private/tmp/maya-mint-core-v2",
+        "/private/tmp/maya-u13-only"
+      ],
+      "remoteSha": "cfe9878b92b0e4c51f6e88685e240f44aa992a49",
+      "localSha": "cfe9878b92b0e4c51f6e88685e240f44aa992a49",
+      "match": true
+    },
+    {
+      "branch": "archive/wave2-detached-8cf205ab-20261005",
+      "sha": "8cf205ab6546e65b3ac45d75582b523a76e5309c",
+      "purpose": "Preserve detached registered Wave 2 staging worktree HEAD",
+      "sourceWorktrees": [
+        "/private/tmp/maya-u13-prep"
+      ],
+      "remoteSha": "8cf205ab6546e65b3ac45d75582b523a76e5309c",
+      "localSha": "8cf205ab6546e65b3ac45d75582b523a76e5309c",
+      "match": true
+    },
+    {
+      "branch": "archive/wave2-detached-1589b3be-20261005",
+      "sha": "1589b3befff0ee1a8e21340003c5c7832e968251",
+      "purpose": "Preserve detached registered Wave 2 staging worktree HEAD",
+      "sourceWorktrees": [
+        "/private/tmp/maya-u9b-clean"
+      ],
+      "remoteSha": "1589b3befff0ee1a8e21340003c5c7832e968251",
+      "localSha": "1589b3befff0ee1a8e21340003c5c7832e968251",
+      "match": true
+    },
+    {
+      "branch": "archive/maya-development-20261005",
+      "sha": "0d9ee769d5fd8538c34442410025938be5bd0eb6",
+      "purpose": "Chronology, current-state map, safe documentation/evidence and loose proof-source archive",
+      "remoteSha": "0d9ee769d5fd8538c34442410025938be5bd0eb6",
+      "localSha": "0d9ee769d5fd8538c34442410025938be5bd0eb6",
+      "match": true
+    }
+  ],
+  "notes": {
+    "ref": "refs/notes/wave1-closure",
+    "sha": "b639f51671699bd69891364bef11bbb373332f4e"
+  },
+  "legacyIosBranches": [
+    {
+      "repository": "maya-ios",
+      "branch": "archive/legacy-ios-development-20261005",
+      "sha": "ee8791da3b13f5fe5dd41545e3a4e828500681e8",
+      "originHead": null,
+      "ahead": 0,
+      "behind": 0,
+      "action": "CREATE_REMOTE_BRANCH",
+      "remoteSha": "ee8791da3b13f5fe5dd41545e3a4e828500681e8",
+      "match": true
+    },
+    {
+      "repository": "maya-ios",
+      "branch": "codex/pr9-access-hardening-20260810",
+      "sha": "d955d4bf9d0e22a365955c286b6cb6e3ea63b057",
+      "originHead": null,
+      "ahead": 0,
+      "behind": 0,
+      "action": "CREATE_REMOTE_BRANCH",
+      "remoteSha": "d955d4bf9d0e22a365955c286b6cb6e3ea63b057",
+      "match": true
+    },
+    {
+      "repository": "maya-ios",
+      "branch": "codex/pr9-native-chat-contract-20260810",
+      "sha": "25072087832d05443aa0a4c6d4cbd843683fa9a3",
+      "originHead": null,
+      "ahead": 0,
+      "behind": 0,
+      "action": "CREATE_REMOTE_BRANCH",
+      "remoteSha": "25072087832d05443aa0a4c6d4cbd843683fa9a3",
+      "match": true
+    }
+  ],
+  "latestVerifiedCandidate": "dff728e85a97841dd72bd290992b888344780780",
+  "candidateAvailableOnOrigin": true,
+  "archiveCommit": "0d9ee769d5fd8538c34442410025938be5bd0eb6",
+  "documentationReachable": [
+    "docs/rebuild/CURRENT-STATE-2026-10-05.md",
+    "docs/rebuild/evidence/archive/2026-09-29_to_2026-10-05/README.md"
+  ],
+  "initialLocalBranchesCovered": 69,
+  "previouslyUnreachableCommitsCovered": 27,
+  "initialWorktreeHeadsCovered": 58,
+  "originalUncommittedFiles": [
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/.gitignore",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/ai администратор/bot.py",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/ai администратор/webhook_server.py",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/maya-os-site/index.html",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/сайт и приложение/app.html",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/.tmp-pilot-fix.sh",
+      "unchanged": true,
+      "originBlobReachable": false,
+      "intentionalExclusion": true
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/.tmp-pilot-unlock.sh",
+      "unchanged": true,
+      "originBlobReachable": false,
+      "intentionalExclusion": true
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/L27-terminal-outcome.patch",
+      "unchanged": true,
+      "originBlobReachable": false,
+      "intentionalExclusion": true
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/NS-1-parent-return.patch",
+      "unchanged": true,
+      "originBlobReachable": false,
+      "intentionalExclusion": true
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/ai администратор/deploy/barbershop-pwa.service",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/ai администратор/pwa_api.py",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/ai администратор/site_community.py",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/ai администратор/site_engagement.py",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/ai администратор/site_guest_chat.py",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/ai администратор/site_publication_bot.py",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/ai администратор/site_publications.py",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/ai администратор/test_site_community.py",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/ai администратор/test_site_engagement.py",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/ai администратор/test_site_guest_chat.py",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/ai администратор/test_site_publications.py",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/docs/SITE_COMMUNITY.md",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/docs/SITE_PUBLICATIONS.md",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/maya-os-site/output/playwright/maya-continuation-desktop-1.png",
+      "unchanged": true,
+      "originBlobReachable": false,
+      "intentionalExclusion": true
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/maya-os-site/output/playwright/maya-continuation-desktop-3.png",
+      "unchanged": true,
+      "originBlobReachable": false,
+      "intentionalExclusion": true
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/maya-os-site/output/playwright/maya-continuation-mobile-1.png",
+      "unchanged": true,
+      "originBlobReachable": false,
+      "intentionalExclusion": true
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/maya-os-site/output/playwright/maya-continuation-mobile-2.png",
+      "unchanged": true,
+      "originBlobReachable": false,
+      "intentionalExclusion": true
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/maya-os-site/output/playwright/maya-continuation-mobile-3.png",
+      "unchanged": true,
+      "originBlobReachable": false,
+      "intentionalExclusion": true
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/maya-os-site/output/playwright/maya-continuation-mobile-4.png",
+      "unchanged": true,
+      "originBlobReachable": false,
+      "intentionalExclusion": true
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/maya-os-site/output/playwright/maya-continuation-mobile-final.png",
+      "unchanged": true,
+      "originBlobReachable": false,
+      "intentionalExclusion": true
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/output/live-pwa-index.html",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": true
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/output/live-root-oauth-callback.html",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": true
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/сайт и приложение/assets/maya-intro.webp",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/сайт и приложение/assets/maya-recording.webp",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/сайт и приложение/pwa-assets/tg-auth/site-community-proxy.php",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/maya-platform/сайт и приложение/pwa-assets/tg-auth/site-publications-proxy.php",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-os-final-integration/CLAUDE_WEEK_CARD.png",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Desktop/Projects/_worktrees/maya-platform/archive/maya-os-prepublication-review/сайт и приложение/app.html",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    },
+    {
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-06/maya-platform-canonical-repository-users-stanislavmosin/work/maya-identity-consent/docs/rebuild/PRESENTATION-CARRIER-MIGRATION-SPEC.md",
+      "unchanged": true,
+      "originBlobReachable": true,
+      "intentionalExclusion": false
+    }
+  ],
+  "uncommittedRequiredWork": 0,
+  "unpushedRequiredCommits": 0,
+  "unpushedRequiredBranches": 0,
+  "productionChanged": false,
+  "migrationsApplied": 0,
+  "grantsChanged": false,
+  "yclientsEffects": 0,
+  "postPushScanner": "PASS_REVIEWED: 1408 canonical findings exactly match pre-publication reviewed set; iOS three public VAPID/storage-key findings reviewed; zero unreviewed",
+  "scopeExclusions": "Independent maya-web salon website and unrelated gym-video work; see RELATED-REPOSITORIES.json. Raw/large/sensitive archives remain local with manifest.",
+  "piiScanNewMaterial": "PASS_REVIEWED",
+  "historicalOriginPrivacyIncident": "Existing owner email in historical Claude login reports. Not newly introduced. Value omitted; no remote history rewrite.",
+  "allRequiredMayaDevelopmentWorkPreservedOnOrigin": true
+}
