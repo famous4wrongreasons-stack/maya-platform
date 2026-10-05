@@ -21,7 +21,8 @@
 // draft here is a proposal the server owns until it is committed; a receipt here is an adjudication
 // of a submission, not of a booking; the timeline is what was said, not what was done.
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import { EncryptionService } from '../../encryption/encryption.service';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { DivergenceStore } from './divergence.store';
@@ -46,8 +47,11 @@ export class WidgetStoresService {
   private readonly divergence: DivergenceStore;
   private readonly loweringSource: LoweringSourceReader;
 
-  constructor(private readonly prisma: PrismaService) {
-    this.timeline = new TimelineStore(prisma);
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() encryption?: EncryptionService,
+  ) {
+    this.timeline = new TimelineStore(prisma, encryption);
     this.intentAudit = new IntentAuditStore(prisma);
     this.divergence = new DivergenceStore(prisma);
     this.loweringSource = new LoweringSourceReader(prisma);

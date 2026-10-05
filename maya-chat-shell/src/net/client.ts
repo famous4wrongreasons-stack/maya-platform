@@ -18,6 +18,7 @@ import {
   errorRetryAfter,
   projectBusinessSearch,
   projectChat,
+  projectConversationHistory,
   projectEmailStart,
   projectEmailVerify,
   projectPasswordLogin,
@@ -32,6 +33,7 @@ import type {
   BusinessSearchProjection,
   ChatFailure,
   ChatProjection,
+  ConversationHistoryProjection,
   ChatRequest,
   EmailStartProjection,
   EmailStartRequest,
@@ -65,6 +67,7 @@ const PATHS = {
   refresh: '/auth/refresh',
   logout: '/auth/logout',
   chat: '/ai/chat',
+  conversation: '/ai/conversation',
   transcribe: '/ai/transcribe',
   widgetIntent: '/widgets/intent',
   widgetResolve: '/widgets/resolve',
@@ -145,7 +148,7 @@ async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | 
   if (signal !== null) signal.addEventListener('abort', onAbort, { once: true });
   // A `search` term makes this a GET that carries the term in the query string, and a GET sends no
   // body and declares no content type — which also keeps it a simple request, with no preflight.
-  const reading = search !== null;
+  const reading = search !== null || endpoint === 'conversation';
   const auth: Readonly<Record<string, string>> = bearer === null ? {} : { Authorization: 'Bearer ' + bearer };
   const headers: Readonly<Record<string, string>> = reading ? auth : { ...auth, 'Content-Type': 'application/json' };
   const path = PATHS[endpoint];
@@ -463,7 +466,7 @@ const unlessAborted = <T>(work: Promise<T>, signal: AbortSignal): Promise<T | nu
 };
 
 /** 401 → refresh once → retry once (§1.4). A second 401 ends the session; it never loops. */
-async function authorizedExchange(auth: Authorizer, endpoint: 'chat' | 'transcribe' | 'widgetIntent' | 'widgetResolve', body: RequestBody, signal: AbortSignal, timeoutMs: number): Promise<AuthorizedExchange> {
+async function authorizedExchange(auth: Authorizer, endpoint: 'chat' | 'conversation' | 'transcribe' | 'widgetIntent' | 'widgetResolve', body: RequestBody, signal: AbortSignal, timeoutMs: number): Promise<AuthorizedExchange> {
   const first = await unlessAborted(auth.authorize(), signal);
   if (first === null) return { kind: 'aborted' };
   if (first.kind !== 'bearer') return first;
@@ -550,6 +553,16 @@ export function transcribeFailure(ex: Exchange): TranscribeFailure {
 /** The two authenticated calls of P1, shaped as `shell/ports.ts` `Transport`. */
 export function createTransport(auth: Authorizer, timeouts: Timeouts = { requestMs: REQUEST_TIMEOUT_MS, transcribeMs: TRANSCRIBE_TIMEOUT_MS }) {
   return {
+    async conversation(signal: AbortSignal): Promise<Outcome<ConversationHistoryProjection, ChatFailure>> {
+      const ex = await authorizedExchange(auth, 'conversation', {}, signal, timeouts.requestMs);
+      if (ex.kind === 'signed_out') return fail({ reason: 'signed_out', signedOut: ex.reason });
+      if (ex.kind === 'unavailable') return fail(chatUnavailable(ex.exchange));
+      if (ex.kind === 'response' && isSuccess(ex.status)) {
+        const value = projectConversationHistory(ex.body);
+        return value === null ? fail({ reason: 'unexpected_response', status: ex.status }) : { ok: true, value };
+      }
+      return fail(chatFailure(ex));
+    },
     /** Body keys `{surface, requestId, messages}` plus an optional server-issued `conversationId`, `surface` the constant 'web' (NT3). */
     async chat(request: ChatRequest, signal: AbortSignal): Promise<Outcome<ChatProjection, ChatFailure>> {
       const body: ChatRequest = {

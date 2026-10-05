@@ -548,6 +548,17 @@ export class AiCoreService {
     C9ConversationReads
   >();
 
+  async currentConversation(user: AuthenticatedUser) {
+    this.requireTenant(user);
+    const timeline = this.moduleRef?.get<AiTypedWidgetTriggerPort>(
+      AI_TYPED_WIDGET_TRIGGER,
+      { strict: false },
+    );
+    if (timeline === undefined)
+      this.modelFailure('conversation_history_unavailable');
+    return timeline.readCurrentConversation(user);
+  }
+
   async chat(user: AuthenticatedUser, dto: AiCoreChatDto) {
     const tenantId = this.requireTenant(user);
     const businessTimezone = await this.resolveBusinessTimezone(tenantId);
@@ -1786,7 +1797,6 @@ export class AiCoreService {
     response: AiCoreCompletion,
     toolResults: AiCoreToolResult[] = [],
   ) {
-    const completedResponse = response;
     const readTurn = this.readTurns.get(dto);
     const coordination = readTurn
       ? await this.orchestrator.finishConversationReads(readTurn).catch(() => ({
@@ -1796,8 +1806,7 @@ export class AiCoreService {
         }))
       : null;
     const grounding =
-      completedResponse.grounding ??
-      this.groundingReport(null, 'not_required', []);
+      response.grounding ?? this.groundingReport(null, 'not_required', []);
     const usage = decisions.reduce(
       (totals, decision) => ({
         input_tokens: this.addTokenCount(
@@ -1841,60 +1850,19 @@ export class AiCoreService {
       semanticPlans.length > 0
         ? this.conversationLayer().summarizeForAudit(semanticPlans)
         : null;
-    await this.auditLog.log({
-      tenantId: this.requireTenant(user),
-      userId: user.userId,
-      action: 'ai.core_turn_completed',
-      entityType: 'ai_core_turn',
-      entityId: dto.requestId,
-      metadata: {
-        surface: dto.surface,
-        source: completedResponse.source,
-        ...(coordination ? { coordination } : {}),
-        ...(this.persistedUserTurns.has(dto)
-          ? { user_turn: this.persistedUserTurns.get(dto) }
-          : {}),
-        models: [...new Set(decisions.map((decision) => decision.model))],
-        model_calls: decisions.length,
-        tools_used: toolsUsed.map((tool) => tool.name),
-        outcome: completedResponse.action ? 'approval_required' : 'reply',
-        brain_persona: brain.persona,
-        brain_intent: brain.intent,
-        conversation_intelligence_version: conversationAudit
-          ? 'maya-ci/1'
-          : null,
-        conversation_domains: conversationAudit?.domains ?? [],
-        conversation_intents: conversationAudit?.intents ?? [],
-        conversation_task_count: conversationAudit?.task_count ?? 0,
-        conversation_denied_task_count:
-          conversationAudit?.denied_task_count ?? 0,
-        conversation_clarification_required:
-          conversationAudit?.clarification_required ?? false,
-        conversation_confirmation_required:
-          conversationAudit?.confirmation_required ?? false,
-        grounding_status: grounding.status,
-        grounding_domain: grounding.domain,
-        grounding_evidence_tools: grounding.evidence_tools,
-        // Почему ответ модели был отклонён. Только числа, без текста.
-        unsourced_numbers: completedResponse.unsourced ?? [],
-        redacted_input: redacted,
-        widget: reportCard?.widget ?? null,
-        ...usage,
-      },
-    });
     const resolution = [...toolsUsed]
       .reverse()
       .find((tool) => tool.resolution !== undefined)?.resolution;
-    return {
+    const completion = {
       request_id: dto.requestId,
       ...(coordination ? { coordination } : {}),
       ...(this.persistedUserTurns.has(dto)
         ? { user_turn: this.persistedUserTurns.get(dto) }
         : {}),
-      reply: completedResponse.reply,
-      source: completedResponse.source,
+      reply: response.reply,
+      source: response.source,
       redacted_input: redacted,
-      action: completedResponse.action,
+      action: response.action,
       tools_used: toolsUsed.map((tool) => ({
         name: tool.name,
         status: tool.status,
@@ -1913,6 +1881,73 @@ export class AiCoreService {
           }
         : {}),
     };
+    const userTurn = this.persistedUserTurns.get(dto);
+    if (userTurn !== undefined && this.moduleRef !== undefined) {
+      const timeline = this.moduleRef.get<AiTypedWidgetTriggerPort>(
+        AI_TYPED_WIDGET_TRIGGER,
+        { strict: false },
+      );
+      // This fingerprints historical text/outcome, not a replay cache. Return
+      // the current complete response unchanged; never splice an old reply into
+      // fresh action or widget fields. Reconciliation may append a new answer.
+      const transcriptProjection = {
+        reply: response.reply,
+        source: response.source,
+        actionStatus: response.action?.status ?? null,
+        groundingStatus: grounding.status,
+        coordinationState: coordination?.state ?? null,
+      };
+      await timeline.persistAssistantReply({
+        actor: user,
+        userTurn,
+        reply: response.reply,
+        completionHash: createHash('sha256')
+          .update(this.canonicalJson(transcriptProjection))
+          .digest('hex'),
+      });
+    }
+    await this.auditLog.log({
+      tenantId: this.requireTenant(user),
+      userId: user.userId,
+      action: 'ai.core_turn_completed',
+      entityType: 'ai_core_turn',
+      entityId: dto.requestId,
+      metadata: {
+        surface: dto.surface,
+        source: response.source,
+        ...(coordination ? { coordination } : {}),
+        ...(this.persistedUserTurns.has(dto)
+          ? { user_turn: this.persistedUserTurns.get(dto) }
+          : {}),
+        models: [...new Set(decisions.map((decision) => decision.model))],
+        model_calls: decisions.length,
+        tools_used: toolsUsed.map((tool) => tool.name),
+        outcome: response.action ? 'approval_required' : 'reply',
+        brain_persona: brain.persona,
+        brain_intent: brain.intent,
+        conversation_intelligence_version: conversationAudit
+          ? 'maya-ci/1'
+          : null,
+        conversation_domains: conversationAudit?.domains ?? [],
+        conversation_intents: conversationAudit?.intents ?? [],
+        conversation_task_count: conversationAudit?.task_count ?? 0,
+        conversation_denied_task_count:
+          conversationAudit?.denied_task_count ?? 0,
+        conversation_clarification_required:
+          conversationAudit?.clarification_required ?? false,
+        conversation_confirmation_required:
+          conversationAudit?.confirmation_required ?? false,
+        grounding_status: grounding.status,
+        grounding_domain: grounding.domain,
+        grounding_evidence_tools: grounding.evidence_tools,
+        // Почему ответ модели был отклонён. Только числа, без текста.
+        unsourced_numbers: response.unsourced ?? [],
+        redacted_input: redacted,
+        widget: reportCard?.widget ?? null,
+        ...usage,
+      },
+    });
+    return completion;
   }
 
   private widgetResolution(execution: Readonly<Record<string, unknown>>): {

@@ -20,7 +20,7 @@
 // Memory only (A6). A signed-in → signed-out transition empties the timeline and aborts the turn in
 // flight, so no history crosses to another session or tenant (D7 B).
 
-import type { ChatFailure, ChatMessage, ChatProjection, ChatWidgetResolution, Outcome } from '../net/types.ts';
+import type { ChatFailure, ChatMessage, ChatProjection, ChatWidgetResolution, ConversationHistoryProjection, Outcome } from '../net/types.ts';
 import type {
   Cancel,
   ComposerState,
@@ -72,7 +72,7 @@ export interface TimelineWriter {
 }
 
 export interface ConversationDeps {
-  readonly transport: Pick<Transport, 'chat'>;
+  readonly transport: Pick<Transport, 'chat' | 'conversation'>;
   readonly session: Pick<SessionPort, 'view' | 'subscribe'>;
   readonly scheduler: Pick<Scheduler, 'now'>;
   readonly newAbort: () => AbortHandle;
@@ -163,6 +163,7 @@ interface UserItem {
   readonly modality: TurnModality;
   readonly requestId: string;
   readonly conversationId?: string;
+  readonly historyEligible?: boolean;
   userTurn?: { readonly turnId: string; readonly conversationId: string };
   state: 'sending' | 'sent' | 'failed';
   failure: ChatFailure | null;
@@ -217,6 +218,8 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
   let dropped = 0;
   let generation = 0;
   let inflight: { readonly itemId: string; readonly abort: AbortHandle; readonly generation: number } | null = null;
+  let restoring: AbortHandle | null = null;
+  let historyUnavailable = false;
   let blocked: 'subscription_required' | 'tenant_required' | null = null;
   let signedIn = deps.session.view().signedIn;
   let current: ConversationView;
@@ -235,7 +238,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
   const snapshot = (): ConversationView => {
     const views = items.map(itemView);
     if (dropped > 0) views.unshift({ kind: 'notice', id: DISPLAY_CAPPED_ID, notice: 'display_capped' });
-    return { items: views, inFlight: inflight !== null, composer: composer(), dropped };
+    return { items: views, inFlight: inflight !== null || restoring !== null, composer: composer(), dropped };
   };
 
   const publish = (ids: readonly string[], reason: DropReason): void => {
@@ -280,7 +283,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
   const historyBefore = (index: number): ChatMessage[] => {
     const out: ChatMessage[] = [];
     for (const item of items.slice(0, index)) {
-      if (item.kind === 'user' && item.state === 'sent') out.push({ role: 'user', content: truncateForHistory(item.text) });
+      if (item.kind === 'user' && item.state === 'sent' && item.historyEligible !== false) out.push({ role: 'user', content: truncateForHistory(item.text) });
       else if (item.kind === 'assistant' && item.text.length > 0) out.push({ role: 'assistant', content: truncateForHistory(item.text) });
     }
     return out.slice(-HISTORY_PRIOR_MAX);
@@ -350,7 +353,11 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
 
   const submitUserTurn = (text: string, origin: TurnOrigin): SubmitResult => {
     if (!composer().enabled) return { accepted: false, refusal: 'composer_disabled' };
-    if (inflight !== null) return { accepted: false, refusal: 'in_flight' };
+    if (inflight !== null || restoring !== null) return { accepted: false, refusal: 'in_flight' };
+    if (historyUnavailable) {
+      restore();
+      return { accepted: false, refusal: 'in_flight' };
+    }
     const checked = normalizeTurnText(text);
     if (!checked.ok) return { accepted: false, refusal: checked.refusal };
     // The conversation has moved on: an earlier failed turn could only be re-sent with a different
@@ -375,7 +382,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
   const retry = (itemId: string): void => {
     const item = items.find((x): x is UserItem => x.kind === 'user' && x.id === itemId);
     if (item === undefined || item.state !== 'failed' || item.retry.retry !== 'same_request') return;
-    if (inflight !== null || !composer().enabled || latestUserTurn() !== item) return;
+    if (inflight !== null || restoring !== null || !composer().enabled || latestUserTurn() !== item) return;
     const notBefore = item.retry.notBefore;
     if (notBefore !== null && deps.scheduler.now() < notBefore) return;
     send(item);
@@ -385,19 +392,73 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
     conversationId = undefined;
     generation += 1;
     const abort = inflight?.abort;
+    const restoreAbort = restoring;
     inflight = null;
+    restoring = null;
+    historyUnavailable = false;
     const ids = items.map((item) => item.id);
     items.length = 0;
     dropped = 0;
     blocked = null;
     abort?.abort();
+    restoreAbort?.abort();
     publish(ids, 'cleared');
+  };
+
+  const restore = (): void => {
+    if (!signedIn || !deps.transport.conversation || restoring !== null) return;
+    const abort = deps.newAbort();
+    const restoreGeneration = generation;
+    restoring = abort;
+    emit();
+    const settleHistory = (outcome: Outcome<ConversationHistoryProjection, ChatFailure>): void => {
+      if (!signedIn || generation !== restoreGeneration || restoring !== abort) return;
+      restoring = null;
+      if (!outcome.ok) {
+        // Older servers predate this additive read route. Keep their existing
+        // chat usable and disclose the missing capability; never apply this
+        // compatibility path to authentication failures or network outages.
+        if (outcome.failure.reason === 'unexpected_response' && outcome.failure.status === 404) {
+          historyUnavailable = false;
+          append({ kind: 'notice', id: nextId('n'), notice: 'history_not_supported' });
+          emit();
+          return;
+        }
+        historyUnavailable = true;
+        if (!items.some((item) => item.kind === 'notice' && item.notice === 'history_unavailable')) append({ kind: 'notice', id: nextId('n'), notice: 'history_unavailable' });
+        emit();
+        return;
+      }
+      historyUnavailable = false;
+      const failureNotice = items.findIndex((item) => item.kind === 'notice' && item.notice === 'history_unavailable');
+      if (failureNotice !== -1) items.splice(failureNotice, 1);
+      const history = outcome.value;
+      conversationId = history.conversationId ?? undefined;
+      if (history.turns.length > 0) append({ kind: 'notice', id: nextId('n'), notice: 'history_restored' });
+      if (history.truncated) append({ kind: 'notice', id: nextId('n'), notice: 'history_truncated' });
+      for (const turn of history.turns) {
+        if (turn.role === 'assistant') append({ kind: 'assistant', id: nextId('a'), text: turn.text });
+        else {
+          // No old request ID, retry, widget or approval is restored. An unfinished
+          // turn remains display-only and never becomes context for a new request.
+          append({ kind: 'user', id: nextId('u'), text: turn.text, modality: 'typed', requestId: '', state: 'sent', failure: null, retry: NO_RETRY, historyEligible: turn.completed });
+          if (!turn.completed) append({ kind: 'notice', id: nextId('n'), notice: 'history_interrupted' });
+        }
+      }
+      emit();
+    };
+    try {
+      deps.transport.conversation(abort.signal).then(settleHistory, () => settleHistory({ ok: false, failure: { reason: 'unexpected_response', status: 0 } }));
+    } catch {
+      settleHistory({ ok: false, failure: { reason: 'unexpected_response', status: 0 } });
+    }
   };
 
   const unsubscribe = deps.session.subscribe((view) => {
     const wasSignedIn = signedIn;
     signedIn = view.signedIn;
     if (wasSignedIn && !view.signedIn) clear();
+    if (!wasSignedIn && view.signedIn) restore();
     emit();
   });
 
@@ -432,6 +493,7 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
   };
 
   current = snapshot();
+  if (signedIn) restore();
 
   return {
     view: () => current,

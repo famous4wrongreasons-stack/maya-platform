@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { TimelineStore } from '../widgets/stores/timeline.store';
 import { stableActionJson } from '../action-engine/action-engine.identity';
 import { C9Run, Prisma } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
@@ -272,19 +273,16 @@ export class C9Store {
     return this.transaction(undefined, async (tx, p, now) => {
       if (!/^[a-f0-9]{64}$/.test(intentHash))
         c9Deny('conversation_intent_hash');
-      const source = await tx.widgetTimelineTurn.findFirst({
-        where: {
+      const source = await TimelineStore.readActiveUserTurnIdentity(
+        tx,
+        {
+          tenantId: p.tenantId,
           id: c9Id(turn.turnId) as string,
           conversationId: c9Id(turn.conversationId) as string,
-          tenantId: p.tenantId,
           principalProofHash: c9PrincipalHash(p),
-          role: 'user',
-          channel: 'pwa',
-          erasedAt: null,
-          retentionUntil: { gt: now },
         },
-        select: { id: true, createdAt: true, retentionUntil: true },
-      });
+        now,
+      );
       if (!source) c9Deny('conversation_turn_unavailable');
       const validUntil = new Date(
         Math.min(

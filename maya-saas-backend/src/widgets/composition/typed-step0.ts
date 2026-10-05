@@ -28,6 +28,7 @@ import {
 } from '../routing/deterministic-router';
 import { scoped } from '../stores/tenant-scope';
 import { sha256Hex } from '../token.util';
+import { EncryptionService } from '../../encryption/encryption.service';
 
 type TypedRoutingCandidate = RoutingCandidate & {
   readonly widgetId: string;
@@ -46,7 +47,65 @@ export class TypedStep0Service implements AiTypedWidgetTriggerPort {
     @Inject(PRINCIPAL_RESOLVER)
     private readonly principals: PrincipalResolver,
     @Inject(USER_TURN_AUDIT) private readonly turnAudit: UserTurnAuditPort,
+    private readonly encryption: EncryptionService,
   ) {}
+
+  async persistAssistantReply(
+    input: Parameters<AiTypedWidgetTriggerPort['persistAssistantReply']>[0],
+  ): Promise<void> {
+    const tenantId = input.actor.tenantId;
+    if (tenantId === null)
+      throw new ForbiddenException('conversation_principal_unavailable');
+    return this.prisma.$transaction(async (tx) => {
+      const principal = await this.principals.resolve(tx);
+      if (
+        principal === null ||
+        principal.authority.tenantId !== tenantId ||
+        principal.authority.userId !== input.actor.userId
+      )
+        throw new ForbiddenException('conversation_principal_unavailable');
+      const [{ now }] = await tx.$queryRaw<
+        { now: Date }[]
+      >`SELECT clock_timestamp() AS now`;
+      return TimelineStore.persistChatReply(
+        tx,
+        {
+          ...input,
+          tenantId,
+          principalProofHash: principal.proofHash,
+        },
+        now,
+        this.encryption,
+      );
+    });
+  }
+
+  async readCurrentConversation(
+    actor: Parameters<AiTypedWidgetTriggerPort['readCurrentConversation']>[0],
+  ): ReturnType<AiTypedWidgetTriggerPort['readCurrentConversation']> {
+    const tenantId = actor.tenantId;
+    if (tenantId === null)
+      throw new ForbiddenException('conversation_principal_unavailable');
+    return this.prisma.$transaction(async (tx) => {
+      const principal = await this.principals.resolve(tx);
+      if (
+        principal === null ||
+        principal.authority.tenantId !== tenantId ||
+        principal.authority.userId !== actor.userId
+      )
+        throw new ForbiddenException('conversation_principal_unavailable');
+      const [{ now }] = await tx.$queryRaw<
+        { now: Date }[]
+      >`SELECT clock_timestamp() AS now`;
+      return TimelineStore.readCurrentConversation(
+        tx,
+        tenantId,
+        principal.proofHash,
+        now,
+        this.encryption,
+      );
+    });
+  }
 
   async routeTypedUtterance(
     input: Parameters<AiTypedWidgetTriggerPort['routeTypedUtterance']>[0],

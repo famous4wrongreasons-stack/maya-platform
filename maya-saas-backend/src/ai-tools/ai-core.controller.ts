@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -30,6 +31,15 @@ export class AiCoreController {
     private readonly aiCore: AiCoreService,
     private readonly aiSpeech: AiSpeechService,
   ) {}
+
+  @Get('conversation')
+  @ApiOperation({
+    summary:
+      'Read current principal-scoped conversation text without restoring actions',
+  })
+  conversation(@CurrentUser() user: AuthenticatedUser) {
+    return this.aiCore.currentConversation(user);
+  }
 
   @Post('chat')
   @ApiOperation({

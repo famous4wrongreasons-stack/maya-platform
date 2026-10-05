@@ -92,6 +92,7 @@ const U = {
   refresh: '/api/auth/refresh',
   logout: '/api/auth/logout',
   chat: '/api/ai/chat',
+  conversation: '/api/ai/conversation',
   transcribe: '/api/ai/transcribe',
   widgetIntent: '/api/widgets/intent',
   widgetResolve: '/api/widgets/resolve',
@@ -313,13 +314,14 @@ const signedIn = async (options = {}) => {
 
 // ── 1. the module surface ──────────────────────────────────────────────────────────────────────
 
-test('PATHS holds exactly the twelve approved literals; one fetch call site; API_BASE is the one endpoint line', async () => {
+test('PATHS holds exactly the approved literals; one fetch call site; API_BASE is the one endpoint line', async () => {
   const src = read('src/net/client.ts');
   const block = src.match(/const PATHS = \{([\s\S]*?)\} as const;/);
   assert.ok(block, 'const PATHS = {…} as const');
   const values = [...block[1].matchAll(/'([^']*)'/g)].map((m) => m[1]).sort();
   assert.deepEqual(values, [
     '/ai/chat',
+    '/ai/conversation',
     '/ai/transcribe',
     '/auth/email/start',
     '/auth/email/verify',
@@ -356,7 +358,7 @@ test('typed methods only: the two widget methods are explicit; no generic reques
   const net = createNet();
   assert.deepEqual(Object.keys(net).sort(), ['session', 'transport']);
   assert.deepEqual(Object.keys(net.session).sort(), ['completeTelegram', 'findBusinesses', 'landing', 'onLanding', 'signInPassword', 'signOut', 'startEmail', 'startTelegram', 'subscribe', 'verifyEmail', 'view']);
-  assert.deepEqual(Object.keys(net.transport).sort(), ['chat', 'resolveWidgets', 'transcribe', 'widgetIntent']);
+  assert.deepEqual(Object.keys(net.transport).sort(), ['chat', 'conversation', 'resolveWidgets', 'transcribe', 'widgetIntent']);
 });
 
 test('widget transport sends only typed bodies and retains only authorized response members', async () => {
@@ -1466,7 +1468,53 @@ test('a 2xx that is not a login does not sign anyone in', async () => {
   }
 });
 
-test('every request of this suite went to one of the twelve approved URLs, and all twelve were exercised', () => {
+test('conversation history is authenticated GET with no selector/body, refreshes once, and strips action authority', async () => {
+  const { net } = await signedIn();
+  const body = {
+    contract: 'maya.conversation-history/1', conversationId: TENANT_ID, truncated: false, interrupted: false,
+    turns: [{ id: USER_ID, role: 'assistant', text: 'Сохранённый ответ', createdAt: '2026-10-05T10:00:00.000Z', completed: true, intentToken: 'never-restore' }],
+    widgets: ['never-restore'],
+  };
+  serve({ [U.conversation]: [json(401, JWT_401), json(200, body)], [U.refresh]: json(201, TOKENS(2)) });
+  const result = await net.transport.conversation(new AbortController().signal);
+  assert.deepEqual(result, { ok: true, value: { conversationId: TENANT_ID, truncated: false, interrupted: false, turns: [{ id: USER_ID, role: 'assistant', text: 'Сохранённый ответ', createdAt: '2026-10-05T10:00:00.000Z', completed: true }] } });
+  assert.equal(calls(U.conversation).length, 2);
+  for (const req of calls(U.conversation)) {
+    assert.equal(req.init.method, 'GET');
+    assert.equal(req.raw, null);
+    assert.deepEqual(Object.keys(req.headers), ['Authorization']);
+  }
+  const getter = { ...body };
+  Object.defineProperty(getter, 'turns', { get() { throw new Error('getter must not execute'); } });
+  for (const invalid of [getter, { ...body, conversationId: null }, { ...body, turns: Array(51).fill(body.turns[0]) }, { ...body, interrupted: true }, { ...body, turns: [{ ...body.turns[0], completed: false }] }]) assert.equal(project.projectConversationHistory(invalid), null);
+  serve({ [U.conversation]: json(503, {}) });
+  assert.deepEqual(await net.transport.conversation(new AbortController().signal), { ok: false, failure: { reason: 'server_error', status: 503 } });
+});
+
+test('every request of this suite went to an approved URL, and all approved URLs were exercised', () => {
   const allowed = Object.values(U).sort();
   assert.deepEqual([...everyUrl].sort(), allowed);
+});
+
+test('a fresh login over an active session clears its timeline and rejects a delayed previous history, even with identical display names', async () => {
+  const { createConversation } = await import('../src/shell/conversation.ts');
+  const { net } = await signedIn();
+  const hold = gate();
+  let oldSignal;
+  serve({ [U.conversation]: async (req) => {
+    oldSignal = req.signal;
+    await hold.opened;
+    return json(200, { contract: 'maya.conversation-history/1', conversationId: TENANT_ID, truncated: false, interrupted: false, turns: [{ id: USER_ID, role: 'assistant', text: 'Previous session private text', createdAt: '2026-10-05T10:00:00.000Z', completed: true }] });
+  } });
+  const conversation = createConversation({ transport: net.transport, session: net.session, scheduler: { now: () => T0 }, newAbort: () => new AbortController() });
+  await new Promise((resolve) => setTimeout(resolve, 5));
+  assert.ok(oldSignal);
+  serve({ [U.login]: json(201, LOGIN_OK), [U.conversation]: json(200, { contract: 'maya.conversation-history/1', conversationId: null, truncated: false, interrupted: false, turns: [] }) });
+  assert.equal((await net.session.signInPassword('second-business', 'second@example.ru', 'correct-horse-9')).step, 'signed_in');
+  assert.equal(oldSignal.aborted, true);
+  hold.open();
+  await new Promise((resolve) => setTimeout(resolve, 5));
+  assert.deepEqual(conversation.view().items, []);
+  assert.equal(conversation.view().inFlight, false);
+  conversation.dispose();
 });

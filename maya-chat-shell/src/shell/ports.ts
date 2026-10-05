@@ -24,6 +24,7 @@ import type {
   BusinessMatch,
   ChatFailure,
   ChatProjection,
+  ConversationHistoryProjection,
   ChatRequest,
   FirstRunFailure,
   Outcome,
@@ -96,6 +97,8 @@ export type RenderFn = (input: RenderInput) => RenderResult;
 // ── network, as the shell reaches it ───────────────────────────────────────────────────────────
 
 export interface Transport {
+  /** Optional for older embedded hosts; the canonical network transport always implements it. */
+  conversation?(signal: AbortSignal): Promise<Outcome<ConversationHistoryProjection, ChatFailure>>;
   chat(request: ChatRequest, signal: AbortSignal): Promise<Outcome<ChatProjection, ChatFailure>>;
   transcribe(request: TranscribeRequest, signal: AbortSignal): Promise<Outcome<TranscribeProjection, TranscribeFailure>>;
   widgetIntent(request: WidgetIntentSubmission, signal: AbortSignal): Promise<Outcome<WidgetIntentProjection, WidgetFailure>>;
@@ -199,6 +202,11 @@ export type NoticeKind =
   | 'tenant_required'
   | 'outdated_client'
   | 'display_capped'
+  | 'history_restored'
+  | 'history_interrupted'
+  | 'history_unavailable'
+  | 'history_not_supported'
+  | 'history_truncated'
   | 'deeplink_refused'
   | 'deeplink_unavailable';
 

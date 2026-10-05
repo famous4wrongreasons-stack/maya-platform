@@ -11,6 +11,14 @@ import { PrismaService } from '../../prisma/prisma.service';
 import type { RequestTx } from '../authority/principal-view';
 import type { LoweredUtterance } from '../lowering/lowering';
 import { scoped } from './tenant-scope';
+import type { EncryptionService } from '../../encryption/encryption.service';
+import {
+  chatReplyId,
+  decodeChatReply,
+  decodeChatCompletion,
+  encodeChatReply,
+  isChatReply,
+} from './chat-reply-codec';
 
 /** Retention windows from §5. Stated once so a store cannot invent its own. */
 export const RETENTION = {
@@ -58,7 +66,10 @@ export const timelineLockKey = (
   `${Buffer.byteLength(tenantId, 'utf8')}:${tenantId}${Buffer.byteLength(conversationId, 'utf8')}:${conversationId}`;
 
 export class TimelineStore {
-  constructor(private readonly prisma: PrismaService | TimelineClient) {}
+  constructor(
+    private readonly prisma: PrismaService | TimelineClient,
+    private readonly encryption?: EncryptionService,
+  ) {}
 
   /**
    * Serialise widget-store changes for one exact conversation without giving callers raw-SQL
@@ -80,6 +91,190 @@ export class TimelineStore {
     id: string,
   ): Promise<void> {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`user-turn:${tenantId}:${id}`}, 0))`;
+  }
+
+  /** Caller resolves the live principal; this owner alone reads/writes transcript rows. */
+  static async persistChatReply(
+    tx: TimelineClient,
+    input: {
+      tenantId: string;
+      principalProofHash: string;
+      userTurn: { turnId: string; conversationId: string };
+      reply: string;
+      completionHash: string;
+    },
+    now: Date,
+    encryption: EncryptionService,
+  ): Promise<void> {
+    const tenantId = input.tenantId;
+    await TimelineStore.lockConversation(
+      tx,
+      tenantId,
+      input.userTurn.conversationId,
+    );
+    const parent = await TimelineStore.readUserTurn(
+      tx,
+      tenantId,
+      input.userTurn.turnId,
+    );
+    if (
+      parent === null ||
+      parent.role !== 'user' ||
+      parent.channel !== 'pwa' ||
+      parent.principalProofHash !== input.principalProofHash ||
+      parent.conversationId !== input.userTurn.conversationId ||
+      parent.erasedAt !== null ||
+      parent.retentionUntil <= now
+    )
+      throw new ConflictException('conversation_scope_conflict');
+    const id = chatReplyId(tenantId, `${parent.id}:${input.completionHash}`);
+    const existing = await TimelineStore.readUserTurn(tx, tenantId, id);
+    // Immutable completion revisions: identical retry dedupes; a reconciled
+    // outcome appends its own text without rewriting an earlier UNKNOWN.
+    if (existing !== null) {
+      if (
+        existing.role !== 'assistant' ||
+        existing.channel !== 'pwa' ||
+        existing.principalProofHash !== input.principalProofHash ||
+        existing.conversationId !== parent.conversationId ||
+        existing.erasedAt !== null ||
+        existing.retentionUntil <= now ||
+        existing.textContent === null ||
+        !isChatReply(existing.textContent)
+      )
+        throw new ConflictException('conversation_reply_conflict');
+      if (
+        decodeChatCompletion(encryption, existing.textContent)
+          .completionHash !== input.completionHash
+      )
+        throw new ConflictException('conversation_completion_conflict');
+      return;
+    }
+    const latest = await tx.widgetTimelineTurn.aggregate({
+      where: scoped(tenantId, { conversationId: parent.conversationId }),
+      _max: { turnIndex: true },
+    });
+    const bounded =
+      input.reply.length <= 32_000
+        ? input.reply
+        : `${input.reply.slice(0, 32_000)}\n[Длинный ответ сокращён в истории.]`;
+    await tx.widgetTimelineTurn.create({
+      data: {
+        id,
+        tenantId,
+        conversationId: parent.conversationId,
+        turnIndex: (latest._max.turnIndex ?? -1) + 1,
+        role: 'assistant',
+        principalProofHash: input.principalProofHash,
+        channel: 'pwa',
+        createdAt: now,
+        retentionUntil: parent.retentionUntil,
+        textContent: encodeChatReply(
+          encryption,
+          bounded,
+          input.completionHash,
+          parent.id,
+        ),
+      },
+    });
+    return;
+  }
+
+  static async readCurrentConversation(
+    tx: TimelineClient,
+    tenantId: string,
+    principalProofHash: string,
+    now: Date,
+    encryption: EncryptionService,
+  ) {
+    const scope = scoped(tenantId, {
+      principalProofHash: principalProofHash,
+      channel: 'pwa',
+      erasedAt: null,
+      retentionUntil: { gt: now },
+    });
+    const latest = await tx.widgetTimelineTurn.findFirst({
+      where: { ...scope, role: 'user' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      select: { conversationId: true },
+    });
+    if (latest === null)
+      return {
+        contract: 'maya.conversation-history/1' as const,
+        conversationId: null,
+        truncated: false,
+        interrupted: false,
+        turns: [],
+      };
+    await TimelineStore.lockConversation(tx, tenantId, latest.conversationId);
+    const rows = await tx.widgetTimelineTurn.findMany({
+      where: {
+        ...scope,
+        conversationId: latest.conversationId,
+        textContent: { not: null },
+      },
+      orderBy: { turnIndex: 'desc' },
+      take: 51,
+      select: { id: true, role: true, textContent: true, createdAt: true },
+    });
+    const latestReplies = new Map<string, string>();
+    const decodedReplies = new Map<
+      string,
+      ReturnType<typeof decodeChatCompletion>
+    >();
+    // Rows are newest first. Resume projects only the latest saved answer per
+    // user turn; prior revisions remain audit history and never enter model context.
+    for (const row of rows) {
+      if (
+        row.role !== 'assistant' ||
+        row.textContent === null ||
+        !isChatReply(row.textContent)
+      )
+        continue;
+      const decoded = decodeChatCompletion(encryption, row.textContent);
+      decodedReplies.set(row.id, decoded);
+      if (!latestReplies.has(decoded.parentId))
+        latestReplies.set(decoded.parentId, row.id);
+    }
+    const turns = rows
+      .slice(0, 50)
+      .reverse()
+      .flatMap<{
+        id: string;
+        role: 'user' | 'assistant';
+        text: string;
+        createdAt: string;
+        completed: boolean;
+      }>((row) => {
+        if (row.role !== 'user' && row.role !== 'assistant') return [];
+        const text = row.textContent;
+        if (text === null) return [];
+        // Only this writer's encrypted replies are restored. A widget body,
+        // receipt or legacy assistant placeholder is not a chat completion.
+        if (row.role === 'assistant' && !isChatReply(text)) return [];
+        const decoded = decodedReplies.get(row.id);
+        if (decoded && latestReplies.get(decoded.parentId) !== row.id)
+          return [];
+        return [
+          {
+            id: row.id,
+            role: row.role,
+            text:
+              row.role === 'assistant'
+                ? decodeChatReply(encryption, text)
+                : text,
+            createdAt: row.createdAt.toISOString(),
+            completed: row.role === 'assistant' || latestReplies.has(row.id),
+          },
+        ];
+      });
+    return {
+      contract: 'maya.conversation-history/1' as const,
+      conversationId: turns.length ? latest.conversationId : null,
+      truncated: rows.length > 50,
+      interrupted: turns.some((turn) => !turn.completed),
+      turns,
+    };
   }
 
   private plusDays(from: Date, days: number): Date {
@@ -249,6 +444,31 @@ export class TimelineStore {
     return { id: row.id, turnIndex };
   }
 
+  /** C9 needs immutable event age and scope, never conversation content. */
+  static readActiveUserTurnIdentity(
+    tx: Pick<TimelineClient, 'widgetTimelineTurn'>,
+    input: {
+      tenantId: string;
+      id: string;
+      conversationId: string;
+      principalProofHash: string;
+    },
+    now: Date,
+  ) {
+    return tx.widgetTimelineTurn.findFirst({
+      where: scoped(input.tenantId, {
+        id: input.id,
+        conversationId: input.conversationId,
+        principalProofHash: input.principalProofHash,
+        role: 'user',
+        channel: 'pwa',
+        erasedAt: null,
+        retentionUntil: { gt: now },
+      }),
+      select: { id: true, createdAt: true, retentionUntil: true },
+    });
+  }
+
   static readUserTurn(
     tx: Pick<TimelineClient, 'widgetTimelineTurn'>,
     tenantId: string,
@@ -397,7 +617,7 @@ export class TimelineStore {
    * join to.
    */
   async readTimeline(tenantId: string, conversationId: string, limit = 50) {
-    return this.prisma.widgetTimelineTurn.findMany({
+    const rows = await this.prisma.widgetTimelineTurn.findMany({
       where: scoped(tenantId, { conversationId, erasedAt: null }),
       orderBy: { turnIndex: 'asc' },
       take: Math.min(limit, 200),
@@ -411,6 +631,13 @@ export class TimelineStore {
         spokenTranscript: true,
       },
     });
+    return rows.map((row) => ({
+      ...row,
+      textContent:
+        row.role === 'assistant' && row.textContent !== null
+          ? decodeChatReply(this.encryption, row.textContent)
+          : row.textContent,
+    }));
   }
 }
 

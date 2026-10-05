@@ -13,6 +13,7 @@ import type {
   BusinessMatch,
   BusinessSearchProjection,
   ChatProjection,
+  ConversationHistoryProjection,
   ChatWidgetResolution,
   EmailStartProjection,
   EmailVerifyProjection,
@@ -162,6 +163,30 @@ export const projectRefresh = (body: unknown): RefreshProjection | null => {
 };
 
 // ── conversation ───────────────────────────────────────────────────────────────────────────────
+
+/** Current principal only. Copy text, never old widgets, receipts or action tokens. */
+export const projectConversationHistory = (body: unknown): ConversationHistoryProjection | null => {
+  const uuid = (v: unknown): v is string => typeof v === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(v);
+  const conversationId = own(body, 'conversationId');
+  const truncated = own(body, 'truncated');
+  const interrupted = own(body, 'interrupted');
+  const turns = own(body, 'turns');
+  if (own(body, 'contract') !== 'maya.conversation-history/1' || (conversationId !== null && !uuid(conversationId)) || typeof truncated !== 'boolean' || typeof interrupted !== 'boolean' || !Array.isArray(turns) || turns.length > 50) return null;
+  const projected: ConversationHistoryProjection['turns'][number][] = [];
+  const ids = new Set<string>();
+  for (const turn of turns) {
+    const id = own(turn, 'id');
+    const role = own(turn, 'role');
+    const content = own(turn, 'text');
+    const createdAt = own(turn, 'createdAt');
+    const completed = own(turn, 'completed');
+    if (!uuid(id) || ids.has(id) || (role !== 'user' && role !== 'assistant') || typeof content !== 'string' || content.length > 32_100 || typeof createdAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(createdAt) || !Number.isFinite(Date.parse(createdAt)) || typeof completed !== 'boolean' || (role === 'assistant' && !completed)) return null;
+    ids.add(id);
+    projected.push({ id, role, text: content, createdAt, completed });
+  }
+  if ((conversationId === null) !== (projected.length === 0) || interrupted !== projected.some((turn) => !turn.completed)) return null;
+  return { conversationId, truncated, interrupted, turns: projected };
+};
 
 /**
  * `POST /ai/chat` (`ai-core.service.ts` `complete`) → `{request_id, reply, action_status}`.

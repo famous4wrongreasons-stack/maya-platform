@@ -248,6 +248,13 @@ export function createNet(options: NetOptions = {}) {
   };
 
   const signIn = (issued: SessionGrant, display: SignInDisplay): void => {
+    // Every new login ends the previous local epoch, even when display names
+    // happen to match. All carriers clear old context before the new grant.
+    if (grant !== null) {
+      grant = null;
+      reason = 'signed_out';
+      notify();
+    }
     install(issued, display, null);
     reason = null;
     flight = null;

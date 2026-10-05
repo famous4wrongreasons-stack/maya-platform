@@ -62,6 +62,7 @@ const harness = (rows: readonly unknown[] = [candidate]) => {
       read: jest.fn().mockResolvedValue([]),
       append: jest.fn().mockResolvedValue(undefined),
     },
+    {} as never,
   );
   return { service, submit, resolve };
 };

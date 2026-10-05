@@ -362,6 +362,10 @@ const READ_TIMELINE_CALLERS: readonly SrcPath[] = [TIMELINE_FACADE];
  * is the reason it cannot.
  */
 const STORE_METHOD_ALLOWLIST = new Set([
+  // Durable text-only continuation stays in the same physical table owner.
+  'persistChatReply',
+  'readCurrentConversation',
+  'readActiveUserTurnIdentity',
   'appendUserTurn',
   'readUserTurn',
   'assertConversation',

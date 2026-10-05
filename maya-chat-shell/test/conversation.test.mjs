@@ -94,6 +94,7 @@ const makeSession = (initial = SIGNED_IN) => {
 
 const setup = (options = {}) => {
   const t = makeTransport();
+  if (options.conversation) t.transport.conversation = options.conversation;
   const session = makeSession(options.session);
   let now = T0;
   let ids = 0;
@@ -114,6 +115,73 @@ const setup = (options = {}) => {
 
 const TYPED = { modality: 'typed' };
 const SPOKEN = { modality: 'spoken' };
+
+test('an older server missing the additive history route remains usable with a visible limitation', async () => {
+  const s = setup({ conversation: async () => ({ ok: false, failure: { reason: 'unexpected_response', status: 404 } }) });
+  await flush();
+  assert.equal(s.items()[0].notice, 'history_not_supported');
+  assert.equal(s.conversation.submitUserTurn('Привет', TYPED).accepted, true);
+  assert.equal(s.calls[0].body.conversationId, undefined);
+  s.conversation.dispose();
+});
+
+test('server continuation waits before send, restores text only, excludes unfinished work from context', async () => {
+  let finish;
+  const s = setup({ conversation: () => new Promise((resolve) => { finish = resolve; }) });
+  assert.equal(s.conversation.view().inFlight, true);
+  assert.deepEqual(s.conversation.submitUserTurn('Рано', TYPED), { accepted: false, refusal: 'in_flight' });
+  finish({ ok: true, value: { conversationId: 'opaque-server-conversation', truncated: true, interrupted: true, turns: [
+    { id: 'u1', role: 'user', text: 'Есть окна у Стаса?', completed: true },
+    { id: 'a1', role: 'assistant', text: 'Сохранённый ответ', completed: true },
+    { id: 'u2', role: 'user', text: 'Оборванное действие', completed: false },
+  ] } });
+  await flush();
+  assert.equal(s.conversation.view().inFlight, false);
+  assert.equal(s.items().some((i) => i.notice === 'history_restored'), true);
+  assert.equal(s.items().some((i) => i.notice === 'history_truncated'), true);
+  assert.equal(s.items().some((i) => i.notice === 'history_interrupted'), true);
+  for (const item of s.items().filter((i) => i.kind === 'user')) {
+    assert.deepEqual(item.retry, { retry: 'none' });
+    assert.equal(item.userTurn, undefined, 'no reusable source/widget authority restored');
+    s.conversation.retry(item.id);
+  }
+  assert.equal(s.calls.length, 0);
+  s.conversation.submitUserTurn('А завтра?', TYPED);
+  assert.equal(s.calls[0].body.conversationId, 'opaque-server-conversation');
+  assert.deepEqual(s.calls[0].body.messages.map((m) => m.content), ['Есть окна у Стаса?', 'Сохранённый ответ', 'А завтра?']);
+  s.conversation.dispose();
+});
+
+test('logout aborts restoration; an old session result never enters the next conversation', async () => {
+  const reads = [];
+  const s = setup({ conversation: (signal) => new Promise((resolve) => { reads.push({ signal, resolve }); }) });
+  s.session.set({ signedIn: false, reason: 'signed_out' });
+  assert.equal(reads[0].signal.aborted, true);
+  s.session.set({ signedIn: true, display: { userName: 'Другой', tenantName: 'Другой бизнес' } });
+  reads[0].resolve({ ok: true, value: { conversationId: 'old', truncated: false, interrupted: false, turns: [{ id: 'old', role: 'assistant', text: 'private old reply', completed: true }] } });
+  await flush();
+  assert.equal(s.items().length, 0);
+  reads[1].resolve({ ok: true, value: { conversationId: null, truncated: false, interrupted: false, turns: [] } });
+  await flush();
+  assert.equal(s.items().length, 0);
+  assert.equal(s.conversation.view().inFlight, false);
+  s.conversation.dispose();
+});
+
+test('history failure is visible; next send retries only the read and keeps the draft until context is restored', async () => {
+  let reads = 0;
+  const s = setup({ conversation: async () => ++reads === 1 ? ({ ok: false, failure: { reason: 'no_connection' } }) : ({ ok: true, value: { conversationId: 'restored', truncated: false, interrupted: false, turns: [] } }) });
+  await flush();
+  assert.equal(s.items()[0].notice, 'history_unavailable');
+  assert.equal(s.calls.length, 0);
+  assert.deepEqual(s.conversation.submitUserTurn('Новый вопрос', TYPED), { accepted: false, refusal: 'in_flight' });
+  await flush();
+  assert.equal(s.calls.length, 0);
+  s.conversation.submitUserTurn('Новый вопрос', TYPED);
+  assert.equal(s.calls[0].body.conversationId, 'restored');
+  assert.deepEqual(s.calls[0].body.messages, [{ role: 'user', content: 'Новый вопрос' }]);
+  s.conversation.dispose();
+});
 
 // ── 1. the one path ────────────────────────────────────────────────────────────────────────────
 
@@ -450,6 +518,7 @@ test('over the real net client: the long reply and the approval shape end in DTO
     wire.push({ url: String(url), body });
     const json = (status, value) => new Response(JSON.stringify(value), { status, headers: { 'Content-Type': 'application/json' } });
     if (String(url) === '/api/auth/login') return json(201, loginBody);
+    if (String(url) === '/api/ai/conversation') return json(200, { contract: 'maya.conversation-history/1', conversationId: null, truncated: false, interrupted: false, turns: [] });
     if (String(url) !== '/api/ai/chat') return json(404, { message: 'not found' });
     const violations = dtoViolations(body);
     if (violations.length > 0) return json(400, { message: violations.join(', '), error: { code: 'validation', message: violations.join(', '), field: 'messages' } });
@@ -478,6 +547,7 @@ test('over the real net client: the long reply and the approval shape end in DTO
           }
         });
       });
+    await settle();
     conversation.submitUserTurn('Распиши неделю', TYPED);
     let v = await settle();
     assert.equal(v.items.at(-1).text.length, 3500);

@@ -198,6 +198,20 @@ export interface ChatProjection {
   readonly resolution: ChatWidgetResolution | null;
 }
 
+/** Text-only continuation. It carries no reusable action or approval authority. */
+export interface ConversationHistoryProjection {
+  readonly conversationId: string | null;
+  readonly truncated: boolean;
+  readonly interrupted: boolean;
+  readonly turns: readonly {
+    readonly id: string;
+    readonly role: 'user' | 'assistant';
+    readonly text: string;
+    readonly createdAt: string;
+    readonly completed: boolean;
+  }[];
+}
+
 /** SH-19's additive chat member, projected without re-authoring the certified envelope. */
 export interface ChatWidgetResolution {
   readonly matched: true;

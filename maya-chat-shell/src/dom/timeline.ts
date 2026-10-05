@@ -67,6 +67,16 @@ export const noticeSentence = (notice: NoticeKind): string => {
       return 'Версия MAYA устарела — обновите страницу';
     case 'display_capped':
       return 'Ранние сообщения скрыты: на экране остаются последние 200.';
+    case 'history_restored':
+      return 'Предыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.';
+    case 'history_truncated':
+      return 'Показаны последние 50 сохранённых сообщений.';
+    case 'history_interrupted':
+      return 'Ответ на это сообщение не сохранён. Если вы просили выполнить действие, сначала уточните его результат.';
+    case 'history_unavailable':
+      return 'Не удалось загрузить переписку. Нажмите отправить, чтобы повторить загрузку. Сообщение пока останется в поле ввода.';
+    case 'history_not_supported':
+      return 'Этот сервер пока не поддерживает восстановление переписки. Здесь начнётся новый разговор.';
     case 'deeplink_refused':
       return 'Эту ссылку нельзя открыть здесь.';
     case 'deeplink_unavailable':

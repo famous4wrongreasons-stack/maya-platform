@@ -14,6 +14,29 @@ export interface AiTypedWidgetResult {
 }
 
 export interface AiTypedWidgetTriggerPort {
+  /** Historical text only. No restored intent, approval, or business authority. */
+  readCurrentConversation(actor: Readonly<AuthenticatedUser>): Promise<{
+    contract: 'maya.conversation-history/1';
+    conversationId: string | null;
+    truncated: boolean;
+    interrupted: boolean;
+    turns: Array<{
+      id: string;
+      role: 'user' | 'assistant';
+      text: string;
+      createdAt: string;
+      completed: boolean;
+    }>;
+  }>;
+  persistAssistantReply(input: {
+    readonly actor: Readonly<AuthenticatedUser>;
+    readonly userTurn: {
+      readonly turnId: string;
+      readonly conversationId: string;
+    };
+    readonly reply: string;
+    readonly completionHash: string;
+  }): Promise<void>;
   persistTypedTurn(input: {
     readonly actor: Readonly<AuthenticatedUser>;
     readonly surface: AiToolSurface;
