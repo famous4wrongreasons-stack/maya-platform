@@ -2364,6 +2364,102 @@ describe('YclientsCRMAdapter', () => {
     );
   });
 
+  it.each([
+    ['missing date row', []],
+    ['missing payload', undefined],
+    ['wrong date row', [{ date: '2026-08-07', is_working: false, slots: [] }]],
+    ['missing status', [{ date: '2026-08-06', slots: [] }]],
+    ['missing slots', [{ date: '2026-08-06', is_working: false }]],
+    [
+      'empty working day',
+      [{ date: '2026-08-06', is_working: true, slots: [] }],
+    ],
+    [
+      'partial interval',
+      [{ date: '2026-08-06', is_working: true, slots: [{ from: '09:00' }] }],
+    ],
+    [
+      'partially complete day',
+      [
+        {
+          date: '2026-08-06',
+          is_working: true,
+          slots: [{ from: '09:00', to: '12:00' }, { from: '13:00' }],
+        },
+      ],
+    ],
+    [
+      'contradictory day off',
+      [
+        {
+          date: '2026-08-06',
+          is_working: false,
+          slots: [{ from: '09:00', to: '18:00' }],
+        },
+      ],
+    ],
+    [
+      'invalid status',
+      [{ date: '2026-08-06', is_working: 'false', slots: [] }],
+    ],
+    [
+      'duplicate date',
+      [
+        { date: '2026-08-06', is_working: false, slots: [] },
+        {
+          date: '2026-08-06',
+          is_working: true,
+          slots: [{ from: '09:00', to: '18:00' }],
+        },
+      ],
+    ],
+  ])('refuses an unverified own schedule source: %s', async (_label, data) => {
+    global.fetch = jest
+      .fn<typeof fetch>()
+      .mockResolvedValue(
+        new Response(JSON.stringify({ data }), { status: 200 }),
+      );
+    await expect(
+      journalAdapter().getStaffScheduleDay({
+        tenantId: 'tenant-1',
+        staffId: '7',
+        date: '2026-08-06',
+      }),
+    ).rejects.toThrow();
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ method: 'GET' }),
+    );
+  });
+
+  it.each([true, 1, false, 0])(
+    'reads an explicit own schedule source status: %s',
+    async (isWorking) => {
+      const slots = isWorking ? [{ from: '09:00', to: '18:00' }] : [];
+      global.fetch = jest.fn<typeof fetch>().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            data: [{ date: '2026-08-06', is_working: isWorking, slots }],
+          }),
+          { status: 200 },
+        ),
+      );
+      await expect(
+        journalAdapter().getStaffScheduleDay({
+          tenantId: 'tenant-1',
+          staffId: '7',
+          date: '2026-08-06',
+        }),
+      ).resolves.toMatchObject({
+        date: '2026-08-06',
+        is_working: Boolean(isWorking),
+        slots,
+      });
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    },
+  );
+
   it('closes a staff day through the YClients schedule endpoint and verifies it', async () => {
     // Дата в запросах и ответах прибита к 2026-08-06, а адаптер запрещает
     // менять график задним числом. Без фиксации часов тест «протухал» ровно

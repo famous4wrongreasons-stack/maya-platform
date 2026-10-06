@@ -1466,6 +1466,419 @@ describe('AiCoreService', () => {
     },
   );
 
+  // Scripted tool selection and source fixtures: no model/provider acceptance.
+  describe('own schedule', () => {
+    beforeEach(() =>
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-06T12:00:00Z')),
+    );
+    afterEach(() => jest.useRealTimers());
+    it.each([
+      {
+        is_working: true,
+        slots: [
+          { from: '09:00', to: '12:00' },
+          { from: '13:00', to: '18:00' },
+        ],
+        reply:
+          'Ваш график на 07.10.2026: 09:00–12:00, 13:00–18:00. Источник: YClients.',
+      },
+      {
+        is_working: false,
+        slots: [],
+        reply: 'По графику на 07.10.2026 у вас выходной. Источник: YClients.',
+      },
+    ])(
+      'composes own schedule from the current source: $is_working',
+      async (day) => {
+        const mocks = createService(['staff.schedule.own.read']);
+        const employee = { ...user, role: UserRole.EMPLOYEE };
+        mocks.model.decide
+          .mockResolvedValue(
+            decision({
+              reply: 'MODEL MUST NOT COMPOSE THE SHIFT',
+              toolCall: null,
+            }),
+          )
+          .mockResolvedValueOnce(
+            decision({
+              reply: null,
+              toolCall: {
+                name: 'staff.schedule.own.read',
+                arguments: { date: '2026-10-07' },
+              },
+            }),
+          );
+        mocks.runtime.execute.mockResolvedValue({
+          status: 'completed',
+          execution_id: 'own-schedule-read',
+          result: {
+            available: true,
+            verified: true,
+            source: 'external_crm',
+            date: '2026-10-07',
+            is_working: day.is_working,
+            slots: day.slots,
+          },
+        });
+        const result = await mocks.service.chat(employee, {
+          ...dto,
+          messages: [{ role: 'user', content: 'Какой у меня график завтра?' }],
+        });
+        expect(result).toMatchObject({
+          reply: day.reply,
+          source: 'safe_fallback',
+          action: null,
+          grounding: {
+            status: 'verified',
+            domain: 'staff_schedule',
+            evidence_tools: ['staff.schedule.own.read'],
+          },
+        });
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(mocks.runtime.execute).toHaveBeenCalledWith(
+          employee,
+          'staff.schedule.own.read',
+          expect.objectContaining({ arguments: { date: '2026-10-07' } }),
+          expect.anything(),
+        );
+      },
+    );
+
+    it.each([
+      [
+        'unlinked',
+        {
+          available: false,
+          reason: 'employee_is_not_linked_to_active_crm_staff',
+          date: '2026-10-07',
+        },
+      ],
+      ['working without intervals', { is_working: true, slots: [] }],
+      ['missing work status', { is_working: undefined }],
+      ['unverified', { verified: false }],
+      ['stale', { stale: true }],
+      ['wrong source', { source: 'model' }],
+      ['wrong date', { date: '2026-10-08' }],
+      ['broken interval', { slots: [{ from: '18:00', to: '09:00' }] }],
+      ['contradictory day off', { is_working: false }],
+    ])('refuses to invent an own schedule when %s', async (label, changes) => {
+      const mocks = createService(['staff.schedule.own.read']);
+      mocks.model.decide
+        .mockResolvedValue(
+          decision({ reply: 'MODEL INVENTED A DAY OFF', toolCall: null }),
+        )
+        .mockResolvedValueOnce(
+          decision({
+            reply: null,
+            toolCall: {
+              name: 'staff.schedule.own.read',
+              arguments: { date: '2026-10-07' },
+            },
+          }),
+        );
+      mocks.runtime.execute.mockResolvedValue({
+        status: 'completed',
+        execution_id: 'own-schedule-read',
+        result: {
+          available: true,
+          verified: true,
+          source: 'external_crm',
+          date: '2026-10-07',
+          is_working: true,
+          slots: [{ from: '09:00', to: '18:00' }],
+          ...changes,
+        },
+      });
+      const result = await mocks.service.chat(
+        { ...user, role: UserRole.EMPLOYEE },
+        {
+          ...dto,
+          messages: [{ role: 'user', content: 'Какой у меня график завтра?' }],
+        },
+      );
+      expect(result).toMatchObject({
+        source: 'safe_fallback',
+        action: null,
+        grounding: { status: 'blocked' },
+      });
+      expect(result.reply).not.toMatch(/выходной|09:00|18:00|MODEL/);
+      expect(result.reply).toContain(
+        label === 'unlinked' ? 'привязк' : 'подтвердить',
+      );
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      ['Завтра я работаю?', '2026-10-07'],
+      ['А послезавтра?', '2026-10-08'],
+      ['Сегодня я работаю?', '2026-10-06'],
+      ['Мой график 2026-10-02', '2026-10-02'],
+      ['Мой график 02.10.2026', '2026-10-02'],
+      ['Мой график 02.10.26.', '2026-10-02'],
+    ])(
+      'binds own schedule date to the current request: %s',
+      async (text, date) => {
+        const mocks = createService(['staff.schedule.own.read']);
+        mocks.model.decide.mockResolvedValueOnce(
+          decision({
+            reply: null,
+            toolCall: {
+              name: 'staff.schedule.own.read',
+              arguments: { date: '2099-01-01' },
+            },
+          }),
+        );
+        mocks.runtime.execute.mockResolvedValue({
+          status: 'completed',
+          result: {
+            available: true,
+            verified: true,
+            source: 'external_crm',
+            date,
+            is_working: false,
+            slots: [],
+          },
+        });
+        const result = await mocks.service.chat(
+          { ...user, role: UserRole.EMPLOYEE },
+          {
+            ...dto,
+            messages: [{ role: 'user', content: text }],
+          },
+        );
+        expect(mocks.runtime.execute).toHaveBeenCalledWith(
+          expect.anything(),
+          'staff.schedule.own.read',
+          expect.objectContaining({ arguments: { date } }),
+          expect.anything(),
+        );
+        expect(result.grounding.status).toBe('verified');
+        expect(result.reply).not.toContain('2099');
+      },
+    );
+
+    it.each([
+      ['Europe/Moscow', '2026-10-08'],
+      ['America/Los_Angeles', '2026-10-07'],
+    ])(
+      'binds own schedule tomorrow across local midnight in %s',
+      async (timezone, expectedDate) => {
+        // Moscow has already entered October 7; UTC is still October 6.
+        jest.setSystemTime(new Date('2026-10-06T21:30:00Z'));
+        const mocks = createService(['staff.schedule.own.read'], {}, timezone);
+        mocks.model.decide.mockResolvedValueOnce(
+          decision({
+            reply: null,
+            toolCall: {
+              name: 'staff.schedule.own.read',
+              arguments: { date: '2026-10-07' },
+            },
+          }),
+        );
+        mocks.runtime.execute.mockResolvedValue({
+          status: 'completed',
+          result: {
+            available: true,
+            verified: true,
+            source: 'external_crm',
+            date: expectedDate,
+            is_working: false,
+            slots: [],
+          },
+        });
+        const result = await mocks.service.chat(
+          { ...user, role: UserRole.EMPLOYEE },
+          {
+            ...dto,
+            messages: [{ role: 'user', content: 'Я завтра работаю?' }],
+          },
+        );
+        expect(mocks.runtime.execute).toHaveBeenCalledWith(
+          expect.anything(),
+          'staff.schedule.own.read',
+          expect.objectContaining({ arguments: { date: expectedDate } }),
+          expect.anything(),
+        );
+        expect(result.grounding.status).toBe('verified');
+        expect(mocks.tenantRead).toHaveBeenCalledWith({
+          where: { id: user.tenantId },
+          select: { defaultTimezone: true },
+        });
+      },
+    );
+
+    it.each([
+      'Мой график',
+      'Сегодня или завтра?',
+      'На 31.02.2026',
+      'Мой график 07.10.026',
+      'Мой график 07.10.326',
+      'Мой график не завтра, а в пятницу',
+      'С 07.10 до пятницы',
+      'Не на завтра, а на следующий день',
+      'Завтра и в пятницу',
+    ])(
+      'clarifies an own schedule date without trusting model args: %s',
+      async (text) => {
+        const mocks = createService(['staff.schedule.own.read']);
+        mocks.model.decide.mockResolvedValueOnce(
+          decision({
+            reply: null,
+            toolCall: {
+              name: 'staff.schedule.own.read',
+              arguments: { date: '2026-10-07' },
+            },
+          }),
+        );
+        const result = await mocks.service.chat(
+          { ...user, role: UserRole.EMPLOYEE },
+          {
+            ...dto,
+            messages: [{ role: 'user', content: text }],
+          },
+        );
+        expect(result.reply).toContain('На какую дату');
+        expect(result.grounding.status).toBe('blocked');
+        expect(mocks.runtime.execute).not.toHaveBeenCalled();
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      },
+    );
+
+    it('refuses an own schedule that would be truncated by result sanitization', async () => {
+      const mocks = createService(['staff.schedule.own.read']);
+      mocks.model.decide.mockResolvedValueOnce(
+        decision({
+          reply: null,
+          toolCall: {
+            name: 'staff.schedule.own.read',
+            arguments: { date: '2026-10-07' },
+          },
+        }),
+      );
+      const minute = (n: number) =>
+        `${String(Math.floor(n / 60)).padStart(2, '0')}:${String(n % 60).padStart(2, '0')}`;
+      mocks.runtime.execute.mockResolvedValue({
+        status: 'completed',
+        result: {
+          available: true,
+          verified: true,
+          source: 'external_crm',
+          date: '2026-10-07',
+          is_working: true,
+          slots: Array.from({ length: 201 }, (_, i) => ({
+            from: minute(i * 2),
+            to: minute(i * 2 + 1),
+          })),
+        },
+      });
+      const result = await mocks.service.chat(
+        { ...user, role: UserRole.EMPLOYEE },
+        {
+          ...dto,
+          messages: [{ role: 'user', content: 'Я завтра работаю?' }],
+        },
+      );
+      expect(result.grounding.status).toBe('blocked');
+      expect(result.reply).toContain('Не удалось подтвердить');
+      expect(result.reply).not.toContain('00:00');
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not expose the staff own schedule in an owner client audience', async () => {
+      const mocks = createService([
+        'staff.schedule.own.read',
+        'catalog.services.read',
+      ]);
+      const result = await mocks.service.chat(user, {
+        ...dto,
+        audience: 'client',
+        messages: [{ role: 'user', content: 'Мой рабочий график на завтра' }],
+      });
+      expect(result.grounding.status).toBe('blocked');
+      expect(mocks.runtime.execute).not.toHaveBeenCalled();
+      for (const [input] of mocks.model.decide.mock.calls)
+        expect(input.tools.map((tool) => tool.name)).not.toContain(
+          'staff.schedule.own.read',
+        );
+    });
+
+    it('rereads the own schedule for a short next-day follow-up instead of reusing the prior shift', async () => {
+      const mocks = createService(['staff.schedule.own.read']);
+      const employee = { ...user, role: UserRole.EMPLOYEE };
+      const ci = new ConversationIntelligenceService();
+      const messages = [
+        { role: 'user' as const, content: 'Я завтра работаю?' },
+      ];
+      for (const [date, isWorking] of [
+        ['2026-10-07', true],
+        ['2026-10-08', false],
+      ] as const) {
+        mocks.model.decide.mockResolvedValueOnce(
+          decision({
+            reply: null,
+            semanticPlan: ci.validatePlan(
+              {
+                dialogue_act: isWorking ? 'request' : 'follow_up',
+                tasks: [
+                  {
+                    intent: 'schedule.get_own',
+                    entities: { period: date },
+                    confidence: 0.99,
+                  },
+                ],
+              },
+              employee.role,
+              ['staff.schedule.own.read'],
+            ),
+            toolCall: { name: 'staff.schedule.own.read', arguments: { date } },
+          }),
+        );
+        mocks.runtime.execute.mockResolvedValueOnce({
+          status: 'completed',
+          execution_id: `own-read-${date}`,
+          result: {
+            available: true,
+            verified: true,
+            source: 'external_crm',
+            date,
+            is_working: isWorking,
+            slots: isWorking ? [{ from: '09:00', to: '18:00' }] : [],
+          },
+        });
+      }
+      const first = await mocks.service.chat(employee, { ...dto, messages });
+      const next = await mocks.service.chat(employee, {
+        ...dto,
+        requestId: 'followup_12345678',
+        messages: [
+          ...messages,
+          { role: 'assistant', content: first.reply },
+          { role: 'user', content: 'А послезавтра?' },
+        ],
+      });
+      expect(first.reply).toContain('07.10.2026: 09:00–18:00');
+      expect(next.reply).toContain('08.10.2026 у вас выходной');
+      expect(next.reply).not.toContain('09:00');
+      expect(next.grounding).toMatchObject({
+        status: 'verified',
+        domain: 'staff_schedule',
+        evidence_tools: ['staff.schedule.own.read'],
+      });
+      expect(
+        mocks.runtime.execute.mock.calls.map(([, name, input]) => [
+          name,
+          input.arguments,
+        ]),
+      ).toEqual([
+        ['staff.schedule.own.read', { date: '2026-10-07' }],
+        ['staff.schedule.own.read', { date: '2026-10-08' }],
+      ]);
+      expect(mocks.model.decide).toHaveBeenCalledTimes(2);
+      expect(next.action).toBeNull();
+    });
+  });
+
   it('uses employee analytics rather than business totals for staff', async () => {
     const employee: AuthenticatedUser = {
       ...user,
@@ -4118,6 +4531,7 @@ describe('AiCoreService', () => {
   function createService(
     toolNames = ['analytics.business.query', 'loyalty.internal.adjust'],
     env: Record<string, string> = {},
+    businessTimezone?: string,
   ) {
     const config = {
       get: jest.fn((name: string) =>
@@ -4175,7 +4589,15 @@ describe('AiCoreService', () => {
         }),
       ),
     };
+    const scheduleDateOwner = new StaffScheduleCommandService(
+      config as unknown as ConfigService,
+      {} as never,
+      {} as never,
+      runtime as unknown as AiToolRuntimeService,
+    );
     const staffScheduleCommand = {
+      resolveReadDate:
+        scheduleDateOwner.resolveReadDate.bind(scheduleDateOwner),
       tryHandle: jest
         .fn<StaffScheduleCommandService['tryHandle']>()
         .mockResolvedValue(null),
@@ -4187,6 +4609,9 @@ describe('AiCoreService', () => {
     // Роутер настоящий: он чистый, детерминированный и без конфигурации.
     // Подменять его макетом значило бы проверять маршрутизацию, которой нет.
     const brain = new MayaBrainRouterService();
+    const tenantRead = jest
+      .fn()
+      .mockResolvedValue({ defaultTimezone: businessTimezone });
     const service = new AiCoreService(
       config as unknown as ConfigService,
       tenantContext as unknown as TenantContextService,
@@ -4199,6 +4624,10 @@ describe('AiCoreService', () => {
       brain,
       {} as C9Orchestrator,
       memory as unknown as AiMemoryService,
+      undefined,
+      businessTimezone
+        ? ({ tenant: { findUnique: tenantRead } } as never)
+        : undefined,
     );
     return {
       auditLog,
@@ -4208,6 +4637,7 @@ describe('AiCoreService', () => {
       runtime,
       service,
       staffScheduleCommand,
+      tenantRead,
       brain,
       memory,
     };

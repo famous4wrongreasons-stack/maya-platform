@@ -2296,14 +2296,19 @@ export class YclientsCRMAdapter implements CRMAdapter {
     dateKey: string,
   ): Promise<StaffScheduleDay> {
     const schedule = await this.fetchStaffScheduleStrict(staffId, dateKey);
-    const slots = normalizeScheduleSlots(
-      (schedule?.slots || [])
-        .map((slot) => ({
-          from: String(slot?.from || '').trim(),
-          to: String(slot?.to || '').trim(),
-        }))
-        .filter((slot) => slot.from && slot.to),
-    );
+    // Absence or a partial provider row is not evidence of a day off.
+    if (
+      !schedule ||
+      !Array.isArray(schedule.slots) ||
+      ![true, false, 0, 1].includes(schedule.is_working as boolean | number)
+    ) {
+      throw new Error('YClients staff schedule is incomplete');
+    }
+    const slots = normalizeScheduleSlots(schedule.slots as StaffScheduleSlot[]);
+    const working = slots.length > 0;
+    if (Boolean(schedule.is_working) !== working) {
+      throw new Error('YClients staff schedule is contradictory');
+    }
     return this.staffScheduleDay(staffId, dateKey, slots);
   }
 
@@ -2398,12 +2403,17 @@ export class YclientsCRMAdapter implements CRMAdapter {
     const response = await this.request<YclientsScheduleApiItem[]>(
       `schedule/${this.getCompanyId()}/${numericId}/${dateKey}/${dateKey}`,
     );
-    const rows = response.data || [];
-    return (
-      rows.find(
-        (row) => row && String(row.date || '').slice(0, 10) === dateKey,
-      ) ?? null
+    const rows = response.data;
+    if (!Array.isArray(rows)) {
+      throw new Error('YClients staff schedule is incomplete');
+    }
+    const matches = rows.filter(
+      (row) => row && String(row.date || '').slice(0, 10) === dateKey,
     );
+    if (matches.length > 1) {
+      throw new Error('YClients staff schedule is ambiguous');
+    }
+    return matches[0] ?? null;
   }
 
   /**

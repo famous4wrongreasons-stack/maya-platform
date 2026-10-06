@@ -80,6 +80,73 @@ describe('AiToolPolicyService', () => {
     expect(tools).toEqual([]);
   });
 
+  it.each([UserRole.CLIENT, UserRole.CUSTOMER])(
+    'refuses the staff own schedule to %s at the canonical policy owner',
+    async (role) => {
+      const { service, tenantContext } = createService({
+        'ai.consultant': true,
+        'ai.admin': true,
+        booking: true,
+      });
+      const registry = new AiToolRegistryService();
+      await expect(
+        tenantContext.runAsSystemTenant('tenant-a', () =>
+          service.assertCanExecute(
+            {
+              tenantId: 'tenant-a',
+              userId: 'account-a',
+              role,
+              surface: 'web',
+            },
+            registry.get('staff.schedule.own.read'),
+          ),
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    },
+  );
+
+  it('keeps the own-schedule read behind current tenant/feature checks and rejects caller staff selection', async () => {
+    const { service, tenantContext } = createService({
+      'ai.admin': true,
+      booking: true,
+    });
+    const registry = new AiToolRegistryService();
+    const definition = registry.get('staff.schedule.own.read');
+    const actor = {
+      tenantId: 'tenant-a',
+      userId: 'employee-a',
+      role: UserRole.EMPLOYEE,
+      surface: 'web' as const,
+    };
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-a', () =>
+        service.assertCanExecute(actor, definition),
+      ),
+    ).resolves.toBeUndefined();
+    await expect(
+      tenantContext.runAsSystemTenant('tenant-b', () =>
+        service.assertCanExecute(actor, definition),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    const revoked = createService({ 'ai.admin': true, booking: false });
+    await expect(
+      revoked.tenantContext.runAsSystemTenant('tenant-a', () =>
+        revoked.service.assertCanExecute(actor, definition),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(
+      registry.validateArguments('staff.schedule.own.read', {
+        date: '2026-10-07',
+      }),
+    ).toEqual({ date: '2026-10-07' });
+    expect(() =>
+      registry.validateArguments('staff.schedule.own.read', {
+        date: '2026-10-07',
+        staff_id: 'colleague',
+      }),
+    ).toThrow();
+  });
+
   it('requires the requester for actor approval and an owner for owner approval', () => {
     const { service } = createService({});
     const registry = new AiToolRegistryService();

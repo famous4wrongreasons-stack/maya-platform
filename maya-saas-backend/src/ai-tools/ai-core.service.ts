@@ -14,6 +14,7 @@ import {
   servicePriceClarification,
 } from './service-price-chat-binding';
 import { localCalendarDate } from '../owner-reports/owner-reports.time';
+import { normalizeScheduleSlots } from '../crm/staff-schedule.utils';
 import {
   mutationClarification,
   mutationReceiptReply,
@@ -475,6 +476,7 @@ const SERVER_COMPOSED_REPLY_TOOLS = new Set([
   // График — точный факт по дате. Его нельзя пересказывать из аналитики
   // записей или заменять предположением модели.
   'staff.schedule.read',
+  'staff.schedule.own.read',
   // Дневной журнал нельзя превращать в месячную сводку или пересчитывать LLM.
   'operations.journal.read',
   // Финансовый ответ должен дословно следовать серверному расчёту. Модель не
@@ -1516,6 +1518,41 @@ export class AiCoreService {
           new Date(),
           businessTimezone,
         );
+        if (decision.toolCall.name === 'staff.schedule.own.read') {
+          // Local date binding uses the original utterance: PII redaction can
+          // replace a numeric date before it reaches the external planner.
+          const date = this.staffScheduleCommand.resolveReadDate(
+            this.latestUserText(dto.messages),
+            businessTimezone,
+          );
+          if (!date)
+            return this.complete(
+              user,
+              dto,
+              brain,
+              sanitized.redacted,
+              toolsUsed,
+              decisions,
+              {
+                reply:
+                  'На какую дату показать ваш график? Укажите одну дату, например «завтра» или «07.10.2026».',
+                source: 'safe_fallback',
+                action: null,
+                grounding: this.groundingReport(
+                  {
+                    evidenceToolNames: ['staff.schedule.own.read'],
+                    fallbackDomain: 'staff_schedule',
+                    closedForAccess: false,
+                    strictNumbers: true,
+                  },
+                  'blocked',
+                  toolResults,
+                ),
+              },
+              toolResults,
+            );
+          hardenedArguments = { ...hardenedArguments, date };
+        }
         if (decision.toolCall.name === 'catalog.service.price.update') {
           // A proposed price/service from the model is never business intent.
           // Bind the exact owner utterance to a current catalog before preparing
@@ -1723,10 +1760,30 @@ export class AiCoreService {
             this.contextualUserText(sanitized.messages),
           )
         ) {
-          const deterministicReply = this.deterministicGroundedReply(
-            toolResults,
-            this.contextualUserText(sanitized.messages),
-          );
+          const ownSchedule =
+            decision.toolCall.name === 'staff.schedule.own.read'
+              ? this.deterministicOwnStaffScheduleReply(
+                  execution.result,
+                  hardenedArguments.date,
+                  execution.stale === true,
+                )
+              : null;
+          const deterministicReply =
+            ownSchedule?.reply ??
+            this.deterministicGroundedReply(
+              toolResults,
+              this.contextualUserText(sanitized.messages),
+            );
+          // A short follow-up can lack a heuristic data hint. The completed
+          // current read still supplies its own domain and evidence identity.
+          const replyRequirement: GroundingRequirement | null = ownSchedule
+            ? {
+                evidenceToolNames: ['staff.schedule.own.read'],
+                fallbackDomain: 'staff_schedule',
+                closedForAccess: false,
+                strictNumbers: true,
+              }
+            : requirement;
           return this.complete(
             user,
             dto,
@@ -1742,8 +1799,8 @@ export class AiCoreService {
                   source: 'safe_fallback',
                   action: null,
                   grounding: this.groundingReport(
-                    requirement,
-                    'verified',
+                    replyRequirement,
+                    ownSchedule?.status ?? 'verified',
                     toolResults,
                   ),
                 }
@@ -3273,6 +3330,63 @@ export class AiCoreService {
       }
       default:
         return null;
+    }
+  }
+
+  private deterministicOwnStaffScheduleReply(
+    result: unknown,
+    requestedDate: unknown,
+    stale: boolean,
+  ): { reply: string; status: 'verified' | 'blocked' } {
+    const data = this.record(result);
+    const unavailable = {
+      reply:
+        'Не удалось подтвердить ваш график на выбранную дату. Попробуйте повторить запрос позже или уточните график у администратора.',
+      status: 'blocked' as const,
+    };
+    if (
+      data.available === false &&
+      data.reason === 'employee_is_not_linked_to_active_crm_staff'
+    )
+      return {
+        reply:
+          'Ваш график пока недоступен: не найдена активная привязка вашего аккаунта к мастеру в CRM. Попросите администратора проверить привязку.',
+        status: 'blocked',
+      };
+    if (
+      stale ||
+      data.stale === true ||
+      data.available !== true ||
+      data.verified !== true ||
+      data.source !== 'external_crm' ||
+      typeof data.date !== 'string' ||
+      data.date !== requestedDate ||
+      typeof data.is_working !== 'boolean' ||
+      !Array.isArray(data.slots) ||
+      data.slots.length > 200
+    )
+      return unavailable;
+    const date = /^(\d{4})-(\d{2})-(\d{2})$/.exec(data.date);
+    if (!date) return unavailable;
+    try {
+      if (
+        new Date(`${data.date}T00:00:00Z`).toISOString().slice(0, 10) !==
+        data.date
+      )
+        return unavailable;
+      // The existing schedule owner defines interval validity and normalization.
+      const slots = normalizeScheduleSlots(data.slots);
+      const working = slots.length > 0;
+      if (data.is_working !== working) return unavailable;
+      const label = `${date[3]}.${date[2]}.${date[1]}`;
+      return {
+        reply: data.is_working
+          ? `Ваш график на ${label}: ${slots.map((slot) => `${slot.from}–${slot.to}`).join(', ')}. Источник: YClients.`
+          : `По графику на ${label} у вас выходной. Источник: YClients.`,
+        status: 'verified',
+      };
+    } catch {
+      return unavailable;
     }
   }
 
@@ -5720,6 +5834,7 @@ export class AiCoreService {
       toolName === 'clients.retention.scan' ||
       toolName === 'clients.dossier.read' ||
       toolName === 'staff.schedule.read' ||
+      toolName === 'staff.schedule.own.read' ||
       toolName === 'operations.journal.read' ||
       toolName === 'staff.schedule.update' ||
       toolName === 'loyalty.internal.adjust'

@@ -32,6 +32,98 @@ describe('AiToolHandlerService output minimization', () => {
     jest.useRealTimers();
   });
 
+  it('reads only the current tenant/account CRM staff link for the own schedule', async () => {
+    const findFirst = jest
+      .fn()
+      .mockResolvedValue({ externalStaffId: 'own-crm-staff' });
+    const getStaffScheduleDay = jest.fn().mockResolvedValue({
+      staff_id: 'own-crm-staff',
+      date: '2026-10-07',
+      is_working: true,
+      slots: [{ from: '09:00', to: '18:00' }],
+      private_provider_metadata: 'not-for-chat',
+    });
+    const service = createService({
+      prisma: { crmStaffAccess: { findFirst } } as unknown as PrismaService,
+      crmService: { getStaffScheduleDay } as unknown as CrmService,
+    });
+    const result = await service.execute(
+      'staff.schedule.own.read',
+      {
+        ...principal,
+        role: UserRole.EMPLOYEE,
+        userId: 'employee-a',
+      },
+      { date: '2026-10-07' },
+      'read-own-schedule',
+    );
+    expect(findFirst).toHaveBeenCalledWith({
+      where: { tenantId: 'tenant-a', userId: 'employee-a', status: 'active' },
+      select: { externalStaffId: true },
+    });
+    expect(getStaffScheduleDay).toHaveBeenCalledWith('tenant-a', {
+      staffId: 'own-crm-staff',
+      date: '2026-10-07',
+    });
+    expect(result).toEqual({
+      available: true,
+      verified: true,
+      source: 'external_crm',
+      date: '2026-10-07',
+      is_working: true,
+      slots: [{ from: '09:00', to: '18:00' }],
+    });
+
+    // The next turn cannot inherit a link that was revoked after the first read.
+    findFirst.mockResolvedValue(null);
+    const revoked = await service.execute(
+      'staff.schedule.own.read',
+      {
+        ...principal,
+        role: UserRole.EMPLOYEE,
+        userId: 'employee-a',
+      },
+      { date: '2026-10-08' },
+      'read-own-schedule-next',
+    );
+    expect(revoked).toEqual({
+      available: false,
+      reason: 'employee_is_not_linked_to_active_crm_staff',
+      date: '2026-10-08',
+    });
+    expect(findFirst).toHaveBeenCalledTimes(2);
+    expect(getStaffScheduleDay).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not reuse an own-schedule CRM staff link across tenants', async () => {
+    const findFirst = jest.fn().mockResolvedValue(null);
+    const getStaffScheduleDay = jest.fn();
+    const service = createService({
+      prisma: { crmStaffAccess: { findFirst } } as unknown as PrismaService,
+      crmService: { getStaffScheduleDay } as unknown as CrmService,
+    });
+    await service.execute(
+      'staff.schedule.own.read',
+      {
+        ...principal,
+        tenantId: 'tenant-b',
+        role: UserRole.EMPLOYEE,
+      },
+      { date: '2026-10-07' },
+      'read-other-tenant',
+    );
+    expect(findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          tenantId: 'tenant-b',
+          userId: principal.userId,
+          status: 'active',
+        },
+      }),
+    );
+    expect(getStaffScheduleDay).not.toHaveBeenCalled();
+  });
+
   it('builds a redacted CRM client dossier for staff', async () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2026-08-12T09:00:00.000Z'));

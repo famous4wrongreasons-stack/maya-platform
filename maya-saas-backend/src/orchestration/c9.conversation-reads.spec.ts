@@ -44,6 +44,50 @@ function fixture() {
 }
 
 describe('C9 delegates deterministic conversation reads to their existing owner', () => {
+  it('keeps the own-schedule read with OCCUPANCY and the current source receipt', async () => {
+    const f = fixture();
+    const result = {
+      status: 'completed',
+      execution_id: 'source-1',
+      result: {
+        available: true,
+        verified: true,
+        source: 'external_crm',
+        date: '2026-10-07',
+        is_working: true,
+        slots: [{ from: '09:00', to: '18:00' }],
+      },
+    };
+    const source = jest.fn().mockResolvedValue(result);
+    await expect(
+      f.coordinator.conversationRead(
+        f.turn,
+        'staff.schedule.own.read',
+        'own-schedule-call',
+        'b'.repeat(64),
+        source,
+      ),
+    ).resolves.toBe(result);
+    expect(source).toHaveBeenCalledTimes(1);
+    expect(f.work.reserve).toHaveBeenCalledWith(
+      'run-1',
+      expect.objectContaining({
+        domain: 'OCCUPANCY',
+        kind: 'TOOL_READ',
+        taskKey: 'staff.schedule.own.read',
+      }),
+    );
+    expect(f.store.conversationReadReceipt).toHaveBeenCalledWith(
+      'run-1',
+      'staff.schedule.own.read',
+      'own-schedule-call',
+      'source-1',
+      false,
+    );
+    expect(f.context.build).not.toHaveBeenCalled();
+    expect(f.agents.answer).not.toHaveBeenCalled();
+  });
+
   it('reconciles a completed source when persistence outlives its coordination lease', async () => {
     const f = fixture();
     const result = {

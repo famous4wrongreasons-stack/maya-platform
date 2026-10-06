@@ -792,6 +792,46 @@ export class StaffScheduleCommandService {
     return forms;
   }
 
+  // Bounded READ binding: reuse the schedule owner's calendar semantics,
+  // but require one explicit date expression in the current user turn.
+  resolveReadDate(text: string, timezone: string): string | null {
+    const normalized = this.normalizeText(text);
+    const dates = normalized.match(
+      /(?<![а-яё0-9./-])(?:послезавтра|завтра|сегодня|\d{4}-\d{2}-\d{2}|\d{1,2}[./]\d{1,2}(?:[./](?:\d{4}|\d{2}))?)(?![а-яё0-9]|[./-]\d)/g,
+    );
+    if (!dates || dates.length !== 1) return null;
+    // A recognized date inside a correction/range is not single-day intent.
+    const prefix = normalized.slice(0, normalized.indexOf(dates[0]));
+    if (
+      /(?:^|[^а-яё])(?:или|между)(?:$|[^а-яё])/.test(normalized) ||
+      /(?:^|[^а-яё])(?:не\s+(?:на\s+)?|(?:с|со|от|до|по|после|кроме|вместо)\s+)$/.test(
+        prefix,
+      ) ||
+      this.words(normalized).some(
+        (word) =>
+          WEEKDAYS.has(word) ||
+          MONTHS.has(word) ||
+          /^(?:недел|месяц)/.test(word),
+      )
+    )
+      return null;
+    const numeric = /^(\d{1,2})[./](\d{1,2})(?:[./](\d{4}|\d{2}))?$/.exec(
+      dates[0],
+    );
+    if (numeric) {
+      const year = numeric[3]
+        ? numeric[3].length === 2
+          ? `20${numeric[3]}`
+          : numeric[3]
+        : this.localDate(new Date(), timezone).slice(0, 4);
+      return this.parseDate(
+        `${year}-${numeric[2].padStart(2, '0')}-${numeric[1].padStart(2, '0')}`,
+        timezone,
+      );
+    }
+    return this.parseDate(dates[0], timezone);
+  }
+
   private parseDate(text: string, timezone: string): string | null {
     const today = this.localDate(new Date(), timezone);
     if (/(?:^|[^а-я])послезавтра(?:$|[^а-я])/.test(text)) {
