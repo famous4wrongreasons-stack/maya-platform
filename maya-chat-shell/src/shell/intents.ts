@@ -20,7 +20,7 @@
 // again, and an opened detail closes. Every activation of a drawn control ends in a state change or a
 // sentence — silent outcomes are 0. The receipt consumer arrives with R7-E1 and B3, not here.
 
-import type { InteractiveRefKey, TerminalLine, WidgetEnvelope, WidgetIntent, WidgetIntentSubmission } from '../contract.ts';
+import type { Cell, Measure, InteractiveRefKey, TerminalLine, WidgetEnvelope, WidgetIntent, WidgetIntentSubmission } from '../contract.ts';
 import { canonicalJson, parseInstant, verify } from '../integrity/h7.ts';
 import type { EnvelopeView, IntegrityVerdict, RenderNode, RenderResult } from '../renderer/nodes.ts';
 import { resolveTarget } from '../routes/registry.ts';
@@ -188,6 +188,8 @@ interface Entry {
   display: Display;
   pending: InteractiveRefKey | null;
   sentence: WidgetSentence | null;
+  /** Presentation receipt only; never rewrites the sealed envelope or its lifecycle. */
+  priceReceipt: WidgetSentence | null;
   inflight: AbortHandle | null;
   expiry: Cancel | null;
   /** Bumped whenever the entry's emission changes, so a late outcome for a predecessor is ignored. */
@@ -289,6 +291,39 @@ const servicePriceSentence = (
     return 'service_price_confirmed';
   }
   return 'service_price_unconfirmed';
+};
+
+/** A submitted pricing proposal is a static preview plus the separate owner-result sentence.
+ * Drop obsolete approval prompts and every control without editing sealed body/lifecycle facts.
+ * No text is composed here: retained facts come from the verified projected body.
+ */
+const servicePriceReceiptResult = (result: RenderResult, view: EnvelopeView): RenderResult => {
+  if (view.kind !== 'APPROVAL' || !('approval_ref' in view.body)) return result;
+  const body = view.body;
+  // Select named source fields, never remove text by value: a service may itself be called
+  // "PENDING" or have the same name as a button. This also preserves the exact diff when the
+  // original renderer used prose and its nodes no longer carry field identities.
+  const leaf = (value: Cell<unknown> | Measure): RenderNode => ({
+    t: 'leaf', source: 'formatted' in value ? 'measure' : 'cell', state: value.state,
+    text: 'formatted' in value && value.state === 'KNOWN' ? value.formatted : value.label,
+    detail: 'basis' in value ? value.basis : null,
+  });
+  const nodes: RenderNode[] = [
+    ...result.nodes.filter(node => node.t === 'heading'),
+    leaf(body.subject),
+    { t: 'block', block: 'list', roleHint: null, label: null,
+      children: body.effect_preview.map(row => ({ t: 'block', block: 'item', roleHint: null, label: null,
+        children: [{ t: 'leaf', source: 'phrase', state: null, text: row.label.rendered, detail: null }, leaf(row.value)],
+      })),
+    },
+    { t: 'block', block: 'paragraph', roleHint: null, label: null, children: [
+      ...(body.audience_size === null ? [] : [leaf(body.audience_size)]),
+      leaf(body.risk_tier), leaf(body.reversible), leaf(body.requested_by_label),
+    ] },
+    ...result.nodes.filter(node => node.t === 'limitation'),
+  ];
+  return { ...result, nodes, mode: 'frozen_prose', readingOrder: [], accessibleNames: {},
+    description: '', liveRegion: 'off', focus: 'none' };
 };
 
 /**
@@ -521,6 +556,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
         result: next.result,
         display: next.display,
         sentence: next.sentence,
+        priceReceipt: null,
         emission: predecessor.emission + 1,
       });
       if (predecessor.display === 'collapsed') vault.drop(predecessor.itemId);
@@ -541,6 +577,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       display: next.display,
       pending: null,
       sentence: next.sentence,
+      priceReceipt: null,
       inflight: null,
       expiry: null,
       emission: 0,
@@ -594,6 +631,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       display: next.display,
       pending: null,
       sentence: next.sentence,
+      priceReceipt: null,
       inflight: null,
       expiry: null,
       emission: 0,
@@ -703,6 +741,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       result: next.result,
       display: next.display,
       sentence: next.sentence,
+      priceReceipt: null,
       emission: opener.emission + 1,
     });
     if (opener.display === 'collapsed') vault.drop(opener.itemId);
@@ -713,6 +752,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
   const activate = async (itemId: string, ref: InteractiveRefKey): Promise<ActivationOutcome> => {
     const entry = entries.get(itemId);
     if (entry === undefined) return { outcome: 'ignored', reason: 'unknown_item' };
+    if (entry.priceReceipt !== null) return { outcome: 'ignored', reason: 'not_drawn' };
     const drawn = entry.display === 'collapsed' ? [] : entry.result.readingOrder;
     if (!drawn.includes(ref)) return { outcome: 'ignored', reason: 'not_drawn' };
     // One activation in flight per item; the busy control is already drawn as pending.
@@ -787,16 +827,30 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     entry.pending = null;
     const priceSentence = servicePriceSentence(entry.envelope, intent, outcome);
     if (priceSentence !== null) {
-      if (outcome.status === 'accepted' || outcome.status === 'settled') {
-        // Keep the existing accepted display transition. Owner evidence words the card, not a new
-        // terminal journal line, and ACCEPTED alone can never say the provider changed its price.
-        entry.display = 'terminal';
-        entry.sentence = priceSentence;
-        publish(entry);
-        counters = { ...counters, stateChanges: counters.stateChanges + 1 };
-        return { outcome: 'dismissed' };
+      // A response loss is also a submitted mutation with an unresolved outcome, never an ordinary
+      // retry. Freeze only presentation, keep the exact diff, and forget spendable tokens. The
+      // receipt sentence is the sole result claim; UNKNOWN gets no invented completed lifecycle.
+      const finish = (item: Entry): void => {
+        cancelWork(item);
+        vault.drop(item.itemId);
+        item.display = 'terminal';
+        item.priceReceipt = priceSentence;
+        item.sentence = priceSentence;
+        item.result = servicePriceReceiptResult(item.result, item.view);
+        publish(item);
+      };
+      finish(entry);
+      if (entry.place === 'detail') {
+        const opener = entries.get(detailOpeners.get(entry.itemId) ?? '');
+        // A detail decision applies only to the exact approval whose sealed parent opened it.
+        // A different proposal now occupying the timeline item cannot inherit this receipt.
+        if (opener !== undefined && opener.envelope.widget_id === entry.envelope.correlation.parent_widget_id
+          && 'approval_ref' in opener.envelope.body && 'approval_ref' in entry.envelope.body
+          && opener.envelope.body.approval_ref === entry.envelope.body.approval_ref) finish(opener);
+        deps.chrome.closeDetail();
       }
-      return endInSentence(entry, priceSentence, true);
+      counters = { ...counters, stateChanges: counters.stateChanges + 1 };
+      return { outcome: 'dismissed' };
     }
     if (route === 'opens_detail' && outcome.status === 'advanced') {
       // Only the accepted server-declared detail path resolves PROGRESS into OPEN. Keeping the
@@ -872,7 +926,8 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
 
   const offEnvironment = deps.environment.onA11yChange(() => {
     for (const entry of entries.values()) {
-      entry.result = renderEntry(entry.view, entry.verdict, entry.place);
+      const result = renderEntry(entry.view, entry.verdict, entry.place);
+      entry.result = entry.priceReceipt === null ? result : servicePriceReceiptResult(result, entry.view);
       publish(entry);
     }
   });

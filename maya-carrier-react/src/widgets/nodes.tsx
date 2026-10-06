@@ -427,8 +427,9 @@ function Block({ node, place, ctx, k }: { readonly node: BlockNode; readonly pla
       </div>
     );
   // paragraph → <p> only when every child may sit inline, else <div>. host.ts:300
+  // Independent sealed leaves need the same wrapping gap as an option row; no text is inserted.
   return node.children.every((child) => INLINE_NODES.has(child.t)) ? (
-    <p key={k} className={className} aria-label={label} style={{ margin: 0, fontSize: 13.5, lineHeight: 1.5, color: ctx.c.ink }}>
+    <p key={k} className={className} aria-label={label} style={{ margin: 0, display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '4px 8px', fontSize: 13.5, lineHeight: 1.5, color: ctx.c.ink }}>
       {children}
     </p>
   ) : (

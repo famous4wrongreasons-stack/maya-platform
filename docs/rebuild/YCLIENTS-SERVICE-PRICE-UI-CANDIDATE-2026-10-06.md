@@ -84,8 +84,9 @@ exact-title/fixed-amount language coverage is bounded; no real-model quality is 
 Create, broader edit/archive, staff/chain settings and whole-API completeness remain
 outside this candidate and need their preserved-state contracts in dependency order.
 
-The later [actual browser checkpoint](YCLIENTS-SERVICE-PRICE-BROWSER-PROOF-2026-10-06.md)
-qualifies three local functional flows but exposes blocking card-state and typography
-defects. Their repair and fresh browser acceptance, aggregate census and V1.4
-release/profile certification are still required for any later release decision. No real YCLIENTS/DeepSeek call,
+The later [repaired actual browser checkpoint](YCLIENTS-SERVICE-PRICE-BROWSER-PROOF-2026-10-06.md)
+qualifies three local UI flows and closes the observed card-state and typography
+blockers: static exact diff after confirmed/rejected/UNKNOWN, no active retry and
+truthful reload. Pricing/approval regressions pass 74/74 and React HTTP continuation
+5/5. Aggregate census and V1.4 release/profile certification are still required for any later release decision. No real YCLIENTS/DeepSeek call,
 production DB/config, existing HTTPS stand, phone, push, merge or deployment was used.

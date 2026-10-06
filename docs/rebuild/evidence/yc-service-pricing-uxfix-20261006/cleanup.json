@@ -1,0 +1,32 @@
+{
+  "own_pg_stopped": true,
+  "ports": {
+    "56347": {
+      "exit_code": 1,
+      "listeners": ""
+    },
+    "56541": {
+      "exit_code": 1,
+      "listeners": ""
+    },
+    "55887": {
+      "exit_code": 1,
+      "listeners": ""
+    }
+  },
+  "harness_stopped": {
+    "at": "2026-10-06T18:06:59.283Z",
+    "reason": "operator_stop",
+    "browser_verdict": "NOT_ASSESSED",
+    "receipts_retained": true,
+    "unexpected_request_count": 0,
+    "cleanup_errors": []
+  },
+  "browser_sessions_closed": [
+    "pricing-confirmed",
+    "pricing-rejected",
+    "pricing-unknown"
+  ],
+  "earlier_browser_pid39846_absent": true,
+  "react_dependency_symlink_removed": true
+}

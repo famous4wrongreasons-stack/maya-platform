@@ -664,7 +664,7 @@ existing stand, production config/database, phone, real provider/model, push, me
 or deployment was touched. See [UI candidate and limits](YCLIENTS-SERVICE-PRICE-UI-CANDIDATE-2026-10-06.md)
 and [fresh UI evidence](evidence/yc-service-pricing-ui-20261006/manifest.json).
 
-## YCLIENTS pricing — actual local browser checkpoint, 2026-10-06 UTC
+## YCLIENTS pricing — pre-fix local browser checkpoint, 2026-10-06 17:41 UTC
 
 Actual Chromium controls exercised UI email login, natural price proposal, detail,
 approve, reject, UNKNOWN repeat/reload and fresh login against real local HTTP/auth,
@@ -681,3 +681,22 @@ frozen authority contract is introduced. GET fixture recovery was available but 
 read by the application after reload, so no read-recovery browser claim is made.
 See [browser findings and procedure](YCLIENTS-SERVICE-PRICE-BROWSER-PROOF-2026-10-06.md)
 and [evidence manifest](evidence/yc-service-pricing-browser-20261006/manifest.json).
+
+## YCLIENTS pricing — repaired local browser UI, 2026-10-06 18:07 UTC
+
+The observed pre-fix UI blockers above are closed by the existing runtime/card-style
+repair and a fresh actual Chromium run. Confirming from actual detail closes the
+sheet and freezes its exact parent with the original diff and confirmed receipt;
+reject and UNKNOWN show their distinct outcomes with zero approval/retry controls.
+Font and paragraph gaps are corrected. Server outcomes remain 1 PATCH/SUCCEEDED,
+0 PATCH/rejected and 1 PATCH/UNKNOWN after reload and new actual UI authentication.
+No post-fix browser repeat was possible because its control is absent; 74/74 unit
+regressions cover repeated stale callbacks, redraw and restoration. Refusing shell/
+React builds and 5/5 current React HTTP-fixture continuation pass.
+
+Independent read-only review confirms bounded UI blocker closure from screenshots,
+three traces and ten state snapshots. All owned services are stopped. Real provider/
+model, browser CRM read recovery, mobile/Safari and release/aggregate certification
+remain unqualified; the NS1 history-traffic census failure is reproduced on baseline.
+See [final browser proof](YCLIENTS-SERVICE-PRICE-BROWSER-PROOF-2026-10-06.md) and
+[repair evidence](evidence/yc-service-pricing-uxfix-20261006/manifest.json).

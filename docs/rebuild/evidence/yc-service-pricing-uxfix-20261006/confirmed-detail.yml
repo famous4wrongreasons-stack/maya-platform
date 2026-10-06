@@ -1,0 +1,93 @@
+- generic [ref=e1]:
+  - heading "MAYA" [level=1] [ref=e2]
+  - main [ref=e3]:
+    - generic [ref=e29]:
+      - region "Разговор с MAYA" [ref=e33]:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic: Maya
+                - generic: Администратор · онлайн
+        - log "Сообщения" [ref=e34]:
+          - generic [ref=e56]:
+            - generic [ref=e57]: "Вы:"
+            - text: Поставь цену услуги «Стрижка» 2500 рублей
+          - generic [ref=e61]:
+            - generic [ref=e62]: "MAYA:"
+            - text: "Изменить цену услуги «Стрижка» в YCLIENTS: 2 000 ₽ → 2 500 ₽ (RUB). Требуется ваше подтверждение."
+          - article "Изменение цены · Стрижка" [ref=e66]:
+            - generic [ref=e67]: "Компания YCLIENTS: 99101. Услуга: 201. Текущая цена: 2000 RUB. Новая цена: 2500 RUB. Источник: YCLIENTS. Риск: Изменение цены в YCLIENTS. Обратимость: Для обратного изменения потребуется новое подтверждение. Состояние: Ожидает вашего подтверждения. Запрошено: Вы. Подтверждение доступно до: 2026-10-06T18:11:10.688Z. Действия: Подтвердить цену; Отклонить изменение; Подробности изменения; Dismiss"
+            - heading "Изменение цены · Стрижка" [level=2] [ref=e68]
+            - paragraph [ref=e69]: Стрижка
+            - list [ref=e70]:
+              - listitem [ref=e71]:
+                - paragraph [ref=e72]: Компания YCLIENTS
+                - paragraph [ref=e73]: "99101"
+              - listitem [ref=e74]:
+                - paragraph [ref=e75]: Услуга
+                - paragraph [ref=e76]: "201"
+              - listitem [ref=e77]:
+                - paragraph [ref=e78]: Текущая цена
+                - paragraph [ref=e79]:
+                  - generic [ref=e80]: 2000 RUB YCLIENTS
+              - listitem [ref=e81]:
+                - paragraph [ref=e82]: Новая цена
+                - paragraph [ref=e83]:
+                  - generic [ref=e84]: 2500 RUB YCLIENTS
+              - listitem [ref=e85]:
+                - paragraph [ref=e86]: Источник
+                - paragraph [ref=e87]: YCLIENTS
+            - paragraph [ref=e88]:
+              - generic [ref=e89]: Изменение цены в YCLIENTS
+              - generic [ref=e90]: Для обратного изменения потребуется новое подтверждение
+              - generic [ref=e91]: Ожидает вашего подтверждения
+              - generic [ref=e92]: Вы
+            - button "Подтвердить цену" [ref=e93] [cursor=pointer]
+            - button "Отклонить изменение" [ref=e94] [cursor=pointer]
+            - button "Подробности изменения" [ref=e95] [cursor=pointer]
+            - button "Dismiss" [ref=e96] [cursor=pointer]
+        - status [ref=e37]
+        - status [ref=e38]
+        - generic [ref=e41]:
+          - generic [ref=e42]: Сообщение для MAYA
+          - textbox "Сообщение для MAYA" [ref=e43]:
+            - /placeholder: Сообщение Maya…
+          - button "Сказать голосом" [ref=e44] [cursor=pointer]
+          - button "Отправить" [disabled] [ref=e51]:
+            - generic [ref=e52]: ↑
+      - dialog [ref=e97]:
+        - generic [ref=e98]:
+          - heading "Изменение цены · Стрижка" [level=2] [ref=e99]
+          - button "Закрыть окно" [ref=e100] [cursor=pointer]
+        - article "Изменение цены · Стрижка" [ref=e103]:
+          - generic [ref=e104]: "Компания YCLIENTS: 99101. Услуга: 201. Текущая цена: 2000 RUB. Новая цена: 2500 RUB. Источник: YCLIENTS. Риск: Изменение цены в YCLIENTS. Обратимость: Для обратного изменения потребуется новое подтверждение. Состояние: Ожидает вашего подтверждения. Запрошено: Вы. Подтверждение доступно до: 2026-10-06T18:11:10.688Z. Действия: Подтвердить цену; Отклонить изменение; Подробности изменения; Dismiss"
+          - heading "Изменение цены · Стрижка" [active] [level=2] [ref=e105]
+          - paragraph [ref=e106]: Стрижка
+          - list [ref=e107]:
+            - listitem [ref=e108]:
+              - paragraph [ref=e109]: Компания YCLIENTS
+              - paragraph [ref=e110]: "99101"
+            - listitem [ref=e111]:
+              - paragraph [ref=e112]: Услуга
+              - paragraph [ref=e113]: "201"
+            - listitem [ref=e114]:
+              - paragraph [ref=e115]: Текущая цена
+              - paragraph [ref=e116]:
+                - generic [ref=e117]: 2000 RUB YCLIENTS
+            - listitem [ref=e118]:
+              - paragraph [ref=e119]: Новая цена
+              - paragraph [ref=e120]:
+                - generic [ref=e121]: 2500 RUB YCLIENTS
+            - listitem [ref=e122]:
+              - paragraph [ref=e123]: Источник
+              - paragraph [ref=e124]: YCLIENTS
+          - paragraph [ref=e125]:
+            - generic [ref=e126]: Изменение цены в YCLIENTS
+            - generic [ref=e127]: Для обратного изменения потребуется новое подтверждение
+            - generic [ref=e128]: Ожидает вашего подтверждения
+            - generic [ref=e129]: Вы
+          - button "Подтвердить цену" [ref=e130] [cursor=pointer]
+          - button "Отклонить изменение" [ref=e131] [cursor=pointer]
+          - button "Подробности изменения" [ref=e132] [cursor=pointer]
+          - button "Dismiss" [ref=e133] [cursor=pointer]

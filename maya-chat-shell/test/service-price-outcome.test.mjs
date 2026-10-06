@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { bodyHash } from '../src/integrity/h7.ts';
 import { projectWidgetIntent } from '../src/net/project.ts';
-import { render } from '../src/renderer/render.ts';
+import { interactiveRefs, render } from '../src/renderer/render.ts';
 import { createLiveSubmission } from '../src/shell/intents.ts';
 import { createShellRuntime } from '../src/shell/shell.ts';
 import { widgetSentence as domSentence } from '../src/dom/host.ts';
@@ -43,6 +43,7 @@ const setup = (options = {}) => {
   let serial = 0;
   const submissions = [];
   const resolves = [];
+  let a11yChange;
   const e = options.envelope ?? envelope();
   const transport = {
     async widgetIntent(submission) {
@@ -59,7 +60,7 @@ const setup = (options = {}) => {
   const runtime = createShellRuntime({
     transport,
     session: { view: () => ({ signedIn: true, display: { userName: 'Test owner', tenantName: null } }), subscribe: () => () => undefined },
-    render, environment: { a11y: () => A11Y, onA11yChange: () => () => undefined, fragment: () => '' },
+    render, environment: { a11y: () => A11Y, onA11yChange: callback => { a11yChange = callback; return () => undefined; }, fragment: () => '' },
     scheduler: { now: () => Date.parse('2026-09-17T09:05:00.000Z'), after: () => () => undefined },
     history: { push() {}, back() {}, onBack: () => () => undefined },
     newAbort: () => new AbortController(), newId: () => `price-outcome-${++serial}`,
@@ -68,8 +69,9 @@ const setup = (options = {}) => {
   const inserted = runtime.widgets.ingest(e);
   assert.equal(inserted.verdict, 'valid');
   const item = () => runtime.conversation.view().items.find(i => i.id === inserted.itemId);
-  assert.equal(item().result.mode, 'structured');
+  assert.equal(item().result.mode, options.renderMode ?? 'structured');
   return { ...runtime, envelope: e, submissions, resolves, item,
+    a11yChange: () => a11yChange(),
     click: (ref = 'i1') => runtime.widgets.activate(inserted.itemId, `intent:${ref}`) };
 };
 
@@ -201,4 +203,142 @@ test('React and DOM carriers use the same honest pricing sentences', () => {
   ]) {
     assert.equal(reactSentence(key), text); assert.equal(domSentence(key), text);
   }
+});
+
+
+const visibleStrings = nodes => nodes.flatMap(node => {
+  if (node.t === 'block' || node.t === 'choice') return visibleStrings(node.children);
+  return 'text' in node ? [node.text] : [];
+});
+const assertStaticPriceReceipt = (s, sentence) => {
+  const item = s.item();
+  assert.equal(item.display, 'terminal');
+  assert.equal(item.sentence, sentence);
+  assert.deepEqual(item.result.readingOrder, []);
+  assert.deepEqual(interactiveRefs(item.result.nodes), []);
+  assert.equal(item.result.liveRegion, 'off');
+  assert.equal(visibleStrings(item.result.nodes).includes(s.envelope.body.state.label), false,
+    'an obsolete pending prompt is not drawn alongside the receipt');
+  for (const row of s.envelope.body.effect_preview) {
+    assert.ok(visibleStrings(item.result.nodes).includes(row.value.formatted ?? row.value.label),
+      'the exact authoritative diff is retained');
+  }
+  assert.equal(s.widgets.heldTokens(), 0);
+};
+
+for (const [name, raw, ref, sentence] of [
+  ['confirmed', completed(), 'i1', 'service_price_confirmed'],
+  ['rejected', { decision: 'REJECTED', state: 'REJECTED', status: 'rejected' }, 'i2', 'service_price_rejected'],
+  ['UNKNOWN', { decision: 'APPROVED', state: 'UNKNOWN', status: 'unknown' }, 'i1', 'service_price_unconfirmed'],
+]) test(`${name} becomes a static diff; repeated callbacks and accessibility redraw preserve its receipt`, async t => {
+  const s = setup({ response: response(raw) }); t.after(s.dispose);
+  const originalBytes = JSON.stringify(s.envelope);
+  await s.click(ref);
+  assertStaticPriceReceipt(s, sentence);
+  for (const oldRef of s.envelope.intents.map(intent => intent.intent_ref)) {
+    assert.deepEqual(await s.click(oldRef), { outcome: 'ignored', reason: 'not_drawn' });
+    assertStaticPriceReceipt(s, sentence);
+  }
+  s.a11yChange();
+  assertStaticPriceReceipt(s, sentence);
+  assert.equal(s.submissions.length, 1);
+  assert.equal(JSON.stringify(s.envelope), originalBytes, 'no fake lifecycle or body-state mutation');
+});
+
+test('lost mutation response freezes the preview and explicit repeated click cannot resend or replace UNKNOWN', async t => {
+  const s = setup({ send: async () => ({ ok: false, failure: { reason: 'no_connection' } }) }); t.after(s.dispose);
+  await s.click(); await s.click(); await s.click('i2');
+  assertStaticPriceReceipt(s, 'service_price_unconfirmed');
+  s.a11yChange();
+  assertStaticPriceReceipt(s, 'service_price_unconfirmed');
+  assert.equal(s.submissions.length, 1);
+});
+
+test('a newly loaded runtime carries no old pricing result or enabled confirmation from history alone', async t => {
+  const old = setup({ response: response({ decision: 'APPROVED', state: 'UNKNOWN', status: 'unknown' }) });
+  await old.click(); old.dispose();
+  const submissions = [];
+  const fresh = createShellRuntime({
+    transport: {
+      async conversation() { return { ok: true, value: { conversationId: 'restored', truncated: false,
+        turns: [{ role: 'assistant', text: 'Изменение цены ожидает проверки.', completed: true }] } }; },
+      async chat() { assert.fail('reload does not create an action'); },
+      async resolveWidgets() { assert.fail('reload cannot invent an authoritative price receipt'); },
+    },
+    submission: { async submit(value) { submissions.push(value); return { status: 'accepted' }; } },
+    session: { view: () => ({ signedIn: true, display: { userName: 'Test owner', tenantName: null } }), subscribe: () => () => undefined },
+    render, environment: { a11y: () => A11Y, onA11yChange: () => () => undefined, fragment: () => '' },
+    scheduler: { now: () => Date.parse('2026-09-17T09:05:00.000Z'), after: () => () => undefined },
+    history: { push() {}, back() {}, onBack: () => () => undefined },
+    newAbort: () => new AbortController(), newId: () => 'reload-id',
+  });
+  t.after(fresh.dispose);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(fresh.conversation.view().items.filter(item => item.kind === 'assistant').map(item => item.text),
+    ['Изменение цены ожидает проверки.']);
+  assert.equal(fresh.conversation.view().items.some(item => item.kind === 'widget'), false);
+  assert.equal(fresh.widgets.heldTokens(), 0);
+  assert.equal(submissions.length, 0);
+});
+
+for (const textOnly of [false, true]) for (const sourceName of ['PENDING', 'Подтвердить цену']) {
+  test(`receipt preserves colliding exact service labels (${sourceName}, textOnly=${textOnly})`, async t => {
+    const e = envelope();
+    e.body.subject.label = sourceName; e.body.subject.value = sourceName;
+    e.body.state.label = 'PENDING';
+    e.intents[0].label = 'Подтвердить цену';
+    e.presentation.a11y.accessible_names['intent:i1'] = 'Подтвердить цену';
+    e.body.effect_preview[0].value.label = sourceName;
+    if (textOnly) e.render.render_tier = 'TEXT_ONLY';
+    const s = setup({ envelope: seal(e), renderMode: textOnly ? 'prose' : 'structured' }); t.after(s.dispose);
+    await s.click();
+    assert.equal(s.item().sentence, 'service_price_confirmed');
+    assert.deepEqual(interactiveRefs(s.item().result.nodes), []);
+    assert.equal(visibleStrings(s.item().result.nodes).filter(text => text === sourceName).length, 2,
+      'exact subject and service fact survive; only the named state field is omitted');
+    for (const row of e.body.effect_preview) {
+      assert.ok(visibleStrings(s.item().result.nodes).includes(row.value.formatted ?? row.value.label));
+    }
+  });
+}
+
+test('a corrected proposal supersedes a frozen UNKNOWN card and needs its own authoritative receipt', async t => {
+  let next = { decision: 'APPROVED', state: 'UNKNOWN', status: 'unknown' };
+  const s = setup({ send: async () => ({ ok: true, value: projectWidgetIntent(response(next)) }) }); t.after(s.dispose);
+  await s.click();
+  const replacement = envelope(); replacement.widget_id = '01M2Q9G7M0XX12C7H20TZJKQ7M';
+  replacement.lifecycle.supersedes_widget_id = s.envelope.widget_id;
+  replacement.body.effect_preview[2].value.value = 2700;
+  replacement.body.effect_preview[2].value.formatted = '2700 RUB';
+  s.widgets.ingest(seal(replacement));
+  assert.equal(s.item().sentence, null); assert.equal(s.item().display, 'live');
+  assert.ok(s.item().result.readingOrder.includes('intent:i1'));
+  next = completed(); next.outcome.price_rubles = 2700;
+  await s.click();
+  assert.equal(s.item().sentence, 'service_price_confirmed');
+  assert.equal(s.submissions.length, 2, 'one request per separately sealed and confirmed proposal');
+});
+
+for (const state of ['SUCCEEDED', 'UNKNOWN']) test(`a ${state} decision from detail freezes its exact parent preview`, async t => {
+  const e = envelope();
+  e.presentation.fullscreen_detail.route_key = 'fs.catalogue';
+  e.intents[2].target.ref = 'fs.catalogue';
+  seal(e);
+  const child = structuredClone(e);
+  child.widget_id = '01M2Q9G7M0XX12C7H20TZJKQ7N';
+  child.correlation.parent_widget_id = e.widget_id;
+  child.presentation.density = 'SHEET';
+  seal(child);
+  const decision = completed(); decision.state = state;
+  const s = setup({ envelope: e, send: async submission => ({ ok: true, value: projectWidgetIntent(
+    submission.widget_id === e.widget_id ? { ...response(null), next_envelope: child } : response(decision)
+  ) }) }); t.after(s.dispose);
+  await s.click('i3');
+  const detail = s.shell.view().fullscreen;
+  assert.equal(detail.phase, 'open');
+  await s.widgets.activate(detail.itemId, 'intent:i1');
+  assert.equal(s.shell.view().fullscreen, null);
+  assertStaticPriceReceipt(s, state === 'SUCCEEDED' ? 'service_price_confirmed' : 'service_price_unconfirmed');
+  await s.click();
+  assert.equal(s.submissions.length, 2, 'one detail open and one decision, no parent retry');
 });

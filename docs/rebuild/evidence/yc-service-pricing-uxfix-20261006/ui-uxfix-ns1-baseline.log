@@ -1,0 +1,20 @@
+NS-1 ROUNDTRIP PROBE — detail → canonical parent return
+
+  journal parent ingested ......................... valid  PASS
+  1. NAVIGATE parent → detail ..................... dismissed  PASS
+  2. fullscreen opens ............................. open  PASS
+  3. detail → parent: backend HTTP ................ 200  PASS
+  4. backend result ............................... ACCEPTED  PASS
+  5. resolved_widget parent ....................... PRESENT  PASS
+  6. runtime projection ........................... PRESERVES resolved_widget  PASS
+  7. parent restored through the return path ...... RETURNED  PASS
+  8. fullscreen detail after return ............... CLOSED  PASS
+  9. timeline parent is the server result ......... SERVER resolved_widget  PASS
+  10. timeline widget items ....................... 1  PASS
+  11. detail entry released ....................... unknown_item  PASS
+  12. focus owner released ........................ null  PASS
+  13. history: one push, one back ................. 1/1  PASS
+  14. submissions sent ............................ 2  PASS
+  15. no chat or reread traffic ................... 1  FAIL
+
+NS-1 ROUNDTRIP: FAIL (1 of 16)

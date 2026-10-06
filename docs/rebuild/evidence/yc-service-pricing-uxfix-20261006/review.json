@@ -1,0 +1,24 @@
+{
+  "reviewer": "pricing_review",
+  "mode": "independent read-only; no tests rerun",
+  "verdict": "BOUNDED_UI_BLOCKERS_CLOSED",
+  "inspected": [
+    "10 numbered state snapshots",
+    "3 Chromium traces/networks",
+    "preview and detail screenshots",
+    "confirmed/rejected/UNKNOWN/relogin screenshots",
+    "build/fixture logs",
+    "cleanup"
+  ],
+  "findings": [
+    "No stale pending controls remain after any of the three outcomes",
+    "Font and metadata gaps fixed",
+    "Confirmed detail closes and freezes the exact parent",
+    "Provider/AE outcomes and receipts agree with visible text"
+  ],
+  "limits": [
+    "No post-fix repeat click: no control; regression tests cover stale callback",
+    "No post-recovery application CRM read",
+    "Not real-provider/model or release acceptance"
+  ]
+}

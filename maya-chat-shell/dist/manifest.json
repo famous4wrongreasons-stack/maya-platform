@@ -66,7 +66,7 @@
       },
       {
         "path": "src/net/project.ts",
-        "sha256": "4e4bdca541c929cd6a88866cdbb79a33033168663d0f8538e790cbf202ec3e23"
+        "sha256": "7dd27b239c9f394f15490122e38d8d5c1d21eb5a213193f922c3b667b76125ca"
       },
       {
         "path": "src/net/session.ts",
@@ -102,7 +102,7 @@
       },
       {
         "path": "src/shell/conversation.ts",
-        "sha256": "fe70a899acd574d450d83a37a5b4a0ce6d5d74b97615b65969ea2ebaae28aca5"
+        "sha256": "725cb951847f6285681401148aad458f863c3ecf4a3507bec5a29e18821d8286"
       },
       {
         "path": "src/shell/deeplink.ts",
@@ -110,7 +110,7 @@
       },
       {
         "path": "src/shell/intents.ts",
-        "sha256": "795c79edc7f686a5026c1d1ec84f9fc0f86982d34c21729c50fd91b4ebec3a52"
+        "sha256": "cad1746b5b394bc3c5a8578bfed46cdb36722015c150d835c969e4fc440426e2"
       },
       {
         "path": "src/shell/ports.ts",
@@ -118,7 +118,7 @@
       },
       {
         "path": "src/shell/shell.ts",
-        "sha256": "0334e8004a1abdc852f50e2f04874c2eaa6dbae6cea499d0b6b3a48ce9edf3d0"
+        "sha256": "a7b5cb6939a9bc4d65e2c7910f5885131b2fc3cb037e15b5f5e6d861bf39e868"
       },
       {
         "path": "src/shell/view.ts",
@@ -130,8 +130,8 @@
       }
     ]
   },
-  "bytes": 465595,
-  "digest": "fe9274b4323288d47609e200b59ec2b5098ac8151bf3ec7f4c16f3c4eb9e1fe1",
+  "bytes": 476762,
+  "digest": "b445052822fc94765972ea620b6a1474c5c9f6b1b6d48750502617088a2c7613",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -139,8 +139,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "4f1960e1ec0b1d8541b3abac7c8036b47b4eca0033f30cd84543733886f5aa34",
-    "modulePath": "m/4f1960e1ec0b1d85/",
+    "digest": "0257835246ee8ecbd8e87c55c20dac7cd6fe5a386d788a7bc82d48acb7607e85",
+    "modulePath": "m/0257835246ee8ecb/",
     "files": [
       {
         "path": "entry/main.js",
@@ -164,8 +164,8 @@
       },
       {
         "path": "src/dom/host.js",
-        "sha256": "a6db41717b8666137b536e9b2df90283fc237bdb67b13f2db981647b1916b593",
-        "bytes": 20828
+        "sha256": "062ca17b5c4490fd84817974ed2277067a795d96e38b00f003ec4de268c142e6",
+        "bytes": 21201
       },
       {
         "path": "src/dom/nav.js",
@@ -204,8 +204,8 @@
       },
       {
         "path": "src/net/project.js",
-        "sha256": "b183472e69e707a2d26c88af1be1d0ef5b7eeb88e55fa6895df6fe1625c18a07",
-        "bytes": 12510
+        "sha256": "a9394688b28f826d9479218e26852e4e8d20a9e6aff15cafb621ced55082f8f4",
+        "bytes": 13681
       },
       {
         "path": "src/net/session.js",
@@ -249,8 +249,8 @@
       },
       {
         "path": "src/shell/conversation.js",
-        "sha256": "6b51fa1559e627b055e7d546e85f43a7d216851106fca017a10e86a04c778f9e",
-        "bytes": 14971
+        "sha256": "9539d0ba0d0fcea597763510b7da95b894ad88455a07043f13b275644eb977a9",
+        "bytes": 15057
       },
       {
         "path": "src/shell/deeplink.js",
@@ -264,8 +264,8 @@
       },
       {
         "path": "src/shell/intents.js",
-        "sha256": "d8180fb5c0e0a807315b59efc7b4b5f250de7094e25e143024c1e403d25a1660",
-        "bytes": 26470
+        "sha256": "b148acf954da2f6129c5dde1360fbc0aa70f46d728adc169a1d35576ad146d92",
+        "bytes": 33673
       },
       {
         "path": "src/shell/ports.js",
@@ -274,8 +274,8 @@
       },
       {
         "path": "src/shell/shell.js",
-        "sha256": "4c30eb6ffc440d1573cecbf7136f08faf24cef5439df0d613c43b7d5a06d364e",
-        "bytes": 7677
+        "sha256": "2f4b957d9aa7a7e0e606375a4268d81aa859c5188e2b787b390d4b3ed5b5224d",
+        "bytes": 7789
       },
       {
         "path": "src/shell/view.js",
@@ -303,7 +303,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "3f794c5391c5fcd476ffdf7af3b9535817853715bfc1247eb92ef59c1a106c71",
+      "sha256": "74fc313edfa9d858d0cdc30a24d52e2311efa4ebd21f67617f1da8759688868e",
       "bytes": 1344
     },
     "assets": [

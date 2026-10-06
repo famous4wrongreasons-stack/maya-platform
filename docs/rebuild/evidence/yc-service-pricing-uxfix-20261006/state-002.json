@@ -1,0 +1,74 @@
+{
+  "contract": "maya.service-price-browser-state/1",
+  "synthetic": true,
+  "browser_verdict": "NOT_ASSESSED",
+  "observed_at": "2026-10-06T18:01:17.534Z",
+  "reason": "operator_snapshot",
+  "model": {
+    "scripted": true,
+    "calls": 1
+  },
+  "cases": [
+    {
+      "name": "confirmed",
+      "tenant_id": "cmuwzfiw60000idc940fr5vzp",
+      "user_id": "cmuwzfiy20001idc9yxwcj0ty",
+      "provider": {
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "current_price_rubles": 2000,
+        "max_price_rubles": 2000,
+        "non_price_preservation_checks": [],
+        "readback_recovered": false
+      },
+      "actions": [],
+      "approvals": [
+        {
+          "id": "cmuwzizvn000widc91ib1on9v",
+          "toolName": "catalog.service.price.update",
+          "status": "pending",
+          "payloadHash": "b2fb5bdf2b4255bcc8b23b18c7708bb2f4c135926803c469c0337f5c9e9f254a",
+          "expiresAt": "2026-10-06T18:11:10.688Z",
+          "errorCode": null
+        }
+      ],
+      "receipts": [],
+      "session_count": 1
+    },
+    {
+      "name": "rejected",
+      "tenant_id": "cmuwzfiyz0009idc97sfw3cfl",
+      "user_id": "cmuwzfj0e000aidc98mou1925",
+      "provider": {
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "current_price_rubles": 2000,
+        "max_price_rubles": 2000,
+        "non_price_preservation_checks": [],
+        "readback_recovered": false
+      },
+      "actions": [],
+      "approvals": [],
+      "receipts": [],
+      "session_count": 0
+    },
+    {
+      "name": "unknown",
+      "tenant_id": "cmuwzfj0n000iidc98w19g6s7",
+      "user_id": "cmuwzfj23000jidc9ch3ceb6u",
+      "provider": {
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "current_price_rubles": 2000,
+        "max_price_rubles": 2000,
+        "non_price_preservation_checks": [],
+        "readback_recovered": false
+      },
+      "actions": [],
+      "approvals": [],
+      "receipts": [],
+      "session_count": 0
+    }
+  ],
+  "unexpected_requests": []
+}

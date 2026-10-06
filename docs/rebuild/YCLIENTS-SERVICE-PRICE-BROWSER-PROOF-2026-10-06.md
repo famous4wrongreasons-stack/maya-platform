@@ -1,46 +1,69 @@
-# Pricing browser proof — functional evidence, UI acceptance blocked
+# Pricing browser proof — bounded local UI PASS
 
-Production baseline: `aba6bfe7f4ba2d2b0fc8975c5d27c4db828d9ced`.
-The authorized serial local browser run completed at 17:41 UTC on 2026-10-06.
-[Evidence manifest](evidence/yc-service-pricing-browser-20261006/manifest.json),
-[sanitized actual network](evidence/yc-service-pricing-browser-20261006/network-sanitized.json)
-and [state progression](evidence/yc-service-pricing-browser-20261006/state-progression.json)
-record three actual Chromium flows, with real UI email login, HTTP, auth, Action
-Engine and owned Postgres. Only model decisions, email delivery and CRM transport
-were synthetic. No fixture response continuation or injected session was used.
+The repaired current carrier completed three fresh actual Chromium flows at 18:07 UTC
+on 2026-10-06. The [final evidence manifest](evidence/yc-service-pricing-uxfix-20261006/manifest.json)
+records source/asset hashes, actual network responses, screenshots, state snapshots,
+checks and cleanup. This is local synthetic qualification, not real YCLIENTS/model or
+release acceptance. The repair follows pre-fix checkpoint
+`d950c04551660dbecd15406b02c23782870e23f5` and changes only existing runtime presentation,
+carrier styling and regressions; sealed authority and AE lifecycle remain unchanged.
 
-- Confirmed: visible 2,000 → 2,500 RUB, detail opened, one PATCH after explicit click,
-  full non-price field preservation, SUCCEEDED and exact linked authoritative receipt.
-- Reject: rejected approval, zero PATCH, no mutating AE execution.
-- UNKNOWN: the provider applied one PATCH then lost the response. The AE stayed
-  UNKNOWN after repeat click, reload and fresh UI login; no second write or false Done.
+- **Confirmed:** actual UI email login → explicit chat price request → visible
+  2,000 → 2,500 RUB → detail → confirm inside detail. The sheet closes; its exact
+  parent retains the diff and confirmed result with no pending prompt or controls.
+  One PATCH preserves every non-price field; AE SUCCEEDED and the exact receipt
+  links to verified provider readback.
+- **Reject:** a separate owner explicitly rejects; the card shows «Изменение отклонено»
+  with no confirmation controls, zero PATCH and no mutating AE execution.
+- **UNKNOWN:** one PATCH applies then loses its response. The static card preserves
+  «Результат пока не подтверждён. Не отправляйте повторно» and offers no retry.
+  Reload plus a new actual UI email login restores history warnings without false
+  Done or a new approval control; the same AE remains UNKNOWN after exactly one PATCH.
 
-These are three manually driven browser scenarios, not three automated Jest tests.
-The one passing Jest test establishes clean completion of the long-running harness.
-Independent read-only review checked all eleven state snapshots, provider events,
-three Chromium traces and screenshots and agrees with the bounded functional result.
+There was no post-fix browser repeat click because the control no longer exists.
+Repeated stale callbacks, a11y redraw, detail-parent binding, colliding source labels,
+new sealed proposals and history-only reload are covered by **74/74** local pricing
+and approval regressions. Existing shell and React refusing builds/typechecks pass;
+the current React continuation using unchanged prior HTTP evidence passes **5/5**.
+The three browser flows use actual controls, HTTP/auth, AE and owned Postgres. Only
+model decisions, email delivery and CRM transport are synthetic; there is no response
+interception, envelope replay or injected session. One passing Jest host lifecycle
+test is recorded separately and is not presented as three automated browser tests.
 
-**UI acceptance remains blocked.** Screenshots expose a pending-looking card with
-active confirmation controls after confirmed/rejected/UNKNOWN outcomes, an UNKNOWN
-explanation overwritten by generic unavailable on repeat click, concatenated risk
-metadata and serif fallback. The parent explicitly requested these fixes and narrow
-regressions, then a fresh actual browser run. Fix preparation may proceed while main
-owns the heavy slot; this evidence is retained as the pre-fix checkpoint.
+Independent read-only review inspected ten state snapshots, three Chromium
+trace/network captures, preview/detail and all outcomes/relogin screenshots. It agrees
+that the observed card-state/font/spacing blockers are closed in this bounded scope.
+Browser consoles had zero errors or warnings. All owned browser/backend/provider/
+relay/PG processes are stopped; the database and raw evidence are retained.
 
 The provider GET recovery sentinel restored fixture availability, but no additional
-application CRM GET occurred (`reads_after_patch` stayed 1). This run does not qualify
-canonical read recovery. Reload required fresh UI login and restored text warnings,
-not old approval cards. No real-provider/model, mobile/Safari or release claim follows.
+application CRM GET occurred (`reads_after_patch` stayed 1). This does not qualify
+canonical read recovery. Reload restores text warnings after reauthentication, not
+historical receipt cards. Mobile/Safari, aggregate census, real-provider/model and
+V1.4 release/profile certification remain unqualified. The unrelated NS1 history-
+request census assertion reproduces on baseline and is retained in the evidence.
 
-The first harness boot failed because Jest did not support a dynamic import callback.
-It failed before UI/business execution, was retained, and was repaired to ordinary
-static imports. The successful attempt used the same built production assets and
-preserved database. All owned services and browser sessions are stopped; the database
-and raw evidence remain. Raw auth traces/mailbox stay outside committed evidence;
-only sanitized network fields and raw-file hashes are published.
+## Retained pre-fix evidence and tooling diagnostics
 
-The following procedure is retained for reproducibility. A fresh run requires an
-available heavy slot and a new evidence directory; never overwrite this checkpoint.
+The [17:41 browser checkpoint](evidence/yc-service-pricing-browser-20261006/manifest.json)
+qualified three functional flows against production baseline
+`aba6bfe7f4ba2d2b0fc8975c5d27c4db828d9ced`, but correctly blocked UI acceptance:
+terminal cards retained active controls, a repeat click overwrote UNKNOWN, and risk
+metadata/font were broken. Its original screenshots and traces are preserved.
+The owner requested the repair and the fresh run above.
+
+The first pre-fix harness boot failed on an unsupported Jest dynamic import, before
+UI/business execution; ordinary static imports repaired it. On the final run, sandbox
+shared-memory restrictions stopped the initial PG start before the already-authorized
+escalated start. A Playwright session transport disappeared before login, and one stale
+post-reload ref was rejected before any action; fresh observed references completed
+the flows. No data reset, bypass or duplicate business mutation was used. Bare tsc
+without the required #contract declaration mapping also remains as a diagnostic;
+the supported shell build/typecheck passes.
+
+Raw auth trace bodies and mailbox codes remain in ignored local output. Committed
+network evidence is sanitized; raw-file hashes retain provenance. The following
+procedure is reproducible using a new evidence directory and a coordinated heavy slot.
 
 ## Resources and isolation
 
@@ -187,7 +210,7 @@ the browser proof database and run directory. Report slot free to the parent.
 Do not push, merge, deploy, call a real model/provider, change the existing stand,
 or expand service create/edit/archive during this acceptance.
 
-The completed run passed the React build/runtime import gate and deployed committed
-migrations to the new proof database. It retained the initial startup failure and
-completed the corrected harness. Current outcomes and blocking UX findings above
-supersede the original preparation-only status; see the evidence manifest for hashes.
+The first run migrated the owned proof database; the repaired run reused it with
+fresh synthetic tenants and no reset. Both runs retain their source, UI and outcome
+evidence. The final bounded UI result above supersedes the preparation-only and
+pre-fix blocked status; see the separate manifests for exact hashes and limits.

@@ -1,0 +1,159 @@
+{
+  "contract": "maya.service-price-browser-state/1",
+  "synthetic": true,
+  "browser_verdict": "NOT_ASSESSED",
+  "observed_at": "2026-10-06T18:05:57.538Z",
+  "reason": "synthetic_provider_reads_recovered_without_dispatch",
+  "model": {
+    "scripted": true,
+    "calls": 3
+  },
+  "cases": [
+    {
+      "name": "confirmed",
+      "tenant_id": "cmuwzfiw60000idc940fr5vzp",
+      "user_id": "cmuwzfiy20001idc9yxwcj0ty",
+      "provider": {
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "current_price_rubles": 2500,
+        "max_price_rubles": 2500,
+        "non_price_preservation_checks": [
+          true
+        ],
+        "readback_recovered": false
+      },
+      "actions": [
+        {
+          "id": "5beb3645-b298-46d0-9b80-d3fed3bd6c1c",
+          "capability": "crm.service.fixed-price.update.v1",
+          "state": "SUCCEEDED",
+          "executionAttemptCount": 1,
+          "finalOutcomeCode": "provider_applied",
+          "safeResultSummaryJson": {
+            "source": "yclients",
+            "currency": "RUB",
+            "revision": "b5ecc981bd75dbc542b97b0fbe417368c2da57b987d7d56a9c77351c1f27c8c2",
+            "verified": true,
+            "service_id": "201",
+            "price_rubles": 2500,
+            "service_name": "Стрижка"
+          },
+          "finalizedAt": "2026-10-06T18:02:11.594Z"
+        }
+      ],
+      "approvals": [
+        {
+          "id": "cmuwzizvn000widc91ib1on9v",
+          "toolName": "catalog.service.price.update",
+          "status": "completed",
+          "payloadHash": "b2fb5bdf2b4255bcc8b23b18c7708bb2f4c135926803c469c0337f5c9e9f254a",
+          "expiresAt": "2026-10-06T18:11:10.688Z",
+          "errorCode": null
+        }
+      ],
+      "receipts": [
+        {
+          "id": "a3351f75-e8ea-46d8-be48-4bd655415fb6",
+          "widgetId": "ab67c407-0fb4-43f2-8391-d9fb5db221ec",
+          "outcome": "ACCEPTED",
+          "refusalCode": null,
+          "actionReceiptRef": null,
+          "submittedAt": "2026-10-06T18:01:35.932Z"
+        },
+        {
+          "id": "43aad972-7bc9-4702-b964-75e0f4042213",
+          "widgetId": "cfd1b36b-fa08-48a6-b23b-e531d34e88ae",
+          "outcome": "ACCEPTED",
+          "refusalCode": null,
+          "actionReceiptRef": "5beb3645-b298-46d0-9b80-d3fed3bd6c1c",
+          "submittedAt": "2026-10-06T18:02:11.488Z"
+        }
+      ],
+      "session_count": 1
+    },
+    {
+      "name": "rejected",
+      "tenant_id": "cmuwzfiyz0009idc97sfw3cfl",
+      "user_id": "cmuwzfj0e000aidc98mou1925",
+      "provider": {
+        "patch_count": 0,
+        "reads_after_patch": 0,
+        "current_price_rubles": 2000,
+        "max_price_rubles": 2000,
+        "non_price_preservation_checks": [],
+        "readback_recovered": false
+      },
+      "actions": [],
+      "approvals": [
+        {
+          "id": "cmuwzmo6m001aidc9ilf9aozn",
+          "toolName": "catalog.service.price.update",
+          "status": "rejected",
+          "payloadHash": "23aaf9c2f98e3a3543347988529041f782217fa86c15b3009917d6669d742ced",
+          "expiresAt": "2026-10-06T18:14:02.157Z",
+          "errorCode": null
+        }
+      ],
+      "receipts": [
+        {
+          "id": "17d1e779-a8ed-4a19-9d27-04e1643698a4",
+          "widgetId": "d4dcf276-398c-4952-9fd9-052789d343a1",
+          "outcome": "ACCEPTED",
+          "refusalCode": null,
+          "actionReceiptRef": null,
+          "submittedAt": "2026-10-06T18:04:24.852Z"
+        }
+      ],
+      "session_count": 1
+    },
+    {
+      "name": "unknown",
+      "tenant_id": "cmuwzfj0n000iidc98w19g6s7",
+      "user_id": "cmuwzfj23000jidc9ch3ceb6u",
+      "provider": {
+        "patch_count": 1,
+        "reads_after_patch": 1,
+        "current_price_rubles": 2500,
+        "max_price_rubles": 2500,
+        "non_price_preservation_checks": [
+          true
+        ],
+        "readback_recovered": true
+      },
+      "actions": [
+        {
+          "id": "40d716dc-a0f1-4d10-8342-353c4d9e5afc",
+          "capability": "crm.service.fixed-price.update.v1",
+          "state": "UNKNOWN",
+          "executionAttemptCount": 1,
+          "finalOutcomeCode": null,
+          "safeResultSummaryJson": null,
+          "finalizedAt": null
+        }
+      ],
+      "approvals": [
+        {
+          "id": "cmuwzo680001lidc9kcxhn8zw",
+          "toolName": "catalog.service.price.update",
+          "status": "executing",
+          "payloadHash": "0c43307447d70c8c6cc749a940fb89846aef17d1d58c83c7933df0a66dcea15e",
+          "expiresAt": "2026-10-06T18:15:12.191Z",
+          "errorCode": "ai_tool_outcome_unknown"
+        }
+      ],
+      "receipts": [
+        {
+          "id": "3451c04c-792c-477a-9333-96bf9b983bcd",
+          "widgetId": "23c327f8-0298-4536-a046-0585d43849b7",
+          "outcome": "ACCEPTED",
+          "refusalCode": null,
+          "actionReceiptRef": null,
+          "submittedAt": "2026-10-06T18:05:33.130Z"
+        }
+      ],
+      "session_count": 1
+    }
+  ],
+  "unexpected_requests": []
+}

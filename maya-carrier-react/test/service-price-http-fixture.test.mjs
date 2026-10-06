@@ -166,8 +166,20 @@ test('actual synthetic HTTP approvals and outcomes survive the current shell and
       assert.equal(card().sentence, expected[name][0]);
       assert.equal(card().display, 'terminal');
       const afterMarkup = markupOf(card());
-      const afterText = textOf(parse(afterMarkup));
+      const afterTree = parse(afterMarkup);
+      const afterText = textOf(afterTree);
       assert.ok(afterText.includes(expected[name][1]), 'the current React drawer shows the honest outcome');
+      assert.equal(findAll(afterTree, el => 'data-ref' in el.attrs).length, 0,
+        'a consumed pricing proposal renders no active confirmation, rejection, or retry control');
+      assert.equal(afterText.includes('PENDING'), false, 'a receipt must replace the stale pending presentation');
+      for (const key of ['approval.current_price', 'approval.proposed_price']) {
+        const row = envelope.body.effect_preview.find(value => value.label.phrase_key === key);
+        assert.ok(afterText.includes(row.value.formatted ?? row.value.label), 'the exact sealed diff remains visible');
+      }
+      const settledView = JSON.stringify(card());
+      await runtime.widgets.activate(ingested.itemId, `intent:${ref}`);
+      assert.equal(submissions.length, 1, 'stale activation cannot submit a second decision');
+      assert.equal(JSON.stringify(card()), settledView, 'stale activation retains the authoritative outcome explanation');
       if (name !== 'confirmed') assert.equal(afterText.includes(expected.confirmed[1]), false);
       const exposed = JSON.stringify(runtime.conversation.view()) + afterMarkup;
       for (const intent of envelope.intents) {

@@ -1,0 +1,10 @@
+{
+  "runtime_source_hashes_checked": 20,
+  "carrier_asset_hashes_checked": 8,
+  "changed_code_hashes_checked": 6,
+  "mismatches": [],
+  "browser_driver_syntax": "PASS",
+  "source_head": "c6a35e5c61975e9d101326e7b3970331f3c905d8",
+  "source_worktree": "clean",
+  "owned_pg_stopped": true
+}
