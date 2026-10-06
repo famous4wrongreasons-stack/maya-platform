@@ -151,7 +151,9 @@ describe('C9 conversation reads [HTTP] [PostgreSQL] [scripted model]', () => {
     const text = 'Покажи мои личные записи как клиента';
     const first = await f.chat(requestId, text);
     expect(first.status).toBe(201);
-    expect(first.body.reply).toBe('У вас пока нет записей.');
+    expect(first.body.reply).toBe(
+      'В доступном списке нет записей. Источник: ваши записи в MAYA.',
+    );
     expect((await f.chat(requestId, text)).body.reply).toBe(first.body.reply);
     expect(source).toHaveBeenCalledTimes(1);
     await revokeSyntheticPersonalLink(f.tenant.id, client.linkId);

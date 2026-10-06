@@ -1341,7 +1341,12 @@ describe('AiCoreService', () => {
       execution_id: 'execution-appointments',
       result: {
         appointments: [
-          { status: 'confirmed', is_upcoming: true },
+          {
+            status: 'confirmed',
+            is_upcoming: true,
+            start_at: '2099-07-20T10:00:00.000Z',
+            branch: { timezone: 'Europe/Moscow' },
+          },
           { status: 'canceled', is_upcoming: false },
         ],
       },
@@ -1353,8 +1358,6 @@ describe('AiCoreService', () => {
     });
 
     expect(result).toMatchObject({
-      reply:
-        'В вашей истории 2 записи. Предстоящих: 1, отменённых: 1. Подробности доступны в разделе «Записи».',
       source: 'safe_fallback',
       grounding: {
         status: 'verified',
@@ -1362,6 +1365,7 @@ describe('AiCoreService', () => {
         evidence_tools: ['appointments.own.list'],
       },
     });
+    expect(result.reply).toContain('Предстоящих: 1, отменённых: 1.');
     // История записей читается только own-scope инструментом и только персоной
     // admin: клиент не должен получить доступ к чужим визитам ни на одном ходу.
     expect(mocks.model.decide.mock.calls[0]?.[0].requiredToolNames).toEqual([
@@ -1376,6 +1380,150 @@ describe('AiCoreService', () => {
     expect(
       JSON.stringify(mocks.model.decide.mock.calls[0]?.[0].toolResults),
     ).toBe('[]');
+  });
+
+  describe('personal appointment details in the canonical chat', () => {
+    const tool = 'appointments.own.list';
+    const client = { ...user, role: UserRole.CLIENT };
+    beforeEach(() =>
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-06T12:00:00Z')),
+    );
+    afterEach(() => jest.useRealTimers());
+    const appointment = (changes: Record<string, unknown> = {}) => ({
+      id: 'private-appointment',
+      status: 'confirmed',
+      is_upcoming: true,
+      start_at: '2026-10-07T09:00:00.000Z',
+      end_at: '2026-10-07T10:00:00.000Z',
+      branch: { name: 'Тестовый филиал', timezone: 'Asia/Novosibirsk' },
+      services: [{ name: 'Стрижка' }],
+      ...changes,
+    });
+    function fixture(result: unknown, stale = false) {
+      const mocks = createService([tool]);
+      mocks.model.decide.mockResolvedValue(
+        decision({ reply: null, toolCall: { name: tool, arguments: {} } }),
+      );
+      mocks.runtime.execute.mockResolvedValue({
+        status: 'completed',
+        execution_id: 'personal-read',
+        result,
+        stale,
+      });
+      return mocks;
+    }
+    const ask = (mocks: ReturnType<typeof fixture>) =>
+      mocks.service.chat(client, {
+        ...dto,
+        messages: [{ role: 'user', content: 'Когда я записан?' }],
+      });
+    it('describes an empty available list without denying history hidden by the source setting', async () => {
+      const reply = await ask(fixture({ appointments: [] }));
+      expect(reply.grounding.status).toBe('verified');
+      expect(reply.reply).toBe(
+        'В доступном списке нет записей. Источник: ваши записи в MAYA.',
+      );
+    });
+    it('answers the next appointment at its branch time without exposing history to another model call', async () => {
+      const mocks = fixture({ appointments: [appointment()] });
+      const reply = await ask(mocks);
+      expect(reply.reply).toContain('07.10.2026');
+      expect(reply.reply).toContain('16:00');
+      expect(reply.reply).toContain('Asia/Novosibirsk');
+      expect(reply.reply).toContain('Стрижка');
+      expect(reply.reply).not.toMatch(/private-appointment|раздел «Записи»/);
+      expect(reply.grounding.status).toBe('verified');
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      expect(mocks.model.decide.mock.calls[0][0].toolResults).toEqual([]);
+    });
+    it('counts the complete raw list and displays only three earliest upcoming appointments', async () => {
+      const rows = Array.from({ length: 45 }, (_, i) =>
+        appointment({
+          id: `private-${i}`,
+          start_at: new Date(Date.UTC(2026, 9, 7 + i, 9)).toISOString(),
+          end_at: new Date(Date.UTC(2026, 9, 7 + i, 10)).toISOString(),
+        }),
+      ).reverse();
+      const reply = await ask(fixture({ appointments: rows }));
+      expect(reply.reply).toContain('45');
+      expect(reply.reply).toContain('07.10.2026');
+      expect(reply.reply).toContain('09.10.2026');
+      expect(reply.reply).not.toContain('10.10.2026');
+      expect(reply.reply).not.toContain('В вашей истории 40');
+    });
+    it('does not offer a canceled future appointment as the next visit', async () => {
+      const reply = await ask(
+        fixture({ appointments: [appointment({ status: 'canceled' })] }),
+      );
+      expect(reply.reply).toContain('Предстоящих: 0');
+      expect(reply.reply).not.toMatch(/16:00|Стрижка/);
+    });
+    it('does not offer a cached upcoming flag after its actual instant has passed', async () => {
+      const reply = await ask(
+        fixture({
+          appointments: [appointment({ start_at: '2026-10-06T09:00:00Z' })],
+        }),
+      );
+      expect(reply.grounding.status).toBe('verified');
+      expect(reply.reply).toContain('Предстоящих: 0');
+      expect(reply.reply).not.toContain('Стрижка');
+    });
+    it.each([
+      new Date('2026-10-07T09:00:00Z'),
+      '2026-10-07T09:00:00Z',
+      '2026-10-07T09:00:00.1Z',
+    ])('accepts canonical reader/persisted instant %s', async (start) => {
+      const reply = await ask(
+        fixture({ appointments: [appointment({ start_at: start })] }),
+      );
+      expect(reply.grounding.status).toBe('verified');
+      expect(reply.reply).toContain('07.10.2026, 16:00');
+    });
+    it.each([
+      ['missing list', {}],
+      ['null list', { appointments: null }],
+      ['malformed entry', { appointments: [null] }],
+      [
+        'missing upcoming time',
+        { appointments: [appointment({ start_at: null })] },
+      ],
+      [
+        'normalized invalid calendar date',
+        { appointments: [appointment({ start_at: '2027-02-30T09:00:00Z' })] },
+      ],
+      [
+        'timezone-free datetime',
+        { appointments: [appointment({ start_at: '2026-10-07T09:00:00' })] },
+      ],
+      [
+        'missing branch timezone',
+        { appointments: [appointment({ branch: { name: 'Филиал' } })] },
+      ],
+      [
+        'unknown status',
+        { appointments: [appointment({ status: 'unknown' })] },
+      ],
+      [
+        'invalid timezone',
+        {
+          appointments: [appointment({ branch: { timezone: 'Mars/Olympus' } })],
+        },
+      ],
+    ])(
+      'does not turn %s into a verified empty history or invented date',
+      async (_label, data) => {
+        const reply = await ask(fixture(data));
+        expect(reply.grounding.status).toBe('blocked');
+        expect(reply.reply).not.toMatch(
+          /У вас пока нет записей|В доступном списке нет записей|16:00|07.10.2026/,
+        );
+      },
+    );
+    it('refuses stale appointment times instead of claiming the snapshot is current', async () => {
+      const reply = await ask(fixture({ appointments: [appointment()] }, true));
+      expect(reply.grounding.status).toBe('blocked');
+      expect(reply.reply).not.toContain('16:00');
+    });
   });
 
   it('explains access denial without pretending the protected source is offline', async () => {

@@ -43,7 +43,7 @@ import { createHash, randomUUID } from 'crypto';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { AuthRateLimitService } from '../auth/auth-rate-limit.service';
 import type { AuthenticatedUser } from '../common/authenticated-user.interface';
-import { UserRole } from '../common/domain.enums';
+import { AppointmentStatus, UserRole } from '../common/domain.enums';
 import {
   ASSISTANT_CAPABILITY_CATALOG,
   type AssistantCapability,
@@ -1777,7 +1777,12 @@ export class AiCoreService {
                     execution.result,
                     execution.stale === true,
                   )
-                : null;
+                : decision.toolCall.name === 'appointments.own.list'
+                  ? this.deterministicOwnAppointmentsReply(
+                      execution.result,
+                      execution.stale === true,
+                    )
+                  : null;
           const deterministicReply =
             sourceReply?.reply ??
             this.deterministicGroundedReply(
@@ -3327,22 +3332,122 @@ export class AiCoreService {
           : `Ваш баланс: ${balanceLabel}.${balanceCaveat} Подходящих услуг для списания сейчас нет.`;
       }
       case 'appointments.own.list': {
-        const appointments = this.record(evidence.result).appointments;
-        if (!Array.isArray(appointments) || appointments.length === 0) {
-          return 'У вас пока нет записей.';
-        }
-        const upcoming = appointments.filter((entry) => {
-          const item = this.record(entry);
-          return item.is_upcoming === true && item.status !== 'canceled';
-        }).length;
-        const cancelled = appointments.filter(
-          (entry) => this.record(entry).status === 'canceled',
-        ).length;
-        return `В вашей истории ${appointments.length} ${this.pluralize(appointments.length, 'запись', 'записи', 'записей')}. Предстоящих: ${upcoming}, отменённых: ${cancelled}. Подробности доступны в разделе «Записи».`;
+        // This list contains personal data and may be presentation-truncated.
+        // Only the server composer over the actual authorized read may use it.
+        return null;
       }
       default:
         return null;
     }
+  }
+
+  private deterministicOwnAppointmentsReply(
+    result: unknown,
+    stale: boolean,
+  ): { reply: string; status: 'verified' | 'blocked' } {
+    const data = this.record(result);
+    const unavailable = {
+      reply:
+        'Не удалось подтвердить ваши записи и время визита. Попробуйте повторить запрос позже.',
+      status: 'blocked' as const,
+    };
+    if (stale || data.stale === true || !Array.isArray(data.appointments))
+      return unavailable;
+    if (data.appointments.length === 0)
+      return {
+        reply: 'В доступном списке нет записей. Источник: ваши записи в MAYA.',
+        status: 'verified',
+      };
+
+    const upcoming: Array<{ instant: number; label: string }> = [];
+    let cancelled = 0;
+    // Catalog labels are optional and bounded. Private identifiers/contact data
+    // never enter the composed reply or a subsequent external model call.
+    const label = (value: unknown): string | null =>
+      typeof value === 'string' && value.trim() && value.length <= 120
+        ? value.replace(/\s+/g, ' ').trim()
+        : null;
+    try {
+      for (const entry of data.appointments) {
+        const item = this.record(entry);
+        if (
+          !Object.values(AppointmentStatus).includes(
+            item.status as AppointmentStatus,
+          ) ||
+          typeof item.is_upcoming !== 'boolean'
+        )
+          return unavailable;
+        if (item.status === AppointmentStatus.CANCELED) {
+          cancelled++;
+          continue;
+        }
+        if (!item.is_upcoming) continue;
+        // The canonical reader returns Date or its persisted ISO serialization.
+        // Do not parse timezone-free input as the machine's local timezone.
+        const start =
+          item.start_at instanceof Date
+            ? item.start_at
+            : typeof item.start_at === 'string' &&
+                /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(
+                  item.start_at,
+                )
+              ? new Date(item.start_at)
+              : null;
+        if (!start || !Number.isFinite(start.getTime())) return unavailable;
+        if (typeof item.start_at === 'string') {
+          const canonicalInput = item.start_at.replace(
+            /(?:\.(\d{1,3}))?Z$/,
+            (_match, millis: string | undefined) =>
+              `.${(millis ?? '').padEnd(3, '0')}Z`,
+          );
+          // JavaScript otherwise normalizes e.g. 30 February to another day.
+          if (start.toISOString() !== canonicalInput) return unavailable;
+        }
+        if (start.getTime() < Date.now()) continue;
+        const branch = this.record(item.branch);
+        if (typeof branch.timezone !== 'string' || !branch.timezone.trim())
+          return unavailable;
+        const time = new Intl.DateTimeFormat('ru-RU', {
+          timeZone: branch.timezone,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hourCycle: 'h23',
+        }).format(start);
+        const services = Array.isArray(item.services)
+          ? item.services
+              .slice(0, 3)
+              .map((service) => label(this.record(service).name))
+              .filter((name): name is string => name !== null)
+          : [];
+        upcoming.push({
+          instant: start.getTime(),
+          label: [
+            `${time} (${branch.timezone})`,
+            label(branch.name),
+            services.length ? services.join(', ') : null,
+          ]
+            .filter(Boolean)
+            .join(' — '),
+        });
+      }
+    } catch {
+      return unavailable;
+    }
+    upcoming.sort((a, b) => a.instant - b.instant);
+    return {
+      reply: [
+        `В доступном списке ${data.appointments.length} ${this.pluralize(data.appointments.length, 'запись', 'записи', 'записей')}. Предстоящих: ${upcoming.length}, отменённых: ${cancelled}.`,
+        upcoming.length ? 'Ближайшие записи:' : null,
+        ...upcoming.slice(0, 3).map((entry) => entry.label),
+        'Источник: ваши записи в MAYA.',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+      status: 'verified',
+    };
   }
 
   private deterministicCompanyProfileReply(

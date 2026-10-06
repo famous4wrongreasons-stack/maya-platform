@@ -3527,7 +3527,11 @@ export class AiToolHandlerService {
       is_upcoming: item.is_upcoming ?? null,
       timeline: item.timeline ?? null,
       branch: branch
-        ? { id: branch.id ?? null, name: branch.name ?? null }
+        ? {
+            id: branch.id ?? null,
+            name: branch.name ?? null,
+            timezone: branch.timezone ?? null,
+          }
         : null,
       staff: staff
         ? {
